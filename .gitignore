@@ -1,0 +1,8 @@
+# ヘルスチェックのローカル生成物(Actionsでは一時ファイル)
+healthcheck_report.txt
+
+# OS/エディタ
+.DS_Store
+Thumbs.db
+*.swp
+__pycache__/

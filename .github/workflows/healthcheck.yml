@@ -1,0 +1,78 @@
+name: healthcheck
+
+# 検証部(ケンショウ)/監査(タダス): 公開サイトとデータを毎日自動点検し、
+# 異常(表示崩れ・画像切れ・データ破損・更新停止)を検知したら Issue を自動起票する。
+
+on:
+  schedule:
+    # JST 10:00(= UTC 01:00)。データ更新(09:00 JST)+デプロイ完了後に点検。
+    - cron: "0 1 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: healthcheck
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run healthcheck
+        id: hc
+        run: python scripts/healthcheck.py
+
+      # ── 異常検知時: Issue を起票 / 既存の未解決Issueに追記 ──
+      - name: Open or update issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh label create healthcheck --color B60205 \
+            --description "日次ヘルスチェックの失敗" 2>/dev/null || true
+          report=healthcheck_report.txt
+          [ -f "$report" ] || echo "レポート生成前に失敗しました。Actionsログを確認してください。" > "$report"
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          {
+            echo "自動検知: ヘルスチェックが失敗しました。"
+            echo ""
+            echo "- 実行: $run_url"
+            echo "- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')"
+            echo ""
+            echo '```'
+            cat "$report"
+            echo '```'
+          } > issue_body.md
+          existing=$(gh issue list --state open --label healthcheck \
+            --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file issue_body.md
+            echo "既存Issue #$existing に追記しました"
+          else
+            gh issue create --label healthcheck \
+              --title "🚨 ヘルスチェック失敗: サイト/データに問題" \
+              --body-file issue_body.md
+          fi
+
+      # ── 復旧時: 未解決の healthcheck Issue を自動クローズ ──
+      - name: Auto-close issue on recovery
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          open=$(gh issue list --state open --label healthcheck \
+            --json number --jq '.[].number' 2>/dev/null || true)
+          for n in $open; do
+            gh issue comment "$n" --body "✅ 直近のヘルスチェックが正常に戻りました。自動クローズします。"
+            gh issue close "$n"
+          done
