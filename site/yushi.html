@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>制度融資・公庫ナビ｜沖縄の企業に、あかりを。</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --fukamidori:#22382A;
+    --midori:#0F6E56;
+    --kin:#B98A2E;
+    --shiro:#F7F4EC;
+    --sumi:#141D17;
+    --glow-orange:#F88800;
+    --glow-navy:#005088;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--shiro);color:var(--fukamidori);line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .eyebrow{color:var(--kin);font-size:clamp(12px,1.4vw,15px);letter-spacing:.35em;font-weight:700;margin-bottom:2rem;}
+  h1,h2{font-family:'Noto Serif JP',serif;font-weight:900;line-height:1.35;}
+  h1{font-size:clamp(1.9rem,6.4vw,4.4rem);}
+  .kin{color:var(--kin);}
+
+  /* ヒーロー:夜の深緑に、あかりが灯る */
+  .hero{
+    min-height:88vh;display:flex;flex-direction:column;justify-content:center;
+    padding:8vh 6vw;color:var(--shiro);position:relative;overflow:hidden;
+    background:radial-gradient(ellipse 60% 45% at 72% 38%, rgba(248,136,0,.28), transparent 65%),
+               linear-gradient(165deg,var(--sumi) 0%,var(--fukamidori) 70%);
+  }
+  .akari{
+    position:absolute;top:30%;right:14%;width:14px;height:14px;border-radius:50%;
+    background:var(--glow-orange);
+    box-shadow:0 0 24px 8px rgba(248,136,0,.55),0 0 90px 40px rgba(248,136,0,.18);
+    animation:tomoru 4s ease-in-out infinite;
+  }
+  @keyframes tomoru{0%,100%{opacity:.75;}50%{opacity:1;}}
+  @media (prefers-reduced-motion:reduce){.akari{animation:none;}}
+  .hero .sub{margin-top:2.2rem;color:rgba(247,244,236,.8);max-width:33em;font-size:clamp(.95rem,1.8vw,1.1rem);}
+  .badge{
+    display:inline-block;margin-top:2.6rem;padding:.7em 1.3em;border-radius:999px;
+    background:rgba(247,244,236,.1);border:1px solid rgba(185,138,46,.5);
+    font-size:.85rem;color:var(--shiro);
+  }
+  .badge strong{color:var(--kin);}
+
+  main{padding:9vh 6vw;max-width:1000px;margin:0 auto;}
+  h2{font-size:clamp(1.5rem,4.4vw,2.6rem);margin-bottom:2.2rem;}
+  .card{
+    margin-top:1.2rem;padding:1.4rem 1.5rem;border-radius:16px;background:#fff;
+    border:1px solid rgba(34,56,42,.14);box-shadow:0 4px 18px rgba(34,56,42,.06);
+  }
+  .cat{
+    display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.1em;
+    padding:.3em .9em;border-radius:999px;background:var(--midori);color:#fff;margin-bottom:.7rem;
+  }
+  .cat.kouko{background:var(--glow-navy);}
+  .card h3{font-family:'Noto Serif JP',serif;font-size:1.08rem;line-height:1.5;}
+  .meta{margin-top:.6rem;font-size:.85rem;color:rgba(34,56,42,.72);display:grid;gap:.25rem;}
+  .card a{color:var(--midori);font-weight:700;font-size:.9rem;display:inline-block;margin-top:.7rem;}
+  .note{margin-top:.5rem;font-size:.82rem;color:var(--glow-navy);}
+  .disclaimer{margin-top:2.5rem;font-size:.78rem;color:rgba(34,56,42,.55);}
+
+  /* GLOW相談CTA */
+  .glow-cta{
+    margin:9vh 0 0;padding:3.2rem 6vw;border-radius:24px;color:var(--shiro);text-align:center;
+    background:radial-gradient(ellipse 55% 60% at 50% 0%, rgba(248,136,0,.25), transparent 70%),var(--fukamidori);
+  }
+  .glow-cta h2{color:var(--shiro);margin-bottom:1rem;}
+  .glow-cta p{color:rgba(247,244,236,.8);font-size:.95rem;max-width:34em;margin:0 auto;}
+  .glow-btn{
+    display:inline-block;margin-top:2.2rem;background:var(--glow-orange);color:#fff;
+    font-weight:700;padding:1.1em 3em;border-radius:999px;text-decoration:none;
+    box-shadow:0 8px 30px rgba(248,136,0,.4);transition:transform .25s;
+  }
+  .glow-btn:hover{transform:translateY(-3px);}
+  .back{display:inline-block;margin:3rem 0 4rem;color:var(--midori);font-weight:700;}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="akari" aria-hidden="true"></div>
+  <p class="eyebrow">LOANS & FINANCE</p>
+  <h1>資金のことで、<br>会社の<span class="kin">あかり</span>を消さない。</h1>
+  <p class="sub">補助金だけでは足りない時、沖縄には公庫と県の制度融資があります。元・沖縄振興開発金融公庫の専門家が、使える資金メニューを整理しました。</p>
+  <span class="badge"><strong>監修</strong> 嶺井 忍(沖縄振興開発金融公庫 35年/株式会社GLOW)</span>
+</section>
+
+<main>
+  <p class="eyebrow">MENU</p>
+  <h2>沖縄で使える資金メニュー</h2>
+  <div id="loan-list"></div>
+  <p class="disclaimer">※金利・限度額・要件は変動します。最新情報は必ず各機関の公式ページでご確認ください。本ページは情報提供であり、融資の可否を保証するものではありません。</p>
+
+  <div class="glow-cta">
+    <p class="eyebrow" style="color:var(--glow-orange)">FREE CONSULTATION</p>
+    <h2>沖縄の企業に、あかりを。</h2>
+    <p>資金調達も、事業の引き継ぎも、次の一手も。公庫35年の経験と地域の実情を知る専門家が、無料でご相談に乗ります。</p>
+    <a class="glow-btn" href="#">無料で相談する</a>
+  </div>
+
+  <a class="back" href="index.html">← 補助金・助成金マッチングへ戻る</a>
+</main>
+
+<script>
+  fetch('data/loans.json').then(r=>r.json()).then(d=>{
+    document.getElementById('loan-list').innerHTML=d.items.map(it=>`
+      <div class="card">
+        <span class="cat ${it.category==='公庫'?'kouko':''}">${it.category}</span>
+        <h3>${it.name}</h3>
+        <div class="meta">
+          <span>使いみち:${it.use}</span>
+          <span>限度額:${it.max_amount} / 金利:${it.rate}</span>
+          <span>対象:${it.target}</span>
+        </div>
+        ${it.note?`<p class="note">専門家メモ:${it.note}</p>`:''}
+        <a href="${it.source_url}" target="_blank" rel="noopener">公式ページで確認 →</a>
+      </div>`).join('');
+  }).catch(()=>{
+    document.getElementById('loan-list').innerHTML='<div class="card"><h3>データ取得エラー</h3><div class="meta"><span>時間をおいて再読み込みしてください。</span></div></div>';
+  });
+</script>
+</body>
+</html>

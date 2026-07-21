@@ -1,0 +1,9 @@
+{
+ "updated_at": "2026-07-20",
+ "supervisor": "監修:嶺井忍(株式会社GLOW 取締役/沖縄振興開発金融公庫 35年)",
+ "items": [
+  {"id":"loan1","name":"【サンプル】沖縄振興開発金融公庫 中小企業資金貸付","category":"公庫","use":"設備資金・運転資金","max_amount":"要確認","rate":"公庫HPで要確認","target":"県内中小企業","source_url":"https://www.okinawakouko.go.jp/","note":"本土の日本政策金融公庫より限度額・金利で有利な場合あり"},
+  {"id":"loan2","name":"【サンプル】沖縄県 中小企業セーフティネット資金","category":"県制度融資","use":"経営安定・資金繰り","max_amount":"要確認","rate":"要確認","target":"売上減少等の要件あり","source_url":"https://www.pref.okinawa.jp/","note":"信用保証協会の保証付き"},
+  {"id":"loan3","name":"【サンプル】事業承継・集約・活性化支援資金","category":"公庫","use":"事業承継・M&Aの株式取得資金等","max_amount":"要確認","rate":"要確認","target":"承継・買収を行う企業","source_url":"https://www.okinawakouko.go.jp/","note":"補助金と併用した資金計画が可能"}
+ ]
+}

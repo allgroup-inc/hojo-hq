@@ -1,0 +1,48 @@
+name: update-subsidies
+
+on:
+  schedule:
+    # JSTで 03:00 / 09:00 / 15:00 / 21:00 の1日4回(cronはUTC)
+    - cron: "0 18,0,6,12 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  fetch-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch jGrants data
+        run: python scripts/fetch_jgrants.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add data/subsidies.json
+          git diff --cached --quiet || git commit -m "auto: update subsidies $(date '+%Y-%m-%d %H:%M')"
+          git push
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Copy data into site
+        run: cp -r data site/data
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

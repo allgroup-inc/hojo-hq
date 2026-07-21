@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>沖縄補助金ナビ｜眠っている支援金を、見つける。</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --fukamidori:#22382A;
+    --midori:#0F6E56;
+    --kin:#B98A2E;
+    --shiro:#F7F4EC;
+    --sumi:#141D17;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Noto Sans JP',sans-serif;
+    background:var(--fukamidori);
+    color:var(--shiro);
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .serif{font-family:'Noto Serif JP',serif;}
+
+  /* ===== ヘッドライン主導のフルスクリーン構成 ===== */
+  section{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:8vh 6vw;
+    position:relative;
+  }
+  .eyebrow{
+    color:var(--kin);
+    font-size:clamp(12px,1.4vw,15px);
+    letter-spacing:.35em;
+    font-weight:700;
+    margin-bottom:2.2rem;
+  }
+  h1,h2{
+    font-family:'Noto Serif JP',serif;
+    font-weight:900;
+    letter-spacing:.02em;
+    line-height:1.32;
+  }
+  h1{font-size:clamp(2.1rem,7.2vw,5.2rem);}
+  h2{font-size:clamp(1.7rem,5.4vw,3.9rem);}
+  .kin{color:var(--kin);}
+  .sub{
+    margin-top:2.4rem;
+    font-size:clamp(.95rem,1.8vw,1.15rem);
+    color:rgba(247,244,236,.78);
+    max-width:34em;
+  }
+
+  /* ヒーロー */
+  .hero{background:linear-gradient(160deg,var(--sumi) 0%,var(--fukamidori) 62%,#1c4436 100%);}
+  .hero::after{
+    content:"";
+    position:absolute;inset:auto 6vw 7vh auto;
+    width:1px;height:11vh;
+    background:linear-gradient(var(--kin),transparent);
+  }
+  .scrolldown{
+    position:absolute;bottom:7vh;right:calc(6vw + 10px);
+    writing-mode:vertical-rl;
+    font-size:11px;letter-spacing:.4em;color:var(--kin);
+  }
+
+  /* 数字セクション：巨大数字がヘッドライン */
+  .impact{background:var(--shiro);color:var(--fukamidori);}
+  .impact .eyebrow{color:var(--midori);}
+  .bignum-row{
+    display:flex;flex-wrap:wrap;gap:4vw;margin-top:3.5rem;
+  }
+  .bignum{flex:1 1 220px;}
+  .bignum .n{
+    font-family:'Noto Serif JP',serif;
+    font-weight:900;
+    font-size:clamp(3.4rem,9vw,6.5rem);
+    line-height:1;
+    color:var(--midori);
+  }
+  .bignum .n small{font-size:.35em;color:var(--kin);margin-left:.15em;}
+  .bignum .l{
+    margin-top:.9rem;font-weight:700;
+    font-size:clamp(.85rem,1.6vw,1rem);
+    border-top:2px solid var(--kin);
+    padding-top:.7rem;display:inline-block;
+  }
+
+  /* ビジョン：一文だけの間 */
+  .vision{background:var(--midori);text-align:center;align-items:center;}
+  .vision h2{max-width:18em;}
+  .vision .eyebrow{color:var(--shiro);opacity:.85;}
+
+  /* 仕組み：見出し3連打 */
+  .how{background:var(--fukamidori);}
+  .how-list{margin-top:3.2rem;display:grid;gap:2.8rem;max-width:42em;}
+  .how-item h3{
+    font-family:'Noto Serif JP',serif;
+    font-weight:800;
+    font-size:clamp(1.25rem,3vw,1.9rem);
+    color:var(--shiro);
+  }
+  .how-item h3 span{color:var(--kin);margin-right:.6em;font-size:.8em;}
+  .how-item p{margin-top:.6rem;color:rgba(247,244,236,.72);font-size:.98rem;max-width:36em;}
+
+  /* CTA */
+  .cta{background:linear-gradient(180deg,var(--sumi),var(--fukamidori));text-align:center;align-items:center;}
+  .line-btn{
+    display:inline-block;margin-top:3rem;
+    background:var(--kin);color:var(--sumi);
+    font-weight:700;font-size:clamp(1rem,2.2vw,1.2rem);
+    padding:1.15em 3.2em;border-radius:999px;
+    text-decoration:none;letter-spacing:.06em;
+    transition:transform .25s ease, box-shadow .25s ease;
+    box-shadow:0 8px 30px rgba(185,138,46,.35);
+  }
+  .line-btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(185,138,46,.5);}
+  .cta-note{margin-top:1.4rem;font-size:.85rem;color:rgba(247,244,236,.6);}
+
+  /* マッチング */
+  .match{background:var(--shiro);color:var(--fukamidori);}
+  .match .eyebrow{color:var(--midori);}
+  .match .sub{color:rgba(34,56,42,.75);}
+  .match-form{
+    margin-top:2.8rem;display:grid;gap:1.2rem;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    max-width:900px;
+  }
+  .match-form label{
+    font-weight:700;font-size:.85rem;display:flex;flex-direction:column;gap:.5rem;
+  }
+  .match-form select{
+    font:inherit;padding:.85em 1em;border-radius:12px;
+    border:2px solid rgba(34,56,42,.25);background:#fff;color:var(--fukamidori);
+  }
+  .match-form select:focus{outline:3px solid var(--kin);border-color:var(--kin);}
+  .chip-group{display:flex;flex-wrap:wrap;gap:.5rem;}
+  .chip{
+    font:inherit;font-size:.85rem;font-weight:500;cursor:pointer;
+    padding:.55em 1.1em;border-radius:999px;background:#fff;
+    border:2px solid rgba(34,56,42,.25);color:var(--fukamidori);
+    transition:background .2s,border-color .2s;
+  }
+  .chip:focus-visible{outline:3px solid var(--kin);}
+  .chip.on{background:var(--midori);border-color:var(--midori);color:#fff;}
+  #match-btn{grid-column:1/-1;justify-self:start;border:none;cursor:pointer;}
+  .match-result{margin-top:3rem;max-width:900px;}
+  .result-head{font-family:'Noto Serif JP',serif;font-weight:800;font-size:1.3rem;}
+  .shokei-banner{
+    margin-top:1.2rem;padding:1.2rem 1.4rem;border-radius:14px;
+    background:var(--fukamidori);color:var(--shiro);font-size:.95rem;line-height:1.8;
+  }
+  .shokei-banner strong{color:var(--kin);}
+  .shokei-link{color:var(--kin);font-weight:700;display:inline-block;margin-top:.4rem;}
+  .card{
+    margin-top:1.1rem;padding:1.2rem 1.4rem;border-radius:14px;background:#fff;
+    border:1px solid rgba(34,56,42,.15);box-shadow:0 4px 16px rgba(34,56,42,.06);
+  }
+  .card h4{font-family:'Noto Serif JP',serif;font-size:1.05rem;line-height:1.5;}
+  .card .meta{margin-top:.5rem;font-size:.85rem;color:rgba(34,56,42,.7);display:flex;flex-wrap:wrap;gap:1em;}
+  .card .deadline{color:#a03a2a;font-weight:700;}
+  .card a{color:var(--midori);font-weight:700;font-size:.9rem;}
+  .result-note{margin-top:1.6rem;font-size:.9rem;color:rgba(34,56,42,.75);}
+  .updated{margin-top:2.5rem;font-size:.78rem;color:rgba(34,56,42,.55);}
+
+  footer{
+    background:var(--sumi);
+    padding:3rem 6vw;font-size:.8rem;
+    color:rgba(247,244,236,.55);
+    display:flex;flex-wrap:wrap;gap:1.5rem;justify-content:space-between;
+  }
+  footer strong{color:var(--kin);font-weight:700;}
+
+  /* スクロール出現 */
+  .rv{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s ease;}
+  .rv.on{opacity:1;transform:none;}
+  @media (prefers-reduced-motion:reduce){
+    .rv{opacity:1;transform:none;transition:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="eyebrow rv">OKINAWA HOJOKIN NAVI</p>
+  <h1 class="rv">沖縄には、<br>まだ<span class="kin">眠っているお金</span>がある。</h1>
+  <p class="sub rv">助成金・補助金は「知っている人」だけが受け取っている。<br>AIが365日、県と市町村の公募情報を監視し、あなたに届けます。</p>
+  <div class="scrolldown">SCROLL</div>
+</section>
+
+<!-- IMPACT NUMBERS -->
+<section class="impact">
+  <p class="eyebrow rv">THE REALITY</p>
+  <h2 class="rv">知らないだけで、<br>もらい損ねている。</h2>
+  <div class="bignum-row">
+    <div class="bignum rv"><div class="n">150<small>制度+</small></div><div class="l">沖縄で使える公募を常時掲載</div></div>
+    <div class="bignum rv"><div class="n">24<small>時間</small></div><div class="l">新着から掲載までの最大遅延</div></div>
+    <div class="bignum rv"><div class="n">365<small>日</small></div><div class="l">AIが休まず公募情報を巡回</div></div>
+  </div>
+</section>
+
+<!-- VISION -->
+<section class="vision">
+  <p class="eyebrow rv">OUR VISION</p>
+  <h2 class="rv">県内すべての経営者に、<br>「使える制度」が届く沖縄へ。</h2>
+</section>
+
+<!-- HOW -->
+<section class="how">
+  <p class="eyebrow rv">HOW IT WORKS</p>
+  <h2 class="rv">探すのは、AIの仕事。<br>選ぶのが、あなたの仕事。</h2>
+  <div class="how-list">
+    <div class="how-item rv"><h3><span>壱</span>AIが毎日、国と沖縄の公募を巡回</h3><p>jGrantsや県・市町村サイトを自動チェック。人力では追えない更新を漏らしません。</p></div>
+    <div class="how-item rv"><h3><span>弐</span>締切・金額・対象を、原文照合で正確に</h3><p>すべての情報は公式ページと突き合わせて掲載。あいまいなものは「要確認」と正直に表示します。</p></div>
+    <div class="how-item rv"><h3><span>参</span>締切7日前、LINEにアラート</h3><p>気になる制度を登録すれば、申し込み忘れをゼロに。相談したい時は専門家におつなぎします。</p></div>
+  </div>
+</section>
+
+<!-- MATCHING -->
+<section class="match" id="match">
+  <p class="eyebrow rv">FREE MATCHING</p>
+  <h2 class="rv">あなたの会社に、<br><span class="kin">いま使える制度</span>を。</h2>
+  <p class="sub rv">4つ選ぶだけ。登録不要・無料で、最新データから自動マッチングします。</p>
+  <div class="match-form rv">
+    <label>市町村
+      <select id="f-area">
+        <option value="">選択してください</option>
+        <option>那覇市</option><option>沖縄市</option><option>うるま市</option>
+        <option>浦添市</option><option>宜野湾市</option><option>糸満市</option>
+        <option>豊見城市</option><option>名護市</option><option>宮古島市</option>
+        <option>石垣市</option><option value="その他">その他の市町村</option>
+      </select>
+    </label>
+    <label>業種
+      <select id="f-biz">
+        <option value="">選択してください</option>
+        <option>飲食・宿泊</option><option>小売・卸売</option><option>建設</option>
+        <option>製造</option><option>情報通信・IT</option><option>医療・福祉</option>
+        <option>サービス</option><option value="その他">その他</option>
+      </select>
+    </label>
+    <label>従業員数
+      <select id="f-emp">
+        <option value="">選択してください</option>
+        <option>5名以下</option><option>6〜20名</option>
+        <option>21〜50名</option><option>51名以上</option>
+      </select>
+    </label>
+    <label>いま気になる経営テーマ(複数選択可)
+      <div class="chip-group" id="f-theme">
+        <button type="button" class="chip" data-v="hanro">販路拡大・売上</button>
+        <button type="button" class="chip" data-v="setsubi">設備投資</button>
+        <button type="button" class="chip" data-v="it">IT化・DX</button>
+        <button type="button" class="chip" data-v="jinzai">人材採用・育成</button>
+        <button type="button" class="chip" data-v="shikin">資金繰り・融資</button>
+        <button type="button" class="chip" data-v="shokei">事業承継・後継者</button>
+      </div>
+    </label>
+    <label>10年後、会社をどうしていたいですか?
+      <select id="f-future">
+        <option value="">選択してください</option>
+        <option value="kakudai">さらに拡大したい</option>
+        <option value="iji">今の規模を守りたい</option>
+        <option value="hikitsugi">次の世代へ引き継ぎたい</option>
+        <option value="joto">良い相手がいれば譲渡も選択肢</option>
+        <option value="mitei">まだ決めていない</option>
+      </select>
+    </label>
+    <button id="match-btn" class="line-btn" type="button">無料でマッチングする</button>
+  </div>
+
+  <div id="match-result" class="match-result" hidden>
+    <p class="result-head">マッチした制度 <span id="result-count" class="kin"></span>件</p>
+    <div id="shokei-banner" class="shokei-banner" hidden>
+      <strong>事業の引き継ぎ・後継に使える補助金</strong>があります。
+      専門家への相談費用なども補助対象になる制度です。
+      <a href="#" class="shokei-link">引き継ぎの無料相談はこちら</a>
+    </div>
+    <div id="result-list"></div>
+    <p class="result-note">締切7日前アラートを受け取るには、LINE登録(無料)をどうぞ。</p>
+  </div>
+  <p class="updated rv">データ最終更新:<span id="updated-at">—</span>(1日4回自動更新)</p>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <p class="eyebrow rv">START FREE</p>
+  <h2 class="rv">その公募、<br><span class="kin">締切7日前</span>にお知らせします。</h2>
+  <a class="line-btn rv" href="#">LINEで無料登録する</a>
+  <p class="cta-note rv">登録は10秒。いつでも解除できます。</p>
+</section>
+
+<footer>
+  <div><strong>沖縄補助金ナビ</strong>(仮称)— 運営:ALLGROUP</div>
+  <div><a href="yushi.html" style="color:var(--kin);font-weight:700;">制度融資・公庫ナビはこちら →</a></div>
+  <div>最新情報は必ず各制度の公式サイトでご確認ください。</div>
+</footer>
+
+<script>
+  // ===== マッチング =====
+  let DB={items:[],updated_at:null};
+  fetch('data/subsidies.json')
+    .then(r=>r.json())
+    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';})
+    .catch(()=>{document.getElementById('updated-at').textContent='取得エラー(公式サイトをご確認ください)';});
+
+  const BIZ_KEYS={
+    '飲食・宿泊':['飲食','宿泊','観光'],'小売・卸売':['小売','卸売','商業'],
+    '建設':['建設'],'製造':['製造','ものづくり'],
+    '情報通信・IT':['情報','IT','デジタル','DX'],'医療・福祉':['医療','福祉','介護'],
+    'サービス':['サービス'],'その他':[]
+  };
+
+  // テーマチップの選択
+  document.querySelectorAll('#f-theme .chip').forEach(c=>{
+    c.addEventListener('click',()=>c.classList.toggle('on'));
+  });
+
+  // テーマ→制度キーワード(すべてマッチング精度向上に実際に使う)
+  const THEME_KEYS={
+    hanro:['販路','売上','持続化','販売促進'],
+    setsubi:['設備','投資','ものづくり'],
+    it:['IT','デジタル','DX'],
+    jinzai:['人材','雇用','育成','キャリア'],
+    shikin:['資金','融資','利子'],
+    shokei:['承継','引継','後継','M&A']
+  };
+
+  document.getElementById('match-btn').addEventListener('click',()=>{
+    const area=document.getElementById('f-area').value;
+    const biz=document.getElementById('f-biz').value;
+    const future=document.getElementById('f-future').value;
+    const themes=[...document.querySelectorAll('#f-theme .chip.on')].map(c=>c.dataset.v);
+    const keys=BIZ_KEYS[biz]||[];
+    const themeKeys=themes.flatMap(t=>THEME_KEYS[t]||[]);
+
+    // 承継シグナル: テーマで承継を選んだ or 10年後が「引き継ぎ/譲渡」
+    const shokeiSignal=themes.includes('shokei')||future==='hikitsugi'||future==='joto';
+
+    let hits=DB.items.filter(it=>{
+      const areaOK=!area||!it.target_area||it.target_area.includes('全国')||it.target_area.includes('沖縄')||it.target_area.includes(area);
+      return areaOK;
+    });
+
+    const score=it=>{
+      const text=(it.name||'')+(it.target_biz||'');
+      let s=0;
+      if(shokeiSignal&&it.tag==='shokei')s-=100;
+      if(themeKeys.some(k=>text.includes(k)))s-=10;
+      if(keys.some(k=>text.includes(k)))s-=5;
+      return s;
+    };
+    hits.sort((a,b)=>{
+      const d=score(a)-score(b);
+      if(d!==0)return d;
+      return (a.deadline||'9999').localeCompare(b.deadline||'9999');
+    });
+    hits=hits.slice(0,10);
+
+    document.getElementById('shokei-banner').hidden=!shokeiSignal;
+    document.getElementById('result-count').textContent=hits.length;
+    document.getElementById('result-list').innerHTML=hits.map(it=>`
+      <div class="card">
+        <h4>${it.name||''}</h4>
+        <div class="meta">
+          <span class="deadline">締切 ${it.deadline||'要確認'}</span>
+          <span>${it.target_area||'対象地域 要確認'}</span>
+          ${it.max_amount?`<span>上限 ${Number(it.max_amount).toLocaleString()}円</span>`:''}
+        </div>
+        <a href="${it.source_url}" target="_blank" rel="noopener">公式ページで確認 →</a>
+      </div>`).join('')||'<div class="card"><h4>条件に合う募集中の制度が見つかりませんでした。</h4><div class="meta"><span>条件を変えるか、LINE登録で新着をお待ちください。</span></div></div>';
+    document.getElementById('match-result').hidden=false;
+    document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
+  },{threshold:.2});
+  document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+ "updated_at": "2026-07-20 12:00",
+ "count": 3,
+ "items": [
+  {"id":"demo1","name":"【サンプル】沖縄県 小規模事業者持続化支援事業","issuer":"","target_area":"沖縄県","target_biz":"全業種","employees":"20名以下","max_amount":500000,"deadline":"2026-08-31","source_url":"https://www.jgrants-portal.go.jp/","tag":"okinawa","fetched_at":"2026-07-20 12:00","status":"募集中"},
+  {"id":"demo2","name":"【サンプル】事業承継・M&A補助金(専門家活用枠)","issuer":"","target_area":"全国","target_biz":"全業種","employees":"","max_amount":6000000,"deadline":"2026-09-30","source_url":"https://www.jgrants-portal.go.jp/","tag":"shokei","fetched_at":"2026-07-20 12:00","status":"募集中"},
+  {"id":"demo3","name":"【サンプル】IT導入補助金2026","issuer":"","target_area":"全国","target_biz":"全業種","employees":"","max_amount":4500000,"deadline":"2026-10-15","source_url":"https://www.jgrants-portal.go.jp/","tag":"nationwide","fetched_at":"2026-07-20 12:00","status":"募集中"}
+ ]
+}
