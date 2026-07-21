@@ -15,14 +15,18 @@ jobs:
   fetch-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
       - name: Fetch jGrants data
         run: python scripts/fetch_jgrants.py
+
+      - name: Fetch local (自治体) data
+        # 守り部審査済み(docs/守り部審査記録.md)。沖縄県・産業振興公社を追加収集しマージ
+        run: python scripts/fetch_local.py
 
       - name: Commit updated data
         run: |
@@ -33,16 +37,16 @@ jobs:
           git push
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Copy data into site
         run: cp -r data site/data
 
       - name: Upload site
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
