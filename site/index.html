@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>沖縄補助金ナビ｜眠っている支援金を、見つける。</title>
+<title>沖縄企業のミカタ｜補助金・融資・経営情報で、沖縄の企業にあかりを。</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -51,6 +51,8 @@
   h1{font-size:clamp(2.1rem,7.2vw,5.2rem);}
   h2{font-size:clamp(1.7rem,5.4vw,3.9rem);}
   .kin{color:var(--kin);}
+    .oath{margin-top:1.4rem;font-family:'Noto Serif JP',serif;font-weight:800;color:var(--kin);font-size:clamp(1rem,2.4vw,1.4rem);}
+  .live-badge{margin-top:2rem;display:inline-block;font-size:.85rem;font-weight:700;padding:.55em 1.2em;border-radius:999px;background:rgba(247,245,241,.1);border:1px solid rgba(248,136,0,.45);}
   .sub{
     margin-top:2.4rem;
     font-size:clamp(.95rem,1.8vw,1.15rem);
@@ -113,6 +115,16 @@
   .how-item h3 span{color:var(--kin);margin-right:.6em;font-size:.8em;}
   .how-item p{margin-top:.6rem;color:rgba(247,245,241,.72);font-size:.98rem;max-width:36em;}
 
+  /* なぜ無料か */
+  .whyfree{background:var(--midori);color:var(--shiro);}
+  .whyfree .eyebrow{color:var(--shiro);opacity:.85;}
+  .why-list{margin-top:3rem;display:grid;gap:2.4rem;max-width:42em;}
+  .why-item h3{font-family:'Noto Serif JP',serif;font-weight:800;font-size:clamp(1.15rem,2.8vw,1.7rem);}
+  .why-item h3 span{color:var(--kin);margin-right:.6em;font-size:.8em;}
+  .why-item p{margin-top:.5rem;color:rgba(247,245,241,.85);font-size:.96rem;max-width:36em;}
+  .why-item strong{color:#fff;border-bottom:2px solid var(--kin);}
+  .why-link{display:inline-block;margin-top:2.6rem;color:var(--kin);font-weight:700;font-size:.95rem;}
+
   /* CTA */
   .cta{background:linear-gradient(180deg,var(--sumi),var(--fukamidori));text-align:center;align-items:center;}
   .line-btn{
@@ -131,7 +143,9 @@
   .match{background:var(--shiro);color:var(--fukamidori);}
   .match .hero-logo{width:130px;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
   .eyebrow{color:var(--midori);}
-  .match .sub{color:rgba(0,51,92,.75);}
+  .match   .oath{margin-top:1.4rem;font-family:'Noto Serif JP',serif;font-weight:800;color:var(--kin);font-size:clamp(1rem,2.4vw,1.4rem);}
+  .live-badge{margin-top:2rem;display:inline-block;font-size:.85rem;font-weight:700;padding:.55em 1.2em;border-radius:999px;background:rgba(247,245,241,.1);border:1px solid rgba(248,136,0,.45);}
+  .sub{color:rgba(0,51,92,.75);}
   .match-form{
     margin-top:2.8rem;display:grid;gap:1.2rem;
     grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
@@ -205,9 +219,11 @@
 <!-- HERO -->
 <section class="hero">
   <img src="assets/glow-logo.png" alt="GLOW" class="hero-logo rv">
-  <p class="eyebrow rv">OKINAWA HOJOKIN NAVI</p>
+  <p class="eyebrow rv">OKINAWA KIGYO NO MIKATA</p>
   <h1 class="rv">沖縄の企業には、<br>まだ眠っている<span class="kin">可能性</span>がある。</h1>
-  <p class="sub rv">助成金・補助金は「知っている人」だけが受け取っている。<br>GLOWが365日、国・県・市町村の公募情報をチェックし、あなたに届けます。</p>
+  <p class="oath rv">——私たちGLOWも、その一社です。</p>
+  <p class="sub rv">補助金・融資は、可能性を起こすきっかけのひとつ。<br>GLOWが365日、国・県・市町村の公募情報をチェックし、あなたに届けます。</p>
+  <p class="live-badge rv">📡 毎日自動更新中|現在の掲載 <span id="live-count">—</span> 件</p>
   <div class="scrolldown">SCROLL</div>
 </section>
 
@@ -226,6 +242,18 @@
 <section class="vision">
   <p class="eyebrow rv">OUR VISION</p>
   <h2 class="rv">県内すべての経営者に、<br>「使える制度」が届く沖縄へ。</h2>
+</section>
+
+<!-- WHY FREE -->
+<section class="whyfree">
+  <p class="eyebrow rv">WHY FREE ?</p>
+  <h2 class="rv">なぜ、無料なのか。<br>先に、全部話します。</h2>
+  <div class="why-list">
+    <div class="why-item rv"><h3><span>壱</span>沖縄の会社が、取りこぼさない島にしたい</h3><p>情報の差だけで会社の未来が変わるのは、もったいない。だから情報は無料で、毎日、全部開きます。</p></div>
+    <div class="why-item rv"><h3><span>弐</span>沖縄の経営者と、つながりたい</h3><p>これも本音です。登録企業が増えるほど、この島の経営者同士で情報を交換できる場になります。</p></div>
+    <div class="why-item rv"><h3><span>参</span>続けるための運営費は、企業様以外から</h3><p>専門家の掲載料と、ご希望の方への経営相談で運営しています。<strong>登録企業様から利用料をいただくことは、今後もありません。</strong></p></div>
+  </div>
+  <a class="why-link rv" href="yakusoku.html">「ミカタの約束」全文を読む →</a>
 </section>
 
 <!-- HOW -->
@@ -308,14 +336,15 @@
 <!-- CTA -->
 <section class="cta">
   <p class="eyebrow rv">START FREE</p>
-  <h2 class="rv">その公募、<br><span class="kin">締切7日前</span>にお知らせします。</h2>
+  <h2 class="rv">この島の可能性を、<br><span class="kin">いっしょに起こそう。</span></h2>
+  <p class="sub rv" style="text-align:center;max-width:none;">気になる公募は、締切7日前にLINEでお知らせします。</p>
   <a class="line-btn rv" href="#">LINEで無料登録する</a>
   <p class="cta-note rv">登録は10秒。いつでも解除できます。</p>
 </section>
 
 <footer>
-  <div><strong>沖縄補助金ナビ</strong>(仮称)— 運営:株式会社GLOW(ALLGROUPグループ)</div>
-  <div><a href="yushi.html" style="color:var(--kin);font-weight:700;">制度融資・公庫ナビはこちら →</a></div>
+  <div><strong>沖縄企業のミカタ</strong> — 運営:株式会社GLOW(ALLGROUPグループ)</div>
+  <div><a href="yushi.html" style="color:var(--kin);font-weight:700;">制度融資・公庫ナビ →</a>  <a href="yakusoku.html" style="color:var(--kin);font-weight:700;margin-left:1.2em;">ミカタの約束(なぜ無料か)→</a></div>
   <div>最新情報は必ず各制度の公式サイトでご確認ください。</div>
 </footer>
 
@@ -324,7 +353,7 @@
   let DB={items:[],updated_at:null};
   fetch('data/subsidies.json')
     .then(r=>r.json())
-    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';})
+    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';const lc=document.getElementById('live-count');if(lc)lc.textContent=d.count||d.items.length||'—';})
     .catch(()=>{document.getElementById('updated-at').textContent='取得エラー(公式サイトをご確認ください)';});
 
   const BIZ_KEYS={
@@ -402,6 +431,7 @@
         html+=hits.slice(1).map(it=>card(it,true)).join('');
         html+=`<div class="unlock">
           <p><strong>残り${hits.length-1}件</strong>は、無料のLINE登録ですべて表示されます。<br>締切7日前アラートも自動で届きます。</p>
+          <p style="font-size:.8rem;margin-top:.6rem;opacity:.85;"><a href="yakusoku.html" style="color:var(--kin);">なぜ無料なの?(ミカタの約束)</a></p>
           <a class="line-btn" href="LINE_URL_PLACEHOLDER" target="_blank" rel="noopener">LINEで無料登録して全て見る</a>
         </div>`;
       }
