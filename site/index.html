@@ -8,11 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --fukamidori:#22382A;
-    --midori:#0F6E56;
-    --kin:#B98A2E;
-    --shiro:#F7F4EC;
-    --sumi:#141D17;
+    --fukamidori:#00335c;
+    --midori:#005088;
+    --kin:#F88800;
+    --shiro:#F7F5F1;
+    --sumi:#021c30;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -34,6 +34,7 @@
     padding:8vh 6vw;
     position:relative;
   }
+  .hero-logo{width:120px;margin-bottom:1.6rem;background:#fff;border-radius:14px;padding:10px 16px;}
   .eyebrow{
     color:var(--kin);
     font-size:clamp(12px,1.4vw,15px);
@@ -53,12 +54,12 @@
   .sub{
     margin-top:2.4rem;
     font-size:clamp(.95rem,1.8vw,1.15rem);
-    color:rgba(247,244,236,.78);
+    color:rgba(247,245,241,.78);
     max-width:34em;
   }
 
   /* ヒーロー */
-  .hero{background:linear-gradient(160deg,var(--sumi) 0%,var(--fukamidori) 62%,#1c4436 100%);}
+  .hero{background:linear-gradient(160deg,var(--sumi) 0%,var(--fukamidori) 62%,#004070 100%);}
   .hero::after{
     content:"";
     position:absolute;inset:auto 6vw 7vh auto;
@@ -73,7 +74,8 @@
 
   /* 数字セクション：巨大数字がヘッドライン */
   .impact{background:var(--shiro);color:var(--fukamidori);}
-  .impact .eyebrow{color:var(--midori);}
+  .impact .hero-logo{width:120px;margin-bottom:1.6rem;background:#fff;border-radius:14px;padding:10px 16px;}
+  .eyebrow{color:var(--midori);}
   .bignum-row{
     display:flex;flex-wrap:wrap;gap:4vw;margin-top:3.5rem;
   }
@@ -96,7 +98,8 @@
   /* ビジョン：一文だけの間 */
   .vision{background:var(--midori);text-align:center;align-items:center;}
   .vision h2{max-width:18em;}
-  .vision .eyebrow{color:var(--shiro);opacity:.85;}
+  .vision .hero-logo{width:120px;margin-bottom:1.6rem;background:#fff;border-radius:14px;padding:10px 16px;}
+  .eyebrow{color:var(--shiro);opacity:.85;}
 
   /* 仕組み：見出し3連打 */
   .how{background:var(--fukamidori);}
@@ -108,7 +111,7 @@
     color:var(--shiro);
   }
   .how-item h3 span{color:var(--kin);margin-right:.6em;font-size:.8em;}
-  .how-item p{margin-top:.6rem;color:rgba(247,244,236,.72);font-size:.98rem;max-width:36em;}
+  .how-item p{margin-top:.6rem;color:rgba(247,245,241,.72);font-size:.98rem;max-width:36em;}
 
   /* CTA */
   .cta{background:linear-gradient(180deg,var(--sumi),var(--fukamidori));text-align:center;align-items:center;}
@@ -119,15 +122,16 @@
     padding:1.15em 3.2em;border-radius:999px;
     text-decoration:none;letter-spacing:.06em;
     transition:transform .25s ease, box-shadow .25s ease;
-    box-shadow:0 8px 30px rgba(185,138,46,.35);
+    box-shadow:0 8px 30px rgba(248,136,0,.35);
   }
-  .line-btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(185,138,46,.5);}
-  .cta-note{margin-top:1.4rem;font-size:.85rem;color:rgba(247,244,236,.6);}
+  .line-btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(248,136,0,.5);}
+  .cta-note{margin-top:1.4rem;font-size:.85rem;color:rgba(247,245,241,.6);}
 
   /* マッチング */
   .match{background:var(--shiro);color:var(--fukamidori);}
-  .match .eyebrow{color:var(--midori);}
-  .match .sub{color:rgba(34,56,42,.75);}
+  .match .hero-logo{width:120px;margin-bottom:1.6rem;background:#fff;border-radius:14px;padding:10px 16px;}
+  .eyebrow{color:var(--midori);}
+  .match .sub{color:rgba(0,51,92,.75);}
   .match-form{
     margin-top:2.8rem;display:grid;gap:1.2rem;
     grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
@@ -138,14 +142,14 @@
   }
   .match-form select{
     font:inherit;padding:.85em 1em;border-radius:12px;
-    border:2px solid rgba(34,56,42,.25);background:#fff;color:var(--fukamidori);
+    border:2px solid rgba(0,51,92,.25);background:#fff;color:var(--fukamidori);
   }
   .match-form select:focus{outline:3px solid var(--kin);border-color:var(--kin);}
   .chip-group{display:flex;flex-wrap:wrap;gap:.5rem;}
   .chip{
     font:inherit;font-size:.85rem;font-weight:500;cursor:pointer;
     padding:.55em 1.1em;border-radius:999px;background:#fff;
-    border:2px solid rgba(34,56,42,.25);color:var(--fukamidori);
+    border:2px solid rgba(0,51,92,.25);color:var(--fukamidori);
     transition:background .2s,border-color .2s;
   }
   .chip:focus-visible{outline:3px solid var(--kin);}
@@ -161,19 +165,19 @@
   .shokei-link{color:var(--kin);font-weight:700;display:inline-block;margin-top:.4rem;}
   .card{
     margin-top:1.1rem;padding:1.2rem 1.4rem;border-radius:14px;background:#fff;
-    border:1px solid rgba(34,56,42,.15);box-shadow:0 4px 16px rgba(34,56,42,.06);
+    border:1px solid rgba(0,51,92,.15);box-shadow:0 4px 16px rgba(0,51,92,.06);
   }
   .card h4{font-family:'Noto Serif JP',serif;font-size:1.05rem;line-height:1.5;}
-  .card .meta{margin-top:.5rem;font-size:.85rem;color:rgba(34,56,42,.7);display:flex;flex-wrap:wrap;gap:1em;}
+  .card .meta{margin-top:.5rem;font-size:.85rem;color:rgba(0,51,92,.7);display:flex;flex-wrap:wrap;gap:1em;}
   .card .deadline{color:#a03a2a;font-weight:700;}
   .card a{color:var(--midori);font-weight:700;font-size:.9rem;}
-  .result-note{margin-top:1.6rem;font-size:.9rem;color:rgba(34,56,42,.75);}
-  .updated{margin-top:2.5rem;font-size:.78rem;color:rgba(34,56,42,.55);}
+  .result-note{margin-top:1.6rem;font-size:.9rem;color:rgba(0,51,92,.75);}
+  .updated{margin-top:2.5rem;font-size:.78rem;color:rgba(0,51,92,.55);}
 
   footer{
     background:var(--sumi);
     padding:3rem 6vw;font-size:.8rem;
-    color:rgba(247,244,236,.55);
+    color:rgba(247,245,241,.55);
     display:flex;flex-wrap:wrap;gap:1.5rem;justify-content:space-between;
   }
   footer strong{color:var(--kin);font-weight:700;}
@@ -191,9 +195,10 @@
 
 <!-- HERO -->
 <section class="hero">
+  <img src="assets/glow-logo.png" alt="GLOW" class="hero-logo rv">
   <p class="eyebrow rv">OKINAWA HOJOKIN NAVI</p>
   <h1 class="rv">沖縄には、<br>まだ<span class="kin">眠っているお金</span>がある。</h1>
-  <p class="sub rv">助成金・補助金は「知っている人」だけが受け取っている。<br>AIが365日、県と市町村の公募情報を監視し、あなたに届けます。</p>
+  <p class="sub rv">助成金・補助金は「知っている人」だけが受け取っている。<br>GLOWが365日、国・県・市町村の公募情報をチェックし、あなたに届けます。</p>
   <div class="scrolldown">SCROLL</div>
 </section>
 
@@ -204,7 +209,7 @@
   <div class="bignum-row">
     <div class="bignum rv"><div class="n">150<small>制度+</small></div><div class="l">沖縄で使える公募を常時掲載</div></div>
     <div class="bignum rv"><div class="n">24<small>時間</small></div><div class="l">新着から掲載までの最大遅延</div></div>
-    <div class="bignum rv"><div class="n">365<small>日</small></div><div class="l">AIが休まず公募情報を巡回</div></div>
+    <div class="bignum rv"><div class="n">365<small>日</small></div><div class="l">GLOWが休まず公募情報をチェック</div></div>
   </div>
 </section>
 
@@ -217,9 +222,9 @@
 <!-- HOW -->
 <section class="how">
   <p class="eyebrow rv">HOW IT WORKS</p>
-  <h2 class="rv">探すのは、AIの仕事。<br>選ぶのが、あなたの仕事。</h2>
+  <h2 class="rv">探すのは、GLOWの仕事。<br>選ぶのが、あなたの仕事。</h2>
   <div class="how-list">
-    <div class="how-item rv"><h3><span>壱</span>AIが毎日、国と沖縄の公募を巡回</h3><p>jGrantsや県・市町村サイトを自動チェック。人力では追えない更新を漏らしません。</p></div>
+    <div class="how-item rv"><h3><span>壱</span>GLOWが毎日、国と沖縄の公募をチェック</h3><p>jGrantsや県・市町村サイトを毎日確認。見落としがちな更新も漏らしません。</p></div>
     <div class="how-item rv"><h3><span>弐</span>締切・金額・対象を、原文照合で正確に</h3><p>すべての情報は公式ページと突き合わせて掲載。あいまいなものは「要確認」と正直に表示します。</p></div>
     <div class="how-item rv"><h3><span>参</span>締切7日前、LINEにアラート</h3><p>気になる制度を登録すれば、申し込み忘れをゼロに。相談したい時は専門家におつなぎします。</p></div>
   </div>
@@ -300,7 +305,7 @@
 </section>
 
 <footer>
-  <div><strong>沖縄補助金ナビ</strong>(仮称)— 運営:ALLGROUP</div>
+  <div><strong>沖縄補助金ナビ</strong>(仮称)— 運営:株式会社GLOW(ALLGROUPグループ)</div>
   <div><a href="yushi.html" style="color:var(--kin);font-weight:700;">制度融資・公庫ナビはこちら →</a></div>
   <div>最新情報は必ず各制度の公式サイトでご確認ください。</div>
 </footer>
