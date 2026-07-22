@@ -313,6 +313,13 @@
   .result-note{margin-top:var(--sp-3);font-size:.9rem;color:rgba(0,51,92,.8);}
   .updated{margin-top:var(--sp-6);font-size:.78rem;color:rgba(0,51,92,.72);}
 
+  /* 診断フォーム: 進捗・ガイド */
+  .form-progress{grid-column:1/-1;font-size:.85rem;font-weight:700;color:rgba(0,51,92,.8);}
+  .form-progress strong{color:var(--kin);font-size:1.05em;}
+  .form-guide{grid-column:1/-1;margin-top:var(--sp-1);font-size:.9rem;font-weight:700;
+    color:var(--fukamidori);background:rgba(248,136,0,.12);
+    border:1px solid rgba(248,136,0,.5);border-radius:12px;padding:var(--sp-2);}
+
   /* 診断結果: 会社情報登録CTA */
   .register-btn{
     display:inline-block;text-decoration:none;margin-top:1rem;
@@ -415,6 +422,7 @@
   <h2 class="rv">あなたの会社に、<br><span class="kin">いま使える制度</span>を。</h2>
   <p class="sub rv">4つ選ぶだけ。登録不要・無料で、最新データから自動マッチングします。</p>
   <div class="match-form rv">
+    <p class="form-progress" id="form-progress" aria-live="polite">選択 <strong>0/4</strong> — 1つでも選ぶと精度が上がります</p>
     <label>市町村
       <select id="f-area">
         <option value="">選択してください</option>
@@ -460,6 +468,7 @@
       </select>
     </label>
     <button id="match-btn" class="line-btn" type="button">無料でマッチングする</button>
+    <p class="form-guide" id="form-guide" hidden>まだ何も選ばれていません 😊 どれか1つだけでも選ぶと、貴社に近い制度に絞ってお探しできます。</p>
   </div>
 
   <div id="match-result" class="match-result" hidden>
@@ -537,8 +546,44 @@
 
   // テーマチップの選択
   document.querySelectorAll('#f-theme .chip').forEach(c=>{
-    c.addEventListener('click',()=>c.classList.toggle('on'));
+    c.addEventListener('click',()=>{
+      c.classList.toggle('on');
+      c.setAttribute('aria-pressed',c.classList.contains('on')?'true':'false');
+      updateProgress();
+    });
   });
+
+  // ===== 進捗表示(4つのセレクト基準+テーマ加点表示) =====
+  const SELECT_IDS=['f-area','f-biz','f-emp','f-future'];
+  const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function selectedCount(){
+    return SELECT_IDS.filter(id=>document.getElementById(id).value).length;
+  }
+  function themeCount(){
+    return document.querySelectorAll('#f-theme .chip.on').length;
+  }
+  function updateProgress(){
+    const n=selectedCount(), t=themeCount();
+    const el=document.getElementById('form-progress');
+    if(!el)return;
+    const theme=t?` ＋テーマ${t}`:'';
+    const msg=n>=4?'準備OK!マッチングしましょう':(n>0?'いい調子です':'1つでも選ぶと精度が上がります');
+    el.innerHTML=`選択 <strong>${n}/4</strong>${theme} — ${msg}`;
+    if(n>0||t>0){const g=document.getElementById('form-guide');if(g)g.hidden=true;}
+  }
+  SELECT_IDS.forEach(id=>document.getElementById(id).addEventListener('change',updateProgress));
+
+  // ===== 件数カウントアップ =====
+  function animateCount(el,to){
+    if(REDUCED||to<=0){el.textContent=to;return;}
+    const dur=600,t0=performance.now();
+    const step=now=>{
+      const p=Math.min(1,(now-t0)/dur);
+      el.textContent=Math.round(to*(1-Math.pow(1-p,3)));
+      if(p<1)requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
 
   // テーマ→制度キーワード(すべてマッチング精度向上に実際に使う)
   const THEME_KEYS={
@@ -551,6 +596,11 @@
   };
 
   document.getElementById('match-btn').addEventListener('click',()=>{
+    if(selectedCount()===0&&themeCount()===0){
+      const g=document.getElementById('form-guide');
+      if(g){g.hidden=false;g.scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'center'});}
+      return;
+    }
     const area=document.getElementById('f-area').value;
     const biz=document.getElementById('f-biz').value;
     const future=document.getElementById('f-future').value;
@@ -582,7 +632,7 @@
     hits=hits.slice(0,10);
 
     document.getElementById('shokei-banner').hidden=!shokeiSignal;
-    document.getElementById('result-count').textContent=hits.length;
+    animateCount(document.getElementById('result-count'),hits.length);
     const maskName=n=>n.length>6?n.slice(0,6)+'●●●●●●':'●●●●●●';
     const card=(it,locked)=>`
       <div class="card ${locked?'locked':''}">
@@ -607,7 +657,9 @@
         </div>`;
       }
     }
-    document.getElementById('result-list').innerHTML=html;
+    const list=document.getElementById('result-list');
+    list.innerHTML=html;
+    if(!REDUCED)[...list.children].forEach((el,i)=>el.style.animationDelay=(i*70)+'ms');
     document.getElementById('match-result').hidden=false;
     document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
   });
