@@ -1,0 +1,27 @@
+name: fukugiiro-ci
+
+on:
+  push:
+    paths:
+      - "data/fukugiiro/**"
+      - "scripts/validate_fukugiiro.py"
+      - "tests/golden_fukugiiro.json"
+  pull_request:
+    paths:
+      - "data/fukugiiro/**"
+      - "scripts/validate_fukugiiro.py"
+      - "tests/golden_fukugiiro.json"
+  workflow_dispatch: {}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: ゴールデンセット自己テスト + 制度DB検証(ケンショウ/マモリ ゲート)
+        run: python scripts/validate_fukugiiro.py --self-test

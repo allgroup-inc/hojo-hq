@@ -1,0 +1,163 @@
+{
+  "today": "2026-07-22",
+  "cases": [
+    {
+      "name": "正例: 検証済みの常時制度",
+      "expect": "pass",
+      "data": {
+        "updated_at": "2026-07-22 00:00",
+        "count": 1,
+        "items": [
+          {
+            "id": "fk-test-seirei1",
+            "name": "テスト手当(ゴールデン正例)",
+            "category": "子育て",
+            "life_events": ["子育て"],
+            "issuer": "テスト庁",
+            "area": "全国",
+            "target_household": "テスト対象世帯の可能性があります",
+            "amount_note": "月額は世帯状況により異なります",
+            "deadline_type": "常時",
+            "deadline": null,
+            "how_to_apply": "市区町村窓口",
+            "source_url": "https://www.example.go.jp/test",
+            "verified": true,
+            "verified_at": "2026-07-22",
+            "verified_by": "kensho",
+            "status": "検証済み",
+            "notes": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "正例: 未検証は要確認表示なら掲載可",
+      "expect": "pass",
+      "data": {
+        "updated_at": "2026-07-22 00:00",
+        "count": 1,
+        "items": [
+          {
+            "id": "fk-test-seirei2",
+            "name": "テスト補助(未検証)",
+            "category": "住まい",
+            "life_events": ["住宅取得・引越"],
+            "issuer": "テスト市",
+            "area": "那覇市",
+            "target_household": "対象となる場合があります",
+            "amount_note": "要確認",
+            "deadline_type": "要確認",
+            "deadline": null,
+            "how_to_apply": "市区町村窓口",
+            "source_url": "https://www.city.example.lg.jp/test",
+            "verified": false,
+            "verified_at": null,
+            "verified_by": null,
+            "status": "要確認",
+            "notes": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "負例: 禁止表現(必ずもらえる)",
+      "expect": "fail",
+      "must_contain": "禁止表現",
+      "data": {
+        "updated_at": "2026-07-22 00:00",
+        "count": 1,
+        "items": [
+          {
+            "id": "fk-test-huhyogen",
+            "name": "テスト給付金",
+            "category": "生活支援",
+            "life_events": ["低所得・生活苦"],
+            "issuer": "テスト庁",
+            "area": "全国",
+            "target_household": "この条件なら必ずもらえる",
+            "amount_note": "要確認",
+            "deadline_type": "常時",
+            "deadline": null,
+            "how_to_apply": "オンライン",
+            "source_url": "https://www.example.go.jp/test",
+            "verified": true,
+            "verified_at": "2026-07-22",
+            "verified_by": "kensho",
+            "status": "検証済み",
+            "notes": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "負例: 過去締切なのに募集中扱い",
+      "expect": "fail",
+      "must_contain": "過去",
+      "data": {
+        "updated_at": "2026-07-22 00:00",
+        "count": 1,
+        "items": [
+          {
+            "id": "fk-test-kigire",
+            "name": "テスト期限切れ補助",
+            "category": "教育",
+            "life_events": ["入園・入学"],
+            "issuer": "テスト県",
+            "area": "沖縄県",
+            "target_household": "対象となる場合があります",
+            "amount_note": "要確認",
+            "deadline_type": "期限あり",
+            "deadline": "2026-06-30",
+            "how_to_apply": "窓口",
+            "source_url": "https://www.pref.okinawa.jp/test",
+            "verified": true,
+            "verified_at": "2026-07-01",
+            "verified_by": "kensho",
+            "status": "検証済み",
+            "notes": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "負例: 未検証なのに検証済み表示",
+      "expect": "fail",
+      "must_contain": "verified=false",
+      "data": {
+        "updated_at": "2026-07-22 00:00",
+        "count": 1,
+        "items": [
+          {
+            "id": "fk-test-gisou",
+            "name": "テスト偽装検証",
+            "category": "医療・健康",
+            "life_events": ["病気・けが"],
+            "issuer": "テスト庁",
+            "area": "全国",
+            "target_household": "対象となる場合があります",
+            "amount_note": "要確認",
+            "deadline_type": "常時",
+            "deadline": null,
+            "how_to_apply": "窓口",
+            "source_url": "https://www.example.go.jp/test",
+            "verified": false,
+            "verified_at": null,
+            "verified_by": null,
+            "status": "検証済み",
+            "notes": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "負例: count不一致",
+      "expect": "fail",
+      "must_contain": "不一致",
+      "data": {
+        "updated_at": "2026-07-22 00:00",
+        "count": 5,
+        "items": []
+      }
+    }
+  ]
+}
