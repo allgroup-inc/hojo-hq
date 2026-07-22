@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-07-23 01:54",
+ "updated_at": "2026-07-23 01:56",
  "count": 13,
  "items": [
   {
@@ -22,7 +22,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-jidofuyoteate",
@@ -45,7 +45,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-shussan-ichijikin",
@@ -67,7 +67,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-ikuji-kyufu",
@@ -91,7 +91,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-jukyo-kakuho",
@@ -115,7 +115,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-kogaku-ryoyo",
@@ -137,7 +137,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-shugaku-shien",
@@ -159,7 +159,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-hitorioya-shien",
@@ -174,6 +174,9 @@
    "target_household": "ひとり親家庭の世帯向けの各種支援(手当・貸付・就業支援など)の入口です",
    "how_to_apply": "お住まいの市区町村の窓口",
    "source_url": "https://www.cfa.go.jp/policies/hitori-oya",
+   "match_tokens": [
+    "ひとり親家庭"
+   ],
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline_type": "常時",
    "deadline": null,
@@ -182,7 +185,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-ninpu-shien",
@@ -204,7 +207,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-shugakushienkin-koko",
@@ -226,7 +229,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-shogaku-kyufukin-koko",
@@ -249,7 +252,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-kyushokusha-shien",
@@ -273,7 +276,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   },
   {
    "id": "fk-kuni-kyoiku-kunren",
@@ -295,7 +298,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-07-23 01:54"
+   "fetched_at": "2026-07-23 01:56"
   }
  ]
 }
