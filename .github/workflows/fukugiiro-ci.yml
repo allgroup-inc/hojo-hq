@@ -7,6 +7,7 @@ on:
       - "scripts/validate_fukugiiro.py"
       - "scripts/check_lp_fukugiiro.py"
       - "tests/golden_fukugiiro.json"
+      - "tests/shindan.test.mjs"
       - "site/fukugiiro/**"
   pull_request:
     paths:
@@ -14,6 +15,7 @@ on:
       - "scripts/validate_fukugiiro.py"
       - "scripts/check_lp_fukugiiro.py"
       - "tests/golden_fukugiiro.json"
+      - "tests/shindan.test.mjs"
       - "site/fukugiiro/**"
   workflow_dispatch: {}
 
@@ -32,3 +34,10 @@ jobs:
 
       - name: LP検査(サイズ予算・禁止表現・基本要件)
         run: python scripts/check_lp_fukugiiro.py
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: 診断ロジック トラジェクトリeval(ミチビキ/ケンショウ ゲート)
+        run: node --test tests/shindan.test.mjs
