@@ -25,9 +25,12 @@ def main():
     if size > SIZE_BUDGET:
         errors.append(f"サイズ予算超過: {size}B > {SIZE_BUDGET}B(画像分離・CSS削減を)")
     html = open(LP, encoding="utf-8").read()
+    # 禁止表現の検査対象は「利用者に見える文言」のみ。CSS/JSを除外する
+    # (失敗台帳 FK-001: CSSの max-width:100% を禁止語『100%』と誤検知した対策)
+    visible = re.sub(r"<(style|script)[^>]*>.*?</\1>", " ", html, flags=re.S | re.I)
     for word in FORBIDDEN:
-        if word in html:
-            errors.append(f"禁止表現『{word}』がLPに含まれる(マモリさんゲート)")
+        if word in visible:
+            errors.append(f"禁止表現『{word}』がLP文言に含まれる(マモリさんゲート)")
     for req, label in [('lang="ja"', "lang属性"), ("viewport", "viewportメタ"),
                        ("<title>", "title"), ('name="description"', "description")]:
         if req not in html:
