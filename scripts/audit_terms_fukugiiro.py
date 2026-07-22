@@ -42,6 +42,25 @@ DOMAINS = [
     ("宜野湾市", "www.city.ginowan.lg.jp"),
 ]
 
+# 検索で特定済みの規約ページ(トップからリンク発見できないサイト用の直指定)
+EXTRA_PAGES = {
+    "www.cfa.go.jp": [
+        "https://www.cfa.go.jp/site-policy",
+        "https://www.cfa.go.jp/copyright-policy",
+    ],
+    "www.mext.go.jp": [
+        "https://www.mext.go.jp/b_menu/1351168.htm",
+        "https://www.mext.go.jp/b_menu/about_link.htm",
+    ],
+    "www.cao.go.jp": [
+        "https://www.cao.go.jp/notice/rule.html",
+    ],
+}
+
+# リンク未発見サイトで試すよくあるパス(404は無視)
+COMMON_PATHS = ["/site-policy", "/sitepolicy.html", "/policy.html", "/riyou.html",
+                "/disclaimer.html", "/link.html", "/about/", "/site/rule/"]
+
 # リンクテキスト/URLに含まれていたら規約系とみなすキーワード
 LINK_KEYWORDS = ["利用規約", "サイトポリシー", "著作権", "リンクについて", "リンク・著作権",
                  "免責", "このサイトについて", "ご利用に", "ご利用ガイド", "サイトの使い方",
@@ -86,7 +105,14 @@ def fetch(url):
 
 
 def strip_html(html):
-    html = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", html, flags=re.S | re.I)
+    # 本文領域(main/article/#main/#content)があればそこを優先し、ナビ汚染を減らす
+    for pat in (r"<main[^>]*>(.*?)</main>", r"<article[^>]*>(.*?)</article>",
+                r'<div[^>]+id="(?:main|content|contents)"[^>]*>(.*)'):
+        m = re.search(pat, html, flags=re.S | re.I)
+        if m:
+            html = m.group(1)
+            break
+    html = re.sub(r"<(script|style|nav|header|footer)[^>]*>.*?</\1>", " ", html, flags=re.S | re.I)
     text = re.sub(r"<[^>]+>", " ", html)
     text = re.sub(r"\s+", " ", text)
     return text.strip()
@@ -136,9 +162,24 @@ def main():
             home = fetch(base_url)
             time.sleep(1.5)
             links = find_terms_links(home, base_url)
+            for extra in EXTRA_PAGES.get(domain, []):
+                if extra not in [u for u, _ in links]:
+                    links.append((extra, "検索特定ページ"))
             if not links:
-                entry["error"] = "規約系リンクがトップページから見つからず — 手動確認要"
-            for url, text in links:
+                # よくあるパスを試す(404は無視)
+                for path in COMMON_PATHS:
+                    if len(links) >= 2:
+                        break
+                    try:
+                        cand = base_url.rstrip("/") + path
+                        fetch(cand)
+                        links.append((cand, f"候補パス{path}"))
+                    except Exception:
+                        pass
+                    time.sleep(1.5)
+            if not links:
+                entry["error"] = "規約系ページを発見できず — 手動確認要"
+            for url, text in links[:4]:
                 try:
                     page = fetch(url)
                     body = strip_html(page)
