@@ -1,5 +1,188 @@
 {
- "updated_at": "2026-07-22 21:00",
- "count": 0,
- "items": []
+ "updated_at": "2026-07-23 01:47",
+ "count": 8,
+ "items": [
+  {
+   "id": "fk-kuni-jidoteate",
+   "name": "児童手当",
+   "category": "子育て",
+   "life_events": [
+    "子育て"
+   ],
+   "issuer": "こども家庭庁",
+   "area": "全国",
+   "target_household": "中学生以下(2024年10月以降は高校生年代まで拡充)のお子さんを育てている世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.cfa.go.jp/policies/kokoseido/jidouteate",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: こども家庭庁ウェブサイト",
+   "fetched_at": "2026-07-23 01:47"
+  },
+  {
+   "id": "fk-kuni-jidofuyoteate",
+   "name": "児童扶養手当",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "低所得・生活苦"
+   ],
+   "issuer": "こども家庭庁",
+   "area": "全国",
+   "target_household": "ひとり親家庭などでお子さんを育てている世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.cfa.go.jp/policies/hitori-oya/fuyou-teate",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: こども家庭庁ウェブサイト",
+   "fetched_at": "2026-07-23 01:47"
+  },
+  {
+   "id": "fk-kuni-shussan-ichijikin",
+   "name": "出産育児一時金",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "厚生労働省(各健康保険)",
+   "area": "全国",
+   "target_household": "健康保険に加入している方(被扶養者を含む)が出産したときに対象となる可能性があります",
+   "how_to_apply": "加入している健康保険(協会けんぽ・国保など)への申請。多くは医療機関での直接支払制度が利用できます",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/shussan/index.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-07-23 01:47"
+  },
+  {
+   "id": "fk-kuni-ikuji-kyufu",
+   "name": "育児休業給付(雇用保険)",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産",
+    "子育て",
+    "就職・転職"
+   ],
+   "issuer": "厚生労働省・ハローワーク",
+   "area": "全国",
+   "target_household": "雇用保険に加入していて育児休業を取得する方が対象となる可能性があります",
+   "how_to_apply": "原則、勤務先を通じてハローワークへ申請",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000158500.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 厚生労働省・ハローワークウェブサイト",
+   "fetched_at": "2026-07-23 01:47"
+  },
+  {
+   "id": "fk-kuni-jukyo-kakuho",
+   "name": "住居確保給付金",
+   "category": "住まい",
+   "life_events": [
+    "失業",
+    "低所得・生活苦",
+    "住宅取得・引越"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "離職・収入減少などで家賃の支払いにお困りの世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの自治体の自立相談支援機関",
+   "source_url": "https://corona-support.mhlw.go.jp/jukyokakuhokyufukin/index.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "要確認",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-07-23 01:47"
+  },
+  {
+   "id": "fk-kuni-kogaku-ryoyo",
+   "name": "高額療養費制度",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが"
+   ],
+   "issuer": "厚生労働省(各健康保険)",
+   "area": "全国",
+   "target_household": "1ヶ月の医療費の自己負担が上限額を超えた方が対象となる可能性があります",
+   "how_to_apply": "加入している健康保険への申請(事前の限度額適用認定証の利用も可能です)",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/juuyou/kougakuiryou/index.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-07-23 01:47"
+  },
+  {
+   "id": "fk-kuni-shugaku-shien",
+   "name": "高等教育の修学支援新制度(授業料等減免・給付型奨学金)",
+   "category": "教育",
+   "life_events": [
+    "入園・入学"
+   ],
+   "issuer": "文部科学省",
+   "area": "全国",
+   "target_household": "大学・短大・高専・専門学校に進学する(在学中の)お子さんがいる世帯が対象となる可能性があります(2025年度から多子世帯の拡充があります)",
+   "how_to_apply": "在学校・進学先を通じた申込み(日本学生支援機構)",
+   "source_url": "https://www.mext.go.jp/kyufu/",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 文部科学省ウェブサイト",
+   "fetched_at": "2026-07-23 01:47"
+  },
+  {
+   "id": "fk-kuni-hitorioya-shien",
+   "name": "ひとり親家庭への支援制度(全体案内)",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "低所得・生活苦"
+   ],
+   "issuer": "こども家庭庁",
+   "area": "全国",
+   "target_household": "ひとり親家庭の世帯向けの各種支援(手当・貸付・就業支援など)の入口です",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.cfa.go.jp/policies/hitori-oya",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: こども家庭庁ウェブサイト",
+   "fetched_at": "2026-07-23 01:47"
+  }
+ ]
 }
