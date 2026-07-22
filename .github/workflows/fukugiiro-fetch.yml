@@ -1,0 +1,38 @@
+name: fukugiiro-fetch
+
+on:
+  schedule:
+    # 朝夕2回まで(守り部審査・第1次ウタガイ採用事項): 06:00 / 18:00 JST
+    - cron: "0 21,9 * * *"
+  push:
+    paths:
+      - "scripts/fetch_fukugiiro.py"
+      - ".github/workflows/fukugiiro-fetch.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 個人向け制度の収集(承認済みソースのみ・書込前に検証)
+        run: python scripts/fetch_fukugiiro.py
+
+      - name: 検証(ゴールデンセット+DB)
+        run: python scripts/validate_fukugiiro.py --self-test
+
+      - name: Commit data
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add data/fukugiiro/seido.json
+          git diff --cached --quiet || git commit -m "auto: fukugiiro seido update $(date '+%Y-%m-%d %H:%M')"
+          git push
