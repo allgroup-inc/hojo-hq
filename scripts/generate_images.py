@@ -125,6 +125,7 @@ def parse_post(path):
         "title": grab("タイトル"),
         "sub": grab("サブ"),
         "number": grab("数字"),
+        "badge": grab("バッジ"),
     }
 
 
@@ -137,6 +138,16 @@ def render(post, out_path):
     eb = font(True, 30)
     d.text((PAD, PAD), "OKINAWA KIGYO NO MIKATA", font=eb, fill=GOLD)
     d.line([(PAD, PAD + 52), (PAD + 220, PAD + 52)], fill=GOLD, width=4)
+
+    # バッジ(予告カード等): 右上に金枠のピル
+    if post.get("badge"):
+        bf = font(True, 28)
+        tw = text_w(d, post["badge"], bf)
+        bw, bh = int(tw + 56), 56
+        bx, by = W - PAD - bw, PAD - 6
+        d.rounded_rectangle([bx, by, bx + bw, by + bh], radius=bh // 2,
+                            outline=GOLD, width=3)
+        d.text((bx + 28, by + (bh - bf.size) // 2 - 2), post["badge"], font=bf, fill=GOLD)
 
     # 中央ブロックを縦積みで配置
     y = 300
