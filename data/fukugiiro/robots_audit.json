@@ -1,0 +1,131 @@
+{
+ "audited_at": "2026-07-22 22:57",
+ "results": [
+  {
+   "label": "こども家庭庁",
+   "domain": "www.cfa.go.jp",
+   "sample_path": "/policies/",
+   "http_status": 200,
+   "machine_check": "代表パス /policies/ は許可範囲",
+   "fetch_ok": true,
+   "robots_excerpt": "#\n# robots.txt\n#\n# This file is to prevent the crawling and indexing of certain parts\n# of your site by web crawlers and spiders run by sites like Yahoo!\n# and Google. By telling these \"robots\" where not to go on your site,\n# you save bandwidth and server resources.\n#\n# This file will be ignored unless it is at the root of your host:\n# Used:    http://example.com/robots.txt\n# Ignored: http://example.com/site/robots.txt\n#\n# For more information about the robots.txt standard, see:\n# http://www.robotstxt.org/robotstxt.html\n\nUser-agent: *\n# CSS, JS, Images\nAllow: /core/*.css$\nAllow: /core/*.css?\nAllow: /core/*.js$\nAllow: /core/*.js?\nAllow: /core/*.gif\nAllow: /core/*.jpg\nAllow: /core/*.jpeg\nAllow: /core/*.png\nAllow: /core/*.svg\nAllow: /profiles/*.css$\nAllow: /profiles/*.css?\nAllow: /profiles/*."
+  },
+  {
+   "label": "厚生労働省",
+   "domain": "www.mhlw.go.jp",
+   "sample_path": "/stf/",
+   "http_status": 200,
+   "machine_check": "代表パス /stf/ は許可範囲",
+   "fetch_ok": true,
+   "robots_excerpt": "# \r\n# robots.txt for http://www.mhlw.go.jp/\r\n# \r\nUser-agent: *        \r\nDisallow: /cgi-bin/   \r\nDisallow: /images/\t\r\nDisallow: /topics/bukyoku/iyaku/kaisyu/00-1-010.html"
+  },
+  {
+   "label": "協会けんぽ",
+   "domain": "www.kyoukaikenpo.or.jp",
+   "sample_path": "/g3/",
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
+   "robots_excerpt": ""
+  },
+  {
+   "label": "文部科学省",
+   "domain": "www.mext.go.jp",
+   "sample_path": "/a_menu/",
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
+   "robots_excerpt": ""
+  },
+  {
+   "label": "JASSO",
+   "domain": "www.jasso.go.jp",
+   "sample_path": "/shogakukin/",
+   "http_status": 200,
+   "machine_check": "代表パス /shogakukin/ は許可範囲",
+   "fetch_ok": true,
+   "robots_excerpt": "<!DOCTYPE html>\r\n<html lang=\"ja\">\r\n\t<head>\r\n\t\t<meta charset=\"utf-8\">\r\n\t\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\r\n\t\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n\t\t<meta name=\"format-detection\" content=\"telephone=no\">\r\n\t\t<title>独立行政法人日本学生支援機構 | JASSO</title>\r\n\t\t<meta name=\"description\" content=\"独立行政法人日本学生支援機構（JASSO）の公式ホームページです。\">\r\n\t\t<meta name=\"keywords\" content=\"\">\r\n\t\t<meta name=\"probobot\" content=\"noindex\">\r\n\t\t<meta property=\"og:title\" content=\"独立行政法人日本学生支援機構\">\r\n\t\t<meta property=\"og:description\" content=\"独立行政法人日本学生支援機構（JASSO）の公式ホームページです。\">\r\n\t\t<meta property=\"og:url\" content=\"https://www.jasso.go.jp/index.html\">\r\n\t\t<meta property=\"og:image\" content=\"https://www.jasso.go.jp/assets/images/common/ogp_ja_logo.jpg\">\r\n\t\t<link rel=\"stylesheet\" href=\"/assets"
+  },
+  {
+   "label": "国土交通省",
+   "domain": "www.mlit.go.jp",
+   "sample_path": "/jutakukentiku/",
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
+   "robots_excerpt": ""
+  },
+  {
+   "label": "内閣府",
+   "domain": "www.cao.go.jp",
+   "sample_path": "/",
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
+   "robots_excerpt": ""
+  },
+  {
+   "label": "内閣府防災",
+   "domain": "www.bousai.go.jp",
+   "sample_path": "/",
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
+   "robots_excerpt": ""
+  },
+  {
+   "label": "全国社会福祉協議会",
+   "domain": "www.shakyo.or.jp",
+   "sample_path": "/",
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
+   "robots_excerpt": ""
+  },
+  {
+   "label": "那覇市",
+   "domain": "www.city.naha.okinawa.jp",
+   "sample_path": "/kurashitetuduki/",
+   "http_status": 200,
+   "machine_check": "代表パス /kurashitetuduki/ は許可範囲",
+   "fetch_ok": true,
+   "robots_excerpt": "User-agent: *\r\nDisallow: /mlmainte/\r\nDisallow: /mldata/\r\nDisallow: /bousaidata/"
+  },
+  {
+   "label": "沖縄市",
+   "domain": "www.city.okinawa.okinawa.jp",
+   "sample_path": "/",
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
+   "robots_excerpt": ""
+  },
+  {
+   "label": "うるま市",
+   "domain": "www.city.uruma.lg.jp",
+   "sample_path": "/",
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
+   "robots_excerpt": ""
+  },
+  {
+   "label": "浦添市",
+   "domain": "www.city.urasoe.lg.jp",
+   "sample_path": "/",
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
+   "robots_excerpt": ""
+  },
+  {
+   "label": "宜野湾市",
+   "domain": "www.city.ginowan.lg.jp",
+   "sample_path": "/",
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
+   "robots_excerpt": ""
+  }
+ ]
+}

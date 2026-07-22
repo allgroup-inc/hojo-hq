@@ -243,6 +243,54 @@ def check_data():
         warnings.append(f"[鮮度] updated_at を解釈できません: {ua!r}")
 
 
+def check_fukugiiro():
+    """フクギイロ区画(site/fukugiiro + data/fukugiiro/seido.json)の監視。
+    未デプロイ(404)の間は WARNING に留め、既存サイトの運用を壊さない。"""
+    status, _, body = fetch(BASE + "/fukugiiro/")
+    if status != 200:
+        warnings.append(f"[フクギイロ] LPが未デプロイまたは取得不可 — status={status}")
+        return
+    notes.append(f"[フクギイロ] LP OK (200, {len(body)} bytes)")
+    for token in ("もらい忘れ", "フクギイロ"):
+        if token not in body:
+            errors.append(f"[フクギイロ] LPに想定要素 '{token}' が見当たりません")
+
+    status, _, body = fetch(BASE + "/data/fukugiiro/seido.json")
+    if status != 200:
+        warnings.append(f"[フクギイロ] seido.json が未デプロイまたは取得不可 — status={status}")
+        return
+    try:
+        data = json.loads(body)
+    except Exception as e:
+        errors.append(f"[フクギイロ] seido.json が壊れています(JSONパース失敗): {e}")
+        return
+    items = data.get("items", [])
+    if data.get("count") != len(items):
+        errors.append(f"[フクギイロ] count({data.get('count')}) と items数({len(items)}) が不一致")
+    if len(items) == 0:
+        warnings.append("[フクギイロ] 掲載0件(立ち上げ期は許容)")
+    # 締切切れを要確認以外で掲載していないか
+    today = datetime.now(JST).date()
+    for it in items:
+        dl = it.get("deadline")
+        if dl and it.get("status") not in ("終了",):
+            try:
+                if datetime.strptime(dl, "%Y-%m-%d").date() < today:
+                    errors.append(f"[フクギイロ] 締切切れを掲載: {it.get('name', '')[:30]} / {dl}")
+            except Exception:
+                pass
+    ua = data.get("updated_at")
+    try:
+        upd = datetime.strptime(ua, "%Y-%m-%d %H:%M").replace(tzinfo=JST)
+        age_h = (datetime.now(JST) - upd).total_seconds() / 3600
+        if age_h > STALE_HOURS:
+            errors.append(f"[フクギイロ] データが古い: 最終更新 {ua}({age_h:.1f}時間前)— 収集停止の疑い")
+        else:
+            notes.append(f"[フクギイロ] 最終更新 {ua}({age_h:.1f}時間前)OK / {len(items)}件")
+    except Exception:
+        warnings.append(f"[フクギイロ] updated_at を解釈できません: {ua!r}")
+
+
 def main():
     ts = datetime.now(JST).strftime("%Y-%m-%d %H:%M JST")
     idx = check_page("/", "トップページ", must_contain=["<", "subsidies"])
@@ -251,6 +299,7 @@ def main():
     check_placeholders(idx)
     check_js_syntax(idx)
     check_data()
+    check_fukugiiro()
 
     lines = [f"# hojo-hq 日次ヘルスチェック  {ts}", f"対象: {BASE}", ""]
     lines.append(f"結果: {'❌ 異常あり' if errors else '✅ 正常'}  "

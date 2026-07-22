@@ -1,0 +1,43 @@
+name: fukugiiro-ci
+
+on:
+  push:
+    paths:
+      - "data/fukugiiro/**"
+      - "scripts/validate_fukugiiro.py"
+      - "scripts/check_lp_fukugiiro.py"
+      - "tests/golden_fukugiiro.json"
+      - "tests/shindan.test.mjs"
+      - "site/fukugiiro/**"
+  pull_request:
+    paths:
+      - "data/fukugiiro/**"
+      - "scripts/validate_fukugiiro.py"
+      - "scripts/check_lp_fukugiiro.py"
+      - "tests/golden_fukugiiro.json"
+      - "tests/shindan.test.mjs"
+      - "site/fukugiiro/**"
+  workflow_dispatch: {}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: ゴールデンセット自己テスト + 制度DB検証(ケンショウ/マモリ ゲート)
+        run: python scripts/validate_fukugiiro.py --self-test
+
+      - name: LP検査(サイズ予算・禁止表現・基本要件)
+        run: python scripts/check_lp_fukugiiro.py
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: 診断ロジック トラジェクトリeval(ミチビキ/ケンショウ ゲート)
+        run: node --test tests/shindan.test.mjs

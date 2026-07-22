@@ -1,0 +1,39 @@
+name: fukugiiro-audit
+
+on:
+  push:
+    paths:
+      - "scripts/audit_sources_fukugiiro.py"
+      - "scripts/audit_terms_fukugiiro.py"
+      - ".github/workflows/fukugiiro-audit.yml"
+  schedule:
+    # 週次(月曜 06:00 JST = 日曜 21:00 UTC)— 収集対象ソースのrobots方針変更を検知
+    - cron: "0 21 * * 0"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: robots.txt 自動監査(マモリさんの事実確認)
+        run: python scripts/audit_sources_fukugiiro.py
+
+      - name: 利用規約 自動監査(規約本文の抜粋収集)
+        run: python scripts/audit_terms_fukugiiro.py
+
+      - name: Commit audit reports
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add docs/フクギイロ_robots監査結果.md docs/フクギイロ_利用規約監査結果.md data/fukugiiro
+          git diff --cached --quiet || git commit -m "auto: fukugiiro source audit $(date '+%Y-%m-%d %H:%M')"
+          git push
