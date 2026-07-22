@@ -17,9 +17,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- フォントCSSは非同期読込(レンダリングブロック回避)。display=swapで先に代替フォント表示 -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=optional">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=optional" rel="stylesheet"></noscript>
 <style>
   :root{
     --fukamidori:#00335c;
@@ -44,13 +44,13 @@
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{
-    font-family:'Noto Sans JP',sans-serif;
+    font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN',Meiryo,sans-serif;
     background:var(--fukamidori);
     color:var(--shiro);
     line-height:var(--lh-body);
     -webkit-font-smoothing:antialiased;
   }
-  .serif{font-family:'Noto Serif JP',serif;}
+  .serif{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;}
 
   /* ===== ヘッドライン主導のフルスクリーン構成 ===== */
   section{
@@ -61,7 +61,7 @@
     padding:8vh 5vw;
     position:relative;
   }
-  .hero-logo{width:130px;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
+  .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
   .eyebrow{
     color:var(--kin);
     font-size:clamp(12px,1.4vw,15px);
@@ -70,7 +70,7 @@
     margin-bottom:2.2rem;
   }
   h1,h2{
-    font-family:'Noto Serif JP',serif;
+    font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;
     font-weight:900;
     letter-spacing:var(--ls-head);
     line-height:var(--lh-head);
@@ -82,7 +82,7 @@
   @media (max-width:640px){.sp{display:block;}}
   h2{font-size:clamp(1.7rem,5.4vw,3.9rem);}
   .kin{color:var(--kin);}
-    .oath{margin-top:1.4rem;font-family:'Noto Serif JP',serif;font-weight:800;color:var(--kin);font-size:clamp(1rem,2.4vw,1.4rem);}
+    .oath{margin-top:1.4rem;font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-weight:800;color:var(--kin);font-size:clamp(1rem,2.4vw,1.4rem);}
   .live-badge{margin-top:2rem;display:inline-block;font-size:.85rem;font-weight:700;padding:.55em 1.2em;border-radius:999px;background:rgba(247,245,241,.1);border:1px solid rgba(248,136,0,.45);}
   .sub{
     margin-top:2.4rem;
@@ -111,9 +111,9 @@
     border-bottom:1px solid rgba(248,136,0,.3);
   }
   .head-brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;}
-  .head-logo{height:26px;filter:drop-shadow(0 0 6px rgba(255,255,255,.5));}
+  .head-logo{height:26px;width:auto;filter:drop-shadow(0 0 6px rgba(255,255,255,.5));}
   .head-name{display:flex;flex-direction:column;line-height:1.25;}
-  .head-name strong{font-family:'Noto Serif JP',serif;font-size:.92rem;color:#F7F5F1;}
+  .head-name strong{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-size:.92rem;color:#F7F5F1;}
   .head-name small{font-size:.58rem;color:rgba(247,245,241,.78);letter-spacing:.05em;}
   .head-nav{display:flex;gap:.2rem;}
   .head-nav a{
@@ -149,14 +149,14 @@
 
   /* 数字セクション：巨大数字がヘッドライン */
   .impact{background:var(--shiro);color:var(--fukamidori);}
-  .impact .hero-logo{width:130px;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
+  .impact .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
   .eyebrow{color:var(--midori);}
   .bignum-row{
     display:flex;flex-wrap:wrap;gap:4vw;margin-top:var(--sp-6);
   }
   .bignum{flex:1 1 220px;}
   .bignum .n{
-    font-family:'Noto Serif JP',serif;
+    font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;
     font-weight:900;
     font-size:clamp(3.4rem,9vw,6.5rem);
     line-height:1;
@@ -179,14 +179,14 @@
     text-align:center;align-items:center;
   }
   .vision h2{max-width:18em;}
-  .vision .hero-logo{width:130px;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
+  .vision .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
   .eyebrow{color:var(--shiro);opacity:.85;}
 
   /* 仕組み：見出し3連打 */
   .how{background:var(--fukamidori);}
   .how-list{margin-top:var(--sp-6);display:grid;gap:var(--sp-5);max-width:42em;}
   .how-item h3{
-    font-family:'Noto Serif JP',serif;
+    font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;
     font-weight:800;
     font-size:clamp(1.25rem,3vw,1.9rem);
     color:var(--shiro);
@@ -198,7 +198,7 @@
   .whyfree{background:var(--midori);color:var(--shiro);}
   .whyfree .eyebrow{color:var(--shiro);opacity:.85;}
   .why-list{margin-top:var(--sp-6);display:grid;gap:var(--sp-5);max-width:42em;}
-  .why-item h3{font-family:'Noto Serif JP',serif;font-weight:800;font-size:clamp(1.15rem,2.8vw,1.7rem);}
+  .why-item h3{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-weight:800;font-size:clamp(1.15rem,2.8vw,1.7rem);}
   .why-item h3 span{color:var(--kin);margin-right:.6em;font-size:.8em;}
   .why-item p{margin-top:.5rem;color:rgba(247,245,241,.85);font-size:.96rem;max-width:36em;}
   .why-item strong{color:#fff;}
@@ -220,9 +220,9 @@
 
   /* マッチング */
   .match{background:var(--shiro);color:var(--fukamidori);}
-  .match .hero-logo{width:130px;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
+  .match .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
   .eyebrow{color:var(--midori);}
-  .match   .oath{margin-top:1.4rem;font-family:'Noto Serif JP',serif;font-weight:800;color:var(--kin);font-size:clamp(1rem,2.4vw,1.4rem);}
+  .match   .oath{margin-top:1.4rem;font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-weight:800;color:var(--kin);font-size:clamp(1rem,2.4vw,1.4rem);}
   .live-badge{margin-top:2rem;display:inline-block;font-size:.85rem;font-weight:700;padding:.55em 1.2em;border-radius:999px;background:rgba(247,245,241,.1);border:1px solid rgba(248,136,0,.45);}
   .sub{color:rgba(0,51,92,.75);}
   .match-form{
@@ -256,7 +256,7 @@
   #match-btn{grid-column:1/-1;justify-self:start;border:none;cursor:pointer;min-height:48px;}
   #match-btn:active{transform:scale(.97);}
   .match-result{margin-top:var(--sp-6);max-width:900px;}
-  .result-head{font-family:'Noto Serif JP',serif;font-weight:800;font-size:1.3rem;}
+  .result-head{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-weight:800;font-size:1.3rem;}
   .shokei-banner{
     margin-top:var(--sp-2);padding:var(--sp-3);border-radius:14px;
     background:var(--fukamidori);color:var(--shiro);font-size:.95rem;line-height:1.8;
@@ -267,7 +267,7 @@
     margin-top:var(--sp-2);padding:var(--sp-3);border-radius:14px;background:#fff;
     border:1px solid rgba(0,51,92,.15);box-shadow:0 4px 16px rgba(0,51,92,.06);
   }
-  .card h4{font-family:'Noto Serif JP',serif;font-size:1.05rem;line-height:var(--lh-tight);overflow-wrap:anywhere;}
+  .card h4{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-size:1.05rem;line-height:var(--lh-tight);overflow-wrap:anywhere;}
   .card .meta{margin-top:.5rem;font-size:.85rem;color:rgba(0,51,92,.78);display:flex;flex-wrap:wrap;gap:1em;}
   .card .deadline{color:#a03a2a;font-weight:700;}
   .card a{color:var(--midori);font-weight:700;font-size:.9rem;}
@@ -281,7 +281,7 @@
   .unlock strong{color:var(--kin);}
   .unlock .line-btn{margin-top:1.1rem;font-size:1rem;padding:.95em 2.4em;}
   .experts{margin-top:var(--sp-6);padding-top:var(--sp-4);border-top:2px solid rgba(0,51,92,.15);}
-  .experts-head{font-family:'Noto Serif JP',serif;font-weight:800;font-size:1.2rem;}
+  .experts-head{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-weight:800;font-size:1.2rem;}
   .experts-sub{margin-top:.4rem;font-size:.88rem;color:rgba(0,51,92,.78);}
   .expert-grid{margin-top:var(--sp-3);display:grid;gap:var(--sp-2);grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
   .expert-card{
@@ -298,7 +298,7 @@
     font-size:.7rem;font-weight:700;letter-spacing:.08em;
     padding:.25em .8em;border-radius:999px;background:var(--midori);color:#fff;
   }
-  .expert-card h5{font-family:'Noto Serif JP',serif;font-size:.98rem;line-height:var(--lh-tight);overflow-wrap:anywhere;}
+  .expert-card h5{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-size:.98rem;line-height:var(--lh-tight);overflow-wrap:anywhere;}
   .expert-field{font-size:.82rem;color:rgba(0,51,92,.8);}
   .expert-record{font-size:.78rem;color:var(--kin);font-weight:700;}
   .expert-btn{
