@@ -1,0 +1,32 @@
+name: line-notify
+description: 障害時に管理者(小柳さん)へLINE Messaging APIでpush通知する。Secrets未設定時は何もせずスキップ(ワークフローを壊さない)。
+inputs:
+  message:
+    description: 送信するテキストメッセージ
+    required: true
+  channel-access-token:
+    description: LINE Messaging APIのチャネルアクセストークン(secrets.LINE_CHANNEL_ACCESS_TOKEN)
+    required: true
+  to-user-id:
+    description: 送信先のLINEユーザーID(secrets.LINE_ADMIN_USER_ID)
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        TOKEN: ${{ inputs.channel-access-token }}
+        TO: ${{ inputs.to-user-id }}
+        MSG: ${{ inputs.message }}
+      run: |
+        if [ -z "$TOKEN" ] || [ -z "$TO" ]; then
+          echo "::notice::LINE Secrets未設定のため通知をスキップします(設定手順: docs/セットアップ手順_Phase0.md)"
+          exit 0
+        fi
+        payload=$(jq -n --arg to "$TO" --arg text "$MSG" \
+          '{to: $to, messages: [{type: "text", text: $text}]}')
+        curl -sS --fail-with-body -X POST https://api.line.me/v2/bot/message/push \
+          -H "Authorization: Bearer $TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "$payload"
+        echo "LINE通知を送信しました"
