@@ -1,6 +1,6 @@
 {
- "updated_at": "2026-07-23 02:01",
- "count": 13,
+ "updated_at": "2026-07-23 02:02",
+ "count": 14,
  "items": [
   {
    "id": "fk-kuni-jidoteate",
@@ -22,7 +22,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-jidofuyoteate",
@@ -45,7 +45,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-shussan-ichijikin",
@@ -67,7 +67,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-ikuji-kyufu",
@@ -91,7 +91,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-jukyo-kakuho",
@@ -115,7 +115,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-kogaku-ryoyo",
@@ -137,7 +137,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-shugaku-shien",
@@ -159,7 +159,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-hitorioya-shien",
@@ -185,7 +185,7 @@
    "verified_by": "kensho(突合レポート○・match_tokens修正後)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-ninpu-shien",
@@ -207,7 +207,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-shugakushienkin-koko",
@@ -229,7 +229,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-shogaku-kyufukin-koko",
@@ -252,7 +252,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-kyushokusha-shien",
@@ -276,7 +276,33 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
+  },
+  {
+   "id": "fk-kuni-seikatsu-konkyu",
+   "name": "生活困窮者自立支援制度(相談窓口)",
+   "category": "生活支援",
+   "life_events": [
+    "低所得・生活苦",
+    "失業"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "生活にお困りごとを抱えている世帯の総合相談窓口です(家賃・就労・家計・子どもの学習支援など)",
+   "how_to_apply": "お住まいの自治体の自立相談支援機関",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000055454.html",
+   "match_tokens": [
+    "生活困窮者自立支援"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-07-23 02:02"
   },
   {
    "id": "fk-kuni-kyoiku-kunren",
@@ -298,7 +324,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-07-23 02:01"
+   "fetched_at": "2026-07-23 02:02"
   }
  ]
 }
