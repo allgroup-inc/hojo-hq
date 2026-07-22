@@ -71,6 +71,85 @@ def check_page(path: str, label: str, must_contain=None):
     return body
 
 
+def check_links(index_html: str | None):
+    """E2Eスモーク: index.html 内の全リンク(href/src, lin.ee等の外部含む)が生きているか。"""
+    import re as _re
+    import urllib.parse as _up
+    if index_html is None:
+        return
+    # preconnect はオリジンへの事前接続でありリソースではない → 対象外
+    scan_html = _re.sub(r'<link[^>]*rel="preconnect"[^>]*>', "", index_html)
+    urls = set()
+    for m in _re.finditer(r'(?:href|src)="([^"]+)"', scan_html):
+        u = m.group(1)
+        if u.startswith(("mailto:", "tel:", "javascript:", "data:")):
+            continue
+        if u == "#" or u.startswith("#"):
+            continue  # ページ内アンカーは placeholder 検知側で扱う
+        if "${" in u:
+            continue  # JSテンプレートリテラル(実URLではない)
+        urls.add(_up.urljoin(BASE + "/", u))
+    ok = 0
+    for u in sorted(urls):
+        req = urllib.request.Request(u, headers={"User-Agent": UA})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as res:
+                st = res.status
+        except urllib.error.HTTPError as e:
+            st = e.code
+        except Exception as e:
+            errors.append(f"[リンク] 取得失敗: {u} — {e}")
+            continue
+        if st >= 400:
+            errors.append(f"[リンク] HTTP {st}: {u}")
+        else:
+            ok += 1
+    notes.append(f"[リンク] {ok}/{len(urls)} 件 OK(リダイレクト追跡後 <400)")
+
+
+def check_placeholders(index_html: str | None):
+    """E2Eスモーク: 開発用プレースホルダや空リンクが本番に残っていないか。"""
+    if index_html is None:
+        return
+    found = []
+    for token in ("LINE_URL_PLACEHOLDER", 'href="#"', "TODO", "FIXME"):
+        if token in index_html:
+            found.append(token)
+    if found:
+        errors.append(f"[残存] 本番HTMLに開発用の残存物: {', '.join(found)}")
+    else:
+        notes.append("[残存] PLACEHOLDER / href=\"#\" なし")
+
+
+def check_js_syntax(index_html: str | None):
+    """E2Eスモーク: index.html のインラインJSが構文エラーでないか(node --check)。"""
+    import re as _re
+    import shutil
+    import subprocess
+    import tempfile
+    if index_html is None:
+        return
+    node = shutil.which("node")
+    if not node:
+        warnings.append("[JS] node が無いため構文チェックをスキップしました")
+        return
+    scripts = _re.findall(r"<script[^>]*>(.*?)</script>", index_html, _re.S)
+    inline = [s for s in scripts if s.strip()]
+    for i, src in enumerate(inline, 1):
+        with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8") as tf:
+            tf.write(src)
+            tmp = tf.name
+        try:
+            r = subprocess.run([node, "--check", tmp], capture_output=True, text=True, timeout=30)
+            if r.returncode != 0:
+                msg = (r.stderr or r.stdout).strip().splitlines()
+                errors.append(f"[JS] インラインscript#{i} 構文エラー: {msg[0] if msg else 'unknown'}")
+            else:
+                notes.append(f"[JS] インラインscript#{i} 構文OK")
+        finally:
+            os.unlink(tmp)
+
+
 def check_logo(index_html: str | None):
     # index.html がロゴを参照しているか
     ref = "assets/glow-logo.png"
@@ -168,6 +247,9 @@ def main():
     ts = datetime.now(JST).strftime("%Y-%m-%d %H:%M JST")
     idx = check_page("/", "トップページ", must_contain=["<", "subsidies"])
     check_logo(idx)
+    check_links(idx)
+    check_placeholders(idx)
+    check_js_syntax(idx)
     check_data()
 
     lines = [f"# hojo-hq 日次ヘルスチェック  {ts}", f"対象: {BASE}", ""]

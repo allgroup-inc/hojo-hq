@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>沖縄企業のミカタ|沖縄で使える補助金・助成金を毎日更新</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -213,14 +214,21 @@
   .match-form select:focus{outline:3px solid var(--kin);border-color:var(--kin);}
   .chip-group{display:flex;flex-wrap:wrap;gap:.5rem;}
   .chip{
-    font:inherit;font-size:.85rem;font-weight:500;cursor:pointer;
-    padding:.55em 1.1em;border-radius:999px;background:#fff;
+    font:inherit;font-size:.9rem;font-weight:500;cursor:pointer;
+    min-height:44px;padding:.6em 1.2em;border-radius:999px;background:#fff;
+    display:inline-flex;align-items:center;gap:.35em;
     border:2px solid rgba(0,51,92,.25);color:var(--fukamidori);
-    transition:background .2s,border-color .2s;
+    transition:background .2s,border-color .2s,transform .12s ease,box-shadow .2s;
   }
+  .chip:hover{border-color:var(--midori);}
+  .chip:active{transform:scale(.96);}
   .chip:focus-visible{outline:3px solid var(--kin);}
-  .chip.on{background:var(--midori);border-color:var(--midori);color:#fff;}
-  #match-btn{grid-column:1/-1;justify-self:start;border:none;cursor:pointer;}
+  .chip.on{background:var(--midori);border-color:var(--midori);color:#fff;
+    box-shadow:0 3px 12px rgba(0,80,136,.35);}
+  .chip.on::before{content:"✓";font-weight:700;}
+  .match-form select{min-height:44px;}
+  #match-btn{grid-column:1/-1;justify-self:start;border:none;cursor:pointer;min-height:48px;}
+  #match-btn:active{transform:scale(.97);}
   .match-result{margin-top:3rem;max-width:900px;}
   .result-head{font-family:'Noto Serif JP',serif;font-weight:800;font-size:1.3rem;}
   .shokei-banner{
