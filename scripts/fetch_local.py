@@ -52,6 +52,21 @@ SOURCES = [
         # <main>が無く終了判定が誤りやすいため詳細取得はせず、締切は「要確認」で掲載
         "fetch_detail": False,
     },
+    {
+        "key": "naha_city",
+        "label": "那覇市(企業支援)",
+        "listing": "https://www.city.naha.okinawa.jp/business/kigyouricchi/kigyoushien/index.html",
+        # 一覧<main>内の市サイト事業ページ(相対リンク)。indexは除外
+        "link_re": re.compile(r'href="((?:\.\./)*(?:business|kurasitetuduki)/[\w./-]*(?<!index)\.html)"'),
+        "tag": "okinawa",
+        # 補助金・支援事業のみ採用(条例・調査報告・窓口案内等を除外)
+        "name_require": re.compile(r"補助|助成|支援事業|支援金"),
+        "name_deny": ("条例", "報告書", "実態調査", "ポータル", "窓口", "市長賞",
+                      "ロゴ", "キャラクター", "商品一覧", "情報",
+                      "支援・助成制度"),  # カテゴリ(ハブ)ページ
+        # 詳細に<main>+公募期間表記あり → 締切抽出可能
+        "fetch_detail": True,
+    },
 ]
 
 # 締切抽出に使うシグナル(この語の直後に出る日付を締切候補とみなす)
@@ -183,6 +198,11 @@ def crawl_source(src: dict, robots_cache: dict) -> list:
             continue
         name = clean_name(m.group(2))
         if not name or len(name) < 6:
+            continue
+        req = src.get("name_require")
+        if req and not req.search(name):
+            continue
+        if any(d in name for d in src.get("name_deny", ())):
             continue
         abs_url = urllib.parse.urljoin(listing_url, href)
         if abs_url.rsplit("/", 1)[-1] in deny:
