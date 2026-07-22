@@ -268,9 +268,11 @@
   .expert-field{font-size:.82rem;color:rgba(0,51,92,.75);}
   .expert-record{font-size:.78rem;color:var(--kin);font-weight:700;}
   .expert-btn{
+    display:inline-block;text-decoration:none;
     margin-top:.4rem;font-size:.85rem;font-weight:700;
     padding:.6em 1.4em;border-radius:999px;background:var(--kin);color:#fff;
   }
+  .sample-note{font-size:.72rem;color:var(--kin);font-weight:700;margin-top:.5rem;}
   .expert-card.coming{opacity:.75;border-style:dashed;}
   .expert-card.coming .expert-photo{font-size:1.3rem;}
   .experts-note{margin-top:1.2rem;font-size:.78rem;color:rgba(0,51,92,.55);}
@@ -413,7 +415,7 @@
     <div id="shokei-banner" class="shokei-banner" hidden>
       <strong>事業の引き継ぎ・後継に使える補助金</strong>があります。
       専門家への相談費用なども補助対象になる制度です。
-      <a href="#" class="shokei-link">引き継ぎの無料相談はこちら</a>
+      <a href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E4%BA%8B%E6%A5%AD%E6%89%BF%E7%B6%99%E7%9B%B8%E8%AB%87%E3%80%91" target="_blank" rel="noopener" class="shokei-link">引き継ぎの無料相談はこちら</a>
     </div>
     <div id="result-list"></div>
     <p class="result-note">締切7日前アラートを受け取るには、LINE登録(無料)をどうぞ。</p>
@@ -428,7 +430,8 @@
           <h5>○○社会保険労務士事務所(掲載例)</h5>
           <p class="expert-field">得意分野: キャリアアップ助成金・雇用系全般</p>
           <p class="expert-record">沖縄で○年|申請支援 △件</p>
-          <span class="expert-btn">この専門家に相談する</span>
+          <p class="sample-note">※掲載イメージです</p>
+          <a class="expert-btn" href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E5%B0%82%E9%96%80%E5%AE%B6%E7%9B%B8%E8%AB%87%E3%80%91" target="_blank" rel="noopener">この専門家に相談する</a>
         </div>
         <div class="expert-card coming">
           <div class="expert-photo">?</div>
@@ -454,7 +457,7 @@
   <p class="eyebrow rv">START FREE</p>
   <h2 class="rv">この島の可能性を、<br><span class="kin">いっしょに起こそう。</span></h2>
   <p class="sub rv" style="text-align:center;max-width:none;">気になる公募は、締切7日前にLINEでお知らせします。</p>
-  <a class="line-btn rv" href="#">LINEで無料登録する</a>
+  <a class="line-btn rv" href="https://lin.ee/sh4bTUe" target="_blank" rel="noopener">LINEで無料登録する</a>
   <p class="cta-note rv">登録は10秒。いつでも解除できます。</p>
 </section>
 
@@ -547,7 +550,7 @@
         html+=hits.slice(1).map(it=>card(it,true)).join('');
         html+=`<div class="unlock">
           <p><strong>残り${hits.length-1}件</strong>は、無料のLINE登録ですべて表示されます。<br>締切7日前アラートも自動で届きます。</p>
-          <a class="line-btn" href="LINE_URL_PLACEHOLDER" target="_blank" rel="noopener">LINEで無料登録して全て見る</a>
+          <a class="line-btn" href="https://lin.ee/sh4bTUe" target="_blank" rel="noopener">LINEで無料登録して全て見る</a>
         </div>`;
       }
     }
