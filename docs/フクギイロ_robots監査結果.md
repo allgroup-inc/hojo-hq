@@ -1,6 +1,6 @@
 # フクギイロ robots.txt 自動監査結果
 
-最終実行: 2026-07-22 22:48 JST / 実行: GitHub Actions(fukugiiro-audit.yml)/ スクリプト: scripts/audit_sources_fukugiiro.py
+最終実行: 2026-07-22 22:52 JST / 実行: GitHub Actions(fukugiiro-audit.yml)/ スクリプト: scripts/audit_sources_fukugiiro.py
 
 > これは機械による事実確認。**収集可否の最終判定は、利用規約審査と合わせて守り部が docs/守り部審査記録.md で行う。**
 > ○=代表パス許可 / ×=不可(手動運用へ) / ?=手動確認要
