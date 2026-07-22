@@ -149,7 +149,7 @@ SEEDS = [
         "issuer": "厚生労働省", "area": "全国",
         "target_household": "生活にお困りごとを抱えている世帯の総合相談窓口です(家賃・就労・家計・子どもの学習支援など)",
         "how_to_apply": "お住まいの自治体の自立相談支援機関",
-        "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/seikatukonnkyuu/index.html",
+        "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000055454.html",
         "match_tokens": ["生活困窮者自立支援"],
     },
     {
