@@ -17,9 +17,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- フォントCSSは非同期読込(レンダリングブロック回避)。display=swapで先に代替フォント表示 -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=optional">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;800;900&family=Noto+Sans+JP:wght@400;500;700&display=optional" rel="stylesheet"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@800;900&family=Noto+Sans+JP:wght@400;700&display=optional">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@800;900&family=Noto+Sans+JP:wght@400;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@800;900&family=Noto+Sans+JP:wght@400;700&display=optional" rel="stylesheet"></noscript>
 <style>
   :root{
     --fukamidori:#00335c;
@@ -61,7 +61,7 @@
     padding:8vh 5vw;
     position:relative;
   }
-  .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
+  .hero-logo{width:130px;height:auto;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
   .eyebrow{
     color:var(--kin);
     font-size:clamp(12px,1.4vw,15px);
@@ -87,7 +87,7 @@
   .sub{
     margin-top:2.4rem;
     font-size:clamp(.95rem,1.8vw,1.15rem);
-    color:#FFFFFF;font-weight:600;
+    color:#FFFFFF;font-weight:700;
     max-width:34em;
   }
   .hero .sub{
@@ -111,7 +111,7 @@
     border-bottom:1px solid rgba(248,136,0,.3);
   }
   .head-brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;}
-  .head-logo{height:26px;width:auto;filter:drop-shadow(0 0 6px rgba(255,255,255,.5));}
+  .head-logo{height:26px;width:auto;width:auto;filter:drop-shadow(0 0 6px rgba(255,255,255,.5));}
   .head-name{display:flex;flex-direction:column;line-height:1.25;}
   .head-name strong{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-size:.92rem;color:#F7F5F1;}
   .head-name small{font-size:.58rem;color:rgba(247,245,241,.78);letter-spacing:.05em;}
@@ -240,7 +240,7 @@
   .match-form select:focus{outline:3px solid var(--kin);border-color:var(--kin);}
   .chip-group{display:flex;flex-wrap:wrap;gap:.5rem;}
   .chip{
-    font:inherit;font-size:.9rem;font-weight:500;cursor:pointer;
+    font:inherit;font-size:.9rem;font-weight:400;cursor:pointer;
     min-height:44px;padding:.6em 1.2em;border-radius:999px;background:#fff;
     display:inline-flex;align-items:center;gap:.35em;
     border:2px solid rgba(0,51,92,.25);color:var(--fukamidori);
@@ -360,7 +360,7 @@
 
 <header class="site-head">
   <a class="head-brand" href="index.html">
-    <img src="assets/glow-logo.png" alt="GLOW" class="head-logo" width="234" height="130">
+    <img src="assets/glow-logo.png" alt="GLOW" class="head-logo" width="468" height="260">
     <span class="head-name"><strong>沖縄企業のミカタ</strong><small>補助金・助成金情報|運営 株式会社GLOW</small></span>
   </a>
 </header>
@@ -368,7 +368,7 @@
 
 <!-- HERO -->
 <section class="hero">
-  <img src="assets/glow-logo.png" alt="GLOW" class="hero-logo rv" width="234" height="130">
+  <img src="assets/glow-logo.png" alt="GLOW" class="hero-logo rv" width="468" height="260">
   <p class="eyebrow rv">OKINAWA KIGYO NO MIKATA</p>
   <h1 class="rv">沖縄の企業には、<br>まだ眠っている<br class="sp"><span class="kin">可能性</span><span class="nowrap">がある。</span></h1>
   <p class="oath rv">——私たちGLOWも、その一社です。</p>
