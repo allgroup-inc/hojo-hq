@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3分でもらい忘れ診断 | フクギイロ</title>
+<meta name="description" content="沖縄県にお住まいの世帯向け。家族の状況にあてはまる可能性のある給付金・手当を3分で診断します。名前や住所の入力は不要です。">
+<meta name="robots" content="noindex">
+<style>
+:root{--fg-primary:#1a6b52;--fg-accent:#f2b705;--fg-ink:#1f2a2e;--fg-bg:#fffdf7;
+  --fg-card:#ffffff;--fg-muted:#5c6b70;--fg-line:#e5e0d4}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  font-size:18px;line-height:1.8;color:var(--fg-ink);background:var(--fg-bg)}
+.wrap{max-width:640px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:1.3rem;margin-bottom:4px}
+.progress{height:8px;background:var(--fg-line);border-radius:4px;margin:16px 0 24px}
+.progress > div{height:100%;background:var(--fg-accent);border-radius:4px;transition:width .3s}
+.q{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:22px}
+.q h2{font-size:1.1rem;margin-bottom:14px}
+.opts{display:grid;gap:10px}
+.opts button,.opts label{display:block;width:100%;text-align:left;padding:13px 16px;min-height:44px;
+  border:2px solid var(--fg-line);border-radius:10px;background:#fff;font-size:1rem;cursor:pointer}
+.opts .sel{border-color:var(--fg-primary);background:#eaf5f0;font-weight:700}
+select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);border-radius:10px;background:#fff}
+.nav{display:flex;gap:10px;margin-top:18px}
+.nav button{flex:1;padding:14px;min-height:44px;border-radius:999px;border:none;font-size:1rem;font-weight:700;cursor:pointer}
+.next{background:var(--fg-primary);color:#fff}
+.back{background:var(--fg-line);color:var(--fg-ink)}
+.note{font-size:.85rem;color:var(--fg-muted);margin-top:10px}
+.result-card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px;margin-bottom:14px}
+.result-card h3{font-size:1.05rem;margin-bottom:4px}
+.lk{display:inline-block;font-size:.8rem;border-radius:4px;padding:1px 10px;font-weight:700;margin-bottom:6px}
+.lk-high{background:#dff2e9;color:#0f5138}
+.lk-mid{background:#fff3cd;color:#7a5b00}
+.result-card a{color:var(--fg-primary)}
+.disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>3分でもらい忘れ診断</h1>
+  <p class="note">名前・住所・電話番号の入力は不要です。答えたくない質問はとばせます。</p>
+  <div class="progress" aria-hidden="true"><div id="bar" style="width:0%"></div></div>
+  <div id="app" aria-live="polite"><noscript>この診断はJavaScriptを使って動きます。設定を有効にしてご覧ください。</noscript></div>
+</div>
+<script src="logic.js"></script>
+<script>
+(function(){
+  var MUNIS = ["那覇市","宜野湾市","石垣市","浦添市","名護市","糸満市","沖縄市","豊見城市","うるま市","宮古島市","南城市","国頭村","大宜味村","東村","今帰仁村","本部町","恩納村","宜野座村","金武町","伊江村","読谷村","嘉手納町","北谷町","北中城村","中城村","西原町","与那原町","南風原町","渡嘉敷村","座間味村","粟国村","渡名喜村","南大東村","北大東村","伊平屋村","伊是名村","久米島町","八重瀬町","多良間村","竹富町","与那国町","県外"];
+  var AGES = ["未就学","小学生","中学生","高校生","大学・専門"];
+  var EVENTS = ["妊娠・出産","入園・入学","引越・住宅購入","就職・転職","失業","病気・けが","介護","災害","特になし"];
+  var EVENT_MAP = {"引越・住宅購入":"住宅取得・引越","病気・けが":"病気・けが","妊娠・出産":"妊娠・出産","入園・入学":"入園・入学","就職・転職":"就職・転職","失業":"失業","介護":"介護","災害":"災害"};
+
+  var state = { step: 0, municipality: null, children: 0, childAges: [], lifeEvents: [], housing: null };
+  var app = document.getElementById("app");
+  var bar = document.getElementById("bar");
+  var TOTAL = 5;
+
+  function h(tag, attrs, children){
+    var el = document.createElement(tag);
+    for (var k in (attrs||{})) {
+      if (k === "text") el.textContent = attrs[k];
+      else if (k.slice(0,2) === "on") el.addEventListener(k.slice(2), attrs[k]);
+      else el.setAttribute(k, attrs[k]);
+    }
+    (children||[]).forEach(function(c){ el.appendChild(c); });
+    return el;
+  }
+  function render(){
+    bar.style.width = Math.round(state.step / TOTAL * 100) + "%";
+    app.innerHTML = "";
+    if (state.step === 0) return qMunicipality();
+    if (state.step === 1) return qChildren();
+    if (state.step === 2) return qChildAges();
+    if (state.step === 3) return qEvents();
+    if (state.step === 4) return qHousing();
+    return showResult();
+  }
+  function nav(nextLabel, onNext){
+    return h("div", {class:"nav"}, [
+      state.step > 0 ? h("button", {class:"back", text:"もどる", onclick:function(){ state.step--; if(state.step===2 && state.children===0) state.step--; render(); }}) : h("span"),
+      h("button", {class:"next", text: nextLabel || "つぎへ", onclick: onNext})
+    ]);
+  }
+  function qMunicipality(){
+    var sel = h("select", {id:"muni", "aria-label":"お住まいの市町村"});
+    sel.appendChild(h("option", {value:"", text:"選んでください"}));
+    MUNIS.forEach(function(m){ sel.appendChild(h("option", {value:m, text:m})); });
+    if (state.municipality) sel.value = state.municipality;
+    app.appendChild(h("div", {class:"q"}, [
+      h("h2", {text:"Q1. お住まいの市町村は?"}), sel,
+      nav("つぎへ", function(){ state.municipality = sel.value || "県外"; state.step = 1; render(); })
+    ]));
+  }
+  function qChildren(){
+    var box = h("div", {class:"opts"});
+    [0,1,2,3].forEach(function(n){
+      var label = n === 3 ? "3人以上" : n + "人";
+      var b = h("button", {text:"お子さん " + label, class: state.children===n ? "sel":""});
+      b.addEventListener("click", function(){ state.children = n; state.step = n > 0 ? 2 : 3; render(); });
+      box.appendChild(b);
+    });
+    app.appendChild(h("div", {class:"q"}, [h("h2",{text:"Q2. お子さんは何人いますか?"}), box, nav("とばす", function(){ state.step = state.children>0?2:3; render(); })]));
+  }
+  function qChildAges(){
+    var box = h("div", {class:"opts"});
+    AGES.forEach(function(a){
+      var b = h("button", {text:a, class: state.childAges.indexOf(a)>=0 ? "sel":""});
+      b.addEventListener("click", function(){
+        var i = state.childAges.indexOf(a);
+        if (i>=0) state.childAges.splice(i,1); else state.childAges.push(a);
+        render();
+      });
+      box.appendChild(b);
+    });
+    app.appendChild(h("div", {class:"q"}, [h("h2",{text:"Q3. お子さんの年齢は?(あてはまるもの全部)"}), box,
+      nav("つぎへ", function(){ state.step = 3; render(); })]));
+  }
+  function qEvents(){
+    var box = h("div", {class:"opts"});
+    EVENTS.forEach(function(ev){
+      var b = h("button", {text:ev, class: state.lifeEvents.indexOf(ev)>=0 ? "sel":""});
+      b.addEventListener("click", function(){
+        if (ev === "特になし") { state.lifeEvents = ["特になし"]; }
+        else {
+          var i = state.lifeEvents.indexOf(ev);
+          var none = state.lifeEvents.indexOf("特になし"); if (none>=0) state.lifeEvents.splice(none,1);
+          if (i>=0) state.lifeEvents.splice(i,1); else state.lifeEvents.push(ev);
+        }
+        render();
+      });
+      box.appendChild(b);
+    });
+    app.appendChild(h("div", {class:"q"}, [h("h2",{text:"Q4. 最近あった・これからある出来事は?(あてはまるもの全部)"}), box,
+      nav("つぎへ", function(){ state.step = 4; render(); })]));
+  }
+  function qHousing(){
+    var box = h("div", {class:"opts"});
+    ["持ち家","賃貸","実家","公営住宅"].forEach(function(hs){
+      var b = h("button", {text:hs, class: state.housing===hs ? "sel":""});
+      b.addEventListener("click", function(){ state.housing = hs; render(); });
+      box.appendChild(b);
+    });
+    app.appendChild(h("div", {class:"q"}, [h("h2",{text:"Q5. お住まいは?(任意)"}), box,
+      nav("診断結果を見る", function(){ state.step = 5; render(); })]));
+  }
+  function showResult(){
+    bar.style.width = "100%";
+    try { localStorage.setItem("fg_shindan_done", new Date().toISOString()); } catch(e){}
+    fetch("../../data/fukugiiro/seido.json").then(function(r){return r.json()}).then(function(db){
+      var answers = {
+        municipality: state.municipality, children: state.children,
+        childAges: state.childAges,
+        lifeEvents: state.lifeEvents.map(function(e){ return EVENT_MAP[e]; }).filter(Boolean)
+      };
+      var rs = window.FGShindan.matchSeido(db.items, answers);
+      app.innerHTML = "";
+      app.appendChild(h("h2", {text:"あなたの世帯が使える可能性のある制度: " + rs.length + "件"}));
+      if (rs.length === 0) {
+        app.appendChild(h("p", {text:"今回の回答では、該当の可能性が高い制度は見つかりませんでした。制度は毎日更新されるので、状況が変わったらまた診断してみてください。"}));
+      }
+      rs.forEach(function(r){
+        var it = r.item;
+        var card = h("div", {class:"result-card"}, [
+          h("span", {class:"lk " + (r.likelihood==="高"?"lk-high":"lk-mid"), text:"対象の可能性: " + r.likelihood}),
+          h("h3", {text: it.name}),
+          h("p", {class:"note", text: it.target_household}),
+          h("p", {class:"note", text:"金額: " + it.amount_note}),
+          h("p", {class:"note", text:"次の一歩: " + it.how_to_apply}),
+          h("a", {href: it.source_url, rel:"noopener", text:"公式ページで確認する"})
+        ]);
+        if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
+        app.appendChild(card);
+      });
+      app.appendChild(h("div", {class:"disclaimer", text:"この診断は公式情報に基づく「可能性のご案内」です。受給できるかどうかの最終判断は各窓口で行われます。医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため診断には表示していません。トップページの制度一覧をご覧ください。"}));
+      app.appendChild(h("p", {style:"margin-top:16px"}, [h("a", {href:"../index.html", text:"← トップへもどる"})]));
+    }).catch(function(){
+      app.innerHTML = "";
+      app.appendChild(h("p", {text:"データの読み込みに失敗しました。時間をおいてもう一度お試しください。"}));
+    });
+  }
+  render();
+})();
+</script>
+</body>
+</html>
