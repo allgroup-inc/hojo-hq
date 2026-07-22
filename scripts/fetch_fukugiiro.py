@@ -143,6 +143,16 @@ SEEDS = [
         "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyushokusha_shien/index.html",
     },
     {
+        "id": "fk-kuni-seikatsu-konkyu",
+        "name": "生活困窮者自立支援制度(相談窓口)",
+        "category": "生活支援", "life_events": ["低所得・生活苦", "失業"],
+        "issuer": "厚生労働省", "area": "全国",
+        "target_household": "生活にお困りごとを抱えている世帯の総合相談窓口です(家賃・就労・家計・子どもの学習支援など)",
+        "how_to_apply": "お住まいの自治体の自立相談支援機関",
+        "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/seikatukonnkyuu/index.html",
+        "match_tokens": ["生活困窮者自立支援"],
+    },
+    {
         "id": "fk-kuni-kyoiku-kunren",
         "name": "教育訓練給付金",
         "category": "仕事・失業", "life_events": ["就職・転職"],
@@ -209,6 +219,20 @@ def main():
         })
         items.append(item)
         print(f"OK: {seed['name']}")
+
+    # 既存DBの検証状態を引き継ぐ(収集のたびに verified がリセットされる事故の防止)
+    try:
+        with open(OUT, encoding="utf-8") as f:
+            prev = {p["id"]: p for p in json.load(f).get("items", [])}
+    except Exception:
+        prev = {}
+    for item in items:
+        old = prev.get(item["id"])
+        if old and old.get("source_url") == item["source_url"] and old.get("verified"):
+            item["verified"] = True
+            item["verified_at"] = old.get("verified_at")
+            item["verified_by"] = old.get("verified_by")
+            item["status"] = old.get("status", "検証済み")
 
     data = {"updated_at": now, "count": len(items), "items": items}
     errors, warns = validate(data)
