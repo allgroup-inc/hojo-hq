@@ -55,6 +55,9 @@ EXTRA_PAGES = {
     "www.cao.go.jp": [
         "https://www.cao.go.jp/notice/rule.html",
     ],
+    "www.mlit.go.jp": [
+        "https://www.mlit.go.jp/link.html",
+    ],
 }
 
 # リンク未発見サイトで試すよくあるパス(404は無視)
