@@ -28,12 +28,22 @@ jobs:
         # 守り部審査済み(docs/守り部審査記録.md)。沖縄県・産業振興公社を追加収集しマージ
         run: python scripts/fetch_local.py
 
+      - name: Install image deps (Noto CJK fonts)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          pip install pillow
+
+      - name: Generate post images
+        # posts/launch/*.md の文言をブランド画像(posts/images/*.png)に焼き込み
+        run: python scripts/generate_images.py
+
       - name: Commit updated data
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
-          git add data/subsidies.json
-          git diff --cached --quiet || git commit -m "auto: update subsidies $(date '+%Y-%m-%d %H:%M')"
+          git add data/subsidies.json posts/images
+          git diff --cached --quiet || git commit -m "auto: update subsidies & images $(date '+%Y-%m-%d %H:%M')"
           git push
 
       - name: Setup Pages
