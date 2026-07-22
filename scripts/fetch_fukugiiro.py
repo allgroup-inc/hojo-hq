@@ -104,6 +104,7 @@ SEEDS = [
         "target_household": "ひとり親家庭の世帯向けの各種支援(手当・貸付・就業支援など)の入口です",
         "how_to_apply": "お住まいの市区町村の窓口",
         "source_url": "https://www.cfa.go.jp/policies/hitori-oya",
+        "match_tokens": ["ひとり親家庭"],
     },
     {
         "id": "fk-kuni-ninpu-shien",

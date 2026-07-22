@@ -69,7 +69,8 @@ def main():
             html = fetch_text(url)
             title = page_title(html)
             text = re.sub(r"<[^>]+>", " ", html)
-            tokens = name_tokens(it["name"])
+            # 総合案内ページ等、制度名がページ文言と一致しない項目は match_tokens で照合語を指定できる
+            tokens = it.get("match_tokens") or name_tokens(it["name"])
             hit = sum(1 for t in tokens if t in text)
             if hit == len(tokens) and tokens:
                 mark = "○"
