@@ -18,4 +18,4 @@
 https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/?utm_source=instagram&utm_medium=social
 
 ※対象になるかの最終判断は各窓口で行われます。金額・要件は公式ページでご確認ください。
-#沖縄 #沖縄子育て #給付金 #手当 #沖縄ママ #沖縄パパ #家計 #フクギイロ
+#沖縄 #沖縄子育て #給付金 #手当 #沖縄ママ #沖縄パパ #家計 #もらいわすれ堂
