@@ -9,6 +9,7 @@ on:
       - "scripts/fetch_fukugiiro.py"
       - "scripts/kensho_fukugiiro.py"
       - "scripts/generate_area_pages.py"
+      - "scripts/generate_kit_pages.py"
       - ".github/workflows/fukugiiro-fetch.yml"
   workflow_dispatch: {}
 
@@ -34,15 +35,16 @@ jobs:
       - name: 一次ソース突合レポート(ケンショウ支援)
         run: python scripts/kensho_fukugiiro.py
 
-      - name: 市町村別ページ再生成(programmatic SEO)
+      - name: 市町村別ページ+申請準備シート再生成(programmatic SEO)
         run: |
           python scripts/generate_area_pages.py
+          python scripts/generate_kit_pages.py
           python scripts/check_lp_fukugiiro.py
 
       - name: Commit data
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
-          git add data/fukugiiro/seido.json docs/フクギイロ_突合レポート.md site/fukugiiro/area
+          git add data/fukugiiro/seido.json docs/フクギイロ_突合レポート.md site/fukugiiro/area site/fukugiiro/kit
           git diff --cached --quiet || git commit -m "auto: fukugiiro seido update $(date '+%Y-%m-%d %H:%M')"
           git push
