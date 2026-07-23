@@ -1,13 +1,13 @@
 {
- "generated_at": "2026-07-23 22:47",
+ "generated_at": "2026-07-24 04:09",
  "alert_days": 7,
- "count": 22,
+ "count": 26,
  "items": [
   {
    "id": "a0WJ200000CDYiwMAH",
    "name": "①省CO2型プラスチック高度リサイクル設備導入事業（バリューチェーン）【令和７年度（補正予算）３次公募及び令和８年度２次公募】",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 7297000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYiwMAH",
    "tag": "nationwide"
@@ -16,7 +16,7 @@
    "id": "a0WJ200000CDYjRMAX",
    "name": "②化石資源由来プラスチックを代替する再生可能資源由来素材 の省CO2型製造設備導入事業（バリューチェーン）【令和７年度（補正予算）第３次公募及び令和８年度第２次公募】",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 7297000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYjRMAX",
    "tag": "nationwide"
@@ -25,7 +25,7 @@
    "id": "a0WJ200000CDYkCMAX",
    "name": "③太陽光パネルリサイクル設備導入事業（バリューチェーン）【令和７年度（補正予算）第３次公募及び令和８年度第２次公募】",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 7297000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYkCMAX",
    "tag": "nationwide"
@@ -34,7 +34,7 @@
    "id": "a0WJ200000CDYkHMAX",
    "name": "④リチウム蓄電池リサイクル設備導入事業（バリューチェーン）【令和７年度（補正予算）第３次公募及び令和８年度第２次公募】",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 7297000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYkHMAX",
    "tag": "nationwide"
@@ -43,7 +43,7 @@
    "id": "a0WJ200000CDYk0MAH",
    "name": "⑤金属破砕・選別設備導入事業（バリューチェーン）【令和７年度（補正予算）第３次公募及び第８年度第２次公募】",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 7297000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYk0MAH",
    "tag": "nationwide"
@@ -52,7 +52,7 @@
    "id": "a0WJ200000CDbyeMAD",
    "name": "「経済安全保障重要技術育成プログラム／ハイブリッドクラウド利用基盤技術の開発／不正機能排除技術の社会実装に向けた市場・技術動向等に係る調査」の公募",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbyeMAD",
    "tag": "nationwide"
@@ -61,7 +61,7 @@
    "id": "a0WJ200000CDapWMAT",
    "name": "【令和８年度】先進的な資源循環投資促進事業",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 36500000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapWMAT",
    "tag": "okinawa"
@@ -70,7 +70,7 @@
    "id": "a0WJ200000CDbzXMAT",
    "name": "【農林水産省】令和7年度補正ウクライナ農業回復緊急支援事業（２次公募）",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbzXMAT",
    "tag": "nationwide"
@@ -79,7 +79,7 @@
    "id": "a0WJ200000CDapkMAD",
    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_PMI推進枠(PMI専門家活用類型)",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 1500000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapkMAD",
    "tag": "shokei"
@@ -88,7 +88,7 @@
    "id": "a0WJ200000CDaplMAD",
    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_PMI推進枠(事業統合投資類型)",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 10000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaplMAD",
    "tag": "shokei"
@@ -97,7 +97,7 @@
    "id": "a0WJ200000CDapgMAD",
    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_事業承継促進枠",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 10000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapgMAD",
    "tag": "shokei"
@@ -106,7 +106,7 @@
    "id": "a0WJ200000CDapmMAD",
    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_専門家活用枠(小規模売り手支援類型)",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 4500000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapmMAD",
    "tag": "shokei"
@@ -115,7 +115,7 @@
    "id": "a0WJ200000CDapjMAD",
    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_専門家活用枠(買い手支援類型-100億企業特例)",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 20000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapjMAD",
    "tag": "shokei"
@@ -124,7 +124,7 @@
    "id": "a0WJ200000CDapiMAD",
    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_専門家活用枠(買い手支援類型／売り手支援類型)",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 8000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapiMAD",
    "tag": "shokei"
@@ -133,7 +133,7 @@
    "id": "a0WJ200000CDaphMAD",
    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_廃業・再チャレンジ枠",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 3000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaphMAD",
    "tag": "shokei"
@@ -142,7 +142,7 @@
    "id": "a0WJ200000CDYqvMAH",
    "name": "令和８年度　ＦＳ調査事業　第２次公募　【　廃棄物処理施設を核とした地域循環共生圏構築促進事業　】",
    "deadline": "2026-07-24",
-   "days_left": 1,
+   "days_left": 0,
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYqvMAH",
    "tag": "nationwide"
@@ -151,7 +151,7 @@
    "id": "a0WJ200000CDYjqMAH",
    "name": "「経済安全保障重要技術育成プログラム／高効率・高品質レーザー加工技術の開発／研究開発項目③高品質・高出力な半導体レーザーの研究開発及び当該半導体レーザーを用いた車載用LiDARの構築」の公募",
    "deadline": "2026-07-27",
-   "days_left": 4,
+   "days_left": 3,
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYjqMAH",
    "tag": "nationwide"
@@ -160,7 +160,7 @@
    "id": "a0WJ200000CDbJKMA1",
    "name": "【応募事業者】令和８年度 プラスチック等資源循環システム構築実証事業　＜二次公募＞",
    "deadline": "2026-07-27",
-   "days_left": 4,
+   "days_left": 3,
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbJKMA1",
    "tag": "okinawa"
@@ -169,7 +169,7 @@
    "id": "a0WJ200000CDbonMAD",
    "name": "「インフラ管理DXにおける地下埋設物データ整備手法活用の人材育成講座のあり方に関する調査」の公募",
    "deadline": "2026-07-28",
-   "days_left": 5,
+   "days_left": 4,
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbonMAD",
    "tag": "nationwide"
@@ -178,7 +178,7 @@
    "id": "naha_city-1007180",
    "name": "令和8年度 那覇市人手不足対応支援補助金",
    "deadline": "2026-07-28",
-   "days_left": 5,
+   "days_left": 4,
    "max_amount": null,
    "source_url": "https://www.city.naha.okinawa.jp/business/kigyouricchi/1003642/1007180.html",
    "tag": "okinawa"
@@ -187,7 +187,7 @@
    "id": "a0WJ200000CDc0JMAT",
    "name": "「スタートアップに対する経営管理・事業化支援人材の伴走支援モデルに係る調査事業」の公募",
    "deadline": "2026-07-30",
-   "days_left": 7,
+   "days_left": 6,
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0JMAT",
    "tag": "nationwide"
@@ -196,9 +196,45 @@
    "id": "a0WJ200000CDKZFMA5",
    "name": "令和８年度_グリーンスローモビリティ等導入促進事業",
    "deadline": "2026-07-30",
-   "days_left": 7,
+   "days_left": 6,
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDKZFMA5",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDXoQMAX",
+   "name": "「グリーンイノベーション基金事業／食料・農林水産業のCO2等削減・吸収技術の開発」の公募",
+   "deadline": "2026-07-31",
+   "days_left": 7,
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXoQMAX",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDbnjMAD",
+   "name": "「次世代航空機の研究開発に関する調査」の公募",
+   "deadline": "2026-07-31",
+   "days_left": 7,
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbnjMAD",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDbHOMA1",
+   "name": "令和8年度当初予算　一次公募　民間企業等による再エネの導入及び地域共生加速化事業のうち、ストレージパリティの達成に向けた太陽光発電設備等の価格低減促進事業",
+   "deadline": "2026-07-31",
+   "days_left": 7,
+   "max_amount": 60000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbHOMA1",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDNujMAH",
+   "name": "情報通信拠点機能強化支援事業費補助金",
+   "deadline": "2026-07-31",
+   "days_left": 7,
+   "max_amount": 1280000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDNujMAH",
    "tag": "nationwide"
   }
  ]
