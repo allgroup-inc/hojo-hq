@@ -66,6 +66,7 @@ def page(title, desc, body, updated, depth=2):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
+<link rel="icon" type="image/svg+xml" href="{rel}assets/icon.svg">
 <style>{STYLE}</style>
 </head>
 <body>
