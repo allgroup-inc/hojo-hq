@@ -27,7 +27,7 @@ OUT_DIR = os.path.join(BASE, "posts", "fukugiiro")
 SHINDAN_URL = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/?utm_source=instagram&utm_medium=social"
 LP_URL = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/?utm_source=instagram&utm_medium=social"
 
-HASHTAGS = "#沖縄 #沖縄子育て #給付金 #手当 #沖縄ママ #沖縄パパ #家計 #フクギイロ"
+HASHTAGS = "#沖縄 #沖縄子育て #給付金 #手当 #沖縄ママ #沖縄パパ #家計 #もらいわすれ堂"
 DISCLAIMER = "※対象になるかの最終判断は各窓口で行われます。金額・要件は公式ページでご確認ください。"
 
 # ライフイベント別の「呼びかけ」文(やさしい日本語)
@@ -69,15 +69,15 @@ def seido_post(idx, it):
 
 
 def launch_post():
-    return f"""# ローンチ告知: フクギイロはじめました
+    return f"""# ローンチ告知: もらいわすれ堂はじめました
 
 ## 画像テキスト
 - タイトル: あなたの世帯、いくらもらい忘れてる?
 - サブ: 沖縄の給付金・手当を3分で診断(無料・匿名)
-- ひとこと: 申請から入金の確認まで、いっしょに
+- ひとこと: あなたが受け取るまで、いっしょに。
 
 ## キャプション
-沖縄のご家庭向けに、給付金・手当の「もらい忘れ」をなくすサイトをはじめました。
+沖縄のご家庭向けに、給付金・手当の「もらい忘れ」をなくすサイト「もらいわすれ堂」をはじめました。
 
 ・名前や住所の入力なし、3分の匿名診断
 ・国の制度から順に掲載中(市町村の制度も順次追加します)

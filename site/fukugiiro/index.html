@@ -3,22 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>フクギイロ | あなたの世帯、いくらもらい忘れてる? — 沖縄の給付金・手当の伴走サイト</title>
-<meta name="description" content="沖縄県にお住まいの世帯向け。国・県・市町村の給付金や手当の「もらい忘れ」を3分で診断し、申請から入金確認まで無料で伴走します。">
-<meta property="og:title" content="フクギイロ | あなたの世帯、いくらもらい忘れてる?">
-<meta property="og:description" content="沖縄の世帯の給付金・手当のもらい忘れを3分診断。申請から入金確認まで無料で伴走。">
+<title>もらいわすれ堂 | あなたの世帯、いくらもらい忘れてる? — 沖縄の給付金・手当の伴走サイト</title>
+<meta name="description" content="沖縄県にお住まいの世帯向け。国・県・市町村の給付金や手当の「もらい忘れ」を3分で診断し、申請から入金確認まで無料で伴走します。あなたが受け取るまで、いっしょに。">
+<meta property="og:title" content="もらいわすれ堂 | あなたの世帯、いくらもらい忘れてる?">
+<meta property="og:description" content="沖縄の世帯の給付金・手当のもらい忘れを3分診断。あなたが受け取るまで、いっしょに。">
+<meta property="og:site_name" content="もらいわすれ堂">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ja_JP">
 <style>
 :root{
-  /* ブランドトークン(仮色。ロゴ・配色データ受領後にここだけ差し替える) */
-  --fg-primary:#1a6b52;      /* 仮: フクギの深緑 */
-  --fg-accent:#f2b705;       /* 仮: フクギの黄 */
-  --fg-ink:#1f2a2e;
-  --fg-bg:#fffdf7;
+  /* もらいわすれ堂 ブランドトークン(docs/もらいわすれ堂_ブランドガイドv1.md) */
+  --fg-primary:#B9502F;      /* 朱: 琉球赤瓦 */
+  --fg-accent:#F2B705;       /* 黄: 沖縄の日差し */
+  --fg-deep:#1A6B52;         /* 深緑: フクギ(運営会社の理念) */
+  --fg-ink:#1F2A2E;
+  --fg-bg:#FFFBF4;           /* 漆喰 */
   --fg-card:#ffffff;
-  --fg-muted:#5c6b70;
-  --fg-line:#e5e0d4;
+  --fg-muted:#5C6B70;
+  --fg-line:#EBE2D4;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
@@ -35,7 +37,8 @@ section{padding:48px 0}
 .btn:active{opacity:.85}
 .note{font-size:.85rem;color:var(--fg-muted)}
 /* hero */
-.hero{background:linear-gradient(180deg,#eaf5f0 0%,var(--fg-bg) 100%);padding:56px 0 40px;text-align:center}
+.hero{background:linear-gradient(180deg,#F9EDE3 0%,var(--fg-bg) 100%);padding:48px 0 40px;text-align:center}
+.hero .logo{width:min(320px,80%);height:auto;margin:0 auto 18px;display:block}
 .hero h1{font-size:1.7rem;margin-bottom:.6em}
 .hero .sub{margin-bottom:1.4em}
 .badge{display:inline-block;background:var(--fg-accent);color:var(--fg-ink);
@@ -68,6 +71,7 @@ footer a{color:#bcd9cf}
 <main>
 <section class="hero">
   <div class="wrap">
+    <img class="logo" src="assets/logo.svg" alt="もらいわすれ堂 — あなたが受け取るまで、いっしょに。" width="460" height="96">
     <span class="badge">沖縄県にお住まいの方向け・ずっと無料</span>
     <h1>あなたの世帯、<br>いくら<strong>もらい忘れて</strong>る?</h1>
     <p class="sub">国・県・市町村の給付金や手当。<br>「知らなかった」だけで、受け取れるはずのお金が眠っているかもしれません。</p>
@@ -88,7 +92,7 @@ footer a{color:#bcd9cf}
 
 <section>
   <div class="wrap">
-    <h2>フクギイロは「情報サイト」ではありません</h2>
+    <h2>もらいわすれ堂は「情報サイト」ではありません</h2>
     <ol class="steps">
       <li><strong>3分診断</strong><br>ご家族の状況にあてはまる可能性のある制度と、おおよその金額の目安がわかります。</li>
       <li><strong>申請のかんたん化</strong><br>必要書類のチェックリストと、どこの窓口に行けばよいかを、あなたの世帯にあわせてご案内します。</li>
@@ -126,7 +130,7 @@ footer a{color:#bcd9cf}
     <details><summary>本当に無料ですか?</summary>
       <p>はい。沖縄県にお住まいの方は、診断もフォローもすべて無料です。運営費用は、企業向けサービスなど法人のお客様からいただいています。</p></details>
     <details><summary>なぜ無料でできるのですか?</summary>
-      <p>私たちは「県民のみなさんからお金をいただかない」ことを運営の原則にしています。企業向けの補助金情報サービス(姉妹サイト「沖縄企業のミカタ」)などの収益で運営しています。</p></details>
+      <p>私たちは「県民のみなさんからお金をいただかない」ことを運営の原則にしています。運営会社(株式会社フクギイロ)の法人向けサービスなどの収益で運営しています。</p></details>
     <details><summary>申請を代わりにやってもらえますか?</summary>
       <p>申請手続きの代行は法律上、専門資格を持つ方(社会保険労務士・行政書士など)にしかできないため、行っていません。そのかわり、必要書類のチェックリストや窓口のご案内で、ご自身での申請をできる限りかんたんにします。専門家が必要な場合は提携先をご紹介します。</p></details>
     <details><summary>診断で個人情報を入力する必要はありますか?</summary>
@@ -137,10 +141,11 @@ footer a{color:#bcd9cf}
 
 <footer>
   <div class="wrap">
-    <p>株式会社フクギイロ(設立準備中)</p>
+    <p><strong>もらいわすれ堂</strong> — あなたが受け取るまで、いっしょに。</p>
+    <p>運営: 株式会社フクギイロ(設立準備中)</p>
     <p>フクギは、沖縄の集落を台風から守ってきた防風林の木。<br>県民のみなさんの家計を守る防風林でありたい、という願いを社名にしました。</p>
     <p style="margin-top:12px"><a href="area/">市町村別の給付金・手当まとめ</a></p>
-    <p style="margin-top:8px"><a href="#">個人情報保護方針(準備中)</a> ・ 姉妹サイト: <a href="../index.html">沖縄企業のミカタ</a></p>
+    <p style="margin-top:8px"><a href="#">個人情報保護方針(準備中)</a></p>
   </div>
 </footer>
 
