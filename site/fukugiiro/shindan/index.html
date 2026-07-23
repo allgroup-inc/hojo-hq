@@ -264,6 +264,16 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         card.appendChild(mk);
         app.appendChild(card);
       });
+      var lineUrl = window.FG_LINE_URL || "https://lin.ee/7fH7vDQ";
+      var lineBox = h("div", {style:"margin:22px 0;padding:18px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
+      lineBox.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px", text:"締切が近づいたら、LINEでお知らせします"}));
+      lineBox.appendChild(h("p", {class:"note", style:"margin-bottom:12px", text:"あなたが見た制度の締切7日前にお知らせ。新しい制度が増えたときもお知らせします。"}));
+      var lineBtn = h("a", {href: lineUrl, target:"_blank", rel:"noopener",
+        style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#06C755;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEで受け取る(無料)"});
+      lineBtn.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("line_add_click"); });
+      lineBox.appendChild(lineBtn);
+      lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。"}));
+      app.appendChild(lineBox);
       app.appendChild(h("div", {class:"disclaimer", text:"この診断は公式情報に基づく「可能性のご案内」です。受給できるかどうかの最終判断は各窓口で行われます。医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため診断には表示していません。トップページの制度一覧をご覧ください。"}));
       app.appendChild(h("p", {style:"margin-top:16px"}, [h("a", {href:"../index.html", text:"← トップへもどる"})]));
     }).catch(function(){
