@@ -272,6 +272,8 @@
   .card .meta{margin-top:.5rem;font-size:.85rem;color:rgba(0,51,92,.78);display:flex;flex-wrap:wrap;gap:1em;}
   .card .deadline{color:#a03a2a;font-weight:700;}
   .card a{color:var(--midori);font-weight:700;font-size:.9rem;}
+    .card.locked{filter:blur(0px);position:relative;}
+  .card.locked h4,.card.locked .meta{filter:blur(5px);user-select:none;}
   .unlock{
     margin-top:var(--sp-3);padding:var(--sp-3);border-radius:14px;text-align:center;
     background:var(--fukamidori);color:var(--shiro);
@@ -312,42 +314,6 @@
   .result-note{margin-top:var(--sp-3);font-size:.9rem;color:rgba(0,51,92,.8);}
   .updated{margin-top:var(--sp-6);font-size:.78rem;color:rgba(0,51,92,.72);}
 
-  /* 申請準備(gBizID)の事前啓発 */
-  .gbizid-note{
-    margin-top:var(--sp-3);padding:var(--sp-3);border-radius:14px;
-    background:rgba(248,136,0,.1);border:1px solid rgba(248,136,0,.45);
-    font-size:.9rem;line-height:1.8;color:var(--fukamidori);
-  }
-  .gbizid-note a{color:var(--midori);font-weight:700;}
-
-  /* 全制度一覧(登録不要の情報インフラ) */
-  .browse{background:var(--shiro);color:var(--fukamidori);}
-  .browse .eyebrow{color:var(--midori);}
-  .browse-controls{margin-top:var(--sp-5);max-width:900px;display:grid;gap:var(--sp-2);}
-  #browse-q{
-    padding:.85em 1.1em;border-radius:12px;border:1.5px solid rgba(0,51,92,.25);
-    font-size:16px;background:#fff;color:var(--fukamidori);min-height:44px;width:100%;
-  }
-  #browse-q:focus{outline:3px solid var(--kin);border-color:var(--kin);}
-  .browse-tags{display:flex;flex-wrap:wrap;gap:.5rem;}
-  .bt{
-    border:1.5px solid rgba(0,51,92,.3);background:#fff;color:var(--fukamidori);
-    font-size:.85rem;font-weight:700;padding:.5em 1.1em;border-radius:999px;cursor:pointer;min-height:40px;
-  }
-  .bt.on{background:var(--fukamidori);color:#fff;border-color:var(--fukamidori);}
-  .browse-count{margin-top:var(--sp-2);font-size:.88rem;color:rgba(0,51,92,.78);}
-  #browse-list{margin-top:var(--sp-2);max-width:900px;display:grid;gap:var(--sp-1);}
-  .brow{background:#fff;border:1px solid rgba(0,51,92,.15);border-radius:12px;padding:.9rem 1.1rem;}
-  .brow a{color:var(--fukamidori);font-weight:700;text-decoration:none;font-size:.95rem;line-height:var(--lh-tight);overflow-wrap:anywhere;}
-  .brow a:hover{color:var(--midori);text-decoration:underline;}
-  .brow-meta{margin-top:.35rem;font-size:.8rem;color:rgba(0,51,92,.7);display:flex;flex-wrap:wrap;gap:.9em;}
-  .brow-meta .deadline{color:#a03a2a;font-weight:700;}
-  #browse-more{
-    margin-top:var(--sp-3);border:none;cursor:pointer;justify-self:start;
-    background:var(--fukamidori);color:#fff;font-weight:700;font-size:.9rem;
-    padding:.8em 2em;border-radius:999px;min-height:44px;
-  }
-
   /* 診断フォーム: 進捗・ガイド */
   .form-progress{grid-column:1/-1;font-size:.85rem;font-weight:700;color:rgba(0,51,92,.8);}
   .form-progress strong{color:var(--kin);font-size:1.05em;}
@@ -368,9 +334,9 @@
 
   /* 結果カードの出現(フェード+上昇)。表示順はJSで70msずつ遅延 */
   @keyframes cardIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
-  #result-list .card,#result-list .unlock,#result-list .gbizid-note,.shokei-banner{animation:cardIn .5s ease both;}
+  #result-list .card,#result-list .unlock,.shokei-banner{animation:cardIn .5s ease both;}
   @media (prefers-reduced-motion:reduce){
-    #result-list .card,#result-list .unlock,#result-list .gbizid-note,.shokei-banner{animation:none;}
+    #result-list .card,#result-list .unlock,.shokei-banner{animation:none;}
   }
 
   footer{
@@ -398,11 +364,6 @@
     <img src="assets/glow-logo.png" alt="GLOW" class="head-logo" width="468" height="260">
     <span class="head-name"><strong>沖縄企業のミカタ</strong><small>補助金・助成金情報|運営 株式会社GLOW</small></span>
   </a>
-  <nav class="head-nav">
-    <a href="#match">診断</a>
-    <a href="#browse">一覧</a>
-    <a class="now" href="https://lin.ee/sh4bTUe" target="_blank" rel="noopener">LINE登録</a>
-  </nav>
 </header>
 
 
@@ -554,25 +515,6 @@
   <p class="updated rv">データ最終更新:<span id="updated-at">—</span>(1日4回自動更新)</p>
 </section>
 
-<!-- BROWSE ALL(登録不要の全件公開) -->
-<section class="browse" id="browse">
-  <p class="eyebrow rv">ALL OPEN DATA</p>
-  <h2 class="rv">全制度、<span class="kin">隠さず公開</span>しています。</h2>
-  <p class="sub rv">登録は不要です。掲載中の補助金・助成金をすべてご覧いただけます。上の診断を使うと、貴社の条件に合わせて絞り込めます。</p>
-  <div class="browse-controls rv">
-    <input id="browse-q" type="search" placeholder="キーワードで検索(例: 設備、IT、観光、承継)" aria-label="制度をキーワードで検索">
-    <div class="browse-tags" role="group" aria-label="タグで絞り込み">
-      <button type="button" class="bt on" data-t="">すべて</button>
-      <button type="button" class="bt" data-t="okinawa">沖縄限定</button>
-      <button type="button" class="bt" data-t="nationwide">全国対象</button>
-      <button type="button" class="bt" data-t="shokei">承継・M&amp;A</button>
-    </div>
-  </div>
-  <p class="browse-count" id="browse-count" aria-live="polite"></p>
-  <div id="browse-list"></div>
-  <button type="button" id="browse-more" hidden>さらに表示</button>
-</section>
-
 <!-- CTA -->
 <section class="cta">
   <p class="eyebrow rv">START FREE</p>
@@ -593,7 +535,7 @@
   let DB={items:[],updated_at:null};
   fetch('data/subsidies.json')
     .then(r=>r.json())
-    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';const lc=document.getElementById('live-count');if(lc)lc.textContent=d.count||d.items.length||'—';renderBrowse();})
+    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';const lc=document.getElementById('live-count');if(lc)lc.textContent=d.count||d.items.length||'—';})
     .catch(()=>{document.getElementById('updated-at').textContent='取得エラー(公式サイトをご確認ください)';});
 
   const BIZ_KEYS={
@@ -692,27 +634,29 @@
 
     document.getElementById('shokei-banner').hidden=!shokeiSignal;
     animateCount(document.getElementById('result-count'),hits.length);
-    // 全件を隠さず表示(2026-07-23 小柳さん決裁: 情報は全開放、LINEは通知価値で登録してもらう)
-    const card=(it)=>`
-      <div class="card">
-        <h4>${it.name||''}</h4>
+    const maskName=n=>n.length>6?n.slice(0,6)+'●●●●●●':'●●●●●●';
+    const card=(it,locked)=>`
+      <div class="card ${locked?'locked':''}">
+        <h4>${locked?maskName(it.name||''):(it.name||'')}</h4>
         <div class="meta">
           <span class="deadline">締切 ${it.deadline||'要確認'}</span>
           <span>${it.target_area||'対象地域 要確認'}</span>
           ${it.max_amount?`<span>上限 ${Number(it.max_amount).toLocaleString()}円</span>`:''}
         </div>
-        <a href="${it.source_url}" target="_blank" rel="noopener">公式ページで確認 →</a>
+        ${locked?'':`<a href="${it.source_url}" target="_blank" rel="noopener">公式ページで確認 →</a>`}
       </div>`;
     let html='';
     if(hits.length===0){
       html='<div class="card"><h4>条件に合う募集中の制度が見つかりませんでした。</h4><div class="meta"><span>条件を変えるか、LINE登録で新着をお待ちください。</span></div></div>';
     }else{
-      html=hits.map(card).join('');
-      html+=`<div class="unlock">
-        <p>公募は毎日入れ替わります。<strong>締切7日前のLINEアラート</strong>と、<strong>貴社の条件に合う新着制度のお知らせ</strong>を無料でお届けします。</p>
-        <a class="line-btn" href="https://lin.ee/sh4bTUe" target="_blank" rel="noopener">LINEで通知を受け取る(無料)</a>
-      </div>`;
-      html+=`<div class="gbizid-note">💡 <strong>申請には多くの場合「gBizIDプライム」が必要です</strong>(取得に約2〜3週間)。気になる制度が見つかったら、締切に間に合うよう早めの準備がおすすめです。<a href="https://gbiz-id.go.jp/top/" target="_blank" rel="noopener">gBizID公式サイト →</a></div>`;
+      html=card(hits[0],false);
+      if(hits.length>1){
+        html+=hits.slice(1).map(it=>card(it,true)).join('');
+        html+=`<div class="unlock">
+          <p><strong>残り${hits.length-1}件</strong>は、無料のLINE登録ですべて表示されます。<br>締切7日前アラートも自動で届きます。</p>
+          <a class="line-btn" href="https://lin.ee/sh4bTUe" target="_blank" rel="noopener">LINEで無料登録して全て見る</a>
+        </div>`;
+      }
     }
     const list=document.getElementById('result-list');
     list.innerHTML=html;
@@ -720,44 +664,6 @@
     document.getElementById('match-result').hidden=false;
     document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
   });
-
-  // ===== 全制度一覧(登録不要・検索/タグ絞り込み) =====
-  const BROWSE_PAGE=20;
-  let browseTag='',browseQ='',browseShown=BROWSE_PAGE;
-  function browseItems(){
-    const q=browseQ.trim().toLowerCase();
-    return (DB.items||[])
-      .filter(it=>!browseTag||it.tag===browseTag)
-      .filter(it=>!q||`${it.name||''} ${it.issuer||''} ${it.target_area||''} ${it.target_biz||''}`.toLowerCase().includes(q))
-      .sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999'));
-  }
-  function renderBrowse(){
-    const list=document.getElementById('browse-list');
-    if(!list)return;
-    const items=browseItems();
-    const shown=items.slice(0,browseShown);
-    document.getElementById('browse-count').textContent=
-      items.length?`${items.length}件中 ${shown.length}件を表示(締切が近い順)`:'条件に合う制度が見つかりませんでした。キーワードを変えてお試しください。';
-    list.innerHTML=shown.map(it=>`
-      <div class="brow">
-        <a href="${it.source_url}" target="_blank" rel="noopener">${it.name||''}</a>
-        <div class="brow-meta">
-          <span class="deadline">締切 ${it.deadline||'要確認'}</span>
-          <span>${it.target_area||'対象地域 要確認'}</span>
-          ${it.max_amount&&Number(it.max_amount)>0?`<span>上限 ${Number(it.max_amount).toLocaleString()}円</span>`:''}
-        </div>
-      </div>`).join('');
-    document.getElementById('browse-more').hidden=shown.length>=items.length;
-  }
-  document.getElementById('browse-q').addEventListener('input',e=>{browseQ=e.target.value;browseShown=BROWSE_PAGE;renderBrowse();});
-  document.querySelectorAll('.browse-tags .bt').forEach(b=>{
-    b.addEventListener('click',()=>{
-      document.querySelectorAll('.browse-tags .bt').forEach(x=>x.classList.remove('on'));
-      b.classList.add('on');
-      browseTag=b.dataset.t;browseShown=BROWSE_PAGE;renderBrowse();
-    });
-  });
-  document.getElementById('browse-more').addEventListener('click',()=>{browseShown+=BROWSE_PAGE;renderBrowse();});
 
   const io=new IntersectionObserver(es=>{
     es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
