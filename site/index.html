@@ -311,6 +311,31 @@
   .expert-card.coming{opacity:.75;border-style:dashed;}
   .expert-card.coming .expert-photo{font-size:1.3rem;}
   .experts-note{margin-top:var(--sp-2);font-size:.78rem;color:rgba(0,51,92,.72);}
+  /* 申請の前に: gBizID の最短ルート案内(出典: gbiz-id.go.jp) */
+  .gbiz{
+    margin-top:var(--sp-4);border-radius:14px;
+    background:#fff;border:1px solid rgba(0,51,92,.18);
+    box-shadow:0 4px 16px rgba(0,51,92,.06);overflow:hidden;
+  }
+  .gbiz summary{
+    cursor:pointer;list-style:none;padding:1.1rem 1.3rem;
+    font-weight:700;font-size:.95rem;color:var(--fukamidori);
+    display:flex;align-items:center;gap:.6em;min-height:44px;
+  }
+  .gbiz summary::-webkit-details-marker{display:none;}
+  .gbiz summary::after{content:"＋";margin-left:auto;color:var(--kin);font-size:1.1em;}
+  .gbiz[open] summary::after{content:"−";}
+  .gbiz summary:focus-visible{outline:3px solid var(--kin);}
+  .gbiz-body{padding:0 1.3rem 1.3rem;font-size:.9rem;line-height:1.85;color:rgba(0,51,92,.88);}
+  .gbiz-row{
+    display:flex;flex-wrap:wrap;gap:.6em;align-items:baseline;
+    padding:.7em 0;border-top:1px solid rgba(0,51,92,.12);
+  }
+  .gbiz-row b{min-width:8.5em;color:var(--fukamidori);}
+  .gbiz-fast{color:#1c6b3a;font-weight:700;}
+  .gbiz-slow{color:#a03a2a;font-weight:700;}
+  .gbiz-note{margin-top:.8em;font-size:.82rem;color:rgba(0,51,92,.72);}
+  .gbiz-body a{color:var(--midori);font-weight:700;}
   .result-note{margin-top:var(--sp-3);font-size:.9rem;color:rgba(0,51,92,.8);}
   .updated{margin-top:var(--sp-6);font-size:.78rem;color:rgba(0,51,92,.72);}
 
@@ -482,6 +507,33 @@
     <div id="result-list"></div>
     <p class="result-note">締切7日前アラートを受け取るには、LINE登録(無料)をどうぞ。</p>
     <a class="register-btn" href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E4%BC%9A%E7%A4%BE%E6%83%85%E5%A0%B1%E7%99%BB%E9%8C%B2%E3%80%91%0A%E4%BC%9A%E7%A4%BE%E5%90%8D%EF%BC%9A%0A%E4%BB%A3%E8%A1%A8%E8%80%85%E5%90%8D%EF%BC%9A%0A%E6%89%80%E5%9C%A8%E5%9C%B0%EF%BC%9A" target="_blank" rel="noopener">貴社専用の制度通知を受け取る(会社情報を登録)</a>
+
+    <details class="gbiz" id="gbiz">
+      <summary>申請の前に:gBizIDは「オンライン」なら待たずに取れます</summary>
+      <div class="gbiz-body">
+        <p>国の補助金(jGrants)の申請には、多くの場合「GビズIDプライム」が必要です。<strong>取り方によって、かかる時間がまったく違います。</strong></p>
+        <div class="gbiz-row">
+          <b>オンライン申請</b>
+          <span><span class="gbiz-fast">24時間365日、速やかに発行</span>(法人代表者の方)</span>
+        </div>
+        <div class="gbiz-row">
+          <b>書類の郵送申請</b>
+          <span><span class="gbiz-slow">審査に最大1か月</span></span>
+        </div>
+        <div class="gbiz-row">
+          <b>用意するもの</b>
+          <span>マイナンバーカード / NFC対応スマートフォン / GビズIDアプリ</span>
+        </div>
+        <div class="gbiz-row">
+          <b>有効期限</b>
+          <span>発行日から2年3か月(プライム・メンバー)。<strong>以前取得した方は期限切れにご注意ください</strong></span>
+        </div>
+        <p class="gbiz-note">
+          ※ gBizIDが必要かどうかは制度によって異なります。沖縄県・市町村・産業振興公社などの制度は独自の申請方法の場合があります。必ず各制度の公募要領でご確認ください。<br>
+          ※ 上記は<a href="https://gbiz-id.go.jp/top/" target="_blank" rel="noopener">GビズID公式サイト</a>の記載に基づく情報です(最新の内容は公式サイトでご確認ください)。
+        </p>
+      </div>
+    </details>
 
     <div class="experts">
       <p class="experts-head">この制度の申請、誰に相談する?</p>
