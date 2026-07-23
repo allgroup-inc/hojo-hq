@@ -25,8 +25,12 @@ jobs:
         run: python scripts/fetch_jgrants.py
 
       - name: Fetch local (自治体) data
-        # 守り部審査済み(docs/守り部審査記録.md)。沖縄県・産業振興公社を追加収集しマージ
+        # 守り部審査済み(docs/守り部審査記録.md)。沖縄県・産業振興公社・那覇市を追加収集しマージ
         run: python scripts/fetch_local.py
+
+      - name: Generate LINE deadline alerts
+        # 締切7日以内の制度からLINE配信下書きを自動生成(配信は人が実行)
+        run: python scripts/generate_line_alerts.py
 
       - name: Install image deps (Noto CJK fonts)
         run: |
@@ -42,9 +46,13 @@ jobs:
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
-          git add data/subsidies.json posts/images
+          git add data/subsidies.json data/line_alerts.json posts/images posts/line
           git diff --cached --quiet || git commit -m "auto: update subsidies & images $(date '+%Y-%m-%d %H:%M')"
-          git push
+          # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done
 
       - name: Setup Pages
         uses: actions/configure-pages@v6

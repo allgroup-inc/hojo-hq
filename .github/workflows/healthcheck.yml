@@ -64,6 +64,20 @@ jobs:
               --body-file issue_body.md
           fi
 
+      # ── 異常検知時: 小柳さんへLINE即時通知(100点基準❼)──
+      # Secrets(LINE_CHANNEL_ACCESS_TOKEN / LINE_ADMIN_USER_ID)未設定の間は
+      # 自動でスキップされる。設定手順: docs/セットアップ手順_Phase0.md
+      - name: LINE通知(小柳さんへ即時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【ミカタ】日次ヘルスチェック失敗
+            サイト/データに問題を検知しました。Issueを確認してください。
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
       # ── 復旧時: 未解決の healthcheck Issue を自動クローズ ──
       - name: Auto-close issue on recovery
         if: success()

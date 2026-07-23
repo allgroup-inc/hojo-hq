@@ -13,4 +13,4 @@
 #沖縄 #補助金 #助成金 #沖縄経営者 #事業承継 #沖縄企業のミカタ
 
 ## 出典
-https://allgroup-inc.github.io/hojo-hq/
+https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch

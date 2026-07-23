@@ -1,0 +1,75 @@
+name: lighthouse
+
+# 100点基準❷: Lighthouse4項目(Performance/Accessibility/Best Practices/SEO)95点以上を
+# 毎日自動計測。閾値割れは Issue を自動起票し、回復したら自動クローズする。
+# 閾値設定: .github/lighthouserc.json
+
+on:
+  schedule:
+    # JST 10:30(= UTC 01:30)。ヘルスチェック(10:00 JST)の後に計測。
+    - cron: "30 1 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: lighthouse
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run Lighthouse(本番サイト・3回計測の中央値)
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            https://allgroup-inc.github.io/hojo-hq/
+          runs: 3
+          uploadArtifacts: true
+          configPath: .github/lighthouserc.json
+
+      # ── 閾値割れ: Issue を起票 / 既存の未解決Issueに追記 ──
+      - name: Open or update issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh label create lighthouse --color D93F0B \
+            --description "Lighthouseスコアが基準(95)未達" 2>/dev/null || true
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          {
+            echo "自動検知: Lighthouseスコアが基準(4項目95以上)を下回りました。"
+            echo ""
+            echo "- 実行(スコア詳細とレポートはArtifacts参照): $run_url"
+            echo "- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')"
+            echo "- 閾値設定: .github/lighthouserc.json"
+          } > issue_body.md
+          existing=$(gh issue list --state open --label lighthouse \
+            --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file issue_body.md
+            echo "既存Issue #$existing に追記しました"
+          else
+            gh issue create --label lighthouse \
+              --title "📉 Lighthouse基準未達: 4項目95以上を下回りました" \
+              --body-file issue_body.md
+          fi
+
+      # ── 回復時: 未解決の lighthouse Issue を自動クローズ ──
+      - name: Auto-close issue on recovery
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          open=$(gh issue list --state open --label lighthouse \
+            --json number --jq '.[].number' 2>/dev/null || true)
+          for n in $open; do
+            gh issue comment "$n" --body "✅ 直近の計測で4項目95以上に回復しました。自動クローズします。"
+            gh issue close "$n"
+          done
