@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-07-23 09:02",
+ "updated_at": "2026-07-23 13:31",
  "count": 14,
  "items": [
   {
@@ -22,7 +22,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-jidofuyoteate",
@@ -45,7 +45,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-shussan-ichijikin",
@@ -67,7 +67,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-ikuji-kyufu",
@@ -91,7 +91,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-jukyo-kakuho",
@@ -115,7 +115,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-kogaku-ryoyo",
@@ -137,7 +137,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-shugaku-shien",
@@ -159,7 +159,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-hitorioya-shien",
@@ -185,7 +185,7 @@
    "verified_by": "kensho(突合レポート○・match_tokens修正後)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-ninpu-shien",
@@ -207,7 +207,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-shugakushienkin-koko",
@@ -229,7 +229,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-shogaku-kyufukin-koko",
@@ -252,7 +252,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-kyushokusha-shien",
@@ -276,7 +276,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-seikatsu-konkyu",
@@ -302,7 +302,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   },
   {
    "id": "fk-kuni-kyoiku-kunren",
@@ -324,7 +324,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-07-23 09:02"
+   "fetched_at": "2026-07-23 13:31"
   }
  ]
 }
