@@ -30,7 +30,8 @@ JST = timezone(timedelta(hours=9))
 BASE_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(BASE_DIR, "..", "data", "subsidies.json")
 OUT_DIR = os.path.join(BASE_DIR, "..", "posts", "launch")
-SITE_URL = "https://allgroup-inc.github.io/hojo-hq/"
+# UTM付き(ヒロメさんのUTM運用: instagram/social/launch)。プロフィールリンクにも同URLを使用
+SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch"
 
 # 選定しきい値
 PROMOTE_MIN_DAYS = 30   # 通常投稿はこれ以上先の締切のみ

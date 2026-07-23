@@ -1,0 +1,89 @@
+name: e2e
+
+# 100点基準❶(前半): 診断→結果→LINE導線を実ブラウザ(Chromium)で毎日検証。
+# 失敗 = ユーザー向け機能の障害として Issue 起票+小柳さんへLINE即時通知(基準❼)。
+
+on:
+  schedule:
+    # JST 10:45(= UTC 01:45)。デプロイ・ヘルスチェック後に実施。
+    - cron: "45 1 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: e2e
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Playwright
+        run: |
+          npm init -y > /dev/null
+          npm i -D @playwright/test
+          npx playwright install --with-deps chromium
+
+      - name: Run diagnosis E2E smoke
+        run: npx playwright test --config tests/e2e/playwright.config.js
+
+      # ── 失敗時: Issue を起票 / 既存の未解決Issueに追記 ──
+      - name: Open or update issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh label create e2e --color B60205 \
+            --description "診断E2Eスモークの失敗(ユーザー向け機能の障害)" 2>/dev/null || true
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          {
+            echo "自動検知: 診断→LINE導線のE2Eスモークが失敗しました。ユーザーが診断を完了できない可能性があります。"
+            echo ""
+            echo "- 実行(詳細ログ): $run_url"
+            echo "- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')"
+          } > issue_body.md
+          existing=$(gh issue list --state open --label e2e \
+            --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file issue_body.md
+            echo "既存Issue #$existing に追記しました"
+          else
+            gh issue create --label e2e \
+              --title "🚨 E2E失敗: 診断→LINE導線が壊れています" \
+              --body-file issue_body.md
+          fi
+
+      # ── 失敗時: 小柳さんへLINE即時通知(Secrets未設定時は自動スキップ)──
+      - name: LINE通知(小柳さんへ即時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【ミカタ】診断E2E失敗
+            診断→LINE導線が壊れている可能性があります。Issueを確認してください。
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      # ── 回復時: 未解決の e2e Issue を自動クローズ ──
+      - name: Auto-close issue on recovery
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          open=$(gh issue list --state open --label e2e \
+            --json number --jq '.[].number' 2>/dev/null || true)
+          for n in $open; do
+            gh issue comment "$n" --body "✅ 直近のE2Eスモークが正常に戻りました。自動クローズします。"
+            gh issue close "$n"
+          done
