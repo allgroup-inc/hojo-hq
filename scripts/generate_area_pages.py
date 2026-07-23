@@ -35,7 +35,7 @@ MUNIS = [
 ]
 
 STYLE = """
-:root{--fg-primary:#1a6b52;--fg-accent:#f2b705;--fg-ink:#1f2a2e;--fg-bg:#fffdf7;--fg-card:#fff;--fg-muted:#5c6b70;--fg-line:#e5e0d4}
+:root{--fg-primary:#B9502F;--fg-accent:#F2B705;--fg-deep:#1A6B52;--fg-ink:#1F2A2E;--fg-bg:#FFFBF4;--fg-card:#fff;--fg-muted:#5C6B70;--fg-line:#EBE2D4}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:18px;line-height:1.8;color:var(--fg-ink);background:var(--fg-bg)}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
@@ -73,8 +73,8 @@ def page(title, desc, body, updated, depth=2):
 <script src="{rel}assets/fg-analytics.js"></script>
 <div class="wrap">
 {body}
-<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>最終更新: {esc(updated)}(毎日自動更新)/ 運営: 株式会社フクギイロ</div>
-<p style="margin-top:16px"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">フクギイロ トップ</a></p>
+<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
+<p style="margin-top:16px"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
 </div>
 </body>
 </html>
@@ -109,7 +109,7 @@ def muni_page(muni, items, updated):
                 f'<a href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する</a>'
                 "</div>"
             )
-    title = f"{muni}の給付金・手当まとめ | フクギイロ"
+    title = f"{muni}の給付金・手当まとめ | もらいわすれ堂"
     desc = f"{muni}にお住まいの世帯が使える可能性のある給付金・手当のまとめ。3分の無料診断で、あなたの世帯にあてはまる制度がわかります。"
     return page(title, desc, "\n".join(body), updated)
 
@@ -124,7 +124,7 @@ def index_page(updated):
         f'<ul class="areas">{lis}</ul>'
         '<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'
     )
-    return page("沖縄県 市町村別の給付金・手当まとめ | フクギイロ", "沖縄県41市町村別の給付金・手当まとめ。", body, updated, depth=1)
+    return page("沖縄県 市町村別の給付金・手当まとめ | もらいわすれ堂", "沖縄県41市町村別の給付金・手当まとめ。", body, updated, depth=1)
 
 
 def main():
