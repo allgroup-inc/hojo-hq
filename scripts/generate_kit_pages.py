@@ -52,10 +52,14 @@ h2{font-size:1.05rem;margin:22px 0 8px;border-left:6px solid var(--fg-accent);pa
 .box{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:16px 18px;margin:10px 0}
 .status{font-size:.8rem;background:#fff3cd;border-radius:4px;padding:1px 8px;color:#7a5b00}
 ul.check{list-style:none}
-ul.check li{padding:8px 0 8px 40px;position:relative;border-bottom:1px dashed var(--fg-line)}
-ul.check li::before{content:"";position:absolute;left:4px;top:12px;width:20px;height:20px;border:2.5px solid var(--fg-primary);border-radius:5px;background:#fff}
+ul.check li{border-bottom:1px dashed var(--fg-line)}
+ul.check label{display:flex;align-items:flex-start;gap:12px;padding:9px 0;cursor:pointer}
+ul.check input[type=checkbox]{width:22px;height:22px;min-width:22px;margin-top:5px;accent-color:var(--fg-primary)}
+ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through}
 .madoguchi{font-size:.95rem;background:#EAF5F0;border-radius:8px;padding:12px 14px;color:#0F5138}
-.memo{border-bottom:2px solid var(--fg-line);height:44px}
+.memo{width:100%;border:none;border-bottom:2px solid var(--fg-line);background:transparent;font:inherit;font-size:.95rem;min-height:44px;resize:vertical;padding:6px 2px}
+.memo:focus{outline:none;border-bottom-color:var(--fg-primary)}
+.prog{font-weight:700;color:var(--fg-deep)}
 .btns{display:flex;gap:10px;margin:18px 0}
 .btns button,.btns a{flex:1;display:block;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
 .btns .primary{background:var(--fg-primary);color:#fff}
@@ -95,6 +99,43 @@ def page(title, desc, body, depth=2):
 """
 
 
+KIT_JS = """
+<script>
+(function(){
+  var KEY = "fk_kit___ID__";
+  var saved = {c:[], m:{}};
+  try { saved = JSON.parse(localStorage.getItem(KEY)) || saved; } catch(e){}
+  var boxes = Array.prototype.slice.call(document.querySelectorAll("ul.check input[type=checkbox]"));
+  var memos = Array.prototype.slice.call(document.querySelectorAll("textarea.memo"));
+  var prog = document.getElementById("prog");
+  var trackedCheck = false;
+  function upd(){
+    var n = boxes.filter(function(b){ return b.checked; }).length;
+    if (prog) prog.textContent = "そろったもの: " + n + " / " + boxes.length + (n === boxes.length && n > 0 ? " — 準備かんりょう!" : "");
+  }
+  function save(){
+    var data = {c: [], m: {}};
+    boxes.forEach(function(b, i){ if (b.checked) data.c.push(i); });
+    memos.forEach(function(t, i){ if (t.value) data.m[i] = t.value.slice(0, 500); });
+    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e){}
+  }
+  boxes.forEach(function(b, i){
+    if (saved.c && saved.c.indexOf(i) >= 0) b.checked = true;
+    b.addEventListener("change", function(){
+      save(); upd();
+      if (!trackedCheck && window.fgTrack) { trackedCheck = true; fgTrack("kit_check"); }
+    });
+  });
+  memos.forEach(function(t, i){
+    if (saved.m && saved.m[i]) t.value = saved.m[i];
+    t.addEventListener("input", save);
+  });
+  upd();
+})();
+</script>
+"""
+
+
 def kit_page(it, updated):
     badge = ' <span class="status">要確認</span>' if it.get("status") == "要確認" else ""
     items = list(COMMON_ITEMS)
@@ -102,7 +143,10 @@ def kit_page(it, updated):
         for x in EVENT_ITEMS.get(ev, []):
             if x not in items:
                 items.append(x)
-    checks = "\n".join(f"<li>{esc(x)}</li>" for x in items)
+    checks = "\n".join(
+        f'<li><label><input type="checkbox" data-k="{i}"><span>{esc(x)}</span></label></li>'
+        for i, x in enumerate(items)
+    )
     warn = ""
     if it.get("status") == "要確認":
         warn = '<div class="box" style="border-color:#E0B54A;background:#FFF8E6"><span class="note">この制度は現在、内容の最終確認中です。お出かけ前に必ず公式ページと窓口でご確認ください。</span></div>'
@@ -133,8 +177,9 @@ def kit_page(it, updated):
 </div>
 
 <h2>持ち物チェックリスト(よくある例)</h2>
-<p class="note">市町村やご家庭の状況によって変わります。「例」としてそろえて、細かい違いは窓口で確認すれば大丈夫です。</p>
+<p class="note">市町村やご家庭の状況によって変わります。「例」としてそろえて、細かい違いは窓口で確認すれば大丈夫です。チェックとメモはこの端末の中だけに保存され、次に開いたときも残っています。</p>
 <div class="box">
+  <p class="note"><span class="prog" id="prog"></span></p>
   <ul class="check">
 {checks}
   </ul>
@@ -146,14 +191,15 @@ def kit_page(it, updated):
 
 <h2>窓口で聞いたことメモ</h2>
 <div class="box">
-  <p class="note">担当窓口・電話番号:</p><div class="memo"></div>
-  <p class="note" style="margin-top:10px">足りなかった書類・次にやること:</p><div class="memo"></div>
-  <p class="note" style="margin-top:10px">いつまでに(期限):</p><div class="memo"></div>
+  <p class="note">担当窓口・電話番号:</p><textarea class="memo" data-m="0" rows="1"></textarea>
+  <p class="note" style="margin-top:10px">足りなかった書類・次にやること:</p><textarea class="memo" data-m="1" rows="1"></textarea>
+  <p class="note" style="margin-top:10px">いつまでに(期限):</p><textarea class="memo" data-m="2" rows="1"></textarea>
 </div>
 
 <div class="disclaimer">このシートは公式情報に基づく「準備のご案内」です。持ち物は一般的な例で、市町村により異なります。受給できるかどうかの最終判断は各窓口で行われます。申請書の作成代行・代筆は行っていません(ご本人が記入します)。専門家のサポートが必要な場合は、提携の専門家(社会保険労務士・行政書士など)をご紹介します。<br>最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)/ 出典: <a href="{esc(it['source_url'])}" rel="noopener">公式ページ</a></div>
 <p style="margin-top:16px" class="no-print"><a href="../index.html">準備シート一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
 """
+    body += KIT_JS.replace("__ID__", it["id"])
     title = f"{it['name']} 申請準備シート(印刷用)| もらいわすれ堂"
     desc = f"{it['name']}の申請に行く前の準備シート。持ち物チェックリスト・窓口でのひとこと・メモ欄つき。印刷してそのまま窓口へ。"
     return page(title, desc, body)

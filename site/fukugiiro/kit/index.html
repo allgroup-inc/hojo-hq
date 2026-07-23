@@ -17,10 +17,14 @@ h2{font-size:1.05rem;margin:22px 0 8px;border-left:6px solid var(--fg-accent);pa
 .box{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:16px 18px;margin:10px 0}
 .status{font-size:.8rem;background:#fff3cd;border-radius:4px;padding:1px 8px;color:#7a5b00}
 ul.check{list-style:none}
-ul.check li{padding:8px 0 8px 40px;position:relative;border-bottom:1px dashed var(--fg-line)}
-ul.check li::before{content:"";position:absolute;left:4px;top:12px;width:20px;height:20px;border:2.5px solid var(--fg-primary);border-radius:5px;background:#fff}
+ul.check li{border-bottom:1px dashed var(--fg-line)}
+ul.check label{display:flex;align-items:flex-start;gap:12px;padding:9px 0;cursor:pointer}
+ul.check input[type=checkbox]{width:22px;height:22px;min-width:22px;margin-top:5px;accent-color:var(--fg-primary)}
+ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through}
 .madoguchi{font-size:.95rem;background:#EAF5F0;border-radius:8px;padding:12px 14px;color:#0F5138}
-.memo{border-bottom:2px solid var(--fg-line);height:44px}
+.memo{width:100%;border:none;border-bottom:2px solid var(--fg-line);background:transparent;font:inherit;font-size:.95rem;min-height:44px;resize:vertical;padding:6px 2px}
+.memo:focus{outline:none;border-bottom-color:var(--fg-primary)}
+.prog{font-weight:700;color:var(--fg-deep)}
 .btns{display:flex;gap:10px;margin:18px 0}
 .btns button,.btns a{flex:1;display:block;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
 .btns .primary{background:var(--fg-primary);color:#fff}
