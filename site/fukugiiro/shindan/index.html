@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3分でもらい忘れ診断 | フクギイロ</title>
+<title>3分でもらい忘れ診断 | もらいわすれ堂</title>
 <meta name="description" content="沖縄県にお住まいの世帯向け。家族の状況にあてはまる可能性のある給付金・手当を3分で診断します。名前や住所の入力は不要です。">
 <meta name="robots" content="noindex">
 <style>
-:root{--fg-primary:#1a6b52;--fg-accent:#f2b705;--fg-ink:#1f2a2e;--fg-bg:#fffdf7;
-  --fg-card:#ffffff;--fg-muted:#5c6b70;--fg-line:#e5e0d4}
+:root{--fg-primary:#B9502F;--fg-accent:#F2B705;--fg-deep:#1A6B52;--fg-ink:#1F2A2E;--fg-bg:#FFFBF4;
+  --fg-card:#ffffff;--fg-muted:#5C6B70;--fg-line:#EBE2D4}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
   font-size:18px;line-height:1.8;color:var(--fg-ink);background:var(--fg-bg)}
@@ -21,7 +21,7 @@ h1{font-size:1.3rem;margin-bottom:4px}
 .opts{display:grid;gap:10px}
 .opts button,.opts label{display:block;width:100%;text-align:left;padding:13px 16px;min-height:44px;
   border:2px solid var(--fg-line);border-radius:10px;background:#fff;font-size:1rem;cursor:pointer}
-.opts .sel{border-color:var(--fg-primary);background:#eaf5f0;font-weight:700}
+.opts .sel{border-color:var(--fg-primary);background:#F9EDE3;font-weight:700}
 select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);border-radius:10px;background:#fff}
 .nav{display:flex;gap:10px;margin-top:18px}
 .nav button{flex:1;padding:14px;min-height:44px;border-radius:999px;border:none;font-size:1rem;font-weight:700;cursor:pointer}
@@ -181,8 +181,8 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         shareBtn.addEventListener("click", function(){
           if (window.fgTrack) window.fgTrack("share_click");
           var url = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/";
-          var text = "沖縄の給付金・手当の「もらい忘れ」を3分で診断できるよ(無料・匿名)";
-          if (navigator.share) { navigator.share({title:"3分でもらい忘れ診断", text:text, url:url}).catch(function(){}); }
+          var text = "「もらいわすれ堂」で沖縄の給付金・手当のもらい忘れを3分で診断できるよ(無料・匿名)";
+          if (navigator.share) { navigator.share({title:"もらいわすれ堂|3分でもらい忘れ診断", text:text, url:url}).catch(function(){}); }
           else if (navigator.clipboard) { navigator.clipboard.writeText(text + " " + url); shareBtn.textContent = "リンクをコピーしました!"; }
         });
         var printBtn = h("button", {text:"印刷して窓口に持っていく"});
