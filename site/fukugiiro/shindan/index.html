@@ -44,6 +44,8 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   <div class="progress" aria-hidden="true"><div id="bar" style="width:0%"></div></div>
   <div id="app" aria-live="polite"><noscript>この診断はJavaScriptを使って動きます。設定を有効にしてご覧ください。</noscript></div>
 </div>
+<script src="../analytics-config.js"></script>
+<script src="../assets/fg-analytics.js"></script>
 <script src="logic.js"></script>
 <script>
 (function(){
@@ -67,10 +69,17 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     (children||[]).forEach(function(c){ el.appendChild(c); });
     return el;
   }
+  var tracked = {};
+  function trackStep(name){
+    if (tracked[name]) return;
+    tracked[name] = true;
+    if (window.fgTrack) window.fgTrack(name);
+  }
   function render(){
     bar.style.width = Math.round(state.step / TOTAL * 100) + "%";
     app.innerHTML = "";
-    if (state.step === 0) return qMunicipality();
+    if (state.step === 0) { trackStep("shindan_start"); return qMunicipality(); }
+    if (state.step >= 1 && state.step <= 4) trackStep("shindan_step_q" + (state.step + 1));
     if (state.step === 1) return qChildren();
     if (state.step === 2) return qChildAges();
     if (state.step === 3) return qEvents();
@@ -155,6 +164,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         lifeEvents: state.lifeEvents.map(function(e){ return EVENT_MAP[e]; }).filter(Boolean)
       };
       var rs = window.FGShindan.matchSeido(db.items, answers);
+      if (window.fgTrack) window.fgTrack(rs.length ? "shindan_complete" : "shindan_zero", {results: rs.length});
       app.innerHTML = "";
       app.appendChild(h("h2", {text:"あなたの世帯が使える可能性のある制度: " + rs.length + "件"}));
       if (rs.length === 0) {

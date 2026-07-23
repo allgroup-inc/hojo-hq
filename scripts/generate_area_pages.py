@@ -57,7 +57,8 @@ def esc(s):
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def page(title, desc, body, updated):
+def page(title, desc, body, updated, depth=2):
+    rel = "../" * depth
     return f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -68,6 +69,8 @@ def page(title, desc, body, updated):
 <style>{STYLE}</style>
 </head>
 <body>
+<script src="{rel}analytics-config.js"></script>
+<script src="{rel}assets/fg-analytics.js"></script>
 <div class="wrap">
 {body}
 <div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>最終更新: {esc(updated)}(毎日自動更新)/ 運営: 株式会社フクギイロ</div>
@@ -121,7 +124,7 @@ def index_page(updated):
         f'<ul class="areas">{lis}</ul>'
         '<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'
     )
-    return page("沖縄県 市町村別の給付金・手当まとめ | フクギイロ", "沖縄県41市町村別の給付金・手当まとめ。", body, updated)
+    return page("沖縄県 市町村別の給付金・手当まとめ | フクギイロ", "沖縄県41市町村別の給付金・手当まとめ。", body, updated, depth=1)
 
 
 def main():
