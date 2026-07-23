@@ -1,0 +1,35 @@
+name: fukugiiro-weekly-report
+
+on:
+  schedule:
+    # 毎週月曜 09:00 JST(= 日曜 00:00 UTC)。yui.md「週次レポートは毎週月曜」
+    - cron: "0 0 * * 1"
+  push:
+    paths:
+      - "scripts/weekly_report_fukugiiro.py"
+      - ".github/workflows/fukugiiro-weekly-report.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 週次レポート生成(統括ユイさん)
+        run: python scripts/weekly_report_fukugiiro.py
+
+      - name: Commit report
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add reports/fukugiiro
+          git diff --cached --quiet || git commit -m "auto: もらいわすれ堂 週次レポート $(date '+%Y-%m-%d')"
+          git push
