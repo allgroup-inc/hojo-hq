@@ -1,8 +1,8 @@
 {
- "updated_at": "2026-07-23 09:41",
- "count": 160,
+ "updated_at": "2026-07-23 11:15",
+ "count": 161,
  "by_tag": {
-  "nationwide": 122,
+  "nationwide": 123,
   "shokei": 15,
   "okinawa": 23
  },
@@ -18,7 +18,7 @@
    "deadline": "2026-07-23",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYslMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -32,7 +32,7 @@
    "deadline": "2026-07-23",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbKSMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:40",
+   "fetched_at": "2026-07-23 11:14",
    "status": "募集中"
   },
   {
@@ -46,7 +46,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapmMAD",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -60,7 +60,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaphMAD",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -74,7 +74,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaplMAD",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -88,7 +88,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapiMAD",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -102,7 +102,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapjMAD",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -116,7 +116,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapgMAD",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -130,7 +130,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapkMAD",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -144,7 +144,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbzXMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -158,7 +158,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYqvMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -172,7 +172,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYkCMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -186,7 +186,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYjRMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -200,7 +200,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapWMAT",
    "tag": "okinawa",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -214,7 +214,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYk0MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -228,7 +228,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYiwMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -242,7 +242,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYkHMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -256,7 +256,7 @@
    "deadline": "2026-07-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbyeMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:40",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -270,7 +270,7 @@
    "deadline": "2026-07-27",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbJKMA1",
    "tag": "okinawa",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -284,7 +284,7 @@
    "deadline": "2026-07-27",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYjqMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:40",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -298,7 +298,7 @@
    "deadline": "2026-07-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbonMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -313,7 +313,7 @@
    "source_url": "https://www.city.naha.okinawa.jp/business/kigyouricchi/1003642/1007180.html",
    "tag": "okinawa",
    "source": "那覇市(企業支援)",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "募集中"
   },
   {
@@ -327,7 +327,7 @@
    "deadline": "2026-07-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDKZFMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -341,7 +341,7 @@
    "deadline": "2026-07-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0JMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -355,7 +355,7 @@
    "deadline": "2026-07-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbHOMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -369,7 +369,7 @@
    "deadline": "2026-07-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDNujMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -383,7 +383,7 @@
    "deadline": "2026-07-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXoQMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -397,7 +397,7 @@
    "deadline": "2026-07-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbnjMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:40",
+   "fetched_at": "2026-07-23 11:14",
    "status": "募集中"
   },
   {
@@ -411,7 +411,7 @@
    "deadline": "2026-08-03",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbPBMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -425,7 +425,7 @@
    "deadline": "2026-08-03",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc1MMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:40",
+   "fetched_at": "2026-07-23 11:14",
    "status": "募集中"
   },
   {
@@ -439,7 +439,7 @@
    "deadline": "2026-08-04",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaL8MAL",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -453,7 +453,7 @@
    "deadline": "2026-08-04",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd5IMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:40",
+   "fetched_at": "2026-07-23 11:14",
    "status": "募集中"
   },
   {
@@ -467,7 +467,21 @@
    "deadline": "2026-08-05",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYv8MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDcyJMAT",
+   "name": "「全固体電池に関する技術（特許）動向調査」の公募",
+   "issuer": "",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2026-08-06",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcyJMAT",
+   "tag": "nationwide",
+   "fetched_at": "2026-07-23 11:14",
    "status": "募集中"
   },
   {
@@ -481,7 +495,7 @@
    "deadline": "2026-08-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0OMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -495,7 +509,7 @@
    "deadline": "2026-08-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcQsMAL",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -509,7 +523,7 @@
    "deadline": "2026-08-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaLwMAL",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -523,7 +537,7 @@
    "deadline": "2026-08-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaMVMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -537,7 +551,7 @@
    "deadline": "2026-08-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDb69MAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:40",
+   "fetched_at": "2026-07-23 11:14",
    "status": "募集中"
   },
   {
@@ -551,7 +565,7 @@
    "deadline": "2026-08-10",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcNyMAL",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:40",
+   "fetched_at": "2026-07-23 11:14",
    "status": "募集中"
   },
   {
@@ -566,7 +580,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1029379.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "募集中"
   },
   {
@@ -580,7 +594,7 @@
    "deadline": "2026-08-17",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0sMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -594,7 +608,7 @@
    "deadline": "2026-08-21",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdNjMAL",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -608,7 +622,7 @@
    "deadline": "2026-08-21",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdSBMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -622,7 +636,7 @@
    "deadline": "2026-08-21",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDckaMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -636,7 +650,7 @@
    "deadline": "2026-08-24",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDb8QMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -650,7 +664,7 @@
    "deadline": "2026-08-26",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdAaMAL",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -664,7 +678,7 @@
    "deadline": "2026-08-26",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaMLMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -678,7 +692,7 @@
    "deadline": "2026-08-26",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaMQMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -692,7 +706,7 @@
    "deadline": "2026-08-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDPbMMAX",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -706,7 +720,7 @@
    "deadline": "2026-09-01",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdJhMAL",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -720,7 +734,7 @@
    "deadline": "2026-09-18",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDb6JMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -734,7 +748,7 @@
    "deadline": "2026-09-25",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcODMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -748,7 +762,7 @@
    "deadline": "2026-09-25",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczgMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -762,7 +776,7 @@
    "deadline": "2026-09-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDTzMMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -776,7 +790,7 @@
    "deadline": "2026-09-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYcpMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -790,7 +804,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000004PhCHEA0",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -804,7 +818,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdRHMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -818,7 +832,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZ2OMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -832,7 +846,7 @@
    "deadline": "2026-10-08",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaooMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -846,7 +860,7 @@
    "deadline": "2026-10-12",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000007Cos5EAC",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -860,7 +874,7 @@
    "deadline": "2026-10-22",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYaFMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -874,7 +888,7 @@
    "deadline": "2026-10-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDPyeMAH",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -888,7 +902,7 @@
    "deadline": "2026-10-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYzVMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -902,7 +916,7 @@
    "deadline": "2026-10-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZ1GMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -916,7 +930,7 @@
    "deadline": "2026-10-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZ04MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -930,7 +944,7 @@
    "deadline": "2026-10-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaotMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -944,7 +958,7 @@
    "deadline": "2026-10-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczHMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -958,7 +972,7 @@
    "deadline": "2026-10-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczMMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -973,7 +987,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1039661.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-07-23 09:40",
+   "fetched_at": "2026-07-23 11:14",
    "status": "募集中"
   },
   {
@@ -987,7 +1001,7 @@
    "deadline": "2026-10-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY4mMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1001,7 +1015,7 @@
    "deadline": "2026-10-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYbNMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1015,7 +1029,7 @@
    "deadline": "2026-11-13",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZDHMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1029,7 +1043,7 @@
    "deadline": "2026-11-20",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd3OMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1043,7 +1057,7 @@
    "deadline": "2026-11-20",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd3YMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1057,7 +1071,7 @@
    "deadline": "2026-11-27",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYzQMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1071,7 +1085,7 @@
    "deadline": "2026-11-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY5GMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1085,7 +1099,7 @@
    "deadline": "2026-11-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZzQMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1099,7 +1113,7 @@
    "deadline": "2026-11-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDa1gMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1113,7 +1127,7 @@
    "deadline": "2026-11-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDa1bMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1127,7 +1141,7 @@
    "deadline": "2026-11-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYEGMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1141,7 +1155,7 @@
    "deadline": "2026-11-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXyuMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1155,7 +1169,7 @@
    "deadline": "2026-12-01",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDCMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1169,7 +1183,7 @@
    "deadline": "2026-12-14",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXmVMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1183,7 +1197,7 @@
    "deadline": "2026-12-18",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYBxMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1197,7 +1211,7 @@
    "deadline": "2026-12-18",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYC7MAP",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1211,7 +1225,7 @@
    "deadline": "2026-12-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDVkeMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1225,7 +1239,7 @@
    "deadline": "2026-12-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY6KMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1239,7 +1253,7 @@
    "deadline": "2026-12-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDHQZMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1253,7 +1267,7 @@
    "deadline": "2026-12-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY7KMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1267,7 +1281,7 @@
    "deadline": "2027-01-15",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDWZ9MAP",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1281,7 +1295,7 @@
    "deadline": "2027-01-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYq2MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1295,7 +1309,7 @@
    "deadline": "2027-01-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXRpMAP",
    "tag": "okinawa",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1309,7 +1323,7 @@
    "deadline": "2027-01-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZDCMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1323,7 +1337,7 @@
    "deadline": "2027-01-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSPMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1337,7 +1351,7 @@
    "deadline": "2027-01-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdPBMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1351,7 +1365,7 @@
    "deadline": "2027-02-26",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSFMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1365,7 +1379,7 @@
    "deadline": "2027-02-26",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSAMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1380,7 +1394,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010156.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:14",
    "status": "募集中"
   },
   {
@@ -1394,7 +1408,7 @@
    "deadline": "2027-02-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDL8JMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1408,7 +1422,7 @@
    "deadline": "2027-03-19",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd5XMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1422,7 +1436,7 @@
    "deadline": "2027-03-19",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9xMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1436,7 +1450,7 @@
    "deadline": "2027-03-19",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdA6MAL",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1450,7 +1464,7 @@
    "deadline": "2027-03-19",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdABMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1464,7 +1478,7 @@
    "deadline": "2027-03-19",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9wMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1478,7 +1492,7 @@
    "deadline": "2027-03-23",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDX4vMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1492,7 +1506,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY7yMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1506,7 +1520,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY7tMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1520,7 +1534,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY88MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1534,7 +1548,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSUMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1548,7 +1562,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY89MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1562,7 +1576,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY8DMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1576,7 +1590,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY91MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1590,7 +1604,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY9BMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1604,7 +1618,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXORMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1618,7 +1632,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY96MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1632,7 +1646,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuIMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1646,7 +1660,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYu3MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1660,7 +1674,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSKMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1674,7 +1688,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuSMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1688,7 +1702,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuhMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1702,7 +1716,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYviMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1716,7 +1730,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYucMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1730,7 +1744,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYumMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1744,7 +1758,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYvnMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1758,7 +1772,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYurMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1772,7 +1786,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY72MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1786,7 +1800,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuXMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1800,7 +1814,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFjMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1814,7 +1828,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXENMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1828,7 +1842,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYCrMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1842,7 +1856,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDOsKMAX",
    "tag": "okinawa",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1856,7 +1870,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000003QZLqEAO",
    "tag": "okinawa",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1870,7 +1884,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFhMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1884,7 +1898,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFfMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1898,7 +1912,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFgMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1912,7 +1926,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFiMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1926,7 +1940,7 @@
    "deadline": "2027-06-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYimMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1940,7 +1954,7 @@
    "deadline": "2028-05-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UaiqSEAR",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1954,7 +1968,7 @@
    "deadline": "2029-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDNhQMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1968,7 +1982,7 @@
    "deadline": "2030-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXK4MAP",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1982,7 +1996,7 @@
    "deadline": "2030-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDJWIMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -1996,7 +2010,7 @@
    "deadline": "2031-01-21",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000GMgXBEA1",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -2010,7 +2024,7 @@
    "deadline": "2031-06-12",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UbU66EAF",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -2024,7 +2038,7 @@
    "deadline": "2032-03-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ2000000qhOQMAY",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -2038,7 +2052,7 @@
    "deadline": "2032-10-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDQEJMA5",
    "tag": "shokei",
-   "fetched_at": "2026-07-23 09:39",
+   "fetched_at": "2026-07-23 11:13",
    "status": "募集中"
   },
   {
@@ -2053,7 +2067,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1034726.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:14",
    "status": "要確認"
   },
   {
@@ -2068,7 +2082,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1023850.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:14",
    "status": "要確認"
   },
   {
@@ -2083,7 +2097,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010151/index.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:14",
    "status": "要確認"
   },
   {
@@ -2098,7 +2112,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010165.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:14",
    "status": "要確認"
   },
   {
@@ -2113,7 +2127,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010146.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "要確認"
   },
   {
@@ -2128,7 +2142,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1029292.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "要確認"
   },
   {
@@ -2143,7 +2157,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-48.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "要確認"
   },
   {
@@ -2158,7 +2172,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-55.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "要確認"
   },
   {
@@ -2173,7 +2187,7 @@
    "source_url": "https://okinawa-ric.jp/service/logidigi.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "要確認"
   },
   {
@@ -2188,7 +2202,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-32-1.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "要確認"
   },
   {
@@ -2203,7 +2217,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-18.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "要確認"
   },
   {
@@ -2218,7 +2232,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-3.html",
    "tag": "shokei",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "要確認"
   },
   {
@@ -2233,7 +2247,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-53.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "要確認"
   },
   {
@@ -2248,7 +2262,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-58-1.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "要確認"
   },
   {
@@ -2263,12 +2277,12 @@
    "source_url": "https://okinawa-ric.jp/service/post-56.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-07-23 09:41",
+   "fetched_at": "2026-07-23 11:15",
    "status": "要確認"
   }
  ],
  "by_source": {
-  "jGrants": 141,
+  "jGrants": 142,
   "那覇市(企業支援)": 1,
   "沖縄県(産業・公募補助金)": 9,
   "沖縄県産業振興公社": 9
