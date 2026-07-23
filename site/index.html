@@ -311,6 +311,26 @@
   .expert-card.coming{opacity:.75;border-style:dashed;}
   .expert-card.coming .expert-photo{font-size:1.3rem;}
   .experts-note{margin-top:var(--sp-2);font-size:.78rem;color:rgba(0,51,92,.72);}
+  /* 申請方法バッジ(ぼかし対象外: 実務判断に使う情報のため常時表示) */
+  .apply-badge{
+    display:inline-block;margin-top:.6rem;
+    font-size:.74rem;font-weight:700;letter-spacing:.02em;
+    padding:.35em .9em;border-radius:999px;
+  }
+  .apply-badge.direct{background:rgba(28,107,58,.12);color:#1c6b3a;border:1px solid rgba(28,107,58,.4);}
+  .apply-badge.egov{background:rgba(0,51,92,.08);color:rgba(0,51,92,.8);border:1px solid rgba(0,51,92,.28);}
+
+  /* GビズID未取得フィルタ */
+  .nogbiz-filter{
+    grid-column:1/-1;display:flex;align-items:flex-start;gap:.7em;
+    padding:var(--sp-2);border-radius:12px;cursor:pointer;
+    background:rgba(0,51,92,.05);border:1px solid rgba(0,51,92,.18);
+    font-size:.88rem;font-weight:700;color:var(--fukamidori);line-height:1.6;
+  }
+  .nogbiz-filter input{width:20px;height:20px;flex-shrink:0;margin-top:.15em;accent-color:var(--kin);}
+  .nogbiz-filter small{display:block;font-weight:400;font-size:.8rem;color:rgba(0,51,92,.75);margin-top:.2em;}
+  .nogbiz-filter:focus-within{outline:3px solid var(--kin);}
+
   /* 申請の前に: gBizID の最短ルート案内(出典: gbiz-id.go.jp) */
   .gbiz{
     margin-top:var(--sp-4);border-radius:14px;
@@ -493,6 +513,12 @@
         <option value="mitei">まだ決めていない</option>
       </select>
     </label>
+    <label class="nogbiz-filter">
+      <input type="checkbox" id="f-nogbiz">
+      <span>GビズIDプライムをまだ持っていない
+        <small>県・市町村など、独自の申請方法で「すぐ動ける可能性がある制度」を上位に表示します。</small>
+      </span>
+    </label>
     <button id="match-btn" class="line-btn" type="button">無料でマッチングする</button>
     <p class="form-guide" id="form-guide" hidden>まだ何も選ばれていません 😊 どれか1つだけでも選ぶと、貴社に近い制度に絞ってお探しできます。</p>
   </div>
@@ -638,6 +664,10 @@
     requestAnimationFrame(step);
   }
 
+  // 申請方法の判定。jGrants掲載制度は電子申請システム上での手続きとなるため
+  // GビズIDプライムが必要。県・市町村・公社の制度は独自申請の場合がある。
+  const needsGbiz=it=>/jgrants-portal\.go\.jp/.test(it.source_url||'');
+
   // テーマ→制度キーワード(すべてマッチング精度向上に実際に使う)
   const THEME_KEYS={
     hanro:['販路','売上','持続化','販売促進'],
@@ -669,10 +699,16 @@
       return areaOK;
     });
 
+    // 申請方法の判定: jGrants(国の電子申請)はGビズIDプライムでのログインが必要。
+    // それ以外(県・市町村・公社)は独自申請のため不要な場合がある(最終的な要否は公募要領で要確認)。
+    const noGbiz=document.getElementById('f-nogbiz').checked;
+
     const score=it=>{
       const text=(it.name||'')+(it.target_biz||'');
       let s=0;
       if(shokeiSignal&&it.tag==='shokei')s-=100;
+      // GビズID未取得の方には、独自申請の制度を上位へ(隠さず順序のみ変更)
+      if(noGbiz&&!needsGbiz(it))s-=50;
       if(themeKeys.some(k=>text.includes(k)))s-=10;
       if(keys.some(k=>text.includes(k)))s-=5;
       return s;
@@ -695,6 +731,9 @@
           <span>${it.target_area||'対象地域 要確認'}</span>
           ${it.max_amount?`<span>上限 ${Number(it.max_amount).toLocaleString()}円</span>`:''}
         </div>
+        ${needsGbiz(it)
+          ?'<span class="apply-badge egov">電子申請(GビズID必要)</span>'
+          :'<span class="apply-badge direct">独自申請(GビズID不要の場合あり)</span>'}
         ${locked?'':`<a href="${it.source_url}" target="_blank" rel="noopener">公式ページで確認 →</a>`}
       </div>`;
     let html='';
