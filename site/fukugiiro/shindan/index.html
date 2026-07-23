@@ -35,12 +35,17 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .lk-mid{background:#fff3cd;color:#7a5b00}
 .result-card a{color:var(--fg-primary)}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:20px}
+.first-badge{display:inline-block;background:var(--fg-primary);color:#fff;font-size:.8rem;border-radius:4px;padding:1px 10px;font-weight:700;margin-bottom:6px;margin-right:6px}
+.actions{display:flex;gap:10px;margin:16px 0}
+.actions button{flex:1;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer}
+.madoguchi{font-size:.85rem;background:#eaf5f0;border-radius:6px;padding:6px 10px;margin-top:6px;color:#0f5138}
+@media print{.progress,.actions,.btn,.nav{display:none!important}body{background:#fff}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>3分でもらい忘れ診断</h1>
-  <p class="note">名前・住所・電話番号の入力は不要です。答えたくない質問はとばせます。</p>
+  <p class="note">名前・住所・電話番号の入力は不要です。答えたくない質問はとばせます。途中でやめても大丈夫、何度でもやり直せます。</p>
   <div class="progress" aria-hidden="true"><div id="bar" style="width:0%"></div></div>
   <div id="app" aria-live="polite"><noscript>この診断はJavaScriptを使って動きます。設定を有効にしてご覧ください。</noscript></div>
 </div>
@@ -170,16 +175,36 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       if (rs.length === 0) {
         app.appendChild(h("p", {text:"今回の回答では、該当の可能性が高い制度は見つかりませんでした。制度は毎日更新されるので、状況が変わったらまた診断してみてください。"}));
       }
-      rs.forEach(function(r){
+      if (rs.length > 0) {
+        var actions = h("div", {class:"actions"});
+        var shareBtn = h("button", {text:"家族に教える(共有)"});
+        shareBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("share_click");
+          var url = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/";
+          var text = "沖縄の給付金・手当の「もらい忘れ」を3分で診断できるよ(無料・匿名)";
+          if (navigator.share) { navigator.share({title:"3分でもらい忘れ診断", text:text, url:url}).catch(function(){}); }
+          else if (navigator.clipboard) { navigator.clipboard.writeText(text + " " + url); shareBtn.textContent = "リンクをコピーしました!"; }
+        });
+        var printBtn = h("button", {text:"印刷して窓口に持っていく"});
+        printBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("print_click");
+          window.print();
+        });
+        actions.appendChild(shareBtn); actions.appendChild(printBtn);
+        app.appendChild(actions);
+        app.appendChild(h("p", {class:"note", text:"ぜんぶ一度にやらなくて大丈夫です。まずは1件だけ、いちばん上から始めてみてください。"}));
+      }
+      rs.forEach(function(r, idx){
         var it = r.item;
-        var card = h("div", {class:"result-card"}, [
-          h("span", {class:"lk " + (r.likelihood==="高"?"lk-high":"lk-mid"), text:"対象の可能性: " + r.likelihood}),
-          h("h3", {text: it.name}),
-          h("p", {class:"note", text: it.target_household}),
-          h("p", {class:"note", text:"金額: " + it.amount_note}),
-          h("p", {class:"note", text:"次の一歩: " + it.how_to_apply}),
-          h("a", {href: it.source_url, rel:"noopener", text:"公式ページで確認する"})
-        ]);
+        var card = h("div", {class:"result-card"}, []);
+        if (idx === 0) card.appendChild(h("span", {class:"first-badge", text:"まずはこの1件から"}));
+        card.appendChild(h("span", {class:"lk " + (r.likelihood==="高"?"lk-high":"lk-mid"), text:"対象の可能性: " + r.likelihood}));
+        card.appendChild(h("h3", {text: it.name}));
+        card.appendChild(h("p", {class:"note", text: it.target_household}));
+        card.appendChild(h("p", {class:"note", text:"金額: " + it.amount_note}));
+        card.appendChild(h("p", {class:"note", text:"次の一歩: " + it.how_to_apply}));
+        card.appendChild(h("div", {class:"madoguchi", text:"窓口でのひとこと: 「" + it.name + "について教えてください」と伝えれば、あとは案内してもらえます。対象かどうか自信がなくても大丈夫です。"}));
+        card.appendChild(h("a", {href: it.source_url, rel:"noopener", text:"公式ページで確認する"}));
         if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
         app.appendChild(card);
       });
