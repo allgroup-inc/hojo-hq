@@ -78,6 +78,7 @@ footer a{color:#bcd9cf}
     <p class="sub">国・県・市町村の給付金や手当。<br>「知らなかった」だけで、受け取れるはずのお金が眠っているかもしれません。</p>
     <a class="btn" href="shindan/">3分でもらい忘れ診断をはじめる</a>
     <p class="note" style="margin-top:10px">個人情報の入力は不要・匿名で診断できます</p>
+    <p id="resume-link" style="margin-top:8px;display:none"><a href="shindan/?resume=1">前回の診断結果をもう一度見る →</a></p>
   </div>
 </section>
 
@@ -160,6 +161,11 @@ footer a{color:#bcd9cf}
 <script src="assets/fg-analytics.js"></script>
 <script>
 (function(){
+  try {
+    if (localStorage.getItem("fg_shindan_answers")) {
+      document.getElementById("resume-link").style.display = "block";
+    }
+  } catch(e){}
   fetch("../data/fukugiiro/seido.json").then(function(r){return r.json()}).then(function(db){
     var n = db.count || 0;
     document.getElementById("seido-count").textContent = n;
