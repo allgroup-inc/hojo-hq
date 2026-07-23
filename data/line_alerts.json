@@ -1,26 +1,8 @@
 {
- "generated_at": "2026-07-23 11:30",
+ "generated_at": "2026-07-23 17:24",
  "alert_days": 7,
- "count": 24,
+ "count": 22,
  "items": [
-  {
-   "id": "a0WJ200000CDbKSMA1",
-   "name": "「多感覚リアリティ、感性、質感等に関する俯瞰的調査」の公募",
-   "deadline": "2026-07-23",
-   "days_left": 0,
-   "max_amount": 0,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbKSMA1",
-   "tag": "nationwide"
-  },
-  {
-   "id": "a0WJ200000CDYslMAH",
-   "name": "「太陽光発電導入拡大等技術開発事業／NEDOプロジェクトを核とした人材育成、産学連携等の総合的展開／ペロブスカイト太陽電池の研究開発・実装を担う人材育成特別講座」の公募",
-   "deadline": "2026-07-23",
-   "days_left": 0,
-   "max_amount": 0,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYslMAH",
-   "tag": "nationwide"
-  },
   {
    "id": "a0WJ200000CDYiwMAH",
    "name": "①省CO2型プラスチック高度リサイクル設備導入事業（バリューチェーン）【令和７年度（補正予算）３次公募及び令和８年度２次公募】",
