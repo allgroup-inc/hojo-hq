@@ -108,6 +108,7 @@ def muni_page(muni, items, updated):
                 f'<p class="note">{esc(it["target_household"])}</p>'
                 f'<p class="note">窓口: {esc(it["how_to_apply"])}</p>'
                 f'<a href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する</a>'
+                f' ・ <a href="../../kit/{esc(it["id"])}/">申請準備シート</a>'
                 "</div>"
             )
     title = f"{muni}の給付金・手当まとめ | もらいわすれ堂"
