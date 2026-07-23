@@ -206,6 +206,10 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         card.appendChild(h("p", {class:"note", text:"次の一歩: " + it.how_to_apply}));
         card.appendChild(h("div", {class:"madoguchi", text:"窓口でのひとこと: 「" + it.name + "について教えてください」と伝えれば、あとは案内してもらえます。対象かどうか自信がなくても大丈夫です。"}));
         card.appendChild(h("a", {href: it.source_url, rel:"noopener", text:"公式ページで確認する"}));
+        card.appendChild(h("span", {text:" ・ "}));
+        var kitLink = h("a", {href:"../kit/" + it.id + "/", text:"🖨 申請準備シート(持ち物リストつき)"});
+        kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("kit_click"); });
+        card.appendChild(kitLink);
         if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
         app.appendChild(card);
       });
