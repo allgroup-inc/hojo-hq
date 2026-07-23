@@ -40,13 +40,17 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .actions{display:flex;gap:10px;margin:16px 0}
 .actions button{flex:1;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer}
 .madoguchi{font-size:.85rem;background:#eaf5f0;border-radius:6px;padding:6px 10px;margin-top:6px;color:#0f5138}
+.markbtn{display:block;width:100%;margin-top:8px;padding:9px 12px;min-height:40px;border-radius:8px;border:1.5px dashed var(--fg-muted);background:#fff;color:var(--fg-muted);font-size:.85rem;cursor:pointer}
+.markbtn.marked{border:1.5px solid #1A6B52;background:#DFF2E9;color:#0F5138;font-weight:700}
+.card-done h3{text-decoration:line-through;color:var(--fg-muted)}
+.resume-box{background:#F9EDE3;border:2px solid var(--fg-primary);border-radius:12px;padding:16px;margin-bottom:16px}
 @media print{.progress,.actions,.btn,.nav{display:none!important}body{background:#fff}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>3分でもらい忘れ診断</h1>
-  <p class="note">名前・住所・電話番号の入力は不要です。答えたくない質問はとばせます。途中でやめても大丈夫、何度でもやり直せます。</p>
+  <p class="note">名前・住所・電話番号の入力は不要です。答えたくない質問はとばせます。途中でやめても大丈夫、何度でもやり直せます。回答や記録はこの端末の中だけに保存され、送信されません。</p>
   <div class="progress" aria-hidden="true"><div id="bar" style="width:0%"></div></div>
   <div id="app" aria-live="polite"><noscript>この診断はJavaScriptを使って動きます。設定を有効にしてご覧ください。</noscript></div>
 </div>
@@ -81,6 +85,26 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     tracked[name] = true;
     if (window.fgTrack) window.fgTrack(name);
   }
+  function loadSaved(){
+    try { return JSON.parse(localStorage.getItem("fg_shindan_answers") || "null"); } catch(e){ return null; }
+  }
+  function applySaved(sv){
+    state.municipality = sv.municipality || null;
+    state.children = sv.children || 0;
+    state.childAges = sv.childAges || [];
+    state.lifeEvents = sv.lifeEvents || [];
+    state.step = 5;
+    if (window.fgTrack) window.fgTrack("shindan_resume");
+    render();
+  }
+  function getMarks(){
+    try { return JSON.parse(localStorage.getItem("fg_seido_marks") || "{}"); } catch(e){ return {}; }
+  }
+  function setMark(id, on){
+    var m = getMarks();
+    if (on) m[id] = 1; else delete m[id];
+    try { localStorage.setItem("fg_seido_marks", JSON.stringify(m)); } catch(e){}
+  }
   function render(){
     bar.style.width = Math.round(state.step / TOTAL * 100) + "%";
     app.innerHTML = "";
@@ -99,6 +123,14 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     ]);
   }
   function qMunicipality(){
+    var sv = loadSaved();
+    if (sv) {
+      app.appendChild(h("div", {class:"resume-box"}, [
+        h("p", {text:"前回の診断結果が、この端末に残っています。", style:"margin-bottom:8px;font-weight:700"}),
+        h("button", {class:"next", text:"前回の結果をもう一度見る", style:"width:100%;padding:12px;border-radius:999px;border:none;font-weight:700;cursor:pointer", onclick:function(){ applySaved(sv); }}),
+        h("p", {class:"note", text:"状況が変わった方は、そのまま下から診断し直せます。"})
+      ]));
+    }
     var sel = h("select", {id:"muni", "aria-label":"お住まいの市町村"});
     sel.appendChild(h("option", {value:"", text:"選んでください"}));
     MUNIS.forEach(function(m){ sel.appendChild(h("option", {value:m, text:m})); });
@@ -162,7 +194,13 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   }
   function showResult(){
     bar.style.width = "100%";
-    try { localStorage.setItem("fg_shindan_done", new Date().toISOString()); } catch(e){}
+    try {
+      localStorage.setItem("fg_shindan_done", new Date().toISOString());
+      localStorage.setItem("fg_shindan_answers", JSON.stringify({
+        municipality: state.municipality, children: state.children,
+        childAges: state.childAges, lifeEvents: state.lifeEvents
+      }));
+    } catch(e){}
     fetch("../../data/fukugiiro/seido.json").then(function(r){return r.json()}).then(function(db){
       var answers = {
         municipality: state.municipality, children: state.children,
@@ -195,10 +233,12 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         app.appendChild(actions);
         app.appendChild(h("p", {class:"note", text:"ぜんぶ一度にやらなくて大丈夫です。まずは1件だけ、いちばん上から始めてみてください。"}));
       }
+      var marks = getMarks();
       rs.forEach(function(r, idx){
         var it = r.item;
-        var card = h("div", {class:"result-card"}, []);
-        if (idx === 0) card.appendChild(h("span", {class:"first-badge", text:"まずはこの1件から"}));
+        var isMarked = !!marks[it.id];
+        var card = h("div", {class:"result-card" + (isMarked ? " card-done" : "")}, []);
+        if (idx === 0 && !isMarked) card.appendChild(h("span", {class:"first-badge", text:"まずはこの1件から"}));
         card.appendChild(h("span", {class:"lk " + (r.likelihood==="高"?"lk-high":"lk-mid"), text:"対象の可能性: " + r.likelihood}));
         card.appendChild(h("h3", {text: it.name}));
         card.appendChild(h("p", {class:"note", text: it.target_household}));
@@ -211,6 +251,17 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("kit_click"); });
         card.appendChild(kitLink);
         if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
+        var mk = h("button", {class:"markbtn" + (isMarked ? " marked" : ""),
+          text: isMarked ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、ここをタップして記録"});
+        mk.addEventListener("click", function(){
+          var now = !card.classList.contains("card-done");
+          setMark(it.id, now);
+          card.classList.toggle("card-done", now);
+          mk.classList.toggle("marked", now);
+          mk.textContent = now ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、ここをタップして記録";
+          if (now && window.fgTrack) window.fgTrack("seido_done_mark");
+        });
+        card.appendChild(mk);
         app.appendChild(card);
       });
       app.appendChild(h("div", {class:"disclaimer", text:"この診断は公式情報に基づく「可能性のご案内」です。受給できるかどうかの最終判断は各窓口で行われます。医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため診断には表示していません。トップページの制度一覧をご覧ください。"}));
@@ -219,6 +270,17 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       app.innerHTML = "";
       app.appendChild(h("p", {text:"データの読み込みに失敗しました。時間をおいてもう一度お試しください。"}));
     });
+  }
+  if (/[?&]resume=1/.test(location.search)) {
+    var _sv = loadSaved();
+    if (_sv) {
+      state.municipality = _sv.municipality || null;
+      state.children = _sv.children || 0;
+      state.childAges = _sv.childAges || [];
+      state.lifeEvents = _sv.lifeEvents || [];
+      state.step = 5;
+      if (window.fgTrack) window.fgTrack("shindan_resume");
+    }
   }
   render();
 })();
