@@ -86,8 +86,18 @@ def fit_font(draw, s, bold, max_w, start, min_size=28):
     return font(bold, min_size)
 
 
+# 禁則処理: 行頭にきてはいけない文字(句読点・閉じ括弧・長音・小書き仮名)
+NO_LINE_START = "、。，．・：；？！」』）］｝〕〉》ーゝゞぁぃぅぇぉっゃゅょゎ"
+# 禁則処理: 行末にきてはいけない文字(開き括弧)
+NO_LINE_END = "「『（［｛〔〈《"
+
+
 def wrap(draw, s, f, max_w):
-    """CJK対応の文字単位ワードラップ。"""
+    """CJK対応の文字単位ワードラップ(基本的な禁則処理つき)。
+
+    句読点や閉じ括弧が行頭に落ちると読みづらいため、
+    その場合は直前の1文字ごと次の行へ送る。
+    """
     lines, cur = [], ""
     for ch in s:
         if ch == "\n":
@@ -96,6 +106,11 @@ def wrap(draw, s, f, max_w):
             continue
         if text_w(draw, cur + ch, f) <= max_w:
             cur += ch
+            continue
+        # ここで折り返す必要がある。禁則にかかる場合は直前の文字ごと送る
+        if len(cur) > 1 and (ch in NO_LINE_START or cur[-1] in NO_LINE_END):
+            lines.append(cur[:-1])
+            cur = cur[-1] + ch
         else:
             lines.append(cur)
             cur = ch
@@ -166,9 +181,9 @@ def render(post, out_path):
             y += int(tf.size * 1.28)
         y += 16
 
-    # サブ(淡色)
+    # サブ(淡色)。1行に収まるよう自動縮小し、末尾の「…」だけが次行に落ちるのを防ぐ
     if post["sub"]:
-        sf = font(False, 40)
+        sf = fit_font(d, post["sub"], False, max_w, start=40, min_size=30)
         for ln in wrap(d, post["sub"], sf, max_w):
             d.text((PAD, y), ln, font=sf, fill=MUTED)
             y += int(sf.size * 1.3)
