@@ -41,11 +41,81 @@ HASHTAGS = "#沖縄 #補助金 #助成金 #沖縄経営者 #事業承継 #沖縄
 DISCLAIMER = "※要件・締切・金額は必ず原文の公募要領でご確認ください。"
 
 
+# 画像に載せる制度名の上限。これを超える場合は意味の切れ目で丸める。
+IMG_SUB_LIMIT = 26
+# 括弧の対応(開いたまま終わらせないために使う)
+_BRACKETS = {"（": "）", "(": ")", "【": "】", "［": "］", "「": "」", "〔": "〕", "《": "》", "〈": "〉"}
+# この文字の「直前」で切ると読みやすい(主に開き括弧)
+_BREAK_BEFORE = "".join(_BRACKETS.keys())
+# この文字の「直後」で切ると読みやすい
+_BREAK_AFTER = "、。・／/　 _"
+_TRIM = "　 、。・／/_"
+
+
 def parse_date(s):
     try:
         return datetime.strptime(s, "%Y-%m-%d").date()
     except Exception:
         return None
+
+
+def _unclosed_positions(s):
+    """閉じられていない開き括弧の位置一覧を返す。"""
+    stack = []
+    for i, ch in enumerate(s):
+        if ch in _BRACKETS:
+            stack.append((i, _BRACKETS[ch]))
+        elif stack and ch == stack[-1][1]:
+            stack.pop()
+    return [p for p, _ in stack]
+
+
+def shorten_name(s, limit=IMG_SUB_LIMIT):
+    """画像に載せる制度名を、意味の切れ目で丸める。
+
+    単純な文字数カットだと「…補助金（第2次」のように括弧が開いたまま終わったり、
+    文の途中でぶつ切りになる。ここでは区切り文字で切り、省略は「…」で明示する。
+    (キャプション側は原文の正式名称をそのまま使うため、この関数は画像専用)
+    """
+    s = " ".join((s or "").split())
+    if len(s) <= limit:
+        return s
+
+    # 名称全体が「」や【】で囲まれていて、閉じ括弧が切り詰め範囲の外にある場合は
+    # 先頭の括弧を落とす(開いたままの括弧を画像に載せないため)
+    if s[0] in _BRACKETS:
+        close = s.find(_BRACKETS[s[0]], 1)
+        if close < 0 or close >= limit:
+            s = s[1:].lstrip(_TRIM)
+            if len(s) <= limit:
+                return s
+
+    head = s[:limit]
+    before = max((head.rfind(c) for c in _BREAK_BEFORE), default=-1)
+    after = max((head.rfind(c) for c in _BREAK_AFTER), default=-1)
+    cut = max(before, after + 1 if after >= 0 else -1)
+    # 切りどころが早すぎる(名称がほとんど残らない)場合は上限で切る
+    if cut < limit // 2:
+        cut = limit
+
+    out = head[:cut].rstrip(_TRIM)
+
+    # 切り詰めが「新たに」括弧を開きっぱなしにした場合だけ、その手前まで戻す。
+    # (元の名称からして閉じ括弧がない場合は、原文どおりを優先してそのまま残す)
+    src_unclosed = set(_unclosed_positions(s))
+    while out:
+        introduced = [p for p in _unclosed_positions(out) if p not in src_unclosed]
+        if not introduced:
+            break
+        pos = min(introduced)
+        if pos <= 0:
+            out = ""
+            break
+        out = out[:pos].rstrip(_TRIM)
+
+    if not out:
+        out = head.rstrip(_TRIM)
+    return out + "…"
 
 
 def amount_text(v):
@@ -137,7 +207,7 @@ def main():
     # 1) ローンチ告知
     made.append(write_post(
         1, "launch", "ローンチ告知",
-        img_title="沖縄企業のミカタ、公開しました",
+        img_title="沖縄企業のミカタ、公開。",
         img_sub="補助金・助成金を、毎日ぜんぶ。",
         img_number=f"掲載 {count}件",
         caption=(
@@ -166,7 +236,7 @@ def main():
         made.append(write_post(
             i, "seido", f"締切が近い制度({i-1}/3・30日以上先)",
             img_title="いま募集中の補助金",
-            img_sub=it["name"][:26],
+            img_sub=shorten_name(it["name"]),
             img_number=num,
             caption=cap,
             source=it["source_url"],
@@ -187,7 +257,7 @@ def main():
         made.append(write_post(
             5, "shokei", "事業承継・M&A",
             img_title="事業承継・M&Aを考えるなら",
-            img_sub=shokei["name"][:26],
+            img_sub=shorten_name(shokei["name"]),
             img_number=num,
             caption=cap,
             source=shokei["source_url"],
@@ -226,8 +296,8 @@ def main():
     # 8) 締切7日前アラート
     made.append(write_post(
         8, "deadline_alert", "締切アラート特典",
-        img_title="締切7日前に、お知らせします。",
-        img_sub="「気づけなかった」をなくす。",
+        img_title="LINEでお知らせ。",
+        img_sub="「気づけなかった」を、なくす。",
         img_number="締切7日前",
         caption=(
             "⏰ 補助金・助成金は、締切を過ぎると申請できません。\n"
@@ -261,13 +331,15 @@ def main():
         made.append(write_post(
             10, "yokoku", "次回公募に備える予告",
             img_title="次の公募に、備える。",
-            img_sub="まずは gBizID プライムの取得から。",
+            img_sub="まずはGビズIDプライムの準備から。",
             img_number="今から準備",
             badge="次回公募に備える",
             caption=(
                 "⏳ 締切が目前の制度は、いま慌てて申請すると要件を満たせないことも。\n"
-                "次の公募に確実に間に合わせるために、まずは電子申請に必須の"
-                "【gBizIDプライム】を取得しておきましょう。発行に2〜3週間かかることがあります。\n"
+                "次の公募に備えて、国の電子申請(jGrants)で使う【GビズIDプライム】を"
+                "用意しておきましょう。マイナンバーカードとスマホがあれば、"
+                "オンライン申請なら24時間365日、速やかに発行されます"
+                "（書類の郵送申請は審査に最大1か月）。\n"
                 f"{ex}"
                 "今回が難しくても、備えておけば次のチャンスをつかめます。\n"
                 f"制度一覧はこちら👇\n{SITE_URL}\n"
