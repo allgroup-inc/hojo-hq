@@ -1,71 +1,8 @@
 {
- "generated_at": "2026-07-24 17:19",
+ "generated_at": "2026-07-24 22:27",
  "alert_days": 7,
- "count": 17,
+ "count": 10,
  "items": [
-  {
-   "id": "a0WJ200000CDapkMAD",
-   "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_PMI推進枠(PMI専門家活用類型)",
-   "deadline": "2026-07-24",
-   "days_left": 0,
-   "max_amount": 1500000,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapkMAD",
-   "tag": "shokei"
-  },
-  {
-   "id": "a0WJ200000CDaplMAD",
-   "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_PMI推進枠(事業統合投資類型)",
-   "deadline": "2026-07-24",
-   "days_left": 0,
-   "max_amount": 10000000,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaplMAD",
-   "tag": "shokei"
-  },
-  {
-   "id": "a0WJ200000CDapgMAD",
-   "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_事業承継促進枠",
-   "deadline": "2026-07-24",
-   "days_left": 0,
-   "max_amount": 10000000,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapgMAD",
-   "tag": "shokei"
-  },
-  {
-   "id": "a0WJ200000CDapmMAD",
-   "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_専門家活用枠(小規模売り手支援類型)",
-   "deadline": "2026-07-24",
-   "days_left": 0,
-   "max_amount": 4500000,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapmMAD",
-   "tag": "shokei"
-  },
-  {
-   "id": "a0WJ200000CDapjMAD",
-   "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_専門家活用枠(買い手支援類型-100億企業特例)",
-   "deadline": "2026-07-24",
-   "days_left": 0,
-   "max_amount": 20000000,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapjMAD",
-   "tag": "shokei"
-  },
-  {
-   "id": "a0WJ200000CDapiMAD",
-   "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_専門家活用枠(買い手支援類型／売り手支援類型)",
-   "deadline": "2026-07-24",
-   "days_left": 0,
-   "max_amount": 8000000,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapiMAD",
-   "tag": "shokei"
-  },
-  {
-   "id": "a0WJ200000CDaphMAD",
-   "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_廃業・再チャレンジ枠",
-   "deadline": "2026-07-24",
-   "days_left": 0,
-   "max_amount": 3000000,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaphMAD",
-   "tag": "shokei"
-  },
   {
    "id": "a0WJ200000CDYjqMAH",
    "name": "「経済安全保障重要技術育成プログラム／高効率・高品質レーザー加工技術の開発／研究開発項目③高品質・高出力な半導体レーザーの研究開発及び当該半導体レーザーを用いた車載用LiDARの構築」の公募",
