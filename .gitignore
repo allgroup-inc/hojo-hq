@@ -14,3 +14,5 @@ playwright-report/
 Thumbs.db
 *.swp
 __pycache__/
+
+.claude/tools/.env
