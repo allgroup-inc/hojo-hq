@@ -9,7 +9,7 @@
 🌺 沖縄の事業者向けに、国・県・関係機関の補助金・助成金情報をまとめて毎日更新する無料サイト「沖縄企業のミカタ」を公開しました。
 
 「知らなかった」で機会を逃さないために。
-📌 気になる制度は、締切7日前にLINEでお知らせします。
+📌 気になる制度は、締切の約1か月前からLINEでお知らせします。
 まずは無料のLINE登録から👇
 https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch
 
