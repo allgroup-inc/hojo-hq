@@ -68,8 +68,25 @@ a{color:var(--fg-primary)}
 .steps{list-style:none;counter-reset:s}
 .steps li{padding:6px 0 6px 44px;position:relative;counter-increment:s}
 .steps li::before{content:counter(s);position:absolute;left:4px;top:8px;width:28px;height:28px;background:var(--fg-accent);border-radius:50%;text-align:center;line-height:28px;font-weight:800;font-size:.9rem}
-@media print{.btns,.no-print{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box{break-inside:avoid}}
+.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
+.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
+.siteheader .hlogo img{width:30px;height:30px}
+.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
+.siteheader nav a.hline{background:#06C755;color:#fff;font-weight:700}
+@media(max-width:560px){.siteheader nav a:not(.hline){display:none}}
+@media print{.btns,.no-print,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box{break-inside:avoid}}
 """
+
+HEADER = '''<header class="siteheader">
+  <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂</a>
+  <nav>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
+    <a class="hline" href="https://lin.ee/7fH7vDQ" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+  </nav>
+</header>'''
 
 
 def esc(s):
@@ -91,6 +108,7 @@ def page(title, desc, body, depth=2):
 <body>
 <script src="{rel}analytics-config.js"></script>
 <script src="{rel}assets/fg-analytics.js"></script>
+{HEADER}
 <div class="wrap">
 {body}
 </div>
