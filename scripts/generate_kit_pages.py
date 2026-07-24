@@ -91,6 +91,7 @@ def page(title, desc, body, depth=2):
 <body>
 <script src="{rel}analytics-config.js"></script>
 <script src="{rel}assets/fg-analytics.js"></script>
+{HEADER}
 <div class="wrap">
 {body}
 </div>
