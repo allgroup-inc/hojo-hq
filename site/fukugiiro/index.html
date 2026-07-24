@@ -65,10 +65,35 @@ details{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:
 summary{font-weight:700;cursor:pointer;min-height:44px;display:flex;align-items:center}
 footer{background:var(--fg-ink);color:#dfe7e5;padding:36px 0;font-size:.9rem}
 footer a{color:#bcd9cf}
+/* header */
+.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);backdrop-filter:blur(4px);
+  border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;
+  gap:8px;padding:8px 14px;flex-wrap:wrap}
+.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);
+  text-decoration:none;font-size:1rem}
+.siteheader .hlogo img{width:30px;height:30px}
+.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
+.siteheader nav a.hline{background:#06C755;color:#fff;font-weight:700}
+/* navcards */
+.navcards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.navcard{display:flex;flex-direction:column;background:var(--fg-card);border:1px solid var(--fg-line);
+  border-radius:12px;padding:16px;text-decoration:none;color:var(--fg-ink);font-weight:700}
+.navcard span{font-size:.78rem;color:var(--fg-muted);font-weight:400;margin-top:4px}
+.navcard.hline2{background:#EAF7EE;border-color:#B7E4C7;color:#0F5138}
 @media(min-width:640px){.hero h1{font-size:2.1rem}.cards{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
+<header class="siteheader">
+  <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂</a>
+  <nav>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
+    <a class="hline" href="https://lin.ee/7fH7vDQ" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+  </nav>
+</header>
 <main>
 <section class="hero">
   <div class="wrap">
@@ -79,6 +104,17 @@ footer a{color:#bcd9cf}
     <a class="btn" href="shindan/">3分でもらい忘れ診断をはじめる</a>
     <p class="note" style="margin-top:10px">個人情報の入力は不要・匿名で診断できます</p>
     <p id="resume-link" style="margin-top:8px;display:none"><a href="shindan/?resume=1">前回の診断結果をもう一度見る →</a></p>
+  </div>
+</section>
+
+<section style="padding:28px 0 0">
+  <div class="wrap">
+    <div class="navcards">
+      <a class="navcard" href="shindan/">🔍 3分診断<span>あなたの世帯の制度をしぼり込む</span></a>
+      <a class="navcard" href="area/">📍 市町村でさがす<span>お住まいの街のまとめ</span></a>
+      <a class="navcard" href="kit/">🖨 申請準備シート<span>持ち物リスト・印刷して窓口へ</span></a>
+      <a class="navcard hline2" href="https://lin.ee/7fH7vDQ" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">💬 LINEで受け取る<span>締切をお知らせ(無料・匿名)</span></a>
+    </div>
   </div>
 </section>
 

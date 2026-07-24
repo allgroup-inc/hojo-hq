@@ -44,10 +44,25 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .markbtn.marked{border:1.5px solid #1A6B52;background:#DFF2E9;color:#0F5138;font-weight:700}
 .card-done h3{text-decoration:line-through;color:var(--fg-muted)}
 .resume-box{background:#F9EDE3;border:2px solid var(--fg-primary);border-radius:12px;padding:16px;margin-bottom:16px}
-@media print{.progress,.actions,.btn,.nav{display:none!important}body{background:#fff}}
+.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
+.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
+.siteheader .hlogo img{width:30px;height:30px}
+.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
+.siteheader nav a.hline{background:#06C755;color:#fff;font-weight:700}
+@media print{.progress,.actions,.btn,.nav,.siteheader{display:none!important}body{background:#fff}}
 </style>
 </head>
 <body>
+<header class="siteheader">
+  <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂</a>
+  <nav>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
+    <a class="hline" href="https://lin.ee/7fH7vDQ" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+  </nav>
+</header>
 <div class="wrap">
   <h1>3分でもらい忘れ診断</h1>
   <p class="note">名前・住所・電話番号の入力は不要です。答えたくない質問はとばせます。途中でやめても大丈夫、何度でもやり直せます。回答や記録はこの端末の中だけに保存され、送信されません。</p>
