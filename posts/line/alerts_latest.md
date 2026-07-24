@@ -1,7 +1,7 @@
 # LINE配信下書き: 締切アラート
 
 - 生成日: 2026-07-24(毎日自動更新)
-- 対象: 締切7日以内の募集中制度 26件(うち8件を掲載, 残り18件は一覧参照)
+- 対象: 締切7日以内の募集中制度 25件(うち8件を掲載, 残り17件は一覧参照)
 - 使い方: 下の本文をそのまま LINE Official Account Manager のメッセージ配信へ。
 
 ---
@@ -38,9 +38,9 @@
 　締切: 本日締切! / 上限365億円
 　詳細: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapWMAT
 
-■ 【農林水産省】令和7年度補正ウクライナ農業回復緊急支援事業（２次公募）
-　締切: 本日締切!
-　詳細: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbzXMAT
+■ 中小企業生産性革命推進事業_事業承継・M&A補助金(15次公募)_PMI推進枠(PMI専門家活用類型)
+　締切: 本日締切! / 上限150万円
+　詳細: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapkMAD
 
 ※要件・締切は必ず原文でご確認ください。
 制度一覧はこちら → https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert
