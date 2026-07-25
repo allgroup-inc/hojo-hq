@@ -1,8 +1,19 @@
-# 反映監査 audit_reflection.py
+# 反映監査 scripts/insurance/
 
-ALLGRP board(xlsx)の反映(入力)の正確性を機械検知する。断定せず「要確認」を出す。
+ALLGROUP 保険対面営業の反映(入力)の正確性を機械検証する。断定せず「要確認」を出す。
 
-## 使い方
+## 2種類の監査
+1. **audit_reflection.py** — board単体の一次スクリーン(負値・空欄)。
+2. **rollup_check.py**(本命) — 定例【実数値】の「チーム合計」= board実績 を突合。board実績は反映日までのMTDなので、定例の**何日目の累計と一致するか**(matched_day)を探す。全ブロックが同じ日で一致すれば反映は整合。
+
+## rollup_check の使い方
+```
+python scripts/insurance/rollup_check.py <board.xlsx> <定例.xlsx> <部門> --out <report.md>
+# 例(7月・CRM): ... d4c0a90e...xlsx c50127bd...xlsx CRM
+```
+2026-07 実行結果: CRM/LTV/QCM いずれも ①〜⑥ が **day24 の累計で board実績と一致(✓)** = ロールアップ誤りなし。boardは反映日24日時点、CRM/QCM定例は25日分が先行。
+
+## audit_reflection の使い方
 ```
 python scripts/insurance/audit_reflection.py <board.xlsx> --out <report.md>
 ```
