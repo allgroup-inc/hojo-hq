@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>無料相談予約 | AIエージェント経営伴走(仮称)</title>
+<meta name="description" content="管理コスト・営業効率でお困りの中小企業の方へ。無料相談はこちらから。">
+<style>
+:root{--gj-primary:#2F6B4F;--gj-accent:#D98E2B;--gj-ink:#1F2A2E;--gj-bg:#FAF7F0;
+  --gj-card:#ffffff;--gj-muted:#5C6B70;--gj-line:#E4DCC9}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  font-size:18px;line-height:1.8;color:var(--gj-ink);background:var(--gj-bg)}
+.wrap{max-width:640px;margin:0 auto;padding:0 20px}
+h1{font-size:1.6rem;margin-bottom:.6em}
+section{padding:36px 0}
+.card{background:var(--gj-card);border:1px solid var(--gj-line);border-radius:12px;padding:22px}
+.btn{display:inline-block;padding:16px 28px;background:var(--gj-primary);color:#fff;text-decoration:none;
+  border-radius:999px;font-weight:700;font-size:1.05rem}
+.steps{list-style:none;counter-reset:s;margin:16px 0}
+.steps li{padding:10px 10px 10px 40px;position:relative;counter-increment:s}
+.steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:26px;height:26px;
+  background:var(--gj-accent);border-radius:50%;text-align:center;line-height:26px;font-weight:800;font-size:.85rem}
+.note{font-size:.85rem;color:var(--gj-muted)}
+.siteheader{position:sticky;top:0;background:rgba(250,247,240,.96);border-bottom:1px solid var(--gj-line);
+  padding:10px 16px}
+.siteheader a{margin-right:14px;font-size:.85rem;text-decoration:none;color:var(--gj-ink)}
+.siteheader .hlogo{font-weight:800;color:var(--gj-primary)}
+footer{background:var(--gj-ink);color:#e6e6e0;padding:28px 0;font-size:.85rem}
+</style>
+</head>
+<body>
+<header class="siteheader">
+  <a class="hlogo" href="/gajumaru/">ガジュマル(仮称)</a>
+  <a href="/gajumaru/about/">代表者紹介</a>
+  <a href="/gajumaru/pricing/">料金</a>
+  <a href="/gajumaru/blog/">お役立ち情報</a>
+  <a href="/gajumaru/contact/">無料相談</a>
+</header>
+<main>
+<section>
+  <div class="wrap">
+    <h1>無料相談予約</h1>
+    <div class="card">
+      <p>下のボタンから、会社名・ご相談内容を添えてメールをお送りください。カチカクくんが1〜2営業日以内に日程調整のご連絡をします。</p>
+      <ol class="steps">
+        <li>メールで簡単な会社概要とお困りごとをお送りください</li>
+        <li>カチカクくんから日程調整のご連絡をします</li>
+        <li>オンラインまたは沖縄県内であれば対面でご相談(無料・所要30分程度)</li>
+      </ol>
+      <p><a class="btn" id="mailBtn" href="#">メールで相談を申し込む</a></p>
+      <p class="note" style="margin-top:14px">ご相談は無料です。しつこい営業は行いません。</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer><div class="wrap">&copy; 2026 ガジュマル(仮称) — ブランド名は検討中です。</div></footer>
+<script src="/gajumaru/analytics-config.js"></script>
+<script>
+(function () {
+  var email = (window.GJ_CONTACT_EMAIL || "contact@example.com");
+  var subject = encodeURIComponent("無料相談のお申し込み");
+  var body = encodeURIComponent("会社名:\n担当者名:\nご相談内容:\n");
+  document.getElementById("mailBtn").href = "mailto:" + email + "?subject=" + subject + "&body=" + body;
+})();
+</script>
+</body>
+</html>
