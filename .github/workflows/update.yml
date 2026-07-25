@@ -60,14 +60,14 @@ jobs:
       - name: Copy data into site
         run: cp -r data site/data
 
-      - name: Prepare Pages artifact(ガジュマル(仮称)は掲載未承認のため除外)
-        # ブランド名・配色・連絡先が未確定、小柳さんの掲載決裁前(絶対ルール5)。
+      - name: Prepare Pages artifact(ノビシロは掲載未承認のため除外)
+        # 配色・連絡先が未確定、小柳さんの掲載決裁前(絶対ルール5)。
         # 詳細: docs/superpowers/plans/2026-07-25-gajumaru-site-skeleton.md
         # 掲載承認が出たらこのステップを削除するだけで公開対象に戻る。
         run: |
           rm -rf /tmp/pages-deploy
           cp -r site /tmp/pages-deploy
-          rm -rf /tmp/pages-deploy/gajumaru
+          rm -rf /tmp/pages-deploy/nobishiro
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v5

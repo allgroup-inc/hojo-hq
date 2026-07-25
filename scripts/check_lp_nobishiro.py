@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ガジュマル(仮称)サイト LP検査(CI用)— 性能予算と禁止表現をコードで守る
+ノビシロ サイト LP検査(CI用)— 性能予算と禁止表現をコードで守る
 - サイズ予算: 各ページ 50KB以下
 - 禁止表現: 誇大な断定表現の混入チェック(守り部ゲート)
 - 基本要件: lang=ja / viewport / title / description の存在
@@ -12,7 +12,7 @@ import re
 import sys
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
-SITE_DIR = os.path.join(BASE, "site", "gajumaru")
+SITE_DIR = os.path.join(BASE, "site", "nobishiro")
 SITE_GLOB = os.path.join(SITE_DIR, "**", "*.html")
 SIZE_BUDGET = 50 * 1024
 
