@@ -1,6 +1,6 @@
 """生CSV行 → 内部正規化レコード。成熟度・早期解約フラグまで計算する。"""
 from __future__ import annotations
-from datetime import date, datetime
+from datetime import date
 
 from .config import AGE_BANDS, AMOUNT_EDGES, AMOUNT_LABELS, EARLY_CHURN_MONTHS
 from .dates import has_reached_months, is_within_months
