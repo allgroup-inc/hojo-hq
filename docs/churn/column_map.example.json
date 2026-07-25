@@ -1,0 +1,14 @@
+{
+  "apply_id": "申込ID",
+  "apply_date": "申込日",
+  "product": "商品",
+  "channel": "集客チャネル",
+  "apply_form": "申込形態",
+  "amount": "金額",
+  "age": "年齢",
+  "gender": "性別",
+  "area": "地域",
+  "agent_id": "営業担当",
+  "cancel_date": "解約日",
+  "cancel_reason": "解約理由"
+}
