@@ -68,6 +68,14 @@
     font-weight:700;
     margin-bottom:2.2rem;
   }
+  /* モバイル: アドレスバー伸縮でvhが変動し、スクロール中に全セクションが
+     再レイアウトされてガタつくため、対応ブラウザでは安定単位svhを使う */
+  @supports (height: 100svh){
+    section{min-height:100svh;padding:8svh 5vw;}
+    .hero::after{height:11svh;}
+    .scrolldown{bottom:7svh;}
+  }
+
   h1,h2{
     font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;
     font-weight:900;
@@ -391,6 +399,16 @@
   .pot-note{margin-top:var(--sp-2);font-size:.75rem;line-height:1.7;color:rgba(247,245,241,.68);}
   .potential .register-btn{margin-top:var(--sp-2);}
 
+  .reg-form{margin-top:var(--sp-2);padding:var(--sp-3);border-radius:14px;background:#fff;
+    border:2px solid rgba(248,136,0,.5);max-width:520px;display:grid;gap:var(--sp-2);}
+  .reg-head{font-size:.9rem;font-weight:700;color:var(--fukamidori);}
+  .reg-form label{display:flex;flex-direction:column;gap:6px;font-size:.85rem;font-weight:700;color:rgba(0,51,92,.85);}
+  .reg-form input,.reg-form select{font:inherit;min-height:44px;padding:.7em 1em;border-radius:12px;
+    border:2px solid rgba(0,51,92,.25);background:#fff;color:var(--fukamidori);}
+  .reg-form input:focus,.reg-form select:focus{outline:3px solid var(--kin);border-color:var(--kin);}
+  .reg-guide{font-size:.85rem;font-weight:700;color:#a03a2a;}
+  .reg-note{font-size:.72rem;color:rgba(0,51,92,.6);}
+  .reg-form .register-btn{margin-top:0;border:none;cursor:pointer;font:inherit;}
   .register-btn{
     display:inline-block;text-decoration:none;margin-top:1rem;
     font-size:.95rem;font-weight:700;padding:.9em 2.2em;border-radius:999px;
@@ -442,7 +460,7 @@
   <p class="eyebrow rv">OKINAWA KIGYO NO MIKATA</p>
   <h1 class="rv">沖縄の企業には、<br>まだ眠っている<br class="sp"><span class="kin">可能性</span><span class="nowrap">がある。</span></h1>
   <p class="oath rv">——私たちGLOWも、その一社です。</p>
-  <p class="sub rv">補助金・助成金は、可能性を起こす<span class="nowrap">きっかけのひとつ。</span><br>GLOWが365日、国・県・市町村の公募情報をチェックし、<span class="nowrap">あなたに届けます。</span></p>
+  <p class="sub rv">補助金・助成金は、可能性を起こす<span class="nowrap">きっかけのひとつ。</span><br>GLOWが365日、国・県・市町村の公募情報を<br>チェックし、<span class="nowrap">あなたに届けます。</span></p>
   <p class="live-badge rv">📡 毎日自動更新中|現在の掲載 <span id="live-count">—</span> 件</p>
   <a class="hero-cta rv" href="#match">⚡ 30秒診断で、貴社の可能性額を見る(無料・登録不要)</a>
   <div class="scrolldown" aria-hidden="true">SCROLL</div>
@@ -569,7 +587,24 @@
     </div>
     <div id="result-list"></div>
     <p class="result-note">締切アラート(約1か月前から)を受け取るには、LINE登録(無料)をどうぞ。</p>
-    <a class="register-btn" href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E4%BC%9A%E7%A4%BE%E6%83%85%E5%A0%B1%E7%99%BB%E9%8C%B2%E3%80%91" target="_blank" rel="noopener">貴社専用の制度通知を受け取る(会社情報を登録)</a>
+    <button type="button" class="register-btn" id="reg-open">貴社専用の制度通知を受け取る(会社情報を登録)</button>
+    <div id="reg-form" class="reg-form" hidden>
+      <p class="reg-head">30秒で完了。入力内容はそのままLINEにセットされ、<strong>送信ボタンを1回押すだけ</strong>です。</p>
+      <label>会社名<input type="text" id="reg-company" placeholder="例) 沖縄商事株式会社" autocomplete="organization"></label>
+      <label>代表者名<input type="text" id="reg-name" placeholder="例) 沖縄 太郎" autocomplete="name"></label>
+      <label>所在地(市町村)
+        <select id="reg-city">
+          <option value="">選択してください</option>
+          <option>那覇市</option><option>沖縄市</option><option>うるま市</option>
+          <option>浦添市</option><option>宜野湾市</option><option>糸満市</option>
+          <option>豊見城市</option><option>名護市</option><option>宮古島市</option>
+          <option>石垣市</option><option>その他の市町村</option>
+        </select>
+      </label>
+      <p class="reg-guide" id="reg-guide" hidden>3項目すべてご入力ください😊</p>
+      <button type="button" class="register-btn" id="reg-send">LINEを開いて送信する</button>
+      <p class="reg-note">※入力内容はLINEのメッセージにセットされるだけで、このサイトには保存されません。</p>
+    </div>
 
     <details class="gbiz" id="gbiz">
       <summary>申請の前に:gBizIDは「オンライン」なら待たずに取れます</summary>
@@ -852,6 +887,26 @@
       setTimeout(function(){document.getElementById('match-btn').click();},400);
     });
     const am=document.getElementById('already-member');
+    // 会社情報登録フォーム(入力→記入済みメッセージをLINEにセット)
+    const ro=document.getElementById('reg-open');
+    if(ro&&!ro.dataset.bound){
+      ro.dataset.bound='1';
+      ro.addEventListener('click',function(){
+        const f=document.getElementById('reg-form');
+        f.hidden=!f.hidden;
+        if(!f.hidden)document.getElementById('reg-company').focus();
+      });
+      document.getElementById('reg-send').addEventListener('click',function(){
+        const c=document.getElementById('reg-company').value.trim();
+        const n=document.getElementById('reg-name').value.trim();
+        const city=document.getElementById('reg-city').value;
+        const g=document.getElementById('reg-guide');
+        if(!c||!n||!city){g.hidden=false;return;}
+        g.hidden=true;
+        const text='【会社情報登録】'+String.fromCharCode(10)+'会社名：'+c+String.fromCharCode(10)+'代表者名：'+n+String.fromCharCode(10)+'所在地：'+city;
+        window.open('https://line.me/R/oaMessage/%40345pqedv/?'+encodeURIComponent(text),'_blank','noopener');
+      });
+    }
     if(am)am.addEventListener('click',function(){
       localStorage.setItem('mikata_member','1');
       document.getElementById('match-btn').click();
