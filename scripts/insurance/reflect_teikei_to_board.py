@@ -55,7 +55,7 @@ def reflect(board_path, teikei_path, dept, out_path, reflect_day=None):
         return v
 
     wb = openpyxl.load_workbook(board_path)  # 数式も保持(実際は値貼り付け)
-    ws = wb.active
+    ws = rc.board_ws(wb)
     start_row, start_col = _find_block(ws, dept)
     actual_col = start_col + 1          # 実績列
     need_col = start_col + 2            # 経過必要数

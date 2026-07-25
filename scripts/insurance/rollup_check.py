@@ -6,6 +6,13 @@ import argparse
 
 BLOCKS = ["★", "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧"]
 
+BOARD_SHEET = "【ALLGRP】A3縦"
+
+
+def board_ws(wb):
+    """マスター(board)のシートを返す。名前で明示指定し、無ければ active。"""
+    return wb[BOARD_SHEET] if BOARD_SHEET in wb.sheetnames else wb.active
+
 # board のボリューム指標行 → 定例ブロック(①〜⑥)。部門により現場用語は違うが位置は共通。
 BOARD_VOLUME_TO_BLOCK = {
     "実稼働時間": "①",
@@ -89,7 +96,7 @@ def board_dept_actuals(board_path, dept):
     「定例_<dept>」ヘッダで部門ブロックの開始列を特定し、実績列(=開始列+1)を読む。"""
     import openpyxl
     wb = openpyxl.load_workbook(board_path, data_only=True)
-    ws = wb.active
+    ws = board_ws(wb)
     start_col = start_row = None
     header = "定例_" + dept
     for row in range(1, ws.max_row + 1):

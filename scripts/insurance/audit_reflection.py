@@ -76,8 +76,9 @@ def extract_board_records(path):
     (指示書の符号ルールを部門別に適用するため)。レイアウト依存のため統合実行で実データ検証。"""
     import openpyxl
     from openpyxl.utils import get_column_letter
+    import rollup_check as _rc
     wb = openpyxl.load_workbook(path, data_only=True)
-    ws = wb.active
+    ws = _rc.board_ws(wb)
     records = []
     metric = None
     block_dept = {}  # ブロック番号 -> 部門名(定例_XXX の直近値)
