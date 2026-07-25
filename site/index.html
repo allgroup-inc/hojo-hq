@@ -272,6 +272,8 @@
   .card a{color:var(--midori);font-weight:700;font-size:.9rem;}
     .card.locked{filter:blur(0px);position:relative;}
   .card.locked h4,.card.locked .meta{filter:blur(5px);user-select:none;}
+  .member-note{margin-top:var(--sp-2);padding:var(--sp-2);border-radius:12px;font-size:.9rem;font-weight:700;
+    background:rgba(0,80,136,.08);border:1px solid rgba(0,80,136,.25);color:var(--fukamidori);}
   .unlock{
     margin-top:var(--sp-3);padding:var(--sp-3);border-radius:14px;text-align:center;
     background:var(--fukamidori);color:var(--shiro);
@@ -811,22 +813,33 @@
           :'<span class="apply-badge direct">独自申請(GビズID不要の場合あり)</span>'}
         ${locked?'':`<a href="${it.source_url}" target="_blank" rel="noopener">公式ページで確認 →</a>`}
       </div>`;
+    const member=localStorage.getItem('mikata_member')==='1';
     let html='';
     if(hits.length===0){
       html='<div class="card"><h4>条件に合う募集中の制度が見つかりませんでした。</h4><div class="meta"><span>条件を変えるか、LINE登録で新着をお待ちください。</span></div></div>';
+    }else if(member){
+      // LINE登録済み(この端末): 全件をロックなしで表示
+      html=hits.map(it=>card(it,false)).join('');
+      html+='<div class="member-note">✅ LINE登録済みの表示です。全'+hits.length+'件を公開中 — 締切が近づいたらLINEでお知らせします。</div>';
     }else{
       html=card(hits[0],false);
       if(hits.length>1){
         html+=hits.slice(1).map(it=>card(it,true)).join('');
         html+=`<div class="unlock">
-          <p><strong>残り${hits.length-1}件</strong>は、無料のLINE登録ですべて表示されます。<br>締切の約1か月前からアラートも自動で届きます。</p>
-          <a class="line-btn" href="go/shindan/" target="_blank" rel="noopener">LINEで無料登録して全て見る</a>
+          <p><strong>残り${hits.length-1}件</strong>(金額・締切つき)は、無料のLINE登録ですべて表示されます。<br>ボタンを押すとLINEの登録画面が開き、このページはその場で全件表示に切り替わります。締切の約1か月前からアラートも自動で届きます。</p>
+          <a class="line-btn" id="unlock-btn" href="go/shindan/" target="_blank" rel="noopener">LINEで無料登録して全て見る</a>
         </div>`;
       }
     }
     const list=document.getElementById('result-list');
     list.innerHTML=html;
     if(!REDUCED)[...list.children].forEach((el,i)=>el.style.animationDelay=(i*70)+'ms');
+    const ub=document.getElementById('unlock-btn');
+    if(ub)ub.addEventListener('click',function(){
+      localStorage.setItem('mikata_member','1');
+      // LINEの登録画面は新しいタブで開く(hrefそのまま)。このページは全件表示へ再描画
+      setTimeout(function(){document.getElementById('match-btn').click();},400);
+    });
     document.getElementById('match-result').hidden=false;
     document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
   });
