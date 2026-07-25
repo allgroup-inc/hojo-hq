@@ -79,6 +79,15 @@
     ].join("");
   }
 
+  function isValidWebhookToken(providedToken, expectedToken) {
+    return (
+      typeof providedToken === "string" &&
+      typeof expectedToken === "string" &&
+      expectedToken.length > 0 &&
+      providedToken === expectedToken
+    );
+  }
+
   var api = {
     PRICE_YEN: PRICE_YEN,
     VALID_INDUSTRIES: VALID_INDUSTRIES,
@@ -91,6 +100,7 @@
     buildReportPrompt: buildReportPrompt,
     escapeHtml: escapeHtml,
     buildReportEmailHtml: buildReportEmailHtml,
+    isValidWebhookToken: isValidWebhookToken,
   };
   if (typeof module !== "undefined" && module.exports) {
     module.exports = api;
