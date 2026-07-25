@@ -42,3 +42,21 @@ test("validateSubmission: answersがnullなら単一エラーで即返す", () =
 test("PRICE_YEN は14800", () => {
   assert.equal(backend.PRICE_YEN, 14800);
 });
+
+test("buildReportPrompt: 回答内容が全てプロンプトに含まれる", () => {
+  const prompt = backend.buildReportPrompt(validAnswers);
+  assert.ok(prompt.includes("飲食業"));
+  assert.ok(prompt.includes("6〜20人"));
+  assert.ok(prompt.includes("ガジュマルくん"));
+});
+
+test("escapeHtml: HTML特殊文字をエスケープする", () => {
+  const result = backend.escapeHtml('<script>alert("x")</script>&');
+  assert.equal(result, "&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;&amp;");
+});
+
+test("buildReportEmailHtml: レポート本文がエスケープされ改行がbrになる", () => {
+  const html = backend.buildReportEmailHtml("1行目\n2行目<b>太字</b>", validAnswers);
+  assert.ok(html.includes("1行目<br>2行目&lt;b&gt;太字&lt;/b&gt;"));
+  assert.ok(html.includes("ガジュマルくん"));
+});
