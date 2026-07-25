@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>AI活用診断 | ノビシロ</title>
+<meta name="description" content="6つの質問に答えるだけで、ガジュマルくんがあなたの会社向けのAI活用診断レポートを作成します(¥14,800)。">
+<style>
+:root{--nb-primary:#2F6B4F;--nb-accent:#D98E2B;--nb-ink:#1F2A2E;--nb-bg:#FAF7F0;
+  --nb-card:#ffffff;--nb-muted:#5C6B70;--nb-line:#E4DCC9}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  font-size:18px;line-height:1.8;color:var(--nb-ink);background:var(--nb-bg)}
+.wrap{max-width:640px;margin:0 auto;padding:0 20px}
+h1{font-size:1.5rem;margin-bottom:.4em}
+section{padding:36px 0}
+.card{background:var(--nb-card);border:1px solid var(--nb-line);border-radius:12px;padding:22px}
+label{display:block;font-weight:700;margin:16px 0 6px}
+label:first-of-type{margin-top:0}
+select,input[type="email"]{width:100%;padding:10px;border:1px solid var(--nb-line);border-radius:8px;font-size:1rem}
+.btn{display:block;width:100%;padding:16px;background:var(--nb-primary);color:#fff;border:none;
+  border-radius:999px;font-weight:700;font-size:1.05rem;margin-top:24px;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:default}
+.error{color:#b3261e;font-size:.9rem;margin-top:12px;white-space:pre-line}
+.note{font-size:.85rem;color:var(--nb-muted)}
+.siteheader{position:sticky;top:0;background:rgba(250,247,240,.96);border-bottom:1px solid var(--nb-line);
+  padding:10px 16px}
+.siteheader a{margin-right:14px;font-size:.85rem;text-decoration:none;color:var(--nb-ink)}
+.siteheader .hlogo{font-weight:800;color:var(--nb-primary)}
+footer{background:var(--nb-ink);color:#e6e6e0;padding:28px 0;font-size:.85rem}
+</style>
+</head>
+<body>
+<header class="siteheader">
+  <a class="hlogo" href="../">ノビシロ</a>
+  <a href="../about/">代表者紹介</a>
+  <a href="../pricing/">料金</a>
+  <a href="../blog/">お役立ち情報</a>
+  <a href="../contact/">無料相談</a>
+</header>
+<main>
+<section>
+  <div class="wrap">
+    <h1>AI活用診断</h1>
+    <p class="note">6つの質問に答えて決済(¥14,800)いただくと、ガジュマルくんがあなたの会社向けの診断レポートをメールでお届けします。</p>
+    <div class="card">
+      <form id="shindanForm">
+        <label for="industry">業種</label>
+        <select id="industry" required>
+          <option value="">選択してください</option>
+          <option>建設業</option><option>飲食業</option><option>小売業</option>
+          <option>サービス業</option><option>製造業</option><option>その他</option>
+        </select>
+
+        <label for="employeeCount">従業員数</label>
+        <select id="employeeCount" required>
+          <option value="">選択してください</option>
+          <option>1〜5人</option><option>6〜20人</option><option>21〜50人</option><option>51人以上</option>
+        </select>
+
+        <label for="monthlyRevenue">月商規模</label>
+        <select id="monthlyRevenue" required>
+          <option value="">選択してください</option>
+          <option>〜300万円</option><option>300〜1000万円</option>
+          <option>1000〜3000万円</option><option>3000万円以上</option>
+        </select>
+
+        <label for="costFeeling">管理コストの実感</label>
+        <select id="costFeeling" required>
+          <option value="">選択してください</option>
+          <option>かなり負担</option><option>やや負担</option><option>あまり気にならない</option>
+        </select>
+
+        <label for="salesChallenge">営業効率の課題</label>
+        <select id="salesChallenge" required>
+          <option value="">選択してください</option>
+          <option>リード獲得</option><option>追客</option><option>提案書作成</option><option>その他</option>
+        </select>
+
+        <label for="priority">最優先課題</label>
+        <select id="priority" required>
+          <option value="">選択してください</option>
+          <option>コスト削減</option><option>営業効率</option>
+        </select>
+
+        <label for="email">メールアドレス(レポートの送付先)</label>
+        <input type="email" id="email" required>
+
+        <button type="submit" class="btn" id="submitBtn">¥14,800で診断を申し込む</button>
+        <p class="error" id="errorMsg" role="alert"></p>
+      </form>
+    </div>
+  </div>
+</section>
+</main>
+<footer><div class="wrap">&copy; 2026 ノビシロ — ブランド名は検討中です。</div></footer>
+<script src="../analytics-config.js"></script>
+<script src="logic.js"></script>
+<script>
+(function () {
+  var GAS_WEB_APP_URL = "GAS_WEB_APP_URL_PLACEHOLDER";
+  var form = document.getElementById("shindanForm");
+  var errorMsg = document.getElementById("errorMsg");
+  var submitBtn = document.getElementById("submitBtn");
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    errorMsg.textContent = "";
+    var answers = {
+      industry: document.getElementById("industry").value,
+      employeeCount: document.getElementById("employeeCount").value,
+      monthlyRevenue: document.getElementById("monthlyRevenue").value,
+      costFeeling: document.getElementById("costFeeling").value,
+      salesChallenge: document.getElementById("salesChallenge").value,
+      priority: document.getElementById("priority").value,
+      email: document.getElementById("email").value,
+    };
+    submitBtn.disabled = true;
+    submitBtn.textContent = "処理中…";
+    window.NBShindan.submitDiagnosis(answers, GAS_WEB_APP_URL, window.fetch.bind(window))
+      .then(function (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      })
+      .catch(function (err) {
+        errorMsg.textContent = err.message;
+        submitBtn.disabled = false;
+        submitBtn.textContent = "¥14,800で診断を申し込む";
+      });
+  });
+})();
+</script>
+</body>
+</html>
