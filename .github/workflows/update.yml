@@ -38,15 +38,24 @@ jobs:
           sudo apt-get install -y --no-install-recommends fonts-noto-cjk
           pip install pillow
 
+      - name: Generate SNS posts
+        # posts/launch/*.md を再生成。画像のCTA件数(ライブ取得)と大見出し件数(md由来)を
+        # 常に同一データで揃えるため、必ず画像生成の直前に実行する。
+        run: python scripts/generate_sns.py
+
       - name: Generate post images
         # posts/launch/*.md の文言をブランド画像(posts/images/*.png)に焼き込み
         run: python scripts/generate_images.py
+
+      - name: Generate story image (縦型1080x1920)
+        # 締切アラート(line_alerts.json)から毎日のストーリーズ画像を生成
+        run: python scripts/generate_story.py
 
       - name: Commit updated data
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
-          git add data/subsidies.json data/line_alerts.json posts/images posts/line
+          git add data/subsidies.json data/line_alerts.json posts/launch posts/images posts/line
           git diff --cached --quiet || git commit -m "auto: update subsidies & images $(date '+%Y-%m-%d %H:%M')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
           for i in 1 2 3; do
