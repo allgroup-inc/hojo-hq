@@ -20,6 +20,19 @@ def test_detect_negative_ignores_diff_metric_that_may_be_negative():
     assert a.detect_negative_anomalies(records) == []
 
 
+def test_qcm_inverted_metric_negative_is_expected_not_anomaly():
+    # 指示書v1.0: QCM の想定単価/戻入等は負値が仕様。要確認から除外する。
+    assert a.is_expected_negative("想定単価", "QCM") is True
+    assert a.is_expected_negative("想定単価", "嘉手納") is False
+    records = [
+        {"metric": "想定単価", "coord": "I65", "area": "QCM", "value": -8.58},
+        {"metric": "想定単価", "coord": "D65", "area": "CRM", "value": -8.58},
+    ]
+    out = a.detect_negative_anomalies(records)
+    # QCM は仕様上マイナス→除外、CRM は要確認として残る
+    assert len(out) == 1 and out[0]["area"] == "CRM"
+
+
 def test_detect_blanks_flags_none():
     records = [
         {"metric": "予算ANP", "coord": "C11", "area": "嘉手納", "value": None},

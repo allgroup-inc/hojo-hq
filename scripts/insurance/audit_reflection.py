@@ -11,6 +11,20 @@ NONNEG_METRICS = {
     "時間→発信数", "想定単価",
 }
 
+# 指示書v1.0 §1/§2: QCM の解約・戻入・実効単価は「少ないほど良い」= 負値が仕様。
+# ⑦⑧(ANP/戻入)は ALL委託・QCM のみ円単位、QCM⑦は絶対値。
+# → 部門×指標で「負値が想定内」の組み合わせを持ち、負値スクリーンから除外する。
+INVERTED_DEPTS = {"QCM"}
+INVERTED_METRIC_HINTS = ("解約", "戻入", "実効単価", "想定単価")
+
+
+def is_expected_negative(metric, dept):
+    """指示書の符号ルール上、負値が想定内(仕様)なら True。断定を避けるための一次判定。"""
+    if dept in INVERTED_DEPTS:
+        m = metric or ""
+        return any(h in m for h in INVERTED_METRIC_HINTS)
+    return False
+
 
 def detect_negative_anomalies(records):
     out = []
@@ -18,8 +32,11 @@ def detect_negative_anomalies(records):
         v = r.get("value")
         if v is None:
             continue
-        if r.get("metric") in NONNEG_METRICS and v < 0:
-            out.append({**r, "reason": "negative"})
+        if r.get("metric") not in NONNEG_METRICS or v >= 0:
+            continue
+        if is_expected_negative(r.get("metric"), r.get("area")):
+            continue  # 仕様上の意図的マイナス(QCM等)は要確認から除外
+        out.append({**r, "reason": "negative"})
     return out
 
 
@@ -47,18 +64,29 @@ def _is_value_column(col):
     return ((col - _BLOCK_START) % _BLOCK_WIDTH) in _VALUE_OFFSETS
 
 
+def _block_index(col):
+    """列→ブロック番号(0=C群,1=H群,2=M群)。"""
+    return (col - _BLOCK_START) // _BLOCK_WIDTH
+
+
 def extract_board_records(path):
     """ALLGRP board(xlsx)を record 形式に変換する薄いアダプタ。
     B列=指標名を拾い、非負指標の行のうち『予算/実績/経過必要数』列(現差異・進捗を除く)
-    の数値セルを record 化する。レイアウト依存のため統合実行で実データ検証する
-    (ユニットテスト対象外)。"""
+    の数値セルを record 化する。各セルの部門(area)は「定例_XXX」ヘッダの直近値で解決する
+    (指示書の符号ルールを部門別に適用するため)。レイアウト依存のため統合実行で実データ検証。"""
     import openpyxl
     from openpyxl.utils import get_column_letter
     wb = openpyxl.load_workbook(path, data_only=True)
     ws = wb.active
     records = []
     metric = None
+    block_dept = {}  # ブロック番号 -> 部門名(定例_XXX の直近値)
     for row in range(1, ws.max_row + 1):
+        # 部門ヘッダ更新: "定例_XXX" セルを検出したら該当ブロックの部門を更新
+        for col in range(_BLOCK_START, ws.max_column + 1):
+            hv = ws.cell(row, col).value
+            if isinstance(hv, str) and hv.strip().startswith("定例_"):
+                block_dept[_block_index(col)] = hv.strip()[len("定例_"):]
         label = ws.cell(row, 2).value  # B列=指標名
         if isinstance(label, str) and label.strip():
             metric = label.strip()
@@ -72,7 +100,7 @@ def extract_board_records(path):
                 records.append({
                     "metric": metric,
                     "coord": f"{get_column_letter(col)}{row}",
-                    "area": "",
+                    "area": block_dept.get(_block_index(col), ""),
                     "value": float(v),
                 })
     wb.close()
