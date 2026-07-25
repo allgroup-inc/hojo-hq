@@ -1,0 +1,152 @@
+{
+  "_note": "generate_jukyu_counter.py --self-test 用ゴールデンセット。正例が通り・負例が落ち・集計が一致することを毎CIで確認する(方程式4: evalなき自動化は事故る)。",
+  "cases": [
+    {
+      "name": "空台帳は有効・集計ゼロ",
+      "valid": true,
+      "ledger": { "reports": [] },
+      "expect": { "total_amount_yen": 0, "household_count": 0, "seido_count": 0, "counted_reports": 0 }
+    },
+    {
+      "name": "検証済み計上2件は積算される",
+      "valid": true,
+      "ledger": {
+        "reports": [
+          {
+            "id": "jk-0001", "reported_at": "2026-08-01", "seido_id": "fk-kuni-jidofuyoteate",
+            "seido_name": "児童扶養手当", "area": "那覇市", "household_type": "ひとり親",
+            "amount_type": "継続", "amount_yen": 44140, "cost_yen": 550,
+            "source": "自己申告", "verified": true, "verified_at": "2026-08-05",
+            "verified_by": "ケンショウ", "status": "計上"
+          },
+          {
+            "id": "jk-0002", "reported_at": "2026-08-03", "seido_id": "fk-kuni-jidoteate",
+            "seido_name": "児童手当", "area": "うるま市", "household_type": "子育て",
+            "amount_type": "継続", "amount_yen": 30000,
+            "source": "自己申告", "verified": true, "verified_at": "2026-08-06",
+            "verified_by": "ケンショウ", "status": "計上"
+          }
+        ]
+      },
+      "expect": { "total_amount_yen": 74140, "household_count": 2, "seido_count": 2, "counted_reports": 2 }
+    },
+    {
+      "name": "保留・未検証は計上されない",
+      "valid": true,
+      "ledger": {
+        "reports": [
+          {
+            "id": "jk-0001", "reported_at": "2026-08-01", "seido_id": "fk-kuni-jidoteate",
+            "seido_name": "児童手当", "area": "那覇市",
+            "amount_type": "継続", "amount_yen": 30000,
+            "source": "自己申告", "verified": true, "status": "計上"
+          },
+          {
+            "id": "jk-0002", "reported_at": "2026-08-02", "seido_id": "fk-kuni-jidoteate",
+            "seido_name": "児童手当", "area": "那覇市",
+            "amount_type": "継続", "amount_yen": 99999,
+            "source": "自己申告", "verified": false, "status": "保留"
+          }
+        ]
+      },
+      "expect": { "total_amount_yen": 30000, "household_count": 1, "seido_count": 1, "counted_reports": 1 }
+    },
+    {
+      "name": "同一世帯キーは重複排除して世帯数を数える",
+      "valid": true,
+      "ledger": {
+        "reports": [
+          {
+            "id": "jk-0001", "reported_at": "2026-08-01", "seido_id": "fk-kuni-jidoteate",
+            "seido_name": "児童手当", "area": "那覇市", "household_key": "h-abc",
+            "amount_type": "継続", "amount_yen": 30000,
+            "source": "自己申告", "verified": true, "status": "計上"
+          },
+          {
+            "id": "jk-0002", "reported_at": "2026-09-01", "seido_id": "fk-kuni-jidofuyoteate",
+            "seido_name": "児童扶養手当", "area": "那覇市", "household_key": "h-abc",
+            "amount_type": "継続", "amount_yen": 44140,
+            "source": "自己申告", "verified": true, "status": "計上"
+          }
+        ]
+      },
+      "expect": { "total_amount_yen": 74140, "household_count": 1, "seido_count": 2, "counted_reports": 2 }
+    },
+    {
+      "name": "未検証なのに status=計上 は不正",
+      "valid": false,
+      "ledger": {
+        "reports": [
+          {
+            "id": "jk-0001", "reported_at": "2026-08-01", "seido_id": "fk-kuni-jidoteate",
+            "seido_name": "児童手当", "area": "那覇市",
+            "amount_type": "継続", "amount_yen": 30000,
+            "source": "自己申告", "verified": false, "status": "計上"
+          }
+        ]
+      }
+    },
+    {
+      "name": "個人情報(氏名)の混入は不正",
+      "valid": false,
+      "ledger": {
+        "reports": [
+          {
+            "id": "jk-0001", "reported_at": "2026-08-01", "seido_id": "fk-kuni-jidoteate",
+            "seido_name": "児童手当", "area": "那覇市", "name": "沖縄太郎",
+            "amount_type": "継続", "amount_yen": 30000,
+            "source": "自己申告", "verified": true, "status": "計上"
+          }
+        ]
+      }
+    },
+    {
+      "name": "amount_yen が負は不正",
+      "valid": false,
+      "ledger": {
+        "reports": [
+          {
+            "id": "jk-0001", "reported_at": "2026-08-01", "seido_id": "fk-kuni-jidoteate",
+            "seido_name": "児童手当", "area": "那覇市",
+            "amount_type": "継続", "amount_yen": -100,
+            "source": "自己申告", "verified": true, "status": "計上"
+          }
+        ]
+      }
+    },
+    {
+      "name": "amount_type 語彙外は不正",
+      "valid": false,
+      "ledger": {
+        "reports": [
+          {
+            "id": "jk-0001", "reported_at": "2026-08-01", "seido_id": "fk-kuni-jidoteate",
+            "seido_name": "児童手当", "area": "那覇市",
+            "amount_type": "毎月", "amount_yen": 30000,
+            "source": "自己申告", "verified": true, "status": "計上"
+          }
+        ]
+      }
+    },
+    {
+      "name": "id 重複は不正",
+      "valid": false,
+      "ledger": {
+        "reports": [
+          {
+            "id": "jk-0001", "reported_at": "2026-08-01", "seido_id": "fk-kuni-jidoteate",
+            "seido_name": "児童手当", "area": "那覇市",
+            "amount_type": "継続", "amount_yen": 30000,
+            "source": "自己申告", "verified": true, "status": "計上"
+          },
+          {
+            "id": "jk-0001", "reported_at": "2026-08-02", "seido_id": "fk-kuni-jidoteate",
+            "seido_name": "児童手当", "area": "那覇市",
+            "amount_type": "継続", "amount_yen": 30000,
+            "source": "自己申告", "verified": true, "status": "計上"
+          }
+        ]
+      }
+    }
+  ]
+}
