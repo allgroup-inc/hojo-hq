@@ -5,10 +5,14 @@ on:
     paths:
       - "site/nobishiro/**"
       - "scripts/check_lp_nobishiro.py"
+      - "gas/nobishiro-shindan/**"
+      - "tests/nobishiro-shindan-*.test.mjs"
   pull_request:
     paths:
       - "site/nobishiro/**"
       - "scripts/check_lp_nobishiro.py"
+      - "gas/nobishiro-shindan/**"
+      - "tests/nobishiro-shindan-*.test.mjs"
   workflow_dispatch: {}
 
 jobs:
@@ -23,3 +27,10 @@ jobs:
 
       - name: LP検査(サイズ予算・禁止表現・基本要件)
         run: python scripts/check_lp_nobishiro.py
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: 診断ロジック テスト(フロント+バックエンド純粋ロジック)
+        run: node --test tests/nobishiro-shindan-logic.test.mjs tests/nobishiro-shindan-backend.test.mjs
