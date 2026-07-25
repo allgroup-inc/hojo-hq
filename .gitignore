@@ -14,3 +14,6 @@ playwright-report/
 Thumbs.db
 *.swp
 __pycache__/
+
+# 早期解約リスク保全: 顧客個人データ・モデル・出力はコミットしない
+private/
