@@ -14,6 +14,7 @@ from .fit import fit_model, save_model, load_model
 from .report_list import build_rows, render_csv, render_html
 from .evaluate import backtest
 from .report_card import build_card, render_html as render_card_html
+from .report_agg import aggregate_by, render_html as render_agg_html
 
 
 def _as_of(value):
@@ -70,6 +71,16 @@ def cmd_card(csv_path, column_map_path, model_path, apply_id, out_path, as_of):
     return card
 
 
+def cmd_report(csv_path, column_map_path, out_path, as_of, fields=("agent_id", "channel", "product")):
+    cmap = load_column_map(column_map_path)
+    records = load_records(csv_path, cmap, _as_of(as_of))
+    labels = {"agent_id": "営業マン別", "channel": "チャネル別", "product": "商品別"}
+    sections = {labels.get(f, f): aggregate_by(records, f) for f in fields}
+    render_agg_html(sections, out_path)
+    print(f"[report] 集計軸={list(sections)} → {out_path}")
+    return sections
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="churn", description="早期解約リスク保全")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -94,6 +105,12 @@ def main(argv=None):
     sp_card.add_argument("--apply-id", required=True)
     sp_card.add_argument("--out", required=True)
 
+    sp_report = sub.add_parser("report")
+    sp_report.add_argument("--csv", required=True)
+    sp_report.add_argument("--column-map", required=True)
+    sp_report.add_argument("--as-of", required=True)
+    sp_report.add_argument("--out", required=True)
+
     args = p.parse_args(argv)
     if args.cmd == "fit":
         cmd_fit(args.csv, args.column_map, args.model, args.as_of)
@@ -103,6 +120,8 @@ def main(argv=None):
         cmd_backtest(args.csv, args.column_map, args.split, args.as_of)
     elif args.cmd == "card":
         cmd_card(args.csv, args.column_map, args.model, args.apply_id, args.out, args.as_of)
+    elif args.cmd == "report":
+        cmd_report(args.csv, args.column_map, args.out, args.as_of)
     return 0
 
 
