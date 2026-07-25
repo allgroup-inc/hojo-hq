@@ -367,6 +367,16 @@
     border:1px solid rgba(248,136,0,.5);border-radius:12px;padding:var(--sp-2);}
 
   /* 診断結果: 会社情報登録CTA */
+  /* 総額ポテンシャル(議事_総額ポテンシャル表示.md の5条件に準拠) */
+  .potential{margin-top:var(--sp-3);padding:var(--sp-3);border-radius:14px;
+    background:var(--fukamidori);color:var(--shiro);}
+  .pot-label{font-size:.88rem;font-weight:700;color:rgba(247,245,241,.88);}
+  .pot-amount{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-weight:900;
+    font-size:clamp(2rem,7vw,3.6rem);line-height:1.25;margin-top:var(--sp-1);}
+  .pot-meta{margin-top:2px;font-size:.85rem;color:rgba(247,245,241,.75);}
+  .pot-note{margin-top:var(--sp-2);font-size:.75rem;line-height:1.7;color:rgba(247,245,241,.68);}
+  .potential .register-btn{margin-top:var(--sp-2);}
+
   .register-btn{
     display:inline-block;text-decoration:none;margin-top:1rem;
     font-size:.95rem;font-weight:700;padding:.9em 2.2em;border-radius:999px;
@@ -525,6 +535,13 @@
 
   <div id="match-result" class="match-result" hidden>
     <p class="result-head" aria-live="polite">マッチした制度 <span id="result-count" class="kin"></span>件</p>
+    <div id="potential" class="potential" hidden>
+      <p class="pot-label">表示中の制度をすべて活用できた場合の「公募上限額」合計(参考値)</p>
+      <p class="pot-amount">最大 <span id="pot-amount" class="kin">—</span></p>
+      <p class="pot-meta" id="pot-meta"></p>
+      <p class="pot-note">※各制度が公表している公募上限額を単純に合計した理論値です。受給できる金額や採択を保証するものではありません。要件・金額は必ず各制度の原文でご確認ください。</p>
+      <a class="register-btn" href="go/shindan/" target="_blank" rel="noopener">この可能性を無料で確認する(LINE)</a>
+    </div>
     <div id="shokei-banner" class="shokei-banner" hidden>
       <strong>事業の引き継ぎ・後継に使える補助金</strong>があります。
       専門家への相談費用なども補助対象になる制度です。
@@ -653,6 +670,13 @@
   SELECT_IDS.forEach(id=>document.getElementById(id).addEventListener('change',updateProgress));
 
   // ===== 件数カウントアップ =====
+  function fmtYen(v){
+    if(v>=100000000){
+      var oku=(v/100000000).toFixed(1).replace(/\.0$/,'');
+      return oku+'億円';
+    }
+    return Math.round(v/10000).toLocaleString()+'万円';
+  }
   function animateCount(el,to){
     if(REDUCED||to<=0){el.textContent=to;return;}
     const dur=600,t0=performance.now();
@@ -722,6 +746,31 @@
 
     document.getElementById('shokei-banner').hidden=!shokeiSignal;
     animateCount(document.getElementById('result-count'),hits.length);
+
+    // 総額ポテンシャル(参考値): 表示中の制度のうち上限額公表分の単純合計
+    (function(){
+      var withAmt=hits.filter(function(it){return Number(it.max_amount)>0;});
+      var total=withAmt.reduce(function(sm,it){return sm+Number(it.max_amount);},0);
+      var pot=document.getElementById('potential');
+      if(!pot)return;
+      if(total<=0){pot.hidden=true;return;}
+      pot.hidden=false;
+      var unknown=hits.length-withAmt.length;
+      var single=Math.max.apply(null,withAmt.map(function(it){return Number(it.max_amount);}));
+      document.getElementById('pot-meta').textContent=
+        '内訳: 上限額公表 '+withAmt.length+'件(単体最大 '+fmtYen(single)+')'
+        +(unknown>0?' ＋ 上限額非公表 '+unknown+'件':'');
+      var el=document.getElementById('pot-amount');
+      if(REDUCED){el.textContent=fmtYen(total);return;}
+      var dur=900,t0=performance.now();
+      (function step(now){
+        var p=Math.min(1,(now-t0)/dur);
+        el.textContent=fmtYen(Math.round(total*(1-Math.pow(1-p,3))));
+        if(p<1)requestAnimationFrame(step);
+      })(t0);
+      // タブ非表示中はrAFが止まるため、最終値を必ず保証する
+      setTimeout(function(){el.textContent=fmtYen(total);},dur+150);
+    })();
     const maskName=n=>n.length>6?n.slice(0,6)+'●●●●●●':'●●●●●●';
     const card=(it,locked)=>`
       <div class="card ${locked?'locked':''}">
