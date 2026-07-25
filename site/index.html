@@ -279,6 +279,9 @@
     background:var(--fukamidori);color:var(--shiro);
   }
   .unlock p{font-size:.95rem;line-height:1.8;}
+  .unlock .already{margin-top:var(--sp-2);}
+  .unlock .already button{background:none;border:none;cursor:pointer;font:inherit;font-size:.85rem;
+    color:rgba(247,245,241,.85);text-decoration:underline;padding:8px;}
   .unlock strong{color:var(--kin);}
   .unlock .line-btn{margin-top:1.1rem;font-size:1rem;padding:.95em 2.4em;}
   .experts{margin-top:var(--sp-6);padding-top:var(--sp-4);border-top:2px solid rgba(0,51,92,.15);}
@@ -647,7 +650,7 @@
   let DB={items:[],updated_at:null};
   fetch('data/subsidies.json')
     .then(r=>r.json())
-    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';const lc=document.getElementById('live-count');if(lc)lc.textContent=d.count||d.items.length||'—';})
+    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';const lc=document.getElementById('live-count');if(lc)lc.textContent=d.count||d.items.length||'—';restoreState();})
     .catch(()=>{document.getElementById('updated-at').textContent='取得エラー(公式サイトをご確認ください)';});
 
   const BIZ_KEYS={
@@ -729,6 +732,12 @@
     const biz=document.getElementById('f-biz').value;
     const future=document.getElementById('f-future').value;
     const themes=[...document.querySelectorAll('#f-theme .chip.on')].map(c=>c.dataset.v);
+    // 選択状態を保存(LINEアプリから戻った時の再読み込みで診断が消えないように)
+    try{
+      var st={done:true,themes:themes};
+      SELECT_IDS.forEach(function(id){st[id]=document.getElementById(id).value;});
+      localStorage.setItem('mikata_form',JSON.stringify(st));
+    }catch(e){}
     const keys=BIZ_KEYS[biz]||[];
     const themeKeys=themes.flatMap(t=>THEME_KEYS[t]||[]);
 
@@ -828,6 +837,7 @@
         html+=`<div class="unlock">
           <p><strong>残り${hits.length-1}件</strong>(金額・締切つき)は、無料のLINE登録ですべて表示されます。<br>ボタンを押すとLINEの登録画面が開き、このページはその場で全件表示に切り替わります。締切の約1か月前からアラートも自動で届きます。</p>
           <a class="line-btn" id="unlock-btn" href="go/shindan/" target="_blank" rel="noopener">LINEで無料登録して全て見る</a>
+          <p class="already"><button type="button" id="already-member">すでにLINE登録済みの方はこちら(タップで全件表示)</button></p>
         </div>`;
       }
     }
@@ -837,11 +847,17 @@
     const ub=document.getElementById('unlock-btn');
     if(ub)ub.addEventListener('click',function(){
       localStorage.setItem('mikata_member','1');
-      // LINEの登録画面は新しいタブで開く(hrefそのまま)。このページは全件表示へ再描画
+      // このページ側は再描画(スマホではLINEアプリ切替でタイマーが止まるため、
+      // 下のpageshow/visibilitychangeが戻ってきた瞬間にも再描画する)
       setTimeout(function(){document.getElementById('match-btn').click();},400);
     });
+    const am=document.getElementById('already-member');
+    if(am)am.addEventListener('click',function(){
+      localStorage.setItem('mikata_member','1');
+      document.getElementById('match-btn').click();
+    });
     document.getElementById('match-result').hidden=false;
-    document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
+    if(!AUTORUN)document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
   });
 
   // 2画面目の背景画像を先行デコード(初回スクロール時のデコード引っかかり防止)
@@ -850,6 +866,36 @@
     im.decoding='async';
     im.src='assets/photos/vision.webp';
   });
+
+  // 再読み込み後の状態復元: 選択を戻し、結果も再表示(復元時は自動スクロールしない)
+  let AUTORUN=false;
+  function restoreState(){
+    var st=null;
+    try{st=JSON.parse(localStorage.getItem('mikata_form')||'null');}catch(e){}
+    if(!st||!st.done)return;
+    SELECT_IDS.forEach(function(id){
+      if(st[id]!==undefined)document.getElementById(id).value=st[id];
+    });
+    document.querySelectorAll('#f-theme .chip').forEach(function(c){
+      var on=(st.themes||[]).indexOf(c.dataset.v)>=0;
+      c.classList.toggle('on',on);
+      c.setAttribute('aria-pressed',on?'true':'false');
+    });
+    updateProgress();
+    AUTORUN=true;
+    document.getElementById('match-btn').click();
+    AUTORUN=false;
+  }
+
+  // LINEアプリから戻ってきた時: 登録済みならロック表示を自動で全件表示に切替
+  function refreshIfMember(){
+    if(localStorage.getItem('mikata_member')==='1'
+       && document.querySelector('#result-list .card.locked')){
+      document.getElementById('match-btn').click();
+    }
+  }
+  window.addEventListener('pageshow',refreshIfMember);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)refreshIfMember();});
 
   const io=new IntersectionObserver(es=>{
     es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
