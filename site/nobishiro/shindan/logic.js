@@ -48,7 +48,16 @@
       })
       .then(function (data) {
         if (data.error) {
-          throw new Error(data.error);
+          if (Array.isArray(data.details) && data.details.length > 0) {
+            throw new Error(data.details.join(" / "));
+          }
+          var messages = {
+            validation_failed: "入力内容をご確認ください。",
+            stripe_session_failed: "決済ページの準備に失敗しました。時間をおいて再度お試しください。",
+            invalid_json: "送信内容に問題がありました。もう一度お試しください。",
+            unknown_type: "エラーが発生しました。時間をおいて再度お試しください。",
+          };
+          throw new Error(messages[data.error] || "エラーが発生しました。時間をおいて再度お試しください。");
         }
         return data.url;
       });
