@@ -31,6 +31,7 @@ CHANNELS = {
     "site":       {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: サイト最下部CTA"},
     "shindan":    {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: 診断結果CTA"},
     "ig":         {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: Instagramプロフィール"},
+    "fb":         {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: Facebookページ"},
     # ── もらいわすれ堂/フクギイロ(小柳遥さん・2026-07-24開設) ──
     "fg-top":     {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: トップページ"},
     "fg-area":    {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 市町村ページ"},

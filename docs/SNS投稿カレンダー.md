@@ -27,6 +27,7 @@
 - [ ] 画像とキャプションの番号が一致している
 - [ ] ハッシュタグがコピーされている(#沖縄 #補助金 #助成金 #沖縄経営者 #事業承継 #沖縄企業のミカタ)
 - [ ] プロフィールのリンクが https://allgroup-inc.github.io/hojo-hq/go/ig/ になっている(lin.ee直貼り禁止)
+- [ ] Meta Business Suiteで **Facebookにも同時投稿**(FB版キャプションはURL直書きに差し替え → docs/Facebook運用設計.md)
 
 ## ストーリーズ運用(毎日)
 
