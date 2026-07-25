@@ -749,17 +749,21 @@
 
     // 総額ポテンシャル(参考値): 表示中の制度のうち上限額公表分の単純合計
     (function(){
+      var SME_CAP=100000000; // 中小向けレンジ: 上限1億円以下(大型公募の混入で合計が非現実化するのを防ぐ)
       var withAmt=hits.filter(function(it){return Number(it.max_amount)>0;});
-      var total=withAmt.reduce(function(sm,it){return sm+Number(it.max_amount);},0);
+      var sme=withAmt.filter(function(it){return Number(it.max_amount)<=SME_CAP;});
+      var large=withAmt.length-sme.length;
+      var total=sme.reduce(function(sm,it){return sm+Number(it.max_amount);},0);
       var pot=document.getElementById('potential');
       if(!pot)return;
       if(total<=0){pot.hidden=true;return;}
       pot.hidden=false;
       var unknown=hits.length-withAmt.length;
-      var single=Math.max.apply(null,withAmt.map(function(it){return Number(it.max_amount);}));
+      var single=Math.max.apply(null,sme.map(function(it){return Number(it.max_amount);}));
       document.getElementById('pot-meta').textContent=
-        '内訳: 上限額公表 '+withAmt.length+'件(単体最大 '+fmtYen(single)+')'
-        +(unknown>0?' ＋ 上限額非公表 '+unknown+'件':'');
+        '内訳: 上限1億円以下の制度 '+sme.length+'件の合計(単体最大 '+fmtYen(single)+')'
+        +(large>0?' ／ 大型公募(1億円超) '+large+'件は含めず':'')
+        +(unknown>0?' ／ 上限額非公表 '+unknown+'件':'');
       var el=document.getElementById('pot-amount');
       if(REDUCED){el.textContent=fmtYen(total);return;}
       var dur=900,t0=performance.now();
