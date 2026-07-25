@@ -53,13 +53,14 @@
 
   /* ===== ヘッドライン主導のフルスクリーン構成 ===== */
   section{
-    min-height:100vh;
     display:flex;
     flex-direction:column;
     justify-content:center;
-    padding:8vh 5vw;
+    padding:72px 5vw;
     position:relative;
   }
+  .hero{min-height:100vh;}
+  @media (max-width:640px){section{padding:56px 5vw;}}
   .hero-logo{width:130px;height:auto;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 8px rgba(255,255,255,.55));}
   .eyebrow{
     color:var(--kin);
@@ -71,7 +72,7 @@
   /* モバイル: アドレスバー伸縮でvhが変動し、スクロール中に全セクションが
      再レイアウトされてガタつくため、対応ブラウザでは安定単位svhを使う */
   @supports (height: 100svh){
-    section{min-height:100svh;padding:8svh 5vw;}
+    .hero{min-height:100svh;}
     .hero::after{height:11svh;}
     .scrolldown{bottom:7svh;}
   }
@@ -280,6 +281,9 @@
   .card a{color:var(--midori);font-weight:700;font-size:.9rem;}
     .card.locked{filter:blur(0px);position:relative;}
   .card.locked h4,.card.locked .meta{filter:blur(5px);user-select:none;}
+  .back-result{position:fixed;right:16px;bottom:16px;z-index:60;font:inherit;font-weight:700;
+    background:var(--kin);color:var(--sumi);border:none;border-radius:999px;min-height:48px;
+    padding:0 20px;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer;}
   .member-note{margin-top:var(--sp-2);padding:var(--sp-2);border-radius:12px;font-size:.9rem;font-weight:700;
     background:rgba(0,80,136,.08);border:1px solid rgba(0,80,136,.25);color:var(--fukamidori);}
   .unlock{
@@ -436,6 +440,10 @@
 
   /* スクロール出現 */
   .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease;}
+  /* スマホ: スクロール中に要素が動く演出は「ガタつき」に感じられるため全廃 */
+  @media (pointer:coarse),(max-width:820px){
+    .rv{opacity:1;transform:none;transition:none;}
+  }
   .rv.on{opacity:1;transform:none;}
   @media (prefers-reduced-motion:reduce){
     .rv{opacity:1;transform:none;transition:none;}
@@ -674,6 +682,7 @@
   <p class="cta-note rv">登録は10秒。いつでも解除できます。</p>
 </section>
 
+<button id="back-result" class="back-result" hidden>💰 診断結果へ戻る</button>
 <footer>
   <div><strong>沖縄企業のミカタ</strong> — 運営:株式会社GLOW</div>
   
@@ -912,6 +921,7 @@
       document.getElementById('match-btn').click();
     });
     document.getElementById('match-result').hidden=false;
+    if(backBtn)backBtn.dataset.ready='1';
     if(!AUTORUN)document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
   });
 
@@ -949,6 +959,18 @@
       document.getElementById('match-btn').click();
     }
   }
+  // フローティング「診断結果へ戻る」: 結果があり、かつ結果が画面外のときだけ表示
+  const backBtn=document.getElementById('back-result');
+  if(backBtn){
+    const mr=document.getElementById('match-result');
+    new IntersectionObserver(function(es){
+      backBtn.hidden = es[0].isIntersecting || mr.hidden || !backBtn.dataset.ready;
+    },{threshold:0}).observe(mr);
+    backBtn.addEventListener('click',function(){
+      (document.getElementById('potential')||mr).scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  }
+
   window.addEventListener('pageshow',refreshIfMember);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)refreshIfMember();});
 
