@@ -1,14 +1,14 @@
-name: gajumaru-ci
+name: nobishiro-ci
 
 on:
   push:
     paths:
-      - "site/gajumaru/**"
-      - "scripts/check_lp_gajumaru.py"
+      - "site/nobishiro/**"
+      - "scripts/check_lp_nobishiro.py"
   pull_request:
     paths:
-      - "site/gajumaru/**"
-      - "scripts/check_lp_gajumaru.py"
+      - "site/nobishiro/**"
+      - "scripts/check_lp_nobishiro.py"
   workflow_dispatch: {}
 
 jobs:
@@ -22,4 +22,4 @@ jobs:
           python-version: "3.12"
 
       - name: LP検査(サイズ予算・禁止表現・基本要件)
-        run: python scripts/check_lp_gajumaru.py
+        run: python scripts/check_lp_nobishiro.py

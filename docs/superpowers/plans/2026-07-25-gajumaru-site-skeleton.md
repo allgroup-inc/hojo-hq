@@ -9,6 +9,8 @@
 **Tech Stack:** 素のHTML/CSS/JS(フレームワークなし)、Python 3.12(LP検査スクリプト、既存 `scripts/check_lp_fukugiiro.py` と同パターン)、GitHub Actions CI、GitHub Pages配信。
 
 > **実装後の追記(最終レビューで判明した欠陥)**: 本プランは全ページで `/gajumaru/...` の絶対パスをナビゲーション・CTA・`analytics-config.js`読み込みに使うよう指示していたが、これは誤り。このリポジトリのGitHub Pagesはプロジェクトページ(`https://allgroup-inc.github.io/hojo-hq/`)として配信されており、ルート直下ではない。絶対パス `/gajumaru/...` は実際のデプロイ先で404になる。既存の `site/fukugiiro/` が相対パス(`../../index.html` 等)を使っているのは、まさにこの理由による。本プランはこの既存規約を見落としており、Plan 2(セルフサーブ診断商品)では**必ず相対パスを使うこと**。実装済みページは最終レビュー後の修正コミットで相対パスに直した(詳細はgitログ参照)。
+>
+> **実装後の追記(ブランド名決定)**: 2026-07-25、ブランド名が「ノビシロ」に決定(仮称段階)。本プラン文書内の `site/gajumaru/`・`ガジュマル(仮称)`・`check_lp_gajumaru.py`・`gajumaru-ci.yml` は実装当時の名称としてそのまま残す(履歴record)。実際のディレクトリ・ファイル・表示文言はすべて `nobishiro` / 「ノビシロ」にリネーム済み。AIエージェント人格「ガジュマルくん」(ブランド名とは別)は変更なし。詳細はgitログ(リネームコミット)参照。
 
 ## Global Constraints
 
