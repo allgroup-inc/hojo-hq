@@ -1,6 +1,7 @@
 import unittest
 import tempfile
 import os
+from unittest.mock import patch
 from scripts.churn import fit, report_card
 
 
@@ -37,6 +38,22 @@ class TestReportCard(unittest.TestCase):
             self.assertIn("%", content)
         finally:
             os.remove(path)
+
+    def test_saturated_risk_displays_as_99_not_100(self):
+        with patch("scripts.churn.report_card.score_record") as mock_score:
+            mock_score.return_value = {
+                "risk": 0.99999, "band": "high", "base_rate": 0.1, "hit_factors": [],
+            }
+            card = report_card.build_card(rec("X", None, False, "NEW"), self.model)
+        self.assertEqual(card["risk_pct"], 99.0)
+
+    def test_near_zero_risk_displays_as_0_1_not_0(self):
+        with patch("scripts.churn.report_card.score_record") as mock_score:
+            mock_score.return_value = {
+                "risk": 0.0000001, "band": "low", "base_rate": 0.1, "hit_factors": [],
+            }
+            card = report_card.build_card(rec("X", None, False, "NEW"), self.model)
+        self.assertEqual(card["risk_pct"], 0.1)
 
 
 if __name__ == "__main__":

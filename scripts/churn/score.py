@@ -2,16 +2,24 @@
 from __future__ import annotations
 import math
 
-from .config import (BAND_HIGH_MULT, BAND_LOW_MULT, FACTOR_FIELDS, MIN_RELIABLE_N)
+from .config import (BAND_HIGH_MULT, BAND_LOW_MULT, FACTOR_FIELDS, MIN_RELIABLE_N,
+                     HIGH_CUTOFF_CEILING)
 from .fit import odds
 
 
 def band_of(risk, base_rate):
-    if risk >= BAND_HIGH_MULT * base_rate:
+    high_cut = min(BAND_HIGH_MULT * base_rate, HIGH_CUTOFF_CEILING)
+    if risk >= high_cut:
         return "high"
     if risk <= BAND_LOW_MULT * base_rate:
         return "low"
     return "med"
+
+
+def display_pct(risk):
+    """表示用%は 0.1〜99.0 に丸め込む。断定表現（0% / 100%）を避けるため。
+    内部の risk（バックテスト・キャリブレーションで使う生値）はここでは変えない。"""
+    return round(min(max(risk, 0.001), 0.99) * 100, 1)
 
 
 def score_record(record, model, factor_fields=FACTOR_FIELDS):

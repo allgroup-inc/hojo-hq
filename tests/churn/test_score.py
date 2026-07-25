@@ -45,5 +45,34 @@ class TestScore(unittest.TestCase):
         self.assertTrue(x_hit and x_hit[0]["reference"])
 
 
+class TestDisplayPct(unittest.TestCase):
+    def test_saturated_risk_caps_at_99_not_100(self):
+        self.assertEqual(score.display_pct(0.99999), 99.0)
+        self.assertEqual(score.display_pct(1.0), 99.0)
+
+    def test_near_zero_risk_floors_at_0_1_not_0(self):
+        self.assertEqual(score.display_pct(0.0000001), 0.1)
+        self.assertEqual(score.display_pct(0.0), 0.1)
+
+    def test_mid_risk_unaffected(self):
+        self.assertEqual(score.display_pct(0.4321), 43.2)
+
+
+class TestBandOfReachability(unittest.TestCase):
+    def test_low_base_rate_mid_risk_is_med(self):
+        # base_rate=0.1 -> high_cut=0.2, low_cut=0.1 (unchanged from before the ceiling)
+        self.assertEqual(score.band_of(0.15, 0.1), "med")
+        self.assertEqual(score.band_of(0.25, 0.1), "high")
+        self.assertEqual(score.band_of(0.05, 0.1), "low")
+
+    def test_high_base_rate_high_risk_still_reachable(self):
+        # base_rate=0.6 -> naive high_cut would be 1.2 (unreachable). Ceiling caps it at 0.9.
+        self.assertEqual(score.band_of(0.95, 0.6), "high")
+
+    def test_high_base_rate_below_ceiling_is_not_high(self):
+        # low_cut=0.6, high_cut=min(1.2, 0.9)=0.9 -> 0.75 falls in the med band
+        self.assertEqual(score.band_of(0.75, 0.6), "med")
+
+
 if __name__ == "__main__":
     unittest.main()

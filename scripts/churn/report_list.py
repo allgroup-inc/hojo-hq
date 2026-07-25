@@ -3,7 +3,7 @@ from __future__ import annotations
 import csv
 import html
 
-from .score import score_record
+from .score import score_record, display_pct
 from .actions import action_for_band
 
 _HEADERS = ["apply_id", "agent_id", "product", "channel", "risk_pct", "band", "hit_summary", "action"]
@@ -26,7 +26,7 @@ def build_rows(scoreable_records, model):
         rows.append({
             "apply_id": r.get("apply_id"), "agent_id": r.get("agent_id"),
             "product": r.get("product"), "channel": r.get("channel"),
-            "risk": s["risk"], "risk_pct": round(s["risk"] * 100, 1),
+            "risk": s["risk"], "risk_pct": display_pct(s["risk"]),
             "band": s["band"], "hit_summary": _hit_summary(s["hit_factors"]),
             "action": action_for_band(s["band"]),
         })

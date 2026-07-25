@@ -22,3 +22,6 @@ MIN_RELIABLE_N = 20
 # リスク帯の閾値（ベース解約率に対する倍率）
 BAND_HIGH_MULT = 2.0
 BAND_LOW_MULT = 1.0
+
+# 高帯のしきい値の上限。base_rateが高くても高リスクを取りこぼさない
+HIGH_CUTOFF_CEILING = 0.9

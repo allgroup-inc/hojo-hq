@@ -2,7 +2,7 @@
 from __future__ import annotations
 import html
 
-from .score import score_record
+from .score import score_record, display_pct
 from .actions import action_for_band
 
 _BAND_LABEL = {"high": "🔴 高リスク", "med": "🟡 中リスク", "low": "🟢 低リスク"}
@@ -18,7 +18,7 @@ def build_card(record, model):
     s = score_record(record, model)
     return {
         "apply_id": record.get("apply_id"),
-        "risk_pct": round(s["risk"] * 100, 1),
+        "risk_pct": display_pct(s["risk"]),
         "band": s["band"],
         "base_pct": round(s["base_rate"] * 100, 1),
         "hit_factors": s["hit_factors"],

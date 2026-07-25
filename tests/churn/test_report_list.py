@@ -1,6 +1,7 @@
 import unittest
 import tempfile
 import os
+from unittest.mock import patch
 from scripts.churn import fit, report_list, actions
 
 
@@ -43,6 +44,26 @@ class TestReportList(unittest.TestCase):
                 self.assertIn("HIGH", content)
             finally:
                 os.remove(path)
+
+    def test_saturated_risk_displays_as_99_not_100(self):
+        model = build_model()
+        with patch("scripts.churn.report_list.score_record") as mock_score:
+            mock_score.return_value = {
+                "risk": 0.99999, "band": "high", "base_rate": 0.1, "hit_factors": [],
+            }
+            rows = report_list.build_rows([rec("X", None, False, "SAT")], model)
+        self.assertEqual(rows[0]["risk_pct"], 99.0)
+        self.assertEqual(rows[0]["risk"], 0.99999)  # raw risk kept for sorting, unclamped
+
+    def test_near_zero_risk_displays_as_0_1_not_0(self):
+        model = build_model()
+        with patch("scripts.churn.report_list.score_record") as mock_score:
+            mock_score.return_value = {
+                "risk": 0.0000001, "band": "low", "base_rate": 0.1, "hit_factors": [],
+            }
+            rows = report_list.build_rows([rec("X", None, False, "ZERO")], model)
+        self.assertEqual(rows[0]["risk_pct"], 0.1)
+        self.assertEqual(rows[0]["risk"], 0.0000001)
 
 
 if __name__ == "__main__":

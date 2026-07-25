@@ -1,6 +1,7 @@
 """学習：成熟実績から要因別リスク率（スムージング付き）とオッズ比を算出。"""
 from __future__ import annotations
 import json
+import sys
 
 from .config import FACTOR_FIELDS, SMOOTHING_K
 
@@ -18,6 +19,10 @@ def fit_model(records, factor_fields=FACTOR_FIELDS, smoothing_k=SMOOTHING_K):
     n_churn = sum(r["is_early_churn"] for r in resolved)
     base_rate = (n_churn / n_resolved) if n_resolved else 0.0
     base_odds = odds(base_rate)
+    if base_rate >= 0.5:
+        print("[fit] 警告: ベース解約率が50%以上です（帯のしきい値が圧縮されます。"
+              "HIGH_CUTOFF_CEILINGで高リスク帯を確保していますが、母数・定義を要確認）",
+              file=sys.stderr)
 
     factors = {}
     for field in factor_fields:

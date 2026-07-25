@@ -1,6 +1,8 @@
 import unittest
 import tempfile
 import os
+import io
+import contextlib
 from scripts.churn import fit
 
 
@@ -42,6 +44,20 @@ class TestFit(unittest.TestCase):
             self.assertEqual(loaded["n_resolved"], model["n_resolved"])
         finally:
             os.remove(path)
+
+    def test_high_base_rate_prints_caution_to_stderr(self):
+        recs = [rec("X", 1) for _ in range(6)] + [rec("Y", 0) for _ in range(4)]  # base_rate=0.6
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            fit.fit_model(recs)
+        self.assertIn("警告", stderr.getvalue())
+
+    def test_low_base_rate_prints_no_caution(self):
+        recs = [rec("X", 1) for _ in range(1)] + [rec("Y", 0) for _ in range(9)]  # base_rate=0.1
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            fit.fit_model(recs)
+        self.assertEqual(stderr.getvalue(), "")
 
 
 if __name__ == "__main__":
