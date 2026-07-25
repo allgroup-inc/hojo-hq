@@ -1,47 +1,56 @@
-# LINE配信下書き: 締切アラート
+# LINE配信下書き: 締切アラート(約1か月前から / 締切3層ルール準拠)
 
 - 生成日: 2026-07-25(毎日自動更新)
-- 対象: 締切7日以内の募集中制度 10件(うち8件を掲載, 残り2件は一覧参照)
+- LINEアラート対象(残り7〜29日): 20件
+- 7日未満(予告切替・配信で急かさない): 10件 → 末尾の予告文を使用
 - 使い方: 下の本文をそのまま LINE Official Account Manager のメッセージ配信へ。
 
 ---
 
 ## 本文(コピペ用)
 ```
-⏰【締切が近い補助金】
+📣【締切が近づいている補助金】
+早めの準備で、間に合わせましょう。
 
-■ 「経済安全保障重要技術育成プログラム／高効率・高品質レーザー加工技術の開発／研究開発項目③高品質・高出力な半導体レーザーの研究開発及び当該半導体レーザーを用いた車載用LiDARの構築」の公募
-　締切: 残り2日(2026-07-27)
-　詳細: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYjqMAH
+🟠 まもなく締切(7〜14日) — 13件
+■ 「NEDOのプロジェクト成果由来の製品・プロセス・サービスに関する各種効果指標の再試算に係る調査」の公募
+　2026-08-03(残り9日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc1MMAT
+■ 「経済安全保障重要技術育成プログラム／ハイブリッドクラウド利用基盤技術の開発／不正機能排除技術の社会実装に向けた市場・技術動向等に係る調査」の公募
+　2026-08-03(残り9日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbyeMAD
+■ 【令和８年度】二酸化炭素排出抑制対策事業費等補助金 （地域共生型廃棄物発電等導入促進事業 （うち地域の廃棄物を活用した地域エネルギー創出事業））（第２次公募）
+　2026-08-03(残り9日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbPBMA1
+■ 「プレシード・シード期の概念実証／実現可能性調査における支援方策に関する調査」の公募
+　2026-08-04(残り10日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd5IMAT
+　…ほか9件は一覧へ
 
-■ 【応募事業者】令和８年度 プラスチック等資源循環システム構築実証事業　＜二次公募＞
-　締切: 残り2日(2026-07-27)
-　詳細: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbJKMA1
+🟢 準備をはじめる(15〜29日) — 7件
+■ 「カーボンリサイクル実現を加速するバイオ由来製品生産技術の開発に関する調査」の公募
+　2026-08-10(残り16日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcNyMAL
+■ 沖縄県認定パートナーVC「Okinawa Partner VC」の公募
+　2026-08-12(残り18日)
+　https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1029379.html
+■ 「次世代冷却に係るマテリアル・デバイスの開発動向に関する調査」の公募
+　2026-08-17(残り23日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0sMAD
+■ 令和８年度　ＺＥＢ実証事業（二次公募）
+　2026-08-17(残り23日) / 上限7億円
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdbJMAT
+　…ほか3件は一覧へ
 
-■ 「インフラ管理DXにおける地下埋設物データ整備手法活用の人材育成講座のあり方に関する調査」の公募
-　締切: 残り3日(2026-07-28)
-　詳細: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbonMAD
-
-■ 令和8年度 那覇市人手不足対応支援補助金
-　締切: 残り3日(2026-07-28)
-　詳細: https://www.city.naha.okinawa.jp/business/kigyouricchi/1003642/1007180.html
-
-■ 「スタートアップに対する経営管理・事業化支援人材の伴走支援モデルに係る調査事業」の公募
-　締切: 残り5日(2026-07-30)
-　詳細: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0JMAT
-
-■ 令和８年度_グリーンスローモビリティ等導入促進事業
-　締切: 残り5日(2026-07-30)
-　詳細: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDKZFMA5
-
-■ 「グリーンイノベーション基金事業／食料・農林水産業のCO2等削減・吸収技術の開発」の公募
-　締切: 残り6日(2026-07-31)
-　詳細: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXoQMAX
-
-■ 「次世代航空機の研究開発に関する調査」の公募
-　締切: 残り6日(2026-07-31)
-　詳細: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbnjMAD
-
+💡 電子申請には gBizIDプライム が必要な制度が多く、発行に2〜3週間かかることがあります。
 ※要件・締切は必ず原文でご確認ください。
-制度一覧はこちら → https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert
+制度一覧 → https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert
+```
+
+## 7日未満の制度(予告切替) — 配信で使う場合はこちらの文面
+```
+⏳ 締切目前の公募が10件あります。
+いまから書類を整えるのは大変なので、無理は禁物。
+次の公募に備えて【gBizIDプライム】の取得(2〜3週間)を先に済ませておきましょう。
+制度一覧 → https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert
 ```
