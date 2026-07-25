@@ -47,6 +47,25 @@ class TestCli(unittest.TestCase):
         m = cli.cmd_backtest(self.csv, self.cmap, "2025-06-01", "2026-07-25")
         self.assertIn("auc", m)
 
+    def test_cmd_card_writes_html_for_existing_apply_id(self):
+        cli.cmd_fit(self.csv, self.cmap, self.model, "2026-07-25")
+        out_path = os.path.join(self.dir, "card.html")
+        card = cli.cmd_card(self.csv, self.cmap, self.model, "NEW_X", out_path, "2026-07-25")
+        self.assertEqual(card["apply_id"], "NEW_X")
+        self.assertTrue(os.path.exists(out_path))
+        with open(out_path, encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("NEW_X", content)
+
+    def test_cmd_report_writes_html(self):
+        out_path = os.path.join(self.dir, "report.html")
+        sections = cli.cmd_report(self.csv, self.cmap, out_path, "2026-07-25")
+        self.assertTrue(os.path.exists(out_path))
+        self.assertTrue(sections)
+        with open(out_path, encoding="utf-8") as f:
+            content = f.read()
+        self.assertIn("解約傾向レポート", content)
+
 
 if __name__ == "__main__":
     unittest.main()
