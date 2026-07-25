@@ -284,6 +284,7 @@
   .back-result{position:fixed;right:16px;bottom:16px;z-index:60;font:inherit;font-weight:700;
     background:var(--kin);color:var(--sumi);border:none;border-radius:999px;min-height:48px;
     padding:0 20px;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer;}
+  .restored-note{font-size:.85rem;font-weight:700;color:rgba(0,51,92,.65);margin-bottom:var(--sp-1);}
   .member-note{margin-top:var(--sp-2);padding:var(--sp-2);border-radius:12px;font-size:.9rem;font-weight:700;
     background:rgba(0,80,136,.08);border:1px solid rgba(0,80,136,.25);color:var(--fukamidori);}
   .unlock{
@@ -723,6 +724,16 @@
     return document.querySelectorAll('#f-theme .chip.on').length;
   }
   function updateProgress(){
+    // 復元表示中に条件を変更したら、古い結果(金額含む)を消して混乱を防ぐ
+    if(RESTORED_VIEW){
+      RESTORED_VIEW=false;
+      const mr=document.getElementById('match-result');
+      if(mr)mr.hidden=true;
+      const bb=document.getElementById('back-result');
+      if(bb){bb.hidden=true;bb.dataset.ready='';}
+      const rn=document.getElementById('restored-note');
+      if(rn)rn.remove();
+    }
     const n=selectedCount(), t=themeCount();
     const el=document.getElementById('form-progress');
     if(!el)return;
@@ -921,6 +932,9 @@
       document.getElementById('match-btn').click();
     });
     document.getElementById('match-result').hidden=false;
+    var _rn=document.getElementById('restored-note');
+    if(_rn)_rn.remove();
+    RESTORED_VIEW=false;
     if(backBtn)backBtn.dataset.ready='1';
     if(!AUTORUN)document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
   });
@@ -934,6 +948,7 @@
 
   // 再読み込み後の状態復元: 選択を戻し、結果も再表示(復元時は自動スクロールしない)
   let AUTORUN=false;
+  let RESTORED_VIEW=false;
   function restoreState(){
     var st=null;
     try{st=JSON.parse(localStorage.getItem('mikata_form')||'null');}catch(e){}
@@ -950,6 +965,16 @@
     AUTORUN=true;
     document.getElementById('match-btn').click();
     AUTORUN=false;
+    // 復元表示であることを明示。条件を触ったら古い結果は消す(下のupdateProgress参照)
+    RESTORED_VIEW=true;
+    var head=document.querySelector('.result-head');
+    if(head&&!document.getElementById('restored-note')){
+      var n=document.createElement('p');
+      n.id='restored-note';
+      n.className='restored-note';
+      n.textContent='↻ 前回の診断結果を表示しています(条件を変えると新しく診断できます)';
+      head.parentNode.insertBefore(n,head);
+    }
   }
 
   // LINEアプリから戻ってきた時: 登録済みならロック表示を自動で全件表示に切替
