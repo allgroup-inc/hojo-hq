@@ -104,3 +104,82 @@ function createStripeCheckoutSession(diagnosisId, email) {
     return null;
   }
 }
+
+function handleStripeWebhook(e) {
+  var expectedToken = PropertiesService.getScriptProperties().getProperty("WEBHOOK_TOKEN");
+  if (!NBBackendLogic.isValidWebhookToken(e.parameter.token, expectedToken)) {
+    return jsonResponse({ error: "invalid_token" });
+  }
+
+  var stripeEvent;
+  try {
+    stripeEvent = JSON.parse(e.postData.contents);
+  } catch (err) {
+    return jsonResponse({ error: "invalid_json" });
+  }
+
+  if (stripeEvent.type !== "checkout.session.completed") {
+    return jsonResponse({ ok: true, ignored: true });
+  }
+
+  var session = stripeEvent.data.object;
+  var diagnosisId = session.client_reference_id;
+  var row = findRowByDiagnosisId(diagnosisId);
+  if (!row) {
+    return jsonResponse({ error: "diagnosis_not_found" });
+  }
+
+  updateRowField(row.rowIndex, COLUMN.paymentStatus, "paid");
+  updateRowField(row.rowIndex, COLUMN.stripeSessionId, session.id);
+
+  try {
+    var answers = JSON.parse(row.values[COLUMN.answersJson - 1]);
+    var reportText = generateReport(answers);
+    var html = NBBackendLogic.buildReportEmailHtml(reportText, answers);
+    MailApp.sendEmail({
+      to: row.values[COLUMN.email - 1],
+      subject: "【ノビシロ】AI活用診断レポートが届きました",
+      htmlBody: html,
+    });
+    updateRowField(row.rowIndex, COLUMN.reportStatus, "sent");
+    updateRowField(row.rowIndex, COLUMN.sentAt, new Date().toISOString());
+  } catch (err) {
+    // 決済は完了しているので行は残す。カチカクくんが日次で "paid_pending_report" 相当を確認し手動フォローする
+    updateRowField(row.rowIndex, COLUMN.reportStatus, "failed: " + err.message);
+  }
+
+  return jsonResponse({ ok: true });
+}
+
+function findRowByDiagnosisId(diagnosisId) {
+  var sheet = getLeadSheet();
+  var values = sheet.getDataRange().getValues();
+  for (var i = 0; i < values.length; i++) {
+    if (values[i][COLUMN.diagnosisId - 1] === diagnosisId) {
+      return { rowIndex: i + 1, values: values[i] };
+    }
+  }
+  return null;
+}
+
+function updateRowField(rowIndex, column, value) {
+  getLeadSheet().getRange(rowIndex, column).setValue(value);
+}
+
+function generateReport(answers) {
+  var apiKey = PropertiesService.getScriptProperties().getProperty("ANTHROPIC_API_KEY");
+  var prompt = NBBackendLogic.buildReportPrompt(answers);
+  var response = UrlFetchApp.fetch("https://api.anthropic.com/v1/messages", {
+    method: "post",
+    contentType: "application/json",
+    headers: { "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    payload: JSON.stringify({
+      model: "claude-sonnet-5",
+      max_tokens: 2048,
+      messages: [{ role: "user", content: prompt }],
+    }),
+    muteHttpExceptions: true,
+  });
+  var data = JSON.parse(response.getContentText());
+  return data.content[0].text;
+}
