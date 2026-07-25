@@ -92,11 +92,15 @@ function createStripeCheckoutSession(diagnosisId, email) {
     customer_email: email,
   };
 
-  var response = UrlFetchApp.fetch("https://api.stripe.com/v1/checkout/sessions", {
-    method: "post",
-    headers: { Authorization: "Bearer " + secretKey },
-    payload: payload,
-    muteHttpExceptions: true,
-  });
-  return JSON.parse(response.getContentText());
+  try {
+    var response = UrlFetchApp.fetch("https://api.stripe.com/v1/checkout/sessions", {
+      method: "post",
+      headers: { Authorization: "Bearer " + secretKey },
+      payload: payload,
+      muteHttpExceptions: true,
+    });
+    return JSON.parse(response.getContentText());
+  } catch (err) {
+    return null;
+  }
 }
