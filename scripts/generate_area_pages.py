@@ -35,7 +35,7 @@ MUNIS = [
 ]
 
 STYLE = """
-:root{--fg-primary:#1a6b52;--fg-accent:#f2b705;--fg-ink:#1f2a2e;--fg-bg:#fffdf7;--fg-card:#fff;--fg-muted:#5c6b70;--fg-line:#e5e0d4}
+:root{--fg-primary:#B9502F;--fg-accent:#F2B705;--fg-deep:#1A6B52;--fg-ink:#1F2A2E;--fg-bg:#FFFBF4;--fg-card:#fff;--fg-muted:#5C6B70;--fg-line:#EBE2D4}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:18px;line-height:1.8;color:var(--fg-ink);background:var(--fg-bg)}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
@@ -50,14 +50,31 @@ h1{font-size:1.35rem;margin-bottom:8px}
 ul.areas{list-style:none;columns:2;gap:12px}
 ul.areas li{margin-bottom:8px}
 a{color:var(--fg-primary)}
+.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
+.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
+.siteheader .hlogo img{width:30px;height:30px}
+.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
+.siteheader nav a.hline{background:#06C755;color:#fff;font-weight:700}
 """
+
+HEADER = '''<header class="siteheader">
+  <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂</a>
+  <nav>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
+    <a class="hline" href="https://lin.ee/7fH7vDQ" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+  </nav>
+</header>'''
 
 
 def esc(s):
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def page(title, desc, body, updated):
+def page(title, desc, body, updated, depth=2):
+    rel = "../" * depth
     return f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -65,13 +82,17 @@ def page(title, desc, body, updated):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
+<link rel="icon" type="image/svg+xml" href="{rel}assets/icon.svg">
 <style>{STYLE}</style>
 </head>
 <body>
+<script src="{rel}analytics-config.js"></script>
+<script src="{rel}assets/fg-analytics.js"></script>
+{HEADER}
 <div class="wrap">
 {body}
-<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>最終更新: {esc(updated)}(毎日自動更新)/ 運営: 株式会社フクギイロ</div>
-<p style="margin-top:16px"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">フクギイロ トップ</a></p>
+<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
+<p style="margin-top:16px"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
 </div>
 </body>
 </html>
@@ -104,9 +125,10 @@ def muni_page(muni, items, updated):
                 f'<p class="note">{esc(it["target_household"])}</p>'
                 f'<p class="note">窓口: {esc(it["how_to_apply"])}</p>'
                 f'<a href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する</a>'
+                f' ・ <a href="../../kit/{esc(it["id"])}/">申請準備シート</a>'
                 "</div>"
             )
-    title = f"{muni}の給付金・手当まとめ | フクギイロ"
+    title = f"{muni}の給付金・手当まとめ | もらいわすれ堂"
     desc = f"{muni}にお住まいの世帯が使える可能性のある給付金・手当のまとめ。3分の無料診断で、あなたの世帯にあてはまる制度がわかります。"
     return page(title, desc, "\n".join(body), updated)
 
@@ -121,7 +143,7 @@ def index_page(updated):
         f'<ul class="areas">{lis}</ul>'
         '<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'
     )
-    return page("沖縄県 市町村別の給付金・手当まとめ | フクギイロ", "沖縄県41市町村別の給付金・手当まとめ。", body, updated)
+    return page("沖縄県 市町村別の給付金・手当まとめ | もらいわすれ堂", "沖縄県41市町村別の給付金・手当まとめ。", body, updated, depth=1)
 
 
 def main():

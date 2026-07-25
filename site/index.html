@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>沖縄企業のミカタ|沖縄で使える補助金・助成金を毎日更新</title>
-<meta name="description" content="沖縄の事業者向けに、国・県・市町村の補助金・助成金情報を毎日自動更新。無料の診断で貴社が使える制度をチェック。締切7日前のLINEアラート付き。運営:株式会社GLOW">
+<meta name="description" content="沖縄の事業者向けに、国・県・市町村の補助金・助成金情報を毎日自動更新。無料の診断で貴社が使える制度をチェック。締切の約1か月前からLINEアラート。運営:株式会社GLOW">
 <meta name="theme-color" content="#00335c">
 <link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="沖縄企業のミカタ|沖縄で使える補助金・助成金を毎日更新">
-<meta property="og:description" content="沖縄の事業者向けに補助金・助成金情報を毎日自動更新。無料診断と締切7日前LINEアラート。">
+<meta property="og:description" content="沖縄の事業者向けに補助金・助成金情報を毎日自動更新。無料診断と、締切の約1か月前からのLINEアラート。">
 <meta property="og:url" content="https://allgroup-inc.github.io/hojo-hq/">
 <meta property="og:image" content="https://allgroup-inc.github.io/hojo-hq/assets/photos/hero.jpg">
 <link rel="icon" type="image/png" href="assets/glow-logo.png">
@@ -311,6 +311,51 @@
   .expert-card.coming{opacity:.75;border-style:dashed;}
   .expert-card.coming .expert-photo{font-size:1.3rem;}
   .experts-note{margin-top:var(--sp-2);font-size:.78rem;color:rgba(0,51,92,.72);}
+  /* 申請方法バッジ(ぼかし対象外: 実務判断に使う情報のため常時表示) */
+  .apply-badge{
+    display:inline-block;margin-top:.6rem;
+    font-size:.74rem;font-weight:700;letter-spacing:.02em;
+    padding:.35em .9em;border-radius:999px;
+  }
+  .apply-badge.direct{background:rgba(28,107,58,.12);color:#1c6b3a;border:1px solid rgba(28,107,58,.4);}
+  .apply-badge.egov{background:rgba(0,51,92,.08);color:rgba(0,51,92,.8);border:1px solid rgba(0,51,92,.28);}
+
+  /* GビズID未取得フィルタ */
+  .nogbiz-filter{
+    grid-column:1/-1;display:flex;align-items:flex-start;gap:.7em;
+    padding:var(--sp-2);border-radius:12px;cursor:pointer;
+    background:rgba(0,51,92,.05);border:1px solid rgba(0,51,92,.18);
+    font-size:.88rem;font-weight:700;color:var(--fukamidori);line-height:1.6;
+  }
+  .nogbiz-filter input{width:20px;height:20px;flex-shrink:0;margin-top:.15em;accent-color:var(--kin);}
+  .nogbiz-filter small{display:block;font-weight:400;font-size:.8rem;color:rgba(0,51,92,.75);margin-top:.2em;}
+  .nogbiz-filter:focus-within{outline:3px solid var(--kin);}
+
+  /* 申請の前に: gBizID の最短ルート案内(出典: gbiz-id.go.jp) */
+  .gbiz{
+    margin-top:var(--sp-4);border-radius:14px;
+    background:#fff;border:1px solid rgba(0,51,92,.18);
+    box-shadow:0 4px 16px rgba(0,51,92,.06);overflow:hidden;
+  }
+  .gbiz summary{
+    cursor:pointer;list-style:none;padding:1.1rem 1.3rem;
+    font-weight:700;font-size:.95rem;color:var(--fukamidori);
+    display:flex;align-items:center;gap:.6em;min-height:44px;
+  }
+  .gbiz summary::-webkit-details-marker{display:none;}
+  .gbiz summary::after{content:"＋";margin-left:auto;color:var(--kin);font-size:1.1em;}
+  .gbiz[open] summary::after{content:"−";}
+  .gbiz summary:focus-visible{outline:3px solid var(--kin);}
+  .gbiz-body{padding:0 1.3rem 1.3rem;font-size:.9rem;line-height:1.85;color:rgba(0,51,92,.88);}
+  .gbiz-row{
+    display:flex;flex-wrap:wrap;gap:.6em;align-items:baseline;
+    padding:.7em 0;border-top:1px solid rgba(0,51,92,.12);
+  }
+  .gbiz-row b{min-width:8.5em;color:var(--fukamidori);}
+  .gbiz-fast{color:#1c6b3a;font-weight:700;}
+  .gbiz-slow{color:#a03a2a;font-weight:700;}
+  .gbiz-note{margin-top:.8em;font-size:.82rem;color:rgba(0,51,92,.72);}
+  .gbiz-body a{color:var(--midori);font-weight:700;}
   .result-note{margin-top:var(--sp-3);font-size:.9rem;color:rgba(0,51,92,.8);}
   .updated{margin-top:var(--sp-6);font-size:.78rem;color:rgba(0,51,92,.72);}
 
@@ -413,7 +458,7 @@
   <div class="how-list">
     <div class="how-item rv"><h3><span>壱</span>GLOWが毎日、国と沖縄の公募をチェック</h3><p>jGrantsや県・市町村サイトを毎日確認。見落としがちな更新も漏らしません。</p></div>
     <div class="how-item rv"><h3><span>弐</span>締切・金額・対象を、原文照合で正確に</h3><p>すべての情報は公式ページと突き合わせて掲載。あいまいなものは「要確認」と正直に表示します。</p></div>
-    <div class="how-item rv"><h3><span>参</span>締切7日前、LINEにアラート</h3><p>気になる制度を登録すれば、申し込み忘れをゼロに。相談したい時は専門家におつなぎします。</p></div>
+    <div class="how-item rv"><h3><span>参</span>間に合う時期に、LINEでお知らせ</h3><p>締切の約1か月前からお知らせします。書類やgBizIDの準備が間に合う時期にお伝えするのが、私たちの役目です。</p></div>
   </div>
 </section>
 
@@ -468,6 +513,12 @@
         <option value="mitei">まだ決めていない</option>
       </select>
     </label>
+    <label class="nogbiz-filter">
+      <input type="checkbox" id="f-nogbiz">
+      <span>GビズIDプライムをまだ持っていない
+        <small>県・市町村など、独自の申請方法で「すぐ動ける可能性がある制度」を上位に表示します。</small>
+      </span>
+    </label>
     <button id="match-btn" class="line-btn" type="button">無料でマッチングする</button>
     <p class="form-guide" id="form-guide" hidden>まだ何も選ばれていません 😊 どれか1つだけでも選ぶと、貴社に近い制度に絞ってお探しできます。</p>
   </div>
@@ -480,8 +531,35 @@
       <a href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E4%BA%8B%E6%A5%AD%E6%89%BF%E7%B6%99%E7%9B%B8%E8%AB%87%E3%80%91" target="_blank" rel="noopener" class="shokei-link">引き継ぎの無料相談はこちら</a>
     </div>
     <div id="result-list"></div>
-    <p class="result-note">締切7日前アラートを受け取るには、LINE登録(無料)をどうぞ。</p>
+    <p class="result-note">締切アラート(約1か月前から)を受け取るには、LINE登録(無料)をどうぞ。</p>
     <a class="register-btn" href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E4%BC%9A%E7%A4%BE%E6%83%85%E5%A0%B1%E7%99%BB%E9%8C%B2%E3%80%91%0A%E4%BC%9A%E7%A4%BE%E5%90%8D%EF%BC%9A%0A%E4%BB%A3%E8%A1%A8%E8%80%85%E5%90%8D%EF%BC%9A%0A%E6%89%80%E5%9C%A8%E5%9C%B0%EF%BC%9A" target="_blank" rel="noopener">貴社専用の制度通知を受け取る(会社情報を登録)</a>
+
+    <details class="gbiz" id="gbiz">
+      <summary>申請の前に:gBizIDは「オンライン」なら待たずに取れます</summary>
+      <div class="gbiz-body">
+        <p>国の補助金(jGrants)の申請には、多くの場合「GビズIDプライム」が必要です。<strong>取り方によって、かかる時間がまったく違います。</strong></p>
+        <div class="gbiz-row">
+          <b>オンライン申請</b>
+          <span><span class="gbiz-fast">24時間365日、速やかに発行</span>(法人代表者の方)</span>
+        </div>
+        <div class="gbiz-row">
+          <b>書類の郵送申請</b>
+          <span><span class="gbiz-slow">審査に最大1か月</span></span>
+        </div>
+        <div class="gbiz-row">
+          <b>用意するもの</b>
+          <span>マイナンバーカード / NFC対応スマートフォン / GビズIDアプリ</span>
+        </div>
+        <div class="gbiz-row">
+          <b>有効期限</b>
+          <span>発行日から2年3か月(プライム・メンバー)。<strong>以前取得した方は期限切れにご注意ください</strong></span>
+        </div>
+        <p class="gbiz-note">
+          ※ gBizIDが必要かどうかは制度によって異なります。沖縄県・市町村・産業振興公社などの制度は独自の申請方法の場合があります。必ず各制度の公募要領でご確認ください。<br>
+          ※ 上記は<a href="https://gbiz-id.go.jp/top/" target="_blank" rel="noopener">GビズID公式サイト</a>の記載に基づく情報です(最新の内容は公式サイトでご確認ください)。
+        </p>
+      </div>
+    </details>
 
     <div class="experts">
       <p class="experts-head">この制度の申請、誰に相談する?</p>
@@ -519,7 +597,7 @@
 <section class="cta">
   <p class="eyebrow rv">START FREE</p>
   <h2 class="rv">この島の可能性を、<br><span class="kin">いっしょに起こそう。</span></h2>
-  <p class="sub rv" style="text-align:center;max-width:none;">気になる公募は、締切7日前にLINEでお知らせします。</p>
+  <p class="sub rv" style="text-align:center;max-width:none;">気になる公募は、締切の約1か月前からLINEでお知らせします。</p>
   <a class="line-btn rv" href="https://lin.ee/sh4bTUe" target="_blank" rel="noopener">LINEで無料登録する</a>
   <p class="cta-note rv">登録は10秒。いつでも解除できます。</p>
 </section>
@@ -586,6 +664,10 @@
     requestAnimationFrame(step);
   }
 
+  // 申請方法の判定。jGrants掲載制度は電子申請システム上での手続きとなるため
+  // GビズIDプライムが必要。県・市町村・公社の制度は独自申請の場合がある。
+  const needsGbiz=it=>/jgrants-portal\.go\.jp/.test(it.source_url||'');
+
   // テーマ→制度キーワード(すべてマッチング精度向上に実際に使う)
   const THEME_KEYS={
     hanro:['販路','売上','持続化','販売促進'],
@@ -617,10 +699,16 @@
       return areaOK;
     });
 
+    // 申請方法の判定: jGrants(国の電子申請)はGビズIDプライムでのログインが必要。
+    // それ以外(県・市町村・公社)は独自申請のため不要な場合がある(最終的な要否は公募要領で要確認)。
+    const noGbiz=document.getElementById('f-nogbiz').checked;
+
     const score=it=>{
       const text=(it.name||'')+(it.target_biz||'');
       let s=0;
       if(shokeiSignal&&it.tag==='shokei')s-=100;
+      // GビズID未取得の方には、独自申請の制度を上位へ(隠さず順序のみ変更)
+      if(noGbiz&&!needsGbiz(it))s-=50;
       if(themeKeys.some(k=>text.includes(k)))s-=10;
       if(keys.some(k=>text.includes(k)))s-=5;
       return s;
@@ -643,6 +731,9 @@
           <span>${it.target_area||'対象地域 要確認'}</span>
           ${it.max_amount?`<span>上限 ${Number(it.max_amount).toLocaleString()}円</span>`:''}
         </div>
+        ${needsGbiz(it)
+          ?'<span class="apply-badge egov">電子申請(GビズID必要)</span>'
+          :'<span class="apply-badge direct">独自申請(GビズID不要の場合あり)</span>'}
         ${locked?'':`<a href="${it.source_url}" target="_blank" rel="noopener">公式ページで確認 →</a>`}
       </div>`;
     let html='';
@@ -653,7 +744,7 @@
       if(hits.length>1){
         html+=hits.slice(1).map(it=>card(it,true)).join('');
         html+=`<div class="unlock">
-          <p><strong>残り${hits.length-1}件</strong>は、無料のLINE登録ですべて表示されます。<br>締切7日前アラートも自動で届きます。</p>
+          <p><strong>残り${hits.length-1}件</strong>は、無料のLINE登録ですべて表示されます。<br>締切の約1か月前からアラートも自動で届きます。</p>
           <a class="line-btn" href="https://lin.ee/sh4bTUe" target="_blank" rel="noopener">LINEで無料登録して全て見る</a>
         </div>`;
       }
