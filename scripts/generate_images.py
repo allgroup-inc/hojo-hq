@@ -19,6 +19,20 @@ from PIL import Image, ImageDraw, ImageFont
 BASE_DIR = os.path.dirname(__file__)
 POSTS_DIR = os.path.join(BASE_DIR, "..", "posts", "launch")
 OUT_DIR = os.path.join(BASE_DIR, "..", "posts", "images")
+DATA_PATH = os.path.join(BASE_DIR, "..", "data", "subsidies.json")
+
+# ブランド表記(全画像共通)。「何の会社か一目で分かる」ための日本語名を必ず載せる。
+BRAND_JA = "沖縄企業のミカタ"
+# プロフィール遷移CTA(全画像共通)。Meta一次情報上、プロフィール遷移は配信量の予測ターゲット
+# (docs/SNS投稿設計_調査結果.md ❶)。フィード上は1枚ずつ流れるため、各画像を自己完結させる。
+def _load_count():
+    try:
+        import json
+        with open(DATA_PATH, encoding="utf-8") as f:
+            d = json.load(f)
+        return d.get("count") or len(d.get("items", []))
+    except Exception:
+        return None
 
 W = H = 1080
 PAD = 96
@@ -86,8 +100,18 @@ def fit_font(draw, s, bold, max_w, start, min_size=28):
     return font(bold, min_size)
 
 
+# 禁則処理: 行頭にきてはいけない文字(句読点・閉じ括弧・長音・小書き仮名)
+NO_LINE_START = "、。，．・：；？！」』）］｝〕〉》ーゝゞぁぃぅぇぉっゃゅょゎ"
+# 禁則処理: 行末にきてはいけない文字(開き括弧)
+NO_LINE_END = "「『（［｛〔〈《"
+
+
 def wrap(draw, s, f, max_w):
-    """CJK対応の文字単位ワードラップ。"""
+    """CJK対応の文字単位ワードラップ(基本的な禁則処理つき)。
+
+    句読点や閉じ括弧が行頭に落ちると読みづらいため、
+    その場合は直前の1文字ごと次の行へ送る。
+    """
     lines, cur = [], ""
     for ch in s:
         if ch == "\n":
@@ -96,6 +120,11 @@ def wrap(draw, s, f, max_w):
             continue
         if text_w(draw, cur + ch, f) <= max_w:
             cur += ch
+            continue
+        # ここで折り返す必要がある。禁則にかかる場合は直前の文字ごと送る
+        if len(cur) > 1 and (ch in NO_LINE_START or cur[-1] in NO_LINE_END):
+            lines.append(cur[:-1])
+            cur = cur[-1] + ch
         else:
             lines.append(cur)
             cur = ch
@@ -134,10 +163,13 @@ def render(post, out_path):
     d = ImageDraw.Draw(img)
     max_w = W - PAD * 2
 
-    # 上部: eyebrow(サイト名)＋金のライン
-    eb = font(True, 30)
-    d.text((PAD, PAD), "OKINAWA KIGYO NO MIKATA", font=eb, fill=GOLD)
-    d.line([(PAD, PAD + 52), (PAD + 220, PAD + 52)], fill=GOLD, width=4)
+    # 上部: 日本語サービス名(大)＋ローマ字(小)＋金のライン
+    # 「何の会社か一目で分かる」ため、全画像に日本語名を大きく載せる(②への対応)
+    bn = font(True, 44)
+    d.text((PAD, PAD), BRAND_JA, font=bn, fill=WHITE)
+    eb = font(True, 24)
+    d.text((PAD, PAD + 58), "OKINAWA KIGYO NO MIKATA｜補助金・助成金 情報", font=eb, fill=GOLD)
+    d.line([(PAD, PAD + 96), (PAD + 220, PAD + 96)], fill=GOLD, width=4)
 
     # バッジ(予告カード等): 右上に金枠のピル
     if post.get("badge"):
@@ -149,7 +181,7 @@ def render(post, out_path):
                             outline=GOLD, width=3)
         d.text((bx + 28, by + (bh - bf.size) // 2 - 2), post["badge"], font=bf, fill=GOLD)
 
-    # 中央ブロックを縦積みで配置
+    # 中央ブロックを縦積みで配置(下部CTA帯と重ならない範囲に収める)
     y = 300
 
     # 数字(大・金)
@@ -166,17 +198,32 @@ def render(post, out_path):
             y += int(tf.size * 1.28)
         y += 16
 
-    # サブ(淡色)
+    # サブ(淡色)。1行に収まるよう自動縮小し、末尾の「…」だけが次行に落ちるのを防ぐ
     if post["sub"]:
-        sf = font(False, 40)
+        sf = fit_font(d, post["sub"], False, max_w, start=40, min_size=30)
         for ln in wrap(d, post["sub"], sf, max_w):
             d.text((PAD, y), ln, font=sf, fill=MUTED)
             y += int(sf.size * 1.3)
 
-    # 下部: サイト表記＋金のライン
-    ff = font(False, 28)
-    d.line([(PAD, H - PAD - 46), (W - PAD, H - PAD - 46)], fill=(255, 255, 255, 40), width=2)
-    d.text((PAD, H - PAD - 30), SITE, font=ff, fill=MUTED)
+    # 下部CTA帯: 余白を埋め、全画像でプロフィール遷移を促す(②の余白解消＋❶のプロフィール遷移)
+    cnt = _load_count()
+    cta_head = "プロフィールのリンクから"
+    cta_main = (f"掲載{cnt}件を、登録なしで今すぐチェック" if cnt
+                else "掲載中の制度を、登録なしで今すぐチェック")
+    band_h = 208
+    band_top = H - PAD - band_h
+    d.rounded_rectangle([PAD, band_top, W - PAD, band_top + band_h],
+                        radius=24, fill=GOLD)
+    cx = PAD + 44
+    cy = band_top + 34
+    hf = font(True, 30)
+    d.text((cx, cy), "▶  " + cta_head, font=hf, fill=(2, 28, 48))
+    cy += 46
+    mf = fit_font(d, cta_main, True, max_w - 88, start=42, min_size=30)
+    d.text((cx, cy), cta_main, font=mf, fill=(2, 28, 48))
+    cy += mf.size + 18
+    uf = font(False, 26)
+    d.text((cx, cy), "@okinawa_mikata ｜ allgroup-inc.github.io/hojo-hq", font=uf, fill=(2, 28, 48))
 
     img.save(out_path, "PNG", optimize=True)
 

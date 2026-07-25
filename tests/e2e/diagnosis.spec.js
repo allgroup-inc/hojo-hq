@@ -42,6 +42,46 @@ test("診断フロー: 入力→マッチング→結果表示→LINE登録導�
   await expect(register).toHaveAttribute("href", /line\.me/);
 });
 
+test("GビズID未取得フィルタ: 申請方法バッジが出し分けられ、独自申請が優先される", async ({ page }) => {
+  await page.goto(SITE);
+  await waitForData(page);
+
+  // 通常の診断: 各カードに申請方法バッジが付くこと
+  await page.selectOption("#f-area", "那覇市");
+  await page.locator("#match-btn").click();
+  const cards = page.locator("#result-list .card");
+  await expect(cards.first()).toBeVisible({ timeout: 10000 });
+  expect(await page.locator("#result-list .apply-badge").count()).toBe(await cards.count());
+
+  // ぼかしカードでも申請方法は読めること(実務判断に必要な情報のため)
+  const lockedBadge = page.locator("#result-list .card.locked .apply-badge").first();
+  if (await lockedBadge.count()) {
+    await expect(lockedBadge).toBeVisible();
+  }
+
+  // チェックONで、独自申請(GビズID不要の場合あり)の制度が先頭に来ること
+  await page.locator("#f-nogbiz").check();
+  await page.locator("#match-btn").click();
+  await expect(page.locator("#result-list .card").first().locator(".apply-badge")).toHaveClass(/direct/);
+});
+
+test("gBizID案内: 結果画面に最短ルートの案内が表示され、開閉できる", async ({ page }) => {
+  await page.goto(SITE);
+  await waitForData(page);
+
+  await page.selectOption("#f-area", "那覇市");
+  await page.locator("#match-btn").click();
+
+  const gbiz = page.locator("#gbiz");
+  await expect(gbiz).toBeVisible({ timeout: 10000 });
+
+  // 折りたたみを開くと、オンライン/郵送の所要期間と公式リンクが読めること
+  await gbiz.locator("summary").click();
+  await expect(gbiz).toContainText("24時間365日");
+  await expect(gbiz).toContainText("最大1か月");
+  await expect(gbiz.locator('a[href*="gbiz-id.go.jp"]')).toBeVisible();
+});
+
 test("承継カモフラージュ設問: 引き継ぎ回答で承継相談バナーが出る", async ({ page }) => {
   await page.goto(SITE);
   await waitForData(page);

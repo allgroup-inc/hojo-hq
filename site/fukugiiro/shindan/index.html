@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3分でもらい忘れ診断 | フクギイロ</title>
+<title>3分でもらい忘れ診断 | もらいわすれ堂</title>
 <meta name="description" content="沖縄県にお住まいの世帯向け。家族の状況にあてはまる可能性のある給付金・手当を3分で診断します。名前や住所の入力は不要です。">
 <meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
 <style>
-:root{--fg-primary:#1a6b52;--fg-accent:#f2b705;--fg-ink:#1f2a2e;--fg-bg:#fffdf7;
-  --fg-card:#ffffff;--fg-muted:#5c6b70;--fg-line:#e5e0d4}
+:root{--fg-primary:#B9502F;--fg-accent:#F2B705;--fg-deep:#1A6B52;--fg-ink:#1F2A2E;--fg-bg:#FFFBF4;
+  --fg-card:#ffffff;--fg-muted:#5C6B70;--fg-line:#EBE2D4}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
   font-size:18px;line-height:1.8;color:var(--fg-ink);background:var(--fg-bg)}
@@ -21,7 +22,7 @@ h1{font-size:1.3rem;margin-bottom:4px}
 .opts{display:grid;gap:10px}
 .opts button,.opts label{display:block;width:100%;text-align:left;padding:13px 16px;min-height:44px;
   border:2px solid var(--fg-line);border-radius:10px;background:#fff;font-size:1rem;cursor:pointer}
-.opts .sel{border-color:var(--fg-primary);background:#eaf5f0;font-weight:700}
+.opts .sel{border-color:var(--fg-primary);background:#F9EDE3;font-weight:700}
 select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);border-radius:10px;background:#fff}
 .nav{display:flex;gap:10px;margin-top:18px}
 .nav button{flex:1;padding:14px;min-height:44px;border-radius:999px;border:none;font-size:1rem;font-weight:700;cursor:pointer}
@@ -35,15 +36,41 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .lk-mid{background:#fff3cd;color:#7a5b00}
 .result-card a{color:var(--fg-primary)}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:20px}
+.first-badge{display:inline-block;background:var(--fg-primary);color:#fff;font-size:.8rem;border-radius:4px;padding:1px 10px;font-weight:700;margin-bottom:6px;margin-right:6px}
+.actions{display:flex;gap:10px;margin:16px 0}
+.actions button{flex:1;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer}
+.madoguchi{font-size:.85rem;background:#eaf5f0;border-radius:6px;padding:6px 10px;margin-top:6px;color:#0f5138}
+.markbtn{display:block;width:100%;margin-top:8px;padding:9px 12px;min-height:40px;border-radius:8px;border:1.5px dashed var(--fg-muted);background:#fff;color:var(--fg-muted);font-size:.85rem;cursor:pointer}
+.markbtn.marked{border:1.5px solid #1A6B52;background:#DFF2E9;color:#0F5138;font-weight:700}
+.card-done h3{text-decoration:line-through;color:var(--fg-muted)}
+.resume-box{background:#F9EDE3;border:2px solid var(--fg-primary);border-radius:12px;padding:16px;margin-bottom:16px}
+.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
+.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
+.siteheader .hlogo img{width:30px;height:30px}
+.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
+.siteheader nav a.hline{background:#06C755;color:#fff;font-weight:700}
+@media print{.progress,.actions,.btn,.nav,.siteheader{display:none!important}body{background:#fff}}
 </style>
 </head>
 <body>
+<header class="siteheader">
+  <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂</a>
+  <nav>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
+    <a class="hline" href="https://lin.ee/7fH7vDQ" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+  </nav>
+</header>
 <div class="wrap">
   <h1>3分でもらい忘れ診断</h1>
-  <p class="note">名前・住所・電話番号の入力は不要です。答えたくない質問はとばせます。</p>
+  <p class="note">名前・住所・電話番号の入力は不要です。答えたくない質問はとばせます。途中でやめても大丈夫、何度でもやり直せます。回答や記録はこの端末の中だけに保存され、送信されません。</p>
   <div class="progress" aria-hidden="true"><div id="bar" style="width:0%"></div></div>
   <div id="app" aria-live="polite"><noscript>この診断はJavaScriptを使って動きます。設定を有効にしてご覧ください。</noscript></div>
 </div>
+<script src="../analytics-config.js"></script>
+<script src="../assets/fg-analytics.js"></script>
 <script src="logic.js"></script>
 <script>
 (function(){
@@ -67,10 +94,37 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     (children||[]).forEach(function(c){ el.appendChild(c); });
     return el;
   }
+  var tracked = {};
+  function trackStep(name){
+    if (tracked[name]) return;
+    tracked[name] = true;
+    if (window.fgTrack) window.fgTrack(name);
+  }
+  function loadSaved(){
+    try { return JSON.parse(localStorage.getItem("fg_shindan_answers") || "null"); } catch(e){ return null; }
+  }
+  function applySaved(sv){
+    state.municipality = sv.municipality || null;
+    state.children = sv.children || 0;
+    state.childAges = sv.childAges || [];
+    state.lifeEvents = sv.lifeEvents || [];
+    state.step = 5;
+    if (window.fgTrack) window.fgTrack("shindan_resume");
+    render();
+  }
+  function getMarks(){
+    try { return JSON.parse(localStorage.getItem("fg_seido_marks") || "{}"); } catch(e){ return {}; }
+  }
+  function setMark(id, on){
+    var m = getMarks();
+    if (on) m[id] = 1; else delete m[id];
+    try { localStorage.setItem("fg_seido_marks", JSON.stringify(m)); } catch(e){}
+  }
   function render(){
     bar.style.width = Math.round(state.step / TOTAL * 100) + "%";
     app.innerHTML = "";
-    if (state.step === 0) return qMunicipality();
+    if (state.step === 0) { trackStep("shindan_start"); return qMunicipality(); }
+    if (state.step >= 1 && state.step <= 4) trackStep("shindan_step_q" + (state.step + 1));
     if (state.step === 1) return qChildren();
     if (state.step === 2) return qChildAges();
     if (state.step === 3) return qEvents();
@@ -84,6 +138,14 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     ]);
   }
   function qMunicipality(){
+    var sv = loadSaved();
+    if (sv) {
+      app.appendChild(h("div", {class:"resume-box"}, [
+        h("p", {text:"前回の診断結果が、この端末に残っています。", style:"margin-bottom:8px;font-weight:700"}),
+        h("button", {class:"next", text:"前回の結果をもう一度見る", style:"width:100%;padding:12px;border-radius:999px;border:none;font-weight:700;cursor:pointer", onclick:function(){ applySaved(sv); }}),
+        h("p", {class:"note", text:"状況が変わった方は、そのまま下から診断し直せます。"})
+      ]));
+    }
     var sel = h("select", {id:"muni", "aria-label":"お住まいの市町村"});
     sel.appendChild(h("option", {value:"", text:"選んでください"}));
     MUNIS.forEach(function(m){ sel.appendChild(h("option", {value:m, text:m})); });
@@ -147,7 +209,13 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   }
   function showResult(){
     bar.style.width = "100%";
-    try { localStorage.setItem("fg_shindan_done", new Date().toISOString()); } catch(e){}
+    try {
+      localStorage.setItem("fg_shindan_done", new Date().toISOString());
+      localStorage.setItem("fg_shindan_answers", JSON.stringify({
+        municipality: state.municipality, children: state.children,
+        childAges: state.childAges, lifeEvents: state.lifeEvents
+      }));
+    } catch(e){}
     fetch("../../data/fukugiiro/seido.json").then(function(r){return r.json()}).then(function(db){
       var answers = {
         municipality: state.municipality, children: state.children,
@@ -155,30 +223,89 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         lifeEvents: state.lifeEvents.map(function(e){ return EVENT_MAP[e]; }).filter(Boolean)
       };
       var rs = window.FGShindan.matchSeido(db.items, answers);
+      if (window.fgTrack) window.fgTrack(rs.length ? "shindan_complete" : "shindan_zero", {results: rs.length});
       app.innerHTML = "";
       app.appendChild(h("h2", {text:"あなたの世帯が使える可能性のある制度: " + rs.length + "件"}));
       if (rs.length === 0) {
         app.appendChild(h("p", {text:"今回の回答では、該当の可能性が高い制度は見つかりませんでした。制度は毎日更新されるので、状況が変わったらまた診断してみてください。"}));
       }
-      rs.forEach(function(r){
+      if (rs.length > 0) {
+        var actions = h("div", {class:"actions"});
+        var shareBtn = h("button", {text:"家族に教える(共有)"});
+        shareBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("share_click");
+          var url = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/";
+          var text = "「もらいわすれ堂」で沖縄の給付金・手当のもらい忘れを3分で診断できるよ(無料・匿名)";
+          if (navigator.share) { navigator.share({title:"もらいわすれ堂|3分でもらい忘れ診断", text:text, url:url}).catch(function(){}); }
+          else if (navigator.clipboard) { navigator.clipboard.writeText(text + " " + url); shareBtn.textContent = "リンクをコピーしました!"; }
+        });
+        var printBtn = h("button", {text:"印刷して窓口に持っていく"});
+        printBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("print_click");
+          window.print();
+        });
+        actions.appendChild(shareBtn); actions.appendChild(printBtn);
+        app.appendChild(actions);
+        app.appendChild(h("p", {class:"note", text:"ぜんぶ一度にやらなくて大丈夫です。まずは1件だけ、いちばん上から始めてみてください。"}));
+      }
+      var marks = getMarks();
+      rs.forEach(function(r, idx){
         var it = r.item;
-        var card = h("div", {class:"result-card"}, [
-          h("span", {class:"lk " + (r.likelihood==="高"?"lk-high":"lk-mid"), text:"対象の可能性: " + r.likelihood}),
-          h("h3", {text: it.name}),
-          h("p", {class:"note", text: it.target_household}),
-          h("p", {class:"note", text:"金額: " + it.amount_note}),
-          h("p", {class:"note", text:"次の一歩: " + it.how_to_apply}),
-          h("a", {href: it.source_url, rel:"noopener", text:"公式ページで確認する"})
-        ]);
+        var isMarked = !!marks[it.id];
+        var card = h("div", {class:"result-card" + (isMarked ? " card-done" : "")}, []);
+        if (idx === 0 && !isMarked) card.appendChild(h("span", {class:"first-badge", text:"まずはこの1件から"}));
+        card.appendChild(h("span", {class:"lk " + (r.likelihood==="高"?"lk-high":"lk-mid"), text:"対象の可能性: " + r.likelihood}));
+        card.appendChild(h("h3", {text: it.name}));
+        card.appendChild(h("p", {class:"note", text: it.target_household}));
+        card.appendChild(h("p", {class:"note", text:"金額: " + it.amount_note}));
+        card.appendChild(h("p", {class:"note", text:"次の一歩: " + it.how_to_apply}));
+        card.appendChild(h("div", {class:"madoguchi", text:"窓口でのひとこと: 「" + it.name + "について教えてください」と伝えれば、あとは案内してもらえます。対象かどうか自信がなくても大丈夫です。"}));
+        card.appendChild(h("a", {href: it.source_url, rel:"noopener", text:"公式ページで確認する"}));
+        card.appendChild(h("span", {text:" ・ "}));
+        var kitLink = h("a", {href:"../kit/" + it.id + "/", text:"🖨 申請準備シート(持ち物リストつき)"});
+        kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("kit_click"); });
+        card.appendChild(kitLink);
         if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
+        var mk = h("button", {class:"markbtn" + (isMarked ? " marked" : ""),
+          text: isMarked ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、ここをタップして記録"});
+        mk.addEventListener("click", function(){
+          var now = !card.classList.contains("card-done");
+          setMark(it.id, now);
+          card.classList.toggle("card-done", now);
+          mk.classList.toggle("marked", now);
+          mk.textContent = now ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、ここをタップして記録";
+          if (now && window.fgTrack) window.fgTrack("seido_done_mark");
+        });
+        card.appendChild(mk);
         app.appendChild(card);
       });
+      var lineUrl = window.FG_LINE_URL || "https://lin.ee/7fH7vDQ";
+      var lineBox = h("div", {style:"margin:22px 0;padding:18px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
+      lineBox.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px", text:"締切が近づいたら、LINEでお知らせします"}));
+      lineBox.appendChild(h("p", {class:"note", style:"margin-bottom:12px", text:"あなたが見た制度の締切を約1か月前からお知らせ。新しい制度が増えたときもお知らせします。"}));
+      var lineBtn = h("a", {href: lineUrl, target:"_blank", rel:"noopener",
+        style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#06C755;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEで受け取る(無料)"});
+      lineBtn.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("line_add_click"); });
+      lineBox.appendChild(lineBtn);
+      lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。"}));
+      app.appendChild(lineBox);
       app.appendChild(h("div", {class:"disclaimer", text:"この診断は公式情報に基づく「可能性のご案内」です。受給できるかどうかの最終判断は各窓口で行われます。医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため診断には表示していません。トップページの制度一覧をご覧ください。"}));
       app.appendChild(h("p", {style:"margin-top:16px"}, [h("a", {href:"../index.html", text:"← トップへもどる"})]));
     }).catch(function(){
       app.innerHTML = "";
       app.appendChild(h("p", {text:"データの読み込みに失敗しました。時間をおいてもう一度お試しください。"}));
     });
+  }
+  if (/[?&]resume=1/.test(location.search)) {
+    var _sv = loadSaved();
+    if (_sv) {
+      state.municipality = _sv.municipality || null;
+      state.children = _sv.children || 0;
+      state.childAges = _sv.childAges || [];
+      state.lifeEvents = _sv.lifeEvents || [];
+      state.step = 5;
+      if (window.fgTrack) window.fgTrack("shindan_resume");
+    }
   }
   render();
 })();
