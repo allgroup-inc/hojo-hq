@@ -129,6 +129,10 @@ function handleStripeWebhook(e) {
     return jsonResponse({ error: "diagnosis_not_found" });
   }
 
+  if (row.values[COLUMN.reportStatus - 1] === "sent") {
+    return jsonResponse({ ok: true, duplicate: true });
+  }
+
   updateRowField(row.rowIndex, COLUMN.paymentStatus, "paid");
   updateRowField(row.rowIndex, COLUMN.stripeSessionId, session.id);
 
@@ -145,7 +149,8 @@ function handleStripeWebhook(e) {
     updateRowField(row.rowIndex, COLUMN.sentAt, new Date().toISOString());
   } catch (err) {
     // 決済は完了しているので行は残す。カチカクくんが日次で "paid_pending_report" 相当を確認し手動フォローする
-    updateRowField(row.rowIndex, COLUMN.reportStatus, "failed: " + err.message);
+    var errMessage = (err && err.message) ? err.message : String(err);
+    updateRowField(row.rowIndex, COLUMN.reportStatus, "failed: " + errMessage);
   }
 
   return jsonResponse({ ok: true });
@@ -181,5 +186,11 @@ function generateReport(answers) {
     muteHttpExceptions: true,
   });
   var data = JSON.parse(response.getContentText());
+  if (data.error) {
+    throw new Error("Claude API error: " + (data.error.message || JSON.stringify(data.error)));
+  }
+  if (!data.content || !data.content[0] || !data.content[0].text) {
+    throw new Error("Claude API returned unexpected response shape: " + response.getContentText());
+  }
   return data.content[0].text;
 }
