@@ -60,3 +60,21 @@ test("buildReportEmailHtml: レポート本文がエスケープされ改行がb
   assert.ok(html.includes("1行目<br>2行目&lt;b&gt;太字&lt;/b&gt;"));
   assert.ok(html.includes("ガジュマルくん"));
 });
+
+test("isValidWebhookToken: 一致すればtrue", () => {
+  assert.equal(backend.isValidWebhookToken("abc123", "abc123"), true);
+});
+
+test("isValidWebhookToken: 不一致はfalse", () => {
+  assert.equal(backend.isValidWebhookToken("abc123", "xyz999"), false);
+});
+
+test("isValidWebhookToken: expectedが空文字ならfalse(未設定のトークンでの誤通過防止)", () => {
+  assert.equal(backend.isValidWebhookToken("", ""), false);
+  assert.equal(backend.isValidWebhookToken(undefined, ""), false);
+});
+
+test("isValidWebhookToken: 型が文字列でなければfalse", () => {
+  assert.equal(backend.isValidWebhookToken(null, "abc123"), false);
+  assert.equal(backend.isValidWebhookToken(123, "abc123"), false);
+});
