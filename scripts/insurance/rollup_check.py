@@ -24,21 +24,23 @@ def cumulative(daily, upto_day):
     return sum(daily[:upto_day])
 
 
-def match_day(daily, target, tol=0.5):
-    """累計が target と一致する最初の日(1始まり)。無ければ None。"""
+def match_day(daily, target, tol=0.5, rel_tol=0.0):
+    """累計が target と一致する最初の日(1始まり)。無ければ None。
+    許容誤差 = max(tol, rel_tol*|target|)。大きな数(配布数等)の丸め差を吸収するため相対許容も使える。"""
+    lim = max(tol, rel_tol * abs(target))
     for d in range(1, len(daily) + 1):
-        if abs(cumulative(daily, d) - target) <= tol:
+        if abs(cumulative(daily, d) - target) <= lim:
             return d
     return None
 
 
-def reconcile(team_daily, board_actuals, tol=0.5):
+def reconcile(team_daily, board_actuals, tol=0.5, rel_tol=0.0):
     """定例チーム合計(日次)と board 実績を突合。
     各ブロックについて board 実績が定例の何日目の累計と一致するか(matched_day)を返す。"""
     out = {}
     for block, val in board_actuals.items():
         daily = team_daily.get(block, [])
-        d = match_day(daily, val, tol)
+        d = match_day(daily, val, tol, rel_tol)
         out[block] = {
             "board": val,
             "matched_day": d,

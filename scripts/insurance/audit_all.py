@@ -23,85 +23,104 @@ AGGREGATE = {"ALL委託"}
 ALL_DEPTS = list(DEPT_BLOCKS) + list(AGGREGATE)
 
 
+# 管轄(責任者姓)→部門。ファイル内の「【○○管轄】」から部門を確実に読むための対応表。
+KANKATSU_TO_DEPT = {
+    "呉屋": "CRM", "徳元": "QCM", "上地": "LTV", "島袋": "ALL委託",
+    "泉谷": "札幌", "金城": "豊見城", "長澤": "特殊", "仲宗根": "催事", "下地": "嘉手納",
+}
+
+
+def _dept_from_kankatsu(text):
+    """「【○○管轄】」等の文字列から部門名を引く。無ければ None。"""
+    if not isinstance(text, str):
+        return None
+    for key, dep in KANKATSU_TO_DEPT.items():
+        if key in text:
+            return dep
+    return None
+
+
 def classify(path):
-    """(kind, month) を返す。kind ∈ {'board','teikei','other'}。month は '6月'/'7月'/None。"""
+    """(kind, month, dept) を返す。
+    kind ∈ {'board','teikei','other'}。month は '6月'/'7月'/None。
+    dept は定例の場合に 【実数値】N2 / 【チーム進捗】H2 の「【○○管轄】」から判定(照合ではなく中身)。"""
     import openpyxl
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     sheets = wb.sheetnames
-    kind, month = "other", None
+    kind, month, dept = "other", None, None
     if "【ALLGRP】A3縦" in sheets:
         kind = "board"
         t = str(wb["【ALLGRP】A3縦"].cell(2, 2).value or "")
     elif "【実数値】A3縦" in sheets:
         kind = "teikei"
-        t = str(wb["【実数値】A3縦"].cell(2, 2).value or "")
+        ws = wb["【実数値】A3縦"]
+        t = str(ws.cell(2, 2).value or "")
+        dept = _dept_from_kankatsu(ws.cell(2, 14).value)  # N2
+        if not dept and "【チーム進捗】A3縦" in sheets:
+            dept = _dept_from_kankatsu(wb["【チーム進捗】A3縦"].cell(2, 8).value)  # H2
+        # 月はタイトルではなく「対象月」T2(=最新対象月)で判定。タイトルは古い雛形のままの場合がある。
+        t2 = ws.cell(2, 20).value  # T2
+        if isinstance(t2, (int, float)):
+            month = f"{int(t2)}月"
     else:
         t = ""
-    for m in ("6月", "7月"):
-        if m in t:
-            month = m
+    if kind == "board":
+        for m in ("6月", "7月"):
+            if m in t:
+                month = m
     wb.close()
-    return kind, month
+    return kind, month, dept
 
 
-def identify(team, board_actuals_by_dept):
-    """定例のチーム合計を各部門のboard実績と突合し、最も揃う部門と(比率, (揃い,必要,modal日))を返す。
-    部門ごとに必要ブロック(催事は①〜④)を使い、揃い数÷必要数の最大を選ぶ。"""
-    best, best_ratio, best_info = None, -1.0, None
-    for dep, ba in board_actuals_by_dept.items():
-        blocks = DEPT_BLOCKS[dep]
-        sub = {b: ba[b] for b in blocks if b in ba}
-        rr = rc.reconcile(team, sub)
-        days = [v["matched_day"] for v in rr.values() if v["ok"]]
-        modal = max(set(days), key=days.count) if days else None
-        aligned = sum(1 for v in rr.values() if v["ok"] and v["matched_day"] == modal)
-        ratio = aligned / max(len(blocks), 1)
-        if ratio > best_ratio:
-            best, best_ratio, best_info = dep, ratio, (aligned, len(blocks), modal)
-    return best, best_ratio, best_info
-
-
-def run(src, out=None, min_ratio=0.8):
+def run(src, out=None):
     files = sorted(glob.glob(os.path.join(src, "*.xlsx")))
-    boards, teikeis = {}, []           # boards: month->path, teikeis: [(path,month)]
+    boards = {}                       # month -> path(最後=最新想定)
+    teikeis = {}                      # (month,dept) -> [paths]
     for f in files:
-        kind, month = classify(f)
+        kind, month, dept = classify(f)
         if kind == "board" and month:
-            boards[month] = f          # 同月複数なら最後を採用(最新想定)
-        elif kind == "teikei" and month:
-            teikeis.append((f, month))
-    lines = ["# 統合反映監査(全月・全部門)", ""]
+            boards[month] = f
+        elif kind == "teikei" and month and dept:
+            teikeis.setdefault((month, dept), []).append(f)
+    lines = ["# 統合反映監査(全月・全部門 / 部門は中身の【○○管轄】で同定)", ""]
     summary = {}
     for month, board in sorted(boards.items()):
-        ba = {}
-        for dep in DEPT_BLOCKS:
-            try:
-                ba[dep] = rc.board_dept_actuals(board, dep)
-            except Exception:
-                ba[dep] = {}
-        assign = {}   # dep -> (path, ratio, info)
-        for f, m in teikeis:
-            if m != month:
-                continue
-            team = rc.parse_team_daily(f)
-            dep, ratio, info = identify(team, ba)
-            if ratio >= min_ratio and (dep not in assign or ratio > assign[dep][1]):
-                assign[dep] = (f, ratio, info)
         lines.append(f"## {month}(board: {os.path.basename(board)[:16]})")
-        lines.append("| 部門 | 判定 | 揃い | 一致日 |")
-        lines.append("|---|---|---|---|")
+        lines.append("| 部門 | 提出 | 突合判定 | 揃い | 一致日 |")
+        lines.append("|---|---|---|---|---|")
         stat = {}
         for dep in ALL_DEPTS:
+            paths = teikeis.get((month, dep), [])
+            submitted = "✅" if paths else "⛔ 未提出"
             if dep in AGGREGATE:
-                lines.append(f"| {dep} | ⚠ 集計(直接照合対象外) | — | — |")
-                stat[dep] = "aggregate"
-            elif dep in assign:
-                _, ratio, (al, need, modal) = assign[dep]
-                lines.append(f"| {dep} | ✅ 整合 | {al}/{need} | day{modal} |")
-                stat[dep] = "ok"
-            else:
-                lines.append(f"| {dep} | ⛔ 未同定/未提供 | — | — |")
+                verdict = "⚠ 集計(直接照合対象外)" if paths else "—"
+                lines.append(f"| {dep} | {submitted} | {verdict} | — | — |")
+                stat[dep] = "aggregate" if paths else "missing"
+                continue
+            if not paths:
+                lines.append(f"| {dep} | ⛔ 未提出 | — | — | — |")
                 stat[dep] = "missing"
+                continue
+            # 提出あり → board実績と日付揃え突合(部門別ブロック)
+            try:
+                ba = rc.board_dept_actuals(board, dep)
+            except Exception:
+                ba = {}
+            blocks = DEPT_BLOCKS[dep]
+            sub = {b: ba[b] for b in blocks if b in ba}
+            best = None
+            for f in paths:
+                team = rc.parse_team_daily(f)
+                rr = rc.reconcile(team, sub)
+                days = [v["matched_day"] for v in rr.values() if v["ok"]]
+                modal = max(set(days), key=days.count) if days else None
+                aligned = sum(1 for v in rr.values() if v["ok"] and v["matched_day"] == modal)
+                if best is None or aligned > best[0]:
+                    best = (aligned, len(blocks), modal)
+            al, need, modal = best
+            ok = al == need
+            lines.append(f"| {dep} | {submitted} | {'✅ 整合' if ok else '⚠ 要確認'} | {al}/{need} | {('day'+str(modal)) if modal else '—'} |")
+            stat[dep] = "ok" if ok else "check"
         lines.append("")
         summary[month] = stat
     report = "\n".join(lines) + "\n"
