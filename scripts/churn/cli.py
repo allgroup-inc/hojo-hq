@@ -13,6 +13,7 @@ from .intake import load_records, load_column_map
 from .fit import fit_model, save_model, load_model
 from .report_list import build_rows, render_csv, render_html
 from .evaluate import backtest
+from .report_card import build_card, render_html as render_card_html
 
 
 def _as_of(value):
@@ -56,6 +57,19 @@ def cmd_backtest(csv_path, column_map_path, split, as_of):
     return metrics
 
 
+def cmd_card(csv_path, column_map_path, model_path, apply_id, out_path, as_of):
+    cmap = load_column_map(column_map_path)
+    records = load_records(csv_path, cmap, _as_of(as_of))
+    target = next((r for r in records if str(r.get("apply_id")) == str(apply_id)), None)
+    if target is None:
+        raise SystemExit(f"申込ID {apply_id} が見つかりません")
+    model = load_model(model_path)
+    card = build_card(target, model)
+    render_card_html(card, out_path)
+    print(f"[card] {apply_id}: {card['risk_pct']}% ({card['band']}) → {out_path}")
+    return card
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="churn", description="早期解約リスク保全")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -72,6 +86,14 @@ def main(argv=None):
         if name == "backtest":
             sp.add_argument("--split", required=True)
 
+    sp_card = sub.add_parser("card")
+    sp_card.add_argument("--csv", required=True)
+    sp_card.add_argument("--column-map", required=True)
+    sp_card.add_argument("--as-of", required=True)
+    sp_card.add_argument("--model", required=True)
+    sp_card.add_argument("--apply-id", required=True)
+    sp_card.add_argument("--out", required=True)
+
     args = p.parse_args(argv)
     if args.cmd == "fit":
         cmd_fit(args.csv, args.column_map, args.model, args.as_of)
@@ -79,6 +101,8 @@ def main(argv=None):
         cmd_score(args.csv, args.column_map, args.model, args.out, args.as_of)
     elif args.cmd == "backtest":
         cmd_backtest(args.csv, args.column_map, args.split, args.as_of)
+    elif args.cmd == "card":
+        cmd_card(args.csv, args.column_map, args.model, args.apply_id, args.out, args.as_of)
     return 0
 
 
