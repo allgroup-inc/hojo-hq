@@ -1,0 +1,25 @@
+name: gajumaru-ci
+
+on:
+  push:
+    paths:
+      - "site/gajumaru/**"
+      - "scripts/check_lp_gajumaru.py"
+  pull_request:
+    paths:
+      - "site/gajumaru/**"
+      - "scripts/check_lp_gajumaru.py"
+  workflow_dispatch: {}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: LP検査(サイズ予算・禁止表現・基本要件)
+        run: python scripts/check_lp_gajumaru.py
