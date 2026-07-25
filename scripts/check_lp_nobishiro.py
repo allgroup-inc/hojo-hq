@@ -45,9 +45,13 @@ def main():
             ("viewport", "viewportメタ"),
             ("<title>", "title"),
             ('name="description"', "description"),
+            ('name="robots" content="noindex"', "noindexメタ"),
         ]:
             if req not in html:
                 errors.append(f"{rel}: 基本要件欠落 {label}")
+
+        for m in re.finditer(r'(?:href|src)="(/[^/][^"]*)"', html):
+            errors.append(f"{rel}: 絶対パスのリンク『{m.group(1)}』(相対パスにすること)")
 
     for e in errors:
         print(f"[ERROR] {e}")
