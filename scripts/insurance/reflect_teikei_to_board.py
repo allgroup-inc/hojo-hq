@@ -76,7 +76,11 @@ def reflect(board_path, teikei_path, dept, out_path, reflect_day=None):
         label = label.strip() if isinstance(label, str) else None
         if label not in BOARD_ACTUAL_SOURCE:
             continue
-        new_act = actual(BOARD_ACTUAL_SOURCE[label])
+        block = BOARD_ACTUAL_SOURCE[label]
+        # 安全弁: 定例に当該ブロックのデータが無い(全ゼロ=未使用)なら触らない(催事の⑤⑥等)
+        if sum(team.get(block, [])) == 0:
+            continue
+        new_act = actual(block)
         old_act = ws.cell(r, actual_col).value
         need = ws.cell(r, need_col).value
         old_diff = ws.cell(r, diff_col).value

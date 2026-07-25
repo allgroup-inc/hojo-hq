@@ -40,6 +40,20 @@ def _dept_from_kankatsu(text):
     return None
 
 
+# 全部門名(ファイル名フォールバック用)。長い名前を先に見る。
+_ALL_DEPT_NAMES = ["ALL委託", "嘉手納", "豊見城", "催事", "札幌", "特殊", "CRM", "QCM", "LTV"]
+
+
+def _dept_from_filename(path):
+    """ファイル名に部門名(例 定例_ALL委託)が含まれればそれを返す。管轄タグが空のファイル用。"""
+    import os
+    base = os.path.basename(path)
+    for dep in _ALL_DEPT_NAMES:
+        if dep in base:
+            return dep
+    return None
+
+
 def classify(path):
     """(kind, month, dept) を返す。
     kind ∈ {'board','teikei','other'}。month は '6月'/'7月'/None。
@@ -58,6 +72,8 @@ def classify(path):
         dept = _dept_from_kankatsu(ws.cell(2, 14).value)  # N2
         if not dept and "【チーム進捗】A3縦" in sheets:
             dept = _dept_from_kankatsu(wb["【チーム進捗】A3縦"].cell(2, 8).value)  # H2
+        if not dept:
+            dept = _dept_from_filename(path)  # 管轄タグが空でもファイル名(定例_XXX)で同定
         # 月はタイトルではなく「対象月」T2(=最新対象月)で判定。タイトルは古い雛形のままの場合がある。
         t2 = ws.cell(2, 20).value  # T2
         if isinstance(t2, (int, float)):
