@@ -268,15 +268,24 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
         var mk = h("button", {class:"markbtn" + (isMarked ? " marked" : ""),
           text: isMarked ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、ここをタップして記録"});
+        // 受給報告の導線: 「受け取った」瞬間に、その制度の報告をLINEへ促す(⑤の回収)
+        var rep = h("div", {style:"display:" + (isMarked ? "block" : "none") + ";margin-top:8px;padding-top:8px;border-top:1px dashed var(--fg-line)"});
+        var repLink = h("a", {href:(window.FG_LINE_URL || "https://lin.ee/7fH7vDQ"), target:"_blank", rel:"noopener",
+          style:"font-weight:700", text:"💬 受け取れた金額をLINEで報告する(匿名・任意)"});
+        repLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("jukyu_report_click", {seido: it.id}); });
+        rep.appendChild(repLink);
+        rep.appendChild(h("p", {class:"note", style:"margin-top:2px", text:"あなたの報告が、次の県民のもらい忘れを防ぎます。制度名とおおよその金額だけでOK。お名前や口座番号はうかがいません。"}));
         mk.addEventListener("click", function(){
           var now = !card.classList.contains("card-done");
           setMark(it.id, now);
           card.classList.toggle("card-done", now);
           mk.classList.toggle("marked", now);
           mk.textContent = now ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、ここをタップして記録";
+          rep.style.display = now ? "block" : "none";
           if (now && window.fgTrack) window.fgTrack("seido_done_mark");
         });
         card.appendChild(mk);
+        card.appendChild(rep);
         app.appendChild(card);
       });
       var lineUrl = window.FG_LINE_URL || "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/";
