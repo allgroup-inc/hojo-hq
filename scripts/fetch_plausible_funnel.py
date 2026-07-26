@@ -140,6 +140,7 @@ def main():
     out = {"schema_version": 1, "updated_at": date.today().isoformat(),
            "period": period, "source": "plausible-stats-api"}
     out.update(fn)
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
         f.write("\n")

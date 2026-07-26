@@ -36,6 +36,7 @@ jobs:
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
-          git add reports/fukugiiro data/fukugiiro/funnel.json
+          git add reports/fukugiiro
+          [ -f data/fukugiiro/funnel.json ] && git add data/fukugiiro/funnel.json || true
           git diff --cached --quiet || git commit -m "auto: もらいわすれ堂 週次レポート $(date '+%Y-%m-%d')"
           git push
