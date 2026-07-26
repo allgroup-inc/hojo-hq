@@ -47,6 +47,11 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .actions{display:flex;gap:10px;margin:16px 0}
 .actions button{flex:1;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer}
 .madoguchi{font-size:.85rem;background:#eaf5f0;border-radius:6px;padding:6px 10px;margin-top:6px;color:#0f5138}
+.kind-msg{background:#EAF5F0;border:1px solid #B7E0CF;border-radius:12px;padding:14px 16px;margin:6px 0 16px;color:#0f5138;line-height:1.7;font-size:.95rem}
+.next-step{background:#FDF5E6;border-left:5px solid var(--fg-primary);border-radius:8px;padding:12px 14px;margin:10px 0}
+.next-step .ns-label{display:inline-block;font-size:.75rem;font-weight:800;color:#fff;background:var(--fg-primary);border-radius:4px;padding:2px 8px;margin-right:6px}
+.next-step .ns-body{font-weight:700}
+.card-sub{font-size:.82rem;color:var(--fg-muted);margin-top:2px}
 .markbtn{display:block;width:100%;margin-top:8px;padding:9px 12px;min-height:44px;border-radius:8px;border:1.5px dashed var(--fg-muted);background:#fff;color:var(--fg-muted);font-size:.85rem;cursor:pointer}
 .markbtn.marked{border:1.5px solid #1A6B52;background:#DFF2E9;color:#0F5138;font-weight:700}
 .card-done h3{text-decoration:line-through;color:var(--fg-muted)}
@@ -264,6 +269,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         summary.appendChild(bd);
         summary.appendChild(h("p", {class:"note", text:"「対象の可能性」のご案内です。受給の可否は各窓口の判断となります。"}));
         app.appendChild(summary);
+        app.appendChild(h("p", {class:"kind-msg", text:"もらい忘れは、知らなかっただけ。あなたは悪くありません。ぜんぶ一度にやらなくて大丈夫。ひとつずつ、いっしょに進めましょう。"}));
       }
       var marks = getMarks();
       rs.forEach(function(r, idx){
@@ -273,15 +279,19 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         if (idx === 0 && !isMarked) card.appendChild(h("span", {class:"first-badge", text:"まずはこの1件から"}));
         card.appendChild(h("span", {class:"lk " + (r.likelihood==="高"?"lk-high":"lk-mid"), text:"対象の可能性: " + r.likelihood}));
         card.appendChild(h("h3", {text: it.name}));
-        card.appendChild(h("p", {class:"note", text: it.target_household}));
-        card.appendChild(h("p", {class:"note", text:"金額: " + it.amount_note}));
-        card.appendChild(h("p", {class:"note", text:"次の一歩: " + it.how_to_apply}));
-        card.appendChild(h("div", {class:"madoguchi", text:"窓口でのひとこと: 「" + it.name + "について教えてください」と伝えれば、あとは案内してもらえます。対象かどうか自信がなくても大丈夫です。"}));
+        var ns = h("div", {class:"next-step"});
+        ns.appendChild(h("span", {class:"ns-label", text:"次にやること"}));
+        ns.appendChild(h("span", {class:"ns-body", text: it.how_to_apply}));
+        card.appendChild(ns);
+        card.appendChild(h("p", {class:"card-sub", text:"対象: " + it.target_household}));
+        card.appendChild(h("p", {class:"card-sub", text:"金額: " + it.amount_note}));
+        card.appendChild(h("div", {class:"madoguchi", text:"窓口でこう言えばOK:「" + it.name + "について教えてください。対象か不安なのですが大丈夫ですか?」/ 対象かどうかは窓口が判断します。自信がなくて大丈夫です。"}));
         card.appendChild(h("a", {href: it.source_url, rel:"noopener", text:"公式ページで確認する"}));
         card.appendChild(h("span", {text:" ・ "}));
         var kitLink = h("a", {href:"../kit/" + it.id + "/", text:"🖨 申請準備シート(持ち物リストつき)"});
         kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("kit_click"); });
         card.appendChild(kitLink);
+        card.appendChild(h("p", {class:"note", style:"margin-top:6px", text:"準備の目安がそろったら、お住まいの窓口へ。最終的な受給の可否は窓口で確認されます。"}));
         if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
         var mk = h("button", {class:"markbtn" + (isMarked ? " marked" : ""),
           text: isMarked ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、ここをタップして記録"});
