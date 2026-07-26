@@ -5,16 +5,20 @@ on:
     paths:
       - "data/fukugiiro/**"
       - "scripts/validate_fukugiiro.py"
+      - "scripts/generate_jukyu_counter.py"
       - "scripts/check_lp_fukugiiro.py"
       - "tests/golden_fukugiiro.json"
+      - "tests/golden_jukyu.json"
       - "tests/shindan.test.mjs"
       - "site/fukugiiro/**"
   pull_request:
     paths:
       - "data/fukugiiro/**"
       - "scripts/validate_fukugiiro.py"
+      - "scripts/generate_jukyu_counter.py"
       - "scripts/check_lp_fukugiiro.py"
       - "tests/golden_fukugiiro.json"
+      - "tests/golden_jukyu.json"
       - "tests/shindan.test.mjs"
       - "site/fukugiiro/**"
   workflow_dispatch: {}
@@ -31,6 +35,11 @@ jobs:
 
       - name: ゴールデンセット自己テスト + 制度DB検証(ケンショウ/マモリ ゲート)
         run: python scripts/validate_fukugiiro.py --self-test
+
+      - name: 受給報告台帳 自己テスト + 検証(ソロバン/ケンショウ ゲート)
+        run: |
+          python scripts/generate_jukyu_counter.py --self-test
+          python scripts/generate_jukyu_counter.py --check
 
       - name: LP検査(サイズ予算・禁止表現・基本要件)
         run: python scripts/check_lp_fukugiiro.py

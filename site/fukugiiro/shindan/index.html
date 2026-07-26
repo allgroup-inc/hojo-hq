@@ -29,18 +29,25 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .next{background:var(--fg-primary);color:#fff}
 .back{background:var(--fg-line);color:var(--fg-ink)}
 .note{font-size:.85rem;color:var(--fg-muted);margin-top:10px}
-.result-card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px;margin-bottom:14px}
-.result-card h3{font-size:1.05rem;margin-bottom:4px}
-.lk{display:inline-block;font-size:.8rem;border-radius:4px;padding:1px 10px;font-weight:700;margin-bottom:6px}
+.result-card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px 16px;margin-bottom:16px}
+.result-card + .result-card{margin-top:0}
+.summary-card{background:linear-gradient(180deg,#F9EDE3,#fff);border:2px solid var(--fg-accent);border-radius:12px;padding:18px 16px;margin:6px 0 18px;text-align:center}
+.summary-card .total{font-size:1.15rem;font-weight:800;color:var(--fg-primary)}
+.summary-card .total b{font-size:1.7rem;margin:0 2px}
+.summary-card .breakdown{font-size:.95rem;margin-top:4px}
+.summary-card .breakdown .hi{color:#0f5138;font-weight:700}
+.summary-card .breakdown .mi{color:#7a5b00;font-weight:700}
+.result-card h3{font-size:1.1rem;line-height:1.35;margin:2px 0 6px}
+.lk{display:inline-block;font-size:.82rem;border-radius:4px;padding:2px 12px;font-weight:700;margin-bottom:6px}
 .lk-high{background:#dff2e9;color:#0f5138}
 .lk-mid{background:#fff3cd;color:#7a5b00}
-.result-card a{color:var(--fg-primary)}
+.result-card a{color:var(--fg-primary);display:inline-block;min-height:32px;line-height:1.9}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:20px}
-.first-badge{display:inline-block;background:var(--fg-primary);color:#fff;font-size:.8rem;border-radius:4px;padding:1px 10px;font-weight:700;margin-bottom:6px;margin-right:6px}
+.first-badge{display:inline-block;background:var(--fg-primary);color:#fff;font-size:.82rem;border-radius:4px;padding:2px 12px;font-weight:700;margin-bottom:6px;margin-right:6px}
 .actions{display:flex;gap:10px;margin:16px 0}
 .actions button{flex:1;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer}
 .madoguchi{font-size:.85rem;background:#eaf5f0;border-radius:6px;padding:6px 10px;margin-top:6px;color:#0f5138}
-.markbtn{display:block;width:100%;margin-top:8px;padding:9px 12px;min-height:40px;border-radius:8px;border:1.5px dashed var(--fg-muted);background:#fff;color:var(--fg-muted);font-size:.85rem;cursor:pointer}
+.markbtn{display:block;width:100%;margin-top:8px;padding:9px 12px;min-height:44px;border-radius:8px;border:1.5px dashed var(--fg-muted);background:#fff;color:var(--fg-muted);font-size:.85rem;cursor:pointer}
 .markbtn.marked{border:1.5px solid #1A6B52;background:#DFF2E9;color:#0F5138;font-weight:700}
 .card-done h3{text-decoration:line-through;color:var(--fg-muted)}
 .resume-box{background:#F9EDE3;border:2px solid var(--fg-primary);border-radius:12px;padding:16px;margin-bottom:16px}
@@ -247,6 +254,16 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         actions.appendChild(shareBtn); actions.appendChild(printBtn);
         app.appendChild(actions);
         app.appendChild(h("p", {class:"note", text:"ぜんぶ一度にやらなくて大丈夫です。まずは1件だけ、いちばん上から始めてみてください。"}));
+        var sum = window.FGShindan.summarize(rs);
+        var summary = h("div", {class:"summary-card"});
+        var total = h("p", {class:"total"});
+        total.innerHTML = "合計 <b>" + sum.total + "</b> 件が対象の可能性";
+        summary.appendChild(total);
+        var bd = h("p", {class:"breakdown"});
+        bd.innerHTML = "可能性 <span class='hi'>高 " + sum.high + "件</span> ・ <span class='mi'>中 " + sum.mid + "件</span>";
+        summary.appendChild(bd);
+        summary.appendChild(h("p", {class:"note", text:"「対象の可能性」のご案内です。受給の可否は各窓口の判断となります。"}));
+        app.appendChild(summary);
       }
       var marks = getMarks();
       rs.forEach(function(r, idx){
@@ -268,21 +285,35 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
         var mk = h("button", {class:"markbtn" + (isMarked ? " marked" : ""),
           text: isMarked ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、ここをタップして記録"});
+        // 受給報告の導線: 「受け取った」瞬間に、その制度の報告をLINEへ促す(⑤の回収)
+        var rep = h("div", {style:"display:" + (isMarked ? "block" : "none") + ";margin-top:8px;padding-top:8px;border-top:1px dashed var(--fg-line)"});
+        var repLink = h("a", {href:"https://allgroup-inc.github.io/hojo-hq/go/fg-jukyu/", target:"_blank", rel:"noopener",
+          style:"font-weight:700", text:"💬 受け取れた金額をLINEで報告する(匿名・任意)"});
+        repLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("jukyu_report_click", {seido: it.id}); });
+        rep.appendChild(repLink);
+        rep.appendChild(h("p", {class:"note", style:"margin-top:2px", text:"あなたの報告が、次の県民のもらい忘れを防ぎます。制度名とおおよその金額だけでOK。お名前や口座番号はうかがいません。"}));
         mk.addEventListener("click", function(){
           var now = !card.classList.contains("card-done");
           setMark(it.id, now);
           card.classList.toggle("card-done", now);
           mk.classList.toggle("marked", now);
           mk.textContent = now ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、ここをタップして記録";
+          rep.style.display = now ? "block" : "none";
           if (now && window.fgTrack) window.fgTrack("seido_done_mark");
         });
         card.appendChild(mk);
+        card.appendChild(rep);
         app.appendChild(card);
       });
       var lineUrl = window.FG_LINE_URL || "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/";
       var lineBox = h("div", {style:"margin:22px 0;padding:18px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
-      lineBox.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px", text:"締切が近づいたら、LINEでお知らせします"}));
-      lineBox.appendChild(h("p", {class:"note", style:"margin-bottom:12px", text:"あなたが見た制度の締切を約1か月前からお知らせ。新しい制度が増えたときもお知らせします。"}));
+      lineBox.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px;font-size:1.05rem", text:"この結果、もらい忘れないために"}));
+      lineBox.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"LINEに登録すると、次の3つを受け取れます(制度の一覧は登録なしでもぜんぶ見られます)。"}));
+      var rewards = h("ul", {style:"list-style:none;text-align:left;max-width:420px;margin:0 auto 12px;padding:0"});
+      ["⏰ この制度の締切を、締切の約1か月前からお知らせ","🆕 あなたの条件に合う新しい制度が増えたらお知らせ","🖨 申請準備シート(持ち物リスト)をまとめて受け取る"].forEach(function(t){
+        rewards.appendChild(h("li", {style:"padding:6px 0;border-bottom:1px solid #cfe9d8", text:t}));
+      });
+      lineBox.appendChild(rewards);
       var lineBtn = h("a", {href: lineUrl, target:"_blank", rel:"noopener",
         style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#06C755;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEで受け取る(無料)"});
       lineBtn.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("line_add_click"); });
