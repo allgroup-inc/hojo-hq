@@ -29,24 +29,25 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .next{background:var(--fg-primary);color:#fff}
 .back{background:var(--fg-line);color:var(--fg-ink)}
 .note{font-size:.85rem;color:var(--fg-muted);margin-top:10px}
-.result-card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px;margin-bottom:14px}
+.result-card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px 16px;margin-bottom:16px}
+.result-card + .result-card{margin-top:0}
 .summary-card{background:linear-gradient(180deg,#F9EDE3,#fff);border:2px solid var(--fg-accent);border-radius:12px;padding:18px 16px;margin:6px 0 18px;text-align:center}
 .summary-card .total{font-size:1.15rem;font-weight:800;color:var(--fg-primary)}
 .summary-card .total b{font-size:1.7rem;margin:0 2px}
 .summary-card .breakdown{font-size:.95rem;margin-top:4px}
 .summary-card .breakdown .hi{color:#0f5138;font-weight:700}
 .summary-card .breakdown .mi{color:#7a5b00;font-weight:700}
-.result-card h3{font-size:1.05rem;margin-bottom:4px}
-.lk{display:inline-block;font-size:.8rem;border-radius:4px;padding:1px 10px;font-weight:700;margin-bottom:6px}
+.result-card h3{font-size:1.1rem;line-height:1.35;margin:2px 0 6px}
+.lk{display:inline-block;font-size:.82rem;border-radius:4px;padding:2px 12px;font-weight:700;margin-bottom:6px}
 .lk-high{background:#dff2e9;color:#0f5138}
 .lk-mid{background:#fff3cd;color:#7a5b00}
-.result-card a{color:var(--fg-primary)}
+.result-card a{color:var(--fg-primary);display:inline-block;min-height:32px;line-height:1.9}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:20px}
-.first-badge{display:inline-block;background:var(--fg-primary);color:#fff;font-size:.8rem;border-radius:4px;padding:1px 10px;font-weight:700;margin-bottom:6px;margin-right:6px}
+.first-badge{display:inline-block;background:var(--fg-primary);color:#fff;font-size:.82rem;border-radius:4px;padding:2px 12px;font-weight:700;margin-bottom:6px;margin-right:6px}
 .actions{display:flex;gap:10px;margin:16px 0}
 .actions button{flex:1;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer}
 .madoguchi{font-size:.85rem;background:#eaf5f0;border-radius:6px;padding:6px 10px;margin-top:6px;color:#0f5138}
-.markbtn{display:block;width:100%;margin-top:8px;padding:9px 12px;min-height:40px;border-radius:8px;border:1.5px dashed var(--fg-muted);background:#fff;color:var(--fg-muted);font-size:.85rem;cursor:pointer}
+.markbtn{display:block;width:100%;margin-top:8px;padding:9px 12px;min-height:44px;border-radius:8px;border:1.5px dashed var(--fg-muted);background:#fff;color:var(--fg-muted);font-size:.85rem;cursor:pointer}
 .markbtn.marked{border:1.5px solid #1A6B52;background:#DFF2E9;color:#0F5138;font-weight:700}
 .card-done h3{text-decoration:line-through;color:var(--fg-muted)}
 .resume-box{background:#F9EDE3;border:2px solid var(--fg-primary);border-radius:12px;padding:16px;margin-bottom:16px}
