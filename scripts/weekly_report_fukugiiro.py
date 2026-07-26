@@ -19,6 +19,7 @@ from datetime import datetime, timezone, timedelta
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
 SEIDO = os.path.join(BASE, "data", "fukugiiro", "seido.json")
+FUNNEL_PATH = os.path.join(BASE, "data", "fukugiiro", "funnel.json")
 JUKYU = os.path.join(BASE, "data", "fukugiiro", "jukyu_reports.json")  # 受給報告台帳(検証済みのみ summary に計上)
 DAICHO = os.path.join(BASE, "docs", "失敗台帳.md")
 AREA_DIR = os.path.join(BASE, "site", "fukugiiro", "area")
@@ -48,6 +49,64 @@ def load_jukyu():
         "total_amount": summary.get("total_amount_yen", 0),
         "households": summary.get("household_count", 0),
     }
+
+
+def load_funnel():
+    """Plausible自動取得のファネル。無ければ None(手動フォールバック)。"""
+    try:
+        with open(FUNNEL_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+def _pct(x):
+    return "—" if x is None else f"{round(x * 100)}%"
+
+
+_MANUAL_FUNNEL = """## 2. ファネル(Plausibleで確認 → 数値を記入)
+
+計測は稼働中ですが、外部ダッシュボードの数値は自動取得できないため**確認先**を示します。
+ダッシュボード: https://plausible.io/allgroup-inc.github.io
+
+| 段 | イベント名 | 今週の値(手動記入) |
+|---|---|---|
+| サイト来訪 | pageview | |
+| 診断開始 | shindan_start | |
+| 診断完了 | shindan_complete | |
+| 準備シート表示 | kit_click | |
+| 印刷 | kit_print / print_click | |
+| 共有 | share_click | |
+| 再訪(つづき) | shindan_resume | |
+| 受給ずみマーク | seido_done_mark | |
+
+*転換率(完了÷開始、シート÷完了)を毎週ここに残すと、離脱段が一目でわかります。*"""
+
+
+def render_funnel_section(funnel):
+    """funnel あれば自動集計セクション、無ければ手動フォールバックを返す。"""
+    if not funnel or not funnel.get("stages"):
+        return _MANUAL_FUNNEL
+    rows = "\n".join(
+        f"| {s['label']} | {s['count']} | {_pct(s['cvr_from_prev'])} | {_pct(s['drop_rate'])} |"
+        for s in funnel["stages"]
+    )
+    kr = funnel.get("key_rates", {})
+    eng = funnel.get("engagement", {})
+    wd = funnel.get("worst_drop")
+    worst_line = (f"**最大離脱**: {wd['label']}(−{_pct(wd['drop_rate'])})← 今週ここが一番落ちている傾向。"
+                  if wd else "**最大離脱**: 算出に十分なデータがまだありません。")
+    return (
+        f"## 2. ファネル(自動取得 — Plausible Stats API / 直近{funnel.get('period','7d')})\n\n"
+        f"更新: {funnel.get('updated_at','-')}。集計値のみ(個人識別子なし)。\n\n"
+        "| 段 | 件数 | 前段比 | 離脱率 |\n|---|---|---|---|\n"
+        f"{rows}\n\n"
+        f"{worst_line}\n\n"
+        f"**診断完了→LINE誘導**: {_pct(kr.get('line_cvr'))}(KPI 30%) / "
+        f"**完了率**: {_pct(kr.get('finish_rate'))} / **0件率**: {_pct(kr.get('zero_rate'))}\n\n"
+        f"補助: 準備シート {eng.get('kit_click',0)} / 受給ずみ {eng.get('seido_done_mark',0)} / "
+        f"受給報告 {eng.get('jukyu_report_click',0)} / 0件 {eng.get('shindan_zero',0)}"
+    )
 
 
 def daicho_summary():
@@ -82,7 +141,7 @@ def freshness(updated_at):
     return label, hours
 
 
-def pick_bottleneck(db, jukyu, keisai):
+def pick_bottleneck(db, jukyu, keisai, funnel=None):
     """今週の単一ボトルネック+単一ネクストアクションを、受給完了への距離で自動判定。
     yui.md『迷ったら受給完了に近づくか?で判断』/『施策は1ヶ月に1つ』に従い最優先を1つだけ返す。"""
     verified = sum(1 for it in db["items"] if it.get("status") == "検証済み")
@@ -107,6 +166,14 @@ def pick_bottleneck(db, jukyu, keisai):
             f"掲載制度数 {keisai}件がKPI(常時{KPI_KEISAI}件)に未達。診断の当たりが薄く、"
             "特に市町村独自制度が空で『自分の街の制度』が出せていない。",
             "沖縄県・市町村の制度を収集対象に追加する(自治体の規約確認が前提。沖縄市・うるま市へ架電中)。",
+        )
+    wd = (funnel or {}).get("worst_drop")
+    line_cvr = ((funnel or {}).get("key_rates") or {}).get("line_cvr")
+    if wd:
+        return (
+            f"主要ゲートは通過。実測ファネルの最大離脱は {wd['label']}(離脱 {_pct(wd['drop_rate'])})。"
+            + (f" 診断完了→LINE は {_pct(line_cvr)}(KPI30%)。" if line_cvr is not None else ""),
+            f"離脱が最大の「{wd['label']}」に的を絞り、その段の文言/導線をA/B候補で1つだけ変更し、みがきの会で効果検証する。",
         )
     return (
         "主要ゲートは通過。次の律速は『診断→LINE登録率』の改善(M4条件30%)。",
@@ -137,7 +204,9 @@ def main():
     daicho = daicho_summary()
     total_amount = jukyu.get("total_amount", 0)
     households = jukyu.get("households", 0)
-    bottleneck, nextaction = pick_bottleneck(db, jukyu, keisai)
+    funnel = load_funnel()
+    funnel_section = render_funnel_section(funnel)
+    bottleneck, nextaction = pick_bottleneck(db, jukyu, keisai, funnel)
 
     daicho_txt = (
         f"記録{daicho['記録']} / 監視中{daicho['監視中']} / クローズ{daicho['クローズ']} / **再発{daicho['再発']}**"
@@ -168,23 +237,7 @@ def main():
 
 受給報告が入り始めると、この表が自動で埋まります(data/fukugiiro/jukyu_reports.json / 検証済みのみ計上)。
 
-## 2. ファネル(Plausibleで確認 → 数値を記入)
-
-計測は稼働中ですが、外部ダッシュボードの数値は自動取得できないため**確認先**を示します。
-ダッシュボード: https://plausible.io/allgroup-inc.github.io
-
-| 段 | イベント名 | 今週の値(手動記入) |
-|---|---|---|
-| サイト来訪 | pageview | |
-| 診断開始 | shindan_start | |
-| 診断完了 | shindan_complete | |
-| 準備シート表示 | kit_click | |
-| 印刷 | kit_print / print_click | |
-| 共有 | share_click | |
-| 再訪(つづき) | shindan_resume | |
-| 受給ずみマーク | seido_done_mark | |
-
-*転換率(完了÷開始、シート÷完了)を毎週ここに残すと、離脱段が一目でわかります。*
+{funnel_section}
 
 ## 3. 掲載・データ品質(自動集計)
 
