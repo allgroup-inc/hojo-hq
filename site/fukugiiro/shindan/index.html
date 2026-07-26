@@ -306,8 +306,13 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       });
       var lineUrl = window.FG_LINE_URL || "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/";
       var lineBox = h("div", {style:"margin:22px 0;padding:18px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
-      lineBox.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px", text:"締切が近づいたら、LINEでお知らせします"}));
-      lineBox.appendChild(h("p", {class:"note", style:"margin-bottom:12px", text:"あなたが見た制度の締切を約1か月前からお知らせ。新しい制度が増えたときもお知らせします。"}));
+      lineBox.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px;font-size:1.05rem", text:"この結果、もらい忘れないために"}));
+      lineBox.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"LINEに登録すると、次の3つを受け取れます(制度の一覧は登録なしでもぜんぶ見られます)。"}));
+      var rewards = h("ul", {style:"list-style:none;text-align:left;max-width:420px;margin:0 auto 12px;padding:0"});
+      ["⏰ この制度の締切を、締切の約1か月前からお知らせ","🆕 あなたの条件に合う新しい制度が増えたらお知らせ","🖨 申請準備シート(持ち物リスト)をまとめて受け取る"].forEach(function(t){
+        rewards.appendChild(h("li", {style:"padding:6px 0;border-bottom:1px solid #cfe9d8", text:t}));
+      });
+      lineBox.appendChild(rewards);
       var lineBtn = h("a", {href: lineUrl, target:"_blank", rel:"noopener",
         style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#06C755;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEで受け取る(無料)"});
       lineBtn.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("line_add_click"); });
