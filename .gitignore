@@ -16,3 +16,4 @@ Thumbs.db
 __pycache__/
 
 .claude/tools/.env
+.claude/settings.local.json
