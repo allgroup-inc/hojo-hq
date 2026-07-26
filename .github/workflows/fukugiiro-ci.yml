@@ -11,6 +11,8 @@ on:
       - "tests/golden_jukyu.json"
       - "tests/shindan.test.mjs"
       - "site/fukugiiro/**"
+      - "scripts/fetch_plausible_funnel.py"
+      - "tests/golden_funnel.json"
   pull_request:
     paths:
       - "data/fukugiiro/**"
@@ -21,6 +23,8 @@ on:
       - "tests/golden_jukyu.json"
       - "tests/shindan.test.mjs"
       - "site/fukugiiro/**"
+      - "scripts/fetch_plausible_funnel.py"
+      - "tests/golden_funnel.json"
   workflow_dispatch: {}
 
 jobs:
@@ -40,6 +44,9 @@ jobs:
         run: |
           python scripts/generate_jukyu_counter.py --self-test
           python scripts/generate_jukyu_counter.py --check
+
+      - name: Plausibleファネル集計 自己テスト
+        run: python scripts/fetch_plausible_funnel.py --self-test
 
       - name: LP検査(サイズ予算・禁止表現・基本要件)
         run: python scripts/check_lp_fukugiiro.py
