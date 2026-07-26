@@ -19,7 +19,7 @@ from datetime import datetime, timezone, timedelta
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
 SEIDO = os.path.join(BASE, "data", "fukugiiro", "seido.json")
-JUKYU = os.path.join(BASE, "data", "fukugiiro", "jukyu_report.json")  # LINE開設後に蓄積(無ければ0)
+JUKYU = os.path.join(BASE, "data", "fukugiiro", "jukyu_reports.json")  # 受給報告台帳(検証済みのみ summary に計上)
 DAICHO = os.path.join(BASE, "docs", "失敗台帳.md")
 AREA_DIR = os.path.join(BASE, "site", "fukugiiro", "area")
 KIT_DIR = os.path.join(BASE, "site", "fukugiiro", "kit")
@@ -34,12 +34,20 @@ def load_seido():
 
 
 def load_jukyu():
-    """受給報告(LINE開設後に蓄積)。無ければ空。"""
+    """受給報告台帳(data/fukugiiro/jukyu_reports.json)を読み、週次レポ用に正規化する。
+    北極星の数字(実受給額累計・支援世帯数)は台帳の summary(検証部が計上したぶんのみ)から取る。
+    台帳が無い/読めない場合は 0。"""
     try:
         with open(JUKYU, encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
     except Exception:
         return {"reports": [], "total_amount": 0, "households": 0}
+    summary = data.get("summary", {}) if isinstance(data, dict) else {}
+    return {
+        "reports": data.get("reports", []) if isinstance(data, dict) else [],
+        "total_amount": summary.get("total_amount_yen", 0),
+        "households": summary.get("household_count", 0),
+    }
 
 
 def daicho_summary():
@@ -158,7 +166,7 @@ def main():
 | 実受給額(累計) | {total_amount:,} 円 | {'計測中' if total_amount else '受付開始前(LINE開設待ち)'} |
 | 支援世帯数(受給報告) | {households} 世帯 | {'計測中' if households else '受付開始前(LINE開設待ち)'} |
 
-受給報告が入り始めると、この表が自動で埋まります(data/fukugiiro/jukyu_report.json)。
+受給報告が入り始めると、この表が自動で埋まります(data/fukugiiro/jukyu_reports.json / 検証済みのみ計上)。
 
 ## 2. ファネル(Plausibleで確認 → 数値を記入)
 
