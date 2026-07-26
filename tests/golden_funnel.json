@@ -1,0 +1,20 @@
+{
+  "_note": "fetch_plausible_funnel.py --self-test 用。build_funnel の集計を検証(方程式4)。率は round(値,4) で比較。",
+  "cases": [
+    {
+      "name": "標準ファネル: 最大離脱は 完了→LINE",
+      "counts": {"shindan_start":100,"shindan_step_q2":90,"shindan_step_q3":50,"shindan_step_q4":45,"shindan_step_q5":40,"shindan_complete":35,"line_add_click":12,"shindan_zero":3,"kit_click":8,"seido_done_mark":2,"jukyu_report_click":1},
+      "expect": {"worst_drop_stage":"line_add_click","line_cvr":0.3429,"finish_rate":0.38,"zero_rate":0.0789}
+    },
+    {
+      "name": "欠損イベントは0扱い",
+      "counts": {"shindan_start":10,"shindan_complete":4},
+      "expect": {"worst_drop_stage":"shindan_step_q2","line_cvr":0.0,"finish_rate":0.4,"zero_rate":0.0}
+    },
+    {
+      "name": "開始0はゼロ除算せず None",
+      "counts": {},
+      "expect": {"worst_drop_stage":null,"line_cvr":null,"finish_rate":null,"zero_rate":null}
+    }
+  ]
+}
