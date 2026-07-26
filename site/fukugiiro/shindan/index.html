@@ -30,6 +30,12 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .back{background:var(--fg-line);color:var(--fg-ink)}
 .note{font-size:.85rem;color:var(--fg-muted);margin-top:10px}
 .result-card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px;margin-bottom:14px}
+.summary-card{background:linear-gradient(180deg,#F9EDE3,#fff);border:2px solid var(--fg-accent);border-radius:12px;padding:18px 16px;margin:6px 0 18px;text-align:center}
+.summary-card .total{font-size:1.15rem;font-weight:800;color:var(--fg-primary)}
+.summary-card .total b{font-size:1.7rem;margin:0 2px}
+.summary-card .breakdown{font-size:.95rem;margin-top:4px}
+.summary-card .breakdown .hi{color:#0f5138;font-weight:700}
+.summary-card .breakdown .mi{color:#7a5b00;font-weight:700}
 .result-card h3{font-size:1.05rem;margin-bottom:4px}
 .lk{display:inline-block;font-size:.8rem;border-radius:4px;padding:1px 10px;font-weight:700;margin-bottom:6px}
 .lk-high{background:#dff2e9;color:#0f5138}
@@ -247,6 +253,16 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         actions.appendChild(shareBtn); actions.appendChild(printBtn);
         app.appendChild(actions);
         app.appendChild(h("p", {class:"note", text:"ぜんぶ一度にやらなくて大丈夫です。まずは1件だけ、いちばん上から始めてみてください。"}));
+        var sum = window.FGShindan.summarize(rs);
+        var summary = h("div", {class:"summary-card"});
+        var total = h("p", {class:"total"});
+        total.innerHTML = "合計 <b>" + sum.total + "</b> 件が対象の可能性";
+        summary.appendChild(total);
+        var bd = h("p", {class:"breakdown"});
+        bd.innerHTML = "可能性 <span class='hi'>高 " + sum.high + "件</span> ・ <span class='mi'>中 " + sum.mid + "件</span>";
+        summary.appendChild(bd);
+        summary.appendChild(h("p", {class:"note", text:"「対象の可能性」のご案内です。受給の可否は各窓口の判断となります。"}));
+        app.appendChild(summary);
       }
       var marks = getMarks();
       rs.forEach(function(r, idx){
