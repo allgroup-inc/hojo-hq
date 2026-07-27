@@ -1,6 +1,6 @@
 # フクギイロ robots.txt 自動監査結果
 
-最終実行: 2026-07-27 09:11 JST / 実行: GitHub Actions(fukugiiro-audit.yml)/ スクリプト: scripts/audit_sources_fukugiiro.py
+最終実行: 2026-07-27 09:24 JST / 実行: GitHub Actions(fukugiiro-audit.yml)/ スクリプト: scripts/audit_sources_fukugiiro.py
 
 > これは機械による事実確認。**収集可否の最終判定は、利用規約審査と合わせて守り部が docs/守り部審査記録.md で行う。**
 > ○=代表パス許可 / ×=不可(手動運用へ) / ?=手動確認要
@@ -10,7 +10,7 @@
 | こども家庭庁 | www.cfa.go.jp | 200 | 代表パス /policies/ は許可範囲 | ○ |
 | 厚生労働省 | www.mhlw.go.jp | 200 | 代表パス /stf/ は許可範囲 | ○ |
 | 協会けんぽ | www.kyoukaikenpo.or.jp | 404 | robots.txt なし(RFC 9309上、クロール制限の指定なし) | ○ |
-| 文部科学省 | www.mext.go.jp | 404 | robots.txt なし(RFC 9309上、クロール制限の指定なし) | ○ |
+| 文部科学省 | www.mext.go.jp | ERR:URLError | 取得失敗(ERR:URLError)— 再実行または手動確認が必要 | ? |
 | JASSO | www.jasso.go.jp | 200 | 代表パス /shogakukin/ は許可範囲 | ○ |
 | 国土交通省 | www.mlit.go.jp | 404 | robots.txt なし(RFC 9309上、クロール制限の指定なし) | ○ |
 | 内閣府 | www.cao.go.jp | 404 | robots.txt なし(RFC 9309上、クロール制限の指定なし) | ○ |
