@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-07-27 04:05",
+ "generated_at": "2026-07-27 11:29",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 10,
- "count": 22,
+ "count": 24,
  "items": [
   {
    "id": "a0WJ200000CDc1MMAT",
@@ -176,6 +176,26 @@
    "max_amount": 700000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdbJMAT",
    "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDcFAMA1",
+   "name": "令和８年度酒類業振興支援事業費補助金（第３期）",
+   "deadline": "2026-08-17",
+   "days_left": 21,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 15000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcFAMA1",
+   "tag": "okinawa"
+  },
+  {
+   "id": "okinawa_pref_sangyo-1021963",
+   "name": "令和8年度沖縄県スタートアップ起業支援金の公募開始",
+   "deadline": "2026-08-19",
+   "days_left": 23,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": null,
+   "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1021963.html",
+   "tag": "okinawa"
   },
   {
    "id": "a0WJ200000CDckaMAD",
