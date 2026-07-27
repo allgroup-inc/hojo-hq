@@ -5,8 +5,9 @@ import html
 
 from .score import score_record, display_pct
 from .actions import action_for_band
+from .console import karte_filename
 
-_HEADERS = ["apply_id", "agent_id", "product", "channel", "risk_pct", "band", "hit_summary", "action"]
+_HEADERS = ["customer_id", "apply_id", "agent_id", "product", "channel", "risk_pct", "band", "hit_summary", "action"]
 _BAND_COLOR = {"high": "#F88800", "med": "#FFD27F", "low": "#EAF2F8"}
 
 
@@ -24,6 +25,8 @@ def build_rows(scoreable_records, model):
     for r in scoreable_records:
         s = score_record(r, model)
         rows.append({
+            "customer_id": r.get("customer_id") or "",
+            "karte_link": karte_filename(r.get("customer_id")) if r.get("customer_id") else "",
             "apply_id": r.get("apply_id"), "agent_id": r.get("agent_id"),
             "product": r.get("product"), "channel": r.get("channel"),
             "risk": s["risk"], "risk_pct": display_pct(s["risk"]),
@@ -46,8 +49,13 @@ def render_html(rows, path):
     trs = []
     for r in rows:
         color = _BAND_COLOR.get(r["band"], "#fff")
-        tds = "".join(f"<td>{html.escape(str(r.get(h, '')))}</td>" for h in _HEADERS)
-        trs.append(f'<tr style="background:{color}">{tds}</tr>')
+        cells = []
+        for h in _HEADERS:
+            val = html.escape(str(r.get(h, "")))
+            if h == "customer_id" and r.get("karte_link"):
+                val = f'<a href="{html.escape(r["karte_link"])}">{val}</a>'
+            cells.append(f"<td>{val}</td>")
+        trs.append(f'<tr style="background:{color}">{"".join(cells)}</tr>')
     doc = (
         '<!doctype html><meta charset="utf-8">'
         '<title>早期解約リスク一覧</title>'
