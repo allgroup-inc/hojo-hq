@@ -14,3 +14,9 @@
 
 ## テスト
 `python -m unittest discover -s tests/churn -v`
+
+## 顧客カルテ(お客様管理)
+別システムから「申込み台帳」と「接触履歴」をCSVで書き出し、顧客IDで束ねてカルテを出す。
+- 接触履歴の列名は `docs/churn/interaction_column_map.example.json` を `private/interaction_map.json` にコピーして合わせる。
+- カルテ出力: `python -m scripts.churn.cli karte --csv private/apps.csv --column-map private/column_map.json --interactions private/inter.csv --interaction-map private/interaction_map.json --model private/risk_model.json --customer-id C1 --out private/karte_C1.html --as-of 2026-07-26`
+- カルテは顧客個人情報を含むため `private/` に出力し、コミットしない。

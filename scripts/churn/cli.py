@@ -15,6 +15,9 @@ from .report_list import build_rows, render_csv, render_html
 from .evaluate import backtest
 from .report_card import build_card, render_html as render_card_html
 from .report_agg import aggregate_by, render_html as render_agg_html
+from .interactions import load_interactions
+from .customer import build_customers
+from .karte import render_html as render_karte_html
 
 
 def _as_of(value):
@@ -81,6 +84,21 @@ def cmd_report(csv_path, column_map_path, out_path, as_of, fields=("agent_id", "
     return sections
 
 
+def cmd_karte(app_csv, app_map, inter_csv, inter_map, model_path, customer_id, out_path, as_of):
+    as_of_d = _as_of(as_of)
+    apps = load_records(app_csv, load_column_map(app_map), as_of_d)
+    inters = load_interactions(inter_csv, load_column_map(inter_map))
+    model = load_model(model_path)
+    customers = build_customers(apps, inters, model, as_of_d)
+    prof = customers.get(str(customer_id))
+    if prof is None:
+        raise SystemExit(f"顧客ID {customer_id} が見つかりません")
+    render_karte_html(prof, out_path)
+    print(f"[karte] {customer_id}: 累計申込{prof['n_applications']}回 "
+          f"最大リスク{prof['max_risk_band']} → {out_path}")
+    return prof
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="churn", description="早期解約リスク保全")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -111,6 +129,16 @@ def main(argv=None):
     sp_report.add_argument("--as-of", required=True)
     sp_report.add_argument("--out", required=True)
 
+    sp_karte = sub.add_parser("karte")
+    sp_karte.add_argument("--csv", required=True)
+    sp_karte.add_argument("--column-map", required=True)
+    sp_karte.add_argument("--interactions", required=True)
+    sp_karte.add_argument("--interaction-map", required=True)
+    sp_karte.add_argument("--model", required=True)
+    sp_karte.add_argument("--customer-id", required=True)
+    sp_karte.add_argument("--out", required=True)
+    sp_karte.add_argument("--as-of", required=True)
+
     args = p.parse_args(argv)
     if args.cmd == "fit":
         cmd_fit(args.csv, args.column_map, args.model, args.as_of)
@@ -122,6 +150,9 @@ def main(argv=None):
         cmd_card(args.csv, args.column_map, args.model, args.apply_id, args.out, args.as_of)
     elif args.cmd == "report":
         cmd_report(args.csv, args.column_map, args.out, args.as_of)
+    elif args.cmd == "karte":
+        cmd_karte(args.csv, args.column_map, args.interactions, args.interaction_map,
+                  args.model, args.customer_id, args.out, args.as_of)
     return 0
 
 
