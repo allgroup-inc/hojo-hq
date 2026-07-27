@@ -22,6 +22,9 @@
 - カルテは顧客個人情報を含むため `private/` に出力し、コミットしない。
 
 ## 運用コンソール(一括生成)
-全顧客のカルテ＋顧客インデックス＋要フォローを1コマンドで `private/console/` に出す。
+全顧客のカルテ＋顧客インデックス＋リスク一覧＋要フォローを1コマンドで `private/console/` に出す。
 `python -m scripts.churn.cli console --csv private/apps.csv --column-map private/column_map.json --interactions private/inter.csv --interaction-map private/interaction_map.json --model private/risk_model.json --out-dir private/console --as-of 2026-07-26`
-生成物は顧客個人情報を含むため `private/` 限定・コミットしない。`private/console/index.html` を開いて回遊する。
+生成物は顧客個人情報を含むため `private/` 限定・コミットしない。
+`index.html`・`list.html`(＝`list.csv`)・各顧客の`karte_*.html`・`followups.html`はすべて同じ`--out-dir`直下に書かれ、
+リスク一覧や顧客インデックスの行から各カルテへ相対リンクで飛べる(サブディレクトリに分かれているとリンク切れ404になるため)。
+`private/console/index.html`(または`list.html`)を開いて回遊する。

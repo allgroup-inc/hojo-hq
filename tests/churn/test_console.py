@@ -41,6 +41,28 @@ class TestConsole(unittest.TestCase):
         finally:
             os.remove(path)
 
+    def test_generate_raises_on_karte_filename_collision(self):
+        # "A/B" と "A_B" はサニタイズ後にどちらも karte_A_B.html になる。
+        # 黙って上書き(=別顧客のPIIへの誤誘導)せず、大声で止める。
+        customers = {
+            "A/B": prof("A/B", "high"),
+            "A_B": prof("A_B", "low"),
+        }
+        out_dir = tempfile.mkdtemp()
+        with self.assertRaises(SystemExit):
+            console.generate(customers, out_dir)
+
+    def test_generate_normal_ids_no_collision(self):
+        customers = {
+            "C1": prof("C1", "high"),
+            "C2": prof("C2", "low"),
+        }
+        out_dir = tempfile.mkdtemp()
+        res = console.generate(customers, out_dir)
+        self.assertEqual(res["n_kartes"], 2)
+        self.assertTrue(os.path.exists(os.path.join(out_dir, "karte_C1.html")))
+        self.assertTrue(os.path.exists(os.path.join(out_dir, "karte_C2.html")))
+
 
 if __name__ == "__main__":
     unittest.main()

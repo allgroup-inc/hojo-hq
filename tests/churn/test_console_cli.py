@@ -49,6 +49,22 @@ class TestConsoleCli(unittest.TestCase):
         with open(os.path.join(self.out, "index.html"), encoding="utf-8") as f:
             self.assertIn('href="karte_C1.html"', f.read())
 
+    def test_console_risk_list_karte_links_resolve(self):
+        # リスク一覧(list.html)がconsoleのout-dirに書かれ、そのカルテリンクが
+        # 実在する同ディレクトリ内のファイルを指していること(404防止)。
+        cli.main(["fit", "--csv", self.acsv, "--column-map", self.amap,
+                  "--model", self.model, "--as-of", "2026-07-26"])
+        res = cli.cmd_console(self.acsv, self.amap, self.icsv, self.imap,
+                              self.model, self.out, "2026-07-26")
+        list_html_path = os.path.join(self.out, "list.html")
+        self.assertTrue(os.path.exists(list_html_path))
+        self.assertEqual(res["list_html"], list_html_path)
+        with open(list_html_path, encoding="utf-8") as f:
+            content = f.read()
+        # C1は継続中の採点対象顧客なので一覧に登場し、karte_C1.htmlへリンクする
+        self.assertIn('href="karte_C1.html"', content)
+        self.assertTrue(os.path.exists(os.path.join(self.out, "karte_C1.html")))
+
 
 if __name__ == "__main__":
     unittest.main()

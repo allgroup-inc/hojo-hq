@@ -67,8 +67,17 @@ def render_index_html(rows, path):
 def generate(customers, out_dir):
     os.makedirs(out_dir, exist_ok=True)
     n = 0
+    seen = {}  # karte_filename -> customer_id（衝突検知用）
     for c in customers.values():
-        render_karte_html(c, os.path.join(out_dir, karte_filename(c["customer_id"])))
+        fname = karte_filename(c["customer_id"])
+        if fname in seen:
+            raise SystemExit(
+                f"[console] カルテファイル名が衝突しました: 顧客ID {seen[fname]!r} と "
+                f"{c['customer_id']!r} がどちらも {fname} になります。"
+                "顧客IDのサニタイズ後が一致するため、誤った顧客のカルテへのリンクを防ぐため停止します。"
+            )
+        seen[fname] = c["customer_id"]
+        render_karte_html(c, os.path.join(out_dir, fname))
         n += 1
     index_path = os.path.join(out_dir, "index.html")
     render_index_html(build_index_rows(customers), index_path)

@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 import argparse
+import os
 from datetime import date
 
 from .intake import load_records, load_column_map
@@ -147,7 +148,17 @@ def cmd_console(app_csv, app_map, inter_csv, inter_map, model_path, out_dir, as_
     model = load_model(model_path)
     customers = build_customers(apps, inters, model, as_of_d)
     res = generate_console(customers, out_dir)
-    print(f"[console] 顧客{res['n_kartes']}件のカルテ＋index＋followups → {out_dir}/")
+    # リスク一覧のカルテリンクが同ディレクトリのkarte_*.htmlへ相対リンクするため、
+    # 一覧もconsoleのout-dirに書き、リンク切れ(404)を防ぐ
+    scoreable = [r for r in apps if r.get("is_scoreable")]
+    rows = build_rows(scoreable, model)
+    list_csv_path = os.path.join(out_dir, "list.csv")
+    list_html_path = os.path.join(out_dir, "list.html")
+    render_csv(rows, list_csv_path)
+    render_html(rows, list_html_path)
+    res["list_csv"] = list_csv_path
+    res["list_html"] = list_html_path
+    print(f"[console] 顧客{res['n_kartes']}件のカルテ＋index＋list＋followups → {out_dir}/")
     return res
 
 
