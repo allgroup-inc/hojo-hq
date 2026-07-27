@@ -123,6 +123,8 @@
   .head-name{display:flex;flex-direction:column;line-height:1.25;}
   .head-name strong{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-size:.92rem;color:#F7F5F1;}
   .head-name small{font-size:.58rem;color:rgba(247,245,241,.78);letter-spacing:.05em;}
+  .head-cta{background:var(--kin);color:var(--sumi);font-weight:700;font-size:.85rem;
+    padding:.55em 1.2em;border-radius:999px;text-decoration:none;white-space:nowrap;}
   .head-nav{display:flex;gap:.2rem;}
   .head-nav a{
     text-decoration:none;color:rgba(247,245,241,.85);font-size:.78rem;font-weight:700;
@@ -389,6 +391,7 @@
   /* 診断フォーム: 進捗・ガイド */
   .form-progress{grid-column:1/-1;font-size:.85rem;font-weight:700;color:rgba(0,51,92,.8);}
   .form-progress strong{color:var(--kin);font-size:1.05em;}
+  .form-note{grid-column:1/-1;font-size:.82rem;color:rgba(0,51,92,.65);margin-top:-6px;}
   .form-guide{grid-column:1/-1;margin-top:var(--sp-1);font-size:.9rem;font-weight:700;
     color:var(--fukamidori);background:rgba(248,136,0,.12);
     border:1px solid rgba(248,136,0,.5);border-radius:12px;padding:var(--sp-2);}
@@ -460,6 +463,7 @@
     <img src="assets/glow-logo.png" alt="GLOW" class="head-logo" width="468" height="260">
     <span class="head-name"><strong>沖縄企業のミカタ</strong><small>補助金・助成金情報|運営 株式会社GLOW</small></span>
   </a>
+  <a class="head-cta" href="#match">無料診断</a>
 </header>
 
 
@@ -518,10 +522,10 @@
 <section class="match" id="match">
   <p class="eyebrow rv">FREE MATCHING</p>
   <h2 class="rv">あなたの会社に、<br><span class="kin">いま使える制度</span>を。</h2>
-  <p class="sub rv">4つ選ぶだけ。登録不要・無料で、最新データから自動マッチングします。</p>
+  <p class="sub rv">4つ選ぶだけ。登録不要・無料で、最新データから自動で診断します。</p>
   <ol class="steps rv">
     <li><span>1</span>条件を4つ選ぶ</li>
-    <li><span>2</span>可能性額と制度がその場で表示</li>
+    <li><span>2</span>結果と可能性額がその場で表示</li>
     <li><span>3</span>LINE登録で全件＋締切アラート</li>
   </ol>
   <div class="match-form rv">
@@ -576,7 +580,8 @@
         <small>県・市町村など、独自の申請方法で「すぐ動ける可能性がある制度」を上位に表示します。</small>
       </span>
     </label>
-    <button id="match-btn" class="line-btn" type="button">無料でマッチングする</button>
+    <button id="match-btn" class="line-btn" type="button">🔍 無料で診断する</button>
+    <p class="form-note">登録・会社名の入力は不要。結果まで<span class="nowrap">そのまま見られます。</span></p>
     <p class="form-guide" id="form-guide" hidden>まだ何も選ばれていません 😊 どれか1つだけでも選ぶと、貴社に近い制度に絞ってお探しできます。</p>
   </div>
 
@@ -586,9 +591,9 @@
       <p class="pot-amount">最大 <span id="pot-amount" class="kin">—</span></p>
       <p class="pot-meta" id="pot-meta"></p>
       <p class="pot-note">※各制度が公表している公募上限額を単純に合計した理論値です。受給できる金額や採択を保証するものではありません。要件・金額は必ず各制度の原文でご確認ください。</p>
-      <a class="register-btn" href="go/shindan/" target="_blank" rel="noopener">この可能性を無料で確認する(LINE)</a>
+      <a class="register-btn" id="pot-cta" href="go/shindan/" target="_blank" rel="noopener">この可能性を無料で確認する(LINE)</a>
     </div>
-    <p class="result-head" aria-live="polite">マッチした制度 <span id="result-count" class="kin"></span>件</p>
+    <p class="result-head" aria-live="polite">診断結果 <span id="result-count" class="kin"></span>件</p>
     <div id="shokei-banner" class="shokei-banner" hidden>
       <strong>事業の引き継ぎ・後継に使える補助金</strong>があります。
       専門家への相談費用なども補助対象になる制度です。
@@ -615,32 +620,6 @@
       <p class="reg-note">※入力内容はLINEのメッセージにセットされるだけで、このサイトには保存されません。</p>
     </div>
 
-    <details class="gbiz" id="gbiz">
-      <summary>申請の前に:gBizIDは「オンライン」なら待たずに取れます</summary>
-      <div class="gbiz-body">
-        <p>国の補助金(jGrants)の申請には、多くの場合「GビズIDプライム」が必要です。<strong>取り方によって、かかる時間がまったく違います。</strong></p>
-        <div class="gbiz-row">
-          <b>オンライン申請</b>
-          <span><span class="gbiz-fast">24時間365日、速やかに発行</span>(法人代表者の方)</span>
-        </div>
-        <div class="gbiz-row">
-          <b>書類の郵送申請</b>
-          <span><span class="gbiz-slow">審査に最大1か月</span></span>
-        </div>
-        <div class="gbiz-row">
-          <b>用意するもの</b>
-          <span>マイナンバーカード / NFC対応スマートフォン / GビズIDアプリ</span>
-        </div>
-        <div class="gbiz-row">
-          <b>有効期限</b>
-          <span>発行日から2年3か月(プライム・メンバー)。<strong>以前取得した方は期限切れにご注意ください</strong></span>
-        </div>
-        <p class="gbiz-note">
-          ※ gBizIDが必要かどうかは制度によって異なります。沖縄県・市町村・産業振興公社などの制度は独自の申請方法の場合があります。必ず各制度の公募要領でご確認ください。<br>
-          ※ 上記は<a href="https://gbiz-id.go.jp/top/" target="_blank" rel="noopener">GビズID公式サイト</a>の記載に基づく情報です(最新の内容は公式サイトでご確認ください)。
-        </p>
-      </div>
-    </details>
 
     <div class="experts">
       <p class="experts-head">この制度の申請、誰に相談する?</p>
@@ -670,6 +649,33 @@
       </div>
       <p class="experts-note">専門家の方へ: 掲載のご相談はLINEよりお問い合わせください。</p>
     </div>
+
+    <details class="gbiz" id="gbiz">
+      <summary>申請の前に:gBizIDは「オンライン」なら待たずに取れます</summary>
+      <div class="gbiz-body">
+        <p>国の補助金(jGrants)の申請には、多くの場合「GビズIDプライム」が必要です。<strong>取り方によって、かかる時間がまったく違います。</strong></p>
+        <div class="gbiz-row">
+          <b>オンライン申請</b>
+          <span><span class="gbiz-fast">24時間365日、速やかに発行</span>(法人代表者の方)</span>
+        </div>
+        <div class="gbiz-row">
+          <b>書類の郵送申請</b>
+          <span><span class="gbiz-slow">審査に最大1か月</span></span>
+        </div>
+        <div class="gbiz-row">
+          <b>用意するもの</b>
+          <span>マイナンバーカード / NFC対応スマートフォン / GビズIDアプリ</span>
+        </div>
+        <div class="gbiz-row">
+          <b>有効期限</b>
+          <span>発行日から2年3か月(プライム・メンバー)。<strong>以前取得した方は期限切れにご注意ください</strong></span>
+        </div>
+        <p class="gbiz-note">
+          ※ gBizIDが必要かどうかは制度によって異なります。沖縄県・市町村・産業振興公社などの制度は独自の申請方法の場合があります。必ず各制度の公募要領でご確認ください。<br>
+          ※ 上記は<a href="https://gbiz-id.go.jp/top/" target="_blank" rel="noopener">GビズID公式サイト</a>の記載に基づく情報です(最新の内容は公式サイトでご確認ください)。
+        </p>
+      </div>
+    </details>
   </div>
   <p class="updated rv">データ最終更新:<span id="updated-at">—</span>(1日4回自動更新)</p>
 </section>
@@ -738,7 +744,7 @@
     const el=document.getElementById('form-progress');
     if(!el)return;
     const theme=t?` ＋テーマ${t}`:'';
-    const msg=n>=4?'準備OK!マッチングしましょう':(n>0?'いい調子です':'1つでも選ぶと精度が上がります');
+    const msg=n>=4?'準備OK!診断できます':(n>0?'いい調子です':'1つでも選ぶと精度が上がります');
     el.innerHTML=`選択 <strong>${n}/4</strong>${theme} — ${msg}`;
     if(n>0||t>0){const g=document.getElementById('form-guide');if(g)g.hidden=true;}
   }
@@ -846,6 +852,17 @@
         return;
       }
       amtEl.style.display='';
+      // 動線設計(2026-07-27 決裁): 合計金額は未登録では見せない。
+      // 「1件+残りぼかし+合計を隠す」→ 見たくてLINE登録 → 戻ると全解禁、の順。
+      var isMember=localStorage.getItem('mikata_member')==='1';
+      var potCta=document.getElementById('pot-cta');
+      if(potCta)potCta.hidden=isMember; // 登録済みにはCTA不要
+      if(!isMember){
+        document.getElementById('pot-amount').textContent='●,●●●万円';
+        document.getElementById('pot-meta').textContent=
+          '合計金額は、無料のLINE登録でこの場に表示されます(対象 '+sme.length+'件の内訳つき)';
+        return;
+      }
       var unknown=hits.length-withAmt.length;
       var single=Math.max.apply(null,sme.map(function(it){return Number(it.max_amount);}));
       document.getElementById('pot-meta').textContent=
@@ -907,6 +924,15 @@
       setTimeout(function(){document.getElementById('match-btn').click();},400);
     });
     const am=document.getElementById('already-member');
+    // 合計金額CTA: unlockボタンと同じ解禁挙動(LINE登録画面を開き、戻るとこの場で全表示)
+    const pc=document.getElementById('pot-cta');
+    if(pc&&!pc.dataset.bound){
+      pc.dataset.bound='1';
+      pc.addEventListener('click',function(){
+        localStorage.setItem('mikata_member','1');
+        setTimeout(function(){document.getElementById('match-btn').click();},400);
+      });
+    }
     // 会社情報登録フォーム(入力→記入済みメッセージをLINEにセット)
     const ro=document.getElementById('reg-open');
     if(ro&&!ro.dataset.bound){
