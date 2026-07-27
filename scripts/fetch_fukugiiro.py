@@ -322,6 +322,47 @@ SEEDS = [
         "source_url": "https://kosodate-green.mlit.go.jp/",
         "match_tokens": ["子育てグリーン"],
     },
+    # ── 沖縄県(県レベル・守り部✅条件付き承認 2026-07-27: 事実+リンクのみ・本文転載禁止・出典.lg.jp)──
+    {
+        "id": "fk-ken-boshi-fushi-kafu-shikin",
+        "name": "母子父子寡婦福祉資金貸付金",
+        "category": "生活支援", "life_events": ["子育て", "低所得・生活苦"],
+        "issuer": "沖縄県", "area": "沖縄県",
+        "target_household": "ひとり親家庭(母子・父子)や寡婦の方が、生活・就学・住宅などの資金でお困りのときに対象となる可能性があります",
+        "how_to_apply": "お住まいの市町村または県の福祉事務所の窓口へ相談",
+        "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/1036529/1036517.html",
+        "match_tokens": ["母子父子寡婦福祉資金", "貸付"],
+    },
+    {
+        "id": "fk-ken-hitorioya-jutaku-shikin",
+        "name": "沖縄県ひとり親家庭住宅支援資金貸付",
+        "category": "住まい", "life_events": ["住宅取得・引越", "低所得・生活苦"],
+        "issuer": "沖縄県", "area": "沖縄県",
+        "target_household": "自立支援プログラムに参加し、就職や技能習得に取り組むひとり親家庭が対象となる可能性があります",
+        "how_to_apply": "県の担当窓口(こども若者政策課)へ相談",
+        "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/1036529/1036514.html",
+        "match_tokens": ["ひとり親", "住宅支援資金"],
+    },
+    {
+        "id": "fk-ken-hitorioya-kurashi-ouen",
+        "name": "沖縄県ひとり親家庭暮らし応援事業",
+        "category": "生活支援", "life_events": ["子育て", "低所得・生活苦"],
+        "issuer": "沖縄県", "area": "沖縄県",
+        "target_household": "児童扶養手当の受給世帯など、ひとり親家庭の方が対象となる可能性があります",
+        "how_to_apply": "お住まいの市町村・県のご案内に沿って申請",
+        "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/1036531/1039524.html",
+        "match_tokens": ["ひとり親", "暮らし応援"],
+    },
+    {
+        "id": "fk-ken-kenei-jutaku",
+        "name": "沖縄県営住宅",
+        "category": "住まい", "life_events": ["住宅取得・引越", "低所得・生活苦"],
+        "issuer": "沖縄県", "area": "沖縄県",
+        "target_household": "住まいにお困りで、所得などの要件にあてはまる世帯が対象となる可能性があります",
+        "how_to_apply": "沖縄県住宅供給公社・県の住宅窓口へ",
+        "source_url": "https://www.pref.okinawa.lg.jp/machizukuri/jutakutochi/1012327/1012334/index.html",
+        "match_tokens": ["県営住宅"],
+    },
 ]
 
 _robots_cache = {}
