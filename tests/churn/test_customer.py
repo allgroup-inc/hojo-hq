@@ -1,6 +1,7 @@
 import unittest
-from datetime import date
+from datetime import date, timedelta
 from scripts.churn import fit, customer
+from scripts.churn.config import FOLLOWUP_DAYS
 
 
 def app(cid, product, early=None, resolved=True, scoreable=False, apply_id="A", cancel=None):
@@ -35,10 +36,16 @@ class TestCustomer(unittest.TestCase):
         cs = customer.build_customers(apps, inters, model, date(2026, 4, 1))
         c = cs["C1"]
         self.assertEqual(c["n_applications"], 2)
+        self.assertEqual(c["n_active"], 1)
+        self.assertEqual(c["n_cancelled"], 1)
         self.assertEqual(c["n_early_churn"], 1)
         self.assertEqual(c["n_additional_guidance"], 1)
         self.assertEqual(c["interactions"][0]["date"], date(2026, 3, 5))  # 降順
         self.assertEqual(c["last_contact_date"], date(2026, 3, 5))
+        # Early-churned app (resolved, not scoreable) should have risk=None
+        self.assertIsNone(c["applications"][0]["risk"])
+        # Active app (not resolved, scoreable) should have risk assigned
+        self.assertIsNotNone(c["applications"][1]["risk"])
 
     def test_unlinked_records_excluded(self):
         model = build_model()
@@ -54,6 +61,37 @@ class TestCustomer(unittest.TestCase):
         cs = customer.build_customers(apps, inters, model, date(2026, 4, 1))  # 31日経過
         self.assertTrue(cs["C2"]["needs_followup"])
         self.assertEqual(cs["C2"]["max_risk_band"], "high")
+
+    def test_needs_followup_boundary(self):
+        """Boundary of needs_followup: exactly FOLLOWUP_DAYS is NOT overdue, FOLLOWUP_DAYS+1 IS."""
+        model = build_model()
+        as_of = date(2026, 4, 1)
+        apps = [app("C3", "X", None, resolved=False, scoreable=True)]  # 高リスク
+
+        # Contact exactly FOLLOWUP_DAYS ago → still on edge, not overdue
+        on_edge = [inter("C3", as_of - timedelta(days=FOLLOWUP_DAYS), "架電")]
+        self.assertFalse(customer.build_customers(apps, on_edge, model, as_of)["C3"]["needs_followup"])
+
+        # Contact FOLLOWUP_DAYS+1 days ago → overdue
+        over = [inter("C3", as_of - timedelta(days=FOLLOWUP_DAYS + 1), "架電")]
+        self.assertTrue(customer.build_customers(apps, over, model, as_of)["C3"]["needs_followup"])
+
+    def test_needs_followup_high_risk_recent_contact(self):
+        """High risk with recent contact → should NOT need followup."""
+        model = build_model()
+        apps = [app("C4", "X", None, resolved=False, scoreable=True)]  # 高リスク
+        inters = [inter("C4", date(2026, 3, 31), "架電")]  # 1日前
+        cs = customer.build_customers(apps, inters, model, date(2026, 4, 1))
+        self.assertFalse(cs["C4"]["needs_followup"])
+        self.assertEqual(cs["C4"]["max_risk_band"], "high")
+
+    def test_needs_followup_low_risk(self):
+        """Low/med risk customer → should NOT need followup, even with no contact."""
+        model = build_model()
+        apps = [app("C5", "Y", None, resolved=False, scoreable=True)]  # 低リスク(product=Y)
+        cs = customer.build_customers(apps, [], model, date(2026, 4, 1))
+        self.assertFalse(cs["C5"]["needs_followup"])
+        self.assertNotEqual(cs["C5"]["max_risk_band"], "high")
 
 
 if __name__ == "__main__":
