@@ -18,6 +18,7 @@ from .report_agg import aggregate_by, render_html as render_agg_html
 from .interactions import load_interactions
 from .customer import build_customers
 from .karte import render_html as render_karte_html
+from .followups import list_followups, render_html as render_followups_html
 
 
 def _as_of(value):
@@ -99,6 +100,18 @@ def cmd_karte(app_csv, app_map, inter_csv, inter_map, model_path, customer_id, o
     return prof
 
 
+def cmd_followups(app_csv, app_map, inter_csv, inter_map, model_path, out_path, as_of):
+    as_of_d = _as_of(as_of)
+    apps = load_records(app_csv, load_column_map(app_map), as_of_d)
+    inters = load_interactions(inter_csv, load_column_map(inter_map))
+    model = load_model(model_path)
+    customers = build_customers(apps, inters, model, as_of_d)
+    rows = list_followups(customers)
+    render_followups_html(rows, out_path)
+    print(f"[followups] 要フォロー {len(rows)}件 → {out_path}")
+    return len(rows)
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="churn", description="早期解約リスク保全")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -139,6 +152,15 @@ def main(argv=None):
     sp_karte.add_argument("--out", required=True)
     sp_karte.add_argument("--as-of", required=True)
 
+    sp_fu = sub.add_parser("followups")
+    sp_fu.add_argument("--csv", required=True)
+    sp_fu.add_argument("--column-map", required=True)
+    sp_fu.add_argument("--interactions", required=True)
+    sp_fu.add_argument("--interaction-map", required=True)
+    sp_fu.add_argument("--model", required=True)
+    sp_fu.add_argument("--out", required=True)
+    sp_fu.add_argument("--as-of", required=True)
+
     args = p.parse_args(argv)
     if args.cmd == "fit":
         cmd_fit(args.csv, args.column_map, args.model, args.as_of)
@@ -153,6 +175,9 @@ def main(argv=None):
     elif args.cmd == "karte":
         cmd_karte(args.csv, args.column_map, args.interactions, args.interaction_map,
                   args.model, args.customer_id, args.out, args.as_of)
+    elif args.cmd == "followups":
+        cmd_followups(args.csv, args.column_map, args.interactions, args.interaction_map,
+                      args.model, args.out, args.as_of)
     return 0
 
 
