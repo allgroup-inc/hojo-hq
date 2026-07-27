@@ -20,7 +20,7 @@ def render_html(rows, path):
         trs.append(
             f"<tr><td>{html.escape(str(c.get('customer_id')))}</td>"
             f"<td>{html.escape(str(c.get('age_band')))} / {html.escape(str(c.get('area')))}</td>"
-            f"<td>{c.get('n_active')}</td><td>{html.escape(str(last))}</td></tr>")
+            f"<td>{html.escape(str(c.get('n_active')))}</td><td>{html.escape(str(last))}</td></tr>")
     doc = (
         '<!doctype html><meta charset="utf-8"><title>要フォロー一覧</title>'
         '<style>body{font-family:"Noto Sans JP","Meiryo",sans-serif;padding:20px}'

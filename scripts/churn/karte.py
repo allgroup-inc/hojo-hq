@@ -3,7 +3,6 @@ from __future__ import annotations
 import html
 
 from .score import display_pct
-from .actions import action_for_band
 
 _BAND_JP = {"high": "🔴 高", "med": "🟡 中", "low": "🟢 低", None: "—"}
 
