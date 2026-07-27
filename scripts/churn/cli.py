@@ -19,6 +19,7 @@ from .interactions import load_interactions
 from .customer import build_customers
 from .karte import render_html as render_karte_html
 from .followups import list_followups, render_html as render_followups_html
+from .karte_effect import contact_effect
 
 
 def _as_of(value):
@@ -112,6 +113,17 @@ def cmd_followups(app_csv, app_map, inter_csv, inter_map, model_path, out_path, 
     return len(rows)
 
 
+def cmd_karte_effect(app_csv, app_map, inter_csv, inter_map, as_of):
+    as_of_d = _as_of(as_of)
+    apps = load_records(app_csv, load_column_map(app_map), as_of_d)
+    inters = load_interactions(inter_csv, load_column_map(inter_map))
+    m = contact_effect(apps, inters)
+    print(f"[karte-effect] 保全接触あり {m['n_contacted']}件 解約率{m['contacted_rate']:.1%} / "
+          f"なし {m['n_not_contacted']}件 解約率{m['not_contacted_rate']:.1%} / "
+          f"差{m['diff']:+.1%}")
+    return m
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="churn", description="早期解約リスク保全")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -161,6 +173,13 @@ def main(argv=None):
     sp_fu.add_argument("--out", required=True)
     sp_fu.add_argument("--as-of", required=True)
 
+    sp_ke = sub.add_parser("karte-effect")
+    sp_ke.add_argument("--csv", required=True)
+    sp_ke.add_argument("--column-map", required=True)
+    sp_ke.add_argument("--interactions", required=True)
+    sp_ke.add_argument("--interaction-map", required=True)
+    sp_ke.add_argument("--as-of", required=True)
+
     args = p.parse_args(argv)
     if args.cmd == "fit":
         cmd_fit(args.csv, args.column_map, args.model, args.as_of)
@@ -178,6 +197,9 @@ def main(argv=None):
     elif args.cmd == "followups":
         cmd_followups(args.csv, args.column_map, args.interactions, args.interaction_map,
                       args.model, args.out, args.as_of)
+    elif args.cmd == "karte-effect":
+        cmd_karte_effect(args.csv, args.column_map, args.interactions,
+                         args.interaction_map, args.as_of)
     return 0
 
 
