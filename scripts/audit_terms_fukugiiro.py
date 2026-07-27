@@ -35,6 +35,7 @@ DOMAINS = [
     ("内閣府", "www.cao.go.jp"),
     ("内閣府防災", "www.bousai.go.jp"),
     ("全国社会福祉協議会", "www.shakyo.or.jp"),
+    ("沖縄県", "www.pref.okinawa.jp"),
     ("那覇市", "www.city.naha.okinawa.jp"),
     ("沖縄市", "www.city.okinawa.okinawa.jp"),
     ("うるま市", "www.city.uruma.lg.jp"),
@@ -182,11 +183,22 @@ def main():
                     time.sleep(1.5)
             if not links:
                 entry["error"] = "規約系ページを発見できず — 手動確認要"
-            for url, text in links[:4]:
+            # 収集: 取得したページからも規約系リンクを1段だけ辿る(ハブ /about/ → 著作権・リンク本文へ到達)。
+            # 暴走防止に上限つき: 収集ページ最大6・訪問URL最大10・自ドメインのみ。
+            queue = list(links[:4])
+            seen_urls = set(u for u, _ in queue)
+            MAX_PAGES, MAX_SEEN = 6, 10
+            while queue and len(entry["pages"]) < MAX_PAGES:
+                url, text = queue.pop(0)
                 try:
                     page = fetch(url)
                     body = strip_html(page)
                     entry["pages"].append({"url": url, "link_text": text, "excerpt": excerpt(body)})
+                    # このページ内の規約系リンクを1段だけ辿る(ハブページ対策)
+                    for sub_url, sub_text in find_terms_links(page, url):
+                        if sub_url not in seen_urls and len(seen_urls) < MAX_SEEN:
+                            seen_urls.add(sub_url)
+                            queue.append((sub_url, sub_text))
                 except Exception as e:
                     entry["pages"].append({"url": url, "link_text": text, "excerpt": f"(取得失敗: {type(e).__name__})"})
                 time.sleep(1.5)

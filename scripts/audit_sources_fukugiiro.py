@@ -35,6 +35,7 @@ TARGETS = [
     ("内閣府", "www.cao.go.jp", "/"),
     ("内閣府防災", "www.bousai.go.jp", "/"),
     ("全国社会福祉協議会", "www.shakyo.or.jp", "/"),
+    ("沖縄県", "www.pref.okinawa.jp", "/"),
     ("那覇市", "www.city.naha.okinawa.jp", "/kurashitetuduki/"),
     ("沖縄市", "www.city.okinawa.okinawa.jp", "/"),
     ("うるま市", "www.city.uruma.lg.jp", "/"),

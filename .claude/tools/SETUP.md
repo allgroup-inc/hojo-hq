@@ -1,7 +1,8 @@
 # .claude/tools — 広告/計測データ連携 セットアップ手順
 
 マーケスキル(ads / ad-creative / cro / analytics 等)が「実績データを引く」ときに使う、
-依存ゼロのNode CLI群。あなたのスタックに絞って収録: Meta / Google広告 / GA4 / TikTok / Google Search Console。
+依存ゼロのNode CLI群。あなたのスタックに絞って収録: Meta / Google広告 / GA4 / TikTok / Google Search Console
+/ OpenAI音声文字起こし(顧客の声の収集・分析用)。
 
 > **状態: 配管は完成・トークン未設定。** 下記トークンを発行して環境変数に入れれば即稼働。
 > トークン発行は各管理画面での作業(Claudeは代行不可)。安全のため**トークンはリポジトリにコミットしない**。
@@ -19,6 +20,7 @@ node .claude/tools/clis/meta-ads.js campaigns list --dry-run   # 実APIを叩か
 | **Google広告** | `GOOGLE_ADS_TOKEN`, `GOOGLE_ADS_DEVELOPER_TOKEN`, `GOOGLE_ADS_CUSTOMER_ID` | Google Ads API Center で**developer token**申請(承認要) → OAuthでアクセストークン。CustomerIDは10桁(ハイフン無し)。 |
 | **TikTok広告** | `TIKTOK_ACCESS_TOKEN`, `TIKTOK_ADVERTISER_ID` | TikTok for Business → Developers → アプリ作成 → OAuthでアクセストークン。 |
 | **Search Console** | `GSC_ACCESS_TOKEN` | GCPサービスアカウント → Search Consoleでそのアカウントに権限付与 → アクセストークン取得。 |
+| **OpenAI(音声文字起こし)** | `OPENAI_API_KEY` | https://platform.openai.com/ → API keys → 新規発行。支払い方法登録必要(従量課金・月額固定費なし)。詳細 `integrations/openai-transcribe.md`。 |
 
 各プラットフォームの操作詳細は `integrations/<name>.md`、全体一覧は `REGISTRY.md`。
 
@@ -27,5 +29,7 @@ node .claude/tools/clis/meta-ads.js campaigns list --dry-run   # 実APIを叩か
 2. **GitHub Actionsで定期実行**: リポジトリ Settings → Secrets and variables → Actions に**同名で登録**。既存の hikari-report/daily-cpa.yml はこの方式(META_ACCESS_TOKEN等)を想定済み。
 
 ## おすすめ着手順
-1. **Meta広告 + GA4**(主戦場・最優先) → 2. TikTok(kakei) → 3. Google広告 → 4. Search Console。
+1. **Meta広告 + GA4**(主戦場・最優先) → 2. TikTok(kakei) → 3. Google広告 → 4. Search Console → 5. OpenAI(音声文字起こし)。
 まずMetaを入れれば `ads`/`ad-creative` が実績CPA/CTRを見て最適化提案できる。
+OpenAIを入れると `voice-of-customer-analysis` スキルで顧客の声(商談録音・インタビュー)を
+文字起こし→分析→コピー/LP改善に反映するところまで動く。

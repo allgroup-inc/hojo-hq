@@ -53,16 +53,15 @@
 
   /* ===== ヘッドライン主導のフルスクリーン構成 ===== */
   section{
-    min-height:100vh;
     display:flex;
     flex-direction:column;
     justify-content:center;
-    padding:8vh 5vw;
+    padding:72px 5vw;
     position:relative;
   }
-  /* 画面外セクションは描画をスキップしてFCP/LCPを短縮。高さは100vh相当を事前確保しスクロールバー崩れを防ぐ */
-  section:not(.hero){content-visibility:auto;contain-intrinsic-size:auto 100vh;}
-  .hero-logo{width:130px;height:auto;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
+  .hero{min-height:100vh;}
+  @media (max-width:640px){section{padding:56px 5vw;}}
+  .hero-logo{width:130px;height:auto;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 8px rgba(255,255,255,.55));}
   .eyebrow{
     color:var(--kin);
     font-size:clamp(12px,1.4vw,15px);
@@ -70,6 +69,14 @@
     font-weight:700;
     margin-bottom:2.2rem;
   }
+  /* モバイル: アドレスバー伸縮でvhが変動し、スクロール中に全セクションが
+     再レイアウトされてガタつくため、対応ブラウザでは安定単位svhを使う */
+  @supports (height: 100svh){
+    .hero{min-height:100svh;}
+    .hero::after{height:11svh;}
+    .scrolldown{bottom:7svh;}
+  }
+
   h1,h2{
     font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;
     font-weight:900;
@@ -108,11 +115,11 @@
     position:fixed;top:0;left:0;right:0;z-index:50;
     display:flex;align-items:center;justify-content:space-between;gap:.6rem;
     padding:.55rem 4vw;
-    background:rgba(2,28,48,.88);backdrop-filter:blur(8px);
+    background:rgba(2,28,48,.97); /* backdrop-filterはスクロール毎フレーム再描画でジャンクの主因のため不使用 */
     border-bottom:1px solid rgba(248,136,0,.3);
   }
   .head-brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;}
-  .head-logo{height:26px;width:auto;width:auto;filter:drop-shadow(0 0 6px rgba(255,255,255,.5));}
+  .head-logo{height:26px;width:auto;}
   .head-name{display:flex;flex-direction:column;line-height:1.25;}
   .head-name strong{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-size:.92rem;color:#F7F5F1;}
   .head-name small{font-size:.58rem;color:rgba(247,245,241,.78);letter-spacing:.05em;}
@@ -128,8 +135,8 @@
   }
 
   /* ヒーロー */
-  .hero h1,.hero .oath,.hero .sub,.hero .live-badge{text-shadow:0 2px 18px rgba(2,28,48,.95),0 1px 4px rgba(2,28,48,1),0 0 40px rgba(2,28,48,.6);}
-  .vision h2,.vision .eyebrow{text-shadow:0 2px 14px rgba(0,40,80,.85),0 1px 3px rgba(0,40,80,.9);}
+  .hero h1,.hero .oath,.hero .sub,.hero .live-badge{text-shadow:0 2px 10px rgba(2,28,48,.95);}
+  .vision h2,.vision .eyebrow{text-shadow:0 2px 10px rgba(0,40,80,.9);}
   .hero{
     background:
       linear-gradient(175deg,rgba(2,28,48,.38) 0%,rgba(2,28,48,.55) 45%,rgba(0,51,92,.78) 100%),
@@ -150,7 +157,7 @@
 
   /* 数字セクション：巨大数字がヘッドライン */
   .impact{background:var(--shiro);color:var(--fukamidori);}
-  .impact .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
+  .impact .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 8px rgba(255,255,255,.55));}
   .eyebrow{color:var(--midori);}
   .bignum-row{
     display:flex;flex-wrap:wrap;gap:4vw;margin-top:var(--sp-6);
@@ -180,7 +187,7 @@
     text-align:center;align-items:center;
   }
   .vision h2{max-width:18em;}
-  .vision .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
+  .vision .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 8px rgba(255,255,255,.55));}
   .eyebrow{color:var(--shiro);opacity:.85;}
 
   /* 仕組み：見出し3連打 */
@@ -221,7 +228,7 @@
 
   /* マッチング */
   .match{background:var(--shiro);color:var(--fukamidori);}
-  .match .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 10px rgba(255,255,255,.65)) drop-shadow(0 2px 6px rgba(255,255,255,.35));}
+  .match .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 8px rgba(255,255,255,.55));}
   .eyebrow{color:var(--midori);}
   .match   .oath{margin-top:1.4rem;font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-weight:800;color:var(--kin);font-size:clamp(1rem,2.4vw,1.4rem);}
   .live-badge{margin-top:2rem;display:inline-block;font-size:.85rem;font-weight:700;padding:.55em 1.2em;border-radius:999px;background:rgba(247,245,241,.1);border:1px solid rgba(248,136,0,.45);}
@@ -274,11 +281,20 @@
   .card a{color:var(--midori);font-weight:700;font-size:.9rem;}
     .card.locked{filter:blur(0px);position:relative;}
   .card.locked h4,.card.locked .meta{filter:blur(5px);user-select:none;}
+  .back-result{position:fixed;right:16px;bottom:16px;z-index:60;font:inherit;font-weight:700;
+    background:var(--kin);color:var(--sumi);border:none;border-radius:999px;min-height:48px;
+    padding:0 20px;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer;}
+  .restored-note{font-size:.85rem;font-weight:700;color:rgba(0,51,92,.65);margin-bottom:var(--sp-1);}
+  .member-note{margin-top:var(--sp-2);padding:var(--sp-2);border-radius:12px;font-size:.9rem;font-weight:700;
+    background:rgba(0,80,136,.08);border:1px solid rgba(0,80,136,.25);color:var(--fukamidori);}
   .unlock{
     margin-top:var(--sp-3);padding:var(--sp-3);border-radius:14px;text-align:center;
     background:var(--fukamidori);color:var(--shiro);
   }
   .unlock p{font-size:.95rem;line-height:1.8;}
+  .unlock .already{margin-top:var(--sp-2);}
+  .unlock .already button{background:none;border:none;cursor:pointer;font:inherit;font-size:.85rem;
+    color:rgba(247,245,241,.85);text-decoration:underline;padding:8px;}
   .unlock strong{color:var(--kin);}
   .unlock .line-btn{margin-top:1.1rem;font-size:1rem;padding:.95em 2.4em;}
   .experts{margin-top:var(--sp-6);padding-top:var(--sp-4);border-top:2px solid rgba(0,51,92,.15);}
@@ -307,6 +323,17 @@
     margin-top:.4rem;font-size:.85rem;font-weight:700;
     padding:.6em 1.4em;border-radius:999px;background:var(--kin);color:#fff;
   }
+  .hero-cta{
+    display:inline-block;margin-top:var(--sp-3);background:var(--kin);color:var(--sumi);
+    font-weight:700;font-size:clamp(.95rem,2vw,1.1rem);padding:.95em 2em;border-radius:999px;
+    text-decoration:none;box-shadow:0 8px 30px rgba(248,136,0,.4);
+    transition:transform .2s ease;
+  }
+  .hero-cta:hover{transform:translateY(-2px);}
+  .steps{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-3);margin-top:var(--sp-3);list-style:none;padding:0;}
+  .steps li{display:flex;align-items:center;gap:.55em;font-size:.9rem;font-weight:700;color:rgba(0,51,92,.85);}
+  .steps li span{flex:none;width:30px;height:30px;border-radius:50%;background:var(--kin);color:var(--sumi);
+    display:flex;align-items:center;justify-content:center;font-weight:900;}
   .sample-note{font-size:.72rem;color:var(--kin);font-weight:700;margin-top:.5rem;}
   .expert-card.coming{opacity:.75;border-style:dashed;}
   .expert-card.coming .expert-photo{font-size:1.3rem;}
@@ -367,6 +394,26 @@
     border:1px solid rgba(248,136,0,.5);border-radius:12px;padding:var(--sp-2);}
 
   /* 診断結果: 会社情報登録CTA */
+  /* 総額ポテンシャル(議事_総額ポテンシャル表示.md の5条件に準拠) */
+  .potential{margin-top:var(--sp-3);padding:var(--sp-3);border-radius:14px;
+    background:var(--fukamidori);color:var(--shiro);}
+  .pot-label{font-size:.88rem;font-weight:700;color:rgba(247,245,241,.88);}
+  .pot-amount{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-weight:900;
+    font-size:clamp(2rem,7vw,3.6rem);line-height:1.25;margin-top:var(--sp-1);}
+  .pot-meta{margin-top:2px;font-size:.85rem;color:rgba(247,245,241,.75);}
+  .pot-note{margin-top:var(--sp-2);font-size:.75rem;line-height:1.7;color:rgba(247,245,241,.68);}
+  .potential .register-btn{margin-top:var(--sp-2);}
+
+  .reg-form{margin-top:var(--sp-2);padding:var(--sp-3);border-radius:14px;background:#fff;
+    border:2px solid rgba(248,136,0,.5);max-width:520px;display:grid;gap:var(--sp-2);}
+  .reg-head{font-size:.9rem;font-weight:700;color:var(--fukamidori);}
+  .reg-form label{display:flex;flex-direction:column;gap:6px;font-size:.85rem;font-weight:700;color:rgba(0,51,92,.85);}
+  .reg-form input,.reg-form select{font:inherit;min-height:44px;padding:.7em 1em;border-radius:12px;
+    border:2px solid rgba(0,51,92,.25);background:#fff;color:var(--fukamidori);}
+  .reg-form input:focus,.reg-form select:focus{outline:3px solid var(--kin);border-color:var(--kin);}
+  .reg-guide{font-size:.85rem;font-weight:700;color:#a03a2a;}
+  .reg-note{font-size:.72rem;color:rgba(0,51,92,.6);}
+  .reg-form .register-btn{margin-top:0;border:none;cursor:pointer;font:inherit;}
   .register-btn{
     display:inline-block;text-decoration:none;margin-top:1rem;
     font-size:.95rem;font-weight:700;padding:.9em 2.2em;border-radius:999px;
@@ -393,7 +440,11 @@
   footer strong{color:var(--kin);font-weight:700;}
 
   /* スクロール出現 */
-  .rv{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s ease;}
+  .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease;}
+  /* スマホ: スクロール中に要素が動く演出は「ガタつき」に感じられるため全廃 */
+  @media (pointer:coarse),(max-width:820px){
+    .rv{opacity:1;transform:none;transition:none;}
+  }
   .rv.on{opacity:1;transform:none;}
   @media (prefers-reduced-motion:reduce){
     .rv{opacity:1;transform:none;transition:none;}
@@ -418,8 +469,9 @@
   <p class="eyebrow rv">OKINAWA KIGYO NO MIKATA</p>
   <h1 class="rv">沖縄の企業には、<br>まだ眠っている<br class="sp"><span class="kin">可能性</span><span class="nowrap">がある。</span></h1>
   <p class="oath rv">——私たちGLOWも、その一社です。</p>
-  <p class="sub rv">補助金・助成金は、可能性を起こす<span class="nowrap">きっかけのひとつ。</span><br>GLOWが365日、国・県・市町村の公募情報をチェックし、<span class="nowrap">あなたに届けます。</span></p>
+  <p class="sub rv">補助金・助成金は、可能性を起こす<span class="nowrap">きっかけのひとつ。</span><br>GLOWが365日、国・県・市町村の公募情報を<br>チェックし、<span class="nowrap">あなたに届けます。</span></p>
   <p class="live-badge rv">📡 毎日自動更新中|現在の掲載 <span id="live-count">—</span> 件</p>
+  <a class="hero-cta rv" href="#match">⚡ 30秒診断で、貴社の可能性額を見る(無料・登録不要)</a>
   <div class="scrolldown" aria-hidden="true">SCROLL</div>
 </section>
 
@@ -467,6 +519,11 @@
   <p class="eyebrow rv">FREE MATCHING</p>
   <h2 class="rv">あなたの会社に、<br><span class="kin">いま使える制度</span>を。</h2>
   <p class="sub rv">4つ選ぶだけ。登録不要・無料で、最新データから自動マッチングします。</p>
+  <ol class="steps rv">
+    <li><span>1</span>条件を4つ選ぶ</li>
+    <li><span>2</span>可能性額と制度がその場で表示</li>
+    <li><span>3</span>LINE登録で全件＋締切アラート</li>
+  </ol>
   <div class="match-form rv">
     <p class="form-progress" id="form-progress" aria-live="polite">選択 <strong>0/4</strong> — 1つでも選ぶと精度が上がります</p>
     <label>市町村
@@ -524,15 +581,39 @@
   </div>
 
   <div id="match-result" class="match-result" hidden>
+    <div id="potential" class="potential" hidden>
+      <p class="pot-label">表示中の制度をすべて活用できた場合の「公募上限額」合計(参考値)</p>
+      <p class="pot-amount">最大 <span id="pot-amount" class="kin">—</span></p>
+      <p class="pot-meta" id="pot-meta"></p>
+      <p class="pot-note">※各制度が公表している公募上限額を単純に合計した理論値です。受給できる金額や採択を保証するものではありません。要件・金額は必ず各制度の原文でご確認ください。</p>
+      <a class="register-btn" href="go/shindan/" target="_blank" rel="noopener">この可能性を無料で確認する(LINE)</a>
+    </div>
     <p class="result-head" aria-live="polite">マッチした制度 <span id="result-count" class="kin"></span>件</p>
     <div id="shokei-banner" class="shokei-banner" hidden>
       <strong>事業の引き継ぎ・後継に使える補助金</strong>があります。
       専門家への相談費用なども補助対象になる制度です。
-      <a href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E4%BA%8B%E6%A5%AD%E6%89%BF%E7%B6%99%E7%9B%B8%E8%AB%87%E3%80%91" target="_blank" rel="noopener" class="shokei-link" onclick="if(window.hqTrack)hqTrack('shokei_line_click')">引き継ぎの無料相談はこちら</a>
+      <a href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E4%BA%8B%E6%A5%AD%E6%89%BF%E7%B6%99%E7%9B%B8%E8%AB%87%E3%80%91" target="_blank" rel="noopener" class="shokei-link">引き継ぎの無料相談はこちら</a>
     </div>
     <div id="result-list"></div>
     <p class="result-note">締切アラート(約1か月前から)を受け取るには、LINE登録(無料)をどうぞ。</p>
-    <a class="register-btn" href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E4%BC%9A%E7%A4%BE%E6%83%85%E5%A0%B1%E7%99%BB%E9%8C%B2%E3%80%91%0A%E4%BC%9A%E7%A4%BE%E5%90%8D%EF%BC%9A%0A%E4%BB%A3%E8%A1%A8%E8%80%85%E5%90%8D%EF%BC%9A%0A%E6%89%80%E5%9C%A8%E5%9C%B0%EF%BC%9A" target="_blank" rel="noopener" onclick="if(window.hqTrack)hqTrack('register_line_click')">貴社専用の制度通知を受け取る(会社情報を登録)</a>
+    <button type="button" class="register-btn" id="reg-open">貴社専用の制度通知を受け取る(会社情報を登録)</button>
+    <div id="reg-form" class="reg-form" hidden>
+      <p class="reg-head">30秒で完了。入力内容はそのままLINEにセットされ、<strong>送信ボタンを1回押すだけ</strong>です。</p>
+      <label>会社名<input type="text" id="reg-company" placeholder="例) 沖縄商事株式会社" autocomplete="organization"></label>
+      <label>代表者名<input type="text" id="reg-name" placeholder="例) 沖縄 太郎" autocomplete="name"></label>
+      <label>所在地(市町村)
+        <select id="reg-city">
+          <option value="">選択してください</option>
+          <option>那覇市</option><option>沖縄市</option><option>うるま市</option>
+          <option>浦添市</option><option>宜野湾市</option><option>糸満市</option>
+          <option>豊見城市</option><option>名護市</option><option>宮古島市</option>
+          <option>石垣市</option><option>その他の市町村</option>
+        </select>
+      </label>
+      <p class="reg-guide" id="reg-guide" hidden>3項目すべてご入力ください😊</p>
+      <button type="button" class="register-btn" id="reg-send">LINEを開いて送信する</button>
+      <p class="reg-note">※入力内容はLINEのメッセージにセットされるだけで、このサイトには保存されません。</p>
+    </div>
 
     <details class="gbiz" id="gbiz">
       <summary>申請の前に:gBizIDは「オンライン」なら待たずに取れます</summary>
@@ -567,11 +648,11 @@
       <div class="expert-grid">
         <div class="expert-card sample">
           <div class="expert-photo">写真</div>
-          <span class="expert-tag">社労士</span>
-          <h5>○○社会保険労務士事務所(掲載例)</h5>
-          <p class="expert-field">得意分野: キャリアアップ助成金・雇用系全般</p>
-          <p class="expert-record">沖縄で○年|申請支援 △件</p>
-          <p class="sample-note">※掲載イメージです</p>
+          <span class="expert-tag">補助金申請</span>
+          <h5>株式会社M's-support(那覇支店)</h5>
+          <p class="expert-field">得意分野: 補助金申請サポート(採択後の交付申請〜実績報告まで伴走)</p>
+          <p class="expert-record">中小企業診断士・行政書士・税理士が在籍</p>
+          <p class="sample-note">※掲載調整中(正式掲載の準備中です)</p>
           <a class="expert-btn" href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E5%B0%82%E9%96%80%E5%AE%B6%E7%9B%B8%E8%AB%87%E3%80%91" target="_blank" rel="noopener">この専門家に相談する</a>
         </div>
         <div class="expert-card coming">
@@ -598,25 +679,23 @@
   <p class="eyebrow rv">START FREE</p>
   <h2 class="rv">この島の可能性を、<br><span class="kin">いっしょに起こそう。</span></h2>
   <p class="sub rv" style="text-align:center;max-width:none;">気になる公募は、締切の約1か月前からLINEでお知らせします。</p>
-  <a class="line-btn rv" href="https://lin.ee/sh4bTUe" target="_blank" rel="noopener" onclick="if(window.hqTrack)hqTrack('line_add_click')">LINEで無料登録する</a>
+  <a class="line-btn rv" href="go/site/" target="_blank" rel="noopener">LINEで無料登録する</a>
   <p class="cta-note rv">登録は10秒。いつでも解除できます。</p>
 </section>
 
+<button id="back-result" class="back-result" hidden>💰 診断結果へ戻る</button>
 <footer>
   <div><strong>沖縄企業のミカタ</strong> — 運営:株式会社GLOW</div>
-
+  
   <div>最新情報は必ず各制度の公式サイトでご確認ください。</div>
 </footer>
-
-<script src="analytics-config.js"></script>
-<script src="assets/hq-analytics.js"></script>
 
 <script>
   // ===== マッチング =====
   let DB={items:[],updated_at:null};
   fetch('data/subsidies.json')
     .then(r=>r.json())
-    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';const lc=document.getElementById('live-count');if(lc)lc.textContent=d.count||d.items.length||'—';})
+    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';const lc=document.getElementById('live-count');if(lc)lc.textContent=d.count||d.items.length||'—';restoreState();})
     .catch(()=>{document.getElementById('updated-at').textContent='取得エラー(公式サイトをご確認ください)';});
 
   const BIZ_KEYS={
@@ -626,18 +705,9 @@
     'サービス':['サービス'],'その他':[]
   };
 
-  // 診断ファネル計測: 「開始」は最初の1回だけ送る(選択・テーマいずれかの初回操作)
-  let shindanStarted=false;
-  function trackShindanStart(){
-    if(shindanStarted)return;
-    shindanStarted=true;
-    if(window.hqTrack)hqTrack('shindan_start');
-  }
-
   // テーマチップの選択
   document.querySelectorAll('#f-theme .chip').forEach(c=>{
     c.addEventListener('click',()=>{
-      trackShindanStart();
       c.classList.toggle('on');
       c.setAttribute('aria-pressed',c.classList.contains('on')?'true':'false');
       updateProgress();
@@ -654,6 +724,16 @@
     return document.querySelectorAll('#f-theme .chip.on').length;
   }
   function updateProgress(){
+    // 復元表示中に条件を変更したら、古い結果(金額含む)を消して混乱を防ぐ
+    if(RESTORED_VIEW){
+      RESTORED_VIEW=false;
+      const mr=document.getElementById('match-result');
+      if(mr)mr.hidden=true;
+      const bb=document.getElementById('back-result');
+      if(bb){bb.hidden=true;bb.dataset.ready='';}
+      const rn=document.getElementById('restored-note');
+      if(rn)rn.remove();
+    }
     const n=selectedCount(), t=themeCount();
     const el=document.getElementById('form-progress');
     if(!el)return;
@@ -662,9 +742,16 @@
     el.innerHTML=`選択 <strong>${n}/4</strong>${theme} — ${msg}`;
     if(n>0||t>0){const g=document.getElementById('form-guide');if(g)g.hidden=true;}
   }
-  SELECT_IDS.forEach(id=>document.getElementById(id).addEventListener('change',()=>{trackShindanStart();updateProgress();}));
+  SELECT_IDS.forEach(id=>document.getElementById(id).addEventListener('change',updateProgress));
 
   // ===== 件数カウントアップ =====
+  function fmtYen(v){
+    if(v>=100000000){
+      var oku=(v/100000000).toFixed(1).replace(/\.0$/,'');
+      return oku+'億円';
+    }
+    return Math.round(v/10000).toLocaleString()+'万円';
+  }
   function animateCount(el,to){
     if(REDUCED||to<=0){el.textContent=to;return;}
     const dur=600,t0=performance.now();
@@ -700,6 +787,12 @@
     const biz=document.getElementById('f-biz').value;
     const future=document.getElementById('f-future').value;
     const themes=[...document.querySelectorAll('#f-theme .chip.on')].map(c=>c.dataset.v);
+    // 選択状態を保存(LINEアプリから戻った時の再読み込みで診断が消えないように)
+    try{
+      var st={done:true,themes:themes};
+      SELECT_IDS.forEach(function(id){st[id]=document.getElementById(id).value;});
+      localStorage.setItem('mikata_form',JSON.stringify(st));
+    }catch(e){}
     const keys=BIZ_KEYS[biz]||[];
     const themeKeys=themes.flatMap(t=>THEME_KEYS[t]||[]);
 
@@ -734,6 +827,42 @@
 
     document.getElementById('shokei-banner').hidden=!shokeiSignal;
     animateCount(document.getElementById('result-count'),hits.length);
+
+    // 総額ポテンシャル(参考値): 表示中の制度のうち上限額公表分の単純合計
+    (function(){
+      var SME_CAP=100000000; // 中小向けレンジ: 上限1億円以下(大型公募の混入で合計が非現実化するのを防ぐ)
+      var withAmt=hits.filter(function(it){return Number(it.max_amount)>0;});
+      var sme=withAmt.filter(function(it){return Number(it.max_amount)<=SME_CAP;});
+      var large=withAmt.length-sme.length;
+      var total=sme.reduce(function(sm,it){return sm+Number(it.max_amount);},0);
+      var pot=document.getElementById('potential');
+      if(!pot)return;
+      pot.hidden=false;
+      var amtEl=document.querySelector('.pot-amount');
+      if(total<=0){
+        amtEl.style.display='none';
+        document.getElementById('pot-meta').textContent=
+          '今回表示された制度は上限額を公表していないものが中心でした。金額の目安はLINEで個別にご案内します。';
+        return;
+      }
+      amtEl.style.display='';
+      var unknown=hits.length-withAmt.length;
+      var single=Math.max.apply(null,sme.map(function(it){return Number(it.max_amount);}));
+      document.getElementById('pot-meta').textContent=
+        '内訳: 上限1億円以下の制度 '+sme.length+'件の合計(単体最大 '+fmtYen(single)+')'
+        +(large>0?' ／ 大型公募(1億円超) '+large+'件は含めず':'')
+        +(unknown>0?' ／ 上限額非公表 '+unknown+'件':'');
+      var el=document.getElementById('pot-amount');
+      if(REDUCED){el.textContent=fmtYen(total);return;}
+      var dur=900,t0=performance.now();
+      (function step(now){
+        var p=Math.min(1,(now-t0)/dur);
+        el.textContent=fmtYen(Math.round(total*(1-Math.pow(1-p,3))));
+        if(p<1)requestAnimationFrame(step);
+      })(t0);
+      // タブ非表示中はrAFが止まるため、最終値を必ず保証する
+      setTimeout(function(){el.textContent=fmtYen(total);},dur+150);
+    })();
     const maskName=n=>n.length>6?n.slice(0,6)+'●●●●●●':'●●●●●●';
     const card=(it,locked)=>`
       <div class="card ${locked?'locked':''}">
@@ -748,26 +877,127 @@
           :'<span class="apply-badge direct">独自申請(GビズID不要の場合あり)</span>'}
         ${locked?'':`<a href="${it.source_url}" target="_blank" rel="noopener">公式ページで確認 →</a>`}
       </div>`;
+    const member=localStorage.getItem('mikata_member')==='1';
     let html='';
     if(hits.length===0){
       html='<div class="card"><h4>条件に合う募集中の制度が見つかりませんでした。</h4><div class="meta"><span>条件を変えるか、LINE登録で新着をお待ちください。</span></div></div>';
+    }else if(member){
+      // LINE登録済み(この端末): 全件をロックなしで表示
+      html=hits.map(it=>card(it,false)).join('');
+      html+='<div class="member-note">✅ LINE登録済みの表示です。全'+hits.length+'件を公開中 — 締切が近づいたらLINEでお知らせします。</div>';
     }else{
       html=card(hits[0],false);
       if(hits.length>1){
         html+=hits.slice(1).map(it=>card(it,true)).join('');
         html+=`<div class="unlock">
-          <p><strong>残り${hits.length-1}件</strong>は、無料のLINE登録ですべて表示されます。<br>締切の約1か月前からアラートも自動で届きます。</p>
-          <a class="line-btn" href="https://lin.ee/sh4bTUe" target="_blank" rel="noopener" onclick="if(window.hqTrack)hqTrack('shindan_line_click')">LINEで無料登録して全て見る</a>
+          <p><strong>残り${hits.length-1}件</strong>(金額・締切つき)は、無料のLINE登録ですべて表示されます。<br>ボタンを押すとLINEの登録画面が開き、このページはその場で全件表示に切り替わります。締切の約1か月前からアラートも自動で届きます。</p>
+          <a class="line-btn" id="unlock-btn" href="go/shindan/" target="_blank" rel="noopener">LINEで無料登録して全て見る</a>
+          <p class="already"><button type="button" id="already-member">すでにLINE登録済みの方はこちら(タップで全件表示)</button></p>
         </div>`;
       }
     }
     const list=document.getElementById('result-list');
     list.innerHTML=html;
     if(!REDUCED)[...list.children].forEach((el,i)=>el.style.animationDelay=(i*70)+'ms');
+    const ub=document.getElementById('unlock-btn');
+    if(ub)ub.addEventListener('click',function(){
+      localStorage.setItem('mikata_member','1');
+      // このページ側は再描画(スマホではLINEアプリ切替でタイマーが止まるため、
+      // 下のpageshow/visibilitychangeが戻ってきた瞬間にも再描画する)
+      setTimeout(function(){document.getElementById('match-btn').click();},400);
+    });
+    const am=document.getElementById('already-member');
+    // 会社情報登録フォーム(入力→記入済みメッセージをLINEにセット)
+    const ro=document.getElementById('reg-open');
+    if(ro&&!ro.dataset.bound){
+      ro.dataset.bound='1';
+      ro.addEventListener('click',function(){
+        const f=document.getElementById('reg-form');
+        f.hidden=!f.hidden;
+        if(!f.hidden)document.getElementById('reg-company').focus();
+      });
+      document.getElementById('reg-send').addEventListener('click',function(){
+        const c=document.getElementById('reg-company').value.trim();
+        const n=document.getElementById('reg-name').value.trim();
+        const city=document.getElementById('reg-city').value;
+        const g=document.getElementById('reg-guide');
+        if(!c||!n||!city){g.hidden=false;return;}
+        g.hidden=true;
+        const text='【会社情報登録】'+String.fromCharCode(10)+'会社名：'+c+String.fromCharCode(10)+'代表者名：'+n+String.fromCharCode(10)+'所在地：'+city;
+        window.open('https://line.me/R/oaMessage/%40345pqedv/?'+encodeURIComponent(text),'_blank','noopener');
+      });
+    }
+    if(am)am.addEventListener('click',function(){
+      localStorage.setItem('mikata_member','1');
+      document.getElementById('match-btn').click();
+    });
     document.getElementById('match-result').hidden=false;
-    document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
-    if(window.hqTrack)hqTrack('shindan_complete',{results:hits.length});
+    var _rn=document.getElementById('restored-note');
+    if(_rn)_rn.remove();
+    RESTORED_VIEW=false;
+    if(backBtn)backBtn.dataset.ready='1';
+    if(!AUTORUN)document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
   });
+
+  // 2画面目の背景画像を先行デコード(初回スクロール時のデコード引っかかり防止)
+  window.addEventListener('load',function(){
+    var im=new Image();
+    im.decoding='async';
+    im.src='assets/photos/vision.webp';
+  });
+
+  // 再読み込み後の状態復元: 選択を戻し、結果も再表示(復元時は自動スクロールしない)
+  let AUTORUN=false;
+  let RESTORED_VIEW=false;
+  function restoreState(){
+    var st=null;
+    try{st=JSON.parse(localStorage.getItem('mikata_form')||'null');}catch(e){}
+    if(!st||!st.done)return;
+    SELECT_IDS.forEach(function(id){
+      if(st[id]!==undefined)document.getElementById(id).value=st[id];
+    });
+    document.querySelectorAll('#f-theme .chip').forEach(function(c){
+      var on=(st.themes||[]).indexOf(c.dataset.v)>=0;
+      c.classList.toggle('on',on);
+      c.setAttribute('aria-pressed',on?'true':'false');
+    });
+    updateProgress();
+    AUTORUN=true;
+    document.getElementById('match-btn').click();
+    AUTORUN=false;
+    // 復元表示であることを明示。条件を触ったら古い結果は消す(下のupdateProgress参照)
+    RESTORED_VIEW=true;
+    var head=document.querySelector('.result-head');
+    if(head&&!document.getElementById('restored-note')){
+      var n=document.createElement('p');
+      n.id='restored-note';
+      n.className='restored-note';
+      n.textContent='↻ 前回の診断結果を表示しています(条件を変えると新しく診断できます)';
+      head.parentNode.insertBefore(n,head);
+    }
+  }
+
+  // LINEアプリから戻ってきた時: 登録済みならロック表示を自動で全件表示に切替
+  function refreshIfMember(){
+    if(localStorage.getItem('mikata_member')==='1'
+       && document.querySelector('#result-list .card.locked')){
+      document.getElementById('match-btn').click();
+    }
+  }
+  // フローティング「診断結果へ戻る」: 結果があり、かつ結果が画面外のときだけ表示
+  const backBtn=document.getElementById('back-result');
+  if(backBtn){
+    const mr=document.getElementById('match-result');
+    new IntersectionObserver(function(es){
+      backBtn.hidden = es[0].isIntersecting || mr.hidden || !backBtn.dataset.ready;
+    },{threshold:0}).observe(mr);
+    backBtn.addEventListener('click',function(){
+      (document.getElementById('potential')||mr).scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  }
+
+  window.addEventListener('pageshow',refreshIfMember);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)refreshIfMember();});
 
   const io=new IntersectionObserver(es=>{
     es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});

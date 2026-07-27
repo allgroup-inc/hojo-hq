@@ -48,6 +48,13 @@ section{padding:48px 0}
 .counter{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;
   padding:24px;text-align:center}
 .counter .num{font-size:2rem;font-weight:800;color:var(--fg-primary)}
+.stats{display:grid;grid-template-columns:1fr;gap:14px}
+.stat{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px;text-align:center}
+.stat .num{font-size:1.9rem;font-weight:800;color:var(--fg-primary);line-height:1.2;display:block}
+.stat .yen{font-size:1.1rem;font-weight:800;margin-right:1px}
+.stat .lbl{font-size:.9rem;color:var(--fg-muted);margin-top:2px}
+.stat.hero-stat{background:linear-gradient(180deg,#FDF5E6 0%,var(--fg-card) 100%);border-color:var(--fg-accent)}
+@media(min-width:640px){.stats{grid-template-columns:repeat(3,1fr)}}
 /* steps */
 .steps{list-style:none;counter-reset:s}
 .steps li{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;
@@ -91,7 +98,7 @@ footer a{color:#bcd9cf}
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
-    <a class="hline" href="https://lin.ee/7fH7vDQ" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a class="hline" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
   </nav>
 </header>
 <main>
@@ -113,18 +120,29 @@ footer a{color:#bcd9cf}
       <a class="navcard" href="shindan/">🔍 3分診断<span>あなたの世帯の制度をしぼり込む</span></a>
       <a class="navcard" href="area/">📍 市町村でさがす<span>お住まいの街のまとめ</span></a>
       <a class="navcard" href="kit/">🖨 申請準備シート<span>持ち物リスト・印刷して窓口へ</span></a>
-      <a class="navcard hline2" href="https://lin.ee/7fH7vDQ" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">💬 LINEで受け取る<span>締切をお知らせ(無料・匿名)</span></a>
+      <a class="navcard hline2" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">💬 LINEで受け取る<span>締切をお知らせ(無料・匿名)</span></a>
     </div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <div class="counter" id="counter">
-      <div id="counter-main"><span class="num" id="seido-count">—</span> 件</div>
-      <div id="counter-label">検証済みで掲載中の制度(毎日自動更新)</div>
-      <p class="note" id="counter-note">受給確認額の公開カウンターは、実績の積み上がりとともに表示予定です。</p>
+    <h2>もらいわすれ堂が、県民に取り戻したお金</h2>
+    <div class="stats">
+      <div class="stat hero-stat">
+        <span class="num" id="jukyu-amount">まもなく公開</span>
+        <div class="lbl" id="jukyu-amount-lbl">みんなが実際に受け取れた金額(累計)</div>
+      </div>
+      <div class="stat">
+        <span class="num" id="jukyu-households">—</span>
+        <div class="lbl">受け取れた世帯(報告ベース)</div>
+      </div>
+      <div class="stat">
+        <span class="num" id="seido-count">—</span>
+        <div class="lbl">検証済みで掲載中の制度</div>
+      </div>
     </div>
+    <p class="note" id="jukyu-note" style="margin-top:12px">受給報告の受付開始に向けて準備中です。金額は利用者の自己申告をもとに、検証部が公式制度と突合できたぶんだけを計上します。個人が特定される情報は含みません。</p>
   </div>
 </section>
 
@@ -137,6 +155,17 @@ footer a{color:#bcd9cf}
       <li><strong>入金確認までフォロー</strong><br>締切が近づいたらお知らせ。「振り込まれた」までを一緒に見届けます。</li>
     </ol>
     <p class="note">※ 申請手続きの代行は行いません。専門家のサポートが必要な場合は、提携する専門家(社会保険労務士・行政書士など)におつなぎします。</p>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="stat" style="text-align:left">
+      <h2 style="border-left:none;padding-left:0;margin-bottom:.4em">「振り込まれました」を教えてください</h2>
+      <p style="margin-bottom:12px">あなたが実際に受け取れた金額のご報告が、次の県民の「もらい忘れ」を防ぎます。上のカウンターは、いただいた報告のうち検証できたぶんを積み上げたものです。<strong>制度名とおおよその金額だけ</strong>で大丈夫。お名前や口座番号はうかがいません。</p>
+      <a class="btn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-jukyu/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('jukyu_report_click')" style="max-width:420px">LINEで受給を報告する(匿名・無料)</a>
+      <p class="note" style="margin-top:10px">報告は任意です。いただいた金額は個人が特定できない形で集計・公開します。</p>
+    </div>
   </div>
 </section>
 
@@ -180,7 +209,7 @@ footer a{color:#bcd9cf}
   <div class="wrap" style="text-align:center">
     <h2 style="color:#fff;border-left:none;padding-left:0">LINEで「もらい忘れ」を防ぐ</h2>
     <p style="color:#fff">締切が近づいたらお知らせ。新しい制度が増えたらお知らせ。<br>登録は無料・名前や住所の入力は不要です。いつでも解除できます。</p>
-    <a class="btn" href="https://lin.ee/7fH7vDQ" target="_blank" rel="noopener" style="background:#fff;color:#06C755;margin-top:8px" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで受け取る(無料)</a>
+    <a class="btn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" style="background:#fff;color:#06C755;margin-top:8px" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで受け取る(無料)</a>
   </div>
 </section>
 </main>
@@ -235,6 +264,23 @@ footer a{color:#bcd9cf}
       });
     }
   }).catch(function(){ /* データ取得失敗時は静的表示のまま(診断・本文は影響なし) */ });
+
+  // 実受給額カウンター(北極星・第0階層)。検証済みで計上ぶんのみを表示。
+  fetch("../data/fukugiiro/jukyu_reports.json").then(function(r){return r.json()}).then(function(jk){
+    var s = jk.summary || {};
+    var amt = s.total_amount_yen || 0;
+    var hh = s.household_count || 0;
+    if(amt > 0){
+      document.getElementById("jukyu-amount").innerHTML =
+        '<span class="yen">¥</span>' + amt.toLocaleString("ja-JP");
+      document.getElementById("jukyu-amount-lbl").textContent = "みんなが実際に受け取れた金額(累計)";
+      document.getElementById("jukyu-households").textContent = hh.toLocaleString("ja-JP") + "世帯";
+      if(jk.disclaimer) document.getElementById("jukyu-note").textContent = jk.disclaimer;
+    } else if(s.note){
+      // 実績ゼロのあいだは金額を誇張しない。「まもなく公開」の静的表示のまま補足だけ差し替える。
+      document.getElementById("jukyu-note").textContent = s.note + (jk.disclaimer ? " " + jk.disclaimer : "");
+    }
+  }).catch(function(){ /* 取得失敗時は「まもなく公開」の静的表示のまま */ });
 })();
 </script>
 </body>
