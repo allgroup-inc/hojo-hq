@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /go/
+Disallow: /staff/
+
+Sitemap: https://allgroup-inc.github.io/hojo-hq/sitemap.xml

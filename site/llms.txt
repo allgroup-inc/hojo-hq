@@ -11,6 +11,10 @@
 ## 沖縄企業のミカタ(沖縄の企業・経営者向け / 運営: 株式会社GLOW)
 - [トップ](https://allgroup-inc.github.io/hojo-hq/): 沖縄の企業が使える補助金・助成金を毎日収集・検証して掲載。
 
+## Optional(機械可読データ)
+- [サイトマップ](https://allgroup-inc.github.io/hojo-hq/sitemap.xml): 全公開ページの一覧(sitemap.xml)。
+- 各制度ページには schema.org の GovernmentService、市町村ページには CollectionPage/ItemList の構造化データ(JSON-LD)を埋め込み。
+
 ## 掲載方針(このサイトの信頼性について)
 - 正確性最優先: 締切・金額・要件は公式の一次情報(省庁・沖縄県・市町村・jGrants等)と照合。確認できない項目は「要確認」と表示し、推測で埋めません。
 - 出典明記: すべての制度に公式ページへのリンクを付けています。最終的な受給の可否は各窓口の判断です。
