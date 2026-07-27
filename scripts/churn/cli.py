@@ -16,7 +16,7 @@ from .evaluate import backtest
 from .report_card import build_card, render_html as render_card_html
 from .report_agg import aggregate_by, render_html as render_agg_html
 from .interactions import load_interactions
-from .customer import build_customers
+from .customer import build_customers, unlinked_counts
 from .karte import render_html as render_karte_html
 from .followups import list_followups, render_html as render_followups_html
 from .karte_effect import contact_effect
@@ -86,10 +86,17 @@ def cmd_report(csv_path, column_map_path, out_path, as_of, fields=("agent_id", "
     return sections
 
 
+def _print_unlinked(apps, inters):
+    u = unlinked_counts(apps, inters)
+    if u["apps"] + u["interactions"] > 0:
+        print(f"[未紐付] 申込{u['apps']}件・接触{u['interactions']}件は顧客ID欠損のため除外")
+
+
 def cmd_karte(app_csv, app_map, inter_csv, inter_map, model_path, customer_id, out_path, as_of):
     as_of_d = _as_of(as_of)
     apps = load_records(app_csv, load_column_map(app_map), as_of_d)
     inters = load_interactions(inter_csv, load_column_map(inter_map))
+    _print_unlinked(apps, inters)
     model = load_model(model_path)
     customers = build_customers(apps, inters, model, as_of_d)
     prof = customers.get(str(customer_id))
@@ -105,6 +112,7 @@ def cmd_followups(app_csv, app_map, inter_csv, inter_map, model_path, out_path, 
     as_of_d = _as_of(as_of)
     apps = load_records(app_csv, load_column_map(app_map), as_of_d)
     inters = load_interactions(inter_csv, load_column_map(inter_map))
+    _print_unlinked(apps, inters)
     model = load_model(model_path)
     customers = build_customers(apps, inters, model, as_of_d)
     rows = list_followups(customers)
@@ -117,10 +125,16 @@ def cmd_karte_effect(app_csv, app_map, inter_csv, inter_map, as_of):
     as_of_d = _as_of(as_of)
     apps = load_records(app_csv, load_column_map(app_map), as_of_d)
     inters = load_interactions(inter_csv, load_column_map(inter_map))
+    _print_unlinked(apps, inters)
     m = contact_effect(apps, inters)
-    print(f"[karte-effect] 保全接触あり {m['n_contacted']}件 解約率{m['contacted_rate']:.1%} / "
-          f"なし {m['n_not_contacted']}件 解約率{m['not_contacted_rate']:.1%} / "
-          f"差{m['diff']:+.1%}")
+    body = (f"保全接触あり {m['n_contacted']}件 解約率{m['contacted_rate']:.1%} / "
+            f"なし {m['n_not_contacted']}件 解約率{m['not_contacted_rate']:.1%} / "
+            f"差{m['diff']:+.1%}")
+    if m["reference"]:
+        # 母数不足：差を結論として提示しない。参考値であることを前後に明記する
+        print(f"[karte-effect] ※参考(母数不足) {body} ※参考(母数不足)")
+    else:
+        print(f"[karte-effect] {body}")
     return m
 
 

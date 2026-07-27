@@ -93,6 +93,19 @@ class TestCustomer(unittest.TestCase):
         self.assertFalse(cs["C5"]["needs_followup"])
         self.assertNotEqual(cs["C5"]["max_risk_band"], "high")
 
+    def test_unlinked_counts(self):
+        apps = [app(None, "X", 1), app("", "Y", 0), app("C1", "X", 0)]
+        inters = [inter(None, date(2026, 1, 1), "架電"), inter("", date(2026, 1, 2), "架電"),
+                  inter("C1", date(2026, 1, 3), "架電")]
+        out = customer.unlinked_counts(apps, inters)
+        self.assertEqual(out, {"apps": 2, "interactions": 2})
+
+    def test_unlinked_counts_all_linked(self):
+        apps = [app("C1", "X", 1)]
+        inters = [inter("C1", date(2026, 1, 1), "架電")]
+        out = customer.unlinked_counts(apps, inters)
+        self.assertEqual(out, {"apps": 0, "interactions": 0})
+
 
 if __name__ == "__main__":
     unittest.main()

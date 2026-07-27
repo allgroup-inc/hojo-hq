@@ -28,6 +28,14 @@ def _scored_application(app, model):
     return out
 
 
+def unlinked_counts(app_records, interaction_records) -> dict:
+    """顧客ID欠損(未紐付)のため束ねから除外されたレコード数を数える。"""
+    return {
+        "apps": sum(1 for a in app_records if not a.get("customer_id")),
+        "interactions": sum(1 for i in interaction_records if not i.get("customer_id")),
+    }
+
+
 def build_customers(app_records, interaction_records, model, as_of):
     groups = {}
     for app in app_records:

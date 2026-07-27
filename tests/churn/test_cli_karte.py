@@ -2,6 +2,8 @@ import unittest
 import tempfile
 import os
 import json
+import io
+import contextlib
 from scripts.churn import cli
 
 AMAP = {"customer_id": "顧客ID", "apply_id": "申込ID", "apply_date": "申込日",
@@ -12,12 +14,14 @@ IMAP = {"customer_id": "顧客ID", "date": "接触日", "kind": "種別",
         "agent": "担当", "content": "案内内容", "memo": "メモ"}
 
 
-def make_apps():
+def make_apps(unlinked_row=False):
     lines = ["顧客ID,申込ID,申込日,商品,集客,申込形態,金額,年齢,性別,地域,営業担当,解約日,解約理由"]
     for i in range(30):
         lines.append(f"CM{i},X{i},2025-01-01,X,催事,対面,5000,25,女,那覇,S1,2025-03-01,高い")
         lines.append(f"CN{i},Y{i},2025-01-01,Y,紹介,オンライン,8000,42,男,浦添,S2,,")
     lines.append("C1,NEW1,2026-06-01,X,催事,対面,5000,25,女,那覇,S1,,")   # 継続中
+    if unlinked_row:
+        lines.append(",NEW2,2026-06-01,X,催事,対面,5000,25,女,那覇,S1,,")  # 顧客ID欠損
     return "\n".join(lines) + "\n"
 
 
@@ -45,6 +49,76 @@ class TestCliKarte(unittest.TestCase):
         self.assertEqual(prof["customer_id"], "C1")
         self.assertEqual(prof["n_applications"], 1)
         self.assertTrue(os.path.exists(out))
+
+    def test_karte_no_unlinked_line_when_none_excluded(self):
+        cli.main(["fit", "--csv", self.acsv, "--column-map", self.amap,
+                  "--model", self.model, "--as-of", "2026-07-26"])
+        out = os.path.join(self.dir, "karte_C1.html")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            cli.cmd_karte(self.acsv, self.amap, self.icsv, self.imap,
+                          self.model, "C1", out, "2026-07-26")
+        self.assertNotIn("未紐付", buf.getvalue())
+
+    def test_karte_prints_unlinked_line_when_excluded(self):
+        with open(self.acsv, "w", encoding="utf-8") as f:
+            f.write(make_apps(unlinked_row=True))
+        with open(self.icsv, "w", encoding="utf-8") as f:
+            f.write("顧客ID,接触日,種別,担当,案内内容,メモ\n"
+                     "C1,2026-06-10,架電,東さん,見直し,不在\n"
+                     ",2026-06-11,架電,東さん,見直し,不在\n")  # 顧客ID欠損の接触
+        cli.main(["fit", "--csv", self.acsv, "--column-map", self.amap,
+                  "--model", self.model, "--as-of", "2026-07-26"])
+        out = os.path.join(self.dir, "karte_C1.html")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            cli.cmd_karte(self.acsv, self.amap, self.icsv, self.imap,
+                          self.model, "C1", out, "2026-07-26")
+        self.assertIn("[未紐付] 申込1件・接触1件は顧客ID欠損のため除外", buf.getvalue())
+
+    def test_followups_prints_unlinked_line_when_excluded(self):
+        with open(self.acsv, "w", encoding="utf-8") as f:
+            f.write(make_apps(unlinked_row=True))
+        cli.main(["fit", "--csv", self.acsv, "--column-map", self.amap,
+                  "--model", self.model, "--as-of", "2026-07-26"])
+        out = os.path.join(self.dir, "followups.html")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            cli.cmd_followups(self.acsv, self.amap, self.icsv, self.imap,
+                              self.model, out, "2026-07-26")
+        self.assertIn("[未紐付] 申込1件・接触0件は顧客ID欠損のため除外", buf.getvalue())
+
+    def test_karte_effect_prints_unlinked_line_and_reference_marker(self):
+        with open(self.acsv, "w", encoding="utf-8") as f:
+            f.write(make_apps(unlinked_row=True))
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            m = cli.cmd_karte_effect(self.acsv, self.amap, self.icsv, self.imap, "2026-07-26")
+        output = buf.getvalue()
+        self.assertIn("[未紐付] 申込1件・接触0件は顧客ID欠損のため除外", output)
+        self.assertTrue(m["reference"])  # サンプルが小さいので参考値
+        self.assertIn("※参考(母数不足)", output)
+
+    def test_karte_effect_no_reference_marker_when_reliable(self):
+        # MIN_RELIABLE_N(=20)以上を両群に確保する
+        lines = ["顧客ID,申込ID,申込日,商品,集客,申込形態,金額,年齢,性別,地域,営業担当,解約日,解約理由"]
+        for i in range(25):
+            lines.append(f"CK{i},AK{i},2025-01-01,X,催事,対面,5000,25,女,那覇,S1,2025-03-01,高い")
+            lines.append(f"CN{i},AN{i},2025-01-01,X,催事,対面,5000,25,女,那覇,S1,,")
+        with open(self.acsv, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines) + "\n")
+        inter_lines = ["顧客ID,接触日,種別,担当,案内内容,メモ"]
+        for i in range(25):
+            inter_lines.append(f"CK{i},2025-01-10,架電,東さん,見直し,不在")
+        with open(self.icsv, "w", encoding="utf-8") as f:
+            f.write("\n".join(inter_lines) + "\n")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            m = cli.cmd_karte_effect(self.acsv, self.amap, self.icsv, self.imap, "2026-07-26")
+        output = buf.getvalue()
+        self.assertFalse(m["reference"])
+        self.assertNotIn("参考", output)
+        self.assertNotIn("未紐付", output)
 
 
 if __name__ == "__main__":
