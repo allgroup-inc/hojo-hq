@@ -36,10 +36,25 @@ test("診断フロー: 入力→マッチング→結果表示→LINE登録導�
   const countText = await page.locator("#result-count").textContent();
   expect(Number(countText), `マッチ件数が数値でない: "${countText}"`).not.toBeNaN();
 
-  // 本命CV: LINE登録導線が生きていること
-  const register = page.locator("#match-result a.register-btn");
-  await expect(register).toBeVisible();
-  await expect(register).toHaveAttribute("href", /line\.me/);
+  // 動線設計(2026-07-27): 未登録では「1件表示+残りぼかし+合計金額マスク」
+  await expect(page.locator("#pot-amount")).toContainText("●");
+  const potCta = page.locator("#pot-cta");
+  await expect(potCta).toBeVisible();
+  await expect(potCta).toHaveAttribute("href", /go\/shindan/); // go-link-discipline: lin.ee直貼り禁止
+
+  // 解禁導線: unlockボタンも /go/ 経由
+  await expect(page.locator("#result-list .unlock a.line-btn")).toHaveAttribute("href", /go\//);
+
+  // 企業情報の入口はサイト内フォーム1つ(reg-open)。PII非保存の注記があること
+  await expect(page.locator("#reg-open")).toBeVisible();
+  await page.locator("#reg-open").click();
+  await expect(page.locator("#reg-form .reg-note")).toContainText("保存されません");
+
+  // 登録済み(端末記憶)を再現: 合計金額が実額になり、ぼかしが解除される
+  await page.evaluate(() => localStorage.setItem("mikata_member", "1"));
+  await page.locator("#match-btn").click();
+  await expect(page.locator("#result-list .card.locked")).toHaveCount(0);
+  await expect(page.locator("#pot-amount")).not.toContainText("●", { timeout: 5000 });
 });
 
 test("GビズID未取得フィルタ: 申請方法バッジが出し分けられ、独自申請が優先される", async ({ page }) => {
