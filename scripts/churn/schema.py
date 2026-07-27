@@ -73,6 +73,7 @@ def normalize_record(raw, column_map, as_of):
             is_scoreable = True  # 継続中・6ヶ月未満 = これから手を打てる
 
     return {
+        "customer_id": _get(raw, column_map, "customer_id"),
         "apply_id": _get(raw, column_map, "apply_id"),
         "apply_date": apply_date,
         "product": (_get(raw, column_map, "product") or "不明"),

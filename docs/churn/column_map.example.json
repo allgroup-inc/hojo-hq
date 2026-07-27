@@ -1,4 +1,5 @@
 {
+  "customer_id": "顧客ID",
   "apply_id": "申込ID",
   "apply_date": "申込日",
   "product": "商品",
