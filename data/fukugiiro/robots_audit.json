@@ -1,5 +1,5 @@
 {
- "audited_at": "2026-07-27 09:24",
+ "audited_at": "2026-07-27 09:31",
  "results": [
   {
    "label": "こども家庭庁",
@@ -32,9 +32,9 @@
    "label": "文部科学省",
    "domain": "www.mext.go.jp",
    "sample_path": "/a_menu/",
-   "http_status": "ERR:URLError",
-   "machine_check": "取得失敗(ERR:URLError)— 再実行または手動確認が必要",
-   "fetch_ok": null,
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
    "robots_excerpt": ""
   },
   {
