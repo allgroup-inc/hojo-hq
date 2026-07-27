@@ -111,8 +111,10 @@ test("承継カモフラージュ設問: 引き継ぎ回答で承継相談バナ
   await expect(banner.locator("a.shokei-link")).toHaveAttribute("href", /line\.me/);
 });
 
-test("CTAのLINE登録リンクが正しい", async ({ page }) => {
+test("CTAのLINE登録リンクが/go/経由である(go-link-discipline)", async ({ page }) => {
   await page.goto(SITE);
   const cta = page.locator("section.cta a.line-btn");
-  await expect(cta).toHaveAttribute("href", /lin\.ee|line\.me/);
+  // lin.ee直貼りは禁止。/go/<チャネル>/ の中間リンク(GA4経路計測つき)を経由する
+  await expect(cta).toHaveAttribute("href", /go\//);
+  await expect(cta).not.toHaveAttribute("href", /lin\.ee/);
 });
