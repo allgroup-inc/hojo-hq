@@ -1,7 +1,11 @@
 """運用コンソール生成：顧客インデックス＋各カルテ＋要フォローを private/ に出す。"""
 from __future__ import annotations
 import html
+import os
 import re
+
+from .karte import render_html as render_karte_html
+from .followups import list_followups, render_html as render_followups_html
 
 _BAND_RANK = {"high": 2, "med": 1, "low": 0}
 _BAND_JP = {"high": "🔴 高", "med": "🟡 中", "low": "🟢 低", None: "—"}
@@ -58,3 +62,16 @@ def render_index_html(rows, path):
     )
     with open(path, "w", encoding="utf-8") as f:
         f.write(doc)
+
+
+def generate(customers, out_dir):
+    os.makedirs(out_dir, exist_ok=True)
+    n = 0
+    for c in customers.values():
+        render_karte_html(c, os.path.join(out_dir, karte_filename(c["customer_id"])))
+        n += 1
+    index_path = os.path.join(out_dir, "index.html")
+    render_index_html(build_index_rows(customers), index_path)
+    fu_path = os.path.join(out_dir, "followups.html")
+    render_followups_html(list_followups(customers), fu_path)
+    return {"index": index_path, "n_kartes": n, "followups": fu_path}

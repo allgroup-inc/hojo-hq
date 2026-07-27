@@ -20,6 +20,7 @@ from .customer import build_customers, unlinked_counts
 from .karte import render_html as render_karte_html
 from .followups import list_followups, render_html as render_followups_html
 from .karte_effect import contact_effect
+from .console import generate as generate_console
 
 
 def _as_of(value):
@@ -138,6 +139,18 @@ def cmd_karte_effect(app_csv, app_map, inter_csv, inter_map, as_of):
     return m
 
 
+def cmd_console(app_csv, app_map, inter_csv, inter_map, model_path, out_dir, as_of):
+    as_of_d = _as_of(as_of)
+    apps = load_records(app_csv, load_column_map(app_map), as_of_d)
+    inters = load_interactions(inter_csv, load_column_map(inter_map))
+    _print_unlinked(apps, inters)
+    model = load_model(model_path)
+    customers = build_customers(apps, inters, model, as_of_d)
+    res = generate_console(customers, out_dir)
+    print(f"[console] 顧客{res['n_kartes']}件のカルテ＋index＋followups → {out_dir}/")
+    return res
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="churn", description="早期解約リスク保全")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -194,6 +207,15 @@ def main(argv=None):
     sp_ke.add_argument("--interaction-map", required=True)
     sp_ke.add_argument("--as-of", required=True)
 
+    sp_console = sub.add_parser("console")
+    sp_console.add_argument("--csv", required=True)
+    sp_console.add_argument("--column-map", required=True)
+    sp_console.add_argument("--interactions", required=True)
+    sp_console.add_argument("--interaction-map", required=True)
+    sp_console.add_argument("--model", required=True)
+    sp_console.add_argument("--out-dir", required=True)
+    sp_console.add_argument("--as-of", required=True)
+
     args = p.parse_args(argv)
     if args.cmd == "fit":
         cmd_fit(args.csv, args.column_map, args.model, args.as_of)
@@ -214,6 +236,9 @@ def main(argv=None):
     elif args.cmd == "karte-effect":
         cmd_karte_effect(args.csv, args.column_map, args.interactions,
                          args.interaction_map, args.as_of)
+    elif args.cmd == "console":
+        cmd_console(args.csv, args.column_map, args.interactions, args.interaction_map,
+                    args.model, args.out_dir, args.as_of)
     return 0
 
 

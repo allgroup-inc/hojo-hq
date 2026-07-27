@@ -20,3 +20,8 @@
 - 接触履歴の列名は `docs/churn/interaction_column_map.example.json` を `private/interaction_map.json` にコピーして合わせる。
 - カルテ出力: `python -m scripts.churn.cli karte --csv private/apps.csv --column-map private/column_map.json --interactions private/inter.csv --interaction-map private/interaction_map.json --model private/risk_model.json --customer-id C1 --out private/karte_C1.html --as-of 2026-07-26`
 - カルテは顧客個人情報を含むため `private/` に出力し、コミットしない。
+
+## 運用コンソール(一括生成)
+全顧客のカルテ＋顧客インデックス＋要フォローを1コマンドで `private/console/` に出す。
+`python -m scripts.churn.cli console --csv private/apps.csv --column-map private/column_map.json --interactions private/inter.csv --interaction-map private/interaction_map.json --model private/risk_model.json --out-dir private/console --as-of 2026-07-26`
+生成物は顧客個人情報を含むため `private/` 限定・コミットしない。`private/console/index.html` を開いて回遊する。
