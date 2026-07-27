@@ -59,7 +59,16 @@ def collect_urls():
         for fn in files:
             if not fn.endswith(".html") or fn in EXCLUDE_FILES:
                 continue
-            rel = os.path.relpath(os.path.join(root, fn), SITE).replace(os.sep, "/")
+            fpath = os.path.join(root, fn)
+            # noindex ページは sitemap に載せない(クローラへの矛盾シグナルを避ける)
+            try:
+                with open(fpath, encoding="utf-8") as fh:
+                    head = fh.read(4000)
+                if 'name="robots"' in head and "noindex" in head:
+                    continue
+            except Exception:
+                pass
+            rel = os.path.relpath(fpath, SITE).replace(os.sep, "/")
             # index.html は末尾スラッシュの正規URLに正規化
             if rel == "index.html":
                 url_path = "/"
