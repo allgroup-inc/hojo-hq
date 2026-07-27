@@ -1,6 +1,6 @@
 # フクギイロ robots.txt 自動監査結果
 
-最終実行: 2026-07-27 06:56 JST / 実行: GitHub Actions(fukugiiro-audit.yml)/ スクリプト: scripts/audit_sources_fukugiiro.py
+最終実行: 2026-07-27 09:11 JST / 実行: GitHub Actions(fukugiiro-audit.yml)/ スクリプト: scripts/audit_sources_fukugiiro.py
 
 > これは機械による事実確認。**収集可否の最終判定は、利用規約審査と合わせて守り部が docs/守り部審査記録.md で行う。**
 > ○=代表パス許可 / ×=不可(手動運用へ) / ?=手動確認要
@@ -16,6 +16,7 @@
 | 内閣府 | www.cao.go.jp | 404 | robots.txt なし(RFC 9309上、クロール制限の指定なし) | ○ |
 | 内閣府防災 | www.bousai.go.jp | 404 | robots.txt なし(RFC 9309上、クロール制限の指定なし) | ○ |
 | 全国社会福祉協議会 | www.shakyo.or.jp | 404 | robots.txt なし(RFC 9309上、クロール制限の指定なし) | ○ |
+| 沖縄県 | www.pref.okinawa.jp | 404 | robots.txt なし(RFC 9309上、クロール制限の指定なし) | ○ |
 | 那覇市 | www.city.naha.okinawa.jp | 200 | 代表パス /kurashitetuduki/ は許可範囲 | ○ |
 | 沖縄市 | www.city.okinawa.okinawa.jp | 404 | robots.txt なし(RFC 9309上、クロール制限の指定なし) | ○ |
 | うるま市 | www.city.uruma.lg.jp | 404 | robots.txt なし(RFC 9309上、クロール制限の指定なし) | ○ |
@@ -114,6 +115,11 @@ Disallow: /topics/bukyoku/iyaku/kaisyu/00-1-010.html
 ```
 
 ### 全国社会福祉協議会 (www.shakyo.or.jp)
+```
+(空/取得なし)
+```
+
+### 沖縄県 (www.pref.okinawa.jp)
 ```
 (空/取得なし)
 ```
