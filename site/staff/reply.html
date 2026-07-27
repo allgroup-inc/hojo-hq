@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>スタッフ用: 会社情報登録への返信文ジェネレータ</title>
+<style>
+  :root{--navy:#00335c;--kin:#F88800;--shiro:#F7F5F1;--sumi:#021c30;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;
+    background:var(--shiro);color:var(--navy);line-height:1.7;padding:24px;max-width:760px;margin:0 auto;}
+  h1{font-size:1.2rem;margin-bottom:4px;}
+  .note{font-size:.8rem;color:rgba(0,51,92,.6);margin-bottom:24px;}
+  .form{display:grid;gap:16px;background:#fff;padding:24px;border-radius:14px;border:1px solid rgba(0,51,92,.15);}
+  label{display:flex;flex-direction:column;gap:6px;font-size:.85rem;font-weight:700;}
+  input,select{font:inherit;min-height:44px;padding:.6em 1em;border-radius:10px;border:2px solid rgba(0,51,92,.25);}
+  input:focus,select:focus{outline:3px solid var(--kin);}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{font:inherit;font-size:.85rem;min-height:40px;padding:.4em 1em;border-radius:999px;background:#fff;
+    border:2px solid rgba(0,51,92,.25);cursor:pointer;}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+  button.go{font:inherit;font-weight:700;min-height:48px;border:none;border-radius:999px;
+    background:var(--kin);color:var(--sumi);cursor:pointer;padding:0 28px;}
+  .out{margin-top:24px;}
+  textarea{width:100%;min-height:340px;font:inherit;font-size:.9rem;padding:16px;border-radius:14px;
+    border:2px solid rgba(0,51,92,.25);background:#fff;}
+  .copy{margin-top:8px;font:inherit;font-weight:700;min-height:44px;border:none;border-radius:999px;
+    background:var(--navy);color:#fff;cursor:pointer;padding:0 24px;}
+  .ok{color:#0a7a3d;font-weight:700;margin-left:8px;}
+  .meta{font-size:.8rem;color:rgba(0,51,92,.6);margin-top:6px;}
+</style>
+</head>
+<body>
+<h1>会社情報登録への返信文ジェネレータ(スタッフ用)</h1>
+<p class="note">LINEチャットに届いた会社情報を入力 →「返信文を作る」→ コピーしてチャットに貼るだけ(約1分)。データは最新の掲載制度(自動更新)から選ばれます。このページは検索に載りません。</p>
+
+<div class="form">
+  <label>会社名(「〇〇様」に入ります)<input id="company" placeholder="例) 沖縄商事株式会社"></label>
+  <label>所在地(市町村)
+    <select id="city">
+      <option value="">選択してください</option>
+      <option>那覇市</option><option>沖縄市</option><option>うるま市</option>
+      <option>浦添市</option><option>宜野湾市</option><option>糸満市</option>
+      <option>豊見城市</option><option>名護市</option><option>宮古島市</option>
+      <option>石垣市</option><option value="その他">その他の市町村</option>
+    </select>
+  </label>
+  <label>業種
+    <select id="biz">
+      <option value="">不明・指定なし</option>
+      <option>飲食・宿泊</option><option>小売・卸売</option><option>建設</option>
+      <option>製造</option><option>情報通信・IT</option><option>医療・福祉</option>
+      <option>サービス</option><option>その他</option>
+    </select>
+  </label>
+  <label>関心テーマ(会話から分かれば)
+    <div class="chips" id="themes">
+      <button type="button" class="chip" data-v="hanro">販路・売上</button>
+      <button type="button" class="chip" data-v="setsubi">設備投資</button>
+      <button type="button" class="chip" data-v="it">IT・DX</button>
+      <button type="button" class="chip" data-v="jinzai">人材</button>
+      <button type="button" class="chip" data-v="shikin">資金繰り</button>
+      <button type="button" class="chip" data-v="shokei">事業承継</button>
+    </div>
+  </label>
+  <button class="go" id="go">返信文を作る</button>
+</div>
+
+<div class="out">
+  <textarea id="result" placeholder="ここに返信文が生成されます"></textarea>
+  <div><button class="copy" id="copy">返信文をコピー</button><span id="copied" class="ok" hidden>✓ コピーしました</span></div>
+  <p class="meta" id="meta"></p>
+</div>
+
+<script>
+let DB={items:[]};
+fetch('../data/subsidies.json').then(r=>r.json()).then(d=>{DB=d;
+  document.getElementById('meta').textContent='データ: '+(d.updated_at||'')+' 時点 / 掲載'+(d.count||0)+'件';
+});
+
+const BIZ_KEYS={'飲食・宿泊':['飲食','宿泊','観光'],'小売・卸売':['小売','卸売','商業'],
+ '建設':['建設'],'製造':['製造','ものづくり'],'情報通信・IT':['情報','IT','デジタル','DX'],
+ '医療・福祉':['医療','福祉','介護'],'サービス':['サービス'],'その他':[]};
+const THEME_KEYS={hanro:['販路','売上','持続化','販売促進'],setsubi:['設備','投資','ものづくり'],
+ it:['IT','デジタル','DX'],jinzai:['人材','雇用','育成','キャリア'],
+ shikin:['資金','融資','利子'],shokei:['承継','引継','後継','M&A']};
+
+document.querySelectorAll('#themes .chip').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('on')));
+
+function fmtYen(v){
+  if(!v)return null;
+  if(v>=100000000){return (v/100000000).toFixed(1).replace(/\.0$/,'')+'億円';}
+  return Math.round(v/10000).toLocaleString()+'万円';
+}
+
+document.getElementById('go').addEventListener('click',()=>{
+  const company=document.getElementById('company').value.trim();
+  const city=document.getElementById('city').value;
+  const biz=document.getElementById('biz').value;
+  const themes=[...document.querySelectorAll('#themes .chip.on')].map(c=>c.dataset.v);
+  const keys=BIZ_KEYS[biz]||[];
+  const themeKeys=themes.flatMap(t=>THEME_KEYS[t]||[]);
+  const today=new Date();today.setHours(0,0,0,0);
+
+  let hits=DB.items.filter(it=>{
+    if(it.status!=='募集中')return false;
+    const d=new Date(it.deadline);
+    if(isNaN(d))return false;
+    const days=(d-today)/86400000;
+    if(days<7)return false; // 締切3層ルール: 7日未満は個別案内でも急かさない
+    const area=it.target_area||'';
+    return !city||!area||area.includes('全国')||area.includes('沖縄')||area.includes(city);
+  });
+  const score=it=>{
+    const text=(it.name||'')+(it.target_biz||'');
+    let s=0;
+    if(themeKeys.some(k=>text.includes(k)))s-=10;
+    if(keys.some(k=>text.includes(k)))s-=5;
+    if((it.tag==='okinawa'))s-=3; // 地元制度を優先
+    return s;
+  };
+  hits.sort((a,b)=>{const d=score(a)-score(b);return d!==0?d:(a.deadline||'').localeCompare(b.deadline||'');});
+  const top=hits.slice(0,4);
+
+  const lines=[];
+  lines.push((company?company+'様':'ご担当者様'));
+  lines.push('');
+  lines.push('ご登録ありがとうございます🌺「沖縄企業のミカタ」担当です。');
+  lines.push('いただいた情報をもとに、いま申請できる可能性のある制度をお調べしました。');
+  lines.push('');
+  top.forEach(it=>{
+    const amt=fmtYen(it.max_amount);
+    lines.push('■ '+it.name);
+    lines.push('　締切: '+it.deadline+(amt?' / 上限'+amt:''));
+    lines.push('　'+it.source_url);
+    lines.push('');
+  });
+  if(top.length===0){
+    lines.push('現在の掲載分では、条件に合致する募集中の制度が見当たりませんでした。');
+    lines.push('新しい公募が出ましたら、いち早くお知らせします。');
+    lines.push('');
+  }
+  lines.push('※要件・締切は必ず原文でご確認ください。');
+  lines.push('気になる制度がありましたら、制度名を返信いただければ');
+  lines.push('申請に強い専門家(相談無料)におつなぎします。');
+  document.getElementById('result').value=lines.join('\n');
+});
+
+document.getElementById('copy').addEventListener('click',async()=>{
+  const t=document.getElementById('result');
+  t.select();
+  try{await navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}
+  const ok=document.getElementById('copied');ok.hidden=false;setTimeout(()=>ok.hidden=true,2000);
+});
+</script>
+</body>
+</html>

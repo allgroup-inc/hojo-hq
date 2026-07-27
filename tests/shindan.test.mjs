@@ -6,7 +6,7 @@ import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 
 const require = createRequire(import.meta.url);
-const { matchSeido } = require("../site/fukugiiro/shindan/logic.js");
+const { matchSeido, summarize } = require("../site/fukugiiro/shindan/logic.js");
 
 const db = JSON.parse(readFileSync(new URL("../data/fukugiiro/seido.json", import.meta.url), "utf-8"));
 const items = db.items;
@@ -63,4 +63,24 @@ test("安定性: 高が中より先に並ぶ", () => {
   const firstMid = rs.findIndex((r) => r.likelihood === "中");
   const lastHigh = rs.map((r) => r.likelihood).lastIndexOf("高");
   if (firstMid >= 0 && lastHigh >= 0) assert.ok(lastHigh < firstMid);
+});
+
+test("summarize: 高/中/合計を正しく数える", () => {
+  const rs = [
+    { item: { name: "A" }, likelihood: "高" },
+    { item: { name: "B" }, likelihood: "高" },
+    { item: { name: "C" }, likelihood: "中" },
+  ];
+  assert.deepEqual(summarize(rs), { total: 3, high: 2, mid: 1 });
+});
+
+test("summarize: 空配列はすべて0", () => {
+  assert.deepEqual(summarize([]), { total: 0, high: 0, mid: 0 });
+});
+
+test("summarize: matchSeido の実結果と整合(合計=件数)", () => {
+  const rs = matchSeido(items, { municipality: "那覇市", children: 2, childAges: ["小学生"], lifeEvents: ["入園・入学"] });
+  const s = summarize(rs);
+  assert.equal(s.total, rs.length);
+  assert.equal(s.high + s.mid, rs.length);
 });
