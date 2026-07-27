@@ -93,7 +93,27 @@ def esc(s):
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def page(title, desc, body, depth=2):
+def kit_jsonld(it):
+    """制度ページの構造化データ(schema.org GovernmentService)。
+    検索/AI検索での意味理解・引用に効く。掲載中の事実(制度名・提供元・対象地域・
+    対象者・公式URL)のみを記述し、金額など未確定の値は入れない(正確性最優先)。"""
+    data = {
+        "@context": "https://schema.org",
+        "@type": "GovernmentService",
+        "name": it.get("name", ""),
+        "serviceType": "給付金・手当・助成制度",
+        "provider": {"@type": "GovernmentOrganization", "name": it.get("issuer", "")},
+        "areaServed": {"@type": "AdministrativeArea", "name": it.get("area", "全国")},
+        "audience": {"@type": "Audience", "audienceType": it.get("target_household", "")},
+        "url": it.get("source_url", ""),
+        "serviceUrl": it.get("source_url", ""),
+    }
+    return ('<script type="application/ld+json">\n'
+            + json.dumps(data, ensure_ascii=False, indent=1)
+            + "\n</script>")
+
+
+def page(title, desc, body, depth=2, head_extra=""):
     rel = "../" * depth
     return f"""<!DOCTYPE html>
 <html lang="ja">
@@ -103,6 +123,7 @@ def page(title, desc, body, depth=2):
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <link rel="icon" type="image/svg+xml" href="{rel}assets/icon.svg">
+{head_extra}
 <style>{STYLE}</style>
 </head>
 <body>
@@ -225,7 +246,7 @@ def kit_page(it, updated):
     body += KIT_JS.replace("__ID__", it["id"])
     title = f"{it['name']} 申請準備シート(印刷用)| もらいわすれ堂"
     desc = f"{it['name']}の申請に行く前の準備シート。持ち物チェックリスト・窓口でのひとこと・メモ欄つき。印刷してそのまま窓口へ。"
-    return page(title, desc, body)
+    return page(title, desc, body, head_extra=kit_jsonld(it))
 
 
 def index_page(items, updated):
