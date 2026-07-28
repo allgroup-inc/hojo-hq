@@ -96,6 +96,14 @@ footer a{color:#bcd9cf}
 .navcard span{font-size:.78rem;color:var(--fg-muted);font-weight:400;margin-top:4px}
 .navcard.hline2{background:#EAF7EE;border-color:#B7E4C7;color:#0F5138}
 @media(min-width:640px){.hero h1{font-size:2.1rem}.cards{grid-template-columns:1fr 1fr}}
+/* PC(広い画面): 余白を減らして横幅を活かす。本文は読みやすさのため広げすぎない */
+@media(min-width:900px){
+  .wrap{max-width:960px}
+  .navcards{grid-template-columns:repeat(4,1fr)}
+  .hero h1{font-size:2.4rem}
+  /* 文章ブロックは中央寄せで幅を抑え、横に間延びさせない */
+  .hero .sub,.story,.steps,details{max-width:760px;margin-left:auto;margin-right:auto}
+}
 </style>
 </head>
 <body>
