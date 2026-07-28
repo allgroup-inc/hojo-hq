@@ -1,0 +1,316 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: #ffffff;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    }
+
+    /* ---------- background / atmosphere (full-bleed clip, never on #root) ---------- */
+    .cta06-bg {
+      position: absolute;
+      inset: 0;
+    }
+    .cta06-ring {
+      position: absolute;
+      top: 480px;
+      left: 50%;
+      border-radius: 50%;
+      border: 1.5px solid rgba(248, 136, 0, 0.14);
+      transform: translate(-50%, -50%);
+    }
+    .cta06-ring--1 {
+      width: 360px;
+      height: 360px;
+    }
+    .cta06-ring--2 {
+      width: 580px;
+      height: 580px;
+      border-color: rgba(248, 136, 0, 0.1);
+    }
+    .cta06-ring--3 {
+      width: 800px;
+      height: 800px;
+      border-color: rgba(248, 136, 0, 0.06);
+    }
+
+    /* ---------- CTA button group ---------- */
+    .cta06-cta-wrap {
+      position: absolute;
+      inset: 0;
+    }
+    .cta06-tag-pos {
+      position: absolute;
+      top: 306px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .cta06-tag {
+      display: inline-block;
+      padding: 8px 22px;
+      background: rgba(248, 136, 0, 0.08);
+      color: #f88800;
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: 0.08em;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+    .cta06-button-pos {
+      position: absolute;
+      top: 372px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    #cta06-button {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      height: 116px;
+      padding: 0 44px;
+      background: #06c755;
+      border-radius: 100px;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+    .cta06-icon {
+      position: relative;
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ffffff;
+    }
+    .cta06-icon::before,
+    .cta06-icon::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background: #06c755;
+      transform: translate(-50%, -50%);
+    }
+    .cta06-icon::before {
+      width: 20px;
+      height: 4px;
+      border-radius: 2px;
+    }
+    .cta06-icon::after {
+      width: 4px;
+      height: 20px;
+      border-radius: 2px;
+    }
+    .cta06-btn-text {
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 42px;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    /* ---------- wordmark (left 60%) ---------- */
+    .cta06-wordmark-wrap {
+      position: absolute;
+      left: 96px;
+      top: 590px;
+      width: 1005px;
+      will-change: transform;
+    }
+    .cta06-accent-line {
+      width: 60px;
+      height: 4px;
+      background: #f88800;
+      border-radius: 2px;
+      transform-origin: 0% 50%;
+      margin-bottom: 18px;
+      will-change: transform;
+    }
+    .cta06-wordmark-text {
+      color: #00335c;
+      font-weight: 700;
+      font-size: 44px;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    /* ---------- QR dummy placeholder (right 40%) ---------- */
+    .cta06-qr-wrap {
+      position: absolute;
+      left: 1165px;
+      top: 560px;
+      width: 659px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      will-change: transform;
+    }
+    .cta06-qr-box {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      background: rgba(248, 136, 0, 0.04);
+      border: 1.5px solid rgba(248, 136, 0, 0.2);
+      border-radius: 14px;
+    }
+    .cta06-qr-finder {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 6px solid #00335c;
+      border-radius: 6px;
+    }
+    .cta06-qr-finder::after {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      background: #00335c;
+      border-radius: 2px;
+    }
+    .cta06-qr-finder.tl {
+      top: 14px;
+      left: 14px;
+    }
+    .cta06-qr-finder.tr {
+      top: 14px;
+      right: 14px;
+    }
+    .cta06-qr-finder.bl {
+      bottom: 14px;
+      left: 14px;
+    }
+    .cta06-qr-noise {
+      position: absolute;
+      top: 66px;
+      right: 14px;
+      bottom: 14px;
+      left: 66px;
+      background-image:
+        linear-gradient(
+          90deg,
+          rgba(0, 51, 92, 0.32) 25%,
+          transparent 25%,
+          transparent 50%,
+          rgba(0, 51, 92, 0.32) 50%,
+          rgba(0, 51, 92, 0.32) 75%,
+          transparent 75%,
+          transparent
+        ),
+        linear-gradient(
+          0deg,
+          rgba(0, 51, 92, 0.32) 25%,
+          transparent 25%,
+          transparent 50%,
+          rgba(0, 51, 92, 0.32) 50%,
+          rgba(0, 51, 92, 0.32) 75%,
+          transparent 75%,
+          transparent
+        );
+      background-size: 14px 14px;
+      opacity: 0.6;
+    }
+    .cta06-qr-caption {
+      margin-top: 14px;
+      color: #9a9a9a;
+      font-weight: 500;
+      font-size: 15px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  </style>
+
+  <div id="root" data-composition-id="06-cta" data-width="1920" data-height="1080">
+    <div class="cta06-bg clip" data-start="0" data-duration="13.013" data-track-index="0">
+      <div class="cta06-ring cta06-ring--3"></div>
+      <div class="cta06-ring cta06-ring--2"></div>
+      <div class="cta06-ring cta06-ring--1"></div>
+    </div>
+
+    <div class="cta06-cta-wrap clip" data-start="0" data-duration="13.013" data-track-index="1">
+      <div class="cta06-tag-pos">
+        <div class="cta06-tag" id="cta06-tag">LINE</div>
+      </div>
+      <div class="cta06-button-pos">
+        <div id="cta06-button">
+          <span class="cta06-icon"></span>
+          <span class="cta06-btn-text">Add Friend</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta06-wordmark-wrap clip" id="cta06-wordmark" data-start="5.5" data-duration="7.513" data-track-index="2">
+      <div class="cta06-accent-line" id="cta06-accent-line"></div>
+      <p class="cta06-wordmark-text">Okinawa Kigyo<br />no Mikata</p>
+    </div>
+
+    <div class="cta06-qr-wrap clip" id="cta06-qr" data-start="5.5" data-duration="7.513" data-track-index="3">
+      <div class="cta06-qr-box">
+        <div class="cta06-qr-finder tl"></div>
+        <div class="cta06-qr-finder tr"></div>
+        <div class="cta06-qr-finder bl"></div>
+        <div class="cta06-qr-noise"></div>
+      </div>
+      <div class="cta06-qr-caption">QR Code</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      // Scene 1 (0.0-5.5s): CTA button spring-pop entrance to center, one settle pulse.
+      tl.fromTo(
+        "#cta06-tag",
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" },
+        0.05,
+      );
+      tl.fromTo(
+        "#cta06-button",
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.6, ease: "power3.out" },
+        0.1,
+      );
+      // single settle pulse (no repeat/yoyo) drawing the eye once
+      tl.to("#cta06-button", { scale: 1.06, duration: 0.22, ease: "power2.out" }, 2.2);
+      tl.to("#cta06-button", { scale: 1, duration: 0.3, ease: "power2.inOut" }, 2.42);
+
+      // Scene 2 (5.5-13.013s): wordmark + QR dummy frame arrive asymmetric 60/40 beside the button,
+      // then hold static for the remainder (deliberate closing hold, no further motion, no extra CTAs).
+      tl.fromTo(
+        "#cta06-wordmark",
+        { opacity: 0, x: -28 },
+        { opacity: 1, x: 0, duration: 0.65, ease: "power3.out" },
+        5.6,
+      );
+      tl.fromTo(
+        "#cta06-accent-line",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.5, ease: "power3.out" },
+        6.3,
+      );
+      tl.fromTo(
+        "#cta06-qr",
+        { opacity: 0, x: 28 },
+        { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" },
+        5.85,
+      );
+
+      window.__timelines["06-cta"] = tl;
+    })();
+  </script>
+</template>
