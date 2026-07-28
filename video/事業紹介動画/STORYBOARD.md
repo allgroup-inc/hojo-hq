@@ -18,6 +18,7 @@ mode: autonomous
 ## Frame 1 — 見逃しの痛み(フック)
 
 - status: outline
+- src: compositions/frames/01-hook.html
 - duration: 12.352s
 - transition_in: cut
 - scene: カレンダーに×印、困った表情を連想させるシンプルな図形アニメーション
@@ -35,6 +36,7 @@ Scene 2 (5.0–12.352s): 1行目が上段へ落ち着き、VOが続く語を話�
 ## Frame 2 — サービス紹介
 
 - status: outline
+- src: compositions/frames/02-product-intro.html
 - duration: 16.853s
 - transition_in: crossfade
 - scene: サイトのトップ画面を模したモックアップ、制度カードが並ぶ様子
@@ -54,6 +56,7 @@ Scene 3 (11.5–16.853s): 「お届けします。」でカードスタックが
 ## Frame 3 — 正確性の裏付け
 
 - status: outline
+- src: compositions/frames/03-proof.html
 - duration: 15.061s
 - transition_in: crossfade
 - scene: 制度カード一覧のモックアップ、チェックマークのアニメーション
@@ -73,6 +76,7 @@ Scene 3 (11.0–15.061s): 「安心です。」で全チップが点灯済みと
 ## Frame 4 — LINE登録のベネフィット
 
 - status: outline
+- src: compositions/frames/04-benefit.html
 - duration: 13.653s
 - transition_in: crossfade
 - scene: LINE通知のモックアップ、スマホ画面フレーム
@@ -92,6 +96,7 @@ Scene 3 (9.5–13.653s): 「お知らせが届きます。」で通知バブル(
 ## Frame 5 — ブランド
 
 - status: outline
+- src: compositions/frames/05-branding.html
 - duration: 14.933s
 - transition_in: crossfade
 - scene: ロゴ+タグライン表示(ネイビー×オレンジ配色)
@@ -112,6 +117,7 @@ Scene 3 (11.0–14.933s): ワードマーク+タグライン全体がsettleし�
 ## Frame 6 — CTA
 
 - status: outline
+- src: compositions/frames/06-cta.html
 - duration: 13.013s
 - transition_in: crossfade
 - scene: LINE登録ボタンとQRコードのプレースホルダー
