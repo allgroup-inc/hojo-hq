@@ -1,5 +1,5 @@
 <template>
-<div id="root" data-composition-id="03-proof" data-width="1920" data-height="1080">
+<div id="root" data-composition-id="03-proof" data-width="1920" data-height="1080" data-duration="15.561">
   <style>
     #root {
       position: absolute;
@@ -162,10 +162,10 @@
     }
   </style>
 
-  <div class="hf03p-bg clip" data-start="0" data-duration="15.061" data-track-index="0"></div>
+  <div class="hf03p-bg clip" data-start="0" data-duration="15.561" data-track-index="0"></div>
 
   <!-- Scene 1-3: card stack, continued from Frame 2 — present for the whole shot -->
-  <div class="hf03p-cards clip" data-start="0" data-duration="15.061" data-track-index="1">
+  <div class="hf03p-cards clip" data-start="0" data-duration="15.561" data-track-index="1">
     <div class="hf03p-card" style="top: 200px;">
       <div class="hf03p-card-icon"><span></span><span></span></div>
       <div class="hf03p-card-lines">
@@ -201,27 +201,27 @@
   </div>
 
   <!-- Scene 1 (0.0-5.0s): a source-link chip appears beside each card, one by one -->
-  <div id="hf03p-chip-0" class="hf03p-chip clip" data-start="0.8" data-duration="14.261" data-track-index="2" style="top: 254px;">
+  <div id="hf03p-chip-0" class="hf03p-chip clip" data-start="0.8" data-duration="14.761" data-track-index="2" style="top: 254px;">
     <span class="hf03p-chip-ring"></span><span class="hf03p-chip-ring"></span>
   </div>
-  <div id="hf03p-chip-1" class="hf03p-chip clip" data-start="2.0" data-duration="13.061" data-track-index="2" style="top: 422px;">
+  <div id="hf03p-chip-1" class="hf03p-chip clip" data-start="2.0" data-duration="13.561" data-track-index="3" style="top: 422px;">
     <span class="hf03p-chip-ring"></span><span class="hf03p-chip-ring"></span>
   </div>
-  <div id="hf03p-chip-2" class="hf03p-chip clip" data-start="3.2" data-duration="11.861" data-track-index="2" style="top: 590px;">
+  <div id="hf03p-chip-2" class="hf03p-chip clip" data-start="3.2" data-duration="12.361" data-track-index="4" style="top: 590px;">
     <span class="hf03p-chip-ring"></span><span class="hf03p-chip-ring"></span>
   </div>
-  <div id="hf03p-chip-3" class="hf03p-chip clip" data-start="4.4" data-duration="10.661" data-track-index="2" style="top: 758px;">
+  <div id="hf03p-chip-3" class="hf03p-chip clip" data-start="4.4" data-duration="11.161" data-track-index="5" style="top: 758px;">
     <span class="hf03p-chip-ring"></span><span class="hf03p-chip-ring"></span>
   </div>
 
   <!-- Scene 2 (5.0-11.0s): the verification sweep passes each card, lighting its chip -->
-  <div id="hf03p-magnifier" class="hf03p-magnifier clip" data-start="5.0" data-duration="5.0" data-track-index="3" style="top: 235px;">
+  <div id="hf03p-magnifier" class="hf03p-magnifier clip" data-start="5.0" data-duration="5.0" data-track-index="6" style="top: 235px;">
     <div class="hf03p-magnifier-glass"></div>
     <div class="hf03p-magnifier-handle"></div>
   </div>
 
   <!-- Scene 3 (11.0-15.061s): generic shield+check motif settles, holds -->
-  <div id="hf03p-badge" class="hf03p-badge clip" data-start="11.0" data-duration="4.061" data-track-index="4">
+  <div id="hf03p-badge" class="hf03p-badge clip" data-start="11.0" data-duration="4.561" data-track-index="7">
     <svg viewBox="0 0 100 120" width="150" height="180" role="img" aria-hidden="true">
       <path
         d="M50 4 L90 18 V54 C90 84 72 104 50 116 C28 104 10 84 10 54 V18 Z"
@@ -284,15 +284,15 @@
 
       tl.to(magnifier, { x: 880, duration: 0.9, ease: "power1.inOut" }, 5.2); // sweep row 0 -> ends 6.1
       lightChip(chips[0], 6.1);
-      tl.to(magnifier, { x: 0, y: 168, duration: 0.25, ease: "power2.inOut" }, 6.1); // drop to row 1
+      tl.to(magnifier, { x: 0, y: 168, duration: 0.25, ease: "power2.inOut", overwrite: "auto" }, 6.1); // drop to row 1
 
       tl.to(magnifier, { x: 880, duration: 0.9, ease: "power1.inOut" }, 6.35); // sweep row 1 -> ends 7.25
       lightChip(chips[1], 7.25);
-      tl.to(magnifier, { x: 0, y: 336, duration: 0.25, ease: "power2.inOut" }, 7.25); // drop to row 2
+      tl.to(magnifier, { x: 0, y: 336, duration: 0.25, ease: "power2.inOut", overwrite: "auto" }, 7.25); // drop to row 2
 
       tl.to(magnifier, { x: 880, duration: 0.9, ease: "power1.inOut" }, 7.5); // sweep row 2 -> ends 8.4
       lightChip(chips[2], 8.4);
-      tl.to(magnifier, { x: 0, y: 504, duration: 0.25, ease: "power2.inOut" }, 8.4); // drop to row 3
+      tl.to(magnifier, { x: 0, y: 504, duration: 0.25, ease: "power2.inOut", overwrite: "auto" }, 8.4); // drop to row 3
 
       tl.to(magnifier, { x: 880, duration: 0.9, ease: "power1.inOut" }, 8.65); // sweep row 3 -> ends 9.55
       lightChip(chips[3], 9.55);

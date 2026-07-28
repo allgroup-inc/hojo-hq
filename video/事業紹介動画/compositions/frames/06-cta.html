@@ -71,7 +71,7 @@
       display: inline-block;
       padding: 8px 22px;
       background: rgba(6, 199, 85, 0.1);
-      color: #06c755;
+      color: #048238;
       font-weight: 600;
       font-size: 0.85cqw;
       letter-spacing: 0.08em;
@@ -90,7 +90,7 @@
       gap: 18px;
       height: 116px;
       padding: 0 46px;
-      background: #06c755;
+      background: #04a342;
       border-radius: 100px;
       transform-origin: 50% 50%;
       will-change: transform;
@@ -172,7 +172,7 @@
     }
 
     #cta06-qr-col {
-      flex: 0 0 34cqw;
+      flex: 0 0 28cqw;
       display: flex;
       justify-content: center;
       will-change: transform, opacity;
@@ -243,7 +243,7 @@
     }
   </style>
 
-  <div id="root" data-composition-id="06-cta" data-width="1920" data-height="1080">
+  <div id="root" data-composition-id="06-cta" data-width="1920" data-height="1080" data-duration="13.013">
     <div class="clip" id="cta06-bg" data-start="0" data-duration="13.013" data-track-index="0">
       <div id="cta06-bg-rings-wrap">
         <div id="cta06-bg-rings">
@@ -310,7 +310,7 @@
         );
         // single settle pulse (no repeat/yoyo) — draws the eye once, never loops
         tl.to("#cta06-button", { scale: 1.07, duration: 0.22, ease: "power2.out" }, 2.2);
-        tl.to("#cta06-button", { scale: 1, duration: 0.3, ease: "power2.inOut" }, 2.42);
+        tl.to("#cta06-button", { scale: 1, duration: 0.3, ease: "power2.inOut", overwrite: "auto" }, 2.42);
 
         // Scene 2 (5.5-13.013s): on the "沖縄企業のミカタで検索を。" cue, the wordmark (60) and
         // the QR dummy frame (40) arrive asymmetric beside the button; nothing else is added

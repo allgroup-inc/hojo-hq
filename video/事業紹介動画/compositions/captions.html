@@ -1,35 +1,30 @@
-<!--
-  Blue Professional — caption skin (preset-local source).
-
-  This is the preset's own lower-third karaoke caption look. product-launch-video's
-  Step 2 copies it into the project as caption-skin.html; captions.mjs then fills the
-  three reserved holes, wraps the fragment in a <template>, and writes
-  compositions/captions.html:
-    · the empty GROUPS array            → the engine's scene-aware word groups
-    · the 0 duration + 0 width/height   → real total + canvas size
-    · the empty data-brand-tokens style → :root tokens derived from the project's frame.md
-
-  Token contract — reference ONLY this fixed vocab (captions.mjs injects it from
-  frame.md, so the Step-2 brand overlay flows through; each var has a blue-professional
-  literal fallback for standalone preview):
-    --cap-ink · --cap-canvas · --cap-accent · --cap-accent-2 · --font-display ·
-    --font-body · --cap-band-top · --cap-band-height
-  Hooks (do not rename): .caption-group / .caption-word + states .is-active / .is-spoken,
-  root data-composition-id="captions", timeline at window.__timelines["captions"].
-  State changes use gsap.set({className}) (applied on the engine's frame-by-frame seek);
-  never tl.call() callbacks (seek does not fire them → wrong state on render).
-
-  Visual: a soft cobalt-tinted card on warm cream — a 4% cobalt fill inside a 1.5px
-  20%-cobalt border, soft 14px rounded corners, NO shadow (the system's premium signal
-  is the absence of cast depth; the tinted card does the lift). Space Grotesk, sentence
-  case, near-black glyphs. Upcoming words sit in muted gray; the current word becomes a
-  solid cobalt chip — the brand's signature single-accent gesture, a pill-rounded fill
-  with cream reading on top; spoken words settle to near-black ink, chip cleared.
--->
+<template id="captions-template" data-composition-id="captions" data-width="1920" data-height="1080">
 <script src="vendor/gsap.min.js"></script>
 
-<!-- captions.mjs injects the project's :root tokens here -->
-<style data-brand-tokens></style>
+
+<style data-brand-tokens>
+      :root {
+      --bg: #FFFFFF;
+      --primary: #F88800;
+      --text: #00335C;
+      --text-muted: #F88800;
+      --text-light: #9A9A9A;
+      --accent-light: rgba(248, 136, 0, 0.08);
+      --accent-medium: rgba(248, 136, 0, 0.15);
+      --border: rgba(248, 136, 0, 0.2);
+      --card-bg: rgba(248, 136, 0, 0.04);
+      --positive: #059669;
+      --negative: #dc2626;
+      --cap-ink: #00335C;
+      --cap-canvas: #FFFFFF;
+      --cap-accent: #F88800;
+      --cap-accent-2: #F88800;
+      --font-display: "Meiryo", system-ui, serif;
+      --font-body: "Meiryo", system-ui, sans-serif;
+      --cap-band-top: 900px;
+      --cap-band-height: 180px;
+      }
+    </style>
 
 <style>
   /* frame.md names "Meiryo" (Windows-only); this render machine has no such
@@ -89,7 +84,7 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.1em 0.34em;
-    font-family: var(--font-display, "Space Grotesk"), system-ui, sans-serif;
+    font-family: "Meiryo", system-ui, sans-serif;
     font-weight: 600;
     font-size: clamp(40px, 4.4vw, 58px);
     line-height: 1.16;
@@ -126,7 +121,7 @@
   }
   /* numerals / data — cobalt 700, the figure voice */
   .caption-word.cap-num {
-    font-family: var(--font-display, "Space Grotesk"), system-ui, sans-serif;
+    font-family: "Meiryo", system-ui, sans-serif;
     font-weight: 700;
     color: var(--cap-accent, #1e2bfa);
   }
@@ -153,10 +148,10 @@
   data-composition-id="captions"
   data-timeline-locked
   data-start="0"
-  data-duration="0"
+  data-duration="85.865"
   data-fps="30"
-  data-width="0"
-  data-height="0"
+  data-width="1920"
+  data-height="1080"
 >
   <div class="caption-layer" aria-hidden="true">
     <div id="caption-stage" class="caption-stage"></div>
@@ -165,8 +160,8 @@
 
 <script>
   // captions.mjs injects the engine's scene-aware groups + real duration here.
-  var GROUPS = [];
-  var DURATION = 0;
+  var GROUPS = [{"id":"caption-group-0","frame":1,"start":0,"end":12.352,"text":"補助金の締切を、知らずに逃した経験はありませんか？","words":[{"id":"caption-word-0-0","text":"補助金の締切を、知らずに逃した経験はありませんか？","start":0,"end":12.352}]},{"id":"caption-group-1","frame":2,"start":12.352,"end":29.205,"text":"沖縄企業のミカタが、補助金情報を毎日自動でお届けします。","words":[{"id":"caption-word-1-0","text":"沖縄企業のミカタが、補助金情報を毎日自動でお届けします。","start":12.352,"end":29.205}]},{"id":"caption-group-2","frame":3,"start":29.205,"end":44.266,"text":"掲載情報は原文を確認して公開しているので安心です。","words":[{"id":"caption-word-2-0","text":"掲載情報は原文を確認して公開しているので安心です。","start":29.205,"end":44.266}]},{"id":"caption-group-3","frame":4,"start":44.266,"end":57.919,"text":"LINE登録で、締切の約1か月前からお知らせが届きます。","words":[{"id":"caption-word-3-0","text":"LINE登録で、締切の約1か月前からお知らせが届きます。","start":44.266,"end":57.919}]},{"id":"caption-group-4","frame":5,"start":57.919,"end":72.852,"text":"『補助金・助成金の情報で、沖縄の企業にあかりを。』","words":[{"id":"caption-word-4-0","text":"『補助金・助成金の情報で、沖縄の企業にあかりを。』","start":57.919,"end":72.852}]},{"id":"caption-group-5","frame":6,"start":72.852,"end":85.985,"text":"今すぐLINE登録して、沖縄企業のミカタで検索を。","words":[{"id":"caption-word-5-0","text":"今すぐLINE登録して、沖縄企業のミカタで検索を。","start":72.852,"end":85.865}]}];
+  var DURATION = 85.865;
 
   (function () {
     var stage = document.getElementById("caption-stage");
@@ -233,3 +228,8 @@
     window.__timelines["captions"] = tl;
   })();
 </script>
+
+<style>
+  .caption-line { line-height: 1.1 !important; }
+</style>
+</template>

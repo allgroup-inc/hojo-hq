@@ -1,0 +1,97 @@
+{
+  "total_duration_s": 85.865,
+  "width": 1920,
+  "height": 1080,
+  "groups": [
+    {
+      "id": "caption-group-0",
+      "frame": 1,
+      "start": 0,
+      "end": 12.352,
+      "text": "補助金の締切を、知らずに逃した経験はありませんか？",
+      "words": [
+        {
+          "id": "caption-word-0-0",
+          "text": "補助金の締切を、知らずに逃した経験はありませんか？",
+          "start": 0,
+          "end": 12.352
+        }
+      ]
+    },
+    {
+      "id": "caption-group-1",
+      "frame": 2,
+      "start": 12.352,
+      "end": 29.205,
+      "text": "沖縄企業のミカタが、補助金情報を毎日自動でお届けします。",
+      "words": [
+        {
+          "id": "caption-word-1-0",
+          "text": "沖縄企業のミカタが、補助金情報を毎日自動でお届けします。",
+          "start": 12.352,
+          "end": 29.205
+        }
+      ]
+    },
+    {
+      "id": "caption-group-2",
+      "frame": 3,
+      "start": 29.205,
+      "end": 44.266,
+      "text": "掲載情報は原文を確認して公開しているので安心です。",
+      "words": [
+        {
+          "id": "caption-word-2-0",
+          "text": "掲載情報は原文を確認して公開しているので安心です。",
+          "start": 29.205,
+          "end": 44.266
+        }
+      ]
+    },
+    {
+      "id": "caption-group-3",
+      "frame": 4,
+      "start": 44.266,
+      "end": 57.919,
+      "text": "LINE登録で、締切の約1か月前からお知らせが届きます。",
+      "words": [
+        {
+          "id": "caption-word-3-0",
+          "text": "LINE登録で、締切の約1か月前からお知らせが届きます。",
+          "start": 44.266,
+          "end": 57.919
+        }
+      ]
+    },
+    {
+      "id": "caption-group-4",
+      "frame": 5,
+      "start": 57.919,
+      "end": 72.852,
+      "text": "『補助金・助成金の情報で、沖縄の企業にあかりを。』",
+      "words": [
+        {
+          "id": "caption-word-4-0",
+          "text": "『補助金・助成金の情報で、沖縄の企業にあかりを。』",
+          "start": 57.919,
+          "end": 72.852
+        }
+      ]
+    },
+    {
+      "id": "caption-group-5",
+      "frame": 6,
+      "start": 72.852,
+      "end": 85.985,
+      "text": "今すぐLINE登録して、沖縄企業のミカタで検索を。",
+      "words": [
+        {
+          "id": "caption-word-5-0",
+          "text": "今すぐLINE登録して、沖縄企業のミカタで検索を。",
+          "start": 72.852,
+          "end": 85.865
+        }
+      ]
+    }
+  ]
+}
