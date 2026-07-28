@@ -80,22 +80,22 @@
       left: 0;
       right: 0;
       top: 78px;
-      width: 158px;
+      width: 210px;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 11px 18px;
+      padding: 11px 20px;
       border-radius: 100px;
       background: rgba(6,199,85,0.14);
       border: 1.5px solid rgba(6,199,85,0.42);
     }
     .f-04-benefit-chip-label {
-      font-size: 19px;
+      font-size: 18px;
       font-weight: 800;
       color: #06A34A;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.01em;
     }
 
     /* lock-screen style notification bubble */
@@ -161,19 +161,20 @@
       margin-bottom: 22px;
     }
     .f-04-benefit-cal-stat {
-      font-size: 100px;
+      font-size: 76px;
       font-weight: 800;
       color: #F88800;
-      line-height: 1;
+      line-height: 1.2;
       letter-spacing: -0.01em;
-      margin-bottom: 14px;
+      margin-bottom: 18px;
+      white-space: nowrap;
     }
     .f-04-benefit-cal-sub {
-      font-size: 29px;
+      font-size: 26px;
       font-weight: 500;
       color: #00335C;
       letter-spacing: 0.01em;
-      margin-bottom: 46px;
+      margin-bottom: 40px;
     }
     .f-04-benefit-strip { position: relative; width: 100%; height: 64px; }
     .f-04-benefit-strip-track {
@@ -227,17 +228,17 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="#06A34A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span class="f-04-benefit-chip-label">LINE</span>
+        <span class="f-04-benefit-chip-label">LINE登録</span>
       </div>
 
       <div class="f-04-benefit-notif" id="f04b-notif">
-        <div class="f-04-benefit-notif-tag" id="f04b-notiftag">NEW</div>
+        <div class="f-04-benefit-notif-tag" id="f04b-notiftag">新着</div>
         <div class="f-04-benefit-notif-top">
           <div class="f-04-benefit-notif-icon"><span>L</span></div>
           <div class="f-04-benefit-notif-meta">
             <div class="f-04-benefit-notif-row">
               <span class="f-04-benefit-notif-title">LINE</span>
-              <span class="f-04-benefit-notif-time">now</span>
+              <span class="f-04-benefit-notif-time">たった今</span>
             </div>
           </div>
         </div>
@@ -250,9 +251,9 @@
   </div>
 
   <div class="f-04-benefit-calendar clip" id="f04b-calendar" data-start="4.5" data-duration="9.153" data-track-index="2">
-    <div class="f-04-benefit-cal-eyebrow" id="f04b-cal-eyebrow">Alert Window</div>
-    <div class="f-04-benefit-cal-stat" id="f04b-cal-stat">~1 MONTH</div>
-    <div class="f-04-benefit-cal-sub" id="f04b-cal-sub">before deadline</div>
+    <div class="f-04-benefit-cal-eyebrow" id="f04b-cal-eyebrow">通知タイミング</div>
+    <div class="f-04-benefit-cal-stat" id="f04b-cal-stat">締切の約1か月前から</div>
+    <div class="f-04-benefit-cal-sub" id="f04b-cal-sub">LINEで自動配信</div>
     <div class="f-04-benefit-strip">
       <div class="f-04-benefit-strip-track">
         <div class="f-04-benefit-strip-fill" id="f04b-stripfill"></div>
