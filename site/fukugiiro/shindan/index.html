@@ -161,10 +161,17 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     var sel = h("select", {id:"muni", "aria-label":"お住まいの市町村"});
     sel.appendChild(h("option", {value:"", text:"選んでください"}));
     MUNIS.forEach(function(m){ sel.appendChild(h("option", {value:m, text:m})); });
+    sel.appendChild(h("option", {value:"県外", text:"沖縄県外にお住まい"}));
     if (state.municipality) sel.value = state.municipality;
+    // 選んだ瞬間に次へ(タップ1回を削減)。空のまま進めない(勝手に県外にしない)
+    function goMuni(){ if (!sel.value) return; state.municipality = sel.value; state.step = 1; render(); }
+    sel.addEventListener("change", goMuni);
     app.appendChild(h("div", {class:"q"}, [
-      h("h2", {text:"Q1. お住まいの市町村は?"}), sel,
-      nav("つぎへ", function(){ state.municipality = sel.value || "県外"; state.step = 1; render(); })
+      h("h2", {text:"Q1. お住まいの市町村は?"}),
+      h("p", {class:"note", text:"制度をしぼり込むためだけに使います。名前や住所(番地)は不要。回答はこの端末の中だけで処理され、送信されません。", style:"margin:-4px 0 10px"}),
+      sel,
+      h("p", {class:"note", text:"最初の質問です。ぜんぶで数問・3分ほどで終わります。", style:"margin-top:10px"}),
+      nav("つぎへ", goMuni)
     ]));
   }
   function qChildren(){
