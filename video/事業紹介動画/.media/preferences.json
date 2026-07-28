@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "preferences": {
+    "destination": {
+      "value": "multi",
+      "confirmed_in": [
+        "事業紹介動画"
+      ],
+      "updated_at": "2026-07-28T03:46:12.523Z"
+    },
+    "aspect": {
+      "value": "1920x1080",
+      "confirmed_in": [
+        "事業紹介動画"
+      ],
+      "updated_at": "2026-07-28T03:46:12.600Z"
+    },
+    "language": {
+      "value": "ja",
+      "confirmed_in": [
+        "事業紹介動画"
+      ],
+      "updated_at": "2026-07-28T03:46:12.671Z"
+    },
+    "flow": {
+      "value": "automation",
+      "confirmed_in": [
+        "事業紹介動画"
+      ],
+      "updated_at": "2026-07-28T03:46:12.739Z"
+    },
+    "storyboard": {
+      "value": "no",
+      "confirmed_in": [
+        "事業紹介動画"
+      ],
+      "updated_at": "2026-07-28T03:46:12.811Z"
+    }
+  },
+  "sightings": {}
+}
