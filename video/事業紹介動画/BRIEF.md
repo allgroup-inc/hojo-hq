@@ -6,7 +6,7 @@ message: "沖縄企業のミカタは、締切を見逃さないための補助�
 destination: multi (website/YouTube embed, Instagram feed, LINE/Instagram Story・Shorts)
 aspect: 1920x1080
 language: ja
-length: ~90s (v1の60秒から変更。理由は Notes 参照)
+length: ~86s (v1の60秒から変更。理由は Notes 参照。台本v3・TTS実測値)
 angle: pain-solution-proof-cta
 ---
 
@@ -17,14 +17,15 @@ angle: pain-solution-proof-cta
 →タグラインの順。トーンは「専門用語をやさしく翻訳する立ち位置」、誠実・信頼感重視。安っぽい/煽り
 表現は避ける。
 
-VO_MODE: verbatim — ナレーション原稿は `docs/事業紹介動画_台本v2.md` を一字一句そのまま使用する
-(v1から名称変更。TTSペース調整のため圧縮。締切表現・タグライン・CVは維持)。
+VO_MODE: verbatim — ナレーション原稿は `docs/事業紹介動画_台本v3.md` を一字一句そのまま使用する
+(v2実測165秒→さらに圧縮し1.4倍速で実測86秒。締切表現・タグライン・CVは維持)。
 Capture mode: no-capture — 実サイト(https://allgroup-inc.github.io/hojo-hq/)はキャプチャしない。
 イラスト/モックアップ調のビジュアルで構成する(現行サイトはブランド刷新前のため)。
 
 ## Assets
 
-- docs/事業紹介動画_台本v2.md — 確定済みナレーション原稿(シーン1〜6、TTSペース調整版)
+- docs/事業紹介動画_台本v3.md — 確定済みナレーション原稿(シーン1〜6、尺調整最終版・実測86秒)
+- docs/事業紹介動画_台本v2.md — 中間版(参考として保持)
 - docs/事業紹介動画_台本v1.md — 元版(三名体制レビュー済み、参考として保持)
 - ブランドカラー: ネイビー #00335C / オレンジ #F88800(CLAUDE.md 2026-07-22 小柳さん決裁)
 - フォント: Meiryo(Web は Noto Sans JP)
@@ -48,3 +49,7 @@ Capture mode: no-capture — 実サイト(https://allgroup-inc.github.io/hojo-hq
   ローカルTTS(Kokoro)は日本語で標準速度1.7文字/秒と遅く、v1全文では170秒超になるため、
   小柳さんに選択肢提示の上、(1)台本を圧縮(v2)・(2)TTS速度1.4倍・(3)尺を60→約90秒に許容、
   の組み合わせで対応することを承認済み。締切表現・タグライン・CVの文言は変更していない
+- 2026-07-28追記: v2(1.4倍速)実測は165秒となり想定を超過。声質を落とす増速やHeyGen復旧待ちより
+  台本のさらなる圧縮を優先する方針で小柳さん承認。台本v3(各行30文字前後)で実測86秒を達成。
+  Kokoroは約40文字を超える文でIndexError(音素トークン上限510)によりクラッシュする既知の制約あり。
+  今後この台本を再度編集する場合、1行30文字程度を超えないよう注意する
