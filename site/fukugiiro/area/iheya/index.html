@@ -24,6 +24,8 @@ h1{font-size:1.35rem;margin-bottom:8px}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 ul.areas{list-style:none;columns:2;gap:12px}
 ul.areas li{margin-bottom:8px}
+.cardgrid{display:grid;gap:14px}
+@media(min-width:900px){.wrap{max-width:900px}.cardgrid{grid-template-columns:1fr 1fr}ul.areas{columns:3}}
 a{color:var(--fg-primary)}
 .siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
 .siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
@@ -52,6 +54,7 @@ a{color:var(--fg-primary)}
 <h2 style='font-size:1.1rem;margin-top:20px'>伊平屋村の制度</h2>
 <p class="note">伊平屋村独自の制度は現在、掲載準備中です(確認がとれたものから順に追加します)。</p>
 <h2 style='font-size:1.1rem;margin-top:20px'>沖縄県の制度(10件)</h2>
+<div class="cardgrid">
 <div class="card"><h2>母子父子寡婦福祉資金貸付金</h2><p class="note">ひとり親家庭(母子・父子)や寡婦の方が、生活・就学・住宅などの資金でお困りのときに対象となる可能性があります</p><p class="note">窓口: お住まいの市町村または県の福祉事務所の窓口へ相談</p><a href="https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/1036529/1036517.html" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-ken-boshi-fushi-kafu-shikin/">申請準備シート</a></div>
 <div class="card"><h2>沖縄県ひとり親家庭住宅支援資金貸付</h2><p class="note">自立支援プログラムに参加し、就職や技能習得に取り組むひとり親家庭が対象となる可能性があります</p><p class="note">窓口: 事前に母子父子自立支援プログラムの策定が必要。申請窓口は沖縄県母子寡婦福祉連合会(098-887-4099)</p><a href="https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/1036529/1036514.html" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-ken-hitorioya-jutaku-shikin/">申請準備シート</a></div>
 <div class="card"><h2>沖縄県ひとり親家庭暮らし応援事業</h2><p class="note">児童扶養手当の受給世帯など、ひとり親家庭の方が対象となる可能性があります</p><p class="note">窓口: 申請は専用キャンペーンサイト(電子クーポン)から。問い合わせは事業事務局(沖縄JTB株式会社・050-1794-2924)</p><a href="https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/1036531/1039524.html" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-ken-hitorioya-kurashi-ouen/">申請準備シート</a></div>
@@ -62,7 +65,9 @@ a{color:var(--fg-primary)}
 <div class="card"><h2>沖縄県 母子及び父子家庭等医療費助成事業</h2><p class="note">健康保険に加入するひとり親家庭などで、対象年齢のお子さん等がいる世帯が対象となる可能性があります</p><p class="note">窓口: お住まいの市町村の窓口</p><a href="https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/1036529/1036519.html" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-ken-boshi-fushi-iryohi/">申請準備シート</a></div>
 <div class="card"><h2>沖縄県 重度心身障害者医療費助成制度</h2><p class="note">重度の心身障害のある方が対象となる可能性があります(自動償還で口座振込)</p><p class="note">窓口: お住まいの市町村の担当窓口</p><a href="https://www.pref.okinawa.lg.jp/kyoiku/shogaifukushi/1007022/1018788/1006977/1006987.html" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-ken-judo-shinshin-iryohi/">申請準備シート</a></div>
 <div class="card"><h2>沖縄県 特定医療費(指定難病)助成制度</h2><p class="note">国が定める指定難病と診断された方が対象となる可能性があります</p><p class="note">窓口: お住まいの地域の保健所へ申請</p><a href="https://www.pref.okinawa.lg.jp/iryokenko/hokenjo/1008066/1008086/1028432.html" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-ken-nanbyo-iryohi/">申請準備シート</a></div>
+</div>
 <h2 style='font-size:1.1rem;margin-top:20px'>全国(国)の制度(29件)</h2>
+<div class="cardgrid">
 <div class="card"><h2>児童手当</h2><p class="note">中学生以下(2024年10月以降は高校生年代まで拡充)のお子さんを育てている世帯が対象となる可能性があります</p><p class="note">窓口: お住まいの市区町村の窓口</p><a href="https://www.cfa.go.jp/policies/kokoseido/jidouteate" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-kuni-jidoteate/">申請準備シート</a></div>
 <div class="card"><h2>児童扶養手当</h2><p class="note">ひとり親家庭などでお子さんを育てている世帯が対象となる可能性があります</p><p class="note">窓口: お住まいの市区町村の窓口</p><a href="https://www.cfa.go.jp/policies/hitori-oya/fuyou-teate" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-kuni-jidofuyoteate/">申請準備シート</a></div>
 <div class="card"><h2>出産育児一時金</h2><p class="note">健康保険に加入している方(被扶養者を含む)が出産したときに対象となる可能性があります</p><p class="note">窓口: 加入している健康保険(協会けんぽ・国保など)への申請。多くは医療機関での直接支払制度が利用できます</p><a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/shussan/index.html" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-kuni-shussan-ichijikin/">申請準備シート</a></div>
@@ -92,6 +97,7 @@ a{color:var(--fg-primary)}
 <div class="card"><h2>特別支援教育就学奨励費</h2><p class="note">特別支援学校・特別支援学級などに通うお子さんがいる世帯が対象となる可能性があります</p><p class="note">窓口: お子さんが通う学校・教育委員会</p><a href="https://www.mext.go.jp/a_menu/shotou/tokubetu/material/1340250.htm" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-kuni-tokushi-shorei/">申請準備シート</a></div>
 <div class="card"><h2>住宅セーフティネット制度(住宅確保要配慮者の入居支援)</h2><p class="note">低所得・ひとり親・高齢などの理由で民間賃貸住宅への入居にお困りの世帯が対象となる可能性があります</p><p class="note">窓口: お住まいの自治体の居住支援窓口・居住支援法人</p><a href="https://www.mlit.go.jp/jutakukentiku/house/jutakukentiku_house_tk3_000055.html" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-kuni-safetynet-jutaku/">申請準備シート</a></div>
 <div class="card"><h2>子育てグリーン住宅支援事業(新築・リフォーム補助)</h2><p class="note">省エネ住宅の新築や省エネリフォームを行う世帯(子育て・若者夫婦世帯は補助が手厚い)が対象となる可能性があります</p><p class="note">窓口: 登録事業者(工務店・リフォーム会社)を通じた申請</p><a href="https://kosodate-green.mlit.go.jp/" rel="noopener">公式ページで確認する</a> ・ <a href="../../kit/fk-kuni-kosodate-green/">申請準備シート</a></div>
+</div>
 <div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>最終更新: 2026-07-28 21:18(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
 <p style="margin-top:16px"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
 </div>
