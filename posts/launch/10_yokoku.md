@@ -9,8 +9,8 @@
 ## キャプション
 ⏳ 締切が目前の制度は、いま慌てて申請すると要件を満たせないことも。
 次の公募に備えて、国の電子申請(jGrants)で使う【GビズIDプライム】を用意しておきましょう。マイナンバーカードとスマホがあれば、オンライン申請なら24時間365日、速やかに発行されます（書類の郵送申請は審査に最大1か月）。
-例）令和8年度 那覇市人手不足対応支援補助金（締切：2026-07-28（本日締切））
-参考: https://www.city.naha.okinawa.jp/business/kigyouricchi/1003642/1007180.html
+例）令和８年度_グリーンスローモビリティ等導入促進事業（締切：2026-07-30（残り1日））
+参考: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDKZFMA5
 今回が難しくても、備えておけば次のチャンスをつかめます。
 制度一覧はこちら👇
 https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch
@@ -19,4 +19,4 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 #沖縄 #補助金 #助成金 #沖縄経営者 #事業承継 #沖縄企業のミカタ
 
 ## 出典
-https://www.city.naha.okinawa.jp/business/kigyouricchi/1003642/1007180.html
+https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDKZFMA5
