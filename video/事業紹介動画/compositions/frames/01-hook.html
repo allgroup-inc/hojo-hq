@@ -1,0 +1,261 @@
+<template>
+  <style>
+    #root[data-composition-id="01-hook"] {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      container-type: size;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    #hook-01-stage {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* ---------- background motif: calendar + × ---------- */
+    #hook-01-bg-motif {
+      position: absolute;
+      inset: 0;
+    }
+    #hook-01-motif-svg {
+      position: absolute;
+      width: 32cqw;
+      height: 32cqw;
+      left: 50%;
+      top: 46cqh;
+      margin-left: -16cqw;
+      margin-top: -16cqh;
+      overflow: visible;
+    }
+    .hook-01-motif-cal {
+      fill: #00335c;
+      opacity: 0.55;
+    }
+    .hook-01-motif-cal-ring {
+      fill: #00335c;
+      opacity: 0.7;
+    }
+    .hook-01-motif-cal-cell {
+      fill: #00335c;
+      opacity: 0.4;
+    }
+    .hook-01-motif-x-line {
+      stroke: #00335c;
+      stroke-width: 15;
+      stroke-linecap: round;
+    }
+    #hook-01-x-glow {
+      opacity: 0;
+      transform-origin: center center;
+    }
+
+    /* ---------- line 1 ---------- */
+    #hook-01-line1-wrap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 36cqh;
+      display: flex;
+      justify-content: center;
+      transform-origin: 50% 0%;
+    }
+    #hook-01-line1 {
+      font-weight: 700;
+      font-size: 4.4cqw;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #00335c;
+      white-space: nowrap;
+    }
+
+    /* ---------- line 2 (word-by-word) ---------- */
+    #hook-01-line2-wrap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 55cqh;
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: 0.9cqw;
+      white-space: nowrap;
+    }
+    .hook-01-word {
+      display: inline-block;
+      font-weight: 700;
+      font-size: 4.2cqw;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #00335c;
+      opacity: 0;
+      will-change: transform, filter, opacity;
+    }
+    #hook-01-w4 {
+      color: #00335c;
+    }
+
+    #hook-01-underline {
+      position: absolute;
+      left: 50%;
+      top: 66cqh;
+      width: 140px;
+      height: 4px;
+      margin-left: -70px;
+      border-radius: 2px;
+      background: #f88800;
+      transform: scaleX(0);
+      transform-origin: 0% 50%;
+    }
+  </style>
+
+  <div id="root" data-composition-id="01-hook">
+    <div id="hook-01-stage">
+      <div
+        class="clip"
+        id="hook-01-bg-motif"
+        data-start="0"
+        data-duration="12.352"
+        data-track-index="0"
+      >
+        <svg id="hook-01-motif-svg" viewBox="0 0 300 300">
+          <!-- glow halo behind the × mark, un-triggered until the climax -->
+          <circle id="hook-01-x-glow" cx="150" cy="182" r="95" fill="#f88800" filter="blur(18px)" />
+
+          <!-- calendar silhouette -->
+          <rect class="hook-01-motif-cal-ring" x="82" y="26" width="14" height="30" rx="7" />
+          <rect class="hook-01-motif-cal-ring" x="204" y="26" width="14" height="30" rx="7" />
+          <rect class="hook-01-motif-cal" x="20" y="50" width="260" height="204" rx="20" />
+          <rect class="hook-01-motif-cal-cell" x="44" y="128" width="26" height="26" rx="5" />
+          <rect class="hook-01-motif-cal-cell" x="82" y="128" width="26" height="26" rx="5" />
+          <rect class="hook-01-motif-cal-cell" x="192" y="128" width="26" height="26" rx="5" />
+          <rect class="hook-01-motif-cal-cell" x="230" y="128" width="26" height="26" rx="5" />
+          <rect class="hook-01-motif-cal-cell" x="44" y="170" width="26" height="26" rx="5" />
+          <rect class="hook-01-motif-cal-cell" x="230" y="170" width="26" height="26" rx="5" />
+          <rect class="hook-01-motif-cal-cell" x="82" y="212" width="26" height="26" rx="5" />
+          <rect class="hook-01-motif-cal-cell" x="192" y="212" width="26" height="26" rx="5" />
+
+          <!-- the × over the missed date -->
+          <line class="hook-01-motif-x-line" id="hook-01-x-1" x1="108" y1="140" x2="192" y2="224" />
+          <line class="hook-01-motif-x-line" id="hook-01-x-2" x1="192" y1="140" x2="108" y2="224" />
+        </svg>
+      </div>
+
+      <div
+        class="clip"
+        id="hook-01-line1-wrap"
+        data-start="0"
+        data-duration="12.352"
+        data-track-index="1"
+      >
+        <div id="hook-01-line1">補助金の締切を、</div>
+      </div>
+
+      <div
+        class="clip"
+        id="hook-01-line2-wrap"
+        data-start="0"
+        data-duration="12.352"
+        data-track-index="2"
+      >
+        <span class="hook-01-word" id="hook-01-w1">知らずに</span>
+        <span class="hook-01-word" id="hook-01-w2">逃した</span>
+        <span class="hook-01-word" id="hook-01-w3">経験は</span>
+        <span class="hook-01-word" id="hook-01-w4">ありませんか?</span>
+      </div>
+
+      <div
+        class="clip"
+        id="hook-01-underline-wrap"
+        data-start="0"
+        data-duration="12.352"
+        data-track-index="3"
+      >
+        <div id="hook-01-underline"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      // Slow ambient push-in across the whole shot so nothing goes static-slide.
+      tl.fromTo(
+        "#hook-01-stage",
+        { scale: 1 },
+        { scale: 1.025, duration: 12.352, ease: "none" },
+        0,
+      );
+
+      // Background motif fades in low, behind everything (missed-deadline cue).
+      tl.fromTo(
+        "#hook-01-bg-motif",
+        { opacity: 0, scale: 0.92 },
+        { opacity: 0.3, scale: 1, duration: 1.1, ease: "power2.out" },
+        0.0,
+      );
+
+      // Scene 1 (0.0-5.0s): headline flashes in, bold, centered.
+      tl.fromTo(
+        "#hook-01-line1",
+        { opacity: 0, scale: 1.14, filter: "blur(14px)" },
+        { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.65, ease: "power3.out" },
+        0.15,
+      );
+
+      // Scene transition (t=5.0s): line 1 settles up and recedes as line 2 takes over.
+      tl.to(
+        "#hook-01-line1-wrap",
+        { y: -230, scale: 0.62, opacity: 0.5, duration: 0.6, ease: "power2.inOut" },
+        5.0,
+      );
+
+      // Scene 2 (5.0-12.352s): the question builds word-by-word (signature move).
+      tl.fromTo(
+        "#hook-01-w1",
+        { opacity: 0, y: 26, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.45, ease: "power3.out" },
+        5.2,
+      );
+      tl.fromTo(
+        "#hook-01-w2",
+        { opacity: 0, scale: 1.25 },
+        { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.6)" },
+        6.4,
+      );
+      tl.fromTo(
+        "#hook-01-w3",
+        { opacity: 0, x: -28, filter: "blur(6px)" },
+        { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.45, ease: "power2.out" },
+        7.6,
+      );
+      tl.fromTo(
+        "#hook-01-w4",
+        { opacity: 0, scale: 1.35, filter: "blur(12px)" },
+        { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.55, ease: "power4.out" },
+        8.8,
+      );
+
+      // Climax (~9.3s): the × mark glows accent orange once, then holds still.
+      tl.to("#hook-01-x-1", { stroke: "#f88800", duration: 0.5, ease: "power2.out" }, 9.3);
+      tl.to("#hook-01-x-2", { stroke: "#f88800", duration: 0.5, ease: "power2.out" }, 9.3);
+      tl.fromTo(
+        "#hook-01-x-glow",
+        { opacity: 0, scale: 0.85 },
+        { opacity: 0.35, scale: 1, duration: 0.7, ease: "power2.out" },
+        9.3,
+      );
+      tl.fromTo(
+        "#hook-01-underline",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.5, ease: "power2.out" },
+        9.3,
+      );
+
+      window.__timelines["01-hook"] = tl;
+    })();
+  </script>
+</template>

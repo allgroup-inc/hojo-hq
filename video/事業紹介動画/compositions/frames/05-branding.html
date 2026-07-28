@@ -1,0 +1,165 @@
+<template>
+  <style>
+    /* Root: style by #root only — a class on the data-composition-id element
+       gets scoped to a descendant selector at assembly and silently drops. */
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      font-family: sans-serif; /* no shipped font file in this project — generic stack only, never a named CJK face */
+    }
+
+    .clip {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* ---- full-bleed ground (clip layer, never painted on #root) ---- */
+    #brand05-bg {
+      background: #ffffff;
+    }
+
+    /* ---- wordmark lockup ---- */
+    #brand05-wordmark-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      top: 14cqh;
+    }
+    .brand05-wordmark {
+      font-size: 5.6cqw;
+      font-weight: 700;
+      color: #00335c;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      text-align: center;
+      white-space: nowrap;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+    .brand05-accent-line {
+      margin-top: 2cqh;
+      width: 60px;
+      height: 4px;
+      border-radius: 2px;
+      background: #f88800;
+      transform: scaleX(0);
+      transform-origin: left center;
+    }
+
+    /* ---- tagline reveal ---- */
+    #brand05-tagline-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.8cqh;
+      top: 36cqh;
+    }
+    .brand05-line {
+      font-size: 2.6cqw;
+      font-weight: 500;
+      color: #00335c;
+      line-height: 1.3;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .brand05-line-keyword {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand05-keyword-glow {
+      position: absolute;
+      inset: -70px -140px;
+      z-index: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(248, 136, 0, 0.55) 0%, rgba(248, 136, 0, 0) 70%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .brand05-keyword-text {
+      position: relative;
+      z-index: 1;
+      font-size: 3cqw;
+      font-weight: 700;
+      color: #f88800;
+    }
+  </style>
+
+  <div id="root" data-composition-id="05-branding" data-width="1920" data-height="1080" data-duration="14.933">
+    <div class="clip" id="brand05-bg" data-start="0" data-duration="14.933" data-track-index="0"></div>
+
+    <div class="clip" id="brand05-wordmark-wrap" data-start="0" data-duration="14.933" data-track-index="1">
+      <div class="brand05-wordmark" id="brand05-wordmark">沖縄企業のミカタ</div>
+      <div class="brand05-accent-line" id="brand05-accent-line"></div>
+    </div>
+
+    <div class="clip" id="brand05-tagline-wrap" data-start="4.0" data-duration="10.933" data-track-index="2">
+      <div class="brand05-line" id="brand05-line1">補助金・助成金の情報で、</div>
+      <div class="brand05-line" id="brand05-line2">沖縄の企業に</div>
+      <div class="brand05-line brand05-line-keyword" id="brand05-line3">
+        <span class="brand05-keyword-glow" id="brand05-keyword-glow"></span>
+        <span class="brand05-keyword-text">あかりを。</span>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Scene 1 (0.0-4.0s) — wordmark settles top-center (spring-pop-entrance),
+      // then its accent underline draws (css-marker-patterns), then holds.
+      tl.fromTo(
+        "#brand05-wordmark",
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.5, ease: "power3.out" },
+        0,
+      );
+      tl.fromTo(
+        "#brand05-accent-line",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.5, ease: "power2.out" },
+        0.55,
+      );
+
+      // Scene 2 (4.0-11.0s) — tagline reveals phrase-by-phrase on the voiceover cue
+      // (kinetic-type-beats), each phrase with a distinct entrance axis; the keyword
+      // phrase "あかりを" lands with one un-triggered soft glow bloom (ambient-glow-bloom).
+      tl.fromTo(
+        "#brand05-line1",
+        { opacity: 0, y: 24, filter: "blur(6px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6, ease: "power3.out" },
+        4.0,
+      );
+      tl.fromTo(
+        "#brand05-line2",
+        { opacity: 0, scale: 0.92 },
+        { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" },
+        6.3,
+      );
+      tl.fromTo(
+        "#brand05-line3",
+        { opacity: 0, y: -16 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
+        8.6,
+      );
+      // Glow blooms in as one beat with the keyword's settle (bloom-and-hold — no
+      // repeating breathe; the packet calls for a single bloom, not an idle loop).
+      tl.fromTo(
+        "#brand05-keyword-glow",
+        { opacity: 0, scale: 0.85 },
+        { opacity: 0.35, scale: 1, duration: 0.6, ease: "power2.out" },
+        8.6,
+      );
+
+      // Scene 3 (11.0-14.933s) — deliberate held beat: the full lockup stays settled,
+      // no further motion (per packet: "held beat, no additional motion").
+
+      window.__timelines["05-branding"] = tl;
+    </script>
+  </div>
+</template>
