@@ -49,6 +49,8 @@ h1{font-size:1.35rem;margin-bottom:8px}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 ul.areas{list-style:none;columns:2;gap:12px}
 ul.areas li{margin-bottom:8px}
+.cardgrid{display:grid;gap:14px}
+@media(min-width:900px){.wrap{max-width:900px}.cardgrid{grid-template-columns:1fr 1fr}ul.areas{columns:3}}
 a{color:var(--fg-primary)}
 .siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
 .siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
@@ -146,6 +148,7 @@ def muni_page(muni, items, updated):
         if not group:
             continue
         body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>{esc(label)}({len(group)}件)</h2>")
+        body.append('<div class="cardgrid">')
         for it in group:
             badge = ' <span class="status">要確認</span>' if it.get("status") == "要確認" else ""
             body.append(
@@ -157,6 +160,7 @@ def muni_page(muni, items, updated):
                 f' ・ <a href="../../kit/{esc(it["id"])}/">申請準備シート</a>'
                 "</div>"
             )
+        body.append('</div>')
     title = f"{muni}の給付金・手当まとめ | もらいわすれ堂"
     desc = f"{muni}にお住まいの世帯が使える可能性のある給付金・手当のまとめ。3分の無料診断で、あなたの世帯にあてはまる制度がわかります。"
     ld = area_jsonld(muni, [local, pref, national])
