@@ -10,7 +10,20 @@
   "bgm_target_duration_s": null,
   "bgm_seed_duration_s": null,
   "bgm_loop_count": null,
-  "voices": [],
+  "voices": [
+    {
+      "id": "01",
+      "path": "assets/voice/01.wav",
+      "duration_s": 27.413,
+      "words": []
+    },
+    {
+      "id": "04",
+      "path": "assets/voice/04.wav",
+      "duration_s": 22.293,
+      "words": []
+    }
+  ],
   "sfx": [],
-  "total_duration_s": 0
+  "total_duration_s": 49.706
 }
