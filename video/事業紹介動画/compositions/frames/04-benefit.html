@@ -1,0 +1,324 @@
+<template>
+<div id="root" data-composition-id="04-benefit"
+     style="position:relative;width:1920px;height:1080px;overflow:hidden;container-type:size;font-family:sans-serif;">
+  <style>
+    #root * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .f-04-benefit-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 26% 42%, rgba(248,136,0,0.06) 0%, rgba(255,255,255,0) 58%),
+        radial-gradient(circle at 78% 30%, rgba(0,51,92,0.04) 0%, rgba(255,255,255,0) 55%),
+        #FFFFFF;
+    }
+
+    /* ---- phone mockup ---- */
+    .f-04-benefit-phone {
+      position: absolute;
+      left: 790px;
+      top: 150px;
+      width: 340px;
+      height: 660px;
+    }
+    .f-04-benefit-bezel {
+      position: absolute;
+      inset: 0;
+      border-radius: 48px;
+      background: #00335C;
+    }
+    .f-04-benefit-notch {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 84px;
+      height: 14px;
+      margin: 0 auto;
+      background: #00335C;
+      border-radius: 0 0 10px 10px;
+      z-index: 3;
+    }
+    .f-04-benefit-screen {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      right: 14px;
+      bottom: 14px;
+      border-radius: 36px;
+      background: #FFFFFF;
+      overflow: hidden;
+    }
+    .f-04-benefit-statusbar {
+      position: absolute;
+      top: 26px;
+      left: 24px;
+      right: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .f-04-benefit-clock {
+      font-size: 15px;
+      font-weight: 700;
+      color: #00335C;
+      letter-spacing: 0.01em;
+    }
+    .f-04-benefit-statusicons { display: flex; align-items: center; gap: 5px; }
+    .f-04-benefit-sigbar { width: 4px; background: #00335C; border-radius: 1px; }
+    .f-04-benefit-battery {
+      width: 20px; height: 10px; border: 1.4px solid #00335C; border-radius: 3px;
+      position: relative; margin-left: 3px;
+    }
+    .f-04-benefit-battery::after {
+      content: ""; position: absolute; inset: 1.5px; width: 70%; background: #00335C; border-radius: 1px;
+    }
+
+    /* LINE registration chip (LINE brand green — explicit per shot spec) */
+    .f-04-benefit-chip {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 78px;
+      width: 158px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 18px;
+      border-radius: 100px;
+      background: rgba(6,199,85,0.14);
+      border: 1.5px solid rgba(6,199,85,0.42);
+    }
+    .f-04-benefit-chip-label {
+      font-size: 19px;
+      font-weight: 800;
+      color: #06A34A;
+      letter-spacing: 0.02em;
+    }
+
+    /* lock-screen style notification bubble */
+    .f-04-benefit-notif {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 210px;
+      width: 272px;
+      margin: 0 auto;
+      background: rgba(248,136,0,0.045);
+      border: 1.5px solid rgba(248,136,0,0.2);
+      border-radius: 14px;
+      padding: 16px 16px 18px;
+    }
+    .f-04-benefit-notif-top { display: flex; align-items: center; gap: 10px; }
+    .f-04-benefit-notif-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #06C755;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .f-04-benefit-notif-icon span {
+      color: #FFFFFF; font-size: 16px; font-weight: 800; line-height: 1;
+    }
+    .f-04-benefit-notif-meta { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .f-04-benefit-notif-row { display: flex; align-items: baseline; justify-content: space-between; }
+    .f-04-benefit-notif-title { font-size: 15px; font-weight: 700; color: #00335C; }
+    .f-04-benefit-notif-time { font-size: 11px; font-weight: 500; color: #9A9A9A; }
+    .f-04-benefit-notif-body { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .f-04-benefit-notif-line { height: 7px; border-radius: 4px; background: rgba(0,51,92,0.12); width: 100%; }
+    .f-04-benefit-notif-tag {
+      position: absolute;
+      top: -11px;
+      right: 14px;
+      background: #F88800;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 4px 11px;
+      border-radius: 100px;
+    }
+
+    /* ---- calendar / alert-window panel ---- */
+    .f-04-benefit-calendar {
+      position: absolute;
+      left: 832px;
+      top: 170px;
+      width: 992px;
+      height: 560px;
+      padding: 52px 56px;
+      background: rgba(248,136,0,0.04);
+      border: 1.5px solid rgba(248,136,0,0.2);
+      border-radius: 14px;
+    }
+    .f-04-benefit-cal-eyebrow {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #F88800;
+      margin-bottom: 22px;
+    }
+    .f-04-benefit-cal-stat {
+      font-size: 100px;
+      font-weight: 800;
+      color: #F88800;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      margin-bottom: 14px;
+    }
+    .f-04-benefit-cal-sub {
+      font-size: 29px;
+      font-weight: 500;
+      color: #00335C;
+      letter-spacing: 0.01em;
+      margin-bottom: 46px;
+    }
+    .f-04-benefit-strip { position: relative; width: 100%; height: 64px; }
+    .f-04-benefit-strip-track {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: rgba(248,136,0,0.09);
+      border-radius: 32px;
+      overflow: hidden;
+    }
+    .f-04-benefit-strip-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #F88800 0%, #FFB25C 100%);
+      border-radius: 32px 6px 6px 32px;
+      transform-origin: left center;
+      display: block;
+    }
+    .f-04-benefit-flag {
+      position: absolute;
+      top: -46px;
+      left: 82%;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+
+  <div class="f-04-benefit-bg clip" id="f04b-bg" data-start="0" data-duration="13.653" data-track-index="0"></div>
+
+  <div class="f-04-benefit-phone clip" id="f04b-phone" data-start="0" data-duration="13.653" data-track-index="1">
+    <div class="f-04-benefit-bezel"></div>
+    <div class="f-04-benefit-notch"></div>
+    <div class="f-04-benefit-screen">
+      <div class="f-04-benefit-statusbar">
+        <div class="f-04-benefit-clock">9:41</div>
+        <div class="f-04-benefit-statusicons">
+          <div class="f-04-benefit-sigbar" style="height:6px;"></div>
+          <div class="f-04-benefit-sigbar" style="height:8px;"></div>
+          <div class="f-04-benefit-sigbar" style="height:10px;"></div>
+          <div class="f-04-benefit-battery"></div>
+        </div>
+      </div>
+
+      <div class="f-04-benefit-chip" id="f04b-chip">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="#06A34A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="f-04-benefit-chip-label">LINE</span>
+      </div>
+
+      <div class="f-04-benefit-notif" id="f04b-notif">
+        <div class="f-04-benefit-notif-tag" id="f04b-notiftag">NEW</div>
+        <div class="f-04-benefit-notif-top">
+          <div class="f-04-benefit-notif-icon"><span>L</span></div>
+          <div class="f-04-benefit-notif-meta">
+            <div class="f-04-benefit-notif-row">
+              <span class="f-04-benefit-notif-title">LINE</span>
+              <span class="f-04-benefit-notif-time">now</span>
+            </div>
+          </div>
+        </div>
+        <div class="f-04-benefit-notif-body">
+          <div class="f-04-benefit-notif-line" style="width:92%;"></div>
+          <div class="f-04-benefit-notif-line" style="width:64%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="f-04-benefit-calendar clip" id="f04b-calendar" data-start="4.5" data-duration="9.153" data-track-index="2">
+    <div class="f-04-benefit-cal-eyebrow" id="f04b-cal-eyebrow">Alert Window</div>
+    <div class="f-04-benefit-cal-stat" id="f04b-cal-stat">~1 MONTH</div>
+    <div class="f-04-benefit-cal-sub" id="f04b-cal-sub">before deadline</div>
+    <div class="f-04-benefit-strip">
+      <div class="f-04-benefit-strip-track">
+        <div class="f-04-benefit-strip-fill" id="f04b-stripfill"></div>
+      </div>
+      <div class="f-04-benefit-flag" id="f04b-flag">
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+          <path d="M8 3V27" stroke="#00335C" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M8 4.5H21L17 9.5L21 14.5H8" fill="#F88800"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.__timelines = window.__timelines || {};
+    var tl = gsap.timeline({ paused: true });
+
+    // Scene 1 (0.0-4.5s) — phone settles from below to centered, LINE chip appears
+    tl.fromTo("#f04b-phone",
+      { y: 180, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.9, ease: "power3.out" }, 0);
+
+    tl.fromTo("#f04b-chip",
+      { opacity: 0, scale: 0.7 },
+      { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.6)" }, 1.6);
+
+    // Scene 1 -> 2 seam: phone shifts to the left 40% column (asymmetric layout)
+    tl.to("#f04b-phone",
+      { x: -680, y: -20, duration: 1.0, ease: "power2.inOut" }, 4.5);
+
+    // Scene 2 (4.5-9.5s) — calendar / alert-window panel draws in on the right 60%
+    tl.fromTo("#f04b-calendar",
+      { x: 60, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.7, ease: "power2.out" }, 4.6);
+
+    tl.fromTo("#f04b-cal-eyebrow",
+      { opacity: 0, y: 14 },
+      { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 5.6);
+
+    tl.fromTo("#f04b-cal-stat",
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 5.95);
+
+    tl.fromTo("#f04b-cal-sub",
+      { opacity: 0, y: 12 },
+      { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 6.4);
+
+    // highlight grows across the strip on the "about 1 month before" VO cue
+    tl.fromTo("#f04b-stripfill",
+      { scaleX: 0 },
+      { scaleX: 0.82, duration: 1.1, ease: "power2.inOut" }, 6.6);
+
+    tl.fromTo("#f04b-flag",
+      { opacity: 0, scale: 0.5 },
+      { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, 7.6);
+
+    // Scene 3 (9.5-13.653s) — notification slides in lock-screen style, settles, holds
+    tl.fromTo("#f04b-notif",
+      { y: -50, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.9, ease: "back.out(1.4)" }, 9.6);
+
+    tl.fromTo("#f04b-notiftag",
+      { opacity: 0, scale: 0.4 },
+      { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, 10.5);
+
+    window.__timelines["04-benefit"] = tl;
+  </script>
+</div>
+</template>

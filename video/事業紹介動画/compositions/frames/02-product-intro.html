@@ -1,0 +1,253 @@
+<template>
+<div id="root" data-composition-id="02-product-intro">
+  <style>
+    #root {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      container-type: size;
+      font-family: sans-serif;
+    }
+
+    /* ---------- ground ---------- */
+    .product-intro-bg {
+      position: absolute;
+      inset: 0;
+      background: #FFFFFF;
+    }
+
+    /* ---------- wordmark (Scene 1) ---------- */
+    .product-intro-wordmark {
+      position: absolute;
+      top: 190px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .product-intro-h1 {
+      font-size: 4.3cqw;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.05;
+      color: #00335C;
+      white-space: nowrap;
+      opacity: 0;
+    }
+    .product-intro-underline {
+      margin-top: 22px;
+      width: 60px;
+      height: 4px;
+      border-radius: 2px;
+      background: #F88800;
+      transform-origin: left center;
+      transform: scaleX(0);
+    }
+
+    /* ---------- cards (Scene 2 / 3) ---------- */
+    .product-intro-card {
+      position: absolute;
+      box-sizing: border-box;
+      background: rgba(248, 136, 0, 0.04);
+      border: 1.5px solid rgba(248, 136, 0, 0.2);
+      border-radius: 14px;
+      opacity: 0;
+    }
+    .product-intro-card-a { left: 96px;   top: 380px; width: 1021px; height: 480px; padding: 34px; }
+    .product-intro-card-b { left: 1144px; top: 380px; width: 680px;  height: 226px; padding: 26px; }
+    .product-intro-card-c { left: 1144px; top: 633px; width: 680px;  height: 226px; padding: 26px; }
+
+    .product-intro-card-tag {
+      display: inline-block;
+      background: rgba(248, 136, 0, 0.15);
+      color: #F88800;
+      font-size: 0.95cqw;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 8px 20px;
+      border-radius: 100px;
+    }
+    .product-intro-card-b .product-intro-card-tag,
+    .product-intro-card-c .product-intro-card-tag {
+      font-size: 0.85cqw;
+      padding: 6px 17px;
+    }
+
+    .product-intro-card-icon {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(248, 136, 0, 0.15);
+      color: #F88800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .product-intro-card-b .product-intro-card-icon,
+    .product-intro-card-c .product-intro-card-icon {
+      top: 22px;
+      right: 22px;
+      width: 36px;
+      height: 36px;
+    }
+    .product-intro-card-icon svg { width: 55%; height: 55%; }
+
+    .product-intro-skel {
+      margin-top: 22px;
+      height: 12px;
+      border-radius: 6px;
+      background: #9A9A9A;
+      opacity: 0.28;
+    }
+    .product-intro-card-b .product-intro-skel,
+    .product-intro-card-c .product-intro-skel {
+      margin-top: 16px;
+      height: 10px;
+    }
+    .product-intro-skel.w1 { width: 72%; }
+    .product-intro-skel.w2 { width: 48%; margin-top: 14px; }
+
+    .product-intro-card-foot {
+      position: absolute;
+      left: 34px;
+      bottom: 26px;
+      font-size: 0.78cqw;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #9A9A9A;
+    }
+    .product-intro-card-b .product-intro-card-foot,
+    .product-intro-card-c .product-intro-card-foot {
+      left: 26px;
+      bottom: 20px;
+    }
+
+    /* ---------- delivery badge (Scene 3) ---------- */
+    .product-intro-badge {
+      position: absolute;
+      left: 1085px;
+      top: 796px;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(248, 136, 0, 0.15);
+      border: 1.5px solid #F88800;
+      color: #F88800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+    }
+    .product-intro-badge svg { width: 46%; height: 46%; }
+  </style>
+
+  <div class="clip product-intro-bg" data-start="0" data-duration="16.853" data-track-index="0"></div>
+
+  <div class="clip product-intro-wordmark" data-start="0" data-duration="16.853" data-track-index="1">
+    <div class="product-intro-h1">沖縄企業のミカタ</div>
+    <div class="product-intro-underline"></div>
+  </div>
+
+  <div class="clip product-intro-card product-intro-card-a" data-start="5.5" data-duration="11.353" data-track-index="2">
+    <span class="product-intro-card-tag">制度A</span>
+    <div class="product-intro-card-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 11A8 8 0 0 0 6.3 6.3L4 8.6" />
+        <path d="M4 4v4.6h4.6" />
+        <path d="M4 13a8 8 0 0 0 13.7 4.7L20 15.4" />
+        <path d="M20 20v-4.6h-4.6" />
+      </svg>
+    </div>
+    <div class="product-intro-skel w1"></div>
+    <div class="product-intro-skel w2"></div>
+    <div class="product-intro-card-foot">自動更新</div>
+  </div>
+
+  <div class="clip product-intro-card product-intro-card-b" data-start="5.5" data-duration="11.353" data-track-index="3">
+    <span class="product-intro-card-tag">制度B</span>
+    <div class="product-intro-card-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 11A8 8 0 0 0 6.3 6.3L4 8.6" />
+        <path d="M4 4v4.6h4.6" />
+        <path d="M4 13a8 8 0 0 0 13.7 4.7L20 15.4" />
+        <path d="M20 20v-4.6h-4.6" />
+      </svg>
+    </div>
+    <div class="product-intro-skel w1"></div>
+    <div class="product-intro-card-foot">自動更新</div>
+  </div>
+
+  <div class="clip product-intro-card product-intro-card-c" data-start="5.5" data-duration="11.353" data-track-index="4">
+    <span class="product-intro-card-tag">制度C</span>
+    <div class="product-intro-card-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 11A8 8 0 0 0 6.3 6.3L4 8.6" />
+        <path d="M4 4v4.6h4.6" />
+        <path d="M4 13a8 8 0 0 0 13.7 4.7L20 15.4" />
+        <path d="M20 20v-4.6h-4.6" />
+      </svg>
+    </div>
+    <div class="product-intro-skel w1"></div>
+    <div class="product-intro-card-foot">自動更新</div>
+  </div>
+
+  <div class="clip product-intro-badge" data-start="11.5" data-duration="5.353" data-track-index="5">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 13l4 4L19 7" />
+    </svg>
+  </div>
+
+  <script>
+    (function () {
+      var tl = gsap.timeline({ paused: true });
+
+      /* ---------- Scene 1 (0.0-5.5s): wordmark settle + underline draw ---------- */
+      tl.fromTo(
+        ".product-intro-h1",
+        { opacity: 0, y: 26 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" },
+        0.15
+      );
+      tl.fromTo(
+        ".product-intro-underline",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.55, ease: "power2.out" },
+        0.85
+      );
+
+      /* ---------- Scene 2 (5.5-11.5s): cards stagger-reveal, bottom-right -> 60/40 layout ---------- */
+      /* anchor: card A (heaviest / largest) */
+      tl.set(".product-intro-card-a", { opacity: 1, x: 70, y: 70 }, 5.5);
+      tl.to(".product-intro-card-a", { x: 0, y: 0, duration: 0.2, ease: "power4.out" }, 5.5);
+
+      /* normal weight: card B, 1-frame overlap into A's tail */
+      tl.set(".product-intro-card-b", { opacity: 1, x: 52, y: 52 }, 5.683);
+      tl.to(".product-intro-card-b", { x: 0, y: 0, duration: 0.16, ease: "power4.out" }, 5.683);
+
+      /* lightest: card C, tighter overlap */
+      tl.set(".product-intro-card-c", { opacity: 1, x: 40, y: 40 }, 5.81);
+      tl.to(".product-intro-card-c", { x: 0, y: 0, duration: 0.14, ease: "power4.out" }, 5.81);
+
+      /* ---------- Scene 3 (11.5-16.853s): stack settles, badge nudges forward, hold ---------- */
+      tl.to(".product-intro-card", { y: "-=6", duration: 0.22, ease: "power2.out" }, 11.5);
+      tl.to(".product-intro-card", { y: "+=6", duration: 0.3, ease: "power2.inOut" }, 11.72);
+
+      /* nudge curve: slow ramp-in -> linear burst -> long decaying tail (10/65/25 dist, tail >=3x ramp-in time) */
+      tl.set(".product-intro-badge", { opacity: 1, x: 60, scale: 0.88 }, 14.2);
+      tl.to(".product-intro-badge", { x: 54, scale: 0.92, duration: 0.12, ease: "power3.in" }, 14.2);
+      tl.to(".product-intro-badge", { x: 15, scale: 1.08, duration: 0.108, ease: "none" }, 14.32);
+      tl.to(".product-intro-badge", { x: 0, scale: 1.0, duration: 0.372, ease: "power4.out" }, 14.428);
+      /* hold ~2s to end of frame (16.853s) */
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["02-product-intro"] = tl;
+    })();
+  </script>
+</div>
+</template>
