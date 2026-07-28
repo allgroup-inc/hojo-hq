@@ -21,7 +21,7 @@ ORIGIN = "https://allgroup-inc.github.io/hojo-hq"
 
 # 除外するディレクトリ(先頭パス一致)とファイル
 EXCLUDE_DIRS = ("go", "staff", "assets")
-EXCLUDE_FILES = ("reply.html",)
+EXCLUDE_FILES = ("reply.html", "googlef26aa27c645edf08.html")  # 後者=Search Console所有権確認ファイル
 
 # 優先度: パス接頭辞ごとの priority / changefreq
 def rank(url_path):
