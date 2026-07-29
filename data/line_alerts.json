@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-07-29 04:17",
+ "generated_at": "2026-07-29 11:07",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 11,
- "count": 24,
+ "count": 25,
  "items": [
   {
    "id": "a0WJ200000CDYv8MAH",
@@ -105,6 +105,16 @@
    "tier": "まもなく締切(7〜14日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcNyMAL",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDdbOMAT",
+   "name": "「経済安全保障重要技術育成プログラム／先進的サイバー防御機能・分析能力強化／サイバーセキュリティにかかる国内外の動向調査」の公募",
+   "deadline": "2026-08-12",
+   "days_left": 14,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdbOMAT",
    "tag": "nationwide"
   },
   {
