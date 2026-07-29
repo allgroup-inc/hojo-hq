@@ -582,6 +582,7 @@
     </label>
     <button id="match-btn" class="line-btn" type="button">🔍 無料で診断する</button>
     <p class="form-note">登録・会社名の入力は不要。結果まで<span class="nowrap">そのまま見られます。</span></p>
+    <p class="form-note">※LINE登録済みの方の診断内容は、制度のご案内・締切アラート・関連サービスのご案内のため非公開で管理します。</p>
     <p class="form-guide" id="form-guide" hidden>まだ何も選ばれていません 😊 どれか1つだけでも選ぶと、貴社に近い制度に絞ってお探しできます。</p>
   </div>
 
@@ -696,6 +697,7 @@
   <div>最新情報は必ず各制度の公式サイトでご確認ください。</div>
 </footer>
 
+<script src="assets/ledger-config.js"></script>
 <script>
   // ===== マッチング =====
   let DB={items:[],updated_at:null};
@@ -963,6 +965,8 @@
     RESTORED_VIEW=false;
     if(backBtn)backBtn.dataset.ready='1';
     if(!AUTORUN)document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
+    LAST_MATCHED=hits.length;
+    sendLedgerIfReady();
   });
 
   // 2画面目の背景画像を先行デコード(初回スクロール時のデコード引っかかり防止)
@@ -1029,6 +1033,61 @@
     es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
   },{threshold:.2});
   document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+  // ===== LIFF連携+企業台帳(基準❺) =====
+  // LINEのリッチメニュー等から https://liff.line.me/<LIFF_ID> で開かれた場合のみ、
+  // LINEユーザーIDを取得して (1)ロック自動解禁 (2)診断内容の台帳送信 を行う。
+  // 通常ブラウザではSDKを読み込まない(Lighthouse・外部訪問者に影響ゼロ)。
+  var LIFF_ID='2010886544-ciK9QPBm';
+  var LAST_MATCHED=0;
+  function sendLedgerIfReady(){
+    var cfg=window.MIKATA_LEDGER||{};
+    if(!cfg.endpoint||!cfg.token)return;
+    var prof=null,st=null;
+    try{prof=JSON.parse(localStorage.getItem('mikata_line')||'null');}catch(e){}
+    try{st=JSON.parse(localStorage.getItem('mikata_form')||'null');}catch(e){}
+    if(!prof||!prof.userId||!st||!st.done)return;
+    if(document.getElementById('match-result').hidden)return;
+    var payload={
+      token:cfg.token,
+      userId:prof.userId,
+      displayName:prof.displayName||'',
+      answers:{
+        area:st['f-area']||'',biz:st['f-biz']||'',emp:st['f-emp']||'',
+        future:st['f-future']||'',themes:st.themes||[]
+      },
+      matchedCount:LAST_MATCHED,
+      source:'diagnosis'
+    };
+    // 同一ユーザー×同一回答は一度だけ送る(復元・再描画のたびの重複行を防ぐ)
+    var key=prof.userId+'|'+JSON.stringify(payload.answers);
+    if(localStorage.getItem('mikata_ledger_sent')===key)return;
+    // GASはCORSプリフライトに応答できないため no-cors+text/plain で送る(fire-and-forget)
+    fetch(cfg.endpoint,{method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
+      .then(function(){try{localStorage.setItem('mikata_ledger_sent',key);}catch(e){}})
+      .catch(function(){});
+  }
+  function initLiff(){
+    if(!window.liff)return;
+    liff.init({liffId:LIFF_ID}).then(function(){
+      if(!liff.isLoggedIn())return;
+      // LIFFで開けている=LINE友だち経由なので、この端末を登録済み扱いにして解禁
+      localStorage.setItem('mikata_member','1');
+      return liff.getProfile().then(function(p){
+        try{localStorage.setItem('mikata_line',
+          JSON.stringify({userId:p.userId,displayName:p.displayName||''}));}catch(e){}
+        refreshIfMember();
+        sendLedgerIfReady();
+      });
+    }).catch(function(){});
+  }
+  if(/\bLine\//.test(navigator.userAgent)||/liff\.state|liffRedirectUri/.test(location.search)){
+    var liffSdk=document.createElement('script');
+    liffSdk.src='https://static.line-scdn.net/liff/edge/2/sdk.js';
+    liffSdk.onload=initLiff;
+    document.head.appendChild(liffSdk);
+  }
 </script>
 </body>
 </html>
