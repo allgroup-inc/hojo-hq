@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-07-29 13:40",
+ "generated_at": "2026-07-29 17:32",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 11,
- "count": 25,
+ "count": 26,
  "items": [
   {
    "id": "a0WJ200000CDYv8MAH",
@@ -256,6 +256,16 @@
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdAaMAL",
    "tag": "nationwide"
+  },
+  {
+   "id": "naha_city-1012419",
+   "name": "令和8年度 市内事業者アジア戦略実証支援事業 補助金",
+   "deadline": "2026-08-26",
+   "days_left": 28,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": null,
+   "source_url": "https://www.city.naha.okinawa.jp/business/kigyouricchi/1003642/1012419.html",
+   "tag": "okinawa"
   }
  ]
 }
