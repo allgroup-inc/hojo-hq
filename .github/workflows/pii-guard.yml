@@ -1,0 +1,20 @@
+name: PII Guard (誤コミット検知)
+on:
+  pull_request:
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 変更ファイルにPIIパターンが無いか検査
+        run: |
+          base='${{ github.event.pull_request.base.sha }}'
+          head='${{ github.event.pull_request.head.sha }}'
+          files=$(git diff --name-only "$base" "$head")
+          echo "変更ファイル:"; echo "$files"
+          python -m scripts.churn.precommit_pii_guard $files

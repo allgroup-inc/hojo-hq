@@ -28,3 +28,10 @@
 `index.html`・`list.html`(＝`list.csv`)・各顧客の`karte_*.html`・`followups.html`はすべて同じ`--out-dir`直下に書かれ、
 リスク一覧や顧客インデックスの行から各カルテへ相対リンクで飛べる(サブディレクトリに分かれているとリンク切れ404になるため)。
 `private/console/index.html`(または`list.html`)を開いて回遊する。
+
+## 誤コミット自動検知(churn-pii-guard)
+公開リポジトリへの個人情報の誤コミットを機械的に止める。
+- ローカルで有効化(各自1回): `git config core.hooksPath .githooks`
+  以後、`private/` 配下・CSV/Excel・`karte_*.html`・`risk_model*.json` をステージしてコミットしようとすると中断する。
+- 意図的に通す場合のみ: `CHURN_PII_GUARD_ALLOW="<パス>" git commit ...`
+- CI(PR)でも `.github/workflows/pii-guard.yml` が同じ検査を実行するので、フック未設定でもPRで検知される。

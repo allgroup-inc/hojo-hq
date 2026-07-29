@@ -1,0 +1,7 @@
+#!/bin/sh
+# 個人情報の誤コミットを止める(churn-pii-guard)。
+# 有効化: git config core.hooksPath .githooks
+python -m scripts.churn.precommit_pii_guard || {
+  echo "コミットを中断しました。上記ファイルは private/ 限定・非コミットです。" >&2
+  exit 1
+}
