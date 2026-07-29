@@ -5,6 +5,13 @@
 
 構成: 診断ページ(LIFF化済み前提)→ POST → GAS Webアプリ → スプレッドシート「ミカタ企業台帳」
 
+## 進捗(2026-07-29 更新)
+- ✅ **LIFF発行済み**: LINEログインチャネル「ミカタ診断」(ID 2010886544)/ **LIFF ID `2010886544-ciK9QPBm`**
+- ✅ **サイト側実装済み**: 診断ページのLIFF化+台帳POST(重複送信防止つき)。通常ブラウザではSDK非読込でLighthouse影響なし。実ブラウザで通し検証済み
+- ✅ CI実装済み: デプロイ時にSecretsから送信先を注入(update.ymlの「Inject ledger config」ステップ。リポジトリには実URL・トークンを置かない)
+- ⏳ **残り(人間側・下の手順1〜4)**: スプレッドシート作成→GASコード貼付→トークン設定→ウェブアプリデプロイ→**GitHub Secretsに `GAS_LEDGER_ENDPOINT` と `GAS_LEDGER_TOKEN` を登録**
+- ⏳ LINE側: リッチメニュー「制度をさがす」のリンクを **`https://liff.line.me/2010886544-ciK9QPBm`** に変更(manager.line.biz)。LINEログインチャネルを「開発中→公開」に切替
+
 ## 手順1: スプレッドシート作成(小柳さん or たかしくん・5分)
 
 1. [Google スプレッドシート](https://sheets.new)で新規作成 → 名前「ミカタ企業台帳」
@@ -92,19 +99,19 @@ function json_(obj) {
 
 1. Apps Script左メニュー「プロジェクトの設定」→「スクリプト プロパティ」
 2. プロパティ `SHARED_TOKEN` / 値: ランダムな長い文字列(例: パスワード生成ツールで32文字)
-3. 同じ値を技術部(Claude Code)へ共有(サイト側からのPOSTに付与する。GitHubには**Secretsとしてのみ**保存)
+3. 同じ値を GitHub Secrets に `GAS_LEDGER_TOKEN` の名前で登録(https://github.com/allgroup-inc/hojo-hq/settings/secrets/actions)。**チャットやドキュメントには貼らない**
 
 ## 手順4: ウェブアプリとしてデプロイ(3分)
 
 1. 右上「デプロイ」→「新しいデプロイ」→ 種類「ウェブアプリ」
 2. 実行ユーザー: **自分** / アクセスできるユーザー: **全員**
    (「全員」でもトークン検証で保護される。URLとトークンの両方を知らない限り書き込み不可)
-3. 発行された **ウェブアプリURL**(`https://script.google.com/macros/s/.../exec`)を技術部へ共有
+3. 発行された **ウェブアプリURL**(`https://script.google.com/macros/s/.../exec`)を GitHub Secrets に `GAS_LEDGER_ENDPOINT` の名前で登録
 
 ## 完了後に技術部が行うこと
 
-- 診断ページをLIFF化(LIFF IDは[Phase 0手順書](セットアップ手順_Phase0.md)④で発行済みの前提)
-- 診断完了時に `{token, userId, displayName, answers, matchedCount}` を上記URLへPOST
+- ✅ 診断ページをLIFF化(実装済み 2026-07-29)
+- ✅ 診断完了時に `{token, userId, displayName, answers, matchedCount}` を上記URLへPOST(実装済み・同一ユーザー×同一回答は1回のみ送信)
 - 会社名/代表者名/所在地はLINE登録後の入力フォーム(またはトーク)から段階的に取得し同じ台帳へ追記
 - E2Eテスト(tests/e2e)に「診断→台帳書き込み」の通し検証を追加(基準❶の後半)
 
