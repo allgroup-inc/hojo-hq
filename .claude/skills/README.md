@@ -20,6 +20,11 @@ TDD・計画・デバッグ・レビュー・Git ワークフロー等の 14 ス
 - `hojo-accuracy-check` — 正確性最優先(原文URL照合・「要確認」表示)
 - `hojo-triangle-review` — 三名体制(スイシン/ウタガイ/ベッカイ)
 
+### 3. 早期解約リスク保全システム(scripts/churn)の運用スキル
+- `churn-pii-guard` — 機密統制(公開リポジトリにPIIを入れない・private/限定・実データ投入前の守り部審査)
+- `churn-model-quality-gate` — モデル品質ゲート(AUC≈0.5は本番不可・断定しない表示・少件数は参考・成熟実績のみ学習)
+- `churn-retention-ops` — 保全運用(締切アラートと別系統・放置検知・営業スコアの誤用防止・効果測定の注意)
+
 ## なぜ「フックでインストール」ではなく vendoring なのか
 Claude Code on the web は毎セッション `~/.claude` が作り直され、
 プラグインのインストール状態は永続しない。さらに SessionStart フックで
