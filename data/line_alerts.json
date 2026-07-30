@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-07-30 17:17",
+ "generated_at": "2026-07-30 18:19",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 10,
- "count": 25,
+ "count": 26,
  "items": [
   {
    "id": "a0WJ200000CDcyJMAT",
@@ -215,6 +215,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 500000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDb8QMAT",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDKZFMA5",
+   "name": "令和８年度_グリーンスローモビリティ等導入促進事業",
+   "deadline": "2026-08-25",
+   "days_left": 26,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDKZFMA5",
    "tag": "nationwide"
   },
   {
