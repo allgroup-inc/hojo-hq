@@ -1108,6 +1108,12 @@
       t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
       y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window,document,'clarity','script','xubivt63gw');
+    // Plausible(週次レポートのサイト訪問者数に使用。goページと同じ計測基盤)
+    var ps=document.createElement('script');
+    ps.defer=true;
+    ps.setAttribute('data-domain','allgroup-inc.github.io');
+    ps.src='https://plausible.io/js/script.js';
+    document.head.appendChild(ps);
   });
   // 診断開始: 最初の条件選択またはテーマタップを1回だけ記録
   var GA_STARTED=false;
