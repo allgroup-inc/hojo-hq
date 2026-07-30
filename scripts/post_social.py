@@ -15,6 +15,7 @@ hojo-hq — SNS自動投稿(Facebookページ+Instagram)
 使い方:
   python scripts/post_social.py            # 本番投稿(Secrets必須)
   python scripts/post_social.py --dry-run  # 選定とキャプションの確認のみ
+  python scripts/post_social.py --preview  # GitHub Actions用: key=value形式で本日の素材を出力
 """
 import glob
 import json
@@ -73,6 +74,13 @@ def main():
     caption = extract_caption(md)
     image_url = RAW_BASE + stem + ".png"
     now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
+
+    if "--preview" in sys.argv:
+        # GitHub Actionsのstep outputs用(小柳さんへのデザイン確認LINEに使う)
+        print(f"stem={stem}")
+        print(f"image={image_url}")
+        print(f"caption_head={caption.splitlines()[0]}")
+        return
 
     print(f"[info] {now} JST / 本日の投稿素材: {stem}")
     print(f"[info] 画像: {image_url}")
