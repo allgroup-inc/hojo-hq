@@ -454,6 +454,51 @@
     html{scroll-behavior:auto;}
   }
   body{padding-top:52px;} /* padding-top-fix */
+
+  /* ===== GLOWとは(運営会社モーダル) ===== */
+  .glow-about-btn{display:inline-flex;align-items:center;gap:.5em;margin-top:14px;
+    padding:.6em 1.5em;border-radius:999px;border:1px solid rgba(255,255,255,.45);
+    background:rgba(255,255,255,.07);color:#fff;font:inherit;font-size:.9rem;cursor:pointer;
+    transition:background .25s,transform .25s;}
+  .glow-about-btn strong{color:var(--kin);letter-spacing:.04em;}
+  .glow-about-btn:hover{background:rgba(255,255,255,.16);transform:translateY(-1px);}
+  .glow-modal{position:fixed;inset:0;z-index:1000;background:rgba(0,20,38,.8);
+    display:flex;align-items:center;justify-content:center;padding:18px;}
+  .glow-modal[hidden]{display:none;}
+  .glow-card{position:relative;background:#fff;color:#1c2b3a;max-width:760px;width:100%;
+    max-height:88vh;overflow-y:auto;border-radius:18px;
+    box-shadow:0 24px 80px rgba(0,0,0,.45);animation:glowUp .35s ease;}
+  @supports (max-height:88svh){.glow-card{max-height:88svh;}}
+  @media (prefers-reduced-motion:reduce){.glow-card{animation:none;}}
+  @keyframes glowUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+  .glow-close{position:sticky;top:12px;z-index:5;display:block;margin:12px 12px 0 auto;
+    width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,51,92,.88);
+    color:#fff;font-size:1.15rem;cursor:pointer;line-height:1;}
+  .glow-head{background:linear-gradient(160deg,#00335c,#00477e);color:#fff;text-align:center;
+    padding:14px 24px 30px;margin-top:-48px;}
+  .glow-head img{width:110px;height:auto;filter:drop-shadow(0 0 8px rgba(255,255,255,.5));}
+  .glow-eyebrow{letter-spacing:.35em;font-size:.7rem;color:var(--kin);margin:14px 0 6px;}
+  .glow-head h2{margin:0;font-size:1.7rem;letter-spacing:.06em;}
+  .glow-lead{margin:10px 0 0;font-size:.95rem;color:rgba(255,255,255,.85);}
+  .glow-lead span{color:var(--kin);font-weight:700;}
+  .glow-body{padding:26px 26px 32px;line-height:1.9;font-size:.95rem;}
+  .glow-body p{margin:0 0 1em;}
+  .glow-themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin:0 0 1.2em;}
+  .glow-themes span{background:#f2f6fa;border-left:3px solid var(--kin);border-radius:8px;
+    padding:.6em .9em;font-weight:700;color:#00335c;font-size:.88rem;}
+  .glow-vision{background:#00335c;color:#fff;border-radius:12px;padding:1em 1.2em;font-weight:600;}
+  .glow-eyebrow2{letter-spacing:.3em;font-size:.68rem;color:#c47500;margin:1.8em 0 .2em;}
+  .glow-name{margin:.1em 0 .6em;font-size:1.45rem;color:#00335c;}
+  .glow-name small{font-size:.72rem;font-weight:700;color:#c47500;margin-left:.8em;letter-spacing:.25em;}
+  .glow-sub{margin:.1em 0 .8em;font-size:1.15rem;color:#00335c;}
+  .glow-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:640px){.glow-grid{grid-template-columns:1fr;}}
+  .glow-cell{border:1px solid #e2e9f0;border-top:3px solid var(--kin);border-radius:10px;padding:14px 16px;}
+  .glow-cell h4{margin:0 0 .5em;color:#00335c;font-size:.98rem;}
+  .glow-cell ul{margin:0;padding-left:1.2em;}
+  .glow-cell li{margin:.3em 0;font-size:.88rem;}
+  .glow-note{color:#7a8b99;font-size:.78rem;margin-top:1em;}
+  body.modal-open{overflow:hidden;}
 </style>
 </head>
 <body>
@@ -476,6 +521,7 @@
   <p class="sub rv">補助金・助成金は、可能性を起こす<span class="nowrap">きっかけのひとつ。</span><br>GLOWが365日、国・県・市町村の公募情報を<br>チェックし、<span class="nowrap">あなたに届けます。</span></p>
   <p class="live-badge rv">📡 毎日自動更新中|現在の掲載 <span id="live-count">—</span> 件</p>
   <a class="hero-cta rv" href="#match">⚡ 30秒診断で、貴社の可能性額を見る(無料・登録不要)</a>
+  <button type="button" class="glow-about-btn rv" id="glow-open">🏢 運営会社|<strong>GLOWとは</strong></button>
   <div class="scrolldown" aria-hidden="true">SCROLL</div>
 </section>
 
@@ -691,6 +737,72 @@
 </section>
 
 <button id="back-result" class="back-result" hidden>💰 診断結果へ戻る</button>
+
+<!-- GLOWとは(運営会社モーダル) -->
+<div id="glow-modal" class="glow-modal" hidden role="dialog" aria-modal="true" aria-labelledby="glow-title">
+  <div class="glow-card">
+    <button type="button" id="glow-close" class="glow-close" aria-label="閉じる">✕</button>
+    <div class="glow-head">
+      <img src="assets/glow-logo.png" alt="GLOW" width="468" height="260">
+      <p class="glow-eyebrow">ABOUT US</p>
+      <h2 id="glow-title">株式会社GLOW</h2>
+      <p class="glow-lead">沖縄の企業と経営者に寄り添う、<span>「沖縄企業のミカタ」</span></p>
+    </div>
+    <div class="glow-body">
+      <p>株式会社GLOWは、沖縄に根ざした企業支援会社として、県内の企業や事業者の皆さまが抱えるさまざまなお悩みを、一緒に考え、解決へ向けてサポートしています。</p>
+      <div class="glow-themes">
+        <span>事業をもっと成長させたい</span>
+        <span>後継者について相談したい</span>
+        <span>会社を引き継ぎたい・譲りたい</span>
+        <span>不動産について相談したい</span>
+      </div>
+      <p>こうした経営上のお悩みに加え、会社に活用できる補助金・助成金などの制度がないかを確認し、必要な支援へつなげることも私たちの役割です。一つひとつのお悩みに寄り添いながら、必要に応じて行政、金融機関、税理士などの専門家とも連携し、それぞれの会社に合った解決方法をご提案します。</p>
+      <p class="glow-vision">沖縄で事業を営む皆さまにとって、「何かあったら、まずは相談してみよう」と思っていただける身近な存在でありたい。<br>株式会社GLOWは、沖縄の企業と経営者に寄り添う「沖縄企業のミカタ」として、企業の成長と地域経済の発展を支えてまいります。</p>
+
+      <p class="glow-eyebrow2">REPRESENTATIVE</p>
+      <h3 class="glow-name">嶺井 忍<small>代表</small></h3>
+      <p>沖縄振興開発金融公庫において長年にわたり企業支援業務に従事。創業支援、大型プロジェクト融資、事業再生支援、事業承継支援など、企業のライフステージに応じた幅広い経営支援を担当し、多くの経営者と伴走してきました。</p>
+      <p>在職中は、成長企業やベンチャー企業への資金調達支援にも携わり、OWNDAYS株式会社の海外展開に向けた融資を担当。同社代表の田中修治氏は、講演や著書において当時の支援について言及しています。</p>
+      <p>現在は、これまで培った企業支援の経験と行政・金融機関・士業との幅広いネットワークを活かし、株式会社GLOWにてM&amp;A・事業承継、不動産売買支援、経営相談などをワンストップで提供。経営者一人ひとりの課題に寄り添い、「経営者が最初に相談するパートナー」として、企業の成長と円滑な事業承継を支えています。</p>
+
+      <p class="glow-eyebrow2">TRACK RECORD</p>
+      <h3 class="glow-sub">これまでの主な支援実績</h3>
+      <div class="glow-grid">
+        <div class="glow-cell">
+          <h4>資金調達・経営改善</h4>
+          <ul>
+            <li>成長企業・ベンチャー企業への資金調達支援</li>
+            <li>中小企業の経営改善・設備投資支援</li>
+            <li>コロナ禍における企業の資金繰り支援</li>
+          </ul>
+        </div>
+        <div class="glow-cell">
+          <h4>創業・事業成長</h4>
+          <ul>
+            <li>創業・新規事業立ち上げ支援</li>
+            <li>OWNDAYSをはじめとする成長企業への伴走支援</li>
+          </ul>
+        </div>
+        <div class="glow-cell">
+          <h4>事業承継・経営支援</h4>
+          <ul>
+            <li>事業承継・後継者支援</li>
+            <li>M&amp;A・事業承継に関する経営相談</li>
+          </ul>
+        </div>
+        <div class="glow-cell">
+          <h4>地域連携・ネットワーク</h4>
+          <ul>
+            <li>地域課題の解決に向けた政策提言・地域活性化</li>
+            <li>行政・金融機関・士業とのネットワーク構築</li>
+          </ul>
+        </div>
+      </div>
+      <p class="glow-note">※沖縄振興開発金融公庫在職中の実績を含みます。</p>
+    </div>
+  </div>
+</div>
+
 <footer>
   <div><strong>沖縄企業のミカタ</strong> — 運営:株式会社GLOW</div>
   
@@ -1130,6 +1242,31 @@
     var a=e.target.closest&&e.target.closest('a[href^="go/"]');
     if(a)gtag('event','line_cta_click',{channel:a.getAttribute('href').replace(/^go\//,'').replace(/\/$/,'')});
   });
+
+  // ===== GLOWとは(運営会社モーダル) =====
+  (function(){
+    var modal=document.getElementById('glow-modal');
+    var opener=document.getElementById('glow-open');
+    var closer=document.getElementById('glow-close');
+    if(!modal||!opener||!closer)return;
+    function openModal(){
+      modal.hidden=false;
+      document.body.classList.add('modal-open');
+      var card=modal.querySelector('.glow-card');
+      if(card)card.scrollTop=0;
+      gtag('event','glow_about_open');
+      closer.focus();
+    }
+    function closeModal(){
+      modal.hidden=true;
+      document.body.classList.remove('modal-open');
+      opener.focus();
+    }
+    opener.addEventListener('click',openModal);
+    closer.addEventListener('click',closeModal);
+    modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidden)closeModal();});
+  })();
 </script>
 </body>
 </html>
