@@ -528,6 +528,10 @@
   .already button{padding:12px 8px;} /* タップ44px確保 */
   .takeji-note{font-size:.78rem;color:rgba(0,51,92,.6);margin:6px 0 0;}
   @media(max-width:640px){br.pc{display:none;}} /* モバイルで1字孤立の改行を防ぐ */
+  .opt-tag{font-size:.72rem;font-weight:600;color:rgba(0,51,92,.5);margin-left:.5em;letter-spacing:.06em;}
+  .more-locked{margin-top:14px;padding:.9em 1.1em;border:1px dashed rgba(0,51,92,.3);
+    border-radius:12px;text-align:center;font-size:.92rem;color:rgba(0,51,92,.75);}
+  .more-locked strong{color:var(--kin);font-size:1.15em;}
 </style>
 </head>
 <body>
@@ -549,7 +553,7 @@
   <p class="oath rv">——私たちGLOWも、その一社です。</p>
   <p class="sub rv">補助金・助成金は、可能性を起こす<span class="nowrap">きっかけのひとつ。</span><br>GLOWが365日、国・県・市町村の公募情報を<br class="pc">チェックし、<span class="nowrap">あなたに届けます。</span></p>
   <p class="live-badge rv">📡 毎日自動更新中|現在の掲載 <span id="live-count">—</span> 件</p>
-  <a class="hero-cta rv" href="#match">⚡ 30秒診断で、貴社の可能性額を見る(無料・登録不要)</a>
+  <a class="hero-cta rv" href="#match">⚡ 30秒診断で、使える補助金と金額の目安を見る(無料・会社名の入力なし)</a>
   <button type="button" class="glow-about-btn rv" id="glow-open">🏢 運営会社|<strong>GLOWとは</strong></button>
   <div class="scrolldown" aria-hidden="true">SCROLL</div>
 </section>
@@ -600,7 +604,7 @@
   <p class="sub rv">4つ選ぶだけ。登録不要・無料で、最新データから自動で診断します。</p>
   <ol class="steps rv">
     <li><span>1</span>条件を4つ選ぶ</li>
-    <li><span>2</span>結果と可能性額がその場で表示</li>
+    <li><span>2</span>結果と金額の目安がその場で表示</li>
     <li><span>3</span>LINE登録で全件＋締切アラート</li>
   </ol>
   <div class="match-form rv">
@@ -639,7 +643,7 @@
         <button type="button" class="chip" aria-pressed="false" data-v="shokei">事業承継・後継者</button>
       </div>
     </label>
-    <label>10年後、会社をどうしていたいですか?
+    <label>10年後、会社をどうしていたいですか?<span class="opt-tag">(任意)</span>
       <select id="f-future">
         <option value="">選択してください</option>
         <option value="kakudai">さらに拡大したい</option>
@@ -663,7 +667,7 @@
 
   <div id="match-result" class="match-result" hidden>
     <div id="potential" class="potential" hidden>
-      <p class="pot-label">表示中の制度をすべて活用できた場合の「公募上限額」合計(参考値)</p>
+      <p class="pot-label">表示中の制度の「上限額」をすべて足した場合の最大額(理論値です)</p>
       <p class="pot-amount">最大 <span id="pot-amount" class="kin">—</span></p>
       <p class="pot-meta" id="pot-meta"></p>
       <p class="pot-note">※各制度が公表している公募上限額を単純に合計した理論値です。受給できる金額や採択を保証するものではありません。要件・金額は必ず各制度の原文でご確認ください。</p>
@@ -873,11 +877,21 @@
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function safeUrl(u){return /^https?:\/\//.test(String(u||''))?String(u):'';}
-  function selectedCount(){
-    return SELECT_IDS.filter(id=>document.getElementById(id).value).length;
-  }
+  // 決裁2026-07-31: 「4つ」=市町村/業種/従業員数/経営テーマ。「10年後」は任意扱い
+  const CORE_IDS=['f-area','f-biz','f-emp'];
+  const CORE_LABELS={'f-area':'市町村','f-biz':'業種','f-emp':'従業員数'};
   function themeCount(){
     return document.querySelectorAll('#f-theme .chip.on').length;
+  }
+  function selectedCount(){
+    return CORE_IDS.filter(id=>document.getElementById(id).value).length
+      +(themeCount()>0?1:0);
+  }
+  function missingLabel(){
+    for(const id of CORE_IDS){
+      if(!document.getElementById(id).value)return CORE_LABELS[id];
+    }
+    return '経営テーマ';
   }
   function updateProgress(){
     // 復元表示中に条件を変更したら、古い結果(金額含む)を消して混乱を防ぐ
@@ -890,13 +904,13 @@
       const rn=document.getElementById('restored-note');
       if(rn)rn.remove();
     }
-    const n=selectedCount(), t=themeCount();
+    const n=selectedCount();
     const el=document.getElementById('form-progress');
     if(!el)return;
-    const theme=t?` ＋テーマ${t}`:'';
-    const msg=n>=4?'準備OK!診断できます':(n>0?'いい調子です':'1つでも選ぶと精度が上がります');
-    el.innerHTML=`選択 <strong>${n}/4</strong>${theme} — ${msg}`;
-    if(n>0||t>0){const g=document.getElementById('form-guide');if(g)g.hidden=true;}
+    const msg=n>=4?'準備OK!診断できます'
+      :(n>0?`あと「${missingLabel()}」を選ぶと4つそろいます`:'1つでも選ぶと精度が上がります');
+    el.innerHTML=`選択 <strong>${n}/4</strong> — ${msg}`;
+    if(n>0){const g=document.getElementById('form-guide');if(g)g.hidden=true;}
   }
   SELECT_IDS.forEach(id=>document.getElementById(id).addEventListener('change',updateProgress));
 
@@ -934,7 +948,7 @@
   };
 
   document.getElementById('match-btn').addEventListener('click',()=>{
-    if(selectedCount()===0&&themeCount()===0){
+    if(selectedCount()===0){
       const g=document.getElementById('form-guide');
       if(g){g.hidden=false;if(!AUTORUN)g.scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'center'});}
       return;
@@ -1068,7 +1082,11 @@
           <a class="line-btn" id="unlock-btn" href="go/shindan/" target="_blank" rel="noopener">LINEで無料登録して全て見る</a>
           <p class="already"><button type="button" id="already-member">すでにLINE登録済みの方はこちら(タップで全件表示)</button></p>
         </div>`;
-        html+=hits.slice(1).map(it=>card(it,true)).join('');
+        // 決裁2026-07-31: ぼかしは3枚まで(スクロールの壁を作らない)。件数の事実は下の1行で伝える
+        html+=hits.slice(1,4).map(it=>card(it,true)).join('');
+        if(hits.length>4){
+          html+=`<div class="more-locked">…ほか<strong>${hits.length-4}件</strong>も、LINE登録でこの場にすべて表示されます</div>`;
+        }
       }
     }
     const list=document.getElementById('result-list');
