@@ -148,6 +148,18 @@ test("台帳送信(基準❺): LINE連携済み端末では診断内容が台帳
   expect(body.source).toBe("diagnosis");
 });
 
+test("GLOWとは: ボタンでモーダルが開閉し、会社紹介と代表プロフィールが読める", async ({ page }) => {
+  await page.goto(SITE);
+  await page.locator("#glow-open").click();
+  const modal = page.locator("#glow-modal");
+  await expect(modal).toBeVisible();
+  await expect(modal).toContainText("株式会社GLOW");
+  await expect(modal).toContainText("嶺井 忍");
+  await expect(modal).toContainText("これまでの主な支援実績");
+  await page.locator("#glow-close").click();
+  await expect(modal).toBeHidden();
+});
+
 test("CTAのLINE登録リンクが/go/経由である(go-link-discipline)", async ({ page }) => {
   await page.goto(SITE);
   const cta = page.locator("section.cta a.line-btn");
