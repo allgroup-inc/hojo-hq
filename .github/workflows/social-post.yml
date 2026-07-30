@@ -1,9 +1,9 @@
 name: social-post
 
-# SNS自動投稿(議事_20260730 議題2)。月・水・金 10:05 JST に1本投稿。
-# 素材は update.yml が毎日再生成する posts/(締切3層ルール準拠)をそのまま使う。
-# Meta Secrets未設定の間は「未接続」と明記してスキップ(グリーンのまま)。
-# 運用ルール: 週1回、直近投稿3本を人が抜き取り点検(三名体制ルール5)。
+# SNS自動投稿(議事_20260730 議題2 + 2026-07-30 小柳さん指示の承認ゲート)。
+# 月・水・金 10:05 JST に起動 → まず小柳さんのLINEへデザイン確認を送る →
+# GitHubの承認(environment: sns-approval)が下りた時だけ実際に投稿する。
+# 承認しなければ投稿されない(実行は保留のまま、最長30日で自動失効)。
 
 on:
   schedule:
@@ -19,8 +19,47 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  post:
+  preview:
     runs-on: ubuntu-latest
+    outputs:
+      stem: ${{ steps.pick.outputs.stem }}
+      image: ${{ steps.pick.outputs.image }}
+      caption_head: ${{ steps.pick.outputs.caption_head }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 本日の投稿素材を選定
+        id: pick
+        run: python scripts/post_social.py --preview >> "$GITHUB_OUTPUT"
+
+      - name: LINEでデザイン確認を送る(小柳さんへ)
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            🖼【ミカタ】本日のSNS投稿 デザイン確認
+            素材: ${{ steps.pick.outputs.stem }}
+            文頭: ${{ steps.pick.outputs.caption_head }}
+
+            ▼画像を確認:
+            ${{ steps.pick.outputs.image }}
+
+            ▼OKなら下のリンクを開いて
+            「Review deployments」→ sns-approval にチェック →「Approve and deploy」
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            承認しなければ投稿されません(見送る場合は放置でOK)。
+
+  post:
+    needs: preview
+    runs-on: ubuntu-latest
+    # 小柳さんの承認(Required reviewers)が下りるまでここで待機する
+    environment: sns-approval
     steps:
       - uses: actions/checkout@v7
 
@@ -35,7 +74,16 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
         run: python scripts/post_social.py
 
-      - name: LINE通知(失敗時・小柳さんへ)
+      - name: LINE通知(投稿完了)
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【ミカタ】SNS投稿を公開しました(${{ needs.preview.outputs.stem }})
+            FacebookページとInstagramをご確認ください。
+
+      - name: LINE通知(失敗時)
         if: failure()
         uses: ./.github/actions/line-notify
         with:

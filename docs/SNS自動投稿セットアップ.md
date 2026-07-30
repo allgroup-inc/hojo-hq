@@ -26,8 +26,9 @@ Meta側のSecrets 3件が無い場合は「未接続」と明記してスキッ�
 
 5. 動作確認: Actions → social-post → Run workflow → FB/IGに1本投稿されることを確認
 
-## 運用ルール(議事で確定)
+## 運用ルール(議事で確定+2026-07-30 小柳さん指示で承認ゲート追加)
 - 頻度: 月・水・金の10:05 JST に1本(変更は小柳さん決裁)
-- **週1回、直近投稿3本を人が抜き取り点検**(三名体制ルール5)。コメント対応は人間(たかしくん/SNS部)
-- 失敗時は小柳さんのLINEに即時通知
+- **毎回投稿前に小柳さんのデザイン承認が必須**: 10:05にLINEへデザイン確認(素材名・画像リンク・文頭・承認リンク)が届く → GitHubの実行ページで「Review deployments」→ sns-approval →「Approve and deploy」を押した時だけ投稿される。**承認しなければ投稿されない**(放置で見送り・30日で自動失効)。仕組み=GitHub Environments(sns-approval・Required reviewer=takeshikoyanagi9-lab)
+- 投稿完了/失敗は小柳さんのLINEに通知
+- コメント対応は人間(たかしくん/SNS部)
 - 見直し期限: 2027-01-末
