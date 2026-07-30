@@ -66,6 +66,13 @@ section{padding:48px 0}
 .card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px}
 .card h3{font-size:1.05rem;margin-bottom:.3em}
 .card .status{font-size:.8rem;background:#fff3cd;border-radius:4px;padding:1px 8px;color:#7a5b00}
+.story{background:var(--fg-card);border:1px solid var(--fg-line);border-left:6px solid var(--fg-deep);border-radius:12px;padding:24px 22px}
+.story .leaf{font-size:1.7rem;display:block;line-height:1;margin-bottom:6px}
+.story p{margin:0 0 .9em}
+.story p:last-child{margin-bottom:0}
+.story .tag{color:var(--fg-deep);font-weight:800;font-size:1.08rem;margin-top:.2em}
+.story .founder{background:#F1F7F3;border-radius:10px;padding:16px 18px}
+.story .founder .by{display:block;text-align:right;color:var(--fg-deep);font-weight:700;font-size:.9rem;margin-top:10px}
 /* faq */
 details{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;
   padding:14px 18px;margin-bottom:12px}
@@ -89,6 +96,14 @@ footer a{color:#bcd9cf}
 .navcard span{font-size:.78rem;color:var(--fg-muted);font-weight:400;margin-top:4px}
 .navcard.hline2{background:#EAF7EE;border-color:#B7E4C7;color:#0F5138}
 @media(min-width:640px){.hero h1{font-size:2.1rem}.cards{grid-template-columns:1fr 1fr}}
+/* PC(広い画面): 余白を減らして横幅を活かす。本文は読みやすさのため広げすぎない */
+@media(min-width:900px){
+  .wrap{max-width:960px}
+  .navcards{grid-template-columns:repeat(4,1fr)}
+  .hero h1{font-size:2.4rem}
+  /* 文章ブロックは中央寄せで幅を抑え、横に間延びさせない */
+  .hero .sub,.story,.steps,details{max-width:760px;margin-left:auto;margin-right:auto}
+}
 </style>
 </head>
 <body>
@@ -121,6 +136,20 @@ footer a{color:#bcd9cf}
       <a class="navcard" href="area/">📍 市町村でさがす<span>お住まいの街のまとめ</span></a>
       <a class="navcard" href="kit/">🖨 申請準備シート<span>持ち物リスト・印刷して窓口へ</span></a>
       <a class="navcard hline2" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">💬 LINEで受け取る<span>締切をお知らせ(無料・匿名)</span></a>
+    </div>
+  </div>
+</section>
+
+<section id="story" style="padding-top:32px">
+  <div class="wrap">
+    <div class="story">
+      <span class="leaf" aria-hidden="true">🌿</span>
+      <h2 style="border-left:none;padding-left:0;margin-bottom:.5em">なぜ「もらいわすれ堂」を始めたのか</h2>
+      <p>沖縄には、国・県・市町村の給付金や手当がたくさんあります。それなのに「知らなかった」「むずかしそう」というだけで、本来受け取れるはずのお金を受け取れていないご家庭が、少なくありません。</p>
+      <p class="founder">沖縄で暮らして、20年あまり。ずっと、沖縄の人たちにお世話になってきました。<br>「この沖縄の皆さんに、少しでもプラスになることはできないか」——そう考えたとき、私に賃金を上げることはできません。けれど、<strong>正しい情報を、漏れなく届けること</strong>ならできます。それで、一人でも多くの沖縄の方の暮らしのお金が、今より少しでもプラスになる。そんな環境をつくりたくて、もらいわすれ堂を始めました。<span class="by">— もらいわすれ堂 運営より</span></p>
+      <p>「フクギ」は、沖縄の集落を台風から守ってきた防風林の木です。運営する<strong>株式会社フクギイロ</strong>は、<strong>「県民の家計を守る防風林でありたい」</strong>という願いを社名にしました。もらいわすれ堂は、その最初の一歩です。</p>
+      <p>だから私たちは、むずかしい制度をやさしい言葉に翻訳し、かならず公式の情報と照らし合わせます。確認できないことは「要確認」と正直に表示し、断定はしません。診断は<strong>匿名で使え、ずっと無料</strong>。申請の代行はしませんが、必要なときは提携する専門家におつなぎします。</p>
+      <p class="tag">あなたが受け取るまで、いっしょに。</p>
     </div>
   </div>
 </section>
@@ -220,10 +249,16 @@ footer a{color:#bcd9cf}
     <p>運営: 株式会社フクギイロ</p>
     <p>フクギは、沖縄の集落を台風から守ってきた防風林の木。<br>県民のみなさんの家計を守る防風林でありたい、という願いを社名にしました。</p>
     <p style="margin-top:12px"><a href="area/">市町村別の給付金・手当まとめ</a> ・ <a href="kit/">申請準備シート一覧</a></p>
-    <p style="margin-top:8px"><a href="#">個人情報保護方針(準備中)</a></p>
+    <p style="margin-top:8px"><a href="privacy/">個人情報保護方針</a></p>
   </div>
 </footer>
 
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"もらいわすれ堂","alternateName":"株式会社フクギイロ","url":"https://allgroup-inc.github.io/hojo-hq/fukugiiro/","slogan":"あなたが受け取るまで、いっしょに。","areaServed":{"@type":"AdministrativeArea","name":"沖縄県"},"description":"沖縄県の世帯向けに、国・県・市町村の給付金や手当の「もらい忘れ」を防ぐ情報を、やさしい言葉と公式リンクで案内し申請を伴走します(申請代行は行いません)。"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"もらいわすれ堂","url":"https://allgroup-inc.github.io/hojo-hq/fukugiiro/","inLanguage":"ja"}
+</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
  {"@type":"Question","name":"本当に無料ですか?","acceptedAnswer":{"@type":"Answer","text":"はい。沖縄県にお住まいの方は、診断もフォローもすべて無料です。運営費用は法人のお客様からいただいています。"}},
