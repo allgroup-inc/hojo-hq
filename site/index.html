@@ -1088,6 +1088,36 @@
     liffSdk.onload=initLiff;
     document.head.appendChild(liffSdk);
   }
+
+  // ===== 計測(GA4)— 診断ファネル: 診断開始→診断実行→LINEタップ =====
+  var GA_ID='G-TW6M6WFB9T';
+  window.dataLayer=window.dataLayer||[];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js',new Date());
+  gtag('config',GA_ID,{transport_type:'beacon'});
+  // 表示速度(Lighthouse 95+)を守るため、gtag.js本体はページ読込完了後に読み込む。
+  // それまでのイベントはdataLayerにキューされるため欠落しない。
+  window.addEventListener('load',function(){
+    var gs=document.createElement('script');
+    gs.async=true;
+    gs.src='https://www.googletagmanager.com/gtag/js?id='+GA_ID;
+    document.head.appendChild(gs);
+  });
+  // 診断開始: 最初の条件選択またはテーマタップを1回だけ記録
+  var GA_STARTED=false;
+  function gaStart(){if(GA_STARTED)return;GA_STARTED=true;gtag('event','diagnosis_start');}
+  SELECT_IDS.forEach(function(id){document.getElementById(id).addEventListener('change',gaStart);});
+  document.querySelectorAll('#f-theme .chip').forEach(function(c){c.addEventListener('click',gaStart);});
+  // 診断実行: 結果表示のたびに件数つきで記録(再読込時の自動復元は除外)
+  document.getElementById('match-btn').addEventListener('click',function(){
+    var wasAuto=AUTORUN;
+    setTimeout(function(){if(!wasAuto)gtag('event','diagnosis_run',{matched_count:LAST_MATCHED});},0);
+  });
+  // LINEタップ: /go/経由の全CTAをチャネル別に記録(goページ側のPlausible計測は別系統で維持)
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href^="go/"]');
+    if(a)gtag('event','line_cta_click',{channel:a.getAttribute('href').replace(/^go\//,'').replace(/\/$/,'')});
+  });
 </script>
 </body>
 </html>
