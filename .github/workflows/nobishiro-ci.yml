@@ -1,0 +1,43 @@
+name: nobishiro-ci
+
+on:
+  push:
+    paths:
+      - "site/nobishiro/**"
+      - "scripts/check_lp_nobishiro.py"
+      - "gas/nobishiro-shindan/**"
+      - "tests/nobishiro-shindan-*.test.mjs"
+  pull_request:
+    paths:
+      - "site/nobishiro/**"
+      - "scripts/check_lp_nobishiro.py"
+      - "gas/nobishiro-shindan/**"
+      - "tests/nobishiro-shindan-*.test.mjs"
+  workflow_dispatch: {}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: LP検査(サイズ予算・禁止表現・基本要件)
+        run: python scripts/check_lp_nobishiro.py
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: 診断ロジック テスト(フロント+バックエンド純粋ロジック)
+        run: node --test tests/nobishiro-shindan-logic.test.mjs tests/nobishiro-shindan-backend.test.mjs
+
+      - name: GASグルーコード 構文チェック
+        run: |
+          for f in gas/nobishiro-shindan/*.gs; do
+            cp "$f" "/tmp/$(basename "$f" .gs).js"
+            node --check "/tmp/$(basename "$f" .gs).js"
+          done
