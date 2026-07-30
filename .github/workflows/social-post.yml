@@ -36,24 +36,37 @@ jobs:
         id: pick
         run: python scripts/post_social.py --preview >> "$GITHUB_OUTPUT"
 
-      - name: LINEでデザイン確認を送る(小柳さんへ)
-        uses: ./.github/actions/line-notify
-        with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
-          message: |
-            🖼【ミカタ】本日のSNS投稿 デザイン確認
-            素材: ${{ steps.pick.outputs.stem }}
-            文頭: ${{ steps.pick.outputs.caption_head }}
+      - name: LINEでデザイン確認を送る(画像つき・小柳さんへ)
+        env:
+          TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          TO: ${{ secrets.LINE_ADMIN_USER_ID }}
+          IMG: ${{ steps.pick.outputs.image }}
+          STEM: ${{ steps.pick.outputs.stem }}
+          HEAD: ${{ steps.pick.outputs.caption_head }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          MSG="🖼【ミカタ】本日のSNS投稿デザイン確認
 
-            ▼画像を確認:
-            ${{ steps.pick.outputs.image }}
+          ☝️上の画像が本日の投稿です
+          文頭: ${HEAD}
 
-            ▼OKなら下のリンクを開いて
-            「Review deployments」→ sns-approval にチェック →「Approve and deploy」
-            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ━━━ 投稿してOKなら ━━━
+          ①下のリンクを開く
+          ${RUN_URL}
+          ②黄色い帯の緑ボタン【Review deployments】を押す
+          ③【sns-approval】にチェックを入れる
+          ④緑ボタン【Approve and deploy】を押す
+          (英語画面ですが押すのはこの2つのボタンだけです)
 
-            承認しなければ投稿されません(見送る場合は放置でOK)。
+          ━━━ 見送るなら ━━━
+          何もしなくてOK。投稿されません。"
+          jq -n --arg to "$TO" --arg img "$IMG" --arg text "$MSG" \
+            '{to:$to, messages:[{type:"image",originalContentUrl:$img,previewImageUrl:$img},{type:"text",text:$text}]}' > payload.json
+          curl -sf -X POST https://api.line.me/v2/bot/message/push \
+            -H "Authorization: Bearer $TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d @payload.json
+          echo "デザイン確認(画像+手順)をLINEへ送信しました"
 
   post:
     needs: preview
