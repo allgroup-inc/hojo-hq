@@ -456,32 +456,35 @@
   body{padding-top:52px;} /* padding-top-fix */
 
   /* ===== GLOWとは(運営会社モーダル) ===== */
-  .glow-about-btn{display:inline-flex;align-items:center;gap:.5em;margin-top:14px;
-    padding:.6em 1.5em;border-radius:999px;border:1px solid rgba(255,255,255,.45);
-    background:rgba(255,255,255,.07);color:#fff;font:inherit;font-size:.9rem;cursor:pointer;
-    transition:background .25s,transform .25s;}
-  .glow-about-btn strong{color:var(--kin);letter-spacing:.04em;}
-  .glow-about-btn:hover{background:rgba(255,255,255,.16);transform:translateY(-1px);}
-  .glow-modal{position:fixed;inset:0;z-index:1000;background:rgba(0,20,38,.8);
-    display:flex;align-items:center;justify-content:center;padding:18px;}
+  .glow-about-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;margin-top:18px;
+    padding:.85em 2em;border-radius:999px;border:none;
+    background:#fff;color:#00335c;font:inherit;font-size:1.02rem;font-weight:700;cursor:pointer;
+    box-shadow:0 6px 20px rgba(0,0,0,.3);transition:box-shadow .25s,transform .25s;}
+  /* 横幅の広い画面ではヒーローのボタン類が間延びしないよう上限をかけて中央寄せ */
+  @media(min-width:760px){
+    .hero .live-badge,.hero .hero-cta,.hero .glow-about-btn{
+      max-width:560px;margin-left:auto;margin-right:auto;}
+  }
+  .glow-about-btn strong{color:#c47500;letter-spacing:.05em;}
+  .glow-about-btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.35);}
+  .glow-modal{position:fixed;inset:0;z-index:1000;background:rgba(0,20,38,.85);
+    display:flex;align-items:stretch;justify-content:center;padding:0;}
   .glow-modal[hidden]{display:none;}
-  .glow-card{position:relative;background:#fff;color:#1c2b3a;max-width:760px;width:100%;
-    max-height:88vh;overflow-y:auto;border-radius:18px;
-    box-shadow:0 24px 80px rgba(0,0,0,.45);animation:glowUp .35s ease;}
-  @supports (max-height:88svh){.glow-card{max-height:88svh;}}
+  .glow-card{position:relative;background:#fff;color:#1c2b3a;width:100%;height:100%;
+    overflow-y:auto;border-radius:0;animation:glowUp .35s ease;}
   @media (prefers-reduced-motion:reduce){.glow-card{animation:none;}}
   @keyframes glowUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
-  .glow-close{position:sticky;top:12px;z-index:5;display:block;margin:12px 12px 0 auto;
-    width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,51,92,.88);
-    color:#fff;font-size:1.15rem;cursor:pointer;line-height:1;}
+  .glow-close{position:sticky;top:14px;z-index:5;display:block;margin:14px 16px 0 auto;
+    width:42px;height:42px;border-radius:50%;border:none;background:rgba(0,51,92,.9);
+    color:#fff;font-size:1.3rem;cursor:pointer;line-height:1;box-shadow:0 4px 12px rgba(0,0,0,.3);}
   .glow-head{background:linear-gradient(160deg,#00335c,#00477e);color:#fff;text-align:center;
-    padding:14px 24px 30px;margin-top:-48px;}
-  .glow-head img{width:110px;height:auto;filter:drop-shadow(0 0 8px rgba(255,255,255,.5));}
-  .glow-eyebrow{letter-spacing:.35em;font-size:.7rem;color:var(--kin);margin:14px 0 6px;}
-  .glow-head h2{margin:0;font-size:1.7rem;letter-spacing:.06em;}
-  .glow-lead{margin:10px 0 0;font-size:.95rem;color:rgba(255,255,255,.85);}
+    padding:20px 24px 38px;margin-top:-56px;}
+  .glow-head img{width:120px;height:auto;filter:drop-shadow(0 0 8px rgba(255,255,255,.5));}
+  .glow-eyebrow{letter-spacing:.35em;font-size:.72rem;color:var(--kin);margin:14px 0 8px;}
+  .glow-head h2{margin:0;font-size:1.9rem;letter-spacing:.06em;}
+  .glow-lead{margin:12px 0 0;font-size:1rem;color:rgba(255,255,255,.88);}
   .glow-lead span{color:var(--kin);font-weight:700;}
-  .glow-body{padding:26px 26px 32px;line-height:1.9;font-size:.95rem;}
+  .glow-body{max-width:760px;margin:0 auto;padding:32px 22px 70px;line-height:2;font-size:1rem;}
   .glow-body p{margin:0 0 1em;}
   .glow-themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin:0 0 1.2em;}
   .glow-themes span{background:#f2f6fa;border-left:3px solid var(--kin);border-radius:8px;
