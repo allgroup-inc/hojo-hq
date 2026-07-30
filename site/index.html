@@ -491,8 +491,16 @@
   .glow-themes span{display:flex;align-items:center;background:#f2f6fa;
     border-left:4px solid var(--kin);border-radius:10px;
     padding:.95em 1.2em;font-weight:700;color:#00335c;font-size:1.05rem;line-height:1.5;}
-  .glow-vision{background:#00335c;color:#fff;border-radius:12px;padding:1em 1.2em;font-weight:600;}
-  .glow-eyebrow2{letter-spacing:.3em;font-size:.68rem;color:#c47500;margin:1.8em 0 .2em;}
+  .glow-vision{background:linear-gradient(160deg,#00335c,#00477e);color:#fff;border-radius:16px;
+    padding:1.8em 1.4em;font-weight:600;text-align:center;font-size:1.06rem;line-height:2.1;
+    letter-spacing:.02em;}
+  .glow-vision .glow-hl{display:inline-block;color:var(--kin);font-size:1.28em;font-weight:800;
+    margin:.15em .1em;letter-spacing:.03em;}
+  .glow-vision small{display:block;margin-top:1.2em;padding-top:1.1em;font-size:.88em;font-weight:500;
+    color:rgba(255,255,255,.88);border-top:1px solid rgba(255,255,255,.25);}
+  @media(max-width:640px){.glow-vision small br{display:none;}}
+  .glow-eyebrow2{letter-spacing:.3em;font-size:.68rem;color:#c47500;
+    margin:2.6em 0 .2em;padding-top:2.4em;border-top:1px solid #e2e9f0;}
   .glow-name{margin:.1em 0 .6em;font-size:1.45rem;color:#00335c;}
   .glow-name small{font-size:.72rem;font-weight:700;color:#c47500;margin-left:.8em;letter-spacing:.25em;}
   .glow-sub{margin:.1em 0 .8em;font-size:1.15rem;color:#00335c;}
@@ -762,7 +770,7 @@
         <span>不動産について相談したい</span>
       </div>
       <p>こうした経営上のお悩みに加え、会社に活用できる補助金・助成金などの制度がないかを確認し、必要な支援へつなげることも私たちの役割です。一つひとつのお悩みに寄り添いながら、必要に応じて行政、金融機関、税理士などの専門家とも連携し、それぞれの会社に合った解決方法をご提案します。</p>
-      <p class="glow-vision">沖縄で事業を営む皆さまにとって、「何かあったら、まずは相談してみよう」と思っていただける身近な存在でありたい。<br>株式会社GLOWは、沖縄の企業と経営者に寄り添う「沖縄企業のミカタ」として、企業の成長と地域経済の発展を支えてまいります。</p>
+      <p class="glow-vision">沖縄で事業を営む皆さまにとって、<span class="glow-hl">「何かあったら、<br class="sp">まずは相談してみよう」</span>と思っていただける身近な存在でありたい。<small>株式会社GLOWは、沖縄の企業と経営者に寄り添う「沖縄企業のミカタ」として、<br>企業の成長と地域経済の発展を支えてまいります。</small></p>
 
       <p class="glow-eyebrow2">REPRESENTATIVE</p>
       <h3 class="glow-name">嶺井 忍<small>代表</small></h3>
