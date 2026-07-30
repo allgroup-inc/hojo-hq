@@ -36,10 +36,25 @@ test("診断フロー: 入力→マッチング→結果表示→LINE登録導�
   const countText = await page.locator("#result-count").textContent();
   expect(Number(countText), `マッチ件数が数値でない: "${countText}"`).not.toBeNaN();
 
-  // 本命CV: LINE登録導線が生きていること
-  const register = page.locator("#match-result a.register-btn");
-  await expect(register).toBeVisible();
-  await expect(register).toHaveAttribute("href", /line\.me/);
+  // 動線設計(2026-07-27): 未登録では「1件表示+残りぼかし+合計金額マスク」
+  await expect(page.locator("#pot-amount")).toContainText("●");
+  const potCta = page.locator("#pot-cta");
+  await expect(potCta).toBeVisible();
+  await expect(potCta).toHaveAttribute("href", /go\/shindan/); // go-link-discipline: lin.ee直貼り禁止
+
+  // 解禁導線: unlockボタンも /go/ 経由
+  await expect(page.locator("#result-list .unlock a.line-btn")).toHaveAttribute("href", /go\//);
+
+  // 企業情報の入口はサイト内フォーム1つ(reg-open)。PII非保存の注記があること
+  await expect(page.locator("#reg-open")).toBeVisible();
+  await page.locator("#reg-open").click();
+  await expect(page.locator("#reg-form .reg-note")).toContainText("保存されません");
+
+  // 登録済み(端末記憶)を再現: 合計金額が実額になり、ぼかしが解除される
+  await page.evaluate(() => localStorage.setItem("mikata_member", "1"));
+  await page.locator("#match-btn").click();
+  await expect(page.locator("#result-list .card.locked")).toHaveCount(0);
+  await expect(page.locator("#pot-amount")).not.toContainText("●", { timeout: 5000 });
 });
 
 test("GビズID未取得フィルタ: 申請方法バッジが出し分けられ、独自申請が優先される", async ({ page }) => {
@@ -96,8 +111,59 @@ test("承継カモフラージュ設問: 引き継ぎ回答で承継相談バナ
   await expect(banner.locator("a.shokei-link")).toHaveAttribute("href", /line\.me/);
 });
 
-test("CTAのLINE登録リンクが正しい", async ({ page }) => {
+test("台帳送信(基準❺): LINE連携済み端末では診断内容が台帳へPOSTされる", async ({ page }) => {
+  // LIFF連携済みの端末状態を再現(実GASには送らず、テスト用エンドポイントで捕捉する)
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "mikata_line",
+      JSON.stringify({ userId: "U_E2E_TEST", displayName: "E2Eテスト" })
+    );
+  });
+  let captured = null;
+  await page.route("**/mikata-ledger-e2e/**", async (route) => {
+    captured = route.request().postData();
+    await route.fulfill({ status: 200, body: '{"ok":true}' });
+  });
+
+  await page.goto(SITE);
+  await waitForData(page);
+  await page.evaluate(() => {
+    window.MIKATA_LEDGER = {
+      endpoint: "https://example.com/mikata-ledger-e2e/",
+      token: "e2e-token",
+    };
+  });
+
+  await page.selectOption("#f-area", "那覇市");
+  await page.selectOption("#f-future", "hikitsugi");
+  await page.locator("#match-btn").click();
+  await expect(page.locator("#match-result")).toBeVisible({ timeout: 10000 });
+
+  await expect.poll(() => captured, { timeout: 5000 }).not.toBeNull();
+  const body = JSON.parse(captured);
+  expect(body.userId).toBe("U_E2E_TEST");
+  expect(body.token).toBe("e2e-token");
+  expect(body.answers.area).toBe("那覇市");
+  expect(body.answers.future).toBe("hikitsugi");
+  expect(body.source).toBe("diagnosis");
+});
+
+test("GLOWとは: ボタンでモーダルが開閉し、会社紹介と代表プロフィールが読める", async ({ page }) => {
+  await page.goto(SITE);
+  await page.locator("#glow-open").click();
+  const modal = page.locator("#glow-modal");
+  await expect(modal).toBeVisible();
+  await expect(modal).toContainText("株式会社GLOW");
+  await expect(modal).toContainText("嶺井 忍");
+  await expect(modal).toContainText("これまでの主な支援実績");
+  await page.locator("#glow-close").click();
+  await expect(modal).toBeHidden();
+});
+
+test("CTAのLINE登録リンクが/go/経由である(go-link-discipline)", async ({ page }) => {
   await page.goto(SITE);
   const cta = page.locator("section.cta a.line-btn");
-  await expect(cta).toHaveAttribute("href", /lin\.ee|line\.me/);
+  // lin.ee直貼りは禁止。/go/<チャネル>/ の中間リンク(GA4経路計測つき)を経由する
+  await expect(cta).toHaveAttribute("href", /go\//);
+  await expect(cta).not.toHaveAttribute("href", /lin\.ee/);
 });

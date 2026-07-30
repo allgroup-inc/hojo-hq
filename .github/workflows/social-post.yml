@@ -1,0 +1,107 @@
+name: social-post
+
+# SNS自動投稿(議事_20260730 議題2 + 2026-07-30 小柳さん指示の承認ゲート)。
+# 月・水・金 10:05 JST に起動 → まず小柳さんのLINEへデザイン確認を送る →
+# GitHubの承認(environment: sns-approval)が下りた時だけ実際に投稿する。
+# 承認しなければ投稿されない(実行は保留のまま、最長30日で自動失効)。
+
+on:
+  schedule:
+    # JST 月水金 10:05(= UTC 1:05)。09:00 JSTのデータ更新・画像再生成の後。
+    - cron: "5 1 * * 1,3,5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: social-post
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    outputs:
+      stem: ${{ steps.pick.outputs.stem }}
+      image: ${{ steps.pick.outputs.image }}
+      caption_head: ${{ steps.pick.outputs.caption_head }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 本日の投稿素材を選定
+        id: pick
+        run: python scripts/post_social.py --preview >> "$GITHUB_OUTPUT"
+
+      - name: LINEでデザイン確認を送る(画像つき・小柳さんへ)
+        env:
+          TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          TO: ${{ secrets.LINE_ADMIN_USER_ID }}
+          IMG: ${{ steps.pick.outputs.image }}
+          STEM: ${{ steps.pick.outputs.stem }}
+          HEAD: ${{ steps.pick.outputs.caption_head }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          MSG="🖼【ミカタ】本日のSNS投稿デザイン確認
+
+          ☝️上の画像が本日の投稿です
+          文頭: ${HEAD}
+
+          ━━━ 投稿してOKなら ━━━
+          ①下のリンクを開く
+          ${RUN_URL}
+          ②黄色い帯の緑ボタン【Review deployments】を押す
+          ③【sns-approval】にチェックを入れる
+          ④緑ボタン【Approve and deploy】を押す
+          (英語画面ですが押すのはこの2つのボタンだけです)
+
+          ━━━ 見送るなら ━━━
+          何もしなくてOK。投稿されません。"
+          jq -n --arg to "$TO" --arg img "$IMG" --arg text "$MSG" \
+            '{to:$to, messages:[{type:"image",originalContentUrl:$img,previewImageUrl:$img},{type:"text",text:$text}]}' > payload.json
+          curl -sf -X POST https://api.line.me/v2/bot/message/push \
+            -H "Authorization: Bearer $TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d @payload.json
+          echo "デザイン確認(画像+手順)をLINEへ送信しました"
+
+  post:
+    needs: preview
+    runs-on: ubuntu-latest
+    # 小柳さんの承認(Required reviewers)が下りるまでここで待機する
+    environment: sns-approval
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Post to Facebook / Instagram
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: python scripts/post_social.py
+
+      - name: LINE通知(投稿完了)
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【ミカタ】SNS投稿を公開しました(${{ needs.preview.outputs.stem }})
+            FacebookページとInstagramをご確認ください。
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【ミカタ】SNS自動投稿が失敗しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

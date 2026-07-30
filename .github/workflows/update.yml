@@ -69,6 +69,22 @@ jobs:
       - name: Copy data into site
         run: cp -r data site/data
 
+      - name: Inject ledger config (基準❺)
+        # 企業台帳の送信先URL・トークンはGitHub Secretsのみが持つ(公開リポジトリに置かない)。
+        # commitステップの後に注入するため、リポジトリ上のファイルは常に空設定のまま。
+        # Secrets未登録の間は空のままデプロイされ、台帳送信は無効(サイトは通常動作)。
+        env:
+          GAS_LEDGER_ENDPOINT: ${{ secrets.GAS_LEDGER_ENDPOINT }}
+          GAS_LEDGER_TOKEN: ${{ secrets.GAS_LEDGER_TOKEN }}
+        run: |
+          if [ -n "$GAS_LEDGER_ENDPOINT" ] && [ -n "$GAS_LEDGER_TOKEN" ]; then
+            printf 'window.MIKATA_LEDGER={endpoint:"%s",token:"%s"};\n' \
+              "$GAS_LEDGER_ENDPOINT" "$GAS_LEDGER_TOKEN" > site/assets/ledger-config.js
+            echo "ledger config injected"
+          else
+            echo "GAS ledger secrets not set; ledger disabled"
+          fi
+
       - name: Prepare Pages artifact(ノビシロは掲載未承認のため除外)
         # 配色・連絡先が未確定、小柳さんの掲載決裁前(絶対ルール5)。
         # 詳細: docs/superpowers/plans/2026-07-25-gajumaru-site-skeleton.md

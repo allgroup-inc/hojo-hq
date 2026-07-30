@@ -14,6 +14,7 @@ import os
 import sys
 import urllib.parse
 import urllib.request
+import urllib.error
 from datetime import date
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
@@ -135,7 +136,19 @@ def main():
     site_id = os.environ.get("PLAUSIBLE_SITE_ID", "allgroup-inc.github.io")
     period = os.environ.get("PLAUSIBLE_PERIOD", "7d")
     api_base = os.environ.get("PLAUSIBLE_API_BASE", "https://plausible.io")
-    counts = fetch_counts(api_key, site_id, period, api_base)
+    try:
+        counts = fetch_counts(api_key, site_id, period, api_base)
+    except urllib.error.HTTPError as e:
+        body = ""
+        try:
+            body = e.read().decode("utf-8", "replace")[:500]
+        except Exception:
+            pass
+        # Plausible が返す理由文言をそのまま表示(鍵無効 or サブスク要 等の切り分け用)。
+        # キー値はログに出さない。取得失敗時は funnel を書かず週次レポは手動フォールバック。
+        print(f"[warn] Plausible Stats API {e.code} {e.reason}: {body}")
+        print("[info] ファネル取得をスキップ(週次レポは確認先表示にフォールバック)")
+        return 0
     fn = build_funnel(counts)
     out = {"schema_version": 1, "updated_at": date.today().isoformat(),
            "period": period, "source": "plausible-stats-api"}
