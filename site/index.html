@@ -460,11 +460,15 @@
     padding:.85em 2em;border-radius:999px;border:none;
     background:#fff;color:#00335c;font:inherit;font-size:1.02rem;font-weight:700;cursor:pointer;
     box-shadow:0 6px 20px rgba(0,0,0,.3);transition:box-shadow .25s,transform .25s;}
+  /* 掲載件数の数字を主役に(全画面共通) */
+  .hero .live-badge #live-count{
+    color:var(--kin);font-weight:800;font-size:1.55em;line-height:1;
+    padding:0 .12em;letter-spacing:.02em;text-shadow:0 0 12px rgba(248,136,0,.35);}
   /* 横幅の広い画面: ボタン類は間延びさせず、その分文字とサイズを大きく見せる */
   @media(min-width:760px){
     .hero .live-badge,.hero .hero-cta,.hero .glow-about-btn{
       max-width:660px;margin-left:auto;margin-right:auto;}
-    .hero .live-badge{font-size:1.08rem;}
+    .hero .live-badge{font-size:1.24rem;padding:.65em 1.6em;}
     .hero .hero-cta{font-size:1.32rem;padding:1em 2em;}
     .hero .glow-about-btn{font-size:1.22rem;padding:1em 2.4em;}
   }
