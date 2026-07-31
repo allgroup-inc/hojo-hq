@@ -46,3 +46,43 @@ function postToSlack_(message) {
     payload: JSON.stringify({ text: message })
   });
 }
+
+/**
+ * 即時アラート(Speed to Lead)
+ * 対応履歴ログの「種別」列に、反応イベント(GlowScoring.DEFAULT_CONFIG.reactionPointsByType
+ * に定義されている種別)が入力された瞬間に、シンプルトリガーとして自動実行され、
+ * 即座にSlack通知する。関数名 onEdit はGASの予約された名前で、手動登録は不要。
+ */
+function onEdit(e) {
+  if (!e || !e.range) return;
+  var sheet = e.range.getSheet();
+  if (sheet.getName() !== GlowSchema.INTERACTION_LOG_SHEET_NAME) return;
+  if (e.range.getNumRows() !== 1 || e.range.getNumColumns() !== 1) return;
+
+  var typeColumnIndex = GlowSchema.INTERACTION_LOG_HEADERS.indexOf("種別") + 1;
+  if (e.range.getColumn() !== typeColumnIndex) return;
+
+  var row = e.range.getRow();
+  if (row < 2) return;
+
+  var newType = e.value;
+  if (typeof GlowScoring.DEFAULT_CONFIG.reactionPointsByType[newType] !== "number") return;
+
+  var headers = GlowSchema.INTERACTION_LOG_HEADERS;
+  var rowValues = sheet.getRange(row, 1, 1, headers.length).getValues()[0];
+  var companyId = rowValues[headers.indexOf("企業ID")];
+
+  var companyName = lookupCompanyName_(companyId);
+  postToSlack_(
+    "【即時アラート】" + companyName + "(" + companyId + ") が反応しました(" + newType + ")。至急対応してください。"
+  );
+}
+
+function lookupCompanyName_(companyId) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  if (!companySheet) return companyId;
+  var records = readCompanyRecords_(companySheet);
+  var match = records.filter(function (r) { return r["企業ID"] === companyId; })[0];
+  return match ? match["会社名"] : companyId;
+}
