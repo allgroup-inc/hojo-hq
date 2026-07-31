@@ -132,6 +132,13 @@
 
   var PARTNER_SUMMARY_FIELDS = ["名称", "累計紹介数", "成約数", "関係性ランク", "提供済み情報ログ", "逆紹介履歴"];
 
+  function calculateConversionRate_(referralCountValue, dealCountValue) {
+    var referrals = Number(referralCountValue);
+    var deals = Number(dealCountValue);
+    if (!referrals || isNaN(referrals) || referrals <= 0 || isNaN(deals)) return "";
+    return (deals / referrals * 100).toFixed(1) + "%";
+  }
+
   function formatPartnerSummary(partnerRecords) {
     return (partnerRecords || []).map(function (partner) {
       var summary = {};
@@ -139,6 +146,7 @@
         var value = partner[field];
         summary[field] = value === undefined || value === null ? "" : value;
       });
+      summary["成約率"] = calculateConversionRate_(partner["累計紹介数"], partner["成約数"]);
       return summary;
     });
   }

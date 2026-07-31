@@ -152,15 +152,27 @@ test("formatPartnerSummary: パートナーマスタの表示用フィールド�
   ];
   const summary = dashboard.formatPartnerSummary(partners);
   assert.deepEqual(summary, [
-    { "名称": "テスト税理士法人", "累計紹介数": 5, "成約数": 1, "関係性ランク": "高", "提供済み情報ログ": "建設業向け資料を提供", "逆紹介履歴": "サンプル建設を紹介" }
+    { "名称": "テスト税理士法人", "累計紹介数": 5, "成約数": 1, "関係性ランク": "高", "提供済み情報ログ": "建設業向け資料を提供", "逆紹介履歴": "サンプル建設を紹介", "成約率": "20.0%" }
   ]);
 });
 
-test("formatPartnerSummary: 欠損フィールドは空文字で埋める", () => {
+test("formatPartnerSummary: 欠損フィールドは空文字で埋める(成約率は累計紹介数0のため空文字)", () => {
   const summary = dashboard.formatPartnerSummary([{ 名称: "テスト銀行" }]);
-  assert.deepEqual(summary[0], { "名称": "テスト銀行", "累計紹介数": "", "成約数": "", "関係性ランク": "", "提供済み情報ログ": "", "逆紹介履歴": "" });
+  assert.deepEqual(summary[0], { "名称": "テスト銀行", "累計紹介数": "", "成約数": "", "関係性ランク": "", "提供済み情報ログ": "", "逆紹介履歴": "", "成約率": "" });
 });
 
 test("formatPartnerSummary: 空配列なら空配列", () => {
   assert.deepEqual(dashboard.formatPartnerSummary([]), []);
+});
+
+test("formatPartnerSummary: 成約率は成約数/累計紹介数を百分率(小数点1桁)で返す", () => {
+  const partners = [{ 名称: "A", 累計紹介数: 3, 成約数: 1 }];
+  const summary = dashboard.formatPartnerSummary(partners);
+  assert.equal(summary[0]["成約率"], "33.3%");
+});
+
+test("formatPartnerSummary: 累計紹介数が0なら成約率は空文字(ゼロ除算しない)", () => {
+  const partners = [{ 名称: "A", 累計紹介数: 0, 成約数: 0 }];
+  const summary = dashboard.formatPartnerSummary(partners);
+  assert.equal(summary[0]["成約率"], "");
 });
