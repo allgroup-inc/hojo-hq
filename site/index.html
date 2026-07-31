@@ -123,6 +123,8 @@
   .head-name{display:flex;flex-direction:column;line-height:1.25;}
   .head-name strong{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-size:.92rem;color:#F7F5F1;}
   .head-name small{font-size:.58rem;color:rgba(247,245,241,.78);letter-spacing:.05em;}
+  .head-cta{background:var(--kin);color:var(--sumi);font-weight:700;font-size:.85rem;
+    padding:.55em 1.2em;border-radius:999px;text-decoration:none;white-space:nowrap;}
   .head-nav{display:flex;gap:.2rem;}
   .head-nav a{
     text-decoration:none;color:rgba(247,245,241,.85);font-size:.78rem;font-weight:700;
@@ -389,6 +391,7 @@
   /* 診断フォーム: 進捗・ガイド */
   .form-progress{grid-column:1/-1;font-size:.85rem;font-weight:700;color:rgba(0,51,92,.8);}
   .form-progress strong{color:var(--kin);font-size:1.05em;}
+  .form-note{grid-column:1/-1;font-size:.82rem;color:rgba(0,51,92,.65);margin-top:-6px;}
   .form-guide{grid-column:1/-1;margin-top:var(--sp-1);font-size:.9rem;font-weight:700;
     color:var(--fukamidori);background:rgba(248,136,0,.12);
     border:1px solid rgba(248,136,0,.5);border-radius:12px;padding:var(--sp-2);}
@@ -451,6 +454,84 @@
     html{scroll-behavior:auto;}
   }
   body{padding-top:52px;} /* padding-top-fix */
+
+  /* ===== GLOWとは(運営会社モーダル) ===== */
+  .glow-about-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;margin-top:18px;
+    padding:.85em 2em;border-radius:999px;border:none;
+    background:#fff;color:#00335c;font:inherit;font-size:1.02rem;font-weight:700;cursor:pointer;
+    box-shadow:0 6px 20px rgba(0,0,0,.3);transition:box-shadow .25s,transform .25s;}
+  /* 掲載件数の数字を主役に(全画面共通) */
+  .hero .live-badge #live-count{
+    color:var(--kin);font-weight:800;font-size:1.55em;line-height:1;
+    padding:0 .12em;letter-spacing:.02em;text-shadow:0 0 12px rgba(248,136,0,.35);}
+  /* 横幅の広い画面: ボタン類は間延びさせず、その分文字とサイズを大きく見せる */
+  @media(min-width:760px){
+    .hero .live-badge,.hero .hero-cta,.hero .glow-about-btn{
+      max-width:660px;margin-left:auto;margin-right:auto;}
+    .hero .live-badge{font-size:1.24rem;padding:.65em 1.6em;}
+    .hero .hero-cta{font-size:1.32rem;padding:1em 2em;}
+    .hero .glow-about-btn{font-size:1.22rem;padding:1em 2.4em;}
+  }
+  .glow-about-btn strong{color:#c47500;letter-spacing:.05em;}
+  .glow-about-btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.35);}
+  .glow-modal{position:fixed;inset:0;z-index:1000;background:rgba(0,20,38,.85);
+    display:flex;align-items:stretch;justify-content:center;padding:0;}
+  .glow-modal[hidden]{display:none;}
+  .glow-card{position:relative;background:#fff;color:#1c2b3a;width:100%;height:100%;
+    overflow-y:auto;border-radius:0;animation:glowUp .35s ease;}
+  @media (prefers-reduced-motion:reduce){.glow-card{animation:none;}}
+  @keyframes glowUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+  .glow-close{position:sticky;top:14px;z-index:5;display:block;margin:14px 16px 0 auto;
+    width:42px;height:42px;border-radius:50%;border:none;background:rgba(0,51,92,.9);
+    color:#fff;font-size:1.3rem;cursor:pointer;line-height:1;box-shadow:0 4px 12px rgba(0,0,0,.3);}
+  .glow-head{background:linear-gradient(160deg,#00335c,#00477e);color:#fff;text-align:center;
+    padding:20px 24px 38px;margin-top:-56px;}
+  .glow-head img{width:120px;height:auto;filter:drop-shadow(0 0 8px rgba(255,255,255,.5));}
+  .glow-eyebrow{letter-spacing:.35em;font-size:.72rem;color:var(--kin);margin:14px 0 8px;}
+  .glow-head h2{margin:0;font-size:1.9rem;letter-spacing:.06em;}
+  .glow-lead{margin:12px 0 0;font-size:1rem;color:rgba(255,255,255,.88);}
+  .glow-lead span{color:var(--kin);font-weight:700;}
+  .glow-body{max-width:760px;margin:0 auto;padding:32px 22px 70px;line-height:2;font-size:1rem;}
+  .glow-body p{margin:0 0 1em;}
+  .glow-themes{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 1.4em;}
+  @media(min-width:560px){.glow-themes{grid-template-columns:1fr 1fr;}}
+  .glow-themes span{display:flex;align-items:center;background:#f2f6fa;
+    border-left:4px solid var(--kin);border-radius:10px;
+    padding:.95em 1.2em;font-weight:700;color:#00335c;font-size:1.05rem;line-height:1.5;}
+  .glow-vision{background:linear-gradient(160deg,#00335c,#00477e);color:#fff;border-radius:16px;
+    padding:1.8em 1.4em;font-weight:600;text-align:center;font-size:1.06rem;line-height:2.1;
+    letter-spacing:.02em;}
+  .glow-vision .glow-hl{display:inline-block;color:var(--kin);font-size:1.28em;font-weight:800;
+    margin:.15em .1em;letter-spacing:.03em;}
+  .glow-vision small{display:block;margin-top:1.2em;padding-top:1.1em;font-size:.88em;font-weight:500;
+    color:rgba(255,255,255,.88);border-top:1px solid rgba(255,255,255,.25);}
+  @media(max-width:640px){.glow-vision small br{display:none;}}
+  .glow-eyebrow2{letter-spacing:.3em;font-size:.68rem;color:#c47500;
+    margin:2.6em 0 .2em;padding-top:2.4em;border-top:1px solid #e2e9f0;}
+  .glow-name{margin:.1em 0 .6em;font-size:1.45rem;color:#00335c;}
+  .glow-name small{font-size:.72rem;font-weight:700;color:#c47500;margin-left:.8em;letter-spacing:.25em;}
+  .glow-sub{margin:.1em 0 .8em;font-size:1.15rem;color:#00335c;}
+  .glow-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:640px){.glow-grid{grid-template-columns:1fr;}}
+  .glow-cell{border:1px solid #e2e9f0;border-top:3px solid var(--kin);border-radius:10px;padding:14px 16px;}
+  .glow-cell h4{margin:0 0 .5em;color:#00335c;font-size:.98rem;}
+  .glow-cell ul{margin:0;padding-left:1.2em;}
+  .glow-cell li{margin:.3em 0;font-size:.88rem;}
+  .glow-note{color:#7a8b99;font-size:.78rem;margin-top:1em;}
+  body.modal-open{overflow:hidden;}
+
+  /* ===== 2026-07-31 全ファネルPDCA修正 ===== */
+  .head-cta{min-height:44px;display:inline-flex;align-items:center;} /* タップ44px確保 */
+  .line-btn,.register-btn,.hero-cta{text-align:center;} /* 2行折返し時の左寄せ崩れ防止 */
+  .head-name small{font-size:10.5px;} /* 9.3px→読める最小サイズへ */
+  .unlock .unlock-note{display:block;margin-top:8px;font-size:.82rem;opacity:.78;font-weight:400;}
+  .already button{padding:12px 8px;} /* タップ44px確保 */
+  .takeji-note{font-size:.78rem;color:rgba(0,51,92,.6);margin:6px 0 0;}
+  @media(max-width:640px){br.pc{display:none;}} /* モバイルで1字孤立の改行を防ぐ */
+  .opt-tag{font-size:.72rem;font-weight:600;color:rgba(0,51,92,.5);margin-left:.5em;letter-spacing:.06em;}
+  .more-locked{margin-top:14px;padding:.9em 1.1em;border:1px dashed rgba(0,51,92,.3);
+    border-radius:12px;text-align:center;font-size:.92rem;color:rgba(0,51,92,.75);}
+  .more-locked strong{color:var(--kin);font-size:1.15em;}
 </style>
 </head>
 <body>
@@ -460,6 +541,7 @@
     <img src="assets/glow-logo.png" alt="GLOW" class="head-logo" width="468" height="260">
     <span class="head-name"><strong>沖縄企業のミカタ</strong><small>補助金・助成金情報|運営 株式会社GLOW</small></span>
   </a>
+  <a class="head-cta" href="#match">無料診断</a>
 </header>
 
 
@@ -469,9 +551,10 @@
   <p class="eyebrow rv">OKINAWA KIGYO NO MIKATA</p>
   <h1 class="rv">沖縄の企業には、<br>まだ眠っている<br class="sp"><span class="kin">可能性</span><span class="nowrap">がある。</span></h1>
   <p class="oath rv">——私たちGLOWも、その一社です。</p>
-  <p class="sub rv">補助金・助成金は、可能性を起こす<span class="nowrap">きっかけのひとつ。</span><br>GLOWが365日、国・県・市町村の公募情報を<br>チェックし、<span class="nowrap">あなたに届けます。</span></p>
+  <p class="sub rv">補助金・助成金は、可能性を起こす<span class="nowrap">きっかけのひとつ。</span><br>GLOWが365日、国・県・市町村の公募情報を<br class="pc">チェックし、<span class="nowrap">あなたに届けます。</span></p>
   <p class="live-badge rv">📡 毎日自動更新中|現在の掲載 <span id="live-count">—</span> 件</p>
-  <a class="hero-cta rv" href="#match">⚡ 30秒診断で、貴社の可能性額を見る(無料・登録不要)</a>
+  <a class="hero-cta rv" href="#match">⚡ 30秒診断で、使える補助金と金額の目安を見る(無料・会社名の入力なし)</a>
+  <button type="button" class="glow-about-btn rv" id="glow-open">🏢 運営会社|<strong>GLOWとは</strong></button>
   <div class="scrolldown" aria-hidden="true">SCROLL</div>
 </section>
 
@@ -518,10 +601,10 @@
 <section class="match" id="match">
   <p class="eyebrow rv">FREE MATCHING</p>
   <h2 class="rv">あなたの会社に、<br><span class="kin">いま使える制度</span>を。</h2>
-  <p class="sub rv">4つ選ぶだけ。登録不要・無料で、最新データから自動マッチングします。</p>
+  <p class="sub rv">4つ選ぶだけ。登録不要・無料で、最新データから自動で診断します。</p>
   <ol class="steps rv">
     <li><span>1</span>条件を4つ選ぶ</li>
-    <li><span>2</span>可能性額と制度がその場で表示</li>
+    <li><span>2</span>結果と金額の目安がその場で表示</li>
     <li><span>3</span>LINE登録で全件＋締切アラート</li>
   </ol>
   <div class="match-form rv">
@@ -560,7 +643,7 @@
         <button type="button" class="chip" aria-pressed="false" data-v="shokei">事業承継・後継者</button>
       </div>
     </label>
-    <label>10年後、会社をどうしていたいですか?
+    <label>10年後、会社をどうしていたいですか?<span class="opt-tag">(任意)</span>
       <select id="f-future">
         <option value="">選択してください</option>
         <option value="kakudai">さらに拡大したい</option>
@@ -573,22 +656,24 @@
     <label class="nogbiz-filter">
       <input type="checkbox" id="f-nogbiz">
       <span>GビズIDプライムをまだ持っていない
-        <small>県・市町村など、独自の申請方法で「すぐ動ける可能性がある制度」を上位に表示します。</small>
+        <small>※GビズIDは国の補助金をネット申請する時に使うIDです。「聞いたことがない」という方はチェックでOK — 県・市町村など独自の申請方法で「すぐ動ける可能性がある制度」を上位に表示します。</small>
       </span>
     </label>
-    <button id="match-btn" class="line-btn" type="button">無料でマッチングする</button>
+    <button id="match-btn" class="line-btn" type="button">🔍 無料で診断する</button>
+    <p class="form-note">登録・会社名の入力は不要。結果まで<span class="nowrap">そのまま見られます。</span></p>
+    <p class="form-note">※LINE登録済みの方の診断内容は、制度のご案内・締切アラート・関連サービスのご案内のため非公開で管理します。</p>
     <p class="form-guide" id="form-guide" hidden>まだ何も選ばれていません 😊 どれか1つだけでも選ぶと、貴社に近い制度に絞ってお探しできます。</p>
   </div>
 
   <div id="match-result" class="match-result" hidden>
     <div id="potential" class="potential" hidden>
-      <p class="pot-label">表示中の制度をすべて活用できた場合の「公募上限額」合計(参考値)</p>
+      <p class="pot-label">表示中の制度の「上限額」をすべて足した場合の最大額(理論値です)</p>
       <p class="pot-amount">最大 <span id="pot-amount" class="kin">—</span></p>
       <p class="pot-meta" id="pot-meta"></p>
       <p class="pot-note">※各制度が公表している公募上限額を単純に合計した理論値です。受給できる金額や採択を保証するものではありません。要件・金額は必ず各制度の原文でご確認ください。</p>
-      <a class="register-btn" href="go/shindan/" target="_blank" rel="noopener">この可能性を無料で確認する(LINE)</a>
+      <a class="register-btn" id="pot-cta" href="go/shindan/" target="_blank" rel="noopener">この可能性を無料で確認する(LINE)</a>
     </div>
-    <p class="result-head" aria-live="polite">マッチした制度 <span id="result-count" class="kin"></span>件</p>
+    <p class="result-head" aria-live="polite">診断結果 <span id="result-count" class="kin"></span>件</p>
     <div id="shokei-banner" class="shokei-banner" hidden>
       <strong>事業の引き継ぎ・後継に使える補助金</strong>があります。
       専門家への相談費用なども補助対象になる制度です。
@@ -598,7 +683,7 @@
     <p class="result-note">締切アラート(約1か月前から)を受け取るには、LINE登録(無料)をどうぞ。</p>
     <button type="button" class="register-btn" id="reg-open">貴社専用の制度通知を受け取る(会社情報を登録)</button>
     <div id="reg-form" class="reg-form" hidden>
-      <p class="reg-head">30秒で完了。入力内容はそのままLINEにセットされ、<strong>送信ボタンを1回押すだけ</strong>です。</p>
+      <p class="reg-head">約30秒で完了。下のボタンを押すと<strong>LINEアプリが開き、入力内容が書き込まれたメッセージが用意されます</strong>。あとはLINE側の送信ボタンを押すだけです。</p>
       <label>会社名<input type="text" id="reg-company" placeholder="例) 沖縄商事株式会社" autocomplete="organization"></label>
       <label>代表者名<input type="text" id="reg-name" placeholder="例) 沖縄 太郎" autocomplete="name"></label>
       <label>所在地(市町村)
@@ -613,6 +698,37 @@
       <p class="reg-guide" id="reg-guide" hidden>3項目すべてご入力ください😊</p>
       <button type="button" class="register-btn" id="reg-send">LINEを開いて送信する</button>
       <p class="reg-note">※入力内容はLINEのメッセージにセットされるだけで、このサイトには保存されません。</p>
+    </div>
+
+
+    <div class="experts">
+      <p class="experts-head">この制度の申請、誰に相談する?</p>
+      <p class="experts-sub">沖縄の信頼できる専門家を、各分野3名まで厳選してご紹介予定です。</p>
+      <div class="expert-grid">
+        <div class="expert-card sample">
+          <div class="expert-photo">写真</div>
+          <span class="expert-tag">補助金申請</span>
+          <h5>株式会社M's-support(那覇支店)</h5>
+          <p class="expert-field">得意分野: 補助金申請サポート(採択後の交付申請〜実績報告まで伴走)</p>
+          <p class="expert-record">中小企業診断士・行政書士・税理士が在籍</p>
+          <p class="sample-note">※掲載調整中(正式掲載の準備中です)</p>
+          <a class="expert-btn" href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E5%B0%82%E9%96%80%E5%AE%B6%E7%9B%B8%E8%AB%87%E3%80%91" target="_blank" rel="noopener">LINEで相談内容を送る</a>
+          <p class="takeji-note">※ご相談は運営(GLOW)のLINEで承り、内容に合わせて専門家へお取り次ぎします。</p>
+        </div>
+        <div class="expert-card coming">
+          <div class="expert-photo">?</div>
+          <span class="expert-tag">行政書士</span>
+          <h5>掲載準備中</h5>
+          <p class="expert-field">補助金申請・許認可に強い専門家を選定中です</p>
+        </div>
+        <div class="expert-card coming">
+          <div class="expert-photo">?</div>
+          <span class="expert-tag">税理士</span>
+          <h5>掲載準備中</h5>
+          <p class="expert-field">顧問の先生はそのまま。補助金だけのセカンドオピニオン</p>
+        </div>
+      </div>
+      <p class="experts-note">専門家の方へ: 掲載のご相談はLINEよりお問い合わせください。</p>
     </div>
 
     <details class="gbiz" id="gbiz">
@@ -641,35 +757,6 @@
         </p>
       </div>
     </details>
-
-    <div class="experts">
-      <p class="experts-head">この制度の申請、誰に相談する?</p>
-      <p class="experts-sub">沖縄の信頼できる専門家を、各分野3名まで厳選してご紹介予定です。</p>
-      <div class="expert-grid">
-        <div class="expert-card sample">
-          <div class="expert-photo">写真</div>
-          <span class="expert-tag">補助金申請</span>
-          <h5>株式会社M's-support(那覇支店)</h5>
-          <p class="expert-field">得意分野: 補助金申請サポート(採択後の交付申請〜実績報告まで伴走)</p>
-          <p class="expert-record">中小企業診断士・行政書士・税理士が在籍</p>
-          <p class="sample-note">※掲載調整中(正式掲載の準備中です)</p>
-          <a class="expert-btn" href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E5%B0%82%E9%96%80%E5%AE%B6%E7%9B%B8%E8%AB%87%E3%80%91" target="_blank" rel="noopener">この専門家に相談する</a>
-        </div>
-        <div class="expert-card coming">
-          <div class="expert-photo">?</div>
-          <span class="expert-tag">行政書士</span>
-          <h5>掲載準備中</h5>
-          <p class="expert-field">補助金申請・許認可に強い専門家を選定中です</p>
-        </div>
-        <div class="expert-card coming">
-          <div class="expert-photo">?</div>
-          <span class="expert-tag">税理士</span>
-          <h5>掲載準備中</h5>
-          <p class="expert-field">顧問の先生はそのまま。補助金だけのセカンドオピニオン</p>
-        </div>
-      </div>
-      <p class="experts-note">専門家の方へ: 掲載のご相談はLINEよりお問い合わせください。</p>
-    </div>
   </div>
   <p class="updated rv">データ最終更新:<span id="updated-at">—</span>(1日4回自動更新)</p>
 </section>
@@ -684,18 +771,85 @@
 </section>
 
 <button id="back-result" class="back-result" hidden>💰 診断結果へ戻る</button>
+
+<!-- GLOWとは(運営会社モーダル) -->
+<div id="glow-modal" class="glow-modal" hidden role="dialog" aria-modal="true" aria-labelledby="glow-title">
+  <div class="glow-card">
+    <button type="button" id="glow-close" class="glow-close" aria-label="閉じる">✕</button>
+    <div class="glow-head">
+      <img src="assets/glow-logo.png" alt="GLOW" width="468" height="260">
+      <p class="glow-eyebrow">ABOUT US</p>
+      <h2 id="glow-title">株式会社GLOW</h2>
+      <p class="glow-lead">沖縄の企業と経営者に寄り添う、<span>「沖縄企業のミカタ」</span></p>
+    </div>
+    <div class="glow-body">
+      <p>株式会社GLOWは、沖縄に根ざした企業支援会社として、県内の企業や事業者の皆さまが抱えるさまざまなお悩みを、一緒に考え、解決へ向けてサポートしています。</p>
+      <div class="glow-themes">
+        <span>事業をもっと成長させたい</span>
+        <span>後継者について相談したい</span>
+        <span>会社を引き継ぎたい・譲りたい</span>
+        <span>不動産について相談したい</span>
+      </div>
+      <p>こうした経営上のお悩みに加え、会社に活用できる補助金・助成金などの制度がないかを確認し、必要な支援へつなげることも私たちの役割です。一つひとつのお悩みに寄り添いながら、必要に応じて行政、金融機関、税理士などの専門家とも連携し、それぞれの会社に合った解決方法をご提案します。</p>
+      <p class="glow-vision">沖縄で事業を営む皆さまにとって、<span class="glow-hl">「何かあったら、<br class="sp">まずは相談してみよう」</span>と思っていただける身近な存在でありたい。<small>株式会社GLOWは、沖縄の企業と経営者に寄り添う「沖縄企業のミカタ」として、<br>企業の成長と地域経済の発展を支えてまいります。</small></p>
+
+      <p class="glow-eyebrow2">REPRESENTATIVE</p>
+      <h3 class="glow-name">嶺井 忍<small>代表</small></h3>
+      <p>沖縄振興開発金融公庫において長年にわたり企業支援業務に従事。創業支援、大型プロジェクト融資、事業再生支援、事業承継支援など、企業のライフステージに応じた幅広い経営支援を担当し、多くの経営者と伴走してきました。</p>
+      <p>在職中は、成長企業やベンチャー企業への資金調達支援にも携わり、OWNDAYS株式会社の海外展開に向けた融資を担当。同社代表の田中修治氏は、講演や著書において当時の支援について言及しています。</p>
+      <p>現在は、これまで培った企業支援の経験と行政・金融機関・士業との幅広いネットワークを活かし、株式会社GLOWにてM&amp;A・事業承継、不動産売買支援、経営相談などをワンストップで提供。経営者一人ひとりの課題に寄り添い、「経営者が最初に相談するパートナー」として、企業の成長と円滑な事業承継を支えています。</p>
+
+      <p class="glow-eyebrow2">TRACK RECORD</p>
+      <h3 class="glow-sub">これまでの主な支援実績</h3>
+      <div class="glow-grid">
+        <div class="glow-cell">
+          <h4>資金調達・経営改善</h4>
+          <ul>
+            <li>成長企業・ベンチャー企業への資金調達支援</li>
+            <li>中小企業の経営改善・設備投資支援</li>
+            <li>コロナ禍における企業の資金繰り支援</li>
+          </ul>
+        </div>
+        <div class="glow-cell">
+          <h4>創業・事業成長</h4>
+          <ul>
+            <li>創業・新規事業立ち上げ支援</li>
+            <li>OWNDAYSをはじめとする成長企業への伴走支援</li>
+          </ul>
+        </div>
+        <div class="glow-cell">
+          <h4>事業承継・経営支援</h4>
+          <ul>
+            <li>事業承継・後継者支援</li>
+            <li>M&amp;A・事業承継に関する経営相談</li>
+          </ul>
+        </div>
+        <div class="glow-cell">
+          <h4>地域連携・ネットワーク</h4>
+          <ul>
+            <li>地域課題の解決に向けた政策提言・地域活性化</li>
+            <li>行政・金融機関・士業とのネットワーク構築</li>
+          </ul>
+        </div>
+      </div>
+      <p class="glow-note">※沖縄振興開発金融公庫在職中の実績を含みます。</p>
+    </div>
+  </div>
+</div>
+
 <footer>
   <div><strong>沖縄企業のミカタ</strong> — 運営:株式会社GLOW</div>
   
   <div>最新情報は必ず各制度の公式サイトでご確認ください。</div>
 </footer>
 
+<script src="assets/ledger-config.js"></script>
 <script>
   // ===== マッチング =====
   let DB={items:[],updated_at:null};
   fetch('data/subsidies.json')
     .then(r=>r.json())
-    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';const lc=document.getElementById('live-count');if(lc)lc.textContent=d.count||d.items.length||'—';restoreState();})
+    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';const lc=document.getElementById('live-count');if(lc)lc.textContent=d.count||d.items.length||'—';try{restoreState();}catch(e){}})
     .catch(()=>{document.getElementById('updated-at').textContent='取得エラー(公式サイトをご確認ください)';});
 
   const BIZ_KEYS={
@@ -717,11 +871,27 @@
   // ===== 進捗表示(4つのセレクト基準+テーマ加点表示) =====
   const SELECT_IDS=['f-area','f-biz','f-emp','f-future'];
   const REDUCED=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function selectedCount(){
-    return SELECT_IDS.filter(id=>document.getElementById(id).value).length;
-  }
+  // 安全ヘルパー: localStorage不可の環境でも機能停止させない/外部由来文字列を無害化
+  function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+  function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function safeUrl(u){return /^https?:\/\//.test(String(u||''))?String(u):'';}
+  // 決裁2026-07-31: 「4つ」=市町村/業種/従業員数/経営テーマ。「10年後」は任意扱い
+  const CORE_IDS=['f-area','f-biz','f-emp'];
+  const CORE_LABELS={'f-area':'市町村','f-biz':'業種','f-emp':'従業員数'};
   function themeCount(){
     return document.querySelectorAll('#f-theme .chip.on').length;
+  }
+  function selectedCount(){
+    return CORE_IDS.filter(id=>document.getElementById(id).value).length
+      +(themeCount()>0?1:0);
+  }
+  function missingLabel(){
+    for(const id of CORE_IDS){
+      if(!document.getElementById(id).value)return CORE_LABELS[id];
+    }
+    return '経営テーマ';
   }
   function updateProgress(){
     // 復元表示中に条件を変更したら、古い結果(金額含む)を消して混乱を防ぐ
@@ -734,13 +904,13 @@
       const rn=document.getElementById('restored-note');
       if(rn)rn.remove();
     }
-    const n=selectedCount(), t=themeCount();
+    const n=selectedCount();
     const el=document.getElementById('form-progress');
     if(!el)return;
-    const theme=t?` ＋テーマ${t}`:'';
-    const msg=n>=4?'準備OK!マッチングしましょう':(n>0?'いい調子です':'1つでも選ぶと精度が上がります');
-    el.innerHTML=`選択 <strong>${n}/4</strong>${theme} — ${msg}`;
-    if(n>0||t>0){const g=document.getElementById('form-guide');if(g)g.hidden=true;}
+    const msg=n>=4?'準備OK!診断できます'
+      :(n>0?`あと「${missingLabel()}」を選ぶと4つそろいます`:'1つでも選ぶと精度が上がります');
+    el.innerHTML=`選択 <strong>${n}/4</strong> — ${msg}`;
+    if(n>0){const g=document.getElementById('form-guide');if(g)g.hidden=true;}
   }
   SELECT_IDS.forEach(id=>document.getElementById(id).addEventListener('change',updateProgress));
 
@@ -778,9 +948,15 @@
   };
 
   document.getElementById('match-btn').addEventListener('click',()=>{
-    if(selectedCount()===0&&themeCount()===0){
+    if(selectedCount()===0){
       const g=document.getElementById('form-guide');
-      if(g){g.hidden=false;g.scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'center'});}
+      if(g){g.hidden=false;if(!AUTORUN)g.scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'center'});}
+      return;
+    }
+    if(!DB.updated_at){
+      // データ読込前の空振り診断を防ぐ(低速回線対策)
+      const g=document.getElementById('form-guide');
+      if(g){g.hidden=false;g.textContent='制度データを読み込んでいます。1〜2秒おいて、もう一度お試しください。';}
       return;
     }
     const area=document.getElementById('f-area').value;
@@ -788,11 +964,9 @@
     const future=document.getElementById('f-future').value;
     const themes=[...document.querySelectorAll('#f-theme .chip.on')].map(c=>c.dataset.v);
     // 選択状態を保存(LINEアプリから戻った時の再読み込みで診断が消えないように)
-    try{
-      var st={done:true,themes:themes};
-      SELECT_IDS.forEach(function(id){st[id]=document.getElementById(id).value;});
-      localStorage.setItem('mikata_form',JSON.stringify(st));
-    }catch(e){}
+    var st={done:true,themes:themes,nogbiz:document.getElementById('f-nogbiz').checked};
+    SELECT_IDS.forEach(function(id){st[id]=document.getElementById(id).value;});
+    lsSet('mikata_form',JSON.stringify(st));
     const keys=BIZ_KEYS[biz]||[];
     const themeKeys=themes.flatMap(t=>THEME_KEYS[t]||[]);
 
@@ -837,15 +1011,29 @@
       var total=sme.reduce(function(sm,it){return sm+Number(it.max_amount);},0);
       var pot=document.getElementById('potential');
       if(!pot)return;
+      if(hits.length===0){pot.hidden=true;return;}
       pot.hidden=false;
       var amtEl=document.querySelector('.pot-amount');
       if(total<=0){
         amtEl.style.display='none';
+        var potCta0=document.getElementById('pot-cta');
+        if(potCta0)potCta0.hidden=true;
         document.getElementById('pot-meta').textContent=
           '今回表示された制度は上限額を公表していないものが中心でした。金額の目安はLINEで個別にご案内します。';
         return;
       }
       amtEl.style.display='';
+      // 動線設計(2026-07-27 決裁): 合計金額は未登録では見せない。
+      // 「1件+残りぼかし+合計を隠す」→ 見たくてLINE登録 → 戻ると全解禁、の順。
+      var isMember=lsGet('mikata_member')==='1';
+      var potCta=document.getElementById('pot-cta');
+      if(potCta)potCta.hidden=isMember; // 登録済みにはCTA不要
+      if(!isMember){
+        document.getElementById('pot-amount').textContent='●,●●●万円';
+        document.getElementById('pot-meta').textContent=
+          '合計金額は、無料のLINE登録でこの場に表示されます(対象 '+sme.length+'件の内訳つき)';
+        return;
+      }
       var unknown=hits.length-withAmt.length;
       var single=Math.max.apply(null,sme.map(function(it){return Number(it.max_amount);}));
       document.getElementById('pot-meta').textContent=
@@ -866,18 +1054,18 @@
     const maskName=n=>n.length>6?n.slice(0,6)+'●●●●●●':'●●●●●●';
     const card=(it,locked)=>`
       <div class="card ${locked?'locked':''}">
-        <h4>${locked?maskName(it.name||''):(it.name||'')}</h4>
+        <h4>${locked?esc(maskName(it.name||'')):esc(it.name||'')}</h4>
         <div class="meta">
-          <span class="deadline">締切 ${it.deadline||'要確認'}</span>
-          <span>${it.target_area||'対象地域 要確認'}</span>
-          ${it.max_amount?`<span>上限 ${Number(it.max_amount).toLocaleString()}円</span>`:''}
+          <span class="deadline">締切 ${esc(it.deadline||'要確認')}</span>
+          <span>${esc(it.target_area||'対象地域 要確認')}</span>
+          ${Number(it.max_amount)>0?`<span>上限 ${Number(it.max_amount).toLocaleString()}円</span>`:''}
         </div>
         ${needsGbiz(it)
           ?'<span class="apply-badge egov">電子申請(GビズID必要)</span>'
           :'<span class="apply-badge direct">独自申請(GビズID不要の場合あり)</span>'}
-        ${locked?'':`<a href="${it.source_url}" target="_blank" rel="noopener">公式ページで確認 →</a>`}
+        ${locked||!safeUrl(it.source_url)?'':`<a href="${esc(safeUrl(it.source_url))}" target="_blank" rel="noopener">公式ページで確認 →</a>`}
       </div>`;
-    const member=localStorage.getItem('mikata_member')==='1';
+    const member=lsGet('mikata_member')==='1';
     let html='';
     if(hits.length===0){
       html='<div class="card"><h4>条件に合う募集中の制度が見つかりませんでした。</h4><div class="meta"><span>条件を変えるか、LINE登録で新着をお待ちください。</span></div></div>';
@@ -888,12 +1076,17 @@
     }else{
       html=card(hits[0],false);
       if(hits.length>1){
-        html+=hits.slice(1).map(it=>card(it,true)).join('');
+        // 解禁ボタンはぼかしカード群の「上」に置く(下に置くと約1,700pxのぼかしの壁で視界外になるため)
         html+=`<div class="unlock">
-          <p><strong>残り${hits.length-1}件</strong>(金額・締切つき)は、無料のLINE登録ですべて表示されます。<br>ボタンを押すとLINEの登録画面が開き、このページはその場で全件表示に切り替わります。締切の約1か月前からアラートも自動で届きます。</p>
+          <p><strong>残り${hits.length-1}件</strong>(金額・締切つき)は、無料のLINE登録ですべて表示されます。<br>ボタンを押すとLINEの登録画面が開き、このページはその場で全件表示に切り替わります。締切の約1か月前からアラートも自動で届きます。<span class="unlock-note">配信が不要になれば、いつでもブロック・解除できます。</span></p>
           <a class="line-btn" id="unlock-btn" href="go/shindan/" target="_blank" rel="noopener">LINEで無料登録して全て見る</a>
           <p class="already"><button type="button" id="already-member">すでにLINE登録済みの方はこちら(タップで全件表示)</button></p>
         </div>`;
+        // 決裁2026-07-31: ぼかしは3枚まで(スクロールの壁を作らない)。件数の事実は下の1行で伝える
+        html+=hits.slice(1,4).map(it=>card(it,true)).join('');
+        if(hits.length>4){
+          html+=`<div class="more-locked">…ほか<strong>${hits.length-4}件</strong>も、LINE登録でこの場にすべて表示されます</div>`;
+        }
       }
     }
     const list=document.getElementById('result-list');
@@ -901,12 +1094,21 @@
     if(!REDUCED)[...list.children].forEach((el,i)=>el.style.animationDelay=(i*70)+'ms');
     const ub=document.getElementById('unlock-btn');
     if(ub)ub.addEventListener('click',function(){
-      localStorage.setItem('mikata_member','1');
+      lsSet('mikata_member','1');
       // このページ側は再描画(スマホではLINEアプリ切替でタイマーが止まるため、
       // 下のpageshow/visibilitychangeが戻ってきた瞬間にも再描画する)
-      setTimeout(function(){document.getElementById('match-btn').click();},400);
+      setTimeout(autoRunMatch,400);
     });
     const am=document.getElementById('already-member');
+    // 合計金額CTA: unlockボタンと同じ解禁挙動(LINE登録画面を開き、戻るとこの場で全表示)
+    const pc=document.getElementById('pot-cta');
+    if(pc&&!pc.dataset.bound){
+      pc.dataset.bound='1';
+      pc.addEventListener('click',function(){
+        lsSet('mikata_member','1');
+        setTimeout(autoRunMatch,400);
+      });
+    }
     // 会社情報登録フォーム(入力→記入済みメッセージをLINEにセット)
     const ro=document.getElementById('reg-open');
     if(ro&&!ro.dataset.bound){
@@ -921,22 +1123,37 @@
         const n=document.getElementById('reg-name').value.trim();
         const city=document.getElementById('reg-city').value;
         const g=document.getElementById('reg-guide');
-        if(!c||!n||!city){g.hidden=false;return;}
+        if(!c||!n||!city){
+          g.textContent=(!c?'「会社名」':!n?'「代表者名」':'「所在地(市町村)」')+'がまだ入っていません😊';
+          g.hidden=false;return;
+        }
         g.hidden=true;
+        gtag('event','line_cta_click',{channel:'regform'});
         const text='【会社情報登録】'+String.fromCharCode(10)+'会社名：'+c+String.fromCharCode(10)+'代表者名：'+n+String.fromCharCode(10)+'所在地：'+city;
         window.open('https://line.me/R/oaMessage/%40345pqedv/?'+encodeURIComponent(text),'_blank','noopener');
       });
     }
     if(am)am.addEventListener('click',function(){
-      localStorage.setItem('mikata_member','1');
-      document.getElementById('match-btn').click();
+      // 誤タップ1回で全解禁されるのを防ぐ(ロック方式の保護)
+      if(!confirm('LINE登録がお済みの方向けの表示に切り替えます。よろしいですか?'))return;
+      lsSet('mikata_member','1');
+      autoRunMatch();
     });
+    // 会社情報登録の入口は登録済みの方のみに表示(未登録時はLINE登録に導線を一本化)
+    var regOpenBtn=document.getElementById('reg-open');
+    if(regOpenBtn)regOpenBtn.hidden=!member;
+    var resultNote=document.querySelector('.result-note');
+    if(resultNote)resultNote.hidden=member;
     document.getElementById('match-result').hidden=false;
     var _rn=document.getElementById('restored-note');
     if(_rn)_rn.remove();
     RESTORED_VIEW=false;
     if(backBtn)backBtn.dataset.ready='1';
     if(!AUTORUN)document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
+    LAST_MATCHED=hits.length;
+    // 計測は「実際に結果を描画した本人操作」のみ(自動復元・自動再描画はAUTORUNで除外)
+    if(!AUTORUN)gtag('event','diagnosis_run',{matched_count:hits.length});
+    sendLedgerIfReady();
   });
 
   // 2画面目の背景画像を先行デコード(初回スクロール時のデコード引っかかり防止)
@@ -949,13 +1166,19 @@
   // 再読み込み後の状態復元: 選択を戻し、結果も再表示(復元時は自動スクロールしない)
   let AUTORUN=false;
   let RESTORED_VIEW=false;
+  // 自動再描画(解禁後・アプリ復帰時など)は必ずこれを使う: 計測と自動スクロールを抑止する
+  function autoRunMatch(){
+    AUTORUN=true;
+    try{document.getElementById('match-btn').click();}finally{AUTORUN=false;}
+  }
   function restoreState(){
     var st=null;
-    try{st=JSON.parse(localStorage.getItem('mikata_form')||'null');}catch(e){}
+    try{st=JSON.parse(lsGet('mikata_form')||'null');}catch(e){}
     if(!st||!st.done)return;
     SELECT_IDS.forEach(function(id){
       if(st[id]!==undefined)document.getElementById(id).value=st[id];
     });
+    if(typeof st.nogbiz==='boolean')document.getElementById('f-nogbiz').checked=st.nogbiz;
     document.querySelectorAll('#f-theme .chip').forEach(function(c){
       var on=(st.themes||[]).indexOf(c.dataset.v)>=0;
       c.classList.toggle('on',on);
@@ -978,10 +1201,12 @@
   }
 
   // LINEアプリから戻ってきた時: 登録済みならロック表示を自動で全件表示に切替
+  // (結果が非表示中=条件変更の途中では発火させない)
   function refreshIfMember(){
-    if(localStorage.getItem('mikata_member')==='1'
+    if(lsGet('mikata_member')==='1'
+       && !document.getElementById('match-result').hidden
        && document.querySelector('#result-list .card.locked')){
-      document.getElementById('match-btn').click();
+      autoRunMatch();
     }
   }
   // フローティング「診断結果へ戻る」: 結果があり、かつ結果が画面外のときだけ表示
@@ -1003,6 +1228,133 @@
     es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});
   },{threshold:.2});
   document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+  // ===== LIFF連携+企業台帳(基準❺) =====
+  // LINEのリッチメニュー等から https://liff.line.me/<LIFF_ID> で開かれた場合のみ、
+  // LINEユーザーIDを取得して (1)ロック自動解禁 (2)診断内容の台帳送信 を行う。
+  // 通常ブラウザではSDKを読み込まない(Lighthouse・外部訪問者に影響ゼロ)。
+  var LIFF_ID='2010886544-ciK9QPBm';
+  var LAST_MATCHED=0;
+  var LEDGER_SENT_MEM='';
+  function sendLedgerIfReady(){
+    var cfg=window.MIKATA_LEDGER||{};
+    if(!cfg.endpoint||!cfg.token)return;
+    var prof=null,st=null;
+    try{prof=JSON.parse(lsGet('mikata_line')||'null');}catch(e){}
+    try{st=JSON.parse(lsGet('mikata_form')||'null');}catch(e){}
+    if(!prof||!prof.userId||!st||!st.done)return;
+    if(document.getElementById('match-result').hidden)return;
+    var payload={
+      token:cfg.token,
+      userId:prof.userId,
+      displayName:prof.displayName||'',
+      answers:{
+        area:st['f-area']||'',biz:st['f-biz']||'',emp:st['f-emp']||'',
+        future:st['f-future']||'',themes:st.themes||[]
+      },
+      matchedCount:LAST_MATCHED,
+      source:'diagnosis'
+    };
+    // 同一ユーザー×同一回答は一度だけ送る(復元・再描画のたびの重複行を防ぐ。
+    // localStorage不可の環境でもセッション内はメモリ変数で抑止)
+    var key=prof.userId+'|'+JSON.stringify(payload.answers);
+    if(key===LEDGER_SENT_MEM||lsGet('mikata_ledger_sent')===key)return;
+    LEDGER_SENT_MEM=key;
+    // GASはCORSプリフライトに応答できないため no-cors+text/plain で送る(fire-and-forget)
+    fetch(cfg.endpoint,{method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
+      .then(function(){lsSet('mikata_ledger_sent',key);})
+      .catch(function(){});
+  }
+  function initLiff(){
+    if(!window.liff)return;
+    liff.init({liffId:LIFF_ID}).then(function(){
+      if(!liff.isLoggedIn())return;
+      // LIFFで開けている=LINE友だち経由なので、この端末を登録済み扱いにして解禁
+      lsSet('mikata_member','1');
+      return liff.getProfile().then(function(p){
+        lsSet('mikata_line',
+          JSON.stringify({userId:p.userId,displayName:p.displayName||''}));
+        refreshIfMember();
+        sendLedgerIfReady();
+      });
+    }).catch(function(){});
+  }
+  if(/\bLine\//.test(navigator.userAgent)||/liff\.state|liffRedirectUri/.test(location.search)){
+    var liffSdk=document.createElement('script');
+    liffSdk.src='https://static.line-scdn.net/liff/edge/2/sdk.js';
+    liffSdk.onload=initLiff;
+    document.head.appendChild(liffSdk);
+  }
+
+  // ===== 計測(GA4)— 診断ファネル: 診断開始→診断実行→LINEタップ =====
+  var GA_ID='G-TW6M6WFB9T';
+  window.dataLayer=window.dataLayer||[];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js',new Date());
+  gtag('config',GA_ID,{transport_type:'beacon'});
+  // 表示速度(Lighthouse 95+)を守るため、gtag.js本体はページ読込完了後に読み込む。
+  // それまでのイベントはdataLayerにキューされるため欠落しない。
+  window.addEventListener('load',function(){
+    var gs=document.createElement('script');
+    gs.async=true;
+    gs.src='https://www.googletagmanager.com/gtag/js?id='+GA_ID;
+    document.head.appendChild(gs);
+    // Microsoft Clarity(セッション録画・ヒートマップ)も同じくload後に読み込む
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments);};
+      t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window,document,'clarity','script','xubivt63gw');
+    // Plausible(週次レポートのサイト訪問者数に使用。goページと同じ計測基盤)
+    var ps=document.createElement('script');
+    ps.defer=true;
+    ps.setAttribute('data-domain','allgroup-inc.github.io');
+    ps.src='https://plausible.io/js/script.js';
+    document.head.appendChild(ps);
+  });
+  // 診断開始: 最初の条件選択またはテーマタップを1回だけ記録
+  var GA_STARTED=false;
+  function gaStart(){if(GA_STARTED)return;GA_STARTED=true;gtag('event','diagnosis_start');}
+  SELECT_IDS.forEach(function(id){document.getElementById(id).addEventListener('change',gaStart);});
+  document.querySelectorAll('#f-theme .chip').forEach(function(c){c.addEventListener('click',gaStart);});
+  // 診断実行イベントは match-btn ハンドラ内で送信(空振り・自動再描画を計測しないため)
+  // LINEタップ: /go/経由のCTAとoaMessage直リンクをチャネル別に記録
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a');
+    if(!a)return;
+    var href=a.getAttribute('href')||'';
+    if(/^go\//.test(href)){
+      gtag('event','line_cta_click',{channel:href.replace(/^go\//,'').replace(/\/$/,'')});
+    }else if(href.indexOf('line.me/R/oaMessage')>=0){
+      gtag('event','line_cta_click',{channel:a.id||a.className||'oaMessage'});
+    }
+  });
+
+  // ===== GLOWとは(運営会社モーダル) =====
+  (function(){
+    var modal=document.getElementById('glow-modal');
+    var opener=document.getElementById('glow-open');
+    var closer=document.getElementById('glow-close');
+    if(!modal||!opener||!closer)return;
+    function openModal(){
+      modal.hidden=false;
+      document.body.classList.add('modal-open');
+      var card=modal.querySelector('.glow-card');
+      if(card)card.scrollTop=0;
+      gtag('event','glow_about_open');
+      closer.focus();
+    }
+    function closeModal(){
+      modal.hidden=true;
+      document.body.classList.remove('modal-open');
+      opener.focus();
+    }
+    opener.addEventListener('click',openModal);
+    closer.addEventListener('click',closeModal);
+    modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidden)closeModal();});
+  })();
 </script>
 </body>
 </html>

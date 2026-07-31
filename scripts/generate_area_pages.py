@@ -49,6 +49,8 @@ h1{font-size:1.35rem;margin-bottom:8px}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 ul.areas{list-style:none;columns:2;gap:12px}
 ul.areas li{margin-bottom:8px}
+.cardgrid{display:grid;gap:14px}
+@media(min-width:900px){.wrap{max-width:900px}.cardgrid{grid-template-columns:1fr 1fr}ul.areas{columns:3}}
 a{color:var(--fg-primary)}
 .siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
 .siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
@@ -73,7 +75,35 @@ def esc(s):
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def page(title, desc, body, updated, depth=2):
+def area_jsonld(muni, groups):
+    """市町村ページの構造化データ: 掲載制度を CollectionPage + ItemList(GovernmentService)で列挙。
+    事実(制度名・提供元・対象地域・公式URL)のみ。金額など未確定値は入れない(正確性最優先)。"""
+    elements = []
+    pos = 1
+    for group in groups:
+        for it in group:
+            elements.append({
+                "@type": "ListItem", "position": pos,
+                "item": {
+                    "@type": "GovernmentService",
+                    "name": it.get("name", ""),
+                    "provider": {"@type": "GovernmentOrganization", "name": it.get("issuer", "")},
+                    "areaServed": {"@type": "AdministrativeArea", "name": it.get("area", "全国")},
+                    "url": it.get("source_url", ""),
+                },
+            })
+            pos += 1
+    data = {
+        "@context": "https://schema.org", "@type": "CollectionPage",
+        "name": f"{muni}にお住まいの方が使える可能性のある給付金・手当",
+        "about": {"@type": "AdministrativeArea", "name": muni},
+        "mainEntity": {"@type": "ItemList", "numberOfItems": len(elements), "itemListElement": elements},
+    }
+    return ('<script type="application/ld+json">\n'
+            + json.dumps(data, ensure_ascii=False) + "\n</script>")
+
+
+def page(title, desc, body, updated, depth=2, head_extra=""):
     rel = "../" * depth
     return f"""<!DOCTYPE html>
 <html lang="ja">
@@ -83,6 +113,7 @@ def page(title, desc, body, updated, depth=2):
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <link rel="icon" type="image/svg+xml" href="{rel}assets/icon.svg">
+{head_extra}
 <style>{STYLE}</style>
 </head>
 <body>
@@ -117,6 +148,7 @@ def muni_page(muni, items, updated):
         if not group:
             continue
         body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>{esc(label)}({len(group)}件)</h2>")
+        body.append('<div class="cardgrid">')
         for it in group:
             badge = ' <span class="status">要確認</span>' if it.get("status") == "要確認" else ""
             body.append(
@@ -128,9 +160,11 @@ def muni_page(muni, items, updated):
                 f' ・ <a href="../../kit/{esc(it["id"])}/">申請準備シート</a>'
                 "</div>"
             )
+        body.append('</div>')
     title = f"{muni}の給付金・手当まとめ | もらいわすれ堂"
     desc = f"{muni}にお住まいの世帯が使える可能性のある給付金・手当のまとめ。3分の無料診断で、あなたの世帯にあてはまる制度がわかります。"
-    return page(title, desc, "\n".join(body), updated)
+    ld = area_jsonld(muni, [local, pref, national])
+    return page(title, desc, "\n".join(body), updated, head_extra=ld)
 
 
 def index_page(updated):

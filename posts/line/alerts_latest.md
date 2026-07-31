@@ -1,8 +1,8 @@
 # LINE配信下書き: 締切アラート(約1か月前から / 締切3層ルール準拠)
 
-- 生成日: 2026-07-26(毎日自動更新)
-- LINEアラート対象(残り7〜29日): 22件
-- 7日未満(予告切替・配信で急かさない): 10件 → 末尾の予告文を使用
+- 生成日: 2026-07-31(毎日自動更新)
+- LINEアラート対象(残り7〜29日): 25件
+- 7日未満(予告切替・配信で急かさない): 12件 → 末尾の予告文を使用
 - 使い方: 下の本文をそのまま LINE Official Account Manager のメッセージ配信へ。
 
 ---
@@ -12,45 +12,45 @@
 📣【締切が近づいている補助金】
 早めの準備で、間に合わせましょう。
 
-🟠 まもなく締切(7〜14日) — 13件
-■ 「NEDOのプロジェクト成果由来の製品・プロセス・サービスに関する各種効果指標の再試算に係る調査」の公募
-　2026-08-03(残り8日)
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc1MMAT
-■ 「経済安全保障重要技術育成プログラム／ハイブリッドクラウド利用基盤技術の開発／不正機能排除技術の社会実装に向けた市場・技術動向等に係る調査」の公募
-　2026-08-03(残り8日)
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbyeMAD
-■ 【令和８年度】二酸化炭素排出抑制対策事業費等補助金 （地域共生型廃棄物発電等導入促進事業 （うち地域の廃棄物を活用した地域エネルギー創出事業））（第２次公募）
-　2026-08-03(残り8日)
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbPBMA1
-■ 「プレシード・シード期の概念実証／実現可能性調査における支援方策に関する調査」の公募
-　2026-08-04(残り9日)
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd5IMAT
-　…ほか9件は一覧へ
-
-🟢 準備をはじめる(15〜29日) — 9件
-■ 「カーボンリサイクル実現を加速するバイオ由来製品生産技術の開発に関する調査」の公募
-　2026-08-10(残り15日)
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcNyMAL
-■ 沖縄県認定パートナーVC「Okinawa Partner VC」の公募
-　2026-08-12(残り17日)
-　https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1029379.html
-■ 「次世代冷却に係るマテリアル・デバイスの開発動向に関する調査」の公募
-　2026-08-17(残り22日)
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0sMAD
-■ 令和８年度　ＺＥＢ実証事業（二次公募）
-　2026-08-17(残り22日) / 上限7億円
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdbJMAT
+🟠 まもなく締切(7〜14日) — 9件
+■ 「インフラ管理DXにおける地下埋設物データ整備手法活用の人材育成講座のあり方に関する調査」の公募
+　2026-08-07(残り7日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbonMAD
+■ 「クリティカルマテリアルのサプライチェーン強靱化に関する調査」の公募
+　2026-08-07(残り7日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDb69MAD
+■ 【事前着手】令和8年度排出削減が困難な産業におけるエネルギー・製造プロセス転換支援事業
+　2026-08-07(残り7日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaMVMA1
+■ 令和8年度排出削減が困難な産業におけるエネルギー・製造プロセス転換支援事業
+　2026-08-07(残り7日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaLwMAL
 　…ほか5件は一覧へ
 
-💡 電子申請には gBizIDプライム が必要な制度が多く、発行に2〜3週間かかることがあります。
+🟢 準備をはじめる(15〜29日) — 16件
+■ 「次世代冷却に係るマテリアル・デバイスの開発動向に関する調査」の公募
+　2026-08-17(残り17日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0sMAD
+■ 令和８年度　ＺＥＢ実証事業（二次公募）
+　2026-08-17(残り17日) / 上限7億円
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdbJMAT
+■ 令和８年度酒類業振興支援事業費補助金（第３期）
+　2026-08-17(残り17日) / 上限1,500万円
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcFAMA1
+■ 令和8年度沖縄県スタートアップ起業支援金の公募開始
+　2026-08-19(残り19日)
+　https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1021963.html
+　…ほか12件は一覧へ
+
+💡 電子申請には gBizIDプライム が必要な制度が多いです。オンライン申請(マイナンバーカード)なら速やかに、書類の郵送申請は審査に最大1か月かかります。
 ※要件・締切は必ず原文でご確認ください。
 制度一覧 → https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert
 ```
 
 ## 7日未満の制度(予告切替) — 配信で使う場合はこちらの文面
 ```
-⏳ 締切目前の公募が10件あります。
+⏳ 締切目前の公募が12件あります。
 いまから書類を整えるのは大変なので、無理は禁物。
-次の公募に備えて【gBizIDプライム】の取得(2〜3週間)を先に済ませておきましょう。
+次の公募に備えて【gBizIDプライム】を先に用意しておきましょう(オンライン申請なら速やかに発行、郵送は最大1か月)。
 制度一覧 → https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert
 ```
