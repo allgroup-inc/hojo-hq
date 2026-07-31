@@ -18,9 +18,6 @@ __pycache__/
 .claude/tools/.env
 .claude/settings.local.json
 
-# 内部戦略・KPI(hikari/kakei含む)をコミットしない: 公開リポジトリのため
-.claude/skills/
-
 # GLOW M&A台帳(非公開スプレッドシートIDを含むため)
 glow-ma/.clasp.json
 .clasp.json
