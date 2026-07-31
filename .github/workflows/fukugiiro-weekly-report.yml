@@ -23,6 +23,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Plausibleファネル取得(キーが有れば)
+        continue-on-error: true
+        env:
+          PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
+        run: python scripts/fetch_plausible_funnel.py
+
       - name: 週次レポート生成(統括ユイさん)
         run: python scripts/weekly_report_fukugiiro.py
 
@@ -31,5 +37,6 @@ jobs:
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
           git add reports/fukugiiro
+          [ -f data/fukugiiro/funnel.json ] && git add data/fukugiiro/funnel.json || true
           git diff --cached --quiet || git commit -m "auto: もらいわすれ堂 週次レポート $(date '+%Y-%m-%d')"
           git push

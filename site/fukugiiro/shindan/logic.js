@@ -73,7 +73,16 @@
     return results;
   }
 
-  var api = { matchSeido: matchSeido };
+  function summarize(results) {
+    var high = 0, mid = 0;
+    for (var i = 0; i < results.length; i++) {
+      if (results[i].likelihood === "高") high++;
+      else if (results[i].likelihood === "中") mid++;
+    }
+    return { total: results.length, high: high, mid: mid };
+  }
+
+  var api = { matchSeido: matchSeido, summarize: summarize };
   if (typeof module !== "undefined" && module.exports) {
     module.exports = api;
   } else {

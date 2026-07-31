@@ -48,6 +48,13 @@ section{padding:48px 0}
 .counter{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;
   padding:24px;text-align:center}
 .counter .num{font-size:2rem;font-weight:800;color:var(--fg-primary)}
+.stats{display:grid;grid-template-columns:1fr;gap:14px}
+.stat{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px;text-align:center}
+.stat .num{font-size:1.9rem;font-weight:800;color:var(--fg-primary);line-height:1.2;display:block}
+.stat .yen{font-size:1.1rem;font-weight:800;margin-right:1px}
+.stat .lbl{font-size:.9rem;color:var(--fg-muted);margin-top:2px}
+.stat.hero-stat{background:linear-gradient(180deg,#FDF5E6 0%,var(--fg-card) 100%);border-color:var(--fg-accent)}
+@media(min-width:640px){.stats{grid-template-columns:repeat(3,1fr)}}
 /* steps */
 .steps{list-style:none;counter-reset:s}
 .steps li{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;
@@ -59,6 +66,13 @@ section{padding:48px 0}
 .card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px}
 .card h3{font-size:1.05rem;margin-bottom:.3em}
 .card .status{font-size:.8rem;background:#fff3cd;border-radius:4px;padding:1px 8px;color:#7a5b00}
+.story{background:var(--fg-card);border:1px solid var(--fg-line);border-left:6px solid var(--fg-deep);border-radius:12px;padding:24px 22px}
+.story .leaf{font-size:1.7rem;display:block;line-height:1;margin-bottom:6px}
+.story p{margin:0 0 .9em}
+.story p:last-child{margin-bottom:0}
+.story .tag{color:var(--fg-deep);font-weight:800;font-size:1.08rem;margin-top:.2em}
+.story .founder{background:#F1F7F3;border-radius:10px;padding:16px 18px}
+.story .founder .by{display:block;text-align:right;color:var(--fg-deep);font-weight:700;font-size:.9rem;margin-top:10px}
 /* faq */
 details{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;
   padding:14px 18px;margin-bottom:12px}
@@ -82,6 +96,14 @@ footer a{color:#bcd9cf}
 .navcard span{font-size:.78rem;color:var(--fg-muted);font-weight:400;margin-top:4px}
 .navcard.hline2{background:#EAF7EE;border-color:#B7E4C7;color:#0F5138}
 @media(min-width:640px){.hero h1{font-size:2.1rem}.cards{grid-template-columns:1fr 1fr}}
+/* PC(広い画面): 余白を減らして横幅を活かす。本文は読みやすさのため広げすぎない */
+@media(min-width:900px){
+  .wrap{max-width:960px}
+  .navcards{grid-template-columns:repeat(4,1fr)}
+  .hero h1{font-size:2.4rem}
+  /* 文章ブロックは中央寄せで幅を抑え、横に間延びさせない */
+  .hero .sub,.story,.steps,details{max-width:760px;margin-left:auto;margin-right:auto}
+}
 </style>
 </head>
 <body>
@@ -118,13 +140,38 @@ footer a{color:#bcd9cf}
   </div>
 </section>
 
+<section id="story" style="padding-top:32px">
+  <div class="wrap">
+    <div class="story">
+      <span class="leaf" aria-hidden="true">🌿</span>
+      <h2 style="border-left:none;padding-left:0;margin-bottom:.5em">なぜ「もらいわすれ堂」を始めたのか</h2>
+      <p>沖縄には、国・県・市町村の給付金や手当がたくさんあります。それなのに「知らなかった」「むずかしそう」というだけで、本来受け取れるはずのお金を受け取れていないご家庭が、少なくありません。</p>
+      <p class="founder">沖縄で暮らして、20年あまり。ずっと、沖縄の人たちにお世話になってきました。<br>「この沖縄の皆さんに、少しでもプラスになることはできないか」——そう考えたとき、私に賃金を上げることはできません。けれど、<strong>正しい情報を、漏れなく届けること</strong>ならできます。それで、一人でも多くの沖縄の方の暮らしのお金が、今より少しでもプラスになる。そんな環境をつくりたくて、もらいわすれ堂を始めました。<span class="by">— もらいわすれ堂 運営より</span></p>
+      <p>「フクギ」は、沖縄の集落を台風から守ってきた防風林の木です。運営する<strong>株式会社フクギイロ</strong>は、<strong>「県民の家計を守る防風林でありたい」</strong>という願いを社名にしました。もらいわすれ堂は、その最初の一歩です。</p>
+      <p>だから私たちは、むずかしい制度をやさしい言葉に翻訳し、かならず公式の情報と照らし合わせます。確認できないことは「要確認」と正直に表示し、断定はしません。診断は<strong>匿名で使え、ずっと無料</strong>。申請の代行はしませんが、必要なときは提携する専門家におつなぎします。</p>
+      <p class="tag">あなたが受け取るまで、いっしょに。</p>
+    </div>
+  </div>
+</section>
+
 <section>
   <div class="wrap">
-    <div class="counter" id="counter">
-      <div id="counter-main"><span class="num" id="seido-count">—</span> 件</div>
-      <div id="counter-label">検証済みで掲載中の制度(毎日自動更新)</div>
-      <p class="note" id="counter-note">受給確認額の公開カウンターは、実績の積み上がりとともに表示予定です。</p>
+    <h2>もらいわすれ堂が、県民に取り戻したお金</h2>
+    <div class="stats">
+      <div class="stat hero-stat">
+        <span class="num" id="jukyu-amount">まもなく公開</span>
+        <div class="lbl" id="jukyu-amount-lbl">みんなが実際に受け取れた金額(累計)</div>
+      </div>
+      <div class="stat">
+        <span class="num" id="jukyu-households">—</span>
+        <div class="lbl">受け取れた世帯(報告ベース)</div>
+      </div>
+      <div class="stat">
+        <span class="num" id="seido-count">—</span>
+        <div class="lbl">検証済みで掲載中の制度</div>
+      </div>
     </div>
+    <p class="note" id="jukyu-note" style="margin-top:12px">受給報告の受付開始に向けて準備中です。金額は利用者の自己申告をもとに、検証部が公式制度と突合できたぶんだけを計上します。個人が特定される情報は含みません。</p>
   </div>
 </section>
 
@@ -137,6 +184,17 @@ footer a{color:#bcd9cf}
       <li><strong>入金確認までフォロー</strong><br>締切が近づいたらお知らせ。「振り込まれた」までを一緒に見届けます。</li>
     </ol>
     <p class="note">※ 申請手続きの代行は行いません。専門家のサポートが必要な場合は、提携する専門家(社会保険労務士・行政書士など)におつなぎします。</p>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="stat" style="text-align:left">
+      <h2 style="border-left:none;padding-left:0;margin-bottom:.4em">「振り込まれました」を教えてください</h2>
+      <p style="margin-bottom:12px">あなたが実際に受け取れた金額のご報告が、次の県民の「もらい忘れ」を防ぎます。上のカウンターは、いただいた報告のうち検証できたぶんを積み上げたものです。<strong>制度名とおおよその金額だけ</strong>で大丈夫。お名前や口座番号はうかがいません。</p>
+      <a class="btn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-jukyu/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('jukyu_report_click')" style="max-width:420px">LINEで受給を報告する(匿名・無料)</a>
+      <p class="note" style="margin-top:10px">報告は任意です。いただいた金額は個人が特定できない形で集計・公開します。</p>
+    </div>
   </div>
 </section>
 
@@ -191,10 +249,16 @@ footer a{color:#bcd9cf}
     <p>運営: 株式会社フクギイロ</p>
     <p>フクギは、沖縄の集落を台風から守ってきた防風林の木。<br>県民のみなさんの家計を守る防風林でありたい、という願いを社名にしました。</p>
     <p style="margin-top:12px"><a href="area/">市町村別の給付金・手当まとめ</a> ・ <a href="kit/">申請準備シート一覧</a></p>
-    <p style="margin-top:8px"><a href="#">個人情報保護方針(準備中)</a></p>
+    <p style="margin-top:8px"><a href="privacy/">個人情報保護方針</a></p>
   </div>
 </footer>
 
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"もらいわすれ堂","alternateName":"株式会社フクギイロ","url":"https://allgroup-inc.github.io/hojo-hq/fukugiiro/","slogan":"あなたが受け取るまで、いっしょに。","areaServed":{"@type":"AdministrativeArea","name":"沖縄県"},"description":"沖縄県の世帯向けに、国・県・市町村の給付金や手当の「もらい忘れ」を防ぐ情報を、やさしい言葉と公式リンクで案内し申請を伴走します(申請代行は行いません)。"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"もらいわすれ堂","url":"https://allgroup-inc.github.io/hojo-hq/fukugiiro/","inLanguage":"ja"}
+</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
  {"@type":"Question","name":"本当に無料ですか?","acceptedAnswer":{"@type":"Answer","text":"はい。沖縄県にお住まいの方は、診断もフォローもすべて無料です。運営費用は法人のお客様からいただいています。"}},
@@ -235,6 +299,23 @@ footer a{color:#bcd9cf}
       });
     }
   }).catch(function(){ /* データ取得失敗時は静的表示のまま(診断・本文は影響なし) */ });
+
+  // 実受給額カウンター(北極星・第0階層)。検証済みで計上ぶんのみを表示。
+  fetch("../data/fukugiiro/jukyu_reports.json").then(function(r){return r.json()}).then(function(jk){
+    var s = jk.summary || {};
+    var amt = s.total_amount_yen || 0;
+    var hh = s.household_count || 0;
+    if(amt > 0){
+      document.getElementById("jukyu-amount").innerHTML =
+        '<span class="yen">¥</span>' + amt.toLocaleString("ja-JP");
+      document.getElementById("jukyu-amount-lbl").textContent = "みんなが実際に受け取れた金額(累計)";
+      document.getElementById("jukyu-households").textContent = hh.toLocaleString("ja-JP") + "世帯";
+      if(jk.disclaimer) document.getElementById("jukyu-note").textContent = jk.disclaimer;
+    } else if(s.note){
+      // 実績ゼロのあいだは金額を誇張しない。「まもなく公開」の静的表示のまま補足だけ差し替える。
+      document.getElementById("jukyu-note").textContent = s.note + (jk.disclaimer ? " " + jk.disclaimer : "");
+    }
+  }).catch(function(){ /* 取得失敗時は「まもなく公開」の静的表示のまま */ });
 })();
 </script>
 </body>

@@ -1,0 +1,34 @@
+name: weekly-report
+
+# 週次レポート(2026-07-30 小柳さん依頼)。
+# 毎週月曜 8:00 JST に、サイト訪問・LINE導線・LINE友だち・IG・FBの数字を
+# 小柳さんのLINEへ届ける。取得できない項目は「未接続/取得不可」と明記する。
+
+on:
+  schedule:
+    # JST 月曜 8:00 = UTC 日曜 23:00
+    - cron: "0 23 * * 0"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 週次レポートを生成してLINEへ送信
+        env:
+          PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_ADMIN_USER_ID: ${{ secrets.LINE_ADMIN_USER_ID }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: python scripts/weekly_report.py

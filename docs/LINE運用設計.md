@@ -20,7 +20,7 @@ oaMessage定型文リンクの一覧は docs/LINEあいさつメッセージ.md 
 
 | 位置 | ボタン | 動作 |
 |---|---|---|
-| 左上 | 🔍 制度をさがす | サイトへ(https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=richmenu&utm_campaign=nav) |
+| 左上 | 🔍 制度をさがす | **`https://liff.line.me/2010886544-ciK9QPBm`**(2026-07-29〜: LIFF経由に変更。診断×LINE IDの紐付け=基準❺のため。旧: サイト直URL+utm) |
 | 右上 | 🏢 会社情報を登録 | oaMessage【会社情報登録】(定型文自動入力) |
 | 左下 | 👨‍💼 専門家に相談 | oaMessage【専門家相談】 |
 | 右下 | 🤝 事業承継の相談 | oaMessage【事業承継相談】 |
