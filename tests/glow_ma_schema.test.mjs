@@ -88,3 +88,12 @@ test("企業マスタに電話番号・連絡不要列が追加されている",
 test("対応履歴ログの種別に連絡不要受領が追加されている", () => {
   assert.ok(schema.INTERACTION_TYPES.indexOf("連絡不要受領") !== -1);
 });
+
+test("ダッシュボード履歴タブの名称・見出しが定義されている", () => {
+  assert.equal(schema.DASHBOARD_HISTORY_SHEET_NAME, "ダッシュボード履歴");
+  assert.deepEqual(schema.DASHBOARD_HISTORY_HEADERS, [
+    "記録日時", "対象企業数",
+    "ランクA_滞留企業数", "ランクB_滞留企業数", "ランクC_滞留企業数", "ランクD_滞留企業数",
+    "掘り起こし待ち件数合計", "連絡不要企業数"
+  ]);
+});
