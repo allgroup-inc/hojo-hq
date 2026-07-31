@@ -36,3 +36,18 @@ test("daysBetween: どちらかが不正な日付ならnull", () => {
   assert.equal(alerting.daysBetween("", "2026-07-27"), null);
   assert.equal(alerting.daysBetween("2026-07-01", null), null);
 });
+
+test("resolveEffectiveRank: 紹介ルートを含む企業は常にAランク相当を返す", () => {
+  const record = { 流入ルート: ["①紹介"], ランク: "D" };
+  assert.equal(alerting.resolveEffectiveRank(record, alerting.DEFAULT_CONFIG), "A");
+});
+
+test("resolveEffectiveRank: 紹介ルートを含まない企業はランクをそのまま返す", () => {
+  const record = { 流入ルート: ["②手紙DM"], ランク: "C" };
+  assert.equal(alerting.resolveEffectiveRank(record, alerting.DEFAULT_CONFIG), "C");
+});
+
+test("resolveEffectiveRank: 流入ルートが未設定でもエラーにならない", () => {
+  const record = { ランク: "B" };
+  assert.equal(alerting.resolveEffectiveRank(record, alerting.DEFAULT_CONFIG), "B");
+});
