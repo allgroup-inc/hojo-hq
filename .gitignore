@@ -28,3 +28,18 @@ glow-ma/.clasp.json
 glow-ma/**/*.csv
 glow-ma/**/*.xlsx
 glow-ma/data/
+
+# 内部戦略・KPI・実数値を含む機密ファイルはコミットしない: 公開リポジトリのため
+.agents/product-marketing.md
+.claude/skills/explainer-video-production/
+.claude/skills/go-link-discipline/
+.claude/skills/hikari-cpa-guard/
+.claude/skills/hikari-lp-integrity/
+.claude/skills/hikari-report-thresholds/
+.claude/skills/hikari-triangle-review/
+.claude/skills/hojo-accuracy-check/
+.claude/skills/hojo-deadline-alert/
+.claude/skills/hojo-triangle-review/
+.claude/skills/kakei-compliance/
+.claude/skills/kakei-gatekeeper-kpi/
+.claude/skills/report-gyoren-ops/
