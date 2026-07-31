@@ -38,10 +38,18 @@
     return Math.floor((to.getTime() - from.getTime()) / msPerDay);
   }
 
+  function resolveEffectiveRank(record, config) {
+    config = config || DEFAULT_CONFIG;
+    var routes = record["流入ルート"] || [];
+    if (routes.indexOf(config.referralRoute) !== -1) return "A";
+    return record["ランク"];
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
     toDate: toDate,
-    daysBetween: daysBetween
+    daysBetween: daysBetween,
+    resolveEffectiveRank: resolveEffectiveRank
   };
 
   if (typeof module !== "undefined" && module.exports) {
