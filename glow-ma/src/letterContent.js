@@ -8,9 +8,12 @@
 (function (global) {
   "use strict";
 
-  var GlowAlerting = (typeof module !== "undefined" && module.exports)
-    ? require("./alerting.js")
-    : global.GlowAlerting;
+  function getGlowAlerting_() {
+    if (typeof module !== "undefined" && module.exports) {
+      return require("./alerting.js");
+    }
+    return global.GlowAlerting;
+  }
 
   var DEFAULT_CONFIG = {
     referralRoute: "①紹介",
@@ -41,6 +44,10 @@
   function buildLetterPrompt(record, trackingUrl, config) {
     config = config || DEFAULT_CONFIG;
     var leadProduct = determineLeadProduct(record, config);
+    var isReferralLead = leadProduct === config.leadProductForReferral;
+    var leadProductCondition = isReferralLead
+      ? "- この企業は紹介ルート経由のため、M&Aの話から入って構わない"
+      : "- いきなりM&Aの話から入らないこと";
     var lines = [
       "あなたは沖縄の中小企業向けM&A・不動産・法人保険を扱う株式会社GLOWの営業担当です。",
       "以下の企業宛てに送る手紙の文面を、丁寧で押しつけがましくない経営相談ベースのトーンで下書きしてください。",
@@ -51,7 +58,7 @@
       "",
       "条件:",
       "- 「売り込み」ではなく「無料の経営相談・情報提供」という体裁にすること",
-      "- いきなりM&Aの話から入らないこと(紹介ルートの場合を除く)",
+      leadProductCondition,
       "- 文末に次のURLへの案内を自然に含めること: " + (trackingUrl || ""),
       "- 断定的な成果保証をしないこと",
       "",
@@ -65,9 +72,12 @@
     var nurturing = config.nurturing || DEFAULT_CONFIG.nurturing;
     return (records || []).filter(function (record) {
       if (nurturing.eligibleStages.indexOf(record["現在ステージ"]) === -1) return false;
+      // 意図的に企業マスタの「ランク」列(スコアそのもの)で判定する。alerting.jsの
+      // resolveEffectiveRank(紹介ルートは常にA相当)は接触サイクル判定専用の例外であり、
+      // 紹介ルートは既にAサイクルでフォローされるため、ナーチャリング対象の選定には適用しない。
       if (nurturing.eligibleRanks.indexOf(record["ランク"]) === -1) return false;
       var lastTouch = record["最終接触日"] || record["登録日"];
-      var days = GlowAlerting.daysBetween(lastTouch, todayValue);
+      var days = getGlowAlerting_().daysBetween(lastTouch, todayValue);
       if (days === null) return false;
       return days >= nurturing.minIntervalDays;
     });
