@@ -50,10 +50,19 @@ function postToSlack_(message) {
 /**
  * 即時アラート(Speed to Lead)
  * 対応履歴ログの「種別」列に、反応イベント(GlowScoring.DEFAULT_CONFIG.reactionPointsByType
- * に定義されている種別)が入力された瞬間に、シンプルトリガーとして自動実行され、
- * 即座にSlack通知する。関数名 onEdit はGASの予約された名前で、手動登録は不要。
+ * に定義されている種別)が入力された瞬間に即座にSlack通知する。
+ *
+ * 注意: この関数は「onEdit」という予約名を使っていない。もし onEdit という名前にすると
+ * GASの**シンプルトリガー**として自動実行されてしまうが、シンプルトリガーは権限が制限された
+ * 実行コンテキストで動作し、authorizationが必要なサービス(本関数が呼ぶ postToSlack_ 内の
+ * UrlFetchApp.fetch を含む)を呼び出すと例外で失敗する。そのため、この関数自体は直接トリガー
+ * されない普通の関数として定義し、下記の installInteractionLogEditTrigger を
+ * Apps Scriptエディタから**人間が手動で一度だけ実行**して、認可済みの「インストール型トリガー」
+ * として登録する必要がある(初回実行時に認可(オーソリ)を求めるダイアログが出るのは正常な挙動)。
+ * installInteractionLogEditTrigger を複数回実行すると同じトリガーが重複登録されるため、
+ * 再実行する場合はApps Scriptエディタの「トリガー」画面で既存登録の有無を確認してから行うこと。
  */
-function onEdit(e) {
+function handleInteractionLogEdit(e) {
   if (!e || !e.range) return;
   var sheet = e.range.getSheet();
   if (sheet.getName() !== GlowSchema.INTERACTION_LOG_SHEET_NAME) return;
@@ -76,6 +85,21 @@ function onEdit(e) {
   postToSlack_(
     "【即時アラート】" + companyName + "(" + companyId + ") が反応しました(" + newType + ")。至急対応してください。"
   );
+}
+
+/**
+ * handleInteractionLogEdit をインストール型のonEditトリガーとして登録する。
+ * Apps Scriptエディタから人間が手動で一度だけ実行すること(実行時に認可ダイアログが出る)。
+ * 既に登録済みの状態で再実行すると、同じトリガーが重複登録されるので注意。
+ * 事前に「トリガー」画面で既存登録の有無を確認してから実行することを推奨する。
+ */
+function installInteractionLogEditTrigger() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  ScriptApp.newTrigger("handleInteractionLogEdit")
+    .forSpreadsheet(ss)
+    .onEdit()
+    .create();
+  Logger.log("即時アラート用のonEditトリガーを登録しました。");
 }
 
 function lookupCompanyName_(companyId) {
