@@ -5,12 +5,14 @@
  *  トリガー登録自体は本Planの範囲外。)
  *
  * 実行すると、企業マスタ・紹介パートナーマスタを読み取り、以下5つの表を
- * 「ダッシュボード」タブに作り直す。他のタブへの書き込みは一切行わない。
+ * 「ダッシュボード」タブに作り直す。
  * - ルート別×ステージ別ファネル
  * - 提案商品別サマリー(提案数・案件化数・成約数)
  * - ランク別サマリー(滞留企業数・掘り起こし待ち件数)
  * - 紹介パートナー別サマリー
  * - データ品質チェック(集計対象外の件数)
+ * これに加えて、「ダッシュボード履歴」タブに主要指標のスナップショットを1行追記する
+ * (こちらは「ダッシュボード」タブと異なり、実行のたびに内容を消さず積み上げる)。
  *
  * 企業マスタ・紹介パートナーマスタの読み取りと集計は、他プロセス(例:
  * importCompaniesFromStaging)による書き込み中の中間状態を拾わないよう、
@@ -29,7 +31,7 @@ function updateDashboard() {
   var partnerSheet = ss.getSheetByName(GlowSchema.PARTNER_MASTER_SHEET_NAME);
   var historySheet = ss.getSheetByName(GlowSchema.DASHBOARD_HISTORY_SHEET_NAME);
   if (!historySheet) {
-    throw new Error("ダッシュボード履歴タブが見つかりません。先に ensureLedgerTabs を実行してください。");
+    historySheet = ensureTab_(ss, GlowSchema.DASHBOARD_HISTORY_SHEET_NAME, GlowSchema.DASHBOARD_HISTORY_HEADERS);
   }
 
   var lock = LockService.getDocumentLock();
@@ -79,7 +81,7 @@ function updateDashboard() {
       historySnapshot["対象企業数"],
       historySnapshot["ランクA_滞留企業数"], historySnapshot["ランクB_滞留企業数"],
       historySnapshot["ランクC_滞留企業数"], historySnapshot["ランクD_滞留企業数"],
-      historySnapshot["掘り起こし待ち件数合計"], historySnapshot["連絡不要企業数"]
+      historySnapshot["掘り起こし待ち件数合計"], historySnapshot["成約企業数"], historySnapshot["連絡不要企業数"]
     ]);
 
     dashboardSheet.getRange(row, 1).setValue(

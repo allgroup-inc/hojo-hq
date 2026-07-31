@@ -18,7 +18,7 @@ Googleスプレッドシートに保持し、このディレクトリにはGAS(G
 4. `glow-ma/.clasp.json.example` を `glow-ma/.clasp.json` としてコピーし、
    `scriptId` を実際のスクリプトIDに書き換える(このファイルはコミットしない)
 5. `cd glow-ma && clasp push` でコードをApps Scriptに反映する
-6. Apps Scriptエディタで `ensureLedgerTabs` を一度だけ手動実行し、6タブを作成する
+6. Apps Scriptエディタで `ensureLedgerTabs` を一度だけ手動実行し、7タブを作成する
 
 ## 7000件リストのインポート
 
