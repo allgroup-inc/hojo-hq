@@ -38,3 +38,23 @@ test("buildTrackingUrl: companyIdまたはbaseUrlが空なら空文字列を返�
   assert.equal(letterContent.buildTrackingUrl("", "https://example.com/track"), "");
   assert.equal(letterContent.buildTrackingUrl("C000001", ""), "");
 });
+
+test("buildLetterPrompt: 会社名・案内する商品・トラッキングURLを含むプロンプトを組み立てる", () => {
+  const record = { 会社名: "テスト商事株式会社", 業種: "建設業", 流入ルート: ["②手紙DM"] };
+  const prompt = letterContent.buildLetterPrompt(record, "https://example.com/track?id=C000001", letterContent.DEFAULT_CONFIG);
+  assert.match(prompt, /テスト商事株式会社/);
+  assert.match(prompt, /法人保険・経営相談/);
+  assert.match(prompt, /https:\/\/example\.com\/track\?id=C000001/);
+});
+
+test("buildLetterPrompt: 紹介ルートの企業はM&Aを案内する文面指示になる", () => {
+  const record = { 会社名: "サンプル建設株式会社", 業種: "建設業", 流入ルート: ["①紹介"] };
+  const prompt = letterContent.buildLetterPrompt(record, "https://example.com/track?id=C000002", letterContent.DEFAULT_CONFIG);
+  assert.match(prompt, /M&A/);
+});
+
+test("buildLetterPrompt: 業種が未設定でもエラーにならない", () => {
+  const record = { 会社名: "テスト商事株式会社", 流入ルート: [] };
+  const prompt = letterContent.buildLetterPrompt(record, "https://example.com/track?id=C000003", letterContent.DEFAULT_CONFIG);
+  assert.match(prompt, /テスト商事株式会社/);
+});
