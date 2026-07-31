@@ -103,3 +103,14 @@ test("calculateReactionScore: 履歴が空なら0", () => {
   assert.equal(scoring.calculateReactionScore([], scoring.DEFAULT_CONFIG), 0);
   assert.equal(scoring.calculateReactionScore(undefined, scoring.DEFAULT_CONFIG), 0);
 });
+
+test("calculateRank: 閾値どおりにA〜Dへ分類する", () => {
+  assert.equal(scoring.calculateRank(70, scoring.DEFAULT_CONFIG), "A");
+  assert.equal(scoring.calculateRank(100, scoring.DEFAULT_CONFIG), "A");
+  assert.equal(scoring.calculateRank(69, scoring.DEFAULT_CONFIG), "B");
+  assert.equal(scoring.calculateRank(40, scoring.DEFAULT_CONFIG), "B");
+  assert.equal(scoring.calculateRank(39, scoring.DEFAULT_CONFIG), "C");
+  assert.equal(scoring.calculateRank(15, scoring.DEFAULT_CONFIG), "C");
+  assert.equal(scoring.calculateRank(14, scoring.DEFAULT_CONFIG), "D");
+  assert.equal(scoring.calculateRank(0, scoring.DEFAULT_CONFIG), "D");
+});

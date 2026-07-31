@@ -109,6 +109,15 @@
     return total;
   }
 
+  function calculateRank(totalScore, config) {
+    config = config || DEFAULT_CONFIG;
+    var t = config.rankThresholds;
+    if (totalScore >= t.A) return "A";
+    if (totalScore >= t.B) return "B";
+    if (totalScore >= t.C) return "C";
+    return "D";
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
     classifyIndustryTier: classifyIndustryTier,
@@ -116,7 +125,8 @@
     calculateAgeBandPoints: calculateAgeBandPoints,
     calculateAttributeScore: calculateAttributeScore,
     calculateRouteBonus: calculateRouteBonus,
-    calculateReactionScore: calculateReactionScore
+    calculateReactionScore: calculateReactionScore,
+    calculateRank: calculateRank
   };
 
   if (typeof module !== "undefined" && module.exports) {
