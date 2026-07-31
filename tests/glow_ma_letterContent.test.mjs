@@ -58,3 +58,26 @@ test("buildLetterPrompt: 業種が未設定でもエラーにならない", () =
   const prompt = letterContent.buildLetterPrompt(record, "https://example.com/track?id=C000003", letterContent.DEFAULT_CONFIG);
   assert.match(prompt, /テスト商事株式会社/);
 });
+
+test("selectNurturingTargets: ステージ・ランク・接触間隔の条件を満たす企業のみ抽出する", () => {
+  const records = [
+    { 企業ID: "C1", 現在ステージ: "関係構築中", ランク: "B", 最終接触日: "2026-01-01" }, // 対象
+    { 企業ID: "C2", 現在ステージ: "未接触", ランク: "B", 最終接触日: "2026-01-01" }, // ステージ対象外
+    { 企業ID: "C3", 現在ステージ: "提案中", ランク: "A", 最終接触日: "2026-01-01" }, // ランク対象外(Aは除外)
+    { 企業ID: "C4", 現在ステージ: "案件化", ランク: "C", 最終接触日: "2026-07-20" } // 直近すぎる(7日前)
+  ];
+  const targets = letterContent.selectNurturingTargets(records, "2026-07-27", letterContent.DEFAULT_CONFIG);
+  assert.deepEqual(targets.map((r) => r["企業ID"]), ["C1"]);
+});
+
+test("selectNurturingTargets: 最終接触日が未設定なら登録日を代わりに使う", () => {
+  const records = [
+    { 企業ID: "C5", 現在ステージ: "関係構築中", ランク: "D", 最終接触日: "", 登録日: "2026-01-01" }
+  ];
+  const targets = letterContent.selectNurturingTargets(records, "2026-07-27", letterContent.DEFAULT_CONFIG);
+  assert.deepEqual(targets.map((r) => r["企業ID"]), ["C5"]);
+});
+
+test("selectNurturingTargets: 対象企業がなければ空配列", () => {
+  assert.deepEqual(letterContent.selectNurturingTargets([], "2026-07-27", letterContent.DEFAULT_CONFIG), []);
+});

@@ -15,7 +15,12 @@
   var DEFAULT_CONFIG = {
     referralRoute: "①紹介",
     leadProductForReferral: "M&A",
-    leadProductDefault: "法人保険・経営相談"
+    leadProductDefault: "法人保険・経営相談",
+    nurturing: {
+      eligibleStages: ["関係構築中", "提案中", "案件化"],
+      eligibleRanks: ["B", "C", "D"],
+      minIntervalDays: 90
+    }
   };
 
   function determineLeadProduct(record, config) {
@@ -55,11 +60,25 @@
     return lines.join("\n");
   }
 
+  function selectNurturingTargets(records, todayValue, config) {
+    config = config || DEFAULT_CONFIG;
+    var nurturing = config.nurturing || DEFAULT_CONFIG.nurturing;
+    return (records || []).filter(function (record) {
+      if (nurturing.eligibleStages.indexOf(record["現在ステージ"]) === -1) return false;
+      if (nurturing.eligibleRanks.indexOf(record["ランク"]) === -1) return false;
+      var lastTouch = record["最終接触日"] || record["登録日"];
+      var days = GlowAlerting.daysBetween(lastTouch, todayValue);
+      if (days === null) return false;
+      return days >= nurturing.minIntervalDays;
+    });
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
     determineLeadProduct: determineLeadProduct,
     buildTrackingUrl: buildTrackingUrl,
-    buildLetterPrompt: buildLetterPrompt
+    buildLetterPrompt: buildLetterPrompt,
+    selectNurturingTargets: selectNurturingTargets
   };
 
   if (typeof module !== "undefined" && module.exports) {
