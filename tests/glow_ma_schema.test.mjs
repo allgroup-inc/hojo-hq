@@ -49,3 +49,13 @@ test("紹介パートナーマスタに紹介料率と逆紹介履歴の列が�
   assert.ok(schema.PARTNER_MASTER_HEADERS.includes("紹介料率"));
   assert.ok(schema.PARTNER_MASTER_HEADERS.includes("逆紹介履歴"));
 });
+
+test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種と一致する", () => {
+  const expected = [
+    "手紙送付", "電話", "ゆんたく相談実施", "面談実施", "紹介受領", "ミカタ接点確認",
+    "レターURLアクセス", "返信", "資料請求",
+    "提案(M&A)", "提案(不動産)", "提案(法人保険)",
+    "成約", "見送り", "ナーチャリング配信"
+  ];
+  assert.deepEqual(schema.INTERACTION_TYPES, expected);
+});
