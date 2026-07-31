@@ -87,10 +87,28 @@ test("mergeCompanyRecords: レコードが空配列なら例外を投げる", ()
   assert.throws(() => dedupe.mergeCompanyRecords([]));
 });
 
-test("SCALAR_FIELDS: 配列/備考項目と合わせると企業マスタのヘッダーと過不足なく一致する(スキーマ変更の検知)", () => {
-  const combined = new Set([...dedupe.SCALAR_FIELDS, "流入ルート", "提案商品", "備考"]);
+test("SCALAR_FIELDS: 配列/備考/連絡不要項目と合わせると企業マスタのヘッダーと過不足なく一致する(スキーマ変更の検知)", () => {
+  const combined = new Set([...dedupe.SCALAR_FIELDS, "流入ルート", "提案商品", "備考", "連絡不要"]);
   const expected = new Set(schema.COMPANY_MASTER_HEADERS);
   assert.deepStrictEqual(combined, expected);
+});
+
+test("mergeCompanyRecords: 連絡不要はいずれかのレコードでTRUEなら統合後もTRUEを維持する(falseが先頭でも失われない)", () => {
+  const records = [
+    { 企業ID: "C000001", 電話番号: "098-000-0001", 連絡不要: false, 流入ルート: [], 提案商品: [], 備考: "" },
+    { 企業ID: "C000002", 電話番号: "098-000-0001", 連絡不要: true, 流入ルート: [], 提案商品: [], 備考: "" }
+  ];
+  const { merged } = dedupe.mergeCompanyRecords(records);
+  assert.equal(merged.連絡不要, true);
+});
+
+test("mergeCompanyRecords: どのレコードも連絡不要でなければfalse", () => {
+  const records = [
+    { 企業ID: "C000001", 流入ルート: [], 提案商品: [], 備考: "" },
+    { 企業ID: "C000002", 流入ルート: [], 提案商品: [], 備考: "" }
+  ];
+  const { merged } = dedupe.mergeCompanyRecords(records);
+  assert.equal(merged.連絡不要, false);
 });
 
 test("nextSequenceNumber: レコードが空配列なら1を返す", () => {

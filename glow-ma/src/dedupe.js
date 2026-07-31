@@ -32,7 +32,7 @@
   }
 
   var SCALAR_FIELDS = [
-    "企業ID", "法人番号", "会社名", "業種", "規模", "代表者名", "代表者年齢", "所在地",
+    "企業ID", "法人番号", "会社名", "業種", "規模", "代表者名", "代表者年齢", "所在地", "電話番号",
     "起点担当者_紹介元", "現在ステージ", "初期スコア", "反応スコア", "総合スコア", "ランク",
     "最終接触日", "次回アクション予定日", "次回アクション内容", "担当者", "登録日"
   ];
@@ -69,6 +69,10 @@
 
     merged["流入ルート"] = unionArrayField(records, "流入ルート");
     merged["提案商品"] = unionArrayField(records, "提案商品");
+    // 連絡不要はいずれかの重複レコードでTRUEなら統合後もTRUEを維持する
+    // (SCALAR_FIELDSの「最初に見つかった非空値」ロジックだとfalseが先に見つかった場合に
+    // 連絡不要TRUEの情報が失われ、DNC対象に再度架電しかねないため特別扱いする)
+    merged["連絡不要"] = records.some(function (record) { return record["連絡不要"] === true; });
 
     var absorbedIds = records.slice(1).map(function (r) { return r["企業ID"]; }).filter(Boolean);
     var noteParts = [];
