@@ -113,12 +113,33 @@
     return { records: finalRecords, absorbedCount: Object.keys(absorbedIdSet).length };
   }
 
+  function propagateDoNotContact(records) {
+    var doNotContactPhones = {};
+    (records || []).forEach(function (record) {
+      var phone = record["電話番号"];
+      if (phone && record["連絡不要"] === true) {
+        doNotContactPhones[phone] = true;
+      }
+    });
+    return (records || []).map(function (record) {
+      var phone = record["電話番号"];
+      if (phone && doNotContactPhones[phone]) {
+        var updated = {};
+        Object.keys(record).forEach(function (key) { updated[key] = record[key]; });
+        updated["連絡不要"] = true;
+        return updated;
+      }
+      return record;
+    });
+  }
+
   var api = {
     normalizeCorporateNumber: normalizeCorporateNumber,
     findDuplicateGroups: findDuplicateGroups,
     mergeCompanyRecords: mergeCompanyRecords,
     nextSequenceNumber: nextSequenceNumber,
     applyMerges: applyMerges,
+    propagateDoNotContact: propagateDoNotContact,
     SCALAR_FIELDS: SCALAR_FIELDS
   };
 

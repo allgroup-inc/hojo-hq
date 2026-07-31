@@ -183,3 +183,35 @@ test("企業ID重複防止の回帰テスト: 名寄せで欠番が生じても2
   Object.values(idCounts).forEach((count) => assert.equal(count, 1));
   assert.deepEqual(round2Result.records.map((r) => r.企業ID).sort(), ["C000001", "C000003", "C000004"]);
 });
+
+test("propagateDoNotContact: 同じ電話番号を持つ企業のいずれかが連絡不要ならすべてに伝播する", () => {
+  const records = [
+    { "企業ID": "C000001", "電話番号": "098-000-0001", "連絡不要": true },
+    { "企業ID": "C000002", "電話番号": "098-000-0001", "連絡不要": false },
+    { "企業ID": "C000003", "電話番号": "098-000-0002", "連絡不要": false }
+  ];
+  const result = dedupe.propagateDoNotContact(records);
+  const find = (id) => result.find((r) => r["企業ID"] === id);
+  assert.equal(find("C000001")["連絡不要"], true);
+  assert.equal(find("C000002")["連絡不要"], true);
+  assert.equal(find("C000003")["連絡不要"], false);
+});
+
+test("propagateDoNotContact: 電話番号が空欄の企業同士は連絡不要を伝播しない", () => {
+  const records = [
+    { "企業ID": "C000001", "電話番号": "", "連絡不要": true },
+    { "企業ID": "C000002", "電話番号": "", "連絡不要": false }
+  ];
+  const result = dedupe.propagateDoNotContact(records);
+  const find = (id) => result.find((r) => r["企業ID"] === id);
+  assert.equal(find("C000002")["連絡不要"], false);
+});
+
+test("propagateDoNotContact: 元の配列を書き換えない(非破壊)", () => {
+  const records = [
+    { "企業ID": "C000001", "電話番号": "098-000-0001", "連絡不要": true },
+    { "企業ID": "C000002", "電話番号": "098-000-0001", "連絡不要": false }
+  ];
+  dedupe.propagateDoNotContact(records);
+  assert.equal(records[1]["連絡不要"], false);
+});
