@@ -79,11 +79,21 @@
     return findBandPoints(n, config.ageBands);
   }
 
+  function calculateAttributeScore(company, config) {
+    config = config || DEFAULT_CONFIG;
+    var tier = classifyIndustryTier(company["業種"], config);
+    var industryPoints = config.industryTierPoints[tier] || 0;
+    var sizePoints = calculateSizeBandPoints(company["規模"], config);
+    var agePoints = calculateAgeBandPoints(company["代表者年齢"], config);
+    return industryPoints + sizePoints + agePoints;
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
     classifyIndustryTier: classifyIndustryTier,
     calculateSizeBandPoints: calculateSizeBandPoints,
-    calculateAgeBandPoints: calculateAgeBandPoints
+    calculateAgeBandPoints: calculateAgeBandPoints,
+    calculateAttributeScore: calculateAttributeScore
   };
 
   if (typeof module !== "undefined" && module.exports) {

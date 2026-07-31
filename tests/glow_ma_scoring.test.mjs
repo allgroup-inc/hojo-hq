@@ -52,3 +52,15 @@ test("calculateAgeBandPoints: データ欠損時は0点(任意加点、モデル
   assert.equal(scoring.calculateAgeBandPoints("", scoring.DEFAULT_CONFIG), 0);
   assert.equal(scoring.calculateAgeBandPoints(undefined, scoring.DEFAULT_CONFIG), 0);
 });
+
+test("calculateAttributeScore: 業種・規模・年齢の加点を合算する", () => {
+  const company = { 業種: "建設業", 規模: "30名", 代表者年齢: "72歳" };
+  // 業種high(20) + 規模30名(10) + 年齢72歳(15) = 45
+  assert.equal(scoring.calculateAttributeScore(company, scoring.DEFAULT_CONFIG), 45);
+});
+
+test("calculateAttributeScore: 代表者年齢が空でも他の加点は計算される", () => {
+  const company = { 業種: "情報通信業", 規模: "200名", 代表者年齢: "" };
+  // 業種mid(10) + 規模200名は範囲外(0) + 年齢なし(0) = 10
+  assert.equal(scoring.calculateAttributeScore(company, scoring.DEFAULT_CONFIG), 10);
+});
