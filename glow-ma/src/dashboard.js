@@ -53,6 +53,7 @@
 
   function buildProductFunnel(records, config) {
     config = config || DEFAULT_CONFIG;
+    var reachedDealStageValues = ["案件化", "成約"];
     var counts = {};
     config.products.forEach(function (product) {
       counts[product] = { "提案数": 0, "案件化数": 0, "成約数": 0 };
@@ -63,7 +64,7 @@
       products.forEach(function (product) {
         if (!counts[product]) return;
         counts[product]["提案数"]++;
-        if (stage === "案件化") counts[product]["案件化数"]++;
+        if (reachedDealStageValues.indexOf(stage) !== -1) counts[product]["案件化数"]++;
         if (stage === "成約") counts[product]["成約数"]++;
       });
     });
@@ -80,11 +81,13 @@
   function buildRankSummary(records, todayValue, config) {
     config = config || DEFAULT_CONFIG;
     var alerting = getGlowAlerting_();
+    var terminalStages = (alerting.DEFAULT_CONFIG && alerting.DEFAULT_CONFIG.terminalStages) || [];
     var counts = {};
     config.ranks.forEach(function (rank) {
       counts[rank] = { "滞留企業数": 0, "掘り起こし待ち件数": 0 };
     });
     (records || []).forEach(function (record) {
+      if (terminalStages.indexOf(record["現在ステージ"]) !== -1) return;
       var effectiveRank = alerting.resolveEffectiveRank(record);
       if (!counts[effectiveRank]) return;
       counts[effectiveRank]["滞留企業数"]++;
@@ -99,6 +102,32 @@
         "掘り起こし待ち件数": counts[rank]["掘り起こし待ち件数"]
       };
     });
+  }
+
+  function countUnclassifiedCompanies(records, config) {
+    config = config || DEFAULT_CONFIG;
+    var alerting = getGlowAlerting_();
+    var list = records || [];
+    var unknownStageCount = 0;
+    var unknownRouteCount = 0;
+    var unknownProductCount = 0;
+    list.forEach(function (record) {
+      var stage = record["現在ステージ"];
+      if (config.stages.indexOf(stage) === -1) unknownStageCount++;
+      var routes = record["流入ルート"] || [];
+      var hasKnownRoute = routes.some(function (route) { return config.routes.indexOf(route) !== -1; });
+      if (routes.length === 0 || !hasKnownRoute) unknownRouteCount++;
+      var products = record["提案商品"] || [];
+      var hasKnownProduct = products.some(function (product) { return config.products.indexOf(product) !== -1; });
+      if (products.length === 0 || !hasKnownProduct) unknownProductCount++;
+    });
+    return {
+      "対象企業数": list.length,
+      "未スコア企業数": alerting.countUnscoredCompanies(list),
+      "現在ステージ未分類企業数": unknownStageCount,
+      "流入ルート未分類企業数": unknownRouteCount,
+      "提案商品未設定企業数": unknownProductCount
+    };
   }
 
   var PARTNER_SUMMARY_FIELDS = ["名称", "累計紹介数", "成約数", "関係性ランク", "提供済み情報ログ", "逆紹介履歴"];
@@ -119,7 +148,9 @@
     buildRouteStageFunnel: buildRouteStageFunnel,
     buildProductFunnel: buildProductFunnel,
     buildRankSummary: buildRankSummary,
-    formatPartnerSummary: formatPartnerSummary
+    countUnclassifiedCompanies: countUnclassifiedCompanies,
+    formatPartnerSummary: formatPartnerSummary,
+    PARTNER_SUMMARY_FIELDS: PARTNER_SUMMARY_FIELDS
   };
 
   if (typeof module !== "undefined" && module.exports) {
