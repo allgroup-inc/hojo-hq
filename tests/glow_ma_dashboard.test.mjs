@@ -177,25 +177,40 @@ test("formatPartnerSummary: 累計紹介数が0なら成約率は空文字(ゼ�
   assert.equal(summary[0]["成約率"], "");
 });
 
-test("buildHistorySnapshot: ランク別滞留企業数・掘り起こし待ち件数合計・連絡不要企業数を集計する", () => {
+test("buildHistorySnapshot: ランク別滞留企業数・掘り起こし待ち件数合計・成約企業数・連絡不要企業数を集計する", () => {
   const records = [
     { 企業ID: "C1", ランク: "A", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: false },
     { 企業ID: "C2", ランク: "B", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2026-07-27", 連絡不要: false },
-    { 企業ID: "C3", ランク: "D", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: true }
+    { 企業ID: "C3", ランク: "D", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: true },
+    { 企業ID: "C4", ランク: "A", 流入ルート: [], 現在ステージ: "成約", 提案商品: ["M&A"], 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: false }
   ];
   const snapshot = dashboard.buildHistorySnapshot(records, "2026-07-27", dashboard.DEFAULT_CONFIG);
-  assert.equal(snapshot["対象企業数"], 3);
+  assert.equal(snapshot["対象企業数"], 4);
   assert.equal(snapshot["ランクA_滞留企業数"], 1);
   assert.equal(snapshot["ランクB_滞留企業数"], 1);
   assert.equal(snapshot["ランクD_滞留企業数"], 1);
-  // C1は掘り起こし対象(30日サイクル超過)。C3は連絡不要のためisOverdueがfalseを返し対象外
+  // C1は掘り起こし対象(30日サイクル超過)。C3は連絡不要のためisOverdueがfalseを返し対象外。
+  // C4は成約(終了ステージ)のためbuildRankSummary上は滞留企業数・掘り起こし待ちどちらにも数えない
   assert.equal(snapshot["掘り起こし待ち件数合計"], 1);
+  assert.equal(snapshot["成約企業数"], 1);
   assert.equal(snapshot["連絡不要企業数"], 1);
+});
+
+test("buildHistorySnapshot: 成約企業数は提案商品数によらず企業1社につき1件として数える(buildProductFunnelの成約数とは別概念)", () => {
+  const records = [
+    { 企業ID: "C1", ランク: "A", 流入ルート: [], 現在ステージ: "成約", 提案商品: ["M&A", "不動産", "法人保険"], 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: false },
+    { 企業ID: "C2", ランク: "B", 流入ルート: [], 現在ステージ: "成約", 提案商品: ["M&A"], 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: false },
+    { 企業ID: "C3", ランク: "C", 流入ルート: [], 現在ステージ: "提案中", 提案商品: ["M&A"], 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: false }
+  ];
+  const snapshot = dashboard.buildHistorySnapshot(records, "2026-07-27", dashboard.DEFAULT_CONFIG);
+  // C1は提案商品3件を持つが、成約企業数は「企業単位」で1件としてのみ数える(3件と数えない)
+  assert.equal(snapshot["成約企業数"], 2);
 });
 
 test("buildHistorySnapshot: 対象企業がなければ全項目0", () => {
   const snapshot = dashboard.buildHistorySnapshot([], "2026-07-27", dashboard.DEFAULT_CONFIG);
   assert.equal(snapshot["対象企業数"], 0);
   assert.equal(snapshot["掘り起こし待ち件数合計"], 0);
+  assert.equal(snapshot["成約企業数"], 0);
   assert.equal(snapshot["連絡不要企業数"], 0);
 });

@@ -141,6 +141,9 @@
     var totalOverdue = rankSummary.reduce(function (sum, r) {
       return sum + r["掘り起こし待ち件数"];
     }, 0);
+    var closedDealCount = list.filter(function (record) {
+      return record["現在ステージ"] === "成約";
+    }).length;
     var doNotContactCount = list.filter(function (record) {
       return record["連絡不要"] === true;
     }).length;
@@ -151,6 +154,7 @@
       "ランクC_滞留企業数": findRank_("C")["滞留企業数"],
       "ランクD_滞留企業数": findRank_("D")["滞留企業数"],
       "掘り起こし待ち件数合計": totalOverdue,
+      "成約企業数": closedDealCount,
       "連絡不要企業数": doNotContactCount
     };
   }
