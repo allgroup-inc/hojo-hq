@@ -176,3 +176,26 @@ test("formatPartnerSummary: 累計紹介数が0なら成約率は空文字(ゼ�
   const summary = dashboard.formatPartnerSummary(partners);
   assert.equal(summary[0]["成約率"], "");
 });
+
+test("buildHistorySnapshot: ランク別滞留企業数・掘り起こし待ち件数合計・連絡不要企業数を集計する", () => {
+  const records = [
+    { 企業ID: "C1", ランク: "A", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: false },
+    { 企業ID: "C2", ランク: "B", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2026-07-27", 連絡不要: false },
+    { 企業ID: "C3", ランク: "D", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: true }
+  ];
+  const snapshot = dashboard.buildHistorySnapshot(records, "2026-07-27", dashboard.DEFAULT_CONFIG);
+  assert.equal(snapshot["対象企業数"], 3);
+  assert.equal(snapshot["ランクA_滞留企業数"], 1);
+  assert.equal(snapshot["ランクB_滞留企業数"], 1);
+  assert.equal(snapshot["ランクD_滞留企業数"], 1);
+  // C1は掘り起こし対象(30日サイクル超過)。C3は連絡不要のためisOverdueがfalseを返し対象外
+  assert.equal(snapshot["掘り起こし待ち件数合計"], 1);
+  assert.equal(snapshot["連絡不要企業数"], 1);
+});
+
+test("buildHistorySnapshot: 対象企業がなければ全項目0", () => {
+  const snapshot = dashboard.buildHistorySnapshot([], "2026-07-27", dashboard.DEFAULT_CONFIG);
+  assert.equal(snapshot["対象企業数"], 0);
+  assert.equal(snapshot["掘り起こし待ち件数合計"], 0);
+  assert.equal(snapshot["連絡不要企業数"], 0);
+});
