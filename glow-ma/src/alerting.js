@@ -45,11 +45,28 @@
     return record["ランク"];
   }
 
+  function isOverdue(record, todayValue, config) {
+    config = config || DEFAULT_CONFIG;
+    var dueDate = record["次回アクション予定日"];
+    if (dueDate) {
+      var daysUntilDue = daysBetween(todayValue, dueDate);
+      if (daysUntilDue !== null) return daysUntilDue <= 0;
+    }
+    var effectiveRank = resolveEffectiveRank(record, config);
+    var cycleDays = config.cycleDaysByRank[effectiveRank];
+    if (typeof cycleDays !== "number") return false;
+    var lastTouch = record["最終接触日"] || record["登録日"];
+    var daysSinceTouch = daysBetween(lastTouch, todayValue);
+    if (daysSinceTouch === null) return false;
+    return daysSinceTouch >= cycleDays;
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
     toDate: toDate,
     daysBetween: daysBetween,
-    resolveEffectiveRank: resolveEffectiveRank
+    resolveEffectiveRank: resolveEffectiveRank,
+    isOverdue: isOverdue
   };
 
   if (typeof module !== "undefined" && module.exports) {
