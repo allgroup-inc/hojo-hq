@@ -58,6 +58,7 @@
 
   function isOverdue(record, todayValue, config) {
     config = config || DEFAULT_CONFIG;
+    if (record["連絡不要"] === true) return false;
     if ((config.terminalStages || []).indexOf(record["現在ステージ"]) !== -1) return false;
     var dueDate = record["次回アクション予定日"];
     if (dueDate) {

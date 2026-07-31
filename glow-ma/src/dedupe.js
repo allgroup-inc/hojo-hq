@@ -12,6 +12,11 @@
     return digits;
   }
 
+  function normalizePhoneNumber(raw) {
+    if (raw === null || raw === undefined) return "";
+    return String(raw).replace(/[^0-9]/g, "");
+  }
+
   function findDuplicateGroups(companies) {
     var byNumber = {};
     var order = [];
@@ -118,19 +123,21 @@
   }
 
   function propagateDoNotContact(records) {
-    var doNotContactPhones = {};
+    var doNotContactPhoneKeys = {};
     (records || []).forEach(function (record) {
-      var phone = record["電話番号"];
-      if (phone && record["連絡不要"] === true) {
-        doNotContactPhones[phone] = true;
+      var phoneKey = normalizePhoneNumber(record["電話番号"]);
+      if (phoneKey && record["連絡不要"] === true) {
+        doNotContactPhoneKeys[phoneKey] = true;
       }
     });
     return (records || []).map(function (record) {
-      var phone = record["電話番号"];
-      if (phone && doNotContactPhones[phone]) {
+      var phoneKey = normalizePhoneNumber(record["電話番号"]);
+      if (phoneKey && doNotContactPhoneKeys[phoneKey] && record["連絡不要"] !== true) {
         var updated = {};
         Object.keys(record).forEach(function (key) { updated[key] = record[key]; });
         updated["連絡不要"] = true;
+        var note = "連絡不要伝播(同一電話番号)";
+        updated["備考"] = record["備考"] ? record["備考"] + " / " + note : note;
         return updated;
       }
       return record;
@@ -139,6 +146,7 @@
 
   var api = {
     normalizeCorporateNumber: normalizeCorporateNumber,
+    normalizePhoneNumber: normalizePhoneNumber,
     findDuplicateGroups: findDuplicateGroups,
     mergeCompanyRecords: mergeCompanyRecords,
     nextSequenceNumber: nextSequenceNumber,

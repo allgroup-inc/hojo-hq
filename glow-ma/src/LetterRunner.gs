@@ -25,6 +25,9 @@ function generateLetterDraftForCompany(companyId) {
   if (!record) {
     throw new Error("企業ID " + companyId + " が企業マスタに見つかりません。");
   }
+  if (record["連絡不要"] === true) {
+    throw new Error("企業ID " + companyId + " は「連絡不要」に設定されているため、レター下書きを生成できません。");
+  }
   writeLetterDraft_(record, GlowSchema.LETTER_DRAFT_TYPES[0]);
   Logger.log("レター下書きを生成しました: " + companyId);
 }

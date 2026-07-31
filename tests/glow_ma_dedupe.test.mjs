@@ -202,7 +202,7 @@ test("企業ID重複防止の回帰テスト: 名寄せで欠番が生じても2
   assert.deepEqual(round2Result.records.map((r) => r.企業ID).sort(), ["C000001", "C000003", "C000004"]);
 });
 
-test("propagateDoNotContact: 同じ電話番号を持つ企業のいずれかが連絡不要ならすべてに伝播する", () => {
+test("propagateDoNotContact: 同じ電話番号を持つ企業のいずれかが連絡不要ならすべてに伝播し、伝播先の備考に監査メモが残る", () => {
   const records = [
     { "企業ID": "C000001", "電話番号": "098-000-0001", "連絡不要": true },
     { "企業ID": "C000002", "電話番号": "098-000-0001", "連絡不要": false },
@@ -212,6 +212,7 @@ test("propagateDoNotContact: 同じ電話番号を持つ企業のいずれかが
   const find = (id) => result.find((r) => r["企業ID"] === id);
   assert.equal(find("C000001")["連絡不要"], true);
   assert.equal(find("C000002")["連絡不要"], true);
+  assert.match(find("C000002")["備考"], /連絡不要伝播/);
   assert.equal(find("C000003")["連絡不要"], false);
 });
 
@@ -232,4 +233,36 @@ test("propagateDoNotContact: 元の配列を書き換えない(非破壊)", () =
   ];
   dedupe.propagateDoNotContact(records);
   assert.equal(records[1]["連絡不要"], false);
+});
+
+test("propagateDoNotContact: 既に連絡不要の企業には伝播メモを追加しない(元の備考を維持)", () => {
+  const records = [
+    { "企業ID": "C000001", "電話番号": "098-000-0001", "連絡不要": true, "備考": "既存メモ" },
+    { "企業ID": "C000002", "電話番号": "098-000-0001", "連絡不要": true, "備考": "既存メモ2" }
+  ];
+  const result = dedupe.propagateDoNotContact(records);
+  const find = (id) => result.find((r) => r["企業ID"] === id);
+  assert.equal(find("C000001")["備考"], "既存メモ");
+  assert.equal(find("C000002")["備考"], "既存メモ2");
+});
+
+test("propagateDoNotContact: 電話番号の表記ゆれ(ハイフンあり/なし)があっても正規化して同一グループとして伝播する", () => {
+  const records = [
+    { "企業ID": "C000001", "電話番号": "098-000-0001", "連絡不要": true },
+    { "企業ID": "C000002", "電話番号": "0980000001", "連絡不要": false }
+  ];
+  const result = dedupe.propagateDoNotContact(records);
+  const find = (id) => result.find((r) => r["企業ID"] === id);
+  assert.equal(find("C000002")["連絡不要"], true);
+  assert.match(find("C000002")["備考"], /連絡不要伝播/);
+});
+
+test("normalizePhoneNumber: 数字以外の記号を除去する", () => {
+  assert.equal(dedupe.normalizePhoneNumber("098-000-0001"), "0980000001");
+  assert.equal(dedupe.normalizePhoneNumber("098 000 0001"), "0980000001");
+});
+
+test("normalizePhoneNumber: null/undefinedは空文字", () => {
+  assert.equal(dedupe.normalizePhoneNumber(null), "");
+  assert.equal(dedupe.normalizePhoneNumber(undefined), "");
 });
