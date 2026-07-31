@@ -4,12 +4,17 @@
  * (将来的には日次・週次の時間主導トリガーに登録して自動実行することを想定しているが、
  *  トリガー登録自体は本Planの範囲外。)
  *
- * 実行すると、企業マスタ・紹介パートナーマスタを読み取り、以下4つの表を
+ * 実行すると、企業マスタ・紹介パートナーマスタを読み取り、以下5つの表を
  * 「ダッシュボード」タブに作り直す。他のタブへの書き込みは一切行わない。
  * - ルート別×ステージ別ファネル
  * - 提案商品別サマリー(提案数・案件化数・成約数)
  * - ランク別サマリー(滞留企業数・掘り起こし待ち件数)
  * - 紹介パートナー別サマリー
+ * - データ品質チェック(集計対象外の件数)
+ *
+ * 企業マスタ・紹介パートナーマスタの読み取りと集計は、他プロセス(例:
+ * importCompaniesFromStaging)による書き込み中の中間状態を拾わないよう、
+ * ScoringRunner.gs と同様にロック取得後に行う。
  */
 function updateDashboard() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -23,20 +28,21 @@ function updateDashboard() {
   }
   var partnerSheet = ss.getSheetByName(GlowSchema.PARTNER_MASTER_SHEET_NAME);
 
-  var records = readCompanyRecords_(companySheet);
-  var partnerRecords = readPartnerRecords_(partnerSheet);
-  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
-
-  var funnel = GlowDashboard.buildRouteStageFunnel(records, GlowDashboard.DEFAULT_CONFIG);
-  var productSummary = GlowDashboard.buildProductFunnel(records, GlowDashboard.DEFAULT_CONFIG);
-  var rankSummary = GlowDashboard.buildRankSummary(records, todayString, GlowDashboard.DEFAULT_CONFIG);
-  var partnerSummary = GlowDashboard.formatPartnerSummary(partnerRecords);
-
   var lock = LockService.getDocumentLock();
   if (!lock.tryLock(30000)) {
     throw new Error("他の処理がダッシュボードを操作中のため、更新を中断しました。しばらく待ってから再実行してください。");
   }
   try {
+    var records = readCompanyRecords_(companySheet);
+    var partnerRecords = readPartnerRecords_(partnerSheet);
+    var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+
+    var funnel = GlowDashboard.buildRouteStageFunnel(records, GlowDashboard.DEFAULT_CONFIG);
+    var productSummary = GlowDashboard.buildProductFunnel(records, GlowDashboard.DEFAULT_CONFIG);
+    var rankSummary = GlowDashboard.buildRankSummary(records, todayString, GlowDashboard.DEFAULT_CONFIG);
+    var partnerSummary = GlowDashboard.formatPartnerSummary(partnerRecords);
+    var qualitySummary = GlowDashboard.countUnclassifiedCompanies(records, GlowDashboard.DEFAULT_CONFIG);
+
     dashboardSheet.clearContents();
     var row = 1;
     row = writeDashboardSection_(dashboardSheet, row, "ルート別×ステージ別ファネル",
@@ -52,10 +58,15 @@ function updateDashboard() {
       rankSummary.map(function (r) { return [r["ランク"], r["滞留企業数"], r["掘り起こし待ち件数"]]; }));
     row++;
     row = writeDashboardSection_(dashboardSheet, row, "紹介パートナー別サマリー",
-      ["名称", "累計紹介数", "成約数", "関係性ランク", "提供済み情報ログ", "逆紹介履歴"],
+      GlowDashboard.PARTNER_SUMMARY_FIELDS,
       partnerSummary.map(function (p) {
-        return [p["名称"], p["累計紹介数"], p["成約数"], p["関係性ランク"], p["提供済み情報ログ"], p["逆紹介履歴"]];
+        return GlowDashboard.PARTNER_SUMMARY_FIELDS.map(function (field) { return p[field]; });
       }));
+    row++;
+    row = writeDashboardSection_(dashboardSheet, row, "データ品質チェック(集計対象外の件数)",
+      ["対象企業数", "未スコア企業数", "現在ステージ未分類企業数", "流入ルート未分類企業数", "提案商品未設定企業数"],
+      [[qualitySummary["対象企業数"], qualitySummary["未スコア企業数"], qualitySummary["現在ステージ未分類企業数"],
+        qualitySummary["流入ルート未分類企業数"], qualitySummary["提案商品未設定企業数"]]]);
     row++;
     dashboardSheet.getRange(row, 1).setValue(
       "最終更新: " + Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm")
