@@ -88,12 +88,23 @@
     return industryPoints + sizePoints + agePoints;
   }
 
+  function calculateRouteBonus(routes, config) {
+    config = config || DEFAULT_CONFIG;
+    var max = 0;
+    (routes || []).forEach(function (route) {
+      var points = config.routeBonus[route];
+      if (typeof points === "number" && points > max) max = points;
+    });
+    return max;
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
     classifyIndustryTier: classifyIndustryTier,
     calculateSizeBandPoints: calculateSizeBandPoints,
     calculateAgeBandPoints: calculateAgeBandPoints,
-    calculateAttributeScore: calculateAttributeScore
+    calculateAttributeScore: calculateAttributeScore,
+    calculateRouteBonus: calculateRouteBonus
   };
 
   if (typeof module !== "undefined" && module.exports) {

@@ -64,3 +64,14 @@ test("calculateAttributeScore: 代表者年齢が空でも他の加点は計算�
   // 業種mid(10) + 規模200名は範囲外(0) + 年齢なし(0) = 10
   assert.equal(scoring.calculateAttributeScore(company, scoring.DEFAULT_CONFIG), 10);
 });
+
+test("calculateRouteBonus: 複数ルートがある場合は最大値を採用する", () => {
+  assert.equal(scoring.calculateRouteBonus(["②手紙DM", "①紹介"], scoring.DEFAULT_CONFIG), 30);
+  assert.equal(scoring.calculateRouteBonus(["③ミカタ経由"], scoring.DEFAULT_CONFIG), 20);
+  assert.equal(scoring.calculateRouteBonus(["②手紙DM"], scoring.DEFAULT_CONFIG), 0);
+});
+
+test("calculateRouteBonus: ルートが空配列なら0", () => {
+  assert.equal(scoring.calculateRouteBonus([], scoring.DEFAULT_CONFIG), 0);
+  assert.equal(scoring.calculateRouteBonus(undefined, scoring.DEFAULT_CONFIG), 0);
+});
