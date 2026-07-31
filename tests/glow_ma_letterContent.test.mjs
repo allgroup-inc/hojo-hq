@@ -47,10 +47,19 @@ test("buildLetterPrompt: 会社名・案内する商品・トラッキングURL�
   assert.match(prompt, /https:\/\/example\.com\/track\?id=C000001/);
 });
 
-test("buildLetterPrompt: 紹介ルートの企業はM&Aを案内する文面指示になる", () => {
+test("buildLetterPrompt: 紹介ルートの企業はM&Aを案内する文面指示になり、矛盾する禁止指示は含まない", () => {
   const record = { 会社名: "サンプル建設株式会社", 業種: "建設業", 流入ルート: ["①紹介"] };
   const prompt = letterContent.buildLetterPrompt(record, "https://example.com/track?id=C000002", letterContent.DEFAULT_CONFIG);
   assert.match(prompt, /M&A/);
+  assert.match(prompt, /M&Aの話から入って構わない/);
+  assert.doesNotMatch(prompt, /いきなりM&Aの話から入らないこと/);
+});
+
+test("buildLetterPrompt: 非紹介ルートの企業はM&Aの話から入らない指示になる", () => {
+  const record = { 会社名: "テスト商事株式会社", 業種: "小売業", 流入ルート: ["②手紙DM"] };
+  const prompt = letterContent.buildLetterPrompt(record, "https://example.com/track?id=C000003", letterContent.DEFAULT_CONFIG);
+  assert.match(prompt, /いきなりM&Aの話から入らないこと/);
+  assert.doesNotMatch(prompt, /M&Aの話から入って構わない/);
 });
 
 test("buildLetterPrompt: 業種が未設定でもエラーにならない", () => {
