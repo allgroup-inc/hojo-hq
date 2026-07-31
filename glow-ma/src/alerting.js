@@ -20,6 +20,7 @@
   var DEFAULT_CONFIG = {
     cycleDaysByRank: { A: 30, B: 90, C: 180, D: 365 },
     referralRoute: "①紹介",
+    terminalStages: ["成約", "見送り"],
     nextBestActionRules: NEXT_BEST_ACTION_RULES,
     defaultNextBestAction: DEFAULT_NEXT_BEST_ACTION
   };
@@ -57,6 +58,7 @@
 
   function isOverdue(record, todayValue, config) {
     config = config || DEFAULT_CONFIG;
+    if ((config.terminalStages || []).indexOf(record["現在ステージ"]) !== -1) return false;
     var dueDate = record["次回アクション予定日"];
     if (dueDate) {
       var daysUntilDue = daysBetween(todayValue, dueDate);
@@ -91,10 +93,12 @@
     var alerts = [];
     (records || []).forEach(function (record) {
       if (!isOverdue(record, todayValue, config)) return;
+      var routes = record["流入ルート"] || [];
       alerts.push({
         "企業ID": record["企業ID"],
         "会社名": record["会社名"],
         "ランク": resolveEffectiveRank(record, config),
+        "紹介ルート特例": routes.indexOf(config.referralRoute) !== -1,
         "ネクストベストアクション": determineNextBestAction(record, config)
       });
     });
@@ -108,6 +112,14 @@
     return alerts;
   }
 
+  function countUnscoredCompanies(records) {
+    var count = 0;
+    (records || []).forEach(function (record) {
+      if (!record["ランク"]) count++;
+    });
+    return count;
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
     toDate: toDate,
@@ -115,7 +127,8 @@
     resolveEffectiveRank: resolveEffectiveRank,
     isOverdue: isOverdue,
     determineNextBestAction: determineNextBestAction,
-    buildDailyAlertList: buildDailyAlertList
+    buildDailyAlertList: buildDailyAlertList,
+    countUnscoredCompanies: countUnscoredCompanies
   };
 
   if (typeof module !== "undefined" && module.exports) {

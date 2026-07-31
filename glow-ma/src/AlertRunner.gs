@@ -6,10 +6,14 @@
  *    SLACK_WEBHOOK_URL を設定する(コードにWebhook URLを直接書かない)
  * 2. Apps Scriptエディタの「トリガー」画面で runDailyAlerts を時間主導トリガー
  *    (毎日 朝など)に手動登録する(トリガー登録自体は本ファイルでは行わない)
+ * 3. 即時アラート(Speed to Lead)を有効にするため、Apps Scriptエディタで
+ *    installInteractionLogEditTrigger を実行する(冪等なので安全に再実行できる)
  *
  * 実行すると、企業マスタ全件から GlowAlerting.buildDailyAlertList で
  * 掘り起こし対象を抽出し、ランク・ネクストベストアクションとともにSlackへ通知する。
  */
+var MAX_ALERT_LINES = 50;
+
 function runDailyAlerts() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
@@ -21,14 +25,24 @@ function runDailyAlerts() {
   var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
   var alerts = GlowAlerting.buildDailyAlertList(records, todayString);
 
+  var unscoredCount = GlowAlerting.countUnscoredCompanies(records);
+  if (unscoredCount > 0) {
+    Logger.log("ランク未設定の企業: " + unscoredCount + "件(recalculateAllScoresを先に実行してください)");
+  }
+
   if (alerts.length === 0) {
     Logger.log("本日の掘り起こし対象はありません。");
     return;
   }
 
-  var lines = alerts.map(function (alert) {
-    return "・" + alert["会社名"] + "(" + alert["ランク"] + "ランク) — " + alert["ネクストベストアクション"];
+  var linesToRender = alerts.slice(0, MAX_ALERT_LINES);
+  var lines = linesToRender.map(function (alert) {
+    return "・" + alert["会社名"] + "(" + alert["ランク"] + "ランク" +
+      (alert["紹介ルート特例"] ? "・紹介ルート特例" : "") + ") — " + alert["ネクストベストアクション"];
   });
+  if (alerts.length > MAX_ALERT_LINES) {
+    lines.push("…ほか " + (alerts.length - MAX_ALERT_LINES) + "件");
+  }
   var message = "【本日の掘り起こし対象】" + alerts.length + "件\n" + lines.join("\n");
   postToSlack_(message);
   Logger.log("掘り起こしアラート送信完了: " + alerts.length + "件");
@@ -40,11 +54,18 @@ function postToSlack_(message) {
     Logger.log("SLACK_WEBHOOK_URL が未設定のため通知をスキップしました: " + message);
     return;
   }
-  UrlFetchApp.fetch(webhookUrl, {
+  var response = UrlFetchApp.fetch(webhookUrl, {
     method: "post",
     contentType: "application/json",
-    payload: JSON.stringify({ text: message })
+    payload: JSON.stringify({ text: message }),
+    muteHttpExceptions: true
   });
+  var responseCode = response.getResponseCode();
+  if (responseCode < 200 || responseCode >= 300) {
+    Logger.log(
+      "Slackへの通知に失敗しました(HTTP " + responseCode + "): " + response.getContentText()
+    );
+  }
 }
 
 /**
@@ -57,10 +78,10 @@ function postToSlack_(message) {
  * 実行コンテキストで動作し、authorizationが必要なサービス(本関数が呼ぶ postToSlack_ 内の
  * UrlFetchApp.fetch を含む)を呼び出すと例外で失敗する。そのため、この関数自体は直接トリガー
  * されない普通の関数として定義し、下記の installInteractionLogEditTrigger を
- * Apps Scriptエディタから**人間が手動で一度だけ実行**して、認可済みの「インストール型トリガー」
+ * Apps Scriptエディタから**人間が手動で実行**して、認可済みの「インストール型トリガー」
  * として登録する必要がある(初回実行時に認可(オーソリ)を求めるダイアログが出るのは正常な挙動)。
- * installInteractionLogEditTrigger を複数回実行すると同じトリガーが重複登録されるため、
- * 再実行する場合はApps Scriptエディタの「トリガー」画面で既存登録の有無を確認してから行うこと。
+ * installInteractionLogEditTrigger は冪等であり、実行前に同名の既存トリガーを削除してから
+ * 登録し直すため、安全に何度でも再実行できる。
  */
 function handleInteractionLogEdit(e) {
   if (!e || !e.range) return;
@@ -89,11 +110,18 @@ function handleInteractionLogEdit(e) {
 
 /**
  * handleInteractionLogEdit をインストール型のonEditトリガーとして登録する。
- * Apps Scriptエディタから人間が手動で一度だけ実行すること(実行時に認可ダイアログが出る)。
- * 既に登録済みの状態で再実行すると、同じトリガーが重複登録されるので注意。
- * 事前に「トリガー」画面で既存登録の有無を確認してから実行することを推奨する。
+ * Apps Scriptエディタから人間が手動で実行すること(実行時に認可ダイアログが出る)。
+ * この関数は冪等: 実行時にまず同じハンドラ関数を指す既存トリガーをすべて削除してから
+ * 新規登録するため、重複登録を心配せずに安全に再実行できる。
  */
 function installInteractionLogEditTrigger() {
+  var existingTriggers = ScriptApp.getProjectTriggers();
+  existingTriggers.forEach(function (trigger) {
+    if (trigger.getHandlerFunction() === "handleInteractionLogEdit") {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   ScriptApp.newTrigger("handleInteractionLogEdit")
     .forSpreadsheet(ss)

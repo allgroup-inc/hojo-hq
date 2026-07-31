@@ -88,6 +88,28 @@ test("isOverdue: 日付を一切計算できない場合は対象外(誤検知�
   assert.equal(alerting.isOverdue(record, "2026-07-27", alerting.DEFAULT_CONFIG), false);
 });
 
+test("isOverdue: 現在ステージが成約(終了ステージ)の企業は、サイクル超過・予定日超過があっても対象外", () => {
+  const record = {
+    ランク: "A",
+    流入ルート: [],
+    現在ステージ: "成約",
+    次回アクション予定日: "2020-01-01",
+    最終接触日: "2000-01-01"
+  };
+  assert.equal(alerting.isOverdue(record, "2026-07-27", alerting.DEFAULT_CONFIG), false);
+});
+
+test("isOverdue: 現在ステージが見送り(終了ステージ)の企業も対象外", () => {
+  const record = {
+    ランク: "B",
+    流入ルート: [],
+    現在ステージ: "見送り",
+    次回アクション予定日: "",
+    最終接触日: "2000-01-01"
+  };
+  assert.equal(alerting.isOverdue(record, "2026-07-27", alerting.DEFAULT_CONFIG), false);
+});
+
 test("determineNextBestAction: Aランク×未接触系ステージは至急電話推奨", () => {
   const record = { ランク: "A", 流入ルート: [], 現在ステージ: "未接触" };
   assert.equal(alerting.determineNextBestAction(record, alerting.DEFAULT_CONFIG), "至急電話推奨(最優先ランク)");
@@ -123,8 +145,54 @@ test("buildDailyAlertList: 掘り起こし対象のみ抽出し、ランクA→D
   assert.equal(alerts.length, 2);
   assert.deepEqual(alerts.map((a) => a["企業ID"]), ["C2", "C1"]);
   assert.equal(alerts[0]["ネクストベストアクション"], "至急電話推奨(最優先ランク)");
+  assert.equal(alerts[0]["紹介ルート特例"], false);
+  assert.equal(alerts[1]["紹介ルート特例"], false);
 });
 
 test("buildDailyAlertList: 対象企業がなければ空配列", () => {
   assert.deepEqual(alerting.buildDailyAlertList([], "2026-07-27", alerting.DEFAULT_CONFIG), []);
+});
+
+test("buildDailyAlertList: 紹介ルートの企業は「紹介ルート特例」がtrueで、企業マスタ上の実際のランクは書き換えずに保持する", () => {
+  const records = [
+    {
+      企業ID: "C4",
+      会社名: "紹介ルート社",
+      ランク: "D",
+      流入ルート: ["①紹介"],
+      現在ステージ: "未接触",
+      次回アクション予定日: "",
+      最終接触日: "2026-06-01"
+    },
+    {
+      企業ID: "C5",
+      会社名: "非紹介社",
+      ランク: "D",
+      流入ルート: ["②手紙DM"],
+      現在ステージ: "関係構築中",
+      次回アクション予定日: "",
+      最終接触日: "2020-01-01"
+    }
+  ];
+  const alerts = alerting.buildDailyAlertList(records, "2026-07-27", alerting.DEFAULT_CONFIG);
+  const referral = alerts.find((a) => a["企業ID"] === "C4");
+  const nonReferral = alerts.find((a) => a["企業ID"] === "C5");
+  assert.equal(referral["ランク"], "A");
+  assert.equal(referral["紹介ルート特例"], true);
+  assert.equal(nonReferral["ランク"], "D");
+  assert.equal(nonReferral["紹介ルート特例"], false);
+});
+
+test("countUnscoredCompanies: ランク未設定(recalculateAllScores未実行)の企業数を数える", () => {
+  const records = [
+    { 企業ID: "C1", ランク: "A" },
+    { 企業ID: "C2", ランク: "" },
+    { 企業ID: "C3" },
+    { 企業ID: "C4", ランク: "D" }
+  ];
+  assert.equal(alerting.countUnscoredCompanies(records), 2);
+});
+
+test("countUnscoredCompanies: 空配列は0", () => {
+  assert.equal(alerting.countUnscoredCompanies([]), 0);
 });
