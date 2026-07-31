@@ -37,6 +37,7 @@ JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA_PATH = os.path.join(BASE, "data", "subsidies.json")
 SNAPSHOT_PATH = os.path.join(BASE, "data", "note_snapshot.json")
+SPONSORS_PATH = os.path.join(BASE, "data", "note_sponsors.json")
 OUT_DIR = os.path.join(BASE, "posts", "note")
 
 SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=note&utm_medium=article&utm_campaign=teiten"
@@ -149,6 +150,46 @@ def ai_column(stats: dict) -> str:
         return fallback
 
 
+def sponsor_section(today):
+    """スポンサー枠(収益軸C / docs/収益軸拡張_設計.md)。
+
+    data/note_sponsors.json が active かつ有効な枠がある時だけ差し込む。
+    販売開始は小柳さん決裁後のため、初期値(active=false)では何も出ない。
+    ステマ規制対応として【PR】表記はここで機械的に付す(手動運用に依存しない)。
+    法務ルールは専門家掲載モデル準拠: 定額掲載料(広告)のみ・成果報酬型紹介料なし。
+    """
+    if not os.path.exists(SPONSORS_PATH):
+        return []
+    try:
+        conf = load_json(SPONSORS_PATH)
+    except (ValueError, OSError):
+        return []
+    if not conf.get("active"):
+        return []
+    slots = []
+    for s in conf.get("slots", []):
+        until = s.get("until")
+        try:
+            if until and datetime.strptime(until, "%Y-%m-%d").date() < today:
+                continue
+        except ValueError:
+            continue
+        if s.get("office") and s.get("specialty"):
+            slots.append(s)
+    if not slots:
+        return []
+    L = ["## この制度、誰に頼めばいい?【PR】", ""]
+    L.append("申請のご相談は、当メディア提携の専門家へ(掲載は定額広告です。紹介手数料はいただいていません)。")
+    L.append("")
+    for s in slots[:2]:
+        line = f"- **{s['office']}**(得意分野: {s['specialty']})"
+        if s.get("url"):
+            line += f" — {s['url']}"
+        L.append(line)
+    L.append("")
+    return L
+
+
 def build_article(data, snapshot, today):
     items = data.get("items", [])
     current = {i["id"]: i for i in items if i.get("id")}
@@ -256,6 +297,8 @@ def build_article(data, snapshot, today):
     L.append("")
     L.append(f"👉 無料マッチング診断・LINE登録はこちら: {SITE_URL}")
     L.append("")
+
+    L.extend(sponsor_section(today))
 
     L.append("## AI編集後記")
     L.append("")
