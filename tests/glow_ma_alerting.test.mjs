@@ -110,6 +110,17 @@ test("isOverdue: 現在ステージが見送り(終了ステージ)の企業も�
   assert.equal(alerting.isOverdue(record, "2026-07-27", alerting.DEFAULT_CONFIG), false);
 });
 
+test("isOverdue: 連絡不要の企業は、サイクル超過・予定日超過があっても対象外", () => {
+  const record = {
+    ランク: "A",
+    流入ルート: [],
+    連絡不要: true,
+    次回アクション予定日: "2020-01-01",
+    最終接触日: "2000-01-01"
+  };
+  assert.equal(alerting.isOverdue(record, "2026-07-27", alerting.DEFAULT_CONFIG), false);
+});
+
 test("determineNextBestAction: Aランク×未接触系ステージは至急電話推奨", () => {
   const record = { ランク: "A", 流入ルート: [], 現在ステージ: "未接触" };
   assert.equal(alerting.determineNextBestAction(record, alerting.DEFAULT_CONFIG), "至急電話推奨(最優先ランク)");
@@ -181,6 +192,32 @@ test("buildDailyAlertList: 紹介ルートの企業は「紹介ルート特例�
   assert.equal(referral["紹介ルート特例"], true);
   assert.equal(nonReferral["ランク"], "D");
   assert.equal(nonReferral["紹介ルート特例"], false);
+});
+
+test("buildDailyAlertList: 連絡不要の企業は、サイクル超過であってもアラート一覧に含まれない", () => {
+  const records = [
+    {
+      企業ID: "C6",
+      会社名: "連絡不要社",
+      ランク: "A",
+      流入ルート: [],
+      連絡不要: true,
+      現在ステージ: "未接触",
+      次回アクション予定日: "",
+      最終接触日: "2000-01-01"
+    },
+    {
+      企業ID: "C7",
+      会社名: "対象社",
+      ランク: "A",
+      流入ルート: [],
+      現在ステージ: "未接触",
+      次回アクション予定日: "",
+      最終接触日: "2000-01-01"
+    }
+  ];
+  const alerts = alerting.buildDailyAlertList(records, "2026-07-27", alerting.DEFAULT_CONFIG);
+  assert.deepEqual(alerts.map((a) => a["企業ID"]), ["C7"]);
 });
 
 test("countUnscoredCompanies: ランク未設定(recalculateAllScores未実行)の企業数を数える", () => {

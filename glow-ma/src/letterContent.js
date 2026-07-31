@@ -71,6 +71,7 @@
     config = config || DEFAULT_CONFIG;
     var nurturing = config.nurturing || DEFAULT_CONFIG.nurturing;
     return (records || []).filter(function (record) {
+      if (record["連絡不要"] === true) return false;
       if (nurturing.eligibleStages.indexOf(record["現在ステージ"]) === -1) return false;
       // 意図的に企業マスタの「ランク」列(スコアそのもの)で判定する。alerting.jsの
       // resolveEffectiveRank(紹介ルートは常にA相当)は接触サイクル判定専用の例外であり、

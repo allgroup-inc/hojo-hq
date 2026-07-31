@@ -87,6 +87,14 @@ test("selectNurturingTargets: 最終接触日が未設定なら登録日を代�
   assert.deepEqual(targets.map((r) => r["企業ID"]), ["C5"]);
 });
 
+test("selectNurturingTargets: 連絡不要の企業は、他の条件を満たしていても対象外", () => {
+  const records = [
+    { 企業ID: "C6", 現在ステージ: "関係構築中", ランク: "B", 連絡不要: true, 最終接触日: "2026-01-01" }
+  ];
+  const targets = letterContent.selectNurturingTargets(records, "2026-07-27", letterContent.DEFAULT_CONFIG);
+  assert.deepEqual(targets, []);
+});
+
 test("selectNurturingTargets: 対象企業がなければ空配列", () => {
   assert.deepEqual(letterContent.selectNurturingTargets([], "2026-07-27", letterContent.DEFAULT_CONFIG), []);
 });

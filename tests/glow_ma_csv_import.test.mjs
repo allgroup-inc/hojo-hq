@@ -37,3 +37,35 @@ test("parseCompanyCsvRow: columnMapに存在しない列は空文字になる", 
   assert.equal(record.会社名, "テスト商事株式会社");
   assert.equal(record.代表者名, "");
 });
+
+test("parseCompanyCsvRow: 連絡不要にマッピングされた列の値がTRUEなら真偽値trueになる", () => {
+  const headerRow = ["法人名", "DNC区分"];
+  const dataRow = ["テスト商事株式会社", "TRUE"];
+  const columnMap = { 会社名: "法人名", 連絡不要: "DNC区分" };
+
+  const record = csvImport.parseCompanyCsvRow(headerRow, dataRow, columnMap, 1, "2026-07-26");
+
+  assert.equal(record.連絡不要, true);
+});
+
+test("parseCompanyCsvRow: 連絡不要が空文字またはマッピングされていない場合はfalse", () => {
+  const headerRow = ["法人名", "DNC区分"];
+  const columnMap = { 会社名: "法人名", 連絡不要: "DNC区分" };
+
+  const recordEmptyValue = csvImport.parseCompanyCsvRow(headerRow, ["テスト商事株式会社", ""], columnMap, 1, "2026-07-26");
+  assert.equal(recordEmptyValue.連絡不要, false);
+
+  const recordUnmapped = csvImport.parseCompanyCsvRow(headerRow, ["テスト商事株式会社", "TRUE"], { 会社名: "法人名" }, 1, "2026-07-26");
+  assert.equal(recordUnmapped.連絡不要, false);
+});
+
+test("電話番号: マッピングされていなければ空文字、マッピングされていれば文字列の値になる", () => {
+  const headerRow = ["法人名", "電話"];
+  const columnMap = { 会社名: "法人名" };
+
+  const recordUnmapped = csvImport.parseCompanyCsvRow(headerRow, ["テスト商事株式会社", "098-000-0001"], columnMap, 1, "2026-07-26");
+  assert.equal(recordUnmapped.電話番号, "");
+
+  const recordMapped = csvImport.parseCompanyCsvRow(headerRow, ["テスト商事株式会社", "098-000-0001"], { 会社名: "法人名", 電話番号: "電話" }, 1, "2026-07-26");
+  assert.equal(recordMapped.電話番号, "098-000-0001");
+});
