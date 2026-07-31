@@ -63,3 +63,12 @@ test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種�
   ];
   assert.deepEqual(schema.INTERACTION_TYPES, expected);
 });
+
+test("レター下書きタブの名称・見出し・種別・ステータスが定義されている", () => {
+  assert.equal(schema.LETTER_DRAFT_SHEET_NAME, "レター下書き");
+  assert.deepEqual(schema.LETTER_DRAFT_HEADERS, [
+    "下書きID", "企業ID", "種別", "生成日時", "本文", "ステータス"
+  ]);
+  assert.deepEqual(schema.LETTER_DRAFT_TYPES, ["初回DM", "ナーチャリング配信"]);
+  assert.deepEqual(schema.LETTER_DRAFT_STATUSES, ["下書き", "送付済み", "見送り"]);
+});
