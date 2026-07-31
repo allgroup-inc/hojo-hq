@@ -130,6 +130,31 @@
     };
   }
 
+  function buildHistorySnapshot(records, todayValue, config) {
+    config = config || DEFAULT_CONFIG;
+    var list = records || [];
+    var rankSummary = buildRankSummary(list, todayValue, config);
+    var findRank_ = function (rank) {
+      var found = rankSummary.filter(function (r) { return r["ランク"] === rank; })[0];
+      return found || { "滞留企業数": 0, "掘り起こし待ち件数": 0 };
+    };
+    var totalOverdue = rankSummary.reduce(function (sum, r) {
+      return sum + r["掘り起こし待ち件数"];
+    }, 0);
+    var doNotContactCount = list.filter(function (record) {
+      return record["連絡不要"] === true;
+    }).length;
+    return {
+      "対象企業数": list.length,
+      "ランクA_滞留企業数": findRank_("A")["滞留企業数"],
+      "ランクB_滞留企業数": findRank_("B")["滞留企業数"],
+      "ランクC_滞留企業数": findRank_("C")["滞留企業数"],
+      "ランクD_滞留企業数": findRank_("D")["滞留企業数"],
+      "掘り起こし待ち件数合計": totalOverdue,
+      "連絡不要企業数": doNotContactCount
+    };
+  }
+
   var PARTNER_SUMMARY_FIELDS = ["名称", "累計紹介数", "成約数", "関係性ランク", "提供済み情報ログ", "逆紹介履歴"];
 
   function calculateConversionRate_(referralCountValue, dealCountValue) {
@@ -156,6 +181,7 @@
     buildRouteStageFunnel: buildRouteStageFunnel,
     buildProductFunnel: buildProductFunnel,
     buildRankSummary: buildRankSummary,
+    buildHistorySnapshot: buildHistorySnapshot,
     countUnclassifiedCompanies: countUnclassifiedCompanies,
     formatPartnerSummary: formatPartnerSummary,
     PARTNER_SUMMARY_FIELDS: PARTNER_SUMMARY_FIELDS
