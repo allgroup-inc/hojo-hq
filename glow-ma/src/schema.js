@@ -19,6 +19,13 @@
     "履歴ID", "企業ID", "日付", "担当者", "種別", "対応相手", "内容メモ", "次回アクション"
   ];
 
+  var INTERACTION_TYPES = [
+    "手紙送付", "電話", "ゆんたく相談実施", "面談実施", "紹介受領", "ミカタ接点確認",
+    "レターURLアクセス", "返信", "資料請求",
+    "提案(M&A)", "提案(不動産)", "提案(法人保険)",
+    "成約", "見送り", "ナーチャリング配信"
+  ];
+
   var PARTNER_MASTER_SHEET_NAME = "紹介パートナーマスタ";
   var PARTNER_MASTER_HEADERS = [
     "パートナーID", "名称", "種別", "担当者名", "関係性ランク", "累計紹介数", "成約数",
@@ -33,6 +40,7 @@
     COMPANY_MASTER_HEADERS: COMPANY_MASTER_HEADERS,
     INTERACTION_LOG_SHEET_NAME: INTERACTION_LOG_SHEET_NAME,
     INTERACTION_LOG_HEADERS: INTERACTION_LOG_HEADERS,
+    INTERACTION_TYPES: INTERACTION_TYPES,
     PARTNER_MASTER_SHEET_NAME: PARTNER_MASTER_SHEET_NAME,
     PARTNER_MASTER_HEADERS: PARTNER_MASTER_HEADERS,
     SETTINGS_SHEET_NAME: SETTINGS_SHEET_NAME,
