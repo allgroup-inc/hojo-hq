@@ -75,3 +75,31 @@ test("calculateRouteBonus: ルートが空配列なら0", () => {
   assert.equal(scoring.calculateRouteBonus([], scoring.DEFAULT_CONFIG), 0);
   assert.equal(scoring.calculateRouteBonus(undefined, scoring.DEFAULT_CONFIG), 0);
 });
+
+test("calculateReactionScore: 種別ごとの加点を合算する", () => {
+  const rows = [
+    { 種別: "レターURLアクセス", 対応相手: "未接触" },
+    { 種別: "ゆんたく相談実施", 対応相手: "経理・総務等の窓口担当" }
+  ];
+  // レターURLアクセス(5) + ゆんたく相談実施(25) = 30
+  assert.equal(scoring.calculateReactionScore(rows, scoring.DEFAULT_CONFIG), 30);
+});
+
+test("calculateReactionScore: 対応相手がオーナー社長本人なら種別を問わず+15", () => {
+  const rows = [{ 種別: "電話", 対応相手: "オーナー社長本人" }];
+  // 電話は反応イベント対象外(0) + 意思決定者ボーナス(15) = 15
+  assert.equal(scoring.calculateReactionScore(rows, scoring.DEFAULT_CONFIG), 15);
+});
+
+test("calculateReactionScore: 反応イベント対象外の種別(手紙送付・電話等)は加点しない", () => {
+  const rows = [
+    { 種別: "手紙送付", 対応相手: "未接触" },
+    { 種別: "ミカタ接点確認", 対応相手: "未接触" }
+  ];
+  assert.equal(scoring.calculateReactionScore(rows, scoring.DEFAULT_CONFIG), 0);
+});
+
+test("calculateReactionScore: 履歴が空なら0", () => {
+  assert.equal(scoring.calculateReactionScore([], scoring.DEFAULT_CONFIG), 0);
+  assert.equal(scoring.calculateReactionScore(undefined, scoring.DEFAULT_CONFIG), 0);
+});

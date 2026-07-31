@@ -98,13 +98,25 @@
     return max;
   }
 
+  function calculateReactionScore(interactionRows, config) {
+    config = config || DEFAULT_CONFIG;
+    var total = 0;
+    (interactionRows || []).forEach(function (row) {
+      var typePoints = config.reactionPointsByType[row["種別"]];
+      if (typeof typePoints === "number") total += typePoints;
+      if (row["対応相手"] === "オーナー社長本人") total += config.decisionMakerBonus;
+    });
+    return total;
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
     classifyIndustryTier: classifyIndustryTier,
     calculateSizeBandPoints: calculateSizeBandPoints,
     calculateAgeBandPoints: calculateAgeBandPoints,
     calculateAttributeScore: calculateAttributeScore,
-    calculateRouteBonus: calculateRouteBonus
+    calculateRouteBonus: calculateRouteBonus,
+    calculateReactionScore: calculateReactionScore
   };
 
   if (typeof module !== "undefined" && module.exports) {
