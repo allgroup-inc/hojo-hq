@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const scoring = require("../glow-ma/src/scoring.js");
+const schema = require("../glow-ma/src/schema.js");
 
 test("DEFAULT_CONFIG にランク閾値A:70/B:40/C:15が設定されている(2026-07-27 triangle-review確定値)", () => {
   assert.deepEqual(scoring.DEFAULT_CONFIG.rankThresholds, { A: 70, B: 40, C: 15 });
@@ -51,6 +52,17 @@ test("calculateAgeBandPoints: 年齢帯ごとの加点", () => {
 test("calculateAgeBandPoints: データ欠損時は0点(任意加点、モデルを歪ませない)", () => {
   assert.equal(scoring.calculateAgeBandPoints("", scoring.DEFAULT_CONFIG), 0);
   assert.equal(scoring.calculateAgeBandPoints(undefined, scoring.DEFAULT_CONFIG), 0);
+});
+
+test("calculateAgeBandPoints: 上限120を超える値(列マッピング誤りで西暦年などが混入した場合)は0点", () => {
+  // 「代表者年齢」は運用者が設定するCSV列マッピングの値をそのまま使うため、
+  // 例えば「創業年」列(例: 1955)を誤って年齢列にマッピングすると、
+  // 上限がInfinityだと70歳以上バンド(15点)に誤って乗ってしまう。120を上限とすることで防ぐ。
+  assert.equal(scoring.calculateAgeBandPoints("1955", scoring.DEFAULT_CONFIG), 0);
+});
+
+test("calculateAgeBandPoints: 上限120以内の72歳は引き続き70〜120バンド(15点)に該当する", () => {
+  assert.equal(scoring.calculateAgeBandPoints("72歳", scoring.DEFAULT_CONFIG), 15);
 });
 
 test("calculateAttributeScore: 業種・規模・年齢の加点を合算する", () => {
@@ -102,6 +114,51 @@ test("calculateReactionScore: 反応イベント対象外の種別(手紙送付�
 test("calculateReactionScore: 履歴が空なら0", () => {
   assert.equal(scoring.calculateReactionScore([], scoring.DEFAULT_CONFIG), 0);
   assert.equal(scoring.calculateReactionScore(undefined, scoring.DEFAULT_CONFIG), 0);
+});
+
+test("calculateReactionScore: 返信(15点)・面談実施(25点)・資料請求(10点)が個別に加点される", () => {
+  assert.equal(
+    scoring.calculateReactionScore([{ 種別: "返信", 対応相手: "未接触" }], scoring.DEFAULT_CONFIG),
+    15
+  );
+  assert.equal(
+    scoring.calculateReactionScore([{ 種別: "面談実施", 対応相手: "未接触" }], scoring.DEFAULT_CONFIG),
+    25
+  );
+  assert.equal(
+    scoring.calculateReactionScore([{ 種別: "資料請求", 対応相手: "未接触" }], scoring.DEFAULT_CONFIG),
+    10
+  );
+});
+
+test("reactionPointsByTypeのキーはすべてGlowSchema.INTERACTION_TYPESに含まれる(一文字のズレで壊れないことを保証)", () => {
+  Object.keys(scoring.DEFAULT_CONFIG.reactionPointsByType).forEach((key) => {
+    assert.ok(schema.INTERACTION_TYPES.includes(key), key + " is not in INTERACTION_TYPES");
+  });
+});
+
+// 反応スコアの上限化に関する回帰テスト。
+// 根拠: docs/superpowers/specs/2026-07-27-glow-ma-reaction-score-cap-triangle-review.md
+// (同一種別の繰り返しは加点せず、意思決定者ボーナスも企業ごとに最大1回)
+test("calculateReactionScore: 同一種別を複数回記録しても加点は1回分のみ", () => {
+  const rows = [
+    { 種別: "レターURLアクセス", 対応相手: "未接触" },
+    { 種別: "レターURLアクセス", 対応相手: "未接触" }
+  ];
+  // レターURLアクセス(5) × 1回のみ = 5(2回分の10にはならない)
+  assert.equal(scoring.calculateReactionScore(rows, scoring.DEFAULT_CONFIG), 5);
+});
+
+test("calculateReactionScore: 対応相手がオーナー社長本人の行が複数あっても意思決定者ボーナスは1回のみ(電話5件で75点になるバグの回帰テスト)", () => {
+  const rows = [
+    { 種別: "電話", 対応相手: "オーナー社長本人" },
+    { 種別: "電話", 対応相手: "オーナー社長本人" },
+    { 種別: "電話", 対応相手: "オーナー社長本人" },
+    { 種別: "電話", 対応相手: "オーナー社長本人" },
+    { 種別: "電話", 対応相手: "オーナー社長本人" }
+  ];
+  // 電話は反応イベント対象外(0) + 意思決定者ボーナスは最大1回(15) = 15(75にはならない)
+  assert.equal(scoring.calculateReactionScore(rows, scoring.DEFAULT_CONFIG), 15);
 });
 
 test("calculateRank: 閾値どおりにA〜Dへ分類する", () => {

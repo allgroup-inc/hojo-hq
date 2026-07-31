@@ -10,32 +10,66 @@
  *
  * readCompanyRecords_ / writeCompanyRecords_ は glow-ma/src/ImportRunner.gs で
  * 定義済みのため、ここでは再定義せずそのまま呼び出す。
+ *
+ * writeCompanyRecords_ は企業マスタを丸ごと書き直す破壊的処理のため、
+ * importCompaniesFromStaging(ImportRunner.gs)と同じLockServiceパターンで
+ * 排他制御する(手動インポートと自動再計算が同時に走ってどちらかの書き込みを
+ * 握りつぶすことを防ぐ)。
  */
 function recalculateAllScores() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
-  if (!companySheet) {
-    throw new Error("企業マスタタブが見つかりません。先に ensureLedgerTabs を実行してください。");
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(30000)) {
+    throw new Error(
+      "他の処理が企業マスタを操作中のため、スコア再計算を開始できませんでした。" +
+      "しばらく待ってから再実行してください。"
+    );
   }
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+    if (!companySheet) {
+      throw new Error("企業マスタタブが見つかりません。先に ensureLedgerTabs を実行してください。");
+    }
 
-  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
-  var interactionsByCompanyId = readInteractionsByCompanyId_(logSheet);
+    var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+    var interactionsByCompanyId = readInteractionsByCompanyId_(logSheet);
 
-  var records = readCompanyRecords_(companySheet);
-  records.forEach(function (record) {
-    var interactionRows = interactionsByCompanyId[record["企業ID"]] || [];
-    var initialScore = GlowScoring.calculateAttributeScore(record) + GlowScoring.calculateRouteBonus(record["流入ルート"]);
-    var reactionScore = GlowScoring.calculateReactionScore(interactionRows);
-    var totalScore = initialScore + reactionScore;
+    var records = readCompanyRecords_(companySheet);
+    var knownCompanyIds = {};
+    records.forEach(function (record) {
+      knownCompanyIds[record["企業ID"]] = true;
+    });
 
-    record["初期スコア"] = initialScore;
-    record["反応スコア"] = reactionScore;
-    record["総合スコア"] = totalScore;
-    record["ランク"] = GlowScoring.calculateRank(totalScore);
-  });
+    var orphanedCount = 0;
+    Object.keys(interactionsByCompanyId).forEach(function (companyId) {
+      if (!knownCompanyIds[companyId]) {
+        orphanedCount += interactionsByCompanyId[companyId].length;
+      }
+    });
 
-  writeCompanyRecords_(companySheet, records);
-  Logger.log("スコア再計算完了: " + records.length + "件");
+    records.forEach(function (record) {
+      var interactionRows = interactionsByCompanyId[record["企業ID"]] || [];
+      var initialScore = GlowScoring.calculateAttributeScore(record) + GlowScoring.calculateRouteBonus(record["流入ルート"]);
+      var reactionScore = GlowScoring.calculateReactionScore(interactionRows);
+      var totalScore = initialScore + reactionScore;
+
+      record["初期スコア"] = initialScore;
+      record["反応スコア"] = reactionScore;
+      record["総合スコア"] = totalScore;
+      record["ランク"] = GlowScoring.calculateRank(totalScore);
+    });
+
+    writeCompanyRecords_(companySheet, records);
+    Logger.log("スコア再計算完了: " + records.length + "件");
+    if (orphanedCount > 0) {
+      Logger.log(
+        "企業マスタに存在しない企業IDの対応履歴ログ: " + orphanedCount +
+        "件(スコアに反映されません。企業IDの入力ミスがないか確認してください)"
+      );
+    }
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function readInteractionsByCompanyId_(sheet) {

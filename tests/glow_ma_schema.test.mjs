@@ -50,6 +50,10 @@ test("紹介パートナーマスタに紹介料率と逆紹介履歴の列が�
   assert.ok(schema.PARTNER_MASTER_HEADERS.includes("逆紹介履歴"));
 });
 
+test("対応履歴ログの対応相手(RESPONDENT_TYPES)が設計書5.2節の3種と一致する", () => {
+  assert.deepEqual(schema.RESPONDENT_TYPES, ["オーナー社長本人", "経理・総務等の窓口担当", "未接触"]);
+});
+
 test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種と一致する", () => {
   const expected = [
     "手紙送付", "電話", "ゆんたく相談実施", "面談実施", "紹介受領", "ミカタ接点確認",
