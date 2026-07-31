@@ -19,3 +19,8 @@ __pycache__/
 
 # GLOW M&A台帳(非公開スプレッドシートIDを含むため)
 glow-ma/.clasp.json
+.clasp.json
+.clasprc.json
+glow-ma/**/*.csv
+glow-ma/**/*.xlsx
+glow-ma/data/

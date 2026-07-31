@@ -24,54 +24,89 @@ var IMPORT_COLUMN_MAP = {
 var STAGING_SHEET_NAME = "インポート待ち";
 
 function importCompaniesFromStaging() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var staging = ss.getSheetByName(STAGING_SHEET_NAME);
-  if (!staging) {
-    throw new Error("「" + STAGING_SHEET_NAME + "」タブが見つかりません。元データを貼り付けてから実行してください。");
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(30000)) {
+    throw new Error(
+      "他の処理が企業マスタを操作中のため、インポートを開始できませんでした。" +
+      "しばらく待ってから再実行してください。"
+    );
   }
-  var values = staging.getDataRange().getValues();
-  if (values.length < 2) {
-    Logger.log("インポート対象のデータ行がありません。");
-    return;
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var staging = ss.getSheetByName(STAGING_SHEET_NAME);
+    if (!staging) {
+      throw new Error("「" + STAGING_SHEET_NAME + "」タブが見つかりません。元データを貼り付けてから実行してください。");
+    }
+    var values = staging.getDataRange().getValues();
+    if (values.length < 2) {
+      Logger.log("インポート対象のデータ行がありません。");
+      return;
+    }
+    var headerRow = values[0].map(String);
+
+    var missingHeaders = Object.keys(IMPORT_COLUMN_MAP)
+      .map(function (targetField) { return IMPORT_COLUMN_MAP[targetField]; })
+      .filter(function (sourceHeader) { return headerRow.indexOf(sourceHeader) === -1; });
+    if (missingHeaders.length > 0) {
+      throw new Error(
+        "IMPORT_COLUMN_MAP が「" + STAGING_SHEET_NAME + "」タブの見出しと一致しません。" +
+        "見つからない見出し: " + missingHeaders.join("、") +
+        " / IMPORT_COLUMN_MAP を実際の見出しに合わせて書き換えてから再実行してください。"
+      );
+    }
+
+    var dataRows = values.slice(1).filter(function (row) {
+      return !row.every(function (cell) { return cell === "" || cell === null; });
+    });
+
+    var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+    if (!companySheet) {
+      throw new Error("企業マスタタブが見つかりません。先に ensureLedgerTabs を実行してください。");
+    }
+
+    var existingRecords = readCompanyRecords_(companySheet);
+    var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+
+    var nextId = GlowDedupe.nextSequenceNumber(existingRecords);
+    var newRecords = dataRows.map(function (row, index) {
+      return GlowCsvImport.parseCompanyCsvRow(headerRow, row, IMPORT_COLUMN_MAP, nextId + index, todayString);
+    });
+
+    var invalidCorporateNumberCount = newRecords.filter(function (record) {
+      return !GlowDedupe.normalizeCorporateNumber(record["法人番号"]);
+    }).length;
+
+    var combined = existingRecords.concat(newRecords);
+    var mergeResult = GlowDedupe.applyMerges(combined);
+    var finalRecords = mergeResult.records;
+
+    var idOccurrences = {};
+    finalRecords.forEach(function (record) {
+      var id = record["企業ID"];
+      idOccurrences[id] = (idOccurrences[id] || 0) + 1;
+    });
+    var duplicateIds = Object.keys(idOccurrences).filter(function (id) { return idOccurrences[id] > 1; });
+    if (duplicateIds.length > 0) {
+      throw new Error(
+        "企業IDの重複を検出したため、書き込みを中止しました(データは変更されていません)。" +
+        "企業マスタを確認してください。重複している企業ID: " + duplicateIds.join("、")
+      );
+    }
+
+    var backupName = "企業マスタ_backup_" + todayString + "_" + Utilities.formatDate(new Date(), "Asia/Tokyo", "HHmmss");
+    companySheet.copyTo(ss).setName(backupName);
+
+    writeCompanyRecords_(companySheet, finalRecords);
+    Logger.log(
+      "インポート完了: 新規読込 " + newRecords.length + "件 / 名寄せ統合 " +
+      mergeResult.absorbedCount + "件 / 最終件数 " + finalRecords.length + "件"
+    );
+    Logger.log(
+      "法人番号が不正または空の新規行: " + invalidCorporateNumberCount + "件(名寄せ対象外)"
+    );
+  } finally {
+    lock.releaseLock();
   }
-  var headerRow = values[0].map(String);
-  var dataRows = values.slice(1).filter(function (row) {
-    return !row.every(function (cell) { return cell === "" || cell === null; });
-  });
-
-  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
-  if (!companySheet) {
-    throw new Error("企業マスタタブが見つかりません。先に ensureLedgerTabs を実行してください。");
-  }
-
-  var existingRecords = readCompanyRecords_(companySheet);
-  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
-
-  var newRecords = dataRows.map(function (row, index) {
-    var sequenceNumber = existingRecords.length + index + 1;
-    return GlowCsvImport.parseCompanyCsvRow(headerRow, row, IMPORT_COLUMN_MAP, sequenceNumber, todayString);
-  });
-
-  var combined = existingRecords.concat(newRecords);
-  var duplicateGroups = GlowDedupe.findDuplicateGroups(combined);
-
-  var absorbedIdSet = {};
-  var mergedByFirstId = {};
-  duplicateGroups.forEach(function (group) {
-    var result = GlowDedupe.mergeCompanyRecords(group);
-    mergedByFirstId[group[0]["企業ID"]] = result.merged;
-    result.absorbedIds.forEach(function (id) { absorbedIdSet[id] = true; });
-  });
-
-  var finalRecords = combined
-    .filter(function (record) { return !absorbedIdSet[record["企業ID"]]; })
-    .map(function (record) { return mergedByFirstId[record["企業ID"]] || record; });
-
-  writeCompanyRecords_(companySheet, finalRecords);
-  Logger.log(
-    "インポート完了: 新規読込 " + newRecords.length + "件 / 名寄せ統合 " +
-    Object.keys(absorbedIdSet).length + "件 / 最終件数 " + finalRecords.length + "件"
-  );
 }
 
 function readCompanyRecords_(sheet) {
