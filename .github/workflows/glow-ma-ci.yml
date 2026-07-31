@@ -1,0 +1,25 @@
+name: glow-ma-ci
+
+on:
+  push:
+    paths:
+      - "glow-ma/**"
+      - "tests/glow_ma_*.test.mjs"
+  pull_request:
+    paths:
+      - "glow-ma/**"
+      - "tests/glow_ma_*.test.mjs"
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: GLOW M&A台帳 ロジック単体テスト
+        run: node --test tests/glow_ma_schema.test.mjs tests/glow_ma_dedupe.test.mjs tests/glow_ma_csv_import.test.mjs
