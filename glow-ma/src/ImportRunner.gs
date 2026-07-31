@@ -19,7 +19,8 @@ var IMPORT_COLUMN_MAP = {
   "規模": "規模",
   "代表者名": "代表者名",
   "代表者年齢": "代表者年齢",
-  "所在地": "所在地"
+  "所在地": "所在地",
+  "電話番号": "電話番号"
 };
 var STAGING_SHEET_NAME = "インポート待ち";
 
@@ -78,7 +79,7 @@ function importCompaniesFromStaging() {
 
     var combined = existingRecords.concat(newRecords);
     var mergeResult = GlowDedupe.applyMerges(combined);
-    var finalRecords = mergeResult.records;
+    var finalRecords = GlowDedupe.propagateDoNotContact(mergeResult.records);
 
     var idOccurrences = {};
     finalRecords.forEach(function (record) {
