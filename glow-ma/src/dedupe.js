@@ -31,9 +31,60 @@
     return groups;
   }
 
+  var SCALAR_FIELDS = [
+    "企業ID", "法人番号", "会社名", "業種", "規模", "代表者名", "代表者年齢", "所在地",
+    "起点担当者_紹介元", "現在ステージ", "初期スコア", "反応スコア", "総合スコア", "ランク",
+    "最終接触日", "次回アクション予定日", "次回アクション内容", "担当者", "登録日"
+  ];
+
+  function unionArrayField(records, field) {
+    var seen = {};
+    var result = [];
+    records.forEach(function (record) {
+      (record[field] || []).forEach(function (value) {
+        if (!seen[value]) {
+          seen[value] = true;
+          result.push(value);
+        }
+      });
+    });
+    return result;
+  }
+
+  function mergeCompanyRecords(records) {
+    if (!records || records.length === 0) {
+      throw new Error("mergeCompanyRecords requires at least one record");
+    }
+    var merged = {};
+    SCALAR_FIELDS.forEach(function (field) {
+      merged[field] = "";
+      for (var i = 0; i < records.length; i++) {
+        var value = records[i][field];
+        if (value !== undefined && value !== null && value !== "") {
+          merged[field] = value;
+          break;
+        }
+      }
+    });
+
+    merged["流入ルート"] = unionArrayField(records, "流入ルート");
+    merged["提案商品"] = unionArrayField(records, "提案商品");
+
+    var absorbedIds = records.slice(1).map(function (r) { return r["企業ID"]; }).filter(Boolean);
+    var noteParts = [];
+    if (records[0]["備考"]) noteParts.push(records[0]["備考"]);
+    if (absorbedIds.length > 0) {
+      noteParts.push("名寄せ統合: " + absorbedIds.join("、") + " を統合");
+    }
+    merged["備考"] = noteParts.join(" / ");
+
+    return { merged: merged, absorbedIds: absorbedIds };
+  }
+
   var api = {
     normalizeCorporateNumber: normalizeCorporateNumber,
-    findDuplicateGroups: findDuplicateGroups
+    findDuplicateGroups: findDuplicateGroups,
+    mergeCompanyRecords: mergeCompanyRecords
   };
 
   if (typeof module !== "undefined" && module.exports) {
