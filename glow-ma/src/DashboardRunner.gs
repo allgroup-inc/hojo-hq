@@ -27,6 +27,10 @@ function updateDashboard() {
     throw new Error("ダッシュボードタブが見つかりません。先に ensureLedgerTabs を実行してください。");
   }
   var partnerSheet = ss.getSheetByName(GlowSchema.PARTNER_MASTER_SHEET_NAME);
+  var historySheet = ss.getSheetByName(GlowSchema.DASHBOARD_HISTORY_SHEET_NAME);
+  if (!historySheet) {
+    throw new Error("ダッシュボード履歴タブが見つかりません。先に ensureLedgerTabs を実行してください。");
+  }
 
   var lock = LockService.getDocumentLock();
   if (!lock.tryLock(30000)) {
@@ -42,6 +46,7 @@ function updateDashboard() {
     var rankSummary = GlowDashboard.buildRankSummary(records, todayString, GlowDashboard.DEFAULT_CONFIG);
     var partnerSummary = GlowDashboard.formatPartnerSummary(partnerRecords);
     var qualitySummary = GlowDashboard.countUnclassifiedCompanies(records, GlowDashboard.DEFAULT_CONFIG);
+    var historySnapshot = GlowDashboard.buildHistorySnapshot(records, todayString, GlowDashboard.DEFAULT_CONFIG);
 
     dashboardSheet.clearContents();
     var row = 1;
@@ -58,9 +63,9 @@ function updateDashboard() {
       rankSummary.map(function (r) { return [r["ランク"], r["滞留企業数"], r["掘り起こし待ち件数"]]; }));
     row++;
     row = writeDashboardSection_(dashboardSheet, row, "紹介パートナー別サマリー",
-      GlowDashboard.PARTNER_SUMMARY_FIELDS,
+      GlowDashboard.PARTNER_SUMMARY_FIELDS.concat(["成約率"]),
       partnerSummary.map(function (p) {
-        return GlowDashboard.PARTNER_SUMMARY_FIELDS.map(function (field) { return p[field]; });
+        return GlowDashboard.PARTNER_SUMMARY_FIELDS.concat(["成約率"]).map(function (field) { return p[field]; });
       }));
     row++;
     row = writeDashboardSection_(dashboardSheet, row, "データ品質チェック(集計対象外の件数)",
@@ -68,6 +73,15 @@ function updateDashboard() {
       [[qualitySummary["対象企業数"], qualitySummary["未スコア企業数"], qualitySummary["現在ステージ未分類企業数"],
         qualitySummary["流入ルート未分類企業数"], qualitySummary["提案商品未設定企業数"]]]);
     row++;
+
+    historySheet.appendRow([
+      Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm"),
+      historySnapshot["対象企業数"],
+      historySnapshot["ランクA_滞留企業数"], historySnapshot["ランクB_滞留企業数"],
+      historySnapshot["ランクC_滞留企業数"], historySnapshot["ランクD_滞留企業数"],
+      historySnapshot["掘り起こし待ち件数合計"], historySnapshot["連絡不要企業数"]
+    ]);
+
     dashboardSheet.getRange(row, 1).setValue(
       "最終更新: " + Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm")
     );
