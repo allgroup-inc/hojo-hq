@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-07-31 08:16",
+ "generated_at": "2026-07-31 11:16",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 12,
- "count": 25,
+ "count": 26,
  "items": [
   {
    "id": "a0WJ200000CDbonMAD",
@@ -96,6 +96,16 @@
    "max_amount": null,
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1029379.html",
    "tag": "okinawa"
+  },
+  {
+   "id": "a0WJ200000CDdRhMAL",
+   "name": "「国内外における土木・建設工事を含む事業実施の適正評価手法の調査業務」の公募",
+   "deadline": "2026-08-14",
+   "days_left": 14,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdRhMAL",
+   "tag": "nationwide"
   },
   {
    "id": "a0WJ200000CDc0sMAD",
