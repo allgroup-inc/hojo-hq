@@ -3,14 +3,15 @@
  * Apps Scriptエディタの関数選択で ensureLedgerTabs を選び、実行ボタンで手動実行する。
  * 実行すると「企業マスタ」「対応履歴ログ」「紹介パートナーマスタ」「設定」の
  * 4タブが(存在しなければ)作成され、1行目に見出しが設定される。
- * 対応履歴ログの「種別」列には、表記ゆれによる反応スコア集計漏れを防ぐため
- * プルダウン入力規則(GlowSchema.INTERACTION_TYPES)を設定する。
+ * 対応履歴ログの「種別」「対応相手」列には、表記ゆれによる反応スコア集計漏れを防ぐため
+ * プルダウン入力規則(GlowSchema.INTERACTION_TYPES / GlowSchema.RESPONDENT_TYPES)を設定する。
  */
 function ensureLedgerTabs() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   ensureTab_(ss, GlowSchema.COMPANY_MASTER_SHEET_NAME, GlowSchema.COMPANY_MASTER_HEADERS);
   var logSheet = ensureTab_(ss, GlowSchema.INTERACTION_LOG_SHEET_NAME, GlowSchema.INTERACTION_LOG_HEADERS);
   applyInteractionTypeValidation_(logSheet);
+  applyRespondentValidation_(logSheet);
   ensureTab_(ss, GlowSchema.PARTNER_MASTER_SHEET_NAME, GlowSchema.PARTNER_MASTER_HEADERS);
   ensureTab_(ss, GlowSchema.SETTINGS_SHEET_NAME, GlowSchema.SETTINGS_HEADERS);
 }
@@ -32,4 +33,13 @@ function applyInteractionTypeValidation_(sheet) {
     .setAllowInvalid(false)
     .build();
   sheet.getRange(2, typeColumnIndex, Math.max(sheet.getMaxRows() - 1, 1), 1).setDataValidation(rule);
+}
+
+function applyRespondentValidation_(sheet) {
+  var respondentColumnIndex = GlowSchema.INTERACTION_LOG_HEADERS.indexOf("対応相手") + 1;
+  var rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(GlowSchema.RESPONDENT_TYPES, true)
+    .setAllowInvalid(false)
+    .build();
+  sheet.getRange(2, respondentColumnIndex, Math.max(sheet.getMaxRows() - 1, 1), 1).setDataValidation(rule);
 }

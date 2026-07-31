@@ -23,7 +23,7 @@
       { min: 51, max: 100, points: 5 }
     ],
     ageBands: [
-      { min: 70, max: Infinity, points: 15 },
+      { min: 70, max: 120, points: 15 },
       { min: 60, max: 69, points: 10 },
       { min: 50, max: 59, points: 5 }
     ],
@@ -49,6 +49,8 @@
     };
     if (matchesAny(config.industryTiers.high)) return "high";
     if (matchesAny(config.industryTiers.low)) return "low";
+    // 未一致(空文字含む)は「未分類」と「実質mid」を区別できないため、
+    // lowとして減点せずmid(中立)扱いにする。意図的な仕様。
     return "mid";
   }
 
@@ -98,14 +100,28 @@
     return max;
   }
 
+  // 反応スコアの上限化: 種別ごとに最初の1件のみ加点し(同一種別の繰り返しは加点しない)、
+  // 意思決定者接触ボーナスも企業ごとに最大1回のみ加点する。
+  // 根拠: docs/superpowers/specs/2026-07-27-glow-ma-reaction-score-cap-triangle-review.md
   function calculateReactionScore(interactionRows, config) {
     config = config || DEFAULT_CONFIG;
     var total = 0;
+    var seenTypes = {};
+    var decisionMakerContacted = false;
     (interactionRows || []).forEach(function (row) {
-      var typePoints = config.reactionPointsByType[row["種別"]];
-      if (typeof typePoints === "number") total += typePoints;
-      if (row["対応相手"] === "オーナー社長本人") total += config.decisionMakerBonus;
+      var type = row["種別"];
+      var typePoints = config.reactionPointsByType[type];
+      if (typeof typePoints === "number" && !seenTypes[type]) {
+        seenTypes[type] = true;
+        total += typePoints;
+      }
+      if (row["対応相手"] === "オーナー社長本人") {
+        decisionMakerContacted = true;
+      }
     });
+    if (decisionMakerContacted) {
+      total += config.decisionMakerBonus;
+    }
     return total;
   }
 

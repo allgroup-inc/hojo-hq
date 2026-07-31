@@ -50,17 +50,21 @@ Googleスプレッドシートに保持し、このディレクトリにはGAS(G
   飲食・小売)は、GLOWチームの実務レビューを経た確定版ではない**たたき台**。
   実データを見ながら見直すこと(見直し期限: 2026-10-27、
   `docs/superpowers/specs/2026-07-27-glow-ma-scoring-triangle-review.md` 参照)
-- 対応履歴ログの「種別」は、反応スコアの集計対象になるかどうかが値によって決まる。
+- 対応履歴ログの「種別」「対応相手」は、反応スコアの集計対象になるかどうかが値によって決まる。
   必ずプルダウンから選択すること(自由入力の表記ゆれは集計に反映されない)
+- 企業マスタの「流入ルート」列はコード(ImportRunner.gs/dedupe.js)が複数値を「、」区切りで
+  書き込む列であり、プルダウン入力規則は設定していない。手動で編集する場合は
+  設計書に定義された①紹介/②手紙DM/③ミカタ経由の正確な文字列以外を入力しないこと
+  (この列には表記ゆれを防ぐ自動チェックが存在しない)
 
 ## 次のフェーズ
 
-スコアリング・掘り起こしアラート・レター生成・ダッシュボードは、
+掘り起こしアラート・レター生成・ダッシュボードは、
 `docs/superpowers/specs/2026-07-26-glow-ma-relation-system-design.md` の
 フェーズ2以降として別Planで実装する。
 
 ## テスト
 
 ```bash
-node --test tests/glow_ma_schema.test.mjs tests/glow_ma_dedupe.test.mjs tests/glow_ma_csv_import.test.mjs
+node --test tests/glow_ma_*.test.mjs
 ```
