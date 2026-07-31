@@ -2,7 +2,7 @@
  * GLOW企業リレーション台帳: シート初期化
  * Apps Scriptエディタの関数選択で ensureLedgerTabs を選び、実行ボタンで手動実行する。
  * 実行すると「企業マスタ」「対応履歴ログ」「紹介パートナーマスタ」「設定」
- * 「レター下書き」の5タブが(存在しなければ)作成され、1行目に見出しが設定される。
+ * 「レター下書き」「ダッシュボード」の6タブが(存在しなければ)作成され、1行目に見出しが設定される。
  * 対応履歴ログの「種別」「対応相手」列、レター下書きの「ステータス」列には、
  * 表記ゆれによる集計漏れを防ぐためプルダウン入力規則を設定する。
  */
@@ -16,6 +16,7 @@ function ensureLedgerTabs() {
   ensureTab_(ss, GlowSchema.SETTINGS_SHEET_NAME, GlowSchema.SETTINGS_HEADERS);
   var letterDraftSheet = ensureTab_(ss, GlowSchema.LETTER_DRAFT_SHEET_NAME, GlowSchema.LETTER_DRAFT_HEADERS);
   applyLetterDraftStatusValidation_(letterDraftSheet);
+  ensureTab_(ss, GlowSchema.DASHBOARD_SHEET_NAME, GlowSchema.DASHBOARD_PLACEHOLDER_HEADERS);
 }
 
 function ensureTab_(spreadsheet, sheetName, headers) {
