@@ -54,12 +54,12 @@ test("対応履歴ログの対応相手(RESPONDENT_TYPES)が設計書5.2節の3�
   assert.deepEqual(schema.RESPONDENT_TYPES, ["オーナー社長本人", "経理・総務等の窓口担当", "未接触"]);
 });
 
-test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種と一致する", () => {
+test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種+連絡不要受領と一致する", () => {
   const expected = [
     "手紙送付", "電話", "ゆんたく相談実施", "面談実施", "紹介受領", "ミカタ接点確認",
     "レターURLアクセス", "返信", "資料請求",
     "提案(M&A)", "提案(不動産)", "提案(法人保険)",
-    "成約", "見送り", "ナーチャリング配信"
+    "成約", "見送り", "ナーチャリング配信", "連絡不要受領"
   ];
   assert.deepEqual(schema.INTERACTION_TYPES, expected);
 });
@@ -78,4 +78,13 @@ test("ダッシュボードタブの名称・プレースホルダー見出し�
   assert.deepEqual(schema.DASHBOARD_PLACEHOLDER_HEADERS, [
     "ダッシュボード(updateDashboardを実行すると内容が生成されます)"
   ]);
+});
+
+test("企業マスタに電話番号・連絡不要列が追加されている", () => {
+  assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("電話番号") !== -1);
+  assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("連絡不要") !== -1);
+});
+
+test("対応履歴ログの種別に連絡不要受領が追加されている", () => {
+  assert.ok(schema.INTERACTION_TYPES.indexOf("連絡不要受領") !== -1);
 });
