@@ -77,10 +77,35 @@
     });
   }
 
+  function buildRankSummary(records, todayValue, config) {
+    config = config || DEFAULT_CONFIG;
+    var alerting = getGlowAlerting_();
+    var counts = {};
+    config.ranks.forEach(function (rank) {
+      counts[rank] = { "滞留企業数": 0, "掘り起こし待ち件数": 0 };
+    });
+    (records || []).forEach(function (record) {
+      var effectiveRank = alerting.resolveEffectiveRank(record);
+      if (!counts[effectiveRank]) return;
+      counts[effectiveRank]["滞留企業数"]++;
+      if (alerting.isOverdue(record, todayValue)) {
+        counts[effectiveRank]["掘り起こし待ち件数"]++;
+      }
+    });
+    return config.ranks.map(function (rank) {
+      return {
+        "ランク": rank,
+        "滞留企業数": counts[rank]["滞留企業数"],
+        "掘り起こし待ち件数": counts[rank]["掘り起こし待ち件数"]
+      };
+    });
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
     buildRouteStageFunnel: buildRouteStageFunnel,
-    buildProductFunnel: buildProductFunnel
+    buildProductFunnel: buildProductFunnel,
+    buildRankSummary: buildRankSummary
   };
 
   if (typeof module !== "undefined" && module.exports) {

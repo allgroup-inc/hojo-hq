@@ -44,3 +44,24 @@ test("buildProductFunnel: 提案商品が未設定の企業は集計対象外", 
   const summary = dashboard.buildProductFunnel(records, dashboard.DEFAULT_CONFIG);
   summary.forEach((s) => assert.equal(s["提案数"], 0));
 });
+
+test("buildRankSummary: 実効ランクごとに滞留企業数と掘り起こし待ち件数を集計する(紹介ルートは常にAとして数える)", () => {
+  const records = [
+    { 企業ID: "C1", ランク: "A", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2020-01-01" },
+    { 企業ID: "C2", ランク: "A", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2026-07-27" },
+    { 企業ID: "C3", ランク: "D", 流入ルート: ["①紹介"], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2026-07-01" }
+  ];
+  const summary = dashboard.buildRankSummary(records, "2026-07-27", dashboard.DEFAULT_CONFIG);
+  const find = (rank) => summary.find((s) => s["ランク"] === rank);
+  assert.equal(find("A")["滞留企業数"], 3);
+  assert.equal(find("A")["掘り起こし待ち件数"], 1);
+  assert.equal(find("D")["滞留企業数"], 0);
+});
+
+test("buildRankSummary: 対象企業がなければ全ランク0件", () => {
+  const summary = dashboard.buildRankSummary([], "2026-07-27", dashboard.DEFAULT_CONFIG);
+  summary.forEach((s) => {
+    assert.equal(s["滞留企業数"], 0);
+    assert.equal(s["掘り起こし待ち件数"], 0);
+  });
+});
