@@ -72,3 +72,10 @@ test("レター下書きタブの名称・見出し・種別・ステータス�
   assert.deepEqual(schema.LETTER_DRAFT_TYPES, ["初回DM", "ナーチャリング配信"]);
   assert.deepEqual(schema.LETTER_DRAFT_STATUSES, ["下書き", "送付済み", "見送り"]);
 });
+
+test("ダッシュボードタブの名称・プレースホルダー見出しが定義されている", () => {
+  assert.equal(schema.DASHBOARD_SHEET_NAME, "ダッシュボード");
+  assert.deepEqual(schema.DASHBOARD_PLACEHOLDER_HEADERS, [
+    "ダッシュボード(updateDashboardを実行すると内容が生成されます)"
+  ]);
+});
