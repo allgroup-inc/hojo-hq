@@ -65,3 +65,22 @@ test("buildRankSummary: 対象企業がなければ全ランク0件", () => {
     assert.equal(s["掘り起こし待ち件数"], 0);
   });
 });
+
+test("formatPartnerSummary: パートナーマスタの表示用フィールドを整形する", () => {
+  const partners = [
+    { 名称: "テスト税理士法人", 累計紹介数: 5, 成約数: 1, 関係性ランク: "高", 提供済み情報ログ: "建設業向け資料を提供", 逆紹介履歴: "サンプル建設を紹介" }
+  ];
+  const summary = dashboard.formatPartnerSummary(partners);
+  assert.deepEqual(summary, [
+    { "名称": "テスト税理士法人", "累計紹介数": 5, "成約数": 1, "関係性ランク": "高", "提供済み情報ログ": "建設業向け資料を提供", "逆紹介履歴": "サンプル建設を紹介" }
+  ]);
+});
+
+test("formatPartnerSummary: 欠損フィールドは空文字で埋める", () => {
+  const summary = dashboard.formatPartnerSummary([{ 名称: "テスト銀行" }]);
+  assert.deepEqual(summary[0], { "名称": "テスト銀行", "累計紹介数": "", "成約数": "", "関係性ランク": "", "提供済み情報ログ": "", "逆紹介履歴": "" });
+});
+
+test("formatPartnerSummary: 空配列なら空配列", () => {
+  assert.deepEqual(dashboard.formatPartnerSummary([]), []);
+});

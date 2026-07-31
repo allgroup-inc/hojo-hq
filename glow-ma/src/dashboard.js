@@ -101,11 +101,25 @@
     });
   }
 
+  var PARTNER_SUMMARY_FIELDS = ["名称", "累計紹介数", "成約数", "関係性ランク", "提供済み情報ログ", "逆紹介履歴"];
+
+  function formatPartnerSummary(partnerRecords) {
+    return (partnerRecords || []).map(function (partner) {
+      var summary = {};
+      PARTNER_SUMMARY_FIELDS.forEach(function (field) {
+        var value = partner[field];
+        summary[field] = value === undefined || value === null ? "" : value;
+      });
+      return summary;
+    });
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
     buildRouteStageFunnel: buildRouteStageFunnel,
     buildProductFunnel: buildProductFunnel,
-    buildRankSummary: buildRankSummary
+    buildRankSummary: buildRankSummary,
+    formatPartnerSummary: formatPartnerSummary
   };
 
   if (typeof module !== "undefined" && module.exports) {
