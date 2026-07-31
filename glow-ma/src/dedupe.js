@@ -12,8 +12,28 @@
     return digits;
   }
 
+  function findDuplicateGroups(companies) {
+    var byNumber = {};
+    var order = [];
+    companies.forEach(function (company) {
+      var num = normalizeCorporateNumber(company["法人番号"]);
+      if (!num) return;
+      if (!byNumber[num]) {
+        byNumber[num] = [];
+        order.push(num);
+      }
+      byNumber[num].push(company);
+    });
+    var groups = [];
+    order.forEach(function (num) {
+      if (byNumber[num].length > 1) groups.push(byNumber[num]);
+    });
+    return groups;
+  }
+
   var api = {
-    normalizeCorporateNumber: normalizeCorporateNumber
+    normalizeCorporateNumber: normalizeCorporateNumber,
+    findDuplicateGroups: findDuplicateGroups
   };
 
   if (typeof module !== "undefined" && module.exports) {
