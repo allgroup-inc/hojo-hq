@@ -13,13 +13,13 @@ test("buildCompanyId: 連番を6桁ゼロ埋めのIDに変換する", () => {
 
 test("parseCompanyCsvRow: 見出しマッピングに従って値を取り出す", () => {
   const headerRow = ["法人名", "業種区分", "所在地欄"];
-  const dataRow = ["沖縄物産株式会社", "小売業", "那覇市"];
+  const dataRow = ["テスト商事株式会社", "小売業", "那覇市"];
   const columnMap = { 会社名: "法人名", 業種: "業種区分", 所在地: "所在地欄" };
 
   const record = csvImport.parseCompanyCsvRow(headerRow, dataRow, columnMap, 1, "2026-07-26");
 
   assert.equal(record.企業ID, "C000001");
-  assert.equal(record.会社名, "沖縄物産株式会社");
+  assert.equal(record.会社名, "テスト商事株式会社");
   assert.equal(record.業種, "小売業");
   assert.equal(record.所在地, "那覇市");
   assert.deepEqual(record.流入ルート, ["②手紙DM"]);
@@ -29,11 +29,11 @@ test("parseCompanyCsvRow: 見出しマッピングに従って値を取り出す
 
 test("parseCompanyCsvRow: columnMapに存在しない列は空文字になる", () => {
   const headerRow = ["法人名"];
-  const dataRow = ["沖縄物産株式会社"];
+  const dataRow = ["テスト商事株式会社"];
   const columnMap = { 会社名: "法人名", 代表者名: "存在しない見出し" };
 
   const record = csvImport.parseCompanyCsvRow(headerRow, dataRow, columnMap, 1, "2026-07-26");
 
-  assert.equal(record.会社名, "沖縄物産株式会社");
+  assert.equal(record.会社名, "テスト商事株式会社");
   assert.equal(record.代表者名, "");
 });

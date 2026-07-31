@@ -81,10 +81,45 @@
     return { merged: merged, absorbedIds: absorbedIds };
   }
 
+  function nextSequenceNumber(records) {
+    var max = 0;
+    (records || []).forEach(function (record) {
+      var id = record && record["企業ID"];
+      if (typeof id !== "string") return;
+      var match = id.match(/^C(\d+)$/);
+      if (!match) return;
+      var num = parseInt(match[1], 10);
+      if (num > max) max = num;
+    });
+    return max + 1;
+  }
+
+  function applyMerges(records) {
+    records = records || [];
+    if (records.length === 0) {
+      return { records: [], absorbedCount: 0 };
+    }
+    var duplicateGroups = findDuplicateGroups(records);
+    var absorbedIdSet = {};
+    var mergedByFirstId = {};
+    duplicateGroups.forEach(function (group) {
+      var result = mergeCompanyRecords(group);
+      mergedByFirstId[group[0]["企業ID"]] = result.merged;
+      result.absorbedIds.forEach(function (id) { absorbedIdSet[id] = true; });
+    });
+    var finalRecords = records
+      .filter(function (record) { return !absorbedIdSet[record["企業ID"]]; })
+      .map(function (record) { return mergedByFirstId[record["企業ID"]] || record; });
+    return { records: finalRecords, absorbedCount: Object.keys(absorbedIdSet).length };
+  }
+
   var api = {
     normalizeCorporateNumber: normalizeCorporateNumber,
     findDuplicateGroups: findDuplicateGroups,
-    mergeCompanyRecords: mergeCompanyRecords
+    mergeCompanyRecords: mergeCompanyRecords,
+    nextSequenceNumber: nextSequenceNumber,
+    applyMerges: applyMerges,
+    SCALAR_FIELDS: SCALAR_FIELDS
   };
 
   if (typeof module !== "undefined" && module.exports) {

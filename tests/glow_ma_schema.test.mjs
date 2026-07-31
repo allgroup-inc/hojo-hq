@@ -12,6 +12,20 @@ test("4つのシート全てのヘッダー定義が配列で存在する", () =
   assert.ok(Array.isArray(schema.SETTINGS_HEADERS));
 });
 
+test("4つのシート全てのヘッダー定義が空配列でない", () => {
+  assert.ok(schema.COMPANY_MASTER_HEADERS.length > 0);
+  assert.ok(schema.INTERACTION_LOG_HEADERS.length > 0);
+  assert.ok(schema.PARTNER_MASTER_HEADERS.length > 0);
+  assert.ok(schema.SETTINGS_HEADERS.length > 0);
+});
+
+test("4つのシート名が期待する文字列と完全一致する", () => {
+  assert.equal(schema.COMPANY_MASTER_SHEET_NAME, "企業マスタ");
+  assert.equal(schema.INTERACTION_LOG_SHEET_NAME, "対応履歴ログ");
+  assert.equal(schema.PARTNER_MASTER_SHEET_NAME, "紹介パートナーマスタ");
+  assert.equal(schema.SETTINGS_SHEET_NAME, "設定");
+});
+
 test("企業マスタのヘッダーに重複がない", () => {
   const unique = new Set(schema.COMPANY_MASTER_HEADERS);
   assert.equal(unique.size, schema.COMPANY_MASTER_HEADERS.length);

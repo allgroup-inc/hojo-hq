@@ -22,4 +22,4 @@ jobs:
           node-version: "22"
 
       - name: GLOW M&A台帳 ロジック単体テスト
-        run: node --test tests/glow_ma_schema.test.mjs tests/glow_ma_dedupe.test.mjs tests/glow_ma_csv_import.test.mjs
+        run: node --test tests/glow_ma_*.test.mjs
