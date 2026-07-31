@@ -52,9 +52,38 @@
     return "mid";
   }
 
+  function extractNumber(text) {
+    var match = String(text || "").match(/\d+/);
+    return match ? parseInt(match[0], 10) : null;
+  }
+
+  function findBandPoints(numericValue, bands) {
+    for (var i = 0; i < bands.length; i++) {
+      var band = bands[i];
+      if (numericValue >= band.min && numericValue <= band.max) return band.points;
+    }
+    return 0;
+  }
+
+  function calculateSizeBandPoints(sizeText, config) {
+    config = config || DEFAULT_CONFIG;
+    var n = extractNumber(sizeText);
+    if (n === null) return 0;
+    return findBandPoints(n, config.sizeBands);
+  }
+
+  function calculateAgeBandPoints(ageText, config) {
+    config = config || DEFAULT_CONFIG;
+    var n = extractNumber(ageText);
+    if (n === null) return 0;
+    return findBandPoints(n, config.ageBands);
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
-    classifyIndustryTier: classifyIndustryTier
+    classifyIndustryTier: classifyIndustryTier,
+    calculateSizeBandPoints: calculateSizeBandPoints,
+    calculateAgeBandPoints: calculateAgeBandPoints
   };
 
   if (typeof module !== "undefined" && module.exports) {

@@ -23,3 +23,32 @@ test("classifyIndustryTier: 未一致の業種はmid(中立)扱い", () => {
 test("classifyIndustryTier: configを省略した場合はDEFAULT_CONFIGが使われる", () => {
   assert.equal(scoring.classifyIndustryTier("建設業"), "high");
 });
+
+test("calculateSizeBandPoints: 10〜50名は10点", () => {
+  assert.equal(scoring.calculateSizeBandPoints("30名", scoring.DEFAULT_CONFIG), 10);
+  assert.equal(scoring.calculateSizeBandPoints("10名", scoring.DEFAULT_CONFIG), 10);
+  assert.equal(scoring.calculateSizeBandPoints("50名", scoring.DEFAULT_CONFIG), 10);
+});
+
+test("calculateSizeBandPoints: 5〜9名・51〜100名は5点", () => {
+  assert.equal(scoring.calculateSizeBandPoints("7名", scoring.DEFAULT_CONFIG), 5);
+  assert.equal(scoring.calculateSizeBandPoints("80名", scoring.DEFAULT_CONFIG), 5);
+});
+
+test("calculateSizeBandPoints: 範囲外・空・数字なしは0点", () => {
+  assert.equal(scoring.calculateSizeBandPoints("2名", scoring.DEFAULT_CONFIG), 0);
+  assert.equal(scoring.calculateSizeBandPoints("", scoring.DEFAULT_CONFIG), 0);
+  assert.equal(scoring.calculateSizeBandPoints(null, scoring.DEFAULT_CONFIG), 0);
+});
+
+test("calculateAgeBandPoints: 年齢帯ごとの加点", () => {
+  assert.equal(scoring.calculateAgeBandPoints("72歳", scoring.DEFAULT_CONFIG), 15);
+  assert.equal(scoring.calculateAgeBandPoints("65", scoring.DEFAULT_CONFIG), 10);
+  assert.equal(scoring.calculateAgeBandPoints("55歳", scoring.DEFAULT_CONFIG), 5);
+  assert.equal(scoring.calculateAgeBandPoints("40歳", scoring.DEFAULT_CONFIG), 0);
+});
+
+test("calculateAgeBandPoints: データ欠損時は0点(任意加点、モデルを歪ませない)", () => {
+  assert.equal(scoring.calculateAgeBandPoints("", scoring.DEFAULT_CONFIG), 0);
+  assert.equal(scoring.calculateAgeBandPoints(undefined, scoring.DEFAULT_CONFIG), 0);
+});
