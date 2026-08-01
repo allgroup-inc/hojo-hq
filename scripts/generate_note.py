@@ -345,7 +345,7 @@ def build_article(data, snapshot, today):
     L.append("")
 
     stem = f"{dstr}_vol{vol}"
-    return stem, "\n".join(L), current
+    return stem, "\n".join(L), current, gone
 
 
 def main():
@@ -356,7 +356,7 @@ def main():
     data = load_json(DATA_PATH)
     snapshot = load_json(SNAPSHOT_PATH) if os.path.exists(SNAPSHOT_PATH) else None
 
-    stem, article, current = build_article(data, snapshot, today)
+    stem, article, current, gone = build_article(data, snapshot, today)
 
     if dry_run:
         print(article)
@@ -377,6 +377,21 @@ def main():
     }
     with open(SNAPSHOT_PATH, "w", encoding="utf-8") as f:
         json.dump(snap, f, ensure_ascii=False, indent=1)
+
+    # 締切到来で消えた制度を「消えたもの図鑑」(メンバー連載)用に蓄積する
+    dstr = today.strftime("%Y-%m-%d")
+    archive_path = os.path.join(BASE, "data", "gone_archive.json")
+    archive = load_json(archive_path) if os.path.exists(archive_path) else {"items": []}
+    seen = {(a.get("name"), a.get("deadline")) for a in archive["items"]}
+    for g in gone:
+        key = (g.get("name"), g.get("deadline"))
+        if key not in seen:
+            archive["items"].append(
+                {"name": g.get("name"), "deadline": g.get("deadline"), "recorded": dstr}
+            )
+            seen.add(key)
+    with open(archive_path, "w", encoding="utf-8") as f:
+        json.dump(archive, f, ensure_ascii=False, indent=1)
 
     if preview:
         title = article.splitlines()[0].lstrip("# ")
