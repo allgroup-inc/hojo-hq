@@ -11,6 +11,7 @@
  * - ランク別サマリー(滞留企業数・掘り起こし待ち件数)
  * - 紹介パートナー別サマリー
  * - データ品質チェック(集計対象外の件数)
+ * - 工程別滞留状況(NDA締結/意向表明受領/DD開始)
  * これに加えて、「ダッシュボード履歴」タブに主要指標のスナップショットを1行追記する
  * (こちらは「ダッシュボード」タブと異なり、実行のたびに内容を消さず積み上げる)。
  *
@@ -30,6 +31,10 @@ function updateDashboard() {
   }
   var partnerSheet = ss.getSheetByName(GlowSchema.PARTNER_MASTER_SHEET_NAME);
   var historySheet = ss.getSheetByName(GlowSchema.DASHBOARD_HISTORY_SHEET_NAME);
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  if (!logSheet) {
+    throw new Error("対応履歴ログタブが見つかりません。先に ensureLedgerTabs を実行してください。");
+  }
 
   var lock = LockService.getDocumentLock();
   if (!lock.tryLock(30000)) {
@@ -41,7 +46,13 @@ function updateDashboard() {
     }
     var records = readCompanyRecords_(companySheet);
     var partnerRecords = readPartnerRecords_(partnerSheet);
+    var interactionsByCompanyId = readInteractionsByCompanyId_(logSheet);
+    var interactionRecords = [];
+    Object.keys(interactionsByCompanyId).forEach(function (companyId) {
+      interactionRecords = interactionRecords.concat(interactionsByCompanyId[companyId]);
+    });
     var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+    var dealStageProgress = GlowDashboard.buildDealStageProgressSummary(interactionRecords, todayString, GlowDashboard.DEFAULT_CONFIG);
 
     var funnel = GlowDashboard.buildRouteStageFunnel(records, GlowDashboard.DEFAULT_CONFIG);
     var productSummary = GlowDashboard.buildProductFunnel(records, GlowDashboard.DEFAULT_CONFIG);
@@ -74,6 +85,10 @@ function updateDashboard() {
       ["対象企業数", "未スコア企業数", "現在ステージ未分類企業数", "流入ルート未分類企業数", "提案商品未設定企業数"],
       [[qualitySummary["対象企業数"], qualitySummary["未スコア企業数"], qualitySummary["現在ステージ未分類企業数"],
         qualitySummary["流入ルート未分類企業数"], qualitySummary["提案商品未設定企業数"]]]);
+    row++;
+    row = writeDashboardSection_(dashboardSheet, row, "工程別滞留状況(NDA締結/意向表明受領/DD開始)",
+      ["工程", "滞留企業数", "平均滞留日数"],
+      dealStageProgress.map(function (d) { return [d["工程"], d["滞留企業数"], d["平均滞留日数"]]; }));
     row++;
 
     historySheet.appendRow([
