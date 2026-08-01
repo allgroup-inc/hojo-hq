@@ -555,7 +555,7 @@
   <p class="oath rv">——私たちGLOWも、その一社です。</p>
   <p class="sub rv">補助金・助成金は、可能性を起こす<span class="nowrap">きっかけのひとつ。</span><br>GLOWが365日、国・県・市町村の公募情報を<br class="pc">チェックし、<span class="nowrap">あなたに届けます。</span></p>
   <p class="live-badge rv">📡 毎日自動更新中|現在の掲載 <span id="live-count">—</span> 件</p>
-  <a class="hero-cta rv" href="#match">⚡ 30秒診断で、使える補助金と<span class="nowrap">金額の目安を見る</span><span class="cta-sub">(無料・会社名の入力なし)</span></a>
+  <a class="hero-cta rv" href="#match">⚡ 30秒診断で、使える<span class="nowrap">可能性のある補助金</span>と<span class="nowrap">金額の目安を見る</span><span class="cta-sub">(無料・会社名の入力なし)</span></a>
   <button type="button" class="glow-about-btn rv" id="glow-open">🏢 運営会社|<strong>GLOWとは</strong></button>
   <div class="scrolldown" aria-hidden="true">SCROLL</div>
 </section>
@@ -910,7 +910,7 @@
     const el=document.getElementById('form-progress');
     if(!el)return;
     const msg=n>=4?'準備OK!診断できます'
-      :(n>0?`あと「${missingLabel()}」を選ぶと4つそろいます`:'1つでも選ぶと精度が上がります');
+      :(n>0?`あと「${missingLabel()}」を選ぶと4つそろいます(そのままでも診断できます)`:'1つでも選ぶと精度が上がります');
     el.innerHTML=`選択 <strong>${n}/4</strong> — ${msg}`;
     if(n>0){const g=document.getElementById('form-guide');if(g)g.hidden=true;}
   }
