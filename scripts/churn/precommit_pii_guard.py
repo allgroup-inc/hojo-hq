@@ -18,6 +18,35 @@ import sys
 # 顧客データの恐れが高い拡張子(このリポジトリは通常これらを追跡しない)
 _RISKY_SUFFIXES = (".csv", ".tsv", ".xlsx", ".xls")
 
+# 中身の検知(⑤): 顧客データの"列見出し"に固有の語。1行に3個以上並べば顧客レコードの貼付を疑う。
+# 単発の言及(prose)や通常コードでは並ばないので誤検知が低い高シグナル判定。
+_CUSTOMER_HEADER_TOKENS = (
+    "現ステータス", "受注日", "契約日", "生年月日", "住所", "保険料", "払込経路",
+    "申込方法", "市町村", "保険会社", "リスト種類", "顧客ID", "氏名", "解約日",
+    "証券番号", "被保険者", "電話番号",
+)
+_HEADER_HIT_THRESHOLD = 3
+# 中身走査の対象外(設計文書・テスト・コード・既存サイト・行政データは該当語が正当に並ぶため)
+_CONTENT_EXEMPT_PREFIXES = (
+    "docs/", "site/", "posts/", "reports/", "data/", "tests/", "scripts/",
+    ".claude/", ".github/",
+)
+
+
+def scan_content(path, text):
+    """テキストが顧客データの列見出しらしき行を含むなら理由、無ければ None。
+
+    設計文書やコードで語が並ぶ誤検知を避けるため、対象パスを絞る(_CONTENT_EXEMPT_PREFIXES)。
+    """
+    p = path.replace("\\", "/")
+    if any(p.startswith(pre) for pre in _CONTENT_EXEMPT_PREFIXES):
+        return None
+    for line in text.splitlines()[:10]:
+        hits = sum(1 for t in _CUSTOMER_HEADER_TOKENS if t in line)
+        if hits >= _HEADER_HIT_THRESHOLD:
+            return f"顧客データの列見出しらしき行を検知(個人情報の恐れ・該当列名 {hits} 個)"
+    return None
+
 
 def _reason(path):
     """危険なら日本語の理由、安全なら None。site配下のindex.html等の正規物は検知しない。"""
@@ -55,12 +84,34 @@ def _staged_paths():
     return [line for line in res.stdout.splitlines() if line.strip()]
 
 
+def _read_text(path):
+    """テキストとして先頭だけ安全に読む(バイナリ/巨大/欠損は空)。"""
+    try:
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            return f.read(65536)
+    except OSError:
+        return ""
+
+
+def _content_blocked(paths, allow):
+    """中身の検知(⑤)。パスblockと重複しないものだけ走査する。"""
+    allowset = set(allow)
+    out = []
+    for p in paths:
+        if p in allowset or _reason(p):  # 許可済み or 既にパスでblock済みはスキップ
+            continue
+        reason = scan_content(p, _read_text(p))
+        if reason:
+            out.append((p, reason))
+    return out
+
+
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     allow = [p for p in os.environ.get("CHURN_PII_GUARD_ALLOW", "").split(",") if p]
     # 引数でパスを渡せばそれを検査(CI用)、無ければステージ済みを検査(pre-commitフック用)
     paths = argv if argv else _staged_paths()
-    blocked = find_blocked_paths(paths, allow)
+    blocked = find_blocked_paths(paths, allow) + _content_blocked(paths, allow)
     if not blocked:
         return 0
     print("⛔ 個人情報の恐れがあるファイルをコミットしようとしています(churn-pii-guard):",
