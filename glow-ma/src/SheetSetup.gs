@@ -7,12 +7,14 @@
  * 表記ゆれによる集計漏れを防ぐためプルダウン入力規則を設定する。
  * 企業マスタの「電話番号」列は先頭ゼロ落ちを防ぐためプレーンテキスト形式を強制し、
  * 「連絡不要」列にはチェックボックスの入力規則を設定する。
+ * 企業マスタの「後継者状況」列には、あり/なし/不明のプルダウン入力規則を設定する(空欄可)。
  */
 function ensureLedgerTabs() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var companySheet = ensureTab_(ss, GlowSchema.COMPANY_MASTER_SHEET_NAME, GlowSchema.COMPANY_MASTER_HEADERS);
   applyPhoneNumberFormat_(companySheet);
   applyDoNotContactValidation_(companySheet);
+  applySuccessorStatusValidation_(companySheet);
   var logSheet = ensureTab_(ss, GlowSchema.INTERACTION_LOG_SHEET_NAME, GlowSchema.INTERACTION_LOG_HEADERS);
   applyInteractionTypeValidation_(logSheet);
   applyRespondentValidation_(logSheet);
@@ -70,4 +72,13 @@ function applyDoNotContactValidation_(sheet) {
   var dncColumnIndex = GlowSchema.COMPANY_MASTER_HEADERS.indexOf("連絡不要") + 1;
   var rule = SpreadsheetApp.newDataValidation().requireCheckbox().build();
   sheet.getRange(2, dncColumnIndex, Math.max(sheet.getMaxRows() - 1, 1), 1).setDataValidation(rule);
+}
+
+function applySuccessorStatusValidation_(sheet) {
+  var successorStatusColumnIndex = GlowSchema.COMPANY_MASTER_HEADERS.indexOf("後継者状況") + 1;
+  var rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(GlowSchema.SUCCESSOR_STATUS_TYPES, true)
+    .setAllowInvalid(false)
+    .build();
+  sheet.getRange(2, successorStatusColumnIndex, Math.max(sheet.getMaxRows() - 1, 1), 1).setDataValidation(rule);
 }

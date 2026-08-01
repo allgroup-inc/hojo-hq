@@ -4,17 +4,18 @@
  * (将来的には日次・週次の時間主導トリガーに登録して自動実行することを想定しているが、
  *  トリガー登録自体は本Planの範囲外。)
  *
- * 実行すると、企業マスタ・紹介パートナーマスタを読み取り、以下5つの表を
+ * 実行すると、企業マスタ・紹介パートナーマスタ・対応履歴ログを読み取り、以下6つの表を
  * 「ダッシュボード」タブに作り直す。
  * - ルート別×ステージ別ファネル
  * - 提案商品別サマリー(提案数・案件化数・成約数)
  * - ランク別サマリー(滞留企業数・掘り起こし待ち件数)
  * - 紹介パートナー別サマリー
  * - データ品質チェック(集計対象外の件数)
+ * - 工程別滞留状況(NDA締結/意向表明受領/DD開始)
  * これに加えて、「ダッシュボード履歴」タブに主要指標のスナップショットを1行追記する
  * (こちらは「ダッシュボード」タブと異なり、実行のたびに内容を消さず積み上げる)。
  *
- * 企業マスタ・紹介パートナーマスタの読み取りと集計は、他プロセス(例:
+ * 企業マスタ・紹介パートナーマスタ・対応履歴ログの読み取りと集計は、他プロセス(例:
  * importCompaniesFromStaging)による書き込み中の中間状態を拾わないよう、
  * ScoringRunner.gs と同様にロック取得後に行う。
  */
@@ -30,8 +31,9 @@ function updateDashboard() {
   }
   var partnerSheet = ss.getSheetByName(GlowSchema.PARTNER_MASTER_SHEET_NAME);
   var historySheet = ss.getSheetByName(GlowSchema.DASHBOARD_HISTORY_SHEET_NAME);
-  if (!historySheet) {
-    historySheet = ensureTab_(ss, GlowSchema.DASHBOARD_HISTORY_SHEET_NAME, GlowSchema.DASHBOARD_HISTORY_HEADERS);
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  if (!logSheet) {
+    throw new Error("対応履歴ログタブが見つかりません。先に ensureLedgerTabs を実行してください。");
   }
 
   var lock = LockService.getDocumentLock();
@@ -39,9 +41,18 @@ function updateDashboard() {
     throw new Error("他の処理がダッシュボードを操作中のため、更新を中断しました。しばらく待ってから再実行してください。");
   }
   try {
+    if (!historySheet) {
+      historySheet = ensureTab_(ss, GlowSchema.DASHBOARD_HISTORY_SHEET_NAME, GlowSchema.DASHBOARD_HISTORY_HEADERS);
+    }
     var records = readCompanyRecords_(companySheet);
     var partnerRecords = readPartnerRecords_(partnerSheet);
+    var interactionsByCompanyId = readInteractionsByCompanyId_(logSheet);
+    var interactionRecords = [];
+    Object.keys(interactionsByCompanyId).forEach(function (companyId) {
+      interactionRecords = interactionRecords.concat(interactionsByCompanyId[companyId]);
+    });
     var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+    var dealStageProgress = GlowDashboard.buildDealStageProgressSummary(interactionRecords, records, todayString, GlowDashboard.DEFAULT_CONFIG);
 
     var funnel = GlowDashboard.buildRouteStageFunnel(records, GlowDashboard.DEFAULT_CONFIG);
     var productSummary = GlowDashboard.buildProductFunnel(records, GlowDashboard.DEFAULT_CONFIG);
@@ -74,6 +85,10 @@ function updateDashboard() {
       ["対象企業数", "未スコア企業数", "現在ステージ未分類企業数", "流入ルート未分類企業数", "提案商品未設定企業数"],
       [[qualitySummary["対象企業数"], qualitySummary["未スコア企業数"], qualitySummary["現在ステージ未分類企業数"],
         qualitySummary["流入ルート未分類企業数"], qualitySummary["提案商品未設定企業数"]]]);
+    row++;
+    row = writeDashboardSection_(dashboardSheet, row, "工程別滞留状況(NDA締結/意向表明受領/DD開始)",
+      ["工程", "滞留企業数", "平均滞留日数"],
+      dealStageProgress.map(function (d) { return [d["工程"], d["滞留企業数"], d["平均滞留日数"]]; }));
     row++;
 
     historySheet.appendRow([
