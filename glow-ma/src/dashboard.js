@@ -161,10 +161,12 @@
 
   var PARTNER_SUMMARY_FIELDS = ["名称", "累計紹介数", "成約数", "関係性ランク", "提供済み情報ログ", "逆紹介履歴"];
 
+  var MIN_REFERRALS_FOR_CONVERSION_RATE = 3;
+
   function calculateConversionRate_(referralCountValue, dealCountValue) {
     var referrals = Number(referralCountValue);
     var deals = Number(dealCountValue);
-    if (!referrals || isNaN(referrals) || referrals <= 0 || isNaN(deals)) return "";
+    if (!referrals || isNaN(referrals) || referrals < MIN_REFERRALS_FOR_CONVERSION_RATE || isNaN(deals)) return "";
     return (deals / referrals * 100).toFixed(1) + "%";
   }
 

@@ -177,6 +177,18 @@ test("formatPartnerSummary: 累計紹介数が0なら成約率は空文字(ゼ�
   assert.equal(summary[0]["成約率"], "");
 });
 
+test("formatPartnerSummary: 累計紹介数が3未満なら成約率は空文字(母数不足)", () => {
+  const partners = [{ 名称: "新規パートナー", 累計紹介数: 1, 成約数: 1 }];
+  const summary = dashboard.formatPartnerSummary(partners);
+  assert.equal(summary[0]["成約率"], "");
+});
+
+test("formatPartnerSummary: 累計紹介数が2でも成約率は空文字(母数不足)", () => {
+  const partners = [{ 名称: "新規パートナー", 累計紹介数: 2, 成約数: 1 }];
+  const summary = dashboard.formatPartnerSummary(partners);
+  assert.equal(summary[0]["成約率"], "");
+});
+
 test("buildHistorySnapshot: ランク別滞留企業数・掘り起こし待ち件数合計・成約企業数・連絡不要企業数を集計する", () => {
   const records = [
     { 企業ID: "C1", ランク: "A", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: false },

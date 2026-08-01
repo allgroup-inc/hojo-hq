@@ -30,15 +30,15 @@ function updateDashboard() {
   }
   var partnerSheet = ss.getSheetByName(GlowSchema.PARTNER_MASTER_SHEET_NAME);
   var historySheet = ss.getSheetByName(GlowSchema.DASHBOARD_HISTORY_SHEET_NAME);
-  if (!historySheet) {
-    historySheet = ensureTab_(ss, GlowSchema.DASHBOARD_HISTORY_SHEET_NAME, GlowSchema.DASHBOARD_HISTORY_HEADERS);
-  }
 
   var lock = LockService.getDocumentLock();
   if (!lock.tryLock(30000)) {
     throw new Error("他の処理がダッシュボードを操作中のため、更新を中断しました。しばらく待ってから再実行してください。");
   }
   try {
+    if (!historySheet) {
+      historySheet = ensureTab_(ss, GlowSchema.DASHBOARD_HISTORY_SHEET_NAME, GlowSchema.DASHBOARD_HISTORY_HEADERS);
+    }
     var records = readCompanyRecords_(companySheet);
     var partnerRecords = readPartnerRecords_(partnerSheet);
     var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
