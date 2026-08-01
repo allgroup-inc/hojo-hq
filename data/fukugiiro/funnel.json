@@ -1,73 +1,73 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-07-31",
+  "updated_at": "2026-08-01",
   "period": "7d",
   "source": "plausible-stats-api",
   "stages": [
     {
       "key": "shindan_start",
       "label": "診断開始",
-      "count": 16,
+      "count": 3,
       "cvr_from_prev": null,
       "drop_rate": null
     },
     {
       "key": "shindan_step_q2",
       "label": "Q2到達",
-      "count": 7,
-      "cvr_from_prev": 0.4375,
-      "drop_rate": 0.5625
+      "count": 3,
+      "cvr_from_prev": 1.0,
+      "drop_rate": 0.0
     },
     {
       "key": "shindan_step_q3",
       "label": "Q3到達",
-      "count": 7,
+      "count": 3,
       "cvr_from_prev": 1.0,
       "drop_rate": 0.0
     },
     {
       "key": "shindan_step_q4",
       "label": "Q4到達",
-      "count": 7,
+      "count": 3,
       "cvr_from_prev": 1.0,
       "drop_rate": 0.0
     },
     {
       "key": "shindan_step_q5",
       "label": "Q5到達",
-      "count": 7,
+      "count": 3,
       "cvr_from_prev": 1.0,
       "drop_rate": 0.0
     },
     {
       "key": "shindan_complete",
       "label": "診断完了(1件以上)",
-      "count": 8,
-      "cvr_from_prev": 1.1428571428571428,
-      "drop_rate": -0.1428571428571428
+      "count": 3,
+      "cvr_from_prev": 1.0,
+      "drop_rate": 0.0
     },
     {
       "key": "line_add_click",
       "label": "LINE誘導クリック",
-      "count": 4,
-      "cvr_from_prev": 0.5,
-      "drop_rate": 0.5
+      "count": 1,
+      "cvr_from_prev": 0.3333333333333333,
+      "drop_rate": 0.6666666666666667
     }
   ],
   "engagement": {
-    "kit_click": 1,
+    "kit_click": 0,
     "seido_done_mark": 0,
     "jukyu_report_click": 1,
     "shindan_zero": 0
   },
   "key_rates": {
-    "finish_rate": 0.5,
-    "line_cvr": 0.5,
+    "finish_rate": 1.0,
+    "line_cvr": 0.3333333333333333,
     "zero_rate": 0.0
   },
   "worst_drop": {
-    "stage": "shindan_step_q2",
-    "label": "診断開始→Q2到達",
-    "drop_rate": 0.5625
+    "stage": "line_add_click",
+    "label": "診断完了(1件以上)→LINE誘導クリック",
+    "drop_rate": 0.6666666666666667
   }
 }
