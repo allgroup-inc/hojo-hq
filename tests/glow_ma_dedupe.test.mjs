@@ -93,6 +93,15 @@ test("SCALAR_FIELDS: 配列/備考/連絡不要項目と合わせると企業マ
   assert.deepStrictEqual(combined, expected);
 });
 
+test("mergeCompanyRecords: 後継者状況は最初に見つかった非空値を維持する(Phase 9で追加した列がマージで失われないことの回帰テスト)", () => {
+  const records = [
+    { 企業ID: "C000001", 電話番号: "098-000-0001", 連絡不要: false, 流入ルート: [], 提案商品: [], 備考: "", 後継者状況: "" },
+    { 企業ID: "C000002", 電話番号: "098-000-0001", 連絡不要: false, 流入ルート: [], 提案商品: [], 備考: "", 後継者状況: "あり" }
+  ];
+  const { merged } = dedupe.mergeCompanyRecords(records);
+  assert.equal(merged["後継者状況"], "あり");
+});
+
 test("mergeCompanyRecords: 連絡不要はいずれかのレコードでTRUEなら統合後もTRUEを維持する(falseが先頭でも失われない)", () => {
   const records = [
     { 企業ID: "C000001", 電話番号: "098-000-0001", 連絡不要: false, 流入ルート: [], 提案商品: [], 備考: "" },

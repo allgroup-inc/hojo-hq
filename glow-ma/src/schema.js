@@ -14,7 +14,7 @@
     "初期スコア", "反応スコア", "総合スコア", "ランク",
     "最終接触日", "次回アクション予定日", "次回アクション内容",
     "担当者", "登録日", "備考",
-    "電話番号", "連絡不要"
+    "電話番号", "連絡不要", "後継者状況"
   ];
 
   var INTERACTION_LOG_SHEET_NAME = "対応履歴ログ";
@@ -26,10 +26,13 @@
     "手紙送付", "電話", "ゆんたく相談実施", "面談実施", "紹介受領", "ミカタ接点確認",
     "レターURLアクセス", "返信", "資料請求",
     "提案(M&A)", "提案(不動産)", "提案(法人保険)",
-    "成約", "見送り", "ナーチャリング配信", "連絡不要受領"
+    "成約", "見送り", "ナーチャリング配信", "連絡不要受領",
+    "NDA締結", "意向表明受領", "DD開始"
   ];
 
   var RESPONDENT_TYPES = ["オーナー社長本人", "経理・総務等の窓口担当", "未接触"];
+
+  var SUCCESSOR_STATUS_TYPES = ["あり", "なし", "不明"];
 
   var PARTNER_MASTER_SHEET_NAME = "紹介パートナーマスタ";
   var PARTNER_MASTER_HEADERS = [
@@ -64,6 +67,7 @@
     INTERACTION_LOG_HEADERS: INTERACTION_LOG_HEADERS,
     INTERACTION_TYPES: INTERACTION_TYPES,
     RESPONDENT_TYPES: RESPONDENT_TYPES,
+    SUCCESSOR_STATUS_TYPES: SUCCESSOR_STATUS_TYPES,
     PARTNER_MASTER_SHEET_NAME: PARTNER_MASTER_SHEET_NAME,
     PARTNER_MASTER_HEADERS: PARTNER_MASTER_HEADERS,
     SETTINGS_SHEET_NAME: SETTINGS_SHEET_NAME,

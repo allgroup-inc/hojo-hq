@@ -159,12 +159,54 @@
     };
   }
 
+  var DEAL_STAGE_TYPES = ["NDA締結", "意向表明受領", "DD開始"];
+
+  function buildDealStageProgressSummary(interactionRecords, companyRecords, todayValue, config) {
+    config = config || DEFAULT_CONFIG;
+    var alerting = getGlowAlerting_();
+    var terminalStages = (alerting.DEFAULT_CONFIG && alerting.DEFAULT_CONFIG.terminalStages) || [];
+    var terminalCompanyIds = {};
+    (companyRecords || []).forEach(function (record) {
+      if (terminalStages.indexOf(record["現在ステージ"]) !== -1) {
+        terminalCompanyIds[record["企業ID"]] = true;
+      }
+    });
+    var latestByCompany = {};
+    (interactionRecords || []).forEach(function (record) {
+      if (DEAL_STAGE_TYPES.indexOf(record["種別"]) === -1) return;
+      var companyId = record["企業ID"];
+      if (!companyId || terminalCompanyIds[companyId]) return;
+      var recordDate = alerting.toDate(record["日付"]);
+      if (!recordDate) return;
+      var current = latestByCompany[companyId];
+      if (!current || recordDate.getTime() > current["日付"].getTime()) {
+        latestByCompany[companyId] = { "種別": record["種別"], "日付": recordDate };
+      }
+    });
+    var daysListByStage = {};
+    DEAL_STAGE_TYPES.forEach(function (type) { daysListByStage[type] = []; });
+    Object.keys(latestByCompany).forEach(function (companyId) {
+      var entry = latestByCompany[companyId];
+      var days = alerting.daysBetween(entry["日付"], todayValue);
+      if (days === null) return;
+      daysListByStage[entry["種別"]].push(days);
+    });
+    return DEAL_STAGE_TYPES.map(function (type) {
+      var daysList = daysListByStage[type];
+      var count = daysList.length;
+      var avgDays = count > 0 ? Math.round(daysList.reduce(function (a, b) { return a + b; }, 0) / count) : 0;
+      return { "工程": type, "滞留企業数": count, "平均滞留日数": avgDays };
+    });
+  }
+
   var PARTNER_SUMMARY_FIELDS = ["名称", "累計紹介数", "成約数", "関係性ランク", "提供済み情報ログ", "逆紹介履歴"];
+
+  var MIN_REFERRALS_FOR_CONVERSION_RATE = 3;
 
   function calculateConversionRate_(referralCountValue, dealCountValue) {
     var referrals = Number(referralCountValue);
     var deals = Number(dealCountValue);
-    if (!referrals || isNaN(referrals) || referrals <= 0 || isNaN(deals)) return "";
+    if (!referrals || isNaN(referrals) || referrals < MIN_REFERRALS_FOR_CONVERSION_RATE || isNaN(deals)) return "";
     return (deals / referrals * 100).toFixed(1) + "%";
   }
 
@@ -186,6 +228,8 @@
     buildProductFunnel: buildProductFunnel,
     buildRankSummary: buildRankSummary,
     buildHistorySnapshot: buildHistorySnapshot,
+    buildDealStageProgressSummary: buildDealStageProgressSummary,
+    DEAL_STAGE_TYPES: DEAL_STAGE_TYPES,
     countUnclassifiedCompanies: countUnclassifiedCompanies,
     formatPartnerSummary: formatPartnerSummary,
     PARTNER_SUMMARY_FIELDS: PARTNER_SUMMARY_FIELDS
