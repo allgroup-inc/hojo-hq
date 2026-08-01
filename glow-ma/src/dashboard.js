@@ -161,17 +161,26 @@
 
   var DEAL_STAGE_TYPES = ["NDA締結", "意向表明受領", "DD開始"];
 
-  function buildDealStageProgressSummary(interactionRecords, todayValue, config) {
+  function buildDealStageProgressSummary(interactionRecords, companyRecords, todayValue, config) {
     config = config || DEFAULT_CONFIG;
     var alerting = getGlowAlerting_();
+    var terminalStages = (alerting.DEFAULT_CONFIG && alerting.DEFAULT_CONFIG.terminalStages) || [];
+    var terminalCompanyIds = {};
+    (companyRecords || []).forEach(function (record) {
+      if (terminalStages.indexOf(record["現在ステージ"]) !== -1) {
+        terminalCompanyIds[record["企業ID"]] = true;
+      }
+    });
     var latestByCompany = {};
     (interactionRecords || []).forEach(function (record) {
       if (DEAL_STAGE_TYPES.indexOf(record["種別"]) === -1) return;
       var companyId = record["企業ID"];
-      if (!companyId) return;
+      if (!companyId || terminalCompanyIds[companyId]) return;
+      var recordDate = alerting.toDate(record["日付"]);
+      if (!recordDate) return;
       var current = latestByCompany[companyId];
-      if (!current || record["日付"] > current["日付"]) {
-        latestByCompany[companyId] = { "種別": record["種別"], "日付": record["日付"] };
+      if (!current || recordDate.getTime() > current["日付"].getTime()) {
+        latestByCompany[companyId] = { "種別": record["種別"], "日付": recordDate };
       }
     });
     var daysListByStage = {};
@@ -179,7 +188,8 @@
     Object.keys(latestByCompany).forEach(function (companyId) {
       var entry = latestByCompany[companyId];
       var days = alerting.daysBetween(entry["日付"], todayValue);
-      daysListByStage[entry["種別"]].push(days || 0);
+      if (days === null) return;
+      daysListByStage[entry["種別"]].push(days);
     });
     return DEAL_STAGE_TYPES.map(function (type) {
       var daysList = daysListByStage[type];
@@ -219,6 +229,7 @@
     buildRankSummary: buildRankSummary,
     buildHistorySnapshot: buildHistorySnapshot,
     buildDealStageProgressSummary: buildDealStageProgressSummary,
+    DEAL_STAGE_TYPES: DEAL_STAGE_TYPES,
     countUnclassifiedCompanies: countUnclassifiedCompanies,
     formatPartnerSummary: formatPartnerSummary,
     PARTNER_SUMMARY_FIELDS: PARTNER_SUMMARY_FIELDS

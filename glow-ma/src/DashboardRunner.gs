@@ -15,7 +15,7 @@
  * これに加えて、「ダッシュボード履歴」タブに主要指標のスナップショットを1行追記する
  * (こちらは「ダッシュボード」タブと異なり、実行のたびに内容を消さず積み上げる)。
  *
- * 企業マスタ・紹介パートナーマスタの読み取りと集計は、他プロセス(例:
+ * 企業マスタ・紹介パートナーマスタ・対応履歴ログの読み取りと集計は、他プロセス(例:
  * importCompaniesFromStaging)による書き込み中の中間状態を拾わないよう、
  * ScoringRunner.gs と同様にロック取得後に行う。
  */
@@ -52,7 +52,7 @@ function updateDashboard() {
       interactionRecords = interactionRecords.concat(interactionsByCompanyId[companyId]);
     });
     var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
-    var dealStageProgress = GlowDashboard.buildDealStageProgressSummary(interactionRecords, todayString, GlowDashboard.DEFAULT_CONFIG);
+    var dealStageProgress = GlowDashboard.buildDealStageProgressSummary(interactionRecords, records, todayString, GlowDashboard.DEFAULT_CONFIG);
 
     var funnel = GlowDashboard.buildRouteStageFunnel(records, GlowDashboard.DEFAULT_CONFIG);
     var productSummary = GlowDashboard.buildProductFunnel(records, GlowDashboard.DEFAULT_CONFIG);

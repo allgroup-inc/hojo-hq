@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const dashboard = require("../glow-ma/src/dashboard.js");
+const schema = require("../glow-ma/src/schema.js");
 
 test("buildRouteStageFunnel: ルート×ステージの組み合わせごとに件数を集計する(複数ルートを持つ企業は両方にカウントされる)", () => {
   const records = [
@@ -235,7 +236,7 @@ test("buildDealStageProgressSummary: 企業ごとに最新の工程遷移イベ�
     { 企業ID: "C3", 日付: "2026-06-21", 種別: "DD開始" },
     { 企業ID: "C4", 日付: "2026-07-01", 種別: "電話" }
   ];
-  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, "2026-07-31", dashboard.DEFAULT_CONFIG);
+  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, [], "2026-07-31", dashboard.DEFAULT_CONFIG);
   assert.deepEqual(summary, [
     { "工程": "NDA締結", "滞留企業数": 1, "平均滞留日数": 30 },
     { "工程": "意向表明受領", "滞留企業数": 1, "平均滞留日数": 20 },
@@ -248,7 +249,7 @@ test("buildDealStageProgressSummary: 同じ工程に複数企業がいる場合�
     { 企業ID: "C1", 日付: "2026-07-21", 種別: "NDA締結" }, // 10日
     { 企業ID: "C2", 日付: "2026-07-11", 種別: "NDA締結" }  // 20日
   ];
-  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, "2026-07-31", dashboard.DEFAULT_CONFIG);
+  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, [], "2026-07-31", dashboard.DEFAULT_CONFIG);
   assert.equal(summary[0]["滞留企業数"], 2);
   assert.equal(summary[0]["平均滞留日数"], 15);
 });
@@ -258,15 +259,66 @@ test("buildDealStageProgressSummary: 対象工程のイベントがない企業�
     { 企業ID: "C1", 日付: "2026-07-01", 種別: "電話" },
     { 企業ID: "C1", 日付: "2026-07-05", 種別: "面談実施" }
   ];
-  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, "2026-07-31", dashboard.DEFAULT_CONFIG);
+  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, [], "2026-07-31", dashboard.DEFAULT_CONFIG);
   summary.forEach(function (row) { assert.equal(row["滞留企業数"], 0); });
 });
 
 test("buildDealStageProgressSummary: 対応履歴が空配列なら全工程0件", () => {
-  const summary = dashboard.buildDealStageProgressSummary([], "2026-07-31", dashboard.DEFAULT_CONFIG);
+  const summary = dashboard.buildDealStageProgressSummary([], [], "2026-07-31", dashboard.DEFAULT_CONFIG);
   assert.deepEqual(summary, [
     { "工程": "NDA締結", "滞留企業数": 0, "平均滞留日数": 0 },
     { "工程": "意向表明受領", "滞留企業数": 0, "平均滞留日数": 0 },
     { "工程": "DD開始", "滞留企業数": 0, "平均滞留日数": 0 }
   ]);
+});
+
+test("buildDealStageProgressSummary: 成約済みの企業は工程別滞留状況の集計から除外される", () => {
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "2025-01-01", 種別: "DD開始" }
+  ];
+  const companyRecords = [
+    { 企業ID: "C1", 現在ステージ: "成約" }
+  ];
+  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, companyRecords, "2026-07-31", dashboard.DEFAULT_CONFIG);
+  const ddStage = summary.find((s) => s["工程"] === "DD開始");
+  assert.equal(ddStage["滞留企業数"], 0);
+});
+
+test("buildDealStageProgressSummary: 見送りの企業も集計から除外される", () => {
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "2025-01-01", 種別: "NDA締結" }
+  ];
+  const companyRecords = [
+    { 企業ID: "C1", 現在ステージ: "見送り" }
+  ];
+  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, companyRecords, "2026-07-31", dashboard.DEFAULT_CONFIG);
+  const ndaStage = summary.find((s) => s["工程"] === "NDA締結");
+  assert.equal(ndaStage["滞留企業数"], 0);
+});
+
+test("DEAL_STAGE_TYPESはすべてGlowSchema.INTERACTION_TYPESに含まれる(一文字のズレで壊れないことを保証)", () => {
+  dashboard.DEAL_STAGE_TYPES.forEach((type) => {
+    assert.ok(schema.INTERACTION_TYPES.includes(type), type + " is not in INTERACTION_TYPES");
+  });
+});
+
+test("buildDealStageProgressSummary: 日付がDateオブジェクトでも文字列と同様に最新判定できる", () => {
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: new Date(2026, 6, 1), 種別: "NDA締結" },
+    { 企業ID: "C1", 日付: "2026-07-11", 種別: "意向表明受領" }
+  ];
+  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, [], "2026-07-31", dashboard.DEFAULT_CONFIG);
+  assert.equal(summary.find((s) => s["工程"] === "意向表明受領")["滞留企業数"], 1);
+  assert.equal(summary.find((s) => s["工程"] === "NDA締結")["滞留企業数"], 0);
+});
+
+test("buildDealStageProgressSummary: 日付が不正/空の対応履歴は集計から除外され平均を歪めない", () => {
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "", 種別: "NDA締結" },
+    { 企業ID: "C2", 日付: "2026-07-01", 種別: "NDA締結" }
+  ];
+  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, [], "2026-07-31", dashboard.DEFAULT_CONFIG);
+  const ndaStage = summary.find((s) => s["工程"] === "NDA締結");
+  assert.equal(ndaStage["滞留企業数"], 1);
+  assert.equal(ndaStage["平均滞留日数"], 30);
 });
