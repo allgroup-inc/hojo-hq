@@ -159,6 +159,36 @@
     };
   }
 
+  var DEAL_STAGE_TYPES = ["NDA締結", "意向表明受領", "DD開始"];
+
+  function buildDealStageProgressSummary(interactionRecords, todayValue, config) {
+    config = config || DEFAULT_CONFIG;
+    var alerting = getGlowAlerting_();
+    var latestByCompany = {};
+    (interactionRecords || []).forEach(function (record) {
+      if (DEAL_STAGE_TYPES.indexOf(record["種別"]) === -1) return;
+      var companyId = record["企業ID"];
+      if (!companyId) return;
+      var current = latestByCompany[companyId];
+      if (!current || record["日付"] > current["日付"]) {
+        latestByCompany[companyId] = { "種別": record["種別"], "日付": record["日付"] };
+      }
+    });
+    var daysListByStage = {};
+    DEAL_STAGE_TYPES.forEach(function (type) { daysListByStage[type] = []; });
+    Object.keys(latestByCompany).forEach(function (companyId) {
+      var entry = latestByCompany[companyId];
+      var days = alerting.daysBetween(entry["日付"], todayValue);
+      daysListByStage[entry["種別"]].push(days || 0);
+    });
+    return DEAL_STAGE_TYPES.map(function (type) {
+      var daysList = daysListByStage[type];
+      var count = daysList.length;
+      var avgDays = count > 0 ? Math.round(daysList.reduce(function (a, b) { return a + b; }, 0) / count) : 0;
+      return { "工程": type, "滞留企業数": count, "平均滞留日数": avgDays };
+    });
+  }
+
   var PARTNER_SUMMARY_FIELDS = ["名称", "累計紹介数", "成約数", "関係性ランク", "提供済み情報ログ", "逆紹介履歴"];
 
   var MIN_REFERRALS_FOR_CONVERSION_RATE = 3;
@@ -188,6 +218,7 @@
     buildProductFunnel: buildProductFunnel,
     buildRankSummary: buildRankSummary,
     buildHistorySnapshot: buildHistorySnapshot,
+    buildDealStageProgressSummary: buildDealStageProgressSummary,
     countUnclassifiedCompanies: countUnclassifiedCompanies,
     formatPartnerSummary: formatPartnerSummary,
     PARTNER_SUMMARY_FIELDS: PARTNER_SUMMARY_FIELDS

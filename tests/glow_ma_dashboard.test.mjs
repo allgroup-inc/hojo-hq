@@ -226,3 +226,47 @@ test("buildHistorySnapshot: 対象企業がなければ全項目0", () => {
   assert.equal(snapshot["成約企業数"], 0);
   assert.equal(snapshot["連絡不要企業数"], 0);
 });
+
+test("buildDealStageProgressSummary: 企業ごとに最新の工程遷移イベントを現在の工程とみなし、工程別に滞留企業数・平均滞留日数を集計する", () => {
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "2026-07-01", 種別: "NDA締結" },
+    { 企業ID: "C2", 日付: "2026-06-01", 種別: "NDA締結" },
+    { 企業ID: "C2", 日付: "2026-07-11", 種別: "意向表明受領" },
+    { 企業ID: "C3", 日付: "2026-06-21", 種別: "DD開始" },
+    { 企業ID: "C4", 日付: "2026-07-01", 種別: "電話" }
+  ];
+  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, "2026-07-31", dashboard.DEFAULT_CONFIG);
+  assert.deepEqual(summary, [
+    { "工程": "NDA締結", "滞留企業数": 1, "平均滞留日数": 30 },
+    { "工程": "意向表明受領", "滞留企業数": 1, "平均滞留日数": 20 },
+    { "工程": "DD開始", "滞留企業数": 1, "平均滞留日数": 40 }
+  ]);
+});
+
+test("buildDealStageProgressSummary: 同じ工程に複数企業がいる場合は平均滞留日数を四捨五入して返す", () => {
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "2026-07-21", 種別: "NDA締結" }, // 10日
+    { 企業ID: "C2", 日付: "2026-07-11", 種別: "NDA締結" }  // 20日
+  ];
+  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, "2026-07-31", dashboard.DEFAULT_CONFIG);
+  assert.equal(summary[0]["滞留企業数"], 2);
+  assert.equal(summary[0]["平均滞留日数"], 15);
+});
+
+test("buildDealStageProgressSummary: 対象工程のイベントがない企業は集計から除外される", () => {
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "2026-07-01", 種別: "電話" },
+    { 企業ID: "C1", 日付: "2026-07-05", 種別: "面談実施" }
+  ];
+  const summary = dashboard.buildDealStageProgressSummary(interactionRecords, "2026-07-31", dashboard.DEFAULT_CONFIG);
+  summary.forEach(function (row) { assert.equal(row["滞留企業数"], 0); });
+});
+
+test("buildDealStageProgressSummary: 対応履歴が空配列なら全工程0件", () => {
+  const summary = dashboard.buildDealStageProgressSummary([], "2026-07-31", dashboard.DEFAULT_CONFIG);
+  assert.deepEqual(summary, [
+    { "工程": "NDA締結", "滞留企業数": 0, "平均滞留日数": 0 },
+    { "工程": "意向表明受領", "滞留企業数": 0, "平均滞留日数": 0 },
+    { "工程": "DD開始", "滞留企業数": 0, "平均滞留日数": 0 }
+  ]);
+});
