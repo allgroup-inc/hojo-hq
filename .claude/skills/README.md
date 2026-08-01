@@ -26,3 +26,13 @@ for d in /tmp/sp/skills/*/; do
   rm -rf ".claude/skills/$name" && cp -r "$d" ".claude/skills/$name"
 done
 ```
+
+## hojo-hq固有スキル(CLAUDE.md憲法をルール化)
+vendoring した汎用スキルとは別に、このリポジトリの意思決定・運用ルールを
+Claude が毎回思い出す必要がないようスキル化したもの。ベンダーからの更新対象外。
+
+- `hojo-accuracy-check` — 制度データ(締切・金額・要件)を掲載・更新するとき。原文URL照合・「要確認」表示・断定禁止を強制。
+- `hojo-deadline-alert` — 締切アラート・告知文面・配信タイミングを設計/レビューするとき。3層ルール(30日以上=SNSのみ/7〜29日=LINE個別/7日未満=次回予告)と「約1か月前から」表現を強制、誤った「締切7日前」表現を排除。
+- `hojo-triangle-review` — 企画・施策・方針など意思決定を伴う議論をまとめるとき。スイシン/ウタガイ/ベッカイの三名体制でウタガイの反対理由必須の議事を強制。
+
+同じパターンの姉妹スキルとして `glow-ma-triangle-review`(GLOW M&A向け)もある。

@@ -34,9 +34,6 @@ glow-ma/data/
 .claude/skills/hikari-lp-integrity/
 .claude/skills/hikari-report-thresholds/
 .claude/skills/hikari-triangle-review/
-.claude/skills/hojo-accuracy-check/
-.claude/skills/hojo-deadline-alert/
-.claude/skills/hojo-triangle-review/
 .claude/skills/kakei-compliance/
 .claude/skills/kakei-gatekeeper-kpi/
 .claude/skills/report-gyoren-ops/
