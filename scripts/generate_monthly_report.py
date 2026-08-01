@@ -175,7 +175,7 @@ def build(data, today, partner: bool) -> str:
 
     L.append(f"## 締切カレンダー(向こう{CALENDAR_MONTHS}ヶ月・締切30日以上の制度のみ)")
     L.append("")
-    horizon = 30 * (CALENDAR_MONTHS + 1)
+    horizon = 92  # 「向こう3ヶ月」の看板と中身を一致させる(2026-08-01再検証で修正)
     cal = [i for i in listable if (days_left(i.get("deadline"), today) or 0) <= horizon]
     cal.sort(key=lambda i: i.get("deadline") or "9999")
     cur_month = None

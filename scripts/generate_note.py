@@ -133,12 +133,14 @@ def ai_column(stats: dict) -> str:
             f"今週の数字: 掲載{stats['total']}件、新着{stats['new']}件、"
             f"公募終了{stats['gone']}件、締切30日未満{stats['closing']}件。"
         )
+        # max_tokensは思考+本文の合計上限のため余裕を持たせ、途中で切れた場合もフォールバック
         resp = client.messages.create(
             model="claude-opus-5",
-            max_tokens=1000,
+            max_tokens=2000,
+            output_config={"effort": "low"},
             messages=[{"role": "user", "content": prompt}],
         )
-        if resp.stop_reason == "refusal":
+        if resp.stop_reason in ("refusal", "max_tokens"):
             return fallback
         text = "".join(b.text for b in resp.content if b.type == "text").strip()
         text = re.sub(r"\s+", "", text)
@@ -168,6 +170,10 @@ def sponsor_section(today):
         return []
     slots = []
     for s in conf.get("slots", []):
+        # 例示データの誤掲載防止+弁護士枠禁止(守り部確定ルール)の機械的ガード
+        if s.get("_example") or "弁護士" in (s.get("office") or ""):
+            print(f"[warn] スポンサー枠をスキップ(例示または弁護士枠): {s.get('office')}")
+            continue
         until = s.get("until")
         try:
             if until and datetime.strptime(until, "%Y-%m-%d").date() < today:
@@ -197,7 +203,15 @@ def build_article(data, snapshot, today):
     first_run = not prev
 
     new_ids = [i for i in current if i not in prev]
-    gone = [prev[i] for i in prev if i not in current][:GONE_MAX]
+    # DBから消えた=公募終了とは限らない(収集側の取りこぼしの可能性がある)。
+    # 断定できるのは「締切日が過去」の場合のみ。締切が未来・不明なのに消えたものは
+    # 制度名を出さず件数のみ(要確認扱い)にする(絶対ルール#1・2026-08-01再検証で修正)。
+    gone_all = [prev[i] for i in prev if i not in current]
+    gone = [
+        g for g in gone_all
+        if (dl := days_left(g.get("deadline"), today)) is not None and dl < 0
+    ][:GONE_MAX]
+    vanished_n = len(gone_all) - len(gone)
 
     closing = sum(
         1 for i in items
@@ -214,8 +228,15 @@ def build_article(data, snapshot, today):
 
     total_amt, inc_n, over_n, unknown_n = potential_sum(items)
 
-    vol = len(glob.glob(os.path.join(OUT_DIR, "*_vol*.md"))) + 1
     dstr = today.strftime("%Y-%m-%d")
+    # 同日再実行は同じvol番号・同じファイル名に上書き(冪等・重複記事防止)
+    existing = sorted(glob.glob(os.path.join(OUT_DIR, "*_vol*.md")))
+    same_day = [p for p in existing if os.path.basename(p).startswith(dstr)]
+    if same_day:
+        m = re.search(r"_vol(\d+)\.md$", os.path.basename(same_day[0]))
+        vol = int(m.group(1)) if m else len(existing)
+    else:
+        vol = len(existing) + 1
     wstr = today.strftime("%Y年%m月%d日")
 
     stats = {"total": len(items), "new": len(new_ids), "gone": len(gone), "closing": closing}
@@ -240,7 +261,9 @@ def build_article(data, snapshot, today):
     L.append(f"- 掲載中の制度: **{len(items)}件**(うち沖縄県・市町村の制度 {okinawa_n}件)")
     if not first_run:
         L.append(f"- 今週の新着: **{len(new_ids)}件**")
-        L.append(f"- 今週消えた(公募終了・締切到来): **{len(gone)}件**")
+        L.append(f"- 今週締切を迎えた制度: **{len(gone)}件**")
+        if vanished_n:
+            L.append(f"- 締切前に掲載終了となった制度: **{vanished_n}件**(公募元の情報を確認中)")
     L.append(f"- 締切まで30日を切った制度: **{closing}件**")
     L.append("")
 
@@ -265,14 +288,20 @@ def build_article(data, snapshot, today):
         L.append("## 今週消えた補助金")
         L.append("")
         if gone:
-            L.append("締切到来・公募終了により、今週データベースから姿を消した制度の記録です。")
+            L.append("締切日を迎え、今週データベースから姿を消した制度の記録です。")
             L.append("「知っていれば出せたのに」を減らすことが、この連載の目的です。")
             L.append("")
             for g in gone:
                 L.append(f"- {g.get('name', '(名称不明)')}(締切: {g.get('deadline', '不明')})")
             L.append("")
         else:
-            L.append("今週、公募終了した制度はありませんでした。")
+            L.append("今週、締切を迎えた制度はありませんでした。")
+            L.append("")
+        if vanished_n:
+            L.append(
+                f"このほか{vanished_n}件が締切前に掲載終了となりました。"
+                "公募元での早期終了か掲載情報の変更かを確認中のため、制度名の記載は控えます。"
+            )
             L.append("")
 
     L.append("## 公募上限額の合計(参考値)")
