@@ -98,3 +98,12 @@ test("ダッシュボード履歴タブの名称・見出しが定義されて�
     "掘り起こし待ち件数合計", "成約企業数", "連絡不要企業数"
   ]);
 });
+
+test("企業マスタに後継者状況列が末尾に追加されている", () => {
+  assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("後継者状況") !== -1);
+  assert.equal(schema.COMPANY_MASTER_HEADERS[schema.COMPANY_MASTER_HEADERS.length - 1], "後継者状況");
+});
+
+test("後継者状況の選択肢(SUCCESSOR_STATUS_TYPES)があり/なし/不明の3択である", () => {
+  assert.deepEqual(schema.SUCCESSOR_STATUS_TYPES, ["あり", "なし", "不明"]);
+});
