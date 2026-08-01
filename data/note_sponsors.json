@@ -1,0 +1,13 @@
+{
+ "_readme": "週刊note記事のスポンサー枠台帳(収益軸C / docs/収益軸拡張_設計.md)。販売開始は小柳さん決裁後(トリガー提案: LINE300社・専門家掲載モデルと同時)。それまで active は false のまま。枠は最大2・定額広告のみ・弁護士枠は作らない。",
+ "active": false,
+ "slots": [
+  {
+   "_example": true,
+   "office": "(例)○○行政書士事務所",
+   "specialty": "持続化補助金・小規模事業者支援",
+   "url": "https://example.com",
+   "until": "2026-12-31"
+  }
+ ]
+}

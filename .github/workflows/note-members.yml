@@ -1,0 +1,73 @@
+name: note-members
+
+# メンバーシップ週刊「AI編集長週報」(週報+消えたもの図鑑+AI三人会議)の自動生成
+# (docs/note収益化_運営計画.md)。毎週月曜 09:50 JST(週刊定点観測 09:35 の後)に
+# 生成→コミット→LINE通知。noteメンバーシップ記事への貼り付けは人間が行う。
+
+on:
+  schedule:
+    # JST 月 09:50(= UTC 月 0:50)
+    - cron: "50 0 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: note-members
+  cancel-in-progress: false
+
+jobs:
+  members:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install deps(AI三人会議用)
+        run: pip install anthropic
+
+      - name: Generate members weekly
+        id: gen
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/generate_members_weekly.py --preview >> "$GITHUB_OUTPUT"
+
+      - name: Commit
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add posts/note/members data/sankai_topics.json
+          git diff --cached --quiet || git commit -m "auto: AI編集長週報 ${{ steps.gen.outputs.stem }}"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done
+
+      - name: LINE通知
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            👥【ミカタ】メンバー限定「AI編集長週報」下書きができました
+
+            ${{ steps.gen.outputs.title }}
+
+            ①内容を一読
+            https://github.com/${{ github.repository }}/blob/main/posts/note/members/${{ steps.gen.outputs.stem }}.md
+            ②noteのメンバーシップ限定記事に貼り付けて公開
+            (メンバーシップ未開設の間は貼り付け不要・下書きが貯まるだけです)
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【ミカタ】AI編集長週報の自動生成が失敗しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

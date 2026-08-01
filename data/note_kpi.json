@@ -1,0 +1,7 @@
+{
+ "_readme": "note運営KPIの手入力台帳(週報が読む)。noteの管理画面の実数のみを入れる。未入力(null)の項目は週報に「集計中」と表示され、推測値は一切使われない。更新はたかしくん(またはClaudeに「note KPI更新して: フォロワー◯人…」と依頼)。",
+ "updated": null,
+ "followers": null,
+ "members": null,
+ "monthly_sales_yen": null
+}
