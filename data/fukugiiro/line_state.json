@@ -4,5 +4,7 @@
   "friend_add_url": "https://lin.ee/7fH7vDQ",
   "note": "開設記録は docs/フクギイロ_LINE運用原稿.md(前提: アカウント開設済み 2026-07-24)。サイトのLINE登録ボタンは /go/fg-*/ 経由で友だち追加に接続済み。",
   "recorded": "2026-07-30",
-  "recorded_by": "全チャット進捗確認(business-organization-strategy)にて記録漏れを検出し追記"
+  "recorded_by": "全チャット進捗確認(business-organization-strategy)にて記録漏れを検出し追記",
+  "verification_note": "要確認: 本記録はドキュメント記述+lin.eeリンクの二次情報に基づく。manager.line.biz実画面での一次確認は未実施(2026-07-31 三名体制検証の指摘)。§D設定反映の作業時に一次確認を完了させること",
+  "primary_verified": false
 }
