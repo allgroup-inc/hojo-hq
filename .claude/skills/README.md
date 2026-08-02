@@ -5,9 +5,14 @@
 
 ## 中身: Superpowers (obra/superpowers v6.2.0 を vendoring)
 TDD・計画・デバッグ・レビュー・Git ワークフロー等の 14 スキル。
-- 出典: https://github.com/obra/superpowers (MIT License)
+- 出典: https://github.com/obra/superpowers (MIT License — 全文は `SUPERPOWERS-LICENSE`)
 - 取り込み元 commit: `3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9`
 - 各スキルは自己完結(必要なスクリプトは各スキル配下の `scripts/` に同梱)。
+
+## 中身: marketingskills (coreyhaines31/marketingskills を vendoring)
+コピー・SEO・広告・価格設計・リサーチ等のマーケティング 48 スキル。
+- 出典: https://github.com/coreyhaines31/marketingskills (ライセンス全文は `MARKETINGSKILLS-LICENSE`)
+- 一括更新は `scripts/update-skills.sh`(Superpowers と同時に upstream 最新へ追従)。
 
 セッション開始時に `.claude/hooks/superpowers-session-start.sh` が
 `using-superpowers` スキルを注入し、「You have superpowers」で自動起動させる。
@@ -37,3 +42,9 @@ Claude が毎回思い出す必要がないようスキル化したもの。ベ�
 - `humanizer` — SNS投稿・LINE配信・サイトコピーなど対外文面の最後の仕上げで必ず使う。AIっぽさ(定型フレーズ・過剰な絵文字/強調)を除き、憲法トーン(専門用語をやさしく翻訳)の自然な日本語に整える(事実情報・CV導線は変えない)。
 
 同じパターンの姉妹スキルとして `glow-ma-triangle-review`(GLOW M&A向け)もある。
+
+## MCPコネクタ(スキルとは別枠・アカウント設定が必要)
+Context7(最新ライブラリのドキュメント取得)や Claude Mem 相当(Mem0など、長期記憶)は
+スキルファイルではなく MCP コネクタのため、リポジトリへの vendoring では追加できない。
+claude.ai のアカウント設定(コネクタ管理)側で接続する必要がある。接続すればアカウント
+全体で使えるようになるが、チャットごとに有効化が必要な場合がある。
