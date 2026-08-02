@@ -291,6 +291,33 @@ def check_fukugiiro():
         warnings.append(f"[フクギイロ] updated_at を解釈できません: {ua!r}")
 
 
+def check_gas_bot():
+    """GAS(企業台帳+LINE会話ボット)の死活確認。
+    Default一律応答を廃止しボットが受付返信を担うため、GASが落ちると
+    お客様への返信が完全沈黙する(議事_20260731 論点1)。ここで毎朝検知する。
+    Secrets未設定の環境では未接続と明記してスキップ(静かに欠損させない)。"""
+    endpoint = os.environ.get("GAS_LEDGER_ENDPOINT", "")
+    token = os.environ.get("GAS_LEDGER_TOKEN", "")
+    if not (endpoint and token):
+        notes.append("[GASボット] 未接続(Secrets未設定のためスキップ)")
+        return
+    try:
+        payload = json.dumps({"diag": "linetoken", "token": token}).encode("utf-8")
+        req = urllib.request.Request(
+            endpoint, data=payload, method="POST",
+            headers={"Content-Type": "application/json", "User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            body = json.loads(r.read().decode("utf-8"))
+        if body.get("ok") and body.get("status") == 200:
+            notes.append("[GASボット] 稼働OK(台帳エンドポイント応答・LINEトークン有効)")
+        elif body.get("ok"):
+            errors.append(f"[GASボット] LINEトークン異常: LINE API応答 {body.get('status')} — ボットが返信できない状態")
+        else:
+            errors.append(f"[GASボット] 診断応答が異常: {str(body)[:120]}")
+    except Exception as e:
+        errors.append(f"[GASボット] 応答なし({type(e).__name__}) — 会話ボット・台帳が停止している疑い")
+
+
 def main():
     ts = datetime.now(JST).strftime("%Y-%m-%d %H:%M JST")
     idx = check_page("/", "トップページ", must_contain=["<", "subsidies"])
@@ -300,6 +327,7 @@ def main():
     check_js_syntax(idx)
     check_data()
     check_fukugiiro()
+    check_gas_bot()
 
     lines = [f"# hojo-hq 日次ヘルスチェック  {ts}", f"対象: {BASE}", ""]
     lines.append(f"結果: {'❌ 異常あり' if errors else '✅ 正常'}  "

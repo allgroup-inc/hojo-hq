@@ -29,6 +29,10 @@ jobs:
 
       - name: Run healthcheck
         id: hc
+        env:
+          # GAS(企業台帳+会話ボット)の死活監視用(議事_20260731 論点1)
+          GAS_LEDGER_ENDPOINT: ${{ secrets.GAS_LEDGER_ENDPOINT }}
+          GAS_LEDGER_TOKEN: ${{ secrets.GAS_LEDGER_TOKEN }}
         run: python scripts/healthcheck.py
 
       # ── 異常検知時: Issue を起票 / 既存の未解決Issueに追記 ──

@@ -16,6 +16,24 @@ Thumbs.db
 __pycache__/
 
 .claude/tools/.env
+.claude/settings.local.json
 
-# 内部戦略・KPI(hikari/kakei含む)をコミットしない: 公開リポジトリのため
-.claude/skills/
+# GLOW M&A台帳(非公開スプレッドシートIDを含むため)
+glow-ma/.clasp.json
+.clasp.json
+.clasprc.json
+glow-ma/**/*.csv
+glow-ma/**/*.xlsx
+glow-ma/data/
+
+# 内部戦略・KPI・実数値を含む機密ファイルはコミットしない: 公開リポジトリのため
+.agents/product-marketing.md
+.claude/skills/explainer-video-production/
+.claude/skills/go-link-discipline/
+.claude/skills/hikari-cpa-guard/
+.claude/skills/hikari-lp-integrity/
+.claude/skills/hikari-report-thresholds/
+.claude/skills/hikari-triangle-review/
+.claude/skills/kakei-compliance/
+.claude/skills/kakei-gatekeeper-kpi/
+.claude/skills/report-gyoren-ops/

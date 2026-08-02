@@ -1,0 +1,70 @@
+name: monthly-report
+
+# 月刊「沖縄補助金白書」(有料版+パートナー版)の自動生成(docs/収益軸拡張_設計.md)。
+# 毎月1日 09:40 JST(09:00 JSTのデータ更新の後)に2種のMarkdownを生成してコミットし、
+# たかしくん・小柳さんへLINE通知する。noteへの公開・パートナーへの配布は人間が行う。
+# 価格・販売開始は小柳さん決裁後(それまで下書きが貯まるだけで外部公開されない)。
+
+on:
+  schedule:
+    # JST 毎月1日 09:40(= UTC 1日 0:40)
+    - cron: "40 0 1 * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monthly-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Generate monthly reports
+        id: gen
+        run: python scripts/generate_monthly_report.py --preview >> "$GITHUB_OUTPUT"
+
+      - name: Commit reports
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add posts/note/premium reports/partner
+          git diff --cached --quiet || git commit -m "auto: 月刊沖縄補助金白書 ${{ steps.gen.outputs.ym }}号(有料版+パートナー版)"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done
+
+      - name: LINE通知(白書完成)
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            📊【ミカタ】月刊 沖縄補助金白書 ${{ steps.gen.outputs.ym }}号ができました
+
+            ①有料版(note用・公開は決裁後)
+            https://github.com/${{ github.repository }}/blob/main/${{ steps.gen.outputs.premium }}
+            ②パートナー版(士業・金融機関向け・配布はムスブ経由)
+            https://github.com/${{ github.repository }}/blob/main/${{ steps.gen.outputs.partner }}
+
+            内容を一読のうえ、①はnoteメンバーシップ記事へ貼り付け、
+            ②は提携先への配布リストに沿ってお渡しください。
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【ミカタ】月刊白書の自動生成が失敗しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
