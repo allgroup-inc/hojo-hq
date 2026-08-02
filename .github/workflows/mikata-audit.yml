@@ -36,4 +36,8 @@ jobs:
           git config user.email "bot@en-life.co.jp"
           git add "docs/企業のミカタ_robots監査結果.md" data/mikata_robots_audit.json
           git diff --cached --quiet || git commit -m "auto: 企業のミカタ source audit $(date '+%Y-%m-%d %H:%M')"
-          git push
+          # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done
