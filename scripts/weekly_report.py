@@ -26,6 +26,7 @@ except Exception:
 JST = timezone(timedelta(hours=9))
 SITE_ID = "allgroup-inc.github.io"
 GRAPH = "https://graph.facebook.com/v21.0"
+FUNNEL_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "hojo", "funnel.json")
 
 
 def get(url, headers=None):
@@ -58,6 +59,31 @@ def section_site():
             lines.append("・LINE登録ボタンのタップ: 0回")
     except Exception:
         lines.append("・LINE登録タップ: 取得不可")
+    return "\n".join(lines)
+
+
+def _pct(x):
+    return "-" if x is None else f"{round(x * 100)}%"
+
+
+def section_funnel():
+    try:
+        with open(FUNNEL_PATH, encoding="utf-8") as f:
+            fn = json.load(f)
+    except FileNotFoundError:
+        return "🔍 診断ファネル: 未接続(data/hojo/funnel.jsonなし)"
+    except Exception as e:  # noqa: BLE001
+        return f"🔍 診断ファネル: 取得不可({type(e).__name__})"
+    stages = fn.get("stages") or []
+    if not stages:
+        return "🔍 診断ファネル: データなし"
+    counts = " → ".join(f"{s['label']} {s['count']}" for s in stages)
+    kr = fn.get("key_rates", {})
+    wd = fn.get("worst_drop")
+    lines = [f"🔍 診断ファネル(直近{fn.get('period', '7d')})", f"・{counts}"]
+    lines.append(f"・診断実行→LINEタップ: {_pct(kr.get('line_cvr'))}")
+    if wd:
+        lines.append(f"・最大離脱: {wd['label']}({_pct(wd['drop_rate'])})")
     return "\n".join(lines)
 
 
@@ -131,6 +157,7 @@ def main():
     body = "\n\n".join([
         f"📊【ミカタ】週次レポート({start}〜{end})",
         section_site(),
+        section_funnel(),
         section_line(),
         section_instagram(),
         section_facebook(),

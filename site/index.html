@@ -1173,7 +1173,7 @@
     if(!AUTORUN)document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
     LAST_MATCHED=hits.length;
     // 計測は「実際に結果を描画した本人操作」のみ(自動復元・自動再描画はAUTORUNで除外)
-    if(!AUTORUN)gtag('event','diagnosis_run',{matched_count:hits.length});
+    if(!AUTORUN){gtag('event','diagnosis_run',{matched_count:hits.length});try{window.plausible('hojo_shindan_complete');}catch(e){}}
     sendLedgerIfReady();
   });
 
@@ -1314,6 +1314,9 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js',new Date());
   gtag('config',GA_ID,{transport_type:'beacon'});
+  // Plausible manual queue(script.js は load後に読み込むため、先にqueueを用意しておく。
+  // 個人識別子は送らずイベント名のみ。集計は scripts/fetch_hojo_funnel.py 参照)
+  window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments);};
   // 表示速度(Lighthouse 95+)を守るため、gtag.js本体はページ読込完了後に読み込む。
   // それまでのイベントはdataLayerにキューされるため欠落しない。
   window.addEventListener('load',function(){
@@ -1336,7 +1339,7 @@
   });
   // 診断開始: 最初の条件選択またはテーマタップを1回だけ記録
   var GA_STARTED=false;
-  function gaStart(){if(GA_STARTED)return;GA_STARTED=true;gtag('event','diagnosis_start');}
+  function gaStart(){if(GA_STARTED)return;GA_STARTED=true;gtag('event','diagnosis_start');try{window.plausible('hojo_shindan_start');}catch(e){}}
   SELECT_IDS.forEach(function(id){document.getElementById(id).addEventListener('change',gaStart);});
   document.querySelectorAll('#f-theme .chip').forEach(function(c){c.addEventListener('click',gaStart);});
   // 診断実行イベントは match-btn ハンドラ内で送信(空振り・自動再描画を計測しないため)
