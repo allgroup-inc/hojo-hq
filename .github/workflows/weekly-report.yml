@@ -43,4 +43,8 @@ jobs:
           git config user.email "bot@en-life.co.jp"
           git add reports/hojo-mikata
           git diff --cached --quiet || git commit -m "auto: 沖縄企業のミカタ 週次レポート $(date '+%Y-%m-%d')"
-          git push
+          # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done
