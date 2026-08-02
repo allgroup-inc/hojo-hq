@@ -1,0 +1,32 @@
+# 収集する情報源の定義
+#
+# type:
+#   jgrants - 国の補助金電子申請システム「jGrants」の公開API(推奨・認証不要)
+#   rss     - RSS/Atomフィード
+#   html    - 通常のWebページ。**必ず robots.txt と利用規約を確認してから**追加すること
+#
+# jgrants の keyword には地域名や分野を入れて絞り込む(例: 沖縄 / IT導入 / 省エネ)
+
+sources:
+  - id: jgrants-all
+    name: jGrants(国の補助金ポータル)
+    type: jgrants
+    keyword: 中小企業
+    enabled: true
+
+  # 地域特化の例:
+  # - id: jgrants-okinawa
+  #   name: jGrants(沖縄関連)
+  #   type: jgrants
+  #   keyword: 沖縄
+  #   enabled: true
+
+  # 自治体サイトのRSSを足す例(RSSがあれば規約面で最も安全):
+  # - id: pref-news
+  #   name: 〇〇県 産業振興課 新着
+  #   type: rss
+  #   url: https://example.jp/feed.xml
+  #   enabled: true
+
+# 1回の実行で処理する新規アイテムの上限(API費用の暴走防止)
+max_items_per_run: 20

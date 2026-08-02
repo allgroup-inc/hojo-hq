@@ -1,0 +1,44 @@
+{
+  "$comment": "補助金・支援制度データのスキーマ。締切(date)・上限額(amount)・補助率(rate)は原文/APIから確認できた値のみ。確認できなければ必ず「要確認」とする。",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "制度の正式名称(原文に忠実に。略称で書き換えない)"
+    },
+    "summary": {
+      "type": "string",
+      "description": "経営者向けの3文以内の要約。専門用語をやさしく言い換える。誇張禁止"
+    },
+    "agency": {
+      "type": "string",
+      "description": "実施機関(例: 中小企業庁 / 〇〇県 / 〇〇市)。不明なら '要確認'"
+    },
+    "date": {
+      "type": "string",
+      "description": "申請締切日。YYYY-MM-DD形式。通年・随時受付なら '随時'。原文から特定できなければ '要確認'"
+    },
+    "amount": {
+      "type": "string",
+      "description": "補助上限額(例: 上限450万円)。原文の表記に忠実に。不明なら '要確認'"
+    },
+    "rate": {
+      "type": "string",
+      "description": "補助率(例: 1/2、小規模事業者は2/3)。不明なら '要確認'"
+    },
+    "target": {
+      "type": "string",
+      "description": "対象者(例: 従業員20名以下の県内中小企業)。不明なら '要確認'"
+    },
+    "area": {
+      "type": "string",
+      "description": "対象地域(例: 全国 / 沖縄県 / 那覇市)。不明なら '要確認'"
+    },
+    "category": {
+      "type": "string",
+      "description": "カテゴリ(例: 設備投資 / IT導入 / 雇用 / 創業 / 販路開拓 / その他)"
+    }
+  },
+  "required": ["title", "summary", "agency", "date", "amount", "rate", "target", "area", "category"],
+  "additionalProperties": false
+}

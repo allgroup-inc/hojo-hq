@@ -206,8 +206,21 @@ def main():
         f.write(article)
 
     if preview:
+        # KPI鮮度チェック(運用規程: 未入力・8日以上放置でリマインド)
+        kpi = load_json(KPI_PATH) if os.path.exists(KPI_PATH) else {}
+        reminder = ""
+        upd = kpi.get("updated")
+        try:
+            stale = (today - datetime.strptime(upd, "%Y-%m-%d").date()).days if upd else None
+        except (TypeError, ValueError):
+            stale = None
+        if upd is None or stale is None:
+            reminder = "⚠️ noteのKPIが未入力です。管理画面の数字(フォロワー/メンバー/今月売上)をチャットで教えてください"
+        elif stale >= 8:
+            reminder = f"⚠️ noteのKPIが{stale}日間更新されていません。最新の数字をチャットで教えてください"
         print(f"stem={stem}")
         print(f"title={article.splitlines()[0].lstrip('# ')}")
+        print(f"kpireminder={reminder}")
     else:
         print(f"[ok] {out_path} を生成しました")
 
