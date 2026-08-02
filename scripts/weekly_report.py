@@ -26,6 +26,8 @@ except Exception:
 JST = timezone(timedelta(hours=9))
 SITE_ID = "allgroup-inc.github.io"
 GRAPH = "https://graph.facebook.com/v21.0"
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT_DIR = os.path.join(BASE, "reports", "hojo-mikata")
 
 
 def get(url, headers=None):
@@ -124,6 +126,24 @@ def push_line(text):
     urllib.request.urlopen(req, timeout=30)
 
 
+def write_report(now, body):
+    """LINE配信本文をrepoにも永続化する(reports/fukugiiroと同じパターン)。
+    LINE直送だけだと別セッションのアカリさんが過去のKPI推移を追えないため。"""
+    week_tag = now.strftime("%G-W%V")
+    md = "\n\n".join([
+        f"# 沖縄企業のミカタ 週次レポート {week_tag}",
+        f"生成: {now.strftime('%Y-%m-%d %H:%M')} JST(統括アカリさん・自動生成)",
+        body,
+        "> 未接続/取得不可の項目は、真のKPI(面談・相談件数)・GLOW接続数を含め手動追跡中。"
+        "自動集計への組み込みはタスク一覧を参照。",
+    ])
+    os.makedirs(OUT_DIR, exist_ok=True)
+    with open(os.path.join(OUT_DIR, f"{week_tag}_weekly.md"), "w", encoding="utf-8") as f:
+        f.write(md + "\n")
+    with open(os.path.join(OUT_DIR, "latest.md"), "w", encoding="utf-8") as f:
+        f.write(md + "\n")
+
+
 def main():
     now = datetime.now(JST)
     start = (now - timedelta(days=7)).strftime("%-m/%-d") if os.name != "nt" else (now - timedelta(days=7)).strftime("%m/%d")
@@ -137,8 +157,9 @@ def main():
         "詳しい内訳: GA4アプリ/Clarityでいつでも確認できます🌺",
     ])
     print(body)
+    write_report(now, body)
     if "--dry-run" in sys.argv:
-        print("[ok] dry-run: 送信なし")
+        print("[ok] dry-run: 送信なし(reports/hojo-mikata/は更新しました)")
         return
     push_line(body)
     print("[ok] LINEへ送信しました")

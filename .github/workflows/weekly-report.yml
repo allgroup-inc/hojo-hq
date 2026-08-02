@@ -8,10 +8,14 @@ on:
   schedule:
     # JST 月曜 8:00 = UTC 日曜 23:00
     - cron: "0 23 * * 0"
+  push:
+    paths:
+      - "scripts/weekly_report.py"
+      - ".github/workflows/weekly-report.yml"
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   report:
@@ -32,3 +36,11 @@ jobs:
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
         run: python scripts/weekly_report.py
+
+      - name: Commit report
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add reports/hojo-mikata
+          git diff --cached --quiet || git commit -m "auto: 沖縄企業のミカタ 週次レポート $(date '+%Y-%m-%d')"
+          git push
