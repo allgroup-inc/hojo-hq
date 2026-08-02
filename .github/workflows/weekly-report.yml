@@ -27,6 +27,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: 診断ファネル取得(キーが有れば)
+        continue-on-error: true
+        env:
+          PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
+        run: python scripts/fetch_hojo_funnel.py
+
       - name: 週次レポートを生成してLINEへ送信
         env:
           PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
@@ -42,6 +48,7 @@ jobs:
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
           git add reports/hojo-mikata
+          [ -f data/hojo/funnel.json ] && git add data/hojo/funnel.json || true
           git diff --cached --quiet || git commit -m "auto: 沖縄企業のミカタ 週次レポート $(date '+%Y-%m-%d')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
           for i in 1 2 3; do
