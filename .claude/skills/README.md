@@ -5,9 +5,14 @@
 
 ## 中身: Superpowers (obra/superpowers v6.2.0 を vendoring)
 TDD・計画・デバッグ・レビュー・Git ワークフロー等の 14 スキル。
-- 出典: https://github.com/obra/superpowers (MIT License)
+- 出典: https://github.com/obra/superpowers (MIT License — 全文は `SUPERPOWERS-LICENSE`)
 - 取り込み元 commit: `3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9`
 - 各スキルは自己完結(必要なスクリプトは各スキル配下の `scripts/` に同梱)。
+
+## 中身: marketingskills (coreyhaines31/marketingskills を vendoring)
+コピー・SEO・広告・価格設計・リサーチ等のマーケティング 48 スキル。
+- 出典: https://github.com/coreyhaines31/marketingskills (ライセンス全文は `MARKETINGSKILLS-LICENSE`)
+- 一括更新は `scripts/update-skills.sh`(Superpowers と同時に upstream 最新へ追従)。
 
 セッション開始時に `.claude/hooks/superpowers-session-start.sh` が
 `using-superpowers` スキルを注入し、「You have superpowers」で自動起動させる。
