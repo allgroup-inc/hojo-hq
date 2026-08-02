@@ -39,4 +39,8 @@ jobs:
           git add reports/fukugiiro
           [ -f data/fukugiiro/funnel.json ] && git add data/fukugiiro/funnel.json || true
           git diff --cached --quiet || git commit -m "auto: もらいわすれ堂 週次レポート $(date '+%Y-%m-%d')"
-          git push
+          # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done

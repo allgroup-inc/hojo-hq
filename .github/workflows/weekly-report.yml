@@ -8,6 +8,10 @@ on:
   schedule:
     # JST 月曜 8:00 = UTC 日曜 23:00
     - cron: "0 23 * * 0"
+  push:
+    paths:
+      - "scripts/weekly_report.py"
+      - ".github/workflows/weekly-report.yml"
   workflow_dispatch: {}
 
 permissions:
@@ -39,10 +43,15 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
         run: python scripts/weekly_report.py
 
-      - name: Commit funnel data
+      - name: Commit report
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
+          git add reports/hojo-mikata
           [ -f data/hojo/funnel.json ] && git add data/hojo/funnel.json || true
-          git diff --cached --quiet || git commit -m "auto: 診断ファネル更新 $(date '+%Y-%m-%d')"
-          git push
+          git diff --cached --quiet || git commit -m "auto: 沖縄企業のミカタ 週次レポート $(date '+%Y-%m-%d')"
+          # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done

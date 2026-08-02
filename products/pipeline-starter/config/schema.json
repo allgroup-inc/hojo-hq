@@ -1,0 +1,32 @@
+{
+  "$comment": "Claude APIに抽出させる項目の定義。用途に合わせて properties を編集する。値が原文から確認できない項目には文字列 '要確認' を入れるよう structure.py が指示する。",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "情報のタイトル(原文に忠実に)"
+    },
+    "summary": {
+      "type": "string",
+      "description": "3文以内の要約。誇張せず事実のみ"
+    },
+    "category": {
+      "type": "string",
+      "description": "カテゴリ(例: 補助金 / ニュース / イベント / その他)"
+    },
+    "date": {
+      "type": "string",
+      "description": "公開日または締切日。YYYY-MM-DD形式。原文から特定できなければ '要確認'"
+    },
+    "amount": {
+      "type": "string",
+      "description": "金額情報があれば(例: 上限200万円)。なければ '該当なし'、不明確なら '要確認'"
+    },
+    "target": {
+      "type": "string",
+      "description": "対象者・対象地域など。なければ '該当なし'"
+    }
+  },
+  "required": ["title", "summary", "category", "date", "amount", "target"],
+  "additionalProperties": false
+}

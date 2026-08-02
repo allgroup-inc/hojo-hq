@@ -1,0 +1,32 @@
+{
+ "audited_at": "2026-08-03 00:17",
+ "results": [
+  {
+   "label": "沖縄県(産業振興)",
+   "domain": "www.pref.okinawa.lg.jp",
+   "sample_path": "/shigoto/keizai/1009879/1010143/index.html",
+   "http_status": 404,
+   "machine_check": "robots.txt なし(RFC 9309上、クロール制限の指定なし)",
+   "fetch_ok": true,
+   "robots_excerpt": ""
+  },
+  {
+   "label": "沖縄県産業振興公社",
+   "domain": "okinawa-ric.jp",
+   "sample_path": "/service/subsidy.html",
+   "http_status": 200,
+   "machine_check": "代表パス /service/subsidy.html は許可範囲",
+   "fetch_ok": true,
+   "robots_excerpt": "User-agent: *\nDisallow: /.shared/\nDisallow: /.service/\nDisallow: /.preview/\nDisallow: /.not-found/\n\nSitemap: https://okinawa-ric.jp/sitemap.xml\n\n"
+  },
+  {
+   "label": "那覇市(企業支援)",
+   "domain": "www.city.naha.okinawa.jp",
+   "sample_path": "/business/kigyouricchi/kigyoushien/index.html",
+   "http_status": 200,
+   "machine_check": "代表パス /business/kigyouricchi/kigyoushien/index.html は許可範囲",
+   "fetch_ok": true,
+   "robots_excerpt": "User-agent: *\r\nDisallow: /mlmainte/\r\nDisallow: /mldata/\r\nDisallow: /bousaidata/"
+  }
+ ]
+}

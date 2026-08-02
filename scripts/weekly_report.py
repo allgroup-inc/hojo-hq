@@ -26,7 +26,9 @@ except Exception:
 JST = timezone(timedelta(hours=9))
 SITE_ID = "allgroup-inc.github.io"
 GRAPH = "https://graph.facebook.com/v21.0"
-FUNNEL_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "hojo", "funnel.json")
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT_DIR = os.path.join(BASE, "reports", "hojo-mikata")
+FUNNEL_PATH = os.path.join(BASE, "data", "hojo", "funnel.json")
 
 
 def get(url, headers=None):
@@ -140,6 +142,39 @@ def section_facebook():
         return f"📘 Facebook: 取得不可({type(e).__name__})"
 
 
+def section_note():
+    """note運営の週次数字(docs/note運用規程.md: アカリさん週次レポへの組込)。"""
+    import glob as _glob
+    base = os.path.dirname(__file__)
+    try:
+        weekly = _glob.glob(os.path.join(base, "..", "posts", "note", "*_vol*.md"))
+        published = 0
+        for p in weekly:
+            with open(p, encoding="utf-8") as f:
+                if "published:" in f.read(2000):
+                    published += 1
+        lines = ["📝 note運営",
+                 f"・週刊下書き: {len(weekly)}本 / 公開済み: {published}本"]
+        unpublished = len(weekly) - published
+        if unpublished >= 4:
+            lines.append(f"⚠️ 未公開の下書きが{unpublished}本(運用規程: 4本たまったら継続を再議論)")
+        kpi_path = os.path.join(base, "..", "data", "note_kpi.json")
+        kpi = {}
+        if os.path.exists(kpi_path):
+            with open(kpi_path, encoding="utf-8") as f:
+                kpi = json.load(f)
+
+        def v(k, u):
+            x = kpi.get(k)
+            return f"{x:,}{u}" if isinstance(x, (int, float)) else "未入力"
+
+        lines.append(f"・フォロワー: {v('followers', '人')} / メンバー: {v('members', '人')}"
+                     f" / 今月売上: {v('monthly_sales_yen', '円')}")
+        return "\n".join(lines)
+    except Exception as e:  # noqa: BLE001
+        return f"📝 note運営: 取得不可({type(e).__name__})"
+
+
 def push_line(text):
     token = os.environ["LINE_CHANNEL_ACCESS_TOKEN"]
     to = os.environ["LINE_ADMIN_USER_ID"]
@@ -148,6 +183,24 @@ def push_line(text):
         "https://api.line.me/v2/bot/message/push", data=payload, method="POST",
         headers={"Authorization": "Bearer " + token, "Content-Type": "application/json"})
     urllib.request.urlopen(req, timeout=30)
+
+
+def write_report(now, body):
+    """LINE配信本文をrepoにも永続化する(reports/fukugiiroと同じパターン)。
+    LINE直送だけだと別セッションのアカリさんが過去のKPI推移を追えないため。"""
+    week_tag = now.strftime("%G-W%V")
+    md = "\n\n".join([
+        f"# 沖縄企業のミカタ 週次レポート {week_tag}",
+        f"生成: {now.strftime('%Y-%m-%d %H:%M')} JST(統括アカリさん・自動生成)",
+        body,
+        "> 未接続/取得不可の項目は、真のKPI(面談・相談件数)・GLOW接続数を含め手動追跡中。"
+        "自動集計への組み込みはタスク一覧を参照。",
+    ])
+    os.makedirs(OUT_DIR, exist_ok=True)
+    with open(os.path.join(OUT_DIR, f"{week_tag}_weekly.md"), "w", encoding="utf-8") as f:
+        f.write(md + "\n")
+    with open(os.path.join(OUT_DIR, "latest.md"), "w", encoding="utf-8") as f:
+        f.write(md + "\n")
 
 
 def main():
@@ -161,11 +214,13 @@ def main():
         section_line(),
         section_instagram(),
         section_facebook(),
+        section_note(),
         "詳しい内訳: GA4アプリ/Clarityでいつでも確認できます🌺",
     ])
     print(body)
+    write_report(now, body)
     if "--dry-run" in sys.argv:
-        print("[ok] dry-run: 送信なし")
+        print("[ok] dry-run: 送信なし(reports/hojo-mikata/は更新しました)")
         return
     push_line(body)
     print("[ok] LINEへ送信しました")

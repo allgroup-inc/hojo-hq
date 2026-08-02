@@ -36,4 +36,8 @@ jobs:
           git config user.email "bot@en-life.co.jp"
           git add docs/フクギイロ_robots監査結果.md docs/フクギイロ_利用規約監査結果.md data/fukugiiro
           git diff --cached --quiet || git commit -m "auto: fukugiiro source audit $(date '+%Y-%m-%d %H:%M')"
-          git push
+          # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done

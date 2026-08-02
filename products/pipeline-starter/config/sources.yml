@@ -1,0 +1,28 @@
+# 収集する情報源の定義
+#
+# type:
+#   rss  - RSS/Atomフィード(推奨。利用規約の問題が起きにくい)
+#   html - 通常のWebページ。**必ず robots.txt と利用規約を確認してから**追加すること
+#
+# 各項目:
+#   id:   英数字とハイフンのみ。データファイル名に使われる
+#   name: 表示名
+#   url:  取得先URL
+#   enabled: false にすると収集をスキップ
+
+sources:
+  - id: sample-gov-news
+    name: サンプル(首相官邸 新着RSS)
+    type: rss
+    url: https://www.kantei.go.jp/index.rdf
+    enabled: true
+
+  # 追加例:
+  # - id: my-industry-news
+  #   name: 業界ニュース
+  #   type: rss
+  #   url: https://example.com/feed.xml
+  #   enabled: true
+
+# 1回の実行で処理する新規アイテムの上限(API費用の暴走防止)
+max_items_per_run: 20

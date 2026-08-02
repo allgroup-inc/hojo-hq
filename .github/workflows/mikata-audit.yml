@@ -1,0 +1,43 @@
+name: mikata-audit
+
+# 組織総点検2026-08-02の是正: フクギイロ側(fukugiiro-audit.yml)には週次の自動再監査が
+# あるが、企業のミカタ側の収集対象ドメインは一回限りの手動レビュー(docs/守り部審査記録.md)
+# のみだった。同じrobots.txt自動監査をミカタの収集対象にも適用し、サイト側の方針変更を検知する。
+
+on:
+  push:
+    paths:
+      - "scripts/audit_sources_mikata.py"
+      - ".github/workflows/mikata-audit.yml"
+  schedule:
+    # 週次(月曜 06:00 JST = 日曜 21:00 UTC)— 収集対象ソースのrobots方針変更を検知
+    - cron: "0 21 * * 0"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: robots.txt 自動監査(マモリさんの事実確認)
+        run: python scripts/audit_sources_mikata.py
+
+      - name: Commit audit report
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add "docs/企業のミカタ_robots監査結果.md" data/mikata_robots_audit.json
+          git diff --cached --quiet || git commit -m "auto: 企業のミカタ source audit $(date '+%Y-%m-%d %H:%M')"
+          # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done

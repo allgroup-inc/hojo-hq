@@ -10,6 +10,7 @@
 | /go/shindan/ | 沖縄企業のミカタ: 診断結果CTA | https://lin.ee/sh4bTUe |
 | /go/ig/ | 沖縄企業のミカタ: Instagramプロフィール | https://lin.ee/sh4bTUe |
 | /go/fb/ | 沖縄企業のミカタ: Facebookページ | https://lin.ee/sh4bTUe |
+| /go/card/ | 沖縄企業のミカタ: 紙配布(QRカード・催事・紹介) | https://lin.ee/sh4bTUe |
 | /go/fg-top/ | フクギイロ: トップページ | https://lin.ee/7fH7vDQ |
 | /go/fg-area/ | フクギイロ: 市町村ページ | https://lin.ee/7fH7vDQ |
 | /go/fg-kit/ | フクギイロ: 制度キットページ | https://lin.ee/7fH7vDQ |

@@ -1,0 +1,39 @@
+# 毎週金曜 10:00 JST(= 金曜 01:00 UTC)に翌週分の投稿下書きを生成してコミットする
+name: generate-posts
+
+on:
+  schedule:
+    - cron: "0 1 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate posts
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # 費用を抑えたい場合は下のコメントを外す(文章の質は下がります)
+          # ANTHROPIC_MODEL: claude-haiku-4-5
+        run: python scripts/generate_posts.py
+
+      - name: Commit & push drafts
+        run: |
+          git config user.name "sns-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add output input/topics.csv
+          git diff --cached --quiet && echo "変更なし" && exit 0
+          git commit -m "auto: post drafts $(date -u +%Y-%m-%d)"
+          git push
