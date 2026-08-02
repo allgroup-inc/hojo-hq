@@ -34,7 +34,7 @@ CVはLINE登録の1点のみ(締切アラートが登録特典)。
 | 週次登録ペース(定常) | 20社/週 |
 
 ## 技術構成
-- 収集: GitHub Actions cron(1日2回 06:00 / 18:00 JST)
+- 収集: GitHub Actions cron(1日4回 03:00 / 09:00 / 15:00 / 21:00 JST。組織総点検2026-08-02で実態と乖離を検知し訂正)
 - 整形: Claude API → JSON(schema: docs/data-schema.md)
 - 公開: 静的HTML + GitHub Pages(org: allgroup-inc)
 - 通知: LINE公式アカウント + Power Automate(締切アラート配信)
