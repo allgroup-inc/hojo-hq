@@ -61,6 +61,7 @@ jobs:
             https://github.com/${{ github.repository }}/blob/main/posts/note/members/${{ steps.gen.outputs.stem }}.md
             ②noteのメンバーシップ限定記事に貼り付けて公開
             (メンバーシップ未開設の間は貼り付け不要・下書きが貯まるだけです)
+            ${{ steps.gen.outputs.kpireminder }}
 
       - name: LINE通知(失敗時)
         if: failure()

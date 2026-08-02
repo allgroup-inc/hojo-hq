@@ -345,7 +345,8 @@ def build_article(data, snapshot, today):
     L.append("")
 
     stem = f"{dstr}_vol{vol}"
-    return stem, "\n".join(L), current, gone
+    stats["vol"] = vol
+    return stem, "\n".join(L), current, gone, stats
 
 
 def main():
@@ -356,7 +357,7 @@ def main():
     data = load_json(DATA_PATH)
     snapshot = load_json(SNAPSHOT_PATH) if os.path.exists(SNAPSHOT_PATH) else None
 
-    stem, article, current, gone = build_article(data, snapshot, today)
+    stem, article, current, gone, stats = build_article(data, snapshot, today)
 
     if dry_run:
         print(article)
@@ -395,8 +396,16 @@ def main():
 
     if preview:
         title = article.splitlines()[0].lstrip("# ")
+        # X告知文(コピー用・1行)。URLは公開後に人間が追記する(運用規程準拠・誇大表現なし)
+        xpost = (
+            f"【今週の沖縄の補助金】掲載{stats['total']}件/新着{stats['new']}件/"
+            f"締切30日切り{stats['closing']}件。今週も静かに入れ替わりました。"
+            f"AIが毎日見張る週刊定点観測 vol.{stats['vol']} を公開しました→ "
+            f"#沖縄 #補助金 #助成金"
+        )
         print(f"stem={stem}")
         print(f"title={title}")
+        print(f"xpost={xpost}")
     else:
         print(f"[ok] {out_path} を生成しました(掲載{len(current)}件)")
 
