@@ -41,7 +41,15 @@ jobs:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
-        run: python scripts/weekly_report.py
+        # pushイベント(コード編集時)はdry-run=LINE送信なし・repo記録のみ。
+        # 実弾のLINE配信は schedule(月曜8時) と workflow_dispatch(手動) のみ。
+        # (2026-08-03: push毎に実配信され小柳さんへ重複LINEが10通飛んだ事故の再発防止)
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python scripts/weekly_report.py --dry-run
+          else
+            python scripts/weekly_report.py
+          fi
 
       - name: Commit report
         run: |
