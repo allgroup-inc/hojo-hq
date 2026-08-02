@@ -114,6 +114,39 @@ def section_facebook():
         return f"📘 Facebook: 取得不可({type(e).__name__})"
 
 
+def section_note():
+    """note運営の週次数字(docs/note運用規程.md: アカリさん週次レポへの組込)。"""
+    import glob as _glob
+    base = os.path.dirname(__file__)
+    try:
+        weekly = _glob.glob(os.path.join(base, "..", "posts", "note", "*_vol*.md"))
+        published = 0
+        for p in weekly:
+            with open(p, encoding="utf-8") as f:
+                if "published:" in f.read(2000):
+                    published += 1
+        lines = ["📝 note運営",
+                 f"・週刊下書き: {len(weekly)}本 / 公開済み: {published}本"]
+        unpublished = len(weekly) - published
+        if unpublished >= 4:
+            lines.append(f"⚠️ 未公開の下書きが{unpublished}本(運用規程: 4本たまったら継続を再議論)")
+        kpi_path = os.path.join(base, "..", "data", "note_kpi.json")
+        kpi = {}
+        if os.path.exists(kpi_path):
+            with open(kpi_path, encoding="utf-8") as f:
+                kpi = json.load(f)
+
+        def v(k, u):
+            x = kpi.get(k)
+            return f"{x:,}{u}" if isinstance(x, (int, float)) else "未入力"
+
+        lines.append(f"・フォロワー: {v('followers', '人')} / メンバー: {v('members', '人')}"
+                     f" / 今月売上: {v('monthly_sales_yen', '円')}")
+        return "\n".join(lines)
+    except Exception as e:  # noqa: BLE001
+        return f"📝 note運営: 取得不可({type(e).__name__})"
+
+
 def push_line(text):
     token = os.environ["LINE_CHANNEL_ACCESS_TOKEN"]
     to = os.environ["LINE_ADMIN_USER_ID"]
@@ -134,6 +167,7 @@ def main():
         section_line(),
         section_instagram(),
         section_facebook(),
+        section_note(),
         "詳しい内訳: GA4アプリ/Clarityでいつでも確認できます🌺",
     ])
     print(body)

@@ -66,6 +66,9 @@ jobs:
 
             気になる点があれば公開せず、そのままご相談ください。
 
+            📣 公開後のX告知文(コピーして記事URLを足すだけ):
+            ${{ steps.gen.outputs.xpost }}
+
       - name: LINE通知(失敗時)
         if: failure()
         uses: ./.github/actions/line-notify
