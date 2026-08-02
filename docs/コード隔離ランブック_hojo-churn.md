@@ -7,6 +7,17 @@
 
 ---
 
+## ★ 進捗(2026-08-02 更新)
+- **リポジトリ新設はエージェント権限では不可**を確認済み: `POST /orgs/allgroup-inc/repos` が **403 Resource not accessible by integration**。組織Adminの操作なので**小柳さんが GitHub UI で作成**する(下記「唯一の人間ステップ」)。
+- **案A(クリーンコピー)を隔離環境で実証済み**: 移設ツリーは**自己完結して緑=107テスト全通過**、誤コミット検知(pii-guard)も移設先で稼働。よって案Aで確定(案Bは不要)。
+- **ワンコマンド移設スクリプトを用意**: `scripts/migrate_hojo_churn.sh`(dry-run 動作確認済み)。private/ は移設対象に含めない実装。
+
+### 唯一の人間ステップ(小柳さん・2クリック)
+1. GitHub → allgroup-inc → New repository → 名前 `hojo-churn` / **Private** を選択 / README等は**無しでOK(空でよい)** → Create。
+2. 作成できたら、このセッションに「作った」と伝える(私が add_repo でスコープに入れて移設・pushまで実行)。または手元で
+   `sh scripts/migrate_hojo_churn.sh git@github.com:allgroup-inc/hojo-churn.git` を実行。
+> 以降(移設・push・テスト確認)は自動。§3後始末(アクセス権を限定メンバーのみ・CI確認)と、§5の「hojo-hqからchurn削除の可否」だけ小柳さん決裁が残る。
+
 ## 0. 実行前チェック(churn-pii-guard)
 - [ ] `hojo-churn` を **private** で作成することを小柳さんが決裁済み。
 - [ ] `private/`(顧客データ)は**移設対象に含めない**(そもそもコミットされていない)。移すのはコードとPIIなしのドキュメント/例のみ。
