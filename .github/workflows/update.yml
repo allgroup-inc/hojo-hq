@@ -57,6 +57,13 @@ jobs:
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
         run: python scripts/record_kgi.py
 
+      - name: Record もらいわすれ堂 IGフォロワー数(❸)
+        # トークン未登録でも graceful に終了0(状態を明記)。--set で手動記録も可。
+        env:
+          MORADOU_IG_USER_ID: ${{ secrets.MORADOU_IG_USER_ID }}
+          MORADOU_IG_TOKEN: ${{ secrets.MORADOU_IG_TOKEN }}
+        run: python scripts/record_ig_followers.py
+
       - name: Commit updated data
         run: |
           git config user.name "hojo-hq-bot"
