@@ -209,7 +209,74 @@ note公式の約30万件有料記事分析(https://note.jp/n/n8522197d1ced / htt
 - 課題: 副業者の過重労働が過去最高水準・業務委託の労働者性問題 〔公式/一次〕 同上
 - 厚労省「副業・兼業の促進に関するガイドライン」が存在(労働時間通算・健康管理のルール) 〔公式/一次〕 https://www.mhlw.go.jp/content/001486498.pdf
 
-## 12. 未確認・要再調査リスト(記事に使う前に追加照合)
+## 12. 育児・教育(2026-08-05追加リサーチ・お題16の正本)
+
+### 効くと実証されたもの
+- ペリー就学前プロジェクト(米・RCT・約60年追跡): 参加群は高卒率・就業率・所得が高く犯罪・10代妊娠が少ない。投資1ドルあたり社会的リターン12.90ドルの推計(モデルにより幅あり) 〔公式/一次〕 https://highscope.org/project/perry-preschool-study/ / https://www.ojp.gov/pdffiles1/ojjdp/181725.pdf
+- ヘックマン: 質の高い幼児教育は年率7〜10%のリターン(2010, J. Public Economics) 〔公式/一次〕 https://www.sciencedirect.com/science/article/abs/pii/S0047272709001418 / https://heckmanequation.org/resource/early-childhood-education-has-a-high-rate-of-return/
+- ダニーデン研究(NZ・1,037名を約40年追跡): 幼少期の自制心スコアが32歳時の健康・経済状態・犯罪歴を勾配的に予測(Moffitt 2011, PNAS) 〔公式/一次〕 https://www.pnas.org/doi/10.1073/pnas.1010076108
+- 蔵書効果(Evans 2010・27か国): 蔵書500冊の家庭の子は教育年数が平均3.2年長い。20冊でも有意 〔公式/一次〕 https://www.sciencedirect.com/science/article/abs/pii/S0276562410000090
+- ほめ方: 言語的承認(ほめ言葉)は内発的動機を高める(Deci 1999メタ分析) / 努力をほめられた子の92%が難課題を選択、知能をほめられた子は33%(Mueller & Dweck 1998) 〔公式/一次〕 https://home.ubalt.edu/tmitch/642/articles%20syllabus/Deci%20Koestner%20Ryan%20meta%20IM%20psy%20bull%2099.pdf / https://psycnet.apa.org/record/1998-04530-003
+- ご褒美は「結果」でなく「行動」に: 読書等インプットへの報酬は効果あり・テスト結果への報酬はほぼゼロ(Fryer 2011, QJE・約3.8万人RCT) 〔公式/一次〕 https://academic.oup.com/qje/article/126/4/1755/1924375
+
+### 効かない/逆効果と実証されたもの
+- 物的な期待されたご褒美は内発的動機を低下(Deci 1999・128研究) 〔公式/一次〕 同上
+- 乳児向け知育DVD: 8〜16か月児で視聴1時間/日ごとに理解語彙が6〜8語少ない(Zimmerman 2007) 〔公式/一次〕 https://www.jpeds.com/article/S0022-3476(07)00447-7/abstract
+- テネシー州プレK(約3,000人RCT): 6年生時点で州学力テストが不参加児より有意に低い=「早期教育はやれば効くではなく質がすべて」 〔公式/一次〕 https://pubmed.ncbi.nlm.nih.gov/35759004/
+- マシュマロ・テストは家庭背景を統制すると効果が大幅縮小(Watts 2018) 〔公式/一次〕 https://journals.sagepub.com/doi/abs/10.1177/0956797618761661
+- 論争併記が必須のもの: 3000万語の格差(再現失敗論文あり)/スマホ×学力(相関・約7万人調査)/朝食×学力(SES交絡)
+
+### 費用・制度(フック用)
+- 学習費総額: すべて公立で約596万円/すべて私立で約1,976万円(文科省・令和5年度子供の学習費調査) 〔公式/一次〕 https://www.mext.go.jp/b_menu/toukei/chousa03/gakushuuhi/kekka/k_detail/mext_00002.html
+- 高校入学〜大学卒業で子ども1人942.5万円(日本公庫・令和3年度) 〔公式/一次〕 https://www.jfc.go.jp/n/findings/pdf/kyouikuhi_chousa_k_r03.pdf
+- 児童手当は2024年10月分から拡充(高校生年代まで・所得制限撤廃等。最新要件は要確認)
+
+## 13. キャリア・転職(2026-08-05追加リサーチ・お題17の正本)
+
+### 市場の一次統計
+- 転職者数331万人(2024年・3年連続増)に対し転職等希望者は約1,000万人=「希望と実行のギャップ」がファネルの核 〔公式/一次(総務省労働力調査)〕 https://www.stat.go.jp/data/roudou/sokuhou/nen/dt/pdf/youyaku.pdf
+- 転職で賃金「増加」40.5%/「減少」29.4%(厚労省・令和6年雇用動向調査)。増減の開きは3年連続拡大=売り手市場の定量根拠。**約3割は下がる**事実も併記必須 〔公式/一次〕 https://www.mhlw.go.jp/toukei/itiran/roudou/koyou/doukou/25-2/dl/gaikyou.pdf
+- エージェント経由(doda)は約6割が年収増=経路で結果分布が違うこと自体がネタ 〔自称(大規模自社データ)〕 https://www.persol-career.co.jp/newsroom/news/research/2026/20260430_2170/
+
+### 実証研究
+- **LinkedIn 2,000万人のランダム化実験**(Science 2022): 弱いつながりの方が強いつながりより転職につながる(逆U字。デジタル産業ほど顕著) 〔公式/一次〕 https://www.science.org/doi/10.1126/science.abl4476
+- Granovetter『Getting a Job』: 職を得た人の約56%が人づて、うち83.4%が「弱いつながり」経由 〔公式/一次〕 https://www.researchgate.net/publication/328078349_Granovetter_1974_Getting_a_Job_A_Study_of_Contacts_and_Careers
+- リファラル: 紹介経由は採用されやすく離職率が大幅に低い(QJE 2015・9社) 〔公式/一次〕 https://academic.oup.com/qje/article-abstract/130/2/805/2331590
+- 選考の予測力: 構造化面接がトップ(Sackett 2022再推計。Schmidt & Hunter 1998では構造化r=.51 vs 非構造化r=.38、経験年数r=.18、学歴r=.10) 〔公式/一次〕 https://pubmed.ncbi.nlm.nih.gov/34968080/ / https://firstpersonnel.org/wp-content/uploads/2013/10/Summary-Schmidt-Hunter-1998.pdf
+- 履歴書の初回スクリーニングは平均7.4秒(Ladders社アイトラッキング・学術査読なし) 〔自称〕 https://www.theladders.com/static/images/basicSite/pdfs/TheLadders-EyeTracking-StudyC2.pdf
+- 学び直し: 単独の賃金効果は弱く「学び×移動(転職)」の組合せで効果という政府分析の構図(断定不可・原典要確認) 〔公式/一次〕 https://www5.cao.go.jp/keizai3/2025/0210nk/n25_2_2.html
+
+### リスク側
+- 前職勤続1年未満の転職者が20.1%(調査開始以来初の2割超・マイナビ2026) 〔自称(大規模調査)〕 https://career-research.mynavi.jp/reserch/20260323_108572/
+- 職業紹介の「就職お祝い金」は禁止(職安法指針)・紹介事業者は入社後2年間の転職勧奨禁止=「急がされる転職」を避ける制度的根拠 〔公式/一次〕 https://jsite.mhlw.go.jp/niigata-hellowork/kyuzin-trouble.html
+
+## 14. 家計・くらしのお金(2026-08-05追加リサーチ・お題18の正本。投資助言に踏み込まない)
+
+### ベースライン統計
+- 二人以上世帯の平均貯蓄1,984万円 vs 中央値1,189万円(2024年・総務省)=「平均に騙されるな」の型 〔公式/一次〕 https://www.stat.go.jp/data/sav/sokuhou/nen/pdf/2024_gai.pdf
+- 金融リテラシー正答率55.7%で横ばい(金融広報中央委員会2022) 〔公式/一次〕 https://www.shiruporuto.jp/public/document/container/literacy_chosa/2022/
+
+### 行動経済学の実証(自動化・デフォルトが最強)
+- **Save More Tomorrow**(Thaler & Benartzi 2004): 昇給時に貯蓄率を自動引き上げ→40か月で3.5%→13.6%(約3.9倍) 〔公式/一次〕 https://besci.org/papers/benartzi-thaler-2004
+- 自動加入のデフォルト効果(Madrian & Shea 2001, QJE) 〔公式/一次〕 https://academic.oup.com/qje/article-abstract/116/4/1149/1903159
+- 英国の年金自動加入: 民間加入率40%(2012)→89%(2024)=ナッジが国の制度になった最大の成功例 〔公式/一次(IFS)〕 https://ifs.org.uk/articles/roll-first-decade-automatic-enrolment-workplace-pensions
+- 引き出せない口座(フィリピンSEED・RCT): 1年で貯蓄残高81%増 〔公式/一次(J-PAL)〕 https://www.povertyactionlab.org/evaluation/commitment-savings-products-philippines
+- 金融教育は効く(Kaiser et al. 2022・33か国76RCT・16万人メタ分析) 〔公式/一次〕 https://www.nber.org/papers/w27057
+- 社会規範ナッジ(英HMRC): 「10人中9人は期限内に納税」の一文で支払反応率15%向上 〔公式/一次〕 https://www.sciencedirect.com/science/article/abs/pii/S0047272717300166
+- 欠乏の心理学(Science 2013): お金の心配の想起だけで認知テスト成績が低下=「意志力でなく認知帯域の問題」 〔公式/一次〕 https://www.science.org/doi/10.1126/science.1238041
+
+### もらい忘れの国際比較(もらいわすれ堂の裏付け素材)
+- 日本: 生活保護の捕捉率は推計約2割 〔公式/一次(厚労省資料)〕 https://www.mhlw.go.jp/content/12601000/000643432.pdf / 休眠預金は毎年約1,200億円発生 〔公式/一次(預金保険機構)〕 https://www.dic.go.jp/katsudo/010_00123.html
+- 英国: 未請求給付は年£230億(約4.4兆円) 〔公式/一次(Policy in Practice)〕 https://policyinpractice.co.uk/publication/missing-out-2024/
+- 米国: EITCは適格者の約20%・年約70億ドルが未請求 〔公式/一次〕 https://taxpolicycenter.org/briefing-book/do-all-people-eligible-eitc-participate
+
+### 構造的に負けるパターン
+- リボ払い実質年率15%が相場 〔事業者解説・金融庁一次は要確認〕 https://www.jibunbank.co.jp/column/article/00204/
+- 宝くじの還元率45.7%(公営競技は約75%) 〔公式/一次(総務省)〕 https://www.soumu.go.jp/main_content/000084191.pdf
+- 家計簿は女性の72.1%が挫折経験(マネーフォワード調査・自称)=「記録より自動化」の根拠 〔自称〕 https://corp.moneyforward.com/news/release/corp/20150529_pfm_research/
+- 固定費: スマホ大手平均7,876円 vs 格安SIM 2,957円(MMD研究所) 〔自称(調査会社)〕 https://mmdlabo.jp/investigation/detail_1712.html
+
+## 15. 未確認・要再調査リスト(記事に使う前に追加照合)
 
 - Milk Road売却額 / Superhuman AIの正確な売上 / Xリンクデブーストの正確な減衰率 / note有料記事の価格上限拡大(5万→10万円説) / beehiiv「State of Paid Newsletters 2026」(bot遮断で未照合) / 大原千鶴氏の会員数(出典間齟齬)
 - 中小企業白書2026・中小機構AI調査・TDB九州沖縄版・商工中金調査の各数値(リサーチ環境から本文PDF未照合。記事07・11の公開前に原文照合必須)

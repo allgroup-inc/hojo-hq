@@ -170,6 +170,201 @@
       "x_hook_a": "企業の副業容認率、64.3%で過去最高。でも受け入れる側の中小企業は29.1%。人手不足の答えがここにある気がして、一次データを調べました",
       "x_hook_b": "「採用できないなら、週1日だけ借りる」。複業人材の受け入れという選択肢を、統計と実務で整理しました",
       "x_hook_c": "社員に副業を認めるか迷っていますか?それとも、よその会社の優秀な人を週1で迎えますか?"
+    },
+    {
+      "id": "16",
+      "slug": "kosodate_kenkyu",
+      "genre": "育児・教育",
+      "reader": "子育て中の親(未就学児〜小中学生)。教育熱心だが情報が多すぎて何が本当か分からなくなっている人",
+      "title_hint": "60年分の研究で仕分けする「効く子育て・効かない子育て」— 世界の実証研究ぜんぶ盛り",
+      "angle": "ペリー就学前RCT・ヘックマン・ダニーデンなど『効く』と実証されたものと、ご褒美・知能ほめ・知育DVD・テネシープレKなど『効かない/逆効果』と実証されたものを仕分けし、共通の型(非認知能力・ほめ方・本のある家)に翻訳する。RCTと相関研究を明確に区別し、論争があるものは反論併記。医療・発達の個別判断には踏み込まない",
+      "paid_price": 1280,
+      "status": "pending",
+      "facts": [
+        {
+          "claim": "ペリー就学前プロジェクト(米・RCT・約60年追跡)では、参加群は高卒率・就業率・所得が高く犯罪が少なく、投資1ドルあたり社会的リターン12.90ドルの推計がある(モデルにより幅あり)",
+          "source": "https://www.ojp.gov/pdffiles1/ojjdp/181725.pdf",
+          "source_name": "米司法省OJJDP報告",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "ヘックマンらの推計では質の高い幼児教育への投資は年率7〜10%のリターンを持つ",
+          "source": "https://heckmanequation.org/resource/early-childhood-education-has-a-high-rate-of-return/",
+          "source_name": "ヘックマン公式サイト(2010, J. Public Economics)",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "ダニーデン研究(NZ・1,037名を約40年追跡)では、幼少期の自制心スコアが32歳時点の健康・経済状態・犯罪歴を勾配的に予測した",
+          "source": "https://www.pnas.org/doi/10.1073/pnas.1010076108",
+          "source_name": "Moffitt et al. 2011, PNAS",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "27か国調査で蔵書500冊の家庭の子は教育年数が平均3.2年長く、蔵書20冊でも有意な効果があった",
+          "source": "https://www.sciencedirect.com/science/article/abs/pii/S0276562410000090",
+          "source_name": "Evans et al. 2010",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "努力(プロセス)をほめられた子の92%が難しい課題を選んだのに対し、知能をほめられた子は33%だった",
+          "source": "https://psycnet.apa.org/record/1998-04530-003",
+          "source_name": "Mueller & Dweck 1998, JPSP",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "128研究のメタ分析で、物的な期待されたご褒美は内発的動機を低下させ、言語的な承認(ほめ言葉)はむしろ高めることが示されている",
+          "source": "https://home.ubalt.edu/tmitch/642/articles%20syllabus/Deci%20Koestner%20Ryan%20meta%20IM%20psy%20bull%2099.pdf",
+          "source_name": "Deci, Koestner & Ryan 1999メタ分析",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "テネシー州の大規模プレK(約3,000人RCT)では6年生時点で参加児の州学力テストが不参加児より有意に低く、早期教育は『やれば効く』ではなく質と中身次第であることを示した",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/35759004/",
+          "source_name": "Durkin et al. 2022, Developmental Psychology",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "幼稚園から高校までの学習費総額は、すべて公立で約596万円・すべて私立で約1,976万円(文科省・令和5年度子供の学習費調査)",
+          "source": "https://www.mext.go.jp/b_menu/toukei/chousa03/gakushuuhi/kekka/k_detail/mext_00002.html",
+          "source_name": "文部科学省",
+          "date": "2026-08-05リサーチ"
+        }
+      ],
+      "x_hook_a": "「頭がいいね」とほめられた子は、難しい課題を選ぶ割合が33%。「がんばったね」の子は92%。60年分の子育て研究を仕分けしました",
+      "x_hook_b": "効く子育ては実は地味でした。本のある家・ほめ方・自制心。世界の実証研究の共通項です",
+      "x_hook_c": "その教育法、RCT(比較実験)で確かめられたものですか?それとも誰かの体験談ですか?"
+    },
+    {
+      "id": "17",
+      "slug": "tenshoku_kenkyu",
+      "genre": "キャリア・転職",
+      "reader": "転職を考え始めた20〜40代の働く個人。動きたいが失敗が怖い人",
+      "title_hint": "転職で年収が上がる人・下がる人の統計学 — 2,000万人実験と国の一次データぜんぶ盛り",
+      "angle": "希望者1,000万人→実行331万人→賃金増40.5%という国の一次データでファネルを示し、LinkedIn2,000万人実験(弱いつながり)・リファラル研究・構造化面接の予測力研究から『うまくいく人の共通の型』を抽出。年収減29.4%・早期離職2割・お祝い金禁止規制などリスク側も必ず併記し、内定保証めいた表現は一切使わない",
+      "paid_price": 1280,
+      "status": "pending",
+      "facts": [
+        {
+          "claim": "2024年の転職者数は331万人、転職等希望者は約1,000万人(総務省労働力調査)",
+          "source": "https://www.stat.go.jp/data/roudou/sokuhou/nen/dt/pdf/youyaku.pdf",
+          "source_name": "総務省 労働力調査",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "転職で賃金が増加した人は40.5%、減少した人は29.4%(厚労省・令和6年雇用動向調査)。約3割は転職で年収が下がる",
+          "source": "https://www.mhlw.go.jp/toukei/itiran/roudou/koyou/doukou/25-2/dl/gaikyou.pdf",
+          "source_name": "厚生労働省 雇用動向調査",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "LinkedInの2,000万人超を対象にしたランダム化実験で、強いつながりより『弱いつながり』の方が転職につながりやすいことが確認された(Science 2022)",
+          "source": "https://www.science.org/doi/10.1126/science.abl4476",
+          "source_name": "Rajkumar et al. 2022, Science",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "Granovetterの古典研究では、職を得た人の約56%が人づてで、その83.4%は『たまにしか会わない弱いつながり』経由だった",
+          "source": "https://www.researchgate.net/publication/328078349_Granovetter_1974_Getting_a_Job_A_Study_of_Contacts_and_Careers",
+          "source_name": "Granovetter 1974『Getting a Job』",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "選考手法の予測力研究では構造化面接がトップ級で、非構造化面接・経験年数・学歴を大きく上回る(Schmidt & Hunter 1998、Sackett 2022再推計)",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/34968080/",
+          "source_name": "Sackett et al. 2022, J. Applied Psychology",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "リクルーターが履歴書の初回スクリーニングにかける時間は平均7.4秒とする企業調査がある(学術査読なしの参考値)",
+          "source": "https://www.theladders.com/static/images/basicSite/pdfs/TheLadders-EyeTracking-StudyC2.pdf",
+          "source_name": "Ladders社アイトラッキング調査",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "直近1年の転職者のうち前職勤続1年未満が20.1%と調査開始以来初めて2割を超えた(マイナビ転職動向調査2026)",
+          "source": "https://career-research.mynavi.jp/reserch/20260323_108572/",
+          "source_name": "マイナビキャリアリサーチLab",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "職業紹介事業者の『就職お祝い金』提供は職業安定法の指針で禁止されており、紹介した人への入社後2年間の転職勧奨も禁止されている",
+          "source": "https://jsite.mhlw.go.jp/niigata-hellowork/kyuzin-trouble.html",
+          "source_name": "厚生労働省 労働局",
+          "date": "2026-08-05リサーチ"
+        }
+      ],
+      "x_hook_a": "転職したい人1,000万人。実際に動くのは331万人。年収が上がるのは4割、下がるのは3割。国の一次データで転職の全体像を整理しました",
+      "x_hook_b": "2,000万人のランダム化実験の結論:仕事を運んでくるのは親友ではなく「たまにしか会わない知人」でした",
+      "x_hook_c": "履歴書が読まれる時間、何秒だと思いますか?"
+    },
+    {
+      "id": "18",
+      "slug": "kakei_kenkyu",
+      "genre": "家計・くらしのお金(投資助言なし)",
+      "reader": "家計を預かる生活者・共働き世帯。節約を頑張っては挫折している人",
+      "title_hint": "貯まる家計は意志力を使っていなかった — 世界の実証研究ぜんぶ盛り(自動化・もらい忘れ・固定費)",
+      "angle": "SMarT(貯蓄率3.9倍)・英年金自動加入(40%→89%)・引き出せない口座(+81%)など『自動化とデフォルトの勝利』を軸に、日英米の『もらい忘れ』統計と構造的に負けるパターン(リボ15%・宝くじ還元率45.7%・家計簿7割挫折)を仕分けする。個別金融商品の推奨・投資助言はしない。欠乏の心理学で『失敗は性格でなく認知資源の問題』と締める",
+      "paid_price": 1280,
+      "status": "pending",
+      "facts": [
+        {
+          "claim": "二人以上世帯の平均貯蓄は1,984万円だが中央値は1,189万円(2024年・総務省家計調査)。平均と中央値の乖離は約800万円",
+          "source": "https://www.stat.go.jp/data/sav/sokuhou/nen/pdf/2024_gai.pdf",
+          "source_name": "総務省 家計調査(貯蓄・負債編)",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "Save More Tomorrowプログラム(昇給のたびに貯蓄率を自動で引き上げる方式)では、参加者の貯蓄率が40か月で3.5%から13.6%へ約3.9倍になった",
+          "source": "https://besci.org/papers/benartzi-thaler-2004",
+          "source_name": "Thaler & Benartzi 2004, Journal of Political Economy",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "英国の年金自動加入制度では、民間セクター適格従業員の加入率が2012年の約40%から2024年に89%へ上昇した",
+          "source": "https://ifs.org.uk/articles/roll-first-decade-automatic-enrolment-workplace-pensions",
+          "source_name": "英財政研究所(IFS)",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "目標額または期日まで引き出せない貯蓄口座を提供されたフィリピンのRCTでは、1年で貯蓄残高が81%増加した",
+          "source": "https://www.povertyactionlab.org/evaluation/commitment-savings-products-philippines",
+          "source_name": "J-PAL(Ashraf, Karlan & Yin 2006, QJE)",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "33か国・76件のRCT・16万人超のメタ分析で、金融教育は金融知識と貯蓄などの行動に正の因果効果を持つことが示されている",
+          "source": "https://www.nber.org/papers/w27057",
+          "source_name": "Kaiser, Lusardi et al. 2022",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "日本では生活保護の捕捉率が推計約2割、10年間取引のない休眠預金が毎年約1,200億円発生している",
+          "source": "https://www.dic.go.jp/katsudo/010_00123.html",
+          "source_name": "預金保険機構(捕捉率は厚労省資料 https://www.mhlw.go.jp/content/12601000/000643432.pdf)",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "英国では未請求の給付が年約230億ポンド、米国ではEITC(勤労所得税額控除)の適格者の約20%・年約70億ドルが未請求と推計されている",
+          "source": "https://policyinpractice.co.uk/publication/missing-out-2024/",
+          "source_name": "Policy in Practice(米はTax Policy Center https://taxpolicycenter.org/briefing-book/do-all-people-eligible-eitc-participate)",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "宝くじの実効還元率は45.7%で、公営競技(約75%)より低い(総務省資料)",
+          "source": "https://www.soumu.go.jp/main_content/000084191.pdf",
+          "source_name": "総務省",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "家計簿については女性の72.1%が挫折経験があるという家計簿アプリ事業者の調査がある(同社調査・利益相反に留意)",
+          "source": "https://corp.moneyforward.com/news/release/corp/20150529_pfm_research/",
+          "source_name": "マネーフォワード調査(2015)",
+          "date": "2026-08-05リサーチ"
+        }
+      ],
+      "x_hook_a": "貯蓄率を3.9倍にしたプログラムの中身は「昇給のたびに自動で貯蓄率が上がる」だけ。意志力は使いません。世界の実証研究をぜんぶ集めました",
+      "x_hook_b": "英国は年金の入り方を「申込制→自動加入」に変えただけで、加入率が40%→89%になりました。家計も同じ原理で動きます",
+      "x_hook_c": "節約が続かないのは、性格のせいだと思いますか?Science誌の答えは違いました"
     }
   ]
 }
