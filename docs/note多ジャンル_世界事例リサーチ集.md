@@ -115,6 +115,77 @@
 6. **単一プラットフォーム依存が最大の死因**。読者接点の自己保有(LINE・メール)と収益分散が生存者の共通項
 7. **ゼロからnote単体で月30万級の検証可能事例は未発見**。既存資産(B2B販路・自社メディア・LINE基盤)との合算設計が現実解
 
-## 6. 未確認・要再調査リスト(記事に使う前に追加照合)
+## 6. 採用・人手不足(2026-08-04追加リサーチ・記事07の正本)
+
+- 中小企業の68.0%が人手不足(日商・東商2024年調査、調査開始以来最大) 〔公式/一次〕 https://j-net21.smrj.go.jp/news/hgc8pd000001r322.html
+- 人手不足倒産2025年度441件で過去最多・約75%が従業員10人未満(TDB) 〔公式/一次〕 https://www.tdb.co.jp/report/economic/20260409-laborshortage-br25fy/
+- 沖縄の有効求人倍率1.1倍前後・福祉2.68倍/建設2.27倍と職種偏在(沖縄労働局) 〔公式/一次〕 https://jsite.mhlw.go.jp/okinawa-roudoukyoku/jirei_toukei/kyujin_kyushoku.html
+- 採用コスト相場: 新卒93.6万円/中途103.3万円(リクルート就職白書) 〔公式/一次〕
+- 米Klavon's: 時給$15化で1週間に応募1,000件超・16枠即充足 〔報道〕 https://www.wpxi.com/news/top-stories/pittsburgh-ice-cream-shop-raises-salaries-has-more-than-1000-applicants/6BGKVR2JPJFZNAQWXWISIWGOXM/
+- 米Chick-fil-Aフランチャイズ: 週3日勤務制で1週間に応募420件・管理職定着100%(当事者申告) 〔報道+自称〕 https://fortune.com/2022/11/02/work-three-days-full-time-hours-chick-fil-a-move-3-day-schedule-gets-429-applications-in-week/
+- 英週休3日実証(61社2,900人・6ヶ月): 離職57%減・バーンアウト71%減・92%継続(参加は自己選抜) 〔公式/一次〕 https://www.4dayweek.com/uk-pilot-results
+- 元湯陣屋: 週休3日+DXで離職率33%→4%・年商2.9億→7億超 〔報道〕 https://forbesjapan.com/articles/detail/74452
+- HILLTOP: 「夜勤なし・ルーチンはロボット」で新卒枠に年約1,000人エントリー(同社によれば) 〔自称〕 https://keikakuhiroba-mfi.com/archives/12041
+- RJP(現実的職務予告)メタ分析: 事前開示で自発的離職が有意に低下(Phillips 1998・40研究) 〔学術/一次〕 https://journals.aom.org/doi/10.5465/256964 / 離職36%減推計 https://www.qic-wd.org/umbrella-summary/realistic-job-previews / 主経路は「正直さの知覚」(Earnest 2011) https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1744-6570.2011.01230.x
+- リファラル採用: 紹介経由は離職確率10〜30%低い(QJE 2015・9社実データ) 〔学術/一次〕 https://academic.oup.com/qje/article-abstract/130/2/805/2331590
+- 入社後ギャップ約79%・筆頭は仕事内容 〔報道〕 https://www.hrpro.co.jp/trend_news.php?news_no=2276 / 中途の最多離職時期は入社3ヶ月未満(エン2024) 〔公式/一次〕 https://corp.en-japan.com/newsrelease/2024/39630.html
+- 厚労省「採用と定着 成功事例集」(中小20社・無料) 〔公式/一次〕 https://www.mhlw.go.jp/stf/newpage_38019.html ※個社数値はPDF原本未照合
+
+## 7. 値上げ・価格転嫁(2026-08-04追加リサーチ・記事08の正本)
+
+- 転嫁率: 中企庁53.5%(2025年9月) 〔公式/一次〕 https://www.meti.go.jp/press/2025/11/20251128002/20251128002.html / TDB39.4%(過去最低) https://www.tdb.co.jp/report/economic/20250828-pricepass-on202507/ / TSR57.1%。**調査主体で数値が違うため併記し「満額転嫁できていない」のみ断定**
+- 九州・沖縄36.9%(2022年以来最低) 〔一次+報道〕 https://www.nikkei.com/article/DGXZQOJC126UA0S5A910C2000000/ / コザ信金191社: 原材料転嫁5割未満33.4% 〔報道〕 https://www.okinawatimes.co.jp/articles/-/1876630
+- ガリガリ君(2016年60→70円): お詫びCM・値上げ月に前年比約+10% 〔報道〕 https://xtrend.nikkei.com/atcl/contents/18/00151/00037/
+- うまい棒(2022年10→12円): 「なくなっちゃうほうが、悲しいから」で感謝優勢 〔報道〕 https://president.jp/articles/-/86513?page=1
+- QBハウス(2019年+11%): 客数減は会社想定を大きく下回り増収継続 〔報道〕 https://biz-journal.jp/2019/10/post_121930.html
+- Amazon Prime(2014年$79→$99): 特典拡充同時実施で更新率は15ヶ月で回復・値上げ前超え 〔報道(CIRP)〕 https://www.fool.com/investing/2016/06/01/amazon-prime-improves-its-customer-retention-rate.aspx
+- 鳥貴族(2017年280→298円): 客数10ヶ月連続減・営業利益予想37%下方修正。「280円均一」がブランドの核だった 〔報道〕 https://maonline.jp/articles/torikizoku_20180921 / https://gendai.media/articles/-/64293
+- Netflix(2011年実質60%値上げ+分割): 3ヶ月で80万人減・株価7割下落 〔報道〕 https://techland.time.com/2011/10/24/netflix-loses-800000-subscribers-after-price-hike-qwikster-debacle/
+- ステルス値上げ(告知なし減量)は告知値上げより信頼毀損が大きい 〔報道〕 https://xtrend.nikkei.com/atcl/contents/18/01199/00002/
+- 学術: コスト由来の値上げは公正と受容・便乗は82%が不公正(Kahneman et al. 1986雪かきスコップ実験) 〔学術/一次〕 https://www.researchgate.net/publication/4900848_Fairness_As_a_Constraint_on_Profit_Seeking_Entitlements_In_The_Market / 顧客満足が値上げ耐性を作る(Homburg 2005) https://journals.sagepub.com/doi/abs/10.1177/0092070304269953 / 松竹梅=妥協効果(Simonson 1989) https://academic.oup.com/jcr/article-abstract/16/2/158/1800431
+- B2B交渉の後ろ盾: 労務費転嫁指針(内閣官房・公取委2023) 〔公式/一次〕 https://www.jftc.go.jp/houdou/pressrelease/2023/nov/231129_roumuhitenka.html / 価格交渉ハンドブック(中企庁) https://www.chusho.meti.go.jp/keiei/torihiki/pamflet/kakaku_kosho_handbook.pdf
+
+## 8. 事業承継(2026-08-04追加リサーチ・記事09の正本)
+
+- 後継者不在率: 全国50.1%・沖縄61.0%(過去最低だが全国6位。2016年は86.2%で全国ワースト1位)(TDB2025) 〔公式/一次+報道〕 https://www.tdb.co.jp/report/economic/20251121-successor25y/ / https://www.okinawatimes.co.jp/articles/-/1735655
+- 休廃業・解散2025年6万7,210件で3年連続最多・**直前期黒字が49.1%**(TSR。"儲かっているのに廃業"の直訳ではない点注意) 〔公式/一次〕 https://prtimes.jp/main/html/rd/p/000000025.000126976.html
+- 後継者難倒産533件・うち代表者の病気死亡起因が4割超(TDB2025年度) 〔公式/一次〕 https://www.tdb.co.jp/report/bankruptcy/aggregation/20260408-bankruptfy2025/
+- 承継準備5〜10年・60歳頃着手を国が明記(事業承継ガイドライン) 〔公式/一次〕 https://www.chusho.meti.go.jp/zaimu/shoukei/download/shoukei_guideline.pdf
+- 沖縄実例: 花ぐすく香華堂(創業50年余の惣菜)→運送業沖縄SEIWAへ第三者承継・従業員全員引継ぎ(県センター+沖縄公庫) 〔公式/一次〕 https://www.okinawakouko.go.jp/newsrelease/1749531948/
+- 事業承継・引継ぎ支援センター: 2024年度成約2,132件・後継者人材バンク106件で過去最高 〔公式/一次〕 https://www.smrj.go.jp/press/2025/f7mbjf000000dnpt-att/20250530_press01.pdf
+- 中川政七商店: 300年で初の親族外承継・在任中に年商12億→57億 〔報道〕 https://president.jp/articles/-/96237
+- Bob's Red Mill: ESOPで従業員に会社を贈与・従業員200→600人・売上過去最高 〔報道〕 https://www.forbes.com/sites/christophermarquis/2024/05/22/bobs-red-mill-securing-the-future-through-employee-ownership/
+- Teamshares: 引退オーナーから80社超買収→従業員保有80%へ移行モデル 〔報道〕 https://techcrunch.com/2023/08/24/this-venture-backed-startup-has-quietly-bought-more-than-80-mom-and-pop-shops/
+- サーチファンド: Stanford追跡(681本)IRR35.1%・ROI4.5倍 〔公式/一次〕 https://cdn.prod.website-files.com/6455268783d6938b9451ea80/669fbcb3e5f07cc9a6093751_StanfordGSB_Study_2024.pdf / 日本初は山口キャピタル(2019) https://yamaguchi-capital.co.jp/search-fund/
+- relay(オープンネーム承継公募): 2025年コザ信金と提携=沖縄金融機関初 〔報道〕 https://www.okinawatimes.co.jp/articles/-/1761862
+- BizBuySell2025: 売却価格中央値$35万・成約期間中央値170日 〔公式/一次(自社集計)〕 https://www.bizbuysell.com/blog/2025-year-in-review/
+- 失敗: 一澤帆布(2通の遺言で兄弟裁判・ブランド分裂) https://ja.wikipedia.org/wiki/一澤帆布工業 / ルシアンHD(悪質買い手・30社近く) 〔報道〕 https://diamond.jp/articles/-/349818 / 国の対応=中小M&Aガイドライン第3版+登録制度(取消事例あり) https://www.meti.go.jp/press/2024/08/20240830002/20240830002.html / https://ma-shienkikan.go.jp/
+
+## 9. 観光・インバウンド×地方(2026-08-04追加リサーチ・記事10の正本)
+
+- 2025年: 訪日4,268万人(JNTO)・消費9兆4,559億円(観光庁)ともに過去最高 〔公式/一次〕 https://www.jnto.go.jp/news/press/20260121_monthly.html / https://www.mlit.go.jp/kankocho/news02_00071.html
+- 外国人延べ宿泊: 地方部+19.1%は三大都市圏+5.1%の約4倍 〔公式/一次(観光庁統計)〕 https://www.mlit.go.jp/kankocho/tokei_hakusyo/shohidoko.html
+- 高付加価値旅行者(100万円以上/回)は訪日客の約1%で消費の11.5% 〔公式/一次〕 https://www.mlit.go.jp/kankocho/news03_000235.html / モデル11地域に「沖縄・奄美」選定 https://www.travelvoice.jp/20230329-153200
+- 沖縄: 2025年度入域1,093万人で過去最多。2025年11月以降の中国便欠航を台湾・韓国でカバー=市場分散の実証 〔報道(県発表)〕 https://www.okinawatimes.co.jp/articles/-/1826517
+- メーカンポン村(タイ・人口数百人): 5世帯ホームステイ→村収入の9割が観光・受入19軒 〔公式/一次+報道〕 https://mekongtourism.org/baan-mae-kampong-exploring-a-pioneering-cbt-project-in-thailand/ / https://www.nationthailand.com/in-focus/30374699
+- フェロー諸島Heimablídni: 農家・漁師の自宅夕食1人45ユーロ〜(政府観光局公認) 〔公式/一次〕 https://visitfaroeislands.com/en/see-do/activities/dining/heimablidni
+- カイコウラ: マオリ5家族が自宅担保で創業→町全体で年約100万人・2,800万NZドル(※1社の数字ではない) 〔公式/一次(IWC)〕 https://wwhandbook.iwc.int/en/case-studies/new-zealand-kaikoura
+- Walk Japan: 約62万円の歩く旅・2025年6,830人 〔報道〕 https://president.jp/articles/-/115833?page=2 / 堺の包丁研ぎ: 2.6万円×年2,000人 https://yamatogokoro.jp/column/experience-report/56893/ / KURABITO STAY: 冬の閑散期に2泊3日8.8万円(JNTO事例化) https://www.jnto.go.jp/projects/regional-support/resources/3930.html
+- 城崎温泉: 小規模家族経営×欧米豪FIT特化で外国人宿泊6年で約45倍(2011年比・豊岡市集計) 〔報道〕 https://yamatogokoro.jp/inbound_case/27839/
+- 失敗: 鬼怒川温泉(団体依存・価格競争の崩壊) https://ja.wikipedia.org/wiki/鬼怒川温泉 / OTA実質手数料15〜20%超 〔業界コラム〕 https://miyako.com/aio/articles/ota-cost-calculator/ / 京都オーバーツーリズム(宿泊税最高1万円へ) https://www.tokyo-np.co.jp/article/383849
+
+## 10. 中小のAI導入実務(2026-08-04追加リサーチ・記事11の正本)
+
+- 中小のAI導入率20.4%(中小機構2026) 〔公式/一次・本文未照合〕 https://www.smrj.go.jp/research_case/questionnaire/fbrion0000002pjw-att/202603_AI_point.pdf / 大企業43.3% vs 中小23.4%(TSR) https://www.tsr-net.co.jp/data/detail/1202766_1527.html
+- **九州・沖縄: 活用35.9%・効果実感90.7%**(TDB2026年3月・沖縄向けフック最有力) 〔公式/一次・本文未照合〕 https://www.tdb.co.jp/report/economic/20260528-genai-kyusyu/
+- 活用しない理由1位「業務がイメージできない」63.4%(中小企業白書2026) 〔公式/一次・本文未照合〕 https://www.chusho.meti.go.jp/pamflet/hakusyo/2026/PDF/chusho/00Hakusyo_zentai.pdf
+- 失敗調査: Gartner「30%がPoC後放棄」 〔公式/一次〕 https://www.gartner.com/en/newsroom/press-releases/2024-07-29-gartner-predicts-30-percent-of-generative-ai-projects-will-be-abandoned-after-proof-of-concept-by-end-of-2025 / MIT「95%が測定可能なリターンなし」 〔報道〕 https://www.forbes.com/sites/jasonsnyder/2025/08/26/mit-finds-95-of-genai-pilots-fail-because-companies-avoid-friction/ / TDB課題1位「人材・ノウハウ不足」54.1% https://www.tdb.co.jp/report/economic/2rwpbngj_lop/
+- 成功: 岡田研磨(白書掲載・月530時間削減) 〔公式/一次・本文未照合〕 https://digiwith.smrj.go.jp/cocoapp/info/feature/hakusyo202604.php / 旭鉄工(IoT年4億円削減+生成AIで横展開) 〔報道〕 https://monoist.itmedia.co.jp/mn/articles/2307/11/news076.html / QuickBooks記帳で月12時間節約(Intuit自称) https://quickbooks.intuit.com/r/bookkeeping/ai-bookkeeping-benefits/
+- Klarna: AIが700人分処理と発表→品質面で人間対応を再強化の揺り戻し 〔公式/一次+報道〕 https://www.klarna.com/international/press/klarna-ai-assistant-handles-two-thirds-of-customer-service-chats-in-its-first-month/ / https://www.twig.so/blog/klarna-ai-customer-support-efficiency
+- 公的支援(存在のみ・詳細は公募要領で要確認): デジタル化・AI導入補助金 https://it-shien.smrj.go.jp/ / 中小企業省力化投資補助金 https://shoryokuka.smrj.go.jp/
+
+## 11. 未確認・要再調査リスト(記事に使う前に追加照合)
 
 - Milk Road売却額 / Superhuman AIの正確な売上 / Xリンクデブーストの正確な減衰率 / note有料記事の価格上限拡大(5万→10万円説) / beehiiv「State of Paid Newsletters 2026」(bot遮断で未照合) / 大原千鶴氏の会員数(出典間齟齬)
+- 中小企業白書2026・中小機構AI調査・TDB九州沖縄版・商工中金調査の各数値(リサーチ環境から本文PDF未照合。記事07・11の公開前に原文照合必須)
+- 厚労省「採用と定着」事例集の個社数値(PDF 403で未照合) / QBハウス値上げ後の客数減少率の一次数値 / M&A後の雇用維持率の白書原典
