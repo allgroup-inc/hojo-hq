@@ -1,0 +1,30 @@
+name: plausible-check
+
+# 手動実行専用。PLAUSIBLE_API_KEY が効くかを確認し、
+# アクセス総量(訪問者数・PV)と診断ファネルの実数をログに出すだけ。
+# 何もコミットしない(contents: read)。数字はActionsのログで確認する。
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Fetch traffic + funnel (print only)
+        env:
+          PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
+        run: |
+          python scripts/fetch_plausible_traffic.py || true
+          python scripts/fetch_plausible_funnel.py || true
+          echo "=====SITE_TRAFFIC====="
+          cat data/kpi/site_traffic.json || true
+          echo "=====FUNNEL====="
+          cat data/fukugiiro/funnel.json || true

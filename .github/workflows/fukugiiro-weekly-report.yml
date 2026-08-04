@@ -29,6 +29,12 @@ jobs:
           PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
         run: python scripts/fetch_plausible_funnel.py
 
+      - name: サイトのアクセス総量取得(訪問者数・PV / キーが有れば)
+        continue-on-error: true
+        env:
+          PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
+        run: python scripts/fetch_plausible_traffic.py
+
       - name: 週次レポート生成(統括ユイさん)
         run: python scripts/weekly_report_fukugiiro.py
 
@@ -38,6 +44,7 @@ jobs:
           git config user.email "bot@en-life.co.jp"
           git add reports/fukugiiro
           [ -f data/fukugiiro/funnel.json ] && git add data/fukugiiro/funnel.json || true
+          [ -f data/kpi/site_traffic.json ] && git add data/kpi/site_traffic.json || true
           git diff --cached --quiet || git commit -m "auto: もらいわすれ堂 週次レポート $(date '+%Y-%m-%d')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
           for i in 1 2 3; do
