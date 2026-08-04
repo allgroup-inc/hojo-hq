@@ -17,7 +17,13 @@
   PLAUSIBLE_PERIOD    既定 7d(7日間)
   PLAUSIBLE_API_BASE  既定 https://plausible.io
   MORADOU_PATH_GLOB   もらいわすれ堂の絞り込み。既定 /hojo-hq/fukugiiro*
+
+手動記録(APIが使えない試用期間の運用A・ダッシュボードの数字を手で残す):
+  python scripts/fetch_plausible_traffic.py --set-domain-visitors 5 --period 24h
+  python scripts/fetch_plausible_traffic.py --set-domain-visitors 30 --set-moradou-visitors 12 --period 7d
+  --note で補足も残せる。source は "manual-dashboard" として記録する。
 """
+import argparse
 import json
 import os
 import urllib.parse
@@ -66,9 +72,51 @@ def fetch_aggregate(api_key, site_id, period, api_base, page_glob=None):
     }
 
 
+def record_manual(state, args, now):
+    """ダッシュボードの数字を手入力で記録する(運用A)。"""
+    entry = {
+        "date": datetime.now(JST).strftime("%Y-%m-%d"),
+        "period": args.period,
+        "source": "manual-dashboard",
+    }
+    if args.set_domain_visitors is not None:
+        entry["domain"] = {"visitors": args.set_domain_visitors, "pageviews": None,
+                           "bounce_rate": None, "visit_duration": None}
+    if args.set_moradou_visitors is not None:
+        entry["moradou"] = {"visitors": args.set_moradou_visitors, "pageviews": None,
+                            "bounce_rate": None, "visit_duration": None}
+    if args.note:
+        entry["note"] = args.note
+    # 同日・同期間の手動エントリは上書き
+    state["history"] = [h for h in state.get("history", [])
+                        if not (h.get("date") == entry["date"] and h.get("period") == entry["period"]
+                                and h.get("source") == "manual-dashboard")]
+    state["history"].append(entry)
+    state["history"] = state["history"][-104:]
+    state["last_checked"] = now
+    state["last_status"] = "manual"
+    with open(OUT, "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False, indent=2)
+    print(f"recorded(manual) {entry['date']} ({entry['period']}): "
+          f"domain visitors={args.set_domain_visitors}, moradou visitors={args.set_moradou_visitors}")
+    return 0
+
+
 def main():
+    ap = argparse.ArgumentParser(description="Plausibleのアクセス総量を記録(自動 or 手動)")
+    ap.add_argument("--set-domain-visitors", type=int, default=None)
+    ap.add_argument("--set-moradou-visitors", type=int, default=None)
+    ap.add_argument("--period", default=os.environ.get("PLAUSIBLE_PERIOD", "7d"))
+    ap.add_argument("--note", default=None)
+    args = ap.parse_args()
+
     state = load()
     now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
+
+    # 手動記録モード(運用A): いずれかの --set-* が指定されたら手入力として記録
+    if args.set_domain_visitors is not None or args.set_moradou_visitors is not None:
+        return record_manual(state, args, now)
+
     api_key = os.environ.get("PLAUSIBLE_API_KEY")
     if not api_key:
         state["last_checked"] = now
