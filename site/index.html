@@ -1230,9 +1230,12 @@
   // LINEアプリから戻ってきた時: 登録済みならロック表示を自動で全件表示に切替
   // (結果が非表示中=条件変更の途中では発火させない)
   function refreshIfMember(){
+    // 未解禁の名残 = ロックカード、または合計金額のマスク(pot-cta表示中)。
+    // 結果1件のみだとロックカードが無いので、pot-cta側も見ないと合計金額が開かない。
+    var potCta=document.getElementById('pot-cta');
     if(lsGet('mikata_member')==='1'
        && !document.getElementById('match-result').hidden
-       && document.querySelector('#result-list .card.locked')){
+       && (document.querySelector('#result-list .card.locked')||(potCta&&!potCta.hidden))){
       autoRunMatch();
     }
   }
@@ -1354,10 +1357,19 @@
     var a=e.target.closest&&e.target.closest('a');
     if(!a)return;
     var href=a.getAttribute('href')||'';
-    if(/^go\//.test(href)){
+    var isGo=/^go\//.test(href);
+    var isOa=href.indexOf('line.me/R/oaMessage')>=0;
+    if(isGo){
       gtag('event','line_cta_click',{channel:href.replace(/^go\//,'').replace(/\/$/,'')});
-    }else if(href.indexOf('line.me/R/oaMessage')>=0){
+    }else if(isOa){
       gtag('event','line_cta_click',{channel:a.id||a.className||'oaMessage'});
+    }
+    // どのLINE登録ボタンから登録しても、この端末を登録済み扱いにして全解禁する。
+    // unlock-btn/pot-cta以外(ページ下部の「LINEで無料登録する」等)から登録すると
+    // 合計金額とカードがロックのままになる齟齬があった(2026-08-04 小柳さん報告)。
+    if(isGo||isOa){
+      lsSet('mikata_member','1');
+      setTimeout(refreshIfMember,400);
     }
   });
 
