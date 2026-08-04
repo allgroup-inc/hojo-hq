@@ -6,6 +6,12 @@ on:
     - cron: "0 18,0,6,12 * * *"
   workflow_dispatch: {}
 
+# 同時実行禁止(2026-08-04): 2本並走→rebaseコンフリクト→マーカー入りJSONが
+# そのままデプロイされ診断が全停止した事故の再発防止。後続は待機して順番に実行する。
+concurrency:
+  group: update-subsidies
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pages: write
@@ -70,9 +76,12 @@ jobs:
           git config user.email "bot@en-life.co.jp"
           git add data/subsidies.json data/line_alerts.json data/kpi posts/launch posts/images posts/line
           git diff --cached --quiet || git commit -m "auto: update subsidies & images $(date '+%Y-%m-%d %H:%M')"
-          # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
+          # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)。
+          # -X theirs: 自動生成ファイル同士のコンフリクトは自分の新しい生成分で解決し、
+          # マーカーを作業ツリーに残さない。失敗したらrebaseを必ずabortして原状回復する。
           for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
+            git pull --rebase -X theirs origin main && git push && break
+            git rebase --abort 2>/dev/null || true
             echo "push retry $i"; sleep 5
           done
 
@@ -81,6 +90,21 @@ jobs:
 
       - name: Copy data into site
         run: cp -r data site/data
+
+      - name: Validate data before deploy (壊れたJSONを公開しないゲート)
+        # 2026-08-04: マーカー入りJSONが公開され診断が全停止した事故の再発防止。
+        # ここで落ちればデプロイされず、公開中の正常なサイトがそのまま残る。
+        run: |
+          python - <<'EOF'
+          import json, sys
+          for p in ["site/data/subsidies.json", "site/data/line_alerts.json"]:
+              d = json.load(open(p, encoding="utf-8"))
+              print(p, "ok")
+          n = len(json.load(open("site/data/subsidies.json", encoding="utf-8")).get("items", []))
+          if n < 10:
+              sys.exit(f"subsidies items={n} — 少なすぎるため公開を中止")
+          print("items:", n)
+          EOF
 
       - name: Inject ledger config (基準❺)
         # 企業台帳の送信先URL・トークンはGitHub Secretsのみが持つ(公開リポジトリに置かない)。
