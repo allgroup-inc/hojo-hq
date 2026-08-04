@@ -1,0 +1,56 @@
+{
+  "_readme": "実例研究シリーズのお題キュー。generate_tanpatsu_draft.py が毎月8日・22日に先頭のpendingを1本記事化する。factsは docs/note多ジャンル_世界事例リサーチ集.md から出典URLごと転記すること(出典なしのfactは生成拒否される)。稼ぎ方勧誘・収益保証系のお題は登録禁止(運営計画v3 §3)",
+  "queue": [
+    {
+      "id": "07",
+      "slug": "chihou_hasshin",
+      "genre": "地方×デジタル",
+      "title_hint": "人口の少ない町・地方の小さな会社が、デジタル発信で商圏を広げた実例研究",
+      "angle": "『地方だから不利』を実例で反証する。ローカルスーパー・1店舗カフェ・人口4万の町のメディアが、狭さを武器にした構造を抽出し、沖縄の中小企業の実務に翻訳する",
+      "paid_price": 1280,
+      "status": "pending",
+      "facts": [
+        {"claim": "北海道釧路の地方スーパー「あいちょう釧路」は地元食材の全国発信でフォロワー約1万人に到達した企業アカウント事例として紹介されている", "source": "https://www.shuttlerock.co.jp/article/detail/post-10034/", "source_name": "Shuttlerock解説記事", "date": "2026-08-04リサーチ"},
+        {"claim": "東京のコーヒー店LIGHT UP COFFEEは1店舗ながら社長の顔出し発信でXフォロワー1万人超の企業アカウント成功例として紹介されている", "source": "https://brandhatch.co.jp/x-corporate-account-success-stories/", "source_name": "BrandHatch解説記事", "date": "2026-08-04リサーチ"},
+        {"claim": "米メリーランド州アナポリス(人口約4万人)のローカルニュースレターNaptown Scoopは1人運営で購読者約1.8万人・開封率65%・2024年は広告収入35万ドル超ペースと本人が公表している", "source": "https://www.sidehustlenation.com/local-newsletter-business/", "source_name": "Side Hustle Nation(本人取材)", "date": "2026-08-04リサーチ"},
+        {"claim": "有料購読の無料→有料転換率はニッチ特化型で4〜10%と、大衆向け(1〜2%)より高いという実測集計がある", "source": "https://www.yana-g-y.com/p/substack-free-to-paid-conversion-rate", "source_name": "Substack転換率集計", "date": "2026-08-04リサーチ"},
+        {"claim": "企業アカウント運用の解説記事に共通する成功要素は、ほぼ毎日投稿・専任担当者かマニュアル整備・ターゲットの利用時間帯狙い・人格の見える発信である", "source": "https://selfachieve.jp/column/sns/x-corporate-account-success-guide/", "source_name": "企業X運用解説", "date": "2026-08-04リサーチ"}
+      ],
+      "x_hook_a": "地方スーパーがフォロワー1万人。人口4万の町の新聞が年5,000万円。『地方だから不利』の反証を集めました",
+      "x_hook_b": "商圏が狭い会社ほど、発信は「全国の同好の士」に届けると強い。実例で確かめました",
+      "x_hook_c": "沖縄は市場が小さいから発信しても無駄、だと思いますか?"
+    },
+    {
+      "id": "08",
+      "slug": "kaifuritsu_keiei",
+      "genre": "顧客接点の経営",
+      "title_hint": "開封率の経営学 — 顧客リストの「数」より「熱」をお金に変えた実例研究",
+      "angle": "フォロワー数・リスト数でなく開封率・熱量が収益の源泉であることを、世界の実測値(開封率44〜65%の媒体の収益)から示し、自社のLINE・メルマガ運用の点検手順に翻訳する",
+      "paid_price": 1280,
+      "status": "pending",
+      "facts": [
+        {"claim": "Substackのニュースレター平均開封率は44%で、メール業界平均の約2倍とされる", "source": "https://backlinko.com/substack-users", "source_name": "Backlinko集計", "date": "2026-08-04リサーチ"},
+        {"claim": "ローカルニュースレターNaptown Scoopの開封率は65%で、収益源は地元広告枠のみで2023年に年20万ドルに達したと本人が公表している", "source": "https://www.nichepursuits.com/my-local-email-newsletter-makes-over-200k-year-heres-how/", "source_name": "Niche Pursuits(本人取材)", "date": "2026-08-04リサーチ"},
+        {"claim": "米政治ニュースレターTangleは開封率約60%・購読者47万人(有料7.1万人)で年415万ドル、無料→有料転換率16%は業界最高水準と報じられている", "source": "https://pressgazette.co.uk/newsletters/politics-newsletter-makes-nearly-4m-in-subs-despite-giving-most-content-away/", "source_name": "Press Gazette", "date": "2026-08-04リサーチ"},
+        {"claim": "有料ニュースレターの解約率は月3〜5%が相場で、月4%なら約17ヶ月で有料読者の半分が入れ替わる計算になる", "source": "https://newsletrix.com/blog/free-to-paid-newsletter-conversion-rate", "source_name": "Newsletrix集計", "date": "2026-08-04リサーチ"},
+        {"claim": "noteの購入者1人あたり月平均支払額は2,696円とnote公式が発表している", "source": "https://note.com/info/n/nbdc8496a3aac", "source_name": "note公式(11周年発表)", "date": "2026-08-04リサーチ"}
+      ]
+    },
+    {
+      "id": "09",
+      "slug": "sns_shodo_kata",
+      "genre": "SNS×コンテンツ販売",
+      "title_hint": "0→1万フォロワーの共通の型 — 世界のプレイブックと日本の企業アカ実例の研究",
+      "angle": "『バズる才能』ではなく複数ソースが一致する再現手順(毎日投稿・能動リプライ・プロフィールのLP化・初速60分)を抽出し、担当者1人の中小企業でも回る週次運用に翻訳する",
+      "paid_price": 1280,
+      "status": "pending",
+      "facts": [
+        {"claim": "beehiivの公式ブログは、90日で0→1,000購読者を目指すX運用として毎日投稿+リプライ営業+週次スレッド+プロフィールLP最適化のプレイブックを公開している", "source": "https://blog.beehiiv.com/p/build-newsletter-scratch-x-twitter", "source_name": "beehiiv公式ブログ(自社宣伝バイアスに留意)", "date": "2026-08-04リサーチ"},
+        {"claim": "Sprout Socialの約20億エンゲージメント分析では、Xの投稿反応が最も良いのは火〜木曜の12〜18時(米国圏データ)とされる", "source": "https://sproutsocial.com/insights/best-times-to-post-on-twitter/", "source_name": "Sprout Social大規模分析", "date": "2026-08-04リサーチ"},
+        {"claim": "Bufferの自社大規模データ分析では、テキストのみ投稿が動画・画像・リンク付き投稿を中央値エンゲージメントで上回った", "source": "https://buffer.com/resources/links-on-x/", "source_name": "Buffer分析", "date": "2026-08-04リサーチ"},
+        {"claim": "Xのおすすめフィードのアルゴリズムはソースコードが公開されており、リプライなど会話の深さと投稿後の初速エンゲージが重要シグナルと解説されている", "source": "https://github.com/xai-org/x-algorithm", "source_name": "xAI公開リポジトリ", "date": "2026-08-04リサーチ"},
+        {"claim": "短期間の大量いいね・大量フォローはスパム判定による表示制限(シャドウバン)の対象になると複数の解説が注意喚起している", "source": "https://mkt-denshi.com/spam-taisaku/", "source_name": "スパム対策解説", "date": "2026-08-04リサーチ"}
+      ]
+    }
+  ]
+}
