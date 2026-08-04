@@ -1,0 +1,64 @@
+name: send-email
+
+# もらいわすれ堂の運用連絡(遥さんへのInstagram投稿依頼など)を SMTP で自動送信する。
+# 手動 or API(workflow_dispatch)で起動。本文は body_file(リポジトリ内のテキスト)推奨。
+# 秘密情報は Secrets(SMTP_*)で渡し、ログに出さない。
+
+on:
+  workflow_dispatch:
+    inputs:
+      to:
+        description: "宛先メールアドレス"
+        required: true
+      subject:
+        description: "件名"
+        required: true
+      body:
+        description: "本文(短いとき。長文は body_file を使う)"
+        required: false
+        default: ""
+      body_file:
+        description: "本文をこのリポジトリ内テキストから読む(例: outbox/ig-request-1.txt)"
+        required: false
+        default: ""
+      attach:
+        description: "添付ファイル(リポジトリ内パス。カンマ区切りで複数可)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Send email
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          IN_TO: ${{ inputs.to }}
+          IN_SUBJECT: ${{ inputs.subject }}
+          IN_BODY: ${{ inputs.body }}
+          IN_BODY_FILE: ${{ inputs.body_file }}
+          IN_ATTACH: ${{ inputs.attach }}
+        run: |
+          args=(--to "$IN_TO" --subject "$IN_SUBJECT")
+          if [ -n "$IN_BODY_FILE" ]; then
+            args+=(--body-file "$IN_BODY_FILE")
+          else
+            args+=(--body "$IN_BODY")
+          fi
+          IFS=',' read -ra A <<< "$IN_ATTACH"
+          for a in "${A[@]}"; do
+            a="$(echo "$a" | xargs)"   # trim spaces
+            [ -n "$a" ] && args+=(--attach "$a")
+          done
+          python scripts/send_email.py "${args[@]}"

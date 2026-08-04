@@ -2,9 +2,16 @@
   "opened": true,
   "opened_date": "2026-07-24",
   "friend_add_url": "https://lin.ee/7fH7vDQ",
-  "note": "開設記録は docs/フクギイロ_LINE運用原稿.md(前提: アカウント開設済み 2026-07-24)。サイトのLINE登録ボタンは /go/fg-*/ 経由で友だち追加に接続済み。",
-  "recorded": "2026-07-30",
-  "recorded_by": "全チャット進捗確認(business-organization-strategy)にて記録漏れを検出し追記",
-  "verification_note": "要確認: 本記録はドキュメント記述+lin.eeリンクの二次情報に基づく。manager.line.biz実画面での一次確認は未実施(2026-07-31 三名体制検証の指摘)。§D設定反映の作業時に一次確認を完了させること",
-  "primary_verified": false
+  "d_setup": true,
+  "d_setup_date": "2026-08-03",
+  "d_setup_detail": {
+    "greeting": "あいさつメッセージ設定済み(診断・市町村リンク入り)",
+    "rich_menu": "リッチメニュー6分割 稼働(3分診断/市町村で探す/申請準備シート/もらい忘れって?/受給を報告する/よくある質問)",
+    "auto_reply": "応答メッセージ 稼働(キーワード「受給を報告する」→ 制度名・金額・市町村を尋ねる。PIIは尋ねない)"
+  },
+  "note": "2026-08-03 小柳さんが manager.line.biz で §D(あいさつ・リッチメニュー6分割・受給報告の応答メッセージ)を設定・利用開始。サイトのLINE登録/受給報告ボタンは /go/fg-*/ 経由で lin.ee/7fH7vDQ に接続済み。受給報告は data/fukugiiro/jukyu_reports.json + scripts/add_jukyu_report.py + docs/受給報告フロー運用手順.md で数字化する。",
+  "recorded": "2026-08-03",
+  "recorded_by": "進捗ループ第1サイクル(§D設定完了を小柳さんが実施・一次確認)",
+  "verification_note": "manager.line.biz 実画面で §D設定を確認済み(2026-08-03)。以降は初回の友だち追加・受給報告の実データで運用検証する。",
+  "primary_verified": true
 }

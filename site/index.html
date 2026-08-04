@@ -12,7 +12,7 @@
 <meta property="og:description" content="沖縄の事業者向けに補助金・助成金情報を毎日自動更新。無料診断と、締切の約1か月前からのLINEアラート。">
 <meta property="og:url" content="https://allgroup-inc.github.io/hojo-hq/">
 <meta property="og:image" content="https://allgroup-inc.github.io/hojo-hq/assets/photos/hero.jpg">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"沖縄企業のミカタ","url":"https://allgroup-inc.github.io/hojo-hq/","description":"沖縄の事業者向けに国・県・市町村の補助金・助成金情報を毎日自動更新。無料の30秒診断と締切アラート。","publisher":{"@type":"Organization","name":"株式会社GLOW","url":"https://allgroup-inc.github.io/hojo-hq/","logo":"https://allgroup-inc.github.io/hojo-hq/assets/glow-logo.png","address":{"@type":"PostalAddress","postalCode":"904-0204","addressRegion":"沖縄県","addressLocality":"中頭郡嘉手納町","streetAddress":"字水釜412番地 マルチメディアセンター4F"},"contactPoint":{"@type":"ContactPoint","contactType":"customer support","email":"info@g-low.co.jp","telephone":"+81-98-989-9329"}}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"沖縄企業のミカタ","url":"https://allgroup-inc.github.io/hojo-hq/","description":"沖縄の事業者向けに国・県・市町村の補助金・助成金情報を毎日自動更新。無料の30秒診断と締切アラート。","publisher":{"@type":"Organization","name":"株式会社GLOW","url":"https://allgroup-inc.github.io/hojo-hq/","logo":"https://allgroup-inc.github.io/hojo-hq/assets/glow-logo.png","address":{"@type":"PostalAddress","postalCode":"904-0204","addressRegion":"沖縄県","addressLocality":"中頭郡嘉手納町","streetAddress":"字水釜412番地 マルチメディアセンター4F"},"contactPoint":{"@type":"ContactPoint","contactType":"customer support","email":"info@g-low.co.jp"}}}</script>
 <link rel="icon" type="image/png" href="assets/glow-logo.png">
 <link rel="preload" as="image" href="assets/photos/hero.webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,6 +47,9 @@
     font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN',Meiryo,sans-serif;
     background:var(--fukamidori);
     color:var(--shiro);
+    /* 日本語の折り返しを文節単位にする(2026-08-04 小柳さん指示。未対応ブラウザは通常折返し) */
+    word-break:auto-phrase;
+    overflow-wrap:break-word;
     line-height:var(--lh-body);
     -webkit-font-smoothing:antialiased;
   }
@@ -507,9 +510,12 @@
   .glow-vision small{display:block;margin-top:1.2em;padding-top:1.1em;font-size:.88em;font-weight:500;
     color:rgba(255,255,255,.88);border-top:1px solid rgba(255,255,255,.25);}
   @media(max-width:640px){.glow-vision small br{display:none;}}
-  .glow-eyebrow2{letter-spacing:.3em;font-size:.68rem;color:#c47500;
+  .glow-eyebrow2{letter-spacing:.3em;font-size:.68rem;color:#c47500;text-align:center;
     margin:2.6em 0 .2em;padding-top:2.4em;border-top:1px solid #e2e9f0;}
-  .glow-name{margin:.1em 0 .6em;font-size:1.45rem;color:#00335c;}
+  .glow-photo{display:block;width:150px;height:150px;border-radius:50%;object-fit:cover;
+    margin:1.3em auto .9em;border:4px solid #fff;
+    box-shadow:0 0 0 3px var(--kin),0 8px 22px rgba(0,51,92,.2);}
+  .glow-name{margin:.1em 0 .6em;font-size:1.45rem;color:#00335c;text-align:center;}
   .glow-name small{font-size:.72rem;font-weight:700;color:#c47500;margin-left:.8em;letter-spacing:.25em;}
   .glow-sub{margin:.1em 0 .8em;font-size:1.15rem;color:#00335c;}
   .glow-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -520,7 +526,7 @@
   .glow-cell li{margin:.3em 0;font-size:.88rem;}
   .glow-note{color:#7a8b99;font-size:.78rem;margin-top:1em;}
   .glow-company{margin:0;border:1px solid #e2e9f0;border-radius:10px;overflow:hidden;}
-  .glow-company>div{display:grid;grid-template-columns:7em 1fr;gap:12px;padding:9px 14px;font-size:.88rem;}
+  .glow-company>div{display:grid;grid-template-columns:7em 1fr;gap:12px;padding:11px 15px;font-size:1.02rem;}
   .glow-company>div:nth-child(odd){background:#f5f8fb;}
   .glow-company dt{color:#00335c;font-weight:700;}
   .glow-company dd{margin:0;color:#243b4f;}
@@ -802,6 +808,8 @@
       <p class="glow-vision">沖縄で事業を営む皆さまにとって、<span class="glow-hl">「何かあったら、<br class="sp">まずは相談してみよう」</span>と思っていただける身近な存在でありたい。<small>株式会社GLOWは、沖縄の企業と経営者に寄り添う「沖縄企業のミカタ」として、<br>企業の成長と地域経済の発展を支えてまいります。</small></p>
 
       <p class="glow-eyebrow2">REPRESENTATIVE</p>
+      <img class="glow-photo" src="assets/minei.webp" width="512" height="512" loading="lazy"
+           alt="株式会社GLOW 代表取締役社長 嶺井忍の写真">
       <h3 class="glow-name">嶺井 忍<small>代表</small></h3>
       <p>沖縄振興開発金融公庫において長年にわたり企業支援業務に従事。創業支援、大型プロジェクト融資、事業再生支援、事業承継支援など、企業のライフステージに応じた幅広い経営支援を担当し、多くの経営者と伴走してきました。</p>
       <p>在職中は、成長企業やベンチャー企業への資金調達支援にも携わり、OWNDAYS株式会社の海外展開に向けた融資を担当。同社代表の田中修治氏は、講演や著書において当時の支援について言及しています。</p>
@@ -853,7 +861,6 @@
         <div><dt>本店</dt><dd>沖縄県中頭郡嘉手納町字水釜412（嘉手納町マルチメディアセンター4F）</dd></div>
         <div><dt>那覇</dt><dd>沖縄県那覇市銘苅322-1（真栄城ビルⅡ 202）</dd></div>
         <div><dt>豊見城</dt><dd>沖縄県豊見城市宜保3-1-1（ロイヤルビル2F）</dd></div>
-        <div><dt>電話</dt><dd>098-989-9329</dd></div>
       </dl>
     </div>
   </div>
@@ -1174,7 +1181,7 @@
     if(!AUTORUN)document.getElementById('match-result').scrollIntoView({behavior:'smooth',block:'start'});
     LAST_MATCHED=hits.length;
     // 計測は「実際に結果を描画した本人操作」のみ(自動復元・自動再描画はAUTORUNで除外)
-    if(!AUTORUN)gtag('event','diagnosis_run',{matched_count:hits.length});
+    if(!AUTORUN){gtag('event','diagnosis_run',{matched_count:hits.length});try{window.plausible('hojo_shindan_complete');}catch(e){}}
     sendLedgerIfReady();
   });
 
@@ -1225,9 +1232,12 @@
   // LINEアプリから戻ってきた時: 登録済みならロック表示を自動で全件表示に切替
   // (結果が非表示中=条件変更の途中では発火させない)
   function refreshIfMember(){
+    // 未解禁の名残 = ロックカード、または合計金額のマスク(pot-cta表示中)。
+    // 結果1件のみだとロックカードが無いので、pot-cta側も見ないと合計金額が開かない。
+    var potCta=document.getElementById('pot-cta');
     if(lsGet('mikata_member')==='1'
        && !document.getElementById('match-result').hidden
-       && document.querySelector('#result-list .card.locked')){
+       && (document.querySelector('#result-list .card.locked')||(potCta&&!potCta.hidden))){
       autoRunMatch();
     }
   }
@@ -1315,6 +1325,9 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js',new Date());
   gtag('config',GA_ID,{transport_type:'beacon'});
+  // Plausible manual queue(script.js は load後に読み込むため、先にqueueを用意しておく。
+  // 個人識別子は送らずイベント名のみ。集計は scripts/fetch_hojo_funnel.py 参照)
+  window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments);};
   // 表示速度(Lighthouse 95+)を守るため、gtag.js本体はページ読込完了後に読み込む。
   // それまでのイベントはdataLayerにキューされるため欠落しない。
   window.addEventListener('load',function(){
@@ -1337,7 +1350,7 @@
   });
   // 診断開始: 最初の条件選択またはテーマタップを1回だけ記録
   var GA_STARTED=false;
-  function gaStart(){if(GA_STARTED)return;GA_STARTED=true;gtag('event','diagnosis_start');}
+  function gaStart(){if(GA_STARTED)return;GA_STARTED=true;gtag('event','diagnosis_start');try{window.plausible('hojo_shindan_start');}catch(e){}}
   SELECT_IDS.forEach(function(id){document.getElementById(id).addEventListener('change',gaStart);});
   document.querySelectorAll('#f-theme .chip').forEach(function(c){c.addEventListener('click',gaStart);});
   // 診断実行イベントは match-btn ハンドラ内で送信(空振り・自動再描画を計測しないため)
@@ -1346,10 +1359,19 @@
     var a=e.target.closest&&e.target.closest('a');
     if(!a)return;
     var href=a.getAttribute('href')||'';
-    if(/^go\//.test(href)){
+    var isGo=/^go\//.test(href);
+    var isOa=href.indexOf('line.me/R/oaMessage')>=0;
+    if(isGo){
       gtag('event','line_cta_click',{channel:href.replace(/^go\//,'').replace(/\/$/,'')});
-    }else if(href.indexOf('line.me/R/oaMessage')>=0){
+    }else if(isOa){
       gtag('event','line_cta_click',{channel:a.id||a.className||'oaMessage'});
+    }
+    // どのLINE登録ボタンから登録しても、この端末を登録済み扱いにして全解禁する。
+    // unlock-btn/pot-cta以外(ページ下部の「LINEで無料登録する」等)から登録すると
+    // 合計金額とカードがロックのままになる齟齬があった(2026-08-04 小柳さん報告)。
+    if(isGo||isOa){
+      lsSet('mikata_member','1');
+      setTimeout(refreshIfMember,400);
     }
   });
 

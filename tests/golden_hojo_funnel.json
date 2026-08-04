@@ -1,0 +1,20 @@
+{
+  "_note": "fetch_hojo_funnel.py --self-test 用。build_funnel の集計を検証。率は round(値,4) で比較。",
+  "cases": [
+    {
+      "name": "標準ファネル: 最大離脱は 診断実行→LINEタップ",
+      "counts": {"hojo_shindan_start": 100, "hojo_shindan_complete": 40, "line_tap": 15},
+      "expect": {"worst_drop_stage": "line_tap", "line_cvr": 0.375, "complete_rate": 0.4}
+    },
+    {
+      "name": "欠損イベントは0扱い",
+      "counts": {"hojo_shindan_start": 10},
+      "expect": {"worst_drop_stage": "hojo_shindan_complete", "line_cvr": null, "complete_rate": 0.0}
+    },
+    {
+      "name": "開始0はゼロ除算せず None",
+      "counts": {},
+      "expect": {"worst_drop_stage": null, "line_cvr": null, "complete_rate": null}
+    }
+  ]
+}
