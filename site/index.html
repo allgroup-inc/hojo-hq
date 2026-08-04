@@ -12,7 +12,7 @@
 <meta property="og:description" content="沖縄の事業者向けに補助金・助成金情報を毎日自動更新。無料診断と、締切の約1か月前からのLINEアラート。">
 <meta property="og:url" content="https://allgroup-inc.github.io/hojo-hq/">
 <meta property="og:image" content="https://allgroup-inc.github.io/hojo-hq/assets/photos/hero.jpg">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"沖縄企業のミカタ","url":"https://allgroup-inc.github.io/hojo-hq/","description":"沖縄の事業者向けに国・県・市町村の補助金・助成金情報を毎日自動更新。無料の30秒診断と締切アラート。","publisher":{"@type":"Organization","name":"株式会社GLOW","url":"https://allgroup-inc.github.io/hojo-hq/","logo":"https://allgroup-inc.github.io/hojo-hq/assets/glow-logo.png","address":{"@type":"PostalAddress","postalCode":"904-0204","addressRegion":"沖縄県","addressLocality":"中頭郡嘉手納町","streetAddress":"字水釜412番地 マルチメディアセンター4F"},"contactPoint":{"@type":"ContactPoint","contactType":"customer support","email":"info@g-low.co.jp","telephone":"+81-98-989-9329"}}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"沖縄企業のミカタ","url":"https://allgroup-inc.github.io/hojo-hq/","description":"沖縄の事業者向けに国・県・市町村の補助金・助成金情報を毎日自動更新。無料の30秒診断と締切アラート。","publisher":{"@type":"Organization","name":"株式会社GLOW","url":"https://allgroup-inc.github.io/hojo-hq/","logo":"https://allgroup-inc.github.io/hojo-hq/assets/glow-logo.png","address":{"@type":"PostalAddress","postalCode":"904-0204","addressRegion":"沖縄県","addressLocality":"中頭郡嘉手納町","streetAddress":"字水釜412番地 マルチメディアセンター4F"},"contactPoint":{"@type":"ContactPoint","contactType":"customer support","email":"info@g-low.co.jp"}}}</script>
 <link rel="icon" type="image/png" href="assets/glow-logo.png">
 <link rel="preload" as="image" href="assets/photos/hero.webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,6 +47,9 @@
     font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN',Meiryo,sans-serif;
     background:var(--fukamidori);
     color:var(--shiro);
+    /* 日本語の折り返しを文節単位にする(2026-08-04 小柳さん指示。未対応ブラウザは通常折返し) */
+    word-break:auto-phrase;
+    overflow-wrap:break-word;
     line-height:var(--lh-body);
     -webkit-font-smoothing:antialiased;
   }
@@ -523,7 +526,7 @@
   .glow-cell li{margin:.3em 0;font-size:.88rem;}
   .glow-note{color:#7a8b99;font-size:.78rem;margin-top:1em;}
   .glow-company{margin:0;border:1px solid #e2e9f0;border-radius:10px;overflow:hidden;}
-  .glow-company>div{display:grid;grid-template-columns:7em 1fr;gap:12px;padding:9px 14px;font-size:.88rem;}
+  .glow-company>div{display:grid;grid-template-columns:7em 1fr;gap:12px;padding:11px 15px;font-size:1.02rem;}
   .glow-company>div:nth-child(odd){background:#f5f8fb;}
   .glow-company dt{color:#00335c;font-weight:700;}
   .glow-company dd{margin:0;color:#243b4f;}
@@ -858,7 +861,6 @@
         <div><dt>本店</dt><dd>沖縄県中頭郡嘉手納町字水釜412（嘉手納町マルチメディアセンター4F）</dd></div>
         <div><dt>那覇</dt><dd>沖縄県那覇市銘苅322-1（真栄城ビルⅡ 202）</dd></div>
         <div><dt>豊見城</dt><dd>沖縄県豊見城市宜保3-1-1（ロイヤルビル2F）</dd></div>
-        <div><dt>電話</dt><dd>098-989-9329</dd></div>
       </dl>
     </div>
   </div>
