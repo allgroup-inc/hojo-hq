@@ -365,6 +365,174 @@
       "x_hook_a": "貯蓄率を3.9倍にしたプログラムの中身は「昇給のたびに自動で貯蓄率が上がる」だけ。意志力は使いません。世界の実証研究をぜんぶ集めました",
       "x_hook_b": "英国は年金の入り方を「申込制→自動加入」に変えただけで、加入率が40%→89%になりました。家計も同じ原理で動きます",
       "x_hook_c": "節約が続かないのは、性格のせいだと思いますか?Science誌の答えは違いました"
+    },
+    {
+      "id": "19",
+      "slug": "sns_shippai_kaihi",
+      "genre": "SNS×コンテンツ販売(失敗回避)",
+      "article_type": "shippai_kaihi",
+      "reader": "SNSで発信・販売を始めた(始めたい)個人・小さな会社。アカウントを失うのが怖い人",
+      "title_hint": "SNSで退場する人の共通点だけを集めた — 凍結・シャドウバン・信頼毀損の失敗回避ぜんぶ盛り",
+      "angle": "伸ばし方ではなく『退場のしかた』だけを多い順に集める。凍結・シャドウバン・規約違反・行政の注意喚起・信頼毀損の実例から共通の落とし穴を抽出し、回避チェックリストに変換する。不安を煽らず、実在アカウントを晒さず、構造として書く",
+      "paid_price": 1280,
+      "status": "pending",
+      "facts": [
+        {
+          "claim": "短期間の大量いいね・大量フォローはスパム判定による表示制限(シャドウバン)の対象になると複数の解説が注意喚起している",
+          "source": "https://mkt-denshi.com/spam-taisaku/",
+          "source_name": "スパム対策解説",
+          "date": "2026-08-04リサーチ"
+        },
+        {
+          "claim": "X APIを介さないスクレイピング・ブラウザ自動操作での自動投稿は永久凍結の対象とされる。予約投稿(認可済みツール)は許可",
+          "source": "https://opentweet.io/blog/twitter-automation-rules-2026",
+          "source_name": "X自動化ルール解説(原文: help.x.com/en/rules-and-policies/x-automation)",
+          "date": "2026-08-04リサーチ"
+        },
+        {
+          "claim": "「シャドウバン確認ツール」を装うアプリ連携詐欺で永久凍結された事例が報告されている",
+          "source": "https://mkt-denshi.com/spam-taisaku/",
+          "source_name": "スパム対策解説",
+          "date": "2026-08-04リサーチ"
+        },
+        {
+          "claim": "「簡単に稼げる」系の情報商材はSNS勧誘起点の消費者トラブルとして国民生活センター・消費者庁が継続的に注意喚起している",
+          "source": "https://www.kokusen.go.jp/soudan_topics/data/infoproducts.html",
+          "source_name": "国民生活センター",
+          "date": "2026-08-04リサーチ"
+        },
+        {
+          "claim": "noteの規約では利益を保証する誇大表現等が禁止され、違反アカウントの停止・売上没収の事例が報じられている",
+          "source": "https://diamond.jp/articles/-/388571",
+          "source_name": "ダイヤモンド・オンライン",
+          "date": "2026-08-04リサーチ"
+        },
+        {
+          "claim": "外部リンク付き投稿はリーチが下がる方向で各分析が一致しており、実務では本文で価値提供しリンクはリプ欄・固定ポストに置く型が定石とされる",
+          "source": "https://buffer.com/resources/links-on-x/",
+          "source_name": "Buffer分析",
+          "date": "2026-08-04リサーチ"
+        },
+        {
+          "claim": "AIで自動返信するボットの実装・運用は2025年10月の規約改定でXの事前書面許可が必要になったとされる(運用前に原文確認)",
+          "source": "https://www.maxmouse.co.jp/tips/2025/1219_1/",
+          "source_name": "規約改定まとめ(マックスマウス)",
+          "date": "2026-08-04リサーチ"
+        }
+      ],
+      "x_hook_a": "SNSの「伸ばし方」は人によって違うのに、「退場のしかた」はみんな同じでした。凍結・シャドウバン・信頼毀損の共通点だけを集めました",
+      "x_hook_b": "アカウントが死ぬ原因の大半は、才能ではなくルールの見落としでした。回避リストにしています",
+      "x_hook_c": "そのフォロワーの増やし方、規約的にセーフだと確認しましたか?"
+    },
+    {
+      "id": "20",
+      "slug": "kosodate_shippai_kaihi",
+      "genre": "育児・教育(失敗回避)",
+      "article_type": "shippai_kaihi",
+      "reader": "子育て中の親。よかれと思ってやっていることが逆効果でないか不安な人",
+      "title_hint": "「よかれと思って」が逆に効く — 研究で逆効果とわかった子育ての失敗回避ぜんぶ盛り",
+      "angle": "『やるべきこと』ではなく『やめるだけで得する逆効果』だけを実証研究から多い順に集める(モノのご褒美・知能ほめ・知育DVD・質の低い早期教育)。親を責めるトーンにせず、『知らなければ誰でもやる罠』として書く。医療・発達の個別判断には踏み込まない",
+      "paid_price": 1280,
+      "status": "pending",
+      "facts": [
+        {
+          "claim": "128研究のメタ分析で、物的な期待されたご褒美は子どもの内発的動機を低下させることが示されている(ほめ言葉はむしろ高める)",
+          "source": "https://home.ubalt.edu/tmitch/642/articles%20syllabus/Deci%20Koestner%20Ryan%20meta%20IM%20psy%20bull%2099.pdf",
+          "source_name": "Deci, Koestner & Ryan 1999, Psychological Bulletin",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "知能をほめられた子は失敗後に粘りが低下し、難しい課題を選ぶ割合が33%(努力をほめられた子は92%)だった",
+          "source": "https://psycnet.apa.org/record/1998-04530-003",
+          "source_name": "Mueller & Dweck 1998, JPSP",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "8〜16か月児では乳児向けDVD・ビデオの視聴1時間/日ごとに理解語彙が6〜8語少ないという調査結果がある",
+          "source": "https://www.jpeds.com/article/S0022-3476(07)00447-7/abstract",
+          "source_name": "Zimmerman et al. 2007, Journal of Pediatrics",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "テネシー州の大規模プレK(約3,000人RCT)では、参加児が6年生時点で州学力テストが不参加児より有意に低く、質を伴わない早期教育の拡大は逆効果になり得ることを示した",
+          "source": "https://pubmed.ncbi.nlm.nih.gov/35759004/",
+          "source_name": "Durkin et al. 2022, Developmental Psychology",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "テストの点数(結果)への金銭報酬は効果がほぼゼロで、本を読む等の行動への報酬は控えめな効果があった(米4都市・約3.8万人のRCT)",
+          "source": "https://academic.oup.com/qje/article/126/4/1755/1924375",
+          "source_name": "Fryer 2011, QJE",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "宿題時間と学力の相関は小学生でほぼゼロ、中学生r=.07、高校生r=.25と、学年が低いほど効果が薄い(メタ分析)",
+          "source": "https://journals.sagepub.com/doi/10.3102/00346543076001001",
+          "source_name": "Cooper et al. 2006, Review of Educational Research",
+          "date": "2026-08-05リサーチ"
+        }
+      ],
+      "x_hook_a": "「頑張ったらゲーム買ってあげる」— 128研究のメタ分析だと、これはやる気を下げる側でした。研究で逆効果とわかった子育てだけを集めました",
+      "x_hook_b": "足し算の子育て情報は無限にあるので、引き算(やめるだけで得する)だけをまとめました",
+      "x_hook_c": "そのご褒美、効いていると思いますか?"
+    },
+    {
+      "id": "21",
+      "slug": "kakei_shippai_kaihi",
+      "genre": "家計・くらしのお金(失敗回避・投資助言なし)",
+      "article_type": "shippai_kaihi",
+      "reader": "家計を預かる生活者。頑張っているのにお金が残らない人",
+      "title_hint": "頑張らずに損だけ塞ぐ — 構造的に負ける家計の失敗回避ぜんぶ盛り",
+      "angle": "『増やす』ではなく『構造的に漏れる穴』だけを多い順に集める(リボ・宝くじの期待値・サブスク解約忘れ・家計簿挫折・もらい忘れ)。個別金融商品の話は一切せず、公的統計と実証研究のみで『塞ぐ順番』のチェックリストにする。欠乏の心理学で『失敗は性格ではない』と締める",
+      "paid_price": 1280,
+      "status": "pending",
+      "facts": [
+        {
+          "claim": "リボ払いの手数料は実質年率15.0%が大手の相場で、元利定額方式は残高が減りにくい構造を持つ",
+          "source": "https://www.jibunbank.co.jp/column/article/00204/",
+          "source_name": "銀行系解説(auじぶん銀行)",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "宝くじの実効還元率は45.7%で、公営競技(約75%)より低い(総務省資料)",
+          "source": "https://www.soumu.go.jp/main_content/000084191.pdf",
+          "source_name": "総務省",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "サブスク利用者の53.0%が「使っていないのに課金」を経験し、放置額は月平均約3,600円というPR調査がある(単独ソースのため参考値)",
+          "source": "https://prtimes.jp/main/html/rd/p/000000006.000182139.html",
+          "source_name": "NilCraft調査(PR調査・利益相反に留意)",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "家計簿は女性の72.1%が挫折経験があるという家計簿アプリ事業者の調査がある(同社調査)",
+          "source": "https://corp.moneyforward.com/news/release/corp/20150529_pfm_research/",
+          "source_name": "マネーフォワード調査(2015)",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "日本では10年間取引のない休眠預金が毎年約1,200億円発生している",
+          "source": "https://www.dic.go.jp/katsudo/010_00123.html",
+          "source_name": "預金保険機構",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "英国では未請求の給付が年約230億ポンド、米国ではEITCの適格者の約20%が未請求と推計され、「制度はあるのに届かない」は国際共通の構造である",
+          "source": "https://policyinpractice.co.uk/publication/missing-out-2024/",
+          "source_name": "Policy in Practice(米はTax Policy Center)",
+          "date": "2026-08-05リサーチ"
+        },
+        {
+          "claim": "お金の心配事を想起させるだけで認知テストの成績が有意に低下する=家計の失敗は意志力でなく認知資源の問題(Science 2013)",
+          "source": "https://www.science.org/doi/10.1126/science.1238041",
+          "source_name": "Mullainathan & Shafir 2013, Science",
+          "date": "2026-08-05リサーチ"
+        }
+      ],
+      "x_hook_a": "宝くじの還元率45.7%。リボの年率15%。休眠預金は毎年1,200億円。頑張って増やす前に、構造的に漏れている穴だけ塞ぐリストを作りました",
+      "x_hook_b": "節約が続かないのは性格のせいではない、というScience論文があります。だから「頑張らない塞ぎ方」だけ集めました",
+      "x_hook_c": "あなたの家計、「増やす努力」と「漏れを塞ぐ」どちらが先だと思いますか?"
     }
   ]
 }
