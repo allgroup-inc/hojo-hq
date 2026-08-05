@@ -277,6 +277,16 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         summary.appendChild(bd);
         summary.appendChild(h("p", {class:"note", text:"「対象の可能性」のご案内です。受給の可否は各窓口の判断となります。"}));
         app.appendChild(summary);
+        // 結果が出た直後(最も関与が高い瞬間)にLINEを差し出す。制度一覧は登録なしでも全部見られる。
+        var topLine = h("div", {style:"margin:8px 0 4px;padding:16px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
+        topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この " + sum.total + " 件、締切を逃さないために"}));
+        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"対象になりそうな制度の締切を、約1か月前にLINEでお知らせします。制度の一覧は登録なしでも、ぜんぶ見られます。"}));
+        var topLineBtn = h("a", {href:(window.FG_LINE_URL || "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/"), target:"_blank", rel:"noopener",
+          style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#06C755;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"💬 LINEで締切通知を受け取る(無料)"});
+        topLineBtn.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_top"}); });
+        topLine.appendChild(topLineBtn);
+        topLine.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名 ・ いつでも解除"}));
+        app.appendChild(topLine);
         app.appendChild(h("p", {class:"kind-msg", text:"もらい忘れは、知らなかっただけ。あなたは悪くありません。ぜんぶ一度にやらなくて大丈夫。ひとつずつ、いっしょに進めましょう。"}));
       }
       var marks = getMarks();
