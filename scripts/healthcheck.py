@@ -133,8 +133,17 @@ def check_js_syntax(index_html: str | None):
     if not node:
         warnings.append("[JS] node が無いため構文チェックをスキップしました")
         return
-    scripts = _re.findall(r"<script[^>]*>(.*?)</script>", index_html, _re.S)
-    inline = [s for s in scripts if s.strip()]
+    # type属性がJS以外(application/ld+json等)のデータブロックはJSではないので対象外
+    # (2026-08-04: JSON-LDを構文エラーと誤検知しLINE誤報を出したため修正)
+    scripts = _re.findall(r"<script([^>]*)>(.*?)</script>", index_html, _re.S)
+    inline = []
+    for attrs, src in scripts:
+        if not src.strip():
+            continue
+        m = _re.search(r'type="([^"]*)"', attrs)
+        if m and m.group(1) not in ("text/javascript", "module"):
+            continue
+        inline.append(src)
     for i, src in enumerate(inline, 1):
         with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8") as tf:
             tf.write(src)
