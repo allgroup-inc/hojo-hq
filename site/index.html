@@ -510,6 +510,19 @@
   .glow-vision small{display:block;margin-top:1.2em;padding-top:1.1em;font-size:.88em;font-weight:500;
     color:rgba(255,255,255,.88);border-top:1px solid rgba(255,255,255,.25);}
   @media(max-width:640px){.glow-vision small br{display:none;}}
+  /* 相談の流れ(2026-08-04 相談転換③) */
+  .consult-flow{margin-top:var(--sp-4);padding:var(--sp-3);border-radius:14px;
+    background:#fff;border:1px solid #e2e9f0;border-top:4px solid var(--kin);text-align:center;}
+  .consult-head{margin:0 0 .9em;font-size:1.18rem;font-weight:800;color:#00335c;}
+  .consult-steps{margin:0 auto;padding:0;max-width:520px;list-style:none;counter-reset:cstep;text-align:left;}
+  .consult-steps li{counter-increment:cstep;position:relative;padding:.55em 0 .55em 2.6em;line-height:1.65;}
+  .consult-steps li::before{content:counter(cstep);position:absolute;left:0;top:.55em;
+    width:1.9em;height:1.9em;border-radius:50%;background:var(--kin);color:#fff;
+    font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .consult-steps strong{display:block;color:#00335c;font-size:1.02rem;}
+  .consult-steps span{display:block;font-size:.88rem;color:#5a6b78;}
+  .consult-flow .register-btn{margin-top:1.1em;}
+  .consult-note{margin:1em 0 0;font-size:.78rem;color:#7a8b99;}
   .glow-eyebrow2{letter-spacing:.3em;font-size:.68rem;color:#c47500;text-align:center;
     margin:2.6em 0 .2em;padding-top:2.4em;border-top:1px solid #e2e9f0;}
   .glow-photo{display:block;width:150px;height:150px;border-radius:50%;object-fit:cover;
@@ -715,6 +728,17 @@
     </div>
 
 
+    <div class="consult-flow">
+      <p class="consult-head">「ちょっと聞いてみたい」で大丈夫です</p>
+      <ol class="consult-steps">
+        <li><strong>LINEで「相談」と一言</strong><span>聞きたいことをそのまま送ってください。書き方に決まりはありません</span></li>
+        <li><strong>担当が内容を確認して返信</strong><span>1営業日以内にお返事します。無料で、売り込みはしません</span></li>
+        <li><strong>必要なら、元公庫の嶺井が直接</strong><span>訪問やオンラインで、貴社の状況に合わせてじっくりお話しします</span></li>
+      </ol>
+      <a class="register-btn" id="consult-btn" href="https://line.me/R/oaMessage/%40345pqedv/?%E7%9B%B8%E8%AB%87" target="_blank" rel="noopener">LINEで「相談」と送ってみる</a>
+      <p class="consult-note">※申請の代行は行っていません。準備の進め方のご案内と、状況に合う専門家のご紹介までお手伝いします。</p>
+    </div>
+
     <div class="experts">
       <p class="experts-head">この制度の申請、誰に相談する?</p>
       <p class="experts-sub">沖縄の信頼できる専門家を、各分野3名まで厳選してご紹介予定です。</p>
@@ -811,9 +835,10 @@
       <img class="glow-photo" src="assets/minei.webp" width="512" height="512" loading="lazy"
            alt="株式会社GLOW 代表取締役社長 嶺井忍の写真">
       <h3 class="glow-name">嶺井 忍<small>代表</small></h3>
-      <p>沖縄振興開発金融公庫において長年にわたり企業支援業務に従事。創業支援、大型プロジェクト融資、事業再生支援、事業承継支援など、企業のライフステージに応じた幅広い経営支援を担当し、多くの経営者と伴走してきました。</p>
-      <p>在職中は、成長企業やベンチャー企業への資金調達支援にも携わり、OWNDAYS株式会社の海外展開に向けた融資を担当。同社代表の田中修治氏は、講演や著書において当時の支援について言及しています。</p>
-      <p>現在は、これまで培った企業支援の経験と行政・金融機関・士業との幅広いネットワークを活かし、株式会社GLOWにて、後継者のこと、不動産のこと、資金繰りのことなど、経営全般のご相談をワンストップでお受けしています。経営者一人ひとりの課題に寄り添い、「経営者が最初に相談するパートナー」として、企業の成長と円滑な事業承継を支えています。</p>
+      <p>沖縄振興開発金融公庫に34年間在籍し、創業支援、事業再生、事業承継、大型プロジェクトファイナンスなど幅広い企業支援業務に従事。地域経済を支える数多くの企業・プロジェクトを支援してきました。</p>
+      <p>離島振興、大型ホテルプロジェクト、大型エネルギープロジェクトなど、沖縄の発展を支える大型案件をはじめ、創業支援から事業再生、事業承継まで、企業のライフステージに応じた幅広い支援を担当。経営者が迷い、決断を迫られる局面では、資金調達だけでなく、その先の成長を見据えた伴走支援を信条としてきました。</p>
+      <p>代表的な支援事例として、現在では世界13カ国・約600店舗以上を展開するアイウェアブランド「OWNDAYS株式会社」の海外展開資金の融資を担当。当時、多くの金融機関が同社への融資に慎重な判断をする中、事業の将来性を評価し海外展開を支援しました。同社会長・田中修治氏は講演や著書の中で、「沖縄公庫の嶺井さんが可能性を信じてくれた」と当時の支援について紹介しています。</p>
+      <p>現在は株式会社GLOWにて、34年間で培った企業支援の経験と行政・金融機関・士業との幅広いネットワークを活かし、M&amp;A・事業承継をはじめとする経営課題に応じた最適な専門家・支援機関との橋渡しを担っています。<strong>「経営者が最初に相談するパートナー」</strong>として、一社一社に寄り添い、企業の持続的な成長と円滑な事業承継を支えています。</p>
 
       <p class="glow-eyebrow2">TRACK RECORD</p>
       <h3 class="glow-sub">これまでの主な支援実績</h3>
@@ -1101,7 +1126,7 @@
     }else if(member){
       // LINE登録済み(この端末): 全件をロックなしで表示
       html=hits.map(it=>card(it,false)).join('');
-      html+='<div class="member-note">✅ LINE登録済みの表示です。全'+hits.length+'件を公開中 — 締切が近づいたらLINEでお知らせします。</div>';
+      html+='<div class="member-note">✅ LINE登録済みの表示です。全'+hits.length+'件を公開中 — 締切が近づいたらLINEでお知らせします。<br>気になる制度があれば、LINEに「相談」と一言どうぞ(無料)。</div>';
     }else{
       html=card(hits[0],false);
       if(hits.length>1){
