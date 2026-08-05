@@ -61,9 +61,12 @@ def load_topics():
         return json.load(f)
 
 
-def pick_topic(topics):
+def pick_topic(topics, topic_id=None):
     for t in topics.get("queue", []):
-        if t.get("status") == "pending":
+        if topic_id:
+            if t.get("id") == topic_id and t.get("status") == "pending":
+                return t
+        elif t.get("status") == "pending":
             return t
     return None
 
@@ -206,10 +209,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--preview", action="store_true")
+    ap.add_argument("--id", dest="topic_id", default=None, help="お題IDを指定して生成(省略時はキュー先頭のpending)")
     args = ap.parse_args()
 
     topics = load_topics()
-    t = pick_topic(topics)
+    t = pick_topic(topics, args.topic_id)
     if t is None:
         print("skipped=empty_queue" if args.preview else "お題キューにpendingがありません(data/tanpatsu_topics.json に追加を)")
         return 0

@@ -9,7 +9,12 @@ on:
   schedule:
     # JST 8日・22日 09:35(= UTC 0:35)
     - cron: "35 0 8,22 * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      topic_id:
+        description: "お題ID(省略時はキュー先頭のpending)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -35,7 +40,12 @@ jobs:
         id: gen
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python scripts/generate_tanpatsu_draft.py --preview >> "$GITHUB_OUTPUT"
+        run: |
+          if [ -n "${{ github.event.inputs.topic_id }}" ]; then
+            python scripts/generate_tanpatsu_draft.py --preview --id "${{ github.event.inputs.topic_id }}" >> "$GITHUB_OUTPUT"
+          else
+            python scripts/generate_tanpatsu_draft.py --preview >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Commit draft & topic queue
         if: steps.gen.outputs.stem != ''
@@ -45,7 +55,7 @@ jobs:
           git add posts/note/tanpatsu data/tanpatsu_topics.json
           git diff --cached --quiet || git commit -m "auto: 単発記事(実例研究)下書き ${{ steps.gen.outputs.stem }}"
           for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
             echo "push retry $i"; sleep 5
           done
 
