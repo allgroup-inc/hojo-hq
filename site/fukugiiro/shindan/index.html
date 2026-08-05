@@ -78,7 +78,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 </header>
 <div class="wrap">
   <h1>3分でもらい忘れ診断</h1>
-  <p class="note">名前・住所・電話番号の入力は不要です。答えたくない質問はとばせます。途中でやめても大丈夫、何度でもやり直せます。回答や記録はこの端末の中だけに保存され、送信されません。</p>
+  <p class="note">名前・住所・電話番号の入力は不要です。<br>答えたくない質問はとばせます。途中でやめても大丈夫、何度でもやり直せます。<br>回答や記録はこの端末の中だけに保存され、送信されません。</p>
   <div class="progress" aria-hidden="true"><div id="bar" style="width:0%"></div></div>
   <div id="app" aria-live="polite"><noscript>この診断はJavaScriptを使って動きます。設定を有効にしてご覧ください。</noscript></div>
 </div>
@@ -287,7 +287,9 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         topLine.appendChild(topLineBtn);
         topLine.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名 ・ いつでも解除"}));
         app.appendChild(topLine);
-        app.appendChild(h("p", {class:"kind-msg", text:"もらい忘れは、知らなかっただけ。あなたは悪くありません。ぜんぶ一度にやらなくて大丈夫。ひとつずつ、いっしょに進めましょう。"}));
+        var kindMsg = h("p", {class:"kind-msg"});
+        kindMsg.innerHTML = "もらい忘れは、知らなかっただけ。<br>あなたは悪くありません。<br>ぜんぶ一度にやらなくて大丈夫。ひとつずつ、いっしょに進めましょう。";
+        app.appendChild(kindMsg);
       }
       var marks = getMarks();
       rs.forEach(function(r, idx){
@@ -348,7 +350,9 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       lineBox.appendChild(lineBtn);
       lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。"}));
       app.appendChild(lineBox);
-      app.appendChild(h("div", {class:"disclaimer", text:"この診断は公式情報に基づく「可能性のご案内」です。受給できるかどうかの最終判断は各窓口で行われます。医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため診断には表示していません。トップページの制度一覧をご覧ください。"}));
+      var disc = h("div", {class:"disclaimer"});
+      disc.innerHTML = "この診断は公式情報に基づく「可能性のご案内」です。<br>受給できるかどうかの最終判断は各窓口で行われます。<br>医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため、診断には表示していません。トップページの制度一覧をご覧ください。";
+      app.appendChild(disc);
       app.appendChild(h("p", {style:"margin-top:16px"}, [h("a", {href:"../index.html", text:"← トップへもどる"})]));
     }).catch(function(){
       app.innerHTML = "";

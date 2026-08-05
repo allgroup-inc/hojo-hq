@@ -193,7 +193,7 @@ def kit_page(it, updated):
     body = f"""
 <p class="note no-print"><a href="../../index.html">もらいわすれ堂</a> › 申請準備シート</p>
 <h1>{esc(it['name'])} 申請準備シート{badge}</h1>
-<p class="note">このシートを印刷して、そのまま窓口に持っていけます(スマホ画面のままでもOK)。書くのはご本人ですが、準備はここで全部終わらせましょう。</p>
+<p class="note">このシートを印刷して、そのまま窓口に持っていけます(スマホ画面のままでもOK)。<br>書くのはご本人ですが、準備はここで全部終わらせましょう。</p>
 {warn}
 <div class="btns">
   <button class="primary" onclick="if(window.fgTrack)fgTrack('kit_print');window.print()">🖨 このシートを印刷する</button>
@@ -217,7 +217,7 @@ def kit_page(it, updated):
 </div>
 
 <h2>持ち物チェックリスト(よくある例)</h2>
-<p class="note">市町村やご家庭の状況によって変わります。「例」としてそろえて、細かい違いは窓口で確認すれば大丈夫です。チェックとメモはこの端末の中だけに保存され、次に開いたときも残っています。</p>
+<p class="note">市町村やご家庭の状況によって変わります。<br>「例」としてそろえて、細かい違いは窓口で確認すれば大丈夫です。<br>チェックとメモはこの端末の中だけに保存され、次に開いたときも残っています。</p>
 <div class="box">
   <p class="note"><span class="prog" id="prog"></span></p>
   <ul class="check">
