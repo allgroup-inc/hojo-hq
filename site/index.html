@@ -510,6 +510,19 @@
   .glow-vision small{display:block;margin-top:1.2em;padding-top:1.1em;font-size:.88em;font-weight:500;
     color:rgba(255,255,255,.88);border-top:1px solid rgba(255,255,255,.25);}
   @media(max-width:640px){.glow-vision small br{display:none;}}
+  /* 相談の流れ(2026-08-04 相談転換③) */
+  .consult-flow{margin-top:var(--sp-4);padding:var(--sp-3);border-radius:14px;
+    background:#fff;border:1px solid #e2e9f0;border-top:4px solid var(--kin);text-align:center;}
+  .consult-head{margin:0 0 .9em;font-size:1.18rem;font-weight:800;color:#00335c;}
+  .consult-steps{margin:0 auto;padding:0;max-width:520px;list-style:none;counter-reset:cstep;text-align:left;}
+  .consult-steps li{counter-increment:cstep;position:relative;padding:.55em 0 .55em 2.6em;line-height:1.65;}
+  .consult-steps li::before{content:counter(cstep);position:absolute;left:0;top:.55em;
+    width:1.9em;height:1.9em;border-radius:50%;background:var(--kin);color:#fff;
+    font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .consult-steps strong{display:block;color:#00335c;font-size:1.02rem;}
+  .consult-steps span{display:block;font-size:.88rem;color:#5a6b78;}
+  .consult-flow .register-btn{margin-top:1.1em;}
+  .consult-note{margin:1em 0 0;font-size:.78rem;color:#7a8b99;}
   .glow-eyebrow2{letter-spacing:.3em;font-size:.68rem;color:#c47500;text-align:center;
     margin:2.6em 0 .2em;padding-top:2.4em;border-top:1px solid #e2e9f0;}
   .glow-photo{display:block;width:150px;height:150px;border-radius:50%;object-fit:cover;
@@ -714,6 +727,17 @@
       <p class="reg-note">※入力内容はLINEのメッセージにセットされるだけで、このサイトには保存されません。</p>
     </div>
 
+
+    <div class="consult-flow">
+      <p class="consult-head">「ちょっと聞いてみたい」で大丈夫です</p>
+      <ol class="consult-steps">
+        <li><strong>LINEで「相談」と一言</strong><span>聞きたいことをそのまま送ってください。書き方に決まりはありません</span></li>
+        <li><strong>担当が内容を確認して返信</strong><span>1営業日以内にお返事します。無料で、売り込みはしません</span></li>
+        <li><strong>必要なら、元公庫の嶺井が直接</strong><span>訪問やオンラインで、貴社の状況に合わせてじっくりお話しします</span></li>
+      </ol>
+      <a class="register-btn" id="consult-btn" href="https://line.me/R/oaMessage/%40345pqedv/?%E7%9B%B8%E8%AB%87" target="_blank" rel="noopener">LINEで「相談」と送ってみる</a>
+      <p class="consult-note">※申請の代行は行っていません。準備の進め方のご案内と、状況に合う専門家のご紹介までお手伝いします。</p>
+    </div>
 
     <div class="experts">
       <p class="experts-head">この制度の申請、誰に相談する?</p>
@@ -1101,7 +1125,7 @@
     }else if(member){
       // LINE登録済み(この端末): 全件をロックなしで表示
       html=hits.map(it=>card(it,false)).join('');
-      html+='<div class="member-note">✅ LINE登録済みの表示です。全'+hits.length+'件を公開中 — 締切が近づいたらLINEでお知らせします。</div>';
+      html+='<div class="member-note">✅ LINE登録済みの表示です。全'+hits.length+'件を公開中 — 締切が近づいたらLINEでお知らせします。<br>気になる制度があれば、LINEに「相談」と一言どうぞ(無料)。</div>';
     }else{
       html=card(hits[0],false);
       if(hits.length>1){

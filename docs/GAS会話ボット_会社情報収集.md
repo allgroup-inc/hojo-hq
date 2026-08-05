@@ -1,27 +1,32 @@
 # LINE会話ボット(会社情報収集) — 議事20260730 議題1「併用で採用」の実装
 
-> ✅ **v1.2 稼働中(2026-07-30 実機テスト合格)** / 🔜 **v1.3 準備済み(下のコード)・貼り替え待ち**
+> ✅ **v1.2 稼働中(2026-07-30 実機テスト合格)** / 🔜 **v1.4 準備済み(下のコード)・貼り替え待ち**
 > v1.3の追加点: 会話の最後に**内容確認ステップ**(復唱→「はい」で記録)。雑談や質問文が会社名として台帳に誤記録されるのを防ぐ(議事_20260731 論点1)。
-> 実装済み機能: ①会話収集(3問+確認→台帳 経路line-chat) ②サイトフォーム一括送信の自動解析(line-form) ③通常メッセージへの受付返信(Default一律応答はOFF・ボットが代役) ④diag遠隔診断(SHARED_TOKEN必須・healthcheckが毎朝死活監視)
+> **v1.4の追加点(2026-08-04 小柳さん決裁・相談転換③)**: 「相談」を含むメッセージの**一次受付**。自動で (a)お客様へ受付返信 (b)**小柳さんのLINEへ即時通知** (c)台帳へ経路`line-consult`で記録(P列にメッセージ本文)。フローは「ボット一次対応→小柳さん確認→嶺井さんへつなぐ→訪問」。ADMIN_USER_IDは貼り替え後に技術部がActionsから自動設定する(手作業不要)
+> 実装済み機能: ①会話収集(3問+確認→台帳 経路line-chat) ②サイトフォーム一括送信の自動解析(line-form) ③通常メッセージへの受付返信(Default一律応答はOFF・ボットが代役) ④diag遠隔診断(SHARED_TOKEN必須・healthcheckが毎朝死活監視) ⑤相談一次受付(v1.4)
 > セットアップのハマりどころ: (a)LINEの「検証」ボタンはGASの302仕様で必ず失敗するが実動作は正常 (b)コード更新は「デプロイ→デプロイを管理→本番デプロイ(AKfycbx6SYv…)→✏️→**新バージョン**→デプロイ」で反映(「新しいデプロイ」はURLが変わるので使わない) (c)UrlFetchApp等の新権限追加時はGoogle再承認が必要。承認ポップアップがブロックされ無反応になったら、script.google.comのポップアップ許可+myaccount.google.com/connectionsで旧承認を削除→エディタで▷実行→「外部サービスへの接続」を含めて許可
 
-## v1.3への更新手順(小柳さん・5分)
+## v1.4への更新手順(小柳さん・5分)
 
 1. スプレッドシート「ミカタ企業台帳」→ 拡張機能 → Apps Script
 2. エディタで **Ctrl+A → Delete** → 下の完全版コードを貼り付け → **Ctrl+S**
 3. **「デプロイ」→「デプロイを管理」→ 本番デプロイ(IDがAKfycbx6SYv…のもの)を選択 → ✏️ → バージョン「新バージョン」→ デプロイ**
 4. LINEで `【会社情報登録】`→3問→**確認画面→「はい」**→台帳に行が増えれば完了
+5. 貼り替えたら「v1.4貼った」と一言ください → 技術部がADMIN_USER_IDを自動設定し、「相談」と送って小柳さんのLINEに通知が届くまで確認します
+6. (相談返信用) LINE公式アカウントの設定で「チャット」がONになっているか確認。ONならスマホのLINE公式アカウントアプリからお客様へ直接返信できます
 
-## コード(完全版 v1.3・コード.gsをこれで置き換え)
+## コード(完全版 v1.4・コード.gsをこれで置き換え)
 
 ```javascript
 /**
- * ミカタ企業台帳 受信エンドポイント(統合版 v1.3)
+ * ミカタ企業台帳 受信エンドポイント(統合版 v1.4)
  * ① 診断ページ(LIFF)からのPOST → 台帳に1行追記
  * ② LINE Webhook(会話ボット) → 会社名/代表者名/所在地を聞き取り、確認の上で台帳に追記
  * ③ サイトのフォーム一括送信(【会社情報登録】+3行)も解析して台帳に自動記録
  * ④ 通常メッセージへの受付返信もボットが担当(Default一律応答はOFFにする)
  * ⑤ diag: 技術部の遠隔診断用(SHARED_TOKEN必須)
+ * ⑥ 相談一次受付(v1.4): 「相談」を含むメッセージ → 受付返信+管理者へ即時通知+台帳記録
+ *    (2026-08-04 小柳さん決裁: ボット一次対応 → 小柳さん確認 → 嶺井さんへつなぐ → 訪問)
  */
 const SHEET_NAME = '台帳';
 const HEADERS = [
@@ -34,7 +39,13 @@ const CONV_TTL_SEC = 1800;
 const RECEIPT_MSG =
   'メッセージを受け取りました🌺\n' +
   '内容を確認のうえ、担当より1営業日以内にご連絡いたします。\n\n' +
-  'お急ぎの方は、下のメニュー「専門家に相談」からもどうぞ。';
+  '補助金や経営のことで聞きたいことがあれば、「相談」と一言送ってください。無料で、売り込みもしません。';
+const CONSULT_MSG =
+  'ご相談を受け付けました🌺\n' +
+  '担当が内容を確認して、1営業日以内にこのLINEへ返信します。\n\n' +
+  'よろしければ、聞きたいことを続けて送っておいてください。' +
+  '(例: 「設備を入れ替えたいが使える制度はあるか」など)\n\n' +
+  '※相談は無料です。申請の代行はできませんが、準備の進め方のご案内や、合う専門家のご紹介までお手伝いします。';
 
 function doPost(e) {
   let body;
@@ -44,8 +55,22 @@ function doPost(e) {
     return json_({ ok: false, error: 'bad json' });
   }
   if (body.diag === 'linetoken') return diagLineToken_(body);
+  if (body.diag === 'setprop') return diagSetProp_(body);
   if (Array.isArray(body.events)) return handleLineWebhook_(body);
   return handleLedgerPost_(body);
+}
+
+/* 技術部の遠隔設定用(SHARED_TOKEN必須)。ADMIN_USER_ID等をチャットに出さずに登録する */
+function diagSetProp_(body) {
+  const props = PropertiesService.getScriptProperties();
+  if (body.token !== props.getProperty('SHARED_TOKEN')) {
+    return json_({ ok: false, error: 'unauthorized' });
+  }
+  if (!body.key || body.key === 'SHARED_TOKEN') {
+    return json_({ ok: false, error: 'bad key' });
+  }
+  props.setProperty(String(body.key), String(body.value || ''));
+  return json_({ ok: true, key: String(body.key) });
 }
 
 /* ---------- 診断用(技術部が遠隔で叩く。healthcheckの死活監視にも使用) ---------- */
@@ -183,10 +208,63 @@ function routeMessage_(userId, text, replyToken) {
     return;
   }
 
+  // キーワード応答(専門家相談・事業承継相談)は管理画面の自動応答が返信する。
+  // v1.4: 返信は任せるが、小柳さんへの通知と台帳記録はこちらで行う
+  if (/^【?(専門家相談|事業承継相談)】?$/.test(t)) {
+    recordConsult_(userId, t, null);
+    return;
+  }
+
+  // ⑥ 相談一次受付(v1.4): 「相談」を含むメッセージは相談として受け付ける
+  if (/相談/.test(t)) {
+    recordConsult_(userId, t, replyToken);
+    return;
+  }
+
+  // ⑥' 相談モード中(受付から6時間)の続きのメッセージも、そのまま小柳さんへ転送する
+  if (cache.get('consult_' + userId)) {
+    notifyAdmin_('📞【相談の続き】\nお名前: ' + (getProfile_(userId).displayName || '') + '\n内容: ' + t);
+    reply_(replyToken, '承りました。担当からの返信をお待ちください🌺');
+    return;
+  }
+
   // ④ 通常メッセージ: 受付返信(Default一律応答の代役)。
-  // キーワード応答(専門家相談・事業承継相談)は管理画面の自動応答に任せるため何もしない
-  if (/^【?(専門家相談|事業承継相談)】?$/.test(t)) return;
   reply_(replyToken, RECEIPT_MSG);
+}
+
+/* ⑥ 相談の一次受付: 受付返信+小柳さんへ即時通知+台帳に経路line-consultで記録 */
+function recordConsult_(userId, text, replyToken) {
+  const profile = getProfile_(userId);
+  const name = profile.displayName || '(表示名なし)';
+  // 相談モード(6時間): この間の続きのメッセージも管理者へ転送する
+  CacheService.getScriptCache().put('consult_' + userId, '1', 21600);
+  // 台帳16列目(P列)に相談メッセージ本文を残す(相談件数のKPI集計にも使う)
+  getSheet_().appendRow([
+    new Date(), userId, name,
+    '', '', '', '', '', '', '', '', 0, '', '', 'line-consult', text,
+  ]);
+  if (replyToken) reply_(replyToken, CONSULT_MSG);
+  notifyAdmin_(
+    '📞【相談の一次受付】\n' +
+    'お名前: ' + name + '\n' +
+    '内容: ' + text + '\n\n' +
+    '台帳に記録済み(経路line-consult)。\n' +
+    '返信はLINE公式アカウントアプリのチャットから。対応後、必要なら嶺井さんへおつなぎください。');
+}
+
+/* 管理者(小柳さん)のLINEへプッシュ通知。ADMIN_USER_ID未設定時は静かにスキップ */
+function notifyAdmin_(text) {
+  const props = PropertiesService.getScriptProperties();
+  const token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+  const admin = props.getProperty('ADMIN_USER_ID');
+  if (!token || !admin) return;
+  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + token },
+    payload: JSON.stringify({ to: admin, messages: [{ type: 'text', text: text }] }),
+    muteHttpExceptions: true,
+  });
 }
 
 function reply_(replyToken, text) {
