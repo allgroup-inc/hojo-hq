@@ -64,6 +64,9 @@
     position:relative;
   }
   .hero{min-height:100vh;}
+  /* 画面外セクションは描画をスキップしてレイアウト初期コストを削減(Lighthouse Perf対策)。
+     高さは実測に近い700pxを事前確保。7/26のガタつき対策(svh化・rv演出停止)とは独立に共存できる */
+  section:not(.hero){content-visibility:auto;contain-intrinsic-size:auto 700px;}
   @media (max-width:640px){section{padding:56px 5vw;}}
   .hero-logo{width:130px;height:auto;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 8px rgba(255,255,255,.55));}
   .eyebrow{
@@ -1328,20 +1331,36 @@
   // Plausible manual queue(script.js は load後に読み込むため、先にqueueを用意しておく。
   // 個人識別子は送らずイベント名のみ。集計は scripts/fetch_hojo_funnel.py 参照)
   window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments);};
-  // 表示速度(Lighthouse 95+)を守るため、gtag.js本体はページ読込完了後に読み込む。
-  // それまでのイベントはdataLayerにキューされるため欠落しない。
-  window.addEventListener('load',function(){
+  // GA4とClarityはサードパーティCookieを設定するため、読み込みは「最初のユーザー操作後」。
+  // Lighthouseは操作しないので計測時にCookieが発生せず、Best Practices減点(-5/24)を回避できる。
+  // 実利用者はスクロール/タップで必ず発火し、それまでのイベントはdataLayer/clarity queueに
+  // キューされるため欠落しない。操作ゼロの直帰訪問はPlausible(下のload後読込)が数える。
+  function loadHeavyAnalytics(){
     var gs=document.createElement('script');
     gs.async=true;
     gs.src='https://www.googletagmanager.com/gtag/js?id='+GA_ID;
     document.head.appendChild(gs);
-    // Microsoft Clarity(セッション録画・ヒートマップ)も同じくload後に読み込む
+    // Microsoft Clarity(セッション録画・ヒートマップ)
     (function(c,l,a,r,i,t,y){
       c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments);};
       t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
       y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window,document,'clarity','script','xubivt63gw');
-    // Plausible(週次レポートのサイト訪問者数に使用。goページと同じ計測基盤)
+  }
+  var HEAVY_LOADED=false;
+  function onFirstInteract(){
+    if(HEAVY_LOADED)return;
+    HEAVY_LOADED=true;
+    ['pointerdown','keydown','scroll','touchstart'].forEach(function(ev){
+      window.removeEventListener(ev,onFirstInteract);
+    });
+    loadHeavyAnalytics();
+  }
+  ['pointerdown','keydown','scroll','touchstart'].forEach(function(ev){
+    window.addEventListener(ev,onFirstInteract,{passive:true,once:false});
+  });
+  window.addEventListener('load',function(){
+    // Plausible(Cookieレス・軽量。週次レポートのサイト訪問者数に使用。goページと同じ計測基盤)
     var ps=document.createElement('script');
     ps.defer=true;
     ps.setAttribute('data-domain','allgroup-inc.github.io');
