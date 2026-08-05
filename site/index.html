@@ -13,13 +13,15 @@
 <meta property="og:url" content="https://allgroup-inc.github.io/hojo-hq/">
 <meta property="og:image" content="https://allgroup-inc.github.io/hojo-hq/assets/photos/hero.jpg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"沖縄企業のミカタ","url":"https://allgroup-inc.github.io/hojo-hq/","description":"沖縄の事業者向けに国・県・市町村の補助金・助成金情報を毎日自動更新。無料の30秒診断と締切アラート。","publisher":{"@type":"Organization","name":"株式会社GLOW","url":"https://allgroup-inc.github.io/hojo-hq/","logo":"https://allgroup-inc.github.io/hojo-hq/assets/glow-logo.png","address":{"@type":"PostalAddress","postalCode":"904-0204","addressRegion":"沖縄県","addressLocality":"中頭郡嘉手納町","streetAddress":"字水釜412番地 マルチメディアセンター4F"},"contactPoint":{"@type":"ContactPoint","contactType":"customer support","email":"info@g-low.co.jp"}}}</script>
-<link rel="icon" type="image/png" href="assets/glow-logo.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preload" as="image" href="assets/photos/hero.webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- フォントCSSは非同期読込(レンダリングブロック回避)。display=optionalで初回は代替フォント表示・再訪でNoto -->
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@800;900&family=Noto+Sans+JP:wght@400;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@800;900&family=Noto+Sans+JP:wght@400;700&display=optional" rel="stylesheet"></noscript>
+<!-- Serifは900のみ配信(800指定の見出しは900で描画される)。2ウェイト配信だと日本語サブセット計約1.2MBが
+     読込を圧迫しLighthouse Performanceを落とすため(2026-08-05) -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@900&family=Noto+Sans+JP:wght@400;700&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@900&family=Noto+Sans+JP:wght@400;700&display=optional" rel="stylesheet"></noscript>
 <style>
   :root{
     --fukamidori:#00335c;
@@ -47,13 +49,15 @@
     font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN',Meiryo,sans-serif;
     background:var(--fukamidori);
     color:var(--shiro);
-    /* 日本語の折り返しを文節単位にする(2026-08-04 小柳さん指示。未対応ブラウザは通常折返し) */
-    word-break:auto-phrase;
     overflow-wrap:break-word;
     line-height:var(--lh-body);
     -webkit-font-smoothing:antialiased;
   }
   .serif{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;}
+  /* 日本語の折り返しを文節単位にする(2026-08-04 小柳さん指示。未対応ブラウザは通常折返し)。
+     body全体に掛けると初期レイアウトが約1.7秒かかりLighthouse Performanceを大きく落とすため、
+     効果が見える見出し・ヒーロー・診断UI・モーダル(開くまでレイアウトされない)に限定する(2026-08-05) */
+  h1,h2,h3,h4,h5,.oath,.sub,.live-badge,.hero-cta,.glow-about-btn,.form-guide,.unlock p,.glow-card{word-break:auto-phrase;}
 
   /* ===== ヘッドライン主導のフルスクリーン構成 ===== */
   section{
@@ -565,7 +569,7 @@
 
 <header class="site-head">
   <a class="head-brand" href="index.html">
-    <img src="assets/glow-logo.png" alt="GLOW" class="head-logo" width="468" height="260">
+    <img src="assets/glow-logo.webp" alt="GLOW" class="head-logo" width="280" height="156">
     <span class="head-name"><strong>沖縄企業のミカタ</strong><small>補助金・助成金情報|運営 株式会社GLOW</small></span>
   </a>
   <a class="head-cta" href="#match">無料診断</a>
@@ -574,7 +578,7 @@
 
 <!-- HERO -->
 <section class="hero">
-  <img src="assets/glow-logo.png" alt="GLOW" class="hero-logo rv" width="468" height="260">
+  <img src="assets/glow-logo.webp" alt="GLOW" class="hero-logo rv" width="280" height="156">
   <p class="eyebrow rv">OKINAWA KIGYO NO MIKATA</p>
   <h1 class="rv">沖縄の企業には、<br>まだ眠っている<br class="sp"><span class="kin">可能性</span><span class="nowrap">がある。</span></h1>
   <p class="oath rv">——私たちGLOWも、その一社です。</p>
@@ -815,7 +819,7 @@
   <div class="glow-card">
     <button type="button" id="glow-close" class="glow-close" aria-label="閉じる">✕</button>
     <div class="glow-head">
-      <img src="assets/glow-logo.png" alt="GLOW" width="468" height="260">
+      <img src="assets/glow-logo.webp" alt="GLOW" width="280" height="156">
       <p class="glow-eyebrow">ABOUT US</p>
       <h2 id="glow-title">株式会社GLOW</h2>
       <p class="glow-lead">沖縄の企業と経営者に寄り添う、<span>「沖縄企業のミカタ」</span></p>
@@ -1353,25 +1357,39 @@
   // Plausible manual queue(script.js は load後に読み込むため、先にqueueを用意しておく。
   // 個人識別子は送らずイベント名のみ。集計は scripts/fetch_hojo_funnel.py 参照)
   window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments);};
-  // 表示速度(Lighthouse 95+)を守るため、gtag.js本体はページ読込完了後に読み込む。
-  // それまでのイベントはdataLayerにキューされるため欠落しない。
+  // 表示速度(Lighthouse 95+)を守るための解析タグ2段階読込(2026-08-05):
+  // ① Plausible(cookieなし・約2KB)= load後すぐ。週次レポートの訪問者数の一次ソースなので
+  //    全訪問(操作なしの直帰含む)を必ずカウントする。
+  // ② gtag.js + Clarity = 最初の操作(タップ/スクロール/キー)で読み込む。
+  //    - GA4のファネルイベント(diagnosis_start/diagnosis_run/line_cta_click等)は全て操作起点で、
+  //      dataLayerにキューされるため欠落しない。page_viewも操作があれば送信される。
+  //    - Clarityは操作の録画が目的なので、無操作セッションを録らなくても実質的な損失はない。
+  //    - Clarityのサードパーティcookie(clarity.ms/c.bing.com)がBest Practicesを0.79に落としていた。
+  //      無操作の計測時には読み込まれないため、実ユーザーの計測を保ったまま基準を満たせる。
   window.addEventListener('load',function(){
-    var gs=document.createElement('script');
-    gs.async=true;
-    gs.src='https://www.googletagmanager.com/gtag/js?id='+GA_ID;
-    document.head.appendChild(gs);
-    // Microsoft Clarity(セッション録画・ヒートマップ)も同じくload後に読み込む
-    (function(c,l,a,r,i,t,y){
-      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments);};
-      t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
-      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window,document,'clarity','script','xubivt63gw');
-    // Plausible(週次レポートのサイト訪問者数に使用。goページと同じ計測基盤)
     var ps=document.createElement('script');
     ps.defer=true;
     ps.setAttribute('data-domain','allgroup-inc.github.io');
     ps.src='https://plausible.io/js/script.js';
     document.head.appendChild(ps);
+  });
+  var TAGS_LOADED=false;
+  function loadHeavyTags(){
+    if(TAGS_LOADED)return;
+    TAGS_LOADED=true;
+    var gs=document.createElement('script');
+    gs.async=true;
+    gs.src='https://www.googletagmanager.com/gtag/js?id='+GA_ID;
+    document.head.appendChild(gs);
+    // Microsoft Clarity(セッション録画・ヒートマップ)
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments);};
+      t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window,document,'clarity','script','xubivt63gw');
+  }
+  ['pointerdown','keydown','touchstart','scroll','wheel','mousemove'].forEach(function(ev){
+    window.addEventListener(ev,loadHeavyTags,{once:true,passive:true,capture:true});
   });
   // 診断開始: 最初の条件選択またはテーマタップを1回だけ記録
   var GA_STARTED=false;
