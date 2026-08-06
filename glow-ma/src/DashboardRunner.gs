@@ -4,7 +4,7 @@
  * (将来的には日次・週次の時間主導トリガーに登録して自動実行することを想定しているが、
  *  トリガー登録自体は本Planの範囲外。)
  *
- * 実行すると、企業マスタ・紹介パートナーマスタ・対応履歴ログを読み取り、以下6つの表を
+ * 実行すると、企業マスタ・紹介パートナーマスタ・対応履歴ログを読み取り、以下8つの表を
  * 「ダッシュボード」タブに作り直す。
  * - ルート別×ステージ別ファネル
  * - 提案商品別サマリー(提案数・案件化数・成約数)
@@ -12,6 +12,8 @@
  * - 紹介パートナー別サマリー
  * - データ品質チェック(集計対象外の件数)
  * - 工程別滞留状況(NDA締結/意向表明受領/DD開始)
+ * - 担当者別ワークロード(保有企業数・Aランク保有数・掘り起こし待ち件数)
+ * - 塩漬け企業一覧(標準サイクルの2倍以上、最終接触が無い企業)
  * これに加えて、「ダッシュボード履歴」タブに主要指標のスナップショットを1行追記する
  * (こちらは「ダッシュボード」タブと異なり、実行のたびに内容を消さず積み上げる)。
  *
@@ -59,6 +61,8 @@ function updateDashboard() {
     var rankSummary = GlowDashboard.buildRankSummary(records, todayString, GlowDashboard.DEFAULT_CONFIG);
     var partnerSummary = GlowDashboard.formatPartnerSummary(partnerRecords);
     var qualitySummary = GlowDashboard.countUnclassifiedCompanies(records, GlowDashboard.DEFAULT_CONFIG);
+    var ownerWorkload = GlowDashboard.buildOwnerWorkloadSummary(records, todayString, GlowDashboard.DEFAULT_CONFIG);
+    var staleList = GlowAlerting.buildStaleList(records, todayString);
     var historySnapshot = GlowDashboard.buildHistorySnapshot(records, todayString, GlowDashboard.DEFAULT_CONFIG);
 
     dashboardSheet.clearContents();
@@ -90,13 +94,22 @@ function updateDashboard() {
       ["工程", "滞留企業数", "平均滞留日数"],
       dealStageProgress.map(function (d) { return [d["工程"], d["滞留企業数"], d["平均滞留日数"]]; }));
     row++;
+    row = writeDashboardSection_(dashboardSheet, row, "担当者別ワークロード",
+      ["担当者", "保有企業数", "Aランク保有数", "掘り起こし待ち件数"],
+      ownerWorkload.map(function (o) { return [o["担当者"], o["保有企業数"], o["Aランク保有数"], o["掘り起こし待ち件数"]]; }));
+    row++;
+    row = writeDashboardSection_(dashboardSheet, row, "塩漬け企業一覧(標準サイクルの2倍以上、最終接触が無い企業)",
+      ["企業ID", "会社名", "ランク", "最終接触からの経過日数"],
+      staleList.map(function (s) { return [s["企業ID"], s["会社名"], s["ランク"], s["最終接触からの経過日数"]]; }));
+    row++;
 
     historySheet.appendRow([
       Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm"),
       historySnapshot["対象企業数"],
       historySnapshot["ランクA_滞留企業数"], historySnapshot["ランクB_滞留企業数"],
       historySnapshot["ランクC_滞留企業数"], historySnapshot["ランクD_滞留企業数"],
-      historySnapshot["掘り起こし待ち件数合計"], historySnapshot["成約企業数"], historySnapshot["連絡不要企業数"]
+      historySnapshot["掘り起こし待ち件数合計"], historySnapshot["成約企業数"], historySnapshot["連絡不要企業数"],
+      historySnapshot["塩漬け企業数"]
     ]);
 
     dashboardSheet.getRange(row, 1).setValue(

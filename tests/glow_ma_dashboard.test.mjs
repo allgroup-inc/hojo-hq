@@ -207,6 +207,9 @@ test("buildHistorySnapshot: ランク別滞留企業数・掘り起こし待ち�
   assert.equal(snapshot["掘り起こし待ち件数合計"], 1);
   assert.equal(snapshot["成約企業数"], 1);
   assert.equal(snapshot["連絡不要企業数"], 1);
+  // C1は最終接触2020-01-01(Aランク30日サイクルの2倍=60日を大幅超過)のため塩漬け。
+  // C3は連絡不要、C4は成約(終了ステージ)のためどちらも塩漬け集計から除外される
+  assert.equal(snapshot["塩漬け企業数"], 1);
 });
 
 test("buildHistorySnapshot: 成約企業数は提案商品数によらず企業1社につき1件として数える(buildProductFunnelの成約数とは別概念)", () => {
@@ -226,6 +229,40 @@ test("buildHistorySnapshot: 対象企業がなければ全項目0", () => {
   assert.equal(snapshot["掘り起こし待ち件数合計"], 0);
   assert.equal(snapshot["成約企業数"], 0);
   assert.equal(snapshot["連絡不要企業数"], 0);
+  assert.equal(snapshot["塩漬け企業数"], 0);
+});
+
+test("buildOwnerWorkloadSummary: 担当者ごとに保有企業数・Aランク保有数・掘り起こし待ち件数を集計し、掘り起こし待ちが多い順に返す(Phase 12)", () => {
+  const records = [
+    { 企業ID: "C1", 担当者: "たかし", ランク: "A", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: false },
+    { 企業ID: "C2", 担当者: "たかし", ランク: "B", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2026-07-27", 連絡不要: false },
+    { 企業ID: "C3", 担当者: "嶺井さん", ランク: "A", 流入ルート: [], 現在ステージ: "未接触", 次回アクション予定日: "", 最終接触日: "2020-01-01", 連絡不要: false }
+  ];
+  const summary = dashboard.buildOwnerWorkloadSummary(records, "2026-07-27", dashboard.DEFAULT_CONFIG);
+  // たかし: 保有2(C1,C2)・Aランク保有1(C1)・掘り起こし待ち1(C1のみ30日超過)
+  // 嶺井さん: 保有1(C3)・Aランク保有1(C3)・掘り起こし待ち1(C3)
+  // 掘り起こし待ちが同数の場合、企業マスタに登場した順(たかしが先)を維持する安定ソートを期待
+  assert.deepEqual(summary, [
+    { "担当者": "たかし", "保有企業数": 2, "Aランク保有数": 1, "掘り起こし待ち件数": 1 },
+    { "担当者": "嶺井さん", "保有企業数": 1, "Aランク保有数": 1, "掘り起こし待ち件数": 1 }
+  ]);
+});
+
+test("buildOwnerWorkloadSummary: 成約(終了ステージ)・連絡不要の企業はワークロード集計から除外される", () => {
+  const records = [
+    { 企業ID: "C1", 担当者: "たかし", ランク: "A", 流入ルート: [], 現在ステージ: "成約", 最終接触日: "2020-01-01", 連絡不要: false },
+    { 企業ID: "C2", 担当者: "たかし", ランク: "A", 流入ルート: [], 現在ステージ: "未接触", 最終接触日: "2020-01-01", 連絡不要: true }
+  ];
+  const summary = dashboard.buildOwnerWorkloadSummary(records, "2026-07-27", dashboard.DEFAULT_CONFIG);
+  assert.deepEqual(summary, []);
+});
+
+test("buildOwnerWorkloadSummary: 担当者が未設定の企業は「未割当」として集計する", () => {
+  const records = [
+    { 企業ID: "C1", ランク: "C", 流入ルート: [], 現在ステージ: "未接触", 最終接触日: "2026-07-27", 連絡不要: false }
+  ];
+  const summary = dashboard.buildOwnerWorkloadSummary(records, "2026-07-27", dashboard.DEFAULT_CONFIG);
+  assert.equal(summary[0]["担当者"], "未割当");
 });
 
 test("buildDealStageProgressSummary: 企業ごとに最新の工程遷移イベントを現在の工程とみなし、工程別に滞留企業数・平均滞留日数を集計する", () => {

@@ -104,6 +104,39 @@
     });
   }
 
+  // 担当者別ワークロード(Phase 12): 実働キャパシティの偏りを検知するための集計。
+  // 成約/見送り(終了ステージ)と連絡不要(DNC)は「もう動かす必要がない」企業のため対象外にする。
+  // 掘り起こし待ち件数が多い担当者ほど先頭に来るよう並び替える。
+  function buildOwnerWorkloadSummary(records, todayValue, config) {
+    config = config || DEFAULT_CONFIG;
+    var alerting = getGlowAlerting_();
+    var terminalStages = (alerting.DEFAULT_CONFIG && alerting.DEFAULT_CONFIG.terminalStages) || [];
+    var counts = {};
+    var order = [];
+    (records || []).forEach(function (record) {
+      if (terminalStages.indexOf(record["現在ステージ"]) !== -1) return;
+      if (record["連絡不要"] === true) return;
+      var owner = record["担当者"] || "未割当";
+      if (!counts[owner]) {
+        counts[owner] = { "保有企業数": 0, "Aランク保有数": 0, "掘り起こし待ち件数": 0 };
+        order.push(owner);
+      }
+      counts[owner]["保有企業数"]++;
+      if (alerting.resolveEffectiveRank(record) === "A") counts[owner]["Aランク保有数"]++;
+      if (alerting.isOverdue(record, todayValue)) counts[owner]["掘り起こし待ち件数"]++;
+    });
+    return order
+      .map(function (owner) {
+        return {
+          "担当者": owner,
+          "保有企業数": counts[owner]["保有企業数"],
+          "Aランク保有数": counts[owner]["Aランク保有数"],
+          "掘り起こし待ち件数": counts[owner]["掘り起こし待ち件数"]
+        };
+      })
+      .sort(function (a, b) { return b["掘り起こし待ち件数"] - a["掘り起こし待ち件数"]; });
+  }
+
   function countUnclassifiedCompanies(records, config) {
     config = config || DEFAULT_CONFIG;
     var alerting = getGlowAlerting_();
@@ -147,6 +180,7 @@
     var doNotContactCount = list.filter(function (record) {
       return record["連絡不要"] === true;
     }).length;
+    var staleCount = getGlowAlerting_().buildStaleList(list, todayValue).length;
     return {
       "対象企業数": list.length,
       "ランクA_滞留企業数": findRank_("A")["滞留企業数"],
@@ -155,7 +189,8 @@
       "ランクD_滞留企業数": findRank_("D")["滞留企業数"],
       "掘り起こし待ち件数合計": totalOverdue,
       "成約企業数": closedDealCount,
-      "連絡不要企業数": doNotContactCount
+      "連絡不要企業数": doNotContactCount,
+      "塩漬け企業数": staleCount
     };
   }
 
@@ -227,6 +262,7 @@
     buildRouteStageFunnel: buildRouteStageFunnel,
     buildProductFunnel: buildProductFunnel,
     buildRankSummary: buildRankSummary,
+    buildOwnerWorkloadSummary: buildOwnerWorkloadSummary,
     buildHistorySnapshot: buildHistorySnapshot,
     buildDealStageProgressSummary: buildDealStageProgressSummary,
     DEAL_STAGE_TYPES: DEAL_STAGE_TYPES,
