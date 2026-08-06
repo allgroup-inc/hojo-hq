@@ -47,11 +47,12 @@ def bold_text(draw, xy, text, fnt, fill, anchor=None, stroke=2):
 
 
 def make_icon(path):
-    """1024x1024 アイコン: 墨黒地に白の「結」+マーカー黄の下線。"""
-    img = Image.new("RGB", (1024, 1024), INK)
+    """1024x1024 アイコン(正式版・2026-08-06 小柳さん決裁「一番伸びる組み合わせ」):
+    マーカー黄地に黒の「結」+黒下線。小サイズ表示での視認性最優先。"""
+    img = Image.new("RGB", (1024, 1024), MARKER)
     d = ImageDraw.Draw(img)
-    bold_text(d, (512, 460), "結", font(560), WHITE, anchor="mm", stroke=8)
-    d.rounded_rectangle([252, 800, 772, 852], radius=26, fill=MARKER)
+    bold_text(d, (512, 470), "結", font(600), INK, anchor="mm", stroke=10)
+    d.rounded_rectangle([252, 810, 772, 858], radius=24, fill=INK)
     img.save(path)
 
 
