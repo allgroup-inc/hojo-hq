@@ -87,6 +87,13 @@
     }
     merged["備考"] = noteParts.join(" / ");
 
+    // 関係メモは蓄積した関係性情報であり、SCALAR_FIELDSの「最初に見つかった非空値」ロジックだと
+    // 統合先以外のレコードに書かれたメモが黙って失われる。備考と同様に全レコード分を連結して残す。
+    merged["関係メモ"] = records
+      .map(function (record) { return record["関係メモ"]; })
+      .filter(Boolean)
+      .join(" / ");
+
     return { merged: merged, absorbedIds: absorbedIds };
   }
 

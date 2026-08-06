@@ -99,9 +99,13 @@ test("ダッシュボード履歴タブの名称・見出しが定義されて�
   ]);
 });
 
-test("企業マスタに後継者状況列が末尾に追加されている", () => {
+test("企業マスタに後継者状況列が追加されている", () => {
   assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("後継者状況") !== -1);
-  assert.equal(schema.COMPANY_MASTER_HEADERS[schema.COMPANY_MASTER_HEADERS.length - 1], "後継者状況");
+});
+
+test("企業マスタに関係メモ列が末尾に追加されている(Phase 10)", () => {
+  assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("関係メモ") !== -1);
+  assert.equal(schema.COMPANY_MASTER_HEADERS[schema.COMPANY_MASTER_HEADERS.length - 1], "関係メモ");
 });
 
 test("後継者状況の選択肢(SUCCESSOR_STATUS_TYPES)があり/なし/不明の3択である", () => {
