@@ -103,13 +103,18 @@ def build_records(rng):
                 if cd <= AS_OF:
                     cancel = cd
                     status = "解約"
+            # 初回引落結果：継続中かつ直近半年の契約だけ値が入る（古い契約は上書きで消える想定）。
+            # 高リスクほど不着/遅延が出やすいよう相関させる（デモ用シグナル）。
+            debit = ""
+            if cancel is None and contract >= date(2026, 2, 1):
+                debit = rng.choice(["不着", "遅延"]) if rng.random() < p * 0.4 else "成功"
             recs.append({
                 "customer_id": cid, "apply_id": f"A{apply_id}",
                 "product": product, "channel": channel, "form": form,
                 "agent": agent, "amount": amount, "age": age,
                 "gender": gender, "area": area, "birth": _birth_from_age(rng, age),
                 "order_date": order, "contract_date": contract,
-                "cancel_date": cancel, "status": status,
+                "cancel_date": cancel, "status": status, "debit_result": debit,
                 "payment": rng.choice(PAYMENTS), "insurer": rng.choice(INSURERS),
             })
 
@@ -125,6 +130,7 @@ def build_records(rng):
             "birth": _birth_from_age(rng, 26),
             "order_date": contract - timedelta(days=5), "contract_date": contract,
             "cancel_date": None, "status": "継続中",
+            "debit_result": ("不着" if k in (1, 4) else "遅延" if k == 2 else "成功"),
             "payment": "コンビニ", "insurer": "A生命",
         })
 
@@ -137,7 +143,7 @@ def build_records(rng):
             "agent": "OK-03", "amount": 3000, "age": 30,
             "gender": "男性", "area": "那覇市", "birth": _birth_from_age(rng, 30),
             "order_date": date(2026, 6, 10), "contract_date": date(2026, 6, 15),
-            "cancel_date": None, "status": "継続中",
+            "cancel_date": None, "status": "継続中", "debit_result": "成功",
             "payment": "口座振替", "insurer": "B損保",
         })
     return recs
@@ -171,7 +177,7 @@ def write_real(recs, path):
     cols = ["営業担当者", "顧客ID", "現ステータス", "受注日", "契約日", "生年月日",
             "年齢", "住所　県", "申し込み商品", "保険料￥", "払込経路", "申込方法",
             "年", "月", "日", "市町村", "契：性別", "保険会社", "リスト種類",
-            "初回保険料着金日"]
+            "初回保険料着金日", "初回引落結果"]
     with open(path, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=cols)
         w.writeheader()
@@ -188,6 +194,7 @@ def write_real(recs, path):
                 "市町村": r["area"], "契：性別": r["gender"],
                 "保険会社": r["insurer"], "リスト種類": r["channel"],
                 "初回保険料着金日": _d(r["cancel_date"]),
+                "初回引落結果": r.get("debit_result", ""),
             })
 
 
