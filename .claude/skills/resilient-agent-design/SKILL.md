@@ -49,7 +49,8 @@ AIでやる: 重要ニュース選定・切り口検討・意図分類・要約�
 保存先は規模に応じて: 小規模=JSON/SQLite、チーム=PostgreSQL、長時間ワークフロー=Trigger.dev等。
 このリポジトリでは `data/` 配下のJSON群がこれに相当する(`subsidies.json`=制度DBと募集status、
 `tanpatsu_topics.json`=お題キューのstatus遷移 pending→drafted→published、`kekka_kpi.json`・
-`note_kpi.json`=KPI台帳、`line_alerts.json`=配信済み記録など)。ActionsがGitコミットで
+`note_kpi.json`=KPI台帳、`line_alerts.json`=配信済み記録、`data/fukugiiro/funnel.json`・
+`data/hojo/funnel.json`=診断ファネル集計など)。ActionsがGitコミットで
 永続化するため、実行履歴と状態変化がそのまま監査ログになる。新しい自動化の状態も
 この型(data/のJSON+Gitコミット)に載せる。
 
@@ -96,7 +97,7 @@ Hook活用例: 危険コマンドの検知と停止・編集後にformatter/lint
 |---|---|---|
 | `/loop`(Skill) | 短時間監視・PR/Issueのポーリング・開発中の試作・デプロイ監視 | PCを閉じても継続したい処理・数週間の永続運用・完全無人の本番業務(セッション内のみ、作成から7日で終了) |
 | Claude Routines(`create_trigger`) | 毎朝の情報収集・定期整理・PRレビュー・デプロイ後検証 | 最小間隔1時間・承認ダイアログ不可・権限は最小限に |
-| GitHub Actions等の通常クラウドワークフロー | AI判断が少ない決まった処理・データ取得/変換/保存/通知 | AIの判断が多い・柔軟性が必要な処理 |
+| GitHub Actions等の通常クラウドワークフロー | AI判断が少ない決まった処理・データ取得/変換/保存/通知(このリポジトリの標準はこれ) | AIの判断が多い・柔軟性が必要な処理 |
 | Claude Agent SDK | 自社アプリへの組み込み・独自UI・細かな権限制御 | 実行環境/スケジューリング/保存/キュー/監視/リトライ/シークレット/コスト制御を自前設計する前提 |
 | Managed Agents | 長時間・非同期エージェント・実行基盤管理を減らしたい | 現在ベータ版、本番の主軸にはまだ不向き |
 
