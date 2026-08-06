@@ -489,8 +489,12 @@ def main():
             "amount_note": seed.get("amount_note", "要確認(公式ページでご確認ください)"),
             "deadline_type": seed.get("deadline_type", "常時" if seed["id"] != "fk-kuni-jukyo-kakuho" else "要確認"),
             "deadline": seed.get("deadline"),
-            "verified": False, "verified_at": None, "verified_by": None,
-            "status": "要確認",
+            # 検証状態はシードを一次情報源にする(公式ページ照合済みは seed 側に verified を持たせる)。
+            # 収集のたびにリセットされないよう、seed の値を尊重する。既存DB引き継ぎ(下)は安全網。
+            "verified": bool(seed.get("verified", False)),
+            "verified_at": seed.get("verified_at"),
+            "verified_by": seed.get("verified_by"),
+            "status": seed.get("status", "検証済み" if seed.get("verified") else "要確認"),
             "notes": "出典: " + seed["issuer"].split("(")[0] + "ウェブサイト",
             "fetched_at": now,
         })
