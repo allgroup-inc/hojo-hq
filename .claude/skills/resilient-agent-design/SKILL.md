@@ -6,10 +6,12 @@ description: "GitHub Actions / cron / Claude Routines / /loop など、繰り返
 # 壊れにくい自動化・エージェント設計
 
 24時間/無人で動く自動化の本質は、AIの賢さではなく**壊れにくいシステム設計**。
-このスキルは、hojo-hqの自動化(GitHub Actions cron・週次レポート・診断ファネル集計等)を
-新規に作る/直す/レビューするときに使う。既存の自動化はこの考え方に近い形(GitHub Actions
-= コード主体のWorkflow、Claude APIでの構造化 = Agent判断部分)で作られているので、
-新しい自動化もこの型に揃える。
+このスキルは、このリポジトリの自動化——GitHub Actions のcron群(update-subsidies=1日4回の
+制度収集、fukugiiro-fetch=朝夕2回、tanpatsu-draft=毎月8日・22日、weekly/monthly-report、
+social-post=承認ゲート付きSNS投稿など)——を新規に作る/直す/レビューするときに使う。
+既存の自動化はこの考え方に近い形(定期実行の基盤 = コード主体のGitHub Actions Workflow、
+Claude APIでの構造化・下書き生成 = Agent判断部分、社外への副作用 = 人間の承認ゲート)で
+作られている。新しい自動化もこの型に揃える。
 
 ## 大原則
 
@@ -45,7 +47,12 @@ AIでやる: 重要ニュース選定・切り口検討・意図分類・要約�
 保存項目: `job_id` / `workflow_version` / `status` / `current_step` / `completed_steps` /
 `pending_steps` / `retry_count` / `idempotency_key` / `last_error` / `cost_usd` / `updated_at`。
 保存先は規模に応じて: 小規模=JSON/SQLite、チーム=PostgreSQL、長時間ワークフロー=Trigger.dev等。
-hojo-hqでは `data/*.json`(例: `data/fukugiiro/funnel.json`, `data/hojo/funnel.json`)がこれに相当する。
+このリポジトリでは `data/` 配下のJSON群がこれに相当する(`subsidies.json`=制度DBと募集status、
+`tanpatsu_topics.json`=お題キューのstatus遷移 pending→drafted→published、`kekka_kpi.json`・
+`note_kpi.json`=KPI台帳、`line_alerts.json`=配信済み記録、`data/fukugiiro/funnel.json`・
+`data/hojo/funnel.json`=診断ファネル集計など)。ActionsがGitコミットで
+永続化するため、実行履歴と状態変化がそのまま監査ログになる。新しい自動化の状態も
+この型(data/のJSON+Gitコミット)に載せる。
 
 **④ 重複実行を「べき等性」で防ぐ**
 `idempotency_key` 例: `news-summary:2026-07-30` / `invoice-reminder:customer-123:2026-07`。
@@ -90,7 +97,7 @@ Hook活用例: 危険コマンドの検知と停止・編集後にformatter/lint
 |---|---|---|
 | `/loop`(Skill) | 短時間監視・PR/Issueのポーリング・開発中の試作・デプロイ監視 | PCを閉じても継続したい処理・数週間の永続運用・完全無人の本番業務(セッション内のみ、作成から7日で終了) |
 | Claude Routines(`create_trigger`) | 毎朝の情報収集・定期整理・PRレビュー・デプロイ後検証 | 最小間隔1時間・承認ダイアログ不可・権限は最小限に |
-| GitHub Actions等の通常クラウドワークフロー | AI判断が少ない決まった処理・データ取得/変換/保存/通知(hojo-hqの標準はこれ) | AIの判断が多い・柔軟性が必要な処理 |
+| GitHub Actions等の通常クラウドワークフロー | AI判断が少ない決まった処理・データ取得/変換/保存/通知(このリポジトリの標準はこれ) | AIの判断が多い・柔軟性が必要な処理 |
 | Claude Agent SDK | 自社アプリへの組み込み・独自UI・細かな権限制御 | 実行環境/スケジューリング/保存/キュー/監視/リトライ/シークレット/コスト制御を自前設計する前提 |
 | Managed Agents | 長時間・非同期エージェント・実行基盤管理を減らしたい | 現在ベータ版、本番の主軸にはまだ不向き |
 
