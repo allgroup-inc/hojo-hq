@@ -121,30 +121,30 @@ test("isOverdue: 連絡不要の企業は、サイクル超過・予定日超過
   assert.equal(alerting.isOverdue(record, "2026-07-27", alerting.DEFAULT_CONFIG), false);
 });
 
-test("isStale: 標準サイクルの2倍以上、最終接触が無ければ塩漬け対象(Phase 12)", () => {
-  // Bランクは90日サイクル。180日以上未接触なら塩漬け(2倍)
+test("isStale: 標準サイクルの2倍以上、最終接触が無ければ長期検討対象(Phase 12)", () => {
+  // Bランクは90日サイクル。180日以上未接触なら長期検討(2倍)
   const stale = { ランク: "B", 流入ルート: [], 最終接触日: "2026-01-01" };
   assert.equal(alerting.isStale(stale, "2026-07-27", alerting.DEFAULT_CONFIG), true);
 });
 
-test("isStale: 標準サイクルの2倍未満なら塩漬け対象外", () => {
+test("isStale: 標準サイクルの2倍未満なら長期検討対象外", () => {
   const notStale = { ランク: "B", 流入ルート: [], 最終接触日: "2026-06-01" };
   assert.equal(alerting.isStale(notStale, "2026-07-27", alerting.DEFAULT_CONFIG), false);
 });
 
-test("isStale: 次回アクション予定日が設定されていても、最終接触が長期間無ければ塩漬け対象(isOverdueと異なり予定日を優先しない)", () => {
+test("isStale: 次回アクション予定日が設定されていても、最終接触が長期間無ければ長期検討対象(isOverdueと異なり予定日を優先しない)", () => {
   const record = { ランク: "B", 流入ルート: [], 次回アクション予定日: "2030-01-01", 最終接触日: "2026-01-01" };
   assert.equal(alerting.isStale(record, "2026-07-27", alerting.DEFAULT_CONFIG), true);
 });
 
-test("isStale: 連絡不要・終了ステージの企業は塩漬け対象外", () => {
+test("isStale: 連絡不要・終了ステージの企業は長期検討対象外", () => {
   const dnc = { ランク: "B", 流入ルート: [], 連絡不要: true, 最終接触日: "2020-01-01" };
   assert.equal(alerting.isStale(dnc, "2026-07-27", alerting.DEFAULT_CONFIG), false);
   const closed = { ランク: "B", 流入ルート: [], 現在ステージ: "成約", 最終接触日: "2020-01-01" };
   assert.equal(alerting.isStale(closed, "2026-07-27", alerting.DEFAULT_CONFIG), false);
 });
 
-test("buildStaleList: 塩漬け企業のみ経過日数の降順で返す(直近接触の企業は除外)", () => {
+test("buildStaleList: 長期検討企業のみ経過日数の降順で返す(直近接触の企業は除外)", () => {
   const records = [
     { 企業ID: "C1", 会社名: "A社", ランク: "B", 流入ルート: [], 最終接触日: "2024-01-01" },
     { 企業ID: "C2", 会社名: "B社", ランク: "B", 流入ルート: [], 最終接触日: "2020-01-01" },
