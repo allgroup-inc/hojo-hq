@@ -190,6 +190,21 @@ def kit_page(it, updated):
     warn = ""
     if it.get("status") == "要確認":
         warn = '<div class="box" style="border-color:#E0B54A;background:#FFF8E6"><span class="note">この制度は現在、内容の最終確認中です。お出かけ前に必ず公式ページと窓口でご確認ください。</span></div>'
+    # 併給・重複の注意(あれば)。断定せず「要確認・窓口で確認」を促す。
+    combine_html = ""
+    cmb = it.get("combine") or {}
+    if cmb.get("note"):
+        ctype = cmb.get("type", "exclusive")
+        clabel = {"exclusive": "併給に注意", "adjust": "金額の調整あり",
+                  "stackable": "一緒に受けられる"}.get(ctype, "併給に注意")
+        colors = {"exclusive": ("#FBEEE6", "#E8C4AE", "#B9502F"),
+                  "adjust": ("#FFF6DB", "#EAD59A", "#7a5b00"),
+                  "stackable": ("#E7F4EC", "#B7E0CF", "#0F5138")}
+        bg, bd, lc = colors.get(ctype, colors["exclusive"])
+        combine_html = (f'<div class="box" style="background:{bg};border-color:{bd}"><p>'
+                        f'<span style="display:inline-block;font-weight:800;color:#fff;background:{lc};'
+                        f'border-radius:4px;padding:1px 8px;margin-right:6px;font-size:.85rem">{clabel}</span>'
+                        f'{esc(cmb["note"])}</p></div>')
     body = f"""
 <p class="note no-print"><a href="../../index.html">もらいわすれ堂</a> › 申請準備シート</p>
 <h1>{esc(it['name'])} 申請準備シート{badge}</h1>
@@ -206,6 +221,7 @@ def kit_page(it, updated):
   <p style="margin-top:8px"><strong>金額の目安</strong><br>{esc(it['amount_note'])}</p>
   <p style="margin-top:8px"><strong>窓口</strong><br>{esc(it['how_to_apply'])}</p>
 </div>
+{combine_html}
 
 <h2>やることは3つだけ</h2>
 <div class="box">

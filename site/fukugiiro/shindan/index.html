@@ -48,6 +48,14 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .actions button{flex:1;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer}
 .madoguchi{font-size:.85rem;background:#eaf5f0;border-radius:6px;padding:6px 10px;margin-top:6px;color:#0f5138}
 .kind-msg{background:#EAF5F0;border:1px solid #B7E0CF;border-radius:12px;padding:14px 16px;margin:6px 0 16px;color:#0f5138;line-height:1.7;font-size:.95rem}
+.combine-note{margin-top:8px;padding:10px 12px;border-radius:8px;font-size:.85rem;line-height:1.65}
+.combine-note .cl{display:inline-block;font-weight:800;border-radius:4px;padding:1px 8px;margin-right:6px;font-size:.8rem}
+.combine-exclusive{background:#FBEEE6;border:1px solid #E8C4AE}
+.combine-exclusive .cl{background:#B9502F;color:#fff}
+.combine-adjust{background:#FFF6DB;border:1px solid #EAD59A}
+.combine-adjust .cl{background:#7a5b00;color:#fff}
+.combine-stackable{background:#E7F4EC;border:1px solid #B7E0CF}
+.combine-stackable .cl{background:#0F5138;color:#fff}
 .next-step{background:#FDF5E6;border-left:5px solid var(--fg-primary);border-radius:8px;padding:12px 14px;margin:10px 0}
 .next-step .ns-label{display:inline-block;font-size:.75rem;font-weight:800;color:#fff;background:var(--fg-primary);border-radius:4px;padding:2px 8px;margin-right:6px}
 .next-step .ns-body{font-weight:700}
@@ -305,6 +313,15 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         card.appendChild(ns);
         card.appendChild(h("p", {class:"card-sub", text:"対象: " + it.target_household}));
         card.appendChild(h("p", {class:"card-sub", text:"金額: " + it.amount_note}));
+        // 併給・重複の注意(あれば)。断定せず「要確認・窓口で確認」を促す。
+        if (it.combine && it.combine.note) {
+          var ctype = it.combine.type || "exclusive";
+          var clabel = {exclusive:"併給に注意", adjust:"金額の調整あり", stackable:"一緒に受けられる"}[ctype] || "併給に注意";
+          var cbox = h("div", {class:"combine-note combine-" + ctype});
+          cbox.appendChild(h("span", {class:"cl", text: clabel}));
+          cbox.appendChild(document.createTextNode(it.combine.note));
+          card.appendChild(cbox);
+        }
         card.appendChild(h("div", {class:"madoguchi", text:"窓口でこう言えばOK:「" + it.name + "について教えてください。対象か不安なのですが大丈夫ですか?」/ 対象かどうかは窓口が判断します。自信がなくて大丈夫です。"}));
         card.appendChild(h("a", {href: it.source_url, rel:"noopener", text:"公式ページで確認する"}));
         card.appendChild(h("span", {text:" ・ "}));
