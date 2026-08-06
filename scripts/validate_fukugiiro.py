@@ -89,6 +89,20 @@ def check_item(item, idx, today):
             if word in text:
                 errors.append(f"{label}: 禁止表現『{word}』が {field} に含まれる(マモリさんゲート)")
 
+    # 併給・重複(任意フィールド combine): 語彙と禁止表現をチェック
+    cmb = item.get("combine")
+    if cmb is not None:
+        if not isinstance(cmb, dict):
+            errors.append(f"{label}: combine は辞書(オブジェクト)でない")
+        else:
+            ct = cmb.get("type")
+            if ct and ct not in {"exclusive", "adjust", "stackable"}:
+                errors.append(f"{label}: combine.type '{ct}' は語彙外(exclusive/adjust/stackable)")
+            cnote = cmb.get("note") or ""
+            for word in FORBIDDEN:
+                if word in cnote:
+                    errors.append(f"{label}: 禁止表現『{word}』が combine.note に含まれる(マモリさんゲート)")
+
     return errors, warnings
 
 

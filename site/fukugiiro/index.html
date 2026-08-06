@@ -30,7 +30,8 @@ main{display:block}
 .wrap{max-width:720px;margin:0 auto;padding:0 20px}
 a{color:var(--fg-primary)}
 h1,h2{line-height:1.4}
-h2{font-size:1.35rem;margin-bottom:.8em;border-left:6px solid var(--fg-accent);padding-left:.5em}
+h2{font-size:1.35rem;margin-bottom:.8em;text-align:center}
+section p{text-align:center}
 section{padding:48px 0}
 .btn{display:block;width:100%;max-width:420px;margin:0 auto;padding:18px 24px;min-height:44px;
   background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;
@@ -58,21 +59,21 @@ section{padding:48px 0}
 /* steps */
 .steps{list-style:none;counter-reset:s}
 .steps li{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;
-  padding:18px 18px 18px 64px;margin-bottom:14px;position:relative;counter-increment:s}
-.steps li::before{content:counter(s);position:absolute;left:18px;top:18px;width:34px;height:34px;
+  padding:52px 18px 18px;margin-bottom:14px;position:relative;counter-increment:s;text-align:center}
+.steps li::before{content:counter(s);position:absolute;left:50%;transform:translateX(-50%);top:14px;width:34px;height:34px;
   background:var(--fg-accent);border-radius:50%;text-align:center;line-height:34px;font-weight:800}
 /* cards */
 .cards{display:grid;gap:14px}
-.card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px}
+.card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px;text-align:center}
 .card h3{font-size:1.05rem;margin-bottom:.3em}
 .card .status{font-size:.8rem;background:#fff3cd;border-radius:4px;padding:1px 8px;color:#7a5b00}
-.story{background:var(--fg-card);border:1px solid var(--fg-line);border-left:6px solid var(--fg-deep);border-radius:12px;padding:24px 22px}
+.story{background:var(--fg-card);border:1px solid var(--fg-line);border-left:6px solid var(--fg-deep);border-radius:12px;padding:24px 22px;text-align:center}
 .story .leaf{font-size:1.7rem;display:block;line-height:1;margin-bottom:6px}
 .story p{margin:0 0 .9em}
 .story p:last-child{margin-bottom:0}
 .story .tag{color:var(--fg-deep);font-weight:800;font-size:1.08rem;margin-top:.2em}
 .story .founder{background:#F1F7F3;border-radius:10px;padding:16px 18px}
-.story .founder .by{display:block;text-align:right;color:var(--fg-deep);font-weight:700;font-size:.9rem;margin-top:10px}
+.story .by{display:block;text-align:center;color:var(--fg-deep);font-weight:700;font-size:.9rem;margin-top:10px}
 /* faq */
 details{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;
   padding:14px 18px;margin-bottom:12px}
@@ -91,7 +92,7 @@ footer a{color:#bcd9cf}
 .siteheader nav a.hline{background:#06C755;color:#fff;font-weight:700}
 /* navcards */
 .navcards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.navcard{display:flex;flex-direction:column;background:var(--fg-card);border:1px solid var(--fg-line);
+.navcard{display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--fg-card);border:1px solid var(--fg-line);
   border-radius:12px;padding:16px;text-decoration:none;color:var(--fg-ink);font-weight:700}
 .navcard span{font-size:.78rem;color:var(--fg-muted);font-weight:400;margin-top:4px}
 .navcard.hline2{background:#EAF7EE;border-color:#B7E4C7;color:#0F5138}
@@ -111,7 +112,7 @@ footer a{color:#bcd9cf}
 .loss{background:#FDF3EC;border:1px solid #F1D8C7;border-radius:12px;padding:20px}
 .loss h2{border-left:none;padding-left:0;margin-bottom:.5em}
 .loss .miss{display:grid;gap:10px;margin-top:6px}
-.loss .miss div{background:#fff;border:1px solid var(--fg-line);border-radius:10px;padding:12px 14px;font-weight:700}
+.loss .miss div{background:#fff;border:1px solid var(--fg-line);border-radius:10px;padding:12px 14px;font-weight:700;text-align:center}
 .loss .miss div span{display:block;font-weight:400;font-size:.85rem;color:var(--fg-muted);margin-top:2px}
 @media(min-width:640px){.loss .miss{grid-template-columns:repeat(3,1fr)}}
 /* スマホ固定CTA(画面下・常時到達できる) */
@@ -168,11 +169,16 @@ footer a{color:#bcd9cf}
     <div class="story">
       <span class="leaf" aria-hidden="true">🌿</span>
       <h2 style="border-left:none;padding-left:0;margin-bottom:.5em">なぜ「もらいわすれ堂」を始めたのか</h2>
-      <p>沖縄には、国・県・市町村の給付金や手当がたくさんあります。<br>それなのに「知らなかった」「むずかしそう」というだけで、本来受け取れるはずのお金を受け取れていないご家庭が、少なくありません。</p>
-      <p class="founder">沖縄で暮らして、20年あまり。<br>ずっと、沖縄の人たちにお世話になってきました。<br><br>「この沖縄の皆さんに、少しでもプラスになることはできないか」。<br>そう考えたとき、私に賃金を上げることはできません。<br>けれど、<strong>正しい情報を、漏れなく届けること</strong>ならできます。<br><br>一人でも多くの沖縄の方の暮らしのお金が、今より少しでもプラスになる。<br>そんな環境をつくりたくて、もらいわすれ堂を始めました。<span class="by">— もらいわすれ堂 運営より</span></p>
-      <p>「フクギ」は、沖縄の集落を台風から守ってきた防風林の木です。<br>運営する<strong>株式会社フクギイロ</strong>は、<strong>「県民の家計を守る防風林でありたい」</strong>という願いを社名にしました。<br>もらいわすれ堂は、その最初の一歩です。</p>
-      <p>だから私たちは、むずかしい制度をやさしい言葉に翻訳し、かならず公式の情報と照らし合わせます。<br>確認できないことは「要確認」と正直に表示し、断定はしません。<br>診断は<strong>匿名で使え、ずっと無料</strong>。<br>申請の代行はしませんが、必要なときは提携する専門家におつなぎします。</p>
-      <p class="tag">あなたが受け取るまで、いっしょに。</p>
+      <p class="founder">もらいわすれ堂に、大きなことはできません。<br>沖縄で暮らすあなたの給料を、直接あげることはできない。<br>景気を変えることも、明日の暮らしを一気に楽にすることもできません。</p>
+      <p>でも、どうしてもずっと思っている事があります。<br>国も、県も、市町村も、沖縄県民のために制度をちゃんと用意してくれている。<br>受け取れるはずのささえが、確かにそこにある。</p>
+      <p>なのに「知らなかった」というだけで、その手が届かないまま終わってしまう人がいる。</p>
+      <p style="font-weight:800;color:var(--fg-primary);font-size:1.1rem">── これが、本当にくやしい。</p>
+      <p>だから私たちは、シンプルにその情報を <strong>正しく・早く・無料で</strong> 届けます。</p>
+      <p>むずかしい制度の言葉を、あなたの暮らしの言葉に翻訳して、<br>「あなたが受け取るまで、いっしょに」歩きます。</p>
+      <p>一人が本来のささえにつながるたび、<br>沖縄の未来は少しずつ明るくなる。私たちは、そう本気で信じています。</p>
+      <p class="tag" style="margin-bottom:.6em">もらいわすれ堂は、この想いひとつで動いています。</p>
+      <p>お約束していることがあります。<br>制度の情報は、かならず公式ページと照らし合わせること。<br>確認できないことは「要確認」と正直に表示し、断定しないこと。<br>診断は<strong>匿名で使え、ずっと無料</strong>であること。<br>申請の代行はしませんが、必要なときは提携する専門家におつなぎします。</p>
+      <p>「フクギ」は、沖縄の集落を台風から守ってきた防風林の木です。<br>運営する<strong>株式会社フクギイロ</strong>は、<strong>「県民の家計を守る防風林でありたい」</strong>という願いを社名にしました。<br>もらいわすれ堂は、その最初の一歩です。<span class="by">— もらいわすれ堂 運営より</span></p>
     </div>
   </div>
 </section>
@@ -217,7 +223,7 @@ footer a{color:#bcd9cf}
 
 <section style="padding-top:0">
   <div class="wrap">
-    <div class="stat" style="text-align:left">
+    <div class="stat">
       <h2 style="border-left:none;padding-left:0;margin-bottom:.4em">「振り込まれました」を教えてください</h2>
       <p style="margin-bottom:12px">あなたが実際に受け取れた金額のご報告が、次の県民の「もらい忘れ」を防ぎます。<br>上のカウンターは、いただいた報告のうち検証できたぶんを積み上げたものです。<br><strong>制度名とおおよその金額だけ</strong>で大丈夫。お名前や口座番号はうかがいません。</p>
       <a class="btn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-jukyu/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('jukyu_report_click')" style="max-width:420px">LINEで受給を報告する(匿名・無料)</a>
@@ -239,7 +245,7 @@ footer a{color:#bcd9cf}
 <section>
   <div class="wrap">
     <h2>正確性へのお約束</h2>
-    <ul style="list-style:none">
+    <ul style="list-style:none;text-align:center">
       <li>・締切・金額・要件は、必ず公式ページ(一次情報)と照合してから掲載します</li>
       <li>・確認が取れない情報は「要確認」と表示し、断定しません</li>
       <li>・すべての制度に公式ページへのリンクを付けています</li>
