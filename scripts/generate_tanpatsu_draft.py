@@ -39,20 +39,19 @@ BASE = os.path.join(os.path.dirname(__file__), "..")
 TOPICS_PATH = os.path.join(BASE, "data", "tanpatsu_topics.json")
 OUT_DIR = os.path.join(BASE, "posts", "note", "tanpatsu")
 
-SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=note&utm_medium=article&utm_campaign=tanpatsu"
-
 # note運用規程3-3: 機械検査はスクリプトから外さない(緩和は決裁事項)
 BANNED_WORDS = ("必ず", "絶対", "誰でも", "楽して", "確実に稼")
 
-FOOTER = f"""
+# 名義分離(2026-08-06): kekka_mag名義の記事にミカタへの誘導リンクは置かない
+FOOTER = """
 ---
 
 この記事はAIが下書きを作成し、人間が内容を確認してから公開しています。
 記事中の事例・数字はすべて公表されている情報のリサーチにもとづくもので、
 成果を保証するものではありません。出典は本文中に明記しています。
 
-沖縄の中小企業向けに、補助金・助成金の情報を毎日AIで収集・公開しています。
-▶ 沖縄企業のミカタ {SITE_URL}
+続きの研究はマガジン「結果の出し方がわかってしまうマガジン」に集めています。
+フォローすると新しい研究レポートが届きます。
 """
 
 
