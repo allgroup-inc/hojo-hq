@@ -430,6 +430,14 @@ SEEDS = [
     },
 ]
 
+# 追加シード(市町村独自・国/県の未収載。公式URLを検索で照合済み)を連結する。
+# assume_reachable=True のシードは、bot遮断(403等)する自治体サイト向けに到達性チェックを省く。
+try:
+    from fetch_fukugiiro_extra import EXTRA_SEEDS
+    SEEDS += EXTRA_SEEDS
+except Exception as _e:  # モジュールが無くても既存シードで動く
+    print(f"[info] EXTRA_SEEDS 読み込みスキップ: {_e}")
+
 _robots_cache = {}
 
 
@@ -468,7 +476,8 @@ def main():
             skipped.append((seed["name"], "robots.txt不許可"))
             print(f"SKIP(robots): {seed['name']}")
             continue
-        ok = reachable(url)
+        # 手動照合済み(assume_reachable)は、bot遮断する自治体サイト等のため到達性チェックを省く
+        ok = True if seed.get("assume_reachable") else reachable(url)
         time.sleep(1.5)
         if not ok:
             skipped.append((seed["name"], "URL到達不可"))
