@@ -141,6 +141,7 @@ noteで「結果の出し方がわかってしまうマガジン」を始めま�
 7. 連携テスト: Actions →「**line-test**」→ Run workflow → スマホに「✅連携テスト成功」が届けば完了
 
 ### ブランドアセットとログの正本(2026-08-06)
+✅ **画像設定完了(2026-08-06)**: icon.png(note/X/LINEプロフィール)・header_note.png(noteヘッダー1920×1006)・header_x.png(Xヘッダー)・eyecatch_05(記事⑤)をすべて反映済み。
 - **画像の正本**: `assets/kekka/`
   - `icon.png`(1024px・note/X共用アイコン)/ `header_x.png`(Xヘッダー1500×500)
   - `eyecatch_◯◯.png`(note記事の見出し画像。**自動下書き時に毎回自動生成**。手動生成: `python scripts/generate_kekka_assets.py --eyecatch "タイトル"`)
