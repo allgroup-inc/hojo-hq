@@ -15,6 +15,9 @@ BASE = os.path.join(os.path.dirname(__file__), "..")
 LP = os.path.join(BASE, "site", "fukugiiro", "index.html")
 SITE_GLOB = os.path.join(BASE, "site", "fukugiiro", "**", "*.html")
 SIZE_BUDGET = 50 * 1024
+# 集約ページ(市町村・準備シート)は掲載制度が増えるほど大きくなる。
+# メインLP(index.html)は50KB厳守のまま、集約ページは96KBまで許容する。
+LIST_BUDGET = 96 * 1024
 
 FORBIDDEN = ["必ずもらえる", "絶対", "審査なし", "誰でももらえる", "100%", "確実にもらえる", "無条件で支給"]
 
@@ -28,8 +31,9 @@ def main():
     for path in pages:
         rel = os.path.relpath(path, BASE)
         size = os.path.getsize(path)
-        if size > SIZE_BUDGET:
-            errors.append(f"{rel}: サイズ予算超過 {size}B > {SIZE_BUDGET}B")
+        budget = LIST_BUDGET if ("/area/" in rel.replace("\\", "/") or "/kit/" in rel.replace("\\", "/")) else SIZE_BUDGET
+        if size > budget:
+            errors.append(f"{rel}: サイズ予算超過 {size}B > {budget}B")
         html = open(path, encoding="utf-8").read()
         # 禁止表現の検査対象は「利用者に見える文言」のみ。CSS/JSを除外する
         # (失敗台帳 FK-001: CSSの max-width:100% を禁止語『100%』と誤検知した対策)
