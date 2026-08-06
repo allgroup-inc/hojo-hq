@@ -19,6 +19,7 @@ site/fukugiiro/kit/<id>/index.html に生成する。fetch後に毎回再生成�
 import json
 import os
 import shutil
+import urllib.parse
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA = os.path.join(BASE, "data", "fukugiiro", "seido.json")
@@ -272,6 +273,13 @@ def kit_page(it, updated):
                         f'{esc(cmb["note"])}</p></div>')
 
     src = esc(it["source_url"])
+    # この制度専用の「情報の訂正」メール導線(件名・本文に制度名を自動で差し込む)
+    _sub = urllib.parse.quote(f"[情報の訂正] {it['name']}")
+    _bd = urllib.parse.quote(
+        f"●制度名：{it['name']}\n●地域：{it.get('area','')}\n"
+        f"●気づいた点（古い・違う箇所）：\n●公式ページURL：{it['source_url']}\n"
+    )
+    report_link = f"mailto:info@fukugiiro.com?subject={_sub}&body={_bd}"
     body = f"""
 <p class="note no-print"><a href="../../index.html">もらいわすれ堂</a> › 申請準備シート</p>
 <h1>{name} 申請ナビ{badge}</h1>
@@ -362,8 +370,12 @@ def kit_page(it, updated):
 </div>
 </section>
 
+<div class="after screen-only" style="text-align:center">
+  この制度の情報が「古い」「違う」と気づいたら、教えてください。確認して24時間以内の修正を目指します。<br>
+  <a href="{report_link}" onclick="if(window.fgTrack)fgTrack('teisei_mail')" style="display:inline-block;margin-top:8px;color:var(--fg-primary);font-weight:700">✎ この制度の情報の間違いを知らせる</a>
+</div>
 <div class="disclaimer">このシートは公式情報に基づく「準備のご案内」です。持ち物は一般的な例で、市町村により異なります。受給できるかどうかの最終判断は各窓口で行われます。申請書の作成代行・代筆は行っていません(ご本人が記入します)。専門家のサポートが必要な場合は、提携の専門家(社会保険労務士・行政書士など)をご紹介します。<br>最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)/ 出典: <a href="{src}" rel="noopener">公式ページ</a></div>
-<p style="margin-top:16px" class="no-print"><a href="../index.html">準備シート一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
+<p style="margin-top:16px" class="no-print"><a href="../index.html">申請ナビ一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../teisei/">情報の訂正</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
 """
     body += KIT_JS.replace("__ID__", it["id"])
     title = f"{it['name']} 申請ナビ(印刷用)| もらいわすれ堂"
