@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-03",
+  "updated_at": "2026-08-04",
   "period": "7d",
   "source": "plausible-stats-api",
   "stages": [
     {
       "key": "shindan_start",
       "label": "診断開始",
-      "count": 2,
+      "count": 5,
       "cvr_from_prev": null,
       "drop_rate": null
     },
@@ -15,8 +15,8 @@
       "key": "shindan_step_q2",
       "label": "Q2到達",
       "count": 2,
-      "cvr_from_prev": 1.0,
-      "drop_rate": 0.0
+      "cvr_from_prev": 0.4,
+      "drop_rate": 0.6
     },
     {
       "key": "shindan_step_q3",
@@ -57,17 +57,17 @@
   "engagement": {
     "kit_click": 0,
     "seido_done_mark": 0,
-    "jukyu_report_click": 1,
+    "jukyu_report_click": 0,
     "shindan_zero": 0
   },
   "key_rates": {
-    "finish_rate": 1.0,
+    "finish_rate": 0.4,
     "line_cvr": 0.5,
     "zero_rate": 0.0
   },
   "worst_drop": {
-    "stage": "line_add_click",
-    "label": "診断完了(1件以上)→LINE誘導クリック",
-    "drop_rate": 0.5
+    "stage": "shindan_step_q2",
+    "label": "診断開始→Q2到達",
+    "drop_rate": 0.6
   }
 }
