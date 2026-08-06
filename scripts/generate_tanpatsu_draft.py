@@ -274,6 +274,15 @@ def main():
     with open(paste_path, "w", encoding="utf-8") as f:
         f.write(paste_body + FOOTER)
 
+    # アイキャッチ自動生成(PIL未導入環境ではスキップ)
+    try:
+        from generate_kekka_assets import make_eyecatch
+        eyecatch_path = os.path.join(BASE, "assets", "kekka", f"eyecatch_{t['id']}.png")
+        os.makedirs(os.path.dirname(eyecatch_path), exist_ok=True)
+        make_eyecatch(title, eyecatch_path)
+    except Exception as e:
+        print(f"アイキャッチ生成スキップ: {e}", file=sys.stderr)
+
     t["status"] = "drafted"
     t["drafted_at"] = today
     with open(TOPICS_PATH, "w", encoding="utf-8") as f:
