@@ -63,8 +63,8 @@ jobs:
         if: steps.gen.outputs.stem != ''
         uses: ./.github/actions/line-notify
         with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
           message: |
             📝【結果マガ】記事の下書きができました
 
@@ -86,18 +86,18 @@ jobs:
         if: steps.gen.outputs.skipped != ''
         uses: ./.github/actions/line-notify
         with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
           message: |
-            ℹ️【ミカタ】単発記事の自動下書きはお休みしました(理由: ${{ steps.gen.outputs.skipped }})
+            ℹ️【結果マガ】記事の自動下書きはお休みしました(理由: ${{ steps.gen.outputs.skipped }})
             お題キュー: data/tanpatsu_topics.json(リサーチ済みお題の補充が必要です)
 
       - name: LINE通知(失敗時)
         if: failure()
         uses: ./.github/actions/line-notify
         with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
           message: |
-            🚨【ミカタ】単発記事の自動下書きが失敗しました
+            🚨【結果マガ】記事の自動下書きが失敗しました
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

@@ -74,8 +74,8 @@ jobs:
       - name: LINE通知(完了)
         uses: ./.github/actions/line-notify
         with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
           message: |
             ✅【結果マガ】公開記録が完了しました
 
@@ -91,8 +91,8 @@ jobs:
         if: failure()
         uses: ./.github/actions/line-notify
         with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
           message: |
             🚨【結果マガ】公開記録ワークフローが失敗しました
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
