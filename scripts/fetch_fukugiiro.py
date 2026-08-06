@@ -95,6 +95,9 @@ SEEDS = [
         "target_household": "大学・短大・高専・専門学校に進学する(在学中の)お子さんがいる世帯が対象となる可能性があります(2025年度から多子世帯の拡充があります)",
         "how_to_apply": "在学校・進学先を通じた申込み(日本学生支援機構)",
         "source_url": "https://www.mext.go.jp/kyufu/",
+        "amount_note": "給付型奨学金(返還不要)と授業料・入学金の減免をセットで受けられる場合があります。世帯年収の目安は約600万円まで、令和7年度からは扶養する子3人以上の多子世帯は所得制限なく減免の対象になる場合があります(要確認)",
+        "verified": True, "verified_at": "2026-08-06",
+        "verified_by": "kensho(文部科学省 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
     },
     {
         "id": "fk-kuni-hitorioya-shien",
@@ -365,6 +368,9 @@ SEEDS = [
         "how_to_apply": "沖縄県住宅供給公社・県の住宅窓口へ",
         "source_url": "https://www.pref.okinawa.lg.jp/machizukuri/jutakutochi/1012327/1012334/index.html",
         "match_tokens": ["県営住宅"],
+        "amount_note": "家賃は世帯の収入などに応じて設定されます。入居には収入基準(月額所得の上限。子育て世帯は緩和あり)があり、募集時期に申込みが必要です(要確認)",
+        "verified": True, "verified_at": "2026-08-06",
+        "verified_by": "kensho(沖縄県 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
     },
     {
         "id": "fk-ken-senshiniryo-funin",
