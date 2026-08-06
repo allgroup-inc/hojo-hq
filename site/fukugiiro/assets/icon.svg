@@ -1,7 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" role="img" aria-label="もらいわすれ堂">
-  <rect x="4" y="4" width="92" height="92" rx="23" fill="#B9502F"/>
-  <text x="50" y="46" font-family="'Hiragino Maru Gothic ProN','HGMaruGothicMPRO','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">もら</text>
-  <text x="50" y="80" font-family="'Hiragino Maru Gothic ProN','HGMaruGothicMPRO','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">堂</text>
-  <circle cx="81" cy="19" r="14" fill="#F2B705" stroke="#FFFBF4" stroke-width="3"/>
-  <text x="81" y="25" font-family="'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif" font-size="17" text-anchor="middle" font-weight="800" fill="#1F2A2E">1</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="もらいわすれ堂">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FDF3E7"/>
+      <stop offset="1" stop-color="#F6E3D4"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="18" fill="url(#tile)"/>
+  <circle cx="22" cy="20" r="4.6" fill="#F2C14E"/>
+  <path d="M29 15 C41 25 41 45 29 56 C18 45 18 25 29 15 Z" fill="#7FB3A8"/>
+  <path d="M35 12 C48 23 48 46 35 57 C23 46 23 23 35 12 Z" fill="#D2694A"/>
+  <path d="M35 54 C34 43 34 26 35 16" stroke="#FCEFE2" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+  <path d="M35 34 C39 31 42 30 45 30" stroke="#FCEFE2" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <path d="M35 42 C31 39 28 38 25 38" stroke="#FCEFE2" stroke-width="1.4" fill="none" stroke-linecap="round"/>
 </svg>
