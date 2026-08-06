@@ -52,7 +52,7 @@ jobs:
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
-          git add posts/note/tanpatsu data/tanpatsu_topics.json
+          git add posts/note data/tanpatsu_topics.json
           git diff --cached --quiet || git commit -m "auto: 単発記事(実例研究)下書き ${{ steps.gen.outputs.stem }}"
           for i in 1 2 3; do
             git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
@@ -66,16 +66,19 @@ jobs:
           channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
           message: |
-            📝【ミカタ】単発記事(実例研究)の下書きができました
+            📝【結果マガ】記事の下書きができました
 
             ${{ steps.gen.outputs.title }}
 
             ━━━ 公開手順(約10分) ━━━
-            ①下のリンクを開いて一読(出典URLを2件抜き取りで開いて確認)
+            ①元記事で内容と出典を一読(出典URLを2件開いて確認)
             https://github.com/${{ github.repository }}/blob/main/posts/note/tanpatsu/${{ steps.gen.outputs.stem }}.md
-            ②冒頭の「公開前に削除」ブロックを外して全文コピー
-            ③noteの新規記事に貼り付け→有料設定→公開
-            ④X告知文はブロック内に3パターン同梱
+            ②貼るだけ版を開き「Raw」→全文コピー
+            https://github.com/${{ github.repository }}/blob/main/posts/note/paste/${{ steps.gen.outputs.topic_id }}_hariduke_you.md
+            ③noteの新規記事へ Ctrl+Shift+V で貼り付け(タイトルは上の1行目)
+            ④有料 ${{ steps.gen.outputs.price }}円/有料ラインは見出し「${{ steps.gen.outputs.paywall }}」の直前/マガジンに追加→公開
+            ⑤公開したらActionsの「publish-record」に ID=${{ steps.gen.outputs.topic_id }} と公開URLを入力して実行
+            → X告知と記録は自動で完了します
 
             気になる点があれば公開せず、そのままご相談ください。
 

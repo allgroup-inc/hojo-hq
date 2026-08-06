@@ -1,0 +1,98 @@
+name: publish-record
+
+# ワンタップ運用の後半(docs/note収益化_運営計画v3_月30万.md)。
+# noteで記事を公開したら、このワークフローに記事IDと公開URLを入れて実行するだけで:
+#  1. 公開記録(3役短評)を記事mdに追記
+#  2. お題キューを published に更新
+#  3. X告知を自動投稿+リプ欄に記事URL(Xシークレット設定時)
+#     未設定時は告知文をLINEに送る(人間がコピペ投稿)
+# 実行方法: GitHub → Actions → publish-record → Run workflow → id と url を入力
+
+on:
+  workflow_dispatch:
+    inputs:
+      article_id:
+        description: "記事ID(例: 19)"
+        required: true
+      note_url:
+        description: "noteの公開URL(https://note.com/kekka_mag/n/…)"
+        required: true
+      x_hook:
+        description: "X告知文の案(a=数字/b=学び/c=問い)"
+        required: false
+        default: "a"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-record
+  cancel-in-progress: false
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Record publication
+        id: rec
+        run: |
+          python scripts/record_publication.py \
+            --id "${{ github.event.inputs.article_id }}" \
+            --url "${{ github.event.inputs.note_url }}" \
+            --hook "${{ github.event.inputs.x_hook }}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit record
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add posts/note/tanpatsu data/tanpatsu_topics.json
+          git diff --cached --quiet || git commit -m "auto: 公開記録 ${{ github.event.inputs.article_id }} → ${{ github.event.inputs.note_url }}"
+          for i in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            echo "push retry $i"; sleep 5
+          done
+
+      - name: Post X announce(シークレット設定時のみ)
+        id: xpost
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+        run: |
+          pip install -q tweepy
+          python scripts/post_x_announce.py \
+            --text "${{ steps.rec.outputs.announce }}" \
+            --reply-url "${{ steps.rec.outputs.url }}" >> "$GITHUB_OUTPUT"
+
+      - name: LINE通知(完了)
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【結果マガ】公開記録が完了しました
+
+            ${{ steps.rec.outputs.title }}
+            ${{ steps.rec.outputs.url }}
+
+            X告知: ${{ steps.xpost.outputs.posted && '自動投稿しました' || '未投稿(Xシークレット未設定)。下の文面を投稿し、リプ欄に記事URLを貼ってください' }}
+            ${{ steps.xpost.outputs.posted }}
+            ━━━━━━━━
+            ${{ steps.rec.outputs.announce }}
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【結果マガ】公開記録ワークフローが失敗しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

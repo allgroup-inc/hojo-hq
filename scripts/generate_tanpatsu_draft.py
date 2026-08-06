@@ -257,6 +257,23 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(content)
 
+    # 貼るだけ版(noteに編集作業ゼロで貼れる本文)と有料ライン見出しを自動生成
+    paste_dir = os.path.join(BASE, "posts", "note", "paste")
+    os.makedirs(paste_dir, exist_ok=True)
+    lines = body.split("\n")
+    paste_body = "\n".join(lines[1:]).lstrip("\n")  # タイトル行を除去
+    paywall_heading = ""
+    if "====" in paste_body:
+        after = paste_body.split("====", 2)[-1]
+        for ln in after.split("\n"):
+            if ln.startswith("## "):
+                paywall_heading = ln[3:].strip()
+                break
+        paste_body = re.sub(r"^====.*====\n*", "", paste_body, flags=re.M)
+    paste_path = os.path.join(paste_dir, f"{t['id']}_hariduke_you.md")
+    with open(paste_path, "w", encoding="utf-8") as f:
+        f.write(paste_body + FOOTER)
+
     t["status"] = "drafted"
     t["drafted_at"] = today
     with open(TOPICS_PATH, "w", encoding="utf-8") as f:
@@ -266,8 +283,11 @@ def main():
     if args.preview:
         print(f"stem={stem}")
         print(f"title={title}")
+        print(f"topic_id={t['id']}")
+        print(f"price={t.get('paid_price', 980)}")
+        print(f"paywall={paywall_heading}")
     else:
-        print(f"生成完了: {out_path}")
+        print(f"生成完了: {out_path} / 貼るだけ版: {paste_path}")
     return 0
 
 
