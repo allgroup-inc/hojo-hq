@@ -14,6 +14,27 @@ TDD・計画・デバッグ・レビュー・Git ワークフロー等の 14 ス
 - 出典: https://github.com/coreyhaines31/marketingskills (ライセンス全文は `MARKETINGSKILLS-LICENSE`)
 - 一括更新は `scripts/update-skills.sh`(Superpowers と同時に upstream 最新へ追従)。
 
+## 中身: taste-skill (Leonxlnx/taste-skill を vendoring)
+AIが生成しがちな「テンプレっぽいデザイン」を避けるためのLP/フロントエンドデザインスキル。
+- 出典: https://github.com/Leonxlnx/taste-skill (MIT License — 全文は `TASTE-SKILL-LICENSE`)
+- 元リポジトリは複数のサブスキルを含むが、中核の `taste-skill` のみ取り込み。
+- React/npm前提の記述を含む(hojo-hqは静的HTML)。デザイン原則(ブリーフ推論・
+  variance/motion/density の3ダイヤル・AIっぽい既定デザインを避ける)は技術非依存で活きる。
+
+## 中身: last30days (mvanhorn/last30days-skill を vendoring)
+Reddit・X・YouTube・TikTok・Hacker News等を横断して、直近30日の話題を要約するリサーチスキル。
+- 出典: https://github.com/mvanhorn/last30days-skill (MIT License — 全文は `LAST30DAYS-LICENSE`)
+- 追加のAPIキー(SCRAPECREATORS_API_KEY等)は任意。未設定でもWebSearchで動作する設計。
+- デモ用メディア(assets/)とテスト/評価用スクリプトは除外(upstream の `.skillignore` 基準に準拠)。
+- 組織総点検で出た「世の中の成功事例を常にウォッチする」の実行手段として導入。
+
+## 中身: social-media-skills (social-media-skills/skills を厳選 vendoring)
+106スキットのうち、Instagram運用(SNS部)とX/note運用(note編集部)に直結する8スキルのみ選定。
+- 出典: https://github.com/social-media-skills/skills (MIT License — 全文は `SOCIAL-MEDIA-SKILLS-LICENSE`)
+- 選定: `instagram-growth` `caption-writer` `carousel-writer` `hashtag-strategy`
+  `content-calendar` `thread-writer` `hook-writer` `platform-specs-and-validation`
+- evals/ は除外(実行時不要、他のvendoringと同じ方針)。
+
 セッション開始時に `.claude/hooks/superpowers-session-start.sh` が
 `using-superpowers` スキルを注入し、「You have superpowers」で自動起動させる。
 
@@ -43,6 +64,13 @@ Claude が毎回思い出す必要がないようスキル化したもの。ベ�
 - `resilient-agent-design` — cron・定期ワークフロー・無人稼働の自動化を新規設計/レビューするとき、または「壊れる・重複する・止まらない」トラブル時に使う。4層設計(Trigger/Workflow/Agent/Guardrail)と壊れにくい設計の7原則(判断だけAIへ・状態は外部保存・べき等性・リトライ上限・権限は最小から・Hookと監視・分業は慎重に)、実行方式の選び方を提供。
 
 同じパターンの姉妹スキルとして `glow-ma-triangle-review`(GLOW M&A向け)もある。
+
+## 検討したが見送ったもの
+- `agent-browser`(ok-skills内) — ブラウザ自動化CLI。`agent-browser install` を実際に試したが、
+  この実行環境の通信制限でChromeのダウンロードに失敗し動作確認できなかったため未導入
+  (2026-08-06)。再検討する場合は、環境に既にあるPlaywright/Chromiumへの接続方法を先に確認する。
+- `claude-hud` — 「Claudeの状態をリアルタイム表示」はダッシュボードUIが本体で、
+  SKILL.md(指示書)だけでは実現できないため対象外。
 
 ## MCPコネクタ(スキルとは別枠・アカウント設定が必要)
 Context7(最新ライブラリのドキュメント取得)や Claude Mem 相当(Mem0など、長期記憶)は
