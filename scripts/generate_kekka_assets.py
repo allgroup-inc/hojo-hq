@@ -67,6 +67,17 @@ def make_x_header(path):
     img.save(path)
 
 
+def make_note_header(path):
+    """1920x1006 noteクリエイターページのヘッダー。中央上下は自動トリミングされ得るため
+    要素は中央帯(縦400-600px付近)に寄せる。"""
+    img = Image.new("RGB", (1920, 1006), INK)
+    d = ImageDraw.Draw(img)
+    bold_text(d, (960, 440), MAG_NAME, font(84), WHITE, anchor="mm", stroke=2)
+    d.rounded_rectangle([540, 520, 1380, 540], radius=10, fill=MARKER)
+    d.text((960, 610), TAGLINE, font=font(42), fill=(200, 205, 210), anchor="mm")
+    img.save(path)
+
+
 def wrap(text, fnt, max_w, draw):
     lines, line = [], ""
     for ch in text:
@@ -116,7 +127,8 @@ def main():
         return
     make_icon(os.path.join(OUT_DIR, "icon.png"))
     make_x_header(os.path.join(OUT_DIR, "header_x.png"))
-    print(f"生成: {OUT_DIR}/icon.png, header_x.png")
+    make_note_header(os.path.join(OUT_DIR, "header_note.png"))
+    print(f"生成: {OUT_DIR}/icon.png, header_x.png, header_note.png")
 
 
 if __name__ == "__main__":
