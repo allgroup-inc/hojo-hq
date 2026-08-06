@@ -129,7 +129,7 @@ noteで「結果の出し方がわかってしまうマガジン」を始めま�
 **未設定の間は通知なし**(ミカタのLINEには一切飛ばない)。結果はGitHubのActions画面で確認できる。
 
 ### 専用LINEの作成と連携(1回だけ・約15分)
-1. https://entry.line.biz/ でLINE公式アカウントを新規作成(個人のLINEでログイン→アカウント名「結果の出し方がわかってしまうマガジン」→無料プラン)
+1. https://entry.line.biz/start/jp/ でLINE公式アカウントを新規作成(個人のLINEでログイン→アカウント名「結果の出し方がわかってしまうマガジン」→無料プラン)。※トップの entry.line.biz は404になるので必ず /start/jp/ 付きで開く。予備: https://manager.line.biz/ にログイン→アカウントリスト→「作成」
 2. 管理画面(manager.line.biz)→ 右上「設定」→「**Messaging API**」→「Messaging APIを利用する」→ プロバイダー名は `kekka_mag` で新規作成 → 有効化
 3. https://developers.line.biz/console/ を開く → できたチャネルをクリック → 「**Messaging API設定**」タブの一番下「**チャネルアクセストークン(長期)**」→「発行」→ コピー
 4. 「**チャネル基本設定**」タブ →「**あなたのユーザーID**」(Uで始まる文字列)→ コピー
