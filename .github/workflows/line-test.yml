@@ -1,0 +1,24 @@
+name: line-test
+
+# 結果マガ専用LINE(KEKKA_LINE_*シークレット)の連携テスト。
+# シークレット登録後に手動実行し、専用LINEに着信すれば連携OK。
+# ミカタのLINEシークレットは一切参照しない。
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: テスト通知
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【結果マガ】LINE連携テスト成功
+
+            この通知が届いていれば、結果マガ専用LINEの設定は完了です。
+            以後、自動下書き(毎月8日・22日)と公開記録の完了通知がここに届きます。

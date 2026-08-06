@@ -127,8 +127,25 @@ noteで「結果の出し方がわかってしまうマガジン」を始めま�
 ### 通知チャネル(2026-08-06改定: ミカタのLINEと完全分離)
 本事業のワークフロー通知は専用シークレット `KEKKA_LINE_CHANNEL_ACCESS_TOKEN` / `KEKKA_LINE_ADMIN_USER_ID` のみを参照する。
 **未設定の間は通知なし**(ミカタのLINEには一切飛ばない)。結果はGitHubのActions画面で確認できる。
-通知が欲しくなったら: この事業専用のLINE公式アカウントを新規作成(account.line.biz)→ Messaging APIチャネルの
-アクセストークンと自分のユーザーIDを上記の名前でGitHub Secretsに登録すれば有効化される。
+
+### 専用LINEの作成と連携(1回だけ・約15分)
+1. https://entry.line.biz/ でLINE公式アカウントを新規作成(個人のLINEでログイン→アカウント名「結果の出し方がわかってしまうマガジン」→無料プラン)
+2. 管理画面(manager.line.biz)→ 右上「設定」→「**Messaging API**」→「Messaging APIを利用する」→ プロバイダー名は `kekka_mag` で新規作成 → 有効化
+3. https://developers.line.biz/console/ を開く → できたチャネルをクリック → 「**Messaging API設定**」タブの一番下「**チャネルアクセストークン(長期)**」→「発行」→ コピー
+4. 「**チャネル基本設定**」タブ →「**あなたのユーザーID**」(Uで始まる文字列)→ コピー
+5. 自分のスマホのLINEで、この新アカウントを**友だち追加**(管理画面の友だち追加QRコード。追加しないと通知が届かない)
+6. GitHub Secrets(https://github.com/allgroup-inc/hojo-hq/settings/secrets/actions)に登録:
+   - `KEKKA_LINE_CHANNEL_ACCESS_TOKEN` = 手順3のトークン
+   - `KEKKA_LINE_ADMIN_USER_ID` = 手順4のユーザーID
+7. 連携テスト: Actions →「**line-test**」→ Run workflow → スマホに「✅連携テスト成功」が届けば完了
+
+### ブランドアセットとログの正本(2026-08-06)
+- **画像の正本**: `assets/kekka/`
+  - `icon.png`(1024px・note/X共用アイコン)/ `header_x.png`(Xヘッダー1500×500)
+  - `eyecatch_◯◯.png`(note記事の見出し画像。**自動下書き時に毎回自動生成**。手動生成: `python scripts/generate_kekka_assets.py --eyecatch "タイトル"`)
+  - ブランド定義: 墨黒#101418 × 白 × マーカー黄#FFD400(研究ノートの蛍光マーカー。ミカタのネイビー×オレンジとは別配色=名義分離)
+- **運用ログの正本**: このリポジトリ(生成・公開記録・お題台帳はすべてGitに自動記録。Actionsの実行履歴も残る)
+- **KPI台帳**: `data/kekka_kpi.json`(noteダッシュボード・Xの実数のみ。週1回・月曜に数字をチャットへ→ツヅルが記録)
 
 ## 補足
 
