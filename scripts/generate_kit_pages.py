@@ -195,8 +195,8 @@ def kit_page(it, updated):
     cmb = it.get("combine") or {}
     if cmb.get("note"):
         ctype = cmb.get("type", "exclusive")
-        clabel = {"exclusive": "併給に注意", "adjust": "金額の調整あり",
-                  "stackable": "一緒に受けられる"}.get(ctype, "併給に注意")
+        clabel = {"exclusive": "どちらか一方", "adjust": "併用に条件あり",
+                  "stackable": "一緒に受けられる"}.get(ctype, "併用に注意")
         colors = {"exclusive": ("#FBEEE6", "#E8C4AE", "#B9502F"),
                   "adjust": ("#FFF6DB", "#EAD59A", "#7a5b00"),
                   "stackable": ("#E7F4EC", "#B7E0CF", "#0F5138")}

@@ -316,7 +316,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         // 併給・重複の注意(あれば)。断定せず「要確認・窓口で確認」を促す。
         if (it.combine && it.combine.note) {
           var ctype = it.combine.type || "exclusive";
-          var clabel = {exclusive:"併給に注意", adjust:"金額の調整あり", stackable:"一緒に受けられる"}[ctype] || "併給に注意";
+          var clabel = {exclusive:"どちらか一方", adjust:"併用に条件あり", stackable:"一緒に受けられる"}[ctype] || "併用に注意";
           var cbox = h("div", {class:"combine-note combine-" + ctype});
           cbox.appendChild(h("span", {class:"cl", text: clabel}));
           cbox.appendChild(document.createTextNode(it.combine.note));
