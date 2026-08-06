@@ -3,6 +3,9 @@ name: verify-sources
 # 100点基準❹: 掲載データと原文の照合を毎日5件自動サンプリング。
 # jGrants由来はAPI再取得で厳密照合(キー不要)、県・公社由来はClaude(Haiku)で照合
 # (Secrets: ANTHROPIC_API_KEY。未設定の間は該当分のみ自動スキップ)。
+# マルチAIダブルチェック(2026-08-06 小柳さん決裁): Secrets に GEMINI_API_KEY を
+# 設定すると、同じ原文を Gemini でも独立照合し、どちらかが矛盾を検知したら NG。
+# 未設定の間は従来の Claude 単独照合のまま動く。
 # 不一致は Issue を自動起票し、回復したら自動クローズする。
 
 on:
@@ -35,6 +38,7 @@ jobs:
       - name: Run source verification
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python scripts/verify_sources.py
 
       # ── 不一致検知時: Issue を起票 / 既存の未解決Issueに追記 ──
