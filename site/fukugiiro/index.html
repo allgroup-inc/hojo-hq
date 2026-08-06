@@ -67,6 +67,7 @@ section{padding:48px 0}
 .card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px;text-align:center}
 .card h3{font-size:1.05rem;margin-bottom:.3em}
 .card .status{font-size:.8rem;background:#fff3cd;border-radius:4px;padding:1px 8px;color:#7a5b00}
+.card .status.ok{background:#EAF7EE;color:#0F5138}
 .story{background:var(--fg-card);border:1px solid var(--fg-line);border-left:6px solid var(--fg-deep);border-radius:12px;padding:24px 22px;text-align:center}
 .story .leaf{font-size:1.7rem;display:block;line-height:1;margin-bottom:6px}
 .story p{margin:0 0 .9em}
@@ -198,6 +199,7 @@ footer a{color:#bcd9cf}
       <div class="stat">
         <span class="num" id="seido-count">—</span>
         <div class="lbl">検証済みで掲載中の制度</div>
+        <div class="note" id="seido-trust" style="margin-top:6px;font-size:.8rem"></div>
       </div>
     </div>
     <p class="note" id="jukyu-note" style="margin-top:12px">受給報告の受付開始に向けて準備中です。金額は利用者の自己申告をもとに、検証部が公式制度と突合できたぶんだけを計上します。個人が特定される情報は含みません。</p>
@@ -315,12 +317,21 @@ footer a{color:#bcd9cf}
     }
   } catch(e){}
   fetch("../data/fukugiiro/seido.json").then(function(r){return r.json()}).then(function(db){
-    var n = db.count || 0;
-    document.getElementById("seido-count").textContent = n;
-    if(n > 0){
+    var items = db.items || [];
+    var total = db.count || items.length;
+    var ver = items.filter(function(it){return it.verified === true}).length;
+    // 「検証済み」ラベルなので検証済み件数を表示(総数ではなく)。
+    document.getElementById("seido-count").textContent = ver;
+    var trust = document.getElementById("seido-trust");
+    if(trust && total > 0){
+      trust.textContent = "掲載" + total + "件のうち" + Math.round(ver / total * 100) + "%を公式ページと照合済み";
+    }
+    if(total > 0){
       var box = document.getElementById("seido-cards");
       box.innerHTML = "";
-      db.items.slice(0,4).forEach(function(it){
+      // 検証済みを優先して見せる(確認済みの安心感を前面に)。
+      var sorted = items.slice().sort(function(a,b){return (b.verified?1:0) - (a.verified?1:0)});
+      sorted.slice(0,4).forEach(function(it){
         var d = document.createElement("div");
         d.className = "card";
         var h = document.createElement("h3"); h.textContent = it.name;
@@ -330,7 +341,10 @@ footer a{color:#bcd9cf}
         var a = document.createElement("a");
         a.href = it.source_url; a.rel = "noopener"; a.textContent = "公式ページで確認";
         d.appendChild(h); d.appendChild(p);
-        if(it.status === "要確認"){
+        if(it.verified === true){
+          var ok = document.createElement("span"); ok.className="status ok"; ok.textContent="✓ 確認済み";
+          d.appendChild(ok); d.appendChild(document.createTextNode(" "));
+        } else if(it.status === "要確認"){
           var s = document.createElement("span"); s.className="status"; s.textContent="要確認";
           d.appendChild(s); d.appendChild(document.createTextNode(" "));
         }

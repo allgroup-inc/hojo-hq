@@ -46,6 +46,10 @@ h1{font-size:1.35rem;margin-bottom:8px}
 .card h2{font-size:1.05rem;margin-bottom:4px}
 .card a{color:var(--fg-primary)}
 .status{font-size:.8rem;background:#fff3cd;border-radius:4px;padding:1px 8px;color:#7a5b00}
+.status.ok{background:#EAF7EE;color:#0F5138}
+.trust{background:#EAF7EE;border:1px solid #B7E4C7;border-radius:10px;padding:12px 14px;font-size:.9rem;color:#0F5138;margin:12px 0}
+.linebtn{display:block;max-width:440px;margin:18px auto;padding:15px 22px;min-height:44px;background:#06C755;color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700}
+.linebtn span{display:block;font-size:.8rem;font-weight:600;opacity:.95;margin-top:2px}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 ul.areas{list-style:none;columns:2;gap:12px}
 ul.areas li{margin-bottom:8px}
@@ -134,11 +138,27 @@ def muni_page(muni, items, updated):
     local = [it for it in items if it["area"] == muni]
     pref = [it for it in items if it["area"] == "沖縄県"]
     national = [it for it in items if it["area"] == "全国"]
+    shown = local + pref + national
+    verified_n = sum(1 for it in shown if it.get("verified") is True)
+    # 単一CV(LINE登録)。締切は「約1か月前」表現で統一(3層ルール準拠)。
+    line_cta = (
+        '<a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-area/" '
+        'target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'line_add_click\')">'
+        f'💬 {esc(muni)}で使える制度の締切をLINEで受け取る'
+        '<span>締切の約1か月前にお知らせ・新しい制度が増えたときも(無料)</span></a>'
+    )
     body = [
         f"<h1>{esc(muni)}にお住まいの方が使える可能性のある給付金・手当</h1>",
         f'<p class="note">国・県・{esc(muni)}の制度から、ご家庭向けのものをまとめています。あなたの世帯にあてはまるものは3分診断でしぼり込めます。</p>',
-        '<a class="btn" href="../../shindan/">3分でもらい忘れ診断をはじめる</a>',
     ]
+    if verified_n:
+        body.append(
+            f'<div class="trust">✓ このうち <strong>{verified_n}件</strong> は、'
+            f'{esc(muni)}や国・県の公式ページと照合して掲載しています(確認済み)。'
+            '金額の目安など一部「要確認」の項目は、公式ページのリンクからご確認いただけます。</div>'
+        )
+    body.append('<a class="btn" href="../../shindan/">3分でもらい忘れ診断をはじめる</a>')
+    body.append(line_cta)
     sections = [(f"{muni}の制度", local), ("沖縄県の制度", pref), ("全国(国)の制度", national)]
     for label, group in sections:
         if not group and label.startswith(muni):
@@ -150,7 +170,12 @@ def muni_page(muni, items, updated):
         body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>{esc(label)}({len(group)}件)</h2>")
         body.append('<div class="cardgrid">')
         for it in group:
-            badge = ' <span class="status">要確認</span>' if it.get("status") == "要確認" else ""
+            if it.get("verified") is True:
+                badge = ' <span class="status ok">✓ 確認済み</span>'
+            elif it.get("status") == "要確認":
+                badge = ' <span class="status">要確認</span>'
+            else:
+                badge = ""
             body.append(
                 '<div class="card">'
                 f"<h2>{esc(it['name'])}{badge}</h2>"
@@ -161,6 +186,12 @@ def muni_page(muni, items, updated):
                 "</div>"
             )
         body.append('</div>')
+    # ページ末にもLINE誘導(締切の見逃し防止=登録特典)
+    body.append(
+        f'<p class="note" style="margin-top:22px;text-align:center">'
+        f'{esc(muni)}で新しい制度が増えたときや、締切が近づいたときに、LINEでそっとお知らせします。</p>'
+    )
+    body.append(line_cta)
     title = f"{muni}の給付金・手当まとめ | もらいわすれ堂"
     desc = f"{muni}にお住まいの世帯が使える可能性のある給付金・手当のまとめ。3分の無料診断で、あなたの世帯にあてはまる制度がわかります。"
     ld = area_jsonld(muni, [local, pref, national])
