@@ -103,11 +103,19 @@ test("企業マスタに後継者状況列が追加されている", () => {
   assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("後継者状況") !== -1);
 });
 
-test("企業マスタに関係メモ列が末尾に追加されている(Phase 10)", () => {
+test("企業マスタに関係メモ列が追加されている(Phase 10)", () => {
   assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("関係メモ") !== -1);
-  assert.equal(schema.COMPANY_MASTER_HEADERS[schema.COMPANY_MASTER_HEADERS.length - 1], "関係メモ");
 });
 
 test("後継者状況の選択肢(SUCCESSOR_STATUS_TYPES)があり/なし/不明の3択である", () => {
   assert.deepEqual(schema.SUCCESSOR_STATUS_TYPES, ["あり", "なし", "不明"]);
+});
+
+test("企業マスタに窓口担当者名・携帯番号列が末尾に追加されている(Phase 13)", () => {
+  assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("窓口担当者名") !== -1);
+  assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("携帯番号") !== -1);
+  assert.deepEqual(
+    schema.COMPANY_MASTER_HEADERS.slice(-2),
+    ["窓口担当者名", "携帯番号"]
+  );
 });
