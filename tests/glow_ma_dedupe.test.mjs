@@ -87,8 +87,8 @@ test("mergeCompanyRecords: レコードが空配列なら例外を投げる", ()
   assert.throws(() => dedupe.mergeCompanyRecords([]));
 });
 
-test("SCALAR_FIELDS: 配列/備考/連絡不要項目と合わせると企業マスタのヘッダーと過不足なく一致する(スキーマ変更の検知)", () => {
-  const combined = new Set([...dedupe.SCALAR_FIELDS, "流入ルート", "提案商品", "備考", "連絡不要"]);
+test("SCALAR_FIELDS: 配列/備考/連絡不要/関係メモ項目と合わせると企業マスタのヘッダーと過不足なく一致する(スキーマ変更の検知)", () => {
+  const combined = new Set([...dedupe.SCALAR_FIELDS, "流入ルート", "提案商品", "備考", "連絡不要", "関係メモ"]);
   const expected = new Set(schema.COMPANY_MASTER_HEADERS);
   assert.deepStrictEqual(combined, expected);
 });
@@ -100,6 +100,25 @@ test("mergeCompanyRecords: 後継者状況は最初に見つかった非空値�
   ];
   const { merged } = dedupe.mergeCompanyRecords(records);
   assert.equal(merged["後継者状況"], "あり");
+});
+
+test("mergeCompanyRecords: 関係メモは全レコード分を連結して残す(Phase 10で追加した蓄積メモがマージで失われないことの回帰テスト)", () => {
+  const records = [
+    { 企業ID: "C000001", 流入ルート: [], 提案商品: [], 備考: "", 関係メモ: "社長は釣りが趣味" },
+    { 企業ID: "C000002", 流入ルート: [], 提案商品: [], 備考: "", 関係メモ: "決算期は3月" }
+  ];
+  const { merged } = dedupe.mergeCompanyRecords(records);
+  assert.match(merged["関係メモ"], /社長は釣りが趣味/);
+  assert.match(merged["関係メモ"], /決算期は3月/);
+});
+
+test("mergeCompanyRecords: 関係メモが片方だけ空欄でも情報を保持する", () => {
+  const records = [
+    { 企業ID: "C000001", 流入ルート: [], 提案商品: [], 備考: "", 関係メモ: "" },
+    { 企業ID: "C000002", 流入ルート: [], 提案商品: [], 備考: "", 関係メモ: "取引銀行は◯◯銀行" }
+  ];
+  const { merged } = dedupe.mergeCompanyRecords(records);
+  assert.equal(merged["関係メモ"], "取引銀行は◯◯銀行");
 });
 
 test("mergeCompanyRecords: 連絡不要はいずれかのレコードでTRUEなら統合後もTRUEを維持する(falseが先頭でも失われない)", () => {

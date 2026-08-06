@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-06",
-  "count": 46,
+  "updated_at": "2026-08-06 07:01",
+  "count": 43,
   "items": [
     {
       "id": "fk-kuni-jidoteate",
@@ -22,7 +22,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: こども家庭庁ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-jidofuyoteate",
@@ -45,7 +45,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: こども家庭庁ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-shussan-ichijikin",
@@ -67,7 +67,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-ikuji-kyufu",
@@ -91,7 +91,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-jukyo-kakuho",
@@ -115,7 +115,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-kogaku-ryoyo",
@@ -137,7 +137,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-shugaku-shien",
@@ -159,7 +159,7 @@
       "verified_by": null,
       "status": "要確認",
       "notes": "出典: 文部科学省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-hitorioya-shien",
@@ -185,7 +185,7 @@
       "verified_by": "kensho(突合レポート○・match_tokens修正後)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: こども家庭庁ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-ninpu-shien",
@@ -207,7 +207,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: こども家庭庁ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-shugakushienkin-koko",
@@ -229,7 +229,11 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: 文部科学省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01",
+      "combine": {
+        "type": "stackable",
+        "note": "高校生等奨学給付金など他の制度と併せて利用できる場合があります(要確認・窓口でご確認ください)。"
+      }
     },
     {
       "id": "fk-kuni-shogaku-kyufukin-koko",
@@ -252,7 +256,11 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: 文部科学省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01",
+      "combine": {
+        "type": "stackable",
+        "note": "高等学校等就学支援金など他の支援と併せて受けられる場合があります(詳しくは要確認・窓口でご確認ください)。"
+      }
     },
     {
       "id": "fk-kuni-kyushokusha-shien",
@@ -276,7 +284,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-      "fetched_at": "2026-08-05 14:09",
+      "fetched_at": "2026-08-06 07:01",
       "combine": {
         "type": "exclusive",
         "note": "雇用保険の失業給付(基本手当)を受けている方は、対象外になる場合があります(要確認・窓口でご確認ください)。"
@@ -306,7 +314,11 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01",
+      "combine": {
+        "type": "adjust",
+        "note": "生活保護など他の制度との関係は状況により異なります(要確認・窓口でご確認ください)。"
+      }
     },
     {
       "id": "fk-kuni-kyoiku-kunren",
@@ -328,7 +340,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
       "status": "検証済み",
       "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-hoiku-mushoka",
@@ -354,7 +366,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: こども家庭庁ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-tokubetsu-jifute",
@@ -380,7 +392,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-shogaiji-fukushi",
@@ -406,7 +418,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-tokubetsu-shogaisha",
@@ -431,7 +443,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-jiritsushien-iryo",
@@ -457,7 +469,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-koyohoken-kihonteate",
@@ -482,7 +494,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-kaigokyugyo-kyufu",
@@ -508,7 +520,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-rousai",
@@ -533,7 +545,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-seikatsu-hogo",
@@ -558,7 +570,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-nenkin-kyufukin",
@@ -583,7 +595,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-saigai-choui",
@@ -608,7 +620,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 厚生労働省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-shugaku-enjo",
@@ -634,7 +646,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 文部科学省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09",
+      "fetched_at": "2026-08-06 07:01",
       "combine": {
         "type": "adjust",
         "note": "生活保護を受けている場合など、他の支援との関係で対象や費目が変わることがあります(要確認・窓口でご確認ください)。"
@@ -664,7 +676,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 文部科学省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-safetynet-jutaku",
@@ -690,7 +702,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 国土交通省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-kosodate-green",
@@ -716,7 +728,7 @@
       "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
       "status": "検証済み",
       "notes": "出典: 国土交通省ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-ken-boshi-fushi-kafu-shikin",
@@ -743,7 +755,7 @@
       "verified_by": "小柳(公式ページ照合)",
       "status": "検証済み",
       "notes": "出典: 沖縄県ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-ken-hitorioya-jutaku-shikin",
@@ -770,7 +782,7 @@
       "verified_by": "小柳(公式ページ照合)",
       "status": "検証済み",
       "notes": "出典: 沖縄県ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-ken-hitorioya-kurashi-ouen",
@@ -797,7 +809,7 @@
       "verified_by": "小柳(公式ページ照合)",
       "status": "検証済み",
       "notes": "出典: 沖縄県ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-ken-kenei-jutaku",
@@ -823,7 +835,7 @@
       "verified_by": null,
       "status": "要確認",
       "notes": "出典: 沖縄県ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-ken-senshiniryo-funin",
@@ -849,7 +861,7 @@
       "verified_by": "小柳(公式ページ照合)",
       "status": "検証済み",
       "notes": "出典: 沖縄県ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-ken-fuiku-kensa",
@@ -875,7 +887,7 @@
       "verified_by": "小柳(公式ページ照合)",
       "status": "検証済み",
       "notes": "出典: 沖縄県ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-ken-kodomo-iryohi",
@@ -901,7 +913,7 @@
       "verified_by": "小柳(公式ページ照合)",
       "status": "検証済み",
       "notes": "出典: 沖縄県ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-ken-boshi-fushi-iryohi",
@@ -929,7 +941,7 @@
       "verified_by": "小柳(公式ページ照合)",
       "status": "検証済み",
       "notes": "出典: 沖縄県ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-ken-judo-shinshin-iryohi",
@@ -956,7 +968,7 @@
       "verified_by": "小柳(公式ページ照合)",
       "status": "検証済み",
       "notes": "出典: 沖縄県ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-ken-nanbyo-iryohi",
@@ -982,59 +994,7 @@
       "verified_by": "小柳(公式ページ照合)",
       "status": "検証済み",
       "notes": "出典: 沖縄県ウェブサイト",
-      "fetched_at": "2026-08-05 14:09"
-    },
-    {
-      "id": "fk-kuni-koukou-shogaku-kyufu",
-      "name": "高校生等奨学給付金",
-      "category": "教育",
-      "life_events": [
-        "入園・入学",
-        "子育て",
-        "低所得・生活苦"
-      ],
-      "issuer": "文部科学省(申請先は都道府県)",
-      "area": "全国",
-      "target_household": "住民税が非課税などの低所得世帯で、高校生等がいる世帯が対象となる可能性があります。",
-      "how_to_apply": "お住まいの都道府県の担当窓口(通っている学校を通じて申請する場合があります)",
-      "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1344089.htm",
-      "amount_note": "返さなくてよい給付金です。金額は世帯状況で異なるため要確認(公式ページでご確認ください)",
-      "deadline_type": "年度内",
-      "combine": {
-        "type": "stackable",
-        "note": "高等学校等就学支援金など他の支援と併せて受けられる場合があります(詳しくは要確認・窓口でご確認ください)。"
-      },
-      "deadline": null,
-      "verified": false,
-      "status": "要確認",
-      "notes": "出典: 文部科学省ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
-      "fetched_at": "2026-08-06 12:36"
-    },
-    {
-      "id": "fk-kuni-kokosei-shugaku-shien",
-      "name": "高等学校等就学支援金制度",
-      "category": "教育",
-      "life_events": [
-        "入園・入学",
-        "子育て",
-        "低所得・生活苦"
-      ],
-      "issuer": "文部科学省",
-      "area": "全国",
-      "target_household": "一定の所得の基準を下回る世帯の高校生等が対象となる可能性があります。",
-      "how_to_apply": "通っている(入学する)学校の窓口、またはオンライン申請(e-Shien)",
-      "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1342674.htm",
-      "amount_note": "授業料に充てるための支援金です。金額・所得基準は要確認(公式ページでご確認ください)",
-      "deadline_type": "年度内",
-      "combine": {
-        "type": "stackable",
-        "note": "高校生等奨学給付金など他の制度と併せて利用できる場合があります(要確認・窓口でご確認ください)。"
-      },
-      "deadline": null,
-      "verified": false,
-      "status": "要確認",
-      "notes": "出典: 文部科学省ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
-      "fetched_at": "2026-08-06 12:36"
+      "fetched_at": "2026-08-06 07:01"
     },
     {
       "id": "fk-kuni-seikatsu-fukushi-shikin",
@@ -1106,32 +1066,6 @@
       "verified": false,
       "status": "要確認",
       "notes": "出典: こども家庭庁ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
-      "fetched_at": "2026-08-06 12:36"
-    },
-    {
-      "id": "fk-kuni-konkyu-jiritsu",
-      "name": "生活困窮者自立支援制度(自立相談支援)",
-      "category": "生活支援",
-      "life_events": [
-        "低所得・生活苦",
-        "失業",
-        "住宅取得・引越"
-      ],
-      "issuer": "厚生労働省(実施は都道府県・市区町村)",
-      "area": "全国",
-      "target_household": "仕事や生活の事情で生活が苦しく、生活保護に至る前に相談したい方(世帯)が対象となる可能性があります。",
-      "how_to_apply": "お住まいの市区町村の自立相談支援機関(相談窓口)",
-      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000073432.html",
-      "amount_note": "相談支援のほか、住居確保給付金などの支援があります。内容・要件は要確認(公式ページでご確認ください)",
-      "deadline_type": "常時",
-      "combine": {
-        "type": "adjust",
-        "note": "生活保護など他の制度との関係は状況により異なります(要確認・窓口でご確認ください)。"
-      },
-      "deadline": null,
-      "verified": false,
-      "status": "要確認",
-      "notes": "出典: 厚生労働省ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
       "fetched_at": "2026-08-06 12:36"
     },
     {
