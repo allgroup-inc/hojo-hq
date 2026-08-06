@@ -13,7 +13,7 @@
  * - データ品質チェック(集計対象外の件数)
  * - 工程別滞留状況(NDA締結/意向表明受領/DD開始)
  * - 担当者別ワークロード(保有企業数・Aランク保有数・掘り起こし待ち件数)
- * - 塩漬け企業一覧(標準サイクルの2倍以上、最終接触が無い企業)
+ * - 長期検討企業一覧(標準サイクルの2倍以上、最終接触が無い企業)
  * これに加えて、「ダッシュボード履歴」タブに主要指標のスナップショットを1行追記する
  * (こちらは「ダッシュボード」タブと異なり、実行のたびに内容を消さず積み上げる)。
  *
@@ -98,7 +98,7 @@ function updateDashboard() {
       ["担当者", "保有企業数", "Aランク保有数", "掘り起こし待ち件数"],
       ownerWorkload.map(function (o) { return [o["担当者"], o["保有企業数"], o["Aランク保有数"], o["掘り起こし待ち件数"]]; }));
     row++;
-    row = writeDashboardSection_(dashboardSheet, row, "塩漬け企業一覧(標準サイクルの2倍以上、最終接触が無い企業)",
+    row = writeDashboardSection_(dashboardSheet, row, "長期検討企業一覧(標準サイクルの2倍以上、最終接触が無い企業)",
       ["企業ID", "会社名", "ランク", "最終接触からの経過日数"],
       staleList.map(function (s) { return [s["企業ID"], s["会社名"], s["ランク"], s["最終接触からの経過日数"]]; }));
     row++;
@@ -109,7 +109,7 @@ function updateDashboard() {
       historySnapshot["ランクA_滞留企業数"], historySnapshot["ランクB_滞留企業数"],
       historySnapshot["ランクC_滞留企業数"], historySnapshot["ランクD_滞留企業数"],
       historySnapshot["掘り起こし待ち件数合計"], historySnapshot["成約企業数"], historySnapshot["連絡不要企業数"],
-      historySnapshot["塩漬け企業数"]
+      historySnapshot["長期検討企業数"]
     ]);
 
     dashboardSheet.getRange(row, 1).setValue(

@@ -190,7 +190,7 @@
       "掘り起こし待ち件数合計": totalOverdue,
       "成約企業数": closedDealCount,
       "連絡不要企業数": doNotContactCount,
-      "塩漬け企業数": staleCount
+      "長期検討企業数": staleCount
     };
   }
 

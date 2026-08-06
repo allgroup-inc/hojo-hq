@@ -207,9 +207,9 @@ test("buildHistorySnapshot: ランク別滞留企業数・掘り起こし待ち�
   assert.equal(snapshot["掘り起こし待ち件数合計"], 1);
   assert.equal(snapshot["成約企業数"], 1);
   assert.equal(snapshot["連絡不要企業数"], 1);
-  // C1は最終接触2020-01-01(Aランク30日サイクルの2倍=60日を大幅超過)のため塩漬け。
-  // C3は連絡不要、C4は成約(終了ステージ)のためどちらも塩漬け集計から除外される
-  assert.equal(snapshot["塩漬け企業数"], 1);
+  // C1は最終接触2020-01-01(Aランク30日サイクルの2倍=60日を大幅超過)のため長期検討。
+  // C3は連絡不要、C4は成約(終了ステージ)のためどちらも長期検討集計から除外される
+  assert.equal(snapshot["長期検討企業数"], 1);
 });
 
 test("buildHistorySnapshot: 成約企業数は提案商品数によらず企業1社につき1件として数える(buildProductFunnelの成約数とは別概念)", () => {
@@ -229,7 +229,7 @@ test("buildHistorySnapshot: 対象企業がなければ全項目0", () => {
   assert.equal(snapshot["掘り起こし待ち件数合計"], 0);
   assert.equal(snapshot["成約企業数"], 0);
   assert.equal(snapshot["連絡不要企業数"], 0);
-  assert.equal(snapshot["塩漬け企業数"], 0);
+  assert.equal(snapshot["長期検討企業数"], 0);
 });
 
 test("buildOwnerWorkloadSummary: 担当者ごとに保有企業数・Aランク保有数・掘り起こし待ち件数を集計し、掘り起こし待ちが多い順に返す(Phase 12)", () => {

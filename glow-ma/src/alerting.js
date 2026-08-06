@@ -23,7 +23,7 @@
     terminalStages: ["成約", "見送り"],
     nextBestActionRules: NEXT_BEST_ACTION_RULES,
     defaultNextBestAction: DEFAULT_NEXT_BEST_ACTION,
-    // 塩漬け判定(Phase 12): 標準サイクルの何倍、最終接触が無いと「長期放置」とみなすか。
+    // 長期検討判定(Phase 12): 標準サイクルの何倍、最終接触が無いと「長期放置」とみなすか。
     // 根拠: docs/superpowers/specs/2026-08-06-glow-ma-workload-stale-triangle-review.md
     staleMultiplier: 2
   };
@@ -116,7 +116,7 @@
     return alerts;
   }
 
-  // 塩漬け判定: isOverdue(単発の期限超過)とは別に、標準サイクルのstaleMultiplier倍以上
+  // 長期検討判定: isOverdue(単発の期限超過)とは別に、標準サイクルのstaleMultiplier倍以上
   // 最終接触が無い企業を「長期放置」として検出する。次回アクション予定日の設定有無に
   // かかわらず判定する(予定日を設定しただけで実際には放置され続けているケースを拾うため)。
   function isStale(record, todayValue, config) {
