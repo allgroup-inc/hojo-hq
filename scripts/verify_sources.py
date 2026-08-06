@@ -23,6 +23,7 @@ import os
 import random
 import re
 import sys
+import urllib.error
 import urllib.request
 from datetime import datetime, timezone, timedelta
 
@@ -32,7 +33,9 @@ REPORT_PATH = os.path.join(os.path.dirname(__file__), "..", "verify_report.txt")
 JGRANTS_DETAIL = "https://api.jgrants-portal.go.jp/exp/v1/public/subsidies/id/{sid}"
 SAMPLE_SIZE = 5
 CLAUDE_MODEL = "claude-haiku-4-5"
-GEMINI_MODEL = "gemini-2.5-flash"
+# モデルは廃止・改名され得るため候補を順に試す。"-latest" エイリアスを最優先に
+# しておくと Google 側の世代交代に自動追従する(2026-08-06: gemini-2.5-flash 404 対応)。
+GEMINI_MODELS = ["gemini-flash-latest", "gemini-3-flash-preview", "gemini-2.5-flash"]
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
     "{model}:generateContent?key={key}"
@@ -172,19 +175,32 @@ def verify_local_with_gemini(item: dict, page_text: str, api_key: str) -> list[s
             },
         }
     ).encode("utf-8")
-    req = urllib.request.Request(
-        GEMINI_URL.format(model=GEMINI_MODEL, key=api_key),
-        data=body,
-        headers={"Content-Type": "application/json"},
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=60) as res:
-            data = json.loads(res.read().decode("utf-8"))
-        verdict = json.loads(data["candidates"][0]["content"]["parts"][0]["text"])
-        return verdict_to_issues(verdict)
-    except Exception as e:
-        print(f"[info] Gemini照合に失敗(この件はClaude判定のみ): {e}")
-        return None
+    last_error: Exception | None = None
+    for model in GEMINI_MODELS:
+        req = urllib.request.Request(
+            GEMINI_URL.format(model=model, key=api_key),
+            data=body,
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as res:
+                data = json.loads(res.read().decode("utf-8"))
+            verdict = json.loads(data["candidates"][0]["content"]["parts"][0]["text"])
+            # 使えたモデルを先頭へ寄せ、以降の照合で404の試行を繰り返さない
+            if GEMINI_MODELS[0] != model:
+                GEMINI_MODELS.remove(model)
+                GEMINI_MODELS.insert(0, model)
+            return verdict_to_issues(verdict)
+        except urllib.error.HTTPError as e:
+            last_error = e
+            if e.code == 404:  # モデル提供終了・改名 → 次の候補へ
+                continue
+            break
+        except Exception as e:
+            last_error = e
+            break
+    print(f"[info] Gemini照合に失敗(この件はClaude判定のみ): {last_error}")
+    return None
 
 
 def main() -> None:
