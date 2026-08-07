@@ -37,7 +37,15 @@ SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_med
 PROMOTE_MIN_DAYS = 30   # 通常投稿はこれ以上先の締切のみ
 SOON_MAX_DAYS = 7       # これ未満は「予告」カードに回す
 
-HASHTAGS = "#沖縄 #補助金 #助成金 #沖縄経営者 #事業承継 #沖縄企業のミカタ"
+# hashtag-strategyスキル準拠: Instagramの5タグ上限を守り、話題ごとにセットを
+# ローテーションする(固定1ブロックの使い回しはNG)。ニッチ・ミドルタグを優先。
+HASHTAG_SETS = {
+    "seido": "#沖縄補助金 #沖縄助成金 #沖縄経営者 #中小企業支援 #沖縄企業のミカタ",
+    "shokei": "#事業承継 #沖縄M&A #後継者問題 #沖縄経営者 #沖縄企業のミカタ",
+    "yokoku": "#沖縄補助金 #GビズID #中小企業支援 #沖縄経営者 #沖縄企業のミカタ",
+    "deadline_alert": "#沖縄補助金 #締切管理 #中小企業支援 #沖縄経営者 #沖縄企業のミカタ",
+}
+DEFAULT_HASHTAGS = "#沖縄企業のミカタ #沖縄経営者 #沖縄補助金 #沖縄助成金 #中小企業支援"
 DISCLAIMER = "※要件・締切・金額は必ず原文の公募要領でご確認ください。"
 
 
@@ -152,6 +160,7 @@ def write_post(n, slug, role, img_title, img_sub, img_number, caption, source, b
     fname = f"{n:02d}_{slug}.md"
     path = os.path.join(OUT_DIR, fname)
     badge_line = f"\n- バッジ: {badge}" if badge else ""
+    hashtags = HASHTAG_SETS.get(slug, DEFAULT_HASHTAGS)
     body = f"""# 投稿{n}｜{role}
 
 ## 画像に載せる文言
@@ -162,7 +171,7 @@ def write_post(n, slug, role, img_title, img_sub, img_number, caption, source, b
 ## キャプション
 {caption}
 
-{HASHTAGS}
+{hashtags}
 
 ## 出典
 {source}
