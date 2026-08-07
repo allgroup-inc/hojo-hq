@@ -23,10 +23,17 @@ jobs:
       - name: トークンのアカウント識別チェック
         env:
           TOKEN: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          TO: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
         run: |
+          # 連携テストは「未設定でも成功に見える」を許さない(2026-08-07の教訓:
+          # トークン未登録のままスキップ送信が success 表示になり、連携完了と誤認した)
           if [ -z "$TOKEN" ]; then
-            echo "::warning::KEKKA_LINE_CHANNEL_ACCESS_TOKEN が未設定です"
-            exit 0
+            echo "::error::KEKKA_LINE_CHANNEL_ACCESS_TOKEN が未登録です。GitHub Secrets にこの名前で登録してください(LINE Developers → プロバイダー kekka_mag → チャネルID 2011004310 → Messaging API設定 → チャネルアクセストークン(長期))"
+            exit 1
+          fi
+          if [ -z "$TO" ]; then
+            echo "::error::KEKKA_LINE_ADMIN_USER_ID が未登録です(チャネル基本設定 → あなたのユーザーID)"
+            exit 1
           fi
           info=$(curl -sS https://api.line.me/v2/bot/info -H "Authorization: Bearer $TOKEN")
           echo "このトークンのアカウント: $(echo "$info" | jq -r '"\(.displayName) (\(.basicId))"')"
