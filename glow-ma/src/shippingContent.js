@@ -34,9 +34,54 @@
     return formatDate_(result);
   }
 
+  var CSV_HEADER_ROW = ["発送日", "企業ID", "会社名", "所在地", "窓口担当者名"];
+
+  function buildShippingCsvRows(letterDrafts, companies, targetDate) {
+    var glowAlerting = getGlowAlerting_();
+    var companyById = {};
+    (companies || []).forEach(function (company) {
+      companyById[company["企業ID"]] = company;
+    });
+
+    var rows = [];
+    (letterDrafts || []).forEach(function (draft) {
+      var sentDateValue = draft["発送日"];
+      if (!sentDateValue) return;
+      var sentDate = glowAlerting.toDate(sentDateValue);
+      if (!sentDate) return;
+      if (formatDate_(sentDate) !== targetDate) return;
+      var company = companyById[draft["企業ID"]];
+      if (!company) return;
+      rows.push([
+        targetDate,
+        draft["企業ID"],
+        company["会社名"] || "",
+        company["所在地"] || "",
+        company["窓口担当者名"] || ""
+      ]);
+    });
+    return [CSV_HEADER_ROW].concat(rows);
+  }
+
+  function escapeCsvField_(value) {
+    var stringValue = value === null || value === undefined ? "" : String(value);
+    if (/[",\r\n]/.test(stringValue)) {
+      return "\"" + stringValue.replace(/"/g, "\"\"") + "\"";
+    }
+    return stringValue;
+  }
+
+  function toCsvString(rows) {
+    return (rows || []).map(function (row) {
+      return row.map(escapeCsvField_).join(",");
+    }).join("\r\n");
+  }
+
   var api = {
     DEFAULT_CONFIG: DEFAULT_CONFIG,
-    computeFollowUpDate: computeFollowUpDate
+    computeFollowUpDate: computeFollowUpDate,
+    buildShippingCsvRows: buildShippingCsvRows,
+    toCsvString: toCsvString
   };
 
   if (typeof module !== "undefined" && module.exports) {
