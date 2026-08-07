@@ -1,0 +1,53 @@
+{
+  "_readme": "ヒロメさん(SNS部)の水:深掘り/金:事例枠のネタキュー。mindshare-arbitrageスキルの「発見」段階を、note編集部(ツヅルさん)のdata/tanpatsu_topics.jsonと同じ型でSNS部に横展開したもの(2026-08-07)。世の中の成功事例を沖縄の経営者向けに翻訳するのが目的。factsは出典URL必須(出典なしのfactは生成拒否)。空きが近づいたら小柳さんへ補充案を提案する運用は note編集部と同じ。",
+  "queue": [
+    {
+      "id": "1",
+      "slug": "yokohama-line-jitsuyo",
+      "genre": "LINE運用の伸ばし方",
+      "title_hint": "自治体LINEはなぜ友だち数47万人に伸びたのか",
+      "angle": "情報配信だけでなく『使い続ける理由』(実用機能)がブロック率を下げる、という構造を沖縄企業のミカタのLINE運用に翻訳する",
+      "status": "pending",
+      "facts": [
+        {
+          "claim": "横浜市の公式LINEアカウントは2020年4月開設、2021年5月のセグメント配信機能導入後に友だち数47万人超(人口比約12%)に到達した",
+          "source": "https://mobilus.co.jp/case/yokohama-city/",
+          "source_name": "モビルス導入事例",
+          "date": "2026-08-02リサーチ"
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "slug": "hubspot-free-tool-leadgen",
+      "genre": "無料ツールでリード獲得",
+      "title_hint": "無料の『採点ツール』が1000万リードを生んだ理由",
+      "angle": "無料診断→メールアドレス→リード育成、という王道パターンを沖縄企業のミカタの診断機能の伸ばし方に翻訳する",
+      "status": "pending",
+      "facts": [
+        {
+          "claim": "HubSpotの無料Website Graderは、これまでに1000万件超のリードを生み出したと報告されている",
+          "source": "https://www.figuringoutwithai.com/growth/free-tool-seo-hubspot-website-grader",
+          "source_name": "Figuring Out With AI",
+          "date": "2026-08-02リサーチ"
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "slug": "roi-calculator-conversion",
+      "genre": "個別化コンテンツの効果",
+      "title_hint": "『自分ごと化』した数字は、なぜ2倍売れるのか",
+      "angle": "ROI計算機のような個別化コンテンツが静的LPの2倍のコンバージョンを生む実証データを、診断結果の金額提示強化に翻訳する",
+      "status": "pending",
+      "facts": [
+        {
+          "claim": "ROI計算機のようなインタラクティブコンテンツは静的なランディングページの2倍のコンバージョンを生み、自分の事業ケースを計算機で作った購買者は既製の事例紹介を渡されただけの購買者より2.1倍購入完了率が高い",
+          "source": "https://outgrow.co/blog/roi-calculator-examples-b2b-saas",
+          "source_name": "Outgrow ROI Calculator Examples",
+          "date": "2026-08-07リサーチ"
+        }
+      ]
+    }
+  ]
+}
