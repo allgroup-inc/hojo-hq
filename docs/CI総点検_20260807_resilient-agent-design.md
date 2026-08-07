@@ -23,12 +23,12 @@
 | 1 | 4層分解(Trigger/Workflow/Agent/Guardrail) | ✅ | 収集・整形=コード、Claude API=判断のみ、社外副作用=承認ゲート |
 | 2 | 完了条件をシステム側で判定 | ✅ | update=デプロイ前JSON検証ゲート、healthcheck=毎朝の機械判定 |
 | 3 | 状態の外部保存 | ✅ | data/のJSON+Gitコミット(監査ログ兼用)+企業台帳(GAS) |
-| 4 | 副作用のべき等性 | ⚠️一部 | weekly-report=schedule限定+push時dry-run。**social-postの同日再実行キーは未実装**(承認ゲートが実質防止。次回改善候補) |
+| 4 | 副作用のべき等性 | ✅ | weekly-report=schedule限定+push時dry-run。social-post=`data/social_post_state.json`(日付+素材キーでFB/IG別に二重投稿防止・実装済みを点検で確認) |
 | 5 | リトライ上限・種類 | ✅ | push=3回+abort、IG投稿=3回、healthcheckがERROR時Issue+LINE |
 | 6 | 権限最小 | ✅ | GITHUB_TOKENは必要権限のみ宣言。Secretsはワークフロー内のみ |
 | 7 | ログ・監視 | ✅ | healthcheck(毎朝10時)+Actionsログ+失敗時Issue自動起票 |
 | 8 | 文章ルールの強制化 | ✅ | 並走禁止・検証ゲートはコード強制(今回のconcurrency完備で完了) |
 
 ## 残課題(次回スプリント候補)
-- social-post に `idempotency_key`(例: `social:2026-08-07`)を導入し、同日2回目の
-  実行を投稿前に検知してスキップする(現状は承認ゲートの人間判断頼み)
+- social-postの状態ファイル(`data/social_post_state.json`)はrunner内のみで有効。
+  run自体の再実行(re-run)をまたぐ二重投稿防止が必要になったら、状態のコミット化を検討

@@ -57,6 +57,10 @@ jobs:
         # 締切アラート(line_alerts.json)から毎日のストーリーズ画像を生成
         run: python scripts/generate_story.py
 
+      - name: Generate weekly carousel (金曜投稿用Top5・毎日更新して鮮度維持)
+        # carousel-writerスキル準拠の7枚組。金曜のsocial-postがこの素材を使う。
+        run: python scripts/generate_carousel.py
+
       - name: Record KGI (LINE友だち数の日次記録)
         # KGI実測値をリポジトリに蓄積(未接続・集計待ちも状態を明記)。
         # readyが3日途切れたら管理者LINEへ警報1回(計測の無言停止対策)。
@@ -76,7 +80,7 @@ jobs:
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
-          git add data/subsidies.json data/line_alerts.json data/kpi posts/launch posts/images posts/line
+          git add data/subsidies.json data/line_alerts.json data/kpi posts/launch posts/images posts/line posts/carousel
           git diff --cached --quiet || git commit -m "auto: update subsidies & images $(date '+%Y-%m-%d %H:%M')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)。
           # -X theirs: 自動生成ファイル同士のコンフリクトは自分の新しい生成分で解決し、

@@ -58,6 +58,22 @@ def save_state(state):
         json.dump(state, f, ensure_ascii=False, indent=2)
 
 
+CAROUSEL_DIR = os.path.join(BASE, "posts", "carousel")
+RAW_CAROUSEL = "https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/posts/carousel/"
+
+
+def carousel_today():
+    """金曜はカルーセル投稿(carousel-writerスキル準拠・保存狙いの週1枠)。
+    素材(caption.md+slide_*.png)が揃っている場合のみ。無ければ通常投稿へフォールバック。"""
+    if datetime.now(JST).weekday() != 4:  # 金曜のみ
+        return None
+    cap = os.path.join(CAROUSEL_DIR, "caption.md")
+    slides = sorted(glob.glob(os.path.join(CAROUSEL_DIR, "slide_*.png")))
+    if os.path.exists(cap) and len(slides) >= 3:
+        return cap, [RAW_CAROUSEL + os.path.basename(s) for s in slides]
+    return None
+
+
 def pick_post():
     """日付でローテーション選定。md と png が揃っている素材のみ対象。"""
     mds = sorted(glob.glob(os.path.join(BASE, "posts", "launch", "*.md")))
@@ -90,9 +106,17 @@ def api(path, params):
 
 def main():
     dry = "--dry-run" in sys.argv
-    md, stem = pick_post()
-    caption = extract_caption(md)
-    image_url = RAW_BASE + stem + ".png"
+    car = carousel_today()
+    if car:
+        md, slide_urls = car
+        stem = "carousel"
+        caption = extract_caption(md)
+        image_url = slide_urls[0]  # プレビューは表紙
+    else:
+        slide_urls = None
+        md, stem = pick_post()
+        caption = extract_caption(md)
+        image_url = RAW_BASE + stem + ".png"
     now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
 
     if "--preview" in sys.argv:
@@ -100,6 +124,8 @@ def main():
         print(f"stem={stem}")
         print(f"image={image_url}")
         print(f"caption_head={caption.splitlines()[0]}")
+        if slide_urls:
+            print(f"slides={len(slide_urls)}")
         return
 
     print(f"[info] {now} JST / 本日の投稿素材: {stem}")
@@ -121,9 +147,22 @@ def main():
     if state.get("facebook"):
         print("[skip] Facebook: 本日分は投稿済み(state記録済み・二重投稿防止)")
     elif page_id and token:
-        res = api(f"/{page_id}/photos",
-                  {"url": image_url, "caption": caption, "access_token": token})
-        print(f"[ok] Facebook投稿 完了: id={res.get('id') or res.get('post_id')}")
+        if slide_urls:
+            # カルーセル→FBは複数写真の1投稿(unpublishedでアップ→feedにattach)
+            media_ids = []
+            for u in slide_urls:
+                r = api(f"/{page_id}/photos",
+                        {"url": u, "published": "false", "access_token": token})
+                media_ids.append(r["id"])
+            params = {"message": caption, "access_token": token}
+            for i, mid in enumerate(media_ids):
+                params[f"attached_media[{i}]"] = json.dumps({"media_fbid": mid})
+            res = api(f"/{page_id}/feed", params)
+            print(f"[ok] Facebook複数写真投稿 完了({len(media_ids)}枚): id={res.get('id')}")
+        else:
+            res = api(f"/{page_id}/photos",
+                      {"url": image_url, "caption": caption, "access_token": token})
+            print(f"[ok] Facebook投稿 完了: id={res.get('id') or res.get('post_id')}")
         posted.append("facebook")
         state["facebook"] = True
         save_state(state)
@@ -133,8 +172,19 @@ def main():
     if state.get("instagram"):
         print("[skip] Instagram: 本日分は投稿済み(state記録済み・二重投稿防止)")
     elif ig_user and token:
-        c = api(f"/{ig_user}/media",
-                {"image_url": image_url, "caption": caption, "access_token": token})
+        if slide_urls:
+            # IGカルーセル: 子コンテナ(is_carousel_item)→CAROUSEL親→publish
+            children = []
+            for u in slide_urls:
+                c = api(f"/{ig_user}/media",
+                        {"image_url": u, "is_carousel_item": "true", "access_token": token})
+                children.append(c["id"])
+            c = api(f"/{ig_user}/media",
+                    {"media_type": "CAROUSEL", "children": ",".join(children),
+                     "caption": caption, "access_token": token})
+        else:
+            c = api(f"/{ig_user}/media",
+                    {"image_url": image_url, "caption": caption, "access_token": token})
         creation_id = c["id"]
         last_err = None
         for _ in range(3):  # コンテナ処理待ちを考慮して公開を最大3回試行
