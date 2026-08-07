@@ -3,6 +3,21 @@
 このディレクトリのスキルは Claude Code のセッション開始時にディスクから自動検出される。
 リポジトリにチェックインしてあるため、Claude Code on the web でも各チャットに最初から入っている。
 
+## hojo-hqはALLGROUP共通スキルの「本店」(2026-08-07〜)
+`humanizer` / `resilient-agent-design` / `mindshare-arbitrage` の3つは、特定の事業に
+依存しない汎用スキルなので、hojo-hqを本店として他の業務リポジトリ(hikari-hq/hikari-lp/
+hikari-report/kakei-hq/report-hq/go/allgroup-site等)がここから同期する運用にしている。
+
+- 新しいALLGROUP共通スキルを追加/更新するときは、まずここ(hojo-hq)に反映する
+- 他リポジトリへの反映は `scripts/update-skills.sh` を実行するだけ(Superpowers/
+  marketingskillsの追従と同じ仕組みで、`allgroup-inc/hojo-hq` からこの3スキルもコピーする)
+- 各リポジトリ固有のスキル(`hojo-accuracy-check`等)はこの仕組みの対象外で、
+  そのリポジトリのCLAUDE.mdに紐づいたまま個別に管理する
+- 各リポジトリ側で共通スキルの中身を直接書き換えない(次回同期で上書きされるため)。
+  直したい場合はhojo-hq側を直してから同期する
+
+これにより、スキルがリポジトリごとにズレる(同じ名前なのに中身が古い/違う)ことを防ぐ。
+
 ## 中身: Superpowers (obra/superpowers v6.2.0 を vendoring)
 TDD・計画・デバッグ・レビュー・Git ワークフロー等の 14 スキル。
 - 出典: https://github.com/obra/superpowers (MIT License — 全文は `SUPERPOWERS-LICENSE`)
