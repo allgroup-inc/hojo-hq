@@ -22,7 +22,10 @@
     referralRoute: "①紹介",
     terminalStages: ["成約", "見送り"],
     nextBestActionRules: NEXT_BEST_ACTION_RULES,
-    defaultNextBestAction: DEFAULT_NEXT_BEST_ACTION
+    defaultNextBestAction: DEFAULT_NEXT_BEST_ACTION,
+    // 長期検討判定(Phase 12): 標準サイクルの何倍、最終接触が無いと「長期放置」とみなすか。
+    // 根拠: docs/superpowers/specs/2026-08-06-glow-ma-workload-stale-triangle-review.md
+    staleMultiplier: 2
   };
 
   function toDate(value) {
@@ -113,6 +116,40 @@
     return alerts;
   }
 
+  // 長期検討判定: isOverdue(単発の期限超過)とは別に、標準サイクルのstaleMultiplier倍以上
+  // 最終接触が無い企業を「長期放置」として検出する。次回アクション予定日の設定有無に
+  // かかわらず判定する(予定日を設定しただけで実際には放置され続けているケースを拾うため)。
+  function isStale(record, todayValue, config) {
+    config = config || DEFAULT_CONFIG;
+    if (record["連絡不要"] === true) return false;
+    if ((config.terminalStages || []).indexOf(record["現在ステージ"]) !== -1) return false;
+    var effectiveRank = resolveEffectiveRank(record, config);
+    var cycleDays = config.cycleDaysByRank[effectiveRank];
+    if (typeof cycleDays !== "number") return false;
+    var lastTouch = record["最終接触日"] || record["登録日"];
+    var daysSinceTouch = daysBetween(lastTouch, todayValue);
+    if (daysSinceTouch === null) return false;
+    var staleThreshold = cycleDays * (config.staleMultiplier || DEFAULT_CONFIG.staleMultiplier);
+    return daysSinceTouch >= staleThreshold;
+  }
+
+  function buildStaleList(records, todayValue, config) {
+    config = config || DEFAULT_CONFIG;
+    var list = [];
+    (records || []).forEach(function (record) {
+      if (!isStale(record, todayValue, config)) return;
+      var lastTouch = record["最終接触日"] || record["登録日"];
+      list.push({
+        "企業ID": record["企業ID"],
+        "会社名": record["会社名"],
+        "ランク": resolveEffectiveRank(record, config),
+        "最終接触からの経過日数": daysBetween(lastTouch, todayValue)
+      });
+    });
+    list.sort(function (a, b) { return b["最終接触からの経過日数"] - a["最終接触からの経過日数"]; });
+    return list;
+  }
+
   function countUnscoredCompanies(records) {
     var count = 0;
     (records || []).forEach(function (record) {
@@ -129,6 +166,8 @@
     isOverdue: isOverdue,
     determineNextBestAction: determineNextBestAction,
     buildDailyAlertList: buildDailyAlertList,
+    isStale: isStale,
+    buildStaleList: buildStaleList,
     countUnscoredCompanies: countUnscoredCompanies
   };
 

@@ -121,6 +121,16 @@ test("mergeCompanyRecords: 関係メモが片方だけ空欄でも情報を保�
   assert.equal(merged["関係メモ"], "取引銀行は◯◯銀行");
 });
 
+test("mergeCompanyRecords: 窓口担当者名・携帯番号は他のスカラー項目と同じく先頭レコードの非空値を優先する(Phase 13)", () => {
+  const records = [
+    { 企業ID: "C000001", 流入ルート: [], 提案商品: [], 備考: "", 窓口担当者名: "", 携帯番号: "" },
+    { 企業ID: "C000002", 流入ルート: [], 提案商品: [], 備考: "", 窓口担当者名: "経理 山田", 携帯番号: "090-0000-0001" }
+  ];
+  const { merged } = dedupe.mergeCompanyRecords(records);
+  assert.equal(merged["窓口担当者名"], "経理 山田");
+  assert.equal(merged["携帯番号"], "090-0000-0001");
+});
+
 test("mergeCompanyRecords: 連絡不要はいずれかのレコードでTRUEなら統合後もTRUEを維持する(falseが先頭でも失われない)", () => {
   const records = [
     { 企業ID: "C000001", 電話番号: "098-000-0001", 連絡不要: false, 流入ルート: [], 提案商品: [], 備考: "" },

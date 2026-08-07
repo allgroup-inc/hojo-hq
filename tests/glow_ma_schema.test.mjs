@@ -54,9 +54,9 @@ test("対応履歴ログの対応相手(RESPONDENT_TYPES)が設計書5.2節の3�
   assert.deepEqual(schema.RESPONDENT_TYPES, ["オーナー社長本人", "経理・総務等の窓口担当", "未接触"]);
 });
 
-test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種+連絡不要受領+工程遷移イベントと一致する", () => {
+test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種+連絡不要受領+工程遷移イベント+入電と一致する", () => {
   const expected = [
-    "手紙送付", "電話", "ゆんたく相談実施", "面談実施", "紹介受領", "ミカタ接点確認",
+    "手紙送付", "電話", "入電", "ゆんたく相談実施", "面談実施", "紹介受領", "ミカタ接点確認",
     "レターURLアクセス", "返信", "資料請求",
     "提案(M&A)", "提案(不動産)", "提案(法人保険)",
     "成約", "見送り", "ナーチャリング配信", "連絡不要受領",
@@ -95,7 +95,7 @@ test("ダッシュボード履歴タブの名称・見出しが定義されて�
   assert.deepEqual(schema.DASHBOARD_HISTORY_HEADERS, [
     "記録日時", "対象企業数",
     "ランクA_滞留企業数", "ランクB_滞留企業数", "ランクC_滞留企業数", "ランクD_滞留企業数",
-    "掘り起こし待ち件数合計", "成約企業数", "連絡不要企業数"
+    "掘り起こし待ち件数合計", "成約企業数", "連絡不要企業数", "長期検討企業数"
   ]);
 });
 
@@ -103,11 +103,19 @@ test("企業マスタに後継者状況列が追加されている", () => {
   assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("後継者状況") !== -1);
 });
 
-test("企業マスタに関係メモ列が末尾に追加されている(Phase 10)", () => {
+test("企業マスタに関係メモ列が追加されている(Phase 10)", () => {
   assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("関係メモ") !== -1);
-  assert.equal(schema.COMPANY_MASTER_HEADERS[schema.COMPANY_MASTER_HEADERS.length - 1], "関係メモ");
 });
 
 test("後継者状況の選択肢(SUCCESSOR_STATUS_TYPES)があり/なし/不明の3択である", () => {
   assert.deepEqual(schema.SUCCESSOR_STATUS_TYPES, ["あり", "なし", "不明"]);
+});
+
+test("企業マスタに窓口担当者名・携帯番号列が末尾に追加されている(Phase 13)", () => {
+  assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("窓口担当者名") !== -1);
+  assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("携帯番号") !== -1);
+  assert.deepEqual(
+    schema.COMPANY_MASTER_HEADERS.slice(-2),
+    ["窓口担当者名", "携帯番号"]
+  );
 });

@@ -131,6 +131,13 @@ test("calculateReactionScore: 返信(15点)・面談実施(25点)・資料請求
   );
 });
 
+test("calculateReactionScore: 入電(20点)は企業側からの反応イベントとして加点される", () => {
+  assert.equal(
+    scoring.calculateReactionScore([{ 種別: "入電", 対応相手: "未接触" }], scoring.DEFAULT_CONFIG),
+    20
+  );
+});
+
 test("reactionPointsByTypeのキーはすべてGlowSchema.INTERACTION_TYPESに含まれる(一文字のズレで壊れないことを保証)", () => {
   Object.keys(scoring.DEFAULT_CONFIG.reactionPointsByType).forEach((key) => {
     assert.ok(schema.INTERACTION_TYPES.includes(key), key + " is not in INTERACTION_TYPES");
