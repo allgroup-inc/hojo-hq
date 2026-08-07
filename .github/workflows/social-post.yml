@@ -73,6 +73,8 @@ jobs:
     runs-on: ubuntu-latest
     # 小柳さんの承認(Required reviewers)が下りるまでここで待機する
     environment: sns-approval
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
 
@@ -86,6 +88,20 @@ jobs:
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
         run: python scripts/post_social.py
+
+      # 二重投稿防止のstate(data/social_post_state.json)は投稿の成否に関わらず
+      # 必ずコミットする(片方だけ成功→job再実行でもう片方が二重投稿されるのを防ぐため)。
+      - name: Commit post state (always)
+        if: always()
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add data/social_post_state.json
+          git diff --cached --quiet || git commit -m "auto: SNS投稿state更新 $(date '+%Y-%m-%d')"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done
 
       - name: LINE通知(投稿完了)
         uses: ./.github/actions/line-notify

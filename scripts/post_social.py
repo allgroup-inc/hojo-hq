@@ -36,6 +36,26 @@ BASE = os.path.join(os.path.dirname(__file__), "..")
 RAW_BASE = "https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/posts/images/"
 GRAPH = "https://graph.facebook.com/v21.0"
 JST = timezone(timedelta(hours=9))
+STATE_PATH = os.path.join(BASE, "data", "social_post_state.json")
+
+
+def load_state(today, stem):
+    """本日・本日の投稿素材と一致する状態のみ有効(resilient-agent-design: べき等性)。
+    Facebook投稿後にInstagramが失敗し、job再実行された場合にFacebookへ二重投稿しない。"""
+    try:
+        with open(STATE_PATH, encoding="utf-8") as f:
+            state = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {"date": today, "stem": stem, "facebook": False, "instagram": False}
+    if state.get("date") != today or state.get("stem") != stem:
+        return {"date": today, "stem": stem, "facebook": False, "instagram": False}
+    return state
+
+
+def save_state(state):
+    os.makedirs(os.path.dirname(STATE_PATH), exist_ok=True)
+    with open(STATE_PATH, "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False, indent=2)
 
 
 def pick_post():
@@ -94,16 +114,25 @@ def main():
     token = os.environ.get("FB_PAGE_ACCESS_TOKEN", "")
     ig_user = os.environ.get("IG_USER_ID", "")
 
+    today = date.today().isoformat()
+    state = load_state(today, stem)
     posted = []
-    if page_id and token:
+
+    if state.get("facebook"):
+        print("[skip] Facebook: 本日分は投稿済み(state記録済み・二重投稿防止)")
+    elif page_id and token:
         res = api(f"/{page_id}/photos",
                   {"url": image_url, "caption": caption, "access_token": token})
         print(f"[ok] Facebook投稿 完了: id={res.get('id') or res.get('post_id')}")
         posted.append("facebook")
+        state["facebook"] = True
+        save_state(state)
     else:
         print("[skip] Facebook: 未接続(FB_PAGE_ID / FB_PAGE_ACCESS_TOKEN 未設定)")
 
-    if ig_user and token:
+    if state.get("instagram"):
+        print("[skip] Instagram: 本日分は投稿済み(state記録済み・二重投稿防止)")
+    elif ig_user and token:
         c = api(f"/{ig_user}/media",
                 {"image_url": image_url, "caption": caption, "access_token": token})
         creation_id = c["id"]
@@ -114,6 +143,8 @@ def main():
                           {"creation_id": creation_id, "access_token": token})
                 print(f"[ok] Instagram投稿 完了: id={pub.get('id')}")
                 posted.append("instagram")
+                state["instagram"] = True
+                save_state(state)
                 last_err = None
                 break
             except Exception as e:  # noqa: BLE001
@@ -124,7 +155,7 @@ def main():
     else:
         print("[skip] Instagram: 未接続(IG_USER_ID 未設定)")
 
-    if not posted:
+    if not posted and not (state.get("facebook") or state.get("instagram")):
         print("[warn] どのSNSにも未接続のため投稿は行われていません(Meta連携後にSecretsを登録してください)")
 
 
