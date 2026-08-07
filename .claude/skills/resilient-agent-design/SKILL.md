@@ -8,7 +8,8 @@ description: "GitHub Actions / cron / Claude Routines / /loop など、繰り返
 24時間/無人で動く自動化の本質は、AIの賢さではなく**壊れにくいシステム設計**。
 このスキルは、このリポジトリの自動化——GitHub Actions のcron群(update-subsidies=1日4回の
 制度収集、fukugiiro-fetch=朝夕2回、tanpatsu-draft=毎月8日・22日、weekly/monthly-report、
-social-post=承認ゲート付きSNS投稿など)——を新規に作る/直す/レビューするときに使う。
+social-post=承認ゲート付きSNS投稿、healthcheck=毎朝10時の死活監視→Issue+LINE通知、
+e2e/lighthouse/verify-sources)と GAS会話ボット——を新規に作る/直す/レビューするときに使う。
 既存の自動化はこの考え方に近い形(定期実行の基盤 = コード主体のGitHub Actions Workflow、
 Claude APIでの構造化・下書き生成 = Agent判断部分、社外への副作用 = 人間の承認ゲート)で
 作られている。新しい自動化もこの型に揃える。
@@ -50,7 +51,8 @@ AIでやる: 重要ニュース選定・切り口検討・意図分類・要約�
 このリポジトリでは `data/` 配下のJSON群がこれに相当する(`subsidies.json`=制度DBと募集status、
 `tanpatsu_topics.json`=お題キューのstatus遷移 pending→drafted→published、`kekka_kpi.json`・
 `note_kpi.json`=KPI台帳、`line_alerts.json`=配信済み記録、`data/fukugiiro/funnel.json`・
-`data/hojo/funnel.json`=診断ファネル集計など)。ActionsがGitコミットで
+`data/hojo/funnel.json`=診断ファネル集計など)。企業からの受信(診断・会話・相談)は
+スプレッドシート「ミカタ企業台帳」(GAS)側に保存する。ActionsがGitコミットで
 永続化するため、実行履歴と状態変化がそのまま監査ログになる。新しい自動化の状態も
 この型(data/のJSON+Gitコミット)に載せる。
 
