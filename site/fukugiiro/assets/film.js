@@ -19,15 +19,15 @@ vb.innerHTML = VP.map((v,i)=>`<div class="vlight" style="left:${v[0]}%;top:${v[1
 
 // ===== 笑顔の壁(S8): 実写9枚(上5・下4) =====
 const PH=[
- [1,3,120,-4,'assets/film/egao/e3.jpg','こどもの笑顔'],
- [21,1,120,3,'assets/film/egao/e1.jpg','姉妹の笑顔'],
- [41,4,120,-2,'assets/film/egao/e4.jpg','おじいとおばあの笑顔'],
- [61,1,120,4,'assets/film/egao/e8.jpg','琉装のこどもたち'],
- [81,4,120,-3,'assets/film/egao/e2.jpg','おばあたちの笑顔'],
- [7,74,132,3,'assets/film/egao/e9.jpg','ふたりの門出'],
- [31,71,132,-3,'assets/film/egao/e6.jpg','きょうだいの笑顔'],
- [55,74,132,2,'assets/film/egao/e7.jpg','おかあさんの笑顔'],
- [79,71,132,-4,'assets/film/egao/e5.jpg','ともだちの笑顔']
+ [10,3,120,-4,'assets/film/egao/e3.jpg','こどもの笑顔'],
+ [30,1,120,3,'assets/film/egao/e1.jpg','姉妹の笑顔'],
+ [50,4,120,-2,'assets/film/egao/e4.jpg','おじいとおばあの笑顔'],
+ [70,1,120,4,'assets/film/egao/e8.jpg','琉装のこどもたち'],
+ [90,4,120,-3,'assets/film/egao/e2.jpg','おばあたちの笑顔'],
+ [12.5,74,132,3,'assets/film/egao/e9.jpg','ふたりの門出'],
+ [37.5,71,132,-3,'assets/film/egao/e6.jpg','きょうだいの笑顔'],
+ [62.5,74,132,2,'assets/film/egao/e7.jpg','おかあさんの笑顔'],
+ [87.5,71,132,-4,'assets/film/egao/e5.jpg','ともだちの笑顔']
 ];
 const fb=document.getElementById('faces');
 fb.innerHTML=PH.map((f,i)=>{
