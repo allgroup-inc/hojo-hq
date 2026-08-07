@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-08-07 11:26",
+ "generated_at": "2026-08-07 16:08",
  "alert_window": [
   7,
   29
  ],
- "soon_closed_count": 9,
+ "soon_closed_count": 4,
  "count": 22,
  "items": [
   {
@@ -178,16 +178,6 @@
    "tag": "okinawa"
   },
   {
-   "id": "a0WJ200000CDYDcMAP",
-   "name": "令和８年度　天然ガス利用設備による強靱性向上対策事業費補助金",
-   "deadline": "2026-08-27",
-   "days_left": 20,
-   "tier": "準備をはじめる(15〜29日)",
-   "max_amount": 0,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDcMAP",
-   "tag": "nationwide"
-  },
-  {
    "id": "a0WJ200000CDPbMMAX",
    "name": "［第十三回］事業再構築補助金_成長分野進出枠、コロナ回復加速枠（交付申請等）",
    "deadline": "2026-08-29",
@@ -225,6 +215,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 25000000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdJhMAL",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDctfMAD",
+   "name": "令和８年度「蓄電池等の製品の持続可能性向上に向けた基盤整備・実証事業」",
+   "deadline": "2026-09-04",
+   "days_left": 28,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 720000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDctfMAD",
    "tag": "nationwide"
   }
  ]
