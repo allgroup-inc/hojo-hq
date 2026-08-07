@@ -48,7 +48,7 @@ glow-ma/src/
   ShippingRunner.gs    — 新規: onEditトリガー(自動記録)・CSV出力メニュー(GAS専用)
 tests/
   glow_ma_shippingContent.test.mjs — 新規
-glow-ma/README.md      — Phase 10のセットアップ・使い方を追記
+glow-ma/README.md      — Phase 16のセットアップ・使い方を追記
 ```
 
 ## データモデル変更

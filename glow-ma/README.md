@@ -474,7 +474,9 @@ glow-ma-triangle-reviewで議事を確定してから実装した
 **セットアップ**
 
 1. `clasp push` で最新コードを反映する
-2. Apps Scriptエディタで `installLetterDraftEditTrigger` を一度だけ手動実行する
+2. Apps Scriptエディタで `ensureLedgerTabs` を再実行し、既存の「レター下書き」タブに
+   「発送日」列(7列目)を反映する
+3. Apps Scriptエディタで `installLetterDraftEditTrigger` を一度だけ手動実行する
    (冪等なので安全に再実行できる。初回実行時に認可ダイアログが出るのは正常な挙動)
 
 **使い方**

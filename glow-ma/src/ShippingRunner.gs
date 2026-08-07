@@ -211,7 +211,10 @@ function readLetterDrafts_(sheet) {
 }
 
 function buildCsvDownloadHtml_(csvString, targetDate) {
-  var base64Csv = Utilities.base64Encode(csvString, Utilities.Charset.UTF_8);
+  // ダウンロードするCSVファイル自体にUTF-8 BOMを付与する(GlowShippingContent.toCsvString の
+  // 出力はBOMなしのクリーンな文字列のまま保つ)。BOMがないと日本語Excelは拡張子.csvを
+  // Shift_JISとして開いてしまい、会社名・所在地・窓口担当者名が文字化けするため。
+  var base64Csv = Utilities.base64Encode("﻿" + csvString, Utilities.Charset.UTF_8);
   var escapedCsv = csvString
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")

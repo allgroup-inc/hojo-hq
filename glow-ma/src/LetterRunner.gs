@@ -143,7 +143,7 @@ function writeLetterDraft_(record, draftType) {
     var draftId = "D-" + Utilities.getUuid();
     var generatedAt = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm");
     draftSheet.getRange(nextRow, 1, 1, GlowSchema.LETTER_DRAFT_HEADERS.length).setValues([[
-      draftId, record["企業ID"], draftType, generatedAt, draftBody, "下書き"
+      draftId, record["企業ID"], draftType, generatedAt, draftBody, "下書き", ""
     ]]);
   } finally {
     lock.releaseLock();

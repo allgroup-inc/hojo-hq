@@ -19,6 +19,10 @@ test("computeFollowUpDate: 不正な日付や空文字ならnullを返す", () =
   assert.equal(shippingContent.computeFollowUpDate("不正な値", 10), null);
 });
 
+test("computeFollowUpDate: Dateオブジェクト(getValues由来)でも計算できる", () => {
+  assert.equal(shippingContent.computeFollowUpDate(new Date(2026, 7, 7), 10), "2026-08-17");
+});
+
 test("buildShippingCsvRows: 指定した発送日に一致する下書きのみ、企業マスタと突合してCSV行を作る", () => {
   const letterDrafts = [
     { 下書きID: "D-1", 企業ID: "C000001", 発送日: "2026-08-10" },
@@ -51,6 +55,20 @@ test("buildShippingCsvRows: 企業マスタに一致する企業が見つから�
   const letterDrafts = [{ 下書きID: "D-1", 企業ID: "C999999", 発送日: "2026-08-10" }];
   const rows = shippingContent.buildShippingCsvRows(letterDrafts, [], "2026-08-10");
   assert.deepEqual(rows, [["発送日", "企業ID", "会社名", "所在地", "窓口担当者名"]]);
+});
+
+test("buildShippingCsvRows: 発送日がDateオブジェクト(getValues由来)でも突合できる", () => {
+  const letterDrafts = [
+    { 下書きID: "D-1", 企業ID: "C000001", 発送日: new Date(2026, 7, 10) }
+  ];
+  const companies = [
+    { 企業ID: "C000001", 会社名: "テスト商事株式会社", 所在地: "沖縄県那覇市1-1-1", 窓口担当者名: "山田" }
+  ];
+  const rows = shippingContent.buildShippingCsvRows(letterDrafts, companies, "2026-08-10");
+  assert.deepEqual(rows, [
+    ["発送日", "企業ID", "会社名", "所在地", "窓口担当者名"],
+    ["2026-08-10", "C000001", "テスト商事株式会社", "沖縄県那覇市1-1-1", "山田"]
+  ]);
 });
 
 test("toCsvString: カンマを含む値をダブルクォートで囲む", () => {
