@@ -52,12 +52,14 @@ const PH=[
  [3,50,104,-3,'oji'],[24,54,96,5,'mama'],[46,51,100,-2,'child'],[68,54,108,3,'oba'],[87,50,96,-4,'child'],
  [1,74,112,3,'family'],[22,78,98,-4,'oji'],[43,75,104,2,'mama'],[65,78,110,-3,'child'],[85,74,100,4,'papa']
 ];
+const REALS={2:'assets/film/egao/e1.jpg'};
+const CAPS={2:'姉妹の笑顔'};
 const fb=document.getElementById('faces');
 fb.innerHTML=PH.map((f,i)=>{
   const [x,y,w,r,t]=f, delay=(i%20)*0.12;
   return `<div class="photo" style="left:${x}%;top:${y}%;width:${w}px;--w:${w}px;--r:${r}deg;transition-delay:${delay}s"><div class="bob" style="animation-delay:${(i%6)*.7}s">
-    <div class="ph">${PORTRAIT(t,i)}</div>
-    <div class="cap">${LABEL[t]}</div></div></div>`;
+    <div class="ph">${REALS[i]?`<img src="${REALS[i]}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`:PORTRAIT(t,i)}</div>
+    <div class="cap">${CAPS[i]||LABEL[t]}</div></div></div>`;
 }).join('');
 
 // ===== シーン出現 =====
