@@ -1,8 +1,8 @@
 {
   "note": "サイトのアクセス総量(Plausible集計・Cookieなし)。KGI❶=もらいわすれ堂 月1万人。domain=ドメイン全体(企業のミカタ+もらいわすれ堂)、moradou=もらいわすれ堂ページのみ。",
   "kgi_target_monthly_users": 10000,
-  "last_checked": "2026-08-07 13:55",
-  "last_status": "partial",
+  "last_checked": "2026-08-07 17:18",
+  "last_status": "ok",
   "history": [
     {
       "date": "2026-08-04",
@@ -19,8 +19,18 @@
     {
       "date": "2026-08-07",
       "period": "7d",
-      "domain": null,
-      "moradou": null
+      "domain": {
+        "visitors": 23,
+        "pageviews": 131,
+        "bounce_rate": 26,
+        "visit_duration": 451
+      },
+      "moradou": {
+        "visitors": 15,
+        "pageviews": 118,
+        "bounce_rate": 19,
+        "visit_duration": 607
+      }
     }
   ]
 }
