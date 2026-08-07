@@ -7,11 +7,15 @@
 <meta name="description" content="沖縄県にお住まいの世帯向け。家族の状況にあてはまる可能性のある給付金・手当を3分で診断します。名前や住所の入力は不要です。">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--fg-primary:#B9502F;--fg-accent:#F2B705;--fg-deep:#1A6B52;--fg-ink:#1F2A2E;--fg-bg:#FFFBF4;
-  --fg-card:#ffffff;--fg-muted:#5C6B70;--fg-line:#EBE2D4}
+:root{--fg-primary:#D2694A;--fg-primary-deep:#B9502F;--fg-accent:#F2C14E;--fg-deep:#1F5C45;--fg-ink:#3B322B;--fg-bg:#FBF5EC;--fg-cta:#22382A;--fg-shadow:0 1px 2px rgba(0,0,0,.04);
+  --fg-card:#FFFDF9;--fg-muted:#8B7C6E;--fg-line:#EEE1D0}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
+body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
   font-size:18px;line-height:1.8;color:var(--fg-ink);background:var(--fg-bg)}
 .wrap{max-width:640px;margin:0 auto;padding:24px 20px 64px}
 h1{font-size:1.3rem;margin-bottom:4px}
@@ -65,11 +69,10 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .card-done h3{text-decoration:line-through;color:var(--fg-muted)}
 .resume-box{background:#F9EDE3;border:2px solid var(--fg-primary);border-radius:12px;padding:16px;margin-bottom:16px}
 .siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
-.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
+.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;color:var(--fg-primary-deep);text-decoration:none;font-size:1rem}
 .siteheader .hlogo img{width:30px;height:30px}
 .siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
 .siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
-.siteheader nav a.hline{background:#06C755;color:#fff;font-weight:700}
 @media(min-width:900px){.wrap{max-width:720px}}
 @media print{.progress,.actions,.btn,.nav,.siteheader{display:none!important}body{background:#fff}}
 </style>
@@ -81,7 +84,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
-    <a class="hline" href="https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
   </nav>
 </header>
 <div class="wrap">
@@ -290,7 +293,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この " + sum.total + " 件、締切を逃さないために"}));
         topLine.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"対象になりそうな制度の締切を、約1か月前にLINEでお知らせします。制度の一覧は登録なしでも、ぜんぶ見られます。"}));
         var topLineBtn = h("a", {href:(window.FG_LINE_URL || "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/"), target:"_blank", rel:"noopener",
-          style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#06C755;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"💬 LINEで締切通知を受け取る(無料)"});
+          style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"LINEで締切通知を受け取る(無料)"});
         topLineBtn.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_top"}); });
         topLine.appendChild(topLineBtn);
         topLine.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名 ・ いつでも解除"}));
@@ -325,7 +328,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         card.appendChild(h("div", {class:"madoguchi", text:"窓口でこう言えばOK:「" + it.name + "について教えてください。対象か不安なのですが大丈夫ですか?」/ 対象かどうかは窓口が判断します。自信がなくて大丈夫です。"}));
         card.appendChild(h("a", {href: it.source_url, rel:"noopener", text:"公式ページで確認する"}));
         card.appendChild(h("span", {text:" ・ "}));
-        var kitLink = h("a", {href:"../kit/" + it.id + "/", text:"🖨 申請準備シート(持ち物リストつき)"});
+        var kitLink = h("a", {href:"../kit/" + it.id + "/", text:"申請準備シート(持ち物リストつき)"});
         kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("kit_click"); });
         card.appendChild(kitLink);
         card.appendChild(h("p", {class:"note", style:"margin-top:6px", text:"準備の目安がそろったら、お住まいの窓口へ。最終的な受給の可否は窓口で確認されます。"}));
@@ -357,12 +360,12 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       lineBox.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px;font-size:1.05rem", text:"この結果、もらい忘れないために"}));
       lineBox.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"LINEに登録すると、次の3つを受け取れます(制度の一覧は登録なしでもぜんぶ見られます)。"}));
       var rewards = h("ul", {style:"list-style:none;text-align:left;max-width:420px;margin:0 auto 12px;padding:0"});
-      ["⏰ この制度の締切を、締切の約1か月前からお知らせ","🆕 あなたの条件に合う新しい制度が増えたらお知らせ","🖨 申請準備シート(持ち物リスト)をまとめて受け取る"].forEach(function(t){
+      ["この制度の締切を、締切の約1か月前からお知らせ","あなたの条件に合う新しい制度が増えたらお知らせ","申請準備シート(持ち物リスト)をまとめて受け取る"].forEach(function(t){
         rewards.appendChild(h("li", {style:"padding:6px 0;border-bottom:1px solid #cfe9d8", text:t}));
       });
       lineBox.appendChild(rewards);
       var lineBtn = h("a", {href: lineUrl, target:"_blank", rel:"noopener",
-        style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#06C755;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEで受け取る(無料)"});
+        style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEで受け取る(無料)"});
       lineBtn.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("line_add_click"); });
       lineBox.appendChild(lineBtn);
       lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。"}));

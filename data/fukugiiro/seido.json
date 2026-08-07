@@ -1,6 +1,6 @@
 {
- "updated_at": "2026-08-08 06:25",
- "count": 119,
+ "updated_at": "2026-08-07 10:15",
+ "count": 143,
  "items": [
   {
    "id": "fk-kuni-jidoteate",
@@ -22,7 +22,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-jidofuyoteate",
@@ -45,7 +45,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-shussan-ichijikin",
@@ -67,7 +67,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-ikuji-kyufu",
@@ -91,7 +91,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-jukyo-kakuho",
@@ -115,7 +115,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-kogaku-ryoyo",
@@ -137,7 +137,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-shugaku-shien",
@@ -151,15 +151,15 @@
    "target_household": "大学・短大・高専・専門学校に進学する(在学中の)お子さんがいる世帯が対象となる可能性があります(2025年度から多子世帯の拡充があります)",
    "how_to_apply": "在学校・進学先を通じた申込み(日本学生支援機構)",
    "source_url": "https://www.mext.go.jp/kyufu/",
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "給付型奨学金(返還不要)と授業料・入学金の減免をセットで受けられる場合があります。世帯年収の目安は約600万円まで、令和7年度からは扶養する子3人以上の多子世帯は所得制限なく減免の対象になる場合があります(要確認)",
    "deadline_type": "常時",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(文部科学省 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-hitorioya-shien",
@@ -185,7 +185,7 @@
    "verified_by": "kensho(突合レポート○・match_tokens修正後)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-ninpu-shien",
@@ -207,7 +207,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-shugakushienkin-koko",
@@ -229,7 +229,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-shogaku-kyufukin-koko",
@@ -252,7 +252,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-kyushokusha-shien",
@@ -276,7 +276,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-seikatsu-konkyu",
@@ -302,7 +302,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-kyoiku-kunren",
@@ -324,7 +324,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-hoiku-mushoka",
@@ -350,7 +350,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-tokubetsu-jifute",
@@ -376,7 +376,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-shogaiji-fukushi",
@@ -402,7 +402,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-tokubetsu-shogaisha",
@@ -427,7 +427,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-jiritsushien-iryo",
@@ -453,7 +453,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-koyohoken-kihonteate",
@@ -478,7 +478,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-kaigokyugyo-kyufu",
@@ -504,7 +504,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-rousai",
@@ -529,7 +529,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-seikatsu-hogo",
@@ -554,7 +554,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-nenkin-kyufukin",
@@ -579,7 +579,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-saigai-choui",
@@ -604,7 +604,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-shugaku-enjo",
@@ -630,7 +630,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-tokushi-shorei",
@@ -656,7 +656,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-safetynet-jutaku",
@@ -682,7 +682,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 国土交通省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-kosodate-green",
@@ -708,7 +708,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 国土交通省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ken-boshi-fushi-kafu-shikin",
@@ -735,7 +735,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ken-hitorioya-jutaku-shikin",
@@ -762,7 +762,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ken-hitorioya-kurashi-ouen",
@@ -789,7 +789,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ken-kenei-jutaku",
@@ -807,15 +807,15 @@
    "match_tokens": [
     "県営住宅"
    ],
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "家賃は世帯の収入などに応じて設定されます。入居には収入基準(月額所得の上限。子育て世帯は緩和あり)があり、募集時期に申込みが必要です(要確認)",
    "deadline_type": "常時",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(沖縄県 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ken-senshiniryo-funin",
@@ -841,7 +841,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ken-fuiku-kensa",
@@ -867,7 +867,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ken-kodomo-iryohi",
@@ -893,7 +893,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ken-boshi-fushi-iryohi",
@@ -921,7 +921,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ken-judo-shinshin-iryohi",
@@ -948,7 +948,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ken-nanbyo-iryohi",
@@ -974,7 +974,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-naha-kodomo-iryo",
@@ -991,14 +991,14 @@
    "source_url": "https://www.city.naha.okinawa.jp/child/kosodateouen/kodomoiryouhijyosei/index.html",
    "deadline_type": "常時",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "未就学児は通院・入院、小中学生は入院の医療費(保険診療分)を助成。未就学児は窓口無料(現物給付)です(食事療養費等は対象外。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-naha-shugaku-enjo",
@@ -1016,14 +1016,14 @@
    "source_url": "https://www.city.naha.okinawa.jp/child/school/1006074/1006075.html",
    "deadline_type": "年度内",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "給食費・学用品費・修学旅行費などの一部が援助される場合があります(金額は品目・学年で異なります。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-naha-sango-care",
@@ -1042,12 +1042,12 @@
    "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-okinawa-kodomo-iryo",
@@ -1059,19 +1059,19 @@
    ],
    "issuer": "沖縄市",
    "area": "沖縄市",
-   "target_household": "沖縄市に住み、健康保険に加入している18歳(年度末)までのお子さんがいる世帯が対象となる可能性があります",
+   "target_household": "沖縄市に住み健康保険に加入している18歳(年度末)までのお子さんがいる世帯が対象となる可能性があります(令和7年4月〜拡大・所得制限なし)",
    "how_to_apply": "沖縄市 こども家庭課(市役所2階)の窓口・マイナポータル",
    "source_url": "https://www.city.okinawa.okinawa.jp/k028/kosodate/kosodateshien/iryouhijosei/213/18583.html",
    "deadline_type": "常時",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "18歳(18歳に達した日以後最初の3月31日)までの通院・入院の医療費(保険診療分)を助成。所得制限はありません(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-okinawa-shugaku-enjo",
@@ -1091,12 +1091,12 @@
    "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-okinawa-sango-care",
@@ -1115,12 +1115,12 @@
    "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-uruma-kodomo-iryo",
@@ -1137,14 +1137,14 @@
    "source_url": "https://www.city.uruma.lg.jp/1005002000/contents/505.html",
    "deadline_type": "常時",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "0歳〜中学生(15歳年度末)までの医療費(保険診療分)を助成。令和4年2月から中学卒業まで窓口無料(現物給付)です(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-uruma-shugaku-enjo",
@@ -1164,12 +1164,12 @@
    "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-uruma-boshi-iryo",
@@ -1191,14 +1191,14 @@
     "type": "adjust",
     "note": "他の医療費助成との併給関係は窓口でご確認ください(要確認)"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "ひとり親家庭等の通院・入院の医療費(保険診療分)を助成。通院は1医療機関あたり月1,000円の自己負担があります(健診・予防接種等は対象外。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-uruma-sango-care",
@@ -1217,12 +1217,12 @@
    "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-urasoe-kodomo-iryo",
@@ -1239,14 +1239,14 @@
    "source_url": "https://www.city.urasoe.lg.jp/doc/6248f14273fe266fe59a99e2",
    "deadline_type": "常時",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "こどもの医療費(保険診療分)を助成。平成30年10月から窓口無料(現物給付)に対応。現物給付・自動償還・窓口申請から選べます(対象年齢は要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-urasoe-shugaku-enjo",
@@ -1266,16 +1266,16 @@
    "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-urasoe-kyushoku",
-   "name": "浦添市 学校給食費の助成(半額補助等)",
+   "name": "浦添市 学校給食費の無償化(令和8年度)",
    "category": "教育",
    "life_events": [
     "入園・入学",
@@ -1283,23 +1283,23 @@
    ],
    "issuer": "浦添市",
    "area": "浦添市",
-   "target_household": "浦添市の市立小・中学校に通うお子さんがいる世帯が対象となる可能性があります",
+   "target_household": "浦添市立小・中学校に通うお子さんがいる世帯が対象となる可能性があります",
    "how_to_apply": "浦添市教育委員会(学校給食の担当課)の窓口",
-   "source_url": "https://www.city.urasoe.lg.jp/doc/2025041600116/",
+   "source_url": "https://www.city.urasoe.lg.jp/doc/2026032600054",
    "deadline_type": "年度内",
    "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "就学援助を受けている場合の取り扱いは窓口でご確認ください(要確認)"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "令和8年度は市立小中学校の給食費が全額無償化されています(小学生 月額5,700円・中学生 月額6,500円相当。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-urasoe-sango-care",
@@ -1318,12 +1318,12 @@
    "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ginowan-kodomo-iryo",
@@ -1336,7 +1336,7 @@
    ],
    "issuer": "宜野湾市",
    "area": "宜野湾市",
-   "target_household": "宜野湾市に住民登録があり健康保険に加入している高校生年代までのお子さんがいる世帯が対象となる可能性があります",
+   "target_household": "宜野湾市に住み健康保険に加入している18歳(高校生年代)までのお子さんがいる世帯が対象となる可能性があります(令和7年10月〜拡大)",
    "how_to_apply": "宜野湾市 こども企画課(こども医療費助成担当)窓口またはオンライン申請",
    "source_url": "https://www.city.ginowan.lg.jp/soshiki/kodomo/3/4/9333.html",
    "deadline_type": "常時",
@@ -1345,18 +1345,18 @@
     "type": "adjust",
     "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "令和7年10月から18歳(高校生年代・年度末)までの通院・入院の医療費(保険診療分)が窓口無料(現物給付)になりました(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ginowan-kyushoku",
-   "name": "宜野湾市 中学校給食費無償化",
+   "name": "宜野湾市 学校給食費の助成(小学生半額・食材費補助)",
    "category": "教育",
    "life_events": [
     "子育て",
@@ -1365,19 +1365,19 @@
    ],
    "issuer": "宜野湾市",
    "area": "宜野湾市",
-   "target_household": "宜野湾市立中学校に通うお子さんがいる世帯が対象となる可能性があります",
+   "target_household": "宜野湾市立小・中学校に通うお子さんがいる世帯が対象となる可能性があります",
    "how_to_apply": "宜野湾市 学校給食センター/教育委員会窓口",
    "source_url": "https://www.city.ginowan.lg.jp/soshiki/kikaku/4/2/1/5_6/14177.html",
    "deadline_type": "要確認",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "小学生の給食費を半額助成し、小中学生に1食あたり29円の食材費補助を行っています(全額無償化は令和5年度限りの実施でした。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・深掘り)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-tomigusuku-kodomo-iryo",
@@ -1399,14 +1399,14 @@
     "type": "adjust",
     "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "こどもの医療費(保険診療分)を助成。窓口無料(現物給付)に対応しています(対象年齢は要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-tomigusuku-kodomo-iryo-2",
@@ -1428,14 +1428,14 @@
     "type": "stackable",
     "note": "こども医療費助成と組み合わせた制度です。窓口でご確認ください(要確認)"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "こども医療費助成の対象で、入院等の医療費の支払いが困難な非課税世帯などに医療資金を貸し付ける制度です(貸付資格認定が必要。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-haebaru-kodomo-iryo",
@@ -1457,14 +1457,14 @@
     "type": "adjust",
     "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "対象年代までの通院・入院の医療費の自己負担分が助成される場合があります(保険適用外は対象外。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 南風原町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-haebaru-shogai-iryo",
@@ -1486,14 +1486,14 @@
     "type": "adjust",
     "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "身体障害者手帳1・2級などに該当する方の医療費の自己負担分が助成される場合があります(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 南風原町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-miyakojima-kodomo-iryo",
@@ -1506,7 +1506,7 @@
    ],
    "issuer": "宮古島市",
    "area": "宮古島市",
-   "target_household": "宮古島市に住民登録があり健康保険に加入している高校生年代までのお子さんがいる世帯が対象となる可能性があります",
+   "target_household": "宮古島市に住み健康保険に加入している18歳(年度末)までのお子さんがいる世帯が対象となる可能性があります(令和8年4月〜高校卒業相当まで拡大)",
    "how_to_apply": "宮古島市 子育て支援課窓口(現物給付・自動償還・申請償還の各方法)",
    "source_url": "https://www.city.miyakojima.lg.jp/kurashi/kodomo/kosodate/kodomoiryouhijyosei.html",
    "deadline_type": "常時",
@@ -1515,14 +1515,14 @@
     "type": "adjust",
     "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "18歳(18歳到達後最初の3月31日)までの医療費(保険診療分)の自己負担分を助成。現物給付等に対応(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 宮古島市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-miyakojima-sango-care",
@@ -1539,14 +1539,14 @@
    "source_url": "https://www.city.miyakojima.lg.jp/kurashi/kodomo/kosodate/2024-0705-1430-323.html",
    "deadline_type": "要確認",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "産後1年以内の母子が対象(宿泊・デイ・訪問型)。課税世帯には1回最大2,500円・計5回分の利用料軽減券が交付される場合があります(令和6年4月〜。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 宮古島市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ishigaki-kodomo-iryo",
@@ -1559,7 +1559,7 @@
    ],
    "issuer": "石垣市",
    "area": "石垣市",
-   "target_household": "石垣市に住民登録があり健康保険に加入している18歳年度末までのお子さんがいる世帯が対象となる可能性があります",
+   "target_household": "石垣市に住み健康保険に加入している18歳(年度末)までのお子さんがいる世帯が対象となる可能性があります(令和5年4月〜拡大)",
    "how_to_apply": "石垣市 こども家庭課窓口(県内医療機関で現物給付)",
    "source_url": "https://www.city.ishigaki.okinawa.jp/kurashi_gyosei/kosodate_kyoiku/kosodate/3363.html",
    "deadline_type": "常時",
@@ -1568,14 +1568,14 @@
     "type": "adjust",
     "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "18歳(18歳到達後最初の3月31日)までの外来・入院の医療費(保険診療分)を助成(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ishigaki-shugaku-enjo",
@@ -1595,12 +1595,12 @@
    "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ishigaki-shingaku-shien",
@@ -1618,14 +1618,14 @@
    "source_url": "https://www.city.ishigaki.okinawa.jp/soshiki/kodomo_kateika/1/1/7117.html",
    "deadline_type": "要確認",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "特定の生年のお子さん向けの進学等支援金(ふるさと納税活用)。年度ごとの事業で受付期間が定められています。今年度の実施・受付期間は公式ページで最新をご確認ください(要確認)",
    "deadline": null,
    "verified": false,
    "verified_at": null,
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-nago-kodomo-iryo",
@@ -1647,14 +1647,14 @@
     "type": "adjust",
     "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "高校3年生(18歳到達後最初の3月31日)までの医療費(保険診療分)を助成(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 名護市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-nago-famisapo",
@@ -1672,14 +1672,14 @@
    "source_url": "https://www.city.nago.okinawa.jp/kurashi/2019030800120/",
    "deadline_type": "常時",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "育児の援助を受けたい人(おねがい会員)と援助したい人(まかせて会員)をつなぐ相互援助の仕組みです。利用料は時間・時間帯で異なります(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 名護市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-shussan-ouen",
@@ -1696,14 +1696,14 @@
    "source_url": "https://www.cfa.go.jp/policies/shussan-kosodate",
    "deadline_type": "要確認",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "妊娠届出時と出生届出後にあわせて計10万円相当(妊娠時5万円+出産時5万円)の給付が受けられる場合があります。伴走型の相談支援もあわせて実施されます(自治体で異なります。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(こども家庭庁 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-hisaisha-saiken",
@@ -1724,14 +1724,14 @@
     "type": "stackable",
     "note": "災害弔慰金・災害援護資金など他の被災者支援と併せて受けられる場合があります(要確認)。窓口でご確認ください。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "基礎支援金(住宅の被害程度に応じ最大100万円)と加算支援金(再建方法に応じ建設・購入で最大200万円/補修100万円/賃借50万円)の合計で、最大300万円が支給される場合があります(世帯人数などで変わります。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(内閣府 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 内閣府ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-hello-training",
@@ -1752,14 +1752,14 @@
     "type": "stackable",
     "note": "求職者支援訓練では一定要件で給付金を受けられる場合があります(要確認)。ハローワークでご確認ください。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "受講料は原則無料です(テキスト代等は自己負担)。求職者支援訓練では一定要件を満たすと月10万円の給付金を受けられる場合があります(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(厚生労働省 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-josei-sodan",
@@ -1775,41 +1775,14 @@
    "source_url": "https://www.mhlw.go.jp/stf/newpage_40452.html",
    "deadline_type": "常時",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "相談は無料です。悩みの相談のほか、緊急時の安全確保・一時保護などの支援もあります(全国共通ダイヤル #8778「はなそう なやみ」。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(厚生労働省 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
-  },
-  {
-   "id": "fk-kuni-jutaku-shoene",
-   "name": "住宅省エネ2025キャンペーン(断熱改修・省エネリフォーム支援)",
-   "category": "住まい",
-   "life_events": [
-    "住宅取得・引越"
-   ],
-   "issuer": "国土交通省・経済産業省・環境省",
-   "area": "全国",
-   "target_household": "住宅の断熱改修・省エネリフォームや対象の新築を行う世帯が対象となる可能性があります。",
-   "how_to_apply": "キャンペーンに登録した施工事業者を通じて申請します(公式サイトで登録事業者を確認)。",
-   "source_url": "https://jutaku-shoene2025.mlit.go.jp/",
-   "deadline_type": "要確認",
-   "assume_reachable": true,
-   "combine": {
-    "type": "stackable",
-    "note": "3省の補助事業を組み合わせて使える場合があります(要確認)。公式サイト・事業者でご確認ください。"
-   },
-   "amount_note": "要確認(公式ページでご確認ください)",
-   "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 国土交通省・経済産業省・環境省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-kokuho-genmen",
@@ -1826,14 +1799,14 @@
    "source_url": "https://www.mhlw.go.jp/stf/newpage_21517.html",
    "deadline_type": "要確認",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "所得が基準以下の世帯は保険料の均等割・平等割が7割・5割・2割軽減される場合があります。災害・失業などでは減免・納付猶予を受けられる場合もあります(市区町村でご確認ください。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(厚生労働省 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-chiiki-houkatsu",
@@ -1849,14 +1822,14 @@
    "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/kaigo_koureisha/chiiki-houkatsu/index.html",
    "deadline_type": "常時",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "相談は無料です。介護・福祉・生活の総合相談に応じ、必要な支援やサービスにつなぐ市区町村の窓口です(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(厚生労働省 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-kashitsuke",
@@ -1870,17 +1843,17 @@
    "area": "全国",
    "target_household": "低所得の世帯や、失業などで生活の立て直しが必要な世帯が対象となる可能性があります。",
    "how_to_apply": "お住まいの市区町村の社会福祉協議会。",
-   "source_url": "https://www.mhlw.go.jp/bunya/seikatsuhogo/kashitsukejoken.html",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/seikatsu-fukushi-shikin1/kashitsukejoken.html",
    "deadline_type": "常時",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "低所得・高齢・障がいのある世帯に、資金の貸付と相談支援を行う制度です(貸付の種類・条件は資金ごとに異なります。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(厚生労働省 公式ページ照合WebSearch・URL更新)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-kokunen-menjo",
@@ -1897,14 +1870,14 @@
    "source_url": "https://www.nenkin.go.jp/service/kokunen/menjo/20150428.html",
    "deadline_type": "常時",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "前年所得が一定以下などの場合、保険料の全額または一部が免除・猶予される場合があります。免除期間も年金額に一部反映され、10年以内なら追納も可能です(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(日本年金機構 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 日本年金機構ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-kuni-boshi-jiritsu-kyufu",
@@ -1922,14 +1895,14 @@
    "source_url": "https://www.cfa.go.jp/policies/hitori-oya/jiritsu-shien-kyuufukin",
    "deadline_type": "要確認",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "自立支援教育訓練給付金は受講費用の6割(上限あり)、高等職業訓練促進給付金は資格取得の修業期間中の生活費が支給される場合があります(自治体で異なります。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(こども家庭庁 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-ken-tsugakuhi",
@@ -1947,14 +1920,14 @@
    "source_url": "https://www.pref.okinawa.jp/kyoiku/edu/1008819/1008843/1021292.html",
    "deadline_type": "年度内",
    "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "所得が一定基準内の世帯で、県内私立高校生等の通学費の一部が補助される場合があります(令和5年度〜。金額・対象は要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(沖縄県 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "fetched_at": "2026-08-06 13:32"
   },
   {
    "id": "fk-itoman-kodomo-iryo",
@@ -1970,19 +1943,18 @@
    "how_to_apply": "糸満市役所 こども未来課(こども医療費担当)の窓口",
    "source_url": "https://www.city.itoman.lg.jp/soshiki/16/1019.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "他の医療費助成(重度心身障害者医療費など)と重なる場合は調整されることがあります(要確認)/窓口でご確認ください"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "通院・入院とも中学校卒業(15歳年度末)までの医療費(保険診療分)を助成(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 糸満市ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-itoman-shugaku-enjo",
@@ -1999,15 +1971,14 @@
    "how_to_apply": "糸満市教育委員会 学校教育課(市役所5階南側 2番窓口)",
    "source_url": "https://www.city.itoman.lg.jp/soshiki/32/15477.html",
    "deadline_type": "年度内",
-   "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 糸満市ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-nanjo-kodomo-iryo",
@@ -2019,19 +1990,18 @@
    ],
    "issuer": "南城市",
    "area": "南城市",
-   "target_household": "中学生までの通院・18歳年度末までの入院にあたるお子さんがいる世帯が対象となる可能性があります",
+   "target_household": "南城市に住み健康保険に加入しているお子さんがいる世帯が対象となる可能性があります(通院は中学3年生まで/入院は18歳年度末まで)",
    "how_to_apply": "南城市役所 子育て支援の担当窓口",
    "source_url": "https://www.city.nanjo.okinawa.jp/kosodate/kosodate/jyosei/1579339822/",
    "deadline_type": "常時",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "令和4年4月から中学卒業まで窓口無料(現物給付)。令和6年4月から入院のみ18歳(年度末)まで拡大されています(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 南城市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 南城市ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-nanjo-sango-care",
@@ -2047,15 +2017,14 @@
    "how_to_apply": "南城市 母子健康包括支援センター(子育て世代包括支援)",
    "source_url": "https://www.city.nanjo.okinawa.jp/kosodate/kosodate/1618553131/",
    "deadline_type": "常時",
-   "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 南城市ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 南城市ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-yaese-kodomo-iryo",
@@ -2071,19 +2040,18 @@
    "how_to_apply": "八重瀬町役場 児童家庭課の窓口",
    "source_url": "https://www.town.yaese.lg.jp/docs/2026033100027",
    "deadline_type": "常時",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "通院・入院とも医療費(保険診療分)を助成。令和8年度にさらに対象拡充の告知があります。最新の対象年齢は公式ページでご確認ください(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 八重瀬町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 八重瀬町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-yaese-kyushoku",
-   "name": "八重瀬町 学校給食費支援事業",
+   "name": "八重瀬町 学校給食費の無償化(令和8年度)",
    "category": "教育",
    "life_events": [
     "入園・入学",
@@ -2091,23 +2059,22 @@
    ],
    "issuer": "八重瀬町",
    "area": "八重瀬町",
-   "target_household": "八重瀬町立の小・中学校に通うお子さんがいる世帯が対象となる可能性があります",
+   "target_household": "八重瀬町立小・中学校に通うお子さんがいる世帯が対象となる可能性があります",
    "how_to_apply": "八重瀬町 学校・教育の担当窓口(通学先の学校を通じた案内)",
    "source_url": "https://www.town.yaese.lg.jp/docs/2023121400014/",
    "deadline_type": "年度内",
-   "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "就学援助を受けている場合は支援の扱いが異なることがあります(要確認)/窓口でご確認ください"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "令和8年度から町立小中学校の給食費が完全無償化されています(口座振替手数料も町負担。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 八重瀬町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 八重瀬町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-yaese-shugaku-enjo",
@@ -2124,15 +2091,14 @@
    "how_to_apply": "八重瀬町教育委員会(就学援助の担当窓口)",
    "source_url": "https://www.town.yaese.lg.jp/category/bunya/kurashi/gakko/bunya-shugaku-enjo/",
    "deadline_type": "年度内",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "生活保護に準ずる困窮世帯の小中学生保護者に学用品費等を援助(毎年度申請)。令和8年度は給食費無償化のため給食費の支給はなく、他の費目が対象です(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 八重瀬町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 八重瀬町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-nishihara-kodomo-iryo",
@@ -2148,15 +2114,14 @@
    "how_to_apply": "西原町役場 健康保険課の窓口",
    "source_url": "https://www.town.nishihara.okinawa.jp/soshiki/9/1776.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "令和4年4月から中学校卒業まで現物給付で助成。令和8年10月から通院・入院とも18歳(高校生年代)まで拡大予定です(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 西原町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 西原町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-nishihara-boshi-iryo",
@@ -2173,19 +2138,18 @@
    "how_to_apply": "西原町役場 こども課の窓口",
    "source_url": "https://www.town.nishihara.okinawa.jp/soshiki/8/1795.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "こども医療費助成など他の医療費助成と重なる場合は調整されることがあります(要確認)/窓口でご確認ください"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "ひとり親家庭等の医療費(保険診療分)を助成。1医療機関(薬局含む)ごとに月1,000円の自己負担を差し引いた額が対象(平成29年4月から自動償還。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 西原町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 西原町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-yonabaru-kodomo-iryo",
@@ -2197,19 +2161,18 @@
    ],
    "issuer": "与那原町",
    "area": "与那原町",
-   "target_household": "受給者証の対象となるお子さんがいる世帯が対象となる可能性があります",
+   "target_household": "与那原町に住み健康保険に加入している18歳(高校生年代)までのお子さんがいる世帯が対象となる可能性があります(令和6年4月診療分〜拡充)",
    "how_to_apply": "与那原町役場 子育て支援課の窓口",
    "source_url": "https://www.town.yonabaru.okinawa.jp/soshiki/11/1535.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "18歳(18歳到達後最初の3月31日)までの医療費(保険診療分)を助成(令和6年4月〜。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 与那原町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 与那原町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-yonabaru-sango-care",
@@ -2225,15 +2188,14 @@
    "how_to_apply": "与那原町役場 子育て支援課(母子保健の担当窓口)",
    "source_url": "https://www.town.yonabaru.okinawa.jp/soshiki/12/6941.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 与那原町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 与那原町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-yomitan-kodomo-iryo",
@@ -2249,19 +2211,18 @@
    "how_to_apply": "読谷村役場 こども未来課(母子保健担当)の窓口",
    "source_url": "https://www.vill.yomitan.okinawa.jp/soshiki/kodomomirai/gyomu/boshi_kenko/support_kenko/642.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
    "combine": {
     "type": "exclusive",
     "note": "生活保護や他の医療費助成を受けている場合など対象外となることがあります(要確認/窓口でご確認ください)。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "0歳〜中学3年生(15歳年度末)までの医療費(保険診療分)を助成。令和4年4月から入院・通院とも窓口無料(現物給付)(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 読谷村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 読谷村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-yomitan-kyushoku",
@@ -2278,15 +2239,14 @@
    "how_to_apply": "読谷村教育委員会(給食センター)の窓口",
    "source_url": "https://www.vill.yomitan.okinawa.jp/kosodate_kyoiku/school/kyushoku/index.html",
    "deadline_type": "年度内",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "令和8年度から村立小学校の給食費を無償化。中学校も県の学校給食費無償化支援事業を活用しています(中学校の無償化の範囲・自己負担は公式でご確認ください。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 読谷村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・深掘り)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 読谷村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-yomitan-boshi-iryo",
@@ -2303,19 +2263,18 @@
    "how_to_apply": "読谷村役場 こども未来課(児童福祉担当)の窓口",
    "source_url": "https://www.vill.yomitan.okinawa.jp/soshiki/kodomomirai/gyomu/jidofukushi/hitorioyashien/1286.html",
    "deadline_type": "要確認",
-   "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "他の医療費助成との併給調整がある場合があります(要確認/窓口でご確認ください)。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "ひとり親家庭等の児童(18歳年度末まで)の医療費(保険診療分)を助成。公費医療受給者・第三者行為分は対象外(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 読谷村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 読谷村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-chatan-kodomo-iryo",
@@ -2327,23 +2286,22 @@
    ],
    "issuer": "北谷町",
    "area": "北谷町",
-   "target_household": "北谷町に住所があり、18歳(高校生世代・18歳到達年度末)までのお子さんがいる世帯が対象となる可能性があります。現物給付です。",
+   "target_household": "北谷町に住み健康保険に加入している18歳(高校生世代)までのお子さんがいる世帯が対象となる可能性があります(令和4年10月〜拡大)",
    "how_to_apply": "北谷町 健康相談センターの窓口",
    "source_url": "https://www.chatan.jp/kosodate/kosodate/teate_support/kodomoiryogenbutsu.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
    "combine": {
     "type": "exclusive",
     "note": "保険適用外の費用などは対象外となることがあります(要確認/窓口でご確認ください)。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "0歳〜18歳(年度末)までの医療費(保険診療分)を窓口無料(現物給付)で助成(令和4年10月〜。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 北谷町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 北谷町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-chatan-boshi-iryo",
@@ -2360,19 +2318,18 @@
    "how_to_apply": "北谷町役場の担当窓口(子育て支援担当)",
    "source_url": "https://www.chatan.jp/kosodate/kosodate/teate_support/boshi_fushi.html",
    "deadline_type": "要確認",
-   "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "他の医療費助成との併給調整がある場合があります(要確認/窓口でご確認ください)。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "ひとり親家庭等(児童は18歳年度末まで)の医療費(保険診療分)を助成。1医療機関あたり1人月1,000円の自己負担。健診・予防接種・文書料・差額ベッド等は対象外(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 北谷町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 北谷町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-kadena-kodomo-iryo",
@@ -2384,23 +2341,22 @@
    ],
    "issuer": "嘉手納町",
    "area": "嘉手納町",
-   "target_household": "嘉手納町に住所があり、18歳到達年度末までのお子さんがいる世帯が対象となる可能性があります。",
+   "target_household": "嘉手納町に住み健康保険に加入している18歳(年度末)までのお子さんがいる世帯が対象となる可能性があります(令和5年4月〜拡大)",
    "how_to_apply": "嘉手納町役場 子ども家庭課の窓口",
    "source_url": "https://www.town.kadena.okinawa.jp/life/kur2905.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
    "combine": {
     "type": "exclusive",
     "note": "生活保護や他の公費医療助成を受けている場合など対象外となることがあります(要確認/窓口でご確認ください)。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "0歳〜18歳(年度末)までの医療費(保険診療分)を助成(令和5年4月〜。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 嘉手納町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 嘉手納町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-kadena-kyushoku",
@@ -2417,15 +2373,14 @@
    "how_to_apply": "嘉手納町役場(教育委員会・子ども家庭課)の窓口",
    "source_url": "https://www.town.kadena.okinawa.jp/life/kadena-kosodate-2025.pdf",
    "deadline_type": "年度内",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "幼稚園・こども園から中学校までの給食費を無償化(令和6年度から幼稚園・こども園も対象に追加。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 嘉手納町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 嘉手納町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-kitanakagusuku-kodomo-iryo",
@@ -2441,19 +2396,18 @@
    "how_to_apply": "北中城村役場 こども未来課の窓口",
    "source_url": "https://www.vill.kitanakagusuku.lg.jp/kakuka/kodomo/jidou/teate/3087.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
    "combine": {
     "type": "exclusive",
     "note": "生活保護や他の公費医療助成を受けている場合など対象外となることがあります(要確認/窓口でご確認ください)。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "0歳〜中学校卒業までの医療費(保険診療分)を助成(令和4年4月〜中学卒業まで拡大。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 北中城村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 北中城村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-kitanakagusuku-kyushoku",
@@ -2470,19 +2424,18 @@
    "how_to_apply": "北中城村教育委員会(給食調理場)の窓口",
    "source_url": "https://www.vill.kitanakagusuku.lg.jp/kakuka/iinkai/kyusyoku/1471.html",
    "deadline_type": "年度内",
-   "assume_reachable": true,
    "combine": {
     "type": "exclusive",
     "note": "給食費に未納がある場合は補助の対象外となることがあります(要確認/窓口でご確認ください)。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "村立小中学校の給食費を補助する制度です(全額無償化ではなく補助方式)。今年度から保護者の個別申請が不要な代理申請方式に変更。国等の他の公費受給者は対象外(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 北中城村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 北中城村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-kitanakagusuku-shugaku-enjo",
@@ -2499,15 +2452,14 @@
    "how_to_apply": "北中城村教育委員会 教育総務課の窓口",
    "source_url": "https://www.vill.kitanakagusuku.lg.jp/kakuka/iinkai/kyouiku/teate/274.html",
    "deadline_type": "年度内",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "要保護・準要保護世帯に学用品費等を援助。目安として新入学用品費 小1=54,060円/中1=63,000円、給食費 小=月4,200円/中=月4,800円、修学旅行費は実費(小上限22,690円/中上限60,910円)などの記載があります(毎年度申請。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 北中城村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 北中城村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-nakagusuku-kodomo-iryo",
@@ -2519,19 +2471,18 @@
    ],
    "issuer": "中城村",
    "area": "中城村",
-   "target_household": "中城村に住所があり、18歳到達年度末までのお子さんがいる世帯が対象となる可能性があります。入院・通院とも現物給付です。",
+   "target_household": "中城村に住み健康保険に加入している18歳(年度末)までのお子さんがいる世帯が対象となる可能性があります(令和5年10月診療分〜拡大)",
    "how_to_apply": "中城村役場 こども課の窓口",
    "source_url": "https://www.vill.nakagusuku.okinawa.jp/detail.jsp?id=52589&menuid=11411&funcid=2",
    "deadline_type": "常時",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "18歳(18歳到達後最初の3月31日)までの入院・通院の医療費(保険診療分)を助成(令和5年10月〜。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 中城村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 中城村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-nakagusuku-boshi-iryo",
@@ -2548,19 +2499,18 @@
    "how_to_apply": "中城村役場 こども課(医療費助成係)の窓口",
    "source_url": "https://www.vill.nakagusuku.okinawa.jp/detail.jsp?id=52594&menuid=11411&funcid=2",
    "deadline_type": "要確認",
-   "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "他の医療費助成との併給調整がある場合があります(要確認/窓口でご確認ください)。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "母子・父子・養育家庭の親と児童(0〜18歳年度末)の医療費(保険診療分)を助成(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 中城村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 中城村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 13:53"
   },
   {
    "id": "fk-kunigami-kodomo-iryo",
@@ -2576,19 +2526,18 @@
    "how_to_apply": "国頭村役場 福祉課",
    "source_url": "https://www.vill.kunigami.okinawa.jp/birth/childcare/",
    "deadline_type": "常時",
-   "assume_reachable": true,
    "combine": {
     "type": "exclusive",
     "note": "生活保護や他の医療費助成を受けている場合は対象外となることがあります(要確認)/窓口でご確認ください"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "0歳〜高校卒業(18歳到達後最初の3月末)までの通院・入院の医療費(保険診療分)を助成。現物給付/自動償還/償還払いのいずれか(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 国頭村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 国頭村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-higashi-kodomo-iryo",
@@ -2604,15 +2553,14 @@
    "how_to_apply": "東村役場(手当・助成の担当窓口)",
    "source_url": "https://www.vill.higashi.okinawa.jp/kosodate_kyoiku/jidofukushi_hitorioyafukushi/index.html",
    "deadline_type": "要確認",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "東村のこども医療費助成です。対象年齢・助成範囲は公式ページでご確認ください(要確認)",
    "deadline": null,
    "verified": false,
    "verified_at": null,
    "verified_by": null,
    "status": "要確認",
-   "notes": "出典: 東村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "notes": "出典: 東村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-ogimi-sango-care",
@@ -2628,15 +2576,14 @@
    "how_to_apply": "大宜味村役場 住民福祉課",
    "source_url": "https://www.vill.ogimi.okinawa.jp/kosodate_kyoiku/ninshin_shussan/1042.html",
    "deadline_type": "要確認",
-   "assume_reachable": true,
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 大宜味村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 大宜味村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-ogimi-shugaku-enjo",
@@ -2652,19 +2599,18 @@
    "how_to_apply": "大宜味村教育委員会",
    "source_url": "https://www.vill.ogimi.okinawa.jp/docs/2023032200017/",
    "deadline_type": "要確認",
-   "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "他の給付制度と調整される場合があります(要確認)/窓口でご確認ください"
    },
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 大宜味村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 大宜味村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-nakijin-kodomo-iryo",
@@ -2680,15 +2626,14 @@
    "how_to_apply": "今帰仁村役場 福祉こども課",
    "source_url": "https://www.nakijin.jp/pagtop/kakuka/hukusikodomoka/2/4_1/2/576.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "中学3年生までの医療費(保険診療分)を助成(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 今帰仁村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 今帰仁村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-nakijin-kyushoku",
@@ -2704,19 +2649,18 @@
    "how_to_apply": "今帰仁村教育委員会",
    "source_url": "https://www.nakijin.jp/pagtop/kosodate/kyoiku_iinkai/information/5121.html",
    "deadline_type": "年度内",
-   "assume_reachable": true,
    "combine": {
     "type": "exclusive",
     "note": "他制度による支援分は対象外となる場合があります(要確認)/窓口でご確認ください"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "村立小中学校および村内在住の小中学生の給食費を全額補助(無償化支援)。2026年4月の給食費改定後も継続(過年度の未納がある場合は対象外のことがあります。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 今帰仁村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 今帰仁村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-motobu-kodomo-iryo",
@@ -2728,19 +2672,18 @@
    ],
    "issuer": "本部町",
    "area": "本部町",
-   "target_household": "本部町に住民登録があり健康保険に加入している高校生世代までのお子さんがいるご家庭が対象となる可能性があります",
+   "target_household": "本部町に住み健康保険に加入している18歳(高校生年代)までのお子さんがいる世帯が対象となる可能性があります(令和7年4月〜拡大)",
    "how_to_apply": "本部町役場(こども医療費助成の担当窓口)",
    "source_url": "https://www.town.motobu.okinawa.jp/kosodatekyouiku/kosodatesien/kodomoiryoujyosei",
    "deadline_type": "常時",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "令和7年4月から高校生世代(18歳到達後最初の3月31日)まで医療費(保険診療分)を助成。学校でのケガは原則対象外(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 本部町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 本部町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-motobu-sango-care",
@@ -2756,15 +2699,14 @@
    "how_to_apply": "本部町役場(産後ケアの担当窓口)",
    "source_url": "https://www.town.motobu.okinawa.jp/doc/2026042100018",
    "deadline_type": "要確認",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "産後1年以内の母子が対象。自己負担の目安は宿泊型4,000円/日帰り(6時間)2,000円/日帰り(3時間)1,000円/訪問型1,000円などの記載があります(非課税・生活保護世帯はキャンセル料免除。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 本部町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 本部町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-onna-kodomo-iryo",
@@ -2780,19 +2722,18 @@
    "how_to_apply": "恩納村役場(こども医療費助成の担当窓口)",
    "source_url": "https://www.vill.onna.okinawa.jp/living/childcare/1648364682/",
    "deadline_type": "常時",
-   "assume_reachable": true,
    "combine": {
     "type": "exclusive",
     "note": "生活保護や交通事故等の第三者行為の場合は対象外となることがあります(要確認)/窓口でご確認ください"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "高校卒業まで(18歳年度末)の医療費(保険診療分)を助成。生活保護受給者や他制度の助成対象者は対象外の場合があります(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 恩納村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 恩納村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-onna-shugaku-enjo",
@@ -2808,19 +2749,18 @@
    "how_to_apply": "恩納村教育委員会",
    "source_url": "https://www.vill.onna.okinawa.jp/living/education/1497599570/1772067691/",
    "deadline_type": "要確認",
-   "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "他の給付制度と調整される場合があります(要確認)/窓口でご確認ください"
    },
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 恩納村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 恩納村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-kumejima-kodomo-iryo",
@@ -2836,15 +2776,14 @@
    "how_to_apply": "久米島町役場の担当課(福祉・こども担当)窓口",
    "source_url": "https://www.town.kumejima.okinawa.jp/docs/childmedical_expenses/",
    "deadline_type": "常時",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "15歳(中学卒業)までの医療費(保険診療分)の自己負担分(調剤・歯科含む)の全部または一部を助成(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 久米島町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 久米島町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-kumejima-shussan-josei",
@@ -2859,19 +2798,18 @@
    "how_to_apply": "久米島町役場の担当課窓口",
    "source_url": "https://www.town.kumejima.okinawa.jp/docs/birth_grant/",
    "deadline_type": "要確認",
-   "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "他の出産関連の給付と受け取り方が異なる場合があります(要確認)。窓口でご確認ください。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "出産奨励金は第1子5万円・第2子10万円・第3子15万円・第4子以降20万円などの記載があります。申請は生後1か月〜1歳の誕生日前日まで(税等の滞納がないこと等が要件。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 久米島町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 久米島町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-taketomi-tokou-iryo",
@@ -2887,19 +2825,18 @@
    "how_to_apply": "竹富町役場(子育て支援担当)窓口。申請書・受診した医療機関の領収書・渡航を証明する領収書などが必要とされています。",
    "source_url": "https://www.town.taketomi.lg.jp/guide/kosodate/kosodateshien/1632457955/",
    "deadline_type": "要確認",
-   "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "こども医療費助成など他の支援と対象範囲が重なる場合があります(要確認)。窓口でご確認ください。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "こども医療費助成の対象受診で本島等へ渡航する際の渡航費(離島割引往復運賃等)を助成。付添の保護者分を含む場合があります(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 竹富町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 竹富町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-taketomi-kodomo-iryo",
@@ -2915,15 +2852,14 @@
    "how_to_apply": "竹富町役場(子育て・健康担当)窓口",
    "source_url": "https://www.town.taketomi.lg.jp/guide/kosodate/kodomo_kenkou/1531276571/",
    "deadline_type": "常時",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "0歳〜中学3年生までの医療費(保険診療分)の自己負担分を助成(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 竹富町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 竹富町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-yonaguni-shogaku",
@@ -2938,19 +2874,18 @@
    "how_to_apply": "与那国町役場(教育委員会)窓口",
    "source_url": "https://www.town.yonaguni.okinawa.jp/docs/2026012000010",
    "deadline_type": "要確認",
-   "assume_reachable": true,
    "combine": {
     "type": "adjust",
     "note": "他の奨学金との併用に条件がある場合があります(要確認)。窓口でご確認ください。"
    },
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "大学等に進む町民のお子さん向けの奨学金基金。貸与型は入学時50万円、給付型は在学中の月額5万円などの記載があります(学力・意欲・経済要件あり。要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 与那国町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 与那国町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-ie-kodomo-iryo",
@@ -2966,15 +2901,14 @@
    "how_to_apply": "伊江村役場(担当課)窓口",
    "source_url": "https://www.iejima.org/document/2015021800155/",
    "deadline_type": "常時",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "高校卒業までの子どもの医療費(保険診療分)の全部または一部を助成。申請は受診の翌月から1年以内(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 伊江村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 伊江村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-kin-kodomo-iryo",
@@ -2990,15 +2924,14 @@
    "how_to_apply": "金武町役場 こども支援課窓口",
    "source_url": "https://www.town.kin.okinawa.jp/soshiki/kodomoshienka/gyomuannai/keizaitekishien/1412.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "18歳(18歳到達後最初の3月31日。高校等在学中は卒業月まで延長可)の医療費(保険診療分)を助成(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 金武町ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 金武町ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-ginoza-kyushoku",
@@ -3014,15 +2947,14 @@
    "how_to_apply": "宜野座村教育委員会窓口",
    "source_url": "https://www.vill.ginoza.okinawa.jp/soshiki/1009/oshirase/1257.html",
    "deadline_type": "年度内",
-   "assume_reachable": true,
-   "amount_note": "要確認(公式ページでご確認ください)",
+   "amount_note": "村立幼稚園・小・中学校の給食費を無償化(令和4年度〜継続)。保育所(園)は主食費のみ補助で副食費等は保護者負担が残る場合があります(要確認)",
    "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 宜野座村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 宜野座村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
   },
   {
    "id": "fk-ginoza-kodomo-iryo",
@@ -3038,15 +2970,620 @@
    "how_to_apply": "宜野座村役場 健康福祉課窓口",
    "source_url": "https://www.vill.ginoza.okinawa.jp/tetsuzuki/29.html",
    "deadline_type": "常時",
-   "assume_reachable": true,
+   "amount_note": "出生(転入)から18歳(高校卒業年度末)までの医療費(保険診療分)を助成(要確認)",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06",
+   "status": "検証済み",
+   "notes": "出典: 宜野座村ウェブサイト(公式URL照合)。金額・締切は要確認。検証部の最終確認待ち。",
+   "fetched_at": "2026-08-06 14:28"
+  },
+  {
+   "id": "fk-minamidaito-shussan-iwai",
+   "name": "南大東村 出産祝い金",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "南大東村",
+   "area": "南大東村",
+   "target_household": "南大東村に住み出産した世帯が対象となる可能性があります",
+   "how_to_apply": "南大東村役場 福祉民生課の窓口",
+   "source_url": "https://www.vill.minamidaito.okinawa.jp/site/iju/740.html",
+   "deadline_type": "要確認",
    "amount_note": "要確認(公式ページでご確認ください)",
    "deadline": null,
    "verified": false,
    "verified_at": null,
    "verified_by": null,
    "status": "要確認",
-   "notes": "出典: 宜野座村ウェブサイト",
-   "fetched_at": "2026-08-08 06:25"
+   "notes": "出典: 南大東村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-minamidaito-kodomo-iryo",
+   "name": "南大東村 こども医療費助成",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て",
+    "病気・けが"
+   ],
+   "issuer": "南大東村",
+   "area": "南大東村",
+   "target_household": "中学生までのお子さんを育てている村内の世帯が対象となる可能性があります",
+   "how_to_apply": "南大東村役場 福祉民生課の窓口",
+   "source_url": "https://www.vill.minamidaito.okinawa.jp/site/iju/740.html",
+   "deadline_type": "常時",
+   "combine": {
+    "type": "adjust",
+    "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
+   },
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 南大東村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-kitadaito-shussan-iwai",
+   "name": "北大東村 出産お祝い金",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "北大東村",
+   "area": "北大東村",
+   "target_household": "北大東村に住民登録がある、または村に定住予定で出産した世帯が対象となる可能性があります",
+   "how_to_apply": "北大東村役場 福祉衛生課または保健・福祉センターの窓口",
+   "source_url": "https://vill.kitadaito.okinawa.jp/life_event/ninsin_syussan/kodomo/oiwaikin.html",
+   "deadline_type": "常時",
+   "amount_note": "第1子10万円・第2子15万円・第3子20万円・第4子以降35万円の場合があります(要確認)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 北大東村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-kitadaito-tosen-hojo",
+   "name": "北大東村 こどもの通院に係る渡船運賃補助制度",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "病気・けが"
+   ],
+   "issuer": "北大東村",
+   "area": "北大東村",
+   "target_household": "こども医療費助成の受給資格をお持ちの小学1年〜中学3年のお子さんが島外通院する世帯が対象となる可能性があります",
+   "how_to_apply": "北大東村役場 福祉衛生課の窓口",
+   "source_url": "https://vill.kitadaito.okinawa.jp/life_event/ninsin_syussan/kodomo/unchin_hojo.html",
+   "deadline_type": "常時",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 北大東村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-kitadaito-kodomo-iryo",
+   "name": "北大東村 こども医療費助成",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て",
+    "病気・けが"
+   ],
+   "issuer": "北大東村",
+   "area": "北大東村",
+   "target_household": "健康保険に加入しているお子さんを育てている村内の世帯が対象となる可能性があります",
+   "how_to_apply": "北大東村役場 福祉衛生課の窓口",
+   "source_url": "https://vill.kitadaito.okinawa.jp/life_event/ninsin_syussan/kodomo/kodomo_iryouhi.html",
+   "deadline_type": "要確認",
+   "combine": {
+    "type": "adjust",
+    "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
+   },
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 北大東村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-kitadaito-ninpu-tokohi",
+   "name": "北大東村 妊婦健康診査の渡航費・宿泊費助成",
+   "category": "医療・健康",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "北大東村",
+   "area": "北大東村",
+   "target_household": "妊婦健康診査のため島外へ渡航する妊婦のいる世帯が対象となる可能性があります",
+   "how_to_apply": "北大東村保健センターの窓口",
+   "source_url": "https://vill.kitadaito.okinawa.jp/life_event/ninsin_syussan/",
+   "deadline_type": "要確認",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 北大東村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-iheya-kodomo-iryo",
+   "name": "伊平屋村 子ども医療費助成制度",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "病気・けが"
+   ],
+   "issuer": "伊平屋村",
+   "area": "伊平屋村",
+   "target_household": "伊平屋村内に住所のあるお子さんのいる世帯が対象となる可能性があります",
+   "how_to_apply": "伊平屋村役場の担当窓口",
+   "source_url": "https://www.vill.iheya.okinawa.jp/site/nabi/1113.html",
+   "deadline_type": "常時",
+   "amount_note": "2019年4月から医療機関の窓口での支払いが不要(現物給付)になっています(対象年齢は要確認)",
+   "combine": {
+    "type": "adjust",
+    "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
+   },
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 伊平屋村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-iheya-tsuinhi-shien",
+   "name": "伊平屋村 離島患者等通院費支援事業",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが",
+    "妊娠・出産"
+   ],
+   "issuer": "伊平屋村",
+   "area": "伊平屋村",
+   "target_household": "島外の医療機関への通院が必要な患者や妊婦のいる世帯が対象となる可能性があります",
+   "how_to_apply": "伊平屋村役場の担当窓口(渡航月から1年以内に申請)",
+   "source_url": "https://www.vill.iheya.okinawa.jp/soshiki/5/1616.html",
+   "deadline_type": "常時",
+   "amount_note": "船賃・宿泊費など通院にかかる費用の一部が支援される場合があります(要確認)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 伊平屋村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-iheya-kokosei-kotsuhi",
+   "name": "伊平屋村 高校生保護者交通費負担軽減補助金",
+   "category": "教育",
+   "life_events": [
+    "入園・入学",
+    "子育て"
+   ],
+   "issuer": "伊平屋村",
+   "area": "伊平屋村",
+   "target_household": "島外の高校へ進学したお子さんの保護者がいる世帯が対象となる可能性があります(村内に高校がないため)",
+   "how_to_apply": "伊平屋村役場の担当窓口",
+   "source_url": "https://www.vill.iheya.okinawa.jp/soshiki/15/2667.html",
+   "deadline_type": "要確認",
+   "amount_note": "学校行事等で保護者が渡航する際の交通費・宿泊費が補助される場合があります(要確認)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 伊平屋村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-izena-kodomo-iryo",
+   "name": "伊是名村 こども医療費助成",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "病気・けが"
+   ],
+   "issuer": "伊是名村",
+   "area": "伊是名村",
+   "target_household": "伊是名村内に住所のあるお子さんのいる世帯が対象となる可能性があります",
+   "how_to_apply": "伊是名村役場 保健センターの窓口",
+   "source_url": "https://vill.izena.okinawa.jp/lifeevent/kosodate/1539770748/1547629178/",
+   "deadline_type": "常時",
+   "combine": {
+    "type": "adjust",
+    "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
+   },
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 伊是名村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-izena-shussan-iwai",
+   "name": "伊是名村 出産祝い金",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "伊是名村",
+   "area": "伊是名村",
+   "target_household": "村内でお子さんが生まれた世帯が対象となる可能性があります",
+   "how_to_apply": "伊是名村役場の担当窓口",
+   "source_url": "https://vill.izena.okinawa.jp/lifeevent/ninshin/1612779115/",
+   "deadline_type": "要確認",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 伊是名村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-izena-tsuinhi-shien",
+   "name": "伊是名村 患者等通院費支援事業",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが",
+    "障がい"
+   ],
+   "issuer": "伊是名村",
+   "area": "伊是名村",
+   "target_household": "島外の医療機関への通院が必要な方(障がいのある方を含む)のいる世帯が対象となる可能性があります",
+   "how_to_apply": "伊是名村役場 保健センターの窓口",
+   "source_url": "https://vill.izena.okinawa.jp/topics/1756866474/",
+   "deadline_type": "要確認",
+   "amount_note": "治療に必要な島外通院の渡航費等が助成される場合があります(要確認)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 伊是名村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-tarama-shussei-iwai",
+   "name": "多良間村 出生祝金",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "多良間村",
+   "area": "多良間村",
+   "target_household": "村内でお子さんが生まれた世帯が対象となる可能性があります",
+   "how_to_apply": "多良間村役場の担当窓口",
+   "source_url": "https://www.vill.tarama.okinawa.jp/gyousei/kurasou/",
+   "deadline_type": "要確認",
+   "amount_note": "第1子・第2子は各5万円、第3子以降は10万円が支給される場合があります(要確認)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 多良間村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-tarama-jutaku-shorei",
+   "name": "多良間村 定住促進住宅建築等奨励金",
+   "category": "住まい",
+   "life_events": [
+    "住宅取得・引越"
+   ],
+   "issuer": "多良間村",
+   "area": "多良間村",
+   "target_household": "村内で住宅を新築・購入する世帯が対象となる可能性があります",
+   "how_to_apply": "多良間村役場の担当窓口",
+   "source_url": "https://www.vill.tarama.okinawa.jp/gyousei/kurasou/",
+   "deadline_type": "要確認",
+   "amount_note": "住宅の規模に応じて50万〜120万円が交付される場合があります(要確認)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 多良間村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-tarama-kodomo-iryo",
+   "name": "多良間村 こども医療費の無料化(高校生まで)",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "病気・けが"
+   ],
+   "issuer": "多良間村",
+   "area": "多良間村",
+   "target_household": "高校生以下のお子さんのいる村内の世帯が対象となる可能性があります",
+   "how_to_apply": "多良間村役場の担当窓口",
+   "source_url": "https://www.vill.tarama.okinawa.jp/gyousei/kurasou/",
+   "deadline_type": "常時",
+   "combine": {
+    "type": "adjust",
+    "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
+   },
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 多良間村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-tokashiki-nyuyoji-iryo",
+   "name": "渡嘉敷村 乳幼児医療費助成事業",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て",
+    "病気・けが"
+   ],
+   "issuer": "渡嘉敷村",
+   "area": "渡嘉敷村",
+   "target_household": "村内に住む乳幼児・お子さんのいる世帯が対象となる可能性があります",
+   "how_to_apply": "渡嘉敷村役場 民生課(福祉係)の窓口",
+   "source_url": "https://www.vill.tokashiki.okinawa.jp/soshiki/sitekanri/4/8/1/1222.html",
+   "deadline_type": "常時",
+   "amount_note": "こども医療費は窓口無料(現物給付)の記載があります(対象年齢は要確認)",
+   "combine": {
+    "type": "adjust",
+    "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
+   },
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 渡嘉敷村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-tokashiki-sango-care",
+   "name": "渡嘉敷村 産後ケア事業",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産",
+    "子育て"
+   ],
+   "issuer": "渡嘉敷村",
+   "area": "渡嘉敷村",
+   "target_household": "出産後おおむね1年以内のお母さんと赤ちゃんのいる世帯が対象となる可能性があります",
+   "how_to_apply": "渡嘉敷村役場 民生課の窓口",
+   "source_url": "https://www.vill.tokashiki.okinawa.jp/iryo_kyoiku_fukushi/kosodate_kyoiku/3093.html",
+   "deadline_type": "常時",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 渡嘉敷村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-tokashiki-kokosei-iryo",
+   "name": "渡嘉敷村 離島高校生医療費助成",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て",
+    "病気・けが",
+    "入園・入学"
+   ],
+   "issuer": "渡嘉敷村",
+   "area": "渡嘉敷村",
+   "target_household": "島外(本島など)で就学する高校生のいる世帯が対象となる可能性があります",
+   "how_to_apply": "渡嘉敷村役場 民生課の窓口",
+   "source_url": "https://www.vill.tokashiki.okinawa.jp/iryo_kyoiku_fukushi/iryo_kenko/index.html",
+   "deadline_type": "要確認",
+   "combine": {
+    "type": "adjust",
+    "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
+   },
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 渡嘉敷村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-zamami-shussan-josei",
+   "name": "座間味村 出産助成金",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "座間味村",
+   "area": "座間味村",
+   "target_household": "村内で新生児が生まれた子育て世帯が対象となる可能性があります",
+   "how_to_apply": "座間味村役場 住民課の窓口",
+   "source_url": "https://www.vill.zamami.okinawa.jp/politics/kurashi/post-11.html",
+   "deadline_type": "常時",
+   "amount_note": "10万円が支給される場合があります(要確認)。妊婦健診の本島渡航の船賃・宿泊費の一部公費負担の記載もあります",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 座間味村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-zamami-kodomo-iryo",
+   "name": "座間味村 こども医療費助成",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て",
+    "病気・けが"
+   ],
+   "issuer": "座間味村",
+   "area": "座間味村",
+   "target_household": "中学3年生までのお子さんがいる世帯が対象となる可能性があります",
+   "how_to_apply": "座間味村役場 住民課の窓口",
+   "source_url": "https://www.vill.zamami.okinawa.jp/kurashi/kosodate/kosodateshien/kenkou/",
+   "deadline_type": "常時",
+   "amount_note": "中学3年生までの医療費を窓口無料(現物給付)で助成しています(要確認)",
+   "combine": {
+    "type": "adjust",
+    "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
+   },
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 座間味村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-zamami-hoikuryo-keigen",
+   "name": "座間味村 幼稚園入園料・保育料の軽減",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "入園・入学"
+   ],
+   "issuer": "座間味村",
+   "area": "座間味村",
+   "target_household": "お子さんが2人以上いる子育て世帯が対象となる可能性があります",
+   "how_to_apply": "座間味村役場 住民課の窓口",
+   "source_url": "https://www.vill.zamami.okinawa.jp/politics/kurashi/post-11.html",
+   "deadline_type": "常時",
+   "amount_note": "第2子は入園料・保育料が半額、第3子以降は無料となる場合があります(要確認)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 座間味村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-zamami-tokosen-hojo",
+   "name": "座間味村 長期・定期治療の渡航船賃の半額補助",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが",
+    "子育て"
+   ],
+   "issuer": "座間味村",
+   "area": "座間味村",
+   "target_household": "専門的な医療・検査のため本島へ長期・定期的に通院が必要な方がいる世帯が対象となる可能性があります",
+   "how_to_apply": "座間味村役場 住民課の窓口",
+   "source_url": "https://www.vill.zamami.okinawa.jp/politics/kurashi/post-11.html",
+   "deadline_type": "常時",
+   "amount_note": "治療目的の船舶運賃が半額補助となる場合があります(付き添いが必要な場合は保護者1人分も。要確認)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 座間味村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-aguni-tsuinhi-josei",
+   "name": "粟国村 離島患者等通院費助成事業",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが",
+    "妊娠・出産"
+   ],
+   "issuer": "粟国村",
+   "area": "粟国村",
+   "target_household": "村に住民登録があり、妊産婦・がん・小児慢性特定疾病・指定難病などで本島への通院が必要な方がいる世帯が対象となる可能性があります(付添人1人を含む)",
+   "how_to_apply": "粟国村役場 民生課の窓口",
+   "source_url": "https://www.vill.aguni.okinawa.jp/kennkouhuskusi/ritokan/1210.html",
+   "deadline_type": "常時",
+   "amount_note": "離島住民割引適用後の航空・船舶運賃と、必要に応じた宿泊費が助成される場合があります(要確認)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 粟国村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-aguni-kokosei-shugaku",
+   "name": "粟国村 離島高校生就学支援",
+   "category": "教育",
+   "life_events": [
+    "入園・入学",
+    "子育て"
+   ],
+   "issuer": "粟国村",
+   "area": "粟国村",
+   "target_household": "島外の高校へ進学するお子さんのいる世帯が対象となる可能性があります",
+   "how_to_apply": "粟国村教育委員会の窓口",
+   "source_url": "https://www.vill.aguni.okinawa.jp/soshiki/kyouiku/kyouikujyouhou/agunikyouiku01/kyouikusoumu01/index.html",
+   "deadline_type": "要確認",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 粟国村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
+  },
+  {
+   "id": "fk-aguni-boshi-iryo",
+   "name": "粟国村 母子及び父子家庭等医療費助成事業",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て",
+    "病気・けが",
+    "低所得・生活苦"
+   ],
+   "issuer": "粟国村",
+   "area": "粟国村",
+   "target_household": "母子家庭・父子家庭などのひとり親世帯が対象となる可能性があります",
+   "how_to_apply": "粟国村役場 民生課の窓口",
+   "source_url": "https://www.vill.aguni.okinawa.jp/kosodate/minseijyouhou/index.html",
+   "deadline_type": "要確認",
+   "combine": {
+    "type": "adjust",
+    "note": "他の医療費助成との併給に注意が必要な場合があります。窓口でご確認ください(要確認)"
+   },
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 粟国村ウェブサイト",
+   "fetched_at": "2026-08-07 10:15"
   }
  ]
 }
