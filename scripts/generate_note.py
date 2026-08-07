@@ -363,10 +363,35 @@ def main():
         print(article)
         return
 
+    # X告知パック(v3様式・A数字/B学び/C問い)。冒頭の削除ブロックに同梱し、
+    # ナナコさんはコピペのみで運用できるようにする(hook-writer原則: 内容に誠実なhookのみ)
+    if stats["gone"]:
+        b_line = (f"B(学び): 補助金は「現れた」ニュースはあっても「消えた」記録はどこにもありません。"
+                  f"今週締切を迎えて消えた{stats['gone']}件を、名前つきで記録しました")
+        c_line = (f"C(問い): 御社が使えたかもしれない制度、今週{stats['gone']}件が静かに締切を迎えました。"
+                  f"来週の分は、間に合ううちに")
+    else:
+        b_line = ("B(学び): 補助金は毎週入れ替わります。今週は1件も消えませんでした。"
+                  "そういう週があることも、毎日見ているからわかる記録です")
+        c_line = (f"C(問い): いま公募中の制度のうち、締切まで30日を切っているのは{stats['closing']}件。"
+                  f"御社に関係する1件が入っていないと言い切れますか")
+    xpack = "\n".join([
+        "▼▼ 公開前にこのブロックを削除 ▼▼",
+        "[週刊定点観測(無料)。公開前チェックは運用規程3-1の5項目]",
+        "",
+        "📣 X告知文パック(公開後、記事URLをリプ欄に。1日1本まで)",
+        f"A(数字): 【今週の沖縄の補助金】掲載{stats['total']}件/新着{stats['new']}件/"
+        f"締切30日切り{stats['closing']}件。AIが毎日見張る週刊定点観測 vol.{stats['vol']}(無料)",
+        b_line,
+        c_line,
+        "▲▲ ここまで削除 ▲▲",
+        "",
+    ])
+
     os.makedirs(OUT_DIR, exist_ok=True)
     out_path = os.path.join(OUT_DIR, f"{stem}.md")
     with open(out_path, "w", encoding="utf-8") as f:
-        f.write(article)
+        f.write(xpack + article)
 
     # 次回の差分検出用スナップショット(消滅コーナーで使う項目だけ保持)
     snap = {
