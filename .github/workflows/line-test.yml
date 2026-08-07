@@ -7,11 +7,44 @@ name: line-test
 on:
   workflow_dispatch: {}
 
+# 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
+concurrency:
+  group: line-test
+  cancel-in-progress: false
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # 登録されているトークンが「どのLINE公式アカウントのものか」をログに出す
+      # (誤って別チャネルのトークンを登録した事故の検出用。トークン自体は出力しない)
+      - name: トークンのアカウント識別チェック
+        env:
+          TOKEN: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          TO: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+        run: |
+          # 連携テストは「未設定でも成功に見える」を許さない(2026-08-07の教訓:
+          # トークン未登録のままスキップ送信が success 表示になり、連携完了と誤認した)
+          if [ -z "$TOKEN" ]; then
+            echo "::error::KEKKA_LINE_CHANNEL_ACCESS_TOKEN が未登録です。GitHub Secrets にこの名前で登録してください(LINE Developers → プロバイダー kekka_mag → チャネルID 2011004310 → Messaging API設定 → チャネルアクセストークン(長期))"
+            exit 1
+          fi
+          if [ -z "$TO" ]; then
+            echo "::error::KEKKA_LINE_ADMIN_USER_ID が未登録です(チャネル基本設定 → あなたのユーザーID)"
+            exit 1
+          fi
+          info=$(curl -sS https://api.line.me/v2/bot/info -H "Authorization: Bearer $TOKEN")
+          echo "このトークンのアカウント: $(echo "$info" | jq -r '"\(.displayName) (\(.basicId))"')"
+          basic=$(echo "$info" | jq -r '.basicId')
+          if [ "$basic" = "@473btavk" ]; then
+            echo "✅ 結果マガ専用アカウント(@473btavk)のトークンです"
+          else
+            echo "::error::登録トークンが結果マガ(@473btavk)ではなく $basic のものです。LINE Developersのプロバイダー kekka_mag → チャネルID 2011004310 からトークンを再発行して上書きしてください"
+            exit 1
+          fi
+
       - name: テスト通知
         uses: ./.github/actions/line-notify
         with:

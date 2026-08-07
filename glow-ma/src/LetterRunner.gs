@@ -13,7 +13,19 @@
  *
  * 生成された下書きは「レター下書き」タブに追記される。ステータスは常に
  * 「下書き」で作成され、自動送信は行わない。必ず人が内容を確認してから送付すること。
+ *
+ * 耐障害性(2026-08-07 resilient-agent-design + glow-ma-triangle-review確定):
+ * - リトライ: Claude API呼び出しが一時的に失敗した場合(429/5xx/ネットワーク例外)は
+ *   最大3回、2秒→10秒のバックオフで再試行する。APIキー無効等の恒久的な失敗
+ *   (401/403等)は再試行しない(コストの無駄・原則⑤)。
+ * - 障害隔離: generateNurturingDraftsForEligibleCompanies はバッチ処理のため、
+ *   1社のリトライが尽きて失敗しても、その1社をスキップして残りの対象企業の処理を
+ *   続ける(1社の失敗で全社が未処理のまま止まることを防ぐ)。失敗した企業IDは
+ *   ログとScript Propertiesに記録するので、後で該当企業だけ
+ *   generateLetterDraftForCompany で再実行できる。
  */
+var SCRIPT_PROP_LAST_NURTURING_FAILURES = "LAST_NURTURING_DRAFT_FAILURES";
+var SCRIPT_PROP_LAST_NURTURING_RUN_AT = "LAST_NURTURING_DRAFT_RUN_AT";
 function generateLetterDraftForCompany(companyId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
@@ -43,15 +55,39 @@ function generateNurturingDraftsForEligibleCompanies() {
   var targets = GlowLetterContent.selectNurturingTargets(records, todayString);
   var generatedCount = 0;
   var skippedCount = 0;
+  var failures = [];
   targets.forEach(function (record) {
     if (hasRecentNurturingDraft_(record["企業ID"], todayString)) {
       skippedCount++;
       return;
     }
-    writeLetterDraft_(record, GlowSchema.LETTER_DRAFT_TYPES[1]);
-    generatedCount++;
+    try {
+      writeLetterDraft_(record, GlowSchema.LETTER_DRAFT_TYPES[1]);
+      generatedCount++;
+    } catch (error) {
+      Logger.log("ナーチャリング下書き生成に失敗したためスキップします: " + record["企業ID"] + " — " + error);
+      failures.push(record["企業ID"] + ": " + error);
+    }
   });
-  Logger.log("ナーチャリング下書き生成完了: " + generatedCount + "件(直近生成済みのためスキップ: " + skippedCount + "件)");
+
+  var scriptProperties = PropertiesService.getScriptProperties();
+  scriptProperties.setProperty(SCRIPT_PROP_LAST_NURTURING_RUN_AT, todayString);
+  if (failures.length > 0) {
+    scriptProperties.setProperty(SCRIPT_PROP_LAST_NURTURING_FAILURES, failures.join(" / "));
+  } else {
+    scriptProperties.deleteProperty(SCRIPT_PROP_LAST_NURTURING_FAILURES);
+  }
+
+  Logger.log(
+    "ナーチャリング下書き生成完了: " + generatedCount + "件(直近生成済みのためスキップ: " + skippedCount +
+    "件 / 失敗: " + failures.length + "件)"
+  );
+  if (failures.length > 0) {
+    throw new Error(
+      failures.length + "件の企業でナーチャリング下書き生成に失敗しました(詳細はログとScript Properties[" +
+      SCRIPT_PROP_LAST_NURTURING_FAILURES + "]を参照)。成功した" + generatedCount + "件の下書きは保存済みです。"
+    );
+  }
 }
 
 /**
@@ -145,6 +181,23 @@ function appendNurturingInteractionLog_(companyId) {
 }
 
 function callClaudeApi_(prompt) {
+  return GlowResilience.withRetry(
+    function () { return callClaudeApiOnce_(prompt); },
+    {
+      maxAttempts: 3,
+      backoffMs: [2000, 10000],
+      sleepFn: Utilities.sleep,
+      isRetryable: function (error) {
+        return !error.statusCode || GlowResilience.isRetryableHttpStatus(error.statusCode);
+      },
+      onRetry: function (error, attempt) {
+        Logger.log("Claude API呼び出しを再試行します(" + attempt + "回目失敗): " + error);
+      }
+    }
+  );
+}
+
+function callClaudeApiOnce_(prompt) {
   var apiKey = PropertiesService.getScriptProperties().getProperty("ANTHROPIC_API_KEY");
   if (!apiKey) {
     throw new Error("ANTHROPIC_API_KEY が未設定です。スクリプト プロパティで設定してください。");
@@ -165,7 +218,9 @@ function callClaudeApi_(prompt) {
   });
   var responseCode = response.getResponseCode();
   if (responseCode < 200 || responseCode >= 300) {
-    throw new Error("Claude APIの呼び出しに失敗しました(ステータスコード " + responseCode + "): " + response.getContentText());
+    var error = new Error("Claude APIの呼び出しに失敗しました(ステータスコード " + responseCode + "): " + response.getContentText());
+    error.statusCode = responseCode;
+    throw error;
   }
   var body = JSON.parse(response.getContentText());
   return body.content && body.content[0] && body.content[0].text ? body.content[0].text : "";

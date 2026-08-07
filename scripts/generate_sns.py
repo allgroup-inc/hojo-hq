@@ -37,7 +37,15 @@ SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_med
 PROMOTE_MIN_DAYS = 30   # 通常投稿はこれ以上先の締切のみ
 SOON_MAX_DAYS = 7       # これ未満は「予告」カードに回す
 
-HASHTAGS = "#沖縄 #補助金 #助成金 #沖縄経営者 #事業承継 #沖縄企業のミカタ"
+# hashtag-strategyスキル準拠: Instagramの5タグ上限を守り、話題ごとにセットを
+# ローテーションする(固定1ブロックの使い回しはNG)。ニッチ・ミドルタグを優先。
+HASHTAG_SETS = {
+    "seido": "#沖縄補助金 #沖縄助成金 #沖縄経営者 #中小企業支援 #沖縄企業のミカタ",
+    "shokei": "#事業承継 #沖縄M&A #後継者問題 #沖縄経営者 #沖縄企業のミカタ",
+    "yokoku": "#沖縄補助金 #GビズID #中小企業支援 #沖縄経営者 #沖縄企業のミカタ",
+    "deadline_alert": "#沖縄補助金 #締切管理 #中小企業支援 #沖縄経営者 #沖縄企業のミカタ",
+}
+DEFAULT_HASHTAGS = "#沖縄企業のミカタ #沖縄経営者 #沖縄補助金 #沖縄助成金 #中小企業支援"
 DISCLAIMER = "※要件・締切・金額は必ず原文の公募要領でご確認ください。"
 
 
@@ -152,6 +160,7 @@ def write_post(n, slug, role, img_title, img_sub, img_number, caption, source, b
     fname = f"{n:02d}_{slug}.md"
     path = os.path.join(OUT_DIR, fname)
     badge_line = f"\n- バッジ: {badge}" if badge else ""
+    hashtags = HASHTAG_SETS.get(slug, DEFAULT_HASHTAGS)
     body = f"""# 投稿{n}｜{role}
 
 ## 画像に載せる文言
@@ -162,7 +171,7 @@ def write_post(n, slug, role, img_title, img_sub, img_number, caption, source, b
 ## キャプション
 {caption}
 
-{HASHTAGS}
+{hashtags}
 
 ## 出典
 {source}
@@ -211,8 +220,8 @@ def main():
         img_sub="補助金・助成金を、毎日ぜんぶ。",
         img_number=f"掲載 {count}件",
         caption=(
-            "🌺 沖縄の事業者向けに、国・県・関係機関の補助金・助成金情報を"
-            "まとめて毎日更新する無料サイト「沖縄企業のミカタ」を公開しました。\n\n"
+            f"沖縄で今使える補助金・助成金、{count}件。ぜんぶ無料で見られる場所を作りました🌺\n"
+            "国・県・関係機関の情報を毎日集めて更新する「沖縄企業のミカタ」です。\n\n"
             "「知らなかった」で機会を逃さないために。\n"
             "📌 気になる制度は、締切の約1か月前からLINEでお知らせします。\n"
             f"まずは無料のLINE登録から👇\n{SITE_URL}"
@@ -225,7 +234,8 @@ def main():
         dl = days_left(it, today)
         num = f"締切まで残り{dl}日" if dl is not None else "募集中"
         cap = (
-            f"📣【募集中】{it['name']}\n"
+            f"📣 締切まで残り{dl}日。いまなら準備が間に合います。\n"
+            f"【募集中】{it['name']}\n"
             f"🗓 {deadline_line(it, today)}\n"
             f"💰 {amount_text(it.get('max_amount'))}\n"
             f"🏝 実施主体：{it.get('issuer') or '要確認'}\n"
@@ -285,6 +295,7 @@ def main():
         img_sub="探すのは、私たちの仕事。",
         img_number="3ステップ",
         caption=(
+            "補助金探しに、夜の時間を使わなくてよくなります。\n"
             "🔎 ① 簡単な診断で条件を選ぶ\n"
             "📋 ② あなたの会社が使えるかもしれない制度を表示\n"
             "📲 ③ LINE登録で締切アラートを受け取る\n"
@@ -301,7 +312,7 @@ def main():
         img_sub="間に合う時期に、お伝えします。",
         img_number="締切1か月前",
         caption=(
-            "⏰ 補助金・助成金は、締切を過ぎると申請できません。\n"
+            "補助金の「知った時にはもう遅い」は、だいたい締切の1か月前に決まります。\n"
             "しかも申請には事業計画書や、国の電子申請で使うGビズIDの準備が要ることも。"
             "締切の直前に知っても、間に合わないことがあります。\n"
             "だからLINE登録で、気になる制度の締切の約1か月前からお知らせします。（無料）\n"
@@ -317,8 +328,8 @@ def main():
         img_sub="沖縄企業のミカタ",
         img_number=f"掲載 {count}件",
         caption=(
-            "🌺 沖縄の事業者のための、補助金・助成金ナビ。\n"
-            "いま使える制度が見つかるかもしれません。\n"
+            "「うちに使える制度、あるのかな」— 30秒でわかります。\n"
+            "沖縄の事業者のための、補助金・助成金ナビ。会社名の入力は不要です🌺\n"
             f"まずは無料のLINE登録から👇\n{SITE_URL}"
         ),
         source=SITE_URL,

@@ -6,13 +6,14 @@ description: "GitHub Actions / cron / Claude Routines / /loop など、繰り返
 # 壊れにくい自動化・エージェント設計
 
 24時間/無人で動く自動化の本質は、AIの賢さではなく**壊れにくいシステム設計**。
-このスキルは、このリポジトリの自動化——GitHub Actions のcron群(update-subsidies=1日4回の
-制度収集、fukugiiro-fetch=朝夕2回、tanpatsu-draft=毎月8日・22日、weekly/monthly-report、
-social-post=承認ゲート付きSNS投稿、healthcheck=毎朝10時の死活監視→Issue+LINE通知、
-e2e/lighthouse/verify-sources)と GAS会話ボット——を新規に作る/直す/レビューするときに使う。
-既存の自動化はこの考え方に近い形(定期実行の基盤 = コード主体のGitHub Actions Workflow、
-Claude APIでの構造化・下書き生成 = Agent判断部分、社外への副作用 = 人間の承認ゲート)で
-作られている。新しい自動化もこの型に揃える。
+このスキルは、このリポジトリの自動化(cron・定期ワークフロー・チャットボット等)を
+新規に作る/直す/レビューするときに使う。既存の自動化がこの考え方に近い形(定期実行の
+基盤 = コード主体のWorkflow、Claude APIでの構造化・下書き生成 = Agent判断部分、
+社外への副作用 = 人間の承認ゲート)で作られていれば、新しい自動化もこの型に揃える。
+
+> ALLGROUP共通スキル(hojo-hqを本店として複数リポジトリで共有)。このファイルは
+> 特定事業のワークフロー名を前提にしないこと。具体例が必要な場合は「このリポジトリの
+> 実際の自動化(cronジョブ名・データ保存先等)を確認したうえで」と案内するに留める。
 
 ## 大原則
 
@@ -48,13 +49,10 @@ AIでやる: 重要ニュース選定・切り口検討・意図分類・要約�
 保存項目: `job_id` / `workflow_version` / `status` / `current_step` / `completed_steps` /
 `pending_steps` / `retry_count` / `idempotency_key` / `last_error` / `cost_usd` / `updated_at`。
 保存先は規模に応じて: 小規模=JSON/SQLite、チーム=PostgreSQL、長時間ワークフロー=Trigger.dev等。
-このリポジトリでは `data/` 配下のJSON群がこれに相当する(`subsidies.json`=制度DBと募集status、
-`tanpatsu_topics.json`=お題キューのstatus遷移 pending→drafted→published、`kekka_kpi.json`・
-`note_kpi.json`=KPI台帳、`line_alerts.json`=配信済み記録、`data/fukugiiro/funnel.json`・
-`data/hojo/funnel.json`=診断ファネル集計など)。企業からの受信(診断・会話・相談)は
-スプレッドシート「ミカタ企業台帳」(GAS)側に保存する。ActionsがGitコミットで
-永続化するため、実行履歴と状態変化がそのまま監査ログになる。新しい自動化の状態も
-この型(data/のJSON+Gitコミット)に載せる。
+GitHub Actions中心のリポジトリでは、`data/`配下のJSONファイル+Gitコミットで状態を
+永続化する構成が相性が良い(実行履歴と状態変化がそのまま監査ログになる)。実際の
+保存先ファイル名・構成はリポジトリごとに異なるので、着手前にそのリポジトリの
+`data/`配下・既存ワークフローを確認してから同じ型に合わせること。
 
 **④ 重複実行を「べき等性」で防ぐ**
 `idempotency_key` 例: `news-summary:2026-07-30` / `invoice-reminder:customer-123:2026-07`。
@@ -99,11 +97,12 @@ Hook活用例: 危険コマンドの検知と停止・編集後にformatter/lint
 |---|---|---|
 | `/loop`(Skill) | 短時間監視・PR/Issueのポーリング・開発中の試作・デプロイ監視 | PCを閉じても継続したい処理・数週間の永続運用・完全無人の本番業務(セッション内のみ、作成から7日で終了) |
 | Claude Routines(`create_trigger`) | 毎朝の情報収集・定期整理・PRレビュー・デプロイ後検証 | 最小間隔1時間・承認ダイアログ不可・権限は最小限に |
-| GitHub Actions等の通常クラウドワークフロー | AI判断が少ない決まった処理・データ取得/変換/保存/通知(このリポジトリの標準はこれ) | AIの判断が多い・柔軟性が必要な処理 |
+| GitHub Actions/Power Automate等の通常クラウドワークフロー | AI判断が少ない決まった処理・データ取得/変換/保存/通知(このリポジトリの標準ツールを確認して使う) | AIの判断が多い・柔軟性が必要な処理 |
 | Claude Agent SDK | 自社アプリへの組み込み・独自UI・細かな権限制御 | 実行環境/スケジューリング/保存/キュー/監視/リトライ/シークレット/コスト制御を自前設計する前提 |
 | Managed Agents | 長時間・非同期エージェント・実行基盤管理を減らしたい | 現在ベータ版、本番の主軸にはまだ不向き |
 
-選び方まとめ: まず試作=`/loop` → 安定運用に載せる=Claude Routines or GitHub Actions →
+選び方まとめ: まず試作=`/loop` → 安定運用に載せる=Claude Routines またはこのリポジトリの
+標準クラウドワークフロー基盤(GitHub Actions・Power Automate等、リポジトリごとに異なる) →
 自社アプリに組み込む=Agent SDK。どれを選んでもHooks・権限制御・環境分離は追加する。
 
 ## 新規/既存の自動化をレビューするときのチェックリスト

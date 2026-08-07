@@ -14,7 +14,7 @@
 https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDPyeMAH
 ※要件・締切・金額は必ず原文の公募要領でご確認ください。
 
-#沖縄 #補助金 #助成金 #沖縄経営者 #事業承継 #沖縄企業のミカタ
+#事業承継 #沖縄M&A #後継者問題 #沖縄経営者 #沖縄企業のミカタ
 
 ## 出典
 https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDPyeMAH

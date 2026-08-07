@@ -2,12 +2,15 @@
  * GLOW企業リレーション台帳: シート初期化
  * Apps Scriptエディタの関数選択で ensureLedgerTabs を選び、実行ボタンで手動実行する。
  * 実行すると「企業マスタ」「対応履歴ログ」「紹介パートナーマスタ」「設定」
- * 「レター下書き」「ダッシュボード」「ダッシュボード履歴」の7タブが(存在しなければ)作成され、1行目に見出しが設定される。
+ * 「レター下書き」「ダッシュボード」「ダッシュボード履歴」「スタッフ」の8タブが
+ * (存在しなければ)作成され、1行目に見出しが設定される。
  * 対応履歴ログの「種別」「対応相手」列、レター下書きの「ステータス」列には、
  * 表記ゆれによる集計漏れを防ぐためプルダウン入力規則を設定する。
  * 企業マスタの「電話番号」列は先頭ゼロ落ちを防ぐためプレーンテキスト形式を強制し、
  * 「連絡不要」列にはチェックボックスの入力規則を設定する。
  * 企業マスタの「後継者状況」列には、あり/なし/不明のプルダウン入力規則を設定する(空欄可)。
+ * スタッフの「有効」列にはチェックボックスの入力規則を設定する(対面連携機能の連携先候補の
+ * on/off切り替え用。ShareRunner.gs参照)。
  */
 function ensureLedgerTabs() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -24,6 +27,8 @@ function ensureLedgerTabs() {
   applyLetterDraftStatusValidation_(letterDraftSheet);
   ensureTab_(ss, GlowSchema.DASHBOARD_SHEET_NAME, GlowSchema.DASHBOARD_PLACEHOLDER_HEADERS);
   ensureTab_(ss, GlowSchema.DASHBOARD_HISTORY_SHEET_NAME, GlowSchema.DASHBOARD_HISTORY_HEADERS);
+  var staffSheet = ensureTab_(ss, GlowSchema.STAFF_SHEET_NAME, GlowSchema.STAFF_HEADERS);
+  applyStaffActiveValidation_(staffSheet);
 }
 
 function ensureTab_(spreadsheet, sheetName, headers) {
@@ -81,4 +86,10 @@ function applySuccessorStatusValidation_(sheet) {
     .setAllowInvalid(false)
     .build();
   sheet.getRange(2, successorStatusColumnIndex, Math.max(sheet.getMaxRows() - 1, 1), 1).setDataValidation(rule);
+}
+
+function applyStaffActiveValidation_(sheet) {
+  var activeColumnIndex = GlowSchema.STAFF_HEADERS.indexOf("有効") + 1;
+  var rule = SpreadsheetApp.newDataValidation().requireCheckbox().build();
+  sheet.getRange(2, activeColumnIndex, Math.max(sheet.getMaxRows() - 1, 1), 1).setDataValidation(rule);
 }

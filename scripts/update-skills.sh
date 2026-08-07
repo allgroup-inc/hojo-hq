@@ -33,11 +33,14 @@ trap 'rm -rf "$TMP"' EXIT
 resolve() { local r="$1"; [ -d "$BASE/$r/.git" ] && echo "$BASE/$r" || echo "/home/user/$r"; }
 
 # マーケ系(Superpowers + marketing 48)。他は Superpowers のみ。全repo共通でALLGROUPスキルも同期。
-MARKETING_REPOS=(hojo-hq hikari-hq hikari-lp hikari-report kakei-hq)
+MARKETING_REPOS=(hojo-hq hikari-hq hikari-lp hikari-report kakei-hq okinawa-villa)
 INFRA_REPOS=(report-hq go allgroup-site)
 
 # ALLGROUP共通スキル(本店=hojo-hq)。ここに追加するとdrift防止対象が増える。
-ALLGROUP_SKILL_NAMES=(humanizer resilient-agent-design mindshare-arbitrage taste-skill last30days social-media-skills)
+# social-media系8スキルは検出仕様(.claude/skills直下のみ走査)のためフラット配置(2026-08-07修正)
+ALLGROUP_SKILL_NAMES=(humanizer resilient-agent-design mindshare-arbitrage taste-skill last30days
+  caption-writer carousel-writer content-calendar hashtag-strategy hook-writer
+  instagram-growth platform-specs-and-validation thread-writer)
 ALLGROUP_LICENSE_NAMES=(TASTE-SKILL-LICENSE LAST30DAYS-LICENSE SOCIAL-MEDIA-SKILLS-LICENSE)
 
 echo "==> cloning upstreams"
