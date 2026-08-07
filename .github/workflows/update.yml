@@ -58,9 +58,11 @@ jobs:
         run: python scripts/generate_story.py
 
       - name: Record KGI (LINE友だち数の日次記録)
-        # KGI実測値をリポジトリに蓄積(未接続・集計待ちも状態を明記)
+        # KGI実測値をリポジトリに蓄積(未接続・集計待ちも状態を明記)。
+        # readyが3日途切れたら管理者LINEへ警報1回(計測の無言停止対策)。
         env:
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_ADMIN_USER_ID: ${{ secrets.LINE_ADMIN_USER_ID }}
         run: python scripts/record_kgi.py
 
       - name: Record もらいわすれ堂 IGフォロワー数(❸)
