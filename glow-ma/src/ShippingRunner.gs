@@ -155,3 +155,70 @@ function installLetterDraftEditTrigger() {
     .create();
   Logger.log("発送日記録用のonEditトリガーを登録しました。");
 }
+
+/**
+ * メニュー「GLOW台帳」→「発送日でCSV出力」から実行する。
+ * 指定した発送日に一致するレター下書きを、企業マスタと突合してCSV化し、
+ * ダウンロードリンク付きのダイアログで表示する。業者への送信は行わない
+ * (人がダウンロードしたファイルを自分の判断で業者に渡す運用)。
+ */
+function exportShippingCsvForDate() {
+  var ui = SpreadsheetApp.getUi();
+  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  var response = ui.prompt(
+    "発送日でCSV出力",
+    "対象の発送日を yyyy-MM-dd 形式で入力してください(空欄なら本日: " + todayString + ")",
+    ui.ButtonSet.OK_CANCEL
+  );
+  if (response.getSelectedButton() !== ui.Button.OK) return;
+  var targetDate = response.getResponseText().trim() || todayString;
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var draftSheet = ss.getSheetByName(GlowSchema.LETTER_DRAFT_SHEET_NAME);
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  if (!draftSheet || !companySheet) {
+    ui.alert(
+      "「" + GlowSchema.LETTER_DRAFT_SHEET_NAME + "」または「" + GlowSchema.COMPANY_MASTER_SHEET_NAME +
+      "」タブが見つかりません。先に ensureLedgerTabs を実行してください。"
+    );
+    return;
+  }
+
+  var letterDrafts = readLetterDrafts_(draftSheet);
+  var companies = readCompanyRecords_(companySheet);
+  var rows = GlowShippingContent.buildShippingCsvRows(letterDrafts, companies, targetDate);
+  if (rows.length <= 1) {
+    ui.alert("発送日「" + targetDate + "」に該当するデータがありません。");
+    return;
+  }
+
+  var csvString = GlowShippingContent.toCsvString(rows);
+  var html = buildCsvDownloadHtml_(csvString, targetDate);
+  var output = HtmlService.createHtmlOutput(html).setWidth(480).setHeight(420);
+  ui.showModalDialog(output, "発送日「" + targetDate + "」のCSV(" + (rows.length - 1) + "件)");
+}
+
+function readLetterDrafts_(sheet) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  var headers = GlowSchema.LETTER_DRAFT_HEADERS;
+  var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  return values.map(function (row) {
+    var record = {};
+    headers.forEach(function (header, i) { record[header] = row[i]; });
+    return record;
+  });
+}
+
+function buildCsvDownloadHtml_(csvString, targetDate) {
+  var base64Csv = Utilities.base64Encode(csvString, Utilities.Charset.UTF_8);
+  var escapedCsv = csvString
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  return "<div style=\"font-family:sans-serif;padding:0.75rem\">" +
+    "<p><a download=\"letter_shipping_" + targetDate + ".csv\" " +
+    "href=\"data:text/csv;charset=utf-8;base64," + base64Csv + "\">CSVをダウンロード</a></p>" +
+    "<pre style=\"white-space:pre-wrap;font-size:0.8rem;border:1px solid #ccc;padding:0.5rem;" +
+    "max-height:220px;overflow:auto\">" + escapedCsv + "</pre></div>";
+}
