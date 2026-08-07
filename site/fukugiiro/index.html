@@ -197,7 +197,181 @@ footer .fwrap p{margin-bottom:6px}
 </style>
 </head>
 <body>
-<header class="siteheader">
+
+<!-- ===== 世界観フィルム(v5): 夜→朝、「沖縄です。」の物語。実写差し替え前の絵コンテ実装 ===== -->
+<link rel="stylesheet" href="assets/film.css">
+<div style="position:relative">
+<div class="tinyhead" id="thead" style="position:absolute">
+  <a class="hl" href="#top"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="2" width="60" height="60" rx="18" fill="#F5E0CE"/><g fill="#F5CE6E"><circle cx="52" cy="16.5" r="1.9"/><circle cx="50.2" cy="20.7" r="1.9"/><circle cx="46" cy="22.5" r="1.9"/><circle cx="41.8" cy="20.7" r="1.9"/><circle cx="40" cy="16.5" r="1.9"/><circle cx="41.8" cy="12.3" r="1.9"/><circle cx="46" cy="10.5" r="1.9"/><circle cx="50.2" cy="12.3" r="1.9"/></g><circle cx="46" cy="16.5" r="4" fill="#F2C14E"/><path d="M11 53 A21 21 0 0 1 53 53" stroke="#D2694A" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M18 53 A14 14 0 0 1 46 53" stroke="#F2C14E" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M25 53 A7 7 0 0 1 39 53" stroke="#6FAEA4" stroke-width="6" fill="none" stroke-linecap="round"/></svg>もらいわすれ堂</a>
+  <a class="skip" href="#honmon">スキップして診断へ →</a>
+</div>
+<div class="film">
+
+  <!-- S1: 146万人(夜・集落の灯り) -->
+  <section class="scene s1" id="s1">
+    <div class="kb">
+      <div class="milky"></div>
+      <div id="stars"></div>
+      <div class="cloud c1" style="top:20%"></div>
+      <div class="moon"></div>
+      <div class="shooting"></div>
+      <div class="island"><svg viewBox="0 0 1200 240" preserveAspectRatio="none"><path d="M0 240 L0 150 C120 118 260 132 380 110 C500 88 640 96 760 118 C880 140 1040 128 1200 150 L1200 240 Z" fill="#0B1514"/></svg></div>
+      <div id="vlights"></div>
+      <div class="flora left"><svg viewBox="0 0 120 200" aria-hidden="true"><g fill="#0B1514"><path d="M58 200 C55 150 52 110 56 78 L64 78 C62 112 64 152 70 200 Z"/><g class="sway"><path d="M60 80 C40 62 18 58 4 66 C22 52 48 56 62 72 Z"/><path d="M60 80 C48 56 30 42 12 42 C32 34 54 52 64 74 Z"/><path d="M62 78 C64 52 78 34 98 30 C80 42 70 60 68 78 Z"/><path d="M62 78 C74 58 96 50 114 56 C96 44 72 54 60 74 Z"/><path d="M60 76 C56 54 58 36 66 24 C58 40 60 60 66 76 Z"/><circle cx="58" cy="82" r="4"/><circle cx="66" cy="84" r="4"/></g></g></svg></div>
+    </div>
+    <div class="pretitle"><p>これは、あなたにも関係のある物語。</p></div>
+    <div class="copy">
+      <p class="stmt stmt-l dark-t">146万人が、<br>住んでいるのが沖縄です。</p>
+      <p class="rise d2 sub">— あの灯りのひとつひとつに、暮らしがある —</p>
+    </div>
+    <div class="filmchip">実写: 夜の集落・那覇の灯り(空撮)</div>
+    <div class="scrollcue">ゆっくり、下へ</div>
+  </section>
+
+  <!-- S2: 出会い・伝統(未明・三線とシーサー) -->
+  <section class="scene s2" id="s2">
+    <div class="kb">
+      <div class="hoshi" style="top:12%;left:30%;width:3px;height:3px;animation-delay:.5s"></div>
+      <div class="hoshi" style="top:20%;left:78%;width:2px;height:2px;animation-delay:1.3s"></div>
+      <div class="hoshi" style="top:6%;left:56%;width:3px;height:3px"></div>
+      <div class="hoshi" style="top:28%;left:14%;width:2px;height:2px;animation-delay:1.9s"></div>
+      <div class="cloud c2" style="top:26%"></div>
+      <!-- 赤瓦屋根とシーサーの影 -->
+      <div class="sil" style="right:0;bottom:0;width:min(64vw,420px)"><svg viewBox="0 0 420 200">
+        <path d="M0 200 L0 168 C40 150 90 128 210 122 C330 128 380 150 420 168 L420 200 Z"/>
+        <path d="M40 160 L60 128 L200 118 L215 150 Z" opacity=".9"/>
+        <g transform="translate(238 74) scale(.9)">
+          <path d="M20 60 C8 56 4 44 10 34 C14 26 24 20 36 20 C52 20 64 30 64 44 C64 54 58 60 50 62 Z"/>
+          <path d="M36 20 C34 12 40 6 48 8 C46 12 46 16 48 20 Z"/>
+          <path d="M50 62 C62 58 72 60 76 68 C68 66 60 66 54 68 Z"/>
+        </g>
+      </svg></div>
+      <!-- 三線を弾く人の影 -->
+      <div class="sil" style="left:6vw;bottom:0;width:min(30vw,170px)"><svg viewBox="0 0 170 200">
+        <circle cx="78" cy="74" r="17"/>
+        <path d="M52 200 C50 156 56 118 66 100 C74 90 90 90 98 100 C108 118 112 156 110 200 Z"/>
+        <path d="M64 116 C48 122 34 116 26 102 L34 96 C42 108 54 112 66 108 Z"/>
+        <path d="M96 118 C110 112 124 100 146 96 L146 104 C126 108 112 120 102 126 Z"/>
+        <ellipse cx="112" cy="122" rx="16" ry="12"/>
+        <rect x="120" y="86" width="44" height="5" rx="2.5" transform="rotate(-18 120 86)"/>
+      </svg></div>
+    </div>
+    <div class="copy">
+      <p class="stmt stmt-s dark-t">出会いを大事にし、<br>伝統を紡ぐのが沖縄です。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#C9D2C6;font-weight:500">いちゃりばちょーでー ——<br>一度会えば、みな兄弟。</p>
+    </div>
+    <div class="filmchip">実写: 三線・エイサーの練習・織物の手元</div>
+  </section>
+
+  <!-- S3: 助け合う(夜明け前・ゆいまーる) -->
+  <section class="scene s3" id="s3">
+    <div class="kb">
+      <div class="cloud c1" style="top:14%"></div>
+      <!-- 舟を一緒に押す人々(ゆいまーる) -->
+      <div class="sil" style="left:50%;bottom:4vh;width:min(78vw,460px);transform:translateX(-50%)"><svg viewBox="0 0 460 160">
+        <path d="M60 128 C120 108 340 108 410 124 C390 146 330 156 230 156 C130 156 84 146 60 128 Z"/>
+        <g>
+          <circle cx="66" cy="70" r="13"/>
+          <path d="M48 132 C48 104 54 88 66 84 C76 82 84 92 86 104 L96 122 L88 128 L76 112 C74 124 72 130 70 132 Z"/>
+        </g>
+        <g>
+          <circle cx="150" cy="58" r="13"/>
+          <path d="M132 124 C132 96 140 78 152 74 C162 72 170 82 172 94 L184 114 L176 120 L164 102 C162 114 158 120 156 124 Z"/>
+        </g>
+        <g transform="scale(-1,1) translate(-880,0)">
+          <circle cx="430" cy="62" r="13"/>
+          <path d="M412 128 C412 100 420 82 432 78 C442 76 450 86 452 98 L464 118 L456 124 L444 106 C442 118 438 124 436 128 Z"/>
+        </g>
+      </svg></div>
+    </div>
+    <div class="copy" style="transform:translateY(-8vh)">
+      <p class="stmt stmt-s dark-t">困ったときは、<br>助け合うのが沖縄です。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#D8DCC9;font-weight:500">ゆいまーる —— 結いの心。</p>
+    </div>
+    <div class="filmchip">実写: 収穫を手伝う人たち・共同売店・道ジュネー</div>
+  </section>
+
+  <!-- S4: 美しい(朝焼けの海) -->
+  <section class="scene s4x" id="s4">
+    <div class="kb">
+      <div class="cloud c1" style="top:12%;background:rgba(255,224,194,.16)"></div>
+      <div class="glow"></div>
+      <div class="risingsun"></div>
+      <div class="bird" style="top:24%"><svg viewBox="0 0 60 24"><path class="flap" d="M4 16 C12 6 20 6 30 14 C40 6 48 6 56 16"/></svg></div>
+      <div class="bird b2" style="top:32%"><svg viewBox="0 0 60 24"><path class="flap" d="M4 16 C12 6 20 6 30 14 C40 6 48 6 56 16"/></svg></div>
+      <div class="bird b3" style="top:18%"><svg viewBox="0 0 60 24"><path class="flap" d="M4 16 C12 6 20 6 30 14 C40 6 48 6 56 16"/></svg></div>
+      <div class="dawnsea">
+        <div class="wave w2"><svg viewBox="0 0 1200 110" preserveAspectRatio="none"><path d="M0 60 C150 25 300 95 450 60 C600 25 750 95 900 60 C1050 25 1200 95 1350 60 L1350 110 L0 110 Z" fill="#B57A55"/></svg></div>
+        <div class="wave w3"><svg viewBox="0 0 1200 110" preserveAspectRatio="none"><path d="M0 60 C150 30 300 90 450 60 C600 30 750 90 900 60 C1050 30 1200 90 1350 60 L1350 110 L0 110 Z" fill="#9A6647"/></svg></div>
+      </div>
+      <!-- ハイビスカスの影 -->
+      <div class="sil dawns" style="left:-2vw;bottom:2vh;width:min(30vw,160px)"><svg viewBox="0 0 160 180">
+        <path d="M40 180 C42 140 46 110 56 88 L64 92 C54 116 50 144 50 180 Z"/>
+        <g transform="translate(60 40) scale(1.05)">
+          <ellipse cx="0" cy="-18" rx="12" ry="20"/>
+          <ellipse cx="17" cy="-6" rx="12" ry="20" transform="rotate(72)"/>
+          <ellipse cx="10" cy="16" rx="12" ry="20" transform="rotate(144)"/>
+          <ellipse cx="-10" cy="16" rx="12" ry="20" transform="rotate(216)"/>
+          <ellipse cx="-17" cy="-6" rx="12" ry="20" transform="rotate(288)"/>
+        </g>
+      </svg></div>
+    </div>
+    <div class="copy" style="transform:translateY(-6vh)">
+      <p class="stmt stmt-l warm-t">なにより、<br>美しいのが沖縄です。</p>
+    </div>
+    <div class="filmchip">実写: 慶良間の海・やんばるの森・朝焼けのビーチ</div>
+  </section>
+
+  <!-- S6: そんな沖縄に(問題→希望) -->
+  <section class="scene s6" id="s6">
+    <div class="mote" style="width:7px;height:7px;top:26%;left:20%"></div>
+    <div class="mote" style="width:5px;height:5px;top:56%;left:76%;animation-delay:1.4s"></div>
+    <div class="copy">
+      <p class="rise q1">そんな沖縄に、いま。<br>まだ眠っている“ささえ”があります。</p>
+      <p class="rise d2 q2">国や県、市町村が用意した給付金や手当が——<br>「知らなかった」というだけで、<br>届かないまま終わることがある。</p>
+      <p class="rise d3 q2" style="color:var(--coral-deep);font-weight:700">一人が受け取るたび、<br>沖縄のみらいは、すこし明るくなる。</p>
+    </div>
+  </section>
+
+  <!-- S7: ビジョン -->
+  <section class="scene s7" id="s7">
+    <div class="sunburst"></div>
+    <div class="mote" style="width:6px;height:6px;top:22%;left:24%;animation-delay:.4s"></div>
+    <div class="mote" style="width:5px;height:5px;top:34%;left:72%;animation-delay:1.6s"></div>
+    <svg class="logo" viewBox="0 0 64 46" aria-label="もらいわすれ堂のロゴ">
+      <g fill="#F5CE6E" class="petal"><circle cx="52" cy="12.5" r="1.9"/><circle cx="50.2" cy="16.7" r="1.9"/><circle cx="46" cy="18.5" r="1.9"/><circle cx="41.8" cy="16.7" r="1.9"/><circle cx="40" cy="12.5" r="1.9"/><circle cx="41.8" cy="8.3" r="1.9"/><circle cx="46" cy="6.5" r="1.9"/><circle cx="50.2" cy="8.3" r="1.9"/></g>
+      <circle cx="46" cy="12.5" r="4" fill="#F2C14E" class="petal"/>
+      <path class="arc a1" d="M11 43 A21 21 0 0 1 53 43" stroke="#D2694A"/>
+      <path class="arc a2" d="M18 43 A14 14 0 0 1 46 43" stroke="#F2C14E"/>
+      <path class="arc a3" d="M25 43 A7 7 0 0 1 39 43" stroke="#6FAEA4"/>
+    </svg>
+    <div class="copy">
+      <p class="vision mincho" id="visiontext">とどけ、沖縄のみらいへ。</p>
+      <p class="wm mincho rise d2" style="margin-top:.9em">もらいわすれ堂</p>
+    </div>
+  </section>
+
+  <!-- S8: 笑顔の写真の壁 -->
+  <section class="scene s8" id="s8">
+    <div class="faces" id="faces"></div>
+    <div class="haze"></div>
+    <div class="copy">
+      <p class="main mincho rise">そのみらいは、<br><span class="em">みんなの笑顔</span>で できている。</p>
+      <p class="sub2 mincho rise d2">こどもも、おとなも、おじいも、おばあも。</p>
+      <p class="mincho rise d3" style="margin-top:1.4em;font-size:clamp(.95rem,3.1vw,1.15rem);color:var(--ink);letter-spacing:.1em">あなたの家にも、まだ気づいていない<br>“ささえ”があるかもしれません。</p>
+      <a class="cta rise d3" href="shindan/">私の“もらい忘れ”を3分で調べる</a>
+      <p class="micro rise d3" style="margin-top:10px">無料 ・ 匿名 ・ 登録不要ではじめられます</p>
+      <p class="rise d3" style="margin-top:14px;font-size:.85rem"><a href="area/" style="color:var(--coral-deep);text-decoration:none;letter-spacing:.06em">まずは、お住まいの市町村のささえを見てみる ›</a></p>
+    </div>
+  </section>
+
+</div>
+
+</div>
+<script src="assets/film.js" defer></script>
+<!-- ===== フィルムここまで。以下、実用レイヤー ===== -->
+
+<header class="siteheader" id="honmon">
   <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="32" height="32">もらいわすれ堂</a>
   <nav>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
