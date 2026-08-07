@@ -5,7 +5,7 @@
 
 ## hojo-hqはALLGROUP共通スキルの「本店」(2026-08-07〜)
 以下の6つは、特定の事業に依存しない汎用スキルなので、hojo-hqを本店として他の業務
-リポジトリ(hikari-hq/hikari-lp/hikari-report/kakei-hq/report-hq/go/allgroup-site等)が
+リポジトリ(hikari-hq/hikari-lp/hikari-report/kakei-hq/okinawa-villa/report-hq/go/allgroup-site等)が
 ここから同期する運用にしている。
 
 - hojo-hqオリジナル: `humanizer` / `resilient-agent-design` / `mindshare-arbitrage`

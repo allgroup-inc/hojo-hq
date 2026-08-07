@@ -33,7 +33,7 @@ trap 'rm -rf "$TMP"' EXIT
 resolve() { local r="$1"; [ -d "$BASE/$r/.git" ] && echo "$BASE/$r" || echo "/home/user/$r"; }
 
 # マーケ系(Superpowers + marketing 48)。他は Superpowers のみ。全repo共通でALLGROUPスキルも同期。
-MARKETING_REPOS=(hojo-hq hikari-hq hikari-lp hikari-report kakei-hq)
+MARKETING_REPOS=(hojo-hq hikari-hq hikari-lp hikari-report kakei-hq okinawa-villa)
 INFRA_REPOS=(report-hq go allgroup-site)
 
 # ALLGROUP共通スキル(本店=hojo-hq)。ここに追加するとdrift防止対象が増える。
