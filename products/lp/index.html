@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>しくみ屋(仮称) | 自動で働く仕組みの、コード一式テンプレート</title>
+<meta name="description" content="情報収集・週次レポート・SNS下書きをGitHubとAIで自動運転にするテンプレート。サーバー代0円、セットアップ15分、日本語手順書つき。">
+<style>
+  :root {
+    --bg: #f3f5f4; --bg2: #e9edeb; --ink: #17201d; --sub: #5d6a64;
+    --line: #d5dcd8; --accent: #0e5c46; --accent-ink: #f3f5f4;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141917; --bg2: #1b211e; --ink: #e6eae8; --sub: #93a09a;
+      --line: #2b332f; --accent: #4bbd97; --accent-ink: #10201a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141917; --bg2: #1b211e; --ink: #e6eae8; --sub: #93a09a;
+    --line: #2b332f; --accent: #4bbd97; --accent-ink: #10201a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.85;
+         font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 22px; }
+  a { color: var(--accent); text-underline-offset: 4px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  header.site { display: flex; justify-content: space-between; align-items: baseline;
+                padding: 22px 0 0; }
+  .brand { font-weight: 800; letter-spacing: .01em; }
+  .brand small { font-weight: 400; color: var(--sub); margin-left: 8px; font-size: .75rem; }
+  header.site nav a { color: var(--sub); text-decoration: none; font-size: .85rem; }
+  header.site nav a:hover { color: var(--ink); }
+
+  .hero { display: grid; gap: 40px; align-items: center; padding: 56px 0 64px; }
+  @media (min-width: 900px) { .hero { grid-template-columns: 6fr 5fr; padding: 72px 0 88px; } }
+  .hero h1 { margin: 0 0 18px; font-size: clamp(2rem, 5.2vw, 3.3rem); font-weight: 900;
+             line-height: 1.28; letter-spacing: -.02em; text-wrap: balance; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p.lead { margin: 0 0 28px; font-size: 1.02rem; max-width: 34em; color: var(--sub); }
+  .cta { display: inline-block; background: var(--accent); color: var(--accent-ink);
+         font-weight: 700; text-decoration: none; padding: 14px 34px; border-radius: 6px; }
+  .cta:active { transform: translateY(1px); }
+  .shot { border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+          background: #fff; box-shadow: 0 24px 48px -32px rgba(23, 32, 29, .35); }
+  .shot img { display: block; width: 100%; height: auto; }
+  .shot-cap { margin-top: 10px; font-size: .78rem; color: var(--sub); }
+
+  .stats { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+           padding: 22px 0; display: flex; flex-wrap: wrap; gap: 10px 48px; }
+  .stats div { font-size: .9rem; color: var(--sub); }
+  .stats b { display: block; font-size: 1.5rem; color: var(--ink);
+             font-family: var(--mono); font-weight: 700; letter-spacing: -.01em; }
+
+  section { padding: 72px 0 8px; }
+  section > h2 { margin: 0 0 10px; font-size: clamp(1.4rem, 3vw, 1.9rem); font-weight: 900;
+                 letter-spacing: -.01em; text-wrap: balance; }
+  section > .sec-lead { margin: 0 0 34px; color: var(--sub); max-width: 62ch; }
+
+  .product { display: grid; gap: 8px 32px; padding: 30px 0; border-top: 1px solid var(--line); }
+  @media (min-width: 800px) { .product { grid-template-columns: 1fr 320px; } }
+  .product h3 { margin: 0; font-size: 1.18rem; font-weight: 800; }
+  .product .use { color: var(--sub); font-size: .85rem; margin: 2px 0 8px; }
+  .product p.desc { margin: 0; font-size: .95rem; max-width: 60ch; }
+  .p-side { display: flex; flex-direction: column; gap: 10px; }
+  @media (min-width: 800px) { .p-side { text-align: right; align-items: flex-end; } }
+  .price { font-family: var(--mono); font-size: 1.35rem; font-weight: 700; }
+  .price small { font-size: .75rem; color: var(--sub); font-weight: 400; margin-left: 6px; }
+  .specs { margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap;
+           gap: 6px 16px; font-size: .78rem; color: var(--sub); }
+  .specs li::before { content: "+ "; color: var(--accent); font-weight: 700; }
+  .buy { font-size: .9rem; font-weight: 700; }
+
+  .belief { border-left: 3px solid var(--accent); padding: 4px 0 4px 26px; margin: 0 0 30px; }
+  .belief h3 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 800; }
+  .belief p { margin: 0; color: var(--sub); font-size: .95rem; max-width: 60ch; }
+
+  table.daiko { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  table.daiko th, table.daiko td { text-align: left; padding: 14px 18px 14px 0;
+                                   border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.daiko th { font-weight: 700; white-space: nowrap; }
+  table.daiko td.p { font-family: var(--mono); white-space: nowrap; font-weight: 700; }
+
+  details { border-top: 1px solid var(--line); padding: 4px 0; }
+  details:last-of-type { border-bottom: 1px solid var(--line); }
+  summary { cursor: pointer; padding: 16px 0; font-weight: 700; list-style: none; }
+  summary::before { content: "+"; color: var(--accent); font-weight: 800; margin-right: 12px; }
+  details[open] summary::before { content: "-"; }
+  details p { margin: 0 0 18px; color: var(--sub); font-size: .93rem; max-width: 62ch; }
+
+  footer.site { margin-top: 80px; border-top: 1px solid var(--line); padding: 28px 0 64px;
+                font-size: .78rem; color: var(--sub); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <div class="brand">しくみ屋<small>仮称</small></div>
+  <nav><a href="#lineup">商品一覧</a></nav>
+</header>
+
+<div class="hero">
+  <div>
+    <h1>寝ている間も、<br><em>仕組み</em>が働く。</h1>
+    <p class="lead">情報収集、週次の売上レポート、SNSの下書き。毎日の定型作業を、GitHubとAIの自動運転に置き換えるテンプレートです。コード一式と日本語手順書つき。</p>
+    <a class="cta" href="#lineup">商品をみる</a>
+  </div>
+  <div>
+    <!-- 画像はテンプレで実際に生成されるサイトのスクリーンショット(サンプルデータ) -->
+    <figure style="margin:0">
+      <div class="shot"><img src="assets/sample-site.png" alt="テンプレートで生成される補助金まとめサイトの画面。締切が近い順に制度が並び、締切間近の強調表示と要確認表示がある" width="1120" height="1200"></div>
+      <figcaption class="shot-cap">テンプレートが生成するサイトの実物(サンプルデータ)。これが毎日自動で更新されます。</figcaption>
+    </figure>
+  </div>
+</div>
+
+<div class="stats" aria-label="運用コストの目安">
+  <div><b>0円</b>サーバー・ドメイン代(GitHub無料枠)</div>
+  <div><b>数百円/月</b>AI利用料(従量課金)</div>
+  <div><b>15分</b>セットアップ(手順書どおりで)</div>
+</div>
+
+<section id="lineup">
+  <h2>商品一覧</h2>
+  <p class="sec-lead">全商品、動くコード一式+日本語手順書+30日間のセットアップサポートつき。読んで終わりのノウハウ集ではありません。販売ページは順次公開します(準備中)。</p>
+
+  <article class="product">
+    <div>
+      <h3>補助金まとめサイト 構築テンプレ</h3>
+      <div class="use">地域や業種で切った補助金情報サイトを作りたい人に</div>
+      <p class="desc">国の補助金ポータルjGrantsの公式APIから受付中の制度を毎日取得。締切と金額はAPIの値をそのまま機械転記し、AIには要約しか書かせません。締切が近い順に自動整列、終了分は自動で薄く。</p>
+      <ul class="specs"><li>jGrants公式API対応</li><li>締切間近の自動強調</li><li>出典リンク必須の品質ゲート</li></ul>
+    </div>
+    <div class="p-side">
+      <div class="price">¥12,800<small>先行価格 ¥9,800</small></div>
+      <a class="buy" href="#lineup">販売ページで詳細を見る(準備中)</a>
+    </div>
+  </article>
+
+  <article class="product">
+    <div>
+      <h3>情報自動収集サイト 構築テンプレ</h3>
+      <div class="use">業界ニュース・入札・求人など、何のまとめサイトにも</div>
+      <p class="desc">RSSやWebサイトを1日2回巡回し、AIが日付・金額・対象者を抽出して一覧サイトに。原文から確認できない項目は「要確認」と表示し、断定させない安全設計です。ヒーローのスクリーンショットはこのテンプレの姉妹版で生成したものです。</p>
+      <ul class="specs"><li>RSS/HTML対応(robots.txt遵守)</li><li>要確認表示の品質ゲート</li><li>ダークモード対応の生成サイト</li></ul>
+    </div>
+    <div class="p-side">
+      <div class="price">¥8,000<small>先行価格 ¥5,980</small></div>
+      <a class="buy" href="#lineup">販売ページで詳細を見る(準備中)</a>
+    </div>
+  </article>
+
+  <article class="product">
+    <div>
+      <h3>週次経営レポート 自動生成テンプレ</h3>
+      <div class="use">自社の振り返りに。士業・コンサルの顧問先レポートにも</div>
+      <p class="desc">売上CSVを置いておくだけで、毎週月曜の朝に集計表+AI所見つきレポートが届きます。計算はプログラム、文章だけAI。だから数字は間違えません。顧問先への提供もライセンスで明示的に許可。</p>
+      <ul class="specs"><li>前週比・カテゴリ別を自動集計</li><li>所見は良かった点・注意点・来週の一手</li><li>月次レポートへの切替も1行</li></ul>
+    </div>
+    <div class="p-side">
+      <div class="price">¥5,000<small>先行価格 ¥3,980</small></div>
+      <a class="buy" href="#lineup">販売ページで詳細を見る(準備中)</a>
+    </div>
+  </article>
+
+  <article class="product">
+    <div>
+      <h3>SNS投稿下書き 自動生成テンプレ</h3>
+      <div class="use">ネタはあるのに書く時間がない店舗・事業者に</div>
+      <p class="desc">ネタ帳に一行書いておくと、毎週金曜に1週間分の下書き(Instagram+X+カルーセル案+画像アイデア)がまとまって出てきます。検索キーワードを冒頭に織り込む2026年設計。タグは内容直結の5個まで。</p>
+      <ul class="specs"><li>ブランド口調を設定で固定</li><li>NGワード・文字数の機械チェック</li><li>カルーセル向きネタを自動判定</li></ul>
+    </div>
+    <div class="p-side">
+      <div class="price">¥3,000<small>先行価格 ¥1,980</small></div>
+      <a class="buy" href="#lineup">販売ページで詳細を見る(準備中)</a>
+    </div>
+  </article>
+</section>
+
+<section>
+  <h2>すべての商品に共通する、3つの決めごと</h2>
+  <p class="sec-lead">AIの自動化は、設計を間違えると「自信満々に間違える機械」になります。全商品を同じ原則で作っています。</p>
+  <div class="belief">
+    <h3>数字と日付はAIに書かせない</h3>
+    <p>計算と転記はプログラムが行い、AIは要約と文章だけを担当します。売上の集計が1円ズレたり、補助金の締切をAIが創作したりしない構造です。</p>
+  </div>
+  <div class="belief">
+    <h3>確認できないことは「要確認」と言う</h3>
+    <p>原文から確定できない情報は断定せず、要確認と表示して出典リンクへ誘導します。見栄えより、読者の信頼を優先しています。</p>
+  </div>
+  <div class="belief">
+    <h3>暴走しない上限を最初から入れる</h3>
+    <p>1回の実行で処理する件数に上限があり、API費用が跳ねません。失敗したデータは公開されず隔離されます。</p>
+  </div>
+</section>
+
+<section>
+  <h2>自分で設定するのが不安なら、代行します</h2>
+  <p class="sec-lead">購入者限定の有償メニューです。「買ったけど動かせなかった」をゼロにします。</p>
+  <table class="daiko">
+    <tr><th>セットアップ代行</th><td>リポジトリ構築からAPIキー設定、初回実行の確認まで丸ごと</td><td class="p">¥30,000</td></tr>
+    <tr><th>特化カスタマイズ</th><td>上記+抽出項目とデザインをあなたの業種向けに調整</td><td class="p">¥50,000</td></tr>
+    <tr><th>月額メンテナンス</th><td>情報源の追加・不具合対応・月次の品質チェック</td><td class="p">¥10,000/月</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>よくある質問</h2>
+  <details>
+    <summary>プログラミングの知識は必要ですか</summary>
+    <p>不要です。手順書はGitHubの画面操作から書いてあり、設定はテキストファイルの書き換えだけ。30日間のセットアップサポートもつきます。</p>
+  </details>
+  <details>
+    <summary>月々いくらかかりますか</summary>
+    <p>サーバー代は0円(GitHub無料枠)。AIの利用料が従量課金で、多くの用途で月数百円に収まります。件数上限があるので想定外の課金は起きにくい設計です。</p>
+  </details>
+  <details>
+    <summary>商用サイトとして使えますか</summary>
+    <p>使えます。購入者本人の事業での利用(リード獲得・広告・顧問先への提供)は自由で、サイト数の制限もありません。テンプレート自体の再販売・再配布だけ禁止です。</p>
+  </details>
+</section>
+
+<footer class="site">
+  しくみ屋(仮称)。各商品の販売ページは順次公開します。<br>
+  補助金の申請代行は行いません(行政書士の独占業務のため。情報提供と専門家への橋渡しまで)。
+</footer>
+
+</div>
+</body>
+</html>
