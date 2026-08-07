@@ -191,3 +191,8 @@ main section h2{letter-spacing:.12em}
 .prise{opacity:0;transform:translateY(18px);transition:opacity 1.1s ease,transform 1.1s ease}
 .prise.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.prise{opacity:1!important;transform:none!important}}
+
+/* S4 実写主役化(本物の太陽・海に置き換え) */
+.s4x .risingsun,.s4x .glow,.s4x .dawnsea{display:none}
+.s4x .photoback::after{background:linear-gradient(180deg,rgba(110,65,40,.32) 0%,rgba(170,105,70,.14) 46%,rgba(243,220,192,.78) 100%)}
+.s4x .photoback::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at 50% 38%,rgba(70,45,30,.30),transparent 62%)}
