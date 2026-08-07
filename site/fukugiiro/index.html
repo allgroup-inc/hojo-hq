@@ -133,11 +133,12 @@ strong{font-weight:700}
   line-height:38px;font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.1rem}
 .steps li strong{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.08rem;color:var(--ink)}
 /* navcards */
-.navcards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.navcard{display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--card);
-  border:1px solid var(--line);border-radius:16px;padding:18px 14px;text-decoration:none;color:var(--ink);
-  font-weight:700;box-shadow:var(--shadow-sm);transition:transform .15s ease}
-.navcard:hover{transform:translateY(-2px)}
+.navcards{display:grid;grid-template-columns:1fr;gap:12px;max-width:760px;margin-left:auto;margin-right:auto}
+@media(min-width:640px){.navcards{grid-template-columns:repeat(3,1fr)}}
+.navcard{display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff;
+  border:1.5px solid var(--blush);border-radius:16px;padding:18px 14px;text-decoration:none;color:var(--coral-deep);
+  font-weight:700;box-shadow:var(--shadow-sm);transition:transform .15s ease,border-color .15s ease}
+.navcard:hover{transform:translateY(-2px);border-color:var(--coral)}
 .navcard span{font-size:.78rem;color:var(--muted);font-weight:400;margin-top:5px;line-height:1.5}
 /* cards (制度) */
 .cards{display:grid;gap:14px}
@@ -186,7 +187,6 @@ footer .fwrap p{margin-bottom:6px}
   .brandmark .wm{font-size:2.2rem}.brandmark img{width:84px;height:84px}}
 @media(min-width:900px){
   .wrap{max-width:980px}
-  .navcards{grid-template-columns:repeat(4,1fr)}
   .hero h1{font-size:2.55rem}
   .hero .sub,.story,.steps,details,.loss{max-width:780px;margin-left:auto;margin-right:auto}
   .steps{grid-template-columns:repeat(3,1fr)}
@@ -280,9 +280,9 @@ footer .fwrap p{margin-bottom:6px}
     </ol>
     <p class="note" style="margin-top:14px">※ 申請手続きの代行は行いません。専門家のサポートが必要な場合は、提携する専門家(社会保険労務士・行政書士など)におつなぎします。</p>
     <div class="navcards" style="margin-top:22px">
-      <a class="navcard" href="area/">市町村でさがす<span>お住まいの街のまとめ</span></a>
-      <a class="navcard" href="kit/">申請準備シート<span>持ち物リスト・印刷して窓口へ</span></a>
-      <a class="navcard" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで受け取る<span>締切の約1か月前にお知らせ(無料)</span></a>
+      <a class="navcard" href="area/">市町村でさがす ›<span>お住まいの街のまとめ</span></a>
+      <a class="navcard" href="kit/">申請準備シート ›<span>持ち物リスト・印刷して窓口へ</span></a>
+      <a class="navcard" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで受け取る ›<span>締切の約1か月前にお知らせ(無料)</span></a>
     </div>
   </div>
 </section>
