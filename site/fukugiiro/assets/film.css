@@ -155,8 +155,8 @@
 @media(max-width:560px){.photo{width:calc(var(--w) * .74)!important;padding-bottom:15px}.photo .cap{font-size:7.5px;bottom:2px}.photo .tag2{font-size:6.8px}}
 .photo .bob{animation:bob 6s ease-in-out infinite alternate}
 @keyframes bob{from{transform:translateY(2px)}to{transform:translateY(-4px)}}
-.s8 .haze{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:175vmin;height:96vmin;border-radius:50%;
-  background:radial-gradient(ellipse,rgba(251,245,236,.98) 32%,rgba(251,245,236,.9) 58%,rgba(251,245,236,0) 78%);z-index:5}
+.s8 .haze{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:120vmin;height:58vmin;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(251,245,236,.9) 30%,rgba(251,245,236,.6) 55%,rgba(251,245,236,0) 76%);z-index:5}
 .s8 .copy p.main{font-size:clamp(1.3rem,4.6vw,2rem);color:var(--ink)}
 .s8 .copy p.main .em{color:var(--coral-deep)}
 .s8 .sub2{margin-top:1em;font-size:clamp(.9rem,2.9vw,1.1rem)!important;color:var(--muted)!important;letter-spacing:.14em!important}
