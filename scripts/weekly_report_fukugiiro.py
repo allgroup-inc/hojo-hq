@@ -83,6 +83,21 @@ _MANUAL_FUNNEL = """## 2. ファネル(Plausibleで確認 → 数値を記入)
 *転換率(完了÷開始、シート÷完了)を毎週ここに残すと、離脱段が一目でわかります。*"""
 
 
+FUNNEL_STALE_DAYS = 3
+
+
+def funnel_stale_warning(updated_at, today):
+    """fetch側はAPI失敗時にexit 0して古いfunnel.jsonを残す設計のため、
+    レポート側で鮮度を判定する。3日以上前または日付不明なら警告行、新しければ None。"""
+    try:
+        age = (today - datetime.strptime(updated_at, "%Y-%m-%d").date()).days
+    except (TypeError, ValueError):
+        return f"⚠️ データ取得日が不明({updated_at!r})。古い可能性あり"
+    if age >= FUNNEL_STALE_DAYS:
+        return f"⚠️ データは{updated_at}時点(取得失敗のため古い可能性)"
+    return None
+
+
 def render_funnel_section(funnel):
     """funnel あれば自動集計セクション、無ければ手動フォールバックを返す。"""
     if not funnel or not funnel.get("stages"):
@@ -96,9 +111,11 @@ def render_funnel_section(funnel):
     wd = funnel.get("worst_drop")
     worst_line = (f"**最大離脱**: {wd['label']}(−{_pct(wd['drop_rate'])})← 今週ここが一番落ちている傾向。"
                   if wd else "**最大離脱**: 算出に十分なデータがまだありません。")
+    warn = funnel_stale_warning(funnel.get("updated_at"), datetime.now(JST).date())
+    warn_line = f"\n{warn}\n" if warn else ""
     return (
         f"## 2. ファネル(自動取得 — Plausible Stats API / 直近{funnel.get('period','7d')})\n\n"
-        f"更新: {funnel.get('updated_at','-')}。集計値のみ(個人識別子なし)。\n\n"
+        f"更新: {funnel.get('updated_at','-')}。集計値のみ(個人識別子なし)。\n{warn_line}\n"
         "| 段 | 件数 | 前段比 | 離脱率 |\n|---|---|---|---|\n"
         f"{rows}\n\n"
         f"{worst_line}\n\n"
