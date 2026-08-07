@@ -52,8 +52,8 @@ const PH=[
  [3,50,104,-3,'oji'],[24,54,96,5,'mama'],[46,51,100,-2,'child'],[68,54,108,3,'oba'],[87,50,96,-4,'child'],
  [1,74,112,3,'family'],[22,78,98,-4,'oji'],[43,75,104,2,'mama'],[65,78,110,-3,'child'],[85,74,100,4,'papa']
 ];
-const REALS={2:'assets/film/egao/e1.jpg',4:'assets/film/egao/e2.jpg',0:'assets/film/egao/e3.jpg',3:'assets/film/egao/e4.jpg',9:'assets/film/egao/e5.jpg',6:'assets/film/egao/e6.jpg'};
-const CAPS={2:'姉妹の笑顔',4:'おばあたちの笑顔',3:'おじいとおばあの笑顔',9:'ともだちの笑顔',6:'きょうだいの笑顔'};
+const REALS={2:'assets/film/egao/e1.jpg',4:'assets/film/egao/e2.jpg',0:'assets/film/egao/e3.jpg',3:'assets/film/egao/e4.jpg',9:'assets/film/egao/e5.jpg',6:'assets/film/egao/e6.jpg',7:'assets/film/egao/e7.jpg',8:'assets/film/egao/e8.jpg',5:'assets/film/egao/e9.jpg'};
+const CAPS={2:'姉妹の笑顔',4:'おばあたちの笑顔',3:'おじいとおばあの笑顔',9:'ともだちの笑顔',6:'きょうだいの笑顔',7:'おかあさんの笑顔',8:'琉装のこどもたち',5:'ふたりの門出'};
 const fb=document.getElementById('faces');
 fb.innerHTML=PH.map((f,i)=>{
   const [x,y,w,r,t]=f, delay=(i%20)*0.12;
