@@ -15,7 +15,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write  # 照合履歴(data/kpi/verify_history.json)のコミットに必要
   issues: write
 
 concurrency:
@@ -40,6 +40,24 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python scripts/verify_sources.py
+
+      # ── 照合履歴を台帳へ蓄積(NG検知時も必ず実行。効果測定2026-11-06の根拠データ)──
+      - name: Commit verify history
+        if: always()
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add data/kpi/verify_history.json
+          git diff --cached --quiet && exit 0
+          git commit -m "auto: verify history $(date -u '+%Y-%m-%d')"
+          d=2
+          for a in 1 2 3; do
+            git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            git fetch origin "${GITHUB_REF_NAME}"
+            git rebase "origin/${GITHUB_REF_NAME}" || git rebase --abort
+            sleep $d; d=$((d*2))
+          done
+          echo "::warning::照合履歴のpushに失敗(照合自体は完了)"
 
       # ── 不一致検知時: Issue を起票 / 既存の未解決Issueに追記 ──
       - name: Open or update issue on failure

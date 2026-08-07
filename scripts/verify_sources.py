@@ -14,6 +14,11 @@ hojo-hq 検証部(ケンショウ)× 100点基準❹
   いれば、同じ原文を Gemini でも独立に照合する。別系統モデルは誤り方が相関しない
   ため、どちらか一方でも矛盾を検知したら NG(要確認)扱い。Gemini側のAPI障害は
   NGにせず情報表示のみ(照合の可用性を外部ベンダーに依存させない)。
+- 判定が割れたときのセカンドパス: 指摘した側のAIに根拠の引用を要求し、
+  引用できない・見落としだった場合は撤回させる(誤検知Issueのノイズ対策)。
+- 照合履歴: 毎回の結果を data/kpi/verify_history.json に追記(同日再実行は上書き)。
+  Gemini参加率も記録し、無料枠切れ等による「静かな脱落」を検知可能にする。
+  NG項目の human_verdict は検証部が false_positive / true_mismatch を追記する運用。
 
 不一致があれば verify_report.txt に書き出して exit 1
 (→ ワークフローがIssueを自動起票する)。
@@ -30,6 +35,12 @@ from datetime import datetime, timezone, timedelta
 JST = timezone(timedelta(hours=9))
 DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "subsidies.json")
 REPORT_PATH = os.path.join(os.path.dirname(__file__), "..", "verify_report.txt")
+# 照合履歴(壊れにくい設計・原則③: 状態はコンテキストでなく外部へ)。
+# 2026-11-06 の効果測定で「NGのうち誤検知/真の不一致」を集計するための台帳。
+# NG項目の human_verdict は人が後から "false_positive" / "true_mismatch" を記入する。
+HISTORY_PATH = os.path.join(
+    os.path.dirname(__file__), "..", "data", "kpi", "verify_history.json"
+)
 JGRANTS_DETAIL = "https://api.jgrants-portal.go.jp/exp/v1/public/subsidies/id/{sid}"
 SAMPLE_SIZE = 5
 CLAUDE_MODEL = "claude-haiku-4-5"
@@ -60,6 +71,45 @@ VERDICT_SCHEMA = {
     },
     "required": ["consistent", "issues", "page_mentions_subsidy"],
     "additionalProperties": False,
+}
+
+# 判定が割れたときの再確認(セカンドパス)。指摘した側に根拠の引用を要求し、
+# 引用できない・見落としだった場合は撤回させる(誤検知によるIssueノイズ対策)。
+RECHECK_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "upheld": {
+            "type": "boolean",
+            "description": "再確認の結果、指摘を維持するか。根拠を示せない・表記ゆれや略称の見落としだった場合は false(撤回)",
+        },
+        "evidence_quote": {
+            "type": "string",
+            "description": "指摘を維持する場合、根拠となる本文箇所の引用(原文ママ)。『言及が見つからない』の維持や撤回時は空文字",
+        },
+        "reason": {"type": "string", "description": "判断理由(日本語・簡潔に)"},
+    },
+    "required": ["upheld", "evidence_quote", "reason"],
+    "additionalProperties": False,
+}
+
+GEMINI_VERDICT_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "consistent": {"type": "BOOLEAN"},
+        "issues": {"type": "ARRAY", "items": {"type": "STRING"}},
+        "page_mentions_subsidy": {"type": "BOOLEAN"},
+    },
+    "required": ["consistent", "issues", "page_mentions_subsidy"],
+}
+
+GEMINI_RECHECK_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "upheld": {"type": "BOOLEAN"},
+        "evidence_quote": {"type": "STRING"},
+        "reason": {"type": "STRING"},
+    },
+    "required": ["upheld", "evidence_quote", "reason"],
 }
 
 
@@ -153,25 +203,15 @@ def verify_local_with_claude(item: dict, page_text: str, client) -> list[str]:
     return verdict_to_issues(json.loads(text))
 
 
-def verify_local_with_gemini(item: dict, page_text: str, api_key: str) -> list[str] | None:
-    """同じ原文をGeminiで独立照合。差異リストを返す(空=OK)。API障害時はNone(スキップ扱い)。"""
+def gemini_generate(prompt: str, schema: dict, api_key: str) -> dict | None:
+    """Gemini APIで構造化出力を得る汎用ヘルパー。API障害時はNone。"""
     body = json.dumps(
         {
-            "contents": [
-                {"parts": [{"text": build_verify_prompt(item, page_text)}]}
-            ],
+            "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
                 "temperature": 0,
                 "responseMimeType": "application/json",
-                "responseSchema": {
-                    "type": "OBJECT",
-                    "properties": {
-                        "consistent": {"type": "BOOLEAN"},
-                        "issues": {"type": "ARRAY", "items": {"type": "STRING"}},
-                        "page_mentions_subsidy": {"type": "BOOLEAN"},
-                    },
-                    "required": ["consistent", "issues", "page_mentions_subsidy"],
-                },
+                "responseSchema": schema,
             },
         }
     ).encode("utf-8")
@@ -190,7 +230,7 @@ def verify_local_with_gemini(item: dict, page_text: str, api_key: str) -> list[s
             if GEMINI_MODELS[0] != model:
                 GEMINI_MODELS.remove(model)
                 GEMINI_MODELS.insert(0, model)
-            return verdict_to_issues(verdict)
+            return verdict
         except urllib.error.HTTPError as e:
             last_error = e
             if e.code == 404:  # モデル提供終了・改名 → 次の候補へ
@@ -199,8 +239,74 @@ def verify_local_with_gemini(item: dict, page_text: str, api_key: str) -> list[s
         except Exception as e:
             last_error = e
             break
-    print(f"[info] Gemini照合に失敗(この件はClaude判定のみ): {last_error}")
+    print(f"[info] Gemini呼び出しに失敗: {last_error}")
     return None
+
+
+def verify_local_with_gemini(item: dict, page_text: str, api_key: str) -> list[str] | None:
+    """同じ原文をGeminiで独立照合。差異リストを返す(空=OK)。API障害時はNone(スキップ扱い)。"""
+    verdict = gemini_generate(
+        build_verify_prompt(item, page_text), GEMINI_VERDICT_SCHEMA, api_key
+    )
+    return verdict_to_issues(verdict) if verdict is not None else None
+
+
+def build_recheck_prompt(item: dict, page_text: str, issues: list[str]) -> str:
+    """判定が割れたときのセカンドパス。指摘側に根拠の引用を要求する。"""
+    listed = "\n".join(f"- {m}" for m in issues)
+    return (
+        "あなたは補助金情報サイトの検証担当です。この掲載データについて、"
+        "以下の指摘が出ましたが、別の独立した照合では問題なしと判定され、結論が割れています。\n\n"
+        f"【指摘】\n{listed}\n\n"
+        "出典ページ本文(抜粋)だけを根拠に、指摘が本当に正しいか再確認してください。\n"
+        "- 金額・日付の食い違いを維持する場合: 根拠となる本文箇所をそのまま引用してください(evidence_quote)\n"
+        "- 「制度の言及が見つからない」を維持する場合: 名称の表記ゆれ・略称・部分一致・関連事業名を"
+        "本文から再走査し、それでも見つからない場合のみ維持してください(evidence_quoteは空でよい)\n"
+        "- 根拠を示せない場合、または表記ゆれ・見落としだった場合: upheld=false で撤回してください\n\n"
+        f"【掲載データ】\n名称: {item.get('name')}\n締切: {item.get('deadline')}\n"
+        f"上限額: {item.get('max_amount')}\n発行元: {item.get('issuer')}\n\n"
+        f"【出典ページ本文(抜粋)】\n{page_text}"
+    )
+
+
+def recheck_with_claude(item: dict, page_text: str, issues: list[str], client) -> dict | None:
+    """Claudeの指摘を本人に再確認させる。API障害時はNone(=指摘維持)。"""
+    try:
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=1024,
+            output_config={"format": {"type": "json_schema", "schema": RECHECK_SCHEMA}},
+            messages=[
+                {"role": "user", "content": build_recheck_prompt(item, page_text, issues)}
+            ],
+        )
+        text = next(b.text for b in response.content if b.type == "text")
+        return json.loads(text)
+    except Exception as e:
+        print(f"[info] Claude再確認に失敗(指摘を維持): {e}")
+        return None
+
+
+def recheck_with_gemini(item: dict, page_text: str, issues: list[str], api_key: str) -> dict | None:
+    """Geminiの指摘を本人に再確認させる。API障害時はNone(=指摘維持)。"""
+    return gemini_generate(
+        build_recheck_prompt(item, page_text, issues), GEMINI_RECHECK_SCHEMA, api_key
+    )
+
+
+def append_history(entry: dict) -> None:
+    """日次の照合結果を data/kpi/verify_history.json へ追記。同日再実行は上書き(べき等)。"""
+    try:
+        with open(HISTORY_PATH, encoding="utf-8") as f:
+            history = json.load(f)
+    except Exception:
+        history = []
+    history = [h for h in history if h.get("date") != entry["date"]]
+    history.append(entry)
+    os.makedirs(os.path.dirname(HISTORY_PATH), exist_ok=True)
+    with open(HISTORY_PATH, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=1)
+        f.write("\n")
 
 
 def main() -> None:
@@ -224,10 +330,16 @@ def main() -> None:
 
     lines: list[str] = [f"原文照合レポート {today}(サンプル{len(sample)}件)", ""]
     failed = 0
+    gemini_eligible = 0  # Geminiが照合に参加すべきだった件数(AI照合対象×キー設定済み)
+    gemini_joined = 0    # 実際に参加できた件数(A-2: 静かな脱落の検知用)
+    history_items: list[dict] = []
     for item in sample:
         is_jgrants = "jgrants-portal" in (item.get("source_url") or "")
         label = f"{item.get('name', '')[:40]} [{item.get('source_url')}]"
         judged_by = ""
+        judges: list[str] = []
+        method = "jgrants" if is_jgrants else "ai"
+        recheck_note = None
         if is_jgrants:
             issues = verify_jgrants(item)
         elif client or gemini_key:
@@ -237,23 +349,46 @@ def main() -> None:
                 issues = [f"出典URLの取得に失敗: {e}(リンク切れの可能性)"]
             else:
                 page_text = strip_html(html)
-                issues = []
-                judges: list[str] = []
+                claude_issues: list[str] | None = None
+                gemini_issues: list[str] | None = None
                 if client:
-                    issues.extend(
-                        f"Claude: {msg}"
-                        for msg in verify_local_with_claude(item, page_text, client)
-                    )
+                    claude_issues = verify_local_with_claude(item, page_text, client)
                     judges.append("Claude")
                 if gemini_key:
+                    gemini_eligible += 1
                     gemini_issues = verify_local_with_gemini(item, page_text, gemini_key)
                     if gemini_issues is not None:
-                        issues.extend(f"Gemini: {msg}" for msg in gemini_issues)
+                        gemini_joined += 1
                         judges.append("Gemini")
-                if len(judges) > 1:
-                    judged_by = f"({'+'.join(judges)}一致)" if not issues else ""
+
+                # 判定が割れたときだけセカンドパス: 指摘した側に根拠の引用を要求し、
+                # 撤回されたら誤検知としてOKに戻す(Issueノイズ対策。撤回も履歴に残す)
+                if claude_issues is not None and gemini_issues is not None:
+                    if claude_issues and not gemini_issues:
+                        r = recheck_with_claude(item, page_text, claude_issues, client)
+                        if r and not r["upheld"]:
+                            recheck_note = f"Claudeが再確認で指摘を撤回: {r['reason']}"
+                            claude_issues = []
+                        elif r and r.get("evidence_quote"):
+                            claude_issues.append(f"根拠引用: {r['evidence_quote'][:200]}")
+                    elif gemini_issues and not claude_issues:
+                        r = recheck_with_gemini(item, page_text, gemini_issues, gemini_key)
+                        if r and not r["upheld"]:
+                            recheck_note = f"Geminiが再確認で指摘を撤回: {r['reason']}"
+                            gemini_issues = []
+                        elif r and r.get("evidence_quote"):
+                            gemini_issues.append(f"根拠引用: {r['evidence_quote'][:200]}")
+
+                issues = [f"Claude: {m}" for m in (claude_issues or [])]
+                issues += [f"Gemini: {m}" for m in (gemini_issues or [])]
+                if len(judges) > 1 and not issues:
+                    judged_by = f"({'+'.join(judges)}一致)"
         else:
             lines.append(f"⏭ SKIP(APIキー未設定): {label}")
+            history_items.append(
+                {"name": item.get("name"), "url": item.get("source_url"),
+                 "method": "skip", "judges": [], "ok": None, "issues": []}
+            )
             continue
 
         if issues:
@@ -262,13 +397,40 @@ def main() -> None:
             lines.extend(f"   - {msg}" for msg in issues)
         else:
             lines.append(f"✅ OK{judged_by}: {label}")
+        if recheck_note:
+            lines.append(f"   ℹ {recheck_note}")
+
+        record = {
+            "name": item.get("name"), "url": item.get("source_url"),
+            "method": method, "judges": judges or (["api"] if is_jgrants else []),
+            "ok": not issues, "issues": issues,
+        }
+        if recheck_note:
+            record["recheck"] = recheck_note
+        if issues:
+            record["human_verdict"] = None  # 人が後から false_positive / true_mismatch を記入
+        history_items.append(record)
 
     lines.append("")
     lines.append(f"結果: NG {failed}件 / 照合 {len(sample)}件")
+    if gemini_key:
+        lines.append(f"Gemini参加: {gemini_joined}/{gemini_eligible}件(AI照合対象)")
+        if gemini_eligible > 0 and gemini_joined == 0:
+            lines.append("⚠ GeminiがAI照合に1件も参加できていません(APIキー・無料枠・障害を確認)")
     report = "\n".join(lines)
     print(report)
     with open(REPORT_PATH, "w", encoding="utf-8") as f:
         f.write(report)
+
+    append_history(
+        {
+            "date": today,
+            "sample": len(sample),
+            "ng": failed,
+            "gemini": {"enabled": bool(gemini_key), "eligible": gemini_eligible, "joined": gemini_joined},
+            "items": history_items,
+        }
+    )
 
     if failed:
         sys.exit(1)
