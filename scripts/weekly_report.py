@@ -14,6 +14,7 @@ hojo-hq — 週次レポート(小柳さんのLINEへ毎週月曜8:00 JSTに配�
 import json
 import os
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -47,6 +48,9 @@ def section_site():
                   "&period=7d&metrics=visitors,pageviews", h)["results"]
         lines = [f"🌐 サイト(7日間)",
                  f"・訪問者: {agg['visitors']['value']}人 / 閲覧: {agg['pageviews']['value']}PV"]
+    except urllib.error.HTTPError as e:
+        # ステータスコードまで残す(2026-08-07: 401調査で「HTTPError」だけでは原因特定に往復が要った)
+        return f"🌐 サイト: 取得不可(HTTP {e.code})"
     except Exception as e:  # noqa: BLE001
         return f"🌐 サイト: 取得不可({type(e).__name__})"
     try:
