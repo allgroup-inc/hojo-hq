@@ -6,6 +6,7 @@ name: mikata-audit
 
 on:
   push:
+    branches: [main]  # 作業ブランチへのbot混入防止(resilient-agent-design監査 2026-08-07)
     paths:
       - "scripts/audit_sources_mikata.py"
       - ".github/workflows/mikata-audit.yml"

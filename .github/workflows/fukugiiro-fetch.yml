@@ -5,6 +5,7 @@ on:
     # 朝夕2回まで(守り部審査・第1次ウタガイ採用事項): 06:00 / 18:00 JST
     - cron: "0 21,9 * * *"
   push:
+    branches: [main]  # 作業ブランチへのbot混入防止(resilient-agent-design監査 2026-08-07)
     paths:
       - "scripts/fetch_fukugiiro.py"
       - "scripts/kensho_fukugiiro.py"
@@ -51,6 +52,6 @@ jobs:
           git diff --cached --quiet || git commit -m "auto: fukugiiro seido update $(date '+%Y-%m-%d %H:%M')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
           for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
+            git pull --rebase origin main && git push origin main && break
             echo "push retry $i"; sleep 5
           done
