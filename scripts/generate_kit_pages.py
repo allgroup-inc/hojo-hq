@@ -49,16 +49,17 @@ EVENT_ITEMS = {
 }
 
 STYLE = """
-:root{--fg-primary:#B9502F;--fg-accent:#F2B705;--fg-deep:#1A6B52;--fg-ink:#1F2A2E;--fg-bg:#FFFBF4;--fg-card:#fff;--fg-muted:#5C6B70;--fg-line:#EBE2D4}
+:root{--fg-primary:#D2694A;--fg-primary-deep:#B9502F;--fg-accent:#F2C14E;--fg-deep:#1F5C45;--fg-ink:#3B322B;--fg-bg:#FBF5EC;--fg-card:#FFFDF9;--fg-muted:#8B7C6E;--fg-line:#EEE1D0;--fg-cta:#22382A;--fg-shadow:0 1px 2px rgba(0,0,0,.04)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:18px;line-height:1.8;color:var(--fg-ink);background:var(--fg-bg)}
+body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:17px;line-height:1.9;color:var(--fg-ink);background:var(--fg-bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
-h1{font-size:1.3rem;margin-bottom:4px}
+h1{font-size:1.35rem;margin-bottom:4px;line-height:1.5}
 h2{font-size:1.05rem;margin:24px 0 8px;border-left:6px solid var(--fg-accent);padding-left:.5em}
 .note{font-size:.85rem;color:var(--fg-muted)}
-.box{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:16px 18px;margin:10px 0}
-.status{font-size:.8rem;background:#fff3cd;border-radius:4px;padding:1px 8px;color:#7a5b00}
-.status.ok{background:#EAF7EE;color:#0F5138}
+.box{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:16px 18px;margin:10px 0;box-shadow:var(--fg-shadow)}
+.status{display:inline-block;font-size:.78rem;background:#FBEED0;border-radius:999px;padding:2px 10px;color:#7a5b00}
+.status.ok{background:#E7F3EC;color:#0F5138}
 .goal{background:linear-gradient(180deg,#FDF5E6 0%,var(--fg-card) 100%);border:1px solid var(--fg-accent);border-radius:12px;padding:16px 18px;margin:12px 0}
 .goal p{margin:6px 0}
 /* 5ステップ工程表(画面のみ・伴走) */
@@ -91,17 +92,16 @@ ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through
 .btns{display:flex;gap:10px;margin:18px 0}
 .btns button,.btns a{flex:1;display:block;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
 .btns .primary{background:var(--fg-primary);color:#fff}
-.linebtn{display:block;max-width:440px;margin:8px auto 0;padding:13px 22px;min-height:44px;background:#06C755;color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700}
+.linebtn{display:block;max-width:440px;margin:8px auto 0;padding:14px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 a{color:var(--fg-primary)}
 .siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
-.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
+.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;color:var(--fg-primary-deep);text-decoration:none;font-size:1.05rem}
 .siteheader .hlogo img{width:30px;height:30px}
 .siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
 .siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
-.siteheader nav a.hline{background:#06C755;color:#fff;font-weight:700}
 @media(min-width:900px){.wrap{max-width:820px}}
-@media(max-width:560px){.siteheader nav a:not(.hline){display:none}}
+@media(max-width:560px){.siteheader nav a{font-size:.74rem;padding:5px 6px}}
 /* 印刷=電話台本+持ち物+窓口ひとこと+メモの1枚に圧縮。工程表・申請後・LINEは画面のみ。 */
 @media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}}
 """
@@ -112,7 +112,7 @@ HEADER = '''<header class="siteheader">
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
-    <a class="hline" href="https://allgroup-inc.github.io/hojo-hq/go/fg-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
   </nav>
 </header>'''
 
@@ -150,6 +150,9 @@ def page(title, desc, body, depth=2, head_extra=""):
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <link rel="icon" type="image/svg+xml" href="{rel}assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 {head_extra}
 <style>{STYLE}</style>
 </head>
@@ -294,7 +297,7 @@ def kit_page(it, updated):
 {combine_html}
 
 <div class="btns">
-  <button class="primary" onclick="if(window.fgTrack)fgTrack('kit_print');window.print()">🖨 印刷して持っていく</button>
+  <button class="primary" onclick="if(window.fgTrack)fgTrack('kit_print');window.print()">印刷して持っていく</button>
   <a href="{src}" rel="noopener" onclick="if(window.fgTrack)fgTrack('kit_official')">公式ページで最新を確認</a>
 </div>
 
@@ -372,7 +375,7 @@ def kit_page(it, updated):
 
 <div class="after screen-only" style="text-align:center">
   この制度の情報が「古い」「違う」と気づいたら、教えてください。確認して24時間以内の修正を目指します。<br>
-  <a href="{report_link}" onclick="if(window.fgTrack)fgTrack('teisei_mail')" style="display:inline-block;margin-top:8px;color:var(--fg-primary);font-weight:700">✎ この制度の情報の間違いを知らせる</a>
+  <a href="{report_link}" onclick="if(window.fgTrack)fgTrack('teisei_mail')" style="display:inline-block;margin-top:8px;color:var(--fg-primary);font-weight:700">この制度の情報の間違いを知らせる</a>
 </div>
 <div class="disclaimer">このシートは公式情報に基づく「準備のご案内」です。持ち物は一般的な例で、市町村により異なります。受給できるかどうかの最終判断は各窓口で行われます。申請書の作成代行・代筆は行っていません(ご本人が記入します)。専門家のサポートが必要な場合は、提携の専門家(社会保険労務士・行政書士など)をご紹介します。<br>最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)/ 出典: <a href="{src}" rel="noopener">公式ページ</a></div>
 <p style="margin-top:16px" class="no-print"><a href="../index.html">申請ナビ一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../teisei/">情報の訂正</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
