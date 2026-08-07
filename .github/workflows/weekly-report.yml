@@ -15,6 +15,11 @@ on:
       - ".github/workflows/weekly-report.yml"
   workflow_dispatch: {}
 
+# 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
+concurrency:
+  group: weekly-report
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -61,6 +66,7 @@ jobs:
           git diff --cached --quiet || git commit -m "auto: 沖縄企業のミカタ 週次レポート $(date '+%Y-%m-%d')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
           for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
+            git pull --rebase -X theirs origin main && git push && break
+            git rebase --abort 2>/dev/null || true
             echo "push retry $i"; sleep 5
           done

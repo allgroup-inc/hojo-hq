@@ -68,10 +68,17 @@ test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種+�
 test("レター下書きタブの名称・見出し・種別・ステータスが定義されている", () => {
   assert.equal(schema.LETTER_DRAFT_SHEET_NAME, "レター下書き");
   assert.deepEqual(schema.LETTER_DRAFT_HEADERS, [
-    "下書きID", "企業ID", "種別", "生成日時", "本文", "ステータス"
+    "下書きID", "企業ID", "種別", "生成日時", "本文", "ステータス", "発送日"
   ]);
   assert.deepEqual(schema.LETTER_DRAFT_TYPES, ["初回DM", "ナーチャリング配信"]);
   assert.deepEqual(schema.LETTER_DRAFT_STATUSES, ["下書き", "送付済み", "見送り"]);
+});
+
+test("レター下書きタブの「発送日」列が末尾に追加されている", () => {
+  assert.equal(
+    schema.LETTER_DRAFT_HEADERS[schema.LETTER_DRAFT_HEADERS.length - 1],
+    "発送日"
+  );
 });
 
 test("ダッシュボードタブの名称・プレースホルダー見出しが定義されている", () => {

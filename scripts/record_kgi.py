@@ -7,7 +7,9 @@
 毎日追記し、週20社ペースの検証と早期警報(閾値割れ検知)の土台を作る。
 
 必要な環境変数: LINE_CHANNEL_ACCESS_TOKEN(update.yml から渡す)
+任意: LINE_ADMIN_USER_ID(あれば、実測が3日以上取れないとき管理者へ警報push)
 未接続・集計待ちのときも last_status に明記する(静かに欠損させない)。
+さらに ready が3日以上途切れたら警報を1回だけ送る(計測の無言停止対策)。
 """
 import json
 import os
@@ -40,6 +42,34 @@ def save(data):
         f.write("\n")
 
 
+def alert_if_stale(data, now):
+    """ready が3日以上途切れていたら管理者LINEへ1回だけ警報(無言停止対策)。"""
+    last_ready = data.get("last_ready_date")
+    if not last_ready or data.get("stale_alerted"):
+        return
+    days = (now.date() - datetime.strptime(last_ready, "%Y-%m-%d").date()).days
+    if days < 3:
+        return
+    token = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN", "")
+    to = os.environ.get("LINE_ADMIN_USER_ID", "")
+    data["stale_alerted"] = True
+    if not (token and to):
+        print(f"record_kgi: 警報対象(ready途絶{days}日)だが通知先未設定")
+        return
+    text = (f"⚠️ KGI計測が{days}日間取得できていません(最終成功 {last_ready})。\n"
+            "LINE Insight APIかトークンの状態を確認してください。\n"
+            "詳細: data/kpi/line_followers.json の last_status")
+    payload = json.dumps({"to": to, "messages": [{"type": "text", "text": text}]}).encode("utf-8")
+    req = urllib.request.Request(
+        "https://api.line.me/v2/bot/message/push", data=payload, method="POST",
+        headers={"Authorization": "Bearer " + token, "Content-Type": "application/json"})
+    try:
+        urllib.request.urlopen(req, timeout=30)
+        print(f"record_kgi: 計測途絶{days}日の警報を送信")
+    except Exception as e:  # noqa: BLE001
+        print(f"record_kgi: 警報送信も失敗 {e}")
+
+
 def main():
     data = load()
     now = datetime.now(JST)
@@ -62,12 +92,14 @@ def main():
             body = json.load(r)
     except Exception as e:  # noqa: BLE001
         data["last_status"] = f"取得不可({type(e).__name__})"
+        alert_if_stale(data, now)
         save(data)
         print(f"record_kgi: 取得不可 {e}")
         return
 
     if body.get("status") != "ready":
         data["last_status"] = f"集計待ち(status={body.get('status')})"
+        alert_if_stale(data, now)
         save(data)
         print("record_kgi: 集計待ち")
         return
@@ -83,6 +115,8 @@ def main():
     hist.append(entry)
     data["history"] = sorted(hist, key=lambda h: h["date"])
     data["last_status"] = "ready"
+    data["last_ready_date"] = now.strftime("%Y-%m-%d")
+    data["stale_alerted"] = False
 
     # 週次ペース(直近7日間の純増)。履歴が7日分たまるまでは null。
     week_ago = (now - timedelta(days=8)).strftime("%Y-%m-%d")

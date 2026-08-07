@@ -11,6 +11,11 @@ on:
       - ".github/workflows/fukugiiro-weekly-report.yml"
   workflow_dispatch: {}
 
+# 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
+concurrency:
+  group: fukugiiro-weekly-report
+  cancel-in-progress: false
+
 permissions:
   contents: write
 

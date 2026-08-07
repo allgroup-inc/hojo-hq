@@ -10,7 +10,7 @@
 運営費は、対応いただける専門家様の掲載料や、ご希望の方への経営相談でまかないます。登録企業様から利用料をいただくことはありません。
 だから毎日、情報を全部ひらけます。
 
-#沖縄 #補助金 #助成金 #沖縄経営者 #事業承継 #沖縄企業のミカタ
+#沖縄企業のミカタ #沖縄経営者 #沖縄補助金 #沖縄助成金 #中小企業支援
 
 ## 出典
 https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch

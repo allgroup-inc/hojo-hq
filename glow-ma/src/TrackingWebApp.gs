@@ -21,12 +21,13 @@
  *
  * リダイレクトは、GASのHtmlServiceがサンドボックス化されたiframe内で出力を
  * 描画する(meta refreshはこのiframeしか動かさず訪問者のブラウザは遷移しない)ため、
- * window.top.location.href によるトップレベル遷移を使う。
+ * window.top.location.href によるトップレベル遷移を使う。表示するHTML自体の組み立ては
+ * glow-ma/src/trackingPage.js(GlowTrackingPage)に分離してあり、Node側でテストできる。
  *
  * また、対応履歴ログへの追記は setValues によるプログラム的な書き込みのため
  * onEditトリガー(AlertRunner.gsのhandleInteractionLogEdit)では検知できない。
  * そのためこのファイル自身がSpeed-to-Lead即時アラートとして直接Slackへ通知する
- * (AlertRunner.gsのpostToSlack_/lookupCompanyName_を再利用)。
+ * (AlertRunner.gsのpostToSlackWithRetry_/lookupCompanyName_を再利用)。
  */
 function doGet(e) {
   var companyId = e && e.parameter && e.parameter.id;
@@ -35,12 +36,9 @@ function doGet(e) {
   }
   var redirectUrl = PropertiesService.getScriptProperties().getProperty("TRACKING_REDIRECT_URL");
   if (!redirectUrl) {
-    return HtmlService.createHtmlOutput("<p>ページが見つかりません。</p>");
+    return HtmlService.createHtmlOutput(GlowTrackingPage.buildNotFoundHtml());
   }
-  var escapedForAttribute = redirectUrl.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
-  var html = "<script>window.top.location.href = " + JSON.stringify(redirectUrl) + ";</script>" +
-    "<p>移動しています... <a target=\"_top\" href=\"" + escapedForAttribute + "\">こちら</a></p>";
-  return HtmlService.createHtmlOutput(html);
+  return HtmlService.createHtmlOutput(GlowTrackingPage.buildRedirectHtml(redirectUrl));
 }
 
 function logTrackingAccess_(companyId) {
@@ -75,7 +73,7 @@ function logTrackingAccess_(companyId) {
   // かかわらず(ロック競合でログが遅延しても)、companyIdが検証済みならここで
   // 直接Slackへ即時通知する。
   var companyName = lookupCompanyName_(companyId);
-  postToSlack_(
+  postToSlackWithRetry_(
     "【即時アラート】" + companyName + "(" + companyId + ") がレターURLにアクセスしました。至急対応してください。"
   );
   return logWritten;
