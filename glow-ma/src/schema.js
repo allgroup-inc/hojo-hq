@@ -45,7 +45,7 @@
 
   var LETTER_DRAFT_SHEET_NAME = "レター下書き";
   var LETTER_DRAFT_HEADERS = [
-    "下書きID", "企業ID", "種別", "生成日時", "本文", "ステータス"
+    "下書きID", "企業ID", "種別", "生成日時", "本文", "ステータス", "発送日"
   ];
   var LETTER_DRAFT_TYPES = ["初回DM", "ナーチャリング配信"];
   var LETTER_DRAFT_STATUSES = ["下書き", "送付済み", "見送り"];
