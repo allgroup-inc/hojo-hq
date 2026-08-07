@@ -4,13 +4,17 @@
 リポジトリにチェックインしてあるため、Claude Code on the web でも各チャットに最初から入っている。
 
 ## hojo-hqはALLGROUP共通スキルの「本店」(2026-08-07〜)
-`humanizer` / `resilient-agent-design` / `mindshare-arbitrage` の3つは、特定の事業に
-依存しない汎用スキルなので、hojo-hqを本店として他の業務リポジトリ(hikari-hq/hikari-lp/
-hikari-report/kakei-hq/report-hq/go/allgroup-site等)がここから同期する運用にしている。
+以下の6つは、特定の事業に依存しない汎用スキルなので、hojo-hqを本店として他の業務
+リポジトリ(hikari-hq/hikari-lp/hikari-report/kakei-hq/report-hq/go/allgroup-site等)が
+ここから同期する運用にしている。
+
+- hojo-hqオリジナル: `humanizer` / `resilient-agent-design` / `mindshare-arbitrage`
+- hojo-hqが選定してvendoring済みのOSS: `taste-skill` / `last30days` / `social-media-skills`
 
 - 新しいALLGROUP共通スキルを追加/更新するときは、まずここ(hojo-hq)に反映する
 - 他リポジトリへの反映は `scripts/update-skills.sh` を実行するだけ(Superpowers/
-  marketingskillsの追従と同じ仕組みで、`allgroup-inc/hojo-hq` からこの3スキルもコピーする)
+  marketingskillsの追従と同じ仕組みで、`allgroup-inc/hojo-hq` からこの6スキル+
+  対応するLICENSEファイルもコピーする)
 - 各リポジトリ固有のスキル(`hojo-accuracy-check`等)はこの仕組みの対象外で、
   そのリポジトリのCLAUDE.mdに紐づいたまま個別に管理する
 - 各リポジトリ側で共通スキルの中身を直接書き換えない(次回同期で上書きされるため)。
