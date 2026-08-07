@@ -53,6 +53,8 @@ Reddit・X・YouTube・TikTok・Hacker News等を横断して、直近30日の�
 - 選定: `instagram-growth` `caption-writer` `carousel-writer` `hashtag-strategy`
   `content-calendar` `thread-writer` `hook-writer` `platform-specs-and-validation`
 - evals/ は除外(実行時不要、他のvendoringと同じ方針)。
+- **配置は `.claude/skills/` 直下にフラット**(スキル検出は直下の `<name>/SKILL.md` しか
+  走査しないため。入れ子だと検出されず使えない — 2026-08-07点検で修正済み)。
 
 セッション開始時に `.claude/hooks/superpowers-session-start.sh` が
 `using-superpowers` スキルを注入し、「You have superpowers」で自動起動させる。
