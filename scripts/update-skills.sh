@@ -6,7 +6,8 @@
 #   - Superpowers 14スキル (obra/superpowers, MIT)
 #   - marketingskills 48スキル (coreyhaines31/marketingskills, MIT) ※マーケ系repoのみ
 #   - ALLGROUP共通スキル (allgroup-inc/hojo-hq を本店として同期。全repo対象。2026-08-07〜)
-#     humanizer / resilient-agent-design / mindshare-arbitrage
+#     humanizer / resilient-agent-design / mindshare-arbitrage (hojo-hqオリジナル)
+#     taste-skill / last30days / social-media-skills (hojo-hqが選定してvendoring済みのOSS)
 #     ※本店(hojo-hq)側でこれらを更新したら、他repoは本スクリプトの再実行だけで追従する。
 #       スキルがrepoごとにズレることを防ぐのが目的なので、内容を各repo側で個別に書き換えない。
 # 触らないもの(各リポジトリ固有の手書き資産):
@@ -34,10 +35,10 @@ resolve() { local r="$1"; [ -d "$BASE/$r/.git" ] && echo "$BASE/$r" || echo "/ho
 # マーケ系(Superpowers + marketing 48)。他は Superpowers のみ。全repo共通でALLGROUPスキルも同期。
 MARKETING_REPOS=(hojo-hq hikari-hq hikari-lp hikari-report kakei-hq)
 INFRA_REPOS=(report-hq go allgroup-site)
-ALL_REPOS=("${MARKETING_REPOS[@]}" "${INFRA_REPOS[@]}")
 
 # ALLGROUP共通スキル(本店=hojo-hq)。ここに追加するとdrift防止対象が増える。
-ALLGROUP_SKILL_NAMES=(humanizer resilient-agent-design mindshare-arbitrage)
+ALLGROUP_SKILL_NAMES=(humanizer resilient-agent-design mindshare-arbitrage taste-skill last30days social-media-skills)
+ALLGROUP_LICENSE_NAMES=(TASTE-SKILL-LICENSE LAST30DAYS-LICENSE SOCIAL-MEDIA-SKILLS-LICENSE)
 
 echo "==> cloning upstreams"
 git clone --depth 1 https://github.com/obra/superpowers.git "$TMP/sp" 2>/dev/null
@@ -69,6 +70,9 @@ update_repo() {
   for n in "${ALLGROUP_SKILL_NAMES[@]}"; do
     [ -d "$TMP/hq/.claude/skills/$n" ] || continue
     rm -rf "$D/.claude/skills/$n"; cp -r "$TMP/hq/.claude/skills/$n" "$D/.claude/skills/$n"
+  done
+  for n in "${ALLGROUP_LICENSE_NAMES[@]}"; do
+    [ -f "$TMP/hq/.claude/skills/$n" ] && cp "$TMP/hq/.claude/skills/$n" "$D/.claude/skills/$n"
   done
   git -C "$D" add .claude/skills
   if git -C "$D" diff --cached --quiet; then echo "[$repo] up to date"; return; fi
