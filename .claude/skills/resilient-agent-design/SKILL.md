@@ -6,24 +6,19 @@ description: "GitHub Actions / cron / Claude Routines / /loop など、繰り返
 # 壊れにくい自動化・エージェント設計
 
 24時間/無人で動く自動化の本質は、AIの賢さではなく**壊れにくいシステム設計**。
-このスキルは、このリポジトリの自動化(GitHub Actionsのcron・定期ワークフロー等)を
-新規に作る/直す/レビューするときに使う。既存の自動化はこの考え方に近い形(定期実行の
-基盤 = GitHub Actionsのコード主体のWorkflow、Claude APIでの構造化・要約・判断 =
-Agent判断部分)で作られている(例: `update.yml`が1日4回のデータ収集・整形を担い、
-Claude APIは構造化のみを担当する)。新しい自動化もこの型に揃える。
+このスキルは、このリポジトリの自動化——GitHub Actions のcron群(update-subsidies=1日4回の
+制度収集、fukugiiro-fetch=朝夕2回、tanpatsu-draft=毎月8日・22日、weekly/monthly-report、
+social-post=承認ゲート付きSNS投稿、healthcheck=毎朝10時の死活監視→Issue+LINE通知、
+e2e/lighthouse/verify-sources)と GAS会話ボット——を新規に作る/直す/レビューするときに使う。
+既存の自動化はこの考え方に近い形(定期実行の基盤 = コード主体のGitHub Actions Workflow、
+Claude APIでの構造化・下書き生成 = Agent判断部分、社外への副作用 = 人間の承認ゲート)で
+作られている。新しい自動化もこの型に揃える。
 
 ## 大原則
 
 最強のAIエージェント = 止まらないAIではない。
 **異常時に安全停止し、原因を残し、正しい地点から再開できるAI**。
 運用で重要なのは「成功したか」だけでなく、**後から理由を説明できること**。
-
-このリポジトリでも、`weekly-report.yml`にpush(コード編集)トリガーとschedule(定期配信)
-トリガーが両方設定されていたため、コード編集のたびに実配信され小柳さんへ重複LINEが
-飛んだ事故が実際に起きている(2026-08-03)。原因は「pushイベントでの完了条件・べき等性
-ガードがなかった」ことで、修正は「push時はdry-runのみ・実配信はschedule/workflow_dispatch
-のみ」という条件分岐だった。これは④べき等性・⑤リトライ設計の欠如がそのまま事故になる
-典型例であり、新しい自動化を作るときは必ずこの教訓を踏まえる。
 
 ## 4層で設計する
 
@@ -53,17 +48,18 @@ AIでやる: 重要ニュース選定・切り口検討・意図分類・要約�
 保存項目: `job_id` / `workflow_version` / `status` / `current_step` / `completed_steps` /
 `pending_steps` / `retry_count` / `idempotency_key` / `last_error` / `cost_usd` / `updated_at`。
 保存先は規模に応じて: 小規模=JSON/SQLite、チーム=PostgreSQL、長時間ワークフロー=Trigger.dev等。
-このリポジトリでは `data/*.json`(`subsidies.json`・`line_alerts.json`・
-`fukugiiro/seido.json`等の制度・アラート台帳)、`reports/*/latest.md`(週次レポートの
-永続化。アカリさん・ユイさんの週次判断が別セッションでも追えるようにするための実装)、
-GAS経由のGoogle Sheets(LIFF診断の企業台帳)がこれに相当する。新しい自動化もこれらと
-同じ「外部ファイル/シート/DBに状態を持たせ、会話やAIの記憶に依存しない」設計に揃える。
+このリポジトリでは `data/` 配下のJSON群がこれに相当する(`subsidies.json`=制度DBと募集status、
+`tanpatsu_topics.json`=お題キューのstatus遷移 pending→drafted→published、`kekka_kpi.json`・
+`note_kpi.json`=KPI台帳、`line_alerts.json`=配信済み記録、`data/fukugiiro/funnel.json`・
+`data/hojo/funnel.json`=診断ファネル集計など)。企業からの受信(診断・会話・相談)は
+スプレッドシート「ミカタ企業台帳」(GAS)側に保存する。ActionsがGitコミットで
+永続化するため、実行履歴と状態変化がそのまま監査ログになる。新しい自動化の状態も
+この型(data/のJSON+Gitコミット)に載せる。
 
 **④ 重複実行を「べき等性」で防ぐ**
 `idempotency_key` 例: `news-summary:2026-07-30` / `invoice-reminder:customer-123:2026-07`。
 状態遷移: completed(何もしない)→running(状態を返す)→failed(再開条件確認)→未作成(新規開始)。
-送信・公開・課金・削除のような**副作用処理には必須**(このリポジトリの`weekly-report.yml`が
-まさにこの欠如で重複LINE配信事故を起こした。詳細は上記「大原則」参照)。
+送信・公開・課金・削除のような**副作用処理には必須**。
 
 **⑤ リトライに上限と種類を持たせる**
 - 再試行してよい: 一時ネットワーク障害・レート制限・サービス一時停止・タイムアウト・5xx
@@ -103,7 +99,7 @@ Hook活用例: 危険コマンドの検知と停止・編集後にformatter/lint
 |---|---|---|
 | `/loop`(Skill) | 短時間監視・PR/Issueのポーリング・開発中の試作・デプロイ監視 | PCを閉じても継続したい処理・数週間の永続運用・完全無人の本番業務(セッション内のみ、作成から7日で終了) |
 | Claude Routines(`create_trigger`) | 毎朝の情報収集・定期整理・PRレビュー・デプロイ後検証 | 最小間隔1時間・承認ダイアログ不可・権限は最小限に |
-| GitHub Actions等の通常クラウドワークフロー | AI判断が少ない決まった処理・データ取得/変換/保存/通知 | AIの判断が多い・柔軟性が必要な処理 |
+| GitHub Actions等の通常クラウドワークフロー | AI判断が少ない決まった処理・データ取得/変換/保存/通知(このリポジトリの標準はこれ) | AIの判断が多い・柔軟性が必要な処理 |
 | Claude Agent SDK | 自社アプリへの組み込み・独自UI・細かな権限制御 | 実行環境/スケジューリング/保存/キュー/監視/リトライ/シークレット/コスト制御を自前設計する前提 |
 | Managed Agents | 長時間・非同期エージェント・実行基盤管理を減らしたい | 現在ベータ版、本番の主軸にはまだ不向き |
 
