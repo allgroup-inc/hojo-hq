@@ -179,3 +179,15 @@
   .risingsun{transform:translateX(-50%) translateY(0)!important}
   .kb{transform:none!important}
 }
+
+/* ===== S4 実写背景(海) ===== */
+.photoback{position:absolute;inset:0;z-index:0}
+.photoback img{width:100%;height:100%;object-fit:cover;display:block}
+.photoback::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(190,130,95,.6) 0%,rgba(226,175,130,.38) 48%,rgba(243,220,192,.8) 100%)}
+/* ===== 実用レイヤーへの世界観接続(内容不変・衣替えのみ) ===== */
+main section h2{letter-spacing:.12em}
+.hero h1{letter-spacing:.08em}
+.prise{opacity:0;transform:translateY(18px);transition:opacity 1.1s ease,transform 1.1s ease}
+.prise.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.prise{opacity:1!important;transform:none!important}}

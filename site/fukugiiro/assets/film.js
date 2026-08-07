@@ -77,4 +77,17 @@ const light = new IntersectionObserver(es => {
 }, {threshold: .55});
 ['s1','s2','s3','s4','s6','s7','s8'].forEach(id => { const el=document.getElementById(id); if(el) light.observe(el); });
 
+
+// 実用レイヤーもフィルムと同じ呼吸で(内容不変・クラス付与のみ)
+const pio = new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); pio.unobserve(e.target); } });
+}, {threshold: .18});
+document.querySelectorAll('main > section:not(.scene) .wrap').forEach(w => {
+  [...w.children].forEach((el,i) => {
+    el.classList.add('prise');
+    el.style.transitionDelay = Math.min(i*0.12, 0.6)+'s';
+    pio.observe(el);
+  });
+});
+
 })();
