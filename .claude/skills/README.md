@@ -5,11 +5,11 @@
 
 ## hojo-hqはALLGROUP共通スキルの「本店」(2026-08-07〜)
 以下の6つは、特定の事業に依存しない汎用スキルなので、hojo-hqを本店として他の業務
-リポジトリ(hikari-hq/hikari-lp/hikari-report/kakei-hq/report-hq/go/allgroup-site等)が
+リポジトリ(hikari-hq/hikari-lp/hikari-report/kakei-hq/okinawa-villa/report-hq/go/allgroup-site等)が
 ここから同期する運用にしている。
 
 - hojo-hqオリジナル: `humanizer` / `resilient-agent-design` / `mindshare-arbitrage`
-- hojo-hqが選定してvendoring済みのOSS: `taste-skill` / `last30days` / social-media系8スキル(下記)
+- hojo-hqが選定してvendoring済みのOSS: `taste-skill` / `last30days` / `social-media-skills`
 
 - 新しいALLGROUP共通スキルを追加/更新するときは、まずここ(hojo-hq)に反映する
 - 他リポジトリへの反映は `scripts/update-skills.sh` を実行するだけ(Superpowers/
@@ -47,13 +47,14 @@ Reddit・X・YouTube・TikTok・Hacker News等を横断して、直近30日の�
 - デモ用メディア(assets/)とテスト/評価用スクリプトは除外(upstream の `.skillignore` 基準に準拠)。
 - 組織総点検で出た「世の中の成功事例を常にウォッチする」の実行手段として導入。
 
-## 中身: social-media系8スキル (social-media-skills/skills を厳選 vendoring・トップ階層に展開)
+## 中身: social-media-skills (social-media-skills/skills を厳選 vendoring)
 106スキットのうち、Instagram運用(SNS部)とX/note運用(note編集部)に直結する8スキルのみ選定。
 - 出典: https://github.com/social-media-skills/skills (MIT License — 全文は `SOCIAL-MEDIA-SKILLS-LICENSE`)
 - 選定: `instagram-growth` `caption-writer` `carousel-writer` `hashtag-strategy`
   `content-calendar` `thread-writer` `hook-writer` `platform-specs-and-validation`
 - evals/ は除外(実行時不要、他のvendoringと同じ方針)。
-- **注意: Claude Codeのスキル検出は `.claude/skills/<名前>/SKILL.md` の1階層のみ**。当初 `social-media-skills/` 配下に入れ子で置いたところ全8スキルが検出されなかったため、トップ階層へ展開した(2026-08-07)。今後も入れ子でスキルを置かないこと。
+- **配置は `.claude/skills/` 直下にフラット**(スキル検出は直下の `<name>/SKILL.md` しか
+  走査しないため。入れ子だと検出されず使えない — 2026-08-07点検で修正済み)。
 
 セッション開始時に `.claude/hooks/superpowers-session-start.sh` が
 `using-superpowers` スキルを注入し、「You have superpowers」で自動起動させる。

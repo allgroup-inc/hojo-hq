@@ -7,8 +7,7 @@
 #   - marketingskills 48スキル (coreyhaines31/marketingskills, MIT) ※マーケ系repoのみ
 #   - ALLGROUP共通スキル (allgroup-inc/hojo-hq を本店として同期。全repo対象。2026-08-07〜)
 #     humanizer / resilient-agent-design / mindshare-arbitrage (hojo-hqオリジナル)
-#     taste-skill / last30days / social-media系8スキル (hojo-hqが選定してvendoring済みのOSS)
-#     ※social-media系はClaude Codeの検出仕様(1階層のみ)に合わせトップ階層に展開済み(2026-08-07)
+#     taste-skill / last30days / social-media-skills (hojo-hqが選定してvendoring済みのOSS)
 #     ※本店(hojo-hq)側でこれらを更新したら、他repoは本スクリプトの再実行だけで追従する。
 #       スキルがrepoごとにズレることを防ぐのが目的なので、内容を各repo側で個別に書き換えない。
 # 触らないもの(各リポジトリ固有の手書き資産):
@@ -34,11 +33,14 @@ trap 'rm -rf "$TMP"' EXIT
 resolve() { local r="$1"; [ -d "$BASE/$r/.git" ] && echo "$BASE/$r" || echo "/home/user/$r"; }
 
 # マーケ系(Superpowers + marketing 48)。他は Superpowers のみ。全repo共通でALLGROUPスキルも同期。
-MARKETING_REPOS=(hojo-hq hikari-hq hikari-lp hikari-report kakei-hq)
+MARKETING_REPOS=(hojo-hq hikari-hq hikari-lp hikari-report kakei-hq okinawa-villa)
 INFRA_REPOS=(report-hq go allgroup-site)
 
 # ALLGROUP共通スキル(本店=hojo-hq)。ここに追加するとdrift防止対象が増える。
-ALLGROUP_SKILL_NAMES=(humanizer resilient-agent-design mindshare-arbitrage taste-skill last30days instagram-growth caption-writer carousel-writer hashtag-strategy content-calendar thread-writer hook-writer platform-specs-and-validation)
+# social-media系8スキルは検出仕様(.claude/skills直下のみ走査)のためフラット配置(2026-08-07修正)
+ALLGROUP_SKILL_NAMES=(humanizer resilient-agent-design mindshare-arbitrage taste-skill last30days
+  caption-writer carousel-writer content-calendar hashtag-strategy hook-writer
+  instagram-growth platform-specs-and-validation thread-writer)
 ALLGROUP_LICENSE_NAMES=(TASTE-SKILL-LICENSE LAST30DAYS-LICENSE SOCIAL-MEDIA-SKILLS-LICENSE)
 
 echo "==> cloning upstreams"
