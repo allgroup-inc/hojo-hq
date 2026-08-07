@@ -200,3 +200,9 @@ main section h2{letter-spacing:.12em}
 /* S1 実写主役化(本物の街の灯り) */
 .s1 .island,.s1 #vlights{display:none}
 .s1 .photoback::after{background:linear-gradient(180deg,rgba(16,27,26,.58) 0%,rgba(16,27,26,.22) 42%,rgba(16,27,26,.30) 70%,rgba(19,30,29,.78) 100%)}
+
+/* S2 実写主役化(浜辺の三線・夕景を夜に溶かす) */
+.s2 .sil{display:none}
+.s2 .photoback img{filter:saturate(.92) brightness(.9)}
+.s2 .photoback::after{background:linear-gradient(180deg,rgba(24,40,40,.74) 0%,rgba(24,40,40,.22) 38%,rgba(24,40,40,.30) 62%,rgba(31,56,56,.78) 100%)}
+.s2 .photoback::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at 50% 36%,rgba(15,28,28,.30),transparent 60%)}
