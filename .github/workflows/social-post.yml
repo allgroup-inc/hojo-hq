@@ -14,9 +14,13 @@ on:
 permissions:
   contents: read
 
+# cancel-in-progress: true(2026-08-07修正): falseだと「承認されないまま放置された回」が
+# 30日間この枠を握り続け、以降の月水金の回が一度も走らずプレビューLINEが止まる
+# (実際に7/31の放置で8/1〜8/7の全プレビューが不達になった)。
+# 新しい回が古い承認待ちを打ち切る=常に「今日の素材」だけが承認対象になる。
 concurrency:
   group: social-post
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   preview:
