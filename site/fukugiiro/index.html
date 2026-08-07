@@ -46,8 +46,9 @@ h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;line-height:
   word-break:keep-all;overflow-wrap:anywhere}
 h2{font-size:1.5rem;margin-bottom:.7em;text-align:center;text-wrap:balance;color:var(--ink)}
 h2 .em{color:var(--coral)}
-/* 本文(p, li, カード説明文)は左寄せ。中央は h1/h2/セクションラベル/ボタンのみ */
-section p,section li{text-align:left}
+/* 既定は中央揃え。長文の読み物(想い・FAQ回答)だけ左寄せ */
+section p{text-align:center}
+.story p,details p{text-align:left}
 section{padding:52px 0}
 /* section eyebrow with tiny leaf */
 .eyebrow{display:block;text-align:center;color:var(--sea);font-family:"Shippori Mincho",serif;
@@ -100,7 +101,7 @@ strong{font-weight:700}
 .loss h2{margin-bottom:.35em}
 .loss .miss{display:grid;gap:12px;margin-top:14px}
 .loss .miss div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;
-  font-weight:700;text-align:left;box-shadow:var(--shadow-sm)}
+  font-weight:700;text-align:center;box-shadow:var(--shadow-sm)}
 .loss .miss div span{display:block;font-weight:400;font-size:.83rem;color:var(--muted);margin-top:4px;line-height:1.6}
 @media(min-width:640px){.loss .miss{grid-template-columns:repeat(3,1fr)}}
 /* story */
@@ -126,7 +127,7 @@ strong{font-weight:700}
 /* steps */
 .steps{list-style:none;counter-reset:s;display:grid;gap:16px}
 .steps li{background:var(--card);border:1px solid var(--line);border-radius:18px;
-  padding:56px 20px 20px;position:relative;counter-increment:s;text-align:left;box-shadow:var(--shadow-sm)}
+  padding:56px 20px 20px;position:relative;counter-increment:s;text-align:center;box-shadow:var(--shadow-sm)}
 .steps li::before{content:counter(s);position:absolute;left:50%;transform:translateX(-50%);top:16px;
   width:38px;height:38px;background:var(--sun);color:#6b4e12;border-radius:50%;text-align:center;
   line-height:38px;font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.1rem}
@@ -141,7 +142,7 @@ strong{font-weight:700}
 /* cards (制度) */
 .cards{display:grid;gap:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;
-  text-align:left;box-shadow:var(--shadow-sm)}
+  text-align:center;box-shadow:var(--shadow-sm)}
 .card h3{font-size:1.06rem;margin-bottom:.35em;color:var(--ink)}
 .card .status{display:inline-block;font-size:.78rem;background:#FBEED0;border-radius:999px;
   padding:2px 10px;color:#7a5b00;margin:2px 4px}
@@ -168,7 +169,7 @@ details[open] summary{margin-bottom:.5em;color:var(--coral-deep)}
 .line-sec .btn{background:#fff;color:#22382A;box-shadow:var(--shadow-sm)}
 .line-sec .btn:active{background:#eef3ef}
 /* footer */
-footer{background:#3B322B;color:#e6ddd2;padding:44px 0;font-size:.9rem}
+footer{background:#3B322B;color:#e6ddd2;padding:44px 0;font-size:.9rem;text-align:center}
 footer .mincho{color:#fff;font-size:1.1rem}
 footer a{color:#F3D7C7}
 footer .fwrap p{margin-bottom:6px}
