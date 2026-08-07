@@ -25,6 +25,12 @@ TDD・計画・デバッグ・レビュー・Git ワークフロー等の 14 ス
 - `churn-model-quality-gate` — モデル品質ゲート(AUC≈0.5は本番不可・断定しない表示・少件数は参考・成熟実績のみ学習)
 - `churn-retention-ops` — 保全運用(締切アラートと別系統・放置検知・営業スコアの誤用防止・効果測定の注意)
 
+### 4. ALLGROUP共通スキル(hojo-hqを本店として同期)
+本リポジトリ hojo-hq を「本店」とし、ALLGROUP各リポジトリへ配布する共通スキル。更新は hojo-hq 側で行い、各所へ同期する。
+- `humanizer` — 対外文面の「AIっぽさ」除去の仕上げ校正(事実・数値・要確認表示・LINE単一CVは崩さない)
+- `resilient-agent-design` — 無人自動化の安全設計(異常時に安全停止・最小権限・Hookで危険操作を止める)
+- `mindshare-arbitrage` — コンテンツ発見→翻訳→投稿の仕組み化(丸パクリせず自分の言葉で・価値を足す)
+
 ## なぜ「フックでインストール」ではなく vendoring なのか
 Claude Code on the web は毎セッション `~/.claude` が作り直され、
 プラグインのインストール状態は永続しない。さらに SessionStart フックで
