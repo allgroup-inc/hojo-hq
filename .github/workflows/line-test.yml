@@ -17,6 +17,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # 登録されているトークンが「どのLINE公式アカウントのものか」をログに出す
+      # (誤って別チャネルのトークンを登録した事故の検出用。トークン自体は出力しない)
+      - name: トークンのアカウント識別チェック
+        env:
+          TOKEN: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::warning::KEKKA_LINE_CHANNEL_ACCESS_TOKEN が未設定です"
+            exit 0
+          fi
+          info=$(curl -sS https://api.line.me/v2/bot/info -H "Authorization: Bearer $TOKEN")
+          echo "このトークンのアカウント: $(echo "$info" | jq -r '"\(.displayName) (\(.basicId))"')"
+          basic=$(echo "$info" | jq -r '.basicId')
+          if [ "$basic" = "@473btavk" ]; then
+            echo "✅ 結果マガ専用アカウント(@473btavk)のトークンです"
+          else
+            echo "::error::登録トークンが結果マガ(@473btavk)ではなく $basic のものです。LINE Developersのプロバイダー kekka_mag → チャネルID 2011004310 からトークンを再発行して上書きしてください"
+            exit 1
+          fi
+
       - name: テスト通知
         uses: ./.github/actions/line-notify
         with:
