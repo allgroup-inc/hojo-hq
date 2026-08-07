@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-08-07 08:55",
+ "generated_at": "2026-08-07 11:26",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 9,
- "count": 21,
+ "count": 22,
  "items": [
   {
    "id": "a0WJ200000CDdRhMAL",
@@ -176,6 +176,16 @@
    "max_amount": null,
    "source_url": "https://www.city.naha.okinawa.jp/business/kigyouricchi/1003642/1012419.html",
    "tag": "okinawa"
+  },
+  {
+   "id": "a0WJ200000CDYDcMAP",
+   "name": "令和８年度　天然ガス利用設備による強靱性向上対策事業費補助金",
+   "deadline": "2026-08-27",
+   "days_left": 20,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDcMAP",
+   "tag": "nationwide"
   },
   {
    "id": "a0WJ200000CDPbMMAX",
