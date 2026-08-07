@@ -35,11 +35,14 @@ function handleLetterDraftEdit(e) {
   var row = e.range.getRow();
   if (row < 2) return;
 
-  var sentDateValue = e.value;
-  if (!sentDateValue) return;
-
+  // Fetch the full typed row FIRST, before using the date value.
+  // e.value may not be properly formatted for date cells; getValues() returns the typed Date object.
   var headers = GlowSchema.LETTER_DRAFT_HEADERS;
   var rowValues = sheet.getRange(row, 1, 1, headers.length).getValues()[0];
+
+  var sentDateValue = rowValues[headers.indexOf("発送日")];
+  if (!sentDateValue) return;
+
   var draftId = rowValues[headers.indexOf("下書きID")];
   var companyId = rowValues[headers.indexOf("企業ID")];
 
@@ -98,6 +101,8 @@ function updateFollowUpDateIfEmpty_(companyId, sentDateValue) {
  * 存在する場合はスキップする(発送日セルを後から訂正しても重複記録しないため)。
  */
 function appendShippedInteractionLogIfNew_(companyId, draftId, sentDateValue) {
+  if (!draftId) return;  // Guard against falsy draftId to prevent false-positive marker matches
+
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
   if (!logSheet) return;
