@@ -1,4 +1,6 @@
-# glow-ma Phase 10 設計書: レター発送日の記録・発送業者連携用CSV出力
+# glow-ma Phase 16 設計書: レター発送日の記録・発送業者連携用CSV出力
+
+(README記載の完了フェーズはPhase 1〜15。本機能はPhase 16として追加する。)
 
 三名体制レビュー: `2026-08-07-glow-ma-letter-shipping-triangle-review.md`(裁定: 採用・条件付き)
 
