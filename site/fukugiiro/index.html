@@ -30,8 +30,9 @@
   --leaf:#7E9B79;        /* フクギの葉 */
   --blush:#F3D7C7;       /* やわらかい珊瑚のもや */
   --line:#EEE1D0;        /* 温かい罫 */
-  --shadow:0 2px 4px rgba(120,80,50,.05), 0 10px 30px rgba(150,90,50,.07);
-  --shadow-sm:0 1px 2px rgba(120,80,50,.06), 0 4px 14px rgba(150,90,50,.06);
+  /* 影は最小限(0 1px 2px .04)に統一 */
+  --shadow:0 1px 2px rgba(0,0,0,.04);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.04);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
@@ -56,9 +57,9 @@ section{padding:52px 0}
 /* buttons */
 .btn{display:block;width:100%;max-width:440px;margin:0 auto;padding:19px 24px;min-height:44px;
   background:var(--coral);color:#fff;text-align:center;text-decoration:none;
-  border-radius:999px;font-size:1.12rem;font-weight:700;box-shadow:0 8px 20px rgba(210,105,74,.28);
-  transition:transform .15s ease, box-shadow .15s ease}
-.btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(210,105,74,.34)}
+  border-radius:999px;font-size:1.12rem;font-weight:700;box-shadow:var(--shadow-sm);
+  transition:transform .15s ease}
+.btn:hover{transform:translateY(-2px)}
 .btn:active{transform:translateY(0);background:var(--coral-deep)}
 .note{font-size:.85rem;color:var(--muted);line-height:1.75}
 .microtrust{font-size:.82rem;color:var(--muted);text-align:center;margin-top:10px}
@@ -82,7 +83,7 @@ strong{font-weight:700}
 .hero::after{width:120px;height:120px;background:#DCEDE8;bottom:6%;right:-30px}
 .hero .wrap{position:relative;z-index:1}
 .brandmark{display:inline-flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:18px}
-.brandmark img{width:76px;height:76px;filter:drop-shadow(0 6px 14px rgba(150,90,50,.16))}
+.brandmark img{width:76px;height:76px}
 .brandmark .wm{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.9rem;color:var(--coral-deep);letter-spacing:.04em}
 .brandmark .tl{font-family:"Shippori Mincho",serif;font-size:.86rem;color:var(--sea);letter-spacing:.08em}
 .badge{display:inline-block;background:#fff;color:var(--coral-deep);border:1px solid var(--blush);
@@ -115,24 +116,20 @@ strong{font-weight:700}
 /* 赤太字の強調は1セクション1ヶ所まで(想いは .cry「くやしい」に集約)。他の強調は濃い文字で */
 .story strong{color:var(--ink)}
 .story .by{display:block;text-align:center;color:var(--sea);font-weight:700;font-size:.88rem;margin-top:12px}
-/* stats */
-.stats{display:grid;grid-template-columns:1fr;gap:14px}
+/* stats(実績は検証済み制度の1枚のみ) */
+.stats{max-width:440px;margin:0 auto}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 18px;
   text-align:center;box-shadow:var(--shadow-sm)}
 .stat .num{font-family:"Shippori Mincho",serif;font-size:1.95rem;font-weight:700;color:var(--coral);
   line-height:1.2;display:block}
-.stat .yen{font-size:1.1rem;font-weight:700;margin-right:1px}
 .stat .lbl{font-size:.9rem;color:var(--muted);margin-top:4px}
-.stat.hero-stat{background:linear-gradient(180deg,#FFF6E8 0%,var(--card) 100%);border-color:var(--sun)}
-@media(min-width:640px){.stats{grid-template-columns:repeat(3,1fr)}}
 /* steps */
 .steps{list-style:none;counter-reset:s;display:grid;gap:16px}
 .steps li{background:var(--card);border:1px solid var(--line);border-radius:18px;
   padding:56px 20px 20px;position:relative;counter-increment:s;text-align:left;box-shadow:var(--shadow-sm)}
 .steps li::before{content:counter(s);position:absolute;left:50%;transform:translateX(-50%);top:16px;
   width:38px;height:38px;background:var(--sun);color:#6b4e12;border-radius:50%;text-align:center;
-  line-height:38px;font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.1rem;
-  box-shadow:0 4px 10px rgba(242,193,78,.4)}
+  line-height:38px;font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.1rem}
 .steps li strong{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.08rem;color:var(--ink)}
 /* navcards */
 .navcards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -168,7 +165,7 @@ details[open] summary{margin-bottom:.5em;color:var(--coral-deep)}
 .line-sec{background:#22382A}
 .line-sec h2{color:#fff}
 .line-sec p{color:#EAF0EC}
-.line-sec .btn{background:#fff;color:#22382A;box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.line-sec .btn{background:#fff;color:#22382A;box-shadow:var(--shadow-sm)}
 .line-sec .btn:active{background:#eef3ef}
 /* footer */
 footer{background:#3B322B;color:#e6ddd2;padding:44px 0;font-size:.9rem}
@@ -178,10 +175,9 @@ footer .fwrap p{margin-bottom:6px}
 /* sticky CTA (mobile) */
 .sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(251,245,236,.97);
   backdrop-filter:blur(8px);border-top:1px solid var(--line);
-  padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:none;box-shadow:0 -4px 20px rgba(150,90,50,.08)}
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:none}
 .sticky-cta a{display:block;max-width:520px;margin:0 auto;background:var(--coral);color:#fff;
-  text-align:center;text-decoration:none;border-radius:999px;font-weight:700;padding:15px;font-size:1.05rem;
-  box-shadow:0 6px 16px rgba(210,105,74,.3)}
+  text-align:center;text-decoration:none;border-radius:999px;font-weight:700;padding:15px;font-size:1.05rem}
 .sticky-cta .mt{display:block;text-align:center;font-size:.72rem;color:var(--muted);margin-top:5px}
 @media(max-width:639px){.sticky-cta{display:block} body{padding-bottom:100px}}
 /* responsive */
@@ -264,21 +260,12 @@ footer .fwrap p{margin-bottom:6px}
     <span class="eyebrow">実 績</span>
     <h2>もらいわすれ堂が、県民に取り戻したお金</h2>
     <div class="stats">
-      <div class="stat hero-stat">
-        <span class="num" id="jukyu-amount">まもなく公開</span>
-        <div class="lbl" id="jukyu-amount-lbl">みんなが実際に受け取れた金額(累計)</div>
-      </div>
-      <div class="stat">
-        <span class="num" id="jukyu-households">—</span>
-        <div class="lbl">受け取れた世帯(報告ベース)</div>
-      </div>
       <div class="stat">
         <span class="num" id="seido-count">—</span>
         <div class="lbl">検証済みで掲載中の制度</div>
-        <div class="note" id="seido-trust" style="margin-top:6px;font-size:.8rem"></div>
+        <div class="note" id="seido-trust" style="margin-top:6px;font-size:.8rem;text-align:center"></div>
       </div>
     </div>
-    <p class="note" id="jukyu-note" style="margin-top:14px">受給報告の受付開始に向けて準備中です。金額は利用者の自己申告をもとに、検証部が公式制度と突合できたぶんだけを計上します。個人が特定される情報は含みません。</p>
   </div>
 </section>
 
@@ -304,7 +291,7 @@ footer .fwrap p{margin-bottom:6px}
   <div class="wrap">
     <div class="story">
       <h2 style="margin-bottom:.4em">「振り込まれました」を教えてください</h2>
-      <p style="margin-bottom:14px">あなたが実際に受け取れた金額のご報告が、次の県民の「もらい忘れ」を防ぎます。<br>上のカウンターは、いただいた報告のうち検証できたぶんを積み上げたものです。<br><strong>制度名とおおよその金額だけ</strong>で大丈夫。お名前や口座番号はうかがいません。</p>
+      <p style="margin-bottom:14px">あなたが実際に受け取れた金額のご報告が、次の県民の「もらい忘れ」を防ぎます。<br>いただいた報告は、検証できたぶんだけを実績として公開していきます。<br><strong>制度名とおおよその金額だけ</strong>で大丈夫。お名前や口座番号はうかがいません。</p>
       <a class="btn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-jukyu/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('jukyu_report_click')">LINEで受給を報告する(匿名・無料)</a>
       <p class="note" style="margin-top:12px">報告は任意です。いただいた金額は個人が特定できない形で集計・公開します。</p>
     </div>
@@ -433,23 +420,7 @@ footer .fwrap p{margin-bottom:6px}
       });
     }
   }).catch(function(){ /* データ取得失敗時は静的表示のまま(診断・本文は影響なし) */ });
-
-  // 実受給額カウンター(北極星・第0階層)。検証済みで計上ぶんのみを表示。
-  fetch("../data/fukugiiro/jukyu_reports.json").then(function(r){return r.json()}).then(function(jk){
-    var s = jk.summary || {};
-    var amt = s.total_amount_yen || 0;
-    var hh = s.household_count || 0;
-    if(amt > 0){
-      document.getElementById("jukyu-amount").innerHTML =
-        '<span class="yen">¥</span>' + amt.toLocaleString("ja-JP");
-      document.getElementById("jukyu-amount-lbl").textContent = "みんなが実際に受け取れた金額(累計)";
-      document.getElementById("jukyu-households").textContent = hh.toLocaleString("ja-JP") + "世帯";
-      if(jk.disclaimer) document.getElementById("jukyu-note").textContent = jk.disclaimer;
-    } else if(s.note){
-      // 実績ゼロのあいだは金額を誇張しない。「まもなく公開」の静的表示のまま補足だけ差し替える。
-      document.getElementById("jukyu-note").textContent = s.note + (jk.disclaimer ? " " + jk.disclaimer : "");
-    }
-  }).catch(function(){ /* 取得失敗時は「まもなく公開」の静的表示のまま */ });
+  // 受給額カウンターは非表示中(実績が積み上がったら jukyu_reports.json 連動で再掲予定)。
 })();
 </script>
 </body>
