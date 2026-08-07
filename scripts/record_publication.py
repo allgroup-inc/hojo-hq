@@ -67,8 +67,11 @@ def main():
     text = open(path, encoding="utf-8").read()
     today = datetime.now(JST).date().isoformat()
 
-    if f"published: {args.url}" in text:
-        print("skip=already_recorded")
+    # べき等性ガード: 同じURLが記録済みなら、X告知を含む後続の副作用をすべて止める
+    # (idempotency_key = 記事ID+公開URL。二重実行してもX二重投稿・二重課金にならない)
+    already = f"published: {args.url}" in text
+    if already:
+        print("already=1")
     else:
         record = (
             f"<!-- published: {args.url} {today}(記録: publish-recordワークフロー)\n"
@@ -90,13 +93,16 @@ def main():
     except FileNotFoundError:
         pass
 
-    hooks = extract_hooks(text)
-    announce = hooks.get(args.hook) or hooks.get("a") or ""
-    # 誇大表現の機械検査(規程3-3。告知文にも適用)
-    for w in ("必ず", "絶対", "誰でも", "楽して", "確実に稼"):
-        if w in announce:
-            print(f"エラー: 告知文に禁止語({w})。手動で文面を直してください", file=sys.stderr)
-            return 1
+    # 記録済み(already)のときは告知文を出力しない → ワークフロー側のX投稿が条件で止まる
+    announce = ""
+    if not already:
+        hooks = extract_hooks(text)
+        announce = hooks.get(args.hook) or hooks.get("a") or ""
+        # 誇大表現の機械検査(規程3-3。告知文にも適用)
+        for w in ("必ず", "絶対", "誰でも", "楽して", "確実に稼"):
+            if w in announce:
+                print(f"エラー: 告知文に禁止語({w})。手動で文面を直してください", file=sys.stderr)
+                return 1
 
     title_m = re.search(r"^# (.+)$", text, flags=re.M)
     print(f"article={os.path.relpath(path, BASE)}")
