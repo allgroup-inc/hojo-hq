@@ -3,41 +3,58 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>情報まとめサイト</title>
-<meta name="description" content="毎日自動更新の情報まとめ">
+<title>情報まとめ</title>
+<meta name="description" content="毎日自動更新">
 <style>
-  :root { --accent: #00335C; --bg: #f7f8fa; }
+  :root {
+    --accent: #0B5A44;
+    --bg: #faf9f7; --ink: #1c1b1a; --sub: #6b6862; --line: #e3e0da; --warn: #a35200;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #16181a; --ink: #e8e6e3; --sub: #96938d; --line: #2c2f33; --warn: #e09b4c; }
+  }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: "Noto Sans JP", "Hiragino Sans", Meiryo, sans-serif;
-         background: var(--bg); color: #1a1a1a; line-height: 1.7; }
-  header { background: var(--accent); color: #fff; padding: 24px 16px; }
-  header h1 { margin: 0; font-size: 1.4rem; }
-  header p { margin: 4px 0 0; opacity: .85; font-size: .85rem; }
-  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
-  .card { background: #fff; border-radius: 10px; padding: 18px 20px; margin-bottom: 14px;
-           box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-  .card h2 { margin: 0 0 6px; font-size: 1.05rem; }
-  .card h2 a { color: var(--accent); text-decoration: none; }
-  .card h2 a:hover { text-decoration: underline; }
-  .meta { font-size: .8rem; color: #666; margin-bottom: 8px; }
-  .meta span { margin-right: 12px; }
-  .badge { display: inline-block; background: #eef3f8; color: var(--accent);
-            border-radius: 4px; padding: 1px 8px; font-size: .75rem; }
-  .warn { color: #b25000; }
-  footer { text-align: center; font-size: .75rem; color: #888; padding: 24px; }
+  body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.75;
+         font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+  header { padding: 56px 0 28px; border-bottom: 2px solid var(--ink); }
+  header h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.6rem); letter-spacing: -.02em;
+               line-height: 1.15; }
+  header p { margin: 10px 0 0; color: var(--sub); font-size: .85rem;
+              font-variant-numeric: tabular-nums; }
+  main { padding: 8px 0 72px; }
+  article { padding: 26px 0; border-bottom: 1px solid var(--line); }
+  article h2 { margin: 0 0 6px; font-size: 1.12rem; line-height: 1.5; letter-spacing: -.01em; }
+  article h2 a { color: var(--ink); text-decoration: none; }
+  article h2 a:hover { color: var(--accent); text-decoration: underline;
+                        text-underline-offset: 4px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0 0 10px; padding: 0;
+           list-style: none; font-size: .8rem; color: var(--sub);
+           font-variant-numeric: tabular-nums; }
+  .meta b { font-weight: 600; color: var(--ink); }
+  .cat { color: var(--accent); font-weight: 700; }
+  .warn { color: var(--warn); font-weight: 600; }
+  article p { margin: 0; font-size: .95rem; max-width: 65ch; }
+  .src { margin-top: 8px; font-size: .78rem; }
+  .src a { color: var(--sub); }
+  .empty { padding: 64px 0; color: var(--sub); }
+  footer { border-top: 1px solid var(--line); padding: 24px 0 56px; font-size: .78rem;
+            color: var(--sub); }
 </style>
 </head>
 <body>
+<div class="wrap">
 <header>
-  <h1>情報まとめサイト</h1>
-  <p>毎日自動更新の情報まとめ | 最終更新: 2026-08-01 20:48 JST</p>
+  <h1>情報まとめ</h1>
+  <p>毎日自動更新。最終更新 2026-08-07 13:03 JST</p>
 </header>
 <main>
-<p>まだ掲載情報がありません。次回の自動収集をお待ちください。</p>
+<p class="empty">まだ掲載情報がありません。次回の自動収集をお待ちください。</p>
 </main>
 <footer>
-  掲載情報は自動収集・自動整形しています。正確な内容は必ずリンク先の原文をご確認ください。<br>
-  「要確認」表示は原文から確定できなかった項目です。
+  掲載情報は自動収集・自動整形しています。正確な内容は必ず出典リンク先の原文でご確認ください。
+  「要確認」は原文から確定できなかった項目です。
 </footer>
+</div>
 </body>
 </html>
