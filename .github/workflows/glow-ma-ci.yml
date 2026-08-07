@@ -11,6 +11,11 @@ on:
       - "tests/glow_ma_*.test.mjs"
   workflow_dispatch: {}
 
+# 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
+concurrency:
+  group: glow-ma-ci
+  cancel-in-progress: false
+
 jobs:
   test:
     runs-on: ubuntu-latest
