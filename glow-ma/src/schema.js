@@ -60,6 +60,11 @@
     "掘り起こし待ち件数合計", "成約企業数", "連絡不要企業数", "長期検討企業数"
   ];
 
+  var STAFF_SHEET_NAME = "スタッフ";
+  // Slack User ID の調べ方: Slackで対象社員のプロフィールを開き「その他」→
+  // 「メンバーIDをコピー」(U から始まる文字列)。メールアドレスではない。
+  var STAFF_HEADERS = ["氏名", "Slack User ID", "有効"];
+
   var api = {
     COMPANY_MASTER_SHEET_NAME: COMPANY_MASTER_SHEET_NAME,
     COMPANY_MASTER_HEADERS: COMPANY_MASTER_HEADERS,
@@ -79,7 +84,9 @@
     DASHBOARD_SHEET_NAME: DASHBOARD_SHEET_NAME,
     DASHBOARD_PLACEHOLDER_HEADERS: DASHBOARD_PLACEHOLDER_HEADERS,
     DASHBOARD_HISTORY_SHEET_NAME: DASHBOARD_HISTORY_SHEET_NAME,
-    DASHBOARD_HISTORY_HEADERS: DASHBOARD_HISTORY_HEADERS
+    DASHBOARD_HISTORY_HEADERS: DASHBOARD_HISTORY_HEADERS,
+    STAFF_SHEET_NAME: STAFF_SHEET_NAME,
+    STAFF_HEADERS: STAFF_HEADERS
   };
 
   if (typeof module !== "undefined" && module.exports) {
