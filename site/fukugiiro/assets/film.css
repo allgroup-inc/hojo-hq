@@ -144,9 +144,9 @@
 .faces{position:absolute;inset:0;z-index:1}
 .photo{position:absolute;background:#fff;padding:5px 5px 20px;border-radius:5px;
   box-shadow:0 8px 22px rgba(90,60,40,.16);
-  opacity:0;transform:translateX(-50%) rotate(var(--r,0deg)) scale(.4) translateY(20px);
+  opacity:0;transform:translate(-50%,-50%) rotate(var(--r,0deg)) scale(.4);
   transition:opacity .8s ease,transform .8s cubic-bezier(.34,1.5,.64,1)}
-.s8.in .photo{opacity:1;transform:translateX(-50%) rotate(var(--r,0deg)) scale(1) translateY(0)}
+.s8.in .photo{opacity:1;transform:translate(-50%,-50%) rotate(var(--r,0deg)) scale(1)}
 .photo .ph{width:100%;aspect-ratio:4/4.6;border-radius:3px;position:relative;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
 .photo .ph::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.5),rgba(255,255,255,0) 55%)}
@@ -219,3 +219,7 @@ main section h2{letter-spacing:.12em}
 
 /* S8: 浅いウィンドウでも写真が文字周りの余白を保てるように */
 .s8{min-height:max(100vh,900px)}
+
+/* PCワイド時のトリミング基準を顔に合わせる */
+.s2 .photoback img{object-position:38% 10%}
+.s3 .photoback img{object-position:50% 26%}

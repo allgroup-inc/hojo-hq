@@ -17,18 +17,30 @@ const vb = document.getElementById('vlights');
 const VP=[[8,81],[13,79],[18,82],[24,80],[31,78],[37,81],[44,79],[52,80],[58,78],[64,81],[71,79],[78,82],[85,80],[91,81],[27,83],[48,83],[68,83],[88,84],[15,84],[55,84]];
 vb.innerHTML = VP.map((v,i)=>`<div class="vlight" style="left:${v[0]}%;top:${v[1]}%;animation-delay:${(i%9)*.5}s"></div>`).join('');
 
-// ===== 笑顔の壁(S8): 実写9枚(上5・下4) =====
-const PH=[
- [10,3,120,-4,'assets/film/egao/e3.jpg','こどもの笑顔'],
- [30,1,120,3,'assets/film/egao/e1.jpg','姉妹の笑顔'],
- [50,4,120,-2,'assets/film/egao/e4.jpg','おじいとおばあの笑顔'],
- [70,1,120,4,'assets/film/egao/e8.jpg','琉装のこどもたち'],
- [90,4,120,-3,'assets/film/egao/e2.jpg','おばあたちの笑顔'],
- [12.5,79,132,3,'assets/film/egao/e9.jpg','ふたりの門出'],
- [37.5,76,132,-3,'assets/film/egao/e6.jpg','きょうだいの笑顔'],
- [62.5,79,132,2,'assets/film/egao/e7.jpg','おかあさんの笑顔'],
- [87.5,76,132,-4,'assets/film/egao/e5.jpg','ともだちの笑顔']
+// ===== 笑顔の壁(S8): 実写9枚。PC=円(縁)を描く配置 / スマホ=上5・下4 =====
+const RING=[
+ [50,9,130,-2,'assets/film/egao/e4.jpg','おじいとおばあの笑顔'],
+ [76.4,17.9,120,4,'assets/film/egao/e8.jpg','琉装のこどもたち'],
+ [90.4,40.4,120,-3,'assets/film/egao/e2.jpg','おばあたちの笑顔'],
+ [85.5,66,120,3,'assets/film/egao/e5.jpg','ともだちの笑顔'],
+ [64,82.7,124,-3,'assets/film/egao/e7.jpg','おかあさんの笑顔'],
+ [36,82.7,124,3,'assets/film/egao/e6.jpg','きょうだいの笑顔'],
+ [14.5,66,120,-4,'assets/film/egao/e9.jpg','ふたりの門出'],
+ [9.6,40.4,120,3,'assets/film/egao/e1.jpg','姉妹の笑顔'],
+ [23.6,17.9,120,-4,'assets/film/egao/e3.jpg','こどもの笑顔']
 ];
+const ROWS=[
+ [10,12,120,-4,'assets/film/egao/e3.jpg','こどもの笑顔'],
+ [30,10,120,3,'assets/film/egao/e1.jpg','姉妹の笑顔'],
+ [50,13,120,-2,'assets/film/egao/e4.jpg','おじいとおばあの笑顔'],
+ [70,10,120,4,'assets/film/egao/e8.jpg','琉装のこどもたち'],
+ [90,13,120,-3,'assets/film/egao/e2.jpg','おばあたちの笑顔'],
+ [12.5,88,132,3,'assets/film/egao/e9.jpg','ふたりの門出'],
+ [37.5,85,132,-3,'assets/film/egao/e6.jpg','きょうだいの笑顔'],
+ [62.5,88,132,2,'assets/film/egao/e7.jpg','おかあさんの笑顔'],
+ [87.5,85,132,-4,'assets/film/egao/e5.jpg','ともだちの笑顔']
+];
+const PH = window.innerWidth>=900 ? RING : ROWS;
 const fb=document.getElementById('faces');
 fb.innerHTML=PH.map((f,i)=>{
   const [x,y,w,r,src,cap]=f, delay=(i%9)*0.15;
