@@ -24,10 +24,10 @@ const PH=[
  [50,4,120,-2,'assets/film/egao/e4.jpg','おじいとおばあの笑顔'],
  [70,1,120,4,'assets/film/egao/e8.jpg','琉装のこどもたち'],
  [90,4,120,-3,'assets/film/egao/e2.jpg','おばあたちの笑顔'],
- [12.5,74,132,3,'assets/film/egao/e9.jpg','ふたりの門出'],
- [37.5,71,132,-3,'assets/film/egao/e6.jpg','きょうだいの笑顔'],
- [62.5,74,132,2,'assets/film/egao/e7.jpg','おかあさんの笑顔'],
- [87.5,71,132,-4,'assets/film/egao/e5.jpg','ともだちの笑顔']
+ [12.5,79,132,3,'assets/film/egao/e9.jpg','ふたりの門出'],
+ [37.5,76,132,-3,'assets/film/egao/e6.jpg','きょうだいの笑顔'],
+ [62.5,79,132,2,'assets/film/egao/e7.jpg','おかあさんの笑顔'],
+ [87.5,76,132,-4,'assets/film/egao/e5.jpg','ともだちの笑顔']
 ];
 const fb=document.getElementById('faces');
 fb.innerHTML=PH.map((f,i)=>{
