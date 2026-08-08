@@ -58,11 +58,11 @@ jobs:
             echo "push retry $i"; sleep 5
           done
 
-      # 二重投稿ガード: 同じ記事ID+URLで再実行された場合(already=1)はX投稿を行わない
-      # (record_publication.py が announce を空にし、この if でも二重に止める)
-      - name: Post X announce(シークレット設定時のみ・初回実行のみ)
+      # 二重投稿ガード: X投稿済み(お題のx_post_url記録あり)なら record_publication.py が
+      # announce を空にする。announce が空の間はこのステップは走らない
+      - name: Post X announce(シークレット設定時のみ・未投稿のときのみ)
         id: xpost
-        if: steps.rec.outputs.already != '1' && steps.rec.outputs.announce != ''
+        if: steps.rec.outputs.announce != ''
         env:
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
