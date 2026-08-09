@@ -6,9 +6,11 @@ name: note-draft
 # (noteに投稿公式APIがなく、非公式手段は絶対ルール2により使わない)。
 
 on:
-  schedule:
-    # JST 月 09:35(= UTC 月 0:35)
-    - cron: "35 0 * * 1"
+  # 定期実行は停止中(2026-08-09 小柳さん指示によるnote路線転換。
+  # 議事: docs/議事_note新路線_うごくAIレシピ_2026-08-09.md。再開時は下のscheduleを戻すだけ)
+  # schedule:
+  #   # JST 月 09:35(= UTC 月 0:35)
+  #   - cron: "35 0 * * 1"
   workflow_dispatch: {}
 
 permissions:
