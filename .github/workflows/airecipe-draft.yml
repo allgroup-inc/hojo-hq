@@ -30,6 +30,11 @@ jobs:
   draft:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # 専用LINE(2026-08-09 小柳さん指示: 他事業のLINEと分離)。未設定の間は通知をスキップし、
+    # ログに警告を出す(下書き生成自体は止めない)。設定手順: docs/うごくAIレシピ_LINE開設キット.md
+    env:
+      AIRECIPE_LINE_TOKEN: ${{ secrets.AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN }}
+      AIRECIPE_LINE_TO: ${{ secrets.AIRECIPE_LINE_ADMIN_USER_ID }}
     steps:
       - uses: actions/checkout@v7
 
@@ -63,12 +68,17 @@ jobs:
             echo "push retry $i"; sleep 5
           done
 
+      - name: 専用LINE未設定の警告
+        if: env.AIRECIPE_LINE_TOKEN == '' || env.AIRECIPE_LINE_TO == ''
+        run: |
+          echo "::warning::AIレシピ専用LINEが未設定のため通知をスキップしました。下書きは posts/airecipe/ に生成済みです。設定手順: docs/うごくAIレシピ_LINE開設キット.md(AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN / AIRECIPE_LINE_ADMIN_USER_ID)"
+
       - name: LINE通知(下書き完成)
-        if: steps.gen.outputs.status == 'ok'
+        if: steps.gen.outputs.status == 'ok' && env.AIRECIPE_LINE_TOKEN != '' && env.AIRECIPE_LINE_TO != ''
         uses: ./.github/actions/line-notify
         with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          channel-access-token: ${{ secrets.AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.AIRECIPE_LINE_ADMIN_USER_ID }}
           message: |
             🍳【AIレシピ】実行検証済みの下書きができました
 
@@ -77,27 +87,29 @@ jobs:
             ━━━ 公開手順(約5分) ━━━
             ①下のリンクを開いて内容を一読(実行ログが載っているか確認)
             https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/posts/airecipe/${{ steps.gen.outputs.stem }}.md
-            ②「Raw」表示で全文コピー
+            ②「Raw」表示で全文コピー(冒頭のタイトル別案・X告知ブロックは削除)
             ③noteの新規記事に貼り付け、「ここから先が有料パートです」の直後に有料ラインを設定して公開
 
+            未公開の在庫: ${{ steps.gen.outputs.stock }}本
+            ${{ steps.gen.outputs.stockwarn }}
             気になる点があれば公開せず、そのままご相談ください。
 
       - name: LINE通知(キュー空/スキップ)
-        if: steps.gen.outputs.status == 'empty_queue'
+        if: steps.gen.outputs.status == 'empty_queue' && env.AIRECIPE_LINE_TOKEN != '' && env.AIRECIPE_LINE_TO != ''
         uses: ./.github/actions/line-notify
         with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          channel-access-token: ${{ secrets.AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.AIRECIPE_LINE_ADMIN_USER_ID }}
           message: |
             🍳【AIレシピ】お題キューが空になりました
             data/airecipe_topics.json にお題を追加してください(チャットで「お題を10本補充して」でもOKです)
 
       - name: LINE通知(失敗時)
-        if: failure()
+        if: failure() && env.AIRECIPE_LINE_TOKEN != '' && env.AIRECIPE_LINE_TO != ''
         uses: ./.github/actions/line-notify
         with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          channel-access-token: ${{ secrets.AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.AIRECIPE_LINE_ADMIN_USER_ID }}
           message: |
             🚨【AIレシピ】自動生成・検証が失敗しました(お題は持ち越し。捏造はしません)
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
