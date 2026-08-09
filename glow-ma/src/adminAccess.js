@@ -32,9 +32,73 @@
       "心当たりがある場合は管理者に確認してください。</p></body></html>";
   }
 
+  var COMPANY_LIST_FIELDS = ["企業ID", "会社名", "ランク", "現在ステージ", "次回アクション予定日", "担当者"];
+  var DEFAULT_LIST_LIMIT = 100;
+
+  function pickCompanyListFields_(company) {
+    var picked = {};
+    COMPANY_LIST_FIELDS.forEach(function (field) {
+      picked[field] = company[field] !== undefined ? company[field] : "";
+    });
+    return picked;
+  }
+
+  function hasAnyFilter(filters) {
+    var f = filters || {};
+    return !!(String(f.search || "").trim() || f.rank || f.stage || f.owner);
+  }
+
+  function applyCompanyFilters(companies, filters) {
+    var f = filters || {};
+    var searchTerm = String(f.search || "").trim().toLowerCase();
+    return (companies || []).filter(function (company) {
+      if (searchTerm) {
+        var name = String(company["会社名"] || "").toLowerCase();
+        var rep = String(company["代表者名"] || "").toLowerCase();
+        if (name.indexOf(searchTerm) === -1 && rep.indexOf(searchTerm) === -1) return false;
+      }
+      if (f.rank && company["ランク"] !== f.rank) return false;
+      if (f.stage && company["現在ステージ"] !== f.stage) return false;
+      if (f.owner && company["担当者"] !== f.owner) return false;
+      return true;
+    });
+  }
+
+  function sortByNextActionDateDesc_(companies) {
+    return companies.slice().sort(function (a, b) {
+      var da = String(a["次回アクション予定日"] || "");
+      var db = String(b["次回アクション予定日"] || "");
+      if (da === db) return 0;
+      return da < db ? 1 : -1;
+    });
+  }
+
+  function buildCompanyListResult(companies, filters) {
+    var filtered = applyCompanyFilters(companies, filters);
+    var limited = hasAnyFilter(filters)
+      ? filtered
+      : sortByNextActionDateDesc_(filtered).slice(0, DEFAULT_LIST_LIMIT);
+    return limited.map(pickCompanyListFields_);
+  }
+
+  function sortInteractionsByDateDesc(records) {
+    return (records || []).slice().sort(function (a, b) {
+      var da = String(a["日付"] || "");
+      var db = String(b["日付"] || "");
+      if (da === db) return 0;
+      return da < db ? 1 : -1;
+    });
+  }
+
   var api = {
     isAllowedEmail: isAllowedEmail,
-    buildAccessDeniedHtml: buildAccessDeniedHtml
+    buildAccessDeniedHtml: buildAccessDeniedHtml,
+    COMPANY_LIST_FIELDS: COMPANY_LIST_FIELDS,
+    DEFAULT_LIST_LIMIT: DEFAULT_LIST_LIMIT,
+    hasAnyFilter: hasAnyFilter,
+    applyCompanyFilters: applyCompanyFilters,
+    buildCompanyListResult: buildCompanyListResult,
+    sortInteractionsByDateDesc: sortInteractionsByDateDesc
   };
 
   if (typeof module !== "undefined" && module.exports) {
