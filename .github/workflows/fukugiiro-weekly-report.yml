@@ -5,6 +5,7 @@ on:
     # 毎週月曜 09:00 JST(= 日曜 00:00 UTC)。yui.md「週次レポートは毎週月曜」
     - cron: "0 0 * * 1"
   push:
+    branches: [main]  # 作業ブランチへのbot混入防止(resilient-agent-design監査 2026-08-07)
     paths:
       - "scripts/weekly_report_fukugiiro.py"
       - ".github/workflows/fukugiiro-weekly-report.yml"

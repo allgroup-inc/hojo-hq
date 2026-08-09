@@ -35,29 +35,34 @@ MUNIS = [
 ]
 
 STYLE = """
-:root{--fg-primary:#B9502F;--fg-accent:#F2B705;--fg-deep:#1A6B52;--fg-ink:#1F2A2E;--fg-bg:#FFFBF4;--fg-card:#fff;--fg-muted:#5C6B70;--fg-line:#EBE2D4}
+:root{--fg-primary:#D2694A;--fg-primary-deep:#B9502F;--fg-accent:#F2C14E;--fg-deep:#1F5C45;--fg-ink:#3B322B;--fg-bg:#FBF5EC;--fg-card:#FFFDF9;--fg-muted:#8B7C6E;--fg-line:#EEE1D0;--fg-cta:#22382A;--fg-shadow:0 1px 2px rgba(0,0,0,.04)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:18px;line-height:1.8;color:var(--fg-ink);background:var(--fg-bg)}
+body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:17px;line-height:1.9;color:var(--fg-ink);background:var(--fg-bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
-h1{font-size:1.35rem;margin-bottom:8px}
+h1{font-size:1.4rem;margin-bottom:8px;line-height:1.5}
 .note{font-size:.85rem;color:var(--fg-muted)}
-.btn{display:block;max-width:420px;margin:20px auto;padding:16px 24px;min-height:44px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700}
-.card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px;margin:14px 0}
+.btn{display:block;max-width:440px;margin:20px auto;padding:17px 24px;min-height:44px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem;box-shadow:var(--fg-shadow)}
+.btn:active{background:var(--fg-primary-deep)}
+.card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:18px;margin:14px 0;box-shadow:var(--fg-shadow)}
 .card h2{font-size:1.05rem;margin-bottom:4px}
 .card a{color:var(--fg-primary)}
-.status{font-size:.8rem;background:#fff3cd;border-radius:4px;padding:1px 8px;color:#7a5b00}
-.disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
+.status{display:inline-block;font-size:.78rem;background:#FBEED0;border-radius:999px;padding:2px 10px;color:#7a5b00}
+.status.ok{background:#E7F3EC;color:#0F5138}
+.trust{background:#EFF5F0;border:1px solid #D5E5DA;border-radius:12px;padding:12px 14px;font-size:.9rem;color:#1F4534;margin:12px 0}
+.linebtn{display:block;max-width:460px;margin:18px auto;padding:16px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
+.linebtn span{display:block;font-size:.8rem;font-weight:600;opacity:.95;margin-top:2px}
+.disclaimer{background:#F6EADB;border-radius:12px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 ul.areas{list-style:none;columns:2;gap:12px}
 ul.areas li{margin-bottom:8px}
 .cardgrid{display:grid;gap:14px}
 @media(min-width:900px){.wrap{max-width:900px}.cardgrid{grid-template-columns:1fr 1fr}ul.areas{columns:3}}
 a{color:var(--fg-primary)}
 .siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
-.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
+.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;color:var(--fg-primary-deep);text-decoration:none;font-size:1.05rem}
 .siteheader .hlogo img{width:30px;height:30px}
 .siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
 .siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
-.siteheader nav a.hline{background:#06C755;color:#fff;font-weight:700}
 """
 
 HEADER = '''<header class="siteheader">
@@ -66,7 +71,7 @@ HEADER = '''<header class="siteheader">
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
-    <a class="hline" href="https://allgroup-inc.github.io/hojo-hq/go/fg-area/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-area/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
   </nav>
 </header>'''
 
@@ -113,6 +118,9 @@ def page(title, desc, body, updated, depth=2, head_extra=""):
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <link rel="icon" type="image/svg+xml" href="{rel}assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 {head_extra}
 <style>{STYLE}</style>
 </head>
@@ -122,7 +130,7 @@ def page(title, desc, body, updated, depth=2, head_extra=""):
 {HEADER}
 <div class="wrap">
 {body}
-<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
+<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
 <p style="margin-top:16px"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
 </div>
 </body>
@@ -134,11 +142,26 @@ def muni_page(muni, items, updated):
     local = [it for it in items if it["area"] == muni]
     pref = [it for it in items if it["area"] == "沖縄県"]
     national = [it for it in items if it["area"] == "全国"]
+    shown = local + pref + national
+    verified_n = sum(1 for it in shown if it.get("verified") is True)
+    # 単一CV(LINE登録)。締切は「約1か月前」表現で統一(3層ルール準拠)。
+    line_cta = (
+        '<a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-area/" '
+        'target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'line_add_click\')">'
+        f'💬 {esc(muni)}で使える制度の締切をLINEで受け取る'
+        '<span>締切の約1か月前にお知らせ・新しい制度が増えたときも(無料)</span></a>'
+    )
     body = [
         f"<h1>{esc(muni)}にお住まいの方が使える可能性のある給付金・手当</h1>",
         f'<p class="note">国・県・{esc(muni)}の制度から、ご家庭向けのものをまとめています。あなたの世帯にあてはまるものは3分診断でしぼり込めます。</p>',
-        '<a class="btn" href="../../shindan/">3分でもらい忘れ診断をはじめる</a>',
     ]
+    if verified_n:
+        body.append(
+            f'<div class="trust">✓ このうち <strong>{verified_n}件</strong> は、'
+            f'{esc(muni)}や国・県の公式ページと照合して掲載しています(確認済み)。'
+            '金額の目安など一部「要確認」の項目は、公式ページのリンクからご確認いただけます。</div>'
+        )
+    body.append('<a class="btn" href="../../shindan/">3分でもらい忘れ診断をはじめる</a>')
     sections = [(f"{muni}の制度", local), ("沖縄県の制度", pref), ("全国(国)の制度", national)]
     for label, group in sections:
         if not group and label.startswith(muni):
@@ -150,7 +173,12 @@ def muni_page(muni, items, updated):
         body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>{esc(label)}({len(group)}件)</h2>")
         body.append('<div class="cardgrid">')
         for it in group:
-            badge = ' <span class="status">要確認</span>' if it.get("status") == "要確認" else ""
+            if it.get("verified") is True:
+                badge = ' <span class="status ok">✓ 確認済み</span>'
+            elif it.get("status") == "要確認":
+                badge = ' <span class="status">要確認</span>'
+            else:
+                badge = ""
             body.append(
                 '<div class="card">'
                 f"<h2>{esc(it['name'])}{badge}</h2>"
@@ -161,6 +189,12 @@ def muni_page(muni, items, updated):
                 "</div>"
             )
         body.append('</div>')
+    # ページ末にもLINE誘導(締切の見逃し防止=登録特典)
+    body.append(
+        f'<p class="note" style="margin-top:22px;text-align:center">'
+        f'{esc(muni)}で新しい制度が増えたときや、締切が近づいたときに、LINEでそっとお知らせします。</p>'
+    )
+    body.append(line_cta)
     title = f"{muni}の給付金・手当まとめ | もらいわすれ堂"
     desc = f"{muni}にお住まいの世帯が使える可能性のある給付金・手当のまとめ。3分の無料診断で、あなたの世帯にあてはまる制度がわかります。"
     ld = area_jsonld(muni, [local, pref, national])

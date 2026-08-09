@@ -38,6 +38,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("GLOW台帳")
     .addItem("選択中の企業を連携する", "showShareDialog")
+    .addItem("発送日でCSV出力", "exportShippingCsvForDate")
     .addToUi();
 }
 

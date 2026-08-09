@@ -9,6 +9,7 @@ on:
     # JST 月曜 8:00 = UTC 日曜 23:00
     - cron: "0 23 * * 0"
   push:
+    branches: [main]  # 作業ブランチへのbot混入防止(resilient-agent-design監査 2026-08-07)
     paths:
       - "scripts/weekly_report.py"
       - ".github/workflows/weekly-report.yml"
