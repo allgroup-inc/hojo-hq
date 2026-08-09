@@ -100,3 +100,29 @@ test("sortInteractionsByDateDesc: 対応履歴を日付の新しい順に並び�
     ["H-2", "H-3", "H-1"]
   );
 });
+
+test("buildCompanyListResult: 次回アクション予定日がDateオブジェクトと文字列の混在でも正しく降順ソートし、返り値は文字列になる", () => {
+  const companiesWithRealDates = [
+    { 企業ID: "C000001", 会社名: "テスト商事株式会社", ランク: "A", 現在ステージ: "提案中", 次回アクション予定日: new Date(2026, 7, 20), 担当者: "たかし" },
+    { 企業ID: "C000002", 会社名: "サンプル建設株式会社", ランク: "B", 現在ステージ: "未接触", 次回アクション予定日: "2026-08-10", 担当者: "嶺井さん" },
+    { 企業ID: "C000003", 会社名: "デモ工業株式会社", ランク: "A", 現在ステージ: "成約", 次回アクション予定日: new Date(2026, 7, 25), 担当者: "たかし" }
+  ];
+  const result = adminAccess.buildCompanyListResult(companiesWithRealDates, {});
+  assert.deepEqual(result.map(c => c["企業ID"]), ["C000003", "C000001", "C000002"]);
+  result.forEach((c) => {
+    assert.equal(typeof c["次回アクション予定日"], "string");
+  });
+  assert.deepEqual(result.map(c => c["次回アクション予定日"]), ["2026-08-25", "2026-08-20", "2026-08-10"]);
+});
+
+test("sortInteractionsByDateDesc: 日付がDateオブジェクトの場合も正しくソート・yyyy-MM-dd文字列に正規化し、入力を変更しない", () => {
+  const records = [
+    { 履歴ID: "H-1", 日付: new Date(2026, 7, 1) },
+    { 履歴ID: "H-2", 日付: new Date(2026, 7, 10) },
+    { 履歴ID: "H-3", 日付: "2026-08-05" }
+  ];
+  const result = adminAccess.sortInteractionsByDateDesc(records);
+  assert.deepEqual(result.map(r => r["履歴ID"]), ["H-2", "H-3", "H-1"]);
+  assert.deepEqual(result.map(r => r["日付"]), ["2026-08-10", "2026-08-05", "2026-08-01"]);
+  assert.ok(records[0]["日付"] instanceof Date, "入力レコードのDateオブジェクトが変更されていない");
+});

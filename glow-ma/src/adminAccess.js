@@ -14,6 +14,31 @@
     return String(email || "").trim().toLowerCase();
   }
 
+  function getGlowAlerting_() {
+    if (typeof module !== "undefined" && module.exports) {
+      return require("./alerting.js");
+    }
+    return global.GlowAlerting;
+  }
+
+  function formatDate_(date) {
+    var year = date.getFullYear();
+    var month = String(date.getMonth() + 1).padStart(2, "0");
+    var day = String(date.getDate()).padStart(2, "0");
+    return year + "-" + month + "-" + day;
+  }
+
+  /**
+   * Sheetsの getValues() は日付セルを文字列ではなくJSの Date オブジェクトで返す。
+   * これをそのまま String(...) すると "Thu Aug 20 2026 00:00:00 GMT+0900 ..." のような
+   * 表示になり、曜日名基準でソートされてしまう(alerting.js の toDate と同じ問題への対処)。
+   * Date/"yyyy-MM-dd"文字列のどちらが来ても "yyyy-MM-dd" 文字列に正規化する。
+   */
+  function normalizeDateForDisplay_(value) {
+    var date = getGlowAlerting_().toDate(value);
+    return date ? formatDate_(date) : "";
+  }
+
   function isAllowedEmail(email, staffRows) {
     var target = normalizeEmail_(email);
     if (!target) return false;
@@ -40,6 +65,7 @@
     COMPANY_LIST_FIELDS.forEach(function (field) {
       picked[field] = company[field] !== undefined ? company[field] : "";
     });
+    picked["次回アクション予定日"] = normalizeDateForDisplay_(company["次回アクション予定日"]);
     return picked;
   }
 
@@ -66,8 +92,8 @@
 
   function sortByNextActionDateDesc_(companies) {
     return companies.slice().sort(function (a, b) {
-      var da = String(a["次回アクション予定日"] || "");
-      var db = String(b["次回アクション予定日"] || "");
+      var da = normalizeDateForDisplay_(a["次回アクション予定日"]);
+      var db = normalizeDateForDisplay_(b["次回アクション予定日"]);
       if (da === db) return 0;
       return da < db ? 1 : -1;
     });
@@ -82,12 +108,21 @@
   }
 
   function sortInteractionsByDateDesc(records) {
-    return (records || []).slice().sort(function (a, b) {
-      var da = String(a["日付"] || "");
-      var db = String(b["日付"] || "");
-      if (da === db) return 0;
-      return da < db ? 1 : -1;
-    });
+    return (records || [])
+      .map(function (record) {
+        var normalized = {};
+        Object.keys(record).forEach(function (key) {
+          normalized[key] = record[key];
+        });
+        normalized["日付"] = normalizeDateForDisplay_(record["日付"]);
+        return normalized;
+      })
+      .sort(function (a, b) {
+        var da = a["日付"];
+        var db = b["日付"];
+        if (da === db) return 0;
+        return da < db ? 1 : -1;
+      });
   }
 
   var api = {
