@@ -193,19 +193,8 @@ def section_note():
 
         lines.append(f"・フォロワー: {v('followers', '人')} / メンバー: {v('members', '人')}"
                      f" / 今月売上: {v('monthly_sales_yen', '円')}")
-
-        # うごくAIレシピ(2026-08-09 路線転換。docs/うごくAIレシピ_設計.md)
-        # 未公開在庫の監視 = 「生成だけが空回りする」静かな脱落の検知
-        recipes = _glob.glob(os.path.join(base, "..", "posts", "airecipe", "*.md"))
-        r_published = 0
-        for p in recipes:
-            with open(p, encoding="utf-8") as f:
-                if "published:" in f.read(2000):
-                    r_published += 1
-        r_unpub = len(recipes) - r_published
-        lines.append(f"🍳 AIレシピ: 下書き{len(recipes)}本 / 公開済み{r_published}本")
-        if r_unpub >= 4:
-            lines.append(f"⚠️ AIレシピの未公開在庫が{r_unpub}本(生成ペース見直しの警告ライン)")
+        # うごくAIレシピの在庫監視はここに入れない(2026-08-09 小柳さん指示のLINE分離。
+        # 専用LINE(AIRECIPE_LINE_*)の下書き通知に在庫本数を同梱する方式に変更)
         return "\n".join(lines)
     except Exception as e:  # noqa: BLE001
         return f"📝 note運営: 取得不可({type(e).__name__})"

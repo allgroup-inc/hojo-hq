@@ -52,7 +52,8 @@ RECIPE_SYSTEM = """あなたは「うごくAIレシピ」というnoteマガジ�
 必ず次のJSONだけを出力します(前後の説明文・コードフェンス不要):
 
 {
-  "title": "記事タイトル(32字以内。何ができるかの具体で釣る。煽らない)",
+  "title": "記事タイトル(32字以内)。公式=【作業の悩み】×【数字のギャップ】×【条件の軽さ】。例:「会議メモを貼るだけ、30分の議事録づくりが1分になる」。数字はuse_caseにあるものだけを使う(捏造しない)。煽らない",
+  "title_alts": ["タイトル別案を2つ(各32字以内)。1つ目=読者の悩みを言語化した問いかけ型(例:「その清書、まだ手でやっていますか」)。2つ目=常識破り型(例:「議事録は会議後に書くものではなくなった」)"],
   "lead": "リード文(120〜200字。読者の困りごと→このレシピで何が変わるか)",
   "dekiru": ["このレシピでできることを3つ、それぞれ40字以内"],
   "prompt_text": "コピペ用プロンプト全文(300〜900字。役割・目的・出力形式・制約を含む。文頭に『あなたは〜』で役割を与える。最後は『それでは、以下の入力を処理してください。』で締める)",
@@ -93,8 +94,8 @@ def banned_hits(text):
 def validate_recipe(r):
     """完了条件はAIの自己申告でなくシステムで判定する(設計原則2)。"""
     errors = []
-    need = {"title": str, "lead": str, "dekiru": list, "prompt_text": str,
-            "steps": list, "arrange": list, "trouble": str}
+    need = {"title": str, "title_alts": list, "lead": str, "dekiru": list,
+            "prompt_text": str, "steps": list, "arrange": list, "trouble": str}
     for k, typ in need.items():
         if not isinstance(r.get(k), typ) or not r.get(k):
             errors.append(f"欠落/型不正: {k}")
@@ -108,6 +109,12 @@ def validate_recipe(r):
         errors.append("stepsは3〜5個")
     if len(r["dekiru"]) != 3:
         errors.append("dekiruは3個")
+    if len(r["title_alts"]) != 2:
+        errors.append("title_altsは2個")
+    for t in r["title_alts"]:
+        if not isinstance(t, str) or len(t) > 40:
+            errors.append("title_altsが不正/長すぎ")
+            break
     joined = json.dumps(r, ensure_ascii=False)
     hits = banned_hits(joined)
     if hits:
@@ -161,6 +168,7 @@ def canned_recipe(topic):
     """--dry-run 用。組版とバリデーションの動作確認のみに使う(記事には使わない)。"""
     return {
         "title": "(dry-run)組版テスト用レシピ",
+        "title_alts": ["(dry-run)別案1", "(dry-run)別案2"],
         "lead": "これはdry-runの組版テストです。" * 8,
         "dekiru": ["テスト1", "テスト2", "テスト3"],
         "prompt_text": "あなたはテスト用のアシスタントです。" + "入力を整理して出力形式に従って返します。" * 12
@@ -176,8 +184,12 @@ def build_xpack(recipe, topic):
     b = ("B(学び): プロンプト集は「動くかどうか」が読む前にわからないのが弱点です。"
          "このマガジンは公開前に機械で実行し、実行ログを原文のまま載せる方式にしました")
     c = f"C(問い): {topic['use_case'].split('が')[0]}の時間、AIに渡せるとしたら何分ほしいですか"
+    alts = recipe.get("title_alts", [])
     return "\n".join([
         "▼▼ 公開前にこのブロックを削除 ▼▼",
+        "🏷 タイトル別案(しっくり来なければ差し替えOK。基本は数字ギャップ型の本題のまま)",
+        *[f"・{t}" for t in alts],
+        "",
         "📣 X告知文パック(公開後、記事URLをリプ欄に。1日1本まで)",
         a, b, c,
         "▲▲ ここまで削除 ▲▲",
@@ -256,6 +268,15 @@ def gh_output(k, v):
     print(f"{k}={str(v).replace(chr(10), ' ')}")
 
 
+def unpublished_stock():
+    """未公開在庫の本数(公開済みは冒頭に published: 行が追記される運用)。"""
+    n = 0
+    for p in OUT_DIR.glob("*.md"):
+        if "published:" not in p.read_text(encoding="utf-8")[:2000]:
+            n += 1
+    return n
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--preview", action="store_true", help="GITHUB_OUTPUT形式で結果を出力")
@@ -318,10 +339,14 @@ def main():
             json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     if args.preview:
+        stock = unpublished_stock()
         gh_output("stem", stem)
         gh_output("title", recipe["title"])
         gh_output("xpost", f"A(数字): {recipe['title']}。実行ログ付きで公開しました")
         gh_output("status", "ok")
+        gh_output("stock", stock)
+        gh_output("stockwarn",
+                  f"⚠️ 未公開の在庫が{stock}本たまっています(生成ペース見直しの警告ライン)" if stock >= 4 else "")
     else:
         print(f"生成完了: {out_path}")
 

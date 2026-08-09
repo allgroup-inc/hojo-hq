@@ -1,0 +1,66 @@
+name: airecipe-line-test
+
+# うごくAIレシピ専用LINE(AIRECIPE_LINE_*シークレット)の連携テスト。
+# シークレット登録後に手動実行し、専用LINEに着信すれば連携OK。
+# ミカタ・結果マガのLINEに誤送信しないための識別チェック付き。
+# 手順: docs/うごくAIレシピ_LINE開設キット.md
+
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: airecipe-line-test
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      # 登録されているトークンが「どのLINE公式アカウントのものか」をログに出す
+      # (誤って他事業チャネルのトークンを登録した事故の検出用。トークン自体は出力しない)
+      - name: トークンのアカウント識別チェック
+        env:
+          TOKEN: ${{ secrets.AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN }}
+          TO: ${{ secrets.AIRECIPE_LINE_ADMIN_USER_ID }}
+          MIKATA_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          KEKKA_TOKEN: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+        run: |
+          # 「未設定でも成功に見える」を許さない(2026-08-07 結果マガ側の教訓)
+          if [ -z "$TOKEN" ]; then
+            echo "::error::AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN が未登録です。GitHub Secrets にこの名前で登録してください(LINE Developers → 新プロバイダー → Messaging API設定 → チャネルアクセストークン(長期))"
+            exit 1
+          fi
+          if [ -z "$TO" ]; then
+            echo "::error::AIRECIPE_LINE_ADMIN_USER_ID が未登録です(チャネル基本設定 → あなたのユーザーID)"
+            exit 1
+          fi
+          if [ -n "$MIKATA_TOKEN" ] && [ "$TOKEN" = "$MIKATA_TOKEN" ]; then
+            echo "::error::登録トークンがミカタ(他事業)のLINEと同一です。AIレシピ専用チャネルのトークンを登録してください"
+            exit 1
+          fi
+          if [ -n "$KEKKA_TOKEN" ] && [ "$TOKEN" = "$KEKKA_TOKEN" ]; then
+            echo "::error::登録トークンが結果マガ(フクギ側)のLINEと同一です。AIレシピ専用チャネルのトークンを登録してください"
+            exit 1
+          fi
+          info=$(curl -sS https://api.line.me/v2/bot/info -H "Authorization: Bearer $TOKEN")
+          echo "このトークンのアカウント: $(echo "$info" | jq -r '"\(.displayName) (\(.basicId))"')"
+          basic=$(echo "$info" | jq -r '.basicId')
+          if [ "$basic" = "@473btavk" ]; then
+            echo "::error::登録トークンが結果マガ(@473btavk)のものです。AIレシピ専用チャネルのトークンを登録してください"
+            exit 1
+          fi
+          echo "✅ アカウント名が「うごくAIレシピ」用であることを上の表示で確認してください"
+
+      - name: テスト通知
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.AIRECIPE_LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【AIレシピ】専用LINE連携テスト成功
+
+            この通知が届いていれば、うごくAIレシピ専用LINEの設定は完了です。
+            以後、自動下書き(毎週火・金 09:35)の完成通知がここに届きます。
