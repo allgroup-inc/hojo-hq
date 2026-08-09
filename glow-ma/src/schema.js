@@ -63,7 +63,7 @@
   var STAFF_SHEET_NAME = "スタッフ";
   // Slack User ID の調べ方: Slackで対象社員のプロフィールを開き「その他」→
   // 「メンバーIDをコピー」(U から始まる文字列)。メールアドレスではない。
-  var STAFF_HEADERS = ["氏名", "Slack User ID", "有効"];
+  var STAFF_HEADERS = ["氏名", "Slack User ID", "有効", "メールアドレス"];
 
   var api = {
     COMPANY_MASTER_SHEET_NAME: COMPANY_MASTER_SHEET_NAME,
