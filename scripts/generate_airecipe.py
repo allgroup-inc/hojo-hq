@@ -344,6 +344,7 @@ def main():
         gh_output("title", recipe["title"])
         gh_output("xpost", f"A(数字): {recipe['title']}。実行ログ付きで公開しました")
         gh_output("status", "ok")
+        gh_output("eyecatch", f"eyecatch_{topic['id']:02d}.png")
         gh_output("stock", stock)
         gh_output("stockwarn",
                   f"⚠️ 未公開の在庫が{stock}本たまっています(生成ペース見直しの警告ライン)" if stock >= 4 else "")
