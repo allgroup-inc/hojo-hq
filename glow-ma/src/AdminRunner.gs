@@ -58,3 +58,57 @@ function renderAdminPage_() {
   return HtmlService.createHtmlOutput(GlowAdminApp.buildAdminAppHtml())
     .setTitle("GLOW企業リレーション台帳");
 }
+
+/**
+ * 企業一覧(絞り込み・並び替え済み、最小フィールドのみ)を返す。
+ * google.script.run 経由で adminApp.js の画面から呼ばれる。
+ */
+function getCompanyList_(filters) {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+  return GlowAdminAccess.buildCompanyListResult(companies, filters || {});
+}
+
+/**
+ * 企業1社分の全項目(機微情報を含む)と、対応履歴ログ(日付降順)を返す。
+ * 該当企業が見つからない場合はnullを返す。
+ */
+function getCompanyDetail_(companyId) {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+  var company = companies.filter(function (c) { return c["企業ID"] === companyId; })[0];
+  if (!company) return null;
+
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  var interactionsByCompany = logSheet ? readInteractionsByCompanyId_(logSheet) : {};
+  var history = GlowAdminAccess.sortInteractionsByDateDesc(interactionsByCompany[companyId] || []);
+
+  return { company: company, history: history };
+}
+
+/**
+ * 一覧画面の「現在ステージ」「担当者」フィルタの選択肢を、企業マスタに実在する
+ * 値から重複なく作る(ランクはA/B/C/Dで固定のため画面側にハードコードする)。
+ */
+function getFilterOptions_() {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+
+  var stageSet = {};
+  var ownerSet = {};
+  companies.forEach(function (company) {
+    if (company["現在ステージ"]) stageSet[company["現在ステージ"]] = true;
+    if (company["担当者"]) ownerSet[company["担当者"]] = true;
+  });
+
+  return {
+    stages: Object.keys(stageSet).sort(),
+    owners: Object.keys(ownerSet).sort()
+  };
+}
