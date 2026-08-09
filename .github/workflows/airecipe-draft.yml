@@ -43,7 +43,9 @@ jobs:
           python-version: "3.12"
 
       - name: Install deps
-        run: pip install anthropic
+        run: |
+          pip install anthropic pillow
+          sudo apt-get install -y -q fonts-ipafont-gothic > /dev/null || true
 
       - name: Generate & verify recipe
         id: gen
@@ -56,12 +58,20 @@ jobs:
             python scripts/generate_airecipe.py --preview >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Generate eyecatch(見出し画像)
+        if: steps.gen.outputs.status == 'ok'
+        env:
+          EYECATCH: ${{ steps.gen.outputs.eyecatch }}
+          TITLE: ${{ steps.gen.outputs.title }}
+        run: |
+          python scripts/generate_airecipe_assets.py --eyecatch "$TITLE" --out "assets/airecipe/$EYECATCH"
+
       - name: Commit draft & queue
         if: steps.gen.outputs.status == 'ok'
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
-          git add posts/airecipe data/airecipe_topics.json
+          git add posts/airecipe data/airecipe_topics.json assets/airecipe
           git diff --cached --quiet || git commit -m "auto: うごくAIレシピ 下書き ${{ steps.gen.outputs.stem }}(実行検証済み)"
           for i in 1 2 3; do
             git pull --rebase origin ${{ github.ref_name }} && git push origin HEAD:${{ github.ref_name }} && break
@@ -89,6 +99,8 @@ jobs:
             https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/posts/airecipe/${{ steps.gen.outputs.stem }}.md
             ②「Raw」表示で全文コピー(冒頭のタイトル別案・X告知ブロックは削除)
             ③noteの新規記事に貼り付け、「ここから先が有料パートです」の直後に有料ラインを設定して公開
+            ④見出し画像はここからダウンロードして設定(自動生成済み):
+            https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/assets/airecipe/${{ steps.gen.outputs.eyecatch }}
 
             未公開の在庫: ${{ steps.gen.outputs.stock }}本
             ${{ steps.gen.outputs.stockwarn }}
