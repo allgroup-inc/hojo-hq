@@ -126,3 +126,11 @@ test("企業マスタに窓口担当者名・携帯番号列が末尾に追加�
     ["窓口担当者名", "携帯番号"]
   );
 });
+
+test("スタッフタブに管理画面Web App用のメールアドレス列が末尾に追加されている(Phase 18a)", () => {
+  assert.ok(schema.STAFF_HEADERS.indexOf("メールアドレス") !== -1);
+  assert.deepEqual(
+    schema.STAFF_HEADERS.slice(-1),
+    ["メールアドレス"]
+  );
+});
