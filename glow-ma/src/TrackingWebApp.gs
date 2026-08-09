@@ -28,8 +28,18 @@
  * onEditトリガー(AlertRunner.gsのhandleInteractionLogEdit)では検知できない。
  * そのためこのファイル自身がSpeed-to-Lead即時アラートとして直接Slackへ通知する
  * (AlertRunner.gsのpostToSlackWithRetry_/lookupCompanyName_を再利用)。
+ *
+ * 管理画面Web App(Phase 18a、AdminRunner.gs)への分岐もこの doGet が担うが、
+ * この関数自体はルーティングのみで、実処理は renderAdminPage_(AdminRunner.gs)に
+ * 完全に委譲する(三名体制レビュー2026-08-09裁定3。doGet を将来も薄いルーターの
+ * ままに保つ)。
  */
 function doGet(e) {
+  var page = e && e.parameter && e.parameter.page;
+  if (page === "admin") {
+    return renderAdminPage_();
+  }
+
   var companyId = e && e.parameter && e.parameter.id;
   if (companyId && /^C\d{6}$/.test(companyId)) {
     logTrackingAccess_(companyId);
