@@ -83,7 +83,7 @@
   var SCRIPT = [
     "var currentFilters = { search: '', rank: '', stage: '', owner: '' };",
     "function escapeHtml(value){return String(value===undefined||value===null?'':value)",
-    ".replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}",
+    ".replace(/&/g,'&amp;').replace(/\"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}",
 
     "function loadFilterOptions(){",
     "google.script.run.withSuccessHandler(function(options){",
