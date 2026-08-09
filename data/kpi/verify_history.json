@@ -122,5 +122,72 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-09",
+  "sample": 5,
+  "ng": 1,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 1
+  },
+  "items": [
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【北海道監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY7tMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(トランジションボンド/トランジションローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9xMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【農林水産省】中山間地域所得確保推進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDCMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "沖縄ものづくり製品開発・技術導入支援事業",
+    "url": "https://okinawa-ric.jp/service/post-18.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": false,
+    "issues": [
+     "Gemini: 掲載データの上限額が「None」となっていますが、出典ページには「1,200万円以内」と記載されています。",
+     "Gemini: 根拠引用: ①補助額：1,200万円以内(初年度)"
+    ],
+    "human_verdict": null
+   },
+   {
+    "name": "休廃止鉱山の鉱害防止に係るエネルギー使用合理化事業費補助金（令和８年度）【中国監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYvnMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
