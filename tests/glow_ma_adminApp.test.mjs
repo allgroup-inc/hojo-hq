@@ -20,11 +20,11 @@ test("buildAdminAppHtml: ランクの選択肢はA/B/C/Dの4つ(固定)", () => 
   });
 });
 
-test("buildAdminAppHtml: google.script.runでgetCompanyList_・getCompanyDetail_・getFilterOptions_を呼ぶ", () => {
+test("buildAdminAppHtml: google.script.runでgetCompanyList・getCompanyDetail・getFilterOptionsを呼ぶ", () => {
   const html = adminApp.buildAdminAppHtml();
-  assert.ok(html.indexOf(".getCompanyList_(") !== -1);
-  assert.ok(html.indexOf(".getCompanyDetail_(") !== -1);
-  assert.ok(html.indexOf(".getFilterOptions_(") !== -1);
+  assert.ok(html.indexOf(".getCompanyList(") !== -1);
+  assert.ok(html.indexOf(".getCompanyDetail(") !== -1);
+  assert.ok(html.indexOf(".getFilterOptions(") !== -1);
 });
 
 test("buildAdminAppHtml: 書き込み系のgoogle.script.run呼び出しを一切含まない(読み取り専用の担保)", () => {

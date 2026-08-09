@@ -95,7 +95,7 @@
     "(options.owners||[]).forEach(function(owner){",
     "var opt = document.createElement('option'); opt.value = owner; opt.textContent = owner;",
     "ownerSelect.appendChild(opt);});",
-    "}).withFailureHandler(function(){}).getFilterOptions_();",
+    "}).withFailureHandler(function(){}).getFilterOptions();",
     "}",
 
     "function loadList(){",
@@ -103,7 +103,7 @@
     "document.getElementById('companyTableBody').innerHTML = '';",
     "var empty = document.getElementById('emptyState');",
     "empty.style.display = 'block'; empty.textContent = '読み込みに失敗しました。再読み込みしてください。';",
-    "}).getCompanyList_(currentFilters);",
+    "}).getCompanyList(currentFilters);",
     "}",
 
     "function renderTable(rows){",
@@ -130,7 +130,7 @@
     "document.getElementById('drawerCompanyId').textContent = companyId;",
     "google.script.run.withSuccessHandler(renderDrawer).withFailureHandler(function(){",
     "document.getElementById('drawerCompanyName').textContent = '読み込みに失敗しました。再読み込みしてください。';",
-    "}).getCompanyDetail_(companyId);",
+    "}).getCompanyDetail(companyId);",
     "}",
 
     "function renderDrawer(detail){",
@@ -142,7 +142,8 @@
     "var fields = [",
     "['業種', c['業種']], ['代表者名', c['代表者名']], ['所在地', c['所在地']],",
     "['電話番号', c['電話番号']], ['窓口担当者名', c['窓口担当者名']], ['携帯番号', c['携帯番号']],",
-    "['ランク', c['ランク']], ['総合スコア', c['総合スコア']], ['現在ステージ', c['現在ステージ']],",
+    "['ランク', c['ランク']], ['初期スコア', c['初期スコア']], ['反応スコア', c['反応スコア']],",
+    "['総合スコア', c['総合スコア']], ['現在ステージ', c['現在ステージ']],",
     "['後継者状況', c['後継者状況']], ['関係メモ', c['関係メモ']]",
     "];",
     "document.getElementById('paneOverview').innerHTML = fields.map(function(f){",

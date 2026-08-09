@@ -20,7 +20,7 @@
  * 「スタッフ」タブの登録メールアドレスと照合する方式。個人Gmail運用(Workspace
  * ドメインなし)のため、Web Appのアクセス設定(「Googleアカウントを持つ全員」)だけでは
  * 利用者を限定できず、この許可リスト照合が唯一の防御線になる。そのため
- * getCompanyList_・getCompanyDetail_ など公開される関数それぞれの冒頭でも
+ * getCompanyList・getCompanyDetail など公開される関数それぞれの冒頭でも
  * requireAdminAccess_ を呼ぶ(doGetでの一度きりのチェックに依存しない多層防御。
  * 三名体制レビュー2026-08-09裁定1・2)。
  */
@@ -62,8 +62,14 @@ function renderAdminPage_() {
 /**
  * 企業一覧(絞り込み・並び替え済み、最小フィールドのみ)を返す。
  * google.script.run 経由で adminApp.js の画面から呼ばれる。
+ *
+ * 以下3関数(getCompanyList・getCompanyDetail・getFilterOptions)は名前の末尾に
+ * `_` を付けてはいけない。Apps Scriptは末尾が`_`の関数を非公開扱いにし、
+ * google.script.run から呼び出せなくする(呼んでもエラーにすらならず、単に
+ * 何も起きない)。アクセス制御は関数名ではなく、各関数の冒頭で呼んでいる
+ * requireAdminAccess_() だけが担う(最終レビュー2026-08-09 Fix 1)。
  */
-function getCompanyList_(filters) {
+function getCompanyList(filters) {
   requireAdminAccess_();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
@@ -75,7 +81,7 @@ function getCompanyList_(filters) {
  * 企業1社分の全項目(機微情報を含む)と、対応履歴ログ(日付降順)を返す。
  * 該当企業が見つからない場合はnullを返す。
  */
-function getCompanyDetail_(companyId) {
+function getCompanyDetail(companyId) {
   requireAdminAccess_();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
@@ -94,7 +100,7 @@ function getCompanyDetail_(companyId) {
  * 一覧画面の「現在ステージ」「担当者」フィルタの選択肢を、企業マスタに実在する
  * 値から重複なく作る(ランクはA/B/C/Dで固定のため画面側にハードコードする)。
  */
-function getFilterOptions_() {
+function getFilterOptions() {
   requireAdminAccess_();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
