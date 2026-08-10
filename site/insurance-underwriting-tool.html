@@ -424,7 +424,7 @@
 
     async function loadData() {
       try {
-        const response = await fetch('/docs/insurance/underwriting_full.json');
+        const response = await fetch('./docs/insurance/underwriting_full.json');
         underwritingData = await response.json();
         console.log('データ読み込み完了:', underwritingData._source);
 
