@@ -26,7 +26,8 @@ from .triage import classify, triage, render_html as render_today_html
 from .cohort import cohort_rows, overall_rate, render_html as render_cohort_html
 from .snapshot import snapshot as do_snapshot
 from .preflight import preflight_report
-from .config import CAPACITY_PER_DAY
+from .pipeline import run_pipeline
+from .config import CAPACITY_PER_DAY, AUC_MIN
 
 
 def _as_of(value):
@@ -202,6 +203,18 @@ def cmd_snapshot(csv_path, interactions, month, out_dir, force):
     return do_snapshot(csv_path, interactions, month, out_dir, force)
 
 
+def cmd_pipeline(csv_path, column_map_path, out_dir, as_of, split, run_date,
+                 auc_min, capacity, interactions):
+    st = run_pipeline(csv_path, column_map_path, out_dir, _as_of(as_of), _as_of(split),
+                      run_date, auc_min=auc_min, capacity=capacity, interactions=interactions)
+    mark = {"completed": "✅完了", "stopped_auc": "🛑AUC停止",
+            "stopped_schema": "🛑スキーマ停止"}.get(st["status"], st["status"])
+    auc = "－" if st["auc"] is None else f"{st['auc']:.3f}"
+    print(f"[pipeline] {mark}  AUC={auc} 済工程={st['completed_steps']}"
+          + ("（べき等スキップ）" if st.get("idempotent_skip") else ""))
+    return st
+
+
 def cmd_preflight(csv_path, column_map_path, as_of):
     rep = preflight_report(csv_path, load_column_map(column_map_path), _as_of(as_of))
     mark = "✅可" if rep["ok"] else "🛑不可"
@@ -308,6 +321,17 @@ def main(argv=None):
     sp_snap.add_argument("--out-dir", default="private/snapshots")
     sp_snap.add_argument("--force", action="store_true")
 
+    sp_pipe = sub.add_parser("pipeline")
+    sp_pipe.add_argument("--csv", required=True)
+    sp_pipe.add_argument("--column-map", required=True)
+    sp_pipe.add_argument("--out-dir", required=True)
+    sp_pipe.add_argument("--as-of", required=True)
+    sp_pipe.add_argument("--split", required=True)
+    sp_pipe.add_argument("--run-date", required=True)
+    sp_pipe.add_argument("--interactions")
+    sp_pipe.add_argument("--auc-min", type=float, default=AUC_MIN)
+    sp_pipe.add_argument("--capacity", type=int, default=CAPACITY_PER_DAY)
+
     args = p.parse_args(argv)
     if args.cmd == "fit":
         cmd_fit(args.csv, args.column_map, args.model, args.as_of)
@@ -337,6 +361,9 @@ def main(argv=None):
         cmd_today(args.csv, args.column_map, args.model, args.out, args.as_of, args.capacity)
     elif args.cmd == "snapshot":
         cmd_snapshot(args.csv, args.interactions, args.month, args.out_dir, args.force)
+    elif args.cmd == "pipeline":
+        cmd_pipeline(args.csv, args.column_map, args.out_dir, args.as_of, args.split,
+                     args.run_date, args.auc_min, args.capacity, args.interactions)
     elif args.cmd == "preflight":
         cmd_preflight(args.csv, args.column_map, args.as_of)
     return 0
