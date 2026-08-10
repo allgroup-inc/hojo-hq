@@ -88,7 +88,7 @@ slide.addText('後継者不安率\n65-70%\n（推定4,000-4,500社）', {
 // Arrow
 slide.addShape(pres.ShapeType.line, {
   x: 4.9, y: 2.1, w: 0.8, h: 0,
-  line: { color: colors.darkGray, width: 3, endShape: 'triangle', endSize: 8 }
+  line: { color: colors.textDark, width: 3, endArrowType: 'triangle' }
 });
 
 // Right side: Opportunity
@@ -110,7 +110,7 @@ slide.addText('年間成約\n120-150件\n（成約率2-3%）', {
 // Explanation box
 slide.addShape(pres.ShapeType.rect, {
   x: 0.5, y: 3.2, w: 9, h: 2,
-  fill: { color: 'FFF8F0' }, line: { color: colors.orange, width: 1 }
+  fill: { color: colors.lightGray }, line: { color: colors.orange, width: 1 }
 });
 
 slide.addText('ギャップの実相', {
@@ -149,7 +149,7 @@ const reasons = [
 
 let yPos = 1.2;
 reasons.forEach((item, idx) => {
-  const borderColor = idx === 0 ? colors.orange : (idx === 1 ? colors.navy : colors.darkGray);
+  const borderColor = idx === 0 ? colors.orange : (idx === 1 ? colors.navy : colors.textDark);
 
   slide.addShape(pres.ShapeType.ellipse, {
     x: 0.5, y: yPos - 0.15, w: 0.5, h: 0.5,
@@ -168,7 +168,7 @@ reasons.forEach((item, idx) => {
 
   slide.addText(item.desc, {
     x: 1.2, y: yPos + 0.3, w: 8.3, h: 0.6,
-    fontSize: 12, color: colors.darkGray, fontFace: 'Arial'
+    fontSize: 12, color: colors.textDark, fontFace: 'Arial'
   });
 
   yPos += 1.15;
