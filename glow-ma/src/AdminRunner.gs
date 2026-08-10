@@ -44,11 +44,12 @@ function readStaffAllowlistEmails_() {
   if (lastRow < 2) return [];
   var headers = GlowSchema.STAFF_HEADERS;
   var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  var nameIndex = headers.indexOf("氏名");
   var emailIndex = headers.indexOf("メールアドレス");
   var activeIndex = headers.indexOf("有効");
   return values
     .filter(function (row) { return row[activeIndex] === true && row[emailIndex]; })
-    .map(function (row) { return { email: row[emailIndex] }; });
+    .map(function (row) { return { email: row[emailIndex], name: row[nameIndex] }; });
 }
 
 function renderAdminPage_() {
@@ -212,4 +213,80 @@ function getPartnerDetail(partnerId) {
   referrals = GlowAdminAccess.normalizeReferralRecords(referrals);
 
   return { partner: partner, history: history, referrals: referrals };
+}
+
+/**
+ * 企業マスタの中から「企業ID」が一致する行の行番号(1始まり、ヘッダー行込み)を返す。
+ * 見つからなければ-1を返す。updateCompanyMemoが書き込み先の行を特定するために使う。
+ */
+function findCompanyRowIndex_(sheet, companyId) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return -1;
+  var idColumnIndex = GlowSchema.COMPANY_MASTER_HEADERS.indexOf("企業ID") + 1;
+  var ids = sheet.getRange(2, idColumnIndex, lastRow - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (ids[i][0] === companyId) return i + 2;
+  }
+  return -1;
+}
+
+/**
+ * 関係メモが上書きされる直前に、更新前の内容を対応履歴ログへ1行自動記録する
+ * (設計書4章。専用の変更履歴テーブルを作らず、既存の対応履歴ログの仕組みで
+ * 「上書きされる前の情報」を追跡可能にする)。
+ * この記録が失敗した場合は例外を投げ、呼び出し元(updateCompanyMemo)で
+ * 関係メモの上書き自体を行わせない。
+ */
+function appendMemoUpdateInteractionLog_(companyId, oldMemo) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  if (!logSheet) {
+    throw new Error("対応履歴ログタブが見つかりません。");
+  }
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(10000)) {
+    throw new Error("他の処理が対応履歴ログを操作中のため、保存を中断しました。しばらく待ってから再実行してください。");
+  }
+  try {
+    var nextRow = logSheet.getLastRow() + 1;
+    var logId = "H-" + Utilities.getUuid();
+    var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+    var staffRows = readStaffAllowlistEmails_();
+    var staffName = GlowAdminAccess.resolveStaffName(Session.getActiveUser().getEmail(), staffRows);
+    var oldMemoText = oldMemo ? String(oldMemo) : "(更新前は未記入)";
+    logSheet.getRange(nextRow, 1, 1, GlowSchema.INTERACTION_LOG_HEADERS.length).setValues([[
+      logId, companyId, todayString, staffName, "関係メモ更新", "未接触",
+      "関係メモを更新しました(更新前の内容: " + oldMemoText + ")", ""
+    ]]);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * 企業詳細ドロワーから呼ばれる、関係メモの更新関数。
+ *
+ * この関数の名前の末尾に `_` を付けてはいけない(getCompanyList等と同じ理由。
+ * Apps Scriptは末尾が`_`の関数を非公開扱いにし、google.script.runから呼び出せなくする)。
+ *
+ * 対応履歴ログへの記録(appendMemoUpdateInteractionLog_)が完了してから
+ * 関係メモを上書きする順序を守ること(設計書3章。記録なき上書きを避けるため)。
+ */
+function updateCompanyMemo(companyId, memo) {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  if (!companySheet) {
+    throw new Error("企業マスタタブが見つかりません。");
+  }
+  var rowIndex = findCompanyRowIndex_(companySheet, companyId);
+  if (rowIndex === -1) {
+    throw new Error("該当する企業が見つかりません: " + companyId);
+  }
+  var memoColumnIndex = GlowSchema.COMPANY_MASTER_HEADERS.indexOf("関係メモ") + 1;
+  var oldMemo = companySheet.getRange(rowIndex, memoColumnIndex).getValue();
+
+  appendMemoUpdateInteractionLog_(companyId, oldMemo);
+
+  companySheet.getRange(rowIndex, memoColumnIndex).setValue(memo);
 }
