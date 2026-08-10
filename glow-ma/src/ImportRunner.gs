@@ -117,16 +117,26 @@ function readCompanyRecords_(sheet) {
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
   var headers = GlowSchema.COMPANY_MASTER_HEADERS;
+  var idIndex = headers.indexOf("企業ID");
   var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
-  return values.map(function (row) {
+  var records = [];
+  values.forEach(function (row) {
+    // 企業マスタの列(電話番号のセル形式・連絡不要チェックボックス・後継者状況の
+    // プルダウンなど)はensureTab_で将来の入力に備えてシート全体(getMaxRows()分)に
+    // あらかじめ書式・入力規則を設定している。Apps Scriptはこの「書式だけの空セル」も
+    // getLastRow()の対象に含めてしまうため、実データが無くても書式が及ぶ行数分だけ
+    // 空の行が返ってくる。企業IDが空の行は実データではないため読み飛ばす
+    // (本番運用2026-08-10で発見。readPartnerInteractionsByPartnerId_等と同じガード)。
+    if (!row[idIndex]) return;
     var record = {};
     headers.forEach(function (header, i) {
       record[header] = row[i];
     });
     record["流入ルート"] = record["流入ルート"] ? String(record["流入ルート"]).split("、") : [];
     record["提案商品"] = record["提案商品"] ? String(record["提案商品"]).split("、") : [];
-    return record;
+    records.push(record);
   });
+  return records;
 }
 
 function writeCompanyRecords_(sheet, records) {
