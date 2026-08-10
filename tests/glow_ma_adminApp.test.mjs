@@ -47,3 +47,24 @@ test("buildAdminAppHtml: google.script.runでgetPartnerListを呼ぶ", () => {
   const html = adminApp.buildAdminAppHtml();
   assert.ok(html.indexOf(".getPartnerList(") !== -1);
 });
+
+test("buildAdminAppHtml: パートナードロワーに概要・対応履歴・紹介実績の3タブを含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["tabPartnerOverviewBtn", "tabPartnerHistoryBtn", "tabPartnerReferralsBtn",
+   "panePartnerOverview", "panePartnerHistory", "panePartnerReferrals"]
+    .forEach((id) => {
+      assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+    });
+});
+
+test("buildAdminAppHtml: google.script.runでgetPartnerDetailを呼ぶ", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf(".getPartnerDetail(") !== -1);
+});
+
+test("buildAdminAppHtml: 書き込み系のgoogle.script.run呼び出しを一切含まない(紹介パートナー開拓状況ビューも読み取り専用)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["addPartner", "logPartnerInteraction", "recordReferral"].forEach((forbidden) => {
+    assert.equal(html.indexOf(forbidden), -1, forbidden + " への呼び出しが含まれてはいけない(後続フェーズの機能)");
+  });
+});
