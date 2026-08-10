@@ -173,3 +173,109 @@ reasons.forEach((item, idx) => {
 
   yPos += 1.15;
 });
+
+// Slide 4: Competitive Landscape
+slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+addTitle(slide, '沖縄のM&A業者ランドスケープ');
+
+const tableData = [
+  ['業者名', '対象案件規模', '報酬体系', '営業スタイル', '小規模対応'],
+  ['大手仲介A', '5-50億円', '2-3%', '直接提案', '×（採算割れ）'],
+  ['地域中堅B', '3-20億円', '3-4%', '紹介ベース', '△（限定的）'],
+  ['金融系C', '2-10億円', '2.5-3.5%', '取引先営業', '△（融資対象のみ）'],
+  ['地場小規模D', '1-5億円', '4-5%', '不定期', '○（実績薄）']
+];
+
+const headerBgColor = colors.navy;
+const altRowBgColor = colors.lightGray;
+
+let tableY = 1.3;
+const cellHeight = 0.45;
+const colWidths = [1.6, 1.8, 1.4, 1.8, 1.8];
+
+tableData.forEach((row, rowIdx) => {
+  let cellX = 0.5;
+
+  row.forEach((cell, colIdx) => {
+    const cellWidth = colWidths[colIdx];
+    const bgColor = rowIdx === 0 ? headerBgColor : (rowIdx % 2 === 0 ? colors.white : altRowBgColor);
+    const textColor = rowIdx === 0 ? colors.white : colors.textDark;
+    const fontSize = rowIdx === 0 ? 11 : 9;
+    const bold = rowIdx === 0;
+
+    slide.addShape(pres.ShapeType.rect, {
+      x: cellX, y: tableY, w: cellWidth, h: cellHeight,
+      fill: { color: bgColor }, line: { color: colors.navy, width: 1 }
+    });
+
+    slide.addText(cell, {
+      x: cellX + 0.05, y: tableY, w: cellWidth - 0.1, h: cellHeight,
+      fontSize: fontSize, bold: bold, color: textColor, align: 'center', valign: 'middle', fontFace: 'Arial'
+    });
+
+    cellX += cellWidth;
+  });
+
+  tableY += cellHeight;
+});
+
+slide.addText('注：小規模対応 ○=対応可能／△=限定的／×=基本対応せず', {
+  x: 0.5, y: 4.9, w: 9, h: 0.3,
+  fontSize: 10, color: colors.textDark, fontFace: 'Arial', align: 'left'
+});
+
+// Slide 5: Why No Small Deal Support
+slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+addTitle(slide, 'なぜ既存業者は小規模案件に対応しないのか');
+
+const reasons5 = [
+  {
+    title: '採算性の壁',
+    content: '小規模案件（¥1-5B）の仲介手数料2-3% = ¥20-150M\n営業人件費（年¥8-12M）で利益なし→大型案件に特化',
+    borderColor: colors.orange
+  },
+  {
+    title: '営業効率の最適化',
+    content: '既存ネットワーク（金融機関・上場企業）の紹介案件に特化\n新規開拓（小規模層）には営業コストがかかりすぎる',
+    borderColor: colors.navy
+  },
+  {
+    title: 'リスク回避',
+    content: '小規模経営者は経営基盤が不安定→交渉が長引く\n既存業者は確実性の高い大型案件に集中',
+    borderColor: colors.textDark
+  }
+];
+
+let yPos5 = 1.3;
+reasons5.forEach(item => {
+  slide.addShape(pres.ShapeType.rect, {
+    x: 0.5, y: yPos5, w: 9, h: 1,
+    fill: { color: colors.lightGray }, line: { color: item.borderColor, width: 2 }
+  });
+
+  slide.addText(item.title, {
+    x: 0.7, y: yPos5 + 0.08, w: 3, h: 0.25,
+    fontSize: 14, bold: true, color: item.borderColor, fontFace: 'Arial'
+  });
+
+  slide.addText(item.content, {
+    x: 4, y: yPos5 + 0.08, w: 5.3, h: 0.85,
+    fontSize: 11, color: colors.textDark, fontFace: 'Arial'
+  });
+
+  yPos5 += 1.15;
+});
+
+slide.addShape(pres.ShapeType.rect, {
+  x: 0.5, y: 4.6, w: 9, h: 0.8,
+  fill: { color: colors.lightGray }, line: { color: colors.navy, width: 1 }
+});
+
+slide.addText('→ GLOWの差別化：小規模案件専門 + 複数収益柱（M&A + 保険 + 経営相談）で採算化', {
+  x: 0.7, y: 4.7, w: 8.6, h: 0.6,
+  fontSize: 12, bold: true, color: colors.navy, fontFace: 'Arial'
+});
