@@ -279,3 +279,104 @@ slide.addText('→ GLOWの差別化：小規模案件専門 + 複数収益柱（
   x: 0.7, y: 4.7, w: 8.6, h: 0.6,
   fontSize: 12, bold: true, color: colors.navy, fontFace: 'Arial'
 });
+
+// Slide 6: Risk Matrix
+slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+addTitle(slide, 'リスク要因分析：沖縄特有');
+
+const riskData = [
+  ['リスク', '説明', '影響度', '確度', '対策'],
+  ['親族承継志向', 'オーナーの「事業は家族へ」という文化的信念が強い', '高', '高', 'シナリオ提示'],
+  ['M&Aリテラシー不足', '経営者がM&A自体の仕組みを理解していない', '高', '高', '段階的教育'],
+  ['観光経済依存', 'インバウンド減少時の景気変動リスク', '中', '中', 'シナリオプラン'],
+  ['農業・建設高齢化', '経営者の急速な高齢化→廃業タイミングの予測難', '高', '高', '早期接触'],
+];
+
+let riskTableY = 1.3;
+const riskCellHeight = 0.52;
+const riskColWidths = [1.5, 3, 1.2, 1.2, 1.6];
+
+riskData.forEach((row, rowIdx) => {
+  let cellX = 0.5;
+
+  row.forEach((cell, colIdx) => {
+    const cellWidth = riskColWidths[colIdx];
+    const bgColor = rowIdx === 0 ? colors.navy : (rowIdx % 2 === 0 ? colors.white : colors.lightGray);
+    const textColor = rowIdx === 0 ? colors.white : colors.textDark;
+    const fontSize = rowIdx === 0 ? 10 : 8.5;
+    const bold = rowIdx === 0;
+
+    slide.addShape(pres.ShapeType.rect, {
+      x: cellX, y: riskTableY, w: cellWidth, h: riskCellHeight,
+      fill: { color: bgColor }, line: { color: colors.navy, width: 1 }
+    });
+
+    slide.addText(cell, {
+      x: cellX + 0.05, y: riskTableY + 0.02, w: cellWidth - 0.1, h: riskCellHeight - 0.04,
+      fontSize: fontSize, bold: bold, color: textColor, align: 'center', valign: 'middle', fontFace: 'Arial'
+    });
+
+    cellX += cellWidth;
+  });
+
+  riskTableY += riskCellHeight;
+});
+
+// Slide 7: Mitigation Strategies
+slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+addTitle(slide, 'リスク対策：実装戦略');
+
+const strategies = [
+  {
+    title: '親族承継志向への対抗戦略',
+    points: [
+      'アプローチ：「親族が引き継ぎたくない理由」のヒアリング',
+      '施策：その課題を「外部統合」で解決する提案',
+      'トリガー：患者獲得、スタッフ確保の困難を言語化'
+    ]
+  },
+  {
+    title: 'M&Aリテラシー向上',
+    points: [
+      '段階的フロー：補助金情報 → 経営相談 → M&A理解 → 提案',
+      '沖縄での実例3-5件を紹介',
+      '成功ストーリーで心理的抵抗を低減'
+    ]
+  },
+  {
+    title: '農業・建設の早期接触',
+    points: [
+      'タイムリミット：今後1-2年が最後の機会',
+      '月間訪問：20-30社/月で市場開拓',
+      '優先度：建設5,539社 + 農業推定3,000+社'
+    ]
+  }
+];
+
+let stratY = 1.3;
+strategies.forEach(strat => {
+  slide.addShape(pres.ShapeType.rect, {
+    x: 0.5, y: stratY, w: 9, h: 1.2,
+    fill: { color: colors.lightGray }, line: { color: colors.navy, width: 1 }
+  });
+
+  slide.addText(strat.title, {
+    x: 0.7, y: stratY + 0.1, w: 8.6, h: 0.2,
+    fontSize: 13, bold: true, color: colors.navy, fontFace: 'Arial'
+  });
+
+  slide.addText(strat.points.join('\n'), {
+    x: 0.7, y: stratY + 0.35, w: 8.6, h: 0.75,
+    fontSize: 10, color: colors.textDark, fontFace: 'Arial'
+  });
+
+  stratY += 1.35;
+});
+
+// Save presentation
+const fs = require('fs');
+pres.writeFile({ fileName: '/tmp/okinawa_ma_executive.pptx' });
