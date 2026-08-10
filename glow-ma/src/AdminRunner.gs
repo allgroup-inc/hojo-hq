@@ -118,3 +118,98 @@ function getFilterOptions() {
     owners: Object.keys(ownerSet).sort()
   };
 }
+
+/**
+ * パートナー対応履歴ログを読み、パートナーIDごとに配列へグルーピングして返す。
+ * readInteractionsByCompanyId_(ScoringRunner.gs、企業向け)と同じパターンだが、
+ * 対象タブ・キー列(パートナーID)が異なるため専用の関数として定義する。
+ */
+function readPartnerInteractionsByPartnerId_(sheet) {
+  var result = {};
+  if (!sheet) return result;
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return result;
+  var headers = GlowSchema.PARTNER_INTERACTION_LOG_HEADERS;
+  var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  values.forEach(function (row) {
+    var record = {};
+    headers.forEach(function (header, i) {
+      record[header] = row[i];
+    });
+    var partnerId = record["パートナーID"];
+    if (!partnerId) return;
+    if (!result[partnerId]) result[partnerId] = [];
+    result[partnerId].push(record);
+  });
+  return result;
+}
+
+/**
+ * パートナー一覧(紹介パートナーマスタ全件+パートナー対応履歴ログの記録件数)を返す。
+ * 企業一覧と異なり件数が少ない想定のため、絞り込み必須・件数上限は設けない。
+ *
+ * この関数の名前の末尾に `_` を付けてはいけない。Apps Scriptは末尾が`_`の関数を
+ * 非公開扱いにし、google.script.run から呼び出せなくする(呼んでもエラーにすら
+ * ならず、単に何も起きない)。アクセス制御は関数名ではなく、冒頭で呼んでいる
+ * requireAdminAccess_() だけが担う(Phase 18a最終レビュー2026-08-09 Fix 1と同じ理由)。
+ */
+function getPartnerList() {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var partnerSheet = ss.getSheetByName(GlowSchema.PARTNER_MASTER_SHEET_NAME);
+  var partners = readPartnerRecords_(partnerSheet);
+
+  var logSheet = ss.getSheetByName(GlowSchema.PARTNER_INTERACTION_LOG_SHEET_NAME);
+  var interactionsByPartner = readPartnerInteractionsByPartnerId_(logSheet);
+
+  return GlowAdminAccess.buildPartnerListRows(partners, interactionsByPartner);
+}
+
+function readReferralRecordsByPartnerId_(sheet) {
+  var result = {};
+  if (!sheet) return result;
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return result;
+  var headers = GlowSchema.REFERRAL_RECORD_HEADERS;
+  var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  values.forEach(function (row) {
+    var record = {};
+    headers.forEach(function (header, i) {
+      record[header] = row[i];
+    });
+    var partnerId = record["パートナーID"];
+    if (!partnerId) return;
+    if (!result[partnerId]) result[partnerId] = [];
+    result[partnerId].push(record);
+  });
+  return result;
+}
+
+/**
+ * パートナー1件分の基本情報+対応履歴(日付降順)+紹介実績を返す。
+ * 該当パートナーが見つからない場合はnullを返す。
+ *
+ * 紹介実績は件数が少ない想定のため、この時点では並び替えを行わずシート上の
+ * 順序のまま返す(対応履歴のような大量データではないため、Task 5・6の時点では
+ * ソートの必要性が薄いと判断。必要になれば後続フェーズで追加する)。
+ *
+ * この関数の名前の末尾に `_` を付けてはいけない(getPartnerListと同じ理由)。
+ */
+function getPartnerDetail(partnerId) {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var partnerSheet = ss.getSheetByName(GlowSchema.PARTNER_MASTER_SHEET_NAME);
+  var partners = readPartnerRecords_(partnerSheet);
+  var partner = partners.filter(function (p) { return p["パートナーID"] === partnerId; })[0];
+  if (!partner) return null;
+
+  var logSheet = ss.getSheetByName(GlowSchema.PARTNER_INTERACTION_LOG_SHEET_NAME);
+  var interactionsByPartner = readPartnerInteractionsByPartnerId_(logSheet);
+  var history = GlowAdminAccess.sortInteractionsByDateDesc(interactionsByPartner[partnerId] || []);
+
+  var referralSheet = ss.getSheetByName(GlowSchema.REFERRAL_RECORD_SHEET_NAME);
+  var referrals = readReferralRecordsByPartnerId_(referralSheet)[partnerId] || [];
+  referrals = GlowAdminAccess.normalizeReferralRecords(referrals);
+
+  return { partner: partner, history: history, referrals: referrals };
+}

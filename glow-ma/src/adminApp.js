@@ -27,29 +27,37 @@
     "tbody tr:hover{background:#fdf2e2}",
     ".rank{display:inline-block;min-width:1.4rem;text-align:center;border-radius:0.3rem;",
     "padding:0.05rem 0.4rem;font-weight:700;color:#fff;background:#f88800}",
-    "#drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:#fff;",
+    "#drawer,#partnerDrawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:#fff;",
     "box-shadow:-4px 0 16px rgba(17,32,44,0.18);transform:translateX(100%);",
     "transition:transform 0.2s ease;display:flex;flex-direction:column}",
-    "#drawer.open{transform:translateX(0)}",
-    "#drawerHeader{padding:1rem 1.25rem;border-bottom:1px solid #e5e9eb;display:flex;",
+    "#drawer.open,#partnerDrawer.open{transform:translateX(0)}",
+    "#drawerHeader,#partnerDrawerHeader{padding:1rem 1.25rem;border-bottom:1px solid #e5e9eb;display:flex;",
     "justify-content:space-between;align-items:flex-start}",
-    "#drawerClose{border:0;background:none;font-size:1.1rem;cursor:pointer;color:#4a5a66}",
+    "#drawerClose,#partnerDrawerClose{border:0;background:none;font-size:1.1rem;cursor:pointer;color:#4a5a66}",
     ".tabs{display:flex;border-bottom:1px solid #e5e9eb}",
     ".tabs button{flex:1;padding:0.6rem;border:0;background:none;cursor:pointer;font:inherit;",
     "color:#4a5a66;border-bottom:2px solid transparent}",
     ".tabs button.active{color:#00335c;border-bottom-color:#f88800;font-weight:600}",
-    "#drawerBody{overflow-y:auto;padding:1rem 1.25rem;flex:1}",
+    "#drawerBody,#partnerDrawerBody{overflow-y:auto;padding:1rem 1.25rem;flex:1}",
     ".field{margin-bottom:0.7rem}",
     ".field .label{font-size:0.76rem;color:#7a828a;text-transform:uppercase;letter-spacing:0.03em}",
     ".field .value{font-size:0.92rem;white-space:pre-wrap}",
     ".empty{color:#7a828a;padding:1.5rem;text-align:center}",
-    "#overlay{position:fixed;inset:0;background:rgba(17,32,44,0.25);display:none}",
-    "#overlay.open{display:block}"
+    "#overlay,#partnerOverlay{position:fixed;inset:0;background:rgba(17,32,44,0.25);display:none}",
+    "#overlay.open,#partnerOverlay.open{display:block}",
+    "#viewSwitcher{display:flex;gap:0;background:#00335c}",
+    "#viewSwitcher button{flex:none;padding:0.6rem 1.1rem;border:0;background:none;",
+    "color:rgba(255,255,255,0.7);cursor:pointer;font:inherit;border-bottom:2px solid transparent}",
+    "#viewSwitcher button.active{color:#fff;border-bottom-color:#f88800;font-weight:600}",
+    ".viewPane{display:none}",
+    ".viewPane.active{display:block}"
   ].join("");
 
   var HEADER_AND_FILTERS = [
     "<header><h1>GLOW企業リレーション台帳</h1></header>",
-    "<div class=\"filters\">",
+    "<div id=\"viewSwitcher\"><button id=\"viewCompanyBtn\" class=\"active\">企業一覧</button>",
+    "<button id=\"viewPartnerBtn\">紹介パートナー開拓状況</button></div>",
+    "<div class=\"filters\" id=\"companyFiltersBar\">",
     "<input type=\"text\" id=\"searchInput\" placeholder=\"会社名・代表者名で検索\">",
     "<select id=\"filterRank\"><option value=\"\">ランク(すべて)</option>",
     "<option value=\"A\">A</option><option value=\"B\">B</option>",
@@ -60,10 +68,20 @@
   ].join("");
 
   var TABLE = [
+    "<div id=\"companyView\" class=\"viewPane active\">",
     "<table><thead><tr><th>会社名</th><th>ランク</th><th>現在ステージ</th>",
     "<th>次回アクション予定日</th><th>担当者</th></tr></thead>",
     "<tbody id=\"companyTableBody\"></tbody></table>",
-    "<div class=\"empty\" id=\"emptyState\" style=\"display:none\">該当する企業が見つかりません</div>"
+    "<div class=\"empty\" id=\"emptyState\" style=\"display:none\">該当する企業が見つかりません</div>",
+    "</div>"
+  ].join("");
+
+  var PARTNER_VIEW = [
+    "<div id=\"partnerView\" class=\"viewPane\">",
+    "<table><thead><tr><th>名称</th><th>種別</th><th>関係性ランク</th><th>対応回数</th></tr></thead>",
+    "<tbody id=\"partnerTableBody\"></tbody></table>",
+    "<div class=\"empty\" id=\"partnerEmptyState\" style=\"display:none\">該当するパートナーが見つかりません</div>",
+    "</div>"
   ].join("");
 
   var DRAWER = [
@@ -77,6 +95,22 @@
     "<div id=\"drawerBody\">",
     "<div id=\"paneOverview\"></div>",
     "<div id=\"paneHistory\" style=\"display:none\"></div>",
+    "</div></div>"
+  ].join("");
+
+  var PARTNER_DRAWER = [
+    "<div id=\"partnerOverlay\"></div>",
+    "<div id=\"partnerDrawer\">",
+    "<div id=\"partnerDrawerHeader\"><div><div id=\"partnerDrawerName\" style=\"font-weight:700\"></div>",
+    "<div id=\"partnerDrawerId\" style=\"font-size:0.8rem;color:#7a828a\"></div></div>",
+    "<button id=\"partnerDrawerClose\">&times;</button></div>",
+    "<div class=\"tabs\"><button id=\"tabPartnerOverviewBtn\" class=\"active\">概要</button>",
+    "<button id=\"tabPartnerHistoryBtn\">対応履歴</button>",
+    "<button id=\"tabPartnerReferralsBtn\">紹介実績</button></div>",
+    "<div id=\"partnerDrawerBody\">",
+    "<div id=\"panePartnerOverview\"></div>",
+    "<div id=\"panePartnerHistory\" style=\"display:none\"></div>",
+    "<div id=\"panePartnerReferrals\" style=\"display:none\"></div>",
     "</div></div>"
   ].join("");
 
@@ -164,12 +198,104 @@
     "document.getElementById('overlay').classList.remove('open');",
     "}",
 
+    "function switchView(target){",
+    "var isCompany = target === 'company';",
+    "document.getElementById('viewCompanyBtn').classList.toggle('active', isCompany);",
+    "document.getElementById('viewPartnerBtn').classList.toggle('active', !isCompany);",
+    "document.getElementById('companyView').classList.toggle('active', isCompany);",
+    "document.getElementById('partnerView').classList.toggle('active', !isCompany);",
+    "document.getElementById('companyFiltersBar').style.display = isCompany ? 'flex' : 'none';",
+    "}",
+
+    "function loadPartnerList(){",
+    "google.script.run.withSuccessHandler(renderPartnerTable).withFailureHandler(function(error){",
+    "document.getElementById('partnerTableBody').innerHTML = '';",
+    "var empty = document.getElementById('partnerEmptyState');",
+    "empty.style.display = 'block'; empty.textContent = '読み込みに失敗しました。再読み込みしてください。';",
+    "}).getPartnerList();",
+    "}",
+
+    "function renderPartnerTable(rows){",
+    "var tbody = document.getElementById('partnerTableBody'); tbody.innerHTML = '';",
+    "var empty = document.getElementById('partnerEmptyState');",
+    "if (!rows || rows.length === 0){ empty.style.display = 'block';",
+    "empty.textContent = '該当するパートナーが見つかりません'; return; }",
+    "empty.style.display = 'none';",
+    "rows.forEach(function(row){",
+    "var tr = document.createElement('tr');",
+    "tr.innerHTML = '<td>' + escapeHtml(row['名称']) + '</td>' +",
+    "'<td>' + escapeHtml(row['種別']) + '</td>' +",
+    "'<td>' + escapeHtml(row['関係性ランク']) + '</td>' +",
+    "'<td>' + escapeHtml(row['対応回数']) + '</td>';",
+    "tr.addEventListener('click', function(){ openPartnerDrawer(row['パートナーID']); });",
+    "tbody.appendChild(tr);});",
+    "}",
+
+    "function openPartnerDrawer(partnerId){",
+    "document.getElementById('partnerDrawer').classList.add('open');",
+    "document.getElementById('partnerOverlay').classList.add('open');",
+    "document.getElementById('partnerDrawerName').textContent = '読み込み中…';",
+    "document.getElementById('partnerDrawerId').textContent = partnerId;",
+    "google.script.run.withSuccessHandler(renderPartnerDrawer).withFailureHandler(function(){",
+    "document.getElementById('partnerDrawerName').textContent = '読み込みに失敗しました。再読み込みしてください。';",
+    "}).getPartnerDetail(partnerId);",
+    "}",
+
+    "function renderPartnerDrawer(detail){",
+    "if (!detail){ document.getElementById('partnerDrawerName').textContent = '該当するパートナーが見つかりません';",
+    "document.getElementById('panePartnerOverview').innerHTML = '';",
+    "document.getElementById('panePartnerHistory').innerHTML = '';",
+    "document.getElementById('panePartnerReferrals').innerHTML = ''; return; }",
+    "var p = detail.partner;",
+    "document.getElementById('partnerDrawerName').textContent = p['名称'] || '(名称未登録)';",
+    "document.getElementById('partnerDrawerId').textContent = p['パートナーID'];",
+    "var fields = [",
+    "['種別', p['種別']], ['担当者名', p['担当者名']], ['関係性ランク', p['関係性ランク']],",
+    "['累計紹介数', p['累計紹介数']], ['成約数', p['成約数']],",
+    "['提供済み情報ログ', p['提供済み情報ログ']], ['逆紹介履歴', p['逆紹介履歴']]",
+    "];",
+    "document.getElementById('panePartnerOverview').innerHTML = fields.map(function(f){",
+    "return '<div class=\"field\"><div class=\"label\">' + escapeHtml(f[0]) + '</div>' +",
+    "'<div class=\"value\">' + (escapeHtml(f[1]) || '—') + '</div></div>';",
+    "}).join('');",
+    "var history = detail.history || [];",
+    "document.getElementById('panePartnerHistory').innerHTML = history.length === 0",
+    "? '<div class=\"empty\">対応履歴がありません</div>'",
+    ": history.map(function(h){",
+    "return '<div class=\"field\"><div class=\"label\">' + escapeHtml(h['日付']) + '</div>' +",
+    "'<div class=\"value\">' + escapeHtml(h['内容メモ']) + '</div></div>';",
+    "}).join('');",
+    "var referrals = detail.referrals || [];",
+    "document.getElementById('panePartnerReferrals').innerHTML = referrals.length === 0",
+    "? '<div class=\"empty\">紹介実績がありません</div>'",
+    ": referrals.map(function(r){",
+    "return '<div class=\"field\"><div class=\"label\">' + escapeHtml(r['紹介日']) + '・紹介料率: ' + escapeHtml(r['紹介料率']) + '</div>' +",
+    "'<div class=\"value\">' + escapeHtml(r['契約内容メモ']) + '(成約有無: ' + escapeHtml(r['成約有無']) + ')</div></div>';",
+    "}).join('');",
+    "}",
+
+    "function closePartnerDrawer(){",
+    "document.getElementById('partnerDrawer').classList.remove('open');",
+    "document.getElementById('partnerOverlay').classList.remove('open');",
+    "}",
+
     "function switchTab(target){",
     "var isOverview = target === 'overview';",
     "document.getElementById('tabOverviewBtn').classList.toggle('active', isOverview);",
     "document.getElementById('tabHistoryBtn').classList.toggle('active', !isOverview);",
     "document.getElementById('paneOverview').style.display = isOverview ? 'block' : 'none';",
     "document.getElementById('paneHistory').style.display = isOverview ? 'none' : 'block';",
+    "}",
+
+    "function switchPartnerTab(target){",
+    "var isOverview = target === 'overview';",
+    "var isHistory = target === 'history';",
+    "document.getElementById('tabPartnerOverviewBtn').classList.toggle('active', isOverview);",
+    "document.getElementById('tabPartnerHistoryBtn').classList.toggle('active', isHistory);",
+    "document.getElementById('tabPartnerReferralsBtn').classList.toggle('active', !isOverview && !isHistory);",
+    "document.getElementById('panePartnerOverview').style.display = isOverview ? 'block' : 'none';",
+    "document.getElementById('panePartnerHistory').style.display = isHistory ? 'block' : 'none';",
+    "document.getElementById('panePartnerReferrals').style.display = (!isOverview && !isHistory) ? 'block' : 'none';",
     "}",
 
     "document.getElementById('searchInput').addEventListener('input', function(e){",
@@ -184,16 +310,24 @@
     "document.getElementById('overlay').addEventListener('click', closeDrawer);",
     "document.getElementById('tabOverviewBtn').addEventListener('click', function(){ switchTab('overview'); });",
     "document.getElementById('tabHistoryBtn').addEventListener('click', function(){ switchTab('history'); });",
+    "document.getElementById('viewCompanyBtn').addEventListener('click', function(){ switchView('company'); });",
+    "document.getElementById('viewPartnerBtn').addEventListener('click', function(){ switchView('partner'); });",
+    "document.getElementById('partnerDrawerClose').addEventListener('click', closePartnerDrawer);",
+    "document.getElementById('partnerOverlay').addEventListener('click', closePartnerDrawer);",
+    "document.getElementById('tabPartnerOverviewBtn').addEventListener('click', function(){ switchPartnerTab('overview'); });",
+    "document.getElementById('tabPartnerHistoryBtn').addEventListener('click', function(){ switchPartnerTab('history'); });",
+    "document.getElementById('tabPartnerReferralsBtn').addEventListener('click', function(){ switchPartnerTab('referrals'); });",
 
     "loadFilterOptions();",
-    "loadList();"
+    "loadList();",
+    "loadPartnerList();"
   ].join("");
 
   function buildAdminAppHtml() {
     return "<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\">" +
       "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
       "<style>" + STYLE + "</style></head><body>" +
-      HEADER_AND_FILTERS + TABLE + DRAWER +
+      HEADER_AND_FILTERS + TABLE + PARTNER_VIEW + DRAWER + PARTNER_DRAWER +
       "<script>" + SCRIPT + "<\/script>" +
       "</body></html>";
   }

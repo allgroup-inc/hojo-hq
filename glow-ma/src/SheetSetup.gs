@@ -2,7 +2,8 @@
  * GLOW企業リレーション台帳: シート初期化
  * Apps Scriptエディタの関数選択で ensureLedgerTabs を選び、実行ボタンで手動実行する。
  * 実行すると「企業マスタ」「対応履歴ログ」「紹介パートナーマスタ」「設定」
- * 「レター下書き」「ダッシュボード」「ダッシュボード履歴」「スタッフ」の8タブが
+ * 「レター下書き」「ダッシュボード」「ダッシュボード履歴」「スタッフ」
+ * 「パートナー対応履歴ログ」「紹介実績ログ」の10タブが
  * (存在しなければ)作成され、1行目に見出しが設定される。
  * 対応履歴ログの「種別」「対応相手」列、レター下書きの「ステータス」列には、
  * 表記ゆれによる集計漏れを防ぐためプルダウン入力規則を設定する。
@@ -29,6 +30,8 @@ function ensureLedgerTabs() {
   ensureTab_(ss, GlowSchema.DASHBOARD_HISTORY_SHEET_NAME, GlowSchema.DASHBOARD_HISTORY_HEADERS);
   var staffSheet = ensureTab_(ss, GlowSchema.STAFF_SHEET_NAME, GlowSchema.STAFF_HEADERS);
   applyStaffActiveValidation_(staffSheet);
+  ensureTab_(ss, GlowSchema.PARTNER_INTERACTION_LOG_SHEET_NAME, GlowSchema.PARTNER_INTERACTION_LOG_HEADERS);
+  ensureTab_(ss, GlowSchema.REFERRAL_RECORD_SHEET_NAME, GlowSchema.REFERRAL_RECORD_HEADERS);
 }
 
 function ensureTab_(spreadsheet, sheetName, headers) {

@@ -34,7 +34,7 @@
    * 表示になり、曜日名基準でソートされてしまう(alerting.js の toDate と同じ問題への対処)。
    * Date/"yyyy-MM-dd"文字列のどちらが来ても "yyyy-MM-dd" 文字列に正規化する。
    */
-  function normalizeDateForDisplay_(value) {
+  function normalizeDateForDisplay(value) {
     var date = getGlowAlerting_().toDate(value);
     return date ? formatDate_(date) : "";
   }
@@ -65,7 +65,7 @@
     COMPANY_LIST_FIELDS.forEach(function (field) {
       picked[field] = company[field] !== undefined ? company[field] : "";
     });
-    picked["次回アクション予定日"] = normalizeDateForDisplay_(company["次回アクション予定日"]);
+    picked["次回アクション予定日"] = normalizeDateForDisplay(company["次回アクション予定日"]);
     return picked;
   }
 
@@ -92,8 +92,8 @@
 
   function sortByNextActionDateDesc_(companies) {
     return companies.slice().sort(function (a, b) {
-      var da = normalizeDateForDisplay_(a["次回アクション予定日"]);
-      var db = normalizeDateForDisplay_(b["次回アクション予定日"]);
+      var da = normalizeDateForDisplay(a["次回アクション予定日"]);
+      var db = normalizeDateForDisplay(b["次回アクション予定日"]);
       if (da === db) return 0;
       return da < db ? 1 : -1;
     });
@@ -114,7 +114,7 @@
         Object.keys(record).forEach(function (key) {
           normalized[key] = record[key];
         });
-        normalized["日付"] = normalizeDateForDisplay_(record["日付"]);
+        normalized["日付"] = normalizeDateForDisplay(record["日付"]);
         return normalized;
       })
       .sort(function (a, b) {
@@ -125,6 +125,39 @@
       });
   }
 
+  /**
+   * パートナー一覧(紹介パートナーマスタ全件+対応回数)の行を組み立てる。
+   * AdminRunner.gs の getPartnerList がシート読み取り後にこれを呼ぶ。
+   */
+  function buildPartnerListRows(partners, interactionsByPartnerId) {
+    var interactionsMap = interactionsByPartnerId || {};
+    return (partners || []).map(function (partner) {
+      var partnerId = partner["パートナーID"];
+      return {
+        "パートナーID": partnerId,
+        "名称": partner["名称"],
+        "種別": partner["種別"],
+        "関係性ランク": partner["関係性ランク"],
+        "対応回数": (interactionsMap[partnerId] || []).length
+      };
+    });
+  }
+
+  /**
+   * 紹介実績ログの各レコードの「紹介日」を "yyyy-MM-dd" 文字列に正規化する。
+   * 入力配列・要素は変更せず、新しい配列・オブジェクトを返す。
+   */
+  function normalizeReferralRecords(referrals) {
+    return (referrals || []).map(function (record) {
+      var normalized = {};
+      Object.keys(record).forEach(function (key) {
+        normalized[key] = record[key];
+      });
+      normalized["紹介日"] = normalizeDateForDisplay(record["紹介日"]);
+      return normalized;
+    });
+  }
+
   var api = {
     isAllowedEmail: isAllowedEmail,
     buildAccessDeniedHtml: buildAccessDeniedHtml,
@@ -133,7 +166,10 @@
     hasAnyFilter: hasAnyFilter,
     applyCompanyFilters: applyCompanyFilters,
     buildCompanyListResult: buildCompanyListResult,
-    sortInteractionsByDateDesc: sortInteractionsByDateDesc
+    sortInteractionsByDateDesc: sortInteractionsByDateDesc,
+    normalizeDateForDisplay: normalizeDateForDisplay,
+    buildPartnerListRows: buildPartnerListRows,
+    normalizeReferralRecords: normalizeReferralRecords
   };
 
   if (typeof module !== "undefined" && module.exports) {
