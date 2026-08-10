@@ -50,8 +50,15 @@ fb.innerHTML=PH.map((f,i)=>{
 }).join('');
 
 // ===== シーン出現 =====
+const fgSeen = new Set();
 const io = new IntersectionObserver(es => {
-  es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  es.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in');
+      const id = e.target.id;
+      if (id && !fgSeen.has(id) && window.fgTrack) { fgSeen.add(id); fgTrack('film_scene_'+id); }
+    }
+  });
 }, {threshold: .35});
 document.querySelectorAll('.scene').forEach(s => io.observe(s));
 
@@ -78,5 +85,11 @@ document.querySelectorAll('main > section:not(.scene) .wrap').forEach(w => {
     pio.observe(el);
   });
 });
+
+
+// 計測: フィルム内の導線クリック
+document.querySelectorAll('.s8 .cta').forEach(a=>a.addEventListener('click',()=>{ if(window.fgTrack) fgTrack('film_cta_shindan'); }));
+document.querySelectorAll('.s8 a[href*="area"]').forEach(a=>a.addEventListener('click',()=>{ if(window.fgTrack) fgTrack('film_link_area'); }));
+document.querySelectorAll('.tinyhead .skip').forEach(a=>a.addEventListener('click',()=>{ if(window.fgTrack) fgTrack('film_skip'); }));
 
 })();
