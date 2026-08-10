@@ -376,7 +376,3 @@ strategies.forEach(strat => {
 
   stratY += 1.35;
 });
-
-// Save presentation
-const fs = require('fs');
-pres.writeFile({ fileName: '/tmp/okinawa_ma_executive.pptx' });
