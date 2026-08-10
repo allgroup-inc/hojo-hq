@@ -497,3 +497,239 @@ slide.addText('→ GLOWの戦略：トリガー発動前の準備段階（信頼
   x: 0.7, y: 4.85, w: 8.6, h: 0.5,
   fontSize: 11, bold: true, color: colors.navy, fontFace: 'Arial'
 });
+
+// Slide 10: GLOW Differentiation & Revenue Model
+slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+addTitle(slide, 'GLOW戦略的ポジショニング：差別化と採算性');
+
+// Left: Differentiation
+slide.addShape(pres.ShapeType.rect, {
+  x: 0.5, y: 1.3, w: 4.3, h: 2.8,
+  fill: { color: colors.lightGray }, line: { color: colors.orange, width: 2 }
+});
+
+slide.addText('競争優位性', {
+  x: 0.7, y: 1.45, w: 4, h: 0.25,
+  fontSize: 14, bold: true, color: colors.orange, fontFace: 'Arial'
+});
+
+const diffPoints = [
+  '✓ 小規模案件専門',
+  '✓ 段階的営業フロー',
+  '✓ 沖縄特化営業',
+  '✓ 信頼構築3-6ヶ月',
+  '✓ 成約率40-60%'
+];
+
+let diffY = 1.85;
+diffPoints.forEach(pt => {
+  slide.addText(pt, {
+    x: 0.7, y: diffY, w: 4, h: 0.25,
+    fontSize: 11, color: colors.textDark, fontFace: 'Arial'
+  });
+  diffY += 0.35;
+});
+
+// Right: Revenue Model
+slide.addShape(pres.ShapeType.rect, {
+  x: 5.2, y: 1.3, w: 4.3, h: 2.8,
+  fill: { color: colors.lightGray }, line: { color: colors.navy, width: 2 }
+});
+
+slide.addText('採算モデル（1件¥1-5B案件）', {
+  x: 5.4, y: 1.45, w: 4, h: 0.25,
+  fontSize: 13, bold: true, color: colors.navy, fontFace: 'Arial'
+});
+
+const revenueLines = [
+  '【売上A】M&A仲介手数料',
+  '¥2-7M',
+  '',
+  '【売上B】事前診断・相談フィー',
+  '¥1-2M',
+  '',
+  '【売上C】法人保険（3年間）',
+  '¥0.5-1M/年',
+  '',
+  '【売上D】経営相談（継続）',
+  '¥0.5M/年',
+  '',
+  '合計：¥6-15M/件'
+];
+
+let revY = 1.85;
+revenueLines.forEach((line, idx) => {
+  const isBold = line.includes('合計') || line.includes('【');
+  const fontSize = isBold ? 10 : 9;
+  const fontBold = isBold;
+  const color = line.includes('合計') ? colors.navy : colors.textDark;
+
+  slide.addText(line, {
+    x: 5.4, y: revY, w: 4, h: 0.2,
+    fontSize: fontSize, bold: fontBold, color: color, fontFace: 'Arial'
+  });
+  revY += 0.18;
+});
+
+// Slide 11: 9-Month Implementation Roadmap
+slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+addTitle(slide, '9ヶ月25-59件達成ロードマップ');
+
+const roadmap = [
+  ['期間', '営業活動', '月間新規接触', '月間成約', '累計成約'],
+  ['8月', '運用開始', '月4-6社', '—', '準備'],
+  ['9-10月', '初期接触 + 信頼構築', '月6-10社', '0-1件', '0-1件'],
+  ['11月-1月', '段階的営業進行中', '月8-12社', '1-2件/月', '3-6件'],
+  ['2-4月', '成熟期 + 新規開拓', '月12-15社', '2-3件/月', '25-59件']
+];
+
+let roadY = 1.3;
+const roadCellH = 0.45;
+const roadColWidths = [1.5, 2.2, 2.0, 1.8, 1.5];
+
+roadmap.forEach((row, rowIdx) => {
+  let cellX = 0.5;
+
+  row.forEach((cell, colIdx) => {
+    const cellWidth = roadColWidths[colIdx];
+    const bgColor = rowIdx === 0 ? colors.navy : (rowIdx === roadmap.length - 1 ? colors.lightGray : colors.white);
+    const textColor = rowIdx === 0 ? colors.white : colors.textDark;
+    const fontSize = rowIdx === 0 ? 10 : 9;
+    const bold = rowIdx === 0 || rowIdx === roadmap.length - 1;
+
+    slide.addShape(pres.ShapeType.rect, {
+      x: cellX, y: roadY, w: cellWidth, h: roadCellH,
+      fill: { color: bgColor }, line: { color: colors.navy, width: 1 }
+    });
+
+    slide.addText(cell, {
+      x: cellX + 0.05, y: roadY, w: cellWidth - 0.1, h: roadCellH,
+      fontSize: fontSize, bold: bold, color: textColor, align: 'center', valign: 'middle', fontFace: 'Arial'
+    });
+
+    cellX += cellWidth;
+  });
+
+  roadY += roadCellH;
+});
+
+// Key drivers
+slide.addShape(pres.ShapeType.rect, {
+  x: 0.5, y: 4.0, w: 9, h: 1.3,
+  fill: { color: colors.lightGray }, line: { color: colors.orange, width: 1 }
+});
+
+slide.addText('実現を支える3つの要素', {
+  x: 0.7, y: 4.1, w: 8.6, h: 0.2,
+  fontSize: 12, bold: true, color: colors.orange, fontFace: 'Arial'
+});
+
+const drivers = [
+  '1. 段階的営業フロー：DM→電話→訪問→関係構築→M&A提案（成約率40-60%）',
+  '2. 3チャネル統合：補助金情報（サイト）+ 訪問営業 + 紹介ルート',
+  '3. データドリブン：案件スコアリング + 業界別アプローチ最適化'
+];
+
+let drvY = 4.35;
+drivers.forEach(drv => {
+  slide.addText(drv, {
+    x: 0.7, y: drvY, w: 8.6, h: 0.25,
+    fontSize: 10, color: colors.textDark, fontFace: 'Arial'
+  });
+  drvY += 0.27;
+});
+
+// Slide 12: Conclusion
+slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+slide.addText('結論：経営判断ポイント', {
+  x: 0.5, y: 0.4, w: 9, h: 0.5,
+  fontSize: 36, bold: true, color: colors.orange, align: 'left', fontFace: 'Arial'
+});
+
+// Left side: Market points
+slide.addShape(pres.ShapeType.rect, {
+  x: 0.5, y: 1.1, w: 4.3, h: 3.8,
+  fill: { color: colors.lightGray }, line: { color: colors.orange, width: 2 }
+});
+
+slide.addText('市場機会のポイント', {
+  x: 0.7, y: 1.25, w: 4, h: 0.25,
+  fontSize: 13, bold: true, color: colors.orange, fontFace: 'Arial'
+});
+
+const marketPoints = [
+  '✓ 後継者不安4,000社',
+  '✓ 年間成約120-150件',
+  '✓ 成約率わずか2-3%',
+  '✓ 年間成長+50%',
+  '✓ 未開拓市場¥200B+',
+  '',
+  '既存業者は採算性で小規模対応が不可',
+  '←GLOWはビジネスモデルで解決'
+];
+
+let mktY = 1.65;
+marketPoints.forEach(pt => {
+  slide.addText(pt, {
+    x: 0.7, y: mktY, w: 3.8, h: 0.25,
+    fontSize: 10, color: pt.includes('←') ? colors.navy : colors.textDark, bold: pt.includes('←'), fontFace: 'Arial'
+  });
+  mktY += 0.28;
+});
+
+// Right side: Investment decision
+slide.addShape(pres.ShapeType.rect, {
+  x: 5.2, y: 1.1, w: 4.3, h: 3.8,
+  fill: { color: colors.navy }, line: { color: colors.navy, width: 0 }
+});
+
+slide.addText('投資判断ポイント', {
+  x: 5.4, y: 1.25, w: 4, h: 0.25,
+  fontSize: 13, bold: true, color: colors.white, fontFace: 'Arial'
+});
+
+const investPoints = [
+  '■ 沖縄特有リスクは対策可能',
+  '  文化理解 + 段階的営業',
+  '',
+  '■ 経営者心理が明確',
+  '  決断トリガー事前把握',
+  '',
+  '■ 採算モデルが実装可能',
+  '  小規模×複数柱で利益確保',
+  '',
+  '■ 9ヶ月25-59件の根拠明確',
+  '  段階的営業×3チャネル'
+];
+
+let invY = 1.65;
+investPoints.forEach(pt => {
+  const fontSize = pt.includes('■') ? 11 : 10;
+  const bold = pt.includes('■');
+  slide.addText(pt, {
+    x: 5.4, y: invY, w: 4, h: 0.2,
+    fontSize: fontSize, bold: bold, color: colors.white, fontFace: 'Arial'
+  });
+  invY += 0.25;
+});
+
+// Decision box
+slide.addShape(pres.ShapeType.rect, {
+  x: 0.5, y: 5.05, w: 9, h: 0.4,
+  fill: { color: colors.orange }, line: { color: colors.orange, width: 0 }
+});
+
+slide.addText('結論：GO / NO-GO の経営判断', {
+  x: 0.7, y: 5.1, w: 8.6, h: 0.3,
+  fontSize: 16, bold: true, color: colors.white, align: 'center', fontFace: 'Arial'
+});
+
+// Save
+pres.writeFile({ fileName: '/tmp/okinawa_ma_executive.pptx' });
+console.log('Created: /tmp/okinawa_ma_executive.pptx');
