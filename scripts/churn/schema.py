@@ -55,6 +55,7 @@ def _get(raw, column_map, key):
 def normalize_record(raw, column_map, as_of):
     apply_date = parse_date(_get(raw, column_map, "apply_date"))
     cancel_date = parse_date(_get(raw, column_map, "cancel_date"))
+    debit_due = parse_date(_get(raw, column_map, "debit_due"))
     age_raw = _get(raw, column_map, "age")
     age = int(str(age_raw).strip()) if age_raw and str(age_raw).strip() else None
     amount = parse_amount(_get(raw, column_map, "amount"))
@@ -87,6 +88,10 @@ def normalize_record(raw, column_map, as_of):
         "agent_id": (_get(raw, column_map, "agent_id") or "不明"),
         "cancel_date": cancel_date,
         "cancel_reason": (_get(raw, column_map, "cancel_reason") or ""),
+        # 予防トリガー用（口座普段使い / 初回引落結果 / 引落予定日）。欠損は既定値。
+        "account_daily": (_get(raw, column_map, "account_daily") or ""),
+        "debit_result": (_get(raw, column_map, "debit_result") or ""),
+        "debit_due": debit_due,
         "is_early_churn": is_early_churn,
         "is_resolved": is_resolved,
         "is_scoreable": is_scoreable,

@@ -55,6 +55,22 @@ class TestSchema(unittest.TestCase):
         self.assertFalse(r["is_resolved"])
         self.assertTrue(r["is_scoreable"])
 
+    def test_prevention_fields_normalized(self):
+        cmap = dict(COLUMN_MAP, account_daily="口座普段使い",
+                    debit_result="初回引落結果", debit_due="引落予定日")
+        r = schema.normalize_record(
+            raw(口座普段使い="いいえ", 初回引落結果="不着", 引落予定日="2026-09-01"),
+            cmap, date(2026, 7, 25))
+        self.assertEqual(r["account_daily"], "いいえ")
+        self.assertEqual(r["debit_result"], "不着")
+        self.assertEqual(r["debit_due"], date(2026, 9, 1))
+
+    def test_prevention_fields_absent_default(self):
+        r = schema.normalize_record(raw(), COLUMN_MAP, date(2026, 8, 1))
+        self.assertEqual(r["account_daily"], "")
+        self.assertEqual(r["debit_result"], "")
+        self.assertIsNone(r["debit_due"])
+
 
 if __name__ == "__main__":
     unittest.main()
