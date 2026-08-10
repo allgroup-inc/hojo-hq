@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>もらえた報告 | もらいわすれ堂</title>
+<meta name="description" content="給付金・手当を受け取れたら、ぜひ教えてください。あなたの「もらえた」が、次の誰かの「調べてみよう」につながります。お名前・住所・金額は不要です。">
+<link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--fg-primary:#D2694A;--fg-primary-deep:#B9502F;--fg-accent:#F2C14E;--fg-deep:#1F5C45;--fg-ink:#3B322B;--fg-bg:#FBF5EC;--fg-card:#FFFDF9;--fg-muted:#8B7C6E;--fg-line:#EEE1D0;--fg-sea:#6FAEA4;--fg-shadow:0 1px 2px rgba(0,0,0,.04)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:17px;line-height:1.9;color:var(--fg-ink);background:var(--fg-bg);-webkit-font-smoothing:antialiased}
+h1,h2{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
+h1{font-size:1.35rem;margin-bottom:6px;text-align:center}
+.note{font-size:.85rem;color:var(--fg-muted)}
+.lead{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:18px 20px;margin:16px 0;box-shadow:var(--fg-shadow);text-align:center}
+.lead .big{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.12rem;color:var(--fg-primary-deep)}
+.box{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:18px 20px;margin:14px 0;box-shadow:var(--fg-shadow)}
+label{display:block;font-weight:700;margin:14px 0 6px}
+label .opt{font-weight:400;font-size:.8rem;color:var(--fg-muted)}
+input[type=text],select,textarea{width:100%;padding:13px 14px;border:1.5px solid var(--fg-line);border-radius:12px;font-size:1rem;font-family:inherit;background:#fff;color:var(--fg-ink)}
+textarea{min-height:90px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--fg-sea)}
+.pii{background:#FDF2EC;border:1px solid #F0D5C5;border-radius:12px;padding:12px 14px;font-size:.85rem;color:#8a5a3d;margin-top:14px}
+.sendbtn{display:block;width:100%;margin:18px auto 0;padding:17px 24px;min-height:44px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border:none;border-radius:999px;font-size:1.1rem;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:var(--fg-shadow)}
+.sendbtn:active{background:var(--fg-primary-deep)}
+#fallback{display:none;margin-top:14px;background:#EFF5F0;border:1px solid #D5E5DA;border-radius:12px;padding:14px 16px;font-size:.9rem}
+#fallback textarea{margin-top:8px;background:#fff}
+#fallback a{display:inline-block;margin-top:10px;padding:11px 20px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:.95rem}
+.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
+.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-family:"Shippori Mincho",serif;font-weight:600;color:var(--fg-primary-deep);text-decoration:none;font-size:1.05rem}
+.siteheader .hlogo img{width:30px;height:30px}
+.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
+.disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
+@media(min-width:900px){.wrap{max-width:760px}}
+</style>
+</head>
+<body>
+<script src="../analytics-config.js"></script>
+<script src="../assets/fg-analytics.js"></script>
+<header class="siteheader">
+  <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂</a>
+  <nav>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+  </nav>
+</header>
+<div class="wrap">
+<p class="note"><a href="../index.html">もらいわすれ堂</a> › もらえた報告</p>
+<h1>受け取れたこと、教えてください</h1>
+<div class="lead">
+  <p class="big">おめでとうございます。</p>
+  <p>あなたの「もらえた」の一言が、<br>「うちも調べてみよう」という<strong>次の誰かの一歩</strong>になります。</p>
+</div>
+
+<div class="box">
+  <label for="seido">受け取れた制度の名前 <span class="opt">(うろ覚えでOK)</span></label>
+  <input type="text" id="seido" placeholder="例: こども医療費助成、児童手当 など">
+  <label for="area">お住まいの市町村 <span class="opt">(任意)</span></label>
+  <select id="area"><option value="">選択しない</option><option>那覇市</option><option>宜野湾市</option><option>石垣市</option><option>浦添市</option><option>名護市</option><option>糸満市</option><option>沖縄市</option><option>豊見城市</option><option>うるま市</option><option>宮古島市</option><option>南城市</option><option>国頭村</option><option>大宜味村</option><option>東村</option><option>今帰仁村</option><option>本部町</option><option>恩納村</option><option>宜野座村</option><option>金武町</option><option>伊江村</option><option>読谷村</option><option>嘉手納町</option><option>北谷町</option><option>北中城村</option><option>中城村</option><option>西原町</option><option>与那原町</option><option>南風原町</option><option>渡嘉敷村</option><option>座間味村</option><option>粟国村</option><option>渡名喜村</option><option>南大東村</option><option>北大東村</option><option>伊平屋村</option><option>伊是名村</option><option>久米島町</option><option>八重瀬町</option><option>多良間村</option><option>竹富町</option><option>与那国町</option></select>
+  <label for="koe">ひとこと <span class="opt">(任意・そのままの言葉で)</span></label>
+  <textarea id="koe" placeholder="例: 診断で知って申請したら、ほんとに振り込まれました!"></textarea>
+  <div class="pii">🔒 <strong>お名前・ご住所・金額は書かないでください。</strong>いただいた報告は、個人がわからない形(件数など)でのみ使わせていただきます。</div>
+  <button class="sendbtn" id="send">LINEで報告を送る</button>
+  <div id="fallback">
+    <strong>報告文をコピーしました。</strong><br>下のボタンでLINEを開き、もらいわすれ堂のトークに貼り付けて送ってください(まだ友だちでない方は、追加すると送れます)。
+    <textarea id="preview" readonly></textarea>
+    <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener">LINEを開く</a>
+  </div>
+</div>
+
+<div class="disclaimer">いただいた報告は、検証部が公式制度と照合できたもののみを件数として計上します。受給の可否・金額の最終判断は各窓口が行うものであり、当サイトが保証するものではありません。<br>運営: 株式会社フクギイロ</div>
+<p style="margin-top:16px"><a href="../index.html">もらいわすれ堂 トップへ</a></p>
+</div>
+<script>
+document.getElementById('send').addEventListener('click', function(){
+  var seido=(document.getElementById('seido').value||'').trim();
+  var area=document.getElementById('area').value;
+  var koe=(document.getElementById('koe').value||'').trim();
+  var lines=['【もらえた報告】'];
+  lines.push('制度: '+(seido||'(名前はうろ覚えです)'));
+  if(area) lines.push('市町村: '+area);
+  if(koe) lines.push('ひとこと: '+koe);
+  var text=lines.join('\n');
+  if(window.fgTrack) fgTrack('jukyu_report_click');
+  var oa=window.FG_LINE_OA_ID;
+  if(oa){
+    location.href='https://line.me/R/oaMessage/%40'+encodeURIComponent(oa.replace(/^@/,''))+'/?'+encodeURIComponent(text);
+    return;
+  }
+  var fb=document.getElementById('fallback');
+  document.getElementById('preview').value=text;
+  fb.style.display='block';
+  if(navigator.clipboard) navigator.clipboard.writeText(text).catch(function(){});
+  fb.scrollIntoView({behavior:'smooth',block:'center'});
+});
+</script>
+</body>
+</html>

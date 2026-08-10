@@ -365,7 +365,7 @@ def kit_page(it, updated):
 <div class="after">
   <p>申請してからが本番です。振り込まれるまで、いっしょに見届けましょう。</p>
   <p class="note" style="margin-top:6px">・結果の通知や振込の時期は、④のメモで管理できます。<br>・「振り込まれた」まで確認できたら、下から教えてください。次の県民の「もらい忘れ」を防ぐ力になります。</p>
-  <a class="linebtn" style="background:var(--fg-primary)" href="https://allgroup-inc.github.io/hojo-hq/go/fg-jukyu/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('jukyu_report_click')">受け取れたことを報告する(匿名・無料)</a>
+  <a class="linebtn" style="background:var(--fg-primary)" href="../../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit')">受け取れたことを報告する(匿名・無料)</a>
 </div>
 <div class="after" style="background:#EAF7EE;border-color:#B7E4C7;text-align:center;color:#0F5138">
   締切や新しい制度は、LINEでそっとお知らせします(締切の約1か月前・無料・名前の入力は不要)
