@@ -22,7 +22,7 @@ Googleスプレッドシートに保持し、このディレクトリにはGAS(G
 4. `glow-ma/.clasp.json.example` を `glow-ma/.clasp.json` としてコピーし、
    `scriptId` を実際のスクリプトIDに書き換える(このファイルはコミットしない)
 5. `cd glow-ma && clasp push` でコードをApps Scriptに反映する
-6. Apps Scriptエディタで `ensureLedgerTabs` を一度だけ手動実行し、8タブを作成する
+6. Apps Scriptエディタで `ensureLedgerTabs` を一度だけ手動実行し、10タブを作成する
 
 ## 7000件リストのインポート
 
@@ -555,7 +555,8 @@ Phase 18aと同じ認証(小柳・福田・嶺井の3名)をそのまま使う�
 ## 次のフェーズ
 
 Phase 1〜16、およびPhase 18a(管理画面Web App: 企業一覧・詳細の閲覧)が完了しました。
-書き込み系(関係メモ編集・対応履歴ログ入力)・スタッフ共有(Slack DM)・手紙URL
+紹介パートナー開拓状況ビュー(読み取り専用)も完了し、管理画面から企業一覧と切り替えて
+閲覧できます。書き込み系(関係メモ編集・対応履歴ログ入力)・スタッフ共有(Slack DM)・手紙URL
 モーダル・KPIカードは、それぞれPhase 18b・18c・18dとして計画中(区切り・順序は暫定案。
 `docs/superpowers/specs/2026-08-09-glow-ma-admin-webapp-phase18a-design.md`参照)。
 今後の改善点は各セクションの「現時点の制約」、および「本番投入前チェックリスト」を参照。
