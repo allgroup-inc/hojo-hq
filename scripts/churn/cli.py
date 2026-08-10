@@ -25,6 +25,7 @@ from .console import generate as generate_console
 from .triage import classify, triage, render_html as render_today_html
 from .cohort import cohort_rows, overall_rate, render_html as render_cohort_html
 from .snapshot import snapshot as do_snapshot
+from .preflight import preflight_report
 from .config import CAPACITY_PER_DAY
 
 
@@ -201,6 +202,21 @@ def cmd_snapshot(csv_path, interactions, month, out_dir, force):
     return do_snapshot(csv_path, interactions, month, out_dir, force)
 
 
+def cmd_preflight(csv_path, column_map_path, as_of):
+    rep = preflight_report(csv_path, load_column_map(column_map_path), _as_of(as_of))
+    mark = "✅可" if rep["ok"] else "🛑不可"
+    print(f"[preflight] {mark}  総{rep['n_total']}件 未紐付{rep['n_unlinked']} "
+          f"成熟{rep['n_resolved']} 継続中{rep['n_scoreable']}")
+    if rep["missing_keys"]:
+        print(f"  ・column_map不足キー: {rep['missing_keys']}")
+    if rep["missing_columns"]:
+        print(f"  ・CSVに無い対応列: {rep['missing_columns']}")
+    bad = {k: v for k, v in rep["date_parse_fails"].items() if v}
+    if bad:
+        print(f"  ・日付パス不能: {bad}")
+    return rep
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="churn", description="早期解約リスク保全")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -280,6 +296,11 @@ def main(argv=None):
     sp_today.add_argument("--as-of", required=True)
     sp_today.add_argument("--capacity", type=int, default=CAPACITY_PER_DAY)
 
+    sp_pre = sub.add_parser("preflight")
+    sp_pre.add_argument("--csv", required=True)
+    sp_pre.add_argument("--column-map", required=True)
+    sp_pre.add_argument("--as-of", required=True)
+
     sp_snap = sub.add_parser("snapshot")
     sp_snap.add_argument("--csv", required=True)
     sp_snap.add_argument("--interactions")
@@ -316,6 +337,8 @@ def main(argv=None):
         cmd_today(args.csv, args.column_map, args.model, args.out, args.as_of, args.capacity)
     elif args.cmd == "snapshot":
         cmd_snapshot(args.csv, args.interactions, args.month, args.out_dir, args.force)
+    elif args.cmd == "preflight":
+        cmd_preflight(args.csv, args.column_map, args.as_of)
     return 0
 
 

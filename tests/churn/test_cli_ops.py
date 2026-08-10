@@ -48,6 +48,12 @@ class TestCliOps(unittest.TestCase):
         self.assertTrue(os.path.exists(out))
         self.assertIn("コホート", self._read(out))
 
+    def test_preflight_runs(self):
+        from scripts.churn.cli import cmd_preflight
+        rep = cmd_preflight(self.csv, self.cmap, "2026-08-01")
+        self.assertTrue(rep["ok"])
+        self.assertEqual(rep["n_total"], 8)
+
     def test_snapshot_creates_dated_dir(self):
         outdir = os.path.join(self.d, "snap")
         main(["snapshot", "--csv", self.csv, "--month", "2026-08", "--out-dir", outdir])
