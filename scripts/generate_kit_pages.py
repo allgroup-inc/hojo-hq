@@ -19,7 +19,11 @@ site/fukugiiro/kit/<id>/index.html に生成する。fetch後に毎回再生成�
 import json
 import os
 import shutil
+import sys
 import urllib.parse
+
+sys.path.insert(0, os.path.dirname(__file__))
+from fg_seo import MUNI_SLUG, breadcrumb_jsonld, canonical_tag, faq_jsonld, ogp_tags
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA = os.path.join(BASE, "data", "fukugiiro", "seido.json")
@@ -140,8 +144,11 @@ def kit_jsonld(it):
             + "\n</script>")
 
 
-def page(title, desc, body, depth=2, head_extra=""):
+def page(title, desc, body, depth=2, head_extra="", canon_path=None):
     rel = "../" * depth
+    seo = ""
+    if canon_path is not None:
+        seo = canonical_tag(canon_path) + "\n" + ogp_tags(title, desc, canon_path) + "\n"
     return f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -149,7 +156,7 @@ def page(title, desc, body, depth=2, head_extra=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
-<link rel="icon" type="image/svg+xml" href="{rel}assets/icon.svg">
+{seo}<link rel="icon" type="image/svg+xml" href="{rel}assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -283,6 +290,12 @@ def kit_page(it, updated):
         f"●気づいた点（古い・違う箇所）：\n●公式ページURL：{it['source_url']}\n"
     )
     report_link = f"mailto:info@fukugiiro.com?subject={_sub}&body={_bd}"
+    # kit→area 逆リンク(内部リンクの一方通行解消・2026-08-10 SEO裁定)
+    area = it.get("area", "全国")
+    if area in MUNI_SLUG:
+        area_link = f'<a href="../../area/{MUNI_SLUG[area]}/">{esc(area)}のほかの給付金・手当</a> ・ '
+    else:
+        area_link = '<a href="../../area/">お住まいの市町村の給付金・手当</a> ・ '
     body = f"""
 <p class="note no-print"><a href="../../index.html">もらいわすれ堂</a> › 申請準備シート</p>
 <h1>{name} 申請ナビ{badge}</h1>
@@ -378,12 +391,31 @@ def kit_page(it, updated):
   <a href="{report_link}" onclick="if(window.fgTrack)fgTrack('teisei_mail')" style="display:inline-block;margin-top:8px;color:var(--fg-primary);font-weight:700">この制度の情報の間違いを知らせる</a>
 </div>
 <div class="disclaimer">このシートは公式情報に基づく「準備のご案内」です。持ち物は一般的な例で、市町村により異なります。受給できるかどうかの最終判断は各窓口で行われます。申請書の作成代行・代筆は行っていません(ご本人が記入します)。専門家のサポートが必要な場合は、提携の専門家(社会保険労務士・行政書士など)をご紹介します。<br>最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)/ 出典: <a href="{src}" rel="noopener">公式ページ</a></div>
-<p style="margin-top:16px" class="no-print"><a href="../index.html">申請ナビ一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../teisei/">情報の訂正</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
+<p style="margin-top:16px" class="no-print">{area_link}<a href="../index.html">申請ナビ一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../teisei/">情報の訂正</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
 """
     body += KIT_JS.replace("__ID__", it["id"])
-    title = f"{it['name']} 申請ナビ(印刷用)| もらいわすれ堂"
-    desc = f"{it['name']}の申請を最後までやり切るナビ。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで。印刷してそのまま窓口へ。"
-    return page(title, desc, body, head_extra=kit_jsonld(it))
+    # 制度名が地域名で始まる場合は前置しない(「北谷町 北谷町 こども医療費助成」の二重表記防止)
+    if area in MUNI_SLUG and not it["name"].startswith(area):
+        title = f"{area} {it['name']}の申請方法・持ち物・窓口|もらいわすれ堂"
+    elif area == "沖縄県" and not it["name"].startswith("沖縄"):
+        title = f"沖縄県 {it['name']}の申請方法・持ち物・窓口|もらいわすれ堂"
+    elif area in MUNI_SLUG or area == "沖縄県":
+        title = f"{it['name']}の申請方法・持ち物・窓口|もらいわすれ堂"
+    else:
+        title = f"{it['name']}の申請方法・持ち物・窓口(沖縄)|もらいわすれ堂"
+    desc = (f"{it['name']}の申請に必要な持ち物リスト・窓口での聞き方・電話で確認する3つのこと。"
+            "印刷してそのまま窓口に持っていける無料の申請準備シート(代行はせず、準備を伴走します)。")
+    faq = faq_jsonld([
+        (f"{it['name']}の対象になるのはどんな人ですか?",
+         f"{it.get('target_household','')}(最終的に対象かどうかは、公式ページと窓口で確認できます)"),
+        (f"{it['name']}はどこに申請しますか?", it.get("how_to_apply", "")),
+        ("何を持っていけばいいですか?",
+         "よくある例は、本人確認書類・マイナンバーがわかるもの・振込先の口座がわかるもの・印鑑です。"
+         "市町村やご家庭の状況で変わるため、行く前に窓口へ電話で確認するのが確実です。"),
+    ])
+    crumbs = breadcrumb_jsonld([("もらいわすれ堂", ""), ("申請準備シート", "kit/"), (it["name"], None)])
+    return page(title, desc, body, head_extra=kit_jsonld(it) + "\n" + faq + "\n" + crumbs,
+                canon_path=f"kit/{it['id']}/")
 
 
 def index_page(items, updated):
@@ -404,7 +436,12 @@ def index_page(items, updated):
 <div class="disclaimer">最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
 <p style="margin-top:16px"><a href="../index.html">もらいわすれ堂 トップ</a></p>
 """
-    return page("申請ナビ一覧 | もらいわすれ堂", "沖縄の給付金・手当の申請ナビ一覧。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで。印刷してそのまま窓口へ。", body, depth=1)
+    return page(
+        "沖縄の給付金・手当の申請準備シート一覧(持ち物・窓口・電話の聞き方)|もらいわすれ堂",
+        "沖縄の給付金・手当の申請準備シート一覧。制度ごとに持ち物リスト・窓口での聞き方・電話で確認する3つのことをまとめ、印刷してそのまま窓口へ持っていけます(無料)。",
+        body, depth=1,
+        head_extra=breadcrumb_jsonld([("もらいわすれ堂", ""), ("申請準備シート", None)]),
+        canon_path="kit/")
 
 
 def main():
