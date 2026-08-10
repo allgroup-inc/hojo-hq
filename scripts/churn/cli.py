@@ -180,7 +180,8 @@ def cmd_cohort(csv_path, column_map_path, out_path, as_of):
     rows = cohort_rows(records, as_of_d)
     ov = overall_rate(rows)
     render_cohort_html(rows, ov, out_path)
-    print(f"[cohort] 全体早期解約率(成熟分) {ov['rate']*100:.1f}% 目標3% "
+    shown = "算出不能" if ov["rate"] is None else f"{ov['rate']*100:.1f}%"
+    print(f"[cohort] 全体早期解約率(成熟分) {shown} 目標3% "
           f"({ov['churn']}/{ov['resolved']}) → {out_path}")
     return ov
 

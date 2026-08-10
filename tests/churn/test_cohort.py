@@ -41,6 +41,18 @@ class TestCohort(unittest.TestCase):
         row = {r["ym"]: r for r in cohort_rows(recs, AS_OF)}["2025-03"]
         self.assertTrue(row["reference"])   # 5 < MIN_RELIABLE_N
 
+    def test_observing_is_calendar_based_not_churn_ratio(self):
+        # 直近コホートで解約が多く resolved/total が高くても、暦上6ヶ月未経過なら観測中
+        recs = ([rec(date(2026, 6, 5), True, 1) for _ in range(8)]
+                + [rec(date(2026, 6, 6), False, None) for _ in range(2)])
+        row = {r["ym"]: r for r in cohort_rows(recs, AS_OF)}["2026-06"]
+        self.assertTrue(row["observing"])   # maturity=0.8でも暦で未成熟
+
+    def test_overall_rate_none_when_no_mature(self):
+        recs = [rec(date(2026, 7, 5), True, 1) for _ in range(5)]  # 暦上 観測中のみ
+        o = overall_rate(cohort_rows(recs, AS_OF))
+        self.assertIsNone(o["rate"])        # 算出不能（0%と断定しない）
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -62,6 +62,20 @@ class TestLearning(unittest.TestCase):
         self.assertTrue(rows[0]["reference"])  # n=2 < MIN_RELIABLE_N
 
 
+class TestEmptyAction(unittest.TestCase):
+    def test_empty_action_not_counted_as_contacted(self):
+        recs = [R("G", date(2025, 1, 1), 0)]
+        contacts = [K("G", date(2025, 1, 1), date(2025, 2, 1), "")]  # 対応内容が空
+        e = effect(recs, contacts, MB)
+        self.assertEqual(e["n_c"], 0)
+        self.assertEqual(e["n_n"], 1)
+
+    def test_empty_action_excluded_from_learning(self):
+        recs = [R("G", date(2025, 1, 1), 0)]
+        contacts = [K("G", date(2025, 1, 1), date(2025, 2, 1), "")]
+        self.assertEqual(learning(recs, contacts, MB), [])
+
+
 class TestContactLog(unittest.TestCase):
     def test_load_parses_dates(self):
         cmap = {"customer_id": "顧客ID", "apply_date": "契約日", "contact_date": "接触日",

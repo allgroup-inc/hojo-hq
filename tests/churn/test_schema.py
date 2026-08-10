@@ -65,6 +65,12 @@ class TestSchema(unittest.TestCase):
         self.assertEqual(r["debit_result"], "不着")
         self.assertEqual(r["debit_due"], date(2026, 9, 1))
 
+    def test_debit_due_tolerant_to_freeform(self):
+        # 実エクセルの引落予定日が自由記述でも全読込をクラッシュさせない
+        cmap = dict(COLUMN_MAP, debit_due="引落予定日")
+        r = schema.normalize_record(raw(引落予定日="毎月27日"), cmap, date(2026, 8, 1))
+        self.assertIsNone(r["debit_due"])
+
     def test_prevention_fields_absent_default(self):
         r = schema.normalize_record(raw(), COLUMN_MAP, date(2026, 8, 1))
         self.assertEqual(r["account_daily"], "")

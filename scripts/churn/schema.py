@@ -55,7 +55,11 @@ def _get(raw, column_map, key):
 def normalize_record(raw, column_map, as_of):
     apply_date = parse_date(_get(raw, column_map, "apply_date"))
     cancel_date = parse_date(_get(raw, column_map, "cancel_date"))
-    debit_due = parse_date(_get(raw, column_map, "debit_due"))
+    try:
+        # 引落予定日は自由記述（「毎月27日」等）があり得る。解釈不能はNoneに落とし全読込を止めない
+        debit_due = parse_date(_get(raw, column_map, "debit_due"))
+    except ValueError:
+        debit_due = None
     age_raw = _get(raw, column_map, "age")
     age = int(str(age_raw).strip()) if age_raw and str(age_raw).strip() else None
     amount = parse_amount(_get(raw, column_map, "amount"))
