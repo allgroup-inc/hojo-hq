@@ -376,3 +376,124 @@ strategies.forEach(strat => {
 
   stratY += 1.35;
 });
+
+// Slide 8: Entrepreneur Psychology - Contradiction & Patterns
+slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+addTitle(slide, '経営者心理メカニズム：なぜ後継者不安なのに成約しないか');
+
+// Three layers
+slide.addShape(pres.ShapeType.rect, {
+  x: 0.5, y: 1.3, w: 9, h: 0.9,
+  fill: { color: colors.lightGray }, line: { color: colors.orange, width: 2 }
+});
+
+slide.addText('Layer 1: 矛盾の説明', {
+  x: 0.7, y: 1.4, w: 2, h: 0.2,
+  fontSize: 13, bold: true, color: colors.orange, fontFace: 'Arial'
+});
+
+slide.addText('後継者不安65-70% ←→ 成約率2-3%\n理由：「不安だが、今は大丈夫」という現状維持バイアス（心理学用語：喪失回避性、家族執着）', {
+  x: 3, y: 1.4, w: 6.3, h: 0.7,
+  fontSize: 11, color: colors.textDark, fontFace: 'Arial'
+});
+
+// Patterns
+slide.addShape(pres.ShapeType.rect, {
+  x: 0.5, y: 2.4, w: 9, h: 0.3,
+  fill: { color: colors.navy }, line: { color: colors.navy, width: 0 }
+});
+
+slide.addText('Layer 2: 沖縄経営者に共通する3つのパターン', {
+  x: 0.7, y: 2.45, w: 8.6, h: 0.2,
+  fontSize: 13, bold: true, color: colors.white, fontFace: 'Arial'
+});
+
+const patterns = [
+  {
+    name: '親族重視型（40-50%）',
+    desc: '「事業は子ども・親族へ」という信念が強い。親族に相談→反対される→立ち消え。'
+  },
+  {
+    name: '保守型（30-40%）',
+    desc: '変化回避、既存方法の継続を好む。「今までうまくいった」に依存。M&A検討も先延ばし。'
+  },
+  {
+    name: '自己実現型（10-20%）',
+    desc: '事業への執着が強く、人生＝経営者。引き継ぎ＝喪失感。「まだやれる」という過信。'
+  }
+];
+
+let patY = 2.85;
+patterns.forEach(pat => {
+  slide.addText(pat.name, {
+    x: 0.7, y: patY, w: 8.6, h: 0.2,
+    fontSize: 11, bold: true, color: colors.textDark, fontFace: 'Arial'
+  });
+
+  slide.addText(pat.desc, {
+    x: 0.7, y: patY + 0.25, w: 8.6, h: 0.45,
+    fontSize: 10, color: colors.textDark, fontFace: 'Arial'
+  });
+
+  patY += 0.8;
+});
+
+// Slide 9: Decision Triggers
+slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+addTitle(slide, 'M&A決断のトリガー：業界別');
+
+const triggers = [
+  {
+    industry: '医療・介護',
+    trigger: 'トリガー：患者が減少 / 医師・看護師が逃げた / 負債が増えた',
+    psychology: '心理：経営環境の急変 = 現状維持不可',
+    timing: 'タイミング：危機が現在進行形→決断が早い'
+  },
+  {
+    industry: '建設業',
+    trigger: 'トリガー：大型工事が急減 / 下請けから外された / 若い職人が集まらない',
+    psychology: '心理：事業基盤の揺らぎ→統合で大型案件対応',
+    timing: 'タイミング：景気サイクルの悪化時期'
+  },
+  {
+    industry: '農業・畜産',
+    trigger: 'トリガー：体力の限界 / 跡継ぎが明確に拒否 / 借金が増えた',
+    psychology: '心理：加齢とともに「続けられない」という現実認識',
+    timing: 'タイミング：経営者が65歳を超えた時期'
+  }
+];
+
+let trigY = 1.3;
+triggers.forEach(trig => {
+  slide.addShape(pres.ShapeType.roundRect, {
+    x: 0.5, y: trigY, w: 9, h: 1.2,
+    fill: { color: colors.lightGray }, line: { color: colors.navy, width: 1 }
+  });
+
+  slide.addText(trig.industry, {
+    x: 0.7, y: trigY + 0.08, w: 8.6, h: 0.2,
+    fontSize: 12, bold: true, color: colors.navy, fontFace: 'Arial'
+  });
+
+  slide.addText(`${trig.trigger}\n${trig.psychology}\n${trig.timing}`, {
+    x: 0.7, y: trigY + 0.32, w: 8.6, h: 0.8,
+    fontSize: 9.5, color: colors.textDark, fontFace: 'Arial'
+  });
+
+  trigY += 1.35;
+});
+
+// Implication
+slide.addShape(pres.ShapeType.rect, {
+  x: 0.5, y: 4.75, w: 9, h: 0.7,
+  fill: { color: colors.lightGray }, line: { color: colors.navy, width: 1 }
+});
+
+slide.addText('→ GLOWの戦略：トリガー発動前の準備段階（信頼構築3-6ヶ月）で接触。トリガー発動時に即座に対応できる提案を用意', {
+  x: 0.7, y: 4.85, w: 8.6, h: 0.5,
+  fontSize: 11, bold: true, color: colors.navy, fontFace: 'Arial'
+});
