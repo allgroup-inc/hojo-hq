@@ -50,7 +50,17 @@
     "color:rgba(255,255,255,0.7);cursor:pointer;font:inherit;border-bottom:2px solid transparent}",
     "#viewSwitcher button.active{color:#fff;border-bottom-color:#f88800;font-weight:600}",
     ".viewPane{display:none}",
-    ".viewPane.active{display:block}"
+    ".viewPane.active{display:block}",
+    ".field .label{display:flex;align-items:center;justify-content:space-between;gap:0.5rem}",
+    ".btn-small{padding:0.25rem 0.6rem;border:1px solid #d8dee1;border-radius:0.3rem;",
+    "background:#fff;cursor:pointer;font:inherit;font-size:0.76rem;text-transform:none;letter-spacing:normal}",
+    ".btn-small:disabled{opacity:0.5;cursor:default}",
+    ".btn-primary{background:#00335c;color:#fff;border-color:#00335c}",
+    "#memoTextarea{width:100%;min-height:6rem;font:inherit;font-size:0.92rem;padding:0.5rem;",
+    "border:1px solid #d8dee1;border-radius:0.35rem;box-sizing:border-box;margin-top:0.3rem}",
+    "#memoEditControls{margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem}",
+    "#memoStatus{font-size:0.78rem;color:#4a5a66}",
+    "#memoStatus.error{color:#b3261e}"
   ].join("");
 
   var HEADER_AND_FILTERS = [
@@ -178,12 +188,13 @@
     "['電話番号', c['電話番号']], ['窓口担当者名', c['窓口担当者名']], ['携帯番号', c['携帯番号']],",
     "['ランク', c['ランク']], ['初期スコア', c['初期スコア']], ['反応スコア', c['反応スコア']],",
     "['総合スコア', c['総合スコア']], ['現在ステージ', c['現在ステージ']],",
-    "['後継者状況', c['後継者状況']], ['関係メモ', c['関係メモ']]",
+    "['後継者状況', c['後継者状況']]",
     "];",
     "document.getElementById('paneOverview').innerHTML = fields.map(function(f){",
     "return '<div class=\"field\"><div class=\"label\">' + escapeHtml(f[0]) + '</div>' +",
     "'<div class=\"value\">' + (escapeHtml(f[1]) || '—') + '</div></div>';",
-    "}).join('');",
+    "}).join('') + renderMemoField(c['関係メモ']);",
+    "attachMemoHandlers(c['企業ID'], c['関係メモ']);",
     "var history = detail.history || [];",
     "document.getElementById('paneHistory').innerHTML = history.length === 0",
     "? '<div class=\"empty\">対応履歴がありません</div>'",
@@ -192,6 +203,19 @@
     "'<div class=\"value\">' + escapeHtml(h['内容メモ']) + '</div></div>';",
     "}).join('');",
     "}",
+
+    "function renderMemoField(memoValue){",
+    "return '<div class=\"field\" id=\"memoField\"><div class=\"label\">関係メモ' +",
+    "'<button class=\"btn-small\" id=\"memoEditBtn\" type=\"button\">編集</button></div>' +",
+    "'<div class=\"value\" id=\"memoValue\">' + (escapeHtml(memoValue) || '—') + '</div>' +",
+    "'<textarea id=\"memoTextarea\" style=\"display:none\"></textarea>' +",
+    "'<div id=\"memoEditControls\" style=\"display:none\">' +",
+    "'<button class=\"btn-small btn-primary\" id=\"memoSaveBtn\" type=\"button\">保存</button>' +",
+    "'<button class=\"btn-small\" id=\"memoCancelBtn\" type=\"button\">キャンセル</button>' +",
+    "'<span id=\"memoStatus\"></span></div></div>';",
+    "}",
+
+    "function attachMemoHandlers(companyId, originalMemo){}",
 
     "function closeDrawer(){",
     "document.getElementById('drawer').classList.remove('open');",

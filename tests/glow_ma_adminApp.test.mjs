@@ -27,11 +27,24 @@ test("buildAdminAppHtml: google.script.runでgetCompanyList・getCompanyDetail�
   assert.ok(html.indexOf(".getFilterOptions(") !== -1);
 });
 
-test("buildAdminAppHtml: 書き込み系のgoogle.script.run呼び出しを一切含まない(読み取り専用の担保)", () => {
+test("buildAdminAppHtml: google.script.runでupdateCompanyMemoを呼ぶ(Phase 18b: 関係メモ編集)", () => {
   const html = adminApp.buildAdminAppHtml();
-  ["shareCompanyWithStaff", "saveRelationMemo", "appendInteractionLog"].forEach((forbidden) => {
-    assert.equal(html.indexOf(forbidden), -1, forbidden + " への呼び出しが含まれてはいけない(Phase 18b以降の機能)");
+  assert.ok(html.indexOf(".updateCompanyMemo(") !== -1);
+});
+
+test("buildAdminAppHtml: 関係メモ編集以外の書き込み系google.script.run呼び出しを含まない(Phase 18b範囲の担保)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["shareCompanyWithStaff", "appendInteractionLog", "addPartner", "logPartnerInteraction", "recordReferral"].forEach((forbidden) => {
+    assert.equal(html.indexOf(forbidden), -1, forbidden + " への呼び出しが含まれてはいけない(Phase 18b範囲外の機能)");
   });
+});
+
+test("buildAdminAppHtml: 企業詳細ドロワーに関係メモ編集用の要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["memoEditBtn", "memoValue", "memoTextarea", "memoEditControls", "memoSaveBtn", "memoCancelBtn", "memoStatus"]
+    .forEach((id) => {
+      assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+    });
 });
 
 test("buildAdminAppHtml: 画面切り替えスイッチャー・パートナー一覧・パートナードロワーの主要要素を含む", () => {
