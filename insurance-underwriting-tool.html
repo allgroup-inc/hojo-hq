@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>保険引き受け目安検索 - なないろ生命 × FWD生命</title>
+  <style>
+    :root {
+      --navy: #00335C;
+      --orange: #F88800;
+      --fwd-orange: #FF8C00;
+      --light: #FFFBF4;
+      --text: #333;
+      --success: #2e7d32;
+      --warning: #e65100;
+      --danger: #c62828;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, Segoe UI, "Noto Sans JP", sans-serif;
+      background: linear-gradient(135deg, var(--light) 0%, #f5f0ea 100%);
+      color: var(--text);
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--orange) 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      opacity: 0.95;
+      margin-top: 10px;
+    }
+
+    .insurers-badge {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: rgba(255,255,255,0.2);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .main {
+      padding: 40px;
+    }
+
+    .search-section {
+      margin-bottom: 40px;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 14px 16px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      font-family: inherit;
+      transition: all 0.3s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--navy);
+      box-shadow: 0 0 0 4px rgba(0,51,92,0.1);
+    }
+
+    button {
+      padding: 14px 28px;
+      background: var(--navy);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.3s;
+      min-width: 100px;
+    }
+
+    button:hover {
+      background: #002347;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,51,92,0.2);
+    }
+
+    button.secondary {
+      background: #999;
+      min-width: 80px;
+    }
+
+    button.secondary:hover {
+      background: #777;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .tab-btn {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #666;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      color: var(--navy);
+      border-bottom-color: var(--navy);
+    }
+
+    .results {
+      display: none;
+      margin-top: 30px;
+    }
+
+    .results.active {
+      display: block;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .results-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .results-count {
+      background: var(--orange);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background: var(--navy);
+      color: white;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    tr:hover {
+      background: #f9f9f9;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status.ok {
+      background: #e8f5e9;
+      color: var(--success);
+    }
+
+    .status.conditional {
+      background: #fff3e0;
+      color: var(--warning);
+    }
+
+    .status.ng {
+      background: #ffebee;
+      color: var(--danger);
+    }
+
+    .status.unknown {
+      background: #f5f5f5;
+      color: #616161;
+    }
+
+    .company-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .company-naneiro {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .company-fwd {
+      background: #ffe0b2;
+      color: #e65100;
+    }
+
+    .confidence {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .no-results {
+      text-align: center;
+      color: #999;
+      padding: 60px 20px;
+    }
+
+    .no-results-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    .disclaimer {
+      background: #fff3cd;
+      border-left: 4px solid var(--orange);
+      padding: 15px;
+      margin-top: 30px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #856404;
+      line-height: 1.6;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    .action-btn {
+      padding: 10px 16px;
+      font-size: 13px;
+      background: #f0f0f0;
+      color: var(--text);
+      border: 1px solid #ddd;
+    }
+
+    .action-btn:hover {
+      background: #e8e8e8;
+    }
+
+    @media (max-width: 768px) {
+      .container { border-radius: 8px; }
+      .main { padding: 20px; }
+      header { padding: 25px 15px; }
+      h1 { font-size: 22px; }
+      table { font-size: 12px; }
+      th, td { padding: 10px 8px; }
+      .search-box { flex-direction: column; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🏥 保険引き受け目安検索</h1>
+      <p class="subtitle">患者の病名から、保険会社ごとの引き受け見込みを検索</p>
+      <div class="insurers-badge">
+        <span class="badge">なないろ生命</span>
+        <span class="badge">FWD生命</span>
+      </div>
+    </header>
+
+    <div class="main">
+      <div class="search-section">
+        <div class="search-box">
+          <input
+            type="text"
+            id="diseaseInput"
+            placeholder="病名を入力（例：がん、糖尿病、心筋梗塞）"
+            autocomplete="off"
+          >
+          <button onclick="search()">🔍 検索</button>
+          <button class="secondary" onclick="clearSearch()">✕ クリア</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('all')">すべて</button>
+        <button class="tab-btn" onclick="switchTab('naneiro')">なないろ生命</button>
+        <button class="tab-btn" onclick="switchTab('fwd')">FWD生命</button>
+      </div>
+
+      <div id="results-all" class="results active">
+        <div class="results-header">
+          <span class="results-title">検索結果（全社）</span>
+          <span class="results-count" id="count-all">0 件</span>
+        </div>
+        <table id="resultTable-all">
+          <thead>
+            <tr>
+              <th>保険会社</th>
+              <th>引き受け</th>
+              <th>条件・詳細</th>
+              <th>信度</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody-all"></tbody>
+        </table>
+      </div>
+
+      <div id="results-naneiro" class="results">
+        <div class="results-header">
+          <span class="results-title">なないろ生命</span>
+          <span class="results-count" id="count-naneiro">0 件</span>
+        </div>
+        <table id="resultTable-naneiro">
+          <thead>
+            <tr>
+              <th>病名</th>
+              <th>対応商品</th>
+              <th>詳細</th>
+              <th>信度</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody-naneiro"></tbody>
+        </table>
+      </div>
+
+      <div id="results-fwd" class="results">
+        <div class="results-header">
+          <span class="results-title">FWD生命</span>
+          <span class="results-count" id="count-fwd">0 件</span>
+        </div>
+        <table id="resultTable-fwd">
+          <thead>
+            <tr>
+              <th>病名</th>
+              <th>引き受け判定</th>
+              <th>複数傷病対応</th>
+              <th>信度</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody-fwd"></tbody>
+        </table>
+      </div>
+
+      <div id="noResults" class="no-results" style="display:none;">
+        <div class="no-results-icon">🔍</div>
+        <p><strong>該当する病名が見つかりませんでした</strong></p>
+        <p style="font-size:13px; margin-top:10px; color:#999;">別の病名をお試しください</p>
+      </div>
+
+      <div class="actions" id="actions" style="display:none;">
+        <button class="action-btn" onclick="downloadCSV()">📥 結果をCSV</button>
+      </div>
+
+      <div class="disclaimer">
+        <strong>⚠️ 重要な注意事項</strong><br>
+        本検索結果は参考情報です。引き受け判定ではありません。最終判定は各保険会社の引き受け審査部にお問い合わせください。複数傷病がある場合の判定は保険会社により異なります。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // なないろ生命のデータ
+    const naneiro_data = {
+      company: "なないろ生命",
+      version: "2026年4月版",
+      products: [
+        { name: "がん特約", diseases: ["がん", "悪性新生物", "肺がん", "乳がん", "胃がん", "大腸がん"] },
+        { name: "入院一時金特約", diseases: ["入院", "手術"] },
+        { name: "先進医療・患者申し出療養特約", diseases: ["先進医療", "患者申し出療養"] },
+        { name: "3大疾病保障特約", diseases: ["がん", "心筋梗塞", "脳卒中", "心疾患", "脳出血"] },
+        { name: "女性医療特約", diseases: ["乳がん", "子宮がん", "女性疾患", "卵巣"] },
+      ]
+    };
+
+    // FWD生命のデータ
+    const fwd_data = {
+      company: "FWD生命",
+      version: "2026年6月版（複数傷病対応）",
+      diseases: [
+        { name: "がん", judgement: "条件付き", condition: "診断後3年以上", multiple: "対応" },
+        { name: "糖尿病", judgement: "引き受け可", condition: "HbA1c値による判定", multiple: "対応" },
+        { name: "高血圧症", judgement: "条件付き", condition: "医学的管理中", multiple: "対応" },
+        { name: "心筋梗塞", judgement: "条件付き", condition: "発症後1年以上", multiple: "対応" },
+        { name: "脳卒中", judgement: "条件付き", condition: "発症後1年以上", multiple: "対応" },
+        { name: "心疾患", judgement: "要確認", condition: "詳細確認が必要", multiple: "対応" },
+        { name: "肺がん", judgement: "条件付き", condition: "診断後3年以上", multiple: "対応" },
+        { name: "乳がん", judgement: "条件付き", condition: "診断後3年以上", multiple: "対応" },
+        { name: "胃がん", judgement: "条件付き", condition: "診断後3年以上", multiple: "対応" },
+        { name: "肝臓がん", judgement: "条件付き", condition: "診断後3年以上", multiple: "対応" },
+      ]
+    };
+
+    let currentTab = 'all';
+
+    function search() {
+      const input = document.getElementById('diseaseInput').value.trim();
+      if (!input) {
+        alert('病名を入力してください');
+        return;
+      }
+
+      const naneiro_results = searchNaneiro(input);
+      const fwd_results = searchFWD(input);
+
+      displayResults(naneiro_results, fwd_results, input);
+    }
+
+    function searchNaneiro(query) {
+      const results = [];
+      const q = query.toLowerCase();
+
+      for (const product of naneiro_data.products) {
+        for (const disease of product.diseases) {
+          const score = calculateScore(q, disease);
+          if (score > 30) {
+            results.push({
+              disease: disease,
+              product: product.name,
+              score: score
+            });
+          }
+        }
+      }
+
+      return results.filter((r, i, arr) => arr.findIndex(x => x.disease === r.disease && x.product === r.product) === i)
+        .sort((a, b) => b.score - a.score);
+    }
+
+    function searchFWD(query) {
+      const results = [];
+      const q = query.toLowerCase();
+
+      for (const disease of fwd_data.diseases) {
+        const score = calculateScore(q, disease.name);
+        if (score > 30) {
+          results.push({
+            disease: disease.name,
+            judgement: disease.judgement,
+            condition: disease.condition,
+            multiple: disease.multiple,
+            score: score
+          });
+        }
+      }
+
+      return results.sort((a, b) => b.score - a.score);
+    }
+
+    function calculateScore(query, target) {
+      const t = target.toLowerCase();
+      if (t === query) return 100;
+      if (t.includes(query) || query.includes(t)) return 80;
+      if (t.includes(query.slice(0, 2))) return 60;
+      return 0;
+    }
+
+    function displayResults(naneiro_results, fwd_results, query) {
+      const noResults = document.getElementById('noResults');
+      const actions = document.getElementById('actions');
+
+      if (naneiro_results.length === 0 && fwd_results.length === 0) {
+        noResults.style.display = 'block';
+        document.getElementById('results-all').classList.remove('active');
+        actions.style.display = 'none';
+        return;
+      }
+
+      noResults.style.display = 'none';
+      actions.style.display = 'flex';
+
+      // 全社表示
+      displayAllResults(naneiro_results, fwd_results);
+
+      // なないろ表示
+      displayNaneiroResults(naneiro_results);
+
+      // FWD表示
+      displayFWDResults(fwd_results);
+
+      switchTab(currentTab);
+    }
+
+    function displayAllResults(naneiro_results, fwd_results) {
+      const body = document.getElementById('resultBody-all');
+      body.innerHTML = '';
+
+      for (const r of naneiro_results) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><span class="company-badge company-naneiro">なないろ生命</span></td>
+          <td><span class="status conditional">条件付き</span></td>
+          <td><strong>${r.disease}</strong> → ${r.product}</td>
+          <td><span class="confidence">${r.score}%</span></td>
+        `;
+        body.appendChild(row);
+      }
+
+      for (const r of fwd_results) {
+        const row = document.createElement('tr');
+        const statusClass = r.judgement.includes('可') ? 'ok' : r.judgement.includes('条件') ? 'conditional' : 'unknown';
+        row.innerHTML = `
+          <td><span class="company-badge company-fwd">FWD生命</span></td>
+          <td><span class="status ${statusClass}">${r.judgement}</span></td>
+          <td><strong>${r.disease}</strong> - ${r.condition}</td>
+          <td><span class="confidence">${r.score}%</span></td>
+        `;
+        body.appendChild(row);
+      }
+
+      document.getElementById('count-all').textContent = (naneiro_results.length + fwd_results.length) + ' 件';
+    }
+
+    function displayNaneiroResults(results) {
+      const body = document.getElementById('resultBody-naneiro');
+      body.innerHTML = '';
+
+      for (const r of results) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong>${r.disease}</strong></td>
+          <td>${r.product}</td>
+          <td>対応可能</td>
+          <td><span class="confidence">${r.score}%</span></td>
+        `;
+        body.appendChild(row);
+      }
+
+      document.getElementById('count-naneiro').textContent = results.length + ' 件';
+    }
+
+    function displayFWDResults(results) {
+      const body = document.getElementById('resultBody-fwd');
+      body.innerHTML = '';
+
+      for (const r of results) {
+        const statusClass = r.judgement.includes('可') ? 'ok' : r.judgement.includes('条件') ? 'conditional' : 'unknown';
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong>${r.disease}</strong></td>
+          <td><span class="status ${statusClass}">${r.judgement}</span></td>
+          <td>${r.condition}</td>
+          <td><span class="confidence">${r.score}%</span></td>
+        `;
+        body.appendChild(row);
+      }
+
+      document.getElementById('count-fwd').textContent = results.length + ' 件';
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.querySelectorAll('[id^="results-"]').forEach(el => el.classList.remove('active'));
+      document.getElementById('results-' + tab).classList.add('active');
+    }
+
+    function clearSearch() {
+      document.getElementById('diseaseInput').value = '';
+      document.getElementById('noResults').style.display = 'none';
+      document.getElementById('actions').style.display = 'none';
+      document.querySelectorAll('[id^="resultBody-"]').forEach(body => body.innerHTML = '');
+    }
+
+    function downloadCSV() {
+      const rows = [];
+      rows.push('保険会社,病名,引き受け,条件,信度');
+
+      const allBody = document.getElementById('resultBody-all');
+      allBody.querySelectorAll('tr').forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        const line = [
+          cells[0].textContent.trim(),
+          cells[2].textContent.trim(),
+          cells[1].textContent.trim(),
+          cells[3].textContent.trim()
+        ].join(',');
+        rows.push(line);
+      });
+
+      const csv = rows.join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `保険引き受け目安_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+    }
+
+    // Enterキーで検索
+    document.getElementById('diseaseInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') search();
+    });
+  </script>
+</body>
+</html>
