@@ -13,7 +13,6 @@ PII（churn-pii-guard）: 入出力は private/ 限定。実PIIは扱わない�
 使い方: python -m scripts.churn.demo_action_today
 """
 from __future__ import annotations
-import csv
 import html
 import os
 from datetime import date
@@ -21,6 +20,8 @@ from datetime import date
 from scripts.churn.intake import load_records, load_column_map
 from scripts.churn.fit import load_model
 from scripts.churn.score import score_record, display_pct
+from scripts.churn.triggers import prevention_trigger
+from scripts.churn.value import saveable
 from scripts.churn.demo_dashboard import _first_move
 
 D = "private/demo"
@@ -40,40 +41,25 @@ def build():
     cmap = load_column_map(f"{D}/column_map_real.json")
     records = load_records(f"{D}/apps.csv", cmap, AS_OF)
     model = load_model(f"{D}/risk_model.json")
-    raw = {}
-    with open(f"{D}/apps.csv", encoding="utf-8-sig", newline="") as f:
-        for row in csv.DictReader(f):
-            raw[(row.get("顧客ID"), row.get("契約日"))] = (
-                row.get("初回引落結果", ""), row.get("口座普段使い", ""), row.get("引落予定日", ""))
 
     items = []
     for r in records:
         if not r.get("is_scoreable"):
             continue
-        ad = r.get("apply_date")
-        debit, account, due = raw.get((r.get("customer_id"), ad.isoformat() if ad else ""), ("", "", ""))
-        # きっかけ判定（優先度の高いものを1つ割り当て＝重複排除）
-        trig = None
-        if debit == "不着":
-            trig = "不着"
-        elif debit == "遅延":
-            trig = "遅延"
-        elif debit == "" and account in ("いいえ", "未確認") and due:
-            trig = "口座確認"
+        # きっかけ判定・守れる金額は本体モジュールに委譲（重複排除）
+        trig = prevention_trigger(r, AS_OF)
         s = score_record(r, model)
         if trig is None:
             if s["band"] != "high":
                 continue  # 候補でない
             trig = "高リスク"
-        annual = (r.get("amount") or 0) * 12
-        saveable = s["risk"] * annual
         move = TRIGGERS[trig][2] or _first_move(s["hit_factors"])
         items.append({
             "trig": trig, "prio": TRIGGERS[trig][0],
             "cid": r.get("customer_id") or "—", "product": r.get("product"),
             "risk_pct": display_pct(s["risk"]), "band": s["band"],
-            "saveable": saveable, "move": move,
-            "detail": account if trig == "口座確認" else "",
+            "saveable": saveable(s["risk"], r.get("amount")), "move": move,
+            "detail": r.get("account_daily", "") if trig == "口座確認" else "",
         })
     items.sort(key=lambda x: (x["prio"], -x["saveable"]))
     today = items[:CAPACITY]

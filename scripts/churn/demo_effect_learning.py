@@ -14,59 +14,30 @@ PII（churn-pii-guard）: 入出力は private/ 限定。合成データ専用�
 使い方: python -m scripts.churn.demo_effect_learning
 """
 from __future__ import annotations
-import csv
 import html
 import os
 from datetime import date
 
 from scripts.churn.intake import load_records, load_column_map
-from scripts.churn.config import MIN_RELIABLE_N
+from scripts.churn.contact_log import load_contacts
+from scripts.churn.effect_learning import effect, learning
 
 D = "private/demo"
 AS_OF = date(2026, 8, 1)
 
 
+# 6ヶ月窓が完全に経過した成熟契約のみで測る（打ち切り回避）。AS_OFの6ヶ月前より前。
+MATURE_BEFORE = date(2026, 2, 1)
+_CONTACT_MAP = {"customer_id": "顧客ID", "apply_date": "契約日", "contact_date": "接触日",
+                "action": "対応内容", "result": "結果区分", "reaction": "顧客反応"}
+
+
 def build():
     cmap = load_column_map(f"{D}/column_map_real.json")
     records = load_records(f"{D}/apps.csv", cmap, AS_OF)
-    act = {}
-    with open(f"{D}/actions.csv", encoding="utf-8-sig", newline="") as f:
-        for row in csv.DictReader(f):
-            act[(row.get("顧客ID"), row.get("契約日"))] = row.get("対応内容", "")
-
-    # 6ヶ月窓が完全に経過した成熟契約のみ（打ち切りバイアス回避：直近契約は生存者が未確定で
-    # 解約者だけ確定＝効果が隠れる）。AS_OF の6ヶ月前より前に契約した分に限定。
-    MATURE_BEFORE = date(2026, 2, 1)
-    resolved = [r for r in records
-                if r.get("is_resolved") and r.get("apply_date") and r["apply_date"] < MATURE_BEFORE]
-    contacted, not_contacted = [], []
-    per_action = {}
-    for r in resolved:
-        ad = r.get("apply_date")
-        a = act.get((r.get("customer_id"), ad.isoformat() if ad else ""))
-        churn = r.get("is_early_churn") or 0
-        if a:
-            contacted.append(churn)
-            b = per_action.setdefault(a, {"n": 0, "churn": 0})
-            b["n"] += 1
-            b["churn"] += churn
-        else:
-            not_contacted.append(churn)
-
-    def rate(lst):
-        return (sum(lst) / len(lst)) if lst else 0.0
-
-    overall = {
-        "n_c": len(contacted), "rate_c": rate(contacted),
-        "n_n": len(not_contacted), "rate_n": rate(not_contacted),
-        "reference": min(len(contacted), len(not_contacted)) < MIN_RELIABLE_N,
-    }
-    overall["diff"] = overall["rate_c"] - overall["rate_n"]
-    actions = [{"action": k, "n": v["n"], "churn": v["churn"],
-                "rate": v["churn"] / v["n"] if v["n"] else 0.0,
-                "reference": v["n"] < MIN_RELIABLE_N} for k, v in per_action.items()]
-    actions.sort(key=lambda x: x["rate"])  # 早期解約率が低い＝効いた順
-    return overall, actions
+    contacts = load_contacts(f"{D}/actions.csv", _CONTACT_MAP)
+    # 本体モジュールに委譲（成熟のみ・解約前接触のみ=免疫時間除外・空アクション除外・母数不足参考）
+    return effect(records, contacts, MATURE_BEFORE), learning(records, contacts, MATURE_BEFORE)
 
 
 def render(overall, actions):

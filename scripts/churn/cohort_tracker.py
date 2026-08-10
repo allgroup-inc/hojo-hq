@@ -20,6 +20,7 @@ from datetime import date
 
 from scripts.churn.intake import load_records, load_column_map
 from scripts.churn.report_agg import aggregate_by
+from scripts.churn.cohort import cohort_rows, overall_rate
 from scripts.churn.config import MIN_RELIABLE_N
 
 D = "private/demo"
@@ -37,36 +38,14 @@ def build():
     cmap = load_column_map(f"{D}/column_map_real.json")
     records = load_records(f"{D}/apps.csv", cmap, AS_OF)
 
-    # コホート = 契約月
-    cohorts = {}
-    for r in records:
-        ad = r.get("apply_date")
-        if not ad:
-            continue
-        c = cohorts.setdefault(_ym(ad), {"total": 0, "resolved": 0, "churn": 0})
-        c["total"] += 1
-        if r.get("is_resolved"):
-            c["resolved"] += 1
-            c["churn"] += r.get("is_early_churn") or 0
-    rows = []
-    for ym in sorted(cohorts):
-        c = cohorts[ym]
-        rate = (c["churn"] / c["resolved"]) if c["resolved"] else None
-        maturity = c["resolved"] / c["total"] if c["total"] else 0
-        rows.append({
-            "ym": ym, "total": c["total"], "resolved": c["resolved"],
-            "churn": c["churn"], "rate": rate, "maturity": maturity,
-            "observing": maturity < 0.8,               # 確定率8割未満＝観測中
-            "reference": c["resolved"] < MIN_RELIABLE_N,
-        })
+    # 本体モジュールに委譲（観測中判定は暦ベース＝解約アウトカムと交絡させない）
+    rows = cohort_rows(records, AS_OF)
+    ov = overall_rate(rows)
+    overall = ov["rate"] if ov["rate"] is not None else 0.0
+    tot_res, tot_churn = ov["resolved"], ov["churn"]
 
-    # 全体は「成熟コホートのみ」で算出（観測中は生存者が未確定＝免疫時間バイアスで率が跳ねるため除外）
-    mature_yms = {x["ym"] for x in rows if not x["observing"]}
-    tot_res = sum(x["resolved"] for x in rows if not x["observing"])
-    tot_churn = sum(x["churn"] for x in rows if not x["observing"])
-    overall = (tot_churn / tot_res) if tot_res else 0.0
-
-    # 漏れ分析も成熟コホートのレコードのみ（同じバイアスを避ける）
+    # 漏れ分析は成熟コホートのレコードのみ（同じバイアスを避ける）
+    mature_yms = {r["ym"] for r in rows if not r["observing"]}
     mature_recs = [r for r in records if r.get("apply_date") and _ym(r["apply_date"]) in mature_yms]
     leak = {f: aggregate_by(mature_recs, f) for f in ("channel", "apply_form", "product", "age_band", "agent_id")}
     return rows, overall, tot_res, tot_churn, leak

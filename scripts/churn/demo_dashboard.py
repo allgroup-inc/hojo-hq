@@ -22,6 +22,7 @@ import os
 from scripts.churn.intake import load_records, load_column_map
 from scripts.churn.fit import load_model
 from scripts.churn.score import score_record, display_pct
+from scripts.churn.value import saveable as saveable_amount
 from scripts.churn.config import MIN_RELIABLE_N
 from datetime import date
 
@@ -63,8 +64,8 @@ def main():
     scored, urgent = [], []
     for r in scoreable:
         s = score_record(r, model)
-        annual = (r.get("amount") or 0) * 12  # 月額 × 12 の目安
-        saveable = s["risk"] * annual         # 期待“守れる”保険料
+        annual = (r.get("amount") or 0) * 12  # 月額 × 12 の目安（表示用）
+        saveable = saveable_amount(s["risk"], r.get("amount"))  # 守れる金額は本体ヘルパー
         ad = r.get("apply_date")
         debit = debit_by_key.get((r.get("customer_id"), ad.isoformat() if ad else ""), "")
         row = (r, s, annual, saveable, debit)
