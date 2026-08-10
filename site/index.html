@@ -514,6 +514,16 @@
   .glow-vision small{display:block;margin-top:1.2em;padding-top:1.1em;font-size:.88em;font-weight:500;
     color:rgba(255,255,255,.88);border-top:1px solid rgba(255,255,255,.25);}
   @media(max-width:640px){.glow-vision small br{display:none;}}
+  /* 目的別にさがす(2026-08-10 小柳さん決裁A・pSEO内部リンク) */
+  .themes-nav{background:#f4f7fa;padding:44px 20px 48px;text-align:center;}
+  .themes-nav h2{color:#00335c;font-size:1.35rem;margin:0 0 .4em;}
+  .tn-sub{color:#5a6b78;font-size:.9rem;margin:0 0 1.3em;}
+  .tn-links{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:640px;margin:0 auto;}
+  .tn-links a{display:inline-block;background:#fff;color:#00335c;font-weight:700;font-size:.92rem;
+    border:1px solid #dbe5ee;border-radius:24px;padding:.6em 1.3em;text-decoration:none;
+    transition:transform .15s,box-shadow .15s;}
+  .tn-links a:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,51,92,.12);
+    border-color:var(--kin);}
   /* 相談の流れ(2026-08-04 相談転換③) */
   .consult-flow{margin-top:var(--sp-4);padding:var(--sp-3);border-radius:14px;
     background:#fff;border:1px solid #e2e9f0;border-top:4px solid var(--kin);text-align:center;}
@@ -801,6 +811,20 @@
     </details>
   </div>
   <p class="updated rv">データ最終更新:<span id="updated-at">—</span>(1日4回自動更新)</p>
+</section>
+
+<!-- 目的別にさがす(2026-08-10 小柳さん決裁A) -->
+<section class="themes-nav">
+  <h2 class="rv">目的別にさがす</h2>
+  <p class="tn-sub rv">「何に使いたいか」から、いま募集中の制度を一覧できます(毎日更新)。</p>
+  <div class="tn-links rv">
+    <a href="themes/setsubi/">設備投資</a>
+    <a href="themes/it/">IT・デジタル化</a>
+    <a href="themes/shoene/">省エネ・脱炭素</a>
+    <a href="themes/koyou/">雇用・人材</a>
+    <a href="themes/sogyo/">創業</a>
+    <a href="themes/shokei/">事業承継・M&amp;A</a>
+  </div>
 </section>
 
 <!-- CTA -->
