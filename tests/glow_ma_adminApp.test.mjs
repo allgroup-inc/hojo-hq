@@ -47,6 +47,18 @@ test("buildAdminAppHtml: 企業詳細ドロワーに関係メモ編集用の要�
     });
 });
 
+test("buildAdminAppHtml: 関係メモの保存に成功/失敗した場合の表示分岐を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf("保存しました") !== -1, "保存成功時のメッセージがない");
+  assert.ok(html.indexOf("保存に失敗しました") !== -1, "保存失敗時のメッセージがない");
+});
+
+test("buildAdminAppHtml: 未保存の変更がある状態でドロワーを閉じようとすると確認する", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf("confirm(") !== -1, "confirm()による離脱確認がない");
+  assert.ok(html.indexOf("保存されていない変更があります") !== -1, "離脱確認のメッセージがない");
+});
+
 test("buildAdminAppHtml: 画面切り替えスイッチャー・パートナー一覧・パートナードロワーの主要要素を含む", () => {
   const html = adminApp.buildAdminAppHtml();
   ["viewCompanyBtn", "viewPartnerBtn", "companyView", "partnerView", "partnerTableBody",
