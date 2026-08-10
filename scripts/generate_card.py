@@ -102,7 +102,7 @@ def card_meishi():
            label, font=f_label, fill=WHITE)
     # GLOWロゴ(光彩つき)をQRの上に
     lg = logo_with_glow(180)
-    im.paste(lg, (int(qr_cx - lg.width / 2), 18), lg)
+    im.paste(lg, (int(qr_cx - lg.width / 2), 52), lg)
     os.makedirs(OUT, exist_ok=True)
     im.save(os.path.join(OUT, "card_meishi.png"))
     print("[ok] card_meishi.png (1254x758 / 91x55mm 350dpi)")
@@ -116,7 +116,7 @@ def card_a6():
     d.rectangle([0, 0, W, 14], fill=ORANGE)
     # GLOWロゴ(光彩つき)を最上部中央に
     lg = logo_with_glow(230)
-    im.paste(lg, (int((W - lg.width) / 2), 34), lg)
+    im.paste(lg, (int((W - lg.width) / 2), 75), lg)
     center(d, "御社が使える補助金、", font(96), 250, W, WHITE)
     center(d, "眠っていませんか?", font(96), 370, W, WHITE)
     center(d, "沖縄で使える補助金・助成金を毎日自動チェック", font(46), 530, W, (200, 214, 228))
