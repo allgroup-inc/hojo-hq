@@ -34,6 +34,29 @@ test("buildAccessDeniedHtml: アクセス権がない旨のHTMLを返す", () =>
   assert.ok(html.indexOf("アクセス権がありません") !== -1);
 });
 
+test("resolveStaffName: メールアドレスが一致すればスタッフの氏名を返す", () => {
+  const staffRows = [
+    { email: "koyanagi@example.com", name: "小柳" },
+    { email: "fukuda@example.com", name: "福田" }
+  ];
+  assert.equal(adminAccess.resolveStaffName("koyanagi@example.com", staffRows), "小柳");
+});
+
+test("resolveStaffName: 大文字小文字・前後空白の違いを無視して一致判定する", () => {
+  const staffRows = [{ email: " Koyanagi@Example.com ", name: "小柳" }];
+  assert.equal(adminAccess.resolveStaffName("koyanagi@example.com", staffRows), "小柳");
+});
+
+test("resolveStaffName: 一致しなければ「不明」を返す", () => {
+  const staffRows = [{ email: "koyanagi@example.com", name: "小柳" }];
+  assert.equal(adminAccess.resolveStaffName("other@example.com", staffRows), "不明");
+});
+
+test("resolveStaffName: スタッフ一覧が空でも「不明」を返す(例外を投げない)", () => {
+  assert.equal(adminAccess.resolveStaffName("koyanagi@example.com", []), "不明");
+  assert.equal(adminAccess.resolveStaffName("koyanagi@example.com", undefined), "不明");
+});
+
 const SAMPLE_COMPANIES = [
   { 企業ID: "C000001", 会社名: "テスト商事株式会社", ランク: "A", 現在ステージ: "提案中", 次回アクション予定日: "2026-08-20", 担当者: "たかし", 携帯番号: "090-0000-0001", 関係メモ: "極秘メモ1" },
   { 企業ID: "C000002", 会社名: "サンプル建設株式会社", ランク: "B", 現在ステージ: "未接触", 次回アクション予定日: "2026-08-10", 担当者: "嶺井さん", 携帯番号: "090-0000-0002", 関係メモ: "極秘メモ2" },
