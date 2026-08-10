@@ -29,6 +29,19 @@
 リスク一覧や顧客インデックスの行から各カルテへ相対リンクで飛べる(サブディレクトリに分かれているとリンク切れ404になるため)。
 `private/console/index.html`(または`list.html`)を開いて回遊する。
 
+## 早期解約<3%の運用コマンド(測る→気づく→動く→学ぶ)
+デモ用スクリプトの中身を本体(モジュール＋CLI)へ昇格。すべて出力は `private/` 限定・合成データで検証済み。
+- **測る**: `python -m scripts.churn.cli cohort --csv private/demo/apps.csv --column-map private/demo/column_map_real.json --out private/demo/cohort.html --as-of 2026-08-01`
+  → 契約月コホート別の早期解約率と目標3%との距離(成熟分のみ・観測中は率を出さない・少件数は参考)。
+- **気づく→動く**: `python -m scripts.churn.cli today --csv ... --column-map ... --model private/demo/risk_model.json --out private/demo/today.html --as-of 2026-08-01`
+  → 「今日の要接触」。②予防トリガー(初回引落の不着/遅延・引落前の口座確認)＋守れる金額の高リスクを1本に束ね、優先度＋守れる金額順にキャパ(既定30/日)内で。超過は繰り越し件数を明示。顧客連絡は人が実行。
+- **残す**: `python -m scripts.churn.cli snapshot --csv ... --interactions ... --month 2026-08 --out-dir private/snapshots`
+  → 月次スナップショット(上書きしない・べき等・manifestで監査可能)。
+- `console` は上記 cohort・today も同じ out-dir に出力する。
+
+新モジュール: `triggers`(予防A/B)・`triage`(今日の要接触)・`contact_log`＋`effect_learning`(結果記録→効果測定→学習)・`cohort`(スコアボード)・`value`(守れる金額)・`snapshot`。
+規律: 表示%クランプ・母数不足は参考・成熟のみ学習・免疫時間除外・営業別は教育目的・業務定数(キャパ/リード日数/AUC閾値)は小柳さん決裁事項。**実データ本番は守り部審査(#142)＋決裁の後、統制環境で。**
+
 ## 誤コミット自動検知(churn-pii-guard)
 公開リポジトリへの個人情報の誤コミットを機械的に止める。
 - ローカルで有効化(各自1回): `git config core.hooksPath .githooks`
