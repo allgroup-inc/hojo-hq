@@ -449,6 +449,11 @@ footer .fwrap p{margin-bottom:6px}
         <div class="lbl">検証済みで掲載中の制度</div>
         <div class="note" id="seido-trust" style="margin-top:6px;font-size:.8rem;text-align:center"></div>
       </div>
+      <div class="stat" id="jukyu-stat" style="display:none">
+        <span class="num" id="jukyu-count">—</span>
+        <div class="lbl">「もらえた」のご報告(検証済み)</div>
+        <div class="note" style="margin-top:6px;font-size:.8rem;text-align:center">利用者からの受給報告のうち、公式制度と突合できた世帯数</div>
+      </div>
     </div>
   </div>
 </section>
@@ -603,7 +608,15 @@ footer .fwrap p{margin-bottom:6px}
       });
     }
   }).catch(function(){ /* データ取得失敗時は静的表示のまま(診断・本文は影響なし) */ });
-  // 受給額カウンターは非表示中(実績が積み上がったら jukyu_reports.json 連動で再掲予定)。
+  // 受給報告カウンター: 検証済み10世帯以上たまってから表示(2026-08-10 小柳さん決裁)。
+  // それまでは非表示のまま台帳(data/fukugiiro/jukyu_reports.json)に蓄積する。
+  fetch("../data/fukugiiro/jukyu_reports.json").then(function(r){return r.json()}).then(function(d){
+    var n = d && d.summary && d.summary.household_count;
+    if(typeof n === "number" && n >= 10){
+      document.getElementById("jukyu-count").textContent = n.toLocaleString("ja-JP") + "世帯";
+      document.getElementById("jukyu-stat").style.display = "";
+    }
+  }).catch(function(){ /* 台帳未配置・取得失敗時は非表示のまま */ });
 })();
 </script>
 </body>
