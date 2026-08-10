@@ -134,3 +134,17 @@ test("スタッフタブに管理画面Web App用のメールアドレス列が�
     ["メールアドレス"]
   );
 });
+
+test("パートナー対応履歴ログのタブ名・見出しが定義されている(紹介パートナー開拓状況ビュー)", () => {
+  assert.equal(schema.PARTNER_INTERACTION_LOG_SHEET_NAME, "パートナー対応履歴ログ");
+  assert.deepEqual(schema.PARTNER_INTERACTION_LOG_HEADERS, [
+    "履歴ID", "パートナーID", "日付", "対応者", "内容メモ", "次回アクション"
+  ]);
+});
+
+test("紹介実績ログのタブ名・見出しが定義されている(紹介パートナー開拓状況ビュー)", () => {
+  assert.equal(schema.REFERRAL_RECORD_SHEET_NAME, "紹介実績ログ");
+  assert.deepEqual(schema.REFERRAL_RECORD_HEADERS, [
+    "実績ID", "パートナーID", "紹介日", "対象企業ID", "紹介料率", "契約内容メモ", "成約有無"
+  ]);
+});
