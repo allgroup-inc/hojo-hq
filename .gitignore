@@ -2,6 +2,9 @@
 healthcheck_report.txt
 verify_report.txt
 
+# Subagent-Driven Development workspace (per-session, git-ignored)
+.superpowers/
+
 # E2E(Playwright)の実行時生成物
 node_modules/
 package.json
