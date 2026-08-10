@@ -57,7 +57,7 @@
     "<header><h1>GLOW企業リレーション台帳</h1></header>",
     "<div id=\"viewSwitcher\"><button id=\"viewCompanyBtn\" class=\"active\">企業一覧</button>",
     "<button id=\"viewPartnerBtn\">紹介パートナー開拓状況</button></div>",
-    "<div class=\"filters\">",
+    "<div class=\"filters\" id=\"companyFiltersBar\">",
     "<input type=\"text\" id=\"searchInput\" placeholder=\"会社名・代表者名で検索\">",
     "<select id=\"filterRank\"><option value=\"\">ランク(すべて)</option>",
     "<option value=\"A\">A</option><option value=\"B\">B</option>",
@@ -204,6 +204,7 @@
     "document.getElementById('viewPartnerBtn').classList.toggle('active', !isCompany);",
     "document.getElementById('companyView').classList.toggle('active', isCompany);",
     "document.getElementById('partnerView').classList.toggle('active', !isCompany);",
+    "document.getElementById('companyFiltersBar').style.display = isCompany ? 'flex' : 'none';",
     "}",
 
     "function loadPartnerList(){",
