@@ -57,6 +57,14 @@
       "心当たりがある場合は管理者に確認してください。</p></body></html>";
   }
 
+  function resolveStaffName(email, staffRows) {
+    var target = normalizeEmail_(email);
+    var match = (staffRows || []).filter(function (staff) {
+      return normalizeEmail_(staff.email) === target;
+    })[0];
+    return match && match.name ? match.name : "不明";
+  }
+
   var COMPANY_LIST_FIELDS = ["企業ID", "会社名", "ランク", "現在ステージ", "次回アクション予定日", "担当者"];
   var DEFAULT_LIST_LIMIT = 100;
 
@@ -161,6 +169,7 @@
   var api = {
     isAllowedEmail: isAllowedEmail,
     buildAccessDeniedHtml: buildAccessDeniedHtml,
+    resolveStaffName: resolveStaffName,
     COMPANY_LIST_FIELDS: COMPANY_LIST_FIELDS,
     DEFAULT_LIST_LIMIT: DEFAULT_LIST_LIMIT,
     hasAnyFilter: hasAnyFilter,
