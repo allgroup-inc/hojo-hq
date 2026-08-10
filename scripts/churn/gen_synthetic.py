@@ -71,9 +71,15 @@ def _birth_from_age(rng, age):
     return date(y, rng.randint(1, 12), rng.randint(1, 28))
 
 
+# 保全アクションと、その"効き"（早期解約率をどれだけ下げるか）のデモ用シグナル。
+# 学習デモで「効いた一手」を再現するため。実データではなく合成の仕込み。
+ACT_EFFECT = {"減額提案": 0.12, "口座確認": 0.12, "再説明": 0.06, "給付案内": 0.03, "安心コール": 0.02}
+
+
 def build_records(rng):
-    """内部正規形のレコード群を作る（レイアウト非依存）。"""
+    """内部正規形のレコード群＋保全アクションログを作る（レイアウト非依存）。"""
     recs = []
+    actions = []  # 保全アクションログ（結果記録）: 顧客ID・契約日・接触日・対応内容・結果区分・顧客反応
     apply_id = 1000
 
     n_customers = 460
@@ -94,7 +100,11 @@ def build_records(rng):
             order = contract - timedelta(days=rng.randint(1, 20))
 
             p = churn_prob(rng, product, channel, form, amount, age, agent)
-            churned = rng.random() < p
+            # 保全アクション（結果記録）: 4割の契約に保全接触。対応内容ごとに早期解約率が下がる（デモ用の効き）。
+            contacted = rng.random() < 0.4
+            action = rng.choice(list(ACT_EFFECT)) if contacted else None
+            p_adj = min(max(p - (ACT_EFFECT[action] if contacted else 0.0), 0.02), 0.85)
+            churned = rng.random() < p_adj
             cancel = None
             status = "継続中"
             if churned:
@@ -103,6 +113,19 @@ def build_records(rng):
                 if cd <= AS_OF:
                     cancel = cd
                     status = "解約"
+            if contacted:
+                # 接触日: 契約後3〜45日。解約より前（免疫時間バイアスを避ける）。未来の接触は記録しない
+                contact_day = contract + timedelta(days=rng.randint(3, 45))
+                if cancel is not None and contact_day >= cancel:
+                    contact_day = cancel - timedelta(days=rng.randint(2, 6))
+                if contact_day < contract:
+                    contact_day = contract + timedelta(days=1)
+                if contact_day <= AS_OF:
+                    reaction = rng.choices(["継続", "検討中", "解約意向"],
+                                           weights=([30, 30, 40] if churned else [60, 30, 10]))[0]
+                    actions.append({"顧客ID": cid, "契約日": contract.isoformat(),
+                                    "接触日": contact_day.isoformat(), "対応内容": action,
+                                    "結果区分": "つながった", "顧客反応": reaction})
             # 初回引落結果・口座普段使い・引落予定日：継続中かつ直近半年の契約だけ値が入る
             # （古い契約は上書きで消える想定）。高リスクほど不着/遅延・口座問題が出やすい（デモ用シグナル）。
             debit = ""
@@ -157,7 +180,7 @@ def build_records(rng):
             "account_daily": "はい", "debit_due": "2026-07-15",
             "payment": "口座振替", "insurer": "B損保",
         })
-    return recs
+    return recs, actions
 
 
 def _d(v):
@@ -242,16 +265,21 @@ def write_interactions(recs, path, rng):
 def gen(out_dir, seed, layout):
     rng = random.Random(seed)
     os.makedirs(out_dir, exist_ok=True)
-    recs = build_records(rng)
+    recs, actions = build_records(rng)
     app_path = os.path.join(out_dir, "apps.csv")
     inter_path = os.path.join(out_dir, "inter.csv")
+    act_path = os.path.join(out_dir, "actions.csv")
     if layout == "real":
         write_real(recs, app_path)
     else:
         write_example(recs, app_path)
     n_inter = write_interactions(recs, inter_path, rng)
-    print(f"[gen] レイアウト={layout} 申込 {len(recs)}件 / 接触 {n_inter}件 "
-          f"→ {app_path} / {inter_path}")
+    with open(act_path, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=["顧客ID", "契約日", "接触日", "対応内容", "結果区分", "顧客反応"])
+        w.writeheader()
+        w.writerows(actions)
+    print(f"[gen] レイアウト={layout} 申込 {len(recs)}件 / 接触 {n_inter}件 / "
+          f"保全ログ {len(actions)}件 → {app_path} / {inter_path} / {act_path}")
 
 
 def main():
