@@ -44,4 +44,132 @@ function addBoxSection(slide, x, y, w, h, bgColor, borderColor, borderWidth, con
   }
 }
 
-// Slides will be added here
+// Slide 1: Title
+let slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+slide.addText('沖縄県M&A市場', {
+  x: 0.5, y: 1.8, w: 9, h: 0.8,
+  fontSize: 54, bold: true, color: colors.textDark, align: 'center', fontFace: 'Arial'
+});
+
+slide.addText('× GLOW戦略', {
+  x: 0.5, y: 2.8, w: 9, h: 0.8,
+  fontSize: 54, bold: true, color: colors.orange, align: 'center', fontFace: 'Arial'
+});
+
+slide.addText('ギャップ市場の機会と実現戦略', {
+  x: 0.5, y: 3.8, w: 9, h: 0.5,
+  fontSize: 28, color: colors.navy, align: 'center', fontFace: 'Arial'
+});
+
+// Slide 2: Market Gap
+slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+addTitle(slide, '沖縄県M&A市場：ギャップ市場の定義');
+
+// Left side: Problem
+slide.addShape(pres.ShapeType.rect, {
+  x: 0.5, y: 1.2, w: 4.3, h: 1.8,
+  fill: { color: colors.lightGray }, line: { color: colors.orange, width: 3 }
+});
+
+slide.addText('市場の課題', {
+  x: 0.7, y: 1.35, w: 4, h: 0.35,
+  fontSize: 20, bold: true, color: colors.orange, fontFace: 'Arial'
+});
+
+slide.addText('後継者不安率\n65-70%\n（推定4,000-4,500社）', {
+  x: 0.7, y: 1.85, w: 4, h: 1,
+  fontSize: 24, bold: true, color: colors.textDark, fontFace: 'Arial'
+});
+
+// Arrow
+slide.addShape(pres.ShapeType.line, {
+  x: 4.9, y: 2.1, w: 0.8, h: 0,
+  line: { color: colors.darkGray, width: 3, endShape: 'triangle', endSize: 8 }
+});
+
+// Right side: Opportunity
+slide.addShape(pres.ShapeType.rect, {
+  x: 5.2, y: 1.2, w: 4.3, h: 1.8,
+  fill: { color: colors.lightGray }, line: { color: colors.navy, width: 3 }
+});
+
+slide.addText('市場の機会', {
+  x: 5.4, y: 1.35, w: 4, h: 0.35,
+  fontSize: 20, bold: true, color: colors.navy, fontFace: 'Arial'
+});
+
+slide.addText('年間成約\n120-150件\n（成約率2-3%）', {
+  x: 5.4, y: 1.85, w: 4, h: 1,
+  fontSize: 24, bold: true, color: colors.textDark, fontFace: 'Arial'
+});
+
+// Explanation box
+slide.addShape(pres.ShapeType.rect, {
+  x: 0.5, y: 3.2, w: 9, h: 2,
+  fill: { color: 'FFF8F0' }, line: { color: colors.orange, width: 1 }
+});
+
+slide.addText('ギャップの実相', {
+  x: 0.7, y: 3.35, w: 8.6, h: 0.3,
+  fontSize: 16, bold: true, color: colors.orange, fontFace: 'Arial'
+});
+
+slide.addText('後継者不安企業4,000-4,500社に対して、実際のM&A成約は年間120-150件（成約率2-3%）。つまり、ほとんどのオーナーが成約に至っていない巨大なギャップ市場である。市場規模は推定¥300-500B、成長率は+50%/3年で拡大中。', {
+  x: 0.7, y: 3.75, w: 8.6, h: 1.3,
+  fontSize: 12, color: colors.textDark, fontFace: 'Arial'
+});
+
+// Slide 3: Why Gap Exists
+slide = pres.addSlide();
+slide.background = { color: colors.white };
+
+addTitle(slide, 'なぜギャップが生まれるのか：3つの理由');
+
+const reasons = [
+  {
+    num: '1',
+    title: '既存M&A業者が小規模案件に対応しない',
+    desc: 'ビジネスモデルの採算性の問題\n小規模案件は仲介手数料が固定費で賄えず、大型案件に特化する戦略'
+  },
+  {
+    num: '2',
+    title: '沖縄特有のリスク・文化的抵抗',
+    desc: '親族承継志向が強く、M&Aリテラシーが低い\n経営者の「今は大丈夫」という現状維持バイアス'
+  },
+  {
+    num: '3',
+    title: '経営者心理の保守性',
+    desc: 'トリガー発動までの準備段階で接触不足\n危機が現在化して初めて検討→時間がない'
+  }
+];
+
+let yPos = 1.2;
+reasons.forEach((item, idx) => {
+  const borderColor = idx === 0 ? colors.orange : (idx === 1 ? colors.navy : colors.darkGray);
+
+  slide.addShape(pres.ShapeType.ellipse, {
+    x: 0.5, y: yPos - 0.15, w: 0.5, h: 0.5,
+    fill: { color: borderColor }, line: { color: borderColor, width: 0 }
+  });
+
+  slide.addText(item.num, {
+    x: 0.5, y: yPos - 0.15, w: 0.5, h: 0.5,
+    fontSize: 18, bold: true, color: colors.white, align: 'center', valign: 'middle', fontFace: 'Arial'
+  });
+
+  slide.addText(item.title, {
+    x: 1.2, y: yPos - 0.1, w: 8.3, h: 0.35,
+    fontSize: 16, bold: true, color: colors.textDark, fontFace: 'Arial'
+  });
+
+  slide.addText(item.desc, {
+    x: 1.2, y: yPos + 0.3, w: 8.3, h: 0.6,
+    fontSize: 12, color: colors.darkGray, fontFace: 'Arial'
+  });
+
+  yPos += 1.15;
+});
