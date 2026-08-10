@@ -510,8 +510,7 @@
 
       if (naneiro_results.length === 0 && fwd_results.length === 0) {
         noResults.style.display = 'block';
-        document.getElementById('results-all').classList.remove('active');
-        document.getElementById('results-all').style.display = 'none';
+        document.querySelectorAll('[id^="results-"]').forEach(el => el.style.display = 'none');
         actions.style.display = 'none';
         clearAllTables();
         return;
@@ -519,16 +518,34 @@
 
       noResults.style.display = 'none';
       actions.style.display = 'flex';
-      document.getElementById('results-all').style.display = 'block';
 
-      // Always populate all tables so user can switch between tabs
-      displayAllResults(naneiro_results, fwd_results);
-      displayNaneiro(naneiro_results);
-      displayFWD(fwd_results);
+      clearAllTables();
 
-      // Ensure the correct tab is active based on currentTab
-      document.querySelectorAll('[id^="results-"]').forEach(el => el.classList.remove('active'));
-      document.getElementById('results-' + currentTab).classList.add('active');
+      // Display based on current tab selection
+      if (currentTab === 'all') {
+        displayAllResults(naneiro_results, fwd_results);
+        document.getElementById('results-all').style.display = 'block';
+        document.getElementById('results-naneiro').style.display = 'none';
+        document.getElementById('results-fwd').style.display = 'none';
+      } else if (currentTab === 'naneiro') {
+        if (naneiro_results.length > 0) {
+          displayNaneiro(naneiro_results);
+          document.getElementById('results-naneiro').style.display = 'block';
+        } else {
+          noResults.style.display = 'block';
+        }
+        document.getElementById('results-all').style.display = 'none';
+        document.getElementById('results-fwd').style.display = 'none';
+      } else if (currentTab === 'fwd') {
+        if (fwd_results.length > 0) {
+          displayFWD(fwd_results);
+          document.getElementById('results-fwd').style.display = 'block';
+        } else {
+          noResults.style.display = 'block';
+        }
+        document.getElementById('results-all').style.display = 'none';
+        document.getElementById('results-naneiro').style.display = 'none';
+      }
     }
 
     function displayAllResults(naneiro_results, fwd_results) {
