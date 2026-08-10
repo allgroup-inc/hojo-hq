@@ -21,15 +21,24 @@ def _mature_resolved(records, mature_before):
 
 
 def _contacts_index(contacts):
-    idx = {}
+    """apply_id を持つ接触は (顧客ID, apply_id) で、無い接触は (顧客ID, 契約日) で索引する。"""
+    by_id, by_date = {}, {}
     for c in contacts:
-        idx.setdefault((c.get("customer_id"), c.get("apply_date")), []).append(c)
-    return idx
+        aid = c.get("apply_id")
+        if aid:
+            by_id.setdefault((c.get("customer_id"), aid), []).append(c)
+        else:
+            by_date.setdefault((c.get("customer_id"), c.get("apply_date")), []).append(c)
+    return by_id, by_date
 
 
 def _qualifying_actions(record, idx):
-    """解約前の接触のみ（免疫時間除外）の対応内容リストを返す。"""
-    cs = idx.get((record.get("customer_id"), record.get("apply_date")), [])
+    """解約前の接触のみ（免疫時間除外）の対応内容リストを返す。
+    突合は (顧客ID, apply_id) 優先＝同日複数契約の二重計上を避ける。無ければ (顧客ID, 契約日)。"""
+    by_id, by_date = idx
+    cs = by_id.get((record.get("customer_id"), record.get("apply_id")))
+    if cs is None:
+        cs = by_date.get((record.get("customer_id"), record.get("apply_date")), [])
     cancel = record.get("cancel_date")
     out = []
     for c in cs:

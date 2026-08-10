@@ -9,13 +9,14 @@ from scripts.churn.effect_learning import effect, learning
 MB = date(2026, 2, 1)  # これより前の契約＝6ヶ月窓が完全に経過（成熟）
 
 
-def R(cid, apply, early, cancel=None):
-    return {"customer_id": cid, "apply_date": apply, "cancel_date": cancel,
-            "is_resolved": True, "is_early_churn": early}
+def R(cid, apply, early, cancel=None, apply_id=None):
+    return {"customer_id": cid, "apply_id": apply_id, "apply_date": apply,
+            "cancel_date": cancel, "is_resolved": True, "is_early_churn": early}
 
 
-def K(cid, apply, contact, action):
-    return {"customer_id": cid, "apply_date": apply, "contact_date": contact, "action": action}
+def K(cid, apply, contact, action, apply_id=None):
+    return {"customer_id": cid, "apply_id": apply_id, "apply_date": apply,
+            "contact_date": contact, "action": action}
 
 
 class TestEffect(unittest.TestCase):
@@ -60,6 +61,24 @@ class TestLearning(unittest.TestCase):
         self.assertEqual(rows[0]["rate"], 0.0)
         self.assertEqual(rows[-1]["action"], "再説明")
         self.assertTrue(rows[0]["reference"])  # n=2 < MIN_RELIABLE_N
+
+
+class TestApplyIdJoin(unittest.TestCase):
+    def test_apply_id_disambiguates_same_day_contracts(self):
+        # 同一顧客が同日に2契約(A1,A2)。A1のみ接触ログあり → A2を二重計上しない
+        recs = [R("C", date(2025, 1, 1), 0, apply_id="A1"),
+                R("C", date(2025, 1, 1), 1, date(2025, 3, 1), apply_id="A2")]
+        contacts = [K("C", date(2025, 1, 1), date(2025, 2, 1), "口座確認", apply_id="A1")]
+        e = effect(recs, contacts, MB)
+        self.assertEqual(e["n_c"], 1)
+        self.assertEqual(e["n_n"], 1)
+
+    def test_falls_back_to_apply_date_when_no_apply_id(self):
+        # ログに apply_id が無ければ (顧客ID,契約日) でフォールバック
+        recs = [R("C", date(2025, 1, 1), 0, apply_id="A1")]
+        contacts = [K("C", date(2025, 1, 1), date(2025, 2, 1), "口座確認")]  # apply_id無し
+        e = effect(recs, contacts, MB)
+        self.assertEqual(e["n_c"], 1)
 
 
 class TestEmptyAction(unittest.TestCase):

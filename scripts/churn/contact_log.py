@@ -22,6 +22,7 @@ def load_contacts(path, column_map):
     for row in rows:
         out.append({
             "customer_id": _get(row, column_map, "customer_id"),
+            "apply_id": _get(row, column_map, "apply_id"),
             "apply_date": parse_date(_get(row, column_map, "apply_date")),
             "contact_date": parse_date(_get(row, column_map, "contact_date")),
             "action": (_get(row, column_map, "action") or ""),
