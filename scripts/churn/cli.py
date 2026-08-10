@@ -162,7 +162,15 @@ def cmd_console(app_csv, app_map, inter_csv, inter_map, model_path, out_dir, as_
     render_html(rows, list_html_path)
     res["list_csv"] = list_csv_path
     res["list_html"] = list_html_path
-    print(f"[console] 顧客{res['n_kartes']}件のカルテ＋index＋list＋followups → {out_dir}/")
+    # 3%スコアボード（コホート）と「今日の要接触」も同ディレクトリへ
+    cohorts = cohort_rows(apps, as_of_d)
+    render_cohort_html(cohorts, overall_rate(cohorts), os.path.join(out_dir, "cohort.html"))
+    today, carry, stats = triage(classify(apps, model, as_of_d), CAPACITY_PER_DAY)
+    render_today_html(today, carry, stats, os.path.join(out_dir, "today.html"), CAPACITY_PER_DAY)
+    res["cohort_html"] = os.path.join(out_dir, "cohort.html")
+    res["today_html"] = os.path.join(out_dir, "today.html")
+    print(f"[console] 顧客{res['n_kartes']}件のカルテ＋index＋list＋followups"
+          f"＋cohort＋today → {out_dir}/")
     return res
 
 
