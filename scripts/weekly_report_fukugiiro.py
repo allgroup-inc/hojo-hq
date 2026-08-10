@@ -113,14 +113,30 @@ def render_funnel_section(funnel):
                   if wd else "**最大離脱**: 算出に十分なデータがまだありません。")
     warn = funnel_stale_warning(funnel.get("updated_at"), datetime.now(JST).date())
     warn_line = f"\n{warn}\n" if warn else ""
+    # 小標本ガード(ウタガイ条件3): 診断完了n<30の間は転換率で施策効果を断定しない
+    complete_n = next((s["count"] for s in funnel["stages"] if s["key"] == "shindan_complete"), 0)
+    small_n = (f"\n⚠️ 診断完了 n={complete_n}(<30)のため、転換率の増減で施策効果を断定しない"
+               "(n≥30到達まで判断保留 — 2026-08-10 三名体制裁定)。\n" if complete_n < 30 else "")
+    # LINE誘導の入口別クリック × 中間ページ到達の突合(クリック後の脱落監視)
+    ld = funnel.get("line_detail") or {}
+    ld_lines = ""
+    if ld:
+        pos = ld.get("click_by_pos") or {}
+        ch = ld.get("redirect_by_channel") or {}
+        pos_txt = " / ".join(f"{k}: {v}" for k, v in sorted(pos.items())) or "データなし"
+        ch_txt = " / ".join(f"{k}: {v}" for k, v in sorted(ch.items())) or "データなし"
+        ld_lines = (f"\nLINE誘導クリック(入口別): {pos_txt}\n"
+                    f"中間ページ到達(line_redirect): {ch_txt}"
+                    "(クリック数と到達数の差=クリック後の脱落)\n")
     return (
         f"## 2. ファネル(自動取得 — Plausible Stats API / 直近{funnel.get('period','7d')})\n\n"
         f"更新: {funnel.get('updated_at','-')}。集計値のみ(個人識別子なし)。\n{warn_line}\n"
         "| 段 | 件数 | 前段比 | 離脱率 |\n|---|---|---|---|\n"
         f"{rows}\n\n"
-        f"{worst_line}\n\n"
+        f"{worst_line}\n{small_n}\n"
         f"**診断完了→LINE誘導**: {_pct(kr.get('line_cvr'))}(KPI 30%) / "
-        f"**完了率**: {_pct(kr.get('finish_rate'))} / **0件率**: {_pct(kr.get('zero_rate'))}\n\n"
+        f"**完了率**: {_pct(kr.get('finish_rate'))} / **0件率**: {_pct(kr.get('zero_rate'))}\n"
+        f"{ld_lines}\n"
         f"補助: 準備シート {eng.get('kit_click',0)} / 受給ずみ {eng.get('seido_done_mark',0)} / "
         f"受給報告 {eng.get('jukyu_report_click',0)} / 0件 {eng.get('shindan_zero',0)}"
     )
