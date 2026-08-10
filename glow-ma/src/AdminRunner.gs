@@ -162,16 +162,7 @@ function getPartnerList() {
   var logSheet = ss.getSheetByName(GlowSchema.PARTNER_INTERACTION_LOG_SHEET_NAME);
   var interactionsByPartner = readPartnerInteractionsByPartnerId_(logSheet);
 
-  return partners.map(function (partner) {
-    var partnerId = partner["パートナーID"];
-    return {
-      "パートナーID": partnerId,
-      "名称": partner["名称"],
-      "種別": partner["種別"],
-      "関係性ランク": partner["関係性ランク"],
-      "対応回数": (interactionsByPartner[partnerId] || []).length
-    };
-  });
+  return GlowAdminAccess.buildPartnerListRows(partners, interactionsByPartner);
 }
 
 function readReferralRecordsByPartnerId_(sheet) {
@@ -218,6 +209,7 @@ function getPartnerDetail(partnerId) {
 
   var referralSheet = ss.getSheetByName(GlowSchema.REFERRAL_RECORD_SHEET_NAME);
   var referrals = readReferralRecordsByPartnerId_(referralSheet)[partnerId] || [];
+  referrals = GlowAdminAccess.normalizeReferralRecords(referrals);
 
   return { partner: partner, history: history, referrals: referrals };
 }

@@ -126,3 +126,37 @@ test("sortInteractionsByDateDesc: 日付がDateオブジェクトの場合も正
   assert.deepEqual(result.map(r => r["日付"]), ["2026-08-10", "2026-08-05", "2026-08-01"]);
   assert.ok(records[0]["日付"] instanceof Date, "入力レコードのDateオブジェクトが変更されていない");
 });
+
+const SAMPLE_PARTNERS = [
+  { パートナーID: "P-1", 名称: "沖縄社労士法人", 種別: "士業", 関係性ランク: "A" },
+  { パートナーID: "P-2", 名称: "那覇商工会", 種別: "商工団体", 関係性ランク: "B" },
+  { パートナーID: "P-3", 名称: "琉球信用金庫", 種別: "金融機関", 関係性ランク: "C" }
+];
+
+test("buildPartnerListRows: 対応履歴の件数を正しく集計し、対応履歴が0件・未登録のパートナーも0件として含める", () => {
+  const interactionsByPartnerId = {
+    "P-1": [{ 履歴ID: "H-1" }, { 履歴ID: "H-2" }],
+    "P-2": []
+    // P-3はマップに存在しない(対応履歴が一度も記録されていない)
+  };
+  const result = adminAccess.buildPartnerListRows(SAMPLE_PARTNERS, interactionsByPartnerId);
+  assert.deepEqual(result, [
+    { "パートナーID": "P-1", "名称": "沖縄社労士法人", "種別": "士業", "関係性ランク": "A", "対応回数": 2 },
+    { "パートナーID": "P-2", "名称": "那覇商工会", "種別": "商工団体", "関係性ランク": "B", "対応回数": 0 },
+    { "パートナーID": "P-3", "名称": "琉球信用金庫", "種別": "金融機関", "関係性ランク": "C", "対応回数": 0 }
+  ]);
+});
+
+test("normalizeReferralRecords: 紹介日をDate・文字列いずれもyyyy-MM-dd文字列に正規化し、他フィールドは変更せず、入力配列も変更しない", () => {
+  const referrals = [
+    { パートナーID: "P-1", 紹介日: new Date(2026, 7, 20), 紹介料率: "10%", 契約内容メモ: "顧問契約", 成約有無: "成約" },
+    { パートナーID: "P-1", 紹介日: "2026-07-01", 紹介料率: "5%", 契約内容メモ: "スポット相談", 成約有無: "未成約" }
+  ];
+  const result = adminAccess.normalizeReferralRecords(referrals);
+  assert.deepEqual(result.map(r => r["紹介日"]), ["2026-08-20", "2026-07-01"]);
+  assert.equal(result[0]["紹介料率"], "10%");
+  assert.equal(result[0]["契約内容メモ"], "顧問契約");
+  assert.equal(result[1]["紹介料率"], "5%");
+  assert.equal(result[1]["契約内容メモ"], "スポット相談");
+  assert.ok(referrals[0]["紹介日"] instanceof Date, "入力配列の要素が変更されていない");
+});
