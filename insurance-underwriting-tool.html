@@ -8,7 +8,6 @@
     :root {
       --navy: #00335C;
       --orange: #F88800;
-      --fwd-orange: #FF8C00;
       --light: #FFFBF4;
       --text: #333;
       --success: #2e7d32;
@@ -54,20 +53,12 @@
       margin-top: 10px;
     }
 
-    .insurers-badge {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      margin-top: 15px;
-      flex-wrap: wrap;
-    }
-
-    .badge {
-      background: rgba(255,255,255,0.2);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 13px;
-      border: 1px solid rgba(255,255,255,0.3);
+    .version-info {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      padding-top: 10px;
     }
 
     .main {
@@ -239,28 +230,32 @@
       color: #616161;
     }
 
-    .company-badge {
-      display: inline-block;
-      padding: 4px 10px;
+    .marks-list {
+      font-size: 12px;
+      line-height: 1.6;
+      max-height: 200px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      padding: 8px;
       border-radius: 4px;
-      font-size: 12px;
+    }
+
+    .mark-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .mark-item:last-child {
+      border-bottom: none;
+    }
+
+    .mark-symbol {
       font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .company-naneiro {
-      background: #e3f2fd;
-      color: #1565c0;
-    }
-
-    .company-fwd {
-      background: #ffe0b2;
-      color: #e65100;
-    }
-
-    .confidence {
-      font-size: 12px;
-      color: #999;
+      color: var(--navy);
+      min-width: 20px;
+      text-align: center;
     }
 
     .no-results {
@@ -284,6 +279,12 @@
       font-size: 13px;
       color: #856404;
       line-height: 1.6;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
     }
 
     .actions {
@@ -322,10 +323,7 @@
     <header>
       <h1>🏥 保険引き受け目安検索</h1>
       <p class="subtitle">患者の病名から、保険会社ごとの引き受け見込みを検索</p>
-      <div class="insurers-badge">
-        <span class="badge">なないろ生命</span>
-        <span class="badge">FWD生命</span>
-      </div>
+      <div class="version-info" id="versionInfo">読み込み中...</div>
     </header>
 
     <div class="main">
@@ -343,9 +341,9 @@
       </div>
 
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('all')">すべて</button>
-        <button class="tab-btn" onclick="switchTab('naneiro')">なないろ生命</button>
-        <button class="tab-btn" onclick="switchTab('fwd')">FWD生命</button>
+        <button class="tab-btn active" onclick="switchTab(event, 'all')">すべて</button>
+        <button class="tab-btn" onclick="switchTab(event, 'naneiro')">なないろ生命</button>
+        <button class="tab-btn" onclick="switchTab(event, 'fwd')">FWD生命</button>
       </div>
 
       <div id="results-all" class="results active">
@@ -357,9 +355,9 @@
           <thead>
             <tr>
               <th>保険会社</th>
-              <th>引き受け</th>
-              <th>条件・詳細</th>
-              <th>信度</th>
+              <th>病名</th>
+              <th>引き受け判定</th>
+              <th>詳細</th>
             </tr>
           </thead>
           <tbody id="resultBody-all"></tbody>
@@ -375,9 +373,9 @@
           <thead>
             <tr>
               <th>病名</th>
-              <th>対応商品</th>
-              <th>詳細</th>
-              <th>信度</th>
+              <th>状態</th>
+              <th>対応商品と判定</th>
+              <th>ページ</th>
             </tr>
           </thead>
           <tbody id="resultBody-naneiro"></tbody>
@@ -394,8 +392,8 @@
             <tr>
               <th>病名</th>
               <th>引き受け判定</th>
-              <th>複数傷病対応</th>
-              <th>信度</th>
+              <th>条件・詳細</th>
+              <th>複数傷病</th>
             </tr>
           </thead>
           <tbody id="resultBody-fwd"></tbody>
@@ -420,193 +418,33 @@
   </div>
 
   <script>
-    // なないろ生命のデータ（2026年4月版）
-    const naneiro_data = {
-      company: "なないろ生命",
-      version: "2026年4月版",
-      products: [
-        {
-          name: "入院一時金特約",
-          diseases: ["入院", "手術", "骨折", "けが", "火傷", "労災"]
-        },
-        {
-          name: "がん治療特約(2022)",
-          diseases: ["がん", "悪性新生物", "肺がん", "乳がん", "胃がん", "大腸がん", "肝臓がん", "膵臓がん"]
-        },
-        {
-          name: "がん診断一時金特約(2024)",
-          diseases: ["がん", "悪性新生物", "上皮内がん", "がん診断"]
-        },
-        {
-          name: "がん完治ベッド特約",
-          diseases: ["がん", "がん治療", "がん入院"]
-        },
-        {
-          name: "3大疾病一時金特約(2024)",
-          diseases: ["がん", "心筋梗塞", "脳卒中", "心疾患", "脳出血", "脳梗塞"]
-        },
-        {
-          name: "通院一時金特約(2022)",
-          diseases: ["通院", "外来診療", "手術通院"]
-        },
-        {
-          name: "先進医療・患者申し出療養特約",
-          diseases: ["先進医療", "患者申し出療養", "先進治療"]
-        },
-        {
-          name: "女性医療特約(入院型/手術型)",
-          diseases: ["乳がん", "子宮がん", "卵巣がん", "女性特有疾患", "妊娠", "出産"]
-        },
-        {
-          name: "女性特定疾病一時金特約(入院)",
-          diseases: ["乳がん", "子宮がん", "卵巣がん"]
-        },
-        {
-          name: "女性特定疾病一時金特約(通院)",
-          diseases: ["乳がん", "子宮がん", "卵巣がん"]
-        },
-        {
-          name: "特定疾病保障付込保険特約",
-          diseases: ["がん", "心筋梗塞", "脳卒中"]
-        },
-        {
-          name: "認知症保障特約",
-          diseases: ["認知症", "アルツハイマー", "脳血管性認知症", "軽度認知障害"]
-        }
-      ]
-    };
-
-    // FWD生命のデータ（2026年6月版・複数傷病対応）
-    const fwd_data = {
-      company: "FWD生命",
-      version: "2026年6月版（複数傷病対応版）",
-      diseases: [
-        {
-          name: "悪性新生物（がん）",
-          judgement: "条件付き",
-          condition: "診断後3年以上経過",
-          multiple: "対応"
-        },
-        {
-          name: "糖尿病",
-          judgement: "条件付き",
-          condition: "HbA1c値による判定・医学的管理中",
-          multiple: "対応"
-        },
-        {
-          name: "高血圧症",
-          judgement: "条件付き",
-          condition: "正常範囲内に管理されている",
-          multiple: "対応"
-        },
-        {
-          name: "心筋梗塞",
-          judgement: "条件付き",
-          condition: "発症後1年以上経過・医学的管理中",
-          multiple: "対応"
-        },
-        {
-          name: "脳卒中（脳梗塞・脳出血）",
-          judgement: "条件付き",
-          condition: "発症後1年以上経過・医学的管理中",
-          multiple: "対応"
-        },
-        {
-          name: "心疾患（狭心症等）",
-          judgement: "条件付き",
-          condition: "医学的管理中・症状安定",
-          multiple: "対応"
-        },
-        {
-          name: "肺がん",
-          judgement: "条件付き",
-          condition: "診断後3年以上経過",
-          multiple: "対応"
-        },
-        {
-          name: "乳がん",
-          judgement: "条件付き",
-          condition: "診断後3年以上経過",
-          multiple: "対応"
-        },
-        {
-          name: "胃がん",
-          judgement: "条件付き",
-          condition: "診断後3年以上経過",
-          multiple: "対応"
-        },
-        {
-          name: "肝臓がん",
-          judgement: "条件付き",
-          condition: "診断後3年以上経過",
-          multiple: "対応"
-        },
-        {
-          name: "膵臓がん",
-          judgement: "条件付き",
-          condition: "診断後3年以上経過",
-          multiple: "対応"
-        },
-        {
-          name: "大腸がん",
-          judgement: "条件付き",
-          condition: "診断後3年以上経過",
-          multiple: "対応"
-        },
-        {
-          name: "腎臓がん",
-          judgement: "条件付き",
-          condition: "診断後3年以上経過",
-          multiple: "対応"
-        },
-        {
-          name: "膀胱がん",
-          judgement: "条件付き",
-          condition: "診断後3年以上経過",
-          multiple: "対応"
-        },
-        {
-          name: "骨盤腔内悪性腫瘍",
-          judgement: "条件付き",
-          condition: "診断後3年以上経過",
-          multiple: "対応"
-        },
-        {
-          name: "子宮がん",
-          judgement: "条件付き",
-          condition: "診断後3年以上経過",
-          multiple: "対応"
-        },
-        {
-          name: "リンパ腫・白血病",
-          judgement: "要確認",
-          condition: "詳細な医学情報が必要",
-          multiple: "対応"
-        },
-        {
-          name: "肺炎",
-          judgement: "要確認",
-          condition: "回復状況により判定",
-          multiple: "対応"
-        },
-        {
-          name: "気管支喘息",
-          judgement: "条件付き",
-          condition: "医学的管理中・症状安定",
-          multiple: "対応"
-        },
-        {
-          name: "慢性閉塞性肺疾患(COPD)",
-          judgement: "要確認",
-          condition: "重症度による判定",
-          multiple: "対応"
-        }
-      ]
-    };
-
+    let underwritingData = null;
     let currentTab = 'all';
+    let lastResults = { naneiro: [], fwd: [] };
+
+    async function loadData() {
+      try {
+        const response = await fetch('/docs/insurance/underwriting_full.json');
+        underwritingData = await response.json();
+        console.log('データ読み込み完了:', underwritingData._source);
+
+        const info = document.getElementById('versionInfo');
+        info.innerHTML = `
+          <div>なないろ生命: ${underwritingData._source.naneiro}</div>
+          <div>${underwritingData._source.fwd}</div>
+        `;
+      } catch (error) {
+        console.error('データ読み込みエラー:', error);
+        document.getElementById('versionInfo').textContent = 'データ読み込み失敗：ページをリロードしてください';
+      }
+    }
 
     function search() {
+      if (!underwritingData) {
+        alert('データの読み込みを待ってください');
+        return;
+      }
+
       const input = document.getElementById('diseaseInput').value.trim();
       if (!input) {
         alert('病名を入力してください');
@@ -616,42 +454,36 @@
       const naneiro_results = searchNaneiro(input);
       const fwd_results = searchFWD(input);
 
-      displayResults(naneiro_results, fwd_results, input);
+      lastResults = { naneiro: naneiro_results, fwd: fwd_results };
+      displayResults(naneiro_results, fwd_results);
     }
 
     function searchNaneiro(query) {
       const results = [];
       const q = query.toLowerCase();
 
-      for (const product of naneiro_data.products) {
-        for (const disease of product.diseases) {
-          const score = calculateScore(q, disease);
-          if (score > 30) {
-            results.push({
-              disease: disease,
-              product: product.name,
-              score: score
-            });
-          }
+      for (const entry of underwritingData.naneiro) {
+        const score = calculateScore(q, entry.disease);
+        if (score > 40) {
+          results.push({
+            ...entry,
+            score: score
+          });
         }
       }
 
-      return results.filter((r, i, arr) => arr.findIndex(x => x.disease === r.disease && x.product === r.product) === i)
-        .sort((a, b) => b.score - a.score);
+      return results.sort((a, b) => b.score - a.score);
     }
 
     function searchFWD(query) {
       const results = [];
       const q = query.toLowerCase();
 
-      for (const disease of fwd_data.diseases) {
-        const score = calculateScore(q, disease.name);
-        if (score > 30) {
+      for (const entry of underwritingData.fwd) {
+        const score = calculateScore(q, entry.disease);
+        if (score > 40) {
           results.push({
-            disease: disease.name,
-            judgement: disease.judgement,
-            condition: disease.condition,
-            multiple: disease.multiple,
+            ...entry,
             score: score
           });
         }
@@ -663,109 +495,150 @@
     function calculateScore(query, target) {
       const t = target.toLowerCase();
       if (t === query) return 100;
-      if (t.includes(query) || query.includes(t)) return 80;
-      if (t.includes(query.slice(0, 2))) return 60;
+      if (t.includes(query)) return 90;
+      if (query.includes(t)) return 80;
+
+      const words = t.split(/[\s・（）()]/);
+      if (words.some(w => w === query)) return 85;
+      if (words.some(w => w.includes(query))) return 70;
+
       return 0;
     }
 
-    function displayResults(naneiro_results, fwd_results, query) {
+    function displayResults(naneiro_results, fwd_results) {
       const noResults = document.getElementById('noResults');
       const actions = document.getElementById('actions');
 
       if (naneiro_results.length === 0 && fwd_results.length === 0) {
         noResults.style.display = 'block';
         document.getElementById('results-all').classList.remove('active');
+        document.getElementById('results-all').style.display = 'none';
         actions.style.display = 'none';
+        clearAllTables();
         return;
       }
 
       noResults.style.display = 'none';
       actions.style.display = 'flex';
+      document.getElementById('results-all').style.display = 'block';
 
-      // 全社表示
       displayAllResults(naneiro_results, fwd_results);
+      displayNaneiro(naneiro_results);
+      displayFWD(fwd_results);
 
-      // なないろ表示
-      displayNaneiroResults(naneiro_results);
-
-      // FWD表示
-      displayFWDResults(fwd_results);
-
-      switchTab(currentTab);
+      if (currentTab === 'all') {
+        document.getElementById('results-all').classList.add('active');
+      }
     }
 
     function displayAllResults(naneiro_results, fwd_results) {
       const body = document.getElementById('resultBody-all');
       body.innerHTML = '';
 
-      for (const r of naneiro_results) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td><span class="company-badge company-naneiro">なないろ生命</span></td>
-          <td><span class="status conditional">条件付き</span></td>
-          <td><strong>${r.disease}</strong> → ${r.product}</td>
-          <td><span class="confidence">${r.score}%</span></td>
-        `;
-        body.appendChild(row);
-      }
+      const combined = [
+        ...naneiro_results.map(r => ({ company: 'なないろ生命', data: r, type: 'naneiro' })),
+        ...fwd_results.map(r => ({ company: 'FWD生命', data: r, type: 'fwd' }))
+      ];
 
-      for (const r of fwd_results) {
+      combined.forEach(item => {
         const row = document.createElement('tr');
-        const statusClass = r.judgement.includes('可') ? 'ok' : r.judgement.includes('条件') ? 'conditional' : 'unknown';
-        row.innerHTML = `
-          <td><span class="company-badge company-fwd">FWD生命</span></td>
-          <td><span class="status ${statusClass}">${r.judgement}</span></td>
-          <td><strong>${r.disease}</strong> - ${r.condition}</td>
-          <td><span class="confidence">${r.score}%</span></td>
-        `;
-        body.appendChild(row);
-      }
+        const data = item.data;
 
-      document.getElementById('count-all').textContent = (naneiro_results.length + fwd_results.length) + ' 件';
+        if (item.type === 'naneiro') {
+          const statusStr = Object.values(data.marks).some(m => m === '○') ? '可' :
+                           Object.values(data.marks).some(m => m === '★') ? '条件付き' : '不可';
+          const statusClass = statusStr === '可' ? 'ok' : statusStr === '条件付き' ? 'conditional' : 'ng';
+
+          row.innerHTML = `
+            <td>${item.company}</td>
+            <td>${data.disease}</td>
+            <td><span class="status ${statusClass}">${statusStr}</span></td>
+            <td><small>状態: ${data.state}<br>ページ: ${data.page}</small></td>
+          `;
+        } else {
+          const statusClass = data.judgement === '可' ? 'ok' :
+                            data.judgement === '条件付き' ? 'conditional' :
+                            data.judgement === '要確認' ? 'unknown' : 'ng';
+
+          row.innerHTML = `
+            <td>${item.company}</td>
+            <td>${data.disease}</td>
+            <td><span class="status ${statusClass}">${data.judgement}</span></td>
+            <td><small>${data.condition || 'なし'}</small></td>
+          `;
+        }
+
+        body.appendChild(row);
+      });
+
+      document.getElementById('count-all').textContent = combined.length + ' 件';
     }
 
-    function displayNaneiroResults(results) {
+    function displayNaneiro(results) {
       const body = document.getElementById('resultBody-naneiro');
       body.innerHTML = '';
 
-      for (const r of results) {
+      results.forEach(data => {
         const row = document.createElement('tr');
+        const statusStr = Object.values(data.marks).some(m => m === '○') ? '可' :
+                         Object.values(data.marks).some(m => m === '★') ? '条件付き' : '不可';
+        const statusClass = statusStr === '可' ? 'ok' : statusStr === '条件付き' ? 'conditional' : 'ng';
+
+        const marksList = Object.entries(data.marks)
+          .filter(([k, v]) => v !== '')
+          .map(([k, v]) => `<div class="mark-item"><span>${k}</span><span class="mark-symbol">${v}</span></div>`)
+          .join('');
+
         row.innerHTML = `
-          <td><strong>${r.disease}</strong></td>
-          <td>${r.product}</td>
-          <td>対応可能</td>
-          <td><span class="confidence">${r.score}%</span></td>
+          <td><strong>${data.disease}</strong></td>
+          <td>${data.state}</td>
+          <td>
+            <span class="status ${statusClass}" style="margin-bottom:8px; display:block; width:fit-content;">${statusStr}</span>
+            <div class="marks-list">${marksList || 'データなし'}</div>
+          </td>
+          <td><small>p.${data.page}</small></td>
         `;
+
         body.appendChild(row);
-      }
+      });
 
       document.getElementById('count-naneiro').textContent = results.length + ' 件';
     }
 
-    function displayFWDResults(results) {
+    function displayFWD(results) {
       const body = document.getElementById('resultBody-fwd');
       body.innerHTML = '';
 
-      for (const r of results) {
-        const statusClass = r.judgement.includes('可') ? 'ok' : r.judgement.includes('条件') ? 'conditional' : 'unknown';
+      results.forEach(data => {
         const row = document.createElement('tr');
+        const statusClass = data.judgement === '可' ? 'ok' :
+                          data.judgement === '条件付き' ? 'conditional' :
+                          data.judgement === '要確認' ? 'unknown' : 'ng';
+
         row.innerHTML = `
-          <td><strong>${r.disease}</strong></td>
-          <td><span class="status ${statusClass}">${r.judgement}</span></td>
-          <td>${r.condition}</td>
-          <td><span class="confidence">${r.score}%</span></td>
+          <td><strong>${data.disease}</strong></td>
+          <td><span class="status ${statusClass}">${data.judgement}</span></td>
+          <td><small>${data.condition || 'なし'}</small></td>
+          <td><small>${data.multiple_diseases || 'なし'}</small></td>
         `;
+
         body.appendChild(row);
-      }
+      });
 
       document.getElementById('count-fwd').textContent = results.length + ' 件';
     }
 
-    function switchTab(tab) {
+    function clearAllTables() {
+      document.getElementById('resultBody-all').innerHTML = '';
+      document.getElementById('resultBody-naneiro').innerHTML = '';
+      document.getElementById('resultBody-fwd').innerHTML = '';
+    }
+
+    function switchTab(e, tab) {
       currentTab = tab;
 
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+      e.target.classList.add('active');
 
       document.querySelectorAll('[id^="results-"]').forEach(el => el.classList.remove('active'));
       document.getElementById('results-' + tab).classList.add('active');
@@ -775,23 +648,19 @@
       document.getElementById('diseaseInput').value = '';
       document.getElementById('noResults').style.display = 'none';
       document.getElementById('actions').style.display = 'none';
-      document.querySelectorAll('[id^="resultBody-"]').forEach(body => body.innerHTML = '');
+      clearAllTables();
     }
 
     function downloadCSV() {
-      const rows = [];
-      rows.push('保険会社,病名,引き受け,条件,信度');
+      const rows = ['保険会社,病名,状態,判定,詳細'];
 
-      const allBody = document.getElementById('resultBody-all');
-      allBody.querySelectorAll('tr').forEach(tr => {
-        const cells = tr.querySelectorAll('td');
-        const line = [
-          cells[0].textContent.trim(),
-          cells[2].textContent.trim(),
-          cells[1].textContent.trim(),
-          cells[3].textContent.trim()
-        ].join(',');
-        rows.push(line);
+      lastResults.naneiro.forEach(r => {
+        const statusStr = Object.values(r.marks).some(m => m === '○') ? '可' : '条件付き';
+        rows.push(`なないろ生命,"${r.disease}","${r.state}","${statusStr}","ページ${r.page}"`);
+      });
+
+      lastResults.fwd.forEach(r => {
+        rows.push(`FWD生命,"${r.disease}","","${r.judgement}","${r.condition}"`);
       });
 
       const csv = rows.join('\n');
@@ -802,10 +671,11 @@
       link.click();
     }
 
-    // Enterキーで検索
     document.getElementById('diseaseInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') search();
     });
+
+    document.addEventListener('DOMContentLoaded', loadData);
   </script>
 </body>
 </html>
