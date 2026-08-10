@@ -46,3 +46,32 @@ def triage(candidates, capacity):
         "total": len(ordered),
     }
     return today, carry, stats
+
+
+def render_html(today, carry, stats, path, capacity):
+    """今日の要接触をHTML出力（表示層・出力は private/ 限定）。"""
+    import html
+    trs = []
+    for i, c in enumerate(today, 1):
+        trs.append(
+            f'<tr><td>{i}</td><td>{html.escape(str(c["trigger"]))}</td>'
+            f'<td>{html.escape(str(c.get("customer_id") or "—"))}</td>'
+            f'<td>{html.escape(str(c.get("product")))}</td>'
+            f'<td>{c["risk_pct"]}%</td><td>{c["saveable"]:,.0f}円</td></tr>')
+    carry_note = (
+        f'キャパ{capacity}件/日 超過 {stats["carry_count"]}件は翌日へ繰り越し'
+        f'（最高“守れる金額” {stats["carry_max_saveable"]:,.0f}円）'
+        if stats["carry_count"] else 'キャパ内・取りこぼしなし')
+    doc = (
+        '<!doctype html><meta charset="utf-8"><title>今日の要接触</title>'
+        '<style>body{font-family:Meiryo,"Noto Sans JP",sans-serif;padding:16px}'
+        'table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px;font-size:13px}'
+        'th{background:#00335C;color:#fff}</style>'
+        f'<h1>今日の要接触（{len(today)}件 / 要接触合計 {stats["total"]}件）</h1>'
+        f'<p>{carry_note}。優先度：不着＞遅延＞口座確認＞高リスク、各内で守れる金額順。'
+        '顧客連絡は人が実行。合成データ。</p>'
+        '<table><thead><tr><th>#</th><th>きっかけ</th><th>顧客ID</th><th>商品</th>'
+        '<th>リスク</th><th>守れる金額</th></tr></thead>'
+        f'<tbody>{"".join(trs)}</tbody></table>')
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(doc)

@@ -22,6 +22,10 @@ from .karte import render_html as render_karte_html
 from .followups import list_followups, render_html as render_followups_html
 from .karte_effect import contact_effect
 from .console import generate as generate_console
+from .triage import classify, triage, render_html as render_today_html
+from .cohort import cohort_rows, overall_rate, render_html as render_cohort_html
+from .snapshot import snapshot as do_snapshot
+from .config import CAPACITY_PER_DAY
 
 
 def _as_of(value):
@@ -162,6 +166,32 @@ def cmd_console(app_csv, app_map, inter_csv, inter_map, model_path, out_dir, as_
     return res
 
 
+def cmd_cohort(csv_path, column_map_path, out_path, as_of):
+    as_of_d = _as_of(as_of)
+    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    rows = cohort_rows(records, as_of_d)
+    ov = overall_rate(rows)
+    render_cohort_html(rows, ov, out_path)
+    print(f"[cohort] 全体早期解約率(成熟分) {ov['rate']*100:.1f}% 目標3% "
+          f"({ov['churn']}/{ov['resolved']}) → {out_path}")
+    return ov
+
+
+def cmd_today(csv_path, column_map_path, model_path, out_path, as_of, capacity):
+    as_of_d = _as_of(as_of)
+    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    model = load_model(model_path)
+    today, carry, stats = triage(classify(records, model, as_of_d), capacity)
+    render_today_html(today, carry, stats, out_path, capacity)
+    print(f"[today] 要接触{stats['total']}件 → 今日{len(today)} / "
+          f"繰り越し{stats['carry_count']} → {out_path}")
+    return stats
+
+
+def cmd_snapshot(csv_path, interactions, month, out_dir, force):
+    return do_snapshot(csv_path, interactions, month, out_dir, force)
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="churn", description="早期解約リスク保全")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -227,6 +257,27 @@ def main(argv=None):
     sp_console.add_argument("--out-dir", required=True)
     sp_console.add_argument("--as-of", required=True)
 
+    sp_cohort = sub.add_parser("cohort")
+    sp_cohort.add_argument("--csv", required=True)
+    sp_cohort.add_argument("--column-map", required=True)
+    sp_cohort.add_argument("--out", required=True)
+    sp_cohort.add_argument("--as-of", required=True)
+
+    sp_today = sub.add_parser("today")
+    sp_today.add_argument("--csv", required=True)
+    sp_today.add_argument("--column-map", required=True)
+    sp_today.add_argument("--model", required=True)
+    sp_today.add_argument("--out", required=True)
+    sp_today.add_argument("--as-of", required=True)
+    sp_today.add_argument("--capacity", type=int, default=CAPACITY_PER_DAY)
+
+    sp_snap = sub.add_parser("snapshot")
+    sp_snap.add_argument("--csv", required=True)
+    sp_snap.add_argument("--interactions")
+    sp_snap.add_argument("--month", required=True)
+    sp_snap.add_argument("--out-dir", default="private/snapshots")
+    sp_snap.add_argument("--force", action="store_true")
+
     args = p.parse_args(argv)
     if args.cmd == "fit":
         cmd_fit(args.csv, args.column_map, args.model, args.as_of)
@@ -250,6 +301,12 @@ def main(argv=None):
     elif args.cmd == "console":
         cmd_console(args.csv, args.column_map, args.interactions, args.interaction_map,
                     args.model, args.out_dir, args.as_of)
+    elif args.cmd == "cohort":
+        cmd_cohort(args.csv, args.column_map, args.out, args.as_of)
+    elif args.cmd == "today":
+        cmd_today(args.csv, args.column_map, args.model, args.out, args.as_of, args.capacity)
+    elif args.cmd == "snapshot":
+        cmd_snapshot(args.csv, args.interactions, args.month, args.out_dir, args.force)
     return 0
 
 
