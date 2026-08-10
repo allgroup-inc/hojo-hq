@@ -261,8 +261,18 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       if (rs.length === 0) {
         app.appendChild(h("p", {text:"今回の回答では、該当の可能性が高い制度は見つかりませんでした。制度は毎日更新されるので、状況が変わったらまた診断してみてください。"}));
       }
+      // 共有・印刷は結果一覧の下へ降格(主CTA=LINEの1つに絞る。2026-08-10 三名体制裁定・第2着手)
+      var actions = null;
+      // 結果の持ち出しテキスト(LINEのトークに貼れば端末が変わっても消えない=嘘のない「保存」)
+      function resultText(){
+        var lines = ["【わたしの診断結果】対象の可能性 " + rs.length + "件(もらいわすれ堂)"];
+        rs.slice(0, 8).forEach(function(r){ lines.push("・" + r.item.name + "(可能性" + r.likelihood + ")"); });
+        if (rs.length > 8) lines.push("…ほか" + (rs.length - 8) + "件");
+        lines.push("くわしく見る: https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/");
+        return lines.join("\n");
+      }
       if (rs.length > 0) {
-        var actions = h("div", {class:"actions"});
+        actions = h("div", {class:"actions"});
         var shareBtn = h("button", {text:"家族に教える(共有)"});
         shareBtn.addEventListener("click", function(){
           if (window.fgTrack) window.fgTrack("share_click");
@@ -277,7 +287,6 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
           window.print();
         });
         actions.appendChild(shareBtn); actions.appendChild(printBtn);
-        app.appendChild(actions);
         app.appendChild(h("p", {class:"note", text:"ぜんぶ一度にやらなくて大丈夫です。まずは1件だけ、いちばん上から始めてみてください。"}));
         var sum = window.FGShindan.summarize(rs);
         var summary = h("div", {class:"summary-card"});
@@ -290,14 +299,19 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         summary.appendChild(h("p", {class:"note", text:"「対象の可能性」のご案内です。受給の可否は各窓口の判断となります。"}));
         app.appendChild(summary);
         // 結果が出た直後(最も関与が高い瞬間)にLINEを差し出す。制度一覧は登録なしでも全部見られる。
+        // 訴求は「結果の保存」(この結果はこの端末にしか残らない=事実に基づく価値。2026-08-10裁定)。
         var topLine = h("div", {style:"margin:8px 0 4px;padding:16px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
-        topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この " + sum.total + " 件、締切を逃さないために"}));
-        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"対象になりそうな制度の締切を、約1か月前にLINEでお知らせします。制度の一覧は登録なしでも、ぜんぶ見られます。"}));
+        topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この結果 " + sum.total + " 件、LINEに残しませんか?"}));
+        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"診断結果はこの端末にだけ保存されるため、機種変更などで消えることがあります。結果をコピーしてLINEのトークに貼っておけばいつでも見返せて、あなたの条件に合う新しい制度が増えたときのお知らせも届きます。制度の一覧は登録なしでも、ぜんぶ見られます。"}));
         var topLineBtn = h("a", {href:(window.FG_LINE_URL || "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/"), target:"_blank", rel:"noopener",
-          style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"LINEで締切通知を受け取る(無料)"});
-        topLineBtn.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_top"}); });
+          style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"LINEに登録して結果を残す(無料)"});
+        var topCopied = h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名 ・ いつでも解除"});
+        topLineBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_top"});
+          try { if (navigator.clipboard) { navigator.clipboard.writeText(resultText()); topCopied.textContent = "結果をコピーしました。LINEで「もらいわすれ堂」のトークに貼り付けると保存できます。"; } } catch(e){}
+        });
         topLine.appendChild(topLineBtn);
-        topLine.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名 ・ いつでも解除"}));
+        topLine.appendChild(topCopied);
         app.appendChild(topLine);
         var kindMsg = h("p", {class:"kind-msg"});
         kindMsg.innerHTML = "もらい忘れは、知らなかっただけ。<br>あなたは悪くありません。<br>ぜんぶ一度にやらなくて大丈夫。ひとつずつ、いっしょに進めましょう。";
@@ -356,18 +370,23 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         card.appendChild(rep);
         app.appendChild(card);
       });
+      // 共有・印刷はここ(結果一覧の下)に配置 — 上部の主CTAはLINE1つに絞る
+      if (actions) app.appendChild(actions);
       var lineUrl = window.FG_LINE_URL || "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/";
       var lineBox = h("div", {style:"margin:22px 0;padding:18px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
       lineBox.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px;font-size:1.05rem", text:"この結果、もらい忘れないために"}));
-      lineBox.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"LINEに登録すると、次の3つを受け取れます(制度の一覧は登録なしでもぜんぶ見られます)。"}));
+      lineBox.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"LINEに登録すると、次の3つができます(制度の一覧は登録なしでもぜんぶ見られます)。"}));
       var rewards = h("ul", {style:"list-style:none;text-align:left;max-width:420px;margin:0 auto 12px;padding:0"});
-      ["この制度の締切を、締切の約1か月前からお知らせ","あなたの条件に合う新しい制度が増えたらお知らせ","申請準備シート(持ち物リスト)をまとめて受け取る"].forEach(function(t){
+      ["診断結果の保存(結果をトークに貼っておけば、機種変更しても消えません)","あなたの条件に合う新しい制度が増えたらお知らせ","締切がある制度は、締切の約1か月前からお知らせ"].forEach(function(t){
         rewards.appendChild(h("li", {style:"padding:6px 0;border-bottom:1px solid #cfe9d8", text:t}));
       });
       lineBox.appendChild(rewards);
       var lineBtn = h("a", {href: lineUrl, target:"_blank", rel:"noopener",
         style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEで受け取る(無料)"});
-      lineBtn.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("line_add_click"); });
+      lineBtn.addEventListener("click", function(){
+        if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_bottom"});
+        try { if (rs.length && navigator.clipboard) navigator.clipboard.writeText(resultText()); } catch(e){}
+      });
       lineBox.appendChild(lineBtn);
       lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。"}));
       app.appendChild(lineBox);
