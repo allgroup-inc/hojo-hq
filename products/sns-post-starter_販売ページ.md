@@ -12,7 +12,7 @@ ZIP化: `cd products && zip -r sns-post-starter.zip sns-post-starter/`
 
 ## 価格
 
-3,000円(ローンチ価格1,980円 推奨)
+5,000円(ローンチ価格2,980円)※2026-08-10 小柳さん決裁済み
 
 ## 本文
 
