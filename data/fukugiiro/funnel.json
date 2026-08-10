@@ -3,6 +3,17 @@
   "updated_at": "2026-08-10",
   "period": "7d",
   "source": "plausible-stats-api",
+  "line_detail": {
+    "click_by_pos": {
+      "(none)": 1
+    },
+    "redirect_by_channel": {
+      "shindan": 4,
+      "fg-jukyu": 1,
+      "fg-shindan": 1,
+      "ig": 1
+    }
+  },
   "stages": [
     {
       "key": "shindan_start",
