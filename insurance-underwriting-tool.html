@@ -420,34 +420,187 @@
   </div>
 
   <script>
-    // なないろ生命のデータ
+    // なないろ生命のデータ（2026年4月版）
     const naneiro_data = {
       company: "なないろ生命",
       version: "2026年4月版",
       products: [
-        { name: "がん特約", diseases: ["がん", "悪性新生物", "肺がん", "乳がん", "胃がん", "大腸がん"] },
-        { name: "入院一時金特約", diseases: ["入院", "手術"] },
-        { name: "先進医療・患者申し出療養特約", diseases: ["先進医療", "患者申し出療養"] },
-        { name: "3大疾病保障特約", diseases: ["がん", "心筋梗塞", "脳卒中", "心疾患", "脳出血"] },
-        { name: "女性医療特約", diseases: ["乳がん", "子宮がん", "女性疾患", "卵巣"] },
+        {
+          name: "入院一時金特約",
+          diseases: ["入院", "手術", "骨折", "けが", "火傷", "労災"]
+        },
+        {
+          name: "がん治療特約(2022)",
+          diseases: ["がん", "悪性新生物", "肺がん", "乳がん", "胃がん", "大腸がん", "肝臓がん", "膵臓がん"]
+        },
+        {
+          name: "がん診断一時金特約(2024)",
+          diseases: ["がん", "悪性新生物", "上皮内がん", "がん診断"]
+        },
+        {
+          name: "がん完治ベッド特約",
+          diseases: ["がん", "がん治療", "がん入院"]
+        },
+        {
+          name: "3大疾病一時金特約(2024)",
+          diseases: ["がん", "心筋梗塞", "脳卒中", "心疾患", "脳出血", "脳梗塞"]
+        },
+        {
+          name: "通院一時金特約(2022)",
+          diseases: ["通院", "外来診療", "手術通院"]
+        },
+        {
+          name: "先進医療・患者申し出療養特約",
+          diseases: ["先進医療", "患者申し出療養", "先進治療"]
+        },
+        {
+          name: "女性医療特約(入院型/手術型)",
+          diseases: ["乳がん", "子宮がん", "卵巣がん", "女性特有疾患", "妊娠", "出産"]
+        },
+        {
+          name: "女性特定疾病一時金特約(入院)",
+          diseases: ["乳がん", "子宮がん", "卵巣がん"]
+        },
+        {
+          name: "女性特定疾病一時金特約(通院)",
+          diseases: ["乳がん", "子宮がん", "卵巣がん"]
+        },
+        {
+          name: "特定疾病保障付込保険特約",
+          diseases: ["がん", "心筋梗塞", "脳卒中"]
+        },
+        {
+          name: "認知症保障特約",
+          diseases: ["認知症", "アルツハイマー", "脳血管性認知症", "軽度認知障害"]
+        }
       ]
     };
 
-    // FWD生命のデータ
+    // FWD生命のデータ（2026年6月版・複数傷病対応）
     const fwd_data = {
       company: "FWD生命",
-      version: "2026年6月版（複数傷病対応）",
+      version: "2026年6月版（複数傷病対応版）",
       diseases: [
-        { name: "がん", judgement: "条件付き", condition: "診断後3年以上", multiple: "対応" },
-        { name: "糖尿病", judgement: "引き受け可", condition: "HbA1c値による判定", multiple: "対応" },
-        { name: "高血圧症", judgement: "条件付き", condition: "医学的管理中", multiple: "対応" },
-        { name: "心筋梗塞", judgement: "条件付き", condition: "発症後1年以上", multiple: "対応" },
-        { name: "脳卒中", judgement: "条件付き", condition: "発症後1年以上", multiple: "対応" },
-        { name: "心疾患", judgement: "要確認", condition: "詳細確認が必要", multiple: "対応" },
-        { name: "肺がん", judgement: "条件付き", condition: "診断後3年以上", multiple: "対応" },
-        { name: "乳がん", judgement: "条件付き", condition: "診断後3年以上", multiple: "対応" },
-        { name: "胃がん", judgement: "条件付き", condition: "診断後3年以上", multiple: "対応" },
-        { name: "肝臓がん", judgement: "条件付き", condition: "診断後3年以上", multiple: "対応" },
+        {
+          name: "悪性新生物（がん）",
+          judgement: "条件付き",
+          condition: "診断後3年以上経過",
+          multiple: "対応"
+        },
+        {
+          name: "糖尿病",
+          judgement: "条件付き",
+          condition: "HbA1c値による判定・医学的管理中",
+          multiple: "対応"
+        },
+        {
+          name: "高血圧症",
+          judgement: "条件付き",
+          condition: "正常範囲内に管理されている",
+          multiple: "対応"
+        },
+        {
+          name: "心筋梗塞",
+          judgement: "条件付き",
+          condition: "発症後1年以上経過・医学的管理中",
+          multiple: "対応"
+        },
+        {
+          name: "脳卒中（脳梗塞・脳出血）",
+          judgement: "条件付き",
+          condition: "発症後1年以上経過・医学的管理中",
+          multiple: "対応"
+        },
+        {
+          name: "心疾患（狭心症等）",
+          judgement: "条件付き",
+          condition: "医学的管理中・症状安定",
+          multiple: "対応"
+        },
+        {
+          name: "肺がん",
+          judgement: "条件付き",
+          condition: "診断後3年以上経過",
+          multiple: "対応"
+        },
+        {
+          name: "乳がん",
+          judgement: "条件付き",
+          condition: "診断後3年以上経過",
+          multiple: "対応"
+        },
+        {
+          name: "胃がん",
+          judgement: "条件付き",
+          condition: "診断後3年以上経過",
+          multiple: "対応"
+        },
+        {
+          name: "肝臓がん",
+          judgement: "条件付き",
+          condition: "診断後3年以上経過",
+          multiple: "対応"
+        },
+        {
+          name: "膵臓がん",
+          judgement: "条件付き",
+          condition: "診断後3年以上経過",
+          multiple: "対応"
+        },
+        {
+          name: "大腸がん",
+          judgement: "条件付き",
+          condition: "診断後3年以上経過",
+          multiple: "対応"
+        },
+        {
+          name: "腎臓がん",
+          judgement: "条件付き",
+          condition: "診断後3年以上経過",
+          multiple: "対応"
+        },
+        {
+          name: "膀胱がん",
+          judgement: "条件付き",
+          condition: "診断後3年以上経過",
+          multiple: "対応"
+        },
+        {
+          name: "骨盤腔内悪性腫瘍",
+          judgement: "条件付き",
+          condition: "診断後3年以上経過",
+          multiple: "対応"
+        },
+        {
+          name: "子宮がん",
+          judgement: "条件付き",
+          condition: "診断後3年以上経過",
+          multiple: "対応"
+        },
+        {
+          name: "リンパ腫・白血病",
+          judgement: "要確認",
+          condition: "詳細な医学情報が必要",
+          multiple: "対応"
+        },
+        {
+          name: "肺炎",
+          judgement: "要確認",
+          condition: "回復状況により判定",
+          multiple: "対応"
+        },
+        {
+          name: "気管支喘息",
+          judgement: "条件付き",
+          condition: "医学的管理中・症状安定",
+          multiple: "対応"
+        },
+        {
+          name: "慢性閉塞性肺疾患(COPD)",
+          judgement: "要確認",
+          condition: "重症度による判定",
+          multiple: "対応"
+        }
       ]
     };
 
