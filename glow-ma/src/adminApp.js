@@ -4,8 +4,9 @@
  * (google.script.run の実際の往復はGAS実行環境が必要なためNodeでは検証できない)。
  *
  * AdminRunner.gs の renderAdminPage_ がこの関数の戻り値を HtmlService.createHtmlOutput
- * に渡してWeb Appのページとして表示する。読み取り専用(Phase 18a)のため、
- * データを変更する google.script.run 呼び出しは一切含まない。
+ * に渡してWeb Appのページとして表示する。基本は読み取り専用だが、Phase 18bで
+ * 「関係メモ」欄の更新だけ書き込み経路(updateCompanyMemo)を1つ追加した。
+ * それ以外のデータを変更する google.script.run 呼び出しは含まない。
  */
 (function (global) {
   "use strict";
@@ -171,6 +172,8 @@
     "}",
 
     "function openDrawer(companyId){",
+    "if (memoEditing && !confirm('保存されていない変更があります。破棄しますか?')) { return; }",
+    "memoEditing = false;",
     "document.getElementById('drawer').classList.add('open');",
     "document.getElementById('overlay').classList.add('open');",
     "document.getElementById('drawerCompanyName').textContent = '読み込み中…';",
@@ -243,12 +246,14 @@
     "}",
 
     "function saveMemo(){",
+    "var savingCompanyId = memoCompanyId;",
     "var newValue = document.getElementById('memoTextarea').value;",
     "document.getElementById('memoSaveBtn').disabled = true;",
     "document.getElementById('memoCancelBtn').disabled = true;",
     "document.getElementById('memoStatus').className = '';",
     "document.getElementById('memoStatus').textContent = '保存中...';",
     "google.script.run.withSuccessHandler(function(){",
+    "if (memoCompanyId !== savingCompanyId) { return; }",
     "memoOriginalValue = newValue; memoEditing = false;",
     "document.getElementById('memoValue').textContent = newValue || '—';",
     "document.getElementById('memoTextarea').style.display = 'none';",
@@ -258,6 +263,7 @@
     "document.getElementById('memoCancelBtn').disabled = false;",
     "document.getElementById('memoStatus').textContent = '保存しました';",
     "}).withFailureHandler(function(){",
+    "if (memoCompanyId !== savingCompanyId) { return; }",
     "document.getElementById('memoSaveBtn').disabled = false;",
     "document.getElementById('memoCancelBtn').disabled = false;",
     "document.getElementById('memoStatus').className = 'error';",

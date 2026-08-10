@@ -120,6 +120,7 @@ function readCompanyRecords_(sheet) {
   var idIndex = headers.indexOf("企業ID");
   var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
   var records = [];
+  var skippedWithDataCount = 0;
   values.forEach(function (row) {
     // 企業マスタの列(電話番号のセル形式・連絡不要チェックボックス・後継者状況の
     // プルダウンなど)はensureTab_で将来の入力に備えてシート全体(getMaxRows()分)に
@@ -127,7 +128,18 @@ function readCompanyRecords_(sheet) {
     // getLastRow()の対象に含めてしまうため、実データが無くても書式が及ぶ行数分だけ
     // 空の行が返ってくる。企業IDが空の行は実データではないため読み飛ばす
     // (本番運用2026-08-10で発見。readPartnerInteractionsByPartnerId_等と同じガード)。
-    if (!row[idIndex]) return;
+    // ただし、企業IDが空でも他の列に値がある行は「人が入力途中の行」の可能性がある。
+    // writeCompanyRecords_の一括書き戻しで消えてしまうため、件数をログに残す
+    // (最終レビュー2026-08-10 I5)。
+    if (!row[idIndex]) {
+      // 未チェックのチェックボックス列はfalseを返すため、空セル扱いにする
+      // (そうしないと書式だけの空行がすべて「入力途中」と誤検知される)。
+      var hasOtherValue = row.some(function (cell) {
+        return cell !== "" && cell !== null && cell !== undefined && cell !== false;
+      });
+      if (hasOtherValue) skippedWithDataCount++;
+      return;
+    }
     var record = {};
     headers.forEach(function (header, i) {
       record[header] = row[i];
@@ -136,6 +148,12 @@ function readCompanyRecords_(sheet) {
     record["提案商品"] = record["提案商品"] ? String(record["提案商品"]).split("、") : [];
     records.push(record);
   });
+  if (skippedWithDataCount > 0) {
+    Logger.log(
+      skippedWithDataCount + "件の企業ID未設定の行をスキップしました" +
+      "(データ入力中の可能性があるため確認してください)"
+    );
+  }
   return records;
 }
 

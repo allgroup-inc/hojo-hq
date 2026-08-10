@@ -1,5 +1,6 @@
 /**
- * GLOW企業リレーション台帳: 管理画面Web App(Phase 18a: 企業一覧・詳細の閲覧)
+ * GLOW企業リレーション台帳: 管理画面Web App
+ * (Phase 18a: 企業一覧・詳細の閲覧 / Phase 18b: 関係メモ編集)
  *
  * 既存の TrackingWebApp.gs の doGet に ?page=admin での分岐が追加されており、
  * この分岐先が本ファイルの renderAdminPage_ を呼ぶ。実処理はすべてこのファイルに
@@ -231,11 +232,34 @@ function findCompanyRowIndex_(sheet, companyId) {
 }
 
 /**
+ * 指定した列(1始まりの列番号)を上から走査し、値が入っている最後の行番号を返す。
+ * ヘッダー行のみの場合は1を返す。
+ *
+ * getLastRow()は書式設定だけが及んでいる空行もデータ有りとみなしてしまうため
+ * (ImportRunner.gsのreadCompanyRecords_と同じ原因。本番運用2026-08-10で発見)、
+ * 新しい行を追記する位置を決めるときはこの関数で実データの末尾を確認すること。
+ */
+function findLastDataRow_(sheet, keyColumnIndex) {
+  var maxRow = sheet.getLastRow();
+  if (maxRow < 2) return 1;
+  var values = sheet.getRange(2, keyColumnIndex, maxRow - 1, 1).getValues();
+  var lastDataRow = 1;
+  for (var i = 0; i < values.length; i++) {
+    if (values[i][0]) lastDataRow = i + 2;
+  }
+  return lastDataRow;
+}
+
+/**
  * 関係メモが上書きされる直前に、更新前の内容を対応履歴ログへ1行自動記録する
  * (設計書4章。専用の変更履歴テーブルを作らず、既存の対応履歴ログの仕組みで
  * 「上書きされる前の情報」を追跡可能にする)。
  * この記録が失敗した場合は例外を投げ、呼び出し元(updateCompanyMemo)で
  * 関係メモの上書き自体を行わせない。
+ *
+ * ドキュメントロックはこの関数では取得しない。呼び出し元のupdateCompanyMemoが
+ * 行特定〜メモ書き込みまでを1つのロックで保護しており、ここで取り直すと
+ * その保護が途切れてしまうため(最終レビュー2026-08-10 I2)。
  */
 function appendMemoUpdateInteractionLog_(companyId, oldMemo) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -243,24 +267,17 @@ function appendMemoUpdateInteractionLog_(companyId, oldMemo) {
   if (!logSheet) {
     throw new Error("対応履歴ログタブが見つかりません。");
   }
-  var lock = LockService.getDocumentLock();
-  if (!lock.tryLock(10000)) {
-    throw new Error("他の処理が対応履歴ログを操作中のため、保存を中断しました。しばらく待ってから再実行してください。");
-  }
-  try {
-    var nextRow = logSheet.getLastRow() + 1;
-    var logId = "H-" + Utilities.getUuid();
-    var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
-    var staffRows = readStaffAllowlistEmails_();
-    var staffName = GlowAdminAccess.resolveStaffName(Session.getActiveUser().getEmail(), staffRows);
-    var oldMemoText = oldMemo ? String(oldMemo) : "(更新前は未記入)";
-    logSheet.getRange(nextRow, 1, 1, GlowSchema.INTERACTION_LOG_HEADERS.length).setValues([[
-      logId, companyId, todayString, staffName, "関係メモ更新", "未接触",
-      "関係メモを更新しました(更新前の内容: " + oldMemoText + ")", ""
-    ]]);
-  } finally {
-    lock.releaseLock();
-  }
+  var idColumnIndex = GlowSchema.INTERACTION_LOG_HEADERS.indexOf("履歴ID") + 1;
+  var nextRow = findLastDataRow_(logSheet, idColumnIndex) + 1;
+  var logId = "H-" + Utilities.getUuid();
+  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  var staffRows = readStaffAllowlistEmails_();
+  var staffName = GlowAdminAccess.resolveStaffName(Session.getActiveUser().getEmail(), staffRows);
+  var oldMemoText = oldMemo ? String(oldMemo) : "(更新前は未記入)";
+  logSheet.getRange(nextRow, 1, 1, GlowSchema.INTERACTION_LOG_HEADERS.length).setValues([[
+    logId, companyId, todayString, staffName, "関係メモ更新", "未接触",
+    "関係メモを更新しました(更新前の内容: " + oldMemoText + ")", ""
+  ]]);
 }
 
 /**
@@ -271,6 +288,14 @@ function appendMemoUpdateInteractionLog_(companyId, oldMemo) {
  *
  * 対応履歴ログへの記録(appendMemoUpdateInteractionLog_)が完了してから
  * 関係メモを上書きする順序を守ること(設計書3章。記録なき上書きを避けるため)。
+ *
+ * ドキュメントロックは行特定〜ログ記録〜メモ書き込みの全体にかける。人間同士の
+ * 同時編集対策ではなく(それが当初の狭すぎる理由だった)、企業マスタ全体を
+ * 読み込み→加工→clearContent+一括書き戻しするrecalculateScores(ScoringRunner.gs)・
+ * syncDoNotContact(DncRunner.gs)・importCompaniesFromStaging(ImportRunner.gs)との
+ * 排他が目的。ロックが途切れると、行特定と書き込みの間に全体書き戻しが挟まって
+ * メモが黙って元に戻る(ロストアップデート)か、行位置がずれて別企業の行に
+ * メモを書き込む(誤行破壊)可能性がある(最終レビュー2026-08-10 I2)。
  */
 function updateCompanyMemo(companyId, memo) {
   requireAdminAccess_();
@@ -279,14 +304,22 @@ function updateCompanyMemo(companyId, memo) {
   if (!companySheet) {
     throw new Error("企業マスタタブが見つかりません。");
   }
-  var rowIndex = findCompanyRowIndex_(companySheet, companyId);
-  if (rowIndex === -1) {
-    throw new Error("該当する企業が見つかりません: " + companyId);
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(10000)) {
+    throw new Error("他の処理がデータを操作中のため、保存を中断しました。しばらく待ってから再実行してください。");
   }
-  var memoColumnIndex = GlowSchema.COMPANY_MASTER_HEADERS.indexOf("関係メモ") + 1;
-  var oldMemo = companySheet.getRange(rowIndex, memoColumnIndex).getValue();
+  try {
+    var rowIndex = findCompanyRowIndex_(companySheet, companyId);
+    if (rowIndex === -1) {
+      throw new Error("該当する企業が見つかりません: " + companyId);
+    }
+    var memoColumnIndex = GlowSchema.COMPANY_MASTER_HEADERS.indexOf("関係メモ") + 1;
+    var oldMemo = companySheet.getRange(rowIndex, memoColumnIndex).getValue();
 
-  appendMemoUpdateInteractionLog_(companyId, oldMemo);
+    appendMemoUpdateInteractionLog_(companyId, oldMemo);
 
-  companySheet.getRange(rowIndex, memoColumnIndex).setValue(memo);
+    companySheet.getRange(rowIndex, memoColumnIndex).setValue(memo);
+  } finally {
+    lock.releaseLock();
+  }
 }

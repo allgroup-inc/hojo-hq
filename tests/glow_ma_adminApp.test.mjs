@@ -93,3 +93,9 @@ test("buildAdminAppHtml: 書き込み系のgoogle.script.run呼び出しを一�
     assert.equal(html.indexOf(forbidden), -1, forbidden + " への呼び出しが含まれてはいけない(後続フェーズの機能)");
   });
 });
+
+test("buildAdminAppHtml: 生成されるクライアントスクリプトが構文エラーを含まない", () => {
+  const html = adminApp.buildAdminAppHtml();
+  const script = html.match(/<script>([\s\S]*)<\/script>/)[1];
+  assert.doesNotThrow(() => new Function(script));
+});
