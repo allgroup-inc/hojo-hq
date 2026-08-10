@@ -38,6 +38,11 @@ section{padding:44px 0}
 .pillars{display:grid;gap:14px}
 .pillar{background:var(--nb-card);border:1px solid var(--nb-line);border-radius:12px;padding:20px}
 .pillar h3{color:var(--nb-primary);margin-bottom:.3em}
+.trustquote{background:var(--nb-card);border:1px solid var(--nb-line);border-radius:12px;padding:18px 20px;
+  display:flex;gap:16px;align-items:center}
+.trustquote .avatar{flex:none;display:block}
+.trustquote p{font-size:.95rem;color:var(--nb-muted)}
+.trustquote a{font-weight:700}
 table.pricecmp{width:100%;border-collapse:collapse;background:var(--nb-card);border:1px solid var(--nb-line);
   border-radius:12px;overflow:hidden}
 table.pricecmp th,table.pricecmp td{padding:12px 14px;border-bottom:1px solid var(--nb-line);text-align:left}
@@ -70,6 +75,19 @@ footer a{color:#bcd0c4}
       <div class="ctarow">
         <a class="btn" href="contact/">無料相談を予約する</a>
         <a class="btn ghost" href="pricing/">料金を見る</a>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:0 0 8px">
+    <div class="wrap">
+      <div class="trustquote">
+        <svg class="avatar" width="56" height="56" viewBox="0 0 120 120" role="img" aria-label="カチカクくんのシンボルアイコン">
+          <circle cx="60" cy="60" r="58" fill="#2F6B4F"/>
+          <path d="M34 78 L34 62 M52 78 L52 50 M70 78 L70 40 M88 78 L88 30" stroke="#D98E2B" stroke-width="8" stroke-linecap="round"/>
+          <path d="M30 78 H90" stroke="#FAF7F0" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <p>「経理も採用も、自分の会社で全部自分でやってきました。だから、どこが本当に苦しいか分かります。」— カチカクくん<br><a href="about/">詳しいプロフィールを見る</a></p>
       </div>
     </div>
   </section>
