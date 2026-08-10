@@ -522,13 +522,14 @@
       actions.style.display = 'flex';
       document.getElementById('results-all').style.display = 'block';
 
+      // Always populate all tables so user can switch between tabs
       displayAllResults(naneiro_results, fwd_results);
       displayNaneiro(naneiro_results);
       displayFWD(fwd_results);
 
-      if (currentTab === 'all') {
-        document.getElementById('results-all').classList.add('active');
-      }
+      // Ensure the correct tab is active based on currentTab
+      document.querySelectorAll('[id^="results-"]').forEach(el => el.classList.remove('active'));
+      document.getElementById('results-' + currentTab).classList.add('active');
     }
 
     function displayAllResults(naneiro_results, fwd_results) {
