@@ -20,6 +20,11 @@ h2{font-size:1.25rem;margin-bottom:.6em;border-left:6px solid var(--nb-accent);p
 section{padding:36px 0}
 .card{background:var(--nb-card);border:1px solid var(--nb-line);border-radius:12px;padding:22px;margin-bottom:16px}
 .card h2{color:var(--nb-primary);margin-bottom:.4em;font-size:1.15rem;border-left:none;padding-left:0}
+.disclosure{background:#EFF3E9;border:1px solid var(--nb-line);border-radius:8px;padding:12px 16px;
+  font-size:.9rem;color:var(--nb-muted);margin-bottom:20px}
+.card-head{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.card-head h2{margin-bottom:0}
+.avatar{flex:none;display:block}
 .btn{display:inline-block;padding:14px 24px;background:var(--nb-primary);color:#fff;text-decoration:none;
   border-radius:999px;font-weight:700}
 .siteheader{position:sticky;top:0;background:rgba(250,247,240,.96);border-bottom:1px solid var(--nb-line);
@@ -41,9 +46,17 @@ footer{background:var(--nb-ink);color:#e6e6e0;padding:28px 0;font-size:.85rem}
   <section>
     <div class="wrap">
       <h1>代表者・チーム紹介</h1>
+      <p class="disclosure">カチカクくんとガジュマルくんは、私たちの実務経験を人格化した「経営伴走者」「AIエージェントチーム」のキャラクターです。実在の特定の個人を指すものではありません。</p>
       <div class="card">
-        <h2>カチカクくん(経営伴走者)</h2>
-        <p>10年以上にわたり、沖縄で複数の事業の経営に実際に携わってきた実務家です。管理コストの重さも、営業効率を上げる難しさも、自分自身が経営者として体験してきました。だからこそ、机上の空論ではなく「実際に効く」自動化だけをご提案します。プロプランをご検討のお客様とは、私が直接お話しします。</p>
+        <div class="card-head">
+          <svg class="avatar" width="64" height="64" viewBox="0 0 120 120" role="img" aria-label="カチカクくんのシンボルアイコン">
+            <circle cx="60" cy="60" r="58" fill="#2F6B4F"/>
+            <path d="M34 78 L34 62 M52 78 L52 50 M70 78 L70 40 M88 78 L88 30" stroke="#D98E2B" stroke-width="8" stroke-linecap="round"/>
+            <path d="M30 78 H90" stroke="#FAF7F0" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <h2>カチカクくん(経営伴走者)</h2>
+        </div>
+        <p>新卒で会社員として働き始め、その後は役員として組織運営に携わりました。そこから独立して自分の会社を設立し、10年以上にわたり沖縄で複数の事業の経営を続けています。経理・採用・営業・資金繰り——管理コストの重さも、営業効率を上げる難しさも、現場から経営まで自分自身で体験してきました。だからこそ、机上の空論ではなく「実際に効く」自動化だけをご提案します。プロプランをご検討のお客様とは、私が直接お話しします。</p>
       </div>
       <div class="card">
         <h2>ガジュマルくん(AIエージェントチーム)</h2>
@@ -55,7 +68,7 @@ footer{background:var(--nb-ink);color:#e6e6e0;padding:28px 0;font-size:.85rem}
     </div>
   </section>
 </main>
-<footer><div class="wrap">&copy; 2026 ノビシロ — ブランド名は検討中です。 <a href="../tokushoho/">特定商取引法に基づく表記</a> ・ <a href="../privacy/">プライバシーポリシー</a></div></footer>
+<footer><div class="wrap">&copy; 2026 ノビシロ <a href="../tokushoho/">特定商取引法に基づく表記</a> ・ <a href="../privacy/">プライバシーポリシー</a></div></footer>
 <script src="../analytics-config.js"></script>
 </body>
 </html>
