@@ -44,6 +44,11 @@ jobs:
       - name: 週次レポート生成(統括ユイさん)
         run: python scripts/weekly_report_fukugiiro.py
 
+      - name: 遥さんボード生成(今週のIG投稿案)
+        # data/fukugiiro/ig_neta.json(拡充ループが更新)→ site/staff/haruka/(robots除外の内部ページ)
+        continue-on-error: true
+        run: python scripts/generate_haruka_board.py
+
       - name: Commit report
         run: |
           git config user.name "hojo-hq-bot"
@@ -51,9 +56,21 @@ jobs:
           git add reports/fukugiiro
           [ -f data/fukugiiro/funnel.json ] && git add data/fukugiiro/funnel.json || true
           [ -f data/kpi/site_traffic.json ] && git add data/kpi/site_traffic.json || true
+          [ -f site/staff/haruka/index.html ] && git add site/staff/haruka || true
           git diff --cached --quiet || git commit -m "auto: もらいわすれ堂 週次レポート $(date '+%Y-%m-%d')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
           for i in 1 2 3; do
             git pull --rebase origin main && git push && break
             echo "push retry $i"; sleep 5
           done
+
+      - name: 遥さんへLINE通知(投稿案が届いた合図)
+        # 直送Secrets(FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN+HARUKA_LINE_USER_ID)があれば遥さんへ、
+        # 無ければミカタOA経由で小柳さんへ(1タップ転送)。どちらも無ければログ表示のみ。
+        continue-on-error: true
+        env:
+          FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN }}
+          HARUKA_LINE_USER_ID: ${{ secrets.HARUKA_LINE_USER_ID }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_ADMIN_USER_ID: ${{ secrets.LINE_ADMIN_USER_ID }}
+        run: python scripts/notify_haruka.py
