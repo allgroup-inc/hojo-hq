@@ -10,7 +10,8 @@
 from __future__ import annotations
 from datetime import timedelta
 
-from .config import PRE_DEBIT_LEAD_DAYS
+from .config import PRE_DEBIT_LEAD_DAYS, INITIAL_CONTACT_DAYS
+from .effect_learning import _contacts_index
 
 _ACCOUNT_PROBLEM = ("いいえ", "未確認")
 
@@ -39,4 +40,44 @@ def prevention_candidates(records, as_of, lead_days=PRE_DEBIT_LEAD_DAYS):
         t = prevention_trigger(r, as_of, lead_days)
         if t is not None:
             out.append((r, t))
+    return out
+
+
+def _has_contact_since(record, idx, as_of):
+    """契約日以降・as_of以前にこの契約への接触があるか。突合は (顧客ID, apply_id) 優先。"""
+    by_id, by_date = idx
+    cs = by_id.get((record.get("customer_id"), record.get("apply_id")))
+    if cs is None:
+        cs = by_date.get((record.get("customer_id"), record.get("apply_date")), [])
+    ap = record.get("apply_date")
+    for c in cs:
+        cd = c.get("contact_date")
+        if cd is not None and (ap is None or cd >= ap) and cd <= as_of:
+            return True
+    return False
+
+
+def initial_contact_trigger(record, contacts_index, as_of, days=INITIAL_CONTACT_DAYS):
+    """契約後 days 日以内・未接触の継続契約なら「初動」。保全は早いほど効く。
+
+    contacts_index は effect_learning._contacts_index(contacts) の戻り値。
+    """
+    if not record.get("is_scoreable"):
+        return None
+    ap = record.get("apply_date")
+    if ap is None:
+        return None
+    age_days = (as_of - ap).days
+    if 0 <= age_days <= days and not _has_contact_since(record, contacts_index, as_of):
+        return "初動"
+    return None
+
+
+def initial_contact_candidates(records, contacts, as_of, days=INITIAL_CONTACT_DAYS):
+    """(record, "初動") の並びを、初動トリガーが立つものだけ返す。"""
+    idx = _contacts_index(contacts)
+    out = []
+    for r in records:
+        if initial_contact_trigger(r, idx, as_of, days) is not None:
+            out.append((r, "初動"))
     return out

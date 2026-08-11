@@ -6,24 +6,32 @@
 from __future__ import annotations
 
 from .score import score_record, display_pct
-from .triggers import prevention_trigger
+from .triggers import prevention_trigger, initial_contact_trigger
+from .effect_learning import _contacts_index
 from .value import saveable as _saveable
 
-# きっかけの優先度（小さいほど先）。不着＞遅延＞口座確認(引落前)＞高リスク。
-PRIORITY = {"不着": 0, "遅延": 1, "口座確認": 2, "高リスク": 3}
+# きっかけの優先度（小さいほど先）。不着＞遅延＞口座確認(引落前)＞初動(未接触新規)＞高リスク。
+PRIORITY = {"不着": 0, "遅延": 1, "口座確認": 2, "初動": 3, "高リスク": 4}
 
 
-def classify(records, model, as_of):
-    """継続中レコードを、きっかけつきの候補に分類する（1契約=1候補・重複排除済み）。"""
+def classify(records, model, as_of, contacts=None):
+    """継続中レコードを、きっかけつきの候補に分類する（1契約=1候補・重複排除済み）。
+
+    contacts を渡すと、契約直後・未接触の継続契約を「初動」として拾う（保全は早いほど効く）。
+    優先度: 予防トリガー(不着/遅延/口座確認) ＞ 初動 ＞ 高リスク。
+    """
+    idx = _contacts_index(contacts) if contacts is not None else None
     cands = []
     for r in records:
         if not r.get("is_scoreable"):
             continue
         trig = prevention_trigger(r, as_of)
+        if trig is None and idx is not None:
+            trig = initial_contact_trigger(r, idx, as_of)
         s = score_record(r, model)
         if trig is None:
             if s["band"] != "high":
-                continue  # 予防トリガーも高リスクもなければ候補でない
+                continue  # 予防トリガーも初動も高リスクもなければ候補でない
             trig = "高リスク"
         cands.append({
             "customer_id": r.get("customer_id"), "apply_id": r.get("apply_id"),
@@ -68,7 +76,7 @@ def render_html(today, carry, stats, path, capacity):
         'table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px;font-size:13px}'
         'th{background:#00335C;color:#fff}</style>'
         f'<h1>今日の要接触（{len(today)}件 / 要接触合計 {stats["total"]}件）</h1>'
-        f'<p>{carry_note}。優先度：不着＞遅延＞口座確認＞高リスク、各内で守れる金額順。'
+        f'<p>{carry_note}。優先度：不着＞遅延＞口座確認＞初動＞高リスク、各内で守れる金額順。'
         '顧客連絡は人が実行。合成データ。</p>'
         '<table><thead><tr><th>#</th><th>きっかけ</th><th>顧客ID</th><th>商品</th>'
         '<th>リスク</th><th>守れる金額</th></tr></thead>'
