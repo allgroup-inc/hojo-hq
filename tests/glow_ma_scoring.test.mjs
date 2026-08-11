@@ -88,6 +88,20 @@ test("calculateRouteBonus: ルートが空配列なら0", () => {
   assert.equal(scoring.calculateRouteBonus(undefined, scoring.DEFAULT_CONFIG), 0);
 });
 
+test("calculatePreScreeningScore: 事前選定スコアが数値ならそのまま返す", () => {
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": 37 }), 37);
+});
+
+test("calculatePreScreeningScore: 事前選定スコアが数値の文字列でも変換して返す", () => {
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": "37" }), 37);
+});
+
+test("calculatePreScreeningScore: 空欄・未設定・非数値は0を返す", () => {
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": "" }), 0);
+  assert.equal(scoring.calculatePreScreeningScore({}), 0);
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": "未評価" }), 0);
+});
+
 test("calculateReactionScore: 種別ごとの加点を合算する", () => {
   const rows = [
     { 種別: "レターURLアクセス", 対応相手: "未接触" },

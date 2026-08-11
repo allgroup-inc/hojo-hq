@@ -101,6 +101,16 @@
     return max;
   }
 
+  /**
+   * 事前選定スコア(外部の選定作業による評価点)を数値として取り出す。
+   * 空欄・非数値は0として扱い、既存の計算結果に影響しない
+   * (設計書: docs/superpowers/specs/2026-08-11-glow-ma-pre-screening-score-import-design.md)。
+   */
+  function calculatePreScreeningScore(record) {
+    var n = Number(record["事前選定スコア"]);
+    return isNaN(n) ? 0 : n;
+  }
+
   // 反応スコアの上限化: 種別ごとに最初の1件のみ加点し(同一種別の繰り返しは加点しない)、
   // 意思決定者接触ボーナスも企業ごとに最大1回のみ加点する。
   // 根拠: docs/superpowers/specs/2026-07-27-glow-ma-reaction-score-cap-triangle-review.md
@@ -142,6 +152,7 @@
     calculateAgeBandPoints: calculateAgeBandPoints,
     calculateAttributeScore: calculateAttributeScore,
     calculateRouteBonus: calculateRouteBonus,
+    calculatePreScreeningScore: calculatePreScreeningScore,
     calculateReactionScore: calculateReactionScore,
     calculateRank: calculateRank
   };
