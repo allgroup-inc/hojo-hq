@@ -10,6 +10,7 @@ import csv
 
 from .intake import read_rows
 from .schema import parse_date, normalize_record
+from .config import ACCOUNT_DAILY_DOMAIN
 
 # パイプラインに最低限必要なキー（予防用の debit_* は任意）
 REQUIRED_KEYS = ["customer_id", "apply_date", "cancel_date", "product", "channel",
@@ -51,6 +52,15 @@ def preflight_report(csv_path, column_map, as_of, required_keys=REQUIRED_KEYS):
     core_dates_ok = fails["apply_date"] == 0 and fails["cancel_date"] == 0
     ok = not missing_keys and not missing_columns and core_dates_ok
 
+    # 口座“普段使い”フラグの想定外値（#142 項目4）。件数だけ数える（値は出さない・okは落とさない）
+    acc_col = column_map.get("account_daily")
+    account_flag_unexpected = 0
+    if acc_col:
+        for r in rows:
+            v = (r.get(acc_col) or "").strip()
+            if v and v not in ACCOUNT_DAILY_DOMAIN:
+                account_flag_unexpected += 1
+
     n_resolved = n_scoreable = None
     if ok:
         recs = [normalize_record(r, column_map, as_of) for r in rows]
@@ -66,4 +76,5 @@ def preflight_report(csv_path, column_map, as_of, required_keys=REQUIRED_KEYS):
         "n_unlinked": n_unlinked,
         "n_resolved": n_resolved,
         "n_scoreable": n_scoreable,
+        "account_flag_unexpected": account_flag_unexpected,
     }

@@ -65,6 +65,25 @@ class TestPreflight(unittest.TestCase):
         json.dumps(rep, ensure_ascii=False)
         self.assertNotIn("C1", json.dumps(rep, ensure_ascii=False))
 
+    def test_account_flag_unexpected_counted_but_not_blocking(self):
+        # 口座普段使いフラグは「はい/いいえ/未確認」想定。想定外の値は件数だけ警告（okは落とさない）
+        header = FULL_HEADER + ",口座普段使い"
+        cmap = dict(CMAP, account_daily="口座普段使い")
+        rows = ["C1,2025-01-01,医療,ネット,単発,5000,25,女,那覇,S1,2025-03-01,負担,はい",
+                "C2,2025-01-01,学資,紹介,継続,5000,40,男,名護,S2,,,たまに使う",  # 想定外
+                "C3,2025-01-01,医療,ネット,単発,5000,30,女,那覇,S1,,,"]           # 空=未入力は数えない
+        csv = _write(self.d, header, rows)
+        rep = preflight_report(csv, cmap, AS_OF)
+        self.assertEqual(rep["account_flag_unexpected"], 1)
+        self.assertTrue(rep["ok"])  # 警告であって停止条件ではない
+        self.assertNotIn("たまに使う", json.dumps(rep, ensure_ascii=False))  # 値は出さない
+
+    def test_account_flag_absent_is_zero(self):
+        # 口座列が無い/未マッピングなら 0（予防用は任意）
+        csv = _write(self.d, FULL_HEADER, ["C1,2025-01-01,医療,ネット,単発,5000,25,女,那覇,S1,2025-03-01,負担"])
+        rep = preflight_report(csv, CMAP, AS_OF)
+        self.assertEqual(rep["account_flag_unexpected"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

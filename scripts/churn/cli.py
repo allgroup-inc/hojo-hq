@@ -227,6 +227,9 @@ def cmd_preflight(csv_path, column_map_path, as_of):
     bad = {k: v for k, v in rep["date_parse_fails"].items() if v}
     if bad:
         print(f"  ・日付パス不能: {bad}")
+    if rep.get("account_flag_unexpected"):
+        print(f"  ・口座フラグ想定外値: {rep['account_flag_unexpected']}件"
+              f"（想定「はい/いいえ/未確認」。入力側の運用確認を推奨・#142項目4）")
     return rep
 
 
