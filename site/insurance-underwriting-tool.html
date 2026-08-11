@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>保険引き受け目安検索 - なないろ生命 × FWD生命</title>
+  <script src="https://cdn.jsdelivr.net/npm/wanakana@5.3.0/dist/wanakana.umd.js"></script>
   <style>
     :root {
       --navy: #00335C;
@@ -493,13 +494,29 @@
 
     function calculateScore(query, target) {
       const t = target.toLowerCase();
-      if (t === query) return 100;
-      if (t.includes(query)) return 90;
-      if (query.includes(t)) return 80;
+      const q = query.toLowerCase();
 
+      // 完全一致
+      if (t === q) return 100;
+      if (t.includes(q)) return 90;
+      if (q.includes(t)) return 80;
+
+      // ひらがな・カタカナ・漢字を統一形式（カタカナ）で比較
+      try {
+        const tKata = wanakana.toKatakana(t);
+        const qKata = wanakana.toKatakana(q);
+
+        if (tKata === qKata) return 100;
+        if (tKata.includes(qKata)) return 90;
+        if (qKata.includes(tKata)) return 80;
+      } catch (e) {
+        // wanakana処理に失敗した場合はスキップ
+      }
+
+      // 単語単位での比較
       const words = t.split(/[\s・（）()]/);
-      if (words.some(w => w === query)) return 85;
-      if (words.some(w => w.includes(query))) return 70;
+      if (words.some(w => w === q)) return 85;
+      if (words.some(w => w.includes(q))) return 70;
 
       return 0;
     }
