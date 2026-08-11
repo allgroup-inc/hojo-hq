@@ -27,7 +27,8 @@ from .cohort import cohort_rows, overall_rate, render_html as render_cohort_html
 from .snapshot import snapshot as do_snapshot
 from .preflight import preflight_report
 from .pipeline import run_pipeline
-from .config import CAPACITY_PER_DAY, AUC_MIN
+from .retention import purge_snapshots
+from .config import CAPACITY_PER_DAY, AUC_MIN, SNAPSHOT_RETENTION_YEARS
 
 
 def _as_of(value):
@@ -215,6 +216,20 @@ def cmd_pipeline(csv_path, column_map_path, out_dir, as_of, split, run_date,
     return st
 
 
+def cmd_retention(snapshots_dir, as_of, years, apply):
+    rep = purge_snapshots(snapshots_dir, _as_of(as_of), years, apply)
+    mode = "実削除" if apply else "ドライラン（消しません）"
+    print(f"[retention] {mode} 保持{rep['retention_years']}年 "
+          f"満期{len(rep['expired'])}件 保持継続{rep['kept']}件")
+    if rep["expired"]:
+        print(f"  ・満期: {rep['expired']}")
+    if apply:
+        print(f"  ・削除済: {rep['deleted']} → deletion_log.json に記録")
+    elif rep["expired"]:
+        print("  ※実削除は --apply を付けて実行してください")
+    return rep
+
+
 def cmd_preflight(csv_path, column_map_path, as_of):
     rep = preflight_report(csv_path, load_column_map(column_map_path), _as_of(as_of))
     mark = "✅可" if rep["ok"] else "🛑不可"
@@ -317,6 +332,12 @@ def main(argv=None):
     sp_pre.add_argument("--column-map", required=True)
     sp_pre.add_argument("--as-of", required=True)
 
+    sp_ret = sub.add_parser("retention")
+    sp_ret.add_argument("--dir", required=True)
+    sp_ret.add_argument("--as-of", required=True)
+    sp_ret.add_argument("--years", type=int, default=SNAPSHOT_RETENTION_YEARS)
+    sp_ret.add_argument("--apply", action="store_true")
+
     sp_snap = sub.add_parser("snapshot")
     sp_snap.add_argument("--csv", required=True)
     sp_snap.add_argument("--interactions")
@@ -369,6 +390,8 @@ def main(argv=None):
                      args.run_date, args.auc_min, args.capacity, args.interactions)
     elif args.cmd == "preflight":
         cmd_preflight(args.csv, args.column_map, args.as_of)
+    elif args.cmd == "retention":
+        cmd_retention(args.dir, args.as_of, args.years, args.apply)
     return 0
 
 
