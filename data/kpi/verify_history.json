@@ -251,5 +251,73 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-11",
+  "sample": 5,
+  "ng": 1,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 1
+  },
+  "items": [
+   {
+    "name": "［第十一回］事業再構築補助金（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UbU66EAF",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "沖縄県認定パートナーVC「Okinawa Partner VC」の公募",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1029379.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": false,
+    "issues": [
+     "Claude: 出典ページに制度の言及が見つからない(移設・削除の可能性)",
+     "Claude: 締切日が矛盾しています。掲載データでは2026-08-12としていますが、出典ページでは「令和8年8月12日（水曜日）」は「認定結果通知」の日付であり、応募締め切りは「令和8年7月24日（金曜日）15時（必着）」です。締切は2026-07-24が正しいです。",
+     "Gemini: 応募締切が2026-08-12とされていますが、出典本文における実際の応募締め切りは令和8年（2026年）7月24日15時必着であり、8月12日は認定結果通知（最終回答）の予定日です。"
+    ],
+    "human_verdict": null
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【中国監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuhMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「ポスト5G情報通信システム基盤強化研究開発事業／AI用データセンターにおけるソフトウェア技術ニーズ分析とテストベッド運営基盤に関する調査」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDckaMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度_Scope3排出量削減のための企業間連携による省CO2設備投資促進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDNDnMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
