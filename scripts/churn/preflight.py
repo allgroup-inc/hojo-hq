@@ -10,7 +10,7 @@ import csv
 
 from .intake import read_rows
 from .schema import parse_date, normalize_record
-from .config import ACCOUNT_DAILY_DOMAIN
+from .config import ACCOUNT_DAILY_DOMAIN, FORBIDDEN_NAME_KEYS
 
 # パイプラインに最低限必要なキー（予防用の debit_* は任意）
 REQUIRED_KEYS = ["customer_id", "apply_date", "cancel_date", "product", "channel",
@@ -49,8 +49,13 @@ def preflight_report(csv_path, column_map, as_of, required_keys=REQUIRED_KEYS):
                         c += 1
         fails[key] = c
 
+    # 前提: 顧客名は持ち込まずID管理。氏名系キーのマッピングは門前で禁止（データ最小化）
+    forbidden_name_keys = [k for k in column_map
+                           if str(k).strip().lower() in FORBIDDEN_NAME_KEYS]
+
     core_dates_ok = fails["apply_date"] == 0 and fails["cancel_date"] == 0
-    ok = not missing_keys and not missing_columns and core_dates_ok
+    ok = (not missing_keys and not missing_columns and core_dates_ok
+          and not forbidden_name_keys)
 
     # 口座“普段使い”フラグの想定外値（#142 項目4）。件数だけ数える（値は出さない・okは落とさない）
     acc_col = column_map.get("account_daily")
@@ -71,6 +76,7 @@ def preflight_report(csv_path, column_map, as_of, required_keys=REQUIRED_KEYS):
         "ok": ok,
         "missing_keys": missing_keys,
         "missing_columns": missing_columns,
+        "forbidden_name_keys": forbidden_name_keys,
         "date_parse_fails": fails,
         "n_total": n_total,
         "n_unlinked": n_unlinked,

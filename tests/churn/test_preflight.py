@@ -84,6 +84,28 @@ class TestPreflight(unittest.TestCase):
         rep = preflight_report(csv, CMAP, AS_OF)
         self.assertEqual(rep["account_flag_unexpected"], 0)
 
+    def test_name_mapping_is_blocked(self):
+        # 前提: 顧客名は持ち込まずID管理。氏名系キーをマップしたら門前で不可
+        header = FULL_HEADER + ",氏名"
+        cmap = dict(CMAP, 氏名="氏名")
+        csv = _write(self.d, header, ["C1,2025-01-01,医療,ネット,単発,5000,25,女,那覇,S1,2025-03-01,負担,山田太郎"])
+        rep = preflight_report(csv, cmap, AS_OF)
+        self.assertIn("氏名", rep["forbidden_name_keys"])
+        self.assertFalse(rep["ok"])
+        self.assertNotIn("山田太郎", json.dumps(rep, ensure_ascii=False))  # 値は出さない
+
+    def test_english_name_key_blocked_case_insensitive(self):
+        cmap = dict(CMAP, Customer_Name="お名前")
+        csv = _write(self.d, FULL_HEADER, ["C1,2025-01-01,医療,ネット,単発,5000,25,女,那覇,S1,2025-03-01,負担"])
+        rep = preflight_report(csv, cmap, AS_OF)
+        self.assertIn("Customer_Name", rep["forbidden_name_keys"])
+        self.assertFalse(rep["ok"])
+
+    def test_no_name_key_is_clean(self):
+        csv = _write(self.d, FULL_HEADER, ["C1,2025-01-01,医療,ネット,単発,5000,25,女,那覇,S1,2025-03-01,負担"])
+        rep = preflight_report(csv, CMAP, AS_OF)
+        self.assertEqual(rep["forbidden_name_keys"], [])
+
 
 if __name__ == "__main__":
     unittest.main()

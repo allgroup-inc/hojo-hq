@@ -239,6 +239,9 @@ def cmd_preflight(csv_path, column_map_path, as_of):
         print(f"  ・column_map不足キー: {rep['missing_keys']}")
     if rep["missing_columns"]:
         print(f"  ・CSVに無い対応列: {rep['missing_columns']}")
+    if rep.get("forbidden_name_keys"):
+        print(f"  ・🛑顧客名の持込は禁止（ID管理が前提）: {rep['forbidden_name_keys']} "
+              f"→ column_mapから外してください")
     bad = {k: v for k, v in rep["date_parse_fails"].items() if v}
     if bad:
         print(f"  ・日付パス不能: {bad}")
