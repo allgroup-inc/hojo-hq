@@ -1,5 +1,6 @@
 import unittest
 from datetime import date
+from scripts.churn import fit
 from scripts.churn.cohort import cohort_rows, overall_rate
 
 AS_OF = date(2026, 8, 1)
@@ -7,6 +8,14 @@ AS_OF = date(2026, 8, 1)
 
 def rec(apply, resolved, early):
     return {"apply_date": apply, "is_resolved": resolved, "is_early_churn": early}
+
+
+def frec(apply, resolved, early, scoreable=False, product="医療"):
+    """score可能な要因つきレコード（着地見込みの推計に使う）。"""
+    return {"apply_date": apply, "is_resolved": resolved, "is_early_churn": early,
+            "is_scoreable": scoreable, "product": product, "channel": "ネット",
+            "apply_form": "単発", "amount_band": "3千〜1万", "age_band": "20代",
+            "gender": "女", "area": "那覇", "agent_id": "S1"}
 
 
 class TestCohort(unittest.TestCase):
@@ -52,6 +61,37 @@ class TestCohort(unittest.TestCase):
         recs = [rec(date(2026, 7, 5), True, 1) for _ in range(5)]  # 暦上 観測中のみ
         o = overall_rate(cohort_rows(recs, AS_OF))
         self.assertIsNone(o["rate"])        # 算出不能（0%と断定しない）
+
+
+class TestProjectedLanding(unittest.TestCase):
+    def _model(self):
+        # X商品=解約多・Y商品=解約なし で学習 → 継続中Xは高リスクと推計される
+        train = ([frec(date(2025, 1, 1), True, 1, product="X") for _ in range(40)]
+                 + [frec(date(2025, 1, 1), True, 0, product="Y") for _ in range(40)])
+        return fit.fit_model(train)
+
+    def test_observing_cohort_gets_projection_separate_from_confirmed(self):
+        model = self._model()
+        # 観測中コホート(2026-07): 継続中のX契約が多い → 着地見込みは高め
+        recs = [frec(date(2026, 7, 1), False, None, scoreable=True, product="X") for _ in range(10)]
+        row = {r["ym"]: r for r in cohort_rows(recs, AS_OF, model=model)}["2026-07"]
+        self.assertTrue(row["observing"])
+        self.assertIsNone(row["rate"])                 # 確定値は無い（混同しない）
+        self.assertIsNotNone(row["projected_rate"])    # 見込みは出る
+        self.assertGreater(row["projected_rate"], 0.0)
+
+    def test_no_model_means_no_projection(self):
+        recs = [frec(date(2026, 7, 1), False, None, scoreable=True) for _ in range(5)]
+        row = {r["ym"]: r for r in cohort_rows(recs, AS_OF)}["2026-07"]
+        self.assertIsNone(row["projected_rate"])       # モデル無しなら推計しない
+
+    def test_projection_blends_confirmed_and_predicted(self):
+        model = self._model()
+        # 確定=Y(解約0) 5件 + 継続中=X(高リスク) 5件 の月 → 見込みは0と高リスクの中間
+        recs = ([frec(date(2026, 7, 1), True, 0, product="Y") for _ in range(5)]
+                + [frec(date(2026, 7, 1), False, None, scoreable=True, product="X") for _ in range(5)])
+        row = {r["ym"]: r for r in cohort_rows(recs, AS_OF, model=model)}["2026-07"]
+        self.assertTrue(0.0 < row["projected_rate"] < 1.0)
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ from __future__ import annotations
 from datetime import date
 
 from .config import MIN_RELIABLE_N, EARLY_CHURN_MONTHS
+from .score import score_record
 
 
 def _ym(d):
@@ -24,23 +25,37 @@ def _cohort_matured(ym, as_of, months=EARLY_CHURN_MONTHS):
     return date(idx // 12, idx % 12 + 1, 1) <= as_of
 
 
-def cohort_rows(records, as_of, min_reliable=MIN_RELIABLE_N):
+def cohort_rows(records, as_of, min_reliable=MIN_RELIABLE_N, model=None):
+    """契約月別の早期解約率。model を渡すと「着地見込み率」も推計する（確定値とは別）。
+
+    着地見込み = 確定分の実解約 ＋ 継続中(is_scoreable)の予測リスク を合算して母数で割る。
+    これは**推計**であり確定値ではない（断定しない・別列で表示）。
+    """
     groups = {}
     for r in records:
         ad = r.get("apply_date")
         if not ad:
             continue
-        g = groups.setdefault(_ym(ad), {"total": 0, "resolved": 0, "churn": 0})
+        g = groups.setdefault(_ym(ad), {"total": 0, "resolved": 0, "churn": 0,
+                                        "scoreable": 0, "risk_sum": 0.0})
         g["total"] += 1
         if r.get("is_resolved"):
             g["resolved"] += 1
             g["churn"] += r.get("is_early_churn") or 0
+        elif r.get("is_scoreable") and model is not None:
+            g["scoreable"] += 1
+            g["risk_sum"] += score_record(r, model)["risk"]
     rows = []
     for ym in sorted(groups):
         g = groups[ym]
+        # 着地見込み: 確定の実解約 + 継続中の予測リスク を、確定+継続中の母数で割る（推計）
+        proj_n = g["resolved"] + g["scoreable"]
+        projected = ((g["churn"] + g["risk_sum"]) / proj_n) if (model is not None and proj_n) else None
         rows.append({
             "ym": ym, "total": g["total"], "resolved": g["resolved"], "churn": g["churn"],
+            "scoreable": g["scoreable"],
             "rate": (g["churn"] / g["resolved"]) if g["resolved"] else None,
+            "projected_rate": projected,
             "maturity": g["resolved"] / g["total"] if g["total"] else 0.0,
             "observing": not _cohort_matured(ym, as_of),  # 暦ベース（解約と交絡させない）
             "reference": g["resolved"] < min_reliable,
@@ -66,8 +81,14 @@ def render_html(rows, overall, path, target=0.03):
             cell = "確定なし"
         else:
             cell = f'{r["rate"]*100:.1f}%' + (" 参考" if r["reference"] else "")
+        # 着地見込み（推計・確定値とは別）。観測中で推計がある時だけ表示
+        if r.get("projected_rate") is not None and r["observing"]:
+            proj = f'{r["projected_rate"]*100:.1f}%<span style="color:#888">(見込)</span>'
+        else:
+            proj = "—"
         trs.append(f'<tr><td>{html.escape(r["ym"])}</td><td>{r["total"]}</td>'
-                   f'<td>{r["resolved"]}</td><td>{r["churn"]}</td><td>{cell}</td></tr>')
+                   f'<td>{r["resolved"]}</td><td>{r["churn"]}</td><td>{cell}</td>'
+                   f'<td>{proj}</td></tr>')
     if overall["rate"] is None:
         head = f'全体 <b>算出不能</b>（成熟したコホートがまだありません）／ 目標 {target*100:.0f}%'
     else:
@@ -81,8 +102,10 @@ def render_html(rows, overall, path, target=0.03):
         'th{background:#00335C;color:#fff}</style>'
         f'<h1>早期解約率 コホート（成熟分のみ）</h1>'
         f'<p>{head}</p>'
-        '<p style="font-size:12px;color:#888">観測中(6ヶ月未確定)は率を出さず全体からも除外。少件数は参考。合成データ。</p>'
-        '<table><thead><tr><th>契約月</th><th>契約数</th><th>確定</th><th>解約</th><th>早期解約率</th></tr></thead>'
+        '<p style="font-size:12px;color:#888">観測中(6ヶ月未確定)は確定率を出さず全体からも除外。'
+        '「着地見込」は継続中の予測リスクからの推計＝参考（確定値ではない）。少件数は参考。合成データ。</p>'
+        '<table><thead><tr><th>契約月</th><th>契約数</th><th>確定</th><th>解約</th>'
+        '<th>早期解約率(確定)</th><th>着地見込(推計)</th></tr></thead>'
         f'<tbody>{"".join(trs)}</tbody></table>')
     with open(path, "w", encoding="utf-8") as f:
         f.write(doc)

@@ -170,7 +170,7 @@ def cmd_console(app_csv, app_map, inter_csv, inter_map, model_path, out_dir, as_
     res["list_csv"] = list_csv_path
     res["list_html"] = list_html_path
     # 3%スコアボード（コホート）と「今日の要接触」も同ディレクトリへ
-    cohorts = cohort_rows(apps, as_of_d)
+    cohorts = cohort_rows(apps, as_of_d, model=model)
     render_cohort_html(cohorts, overall_rate(cohorts), os.path.join(out_dir, "cohort.html"))
     today, carry, stats = triage(classify(apps, model, as_of_d), CAPACITY_PER_DAY)
     render_today_html(today, carry, stats, os.path.join(out_dir, "today.html"), CAPACITY_PER_DAY)
@@ -181,10 +181,11 @@ def cmd_console(app_csv, app_map, inter_csv, inter_map, model_path, out_dir, as_
     return res
 
 
-def cmd_cohort(csv_path, column_map_path, out_path, as_of):
+def cmd_cohort(csv_path, column_map_path, out_path, as_of, model_path=None):
     as_of_d = _as_of(as_of)
     records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
-    rows = cohort_rows(records, as_of_d)
+    model = load_model(model_path) if model_path else None
+    rows = cohort_rows(records, as_of_d, model=model)
     ov = overall_rate(rows)
     render_cohort_html(rows, ov, out_path)
     shown = "算出不能" if ov["rate"] is None else f"{ov['rate']*100:.1f}%"
@@ -325,6 +326,7 @@ def main(argv=None):
     sp_cohort.add_argument("--column-map", required=True)
     sp_cohort.add_argument("--out", required=True)
     sp_cohort.add_argument("--as-of", required=True)
+    sp_cohort.add_argument("--model", help="任意。指定すると着地見込み(推計)も表示")
 
     sp_today = sub.add_parser("today")
     sp_today.add_argument("--csv", required=True)
@@ -387,7 +389,7 @@ def main(argv=None):
         cmd_console(args.csv, args.column_map, args.interactions, args.interaction_map,
                     args.model, args.out_dir, args.as_of)
     elif args.cmd == "cohort":
-        cmd_cohort(args.csv, args.column_map, args.out, args.as_of)
+        cmd_cohort(args.csv, args.column_map, args.out, args.as_of, args.model)
     elif args.cmd == "today":
         cmd_today(args.csv, args.column_map, args.model, args.out, args.as_of, args.capacity)
     elif args.cmd == "snapshot":
