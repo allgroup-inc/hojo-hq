@@ -16,6 +16,10 @@ FACTOR_FIELDS = ["product", "channel", "apply_form", "amount_band",
 
 # 学習のスムージング強度（大きいほど少件数を全体平均へ強く引き寄せる）
 SMOOTHING_K = 30
+
+# 段階導入（先行/後発）で「先行群（保全を先に受ける側）」へ割り付ける比率。
+# 因果効果を測るための対照群設計。実運用の比率・ウェーブ設計は小柳さん決裁事項（決裁待ち）。
+EXPERIMENT_TREATED_FRACTION = 0.5
 # 「参考値」と注記する最小件数（これ未満は母数不足）
 MIN_RELIABLE_N = 20
 
