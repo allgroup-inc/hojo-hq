@@ -10,7 +10,7 @@
 <link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
 <style>
 :root{--fg-primary:#D2694A;--fg-primary-deep:#B9502F;--fg-accent:#F2C14E;--fg-deep:#1F5C45;--fg-ink:#3B322B;--fg-bg:#FBF5EC;--fg-cta:#22382A;--fg-shadow:0 1px 2px rgba(0,0,0,.04);
   --fg-card:#FFFDF9;--fg-muted:#8B7C6E;--fg-line:#EEE1D0}
@@ -108,6 +108,8 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   var app = document.getElementById("app");
   var bar = document.getElementById("bar");
   var TOTAL = 5;
+  // 市町村→ページslug(診断結果から市町村ページへ1タップで案内するため)
+  var MUNI_SLUG = {"那覇市":"naha","宜野湾市":"ginowan","石垣市":"ishigaki","浦添市":"urasoe","名護市":"nago","糸満市":"itoman","沖縄市":"okinawa","豊見城市":"tomigusuku","うるま市":"uruma","宮古島市":"miyakojima","南城市":"nanjo","国頭村":"kunigami","大宜味村":"ogimi","東村":"higashi","今帰仁村":"nakijin","本部町":"motobu","恩納村":"onna","宜野座村":"ginoza","金武町":"kin","伊江村":"ie","読谷村":"yomitan","嘉手納町":"kadena","北谷町":"chatan","北中城村":"kitanakagusuku","中城村":"nakagusuku","西原町":"nishihara","与那原町":"yonabaru","南風原町":"haebaru","渡嘉敷村":"tokashiki","座間味村":"zamami","粟国村":"aguni","渡名喜村":"tonaki","南大東村":"minamidaito","北大東村":"kitadaito","伊平屋村":"iheya","伊是名村":"izena","久米島町":"kumejima","八重瀬町":"yaese","多良間村":"tarama","竹富町":"taketomi","与那国町":"yonaguni"};
 
   function h(tag, attrs, children){
     var el = document.createElement(tag);
@@ -128,6 +130,25 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   function loadSaved(){
     try { return JSON.parse(localStorage.getItem("fg_shindan_answers") || "null"); } catch(e){ return null; }
   }
+  // 途中保存(設問ごと)。バスの中・家事の合間の中断で回答を失わないための保険。
+  // 家族共用端末で他人の古い回答が誤結果を出さないよう、24時間で自動失効(三名体制の採用条件)。
+  var PROGRESS_TTL = 24 * 60 * 60 * 1000;
+  function saveProgress(){
+    if (state.step <= 0 || state.step >= 5) return;
+    try { localStorage.setItem("fg_shindan_progress", JSON.stringify({
+      step: state.step, municipality: state.municipality, children: state.children,
+      childAges: state.childAges, lifeEvents: state.lifeEvents, housing: state.housing, ts: Date.now()
+    })); } catch(e){}
+  }
+  function loadProgress(){
+    try {
+      var p = JSON.parse(localStorage.getItem("fg_shindan_progress") || "null");
+      if (!p || !p.ts || (Date.now() - p.ts) > PROGRESS_TTL) return null;
+      if (!p.step || p.step < 1 || p.step > 4) return null;
+      return p;
+    } catch(e){ return null; }
+  }
+  function clearProgress(){ try { localStorage.removeItem("fg_shindan_progress"); } catch(e){} }
   function applySaved(sv){
     state.municipality = sv.municipality || null;
     state.children = sv.children || 0;
@@ -147,6 +168,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   }
   function render(){
     bar.style.width = Math.round(state.step / TOTAL * 100) + "%";
+    saveProgress();
     app.innerHTML = "";
     if (state.step === 0) { trackStep("shindan_start"); return qMunicipality(); }
     if (state.step >= 1 && state.step <= 4) trackStep("shindan_step_q" + (state.step + 1));
@@ -163,8 +185,27 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     ]);
   }
   function qMunicipality(){
+    // 途中まで答えた回答が残っていれば「つづきから」を出す(24時間以内のみ)
+    var pv = loadProgress();
+    if (pv) {
+      app.appendChild(h("div", {class:"resume-box"}, [
+        h("p", {text:"とちゅうまで答えた回答が、この端末に残っています。", style:"margin-bottom:8px;font-weight:700"}),
+        h("button", {class:"next", text:"つづきから(質問" + (pv.step + 1) + "から)", style:"width:100%;padding:12px;border-radius:999px;border:none;font-weight:700;cursor:pointer", onclick:function(){
+          state.step = pv.step; state.municipality = pv.municipality || null; state.children = pv.children || 0;
+          state.childAges = pv.childAges || []; state.lifeEvents = pv.lifeEvents || []; state.housing = pv.housing || null;
+          if (window.fgTrack) window.fgTrack("shindan_resume", {kind:"progress"});
+          render();
+        }}),
+        h("button", {text:"最初からやり直す", style:"width:100%;margin-top:8px;padding:10px;border-radius:999px;border:1px solid var(--fg-line);background:#fff;cursor:pointer", onclick:function(){
+          clearProgress();
+          state.step = 0; state.municipality = null; state.children = 0; state.childAges = []; state.lifeEvents = []; state.housing = null;
+          render();
+        }}),
+        h("p", {class:"note", text:"回答はこの端末の中だけに保存され、24時間で自動的に消えます。"})
+      ]));
+    }
     var sv = loadSaved();
-    if (sv) {
+    if (sv && !pv) {
       app.appendChild(h("div", {class:"resume-box"}, [
         h("p", {text:"前回の診断結果が、この端末に残っています。", style:"margin-bottom:8px;font-weight:700"}),
         h("button", {class:"next", text:"前回の結果をもう一度見る", style:"width:100%;padding:12px;border-radius:999px;border:none;font-weight:700;cursor:pointer", onclick:function(){ applySaved(sv); }}),
@@ -241,6 +282,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   }
   function showResult(){
     bar.style.width = "100%";
+    clearProgress();
     try {
       localStorage.setItem("fg_shindan_done", new Date().toISOString());
       localStorage.setItem("fg_shindan_answers", JSON.stringify({
@@ -317,6 +359,18 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         kindMsg.innerHTML = "もらい忘れは、知らなかっただけ。<br>あなたは悪くありません。<br>ぜんぶ一度にやらなくて大丈夫。ひとつずつ、いっしょに進めましょう。";
         app.appendChild(kindMsg);
       }
+      // 医療・健康の制度は診断では判定しない設計(症状を尋ねない方針)のため、
+      // 市町村ページへの非断定の案内をここに出す(2026-08-11 三名体制裁定・文言は断定禁止)。
+      var areaSlug = MUNI_SLUG[state.municipality];
+      var areaHref = areaSlug ? ("../area/" + areaSlug + "/") : "../area/";
+      var areaLabel = areaSlug ? (state.municipality + "の給付金・手当を見る") : "お住まいの市町村のページを見る";
+      var medBanner = h("div", {style:"margin:14px 0;padding:14px 16px;background:#FFF8E6;border:1px solid #EAD59A;border-radius:12px"});
+      medBanner.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px", text:"こども医療費助成などの「医療・健康」の制度は、この診断では判定していません"}));
+      medBanner.appendChild(h("p", {class:"note", style:"margin-bottom:8px", text:"症状などをおたずねしない方針のためです。お住まいの市町村のページで、医療費助成を含む全制度をまとめて確認できます。"}));
+      var areaLink = h("a", {href: areaHref, style:"font-weight:700", text: areaLabel + " ›"});
+      areaLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("result_area_link"); });
+      medBanner.appendChild(areaLink);
+      app.appendChild(medBanner);
       var marks = getMarks();
       rs.forEach(function(r, idx){
         var it = r.item;
@@ -391,12 +445,15 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。"}));
       app.appendChild(lineBox);
       var disc = h("div", {class:"disclaimer"});
-      disc.innerHTML = "この診断は公式情報に基づく「可能性のご案内」です。<br>受給できるかどうかの最終判断は各窓口で行われます。<br>医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため、診断には表示していません。トップページの制度一覧をご覧ください。";
+      disc.innerHTML = "この診断は公式情報に基づく「可能性のご案内」です。<br>受給できるかどうかの最終判断は各窓口で行われます。<br>医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため、診断には表示していません。上の黄色い案内から、お住まいの市町村のページでご確認ください。";
       app.appendChild(disc);
       app.appendChild(h("p", {style:"margin-top:16px"}, [h("a", {href:"../index.html", text:"← トップへもどる"})]));
     }).catch(function(){
+      // 電波の弱い場所(バス・離島)での読込失敗。回答は失わせず、その場で再試行できるようにする
       app.innerHTML = "";
-      app.appendChild(h("p", {text:"データの読み込みに失敗しました。時間をおいてもう一度お試しください。"}));
+      app.appendChild(h("p", {text:"データの読み込みに失敗しました(電波の弱い場所などで起こることがあります)。", style:"margin-bottom:6px"}));
+      app.appendChild(h("p", {class:"note", text:"ご安心ください。あなたの回答は消えていません。", style:"margin-bottom:12px"}));
+      app.appendChild(h("button", {class:"next", text:"もう一度読み込む", style:"width:100%;max-width:420px;display:block;margin:0 auto;padding:13px;border-radius:999px;border:none;font-weight:700;cursor:pointer", onclick:function(){ showResult(); }}));
     });
   }
   if (/[?&]resume=1/.test(location.search)) {
