@@ -111,6 +111,12 @@ def run_pipeline(csv_path, column_map_path, out_dir, as_of, split, run_date,
     # --- バックテスト（品質ゲートの根拠） ---
     metrics = backtest(records, split)
     state["auc"] = metrics["auc"]
+    # 較正・精度@キャパは情報として残す（AUCが唯一の停止ゲート。較正は警告に留める）
+    state["ece"] = metrics["ece"]
+    state["calibration_warning"] = metrics["calibration_warning"]
+    state["precision_at_capacity"] = metrics["precision_at_capacity"]
+    if metrics["calibration_warning"]:
+        notify(f"[pipeline] ⚠️較正不良 ECE={metrics['ece']:.3f}（リスク%の水準ズレ・要確認）")
     state["completed_steps"].append("backtest")
     _save_state(out_dir, run_date, state)
 

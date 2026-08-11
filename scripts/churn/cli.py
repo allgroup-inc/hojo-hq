@@ -68,7 +68,11 @@ def cmd_backtest(csv_path, column_map_path, split, as_of):
     metrics = backtest(records, date(y, m, d))
     print(f"[backtest] n_test={metrics['n_test']} AUC={metrics['auc']:.3f} "
           f"pred={metrics['pred_mean']:.1%} actual={metrics['actual_mean']:.1%} "
-          f"top10%lift={metrics['top_decile_lift']:.2f}")
+          f"top10%lift={metrics['top_decile_lift']:.2f} "
+          f"ECE={metrics['ece']:.3f} precision@{metrics['capacity']}={metrics['precision_at_capacity']:.1%}")
+    if metrics["calibration_warning"]:
+        print(f"  ・⚠️較正不良（ECE={metrics['ece']:.3f}）: リスク%の水準がズレています。"
+              f"母数・定義を要確認（当たっても優先度づけを誤り得る）")
     return metrics
 
 
