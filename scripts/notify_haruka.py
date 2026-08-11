@@ -3,11 +3,12 @@
 """
 遥さんへ「今週のIG投稿案」をLINEでプッシュ通知する(2026-08-11 小柳さん指示)。
 
-送り先の優先順位(Secretsの有無で自動フォールバック・常に終了0):
-1. 遥さん直送: FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN + HARUKA_LINE_USER_ID
-2. 小柳さん経由(1タップ転送): LINE_CHANNEL_ACCESS_TOKEN + LINE_ADMIN_USER_ID(ミカタOA・既存)
-3. どちらも無ければ本文を標準出力に表示するだけ(ボードURLは常に有効)
+送り先(常に終了0):
+- 遥さん直送: FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN + HARUKA_LINE_USER_ID(もらいわすれ堂OAのみ)
+- Secrets未設定の間は本文をログ表示するだけ(ボードURLは常に有効)
 
+**ミカタ(企業のミカタ/GLOW)のLINE OAは使わない**(2026-08-11 小柳さん指摘で撤去。
+フクギイロとGLOWは別会社・別ブランドのため、もらいわすれ堂の連絡をミカタOAに流さない)。
 内部連絡用のプッシュであり、県民向け配信ではない(CV単一ルールの対象外)。
 """
 import json
@@ -45,17 +46,12 @@ def main():
     text = build_text()
     fg_token = os.environ.get("FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN", "")
     haruka = os.environ.get("HARUKA_LINE_USER_ID", "")
-    mk_token = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN", "")
-    admin = os.environ.get("LINE_ADMIN_USER_ID", "")
     try:
         if fg_token and haruka:
             push(fg_token, haruka, text)
             print("[ok] 遥さんへ直送しました(もらいわすれ堂OA)")
-        elif mk_token and admin:
-            push(mk_token, admin, "【遥さんへ転送お願いします】\n" + text)
-            print("[ok] 小柳さんのLINEへ送信(遥さんへ1タップ転送用)")
         else:
-            print("[info] LINE未接続のため表示のみ。ボード: " + BOARD_URL)
+            print("[info] もらいわすれ堂OAのSecrets未設定のため表示のみ(ミカタOAは使わない)。ボード: " + BOARD_URL)
             print(text)
     except Exception as e:
         # 通知失敗でも週次レポ本体は止めない(ボードは生成済み・URLで見られる)

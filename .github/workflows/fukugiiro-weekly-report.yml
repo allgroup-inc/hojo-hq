@@ -65,12 +65,10 @@ jobs:
           done
 
       - name: 遥さんへLINE通知(投稿案が届いた合図)
-        # 直送Secrets(FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN+HARUKA_LINE_USER_ID)があれば遥さんへ、
-        # 無ければミカタOA経由で小柳さんへ(1タップ転送)。どちらも無ければログ表示のみ。
+        # もらいわすれ堂OAの直送Secretsがある場合のみ送信。ミカタOAは使わない
+        # (2026-08-11 小柳さん指摘: フクギイロとGLOWは別会社・別ブランドのため)。
         continue-on-error: true
         env:
           FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN }}
           HARUKA_LINE_USER_ID: ${{ secrets.HARUKA_LINE_USER_ID }}
-          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          LINE_ADMIN_USER_ID: ${{ secrets.LINE_ADMIN_USER_ID }}
         run: python scripts/notify_haruka.py
