@@ -1,6 +1,6 @@
 {
- "updated_at": "2026-08-11 06:33",
- "count": 143,
+ "updated_at": "2026-08-11 10:23",
+ "count": 160,
  "items": [
   {
    "id": "fk-kuni-jidoteate",
@@ -3651,6 +3651,394 @@
    "status": "要確認",
    "notes": "出典: 粟国村ウェブサイト",
    "fetched_at": "2026-08-11 06:33"
+  },
+  {
+   "id": "fk-kuni-shobyo-teate",
+   "name": "傷病手当金",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが"
+   ],
+   "issuer": "全国健康保険協会(協会けんぽ)・健康保険組合",
+   "area": "全国",
+   "target_household": "業務外の病気やけがの療養のため仕事を休み、その間の給与が受けられない(または少ない)健康保険の被保険者の方が対象となる可能性があります",
+   "how_to_apply": "加入している健康保険(協会けんぽの都道府県支部・健康保険組合)へ支給申請書を提出",
+   "source_url": "https://www.kyoukaikenpo.or.jp/benefit/injury_and_sickness_allowance/index.html",
+   "amount_note": "1日あたり「直近12か月の標準報酬月額の平均÷30×2/3」が通算1年6か月を限度に支給される場合があります(要確認)。加入している健康保険により内容が異なります",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 全国健康保険協会(協会けんぽ)・健康保険組合ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23",
+   "combine": {
+    "type": "adjust",
+    "note": "出産手当金・障害年金・労災の休業(補償)給付を受けられる期間は、支給されないか調整される場合があります(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-shussan-teate",
+   "name": "出産手当金",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "全国健康保険協会(協会けんぽ)・健康保険組合",
+   "area": "全国",
+   "target_household": "出産のため仕事を休み、その間の給与が受けられない健康保険の被保険者の方が対象となる可能性があります(出産日以前42日〜出産日後56日の範囲)",
+   "how_to_apply": "加入している健康保険(協会けんぽの都道府県支部・健康保険組合)へ出産手当金支給申請書を提出",
+   "source_url": "https://www.kyoukaikenpo.or.jp/benefit/childbirth/001/index.html",
+   "amount_note": "1日あたり「直近12か月の標準報酬月額の平均÷30×2/3」が支給される場合があります(要確認)。加入している健康保険により内容が異なります",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 全国健康保険協会(協会けんぽ)・健康保険組合ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23",
+   "combine": {
+    "type": "adjust",
+    "note": "同じ期間に傷病手当金を受けられる場合は出産手当金が優先され調整される場合があります。出産育児一時金(分娩費用の給付)とは別制度です(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-maisoryo",
+   "name": "埋葬料・埋葬費(健康保険)/葬祭費(国保・後期高齢者)",
+   "category": "生活支援",
+   "life_events": [
+    "病気・けが"
+   ],
+   "issuer": "全国健康保険協会(協会けんぽ)・健康保険組合(国保・後期高齢者医療は市区町村)",
+   "area": "全国",
+   "target_household": "健康保険の被保険者・被扶養者が亡くなったとき、生計を維持されていて埋葬を行う方が対象となる可能性があります",
+   "how_to_apply": "加入している健康保険(協会けんぽの都道府県支部等)へ申請(国保・後期高齢者医療の葬祭費は市区町村窓口)",
+   "source_url": "https://www.kyoukaikenpo.or.jp/benefit/burial_charges/index.html",
+   "amount_note": "協会けんぽでは埋葬料5万円(埋葬費は実費で上限5万円)の場合があります(要確認)。加入している健康保険により内容が異なります",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 全国健康保険協会(協会けんぽ)・健康保険組合(国保・後期高齢者医療は市区町村)ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23"
+  },
+  {
+   "id": "fk-kuni-kogaku-kaigo-service",
+   "name": "高額介護サービス費",
+   "category": "介護",
+   "life_events": [
+    "介護",
+    "低所得・生活苦"
+   ],
+   "issuer": "市区町村(介護保険の保険者)",
+   "area": "全国",
+   "target_household": "介護保険サービスの月々の利用者負担額の合計が、所得に応じた上限額を超えた世帯の方が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の介護保険窓口へ申請(該当者には案内が届く場合があります)",
+   "source_url": "https://www.kaigokensaku.mhlw.go.jp/commentary/fee.html",
+   "amount_note": "所得区分ごとの負担限度額を超えた分が支給される場合があります(要確認)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 市区町村(介護保険の保険者)ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23",
+   "combine": {
+    "type": "stackable",
+    "note": "医療と介護の両方の負担が重い場合は「高額医療・高額介護合算療養費制度」の対象にもなる場合があります(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-kogaku-iryo-kaigo-gassan",
+   "name": "高額医療・高額介護合算療養費制度",
+   "category": "介護",
+   "life_events": [
+    "介護",
+    "病気・けが"
+   ],
+   "issuer": "各医療保険者(協会けんぽ・健康保険組合・国保等)・介護保険者(市区町村)",
+   "area": "全国",
+   "target_household": "毎年8月1日〜翌年7月31日の1年間で、同一世帯の医療保険と介護保険の自己負担の合算額が基準額を超えた世帯の方が対象となる可能性があります",
+   "how_to_apply": "加入している医療保険(協会けんぽ支部・健保組合・市区町村国保等)へ申請",
+   "source_url": "https://www.kyoukaikenpo.or.jp/benefit/high_cost_medical_expenses/003/index.html",
+   "amount_note": "基準額を超えた分が支給される場合があります(要確認)。加入している健康保険により内容が異なります",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 各医療保険者(協会けんぽ・健康保険組合・国保等)・介護保険者(市区町村)ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23",
+   "combine": {
+    "type": "adjust",
+    "note": "医療・介護いずれか一方の自己負担が0円の場合は対象外とされています。高額療養費制度(月単位)とは別の年単位の制度です(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-kaigo-jutaku-kaishu",
+   "name": "居宅介護(介護予防)住宅改修費",
+   "category": "介護",
+   "life_events": [
+    "介護"
+   ],
+   "issuer": "市区町村(介護保険の保険者)",
+   "area": "全国",
+   "target_household": "要介護・要支援認定を受け、自宅に手すりの取付けや段差解消などの住宅改修を行う世帯が対象となる可能性があります",
+   "how_to_apply": "改修前にケアマネジャー等に相談のうえ、お住まいの市区町村の介護保険窓口へ事前申請(工事前の申請が必要とされています)",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000212398.html",
+   "amount_note": "支給限度基準額20万円の範囲で、費用の7〜9割が払い戻される場合があります(要確認)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 市区町村(介護保険の保険者)ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23"
+  },
+  {
+   "id": "fk-kuni-shoni-mansei",
+   "name": "小児慢性特定疾病医療費助成",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが",
+    "子育て"
+   ],
+   "issuer": "都道府県・指定都市・中核市等",
+   "area": "全国",
+   "target_household": "国が定める小児慢性特定疾病にかかっている18歳未満のお子さんを養育している世帯が対象となる可能性があります(継続治療の場合は20歳未満まで対象となる場合があります)",
+   "how_to_apply": "お住まいの都道府県等の窓口(保健所など)へ申請",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000078973.html",
+   "amount_note": "医療費の自己負担分の一部が助成され、所得等に応じた自己負担上限月額が設定される場合があります(要確認)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 都道府県・指定都市・中核市等ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23"
+  },
+  {
+   "id": "fk-kuni-nyuin-shokuji-gengaku",
+   "name": "入院時食事療養費の標準負担額減額(住民税非課税世帯など)",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが",
+    "低所得・生活苦"
+   ],
+   "issuer": "全国健康保険協会(協会けんぽ)・健康保険組合 等の各医療保険者",
+   "area": "全国",
+   "target_household": "住民税非課税世帯などの方が入院した場合に、食事代の標準負担額が減額の対象となる可能性があります",
+   "how_to_apply": "加入している健康保険(協会けんぽの都道府県支部等)へ「限度額適用・標準負担額減額認定申請書」を提出(マイナ保険証の利用で認定証の提示に代えられる場合があります)",
+   "source_url": "https://www.kyoukaikenpo.or.jp/benefit/mynumber_insurance_card/002/index.html",
+   "amount_note": "住民税非課税世帯等は1食あたりの標準負担額が減額される場合があります(要確認)。加入している健康保険により内容が異なります",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 全国健康保険協会(協会けんぽ)・健康保険組合 等の各医療保険者ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23",
+   "combine": {
+    "type": "adjust",
+    "note": "食事の標準負担額は高額療養費の対象に含まれないとされています(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-iryohi-kojo",
+   "name": "医療費控除(セルフメディケーション税制含む)",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが"
+   ],
+   "issuer": "国(国税庁・所得税の所得控除)",
+   "area": "全国",
+   "target_household": "1年間に本人や生計を一にするご家族の医療費を一定額を超えて支払った方が対象となる可能性があります",
+   "how_to_apply": "確定申告(還付申告)で医療費控除の明細書を添付して税務署へ申請(e-Tax可)",
+   "source_url": "https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1120.htm",
+   "amount_note": "支払医療費を基に計算した金額(最高200万円)の所得控除を受けられる場合があります(要確認)。セルフメディケーション税制は対象医薬品購入費12,000円超の部分(上限88,000円)が対象となる場合があります(要確認)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 国(国税庁・所得税の所得控除)ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23",
+   "combine": {
+    "type": "exclusive",
+    "note": "通常の医療費控除とセルフメディケーション税制は、どちらか一方の選択適用とされています"
+   }
+  },
+  {
+   "id": "fk-kuni-koki-korei-hokenryo-keigen",
+   "name": "後期高齢者医療制度の保険料軽減",
+   "category": "医療・健康",
+   "life_events": [
+    "低所得・生活苦"
+   ],
+   "issuer": "都道府県の後期高齢者医療広域連合・市区町村",
+   "area": "全国",
+   "target_household": "後期高齢者医療制度(原則75歳以上)の被保険者で、世帯の所得が一定以下の方が対象となる可能性があります",
+   "how_to_apply": "原則として所得情報に基づき自動判定される場合があります。詳細はお住まいの市区町村の後期高齢者医療担当窓口へ",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/newpage_00009.html",
+   "amount_note": "所得に応じて均等割額の7割・5割・2割が軽減される場合があります(要確認)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 都道府県の後期高齢者医療広域連合・市区町村ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23",
+   "combine": {
+    "type": "adjust",
+    "note": "「国民健康保険料(税)の軽減・減免」とは別制度(後期高齢者医療制度側の軽減)です"
+   }
+  },
+  {
+   "id": "fk-ken-shiritsu-shogaku-kyufu",
+   "name": "沖縄県 私立高等学校等奨学のための給付金",
+   "category": "教育",
+   "life_events": [
+    "入園・入学",
+    "子育て",
+    "低所得・生活苦"
+   ],
+   "issuer": "沖縄県",
+   "area": "沖縄県",
+   "target_household": "私立高校等に通う高校生等がいる、住民税所得割非課税世帯などの世帯が対象となる可能性があります",
+   "how_to_apply": "在学する私立学校を通じて、または沖縄県の担当課へ申請(令和8年度の受付は2026-09-30までとされています)",
+   "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/gakko/1023180/1018620/1040680.html",
+   "amount_note": "授業料以外の教育費(教科書費・教材費など)にあてる返済不要の給付金が支給される場合があります(金額は世帯状況・課程で異なります。要確認)",
+   "deadline_type": "期限あり",
+   "deadline": "2026-09-30",
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 沖縄県ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23",
+   "combine": {
+    "type": "adjust",
+    "note": "公立高校向けの「高校生等奨学給付金」とは申請先・様式が異なります(要確認)"
+   }
+  },
+  {
+   "id": "fk-kunigami-nyugaku-iwaikin",
+   "name": "国頭村 入学祝金・卒業祝金(定住支援)",
+   "category": "子育て",
+   "life_events": [
+    "入園・入学",
+    "子育て"
+   ],
+   "issuer": "国頭村",
+   "area": "国頭村",
+   "target_household": "国頭村に住み、お子さんが小・中学校に入学、または中学校を卒業する世帯が対象となる可能性があります",
+   "how_to_apply": "国頭村役場の担当窓口(定住支援)",
+   "source_url": "https://www.vill.kunigami.okinawa.jp/teijyuusien/",
+   "amount_note": "入学時・卒業時に祝金が支給される場合があります(検索照合時の情報では各5万円。金額・要件は要確認)",
+   "deadline_type": "要確認",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 国頭村ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23"
+  },
+  {
+   "id": "fk-higashi-kyushoku-josei",
+   "name": "東村 学校給食費の助成",
+   "category": "教育",
+   "life_events": [
+    "入園・入学",
+    "子育て"
+   ],
+   "issuer": "東村",
+   "area": "東村",
+   "target_household": "東村立の小・中学校に通うお子さんがいる世帯が対象となる可能性があります",
+   "how_to_apply": "東村教育委員会の窓口",
+   "source_url": "https://www.vill.higashi.okinawa.jp/soshikikarasagasu/kyoikuiinkai/gyomuannai/2/1277.html",
+   "amount_note": "学校給食費の一部が助成される場合があります(金額・要件は要確認)",
+   "deadline_type": "年度内",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 東村ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23",
+   "combine": {
+    "type": "adjust",
+    "note": "就学援助を受けている場合の取り扱いは窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-higashi-shussan-iwaikin",
+   "name": "東村 出産祝金",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "東村",
+   "area": "東村",
+   "target_household": "出生日時点で東村に住所があるなど、村の要件を満たすお子さんが生まれた世帯が対象となる可能性があります",
+   "how_to_apply": "東村 福祉保健課の窓口",
+   "source_url": "https://www.vill.higashi.okinawa.jp/soshikikarasagasu/fukushihokenka/8/466.html",
+   "amount_note": "出産祝金が支給される場合があります(金額・申請期限は要確認)",
+   "deadline_type": "要確認",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 東村ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23"
+  },
+  {
+   "id": "fk-higashi-influenza-josei",
+   "name": "東村 インフルエンザ予防接種費用助成",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが",
+    "子育て"
+   ],
+   "issuer": "東村",
+   "area": "東村",
+   "target_household": "東村に住む1歳〜64歳の方が対象となる可能性があります(65歳以上の方は定期接種の助成が別にあります)",
+   "how_to_apply": "東村 福祉保健課の窓口",
+   "source_url": "https://www.vill.higashi.okinawa.jp/oshirase/1979.html",
+   "amount_note": "接種費用の一部が助成される場合があります(金額・実施期間は要確認)",
+   "deadline_type": "要確認",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 東村ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23"
+  },
+  {
+   "id": "fk-ie-kosodate-shienkin",
+   "name": "伊江村 子育て支援金(出産祝金)",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産",
+    "子育て"
+   ],
+   "issuer": "伊江村",
+   "area": "伊江村",
+   "target_household": "伊江村に住み、お子さんが生まれた世帯が対象となる可能性があります",
+   "how_to_apply": "伊江村 母子健康包括支援センター「あいのわ」の窓口",
+   "source_url": "https://www.iejima.org/document/2021011800012/",
+   "amount_note": "お子さんの人数に応じた支援金が支給される場合があります(検索照合時の情報では第1子20万円〜。金額・要件は要確認)",
+   "deadline_type": "要確認",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 伊江村ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23"
+  },
+  {
+   "id": "fk-kin-shugaku-enjo",
+   "name": "金武町 就学援助",
+   "category": "教育",
+   "life_events": [
+    "入園・入学",
+    "子育て",
+    "低所得・生活苦"
+   ],
+   "issuer": "金武町",
+   "area": "金武町",
+   "target_household": "経済的な理由でお困りの、町立小・中学校に通うお子さんの保護者世帯(生活保護受給世帯・住民税非課税相当など)が対象となる可能性があります",
+   "how_to_apply": "金武町教育委員会の窓口",
+   "source_url": "https://www.town.kin.okinawa.jp/kosodate_kyoiku/kyoikuiinkai/2028.html",
+   "amount_note": "学用品費・給食費などの一部が援助される場合があります(金額は品目・学年で異なります。要確認)",
+   "deadline_type": "年度内",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 金武町ウェブサイト(2026-08-11 拡充サイクル・検索照合で追加)",
+   "fetched_at": "2026-08-11 10:23"
   }
  ]
 }
