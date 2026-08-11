@@ -101,14 +101,21 @@
     return max;
   }
 
+  // 事前選定スコアの上限。glow-ma側の目盛り(属性スコア最大45・ルートボーナス最大30・
+  // ランクA閾値70)に対し、実データの事前選定スコアの実測最大値は約37〜40。
+  // 50は実測値に十分な余裕を持たせつつ、壊れた入力(日付として解釈されたセルが返す
+  // 約1.7e12など)が総合スコアを支配するのを防ぐための上限(最終レビュー2026-08-11 I5)。
+  var MAX_PRE_SCREENING_SCORE = 50;
+
   /**
    * 事前選定スコア(外部の選定作業による評価点)を数値として取り出す。
-   * 空欄・非数値は0として扱い、既存の計算結果に影響しない
+   * 空欄・非数値・負値・無限大は0として扱い、上限を超える値はMAX_PRE_SCREENING_SCOREに丸める
    * (設計書: docs/superpowers/specs/2026-08-11-glow-ma-pre-screening-score-import-design.md)。
    */
   function calculatePreScreeningScore(record) {
     var n = Number(record["事前選定スコア"]);
-    return isNaN(n) ? 0 : n;
+    if (!isFinite(n) || n < 0) return 0;
+    return Math.min(n, MAX_PRE_SCREENING_SCORE);
   }
 
   // 反応スコアの上限化: 種別ごとに最初の1件のみ加点し(同一種別の繰り返しは加点しない)、

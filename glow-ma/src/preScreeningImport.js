@@ -56,9 +56,19 @@
     return { matches: matches, unmatchedNames: unmatchedNames };
   }
 
+  var PRE_SCREENING_FIELDS = ["事前選定ランク", "事前選定スコア"];
+
+  function isBlankValue(value) {
+    return value === "" || value === null || value === undefined;
+  }
+
   /**
    * 企業マスタのレコード配列に、matchesの内容(事前選定ランク・事前選定スコア)を反映した
    * 新しい配列を返す。入力配列・要素は変更しない。一致しなかった企業のレコードはそのまま返す。
+   *
+   * 空欄(""・null・undefined)は上書きしない。2ファイル目のリストに1ファイル目で採点済みの
+   * 企業が空欄で載っていた場合に、1回目の取り込み結果を黙って消してしまうのを防ぐ
+   * (最終レビュー2026-08-11 I4)。
    */
   function applyMatchesToCompanyRecords(companyRecords, matches) {
     var matchByCompanyId = {};
@@ -72,8 +82,9 @@
       Object.keys(record).forEach(function (key) {
         updated[key] = record[key];
       });
-      updated["事前選定ランク"] = match["事前選定ランク"];
-      updated["事前選定スコア"] = match["事前選定スコア"];
+      PRE_SCREENING_FIELDS.forEach(function (field) {
+        if (!isBlankValue(match[field])) updated[field] = match[field];
+      });
       return updated;
     });
   }

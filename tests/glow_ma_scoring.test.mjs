@@ -102,6 +102,31 @@ test("calculatePreScreeningScore: 空欄・未設定・非数値は0を返す", 
   assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": "未評価" }), 0);
 });
 
+test("calculatePreScreeningScore: 負値は0を返す(最終レビュー2026-08-11 I5)", () => {
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": -1 }), 0);
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": "-40" }), 0);
+});
+
+test("calculatePreScreeningScore: Infinityは0を返す(同 I5)", () => {
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": Infinity }), 0);
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": -Infinity }), 0);
+});
+
+test("calculatePreScreeningScore: 日付として解釈された巨大な値は上限50に丸める(同 I5)", () => {
+  // スプレッドシートが「3-5」等を日付と解釈した場合、Number()はNaNではなく約1.7e12を返す
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": 1700000000000 }), 50);
+});
+
+test("calculatePreScreeningScore: 上限50を超える通常の値も50に丸める(同 I5)", () => {
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": 60 }), 50);
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": 50 }), 50);
+});
+
+test("calculatePreScreeningScore: 上限内の通常値はそのまま通す(同 I5)", () => {
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": 35 }), 35);
+  assert.equal(scoring.calculatePreScreeningScore({ "事前選定スコア": 0 }), 0);
+});
+
 test("calculateReactionScore: 種別ごとの加点を合算する", () => {
   const rows = [
     { 種別: "レターURLアクセス", 対応相手: "未接触" },

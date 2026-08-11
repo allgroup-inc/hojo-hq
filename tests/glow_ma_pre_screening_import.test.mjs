@@ -106,3 +106,49 @@ test("applyMatchesToCompanyRecords: 入力配列を変更しない", () => {
   preScreeningImport.applyMatchesToCompanyRecords(companyRecords, matches);
   assert.equal(companyRecords[0]["事前選定ランク"], "");
 });
+
+test("applyMatchesToCompanyRecords: 事前選定ランクが空欄の一致は既存のランクを保持する(最終レビュー2026-08-11 I4)", () => {
+  const companyRecords = [
+    { "企業ID": "C000001", "会社名": "太田建設株式会社", "事前選定ランク": "仮S", "事前選定スコア": "37" }
+  ];
+  const matches = [{ "企業ID": "C000001", "事前選定ランク": "", "事前選定スコア": "20" }];
+  const result = preScreeningImport.applyMatchesToCompanyRecords(companyRecords, matches);
+  assert.equal(result[0]["事前選定ランク"], "仮S");
+  assert.equal(result[0]["事前選定スコア"], "20");
+});
+
+test("applyMatchesToCompanyRecords: 事前選定スコアが空欄の一致は既存のスコアを保持する(同 I4)", () => {
+  const companyRecords = [
+    { "企業ID": "C000001", "会社名": "太田建設株式会社", "事前選定ランク": "仮S", "事前選定スコア": "37" }
+  ];
+  const matches = [{ "企業ID": "C000001", "事前選定ランク": "仮A", "事前選定スコア": "" }];
+  const result = preScreeningImport.applyMatchesToCompanyRecords(companyRecords, matches);
+  assert.equal(result[0]["事前選定ランク"], "仮A");
+  assert.equal(result[0]["事前選定スコア"], "37");
+});
+
+test("applyMatchesToCompanyRecords: 両方が空欄・undefinedの一致は既存値を両方とも保持する(同 I4)", () => {
+  const companyRecords = [
+    { "企業ID": "C000001", "会社名": "太田建設株式会社", "事前選定ランク": "仮S", "事前選定スコア": "37" },
+    { "企業ID": "C000002", "会社名": "株式会社南西工業", "事前選定ランク": "仮A", "事前選定スコア": "30" }
+  ];
+  const matches = [
+    { "企業ID": "C000001", "事前選定ランク": "", "事前選定スコア": "" },
+    { "企業ID": "C000002" }
+  ];
+  const result = preScreeningImport.applyMatchesToCompanyRecords(companyRecords, matches);
+  assert.equal(result[0]["事前選定ランク"], "仮S");
+  assert.equal(result[0]["事前選定スコア"], "37");
+  assert.equal(result[1]["事前選定ランク"], "仮A");
+  assert.equal(result[1]["事前選定スコア"], "30");
+});
+
+test("applyMatchesToCompanyRecords: 値が揃った一致は従来どおり両方を上書きする(回帰確認)", () => {
+  const companyRecords = [
+    { "企業ID": "C000001", "会社名": "太田建設株式会社", "事前選定ランク": "仮B", "事前選定スコア": "10" }
+  ];
+  const matches = [{ "企業ID": "C000001", "事前選定ランク": "仮S", "事前選定スコア": "37" }];
+  const result = preScreeningImport.applyMatchesToCompanyRecords(companyRecords, matches);
+  assert.equal(result[0]["事前選定ランク"], "仮S");
+  assert.equal(result[0]["事前選定スコア"], "37");
+});
