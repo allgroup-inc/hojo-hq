@@ -321,7 +321,7 @@
 <body>
   <div class="container">
     <header>
-      <h1>🏥 保険引き受け目安検索</h1>
+      <h1>保険引き受け目安検索</h1>
       <p class="subtitle">患者の病名から、保険会社ごとの引き受け見込みを検索</p>
       <div class="version-info" id="versionInfo">読み込み中...</div>
     </header>
@@ -335,8 +335,8 @@
             placeholder="病名を入力（例：がん、糖尿病、心筋梗塞）"
             autocomplete="off"
           >
-          <button onclick="search()">🔍 検索</button>
-          <button class="secondary" onclick="clearSearch()">✕ クリア</button>
+          <button onclick="search()">検索</button>
+          <button class="secondary" onclick="clearSearch()">クリア</button>
         </div>
       </div>
 
@@ -401,17 +401,16 @@
       </div>
 
       <div id="noResults" class="no-results" style="display:none;">
-        <div class="no-results-icon">🔍</div>
         <p><strong>該当する病名が見つかりませんでした</strong></p>
         <p style="font-size:13px; margin-top:10px; color:#999;">別の病名をお試しください</p>
       </div>
 
       <div class="actions" id="actions" style="display:none;">
-        <button class="action-btn" onclick="downloadCSV()">📥 結果をCSV</button>
+        <button class="action-btn" onclick="downloadCSV()">結果をCSV</button>
       </div>
 
       <div class="disclaimer">
-        <strong>⚠️ 重要な注意事項</strong><br>
+        <strong>重要な注意事項</strong><br>
         本検索結果は参考情報です。引き受け判定ではありません。最終判定は各保険会社の引き受け審査部にお問い合わせください。複数傷病がある場合の判定は保険会社により異なります。
       </div>
     </div>
@@ -424,7 +423,7 @@
 
     async function loadData() {
       try {
-        const response = await fetch('/docs/insurance/underwriting_full.json');
+        const response = await fetch('/hojo-hq/docs/insurance/underwriting_full.json');
         underwritingData = await response.json();
         console.log('データ読み込み完了:', underwritingData._source);
 
@@ -511,8 +510,7 @@
 
       if (naneiro_results.length === 0 && fwd_results.length === 0) {
         noResults.style.display = 'block';
-        document.getElementById('results-all').classList.remove('active');
-        document.getElementById('results-all').style.display = 'none';
+        document.querySelectorAll('[id^="results-"]').forEach(el => el.style.display = 'none');
         actions.style.display = 'none';
         clearAllTables();
         return;
@@ -520,16 +518,34 @@
 
       noResults.style.display = 'none';
       actions.style.display = 'flex';
-      document.getElementById('results-all').style.display = 'block';
 
-      // Always populate all tables so user can switch between tabs
-      displayAllResults(naneiro_results, fwd_results);
-      displayNaneiro(naneiro_results);
-      displayFWD(fwd_results);
+      clearAllTables();
 
-      // Ensure the correct tab is active based on currentTab
-      document.querySelectorAll('[id^="results-"]').forEach(el => el.classList.remove('active'));
-      document.getElementById('results-' + currentTab).classList.add('active');
+      // Display based on current tab selection
+      if (currentTab === 'all') {
+        displayAllResults(naneiro_results, fwd_results);
+        document.getElementById('results-all').style.display = 'block';
+        document.getElementById('results-naneiro').style.display = 'none';
+        document.getElementById('results-fwd').style.display = 'none';
+      } else if (currentTab === 'naneiro') {
+        if (naneiro_results.length > 0) {
+          displayNaneiro(naneiro_results);
+          document.getElementById('results-naneiro').style.display = 'block';
+        } else {
+          noResults.style.display = 'block';
+        }
+        document.getElementById('results-all').style.display = 'none';
+        document.getElementById('results-fwd').style.display = 'none';
+      } else if (currentTab === 'fwd') {
+        if (fwd_results.length > 0) {
+          displayFWD(fwd_results);
+          document.getElementById('results-fwd').style.display = 'block';
+        } else {
+          noResults.style.display = 'block';
+        }
+        document.getElementById('results-all').style.display = 'none';
+        document.getElementById('results-naneiro').style.display = 'none';
+      }
     }
 
     function displayAllResults(naneiro_results, fwd_results) {
