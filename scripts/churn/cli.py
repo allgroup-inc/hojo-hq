@@ -28,7 +28,9 @@ from .snapshot import snapshot as do_snapshot
 from .preflight import preflight_report
 from .pipeline import run_pipeline
 from .retention import purge_snapshots
-from .config import CAPACITY_PER_DAY, AUC_MIN, SNAPSHOT_RETENTION_YEARS
+from .contact_log import load_contacts
+from .playbook import segment_playbook, render_html as render_playbook_html
+from .config import CAPACITY_PER_DAY, AUC_MIN, SNAPSHOT_RETENTION_YEARS, EARLY_CHURN_MONTHS
 
 
 def _as_of(value):
@@ -221,6 +223,26 @@ def cmd_pipeline(csv_path, column_map_path, out_dir, as_of, split, run_date,
     return st
 
 
+def _mature_before(as_of, months=EARLY_CHURN_MONTHS):
+    """as_of から months ヶ月前（この日より前の契約＝6ヶ月窓が経過し成熟）。日はそのまま。"""
+    idx = as_of.year * 12 + (as_of.month - 1) - months
+    day = min(as_of.day, 28)  # 月末差異を避ける
+    return date(idx // 12, idx % 12 + 1, day)
+
+
+def cmd_playbook(csv_path, column_map_path, contacts_path, contact_map_path,
+                 out_path, as_of, segment):
+    as_of_d = _as_of(as_of)
+    cmap = load_column_map(column_map_path)
+    records = load_records(csv_path, cmap, as_of_d)
+    contacts = load_contacts(contacts_path, load_column_map(contact_map_path))
+    rows = segment_playbook(records, contacts, _mature_before(as_of_d), segment_field=segment)
+    labels = {"product": "商品", "agent_id": "営業担当", "channel": "チャネル", "area": "地域"}
+    render_playbook_html(rows, out_path, segment_label=labels.get(segment, segment))
+    print(f"[playbook] セグメント={segment} {len(rows)}層 → {out_path}")
+    return rows
+
+
 def cmd_retention(snapshots_dir, as_of, years, apply):
     rep = purge_snapshots(snapshots_dir, _as_of(as_of), years, apply)
     mode = "実削除" if apply else "ドライラン（消しません）"
@@ -347,6 +369,15 @@ def main(argv=None):
     sp_ret.add_argument("--years", type=int, default=SNAPSHOT_RETENTION_YEARS)
     sp_ret.add_argument("--apply", action="store_true")
 
+    sp_pb = sub.add_parser("playbook")
+    sp_pb.add_argument("--csv", required=True)
+    sp_pb.add_argument("--column-map", required=True)
+    sp_pb.add_argument("--contacts", required=True)
+    sp_pb.add_argument("--contact-map", required=True)
+    sp_pb.add_argument("--out", required=True)
+    sp_pb.add_argument("--as-of", required=True)
+    sp_pb.add_argument("--segment", default="product")
+
     sp_snap = sub.add_parser("snapshot")
     sp_snap.add_argument("--csv", required=True)
     sp_snap.add_argument("--interactions")
@@ -401,6 +432,9 @@ def main(argv=None):
         cmd_preflight(args.csv, args.column_map, args.as_of)
     elif args.cmd == "retention":
         cmd_retention(args.dir, args.as_of, args.years, args.apply)
+    elif args.cmd == "playbook":
+        cmd_playbook(args.csv, args.column_map, args.contacts, args.contact_map,
+                     args.out, args.as_of, args.segment)
     return 0
 
 
