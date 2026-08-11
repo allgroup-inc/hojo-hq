@@ -14,7 +14,8 @@
     "初期スコア", "反応スコア", "総合スコア", "ランク",
     "最終接触日", "次回アクション予定日", "次回アクション内容",
     "担当者", "登録日", "備考",
-    "電話番号", "連絡不要", "後継者状況", "関係メモ", "窓口担当者名", "携帯番号"
+    "電話番号", "連絡不要", "後継者状況", "関係メモ", "窓口担当者名", "携帯番号",
+    "事前選定ランク", "事前選定スコア"
   ];
 
   var INTERACTION_LOG_SHEET_NAME = "対応履歴ログ";
@@ -75,6 +76,10 @@
     "実績ID", "パートナーID", "紹介日", "対象企業ID", "紹介料率", "契約内容メモ", "成約有無"
   ];
 
+  var PRE_SCREENING_STAGING_SHEET_NAME = "事前選定リスト";
+  var PRE_SCREENING_MISMATCH_SHEET_NAME = "事前選定_未一致";
+  var PRE_SCREENING_MISMATCH_HEADERS = ["会社名", "記録日時"];
+
   var api = {
     COMPANY_MASTER_SHEET_NAME: COMPANY_MASTER_SHEET_NAME,
     COMPANY_MASTER_HEADERS: COMPANY_MASTER_HEADERS,
@@ -100,7 +105,10 @@
     PARTNER_INTERACTION_LOG_SHEET_NAME: PARTNER_INTERACTION_LOG_SHEET_NAME,
     PARTNER_INTERACTION_LOG_HEADERS: PARTNER_INTERACTION_LOG_HEADERS,
     REFERRAL_RECORD_SHEET_NAME: REFERRAL_RECORD_SHEET_NAME,
-    REFERRAL_RECORD_HEADERS: REFERRAL_RECORD_HEADERS
+    REFERRAL_RECORD_HEADERS: REFERRAL_RECORD_HEADERS,
+    PRE_SCREENING_STAGING_SHEET_NAME: PRE_SCREENING_STAGING_SHEET_NAME,
+    PRE_SCREENING_MISMATCH_SHEET_NAME: PRE_SCREENING_MISMATCH_SHEET_NAME,
+    PRE_SCREENING_MISMATCH_HEADERS: PRE_SCREENING_MISMATCH_HEADERS
   };
 
   if (typeof module !== "undefined" && module.exports) {
