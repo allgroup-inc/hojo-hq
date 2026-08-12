@@ -410,6 +410,21 @@
         <button class="action-btn" onclick="downloadCSV()">結果をCSV</button>
       </div>
 
+      <div id="exclusionInfo" style="display:none; background: #f5f5f5; border-left: 4px solid #F88800; padding: 15px; margin-top: 20px; border-radius: 4px; font-size: 13px;">
+        <strong style="color: #F88800;">部位不担保（対象外の部位）について</strong><br>
+        <p style="margin-top: 8px; color: #666;">各保険会社では特定の病状や部位について、保険の対象外となる場合があります。詳細は以下のPDFをご参照ください：</p>
+        <div style="margin-top: 10px;">
+          <div style="margin-bottom: 8px;">
+            <strong>FWD生命</strong><br>
+            <small>「体況に関する引受けの目安 Vol.13.0（2026年6月改訂）」のページ205をご参照ください。</small>
+          </div>
+          <div>
+            <strong>なないろ生命</strong><br>
+            <small>「お引受のめやす（2026年4月作成）」のページ8をご参照ください。</small>
+          </div>
+        </div>
+      </div>
+
       <div class="disclaimer">
         <strong>重要な注意事項</strong><br>
         本検索結果は参考情報です。引き受け判定ではありません。最終判定は各保険会社の引き受け審査部にお問い合わせください。複数傷病がある場合の判定は保険会社により異なります。
@@ -524,17 +539,20 @@
     function displayResults(naneiro_results, fwd_results) {
       const noResults = document.getElementById('noResults');
       const actions = document.getElementById('actions');
+      const exclusionInfo = document.getElementById('exclusionInfo');
 
       if (naneiro_results.length === 0 && fwd_results.length === 0) {
         noResults.style.display = 'block';
         document.querySelectorAll('[id^="results-"]').forEach(el => el.style.display = 'none');
         actions.style.display = 'none';
+        exclusionInfo.style.display = 'none';
         clearAllTables();
         return;
       }
 
       noResults.style.display = 'none';
       actions.style.display = 'flex';
+      exclusionInfo.style.display = 'block';
 
       clearAllTables();
 
@@ -691,6 +709,7 @@
       document.getElementById('diseaseInput').value = '';
       document.getElementById('noResults').style.display = 'none';
       document.getElementById('actions').style.display = 'none';
+      document.getElementById('exclusionInfo').style.display = 'none';
       clearAllTables();
     }
 
