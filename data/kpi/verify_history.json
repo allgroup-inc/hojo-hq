@@ -319,5 +319,73 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-12",
+  "sample": 5,
+  "ng": 1,
+  "gemini": {
+   "enabled": true,
+   "eligible": 2,
+   "joined": 1
+  },
+  "items": [
+   {
+    "name": "令和8年度沖縄県スタートアップ起業支援金の公募開始",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1021963.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": false,
+    "issues": [
+     "Claude: 締切日が矛盾しています。ページ本文では「令和8年7月24日（金曜日）～令和8年8月19日 15時〆切（水曜日）」と記載されており、掲載データの「2026-08-19」は日付のみで時刻情報（15時）が欠落しています。ただし日付自体は一致しています。",
+     "Claude: 上限額がNoneとなっていますが、ページ本文の補助対象経費の表に「人件費：200万円」の補助上限額が明記されています。また「事業費」の補助上限額も記載されているため、上限額の情報が完全に欠落しています。",
+     "Gemini: 補助上限額について、出典ページには「200万円」と記載されていますが、掲載データでは「None」となっています。"
+    ],
+    "human_verdict": null
+   },
+   {
+    "name": "いわき市診療所開設・承継支援補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXK4MAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "よろず支援拠点事業 生産性向上支援センター",
+    "url": "https://okinawa-ric.jp/service/post-58-1.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度　水力発電導入促進支援事業費補助金（既存設備有効活用強化支援事業）公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYcpMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "［第六回以降］事業再構築補助金（共同申請者）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000007Cos5EAC",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
