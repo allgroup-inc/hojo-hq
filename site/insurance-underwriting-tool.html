@@ -348,21 +348,45 @@
       </div>
 
       <div id="results-all" class="results active">
-        <div class="results-header">
-          <span class="results-title">検索結果（全社）</span>
-          <span class="results-count" id="count-all">0 件</span>
+        <div id="all-naneiro-section" style="display:none;">
+          <div class="results-header">
+            <span class="results-title">なないろ生命</span>
+            <span class="results-count" id="count-all-naneiro">0 件</span>
+          </div>
+          <table id="resultTable-all-naneiro">
+            <thead>
+              <tr>
+                <th>病名</th>
+                <th>状態</th>
+                <th>対応商品と判定</th>
+                <th>ページ</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody-all-naneiro"></tbody>
+          </table>
         </div>
-        <table id="resultTable-all">
-          <thead>
-            <tr>
-              <th>保険会社</th>
-              <th>病名</th>
-              <th>引き受け判定</th>
-              <th>詳細</th>
-            </tr>
-          </thead>
-          <tbody id="resultBody-all"></tbody>
-        </table>
+
+        <div id="all-fwd-section" style="display:none; margin-top:40px;">
+          <div class="results-header">
+            <span class="results-title">FWD生命</span>
+            <span class="results-count" id="count-all-fwd">0 件</span>
+          </div>
+          <table id="resultTable-all-fwd">
+            <thead>
+              <tr>
+                <th>病名</th>
+                <th>引き受け判定</th>
+                <th>条件・詳細</th>
+                <th>死亡保険</th>
+                <th>医療保険</th>
+                <th>特約</th>
+                <th>生活支援特則等</th>
+                <th>告知ポイント</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody-all-fwd"></tbody>
+          </table>
+        </div>
       </div>
 
       <div id="results-naneiro" class="results">
@@ -394,7 +418,11 @@
               <th>病名</th>
               <th>引き受け判定</th>
               <th>条件・詳細</th>
-              <th>告知・特約情報</th>
+              <th>死亡保険</th>
+              <th>医療保険</th>
+              <th>特約</th>
+              <th>生活支援特則等</th>
+              <th>告知ポイント</th>
             </tr>
           </thead>
           <tbody id="resultBody-fwd"></tbody>
@@ -584,46 +612,72 @@
     }
 
     function displayAllResults(naneiro_results, fwd_results) {
-      const body = document.getElementById('resultBody-all');
-      body.innerHTML = '';
+      // Show/hide sections
+      document.getElementById('all-naneiro-section').style.display = naneiro_results.length > 0 ? 'block' : 'none';
+      document.getElementById('all-fwd-section').style.display = fwd_results.length > 0 ? 'block' : 'none';
 
-      const combined = [
-        ...naneiro_results.map(r => ({ company: 'なないろ生命', data: r, type: 'naneiro' })),
-        ...fwd_results.map(r => ({ company: 'FWD生命', data: r, type: 'fwd' }))
-      ];
+      // Display なないろ results
+      if (naneiro_results.length > 0) {
+        const naneiro_body = document.getElementById('resultBody-all-naneiro');
+        naneiro_body.innerHTML = '';
 
-      combined.forEach(item => {
-        const row = document.createElement('tr');
-        const data = item.data;
-
-        if (item.type === 'naneiro') {
+        naneiro_results.forEach(data => {
+          const row = document.createElement('tr');
           const statusStr = Object.values(data.marks).some(m => m === '○') ? '可' :
                            Object.values(data.marks).some(m => m === '★') ? '条件付き' : '不可';
           const statusClass = statusStr === '可' ? 'ok' : statusStr === '条件付き' ? 'conditional' : 'ng';
 
+          const marksList = Object.entries(data.marks)
+            .filter(([k, v]) => v !== '')
+            .map(([k, v]) => `<div class="mark-item"><span>${k}</span><span class="mark-symbol">${v}</span></div>`)
+            .join('');
+
+          const remarksHtml = data.remarks ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid #ddd; font-size:12px; color:#d32f2f;"><strong>備考:</strong> ${data.remarks}</div>` : '';
+
           row.innerHTML = `
-            <td>${item.company}</td>
-            <td>${data.disease}</td>
-            <td><span class="status ${statusClass}">${statusStr}</span></td>
-            <td><small>状態: ${data.state}<br>ページ: ${data.page}</small></td>
+            <td><strong>${data.disease}</strong></td>
+            <td>${data.state}</td>
+            <td>
+              <span class="status ${statusClass}" style="margin-bottom:8px; display:block; width:fit-content;">${statusStr}</span>
+              <div class="marks-list">${marksList || 'データなし'}</div>
+              ${remarksHtml}
+            </td>
+            <td><small>p.${data.page}</small></td>
           `;
-        } else {
+
+          naneiro_body.appendChild(row);
+        });
+
+        document.getElementById('count-all-naneiro').textContent = naneiro_results.length + ' 件';
+      }
+
+      // Display FWD results
+      if (fwd_results.length > 0) {
+        const fwd_body = document.getElementById('resultBody-all-fwd');
+        fwd_body.innerHTML = '';
+
+        fwd_results.forEach(data => {
+          const row = document.createElement('tr');
           const statusClass = data.judgement === '可' ? 'ok' :
                             data.judgement === '条件付き' ? 'conditional' :
                             data.judgement === '要確認' ? 'unknown' : 'ng';
 
           row.innerHTML = `
-            <td>${item.company}</td>
-            <td>${data.disease}</td>
+            <td><strong>${data.disease}</strong></td>
             <td><span class="status ${statusClass}">${data.judgement}</span></td>
             <td><small>${data.condition || 'なし'}</small></td>
+            <td><small>${data['死亡保険'] || 'なし'}</small></td>
+            <td><small>${data['医療保険'] || 'なし'}</small></td>
+            <td><small>${data['特約'] || 'なし'}</small></td>
+            <td><small>${data['生活支援特則等'] || 'なし'}</small></td>
+            <td><small style="color: #d32f2f; font-weight: 600;">${data['ポイント'] || 'なし'}</small></td>
           `;
-        }
 
-        body.appendChild(row);
-      });
+          fwd_body.appendChild(row);
+        });
 
-      document.getElementById('count-all').textContent = combined.length + ' 件';
+        document.getElementById('count-all-fwd').textContent = fwd_results.length + ' 件';
+      }
     }
 
     function displayNaneiro(results) {
@@ -670,17 +724,15 @@
                           data.judgement === '条件付き' ? 'conditional' :
                           data.judgement === '要確認' ? 'unknown' : 'ng';
 
-        const pointStyle = data.ポイント ? 'color: #d32f2f; font-weight: 600;' : '';
-
-        // Display endorsement info and points together
-        const endorsementText = data['特約'] ? data['特約'].trim() : '';
-        const endorsementInfo = endorsementText ? `<div style="margin-top: 6px; color: #F88800; font-weight: 600;">特約: ${endorsementText}</div>` : '';
-
         row.innerHTML = `
           <td><strong>${data.disease}</strong></td>
           <td><span class="status ${statusClass}">${data.judgement}</span></td>
           <td><small>${data.condition || 'なし'}</small></td>
-          <td><small style="${pointStyle}">${data.ポイント || 'なし'}</small>${endorsementInfo}</td>
+          <td><small>${data['死亡保険'] || 'なし'}</small></td>
+          <td><small>${data['医療保険'] || 'なし'}</small></td>
+          <td><small>${data['特約'] || 'なし'}</small></td>
+          <td><small>${data['生活支援特則等'] || 'なし'}</small></td>
+          <td><small style="color: #d32f2f; font-weight: 600;">${data['ポイント'] || 'なし'}</small></td>
         `;
 
         body.appendChild(row);
