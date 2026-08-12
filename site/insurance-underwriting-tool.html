@@ -393,7 +393,7 @@
               <th>病名</th>
               <th>引き受け判定</th>
               <th>条件・詳細</th>
-              <th>複数傷病</th>
+              <th>案内可否特約</th>
             </tr>
           </thead>
           <tbody id="resultBody-fwd"></tbody>
@@ -615,11 +615,15 @@
                           data.judgement === '条件付き' ? 'conditional' :
                           data.judgement === '要確認' ? 'unknown' : 'ng';
 
+        // Prepare endorsement display
+        const endorsementText = data['特約'] ? data['特約'].trim() : 'なし';
+        const endorsementStyle = data['特約'] && data['特約'].includes('×') ? 'color: #c62828;' : '';
+
         row.innerHTML = `
           <td><strong>${data.disease}</strong></td>
           <td><span class="status ${statusClass}">${data.judgement}</span></td>
-          <td><small>${data.condition || 'なし'}</small></td>
-          <td><small>${data.multiple_diseases || 'なし'}</small></td>
+          <td><small>${data.condition || 'なし'}<br><strong style="color: #F88800;">告知: ${data.ポイント || 'なし'}</strong></small></td>
+          <td><small style="${endorsementStyle}">${endorsementText}</small></td>
         `;
 
         body.appendChild(row);
