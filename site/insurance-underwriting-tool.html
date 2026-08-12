@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>保険引き受け目安検索 - なないろ生命 × FWD生命</title>
+  <script src="https://cdn.jsdelivr.net/npm/wanakana@5.3.0/dist/wanakana.umd.js"></script>
   <style>
     :root {
       --navy: #00335C;
@@ -393,7 +394,7 @@
               <th>病名</th>
               <th>引き受け判定</th>
               <th>条件・詳細</th>
-              <th>案内可否特約</th>
+              <th>告知・特約情報</th>
             </tr>
           </thead>
           <tbody id="resultBody-fwd"></tbody>
@@ -423,7 +424,7 @@
 
     async function loadData() {
       try {
-        const response = await fetch('./docs/insurance/underwriting_full.json');
+        const response = await fetch('/hojo-hq/docs/insurance/underwriting_full.json');
         underwritingData = await response.json();
         console.log('データ読み込み完了:', underwritingData._source);
 
@@ -493,13 +494,29 @@
 
     function calculateScore(query, target) {
       const t = target.toLowerCase();
-      if (t === query) return 100;
-      if (t.includes(query)) return 90;
-      if (query.includes(t)) return 80;
+      const q = query.toLowerCase();
 
+      // 完全一致
+      if (t === q) return 100;
+      if (t.includes(q)) return 90;
+      if (q.includes(t)) return 80;
+
+      // ひらがな・カタカナ・漢字を統一形式（カタカナ）で比較
+      try {
+        const tKata = wanakana.toKatakana(t);
+        const qKata = wanakana.toKatakana(q);
+
+        if (tKata === qKata) return 100;
+        if (tKata.includes(qKata)) return 90;
+        if (qKata.includes(tKata)) return 80;
+      } catch (e) {
+        // wanakana処理に失敗した場合はスキップ
+      }
+
+      // 単語単位での比較
       const words = t.split(/[\s・（）()]/);
-      if (words.some(w => w === query)) return 85;
-      if (words.some(w => w.includes(query))) return 70;
+      if (words.some(w => w === q)) return 85;
+      if (words.some(w => w.includes(q))) return 70;
 
       return 0;
     }
@@ -510,8 +527,7 @@
 
       if (naneiro_results.length === 0 && fwd_results.length === 0) {
         noResults.style.display = 'block';
-        document.getElementById('results-all').classList.remove('active');
-        document.getElementById('results-all').style.display = 'none';
+        document.querySelectorAll('[id^="results-"]').forEach(el => el.style.display = 'none');
         actions.style.display = 'none';
         clearAllTables();
         return;
@@ -519,16 +535,34 @@
 
       noResults.style.display = 'none';
       actions.style.display = 'flex';
-      document.getElementById('results-all').style.display = 'block';
 
-      // Always populate all tables so user can switch between tabs
-      displayAllResults(naneiro_results, fwd_results);
-      displayNaneiro(naneiro_results);
-      displayFWD(fwd_results);
+      clearAllTables();
 
-      // Ensure the correct tab is active based on currentTab
-      document.querySelectorAll('[id^="results-"]').forEach(el => el.classList.remove('active'));
-      document.getElementById('results-' + currentTab).classList.add('active');
+      // Display based on current tab selection
+      if (currentTab === 'all') {
+        displayAllResults(naneiro_results, fwd_results);
+        document.getElementById('results-all').style.display = 'block';
+        document.getElementById('results-naneiro').style.display = 'none';
+        document.getElementById('results-fwd').style.display = 'none';
+      } else if (currentTab === 'naneiro') {
+        if (naneiro_results.length > 0) {
+          displayNaneiro(naneiro_results);
+          document.getElementById('results-naneiro').style.display = 'block';
+        } else {
+          noResults.style.display = 'block';
+        }
+        document.getElementById('results-all').style.display = 'none';
+        document.getElementById('results-fwd').style.display = 'none';
+      } else if (currentTab === 'fwd') {
+        if (fwd_results.length > 0) {
+          displayFWD(fwd_results);
+          document.getElementById('results-fwd').style.display = 'block';
+        } else {
+          noResults.style.display = 'block';
+        }
+        document.getElementById('results-all').style.display = 'none';
+        document.getElementById('results-naneiro').style.display = 'none';
+      }
     }
 
     function displayAllResults(naneiro_results, fwd_results) {
@@ -589,12 +623,15 @@
           .map(([k, v]) => `<div class="mark-item"><span>${k}</span><span class="mark-symbol">${v}</span></div>`)
           .join('');
 
+        const remarksHtml = data.remarks ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid #ddd; font-size:12px; color:#d32f2f;"><strong>備考:</strong> ${data.remarks}</div>` : '';
+
         row.innerHTML = `
           <td><strong>${data.disease}</strong></td>
           <td>${data.state}</td>
           <td>
             <span class="status ${statusClass}" style="margin-bottom:8px; display:block; width:fit-content;">${statusStr}</span>
             <div class="marks-list">${marksList || 'データなし'}</div>
+            ${remarksHtml}
           </td>
           <td><small>p.${data.page}</small></td>
         `;
@@ -615,15 +652,17 @@
                           data.judgement === '条件付き' ? 'conditional' :
                           data.judgement === '要確認' ? 'unknown' : 'ng';
 
-        // Prepare endorsement display
-        const endorsementText = data['特約'] ? data['特約'].trim() : 'なし';
-        const endorsementStyle = data['特約'] && data['特約'].includes('×') ? 'color: #c62828;' : '';
+        const pointStyle = data.ポイント ? 'color: #d32f2f; font-weight: 600;' : '';
+
+        // Display endorsement info and points together
+        const endorsementText = data['特約'] ? data['特約'].trim() : '';
+        const endorsementInfo = endorsementText ? `<div style="margin-top: 6px; color: #F88800; font-weight: 600;">特約: ${endorsementText}</div>` : '';
 
         row.innerHTML = `
           <td><strong>${data.disease}</strong></td>
           <td><span class="status ${statusClass}">${data.judgement}</span></td>
-          <td><small>${data.condition || 'なし'}<br><strong style="color: #F88800;">告知: ${data.ポイント || 'なし'}</strong></small></td>
-          <td><small style="${endorsementStyle}">${endorsementText}</small></td>
+          <td><small>${data.condition || 'なし'}</small></td>
+          <td><small style="${pointStyle}">${data.ポイント || 'なし'}</small>${endorsementInfo}</td>
         `;
 
         body.appendChild(row);
