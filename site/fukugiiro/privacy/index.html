@@ -14,7 +14,7 @@
 :root{--fg-primary:#D2694A;--fg-primary-deep:#B9502F;--fg-accent:#F2C14E;--fg-deep:#1F5C45;--fg-ink:#3B322B;--fg-bg:#FBF5EC;--fg-card:#FFFDF9;--fg-muted:#8B7C6E;--fg-line:#EEE1D0;--fg-shadow:0 1px 2px rgba(0,0,0,.04)}
 *{margin:0;padding:0;box-sizing:border-box}
 h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
-body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:18px;line-height:1.9;color:var(--fg-ink);background:var(--fg-bg)}
+body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:17px;line-height:1.9;color:var(--fg-ink);background:var(--fg-bg)}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
 @media(min-width:900px){.wrap{max-width:780px}}
 h1{font-size:1.4rem;margin-bottom:6px}
@@ -39,6 +39,9 @@ a{color:var(--fg-primary)}
 .contact dt{font-weight:700;font-size:.88rem;color:var(--fg-muted);margin-top:8px}
 .contact dd{margin:0 0 4px}
 .btn{display:block;max-width:420px;margin:20px auto 6px;padding:14px 24px;min-height:44px;background:#22382A;color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tablewrap table{min-width:560px}
+.pill{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -71,12 +74,12 @@ a{color:var(--fg-primary)}
 </ul>
 
 <h2>2. 取得する情報・取得しない情報</h2>
-<table>
+<div class="tablewrap"><table>
 <tr><th>経路</th><th>情報</th><th>取得</th><th>使いみち</th></tr>
 <tr><td>3分診断</td><td>お住まいの市町村・世帯構成・お子さんの年齢帯・ライフイベント・住まいの状況</td><td><span class="pill no">取得しません</span></td><td>端末内で「使える可能性のある制度」を判定するためだけに使用。回答はお使いのブラウザ内(ローカル保存)にのみ残り、当社へ送信されません。ブラウザのデータ消去でいつでも削除できます。</td></tr>
 <tr><td>LINE登録</td><td>LINEの識別子・表示名など(LINEプラットフォーム上の情報)</td><td><span class="pill">取得します</span></td><td>締切リマインド・申請手順・受給フォローのお知らせ配信(登録者のみ)</td></tr>
 <tr><td>アクセス解析</td><td>ページの閲覧状況の匿名統計(Cookie不使用・個人を特定しません)</td><td><span class="pill">取得します</span><br>(個人特定なし)</td><td>サイトの改善と、「届いていない支援」の匿名分析</td></tr>
-</table>
+</table></div>
 
 <h2>3. 受け取らない情報</h2>
 <p>診断・LINE配信といったサービスのご利用にあたり、氏名・正確な住所(番地)・電話番号・メールアドレス・マイナンバー・口座情報、および病名などの要配慮個人情報は取得しません。<br>障がい・医療に関わる制度は「該当の可能性がある窓口のご案内」までとし、症状などの入力はお願いしません。</p>
@@ -101,13 +104,13 @@ a{color:var(--fg-primary)}
 </ul>
 
 <h2>6. Cookie・アクセス解析について</h2>
-<p>当サイトのアクセス解析は Cookie を使いません。個人を特定できる情報を集めず、どのページがよく読まれているかといった匿名の統計だけを扱います。</p>
+<p>当サイトのアクセス解析は Cookieを使いません。個人を特定できる情報を集めず、どのページがよく読まれているかといった匿名の統計だけを扱います。</p>
 
 <h2>7. 保存期間・削除・開示等のご請求</h2>
 <ul>
 <li>診断の回答: 当社サーバーには保存しません(お使いの端末内のみ)。端末側の記録はご自身でいつでも消去できます。</li>
 <li>LINEの識別子・配信関連データ: ブロック・退会をされた場合、90日以内に当社側の紐づけを削除します。</li>
-<li>ご本人からの利用停止・削除・開示等のご請求は、下記のお問い合わせ窓口(LINE または メール)で承り、30日以内に対応します。</li>
+<li>ご本人からの利用停止・削除・開示等のご請求は、下記のお問い合わせ窓口(LINEまたはメール)で承り、30日以内に対応します。</li>
 </ul>
 
 <h2>8. 安全管理</h2>

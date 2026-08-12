@@ -36,7 +36,8 @@ h2{font-size:1.05rem;margin:24px 0 8px;border-left:6px solid var(--fg-accent);pa
 .goal p{margin:6px 0}
 /* 5ステップ工程表(画面のみ・伴走) */
 .track{list-style:none;counter-reset:st}
-.track li{position:relative;padding:12px 0 12px 46px;border-bottom:1px dashed var(--fg-line)}
+.track li{position:relative;padding:12px 0 12px 46px;border-bottom:1px dashed var(--fg-line);counter-increment:st}
+.track .n::before{content:counter(st)}
 .track li:last-child{border-bottom:none}
 .track label{display:flex;align-items:flex-start;gap:10px;cursor:pointer}
 .track input[type=checkbox]{width:24px;height:24px;min-width:24px;margin-top:3px;accent-color:var(--fg-deep)}
@@ -67,6 +68,7 @@ ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through
 .linebtn{display:block;max-width:440px;margin:8px auto 0;padding:14px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 a{color:var(--fg-primary)}
+.footlinks a{display:inline-block;padding:6px 2px;white-space:nowrap}
 .siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
 .siteheader .hlogo{display:flex;align-items:center;gap:8px;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;color:var(--fg-primary-deep);text-decoration:none;font-size:1.05rem}
 .siteheader .hlogo img{width:30px;height:30px}
@@ -75,7 +77,9 @@ a{color:var(--fg-primary)}
 @media(min-width:900px){.wrap{max-width:820px}}
 @media(max-width:560px){.siteheader nav a{font-size:.74rem;padding:5px 6px}}
 /* 印刷=電話台本+持ち物+窓口ひとこと+メモの1枚に圧縮。工程表・申請後・LINEは画面のみ。 */
-@media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}}
+@media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:.8em;word-break:break-all}
+  .memo{min-height:56px;resize:none}}
 </style>
 </head>
 <body>
@@ -93,7 +97,7 @@ a{color:var(--fg-primary)}
 <div class="wrap">
 
 <h1>申請ナビ一覧</h1>
-<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請ナビを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで、印刷してそのまま窓口へ。どれが自分に合うかわからないときは、まず3分診断からどうぞ。</p>
+<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請ナビを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで、印刷してそのまま窓口へ。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>
 <div class="box"><ul style="list-style:none"><li style="margin-bottom:8px"><a href="fk-kuni-jidoteate/">児童手当</a> <span class="status ok">✓ 確認済み</span></li>
 <li style="margin-bottom:8px"><a href="fk-kuni-jidofuyoteate/">児童扶養手当</a> <span class="status ok">✓ 確認済み</span></li>
@@ -256,7 +260,7 @@ a{color:var(--fg-primary)}
 <li style="margin-bottom:8px"><a href="fk-ie-kosodate-shienkin/">伊江村 子育て支援金(出産祝金)</a> <span class="status">要確認</span></li>
 <li style="margin-bottom:8px"><a href="fk-kin-shugaku-enjo/">金武町 就学援助</a> <span class="status">要確認</span></li></ul></div>
 <div class="disclaimer">最終更新: 2026-08-13 06:37(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
-<p style="margin-top:16px"><a href="../index.html">もらいわすれ堂 トップ</a></p>
+<p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップ</a></p>
 
 </div>
 </body>

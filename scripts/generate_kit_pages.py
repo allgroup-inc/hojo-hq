@@ -68,7 +68,8 @@ h2{font-size:1.05rem;margin:24px 0 8px;border-left:6px solid var(--fg-accent);pa
 .goal p{margin:6px 0}
 /* 5ステップ工程表(画面のみ・伴走) */
 .track{list-style:none;counter-reset:st}
-.track li{position:relative;padding:12px 0 12px 46px;border-bottom:1px dashed var(--fg-line)}
+.track li{position:relative;padding:12px 0 12px 46px;border-bottom:1px dashed var(--fg-line);counter-increment:st}
+.track .n::before{content:counter(st)}
 .track li:last-child{border-bottom:none}
 .track label{display:flex;align-items:flex-start;gap:10px;cursor:pointer}
 .track input[type=checkbox]{width:24px;height:24px;min-width:24px;margin-top:3px;accent-color:var(--fg-deep)}
@@ -99,6 +100,7 @@ ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through
 .linebtn{display:block;max-width:440px;margin:8px auto 0;padding:14px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 a{color:var(--fg-primary)}
+.footlinks a{display:inline-block;padding:6px 2px;white-space:nowrap}
 .siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
 .siteheader .hlogo{display:flex;align-items:center;gap:8px;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;color:var(--fg-primary-deep);text-decoration:none;font-size:1.05rem}
 .siteheader .hlogo img{width:30px;height:30px}
@@ -107,7 +109,9 @@ a{color:var(--fg-primary)}
 @media(min-width:900px){.wrap{max-width:820px}}
 @media(max-width:560px){.siteheader nav a{font-size:.74rem;padding:5px 6px}}
 /* 印刷=電話台本+持ち物+窓口ひとこと+メモの1枚に圧縮。工程表・申請後・LINEは画面のみ。 */
-@media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}}
+@media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:.8em;word-break:break-all}
+  .memo{min-height:56px;resize:none}}
 """
 
 HEADER = '''<header class="siteheader">
@@ -299,7 +303,7 @@ def kit_page(it, updated):
     body = f"""
 <p class="note no-print"><a href="../../index.html">もらいわすれ堂</a> › 申請準備シート</p>
 <h1>{name} 申請ナビ{badge}</h1>
-<p class="note">「どこに・何を持って・何と言えばいいか」を、この1枚にまとめました。<br>書くのはご本人ですが、迷わないところまでは、ぜんぶここで終わらせましょう。</p>
+<p class="note">「どこに・何を持って・何と言えばいいか」を、この<span style="white-space:nowrap">1枚</span>にまとめました。<br>書くのはご本人ですが、迷わないところまでは、ぜんぶここで終わらせましょう。</p>
 {warn}
 
 <div class="goal">
@@ -321,7 +325,7 @@ def kit_page(it, updated):
 <p class="note"><span class="prog" id="stepprog"></span></p>
 <div class="box">
   <ol class="track">
-    <li><label><input type="checkbox"><span class="n"></span><span>公式ページで「対象」と「締切」を見る</span></label></li>
+    <li><label><input type="checkbox"><span class="n"></span><span>公式ページで「対象」と<span style="white-space:nowrap">「締切」</span>を見る</span></label></li>
     <li><label><input type="checkbox"><span class="n"></span><span>窓口に電話して「私の場合の持ち物」を聞く(下に台本があります)</span></label></li>
     <li><label><input type="checkbox"><span class="n"></span><span>持ち物をそろえる(全部なくても大丈夫)</span></label></li>
     <li><label><input type="checkbox"><span class="n"></span><span>窓口で申請する(会話はこのとおりでOK)</span></label></li>
@@ -334,7 +338,7 @@ def kit_page(it, updated):
 <div class="phone">
   <p class="note">行く前にこの3つを聞いておくと、持ち物不足でのやり直しがなくなります。対象になるか自信がなくても、そのまま聞いて大丈夫です。</p>
   <div class="say">「<b>{name}</b>の申請をしたいのですが、3つ教えてください」</div>
-  <div class="say">① 受付の<b>時間</b>と、行く<b>場所(窓口)</b>はどこですか？</div>
+  <div class="say">① 受付の<b>時間</b>と、行く<b>場所(窓口)</b>を教えてください</div>
   <div class="say">② <b>私の場合</b>、何を持っていけばいいですか？</div>
   <div class="say">③ <b>申請書</b>はそちらにありますか？ <b>いつまで</b>に出せばいいですか？</div>
   <p class="note" style="margin-top:10px">電話番号は公式ページに載っています → <a href="{src}" rel="noopener">公式ページで電話番号を確認</a></p>
@@ -345,7 +349,7 @@ def kit_page(it, updated):
 <h2>② 持ち物チェックリスト</h2>
 <p class="note">市町村やご家庭の状況で変わります。「例」としてそろえて、細かい違いは①の電話か窓口で確認すれば大丈夫です。チェックはこの端末にだけ保存されます。</p>
 <div class="box">
-  <p class="note"><span class="prog" id="prog"></span></p>
+  <p class="note screen-only"><span class="prog" id="prog"></span></p>
   <div class="items"><h3>ほぼ必ず要るもの</h3>
   <ul class="check">
 {chr(10).join(core_html)}
@@ -362,7 +366,7 @@ def kit_page(it, updated):
   <ul class="ask">
     <li>締切はいつまでですか？</li>
     <li>申請書はこの場で書けますか？ 書き方も教えてください</li>
-    <li>振り込まれるのは、だいたいいつ頃ですか？</li>
+    <li>振り込まれるのは、いつ頃ですか？</li>
   </ul>
 </div>
 
@@ -381,7 +385,7 @@ def kit_page(it, updated):
   <a class="linebtn" style="background:var(--fg-primary)" href="../../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit')">受け取れたことを報告する(匿名・無料)</a>
 </div>
 <div class="after" style="background:#EAF7EE;border-color:#B7E4C7;text-align:center;color:#0F5138">
-  締切や新しい制度は、LINEでそっとお知らせします(締切の約1か月前・無料・名前の入力は不要)
+  締切や新しい制度は、LINEでそっとお知らせします(締切の約1か月前から・無料・名前の入力は不要)
   <a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで受け取る</a>
 </div>
 </section>
@@ -390,8 +394,8 @@ def kit_page(it, updated):
   この制度の情報が「古い」「違う」と気づいたら、教えてください。確認して24時間以内の修正を目指します。<br>
   <a href="{report_link}" onclick="if(window.fgTrack)fgTrack('teisei_mail')" style="display:inline-block;margin-top:8px;color:var(--fg-primary);font-weight:700">この制度の情報の間違いを知らせる</a>
 </div>
-<div class="disclaimer">このシートは公式情報に基づく「準備のご案内」です。持ち物は一般的な例で、市町村により異なります。受給できるかどうかの最終判断は各窓口で行われます。申請書の作成代行・代筆は行っていません(ご本人が記入します)。専門家のサポートが必要な場合は、提携の専門家(社会保険労務士・行政書士など)をご紹介します。<br>最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)/ 出典: <a href="{src}" rel="noopener">公式ページ</a></div>
-<p style="margin-top:16px" class="no-print">{area_link}<a href="../index.html">申請ナビ一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../teisei/">情報の訂正</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
+<div class="disclaimer">このシートは公式情報に基づく「準備のご案内」です。持ち物は一般的な例で、市町村により異なります。受給できるかどうかの最終判断は各窓口で行われます。<br>申請書の作成代行・代筆は行っていません(ご本人が記入します)。<br>専門家のサポートが必要な場合は、提携の専門家(社会保険労務士・行政書士など)をご紹介します。<br>最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)/ 出典: <a href="{src}" rel="noopener">公式ページ</a></div>
+<p style="margin-top:16px" class="no-print footlinks">{area_link}<a href="../index.html">申請ナビ一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../teisei/">情報の訂正</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
 """
     body += KIT_JS.replace("__ID__", it["id"])
     # 制度名が地域名で始まる場合は前置しない(「北谷町 北谷町 こども医療費助成」の二重表記防止)
@@ -430,11 +434,11 @@ def index_page(items, updated):
     lis = "\n".join(line(it) for it in items)
     body = f"""
 <h1>申請ナビ一覧</h1>
-<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請ナビを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで、印刷してそのまま窓口へ。どれが自分に合うかわからないときは、まず3分診断からどうぞ。</p>
+<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請ナビを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで、印刷してそのまま窓口へ。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>
 <div class="box"><ul style="list-style:none">{lis}</ul></div>
 <div class="disclaimer">最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
-<p style="margin-top:16px"><a href="../index.html">もらいわすれ堂 トップ</a></p>
+<p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップ</a></p>
 """
     return page(
         "沖縄の給付金・手当の申請準備シート一覧(持ち物・窓口・電話の聞き方)|もらいわすれ堂",

@@ -46,10 +46,12 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .lk{display:inline-block;font-size:.82rem;border-radius:4px;padding:2px 12px;font-weight:700;margin-bottom:6px}
 .lk-high{background:#dff2e9;color:#0f5138}
 .lk-mid{background:#fff3cd;color:#7a5b00}
-.result-card a{color:var(--fg-primary);display:inline-block;min-height:32px;line-height:1.9}
+.result-card a{color:var(--fg-primary);display:inline-block;min-height:44px;line-height:1.9;padding:6px 0}
+@media(max-width:480px){.result-card .linksep{display:none}.result-card a.cardlink{display:block}}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:20px}
 .first-badge{display:inline-block;background:var(--fg-primary);color:#fff;font-size:.82rem;border-radius:4px;padding:2px 12px;font-weight:700;margin-bottom:6px;margin-right:6px}
 .actions{display:flex;gap:10px;margin:16px 0}
+@media(max-width:480px){.actions{flex-direction:column}}
 .actions button{flex:1;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer}
 .madoguchi{font-size:.85rem;background:#eaf5f0;border-radius:6px;padding:6px 10px;margin-top:6px;color:#0f5138}
 .kind-msg{background:#EAF5F0;border:1px solid #B7E0CF;border-radius:12px;padding:14px 16px;margin:6px 0 16px;color:#0f5138;line-height:1.7;font-size:.95rem}
@@ -90,7 +92,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 </header>
 <div class="wrap">
   <h1>3分でもらい忘れ診断</h1>
-  <p class="note">名前・住所・電話番号の入力は不要です。<br>答えたくない質問はとばせます。途中でやめても大丈夫、何度でもやり直せます。<br>回答や記録はこの端末の中だけに保存され、送信されません。</p>
+  <p class="note">名前・住所・電話番号の入力は不要です。<br>答えたくない質問はとばせます。<br>途中でやめても大丈夫。何度でもやり直せます。<br>回答や記録はこの端末の中だけに保存され、送信されません。</p>
   <div class="progress" aria-hidden="true"><div id="bar" style="width:0%"></div></div>
   <div id="app" aria-live="polite"><noscript>この診断はJavaScriptを使って動きます。設定を有効にしてご覧ください。</noscript></div>
 </div>
@@ -105,6 +107,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   var EVENT_MAP = {"引越・住宅購入":"住宅取得・引越","病気・けが":"病気・けが","妊娠・出産":"妊娠・出産","入園・入学":"入園・入学","就職・転職":"就職・転職","失業":"失業","介護":"介護","災害":"災害"};
 
   var state = { step: 0, municipality: null, children: 0, childAges: [], lifeEvents: [], housing: null };
+  var childrenTouched = false; // Q2未回答時に「0人」が選択済みに見える問題の表示用フラグ(初期値0は維持)
   var app = document.getElementById("app");
   var bar = document.getElementById("bar");
   var TOTAL = 5;
@@ -150,6 +153,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   }
   function clearProgress(){ try { localStorage.removeItem("fg_shindan_progress"); } catch(e){} }
   function applySaved(sv){
+    childrenTouched = true;
     state.municipality = sv.municipality || null;
     state.children = sv.children || 0;
     state.childAges = sv.childAges || [];
@@ -189,8 +193,9 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     var pv = loadProgress();
     if (pv) {
       app.appendChild(h("div", {class:"resume-box"}, [
-        h("p", {text:"とちゅうまで答えた回答が、この端末に残っています。", style:"margin-bottom:8px;font-weight:700"}),
+        h("p", {text:"途中まで答えた回答が、この端末に残っています。", style:"margin-bottom:8px;font-weight:700"}),
         h("button", {class:"next", text:"つづきから(質問" + (pv.step + 1) + "から)", style:"width:100%;padding:12px;border-radius:999px;border:none;font-weight:700;cursor:pointer", onclick:function(){
+          childrenTouched = true;
           state.step = pv.step; state.municipality = pv.municipality || null; state.children = pv.children || 0;
           state.childAges = pv.childAges || []; state.lifeEvents = pv.lifeEvents || []; state.housing = pv.housing || null;
           if (window.fgTrack) window.fgTrack("shindan_resume", {kind:"progress"});
@@ -222,9 +227,9 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     sel.addEventListener("change", goMuni);
     app.appendChild(h("div", {class:"q"}, [
       h("h2", {text:"Q1. お住まいの市町村は?"}),
-      h("p", {class:"note", text:"制度をしぼり込むためだけに使います。名前や住所(番地)は不要。回答はこの端末の中だけで処理され、送信されません。", style:"margin:-4px 0 10px"}),
+      h("p", {class:"note", text:"制度をしぼり込むためだけに使います。名前や住所(番地)は不要です。回答はこの端末の中だけで処理され、送信されません。", style:"margin:-4px 0 10px"}),
       sel,
-      h("p", {class:"note", text:"最初の質問です。ぜんぶで数問・3分ほどで終わります。", style:"margin-top:10px"}),
+      h("p", {class:"note", text:"最初の質問です。ぜんぶで" + TOTAL + "問・3分ほどで終わります。", style:"margin-top:10px"}),
       nav("つぎへ", goMuni)
     ]));
   }
@@ -232,8 +237,8 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     var box = h("div", {class:"opts"});
     [0,1,2,3].forEach(function(n){
       var label = n === 3 ? "3人以上" : n + "人";
-      var b = h("button", {text:"お子さん " + label, class: state.children===n ? "sel":""});
-      b.addEventListener("click", function(){ state.children = n; state.step = n > 0 ? 2 : 3; render(); });
+      var b = h("button", {text:"お子さん " + label, class: (childrenTouched && state.children===n) ? "sel":""});
+      b.addEventListener("click", function(){ childrenTouched = true; state.children = n; state.step = n > 0 ? 2 : 3; render(); });
       box.appendChild(b);
     });
     app.appendChild(h("div", {class:"q"}, [h("h2",{text:"Q2. お子さんは何人いますか?"}), box, nav("とばす", function(){ state.step = state.children>0?2:3; render(); })]));
@@ -299,7 +304,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       var rs = window.FGShindan.matchSeido(db.items, answers);
       if (window.fgTrack) window.fgTrack(rs.length ? "shindan_complete" : "shindan_zero", {results: rs.length});
       app.innerHTML = "";
-      app.appendChild(h("h2", {text:"あなたの世帯が使える可能性のある制度: " + rs.length + "件"}));
+      var rh = h("h2"); rh.innerHTML = "あなたの世帯が使える<wbr>可能性のある<wbr>制度: " + rs.length + "件"; app.appendChild(rh);
       if (rs.length === 0) {
         app.appendChild(h("p", {text:"今回の回答では、該当の可能性が高い制度は見つかりませんでした。制度は毎日更新されるので、状況が変わったらまた診断してみてください。"}));
       }
@@ -345,10 +350,11 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         // 掲載件数は生データから出す(固定の数字を書くと古くなるため。正確性最優先)。
         var seidoCount = db.count || (db.items || []).length;
         var topLine = h("div", {style:"margin:8px 0 4px;padding:16px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
-        topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この結果 " + sum.total + " 件、今日のままとは限りません"}));
-        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"制度は増えたり、変わったりします(いまの掲載は" + seidoCount + "件・毎日更新)。LINEに登録しておくと、新しい制度が増えたときや締切が近づいたときにお知らせが届きます。いまの結果もコピーして残せます。制度の一覧は登録なしでも、ぜんぶ見られます。"}));
+        topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この結果" + sum.total + "件、今日のままとは限りません"}));
+        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:6px", text:"制度は増えたり、変わったりします(いまの掲載は" + seidoCount + "件・毎日更新)。LINEに登録しておくと、新しい制度が増えたときや締切が近づいたときにお知らせが届きます。"}));
+        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"いまの結果もコピーして残せます。制度の一覧は登録なしでも、ぜんぶ見られます。"}));
         var topLineBtn = h("a", {href:(window.FG_LINE_URL || "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/"), target:"_blank", rel:"noopener",
-          style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"LINEで“見逃し”をなくす(無料)"});
+          style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"LINEで「見逃し」をなくす(無料)"});
         var topCopied = h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名 ・ いつでも解除"});
         topLineBtn.addEventListener("click", function(){
           if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_top"});
@@ -383,7 +389,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         card.appendChild(h("h3", {text: it.name}));
         var ns = h("div", {class:"next-step"});
         ns.appendChild(h("span", {class:"ns-label", text:"次にやること"}));
-        ns.appendChild(h("span", {class:"ns-body", text: it.how_to_apply}));
+        ns.appendChild(h("span", {class:"ns-body", text: (it.how_to_apply||"").replace(/市区町村/g,"市町村").replace(/。$/,"")}));
         card.appendChild(ns);
         card.appendChild(h("p", {class:"card-sub", text:"対象: " + it.target_household}));
         card.appendChild(h("p", {class:"card-sub", text:"金額: " + it.amount_note}));
@@ -396,16 +402,20 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
           cbox.appendChild(document.createTextNode(it.combine.note));
           card.appendChild(cbox);
         }
-        card.appendChild(h("div", {class:"madoguchi", text:"窓口でこう言えばOK:「" + it.name + "について教えてください。対象か不安なのですが大丈夫ですか?」/ 対象かどうかは窓口が判断します。自信がなくて大丈夫です。"}));
-        card.appendChild(h("a", {href: it.source_url, rel:"noopener", text:"公式ページで確認する"}));
-        card.appendChild(h("span", {text:" ・ "}));
-        var kitLink = h("a", {href:"../kit/" + it.id + "/", text:"申請準備シート(持ち物リストつき)"});
+        var mg = h("div", {class:"madoguchi"});
+        mg.appendChild(document.createTextNode("窓口でこう言えばOK:"));
+        mg.appendChild(h("span", {style:"user-select:all;-webkit-user-select:all;display:block;margin:2px 0", text:"「" + it.name + "について教えてください。対象か不安なのですが大丈夫ですか?」"}));
+        mg.appendChild(h("span", {class:"note", style:"display:block;margin-top:2px;color:#0f5138", text:"対象かどうかは窓口が判断します。自信がなくて大丈夫です。"}));
+        card.appendChild(mg);
+        card.appendChild(h("a", {href: it.source_url, rel:"noopener", class:"cardlink", text:"公式ページで確認する"}));
+        card.appendChild(h("span", {class:"linksep", text:" ・ "}));
+        var kitLink = h("a", {href:"../kit/" + it.id + "/", class:"cardlink", text:"申請準備シート(持ち物リストつき)"});
         kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("kit_click"); });
         card.appendChild(kitLink);
         card.appendChild(h("p", {class:"note", style:"margin-top:6px", text:"準備の目安がそろったら、お住まいの窓口へ。最終的な受給の可否は窓口で確認されます。"}));
         if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
         var mk = h("button", {class:"markbtn" + (isMarked ? " marked" : ""),
-          text: isMarked ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、ここをタップして記録"});
+          text: isMarked ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、タップして記録"});
         // 受給報告の導線: 「受け取った」瞬間に、その制度の報告をLINEへ促す(⑤の回収)
         var rep = h("div", {style:"display:" + (isMarked ? "block" : "none") + ";margin-top:8px;padding-top:8px;border-top:1px dashed var(--fg-line)"});
         var repLink = h("a", {href:"../houkoku/",
@@ -418,7 +428,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
           setMark(it.id, now);
           card.classList.toggle("card-done", now);
           mk.classList.toggle("marked", now);
-          mk.textContent = now ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、ここをタップして記録";
+          mk.textContent = now ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、タップして記録";
           rep.style.display = now ? "block" : "none";
           if (now && window.fgTrack) window.fgTrack("seido_done_mark");
         });
@@ -438,7 +448,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       });
       lineBox.appendChild(rewards);
       var lineBtn = h("a", {href: lineUrl, target:"_blank", rel:"noopener",
-        style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEで受け取る(無料)"});
+        style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEでお知らせを受け取る(無料)"});
       lineBtn.addEventListener("click", function(){
         if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_bottom"});
         try { if (rs.length && navigator.clipboard) navigator.clipboard.writeText(resultText()); } catch(e){}
@@ -447,7 +457,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。"}));
       app.appendChild(lineBox);
       var disc = h("div", {class:"disclaimer"});
-      disc.innerHTML = "この診断は公式情報に基づく「可能性のご案内」です。<br>受給できるかどうかの最終判断は各窓口で行われます。<br>医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため、診断には表示していません。上の黄色い案内から、お住まいの市町村のページでご確認ください。";
+      disc.innerHTML = "この診断は公式情報に基づく「可能性のご案内」です。<br>受給できるかどうかの最終判断は各窓口で行われます。<br>医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため、診断には表示していません。<a href=\"" + areaHref + "\">お住まいの市町村のページ</a>でご確認ください。";
       app.appendChild(disc);
       app.appendChild(h("p", {style:"margin-top:16px"}, [h("a", {href:"../index.html", text:"← トップへもどる"})]));
     }).catch(function(){
