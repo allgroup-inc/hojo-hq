@@ -28,6 +28,7 @@ class TestTriage(unittest.TestCase):
 
     def test_priority_map_order(self):
         self.assertLess(PRIORITY["不着"], PRIORITY["遅延"])
+        self.assertLess(PRIORITY["遅延"], PRIORITY["口座確認"])
         self.assertLess(PRIORITY["口座確認"], PRIORITY["初動"])
         self.assertLess(PRIORITY["初動"], PRIORITY["高リスク"])
 
@@ -52,8 +53,6 @@ class TestTriage(unittest.TestCase):
              "amount": 5000, "debit_result": "", "account_daily": "はい", "debit_due": None}
         model = fit.fit_model([])
         self.assertNotIn("初動", [c["trigger"] for c in classify([r], model, AS_OF)])
-        self.assertLess(PRIORITY["遅延"], PRIORITY["口座確認"])
-        self.assertLess(PRIORITY["口座確認"], PRIORITY["高リスク"])
 
 
 def rec(product, **over):

@@ -67,6 +67,28 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(st2["status"], "completed")
         self.assertTrue(st2.get("idempotent_skip"))
 
+    def test_initial_contact_surfaces_in_today_when_contacts_given(self):
+        # 契約直後・未接触の継続契約 → 保全ログを渡すと today.html に「初動」が出る
+        csv2 = os.path.join(self.d, "apps2.csv")
+        rows = list(_rows().splitlines())
+        # 2026-07-25 契約（as_of 2026-08-01 の7日前）・継続中・口座OK・引落問題なし＝初動のみ
+        rows.append("R1,2026-07-25,医療,ネット,単発,5000,25,女,那覇,S1,,,はい,,")
+        with open(csv2, "w", encoding="utf-8") as f:
+            f.write("\n".join(rows) + "\n")
+        cpath = os.path.join(self.d, "contacts.csv")
+        with open(cpath, "w", encoding="utf-8") as f:
+            f.write("顧客ID,契約日,接触日,対応内容\n")  # 接触ゼロ（未接触）
+        cmap2 = os.path.join(self.d, "contactmap.json")
+        with open(cmap2, "w", encoding="utf-8") as f:
+            json.dump({"customer_id": "顧客ID", "apply_date": "契約日",
+                       "contact_date": "接触日", "action": "対応内容"}, f, ensure_ascii=False)
+        st = run_pipeline(csv2, self.cmap, os.path.join(self.d, "o2"), date(2026, 8, 1),
+                          date(2025, 7, 1), "2026-08-01", auc_min=0.0, notify=lambda *_: None,
+                          contacts_path=cpath, contact_map_path=cmap2)
+        self.assertEqual(st["status"], "completed")
+        with open(os.path.join(self.d, "o2", "today.html"), encoding="utf-8") as f:
+            self.assertIn("初動", f.read())
+
 
 if __name__ == "__main__":
     unittest.main()

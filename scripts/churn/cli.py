@@ -30,6 +30,8 @@ from .pipeline import run_pipeline
 from .retention import purge_snapshots
 from .contact_log import load_contacts
 from .playbook import segment_playbook, render_html as render_playbook_html
+from .experiment import compare_naive_vs_controlled, assignment_ledger
+from .config import EXPERIMENT_TREATED_FRACTION
 from .config import CAPACITY_PER_DAY, AUC_MIN, SNAPSHOT_RETENTION_YEARS, EARLY_CHURN_MONTHS
 
 
@@ -196,11 +198,14 @@ def cmd_cohort(csv_path, column_map_path, out_path, as_of, model_path=None):
     return ov
 
 
-def cmd_today(csv_path, column_map_path, model_path, out_path, as_of, capacity):
+def cmd_today(csv_path, column_map_path, model_path, out_path, as_of, capacity,
+              contacts_path=None, contact_map_path=None):
     as_of_d = _as_of(as_of)
     records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
     model = load_model(model_path)
-    today, carry, stats = triage(classify(records, model, as_of_d), capacity)
+    contacts = (load_contacts(contacts_path, load_column_map(contact_map_path))
+                if contacts_path and contact_map_path else None)
+    today, carry, stats = triage(classify(records, model, as_of_d, contacts=contacts), capacity)
     render_today_html(today, carry, stats, out_path, capacity)
     print(f"[today] 要接触{stats['total']}件 → 今日{len(today)} / "
           f"繰り越し{stats['carry_count']} → {out_path}")
@@ -212,9 +217,10 @@ def cmd_snapshot(csv_path, interactions, month, out_dir, force):
 
 
 def cmd_pipeline(csv_path, column_map_path, out_dir, as_of, split, run_date,
-                 auc_min, capacity, interactions):
+                 auc_min, capacity, interactions, contacts=None, contact_map=None):
     st = run_pipeline(csv_path, column_map_path, out_dir, _as_of(as_of), _as_of(split),
-                      run_date, auc_min=auc_min, capacity=capacity, interactions=interactions)
+                      run_date, auc_min=auc_min, capacity=capacity, interactions=interactions,
+                      contacts_path=contacts, contact_map_path=contact_map)
     mark = {"completed": "✅完了", "stopped_auc": "🛑AUC停止",
             "stopped_schema": "🛑スキーマ停止"}.get(st["status"], st["status"])
     auc = "－" if st["auc"] is None else f"{st['auc']:.3f}"
@@ -241,6 +247,29 @@ def cmd_playbook(csv_path, column_map_path, contacts_path, contact_map_path,
     render_playbook_html(rows, out_path, segment_label=labels.get(segment, segment))
     print(f"[playbook] セグメント={segment} {len(rows)}層 → {out_path}")
     return rows
+
+
+def cmd_uplift(csv_path, column_map_path, contacts_path, contact_map_path, as_of,
+               treated_fraction, salt):
+    as_of_d = _as_of(as_of)
+    cmap = load_column_map(column_map_path)
+    records = load_records(csv_path, cmap, as_of_d)
+    contacts = load_contacts(contacts_path, load_column_map(contact_map_path))
+    out = compare_naive_vs_controlled(records, contacts, _mature_before(as_of_d),
+                                      treated_fraction=treated_fraction, salt=salt)
+    led = assignment_ledger([r.get("customer_id") for r in records], treated_fraction, salt)
+    c = out["controlled"]
+    ref = "（参考・母数不足）" if c["reference"] else ""
+    print(f"[uplift] 段階導入台帳 先行{led['先行']}/後発{led['後発']}（計{led['total']}）")
+    print(f"  結論=対照群比較{ref}: 介入(先行){c['rate_treat']:.1%}(n={c['n_treat']}) / "
+          f"対照(後発){c['rate_ctrl']:.1%}(n={c['n_ctrl']})")
+    print(f"  早期解約の減少 diff={c['diff']:+.1%} "
+          f"95%CI[{c['diff_ci'][0]:+.1%}, {c['diff_ci'][1]:+.1%}]"
+          + ("（0を含む＝有意でない）" if c['diff_ci'][0] <= 0 <= c['diff_ci'][1] else "（0を跨がない＝有意に減少）"))
+    n = out["naive"]
+    print(f"  ※参考(生存者バイアス) 単純比較: 接触あり{n['rate_c']:.1%} / なし{n['rate_n']:.1%} "
+          f"差{n['diff']:+.1%}（因果ではない）")
+    return out
 
 
 def cmd_retention(snapshots_dir, as_of, years, apply):
@@ -357,6 +386,8 @@ def main(argv=None):
     sp_today.add_argument("--out", required=True)
     sp_today.add_argument("--as-of", required=True)
     sp_today.add_argument("--capacity", type=int, default=CAPACITY_PER_DAY)
+    sp_today.add_argument("--contacts", help="任意。保全ログCSV（初動＝契約直後・未接触を拾う）")
+    sp_today.add_argument("--contact-map", help="任意。保全ログのcolumn_map")
 
     sp_pre = sub.add_parser("preflight")
     sp_pre.add_argument("--csv", required=True)
@@ -368,6 +399,15 @@ def main(argv=None):
     sp_ret.add_argument("--as-of", required=True)
     sp_ret.add_argument("--years", type=int, default=SNAPSHOT_RETENTION_YEARS)
     sp_ret.add_argument("--apply", action="store_true")
+
+    sp_up = sub.add_parser("uplift")
+    sp_up.add_argument("--csv", required=True)
+    sp_up.add_argument("--column-map", required=True)
+    sp_up.add_argument("--contacts", required=True)
+    sp_up.add_argument("--contact-map", required=True)
+    sp_up.add_argument("--as-of", required=True)
+    sp_up.add_argument("--treated-fraction", type=float, default=EXPERIMENT_TREATED_FRACTION)
+    sp_up.add_argument("--salt", default="")
 
     sp_pb = sub.add_parser("playbook")
     sp_pb.add_argument("--csv", required=True)
@@ -393,6 +433,8 @@ def main(argv=None):
     sp_pipe.add_argument("--split", required=True)
     sp_pipe.add_argument("--run-date", required=True)
     sp_pipe.add_argument("--interactions")
+    sp_pipe.add_argument("--contacts", help="任意。保全ログCSV（初動を今日の要接触に載せる）")
+    sp_pipe.add_argument("--contact-map", help="任意。保全ログのcolumn_map")
     sp_pipe.add_argument("--auc-min", type=float, default=AUC_MIN)
     sp_pipe.add_argument("--capacity", type=int, default=CAPACITY_PER_DAY)
 
@@ -422,16 +464,21 @@ def main(argv=None):
     elif args.cmd == "cohort":
         cmd_cohort(args.csv, args.column_map, args.out, args.as_of, args.model)
     elif args.cmd == "today":
-        cmd_today(args.csv, args.column_map, args.model, args.out, args.as_of, args.capacity)
+        cmd_today(args.csv, args.column_map, args.model, args.out, args.as_of, args.capacity,
+                  args.contacts, args.contact_map)
     elif args.cmd == "snapshot":
         cmd_snapshot(args.csv, args.interactions, args.month, args.out_dir, args.force)
     elif args.cmd == "pipeline":
         cmd_pipeline(args.csv, args.column_map, args.out_dir, args.as_of, args.split,
-                     args.run_date, args.auc_min, args.capacity, args.interactions)
+                     args.run_date, args.auc_min, args.capacity, args.interactions,
+                     args.contacts, args.contact_map)
     elif args.cmd == "preflight":
         cmd_preflight(args.csv, args.column_map, args.as_of)
     elif args.cmd == "retention":
         cmd_retention(args.dir, args.as_of, args.years, args.apply)
+    elif args.cmd == "uplift":
+        cmd_uplift(args.csv, args.column_map, args.contacts, args.contact_map,
+                   args.as_of, args.treated_fraction, args.salt)
     elif args.cmd == "playbook":
         cmd_playbook(args.csv, args.column_map, args.contacts, args.contact_map,
                      args.out, args.as_of, args.segment)

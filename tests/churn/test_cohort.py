@@ -85,13 +85,29 @@ class TestProjectedLanding(unittest.TestCase):
         row = {r["ym"]: r for r in cohort_rows(recs, AS_OF)}["2026-07"]
         self.assertIsNone(row["projected_rate"])       # モデル無しなら推計しない
 
-    def test_projection_blends_confirmed_and_predicted(self):
+    def test_projection_is_mean_predicted_risk_not_censoring_blend(self):
+        # 打ち切りバイアス回避: 既解約(前倒し)を実数1で数え生存者を予測で足すと過大。
+        # 着地見込みは全メンバーの予測リスク平均（較正前提の前向き推計）にする。
+        from scripts.churn.score import score_record
         model = self._model()
-        # 確定=Y(解約0) 5件 + 継続中=X(高リスク) 5件 の月 → 見込みは0と高リスクの中間
-        recs = ([frec(date(2026, 7, 1), True, 0, product="Y") for _ in range(5)]
-                + [frec(date(2026, 7, 1), False, None, scoreable=True, product="X") for _ in range(5)])
-        row = {r["ym"]: r for r in cohort_rows(recs, AS_OF, model=model)}["2026-07"]
-        self.assertTrue(0.0 < row["projected_rate"] < 1.0)
+        # ベース3%相当のコホート: 既解約3(前倒し) + 継続中97、全員同一プロファイル(X系ではない低リスク側)
+        base = ([frec(date(2025, 1, 1), True, 1, product="Y") for _ in range(3)]  # 学習にベース率を作る
+                + [frec(date(2025, 1, 1), True, 0, product="Y") for _ in range(97)])
+        m = fit.fit_model(base)
+        recs = ([frec(date(2026, 7, 1), True, 1, product="Y") for _ in range(3)]
+                + [frec(date(2026, 7, 1), False, None, scoreable=True, product="Y") for _ in range(97)])
+        row = {r["ym"]: r for r in cohort_rows(recs, AS_OF, model=m)}["2026-07"]
+        expected = sum(score_record(r, m)["risk"] for r in recs) / len(recs)
+        self.assertAlmostEqual(row["projected_rate"], expected, places=6)
+        # 前倒しブレンド (3 + 97*risk)/100 より小さい（過大評価しない）
+        self.assertLess(row["projected_rate"], 0.05)
+
+    def test_matured_cohort_has_no_projection(self):
+        model = self._model()
+        recs = [frec(date(2025, 1, 5), True, 0, product="Y") for _ in range(30)]  # 成熟
+        row = {r["ym"]: r for r in cohort_rows(recs, AS_OF, model=model)}["2025-01"]
+        self.assertFalse(row["observing"])
+        self.assertIsNone(row["projected_rate"])       # 成熟は確定値のみ・推計しない
 
 
 if __name__ == "__main__":

@@ -27,6 +27,7 @@ import json
 import os
 
 from .intake import load_column_map, load_records
+from .contact_log import load_contacts
 from .preflight import preflight_report
 from .fit import fit_model
 from .evaluate import backtest
@@ -56,7 +57,7 @@ def _load_state(out_dir, run_date):
 
 def run_pipeline(csv_path, column_map_path, out_dir, as_of, split, run_date,
                  auc_min=AUC_MIN, capacity=CAPACITY_PER_DAY, notify=print,
-                 interactions=None):
+                 interactions=None, contacts_path=None, contact_map_path=None):
     """日次パイプラインを実行し、実行状態のdictを返す。
 
     引数:
@@ -133,7 +134,11 @@ def run_pipeline(csv_path, column_map_path, out_dir, as_of, split, run_date,
     state["completed_steps"].append("score")
     _save_state(out_dir, run_date, state)
 
-    today, carry, stats = triage(classify(records, model, as_of), capacity)
+    # 保全ログがあれば「初動（契約直後・未接触）」も今日の要接触に載せる
+    contacts = None
+    if contacts_path and contact_map_path:
+        contacts = load_contacts(contacts_path, load_column_map(contact_map_path))
+    today, carry, stats = triage(classify(records, model, as_of, contacts=contacts), capacity)
     render_today_html(today, carry, stats, os.path.join(out_dir, "today.html"), capacity)
     state["completed_steps"].append("today")
     _save_state(out_dir, run_date, state)
