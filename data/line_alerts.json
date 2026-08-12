@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-08-12 10:25",
+ "generated_at": "2026-08-12 16:18",
  "alert_window": [
   7,
   29
  ],
- "soon_closed_count": 6,
- "count": 23,
+ "soon_closed_count": 5,
+ "count": 24,
  "items": [
   {
    "id": "okinawa_pref_sangyo-1021963",
@@ -175,6 +175,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 25000000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdJhMAL",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDYDcMAP",
+   "name": "令和８年度　天然ガス利用設備による強靱性向上対策事業費補助金",
+   "deadline": "2026-09-01",
+   "days_left": 20,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDcMAP",
    "tag": "nationwide"
   },
   {
