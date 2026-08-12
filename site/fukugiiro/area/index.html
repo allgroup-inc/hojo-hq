@@ -24,7 +24,7 @@
 :root{--fg-primary:#D2694A;--fg-primary-deep:#B9502F;--fg-accent:#F2C14E;--fg-deep:#1F5C45;--fg-ink:#3B322B;--fg-bg:#FBF5EC;--fg-card:#FFFDF9;--fg-muted:#8B7C6E;--fg-line:#EEE1D0;--fg-cta:#22382A;--fg-shadow:0 1px 2px rgba(0,0,0,.04)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:17px;line-height:1.9;color:var(--fg-ink);background:var(--fg-bg);-webkit-font-smoothing:antialiased}
-h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:auto-phrase;overflow-wrap:anywhere}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
 h1{font-size:1.4rem;margin-bottom:8px;line-height:1.5}
 .note{font-size:.85rem;color:var(--fg-muted)}
@@ -42,7 +42,11 @@ h1{font-size:1.4rem;margin-bottom:8px;line-height:1.5}
 ul.areas{list-style:none;columns:2;gap:12px}
 ul.areas li{margin-bottom:8px}
 ul.seidolist{list-style:none;columns:1}
-ul.seidolist li{margin-bottom:8px;border-bottom:1px dashed var(--fg-line);padding-bottom:6px}
+ul.seidolist li{margin:0;border-bottom:1px dashed var(--fg-line);break-inside:avoid}
+ul.seidolist a{display:block;padding:8px 0}
+ul.areas a{display:inline-block;padding:8px 4px}
+.card a{display:inline-block;padding:4px 0;white-space:nowrap}
+.footlinks a{display:inline-block;padding:6px 2px;white-space:nowrap}
 @media(min-width:900px){ul.seidolist{columns:2;column-gap:28px}}
 .cardgrid{display:grid;gap:14px}
 @media(min-width:900px){.wrap{max-width:900px}.cardgrid{grid-template-columns:1fr 1fr}ul.areas{columns:3}}
@@ -108,8 +112,8 @@ a{color:var(--fg-primary)}
 <li><a href="tarama/">多良間村</a></li>
 <li><a href="taketomi/">竹富町</a></li>
 <li><a href="yonaguni/">与那国町</a></li></ul><a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>
-<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: 2026-08-13 06:37(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
-<p style="margin-top:16px"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
+<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: 2026-08-13 06:37(毎日自動更新) / もらいわすれ堂(運営: 株式会社フクギイロ)</div>
+<p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップへ</a></p>
 </div>
 </body>
 </html>
