@@ -79,10 +79,10 @@
 .s1 .sub{margin-top:1.2em;font-size:clamp(.85rem,2.6vw,1rem)!important;letter-spacing:.22em!important;color:#E9D8BC!important;font-weight:500!important}
 /* 前口上(映画の導入) */
 .pretitle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:8;pointer-events:none}
-.pretitle p{font-family:"Shippori Mincho",serif;font-weight:500;font-size:clamp(.95rem,3vw,1.2rem);letter-spacing:.3em;color:#E9DCC2;opacity:0;animation:pre 4s ease .6s forwards}
+.pretitle p{font-family:"Shippori Mincho",serif;font-weight:500;font-size:clamp(.95rem,3vw,1.2rem);letter-spacing:.3em;color:#E9DCC2;opacity:0;animation:pre 2.6s ease .4s forwards}
 @keyframes pre{0%{opacity:0}18%{opacity:1}66%{opacity:1}100%{opacity:0}}
-.s1 .stmt{transition-delay:3.6s}
-.s1 .sub{transition-delay:4.6s!important}
+.s1 .stmt{transition-delay:2.2s}
+.s1 .sub{transition-delay:3s!important}
 /* ビジョンの光 */
 .sunburst{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);width:90vmin;height:90vmin;border-radius:50%;z-index:1;
   background:radial-gradient(circle,rgba(246,203,116,.5) 0%,rgba(246,203,116,.22) 34%,rgba(246,203,116,0) 66%);
