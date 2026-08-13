@@ -271,3 +271,21 @@ test("buildKpiSummary: 各項目を正しく集計する", () => {
   assert.equal(summary.deal, 2); // C1(提案中) + C3(案件化)
   assert.equal(summary.stale, 1); // C3: 最終接触2020年、標準サイクル(D=365日)の2倍以上経過
 });
+
+test("buildOwnerWorkload: 担当者ごとに集計し、担当数の多い順に並べる", () => {
+  const today = "2026-08-13";
+  const companies = [
+    { "企業ID": "C1", "担当者": "福田", "次回アクション予定日": "2026-08-01", "連絡不要": false },
+    { "企業ID": "C2", "担当者": "福田", "次回アクション予定日": "2026-08-20", "連絡不要": false },
+    { "企業ID": "C3", "担当者": "宮城", "次回アクション予定日": "", "連絡不要": false },
+    { "企業ID": "C4", "担当者": "", "次回アクション予定日": "2026-08-01", "連絡不要": false }
+  ];
+  const result = adminAccess.buildOwnerWorkload(companies, today);
+  assert.equal(result.length, 2); // 担当者未設定(C4)は除外
+  assert.equal(result[0].owner, "福田");
+  assert.equal(result[0].total, 2);
+  assert.equal(result[0].overdueOrUntouched, 1); // C1のみoverdue
+  assert.equal(result[1].owner, "宮城");
+  assert.equal(result[1].total, 1);
+  assert.equal(result[1].overdueOrUntouched, 1); // C3はuntouched
+});

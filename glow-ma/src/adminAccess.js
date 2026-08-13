@@ -58,6 +58,24 @@
     };
   }
 
+  function buildOwnerWorkload(companies, todayString) {
+    var counts = {};
+    var order = [];
+    (companies || []).forEach(function (company) {
+      var owner = company["担当者"];
+      if (!owner) return;
+      if (!counts[owner]) {
+        counts[owner] = { owner: owner, total: 0, overdueOrUntouched: 0 };
+        order.push(owner);
+      }
+      counts[owner].total++;
+      var urgency = computeUrgency(company, todayString);
+      if (urgency === "overdue" || urgency === "untouched") counts[owner].overdueOrUntouched++;
+    });
+    return order.map(function (owner) { return counts[owner]; })
+      .sort(function (a, b) { return b.total - a.total; });
+  }
+
   function formatDate_(date) {
     var year = date.getFullYear();
     var month = String(date.getMonth() + 1).padStart(2, "0");
@@ -224,7 +242,8 @@
     buildPartnerListRows: buildPartnerListRows,
     normalizeReferralRecords: normalizeReferralRecords,
     computeUrgency: computeUrgency,
-    buildKpiSummary: buildKpiSummary
+    buildKpiSummary: buildKpiSummary,
+    buildOwnerWorkload: buildOwnerWorkload
   };
 
   if (typeof module !== "undefined" && module.exports) {
