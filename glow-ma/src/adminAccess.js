@@ -32,6 +32,32 @@
     return "ok";
   }
 
+  function buildKpiSummary(companies, todayString) {
+    var list = companies || [];
+    var byRank = { A: 0, B: 0, C: 0, D: 0 };
+    var overdueOrUntouched = 0;
+    var hot = 0;
+    var deal = 0;
+    var dealStages = ["提案中", "案件化"];
+    list.forEach(function (company) {
+      var rank = company["ランク"];
+      if (byRank[rank] !== undefined) byRank[rank]++;
+      var urgency = computeUrgency(company, todayString);
+      if (urgency === "overdue" || urgency === "untouched") overdueOrUntouched++;
+      if (company["本日反応あり"]) hot++;
+      if (dealStages.indexOf(company["現在ステージ"]) !== -1) deal++;
+    });
+    var stale = getGlowAlerting_().buildStaleList(list, todayString).length;
+    return {
+      total: list.length,
+      overdueOrUntouched: overdueOrUntouched,
+      hot: hot,
+      byRank: byRank,
+      deal: deal,
+      stale: stale
+    };
+  }
+
   function formatDate_(date) {
     var year = date.getFullYear();
     var month = String(date.getMonth() + 1).padStart(2, "0");
@@ -197,7 +223,8 @@
     normalizeDateForDisplay: normalizeDateForDisplay,
     buildPartnerListRows: buildPartnerListRows,
     normalizeReferralRecords: normalizeReferralRecords,
-    computeUrgency: computeUrgency
+    computeUrgency: computeUrgency,
+    buildKpiSummary: buildKpiSummary
   };
 
   if (typeof module !== "undefined" && module.exports) {

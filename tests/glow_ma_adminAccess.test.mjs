@@ -252,3 +252,22 @@ test("computeUrgency: 4日以上先ならok", () => {
   const company = { "次回アクション予定日": "2026-08-20" };
   assert.equal(adminAccess.computeUrgency(company, "2026-08-13"), "ok");
 });
+
+test("buildKpiSummary: 各項目を正しく集計する", () => {
+  const today = "2026-08-13";
+  const companies = [
+    { "企業ID": "C1", "ランク": "A", "現在ステージ": "提案中", "次回アクション予定日": "2026-08-01",
+      "連絡不要": false, "本日反応あり": false, "最終接触日": "2026-08-01", "登録日": "2026-01-01" },
+    { "企業ID": "C2", "ランク": "B", "現在ステージ": "未接触", "次回アクション予定日": "",
+      "連絡不要": false, "本日反応あり": true, "最終接触日": "", "登録日": "2026-08-10" },
+    { "企業ID": "C3", "ランク": "D", "現在ステージ": "案件化", "次回アクション予定日": "2026-08-20",
+      "連絡不要": false, "本日反応あり": false, "最終接触日": "2020-01-01", "登録日": "2020-01-01" }
+  ];
+  const summary = adminAccess.buildKpiSummary(companies, today);
+  assert.equal(summary.total, 3);
+  assert.equal(summary.overdueOrUntouched, 2); // C1(overdue) + C2(untouched)
+  assert.equal(summary.hot, 1); // C2
+  assert.deepEqual(summary.byRank, { A: 1, B: 1, C: 0, D: 1 });
+  assert.equal(summary.deal, 2); // C1(提案中) + C3(案件化)
+  assert.equal(summary.stale, 1); // C3: 最終接触2020年、標準サイクル(D=365日)の2倍以上経過
+});
