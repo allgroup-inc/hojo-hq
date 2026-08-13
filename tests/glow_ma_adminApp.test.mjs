@@ -178,3 +178,15 @@ test("buildAdminAppHtml: renderDrawerで連絡不要フラグをshareTargetDnc�
   assert.ok(html.indexOf("shareTargetDnc") !== -1 && /shareTargetDnc\s*=\s*!!/.test(html),
     "renderDrawer内でshareTargetDncへの代入が見つからない");
 });
+
+test("buildAdminAppHtml: レター下書きプレビューボタン・モーダルの主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["letterPreviewBtn", "letterPreviewModal", "letterPreviewBody"].forEach((id) => {
+    assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+  });
+});
+
+test("buildAdminAppHtml: google.script.runでgetLatestLetterDraftを呼ぶ", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf(".getLatestLetterDraft(") !== -1);
+});

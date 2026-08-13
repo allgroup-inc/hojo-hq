@@ -480,6 +480,7 @@
     "<div id=\"drawerCompanyId\" style=\"font-size:0.8rem;color:#7a828a\"></div></div>",
     "<div class=\"row1-actions\">",
     "<button class=\"share-btn\" id=\"shareBtn\">🤝 連携</button>",
+    "<button class=\"btn-small\" id=\"letterPreviewBtn\">下書きを見る</button>",
     "<button id=\"drawerClose\">&times;</button>",
     "</div></div>",
     "<div class=\"tabs\"><button id=\"tabOverviewBtn\" class=\"active\">概要</button>",
@@ -515,6 +516,16 @@
     "<button class=\"btn share-send\" id=\"shareSendBtn\">連携する</button>",
     "<div id=\"shareStatus\" style=\"margin-top:8px;font-size:0.78rem;\"></div>",
     "</div></div>"
+  ].join("");
+
+  var LETTER_PREVIEW_MODAL = [
+    "<div class=\"kpi-modal\" id=\"letterPreviewModal\">",
+    "<div class=\"km-head\"><div class=\"km-head-row\">",
+    "<div><h3>レター下書き</h3></div>",
+    "<button class=\"close-btn\" id=\"letterPreviewModalClose\">&times;</button>",
+    "</div></div>",
+    "<div class=\"km-body\" id=\"letterPreviewBody\"></div>",
+    "</div>"
   ].join("");
 
   var PARTNER_DRAWER = [
@@ -831,6 +842,27 @@
     "}).shareCompanyWithStaff(shareTargetCompanyId, checked, note);",
     "}",
 
+    "function openLetterPreview(){",
+    "var companyId = document.getElementById('drawerCompanyId').textContent;",
+    "document.getElementById('letterPreviewBody').innerHTML = '<p class=\"empty-note\">読み込み中…</p>';",
+    "document.getElementById('letterPreviewModal').classList.add('open');",
+    "document.getElementById('overlay').classList.add('open');",
+    "google.script.run.withSuccessHandler(function(draft){",
+    "if (!draft){ document.getElementById('letterPreviewBody').innerHTML = '<p class=\"empty-note\">下書きなし</p>'; return; }",
+    "document.getElementById('letterPreviewBody').innerHTML =",
+    "'<div class=\"field\"><div class=\"label\">生成日時</div><div class=\"value\">'+escapeHtml(draft['生成日時'])+'</div></div>' +",
+    "'<div class=\"field\"><div class=\"label\">ステータス</div><div class=\"value\">'+escapeHtml(draft['ステータス'])+'</div></div>' +",
+    "'<div class=\"field\"><div class=\"label\">本文</div><div class=\"value\">'+escapeHtml(draft['本文'])+'</div></div>';",
+    "}).withFailureHandler(function(){",
+    "document.getElementById('letterPreviewBody').innerHTML = '<p class=\"empty-note\">読み込みに失敗しました。</p>';",
+    "}).getLatestLetterDraft(companyId);",
+    "}",
+
+    "function closeLetterPreview(){",
+    "document.getElementById('letterPreviewModal').classList.remove('open');",
+    "document.getElementById('overlay').classList.remove('open');",
+    "}",
+
     "function switchView(target){",
     "var isCompany = target === 'company';",
     "document.getElementById('viewCompanyBtn').classList.toggle('active', isCompany);",
@@ -960,6 +992,8 @@
     "document.getElementById('shareModalClose').addEventListener('click', closeShareModal);",
     "document.getElementById('shareSendBtn').addEventListener('click', sendShare);",
     "document.getElementById('shareNote').addEventListener('input', updateSharePreview);",
+    "document.getElementById('letterPreviewBtn').addEventListener('click', openLetterPreview);",
+    "document.getElementById('letterPreviewModalClose').addEventListener('click', closeLetterPreview);",
 
     "loadFilterOptions();",
     "loadKpiSummary();",
@@ -973,7 +1007,7 @@
     return "<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\">" +
       "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
       "<style>" + STYLE + "</style></head><body>" +
-      HEADER_AND_FILTERS + KPI_ROW + TABLE + SIDE_PANEL + PARTNER_VIEW + DRAWER + PARTNER_DRAWER + KPI_MODAL + SHARE_MODAL +
+      HEADER_AND_FILTERS + KPI_ROW + TABLE + SIDE_PANEL + PARTNER_VIEW + DRAWER + PARTNER_DRAWER + KPI_MODAL + SHARE_MODAL + LETTER_PREVIEW_MODAL +
       "<script>" + SCRIPT + "<\/script>" +
       "</body></html>";
   }
