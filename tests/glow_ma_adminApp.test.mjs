@@ -115,3 +115,21 @@ test("buildAdminAppHtml: KPIカード・緊急度ドット・ランクバッジ�
       assert.ok(html.indexOf(selector) !== -1, selector + " が定義されていない");
     });
 });
+
+test("buildAdminAppHtml: 流入ルート・提案商品の絞り込みと、列ソート用の見出しを含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["filterRoute", "filterProduct"].forEach((id) => {
+    assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+  });
+  ["data-sort=\"name\"", "data-sort=\"biz\"", "data-sort=\"route\"", "data-sort=\"stage\"",
+   "data-sort=\"products\"", "data-sort=\"rank\"", "data-sort=\"next\""]
+    .forEach((attr) => {
+      assert.ok(html.indexOf(attr) !== -1, attr + " が含まれていない");
+    });
+});
+
+test("buildAdminAppHtml: google.script.runでgetFilterOptionsの結果からroute/product選択肢を組み立てる", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf("options.routes") !== -1, "流入ルート選択肢の組み立てがない");
+  assert.ok(html.indexOf("options.products") !== -1, "提案商品選択肢の組み立てがない");
+});
