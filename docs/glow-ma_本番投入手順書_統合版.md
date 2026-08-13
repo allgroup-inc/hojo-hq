@@ -181,8 +181,17 @@ D章の`installLetterDraftEditTrigger`実行後、実データ投入前にテス
 万一、許可リスト登録済みの本人(小柳さん以外)でもアクセス権なしと判定される場合、
 `Session.getActiveUser().getEmail()`が空文字を返している可能性が高い。以下いずれかを試す:
 
-- (a) `glow-ma/src/appsscript.json` に `"oauthScopes": ["https://www.googleapis.com/auth/userinfo.email"]`
-      を追加してから再デプロイする
+- (a) ~~`glow-ma/src/appsscript.json` に `"oauthScopes": ["https://www.googleapis.com/auth/userinfo.email"]`
+      を追加してから再デプロイする~~ → **この手順はもう当てはまらない。絶対にそのまま実行しないこと。**
+      レター発送QR機能の対応(2026-08-13)で `glow-ma/src/appsscript.json` には既に
+      `oauthScopes` が明示宣言されており、`userinfo.email` もその中に含まれている
+      (現在の中身は `drive.file` / `spreadsheets` / `script.external_request` /
+      `script.scriptapp` / `script.container.ui` / `userinfo.email` の6件)。
+      上記の記述どおりに `oauthScopes` を書き換えると6件の配列が1件に置き換わり、
+      シート・Drive・外部リクエスト・トリガー・メニューUIが同時に壊れる。
+      まず現物の `glow-ma/src/appsscript.json` を開き、`userinfo.email` が
+      配列内にあることを確認する(あれば、この原因は既に解消済みなので (b) へ進む)。
+      万一欠けていた場合は、**配列全体を置き換えるのではなく1行だけ追加**して再デプロイする
 - (b) デプロイの「実行ユーザー」設定を再検討する(「アクセスしているユーザー」に変更すると
       `Session.getActiveUser()`の信頼性は上がるが、各利用者がスプレッドシートへのアクセス権と
       スクリプト実行の認可を別途持っている必要がある、という別のトレードオフが生じる)
