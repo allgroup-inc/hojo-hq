@@ -11,10 +11,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../assets/fg-base.css">
 <style>
-:root{--fg-primary:#D2694A;--fg-primary-deep:#B9502F;--fg-accent:#F2C14E;--fg-deep:#1F5C45;--fg-ink:#3B322B;--fg-bg:#FBF5EC;--fg-cta:#22382A;--fg-shadow:0 1px 2px rgba(0,0,0,.04);
-  --fg-card:#FFFDF9;--fg-muted:#8B7C6E;--fg-line:#EEE1D0}
-*{margin:0;padding:0;box-sizing:border-box}
 h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
 body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
   font-size:18px;line-height:1.8;color:var(--fg-ink);background:var(--fg-bg)}
@@ -48,7 +46,6 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .lk-mid{background:#fff3cd;color:#7a5b00}
 .result-card a{color:var(--fg-primary);display:inline-block;min-height:44px;line-height:1.9;padding:6px 0}
 @media(max-width:480px){.result-card .linksep{display:none}.result-card a.cardlink{display:block}}
-.disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:20px}
 .first-badge{display:inline-block;background:var(--fg-primary);color:#fff;font-size:.82rem;border-radius:4px;padding:2px 12px;font-weight:700;margin-bottom:6px;margin-right:6px}
 .actions{display:flex;gap:10px;margin:16px 0}
 @media(max-width:480px){.actions{flex-direction:column}}
@@ -71,11 +68,6 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .markbtn.marked{border:1.5px solid #1A6B52;background:#DFF2E9;color:#0F5138;font-weight:700}
 .card-done h3{text-decoration:line-through;color:var(--fg-muted)}
 .resume-box{background:#F9EDE3;border:2px solid var(--fg-primary);border-radius:12px;padding:16px;margin-bottom:16px}
-.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
-.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;color:var(--fg-primary-deep);text-decoration:none;font-size:1rem}
-.siteheader .hlogo img{width:30px;height:30px}
-.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
 @media(min-width:900px){.wrap{max-width:720px}}
 @media print{.progress,.actions,.btn,.nav,.siteheader{display:none!important}body{background:#fff}}
 </style>
