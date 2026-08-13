@@ -32,10 +32,10 @@ test("buildAdminAppHtml: google.script.runでupdateCompanyMemoを呼ぶ(Phase 18
   assert.ok(html.indexOf(".updateCompanyMemo(") !== -1);
 });
 
-test("buildAdminAppHtml: 関係メモ編集以外の書き込み系google.script.run呼び出しを含まない(Phase 18b範囲の担保)", () => {
+test("buildAdminAppHtml: 想定外の書き込み系google.script.run呼び出しを含まない", () => {
   const html = adminApp.buildAdminAppHtml();
-  ["shareCompanyWithStaff", "appendInteractionLog", "addPartner", "logPartnerInteraction", "recordReferral"].forEach((forbidden) => {
-    assert.equal(html.indexOf(forbidden), -1, forbidden + " への呼び出しが含まれてはいけない(Phase 18b範囲外の機能)");
+  ["appendInteractionLog", "addPartner", "logPartnerInteraction", "recordReferral"].forEach((forbidden) => {
+    assert.equal(html.indexOf(forbidden), -1, forbidden + " への呼び出しが含まれてはいけない(未実装の機能)");
   });
 });
 
@@ -157,4 +157,18 @@ test("buildAdminAppHtml: google.script.runでgetNextActionQueue・getOwnerWorklo
   const html = adminApp.buildAdminAppHtml();
   assert.ok(html.indexOf(".getNextActionQueue(") !== -1);
   assert.ok(html.indexOf(".getOwnerWorkload(") !== -1);
+});
+
+test("buildAdminAppHtml: ドロワーに🤝連携ボタンと共有モーダルの主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["shareBtn", "shareModal", "shareTitle", "shareStaffList", "shareNote", "sharePreview", "shareSendBtn"]
+    .forEach((id) => {
+      assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+    });
+});
+
+test("buildAdminAppHtml: google.script.runでgetShareableStaffList・shareCompanyWithStaffを呼ぶ", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf(".getShareableStaffList(") !== -1);
+  assert.ok(html.indexOf(".shareCompanyWithStaff(") !== -1);
 });

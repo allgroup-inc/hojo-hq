@@ -478,7 +478,10 @@
     "<div id=\"drawer\">",
     "<div id=\"drawerHeader\"><div><div id=\"drawerCompanyName\" style=\"font-weight:700\"></div>",
     "<div id=\"drawerCompanyId\" style=\"font-size:0.8rem;color:#7a828a\"></div></div>",
-    "<button id=\"drawerClose\">&times;</button></div>",
+    "<div class=\"row1-actions\">",
+    "<button class=\"share-btn\" id=\"shareBtn\">🤝 連携</button>",
+    "<button id=\"drawerClose\">&times;</button>",
+    "</div></div>",
     "<div class=\"tabs\"><button id=\"tabOverviewBtn\" class=\"active\">概要</button>",
     "<button id=\"tabHistoryBtn\">対応履歴</button></div>",
     "<div id=\"drawerBody\">",
@@ -496,6 +499,22 @@
     "</div></div>",
     "<div class=\"km-body\" id=\"kmBody\"></div>",
     "</div>"
+  ].join("");
+
+  var SHARE_MODAL = [
+    "<div class=\"kpi-modal\" id=\"shareModal\">",
+    "<div class=\"km-head\"><div class=\"km-head-row\">",
+    "<div><h3 id=\"shareTitle\"></h3></div>",
+    "<button class=\"close-btn\" id=\"shareModalClose\">&times;</button>",
+    "</div></div>",
+    "<div class=\"km-body\">",
+    "<div id=\"shareDncWarn\" class=\"share-warn\" style=\"display:none\">この企業は連絡不要(DNC)登録されています。共有内容にご注意ください。</div>",
+    "<div id=\"shareStaffList\" class=\"share-staff\"></div>",
+    "<textarea id=\"shareNote\" placeholder=\"一言メモ(任意)\"></textarea>",
+    "<div class=\"share-preview\" id=\"sharePreview\"></div>",
+    "<button class=\"btn share-send\" id=\"shareSendBtn\">連携する</button>",
+    "<div id=\"shareStatus\" style=\"margin-top:8px;font-size:0.78rem;\"></div>",
+    "</div></div>"
   ].join("");
 
   var PARTNER_DRAWER = [
@@ -759,6 +778,58 @@
     "document.getElementById('overlay').classList.remove('open');",
     "}",
 
+    "var shareTargetCompanyId = null;",
+    "var shareTargetCompanyName = null;",
+    "var shareTargetDnc = false;",
+
+    "function openShareModal(){",
+    "shareTargetCompanyId = document.getElementById('drawerCompanyId').textContent;",
+    "shareTargetCompanyName = document.getElementById('drawerCompanyName').textContent;",
+    "document.getElementById('shareTitle').textContent = shareTargetCompanyName + ' を連携';",
+    "document.getElementById('shareDncWarn').style.display = shareTargetDnc ? 'block' : 'none';",
+    "document.getElementById('shareStatus').textContent = '';",
+    "google.script.run.withSuccessHandler(function(staffList){",
+    "document.getElementById('shareStaffList').innerHTML = staffList.map(function(s){",
+    "return '<label><input type=\"checkbox\" value=\"'+escapeHtml(s.slackUserId)+'\"> '+escapeHtml(s.name)+'</label>';",
+    "}).join('');",
+    "document.getElementById('shareNote').value = '';",
+    "updateSharePreview();",
+    "document.querySelectorAll('#shareStaffList input').forEach(function(el){",
+    "el.addEventListener('change', updateSharePreview);",
+    "});",
+    "}).withFailureHandler(function(){",
+    "document.getElementById('shareStaffList').innerHTML = '<p class=\"empty-note\">スタッフ一覧の読み込みに失敗しました。</p>';",
+    "}).getShareableStaffList();",
+    "document.getElementById('shareModal').classList.add('open');",
+    "document.getElementById('overlay').classList.add('open');",
+    "}",
+
+    "function updateSharePreview(){",
+    "var checked = Array.prototype.slice.call(document.querySelectorAll('#shareStaffList input:checked')).map(function(el){ return el.value; });",
+    "var note = document.getElementById('shareNote').value;",
+    "document.getElementById('sharePreview').textContent = shareTargetCompanyName + ' の情報を連携します。宛先: ' + checked.length + '名' + (note ? ' / メモ: ' + note : '');",
+    "}",
+
+    "function closeShareModal(){",
+    "document.getElementById('shareModal').classList.remove('open');",
+    "document.getElementById('overlay').classList.remove('open');",
+    "}",
+
+    "function sendShare(){",
+    "var checked = Array.prototype.slice.call(document.querySelectorAll('#shareStaffList input:checked')).map(function(el){ return el.value; });",
+    "if (checked.length===0){ document.getElementById('shareStatus').textContent = '連携先を選択してください。'; return; }",
+    "var note = document.getElementById('shareNote').value;",
+    "document.getElementById('shareSendBtn').disabled = true;",
+    "document.getElementById('shareStatus').textContent = '送信中...';",
+    "google.script.run.withSuccessHandler(function(resultText){",
+    "document.getElementById('shareSendBtn').disabled = false;",
+    "document.getElementById('shareStatus').textContent = resultText;",
+    "}).withFailureHandler(function(){",
+    "document.getElementById('shareSendBtn').disabled = false;",
+    "document.getElementById('shareStatus').textContent = '連携に失敗しました。もう一度お試しください。';",
+    "}).shareCompanyWithStaff(shareTargetCompanyId, checked, note);",
+    "}",
+
     "function switchView(target){",
     "var isCompany = target === 'company';",
     "document.getElementById('viewCompanyBtn').classList.toggle('active', isCompany);",
@@ -884,6 +955,10 @@
     "document.getElementById('tabPartnerReferralsBtn').addEventListener('click', function(){ switchPartnerTab('referrals'); });",
     "document.getElementById('kpiModalClose').addEventListener('click', closeKpiModal);",
     "document.getElementById('kpiScrim').addEventListener('click', closeKpiModal);",
+    "document.getElementById('shareBtn').addEventListener('click', openShareModal);",
+    "document.getElementById('shareModalClose').addEventListener('click', closeShareModal);",
+    "document.getElementById('shareSendBtn').addEventListener('click', sendShare);",
+    "document.getElementById('shareNote').addEventListener('input', updateSharePreview);",
 
     "loadFilterOptions();",
     "loadKpiSummary();",
@@ -897,7 +972,7 @@
     return "<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\">" +
       "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
       "<style>" + STYLE + "</style></head><body>" +
-      HEADER_AND_FILTERS + KPI_ROW + TABLE + SIDE_PANEL + PARTNER_VIEW + DRAWER + PARTNER_DRAWER + KPI_MODAL +
+      HEADER_AND_FILTERS + KPI_ROW + TABLE + SIDE_PANEL + PARTNER_VIEW + DRAWER + PARTNER_DRAWER + KPI_MODAL + SHARE_MODAL +
       "<script>" + SCRIPT + "<\/script>" +
       "</body></html>";
   }
