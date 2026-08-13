@@ -65,7 +65,10 @@
     return match && match.name ? match.name : "不明";
   }
 
-  var COMPANY_LIST_FIELDS = ["企業ID", "会社名", "ランク", "現在ステージ", "次回アクション予定日", "担当者"];
+  var COMPANY_LIST_FIELDS = [
+    "企業ID", "会社名", "ランク", "現在ステージ", "次回アクション予定日", "担当者",
+    "業種", "所在地", "流入ルート", "提案商品"
+  ];
   var DEFAULT_LIST_LIMIT = 100;
 
   function pickCompanyListFields_(company) {
@@ -74,12 +77,14 @@
       picked[field] = company[field] !== undefined ? company[field] : "";
     });
     picked["次回アクション予定日"] = normalizeDateForDisplay(company["次回アクション予定日"]);
+    picked["流入ルート"] = company["流入ルート"] || [];
+    picked["提案商品"] = company["提案商品"] || [];
     return picked;
   }
 
   function hasAnyFilter(filters) {
     var f = filters || {};
-    return !!(String(f.search || "").trim() || f.rank || f.stage || f.owner);
+    return !!(String(f.search || "").trim() || f.rank || f.stage || f.owner || f.route || f.product);
   }
 
   function applyCompanyFilters(companies, filters) {
@@ -94,6 +99,8 @@
       if (f.rank && company["ランク"] !== f.rank) return false;
       if (f.stage && company["現在ステージ"] !== f.stage) return false;
       if (f.owner && company["担当者"] !== f.owner) return false;
+      if (f.route && (company["流入ルート"] || []).indexOf(f.route) === -1) return false;
+      if (f.product && (company["提案商品"] || []).indexOf(f.product) === -1) return false;
       return true;
     });
   }

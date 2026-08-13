@@ -65,7 +65,8 @@ const SAMPLE_COMPANIES = [
 
 test("COMPANY_LIST_FIELDS: 一覧に必要な最小限のフィールドのみを定義する(機微情報を含まない)", () => {
   assert.deepEqual(adminAccess.COMPANY_LIST_FIELDS, [
-    "企業ID", "会社名", "ランク", "現在ステージ", "次回アクション予定日", "担当者"
+    "企業ID", "会社名", "ランク", "現在ステージ", "次回アクション予定日", "担当者",
+    "業種", "所在地", "流入ルート", "提案商品"
   ]);
 });
 
@@ -101,8 +102,8 @@ test("applyCompanyFilters: ランク・ステージ・担当者の完全一致�
 test("buildCompanyListResult: 絞り込み指定時は上位100件制限をかけず、最小フィールドのみ返す(機微情報を含まない)", () => {
   const result = adminAccess.buildCompanyListResult(SAMPLE_COMPANIES, { rank: "A" });
   assert.deepEqual(result, [
-    { 企業ID: "C000001", 会社名: "テスト商事株式会社", ランク: "A", 現在ステージ: "提案中", 次回アクション予定日: "2026-08-20", 担当者: "たかし" },
-    { 企業ID: "C000003", 会社名: "デモ工業株式会社", ランク: "A", 現在ステージ: "成約", 次回アクション予定日: "", 担当者: "たかし" }
+    { 企業ID: "C000001", 会社名: "テスト商事株式会社", ランク: "A", 現在ステージ: "提案中", 次回アクション予定日: "2026-08-20", 担当者: "たかし", 業種: "", 所在地: "", 流入ルート: [], 提案商品: [] },
+    { 企業ID: "C000003", 会社名: "デモ工業株式会社", ランク: "A", 現在ステージ: "成約", 次回アクション予定日: "", 担当者: "たかし", 業種: "", 所在地: "", 流入ルート: [], 提案商品: [] }
   ]);
 });
 
@@ -182,4 +183,45 @@ test("normalizeReferralRecords: 紹介日をDate・文字列いずれもyyyy-MM-
   assert.equal(result[1]["紹介料率"], "5%");
   assert.equal(result[1]["契約内容メモ"], "スポット相談");
   assert.ok(referrals[0]["紹介日"] instanceof Date, "入力配列の要素が変更されていない");
+});
+
+test("buildCompanyListResult: 業種・所在地・流入ルート・提案商品を含む", () => {
+  const companies = [{
+    "企業ID": "C000001", "会社名": "テスト建設", "ランク": "B", "現在ステージ": "未接触",
+    "次回アクション予定日": "", "担当者": "", "業種": "建設業", "所在地": "沖縄県那覇市",
+    "流入ルート": ["②手紙DM"], "提案商品": ["法人保険"]
+  }];
+  const result = adminAccess.buildCompanyListResult(companies, {});
+  assert.equal(result[0]["業種"], "建設業");
+  assert.equal(result[0]["所在地"], "沖縄県那覇市");
+  assert.deepEqual(result[0]["流入ルート"], ["②手紙DM"]);
+  assert.deepEqual(result[0]["提案商品"], ["法人保険"]);
+});
+
+test("applyCompanyFilters: 流入ルートで絞り込める", () => {
+  const companies = [
+    { "企業ID": "C1", "会社名": "A社", "流入ルート": ["①紹介"] },
+    { "企業ID": "C2", "会社名": "B社", "流入ルート": ["②手紙DM"] }
+  ];
+  const result = adminAccess.applyCompanyFilters(companies, { route: "①紹介" });
+  assert.equal(result.length, 1);
+  assert.equal(result[0]["企業ID"], "C1");
+});
+
+test("applyCompanyFilters: 提案商品で絞り込める", () => {
+  const companies = [
+    { "企業ID": "C1", "会社名": "A社", "提案商品": ["M&A"] },
+    { "企業ID": "C2", "会社名": "B社", "提案商品": ["法人保険"] }
+  ];
+  const result = adminAccess.applyCompanyFilters(companies, { product: "M&A" });
+  assert.equal(result.length, 1);
+  assert.equal(result[0]["企業ID"], "C1");
+});
+
+test("applyCompanyFilters: route/productとも未指定なら全件通す", () => {
+  const companies = [
+    { "企業ID": "C1", "会社名": "A社", "流入ルート": ["①紹介"], "提案商品": ["M&A"] }
+  ];
+  const result = adminAccess.applyCompanyFilters(companies, {});
+  assert.equal(result.length, 1);
 });
