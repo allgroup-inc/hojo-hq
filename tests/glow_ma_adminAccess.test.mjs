@@ -225,3 +225,30 @@ test("applyCompanyFilters: route/productとも未指定なら全件通す", () =
   const result = adminAccess.applyCompanyFilters(companies, {});
   assert.equal(result.length, 1);
 });
+
+test("computeUrgency: 連絡不要企業はnone", () => {
+  const company = { "連絡不要": true, "次回アクション予定日": "2026-08-01" };
+  assert.equal(adminAccess.computeUrgency(company, "2026-08-13"), "none");
+});
+
+test("computeUrgency: 次回アクション予定日が未設定ならuntouched", () => {
+  const company = { "連絡不要": false, "次回アクション予定日": "" };
+  assert.equal(adminAccess.computeUrgency(company, "2026-08-13"), "untouched");
+});
+
+test("computeUrgency: 次回アクション予定日が本日以前ならoverdue", () => {
+  const company = { "次回アクション予定日": "2026-08-13" };
+  assert.equal(adminAccess.computeUrgency(company, "2026-08-13"), "overdue");
+  const past = { "次回アクション予定日": "2026-08-01" };
+  assert.equal(adminAccess.computeUrgency(past, "2026-08-13"), "overdue");
+});
+
+test("computeUrgency: 3日以内ならsoon", () => {
+  const company = { "次回アクション予定日": "2026-08-16" };
+  assert.equal(adminAccess.computeUrgency(company, "2026-08-13"), "soon");
+});
+
+test("computeUrgency: 4日以上先ならok", () => {
+  const company = { "次回アクション予定日": "2026-08-20" };
+  assert.equal(adminAccess.computeUrgency(company, "2026-08-13"), "ok");
+});

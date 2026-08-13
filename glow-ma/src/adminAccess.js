@@ -21,6 +21,17 @@
     return global.GlowAlerting;
   }
 
+  function computeUrgency(company, todayString) {
+    if (company["連絡不要"] === true) return "none";
+    var nextDate = company["次回アクション予定日"];
+    if (!nextDate) return "untouched";
+    var diffDays = getGlowAlerting_().daysBetween(todayString, nextDate);
+    if (diffDays === null) return "untouched";
+    if (diffDays <= 0) return "overdue";
+    if (diffDays <= 3) return "soon";
+    return "ok";
+  }
+
   function formatDate_(date) {
     var year = date.getFullYear();
     var month = String(date.getMonth() + 1).padStart(2, "0");
@@ -185,7 +196,8 @@
     sortInteractionsByDateDesc: sortInteractionsByDateDesc,
     normalizeDateForDisplay: normalizeDateForDisplay,
     buildPartnerListRows: buildPartnerListRows,
-    normalizeReferralRecords: normalizeReferralRecords
+    normalizeReferralRecords: normalizeReferralRecords,
+    computeUrgency: computeUrgency
   };
 
   if (typeof module !== "undefined" && module.exports) {
