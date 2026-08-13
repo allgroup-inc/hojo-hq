@@ -471,6 +471,12 @@
         underwritingData = await response.json();
         console.log('データ読み込み完了:', underwritingData._source);
 
+        // Debug: Show sample FWD data structure
+        if (underwritingData.fwd && underwritingData.fwd.length > 0) {
+          console.log('FWDサンプルデータ:', underwritingData.fwd[0]);
+          console.log('FWDデータキー:', Object.keys(underwritingData.fwd[0]));
+        }
+
         const info = document.getElementById('versionInfo');
         info.innerHTML = `
           <div>なないろ生命: ${underwritingData._source.naneiro}</div>
@@ -717,6 +723,11 @@
     function displayFWD(results) {
       const body = document.getElementById('resultBody-fwd');
       body.innerHTML = '';
+
+      console.log('displayFWD called with', results.length, 'results');
+      if (results.length > 0) {
+        console.log('First FWD result:', results[0]);
+      }
 
       results.forEach(data => {
         const row = document.createElement('tr');
