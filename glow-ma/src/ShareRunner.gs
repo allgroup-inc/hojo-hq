@@ -94,6 +94,7 @@ function readActiveStaff_(ss) {
  * 1人への送信失敗が他の宛先への送信を止めないよう、宛先ごとに障害を隔離する。
  */
 function shareCompanyWithStaff(companyId, staffIds, note) {
+  requireAdminAccess_();
   if (!staffIds || staffIds.length === 0) {
     throw new Error("連携先が選択されていません。");
   }

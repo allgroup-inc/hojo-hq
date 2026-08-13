@@ -316,3 +316,14 @@ test("buildNextActionQueue: limitで件数を絞る", () => {
   const result = adminAccess.buildNextActionQueue(companies, today, 2);
   assert.equal(result.length, 2);
 });
+
+test("buildNextActionQueue: 次回アクション予定日がDateオブジェクトでもpickCompanyListFields_と同じnormalizeDateForDisplayでyyyy-MM-dd文字列に正規化して返す(最終レビュー Finding 3)", () => {
+  const today = "2026-08-13";
+  const companies = [
+    { "企業ID": "C_overdue_date", "次回アクション予定日": new Date(2026, 7, 1), "連絡不要": false, "本日反応あり": false }
+  ];
+  const result = adminAccess.buildNextActionQueue(companies, today, 8);
+  assert.equal(result.length, 1);
+  assert.equal(typeof result[0]["次回アクション予定日"], "string");
+  assert.equal(result[0]["次回アクション予定日"], "2026-08-01");
+});

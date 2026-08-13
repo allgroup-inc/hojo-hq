@@ -228,6 +228,9 @@ function getLatestLetterDraft(companyId) {
     var latestDate = latest["生成日時"] instanceof Date ? latest["生成日時"] : new Date(latest["生成日時"]);
     if (currentDate > latestDate) latest = record;
   });
+  if (latest && latest["生成日時"] instanceof Date) {
+    latest["生成日時"] = Utilities.formatDate(latest["生成日時"], "Asia/Tokyo", "yyyy-MM-dd HH:mm");
+  }
   return latest;
 }
 

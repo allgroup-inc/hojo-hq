@@ -190,3 +190,33 @@ test("buildAdminAppHtml: google.script.runでgetLatestLetterDraftを呼ぶ", () 
   const html = adminApp.buildAdminAppHtml();
   assert.ok(html.indexOf(".getLatestLetterDraft(") !== -1);
 });
+
+test("buildAdminAppHtml: ドロワー・オーバーレイ・タブに、Task8で導入したCSS(.scrim/.drawer/.tab)が適用されるクラスが付与されている(最終レビュー Finding 1)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf('class="scrim" id="overlay"') !== -1, "overlayにclass=scrimがない");
+  assert.ok(html.indexOf('class="scrim" id="partnerOverlay"') !== -1, "partnerOverlayにclass=scrimがない");
+  assert.ok(html.indexOf('class="drawer" id="drawer"') !== -1, "drawerにclass=drawerがない");
+  assert.ok(html.indexOf('class="drawer" id="partnerDrawer"') !== -1, "partnerDrawerにclass=drawerがない");
+  assert.ok(html.indexOf('class="drawer-head" id="drawerHeader"') !== -1, "drawerHeaderにclass=drawer-headがない");
+  assert.ok(html.indexOf('class="drawer-content" id="drawerBody"') !== -1, "drawerBodyにclass=drawer-contentがない");
+  assert.ok(html.indexOf('class="tab active" id="tabOverviewBtn"') !== -1, "tabOverviewBtnにclass=tab activeがない");
+  assert.ok(html.indexOf('class="tab" id="tabHistoryBtn"') !== -1, "tabHistoryBtnにclass=tabがない");
+});
+
+test("buildAdminAppHtml: STYLE内に.scrim/.drawer/.drawer.open/.tab/.tab.activeのCSSルールが定義されている(最終レビュー Finding 1)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  [".scrim{", ".drawer{", ".drawer.open{", ".drawer-head{", ".drawer-content{", ".tab{", ".tab.active{"]
+    .forEach((selector) => {
+      assert.ok(html.indexOf(selector) !== -1, selector + " が定義されていない");
+    });
+});
+
+test("buildAdminAppHtml: デモに存在しないPhase 18a/18b由来のUI(viewSwitcher/viewPane/empty/btn-small/memoTextarea)のCSSが復元されている(最終レビュー Finding 1)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["#viewSwitcher{", "#viewSwitcher button{", "#viewSwitcher button.active{", ".viewPane{", ".viewPane.active{",
+   "header{", ".empty{", ".btn-small{", ".btn-primary{", "#memoTextarea{", "#memoEditControls{",
+   "#memoStatus{", "#memoStatus.error{", ".field{", ".field .label{", ".field .value{"]
+    .forEach((selector) => {
+      assert.ok(html.indexOf(selector) !== -1, selector + " が定義されていない");
+    });
+});

@@ -85,6 +85,7 @@
         var urgency = computeUrgency(company, todayString);
         var withUrgency = {};
         Object.keys(company).forEach(function (key) { withUrgency[key] = company[key]; });
+        withUrgency["次回アクション予定日"] = normalizeDateForDisplay(company["次回アクション予定日"]);
         withUrgency.urgency = urgency;
         return withUrgency;
       })
