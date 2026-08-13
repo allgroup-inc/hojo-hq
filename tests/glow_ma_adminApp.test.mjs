@@ -172,3 +172,9 @@ test("buildAdminAppHtml: google.script.runでgetShareableStaffList・shareCompan
   assert.ok(html.indexOf(".getShareableStaffList(") !== -1);
   assert.ok(html.indexOf(".shareCompanyWithStaff(") !== -1);
 });
+
+test("buildAdminAppHtml: renderDrawerで連絡不要フラグをshareTargetDncに反映する", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf("shareTargetDnc") !== -1 && /shareTargetDnc\s*=\s*!!/.test(html),
+    "renderDrawer内でshareTargetDncへの代入が見つからない");
+});

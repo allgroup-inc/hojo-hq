@@ -687,6 +687,7 @@
     "if (!detail){ document.getElementById('drawerCompanyName').textContent = '該当する企業が見つかりません';",
     "document.getElementById('paneOverview').innerHTML = ''; document.getElementById('paneHistory').innerHTML = ''; return; }",
     "var c = detail.company;",
+    "shareTargetDnc = !!c['連絡不要'];",
     "document.getElementById('drawerCompanyName').textContent = c['会社名'] || '(社名未登録)';",
     "document.getElementById('drawerCompanyId').textContent = c['企業ID'];",
     "var fields = [",
