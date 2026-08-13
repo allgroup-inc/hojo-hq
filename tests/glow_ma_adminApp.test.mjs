@@ -211,6 +211,17 @@ test("buildAdminAppHtml: STYLE内に.scrim/.drawer/.drawer.open/.tab/.tab.active
     });
 });
 
+test("buildAdminAppHtml: .app/.body-gridでラップされ、KPI行・企業テーブル・サイドパネルが二カラムレイアウトの対象になっている(最終レビュー再検証 Fix 4)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf('class="app"') !== -1, "class=\"app\" が含まれていない");
+  assert.ok(html.indexOf('class="body-grid"') !== -1, "class=\"body-grid\" が含まれていない");
+  const idxBodyGrid = html.indexOf('class="body-grid"');
+  ['id="kpiRow"', 'id="companyTableBody"', 'id="queue"'].forEach((needle) => {
+    const idx = html.indexOf(needle);
+    assert.ok(idx > idxBodyGrid, needle + " が class=\"body-grid\" より後(内側)にない");
+  });
+});
+
 test("buildAdminAppHtml: デモに存在しないPhase 18a/18b由来のUI(viewSwitcher/viewPane/empty/btn-small/memoTextarea)のCSSが復元されている(最終レビュー Finding 1)", () => {
   const html = adminApp.buildAdminAppHtml();
   ["#viewSwitcher{", "#viewSwitcher button{", "#viewSwitcher button.active{", ".viewPane{", ".viewPane.active{",

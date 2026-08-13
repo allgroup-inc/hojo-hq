@@ -328,7 +328,8 @@
     "display:flex; flex-direction:column; box-shadow:var(--shadow-lg);",
     "}",
     ".drawer.open{transform:translateX(0);}",
-    ".drawer-head{padding:20px 22px 14px; border-bottom:1px solid var(--line); flex:0 0 auto; position:relative;}",
+    ".drawer-head{padding:20px 22px 14px; border-bottom:1px solid var(--line); flex:0 0 auto; position:relative;",
+    "display:flex; justify-content:space-between; align-items:flex-start;}",
     ".drawer-head::before{content:\"\"; position:absolute; left:0; right:0; top:0; height:3px;",
     "background:linear-gradient(90deg, var(--brand-navy), var(--brand-navy-2) 40%, var(--brand-kin) 100%);}",
     ".drawer-head .row1{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}",
@@ -452,7 +453,7 @@
     "<div id=\"viewSwitcher\"><button id=\"viewCompanyBtn\" class=\"active\">企業一覧</button>",
     "<button id=\"viewPartnerBtn\">紹介パートナー開拓状況</button></div>",
     "<div class=\"filters\" id=\"companyFiltersBar\">",
-    "<input type=\"text\" id=\"searchInput\" placeholder=\"会社名・代表者名で検索\">",
+    "<input type=\"search\" id=\"searchInput\" placeholder=\"会社名・代表者名で検索\">",
     "<select id=\"filterRank\"><option value=\"\">ランク(すべて)</option>",
     "<option value=\"A\">A</option><option value=\"B\">B</option>",
     "<option value=\"C\">C</option><option value=\"D\">D</option></select>",
@@ -508,7 +509,7 @@
     "<div class=\"row1-actions\">",
     "<button class=\"share-btn\" id=\"shareBtn\">🤝 連携</button>",
     "<button class=\"btn-small\" id=\"letterPreviewBtn\">下書きを見る</button>",
-    "<button id=\"drawerClose\">&times;</button>",
+    "<button class=\"close-btn\" id=\"drawerClose\">&times;</button>",
     "</div></div>",
     "<div class=\"tabs\"><button class=\"tab active\" id=\"tabOverviewBtn\">概要</button>",
     "<button class=\"tab\" id=\"tabHistoryBtn\">対応履歴</button></div>",
@@ -560,7 +561,7 @@
     "<div class=\"drawer\" id=\"partnerDrawer\">",
     "<div class=\"drawer-head\" id=\"partnerDrawerHeader\"><div><div id=\"partnerDrawerName\" style=\"font-weight:700\"></div>",
     "<div id=\"partnerDrawerId\" style=\"font-size:0.8rem;color:#7a828a\"></div></div>",
-    "<button id=\"partnerDrawerClose\">&times;</button></div>",
+    "<button class=\"close-btn\" id=\"partnerDrawerClose\">&times;</button></div>",
     "<div class=\"tabs\"><button class=\"tab active\" id=\"tabPartnerOverviewBtn\">概要</button>",
     "<button class=\"tab\" id=\"tabPartnerHistoryBtn\">対応履歴</button>",
     "<button class=\"tab\" id=\"tabPartnerReferralsBtn\">紹介実績</button></div>",
@@ -1034,7 +1035,11 @@
     return "<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\">" +
       "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
       "<style>" + STYLE + "</style></head><body>" +
-      HEADER_AND_FILTERS + KPI_ROW + TABLE + SIDE_PANEL + PARTNER_VIEW + DRAWER + PARTNER_DRAWER + KPI_MODAL + SHARE_MODAL + LETTER_PREVIEW_MODAL +
+      "<div class=\"app\">" +
+      HEADER_AND_FILTERS +
+      "<div class=\"body-grid\">" + KPI_ROW + TABLE + SIDE_PANEL + PARTNER_VIEW + "</div>" +
+      "</div>" +
+      DRAWER + PARTNER_DRAWER + KPI_MODAL + SHARE_MODAL + LETTER_PREVIEW_MODAL +
       "<script>" + SCRIPT + "<\/script>" +
       "</body></html>";
   }
