@@ -68,13 +68,50 @@ function exportQrCodesForDate() {
 
 /**
  * 発送日ごとのQR画像保存先フォルダを取得または新規作成する。
- * 同名フォルダが既にあれば再利用する(同じ発送日で再実行しても重複フォルダを作らない)。
+ * 同じ発送日で再実行しても重複フォルダを作らないことが目的。
+ *
+ * 権限を`drive.file`(スクリプト自身が作成したファイル・フォルダのみ)に絞っているため、
+ * 名前での検索(getFoldersByName)は`drive.file`での動作が公式に保証されていない。
+ * 検索が黙って空を返すと毎回フォルダが増え、完了ダイアログのフォルダ名表示は同じなので
+ * 誰も気づけない。そこで参照は次の優先順で行う:
+ *
+ *   1. スクリプトプロパティに記録したフォルダID → getFolderById(検索に依存しない)
+ *   2. 1が無い/失効している場合の次善策として、従来どおり名前で検索
+ *   3. どちらでも見つからなければ新規作成
+ *
+ * 取得・作成できたフォルダのIDは毎回プロパティへ書き戻し、次回以降は1の経路で参照する。
  */
 function getOrCreateQrFolder_(targetDate) {
   var folderName = "QR_" + targetDate;
-  var folders = DriveApp.getFoldersByName(folderName);
-  if (folders.hasNext()) return folders.next();
-  return DriveApp.createFolder(folderName);
+  var properties = PropertiesService.getScriptProperties();
+  var propertyKey = "QR_FOLDER_ID_" + targetDate;
+  var folder = null;
+
+  var cachedId = properties.getProperty(propertyKey);
+  if (cachedId) {
+    try {
+      folder = DriveApp.getFolderById(cachedId);
+      // ゴミ箱に入れられたフォルダもIDでは取得できてしまう。そのまま使うと
+      // 生成したQR画像がゴミ箱の中に保存され、運用者から見えなくなる。
+      if (folder.isTrashed()) folder = null;
+    } catch (err) {
+      // 記録済みIDのフォルダが削除された・IDが古い等。次の手段にフォールバックする。
+      Logger.log("QRフォルダIDでの取得に失敗しました: " + cachedId + " — " + err);
+      folder = null;
+    }
+  }
+
+  if (!folder) {
+    var folders = DriveApp.getFoldersByName(folderName);
+    if (folders.hasNext()) folder = folders.next();
+  }
+
+  if (!folder) {
+    folder = DriveApp.createFolder(folderName);
+  }
+
+  properties.setProperty(propertyKey, folder.getId());
+  return folder;
 }
 
 /**
@@ -108,14 +145,22 @@ function generateAndSaveQr_(row, folder, targetDate) {
         "QR画像リンク": "", "ステータス": "QR生成失敗(画像データではない)"
       };
     }
-    blob.setName(row["企業ID"] + ".png");
-    // 同じ発送日で再実行したときに同名ファイルが二重に残らないよう、既存ファイルは
-    // ゴミ箱に移してから作り直す(Driveは同名ファイルの重複を許すため)。
-    var existingFiles = folder.getFilesByName(row["企業ID"] + ".png");
-    while (existingFiles.hasNext()) {
-      existingFiles.next().setTrashed(true);
-    }
+    var fileName = row["企業ID"] + ".png";
+    blob.setName(fileName);
+    // 同じ発送日で再実行したときに同名ファイルが二重に残らないよう、古いファイルは
+    // ゴミ箱に移す(Driveは同名ファイルの重複を許すため)。
+    // 順序が重要: 先に新しいファイルを作り、成功してから古いファイルを消す。
+    // 先に消してからcreateFileが失敗すると、前回の正しいQR画像も失って手元に何も
+    // 残らなくなるため(CLAUDE.md 絶対ルール1: 印刷業者に渡す実物を壊さない)。
     var file = folder.createFile(blob);
+    var newFileId = file.getId();
+    var sameNameFiles = folder.getFilesByName(fileName);
+    while (sameNameFiles.hasNext()) {
+      var existing = sameNameFiles.next();
+      // 今作ったファイル自身は消さない(作成直後は同名ファイルが2つ並ぶため、
+      // 名前ではなくIDで判定する)。
+      if (existing.getId() !== newFileId) existing.setTrashed(true);
+    }
     return {
       "企業ID": row["企業ID"], "会社名": row["会社名"], "発送日": targetDate,
       "トラッキングURL": row.trackingUrl,

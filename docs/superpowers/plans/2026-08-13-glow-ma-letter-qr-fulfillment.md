@@ -524,7 +524,9 @@ git commit -m "docs(glow-ma): レター発送 個別QRコード生成の使い�
 最終レビュー指摘(Finding 3)への対応として、Drive権限を最小化するため
 `glow-ma/src/appsscript.json` に `oauthScopes` を**明示的に宣言**した
 (`drive.file` / `spreadsheets` / `script.external_request` / `script.scriptapp` /
-`userinfo.email` の5つ)。
+`script.container.ui` / `userinfo.email` の6つ。`script.container.ui` は再検証指摘で
+追加。メニュー・ダイアログ・サイドバーの表示に必須で、欠けるとQR機能だけでなく
+「GLOW台帳」メニュー全体が動かなくなる)。
 
 **`oauthScopes` を明示するとApps Scriptの自動スコープ検出はプロジェクト全体で無効になる。**
 影響範囲は新規のQR機能だけではなく、既存の全機能に及ぶ。したがって:
