@@ -231,3 +231,35 @@ test("buildAdminAppHtml: デモに存在しないPhase 18a/18b由来のUI(viewSw
       assert.ok(html.indexOf(selector) !== -1, selector + " が定義されていない");
     });
 });
+
+test("buildAdminAppHtml: 列見出しに矢印アイコンとソート状態管理・クリックハンドラを含む(設計§4)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["name", "biz", "route", "stage", "products", "rank", "next"].forEach((key) => {
+    const th = html.indexOf('data-sort="' + key + '"');
+    assert.ok(th !== -1, key + " 列の見出しがない");
+    const nextTh = html.indexOf("</th>", th);
+    const arrowInThisHeader = html.indexOf('<span class="arrow">▾</span>', th);
+    assert.ok(
+      arrowInThisHeader !== -1 && arrowInThisHeader < nextTh,
+      key + " 列に矢印アイコンが含まれていない"
+    );
+  });
+  const arrowCount = (html.match(/<span class="arrow">▾<\/span>/g) || []).length;
+  assert.equal(arrowCount, 7, "ソート可能な7列すべてに矢印スパンが必要");
+  assert.ok(html.indexOf("var sortKey = null;") !== -1, "sortKey状態変数がない");
+  assert.ok(html.indexOf("var sortDir = 1;") !== -1, "sortDir状態変数がない");
+  assert.ok(html.indexOf("function getSortedRows()") !== -1, "getSortedRows関数がない");
+  assert.ok(html.indexOf("function updateSortIndicators()") !== -1, "updateSortIndicators関数がない");
+  assert.ok(html.indexOf("thead th[data-sort]") !== -1, "ソート見出しへのクリックハンドラ登録がない");
+  assert.ok(html.indexOf("sortDir = -sortDir") !== -1, "昇順・降順トグルロジックがない");
+});
+
+test("buildAdminAppHtml: getSortedRowsが7列すべてに対応する比較ロジックを持つ", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["case 'name':", "case 'biz':", "case 'route':", "case 'stage':", "case 'products':",
+   "case 'rank':", "case 'next':"]
+    .forEach((caseLine) => {
+      assert.ok(html.indexOf(caseLine) !== -1, caseLine + " の比較ロジックがない");
+    });
+  assert.ok(html.indexOf("rankOrder") !== -1, "ランクの並び順定義(A<B<C<D)がない");
+});
