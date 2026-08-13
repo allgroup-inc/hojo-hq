@@ -183,6 +183,55 @@ function getNextActionQueue() {
 }
 
 /**
+ * ドロワーの🤝連携ボタン用。ShareRunner.gsのreadActiveStaff_と同じロジックだが、
+ * 呼び出し元(スプレッドシートメニュー vs Web App)が異なるため、末尾に`_`を付けない
+ * 公開関数として別途用意する(google.script.runから呼ぶため)。
+ */
+function getShareableStaffList() {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(GlowSchema.STAFF_SHEET_NAME);
+  if (!sheet) return [];
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  var headers = GlowSchema.STAFF_HEADERS;
+  var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  var nameIndex = headers.indexOf("氏名");
+  var slackIdIndex = headers.indexOf("Slack User ID");
+  var activeIndex = headers.indexOf("有効");
+  return values
+    .filter(function (row) { return row[activeIndex] === true && row[nameIndex] && row[slackIdIndex]; })
+    .map(function (row) { return { name: row[nameIndex], slackUserId: row[slackIdIndex] }; });
+}
+
+/**
+ * 企業1社分の最新レター下書き(生成日時が最も新しい行)を返す。存在しなければnull。
+ */
+function getLatestLetterDraft(companyId) {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(GlowSchema.LETTER_DRAFT_SHEET_NAME);
+  if (!sheet) return null;
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return null;
+  var headers = GlowSchema.LETTER_DRAFT_HEADERS;
+  var idIndex = headers.indexOf("企業ID");
+  var dateIndex = headers.indexOf("生成日時");
+  var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  var latest = null;
+  values.forEach(function (row) {
+    if (row[idIndex] !== companyId) return;
+    var record = {};
+    headers.forEach(function (header, i) { record[header] = row[i]; });
+    if (!latest) { latest = record; return; }
+    var currentDate = row[dateIndex] instanceof Date ? row[dateIndex] : new Date(row[dateIndex]);
+    var latestDate = latest["生成日時"] instanceof Date ? latest["生成日時"] : new Date(latest["生成日時"]);
+    if (currentDate > latestDate) latest = record;
+  });
+  return latest;
+}
+
+/**
  * パートナー対応履歴ログを読み、パートナーIDごとに配列へグルーピングして返す。
  * readInteractionsByCompanyId_(ScoringRunner.gs、企業向け)と同じパターンだが、
  * 対象タブ・キー列(パートナーID)が異なるため専用の関数として定義する。
