@@ -99,3 +99,19 @@ test("buildAdminAppHtml: 生成されるクライアントスクリプトが構�
   const script = html.match(/<script>([\s\S]*)<\/script>/)[1];
   assert.doesNotThrow(() => new Function(script));
 });
+
+test("buildAdminAppHtml: コーポレートカラーの変数とロゴのアニメーションを含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf("--kin:#F88800") !== -1 || html.indexOf("--kin: #F88800") !== -1,
+    "コーポレートカラー(金)が定義されていない");
+  assert.ok(html.indexOf("logoGlow") !== -1, "ロゴの光るアニメーションが定義されていない");
+  assert.ok(html.indexOf("prefers-reduced-motion") !== -1, "reduced-motion対応がない");
+});
+
+test("buildAdminAppHtml: KPIカード・緊急度ドット・ランクバッジ用のCSSクラスを含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  [".kpi{", ".rank-A{", ".rank-B{", ".rank-C{", ".rank-D{", ".dot.overdue{", ".dot.soon{", ".dot.ok{"]
+    .forEach((selector) => {
+      assert.ok(html.indexOf(selector) !== -1, selector + " が定義されていない");
+    });
+});
