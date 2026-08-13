@@ -3,7 +3,7 @@
  * Apps Scriptエディタの関数選択で ensureLedgerTabs を選び、実行ボタンで手動実行する。
  * 実行すると「企業マスタ」「対応履歴ログ」「紹介パートナーマスタ」「設定」
  * 「レター下書き」「ダッシュボード」「ダッシュボード履歴」「スタッフ」
- * 「パートナー対応履歴ログ」「紹介実績ログ」の10タブが
+ * 「パートナー対応履歴ログ」「紹介実績ログ」「QR生成結果」の11タブが
  * (存在しなければ)作成され、1行目に見出しが設定される。
  * 対応履歴ログの「種別」「対応相手」列、レター下書きの「ステータス」列には、
  * 表記ゆれによる集計漏れを防ぐためプルダウン入力規則を設定する。
@@ -32,6 +32,7 @@ function ensureLedgerTabs() {
   applyStaffActiveValidation_(staffSheet);
   ensureTab_(ss, GlowSchema.PARTNER_INTERACTION_LOG_SHEET_NAME, GlowSchema.PARTNER_INTERACTION_LOG_HEADERS);
   ensureTab_(ss, GlowSchema.REFERRAL_RECORD_SHEET_NAME, GlowSchema.REFERRAL_RECORD_HEADERS);
+  ensureTab_(ss, GlowSchema.QR_RESULT_SHEET_NAME, GlowSchema.QR_RESULT_HEADERS);
 }
 
 function ensureTab_(spreadsheet, sheetName, headers) {
