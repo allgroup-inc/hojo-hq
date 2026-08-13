@@ -464,6 +464,15 @@
     "</div>"
   ].join("");
 
+  var SIDE_PANEL = [
+    "<div class=\"side\">",
+    "<div class=\"panel\"><div class=\"panel-head\"><h2>本日のネクストアクション</h2></div>",
+    "<div class=\"panel-body-pad\" id=\"queue\"></div></div>",
+    "<div class=\"panel\"><div class=\"panel-head\"><h2>担当者別ワークロード</h2></div>",
+    "<div class=\"panel-body-pad\" id=\"workloadList\"></div></div>",
+    "</div>"
+  ].join("");
+
   var DRAWER = [
     "<div id=\"overlay\"></div>",
     "<div id=\"drawer\">",
@@ -575,6 +584,43 @@
     "function closeKpiModal(){",
     "document.getElementById('kpiModal').classList.remove('open');",
     "document.getElementById('kpiScrim').classList.remove('open');",
+    "}",
+
+    "function loadQueue(){",
+    "google.script.run.withSuccessHandler(renderQueue).withFailureHandler(function(){",
+    "document.getElementById('queue').innerHTML = '';",
+    "}).getNextActionQueue();",
+    "}",
+
+    "function renderQueue(items){",
+    "var el = document.getElementById('queue');",
+    "if (!items || items.length===0){ el.innerHTML = '<p class=\"empty-note\">本日、優先度の高い企業はありません。</p>'; return; }",
+    "el.innerHTML = items.map(function(c){",
+    "var flag = c['本日反応あり'] ? '<span class=\"hot-flag\">反応あり</span>' : '<span class=\"rank rank-'+escapeHtml(c['ランク'])+'\">'+escapeHtml(c['ランク'])+'</span>';",
+    "return '<div class=\"queue-item\" data-id=\"'+escapeHtml(c['企業ID'])+'\">' +",
+    "'<div class=\"qtop\"><span class=\"qname\">'+escapeHtml(c['会社名'])+'</span>'+flag+'</div>' +",
+    "'<div class=\"qmeta\">'+escapeHtml(c['担当者']||'未割当')+' 担当 ・ 次回アクション予定日: '+escapeHtml(c['次回アクション予定日']||'未設定')+'</div>' +",
+    "'</div>';",
+    "}).join('');",
+    "el.querySelectorAll('.queue-item').forEach(function(item){",
+    "item.addEventListener('click', function(){ openDrawer(item.dataset.id); });",
+    "});",
+    "}",
+
+    "function loadWorkload(){",
+    "google.script.run.withSuccessHandler(renderWorkload).withFailureHandler(function(){",
+    "document.getElementById('workloadList').innerHTML = '';",
+    "}).getOwnerWorkload();",
+    "}",
+
+    "function renderWorkload(rows){",
+    "var el = document.getElementById('workloadList');",
+    "if (!rows || rows.length===0){ el.innerHTML = '<p class=\"empty-note\">担当者が設定された企業がありません。</p>'; return; }",
+    "el.innerHTML = rows.map(function(r){",
+    "return '<div class=\"workload-row\"><div class=\"w-top\"><span class=\"w-name\">'+escapeHtml(r.owner)+'</span></div>' +",
+    "'<div class=\"w-stats\"><span><b>'+r.total+'</b>件担当</span><span><b>'+r.overdueOrUntouched+'</b>件 未着手/期限超過</span></div>' +",
+    "'</div>';",
+    "}).join('');",
     "}",
 
     "function loadList(){",
@@ -841,6 +887,8 @@
 
     "loadFilterOptions();",
     "loadKpiSummary();",
+    "loadQueue();",
+    "loadWorkload();",
     "loadList();",
     "loadPartnerList();"
   ].join("");
@@ -849,7 +897,7 @@
     return "<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\">" +
       "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
       "<style>" + STYLE + "</style></head><body>" +
-      HEADER_AND_FILTERS + KPI_ROW + TABLE + PARTNER_VIEW + DRAWER + PARTNER_DRAWER + KPI_MODAL +
+      HEADER_AND_FILTERS + KPI_ROW + TABLE + SIDE_PANEL + PARTNER_VIEW + DRAWER + PARTNER_DRAWER + KPI_MODAL +
       "<script>" + SCRIPT + "<\/script>" +
       "</body></html>";
   }

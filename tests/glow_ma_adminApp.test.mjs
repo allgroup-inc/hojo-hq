@@ -145,3 +145,16 @@ test("buildAdminAppHtml: google.script.runでgetKpiSummaryを呼ぶ", () => {
   const html = adminApp.buildAdminAppHtml();
   assert.ok(html.indexOf(".getKpiSummary(") !== -1);
 });
+
+test("buildAdminAppHtml: ネクストアクション・ワークロードパネルの主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["queue", "workloadList"].forEach((id) => {
+    assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+  });
+});
+
+test("buildAdminAppHtml: google.script.runでgetNextActionQueue・getOwnerWorkloadを呼ぶ", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf(".getNextActionQueue(") !== -1);
+  assert.ok(html.indexOf(".getOwnerWorkload(") !== -1);
+});
