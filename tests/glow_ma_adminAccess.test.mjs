@@ -65,7 +65,8 @@ const SAMPLE_COMPANIES = [
 
 test("COMPANY_LIST_FIELDS: 一覧に必要な最小限のフィールドのみを定義する(機微情報を含まない)", () => {
   assert.deepEqual(adminAccess.COMPANY_LIST_FIELDS, [
-    "企業ID", "会社名", "ランク", "現在ステージ", "次回アクション予定日", "担当者"
+    "企業ID", "会社名", "ランク", "現在ステージ", "次回アクション予定日", "担当者",
+    "業種", "所在地", "流入ルート", "提案商品"
   ]);
 });
 
@@ -101,8 +102,8 @@ test("applyCompanyFilters: ランク・ステージ・担当者の完全一致�
 test("buildCompanyListResult: 絞り込み指定時は上位100件制限をかけず、最小フィールドのみ返す(機微情報を含まない)", () => {
   const result = adminAccess.buildCompanyListResult(SAMPLE_COMPANIES, { rank: "A" });
   assert.deepEqual(result, [
-    { 企業ID: "C000001", 会社名: "テスト商事株式会社", ランク: "A", 現在ステージ: "提案中", 次回アクション予定日: "2026-08-20", 担当者: "たかし" },
-    { 企業ID: "C000003", 会社名: "デモ工業株式会社", ランク: "A", 現在ステージ: "成約", 次回アクション予定日: "", 担当者: "たかし" }
+    { 企業ID: "C000001", 会社名: "テスト商事株式会社", ランク: "A", 現在ステージ: "提案中", 次回アクション予定日: "2026-08-20", 担当者: "たかし", 業種: "", 所在地: "", 流入ルート: [], 提案商品: [] },
+    { 企業ID: "C000003", 会社名: "デモ工業株式会社", ランク: "A", 現在ステージ: "成約", 次回アクション予定日: "", 担当者: "たかし", 業種: "", 所在地: "", 流入ルート: [], 提案商品: [] }
   ]);
 });
 
@@ -182,4 +183,147 @@ test("normalizeReferralRecords: 紹介日をDate・文字列いずれもyyyy-MM-
   assert.equal(result[1]["紹介料率"], "5%");
   assert.equal(result[1]["契約内容メモ"], "スポット相談");
   assert.ok(referrals[0]["紹介日"] instanceof Date, "入力配列の要素が変更されていない");
+});
+
+test("buildCompanyListResult: 業種・所在地・流入ルート・提案商品を含む", () => {
+  const companies = [{
+    "企業ID": "C000001", "会社名": "テスト建設", "ランク": "B", "現在ステージ": "未接触",
+    "次回アクション予定日": "", "担当者": "", "業種": "建設業", "所在地": "沖縄県那覇市",
+    "流入ルート": ["②手紙DM"], "提案商品": ["法人保険"]
+  }];
+  const result = adminAccess.buildCompanyListResult(companies, {});
+  assert.equal(result[0]["業種"], "建設業");
+  assert.equal(result[0]["所在地"], "沖縄県那覇市");
+  assert.deepEqual(result[0]["流入ルート"], ["②手紙DM"]);
+  assert.deepEqual(result[0]["提案商品"], ["法人保険"]);
+});
+
+test("applyCompanyFilters: 流入ルートで絞り込める", () => {
+  const companies = [
+    { "企業ID": "C1", "会社名": "A社", "流入ルート": ["①紹介"] },
+    { "企業ID": "C2", "会社名": "B社", "流入ルート": ["②手紙DM"] }
+  ];
+  const result = adminAccess.applyCompanyFilters(companies, { route: "①紹介" });
+  assert.equal(result.length, 1);
+  assert.equal(result[0]["企業ID"], "C1");
+});
+
+test("applyCompanyFilters: 提案商品で絞り込める", () => {
+  const companies = [
+    { "企業ID": "C1", "会社名": "A社", "提案商品": ["M&A"] },
+    { "企業ID": "C2", "会社名": "B社", "提案商品": ["法人保険"] }
+  ];
+  const result = adminAccess.applyCompanyFilters(companies, { product: "M&A" });
+  assert.equal(result.length, 1);
+  assert.equal(result[0]["企業ID"], "C1");
+});
+
+test("applyCompanyFilters: route/productとも未指定なら全件通す", () => {
+  const companies = [
+    { "企業ID": "C1", "会社名": "A社", "流入ルート": ["①紹介"], "提案商品": ["M&A"] }
+  ];
+  const result = adminAccess.applyCompanyFilters(companies, {});
+  assert.equal(result.length, 1);
+});
+
+test("computeUrgency: 連絡不要企業はnone", () => {
+  const company = { "連絡不要": true, "次回アクション予定日": "2026-08-01" };
+  assert.equal(adminAccess.computeUrgency(company, "2026-08-13"), "none");
+});
+
+test("computeUrgency: 次回アクション予定日が未設定ならuntouched", () => {
+  const company = { "連絡不要": false, "次回アクション予定日": "" };
+  assert.equal(adminAccess.computeUrgency(company, "2026-08-13"), "untouched");
+});
+
+test("computeUrgency: 次回アクション予定日が本日以前ならoverdue", () => {
+  const company = { "次回アクション予定日": "2026-08-13" };
+  assert.equal(adminAccess.computeUrgency(company, "2026-08-13"), "overdue");
+  const past = { "次回アクション予定日": "2026-08-01" };
+  assert.equal(adminAccess.computeUrgency(past, "2026-08-13"), "overdue");
+});
+
+test("computeUrgency: 3日以内ならsoon", () => {
+  const company = { "次回アクション予定日": "2026-08-16" };
+  assert.equal(adminAccess.computeUrgency(company, "2026-08-13"), "soon");
+});
+
+test("computeUrgency: 4日以上先ならok", () => {
+  const company = { "次回アクション予定日": "2026-08-20" };
+  assert.equal(adminAccess.computeUrgency(company, "2026-08-13"), "ok");
+});
+
+test("buildKpiSummary: 各項目を正しく集計する", () => {
+  const today = "2026-08-13";
+  const companies = [
+    { "企業ID": "C1", "ランク": "A", "現在ステージ": "提案中", "次回アクション予定日": "2026-08-01",
+      "連絡不要": false, "本日反応あり": false, "最終接触日": "2026-08-01", "登録日": "2026-01-01" },
+    { "企業ID": "C2", "ランク": "B", "現在ステージ": "未接触", "次回アクション予定日": "",
+      "連絡不要": false, "本日反応あり": true, "最終接触日": "", "登録日": "2026-08-10" },
+    { "企業ID": "C3", "ランク": "D", "現在ステージ": "案件化", "次回アクション予定日": "2026-08-20",
+      "連絡不要": false, "本日反応あり": false, "最終接触日": "2020-01-01", "登録日": "2020-01-01" }
+  ];
+  const summary = adminAccess.buildKpiSummary(companies, today);
+  assert.equal(summary.total, 3);
+  assert.equal(summary.overdueOrUntouched, 2); // C1(overdue) + C2(untouched)
+  assert.equal(summary.hot, 1); // C2
+  assert.deepEqual(summary.byRank, { A: 1, B: 1, C: 0, D: 1 });
+  assert.equal(summary.deal, 2); // C1(提案中) + C3(案件化)
+  assert.equal(summary.stale, 1); // C3: 最終接触2020年、標準サイクル(D=365日)の2倍以上経過
+});
+
+test("buildOwnerWorkload: 担当者ごとに集計し、担当数の多い順に並べる", () => {
+  const today = "2026-08-13";
+  const companies = [
+    { "企業ID": "C1", "担当者": "福田", "次回アクション予定日": "2026-08-01", "連絡不要": false },
+    { "企業ID": "C2", "担当者": "福田", "次回アクション予定日": "2026-08-20", "連絡不要": false },
+    { "企業ID": "C3", "担当者": "宮城", "次回アクション予定日": "", "連絡不要": false },
+    { "企業ID": "C4", "担当者": "", "次回アクション予定日": "2026-08-01", "連絡不要": false }
+  ];
+  const result = adminAccess.buildOwnerWorkload(companies, today);
+  assert.equal(result.length, 2); // 担当者未設定(C4)は除外
+  assert.equal(result[0].owner, "福田");
+  assert.equal(result[0].total, 2);
+  assert.equal(result[0].overdueOrUntouched, 1); // C1のみoverdue
+  assert.equal(result[1].owner, "宮城");
+  assert.equal(result[1].total, 1);
+  assert.equal(result[1].overdueOrUntouched, 1); // C3はuntouched
+});
+
+test("buildNextActionQueue: 反応あり→未着手→期限超過→まもなくの順に並べ、上限件数で切る", () => {
+  const today = "2026-08-13";
+  const companies = [
+    { "企業ID": "C_ok", "次回アクション予定日": "2026-09-01", "連絡不要": false, "本日反応あり": false },
+    { "企業ID": "C_soon", "次回アクション予定日": "2026-08-15", "連絡不要": false, "本日反応あり": false },
+    { "企業ID": "C_overdue", "次回アクション予定日": "2026-08-01", "連絡不要": false, "本日反応あり": false },
+    { "企業ID": "C_untouched", "次回アクション予定日": "", "連絡不要": false, "本日反応あり": false },
+    { "企業ID": "C_hot", "次回アクション予定日": "2026-09-01", "連絡不要": false, "本日反応あり": true }
+  ];
+  const result = adminAccess.buildNextActionQueue(companies, today, 8);
+  const ids = result.map(function (c) { return c["企業ID"]; });
+  assert.deepEqual(ids, ["C_hot", "C_untouched", "C_overdue", "C_soon"]); // C_okは対象外
+  assert.equal(result[0].urgency, "ok"); // C_hotは次回アクション予定日自体はok
+  assert.equal(result[1].urgency, "untouched");
+});
+
+test("buildNextActionQueue: limitで件数を絞る", () => {
+  const today = "2026-08-13";
+  const companies = [
+    { "企業ID": "C1", "次回アクション予定日": "", "連絡不要": false },
+    { "企業ID": "C2", "次回アクション予定日": "", "連絡不要": false },
+    { "企業ID": "C3", "次回アクション予定日": "", "連絡不要": false }
+  ];
+  const result = adminAccess.buildNextActionQueue(companies, today, 2);
+  assert.equal(result.length, 2);
+});
+
+test("buildNextActionQueue: 次回アクション予定日がDateオブジェクトでもpickCompanyListFields_と同じnormalizeDateForDisplayでyyyy-MM-dd文字列に正規化して返す(最終レビュー Finding 3)", () => {
+  const today = "2026-08-13";
+  const companies = [
+    { "企業ID": "C_overdue_date", "次回アクション予定日": new Date(2026, 7, 1), "連絡不要": false, "本日反応あり": false }
+  ];
+  const result = adminAccess.buildNextActionQueue(companies, today, 8);
+  assert.equal(result.length, 1);
+  assert.equal(typeof result[0]["次回アクション予定日"], "string");
+  assert.equal(result[0]["次回アクション予定日"], "2026-08-01");
 });

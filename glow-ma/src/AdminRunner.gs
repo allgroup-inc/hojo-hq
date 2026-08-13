@@ -110,15 +110,128 @@ function getFilterOptions() {
 
   var stageSet = {};
   var ownerSet = {};
+  var routeSet = {};
+  var productSet = {};
   companies.forEach(function (company) {
     if (company["現在ステージ"]) stageSet[company["現在ステージ"]] = true;
     if (company["担当者"]) ownerSet[company["担当者"]] = true;
+    (company["流入ルート"] || []).forEach(function (route) { routeSet[route] = true; });
+    (company["提案商品"] || []).forEach(function (product) { productSet[product] = true; });
   });
 
   return {
     stages: Object.keys(stageSet).sort(),
-    owners: Object.keys(ownerSet).sort()
+    owners: Object.keys(ownerSet).sort(),
+    routes: Object.keys(routeSet).sort(),
+    products: Object.keys(productSet).sort()
   };
+}
+
+/**
+ * 対応履歴ログから、本日日付の行がある企業IDの集合を返す(即時アラート/KPIの「hot」判定用)。
+ */
+function buildTodayReactedCompanyIdSet_(logSheet, todayString) {
+  var result = {};
+  if (!logSheet) return result;
+  var lastRow = logSheet.getLastRow();
+  if (lastRow < 2) return result;
+  var headers = GlowSchema.INTERACTION_LOG_HEADERS;
+  var dateIndex = headers.indexOf("日付");
+  var idIndex = headers.indexOf("企業ID");
+  var values = logSheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  values.forEach(function (row) {
+    var companyId = row[idIndex];
+    if (!companyId) return;
+    var dateValue = row[dateIndex];
+    var dateString = dateValue instanceof Date
+      ? Utilities.formatDate(dateValue, "Asia/Tokyo", "yyyy-MM-dd")
+      : String(dateValue || "");
+    if (dateString === todayString) result[companyId] = true;
+  });
+  return result;
+}
+
+function loadCompaniesWithReactionFlag_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  var reactedSet = buildTodayReactedCompanyIdSet_(logSheet, todayString);
+  companies.forEach(function (company) {
+    company["本日反応あり"] = !!reactedSet[company["企業ID"]];
+  });
+  return { companies: companies, todayString: todayString };
+}
+
+function getKpiSummary() {
+  requireAdminAccess_();
+  var loaded = loadCompaniesWithReactionFlag_();
+  return GlowAdminAccess.buildKpiSummary(loaded.companies, loaded.todayString);
+}
+
+function getOwnerWorkload() {
+  requireAdminAccess_();
+  var loaded = loadCompaniesWithReactionFlag_();
+  return GlowAdminAccess.buildOwnerWorkload(loaded.companies, loaded.todayString);
+}
+
+function getNextActionQueue() {
+  requireAdminAccess_();
+  var loaded = loadCompaniesWithReactionFlag_();
+  return GlowAdminAccess.buildNextActionQueue(loaded.companies, loaded.todayString, 8);
+}
+
+/**
+ * ドロワーの🤝連携ボタン用。ShareRunner.gsのreadActiveStaff_と同じロジックだが、
+ * 呼び出し元(スプレッドシートメニュー vs Web App)が異なるため、末尾に`_`を付けない
+ * 公開関数として別途用意する(google.script.runから呼ぶため)。
+ */
+function getShareableStaffList() {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(GlowSchema.STAFF_SHEET_NAME);
+  if (!sheet) return [];
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  var headers = GlowSchema.STAFF_HEADERS;
+  var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  var nameIndex = headers.indexOf("氏名");
+  var slackIdIndex = headers.indexOf("Slack User ID");
+  var activeIndex = headers.indexOf("有効");
+  return values
+    .filter(function (row) { return row[activeIndex] === true && row[nameIndex] && row[slackIdIndex]; })
+    .map(function (row) { return { name: row[nameIndex], slackUserId: row[slackIdIndex] }; });
+}
+
+/**
+ * 企業1社分の最新レター下書き(生成日時が最も新しい行)を返す。存在しなければnull。
+ */
+function getLatestLetterDraft(companyId) {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(GlowSchema.LETTER_DRAFT_SHEET_NAME);
+  if (!sheet) return null;
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return null;
+  var headers = GlowSchema.LETTER_DRAFT_HEADERS;
+  var idIndex = headers.indexOf("企業ID");
+  var dateIndex = headers.indexOf("生成日時");
+  var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  var latest = null;
+  values.forEach(function (row) {
+    if (row[idIndex] !== companyId) return;
+    var record = {};
+    headers.forEach(function (header, i) { record[header] = row[i]; });
+    if (!latest) { latest = record; return; }
+    var currentDate = row[dateIndex] instanceof Date ? row[dateIndex] : new Date(row[dateIndex]);
+    var latestDate = latest["生成日時"] instanceof Date ? latest["生成日時"] : new Date(latest["生成日時"]);
+    if (currentDate > latestDate) latest = record;
+  });
+  if (latest && latest["生成日時"] instanceof Date) {
+    latest["生成日時"] = Utilities.formatDate(latest["生成日時"], "Asia/Tokyo", "yyyy-MM-dd HH:mm");
+  }
+  return latest;
 }
 
 /**

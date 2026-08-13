@@ -32,10 +32,10 @@ test("buildAdminAppHtml: google.script.runでupdateCompanyMemoを呼ぶ(Phase 18
   assert.ok(html.indexOf(".updateCompanyMemo(") !== -1);
 });
 
-test("buildAdminAppHtml: 関係メモ編集以外の書き込み系google.script.run呼び出しを含まない(Phase 18b範囲の担保)", () => {
+test("buildAdminAppHtml: 想定外の書き込み系google.script.run呼び出しを含まない", () => {
   const html = adminApp.buildAdminAppHtml();
-  ["shareCompanyWithStaff", "appendInteractionLog", "addPartner", "logPartnerInteraction", "recordReferral"].forEach((forbidden) => {
-    assert.equal(html.indexOf(forbidden), -1, forbidden + " への呼び出しが含まれてはいけない(Phase 18b範囲外の機能)");
+  ["appendInteractionLog", "addPartner", "logPartnerInteraction", "recordReferral"].forEach((forbidden) => {
+    assert.equal(html.indexOf(forbidden), -1, forbidden + " への呼び出しが含まれてはいけない(未実装の機能)");
   });
 });
 
@@ -98,4 +98,136 @@ test("buildAdminAppHtml: 生成されるクライアントスクリプトが構�
   const html = adminApp.buildAdminAppHtml();
   const script = html.match(/<script>([\s\S]*)<\/script>/)[1];
   assert.doesNotThrow(() => new Function(script));
+});
+
+test("buildAdminAppHtml: コーポレートカラーの変数とロゴのアニメーションを含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf("--kin:#F88800") !== -1 || html.indexOf("--kin: #F88800") !== -1,
+    "コーポレートカラー(金)が定義されていない");
+  assert.ok(html.indexOf("logoGlow") !== -1, "ロゴの光るアニメーションが定義されていない");
+  assert.ok(html.indexOf("prefers-reduced-motion") !== -1, "reduced-motion対応がない");
+});
+
+test("buildAdminAppHtml: KPIカード・緊急度ドット・ランクバッジ用のCSSクラスを含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  [".kpi{", ".rank-A{", ".rank-B{", ".rank-C{", ".rank-D{", ".dot.overdue{", ".dot.soon{", ".dot.ok{"]
+    .forEach((selector) => {
+      assert.ok(html.indexOf(selector) !== -1, selector + " が定義されていない");
+    });
+});
+
+test("buildAdminAppHtml: 流入ルート・提案商品の絞り込みと、列ソート用の見出しを含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["filterRoute", "filterProduct"].forEach((id) => {
+    assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+  });
+  ["data-sort=\"name\"", "data-sort=\"biz\"", "data-sort=\"route\"", "data-sort=\"stage\"",
+   "data-sort=\"products\"", "data-sort=\"rank\"", "data-sort=\"next\""]
+    .forEach((attr) => {
+      assert.ok(html.indexOf(attr) !== -1, attr + " が含まれていない");
+    });
+});
+
+test("buildAdminAppHtml: google.script.runでgetFilterOptionsの結果からroute/product選択肢を組み立てる", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf("options.routes") !== -1, "流入ルート選択肢の組み立てがない");
+  assert.ok(html.indexOf("options.products") !== -1, "提案商品選択肢の組み立てがない");
+});
+
+test("buildAdminAppHtml: KPI行とKPIモーダルの主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["kpiRow", "kpiModal", "kmTitle", "kmSub", "kmBody"].forEach((id) => {
+    assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+  });
+});
+
+test("buildAdminAppHtml: google.script.runでgetKpiSummaryを呼ぶ", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf(".getKpiSummary(") !== -1);
+});
+
+test("buildAdminAppHtml: ネクストアクション・ワークロードパネルの主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["queue", "workloadList"].forEach((id) => {
+    assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+  });
+});
+
+test("buildAdminAppHtml: google.script.runでgetNextActionQueue・getOwnerWorkloadを呼ぶ", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf(".getNextActionQueue(") !== -1);
+  assert.ok(html.indexOf(".getOwnerWorkload(") !== -1);
+});
+
+test("buildAdminAppHtml: ドロワーに🤝連携ボタンと共有モーダルの主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["shareBtn", "shareModal", "shareTitle", "shareStaffList", "shareNote", "sharePreview", "shareSendBtn"]
+    .forEach((id) => {
+      assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+    });
+});
+
+test("buildAdminAppHtml: google.script.runでgetShareableStaffList・shareCompanyWithStaffを呼ぶ", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf(".getShareableStaffList(") !== -1);
+  assert.ok(html.indexOf(".shareCompanyWithStaff(") !== -1);
+});
+
+test("buildAdminAppHtml: renderDrawerで連絡不要フラグをshareTargetDncに反映する", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf("shareTargetDnc") !== -1 && /shareTargetDnc\s*=\s*!!/.test(html),
+    "renderDrawer内でshareTargetDncへの代入が見つからない");
+});
+
+test("buildAdminAppHtml: レター下書きプレビューボタン・モーダルの主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["letterPreviewBtn", "letterPreviewModal", "letterPreviewBody"].forEach((id) => {
+    assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+  });
+});
+
+test("buildAdminAppHtml: google.script.runでgetLatestLetterDraftを呼ぶ", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf(".getLatestLetterDraft(") !== -1);
+});
+
+test("buildAdminAppHtml: ドロワー・オーバーレイ・タブに、Task8で導入したCSS(.scrim/.drawer/.tab)が適用されるクラスが付与されている(最終レビュー Finding 1)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf('class="scrim" id="overlay"') !== -1, "overlayにclass=scrimがない");
+  assert.ok(html.indexOf('class="scrim" id="partnerOverlay"') !== -1, "partnerOverlayにclass=scrimがない");
+  assert.ok(html.indexOf('class="drawer" id="drawer"') !== -1, "drawerにclass=drawerがない");
+  assert.ok(html.indexOf('class="drawer" id="partnerDrawer"') !== -1, "partnerDrawerにclass=drawerがない");
+  assert.ok(html.indexOf('class="drawer-head" id="drawerHeader"') !== -1, "drawerHeaderにclass=drawer-headがない");
+  assert.ok(html.indexOf('class="drawer-content" id="drawerBody"') !== -1, "drawerBodyにclass=drawer-contentがない");
+  assert.ok(html.indexOf('class="tab active" id="tabOverviewBtn"') !== -1, "tabOverviewBtnにclass=tab activeがない");
+  assert.ok(html.indexOf('class="tab" id="tabHistoryBtn"') !== -1, "tabHistoryBtnにclass=tabがない");
+});
+
+test("buildAdminAppHtml: STYLE内に.scrim/.drawer/.drawer.open/.tab/.tab.activeのCSSルールが定義されている(最終レビュー Finding 1)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  [".scrim{", ".drawer{", ".drawer.open{", ".drawer-head{", ".drawer-content{", ".tab{", ".tab.active{"]
+    .forEach((selector) => {
+      assert.ok(html.indexOf(selector) !== -1, selector + " が定義されていない");
+    });
+});
+
+test("buildAdminAppHtml: .app/.body-gridでラップされ、KPI行・企業テーブル・サイドパネルが二カラムレイアウトの対象になっている(最終レビュー再検証 Fix 4)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf('class="app"') !== -1, "class=\"app\" が含まれていない");
+  assert.ok(html.indexOf('class="body-grid"') !== -1, "class=\"body-grid\" が含まれていない");
+  const idxBodyGrid = html.indexOf('class="body-grid"');
+  ['id="kpiRow"', 'id="companyTableBody"', 'id="queue"'].forEach((needle) => {
+    const idx = html.indexOf(needle);
+    assert.ok(idx > idxBodyGrid, needle + " が class=\"body-grid\" より後(内側)にない");
+  });
+});
+
+test("buildAdminAppHtml: デモに存在しないPhase 18a/18b由来のUI(viewSwitcher/viewPane/empty/btn-small/memoTextarea)のCSSが復元されている(最終レビュー Finding 1)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["#viewSwitcher{", "#viewSwitcher button{", "#viewSwitcher button.active{", ".viewPane{", ".viewPane.active{",
+   "header{", ".empty{", ".btn-small{", ".btn-primary{", "#memoTextarea{", "#memoEditControls{",
+   "#memoStatus{", "#memoStatus.error{", ".field{", ".field .label{", ".field .value{"]
+    .forEach((selector) => {
+      assert.ok(html.indexOf(selector) !== -1, selector + " が定義されていない");
+    });
 });
