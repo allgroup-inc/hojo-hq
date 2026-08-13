@@ -159,3 +159,10 @@ test("事前選定リスト・事前選定_未一致タブの名称・見出し�
   assert.equal(schema.PRE_SCREENING_MISMATCH_SHEET_NAME, "事前選定_未一致");
   assert.deepEqual(schema.PRE_SCREENING_MISMATCH_HEADERS, ["会社名", "記録日時"]);
 });
+
+test("QR生成結果タブの名称・見出しが定義されている", () => {
+  assert.equal(schema.QR_RESULT_SHEET_NAME, "QR生成結果");
+  assert.deepEqual(schema.QR_RESULT_HEADERS, [
+    "企業ID", "会社名", "トラッキングURL", "QR画像リンク", "ステータス"
+  ]);
+});
