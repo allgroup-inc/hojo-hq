@@ -35,10 +35,12 @@ function exportQrCodesForDate() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var draftSheet = ss.getSheetByName(GlowSchema.LETTER_DRAFT_SHEET_NAME);
   var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
-  if (!draftSheet || !companySheet) {
+  var qrResultSheet = ss.getSheetByName(GlowSchema.QR_RESULT_SHEET_NAME);
+  if (!draftSheet || !companySheet || !qrResultSheet) {
     ui.alert(
-      "「" + GlowSchema.LETTER_DRAFT_SHEET_NAME + "」または「" + GlowSchema.COMPANY_MASTER_SHEET_NAME +
-      "」タブが見つかりません。先に ensureLedgerTabs を実行してください。"
+      "「" + GlowSchema.LETTER_DRAFT_SHEET_NAME + "」「" + GlowSchema.COMPANY_MASTER_SHEET_NAME +
+      "」「" + GlowSchema.QR_RESULT_SHEET_NAME +
+      "」タブのいずれかが見つかりません。先に ensureLedgerTabs を実行してください。"
     );
     return;
   }
@@ -53,7 +55,7 @@ function exportQrCodesForDate() {
 
   var folder = getOrCreateQrFolder_(targetDate);
   var results = manifest.map(function (row) {
-    return generateAndSaveQr_(row, folder);
+    return generateAndSaveQr_(row, folder, targetDate);
   });
 
   writeQrResultSheet_(ss, results);
@@ -79,28 +81,52 @@ function getOrCreateQrFolder_(targetDate) {
  * 1社分のQRコード画像を外部API経由で生成し、Driveフォルダへ保存する。
  * API呼び出し・画像保存のいずれかが失敗しても例外を投げず、ステータス付きの
  * 結果オブジェクトを返す(1社の失敗で全体の処理を止めないため)。
+ *
+ * HTTP 200 でも本文が画像とは限らない(外部APIのメンテナンス画面等が 200 text/html で
+ * 返る場合がある)。読めないPNGを「成功」として印刷業者に渡さないため、Content-Type が
+ * image/ で始まることまで確認してから成功扱いにする(CLAUDE.md 絶対ルール1: 断定しない)。
  */
-function generateAndSaveQr_(row, folder) {
+function generateAndSaveQr_(row, folder, targetDate) {
   var qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" +
     encodeURIComponent(row.trackingUrl);
   try {
     var response = UrlFetchApp.fetch(qrApiUrl, { muteHttpExceptions: true });
     if (response.getResponseCode() !== 200) {
       return {
-        "企業ID": row["企業ID"], "会社名": row["会社名"], "トラッキングURL": row.trackingUrl,
+        "企業ID": row["企業ID"], "会社名": row["会社名"], "発送日": targetDate,
+        "トラッキングURL": row.trackingUrl,
         "QR画像リンク": "", "ステータス": "QR生成失敗(HTTP " + response.getResponseCode() + ")"
       };
     }
-    var blob = response.getBlob().setName(row["企業ID"] + ".png");
+    var blob = response.getBlob();
+    var contentType = blob.getContentType();
+    if (!contentType || contentType.indexOf("image/") !== 0) {
+      Logger.log("QR生成APIが画像以外を返しました: " + row["企業ID"] + " — Content-Type: " + contentType);
+      return {
+        "企業ID": row["企業ID"], "会社名": row["会社名"], "発送日": targetDate,
+        "トラッキングURL": row.trackingUrl,
+        "QR画像リンク": "", "ステータス": "QR生成失敗(画像データではない)"
+      };
+    }
+    blob.setName(row["企業ID"] + ".png");
+    // 同じ発送日で再実行したときに同名ファイルが二重に残らないよう、既存ファイルは
+    // ゴミ箱に移してから作り直す(Driveは同名ファイルの重複を許すため)。
+    var existingFiles = folder.getFilesByName(row["企業ID"] + ".png");
+    while (existingFiles.hasNext()) {
+      existingFiles.next().setTrashed(true);
+    }
     var file = folder.createFile(blob);
     return {
-      "企業ID": row["企業ID"], "会社名": row["会社名"], "トラッキングURL": row.trackingUrl,
+      "企業ID": row["企業ID"], "会社名": row["会社名"], "発送日": targetDate,
+      "トラッキングURL": row.trackingUrl,
       "QR画像リンク": file.getUrl(), "ステータス": "成功"
     };
   } catch (err) {
+    Logger.log("QR生成に失敗しました: " + row["企業ID"] + " — " + err);
     return {
-      "企業ID": row["企業ID"], "会社名": row["会社名"], "トラッキングURL": row.trackingUrl,
-      "QR画像リンク": "", "ステータス": "QR生成失敗(" + err.message + ")"
+      "企業ID": row["企業ID"], "会社名": row["会社名"], "発送日": targetDate,
+      "トラッキングURL": row.trackingUrl,
+      "QR画像リンク": "", "ステータス": "QR生成失敗(" + String(err) + ")"
     };
   }
 }

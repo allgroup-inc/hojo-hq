@@ -82,7 +82,7 @@
 
   var QR_RESULT_SHEET_NAME = "QR生成結果";
   var QR_RESULT_HEADERS = [
-    "企業ID", "会社名", "トラッキングURL", "QR画像リンク", "ステータス"
+    "企業ID", "会社名", "発送日", "トラッキングURL", "QR画像リンク", "ステータス"
   ];
 
   var api = {

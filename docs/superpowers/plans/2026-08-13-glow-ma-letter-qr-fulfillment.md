@@ -518,3 +518,21 @@ git commit -m "docs(glow-ma): レター発送 個別QRコード生成の使い�
 - 全タスク完了後、`node --test tests/glow_ma_*.test.mjs`で全体テストを実行し、最終コードレビューを行う
 - `finishing-a-development-branch`スキルでmainへマージする
 - 本番環境で`clasp push`→`ensureLedgerTabs`再実行(QR生成結果タブ作成)→メニュー動作確認を、ユーザーと一緒にスクリーンショットベースで行う
+
+### ⚠️ 最終レビュー修正で `appsscript.json` に `oauthScopes` を明示したことによる必須作業
+
+最終レビュー指摘(Finding 3)への対応として、Drive権限を最小化するため
+`glow-ma/src/appsscript.json` に `oauthScopes` を**明示的に宣言**した
+(`drive.file` / `spreadsheets` / `script.external_request` / `script.scriptapp` /
+`userinfo.email` の5つ)。
+
+**`oauthScopes` を明示するとApps Scriptの自動スコープ検出はプロジェクト全体で無効になる。**
+影響範囲は新規のQR機能だけではなく、既存の全機能に及ぶ。したがって:
+
+- `clasp push` 後は、**新しいQR機能だけでなく、既存の自動トリガー(発送日記録の自動反映、
+  日次アラート配信、対応履歴の編集トリガー)と、スプレッドシートメニューの全機能、
+  管理画面Web Appのアクセス制御を、本番環境で1つずつエンドツーエンドに手動再テストする**。
+  これが終わるまでデプロイ完了とみなさないこと
+- **次回のトリガー実行時・メニュー操作時にGoogleの再認可(consent)画面が表示される**。
+  想定どおりの挙動なので承認する。承認されるまでトリガーは失敗する
+- デプロイ後数日は、Googleから届く**トリガー失敗の通知メール**を注視すること
