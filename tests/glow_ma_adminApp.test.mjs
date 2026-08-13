@@ -133,3 +133,15 @@ test("buildAdminAppHtml: google.script.runでgetFilterOptionsの結果からrout
   assert.ok(html.indexOf("options.routes") !== -1, "流入ルート選択肢の組み立てがない");
   assert.ok(html.indexOf("options.products") !== -1, "提案商品選択肢の組み立てがない");
 });
+
+test("buildAdminAppHtml: KPI行とKPIモーダルの主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["kpiRow", "kpiModal", "kmTitle", "kmSub", "kmBody"].forEach((id) => {
+    assert.ok(html.indexOf('id="' + id + '"') !== -1, id + " が含まれていない");
+  });
+});
+
+test("buildAdminAppHtml: google.script.runでgetKpiSummaryを呼ぶ", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf(".getKpiSummary(") !== -1);
+});

@@ -436,6 +436,10 @@
     "</div>"
   ].join("");
 
+  var KPI_ROW = [
+    "<div class=\"kpi-row\" id=\"kpiRow\"></div>"
+  ].join("");
+
   var TABLE = [
     "<div id=\"companyView\" class=\"viewPane active\">",
     "<table><thead><tr>",
@@ -472,6 +476,17 @@
     "<div id=\"paneOverview\"></div>",
     "<div id=\"paneHistory\" style=\"display:none\"></div>",
     "</div></div>"
+  ].join("");
+
+  var KPI_MODAL = [
+    "<div class=\"scrim\" id=\"kpiScrim\"></div>",
+    "<div class=\"kpi-modal\" id=\"kpiModal\">",
+    "<div class=\"km-head\"><div class=\"km-head-row\">",
+    "<div><h3 id=\"kmTitle\"></h3><div class=\"km-sub\" id=\"kmSub\"></div></div>",
+    "<button class=\"close-btn\" id=\"kpiModalClose\">&times;</button>",
+    "</div></div>",
+    "<div class=\"km-body\" id=\"kmBody\"></div>",
+    "</div>"
   ].join("");
 
   var PARTNER_DRAWER = [
@@ -517,6 +532,49 @@
     "var opt = document.createElement('option'); opt.value = product; opt.textContent = product;",
     "productSelect.appendChild(opt);});",
     "}).withFailureHandler(function(){}).getFilterOptions();",
+    "}",
+
+    "function loadKpiSummary(){",
+    "google.script.run.withSuccessHandler(renderKpiRow).withFailureHandler(function(){",
+    "document.getElementById('kpiRow').innerHTML = '';",
+    "}).getKpiSummary();",
+    "}",
+
+    "var LAST_KPI_SUMMARY = null;",
+    "function renderKpiRow(summary){",
+    "LAST_KPI_SUMMARY = summary;",
+    "var byRank = summary.byRank || {A:0,B:0,C:0,D:0};",
+    "var kpis = [",
+    "{key:'total', label:'パイプライン企業数', value:summary.total, sub:'絞り込みなしの全企業数'},",
+    "{key:'overdueOrUntouched', label:'本日の掘り起こし対象', value:summary.overdueOrUntouched, sub:'未着手・対応期限超過', cls:'alert'},",
+    "{key:'hot', label:'即時アラート', value:summary.hot, sub:'本日、企業側から反応あり', cls:'hot'},",
+    "{key:'rank', label:'ランク内訳', value:'A'+byRank.A+'/B'+byRank.B+'/C'+byRank.C+'/D'+byRank.D, sub:'ランク別企業数'},",
+    "{key:'deal', label:'提案中・案件化', value:summary.deal, sub:'商談が進行中の企業数'},",
+    "{key:'stale', label:'長期検討企業', value:summary.stale, sub:'標準サイクルの2倍以上、未接触', cls:'stale'}",
+    "];",
+    "var row = document.getElementById('kpiRow');",
+    "row.innerHTML = kpis.map(function(k){",
+    "return '<div class=\"kpi ' + (k.cls||'') + '\" data-kpi=\"' + k.key + '\" role=\"button\" tabindex=\"0\">' +",
+    "'<div class=\"label\">' + escapeHtml(k.label) + '</div>' +",
+    "'<div class=\"value\">' + escapeHtml(k.value) + '</div>' +",
+    "'<div class=\"sub\">' + escapeHtml(k.sub) + '</div></div>';",
+    "}).join('');",
+    "row.querySelectorAll('.kpi').forEach(function(el){",
+    "el.addEventListener('click', function(){ openKpiModal(el.dataset.kpi); });",
+    "});",
+    "}",
+
+    "function openKpiModal(key){",
+    "document.getElementById('kmTitle').textContent = key;",
+    "document.getElementById('kmSub').textContent = 'クリックした企業の詳細を開けます';",
+    "document.getElementById('kmBody').innerHTML = '<p class=\"km-empty\">一覧側の絞り込みで詳細な内訳を確認してください。</p>';",
+    "document.getElementById('kpiScrim').classList.add('open');",
+    "document.getElementById('kpiModal').classList.add('open');",
+    "}",
+
+    "function closeKpiModal(){",
+    "document.getElementById('kpiModal').classList.remove('open');",
+    "document.getElementById('kpiScrim').classList.remove('open');",
     "}",
 
     "function loadList(){",
@@ -778,8 +836,11 @@
     "document.getElementById('tabPartnerOverviewBtn').addEventListener('click', function(){ switchPartnerTab('overview'); });",
     "document.getElementById('tabPartnerHistoryBtn').addEventListener('click', function(){ switchPartnerTab('history'); });",
     "document.getElementById('tabPartnerReferralsBtn').addEventListener('click', function(){ switchPartnerTab('referrals'); });",
+    "document.getElementById('kpiModalClose').addEventListener('click', closeKpiModal);",
+    "document.getElementById('kpiScrim').addEventListener('click', closeKpiModal);",
 
     "loadFilterOptions();",
+    "loadKpiSummary();",
     "loadList();",
     "loadPartnerList();"
   ].join("");
@@ -788,7 +849,7 @@
     return "<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\">" +
       "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
       "<style>" + STYLE + "</style></head><body>" +
-      HEADER_AND_FILTERS + TABLE + PARTNER_VIEW + DRAWER + PARTNER_DRAWER +
+      HEADER_AND_FILTERS + KPI_ROW + TABLE + PARTNER_VIEW + DRAWER + PARTNER_DRAWER + KPI_MODAL +
       "<script>" + SCRIPT + "<\/script>" +
       "</body></html>";
   }
