@@ -289,3 +289,30 @@ test("buildOwnerWorkload: 担当者ごとに集計し、担当数の多い順に
   assert.equal(result[1].total, 1);
   assert.equal(result[1].overdueOrUntouched, 1); // C3はuntouched
 });
+
+test("buildNextActionQueue: 反応あり→未着手→期限超過→まもなくの順に並べ、上限件数で切る", () => {
+  const today = "2026-08-13";
+  const companies = [
+    { "企業ID": "C_ok", "次回アクション予定日": "2026-09-01", "連絡不要": false, "本日反応あり": false },
+    { "企業ID": "C_soon", "次回アクション予定日": "2026-08-15", "連絡不要": false, "本日反応あり": false },
+    { "企業ID": "C_overdue", "次回アクション予定日": "2026-08-01", "連絡不要": false, "本日反応あり": false },
+    { "企業ID": "C_untouched", "次回アクション予定日": "", "連絡不要": false, "本日反応あり": false },
+    { "企業ID": "C_hot", "次回アクション予定日": "2026-09-01", "連絡不要": false, "本日反応あり": true }
+  ];
+  const result = adminAccess.buildNextActionQueue(companies, today, 8);
+  const ids = result.map(function (c) { return c["企業ID"]; });
+  assert.deepEqual(ids, ["C_hot", "C_untouched", "C_overdue", "C_soon"]); // C_okは対象外
+  assert.equal(result[0].urgency, "ok"); // C_hotは次回アクション予定日自体はok
+  assert.equal(result[1].urgency, "untouched");
+});
+
+test("buildNextActionQueue: limitで件数を絞る", () => {
+  const today = "2026-08-13";
+  const companies = [
+    { "企業ID": "C1", "次回アクション予定日": "", "連絡不要": false },
+    { "企業ID": "C2", "次回アクション予定日": "", "連絡不要": false },
+    { "企業ID": "C3", "次回アクション予定日": "", "連絡不要": false }
+  ];
+  const result = adminAccess.buildNextActionQueue(companies, today, 2);
+  assert.equal(result.length, 2);
+});

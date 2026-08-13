@@ -76,6 +76,29 @@
       .sort(function (a, b) { return b.total - a.total; });
   }
 
+  var URGENCY_ORDER_ = { untouched: 0, overdue: 1, soon: 2, ok: 3, none: 4 };
+
+  function buildNextActionQueue(companies, todayString, limit) {
+    var max = typeof limit === "number" ? limit : 8;
+    var candidates = (companies || [])
+      .map(function (company) {
+        var urgency = computeUrgency(company, todayString);
+        var withUrgency = {};
+        Object.keys(company).forEach(function (key) { withUrgency[key] = company[key]; });
+        withUrgency.urgency = urgency;
+        return withUrgency;
+      })
+      .filter(function (company) {
+        return company["本日反応あり"] || company.urgency === "overdue" ||
+          company.urgency === "untouched" || company.urgency === "soon";
+      });
+    candidates.sort(function (a, b) {
+      if (!!a["本日反応あり"] !== !!b["本日反応あり"]) return a["本日反応あり"] ? -1 : 1;
+      return URGENCY_ORDER_[a.urgency] - URGENCY_ORDER_[b.urgency];
+    });
+    return candidates.slice(0, max);
+  }
+
   function formatDate_(date) {
     var year = date.getFullYear();
     var month = String(date.getMonth() + 1).padStart(2, "0");
@@ -243,7 +266,8 @@
     normalizeReferralRecords: normalizeReferralRecords,
     computeUrgency: computeUrgency,
     buildKpiSummary: buildKpiSummary,
-    buildOwnerWorkload: buildOwnerWorkload
+    buildOwnerWorkload: buildOwnerWorkload,
+    buildNextActionQueue: buildNextActionQueue
   };
 
   if (typeof module !== "undefined" && module.exports) {
