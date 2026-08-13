@@ -110,15 +110,76 @@ function getFilterOptions() {
 
   var stageSet = {};
   var ownerSet = {};
+  var routeSet = {};
+  var productSet = {};
   companies.forEach(function (company) {
     if (company["現在ステージ"]) stageSet[company["現在ステージ"]] = true;
     if (company["担当者"]) ownerSet[company["担当者"]] = true;
+    (company["流入ルート"] || []).forEach(function (route) { routeSet[route] = true; });
+    (company["提案商品"] || []).forEach(function (product) { productSet[product] = true; });
   });
 
   return {
     stages: Object.keys(stageSet).sort(),
-    owners: Object.keys(ownerSet).sort()
+    owners: Object.keys(ownerSet).sort(),
+    routes: Object.keys(routeSet).sort(),
+    products: Object.keys(productSet).sort()
   };
+}
+
+/**
+ * 対応履歴ログから、本日日付の行がある企業IDの集合を返す(即時アラート/KPIの「hot」判定用)。
+ */
+function buildTodayReactedCompanyIdSet_(logSheet, todayString) {
+  var result = {};
+  if (!logSheet) return result;
+  var lastRow = logSheet.getLastRow();
+  if (lastRow < 2) return result;
+  var headers = GlowSchema.INTERACTION_LOG_HEADERS;
+  var dateIndex = headers.indexOf("日付");
+  var idIndex = headers.indexOf("企業ID");
+  var values = logSheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  values.forEach(function (row) {
+    var companyId = row[idIndex];
+    if (!companyId) return;
+    var dateValue = row[dateIndex];
+    var dateString = dateValue instanceof Date
+      ? Utilities.formatDate(dateValue, "Asia/Tokyo", "yyyy-MM-dd")
+      : String(dateValue || "");
+    if (dateString === todayString) result[companyId] = true;
+  });
+  return result;
+}
+
+function loadCompaniesWithReactionFlag_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  var reactedSet = buildTodayReactedCompanyIdSet_(logSheet, todayString);
+  companies.forEach(function (company) {
+    company["本日反応あり"] = !!reactedSet[company["企業ID"]];
+  });
+  return { companies: companies, todayString: todayString };
+}
+
+function getKpiSummary() {
+  requireAdminAccess_();
+  var loaded = loadCompaniesWithReactionFlag_();
+  return GlowAdminAccess.buildKpiSummary(loaded.companies, loaded.todayString);
+}
+
+function getOwnerWorkload() {
+  requireAdminAccess_();
+  var loaded = loadCompaniesWithReactionFlag_();
+  return GlowAdminAccess.buildOwnerWorkload(loaded.companies, loaded.todayString);
+}
+
+function getNextActionQueue() {
+  requireAdminAccess_();
+  var loaded = loadCompaniesWithReactionFlag_();
+  return GlowAdminAccess.buildNextActionQueue(loaded.companies, loaded.todayString, 8);
 }
 
 /**
