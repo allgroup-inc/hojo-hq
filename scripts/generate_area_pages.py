@@ -179,7 +179,7 @@ def muni_page(muni, items, updated):
         body.append('<div class="cardgrid">')
         for it in group:
             if it.get("verified") is True:
-                badge = ' <span class="status ok">✓ 確認済み</span>'
+                badge = ' <span class="status ok">✓ 公式と照合済み</span>'
             elif it.get("status") == "要確認":
                 badge = ' <span class="status">要確認</span>'
             else:

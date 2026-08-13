@@ -486,7 +486,7 @@ footer .fwrap p{margin-bottom:6px}
 
 <section>
   <div class="wrap">
-    <h2>こんな「もらい忘れ」</h2>
+    <h2>たとえば、こんな制度を掲載しています</h2>
     <div class="cards" id="seido-cards">
       <div class="card"><h3>制度情報を準備中です</h3><p class="note">検証が完了した制度から順に掲載します。</p></div>
     </div>
@@ -597,7 +597,7 @@ footer .fwrap p{margin-bottom:6px}
         a.href = it.source_url; a.rel = "noopener"; a.textContent = "公式ページで確認";
         d.appendChild(h); d.appendChild(p);
         if(it.verified === true){
-          var ok = document.createElement("span"); ok.className="status ok"; ok.textContent="✓ 確認済み";
+          var ok = document.createElement("span"); ok.className="status ok"; ok.textContent="✓ 公式と照合済み";
           d.appendChild(ok); d.appendChild(document.createTextNode(" "));
         } else if(it.status === "要確認"){
           var s = document.createElement("span"); s.className="status"; s.textContent="要確認";
