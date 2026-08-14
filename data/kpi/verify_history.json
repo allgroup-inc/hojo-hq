@@ -454,5 +454,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-14",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 2,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和７年度補正 業務産業用蓄電システム導入支援事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY4mMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和5年沖縄建設産業グローバル化支援業務委託に係る企画提案書等の募集",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010165.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "よろず支援拠点事業 生産性向上支援センター",
+    "url": "https://okinawa-ric.jp/service/post-58-1.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度子育て【改修型】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSFMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度】INPIT外国出願補助金（中間手続補助）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXmVMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
