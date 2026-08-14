@@ -87,6 +87,7 @@ Claude が毎回思い出す必要がないようスキル化したもの。ベ�
 - `multi-ai-crosscheck` — 複数AI(Claude+Gemini等)による独立クロスチェックを設計・実装・レビューするとき。独立性・保守的マージ・割れたら根拠引用の再確認・参加率と履歴の台帳化という4原則の型(参照実装: scripts/verify_sources.py)。
 - `context-limit-handoff` — 会話が「コンテキストウィンドウがいっぱいです」の警告を出したとき。作業状態をgit等の外部に持たせ、コンパクト化・巻き戻し・新セッションのどれを選んでも作業を失わないための判断フローを提供。
 - `feature-factory` — 1人開発でも複数エージェントに役割分担させて機能追加を進めるとき。調査→ストーリー→仕様→実装(分業)→検証の役割分担チェーンと、CLAUDE.mdを土台にした再現性の作り方を提供。`subagent-driven-development`/`writing-plans`/`brainstorming`/`test-driven-development`(Superpowers)を実行エンジンとして使う前提のオーケストレーション層。
+- `hojo-lighthouse-triage` — Lighthouseワークフローの失敗通知・自動起票Issueに対応するとき。Claude Code環境からは本番URLやGitHub Actionsアーティファクトに直接アクセスできないため、ローカルに事前installされたChromium+Lighthouseで実測再現してから原因特定・修正する手順を提供(2026-08-09、text-wrap:balanceのTBT悪化を実測で特定した際に確立)。
 
 同じパターンの姉妹スキルとして `glow-ma-triangle-review`(GLOW M&A向け)もある。
 
