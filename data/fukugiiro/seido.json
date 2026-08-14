@@ -1,6 +1,6 @@
 {
- "updated_at": "2026-08-14 06:36",
- "count": 160,
+ "updated_at": "2026-08-14 10:28",
+ "count": 167,
  "items": [
   {
    "id": "fk-kuni-jidoteate",
@@ -3865,7 +3865,7 @@
    "how_to_apply": "確定申告(還付申告)で医療費控除の明細書を添付して税務署へ申請(e-Tax可)",
    "source_url": "https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1120.htm",
    "deadline_type": "常時",
-   "amount_note": "支払医療費を基に計算した金額(最高200万円)の所得控除を受けられる場合があります(要確認)。セルフメディケーション税制は対象医薬品購入費12,000円超の部分(上限88,000円)が対象となる場合があります(要確認)",
+   "amount_note": "支払医療費を基に計算した金額(最高200万円)の所得控除を受けられる場合があります(要確認)。セルフメディケーション税制は対象医薬品購入費12,000円超の部分(上限88,000円)が対象となる場合があります(2026年12月31日までの特例・延長の有無は要確認)",
    "combine": {
     "type": "exclusive",
     "note": "通常の医療費控除とセルフメディケーション税制は、どちらか一方の選択適用とされています"
@@ -4071,7 +4071,7 @@
    "source_url": "https://www.town.kin.okinawa.jp/kosodate_kyoiku/kyoikuiinkai/2028.html",
    "deadline_type": "年度内",
    "assume_reachable": true,
-   "amount_note": "学用品費・給食費などの一部が援助される場合があります(金額は品目・学年で異なります。要確認)",
+   "amount_note": "学用品費・給食費などの一部が援助される場合があります(金額は品目・学年で異なります。掲載は令和7年度の情報に基づくため、今年度分は教育委員会にご確認ください)",
    "deadline": null,
    "verified": false,
    "verified_at": null,
@@ -4079,6 +4079,162 @@
    "status": "要確認",
    "notes": "出典: 金武町ウェブサイト",
    "fetched_at": "2026-08-14 06:36"
+  },
+  {
+   "id": "fk-yonaguni-judo-iryohi",
+   "name": "与那国町 重度心身障害者(児)医療費助成",
+   "category": "医療・健康",
+   "life_events": [
+    "障がい",
+    "病気・けが"
+   ],
+   "issuer": "与那国町",
+   "area": "与那国町",
+   "target_household": "与那国町に住民登録があり健康保険に加入している、重度の心身障がいのある方(お子さんを含む)のいる世帯が対象となる可能性があります(受給者証の交付が必要とされています)",
+   "how_to_apply": "与那国町役場 福祉担当課の窓口(郵送提出も可の記載あり。課名は要確認)",
+   "source_url": "https://www.town.yonaguni.okinawa.jp/docs/2022091600011/",
+   "amount_note": "医療機関で支払った保険診療の自己負担分の払い戻しを受けられる場合があります(支払いは原則申請の翌月。金額・要件は要確認)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 与那国町ウェブサイト(2026-08-14 拡充サイクル2・検索照合で追加)",
+   "fetched_at": "2026-08-14 10:28",
+   "combine": {
+    "type": "adjust",
+    "note": "他の医療費助成との併給関係は窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-yonaguni-haken-hojo",
+   "name": "与那国町 児童生徒の派遣費補助金",
+   "category": "教育",
+   "life_events": [
+    "子育て"
+   ],
+   "issuer": "与那国町",
+   "area": "与那国町",
+   "target_household": "島外で行われる大会等に参加する与那国町のお子さん(引率指導者を含む)のいる世帯が対象となる可能性があります",
+   "how_to_apply": "与那国町教育委員会 総務課の窓口",
+   "source_url": "https://www.town.yonaguni.okinawa.jp/docs/2026040200024",
+   "amount_note": "島外大会等に参加する際の渡航費などの一部が補助される場合があります(補助率・上限額は要確認)",
+   "deadline_type": "年度内",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 与那国町ウェブサイト(2026-08-14 拡充サイクル2・検索照合で追加)",
+   "fetched_at": "2026-08-14 10:28"
+  },
+  {
+   "id": "fk-yonaguni-rito-kokosei-hogosha",
+   "name": "与那国町 離島高校生保護者負担軽減補助金",
+   "category": "教育",
+   "life_events": [
+    "子育て",
+    "入園・入学"
+   ],
+   "issuer": "与那国町",
+   "area": "与那国町",
+   "target_household": "与那国町の中学校から島外の高校・特別支援学校高等部などへ進学した生徒の保護者の世帯が対象となる可能性があります(島内に高校がないため)",
+   "how_to_apply": "与那国町教育委員会の窓口(担当課は要確認)",
+   "source_url": "https://www.town.yonaguni.okinawa.jp/reiki_int/reiki_honbun/q954RG00000754.html",
+   "amount_note": "学校行事などに要する渡航費・宿泊費の一部が補助される場合があります(補助額は要確認)",
+   "deadline_type": "要確認",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 与那国町ウェブサイト(2026-08-14 拡充サイクル2・検索照合で追加)",
+   "fetched_at": "2026-08-14 10:28",
+   "combine": {
+    "type": "adjust",
+    "note": "与那国町離島高校生修学支援費補助金(別制度)との関係・併用可否は窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-kunigami-shussan-iwaikin",
+   "name": "国頭村 出産祝金",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "国頭村",
+   "area": "国頭村",
+   "target_household": "国頭村に住民登録のある世帯でお子さんが生まれた方が対象となる可能性があります(定住要件などの条件があるとされています)",
+   "how_to_apply": "国頭村役場の担当窓口(申請期間は出生日から90日以降1年以内とされています)",
+   "source_url": "https://www.vill.kunigami.okinawa.jp/birth/",
+   "amount_note": "第1子5万円・第2子10万円・第3子以降20万円が支給される場合があります(要確認)",
+   "deadline_type": "要確認",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 国頭村ウェブサイト(2026-08-14 拡充サイクル2・検索照合で追加)",
+   "fetched_at": "2026-08-14 10:28"
+  },
+  {
+   "id": "fk-kunigami-kekkon-iwaikin",
+   "name": "国頭村 結婚祝金",
+   "category": "生活支援",
+   "life_events": [
+    "住宅取得・引越"
+   ],
+   "issuer": "国頭村",
+   "area": "国頭村",
+   "target_household": "国頭村に居住・定住する新婚のご夫婦の世帯が対象となる可能性があります(定住要件などの条件があるとされています)",
+   "how_to_apply": "国頭村役場の担当窓口(定住支援)",
+   "source_url": "https://www.vill.kunigami.okinawa.jp/teijyuusien/",
+   "amount_note": "結婚祝金20万円が支給される場合があります(条件あり・要確認)",
+   "deadline_type": "要確認",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 国頭村ウェブサイト(2026-08-14 拡充サイクル2・検索照合で追加)",
+   "fetched_at": "2026-08-14 10:28"
+  },
+  {
+   "id": "fk-iejima-gakushi-taiyo",
+   "name": "伊江村 学資費用貸与",
+   "category": "教育",
+   "life_events": [
+    "入園・入学"
+   ],
+   "issuer": "伊江村",
+   "area": "伊江村",
+   "target_household": "専修学校または大学などへ進学する伊江村の学生のいる世帯が対象となる可能性があります(貸与のため返還が必要な場合があります)",
+   "how_to_apply": "伊江村教育委員会の窓口(担当課は要確認)",
+   "source_url": "https://www.iejima.org/document/2026012900020/",
+   "amount_note": "専修学校・大学などの学資費用の貸与を受けられる場合があります(貸与額・募集期間は要確認)",
+   "deadline_type": "要確認",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 伊江村ウェブサイト(2026-08-14 拡充サイクル2・検索照合で追加)",
+   "fetched_at": "2026-08-14 10:28"
+  },
+  {
+   "id": "fk-kin-boshi-fushi-iryohi",
+   "name": "金武町 母子及び父子家庭等医療費助成制度",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て",
+    "病気・けが",
+    "低所得・生活苦"
+   ],
+   "issuer": "金武町",
+   "area": "金武町",
+   "target_household": "金武町のひとり親家庭等(母子家庭・父子家庭など)の世帯が対象となる可能性があります",
+   "how_to_apply": "金武町役場 こども支援課の窓口",
+   "source_url": "https://www.town.kin.okinawa.jp/soshiki/kodomoshienka/gyomuannai/keizaitekishien/1404.html",
+   "amount_note": "医療費のうち保険診療の自己負担分が助成される場合があります(所得制限などの詳細は要確認)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "status": "要確認",
+   "notes": "出典: 金武町ウェブサイト(2026-08-14 拡充サイクル2・検索照合で追加)",
+   "fetched_at": "2026-08-14 10:28",
+   "combine": {
+    "type": "adjust",
+    "note": "金武町こども医療費助成制度との使い分け・併用関係は窓口でご確認ください(要確認)"
+   }
   }
  ]
 }
