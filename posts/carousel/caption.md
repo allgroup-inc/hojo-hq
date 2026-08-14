@@ -9,8 +9,8 @@
 　締切 2026-09-28・残り45日 / 上限 4,000万円
 4. 令和８年度　水力発電導入促進支援事業費補助金（既存設備有効活用強化支援事業）公募
 　締切 2026-09-29・残り46日 / 上限 14.7億円
-5. ［第六回以降］事業再構築補助金（共同申請者）
-　締切 2026-10-12・残り59日 / 上限 1.5億円
+5. 小規模事業者持続化補助金＜共同・協業型＞ 第３回公募
+　締切 2026-09-30・残り47日 / 上限 3,000万円
 
 🔖 保存しておくと、締切前に見返せます。
 うちの会社で使えるかは30秒診断で👇
@@ -25,4 +25,4 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 - 令和８年度「水力発電導入促進支援事業費補助金（事業性評価支援事業）」（新規事業　３次締切分）: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcODMA1
 - 【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（19次締切）: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDTzMMAX
 - 令和８年度　水力発電導入促進支援事業費補助金（既存設備有効活用強化支援事業）公募: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYcpMAH
-- ［第六回以降］事業再構築補助金（共同申請者）: https://www.jgrants-portal.go.jp/subsidy/a0W2x000007Cos5EAC
+- 小規模事業者持続化補助金＜共同・協業型＞ 第３回公募: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcQOMA1
