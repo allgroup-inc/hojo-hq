@@ -83,6 +83,36 @@ test("buildConversionStats: 母数0のとき率はnull(0%や100%と断定しな�
   assert.equal(stats.signupRate, null);
 });
 
+test("buildTemperatureStats: 温度感ごとに訪問実施数・申込み数・申込み率を返す(高中低の順)", () => {
+  const list = [
+    apo({ "温度感": "高", "ステータス": "実施済" }),
+    apo({ "温度感": "高", "ステータス": "申込み" }),
+    apo({ "温度感": "高", "ステータス": "申込み" }),
+    apo({ "温度感": "高", "ステータス": "実施済" }),
+    apo({ "温度感": "中", "ステータス": "実施済" }),
+    apo({ "温度感": "高", "ステータス": "キャンセル(顧客都合)" }),
+    apo({ "温度感": "高", "ステータス": "予定" })
+  ];
+  const rows = core.buildTemperatureStats(list, {});
+  assert.deepEqual(rows.map((r) => r.temperature), ["高", "中", "低"]);
+  assert.equal(rows[0].completed, 4);
+  assert.equal(rows[0].signups, 2);
+  assert.ok(Math.abs(rows[0].rate - 0.5) < 1e-9);
+  assert.equal(rows[1].completed, 1);
+  assert.equal(rows[1].signups, 0);
+  assert.equal(rows[1].rate, 0);
+});
+
+test("buildTemperatureStats: 訪問実施ゼロの温度感は率null(断定しない)、sinceDateで絞れる", () => {
+  const rows = core.buildTemperatureStats([
+    apo({ "温度感": "低", "ステータス": "申込み", "日付": "2026-07-01" })
+  ], { sinceDate: "2026-08-01" });
+  rows.forEach((row) => {
+    assert.equal(row.completed, 0);
+    assert.equal(row.rate, null);
+  });
+});
+
 test("buildConversionStats: sinceDate以降の日付だけを集計する", () => {
   const list = [
     apo({ "日付": "2026-07-01", "ステータス": "申込み" }),

@@ -17,26 +17,28 @@
 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n" +
 "<title>アポ管理コンソール</title>\n" +
 "<style>\n" +
-":root{--navy:#00335c;--navy-deep:#001f3a;--orange:#F88800;--bg:#f4f6f9;--card:#ffffff;--ink:#11202c;--sub:#4a5a66;--line:#dde4ea;--ok:#1a7f4e;--warn:#b95000;--bad:#b3261e;--chip:#e8eef4}\n" +
-"@media (prefers-color-scheme: dark){:root{--bg:#0d1721;--card:#152232;--ink:#e8eef4;--sub:#9fb0bd;--line:#28394b;--chip:#1d2d3f}}\n" +
+":root{--pop1:#7C3AED;--pop2:#FF2D78;--pop3:#00B8D9;--pop4:#FFC400;--pop5:#17C964;--pop6:#FF7A00;" +
+"--grad:linear-gradient(120deg,#7C3AED,#FF2D78 55%,#FF7A00);" +
+"--bg:#FFF6FB;--card:#ffffff;--ink:#241b3d;--sub:#6b5f85;--line:#f0dcef;--ok:#0f8a4d;--warn:#c25a00;--bad:#d61f4c;--chip:#f6ecfb}\n" +
+"@media (prefers-color-scheme: dark){:root{--bg:#170f2b;--card:#221741;--ink:#f3ecff;--sub:#b7a8d9;--line:#3a2a63;--chip:#2c1e52}}\n" +
 "*{box-sizing:border-box;margin:0;padding:0}\n" +
 "body{font-family:-apple-system,BlinkMacSystemFont,\"Hiragino Sans\",\"Noto Sans JP\",Meiryo,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:6rem}\n" +
-"header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--navy-deep),var(--navy));color:#fff;padding:0.8rem 1rem 0.6rem;box-shadow:0 2px 8px rgba(0,0,0,.25)}\n" +
+"header{position:sticky;top:0;z-index:20;background:var(--grad);color:#fff;padding:0.8rem 1rem 0.6rem;box-shadow:0 2px 12px rgba(124,58,237,.35)}\n" +
 "header h1{font-size:1rem;letter-spacing:.05em}\n" +
-"header h1 span{color:var(--orange)}\n" +
+"header h1 span{color:var(--pop4)}\n" +
 ".topbar{display:flex;align-items:center;justify-content:space-between;gap:.5rem}\n" +
 ".seg{display:flex;background:rgba(255,255,255,.14);border-radius:999px;padding:2px}\n" +
 ".seg button{border:0;background:transparent;color:#fff;padding:.35rem .9rem;border-radius:999px;font-size:.85rem;cursor:pointer}\n" +
-".seg button.on{background:var(--orange);color:#fff;font-weight:700}\n" +
+".seg button.on{background:#fff;color:var(--pop1);font-weight:700}\n" +
 ".chips{display:flex;gap:.4rem;overflow-x:auto;padding:.6rem 1rem .2rem;-webkit-overflow-scrolling:touch}\n" +
 ".chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:.3rem .8rem;font-size:.8rem;cursor:pointer}\n" +
-".chip.on{background:var(--navy);border-color:var(--navy);color:#fff}\n" +
+".chip.on{background:var(--pop1);border-color:var(--pop1);color:#fff}\n" +
 ".summary{display:flex;gap:.6rem;align-items:baseline;padding:.5rem 1rem .2rem;color:var(--sub);font-size:.85rem}\n" +
 ".summary b{color:var(--ink);font-size:1.05rem}\n" +
 ".summary .unconf b{color:var(--warn)}\n" +
 "main{padding:0.4rem 1rem}\n" +
 ".daylabel{margin:.9rem 0 .3rem;font-size:.85rem;color:var(--sub);font-weight:700}\n" +
-".card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--navy);border-radius:12px;padding:.7rem .85rem;margin:.5rem 0;display:flex;gap:.8rem;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.06)}\n" +
+".card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--pop3);border-radius:14px;padding:.7rem .85rem;margin:.5rem 0;display:flex;gap:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(124,58,237,.10)}\n" +
 ".card .time{flex:none;text-align:center;min-width:3.4rem}\n" +
 ".card .time b{display:block;font-size:1.05rem}\n" +
 ".card .time small{color:var(--sub)}\n" +
@@ -45,17 +47,17 @@
 ".card .meta{color:var(--sub);font-size:.8rem;margin-top:.15rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n" +
 ".badges{display:flex;gap:.35rem;margin-top:.35rem;flex-wrap:wrap}\n" +
 ".pill{font-size:.7rem;border-radius:999px;padding:.12rem .55rem;border:1px solid var(--line);color:var(--sub)}\n" +
-".pill.st-予定{background:#fff4e0;color:#8a5b00;border-color:#f0d9a8}\n" +
-".pill.st-確定{background:#e2f2e9;color:var(--ok);border-color:#b7dcc8}\n" +
+".pill.st-予定{background:#FFF3C4;color:#8a6d00;border-color:#ffe58a}\n" +
+".pill.st-確定{background:#D9FBE8;color:var(--ok);border-color:#98efc2}\n" +
 ".pill.st-実施済{background:var(--chip)}\n" +
-".pill.st-申込み{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700}\n" +
-".pill.st-再調整中{background:#fdebd7;color:var(--warn);border-color:#f4c894}\n" +
-".pill.cancel{background:#fbe9e7;color:var(--bad);border-color:#eec2bd;text-decoration:line-through}\n" +
-".pill.temp-高{border-color:var(--bad);color:var(--bad)}\n" +
-".pill.temp-中{border-color:var(--warn);color:var(--warn)}\n" +
+".pill.st-申込み{background:linear-gradient(120deg,var(--pop2),var(--pop6));color:#fff;border-color:transparent;font-weight:700}\n" +
+".pill.st-再調整中{background:#FFE7D1;color:var(--warn);border-color:#ffce9e}\n" +
+".pill.cancel{background:#FFE1E8;color:var(--bad);border-color:#ffb8ca;text-decoration:line-through}\n" +
+".pill.temp-高{border-color:var(--pop2);color:var(--pop2);font-weight:700}\n" +
+".pill.temp-中{border-color:var(--pop6);color:var(--pop6)}\n" +
 ".card.done{opacity:.62}\n" +
 ".empty{text-align:center;color:var(--sub);padding:2.2rem 1rem;font-size:.9rem}\n" +
-".fab{position:fixed;right:1rem;bottom:1.2rem;z-index:25;border:0;border-radius:999px;background:var(--orange);color:#fff;font-size:.95rem;font-weight:700;padding:.9rem 1.3rem;box-shadow:0 4px 14px rgba(248,136,0,.45);cursor:pointer}\n" +
+".fab{position:fixed;right:1rem;bottom:1.2rem;z-index:25;border:0;border-radius:999px;background:var(--grad);color:#fff;font-size:.95rem;font-weight:700;padding:.9rem 1.3rem;box-shadow:0 4px 16px rgba(255,45,120,.45);cursor:pointer}\n" +
 ".sheetback{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;display:none}\n" +
 ".sheetback.open{display:block}\n" +
 ".sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--card);border-radius:16px 16px 0 0;padding:1rem 1rem 1.4rem;transform:translateY(105%);transition:transform .22s ease}\n" +
@@ -64,10 +66,10 @@
 ".sheet h2{font-size:.95rem;margin-bottom:.6rem}\n" +
 ".sheet .grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}\n" +
 ".sheet button{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:10px;padding:.7rem .4rem;font-size:.85rem;cursor:pointer}\n" +
-".sheet button.primary{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:700}\n" +
+".sheet button.primary{background:linear-gradient(120deg,var(--pop2),var(--pop6));border-color:transparent;color:#fff;font-weight:700}\n" +
 ".sheet button.danger{color:var(--bad)}\n" +
 ".sheet .delayrow{display:flex;gap:.5rem;margin-top:.6rem}\n" +
-".sheet .delayrow button{flex:1;background:#fdebd7;border-color:#f4c894;color:var(--warn);font-weight:700}\n" +
+".sheet .delayrow button{flex:1;background:#FFF3C4;border-color:#ffe58a;color:#8a6d00;font-weight:700}\n" +
 ".modal{position:fixed;inset:0;z-index:40;background:var(--bg);display:none;overflow-y:auto;padding:1rem}\n" +
 ".modal.open{display:block}\n" +
 ".modal h2{font-size:1rem;margin:.3rem 0 .8rem}\n" +
@@ -79,9 +81,9 @@
 ".overlapwarn.show{display:block}\n" +
 ".btnrow{display:flex;gap:.6rem;margin-top:1rem}\n" +
 ".btnrow button{flex:1;border:0;border-radius:10px;padding:.85rem;font-size:.95rem;cursor:pointer}\n" +
-".btnrow .save{background:var(--orange);color:#fff;font-weight:700}\n" +
+".btnrow .save{background:var(--grad);color:#fff;font-weight:700}\n" +
 ".btnrow .back{background:var(--chip);color:var(--ink)}\n" +
-".toast{position:fixed;left:50%;bottom:5.6rem;transform:translateX(-50%);z-index:50;background:var(--navy-deep);color:#fff;border-radius:999px;padding:.55rem 1.1rem;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s}\n" +
+".toast{position:fixed;left:50%;bottom:5.6rem;transform:translateX(-50%);z-index:50;background:var(--pop1);color:#fff;border-radius:999px;padding:.55rem 1.1rem;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 4px 14px rgba(124,58,237,.4)}\n" +
 ".toast.show{opacity:1}\n" +
 ".loading{text-align:center;color:var(--sub);padding:2rem;font-size:.85rem}\n" +
 ".panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.9rem;margin:.7rem 0}\n" +
@@ -91,11 +93,23 @@
 ".fillrow .lbl{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.2rem}\n" +
 ".fillrow .lbl b{font-weight:700}\n" +
 ".fillrow .track{height:10px;border-radius:999px;background:var(--chip);overflow:hidden}\n" +
-".fillrow .bar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--navy),var(--orange))}\n" +
+".fillrow .bar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--pop3),var(--pop1),var(--pop2))}\n" +
 ".funnel{display:flex;flex-direction:column;gap:.4rem}\n" +
-".fstep{display:flex;justify-content:space-between;align-items:baseline;border-left:4px solid var(--navy);background:var(--chip);border-radius:8px;padding:.55rem .7rem;font-size:.85rem}\n" +
+".fstep{display:flex;justify-content:space-between;align-items:baseline;border-left:4px solid var(--pop1);background:var(--chip);border-radius:8px;padding:.55rem .7rem;font-size:.85rem}\n" +
+".fstep:nth-child(2){border-left-color:var(--pop3)}\n" +
+".fstep:nth-child(3){border-left-color:var(--pop2)}\n" +
 ".fstep b{font-size:1.05rem}\n" +
-".fstep .rate{color:var(--orange);font-weight:700}\n" +
+".fstep .rate{color:var(--pop2);font-weight:700}\n" +
+".temprow{display:flex;align-items:center;gap:.6rem;margin:.5rem 0}\n" +
+".temprow .tlabel{flex:none;width:4.6rem;font-size:.82rem;font-weight:700}\n" +
+".temprow .tlabel.t高{color:var(--pop2)}.temprow .tlabel.t中{color:var(--pop6)}.temprow .tlabel.t低{color:var(--pop3)}\n" +
+".temprow .track{flex:1;height:10px;border-radius:999px;background:var(--chip);overflow:hidden}\n" +
+".temprow .bar{height:100%;border-radius:999px}\n" +
+".temprow .bar.t高{background:linear-gradient(90deg,var(--pop2),var(--pop6))}\n" +
+".temprow .bar.t中{background:linear-gradient(90deg,var(--pop6),var(--pop4))}\n" +
+".temprow .bar.t低{background:linear-gradient(90deg,var(--pop3),var(--pop5))}\n" +
+".temprow .tval{flex:none;min-width:6.2rem;text-align:right;font-size:.8rem}\n" +
+".temprow .tval b{font-size:.95rem}\n" +
 "</style></head><body>\n" +
 "<header><div class=\"topbar\"><h1>アポ管理<span>コンソール</span></h1>\n" +
 "<div class=\"seg\"><button id=\"segDay\" class=\"on\">本日</button><button id=\"segWeek\">週</button><button id=\"segStats\">分析</button></div></div></header>\n" +
@@ -189,6 +203,20 @@
 "  html += '</div><div class=\"note\">率の母数: 訪問実施率=結果が出たアポ、申込み率=訪問実施。' +\n" +
 "    (funnel.concluded < 10 ? '<br>⚠️ 件数が少ないため参考値です(母数10件未満)' : '') +\n" +
 "    '<br>※予定・確定・再調整中のアポは結果待ちのため含みません。評価目的では使いません</div></div>';\n" +
+"  var tempIcons = { '高': '🔥', '中': '⚡', '低': '❄️' };\n" +
+"  var lowTempSample = false;\n" +
+"  html += '<div class=\"panel\"><h3>🌡️ 温度感別の申込み率(過去30日・チーム全体)</h3>';\n" +
+"  (stats.byTemperature || []).forEach(function (row) {\n" +
+"    if (row.completed > 0 && row.completed < 10) lowTempSample = true;\n" +
+"    var percent = row.rate === null ? 0 : Math.round(row.rate * 100);\n" +
+"    html += '<div class=\"temprow\"><span class=\"tlabel t' + esc(row.temperature) + '\">' +\n" +
+"      (tempIcons[row.temperature] || '') + ' 温度 ' + esc(row.temperature) + '</span>' +\n" +
+"      '<div class=\"track\"><div class=\"bar t' + esc(row.temperature) + '\" style=\"width:' + percent + '%\"></div></div>' +\n" +
+"      '<span class=\"tval\"><b>' + formatRate(row.rate) + '</b><br>' + row.signups + '/' + row.completed + '件</span></div>';\n" +
+"  });\n" +
+"  html += '<div class=\"note\">母数=その温度感の訪問実施(実施済+申込み)。' +\n" +
+"    (lowTempSample ? '<br>⚠️ 母数10件未満の行は参考値です。' : '') +\n" +
+"    '<br>どんなアポを取れば決まりやすいかの改善用。評価目的では使いません</div></div>';\n" +
 "  $('board').innerHTML = html;\n" +
 "}\n" +
 "function effectiveOwner() { return state.mine ? state.meName : state.owner; }\n" +
@@ -330,6 +358,7 @@
 "  state.view = view;\n" +
 "  ['segDay', 'segWeek', 'segStats'].forEach(function (id) { $(id).classList.remove('on'); });\n" +
 "  $(buttonId).classList.add('on');\n" +
+"  $('fabNew').style.display = (view === 'stats') ? 'none' : '';\n" +
 "  load();\n" +
 "}\n" +
 "$('segDay').addEventListener('click', function () { setView('day', 'segDay'); });\n" +

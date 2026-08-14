@@ -132,7 +132,8 @@ function getStats() {
     date: today,
     sinceDate: since,
     fill: ApoCore.buildFillStats(appointments, today, ApoAccess.listSalesStaff(staffRows)),
-    funnel: ApoCore.buildConversionStats(appointments, { sinceDate: since })
+    funnel: ApoCore.buildConversionStats(appointments, { sinceDate: since }),
+    byTemperature: ApoCore.buildTemperatureStats(appointments, { sinceDate: since })
   };
 }
 

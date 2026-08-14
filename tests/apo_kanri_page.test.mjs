@@ -28,6 +28,18 @@ test("分析タブ: 埋まり状況・転換ファネル・評価非利用の注
   assert.ok(html.includes("件数が少ないため参考値"));
 });
 
+test("分析タブ: 温度感別の申込み率パネルがある(母数併記・参考値注記)", () => {
+  assert.ok(html.includes("温度感別の申込み率"));
+  assert.ok(html.includes("byTemperature"));
+  assert.ok(html.includes("母数10件未満の行は参考値"));
+});
+
+test("ビビッドカラー: グラデーション変数とポップカラーが定義されている", () => {
+  assert.ok(html.includes("--grad:linear-gradient"));
+  assert.ok(html.includes("--pop1:#7C3AED"));
+  assert.ok(html.includes("--pop2:#FF2D78"));
+});
+
 test("ステータス7種と遅れそうボタンが画面に定義されている", () => {
   ["予定", "確定", "実施済", "申込み", "キャンセル(顧客都合)",
     "キャンセル(自社都合)", "再調整中"].forEach((status) => {
