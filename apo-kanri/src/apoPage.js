@@ -84,9 +84,21 @@
 ".toast{position:fixed;left:50%;bottom:5.6rem;transform:translateX(-50%);z-index:50;background:var(--navy-deep);color:#fff;border-radius:999px;padding:.55rem 1.1rem;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s}\n" +
 ".toast.show{opacity:1}\n" +
 ".loading{text-align:center;color:var(--sub);padding:2rem;font-size:.85rem}\n" +
+".panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.9rem;margin:.7rem 0}\n" +
+".panel h3{font-size:.85rem;margin-bottom:.6rem}\n" +
+".panel .note{color:var(--sub);font-size:.72rem;margin-top:.6rem;line-height:1.6}\n" +
+".fillrow{margin:.55rem 0}\n" +
+".fillrow .lbl{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.2rem}\n" +
+".fillrow .lbl b{font-weight:700}\n" +
+".fillrow .track{height:10px;border-radius:999px;background:var(--chip);overflow:hidden}\n" +
+".fillrow .bar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--navy),var(--orange))}\n" +
+".funnel{display:flex;flex-direction:column;gap:.4rem}\n" +
+".fstep{display:flex;justify-content:space-between;align-items:baseline;border-left:4px solid var(--navy);background:var(--chip);border-radius:8px;padding:.55rem .7rem;font-size:.85rem}\n" +
+".fstep b{font-size:1.05rem}\n" +
+".fstep .rate{color:var(--orange);font-weight:700}\n" +
 "</style></head><body>\n" +
 "<header><div class=\"topbar\"><h1>アポ管理<span>コンソール</span></h1>\n" +
-"<div class=\"seg\"><button id=\"segDay\" class=\"on\">本日</button><button id=\"segWeek\">週</button></div></div></header>\n" +
+"<div class=\"seg\"><button id=\"segDay\" class=\"on\">本日</button><button id=\"segWeek\">週</button><button id=\"segStats\">分析</button></div></div></header>\n" +
 "<div class=\"chips\" id=\"chips\"><button class=\"chip\" id=\"chipMine\">自分のアポ</button></div>\n" +
 "<div class=\"summary\" id=\"summary\"></div>\n" +
 "<main id=\"board\"><div class=\"loading\">読み込み中…</div></main>\n" +
@@ -149,8 +161,35 @@
 "}\n" +
 "function load() {\n" +
 "  $('board').innerHTML = '<div class=\"loading\">読み込み中…</div>';\n" +
+"  if (state.view === 'stats') {\n" +
+"    google.script.run.withSuccessHandler(renderStats).withFailureHandler(fail).getStats();\n" +
+"    return;\n" +
+"  }\n" +
 "  google.script.run.withSuccessHandler(renderBoard).withFailureHandler(fail)\n" +
 "    .getBoard({ view: state.view, date: todayString(), owner: effectiveOwner() });\n" +
+"}\n" +
+"function formatHours(minutes) { return (Math.round(minutes / 6) / 10) + 'h'; }\n" +
+"function formatRate(rate) { return rate === null || rate === undefined ? '—' : Math.round(rate * 100) + '%'; }\n" +
+"function renderStats(stats) {\n" +
+"  $('summary').innerHTML = '<span>本日の埋まり状況+過去30日の転換</span>';\n" +
+"  var fill = stats.fill || { owners: [], total: { bookedMinutes: 0, count: 0 } };\n" +
+"  var funnel = stats.funnel || { concluded: 0, completed: 0, signups: 0, visitRate: null, signupRate: null };\n" +
+"  var html = '<div class=\"panel\"><h3>📊 本日の埋まり状況(営業時間 9:00〜18:00 換算)</h3>';\n" +
+"  html += '<div class=\"fillrow\"><div class=\"lbl\"><span>全体</span><b>' + fill.total.count + '件・' + formatHours(fill.total.bookedMinutes) + '</b></div></div>';\n" +
+"  fill.owners.forEach(function (entry) {\n" +
+"    html += '<div class=\"fillrow\"><div class=\"lbl\"><span>' + esc(entry.owner) + '</span>' +\n" +
+"      '<b>' + entry.count + '件・' + formatHours(entry.bookedMinutes) + '(' + Math.round(entry.ratio * 100) + '%)</b></div>' +\n" +
+"      '<div class=\"track\"><div class=\"bar\" style=\"width:' + Math.round(entry.ratio * 100) + '%\"></div></div></div>';\n" +
+"  });\n" +
+"  html += '<div class=\"note\">※空き=キャンセル・再調整中を除いた予約済み時間。評価目的では使いません</div></div>';\n" +
+"  html += '<div class=\"panel\"><h3>🔀 転換ファネル(過去30日・' + esc(stats.sinceDate) + '以降・チーム全体)</h3><div class=\"funnel\">';\n" +
+"  html += '<div class=\"fstep\"><span>結果が出たアポ</span><b>' + funnel.concluded + '件</b></div>';\n" +
+"  html += '<div class=\"fstep\"><span>訪問実施(実施済+申込み)</span><span><span class=\"rate\">' + formatRate(funnel.visitRate) + '</span> <b>' + funnel.completed + '件</b></span></div>';\n" +
+"  html += '<div class=\"fstep\"><span>申込み</span><span><span class=\"rate\">' + formatRate(funnel.signupRate) + '</span> <b>' + funnel.signups + '件</b></span></div>';\n" +
+"  html += '</div><div class=\"note\">率の母数: 訪問実施率=結果が出たアポ、申込み率=訪問実施。' +\n" +
+"    (funnel.concluded < 10 ? '<br>⚠️ 件数が少ないため参考値です(母数10件未満)' : '') +\n" +
+"    '<br>※予定・確定・再調整中のアポは結果待ちのため含みません。評価目的では使いません</div></div>';\n" +
+"  $('board').innerHTML = html;\n" +
 "}\n" +
 "function effectiveOwner() { return state.mine ? state.meName : state.owner; }\n" +
 "function fail(error) { toast('エラー: ' + (error && error.message ? error.message : error)); }\n" +
@@ -287,8 +326,15 @@
 "    toast('遅れ連絡を送信しました(影響しうる後続アポ ' + result.targetCount + '件)');\n" +
 "  }).withFailureHandler(fail).reportDelay(minutes);\n" +
 "}\n" +
-"$('segDay').addEventListener('click', function () { state.view = 'day'; $('segDay').classList.add('on'); $('segWeek').classList.remove('on'); load(); });\n" +
-"$('segWeek').addEventListener('click', function () { state.view = 'week'; $('segWeek').classList.add('on'); $('segDay').classList.remove('on'); load(); });\n" +
+"function setView(view, buttonId) {\n" +
+"  state.view = view;\n" +
+"  ['segDay', 'segWeek', 'segStats'].forEach(function (id) { $(id).classList.remove('on'); });\n" +
+"  $(buttonId).classList.add('on');\n" +
+"  load();\n" +
+"}\n" +
+"$('segDay').addEventListener('click', function () { setView('day', 'segDay'); });\n" +
+"$('segWeek').addEventListener('click', function () { setView('week', 'segWeek'); });\n" +
+"$('segStats').addEventListener('click', function () { setView('stats', 'segStats'); });\n" +
 "$('fabNew').addEventListener('click', function () { openModal(null); });\n" +
 "$('sheetBack').addEventListener('click', closeSheet);\n" +
 "$('sheetClose').addEventListener('click', closeSheet);\n" +

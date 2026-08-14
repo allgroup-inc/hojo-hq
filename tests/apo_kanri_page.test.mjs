@@ -12,12 +12,20 @@ test("モバイル対応: viewport metaとレスポンシブの基本が入っ�
   assert.ok(html.includes("width=device-width"));
 });
 
-test("サーバ呼び出し5関数がすべて配線されている", () => {
-  ["getBoard", "saveAppointment", "updateStatus", "reportDelay", "getFormOptions"]
+test("サーバ呼び出し6関数がすべて配線されている", () => {
+  ["getBoard", "saveAppointment", "updateStatus", "reportDelay", "getFormOptions", "getStats"]
     .forEach((fn) => {
       assert.ok(html.includes(fn), fn + " の呼び出しが必要");
     });
   assert.ok(html.includes("google.script.run"));
+});
+
+test("分析タブ: 埋まり状況・転換ファネル・評価非利用の注記・少件数の参考値注記がある", () => {
+  assert.ok(html.includes("分析"));
+  assert.ok(html.includes("埋まり状況"));
+  assert.ok(html.includes("転換ファネル"));
+  assert.ok(html.includes("評価目的では使いません"));
+  assert.ok(html.includes("件数が少ないため参考値"));
 });
 
 test("ステータス7種と遅れそうボタンが画面に定義されている", () => {

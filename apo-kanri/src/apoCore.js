@@ -180,6 +180,79 @@
     return String(value);
   }
 
+  // 埋まり状況の営業時間窓(9:00〜18:00 = 540分)。将来変えたくなったら設定タブ化を検討
+  var WORKDAY_MINUTES = 540;
+  // 「その時間が埋まっている」とみなすステータス(キャンセル系・再調整中は空き扱い)
+  var BOOKED_STATUSES = ["予定", "確定", "実施済", "申込み"];
+
+  /**
+   * 本日の埋まり状況: 営業ごとの予約済み分数・件数・埋まり率(営業時間窓に対する割合)。
+   * アポゼロの営業も0%で返し、全員の稼働が一目で見えるようにする。
+   * ※評価目的では使わない(v1.1三名体制裁定)。
+   */
+  function buildFillStats(appointments, dateString, salesStaffNames) {
+    var byOwner = {};
+    (salesStaffNames || []).forEach(function (name) {
+      byOwner[name] = { owner: name, bookedMinutes: 0, count: 0 };
+    });
+    var totalMinutes = 0;
+    var totalCount = 0;
+    validAppointments_(appointments).forEach(function (record) {
+      if (normalizeDateString(record["日付"]) !== dateString) return;
+      if (BOOKED_STATUSES.indexOf(record["ステータス"]) === -1) return;
+      var owner = record["担当営業"];
+      if (!byOwner[owner]) byOwner[owner] = { owner: owner, bookedMinutes: 0, count: 0 };
+      var minutes = Number(record["所要分"]) || 60;
+      byOwner[owner].bookedMinutes += minutes;
+      byOwner[owner].count += 1;
+      totalMinutes += minutes;
+      totalCount += 1;
+    });
+    var order = (salesStaffNames || []).slice();
+    Object.keys(byOwner).forEach(function (name) {
+      if (order.indexOf(name) === -1) order.push(name);
+    });
+    var owners = order.map(function (name) {
+      var entry = byOwner[name];
+      entry.ratio = Math.min(1, entry.bookedMinutes / WORKDAY_MINUTES);
+      return entry;
+    });
+    return {
+      owners: owners,
+      total: { bookedMinutes: totalMinutes, count: totalCount }
+    };
+  }
+
+  /**
+   * 転換ファネル(チーム全体のみ。営業マン別は評価誤用リスクのため見送り):
+   * - 母数 = 結果が出たアポ(実施済+申込み+キャンセル2種)。予定・確定・再調整中は除外
+   * - 訪問実施率 = (実施済+申込み) ÷ 母数 / 申込み率 = 申込み ÷ (実施済+申込み)
+   * 母数0のときは率をnullで返す(0%や100%と断定しない。表示側は「—」にする)。
+   */
+  function buildConversionStats(appointments, options) {
+    var sinceDate = (options || {}).sinceDate || "";
+    var concluded = 0;
+    var completed = 0;
+    var signups = 0;
+    validAppointments_(appointments).forEach(function (record) {
+      if (sinceDate && normalizeDateString(record["日付"]) < sinceDate) return;
+      var status = record["ステータス"];
+      var isCompleted = status === "実施済" || status === "申込み";
+      var isCancelled = status === "キャンセル(顧客都合)" || status === "キャンセル(自社都合)";
+      if (!isCompleted && !isCancelled) return;
+      concluded += 1;
+      if (isCompleted) completed += 1;
+      if (status === "申込み") signups += 1;
+    });
+    return {
+      concluded: concluded,
+      completed: completed,
+      signups: signups,
+      visitRate: concluded > 0 ? completed / concluded : null,
+      signupRate: completed > 0 ? signups / completed : null
+    };
+  }
+
   var api = {
     generateApoId: generateApoId,
     normalizeDateString: normalizeDateString,
@@ -189,7 +262,9 @@
     buildWeekView: buildWeekView,
     detectOverlap: detectOverlap,
     buildDelayTargets: buildDelayTargets,
-    buildChangeDiff: buildChangeDiff
+    buildChangeDiff: buildChangeDiff,
+    buildFillStats: buildFillStats,
+    buildConversionStats: buildConversionStats
   };
 
   if (typeof module !== "undefined" && module.exports) {

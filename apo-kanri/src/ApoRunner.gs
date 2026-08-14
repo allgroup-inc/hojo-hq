@@ -118,6 +118,24 @@ function getBoard(params) {
   };
 }
 
+/**
+ * 分析タブ用の集計: 本日の埋まり状況(営業別)+過去30日の転換ファネル(チーム全体のみ)。
+ * 営業マン別の転換率は評価誤用リスクのため返さない(v1.1三名体制裁定)。
+ */
+function getStats() {
+  requireApoAccess_();
+  var appointments = readAppointments_();
+  var staffRows = readStaffRows_();
+  var today = ApoCore.normalizeDateString(new Date());
+  var since = ApoCore.normalizeDateString(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
+  return {
+    date: today,
+    sinceDate: since,
+    fill: ApoCore.buildFillStats(appointments, today, ApoAccess.listSalesStaff(staffRows)),
+    funnel: ApoCore.buildConversionStats(appointments, { sinceDate: since })
+  };
+}
+
 function getFormOptions() {
   requireApoAccess_();
   var staffRows = readStaffRows_();
