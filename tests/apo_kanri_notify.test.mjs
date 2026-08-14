@@ -71,6 +71,42 @@ test("buildDelayMessage: 遅れ分数と後続アポ一覧・各行のアポ入�
   assert.ok(msg.includes("両方次郎さん"));
 });
 
+test("buildSubstituteSection: 空き営業を前後の場所+Googleマップリンク付きで列挙する", () => {
+  const candidates = [
+    {
+      owner: "営業二郎",
+      before: { "開始時刻": "13:00", "場所またはURL": "那覇市おもろまち", "形式": "訪問" },
+      after: { "開始時刻": "16:00", "場所またはURL": "浦添市", "形式": "訪問" }
+    },
+    { owner: "営業三郎", before: null, after: null }
+  ];
+  const section = notify.buildSubstituteSection(candidates);
+  assert.ok(section.includes("代打候補"));
+  assert.ok(section.includes("営業二郎"));
+  assert.ok(section.includes("13:00"));
+  assert.ok(section.includes("https://www.google.com/maps/search/?api=1&query="));
+  assert.ok(section.includes(encodeURIComponent("那覇市おもろまち")));
+  assert.ok(section.includes("営業三郎"));
+  assert.ok(section.includes("この日の他アポなし"));
+});
+
+test("buildSubstituteSection: オンラインの前後アポには地図リンクを付けない", () => {
+  const candidates = [
+    { owner: "営業二郎", before: { "開始時刻": "13:00", "場所またはURL": "https://zoom.us/j/123", "形式": "オンライン" }, after: null }
+  ];
+  const section = notify.buildSubstituteSection(candidates);
+  assert.ok(!section.includes("google.com/maps"));
+  assert.ok(section.includes("オンライン"));
+});
+
+test("buildSubstituteSection: 候補0件なら空き営業なしの文面、最大5名まで", () => {
+  assert.ok(notify.buildSubstituteSection([]).includes("空いている営業がいません"));
+  const many = Array.from({ length: 8 }, (_, i) => ({ owner: "営業" + i, before: null, after: null }));
+  const section = notify.buildSubstituteSection(many);
+  assert.ok(section.includes("営業4"));
+  assert.ok(!section.includes("営業5"));
+});
+
 test("buildDelayMessage: 後続アポ0件でも成立する文面を返す", () => {
   const msg = notify.buildDelayMessage("営業一郎", 15, [], () => "");
   assert.ok(msg.includes("+15分"));

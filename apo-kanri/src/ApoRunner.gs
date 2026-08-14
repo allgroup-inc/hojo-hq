@@ -184,8 +184,15 @@ function saveAppointment(payload) {
       updateAppointmentRow_(payload);
       if (diff) {
         appendHistory_(payload["アポID"], operator, "変更", diff);
-        notifySafely_(payload["アポID"], operator, "変更",
-          buildStatusAwareMessage_(payload, oldRecord["ステータス"], diff, mention));
+        var message = buildStatusAwareMessage_(payload, oldRecord["ステータス"], diff, mention);
+        // キャンセルで枠が空いたら、代打候補(GPSレス・2026-08-14決裁)を通知に添える。
+        // 位置情報は取得せず、前後アポの場所を提示するだけ。行かせる判断・連絡は人間が行う
+        if (payload["ステータス"].indexOf("キャンセル") === 0 &&
+            oldRecord["ステータス"].indexOf("キャンセル") !== 0) {
+          message += "\n" + ApoNotify.buildSubstituteSection(
+            ApoCore.buildSubstituteCandidates(appointments, payload, ApoAccess.listSalesStaff(staffRows)));
+        }
+        notifySafely_(payload["アポID"], operator, "変更", message);
       }
       return { ok: true, apoId: payload["アポID"] };
     }

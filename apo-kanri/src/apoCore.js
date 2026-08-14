@@ -282,6 +282,56 @@
     });
   }
 
+  /**
+   * 代打候補(GPSレス版・2026-08-14 小柳さん決裁): アポがキャンセルになった枠に対し、
+   * その時間帯が空いている営業を「同日の直前・直後のアポ(時刻・場所)」付きで返す。
+   * 位置情報は一切取得しない。どの候補が近いかの判断は、前後の場所を見た人間が行う。
+   * 並び順: 前後にアポがある(現場に出ている)営業を先頭に。元の担当営業は候補外。
+   */
+  function buildSubstituteCandidates(appointments, cancelledApo, salesStaffNames) {
+    var dateString = normalizeDateString(cancelledApo["日付"]);
+    var windowStart = timeToMinutes_(cancelledApo["開始時刻"]);
+    if (windowStart === null) return [];
+    var windowEnd = windowStart + (Number(cancelledApo["所要分"]) || 60);
+
+    var sameDayActive = validAppointments_(appointments).filter(function (record) {
+      if (record["アポID"] === cancelledApo["アポID"]) return false;
+      if (normalizeDateString(record["日付"]) !== dateString) return false;
+      return BOOKED_STATUSES.indexOf(record["ステータス"]) !== -1;
+    });
+
+    var candidates = [];
+    (salesStaffNames || []).forEach(function (owner) {
+      if (owner === cancelledApo["担当営業"]) return;
+      var mine = sameDayActive.filter(function (record) { return record["担当営業"] === owner; });
+      var isBusy = mine.some(function (record) {
+        var start = timeToMinutes_(record["開始時刻"]);
+        if (start === null) return false;
+        var end = start + (Number(record["所要分"]) || 60);
+        return start < windowEnd && windowStart < end;
+      });
+      if (isBusy) return;
+      var before = null;
+      var after = null;
+      mine.forEach(function (record) {
+        var start = timeToMinutes_(record["開始時刻"]);
+        if (start === null) return;
+        if (start < windowStart) {
+          if (!before || start > timeToMinutes_(before["開始時刻"])) before = record;
+        } else {
+          if (!after || start < timeToMinutes_(after["開始時刻"])) after = record;
+        }
+      });
+      candidates.push({ owner: owner, before: before, after: after });
+    });
+
+    return candidates.sort(function (a, b) {
+      var aField = (a.before || a.after) ? 0 : 1;
+      var bField = (b.before || b.after) ? 0 : 1;
+      return aField - bField;
+    });
+  }
+
   var api = {
     generateApoId: generateApoId,
     normalizeDateString: normalizeDateString,
@@ -294,7 +344,8 @@
     buildChangeDiff: buildChangeDiff,
     buildFillStats: buildFillStats,
     buildConversionStats: buildConversionStats,
-    buildTemperatureStats: buildTemperatureStats
+    buildTemperatureStats: buildTemperatureStats,
+    buildSubstituteCandidates: buildSubstituteCandidates
   };
 
   if (typeof module !== "undefined" && module.exports) {
