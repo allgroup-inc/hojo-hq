@@ -26,6 +26,10 @@ glow-ma/**/*.csv
 glow-ma/**/*.xlsx
 glow-ma/data/
 
+# 顧客個人情報の置き場(家計の見直しやさん 顧客管理/移行元CSV・プロファイルレポート等)。
+# 本リポジトリは公開のため、PIIを含むものは private/ 配下だけに置き一切コミットしない。
+private/
+
 # 内部戦略・KPI・実数値を含む機密ファイルはコミットしない: 公開リポジトリのため
 .agents/product-marketing.md
 .claude/skills/explainer-video-production/
