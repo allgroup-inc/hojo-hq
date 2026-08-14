@@ -26,7 +26,7 @@
     return "<!doctype html>\n" +
 "<html lang=\"ja\"><head><meta charset=\"utf-8\">\n" +
 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n" +
-"<title>カケイのポ</title>\n" +
+"<title>家計のポッ</title>\n" +
 "<style>\n" +
 "/* 家計の見直しやさんカラー(仮)。正式な色コード受領後はこの2行だけ差し替える */\n" +
 ":root{--pop1:#2E8B57;--pop2:#FF5A36;--pop3:#4C9FE0;--pop4:#FFC400;--pop5:#7CB342;--pop6:#F57C00;" +
@@ -129,7 +129,7 @@
 ".temprow .tval b{font-size:.95rem}\n" +
 "</style></head><body>\n" +
 "<header><div class=\"topbar\"><div class=\"brand\">" + buildLogoHtml_() + "<div class=\"brandtext\">" +
-"<h1>カケイの<span>ポ</span></h1><div class=\"brandsub\">家計の見直しやさん アポ管理</div></div></div>\n" +
+"<h1>家計の<span>ポッ</span></h1><div class=\"brandsub\">家計の見直しやさん アポ管理</div></div></div>\n" +
 "<div class=\"seg\"><button id=\"segDay\" class=\"on\">本日</button><button id=\"segWeek\">週</button><button id=\"segStats\">分析</button></div></div></header>\n" +
 "<div class=\"chips\" id=\"chips\"><button class=\"chip\" id=\"chipMine\">自分のアポ</button></div>\n" +
 "<div class=\"summary\" id=\"summary\"></div>\n" +

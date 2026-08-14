@@ -34,9 +34,9 @@ test("分析タブ: 温度感別の申込み率パネルがある(母数併記�
   assert.ok(html.includes("母数10件未満の行は参考値"));
 });
 
-test("カケイのポ: システム名とブランド表記・ロゴ枠がある", () => {
-  assert.ok(html.includes("<title>カケイのポ</title>"));
-  assert.ok(html.includes("カケイの<span>ポ</span>"));
+test("家計のポッ: システム名とブランド表記・ロゴ枠がある", () => {
+  assert.ok(html.includes("<title>家計のポッ</title>"));
+  assert.ok(html.includes("家計の<span>ポッ</span>"));
   assert.ok(html.includes("家計の見直しやさん アポ管理"));
   assert.ok(html.includes("logomark") || html.includes("logoimg"));
 });
