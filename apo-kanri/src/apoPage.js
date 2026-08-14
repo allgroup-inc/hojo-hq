@@ -11,9 +11,9 @@
 (function (global) {
   "use strict";
 
-  // 家計の見直しやさん公式ロゴを受領したら、base64データURI(data:image/png;base64,...)を
-  // ここに貼るだけでヘッダーのロゴが差し替わる。空文字の間は🏠のテキストロゴで表示する。
-  var KAKEIPO_LOGO_DATA_URI = "";
+  // 家計の見直しやさんロゴ(2026-08-14 小柳さん提供画像を元にSVGで描き起こした再現版)。
+  // 公式のロゴデータ(高解像度PNG/SVG)を入手したら、このbase64データURIを差し替えるだけでよい。
+  var KAKEIPO_LOGO_DATA_URI = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8ZGVmcz4KICAgIDxjbGlwUGF0aCBpZD0iYyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDYiLz48L2NsaXBQYXRoPgogIDwvZGVmcz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2ZmZmZmZiIvPgogIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjQ2IiBmaWxsPSIjRjlDOTNGIi8+CiAgPGcgY2xpcC1wYXRoPSJ1cmwoI2MpIj4KICAgIDxlbGxpcHNlIGN4PSI1MCIgY3k9IjkzIiByeD0iNTgiIHJ5PSIyMiIgZmlsbD0iI2ZmZmZmZiIvPgogIDwvZz4KICA8IS0tIOWkqumZvSAtLT4KICA8ZyBzdHJva2U9IiMyMjFEMTEiIHN0cm9rZS13aWR0aD0iMi4yIiBzdHJva2UtbGluZWNhcD0icm91bmQiPgogICAgPGNpcmNsZSBjeD0iNzYiIGN5PSIyNCIgcj0iNS4yIiBmaWxsPSIjRjlDOTNGIi8+CiAgICA8bGluZSB4MT0iNzYiIHkxPSIxNC41IiB4Mj0iNzYiIHkyPSIxNy41Ii8+CiAgICA8bGluZSB4MT0iNzYiIHkxPSIzMC41IiB4Mj0iNzYiIHkyPSIzMy41Ii8+CiAgICA8bGluZSB4MT0iNjYuNSIgeTE9IjI0IiB4Mj0iNjkuNSIgeTI9IjI0Ii8+CiAgICA8bGluZSB4MT0iODIuNSIgeTE9IjI0IiB4Mj0iODUuNSIgeTI9IjI0Ii8+CiAgICA8bGluZSB4MT0iNjkuMyIgeTE9IjE3LjMiIHgyPSI3MS40IiB5Mj0iMTkuNCIvPgogICAgPGxpbmUgeDE9IjgwLjYiIHkxPSIyOC42IiB4Mj0iODIuNyIgeTI9IjMwLjciLz4KICAgIDxsaW5lIHgxPSI2OS4zIiB5MT0iMzAuNyIgeDI9IjcxLjQiIHkyPSIyOC42Ii8+CiAgICA8bGluZSB4MT0iODAuNiIgeTE9IjE5LjQiIHgyPSI4Mi43IiB5Mj0iMTcuMyIvPgogIDwvZz4KICA8IS0tIOOBiuOBhuOBoSAtLT4KICA8ZyBzdHJva2U9IiMyMjFEMTEiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxyZWN0IHg9IjMwIiB5PSI0OCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjZmZmZmZmIi8+CiAgICA8cGF0aCBkPSJNMjQgNTAgTDUwIDI3IEw3NiA1MCIgZmlsbD0ibm9uZSIvPgogIDwvZz4KICA8IS0tIOOBi+OBiiAtLT4KICA8ZyBzdHJva2U9IiMyMjFEMTEiIHN0cm9rZS13aWR0aD0iMi42IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiPgogICAgPGxpbmUgeDE9IjM4IiB5MT0iNTQiIHgyPSI2MiIgeTI9IjU0Ii8+CiAgICA8bGluZSB4MT0iNDMiIHkxPSI2MCIgeDI9IjQzIiB5Mj0iNjMiLz4KICAgIDxsaW5lIHgxPSI1NyIgeTE9IjYwIiB4Mj0iNTciIHkyPSI2MyIvPgogICAgPHBhdGggZD0iTTQxIDY2IFE1MCA3NCA1OSA2NiIvPgogIDwvZz4KICA8dGV4dCB4PSI1MCIgeT0iOTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSInSGlyYWdpbm8gU2FucycsJ05vdG8gU2FucyBKUCcsTWVpcnlvLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iOC4yIiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjMjIxRDExIj7lrrboqIjjga7opovnm7TjgZfjgoTjgZXjgpM8L3RleHQ+Cjwvc3ZnPgo=";
 
   function buildLogoHtml_() {
     if (KAKEIPO_LOGO_DATA_URI) {
@@ -28,24 +28,24 @@
 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n" +
 "<title>家計のポっ</title>\n" +
 "<style>\n" +
-"/* 家計の見直しやさんカラー(仮)。正式な色コード受領後はこの2行だけ差し替える */\n" +
-":root{--pop1:#2E8B57;--pop2:#FF5A36;--pop3:#4C9FE0;--pop4:#FFC400;--pop5:#7CB342;--pop6:#F57C00;" +
-"--grad:linear-gradient(120deg,#F57C00,#FFA726 55%,#FFC400);" +
-"--bg:#FFF8EE;--card:#ffffff;--ink:#3B2F1E;--sub:#8A7A5C;--line:#F3E4C8;--ok:#2E8B57;--warn:#c25a00;--bad:#D64533;--chip:#FBF0DA}\n" +
-"@media (prefers-color-scheme: dark){:root{--bg:#221A0F;--card:#2E2416;--ink:#F7EEDD;--sub:#C9B999;--line:#4A3B22;--chip:#3A2E1A}}\n" +
+"/* 家計の見直しやさんカラー: 公式ロゴ(2026-08-14 小柳さん提供)から抽出した 黄#F9C93F × 墨#221D11 */\n" +
+":root{--pop1:#2B2519;--pop2:#E8590C;--pop3:#4C9FE0;--pop4:#F9C93F;--pop5:#7CB342;--pop6:#F57C00;" +
+"--grad:linear-gradient(120deg,#FFD75E,#F9C93F 55%,#F2B71E);" +
+"--bg:#FFFDF4;--card:#ffffff;--ink:#221D11;--sub:#857A5F;--line:#F0E6C8;--ok:#2E8B57;--warn:#c25a00;--bad:#D64533;--chip:#FBF4DC}\n" +
+"@media (prefers-color-scheme: dark){:root{--bg:#1E1A10;--card:#2A2416;--ink:#F7F0DC;--sub:#C9BE9C;--line:#4A4226;--chip:#383018}}\n" +
 "*{box-sizing:border-box;margin:0;padding:0}\n" +
 "body{font-family:-apple-system,BlinkMacSystemFont,\"Hiragino Sans\",\"Noto Sans JP\",Meiryo,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:6rem}\n" +
-"header{position:sticky;top:0;z-index:20;background:var(--grad);color:#fff;padding:0.8rem 1rem 0.6rem;box-shadow:0 2px 12px rgba(245,124,0,.35)}\n" +
+"header{position:sticky;top:0;z-index:20;background:var(--grad);color:#221D11;padding:0.8rem 1rem 0.6rem;box-shadow:0 2px 12px rgba(226,183,60,.5)}\n" +
 ".brand{display:flex;align-items:center;gap:.5rem;min-width:0}\n" +
 ".logomark{flex:none;width:2rem;height:2rem;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.15rem;box-shadow:0 2px 6px rgba(0,0,0,.18)}\n" +
-".logoimg{flex:none;height:2rem;max-width:8rem;border-radius:8px;background:#fff;padding:2px 4px;object-fit:contain}\n" +
+".logoimg{flex:none;width:2.4rem;height:2.4rem;border-radius:999px;background:#fff;object-fit:contain;box-shadow:0 2px 6px rgba(0,0,0,.15)}\n" +
 ".brandtext{min-width:0}\n" +
 "header h1{font-size:1.05rem;letter-spacing:.05em;line-height:1.1}\n" +
-"header h1 span{color:#7A3D00;background:var(--pop4);border-radius:6px;padding:0 .3rem;margin-left:.1rem}\n" +
+"header h1 span{color:#F9C93F;background:#221D11;border-radius:6px;padding:0 .3rem;margin-left:.1rem}\n" +
 ".brandsub{font-size:.6rem;opacity:.92;letter-spacing:.08em;margin-top:.15rem}\n" +
 ".topbar{display:flex;align-items:center;justify-content:space-between;gap:.5rem}\n" +
-".seg{display:flex;background:rgba(255,255,255,.14);border-radius:999px;padding:2px}\n" +
-".seg button{border:0;background:transparent;color:#fff;padding:.35rem .9rem;border-radius:999px;font-size:.85rem;cursor:pointer}\n" +
+".seg{display:flex;background:rgba(0,0,0,.10);border-radius:999px;padding:2px}\n" +
+".seg button{border:0;background:transparent;color:#221D11;padding:.35rem .9rem;border-radius:999px;font-size:.85rem;cursor:pointer}\n" +
 ".seg button.on{background:#fff;color:var(--pop1);font-weight:700}\n" +
 ".chips{display:flex;gap:.4rem;overflow-x:auto;padding:.6rem 1rem .2rem;-webkit-overflow-scrolling:touch}\n" +
 ".chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:.3rem .8rem;font-size:.8rem;cursor:pointer}\n" +
@@ -55,7 +55,7 @@
 ".summary .unconf b{color:var(--warn)}\n" +
 "main{padding:0.4rem 1rem}\n" +
 ".daylabel{margin:.9rem 0 .3rem;font-size:.85rem;color:var(--sub);font-weight:700}\n" +
-".card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--pop5);border-radius:14px;padding:.7rem .85rem;margin:.5rem 0;display:flex;gap:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(245,124,0,.12)}\n" +
+".card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--pop4);border-radius:14px;padding:.7rem .85rem;margin:.5rem 0;display:flex;gap:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(190,150,40,.14)}\n" +
 ".card .time{flex:none;text-align:center;min-width:3.4rem}\n" +
 ".card .time b{display:block;font-size:1.05rem}\n" +
 ".card .time small{color:var(--sub)}\n" +
@@ -74,7 +74,7 @@
 ".pill.temp-中{border-color:var(--pop6);color:var(--pop6)}\n" +
 ".card.done{opacity:.62}\n" +
 ".empty{text-align:center;color:var(--sub);padding:2.2rem 1rem;font-size:.9rem}\n" +
-".fab{position:fixed;right:1rem;bottom:1.2rem;z-index:25;border:0;border-radius:999px;background:var(--grad);color:#fff;font-size:.95rem;font-weight:700;padding:.9rem 1.3rem;box-shadow:0 4px 16px rgba(245,124,0,.45);cursor:pointer}\n" +
+".fab{position:fixed;right:1rem;bottom:1.2rem;z-index:25;border:0;border-radius:999px;background:var(--grad);color:#221D11;font-size:.95rem;font-weight:700;padding:.9rem 1.3rem;box-shadow:0 4px 16px rgba(226,183,60,.55);cursor:pointer}\n" +
 ".sheetback{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;display:none}\n" +
 ".sheetback.open{display:block}\n" +
 ".sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--card);border-radius:16px 16px 0 0;padding:1rem 1rem 1.4rem;transform:translateY(105%);transition:transform .22s ease}\n" +
@@ -98,9 +98,9 @@
 ".overlapwarn.show{display:block}\n" +
 ".btnrow{display:flex;gap:.6rem;margin-top:1rem}\n" +
 ".btnrow button{flex:1;border:0;border-radius:10px;padding:.85rem;font-size:.95rem;cursor:pointer}\n" +
-".btnrow .save{background:var(--grad);color:#fff;font-weight:700}\n" +
+".btnrow .save{background:var(--grad);color:#221D11;font-weight:700}\n" +
 ".btnrow .back{background:var(--chip);color:var(--ink)}\n" +
-".toast{position:fixed;left:50%;bottom:5.6rem;transform:translateX(-50%);z-index:50;background:var(--pop1);color:#fff;border-radius:999px;padding:.55rem 1.1rem;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 4px 14px rgba(46,139,87,.4)}\n" +
+".toast{position:fixed;left:50%;bottom:5.6rem;transform:translateX(-50%);z-index:50;background:var(--pop1);color:#fff;border-radius:999px;padding:.55rem 1.1rem;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 4px 14px rgba(34,29,17,.45)}\n" +
 ".toast.show{opacity:1}\n" +
 ".loading{text-align:center;color:var(--sub);padding:2rem;font-size:.85rem}\n" +
 ".panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.9rem;margin:.7rem 0}\n" +
@@ -110,7 +110,7 @@
 ".fillrow .lbl{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.2rem}\n" +
 ".fillrow .lbl b{font-weight:700}\n" +
 ".fillrow .track{height:10px;border-radius:999px;background:var(--chip);overflow:hidden}\n" +
-".fillrow .bar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--pop3),var(--pop1),var(--pop2))}\n" +
+".fillrow .bar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--pop4),var(--pop6))}\n" +
 ".funnel{display:flex;flex-direction:column;gap:.4rem}\n" +
 ".fstep{display:flex;justify-content:space-between;align-items:baseline;border-left:4px solid var(--pop1);background:var(--chip);border-radius:8px;padding:.55rem .7rem;font-size:.85rem}\n" +
 ".fstep:nth-child(2){border-left-color:var(--pop3)}\n" +

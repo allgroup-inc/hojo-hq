@@ -41,11 +41,12 @@ test("家計のポっ: システム名(正式表記=小さいひらがな『っ�
   assert.ok(html.includes("logomark") || html.includes("logoimg"));
 });
 
-test("家計の見直しやさんカラー(仮): グラデーション変数と暖色パレットが定義されている", () => {
+test("家計の見直しやさんカラー: ロゴ抽出の黄×墨パレットとロゴ画像が入っている", () => {
   assert.ok(html.includes("--grad:linear-gradient"));
-  assert.ok(html.includes("--pop1:#2E8B57"));
-  assert.ok(html.includes("--pop6:#F57C00"));
-  assert.ok(html.includes("正式な色コード受領後はこの2行だけ差し替える"));
+  assert.ok(html.includes("--pop4:#F9C93F"));
+  assert.ok(html.includes("--ink:#221D11"));
+  assert.ok(html.includes("data:image/svg+xml;base64,"));
+  assert.ok(html.includes('alt="家計の見直しやさん"'));
 });
 
 test("ステータス7種と遅れそうボタンが画面に定義されている", () => {
