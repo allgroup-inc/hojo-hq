@@ -25,7 +25,7 @@ function doGet() {
     return HtmlService.createHtmlOutput(ApoAccess.buildAccessDeniedHtml());
   }
   return HtmlService.createHtmlOutput(ApoPage.buildApoAppHtml())
-    .setTitle("家計のポッ")
+    .setTitle("家計のポっ")
     .addMetaTag("viewport", "width=device-width, initial-scale=1");
 }
 
