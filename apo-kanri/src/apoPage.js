@@ -11,21 +11,38 @@
 (function (global) {
   "use strict";
 
+  // 家計の見直しやさん公式ロゴを受領したら、base64データURI(data:image/png;base64,...)を
+  // ここに貼るだけでヘッダーのロゴが差し替わる。空文字の間は🏠のテキストロゴで表示する。
+  var KAKEIPO_LOGO_DATA_URI = "";
+
+  function buildLogoHtml_() {
+    if (KAKEIPO_LOGO_DATA_URI) {
+      return "<img class=\"logoimg\" src=\"" + KAKEIPO_LOGO_DATA_URI + "\" alt=\"家計の見直しやさん\">";
+    }
+    return "<span class=\"logomark\">🏠</span>";
+  }
+
   function buildApoAppHtml() {
     return "<!doctype html>\n" +
 "<html lang=\"ja\"><head><meta charset=\"utf-8\">\n" +
 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n" +
-"<title>アポ管理コンソール</title>\n" +
+"<title>カケイのポ</title>\n" +
 "<style>\n" +
-":root{--pop1:#7C3AED;--pop2:#FF2D78;--pop3:#00B8D9;--pop4:#FFC400;--pop5:#17C964;--pop6:#FF7A00;" +
-"--grad:linear-gradient(120deg,#7C3AED,#FF2D78 55%,#FF7A00);" +
-"--bg:#FFF6FB;--card:#ffffff;--ink:#241b3d;--sub:#6b5f85;--line:#f0dcef;--ok:#0f8a4d;--warn:#c25a00;--bad:#d61f4c;--chip:#f6ecfb}\n" +
-"@media (prefers-color-scheme: dark){:root{--bg:#170f2b;--card:#221741;--ink:#f3ecff;--sub:#b7a8d9;--line:#3a2a63;--chip:#2c1e52}}\n" +
+"/* 家計の見直しやさんカラー(仮)。正式な色コード受領後はこの2行だけ差し替える */\n" +
+":root{--pop1:#2E8B57;--pop2:#FF5A36;--pop3:#4C9FE0;--pop4:#FFC400;--pop5:#7CB342;--pop6:#F57C00;" +
+"--grad:linear-gradient(120deg,#F57C00,#FFA726 55%,#FFC400);" +
+"--bg:#FFF8EE;--card:#ffffff;--ink:#3B2F1E;--sub:#8A7A5C;--line:#F3E4C8;--ok:#2E8B57;--warn:#c25a00;--bad:#D64533;--chip:#FBF0DA}\n" +
+"@media (prefers-color-scheme: dark){:root{--bg:#221A0F;--card:#2E2416;--ink:#F7EEDD;--sub:#C9B999;--line:#4A3B22;--chip:#3A2E1A}}\n" +
 "*{box-sizing:border-box;margin:0;padding:0}\n" +
 "body{font-family:-apple-system,BlinkMacSystemFont,\"Hiragino Sans\",\"Noto Sans JP\",Meiryo,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:6rem}\n" +
-"header{position:sticky;top:0;z-index:20;background:var(--grad);color:#fff;padding:0.8rem 1rem 0.6rem;box-shadow:0 2px 12px rgba(124,58,237,.35)}\n" +
-"header h1{font-size:1rem;letter-spacing:.05em}\n" +
-"header h1 span{color:var(--pop4)}\n" +
+"header{position:sticky;top:0;z-index:20;background:var(--grad);color:#fff;padding:0.8rem 1rem 0.6rem;box-shadow:0 2px 12px rgba(245,124,0,.35)}\n" +
+".brand{display:flex;align-items:center;gap:.5rem;min-width:0}\n" +
+".logomark{flex:none;width:2rem;height:2rem;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.15rem;box-shadow:0 2px 6px rgba(0,0,0,.18)}\n" +
+".logoimg{flex:none;height:2rem;max-width:8rem;border-radius:8px;background:#fff;padding:2px 4px;object-fit:contain}\n" +
+".brandtext{min-width:0}\n" +
+"header h1{font-size:1.05rem;letter-spacing:.05em;line-height:1.1}\n" +
+"header h1 span{color:#7A3D00;background:var(--pop4);border-radius:6px;padding:0 .3rem;margin-left:.1rem}\n" +
+".brandsub{font-size:.6rem;opacity:.92;letter-spacing:.08em;margin-top:.15rem}\n" +
 ".topbar{display:flex;align-items:center;justify-content:space-between;gap:.5rem}\n" +
 ".seg{display:flex;background:rgba(255,255,255,.14);border-radius:999px;padding:2px}\n" +
 ".seg button{border:0;background:transparent;color:#fff;padding:.35rem .9rem;border-radius:999px;font-size:.85rem;cursor:pointer}\n" +
@@ -38,7 +55,7 @@
 ".summary .unconf b{color:var(--warn)}\n" +
 "main{padding:0.4rem 1rem}\n" +
 ".daylabel{margin:.9rem 0 .3rem;font-size:.85rem;color:var(--sub);font-weight:700}\n" +
-".card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--pop3);border-radius:14px;padding:.7rem .85rem;margin:.5rem 0;display:flex;gap:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(124,58,237,.10)}\n" +
+".card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--pop5);border-radius:14px;padding:.7rem .85rem;margin:.5rem 0;display:flex;gap:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(245,124,0,.12)}\n" +
 ".card .time{flex:none;text-align:center;min-width:3.4rem}\n" +
 ".card .time b{display:block;font-size:1.05rem}\n" +
 ".card .time small{color:var(--sub)}\n" +
@@ -57,7 +74,7 @@
 ".pill.temp-中{border-color:var(--pop6);color:var(--pop6)}\n" +
 ".card.done{opacity:.62}\n" +
 ".empty{text-align:center;color:var(--sub);padding:2.2rem 1rem;font-size:.9rem}\n" +
-".fab{position:fixed;right:1rem;bottom:1.2rem;z-index:25;border:0;border-radius:999px;background:var(--grad);color:#fff;font-size:.95rem;font-weight:700;padding:.9rem 1.3rem;box-shadow:0 4px 16px rgba(255,45,120,.45);cursor:pointer}\n" +
+".fab{position:fixed;right:1rem;bottom:1.2rem;z-index:25;border:0;border-radius:999px;background:var(--grad);color:#fff;font-size:.95rem;font-weight:700;padding:.9rem 1.3rem;box-shadow:0 4px 16px rgba(245,124,0,.45);cursor:pointer}\n" +
 ".sheetback{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;display:none}\n" +
 ".sheetback.open{display:block}\n" +
 ".sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--card);border-radius:16px 16px 0 0;padding:1rem 1rem 1.4rem;transform:translateY(105%);transition:transform .22s ease}\n" +
@@ -83,7 +100,7 @@
 ".btnrow button{flex:1;border:0;border-radius:10px;padding:.85rem;font-size:.95rem;cursor:pointer}\n" +
 ".btnrow .save{background:var(--grad);color:#fff;font-weight:700}\n" +
 ".btnrow .back{background:var(--chip);color:var(--ink)}\n" +
-".toast{position:fixed;left:50%;bottom:5.6rem;transform:translateX(-50%);z-index:50;background:var(--pop1);color:#fff;border-radius:999px;padding:.55rem 1.1rem;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 4px 14px rgba(124,58,237,.4)}\n" +
+".toast{position:fixed;left:50%;bottom:5.6rem;transform:translateX(-50%);z-index:50;background:var(--pop1);color:#fff;border-radius:999px;padding:.55rem 1.1rem;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 4px 14px rgba(46,139,87,.4)}\n" +
 ".toast.show{opacity:1}\n" +
 ".loading{text-align:center;color:var(--sub);padding:2rem;font-size:.85rem}\n" +
 ".panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.9rem;margin:.7rem 0}\n" +
@@ -111,7 +128,8 @@
 ".temprow .tval{flex:none;min-width:6.2rem;text-align:right;font-size:.8rem}\n" +
 ".temprow .tval b{font-size:.95rem}\n" +
 "</style></head><body>\n" +
-"<header><div class=\"topbar\"><h1>アポ管理<span>コンソール</span></h1>\n" +
+"<header><div class=\"topbar\"><div class=\"brand\">" + buildLogoHtml_() + "<div class=\"brandtext\">" +
+"<h1>カケイの<span>ポ</span></h1><div class=\"brandsub\">家計の見直しやさん アポ管理</div></div></div>\n" +
 "<div class=\"seg\"><button id=\"segDay\" class=\"on\">本日</button><button id=\"segWeek\">週</button><button id=\"segStats\">分析</button></div></div></header>\n" +
 "<div class=\"chips\" id=\"chips\"><button class=\"chip\" id=\"chipMine\">自分のアポ</button></div>\n" +
 "<div class=\"summary\" id=\"summary\"></div>\n" +

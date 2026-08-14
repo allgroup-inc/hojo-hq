@@ -34,10 +34,18 @@ test("分析タブ: 温度感別の申込み率パネルがある(母数併記�
   assert.ok(html.includes("母数10件未満の行は参考値"));
 });
 
-test("ビビッドカラー: グラデーション変数とポップカラーが定義されている", () => {
+test("カケイのポ: システム名とブランド表記・ロゴ枠がある", () => {
+  assert.ok(html.includes("<title>カケイのポ</title>"));
+  assert.ok(html.includes("カケイの<span>ポ</span>"));
+  assert.ok(html.includes("家計の見直しやさん アポ管理"));
+  assert.ok(html.includes("logomark") || html.includes("logoimg"));
+});
+
+test("家計の見直しやさんカラー(仮): グラデーション変数と暖色パレットが定義されている", () => {
   assert.ok(html.includes("--grad:linear-gradient"));
-  assert.ok(html.includes("--pop1:#7C3AED"));
-  assert.ok(html.includes("--pop2:#FF2D78"));
+  assert.ok(html.includes("--pop1:#2E8B57"));
+  assert.ok(html.includes("--pop6:#F57C00"));
+  assert.ok(html.includes("正式な色コード受領後はこの2行だけ差し替える"));
 });
 
 test("ステータス7種と遅れそうボタンが画面に定義されている", () => {

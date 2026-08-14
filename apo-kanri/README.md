@@ -1,4 +1,9 @@
-# アポ管理コンソール(apo-kanri)
+# カケイのポ(apo-kanri)
+
+家計の見直しやさん(株式会社エンライフ)の対面営業向けアポ管理システム。
+名称「カケイのポ」は2026-08-14 小柳さん決定。配色は家計の見直しやさん系の**仮カラー**
+(公式の色コード・ロゴ受領後、`src/apoPage.js` のCSS変数2行と `KAKEIPO_LOGO_DATA_URI` を
+差し替えるだけで正式ブランド版になる)。
 
 設計書: `docs/superpowers/specs/2026-08-14-apo-kanri-console-design.md`
 実装プラン: `docs/superpowers/plans/2026-08-14-apo-kanri-console.md`

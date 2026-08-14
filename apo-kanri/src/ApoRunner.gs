@@ -25,7 +25,7 @@ function doGet() {
     return HtmlService.createHtmlOutput(ApoAccess.buildAccessDeniedHtml());
   }
   return HtmlService.createHtmlOutput(ApoPage.buildApoAppHtml())
-    .setTitle("アポ管理コンソール")
+    .setTitle("カケイのポ")
     .addMetaTag("viewport", "width=device-width, initial-scale=1");
 }
 
