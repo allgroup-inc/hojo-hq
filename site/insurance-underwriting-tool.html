@@ -345,6 +345,7 @@
         <button class="tab-btn active" onclick="switchTab(event, 'all')">すべて</button>
         <button class="tab-btn" onclick="switchTab(event, 'naneiro')">なないろ生命</button>
         <button class="tab-btn" onclick="switchTab(event, 'fwd')">FWD生命</button>
+        <button class="tab-btn" onclick="switchTab(event, 'zurich')">チューリッヒ生命</button>
       </div>
 
       <div id="results-all" class="results active">
@@ -385,6 +386,25 @@
               </tr>
             </thead>
             <tbody id="resultBody-all-fwd"></tbody>
+          </table>
+        </div>
+
+        <div id="all-zurich-section" style="display:none; margin-top:40px;">
+          <div class="results-header">
+            <span class="results-title">チューリッヒ生命</span>
+            <span class="results-count" id="count-all-zurich">0 件</span>
+          </div>
+          <table id="resultTable-all-zurich">
+            <thead>
+              <tr>
+                <th>病名</th>
+                <th>引き受け判定</th>
+                <th>状態・経過</th>
+                <th>対応商品</th>
+                <th>ページ</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody-all-zurich"></tbody>
           </table>
         </div>
       </div>
@@ -429,6 +449,25 @@
         </table>
       </div>
 
+      <div id="results-zurich" class="results">
+        <div class="results-header">
+          <span class="results-title">チューリッヒ生命</span>
+          <span class="results-count" id="count-zurich">0 件</span>
+        </div>
+        <table id="resultTable-zurich">
+          <thead>
+            <tr>
+              <th>病名</th>
+              <th>引き受け判定</th>
+              <th>状態・経過</th>
+              <th>対応商品</th>
+              <th>ページ</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody-zurich"></tbody>
+        </table>
+      </div>
+
       <div id="noResults" class="no-results" style="display:none;">
         <p><strong>該当する病名が見つかりませんでした</strong></p>
         <p style="font-size:13px; margin-top:10px; color:#999;">別の病名をお試しください</p>
@@ -463,7 +502,7 @@
   <script>
     let underwritingData = null;
     let currentTab = 'all';
-    let lastResults = { naneiro: [], fwd: [] };
+    let lastResults = { naneiro: [], fwd: [], zurich: [] };
 
     async function loadData() {
       try {
@@ -502,9 +541,10 @@
 
       const naneiro_results = searchNaneiro(input);
       const fwd_results = searchFWD(input);
+      const zurich_results = searchZurich(input);
 
-      lastResults = { naneiro: naneiro_results, fwd: fwd_results };
-      displayResults(naneiro_results, fwd_results);
+      lastResults = { naneiro: naneiro_results, fwd: fwd_results, zurich: zurich_results };
+      displayResults(naneiro_results, fwd_results, zurich_results);
     }
 
     function searchNaneiro(query) {
@@ -529,6 +569,25 @@
       const q = query.toLowerCase();
 
       for (const entry of underwritingData.fwd) {
+        const score = calculateScore(q, entry.disease);
+        if (score > 40) {
+          results.push({
+            ...entry,
+            score: score
+          });
+        }
+      }
+
+      return results.sort((a, b) => b.score - a.score);
+    }
+
+    function searchZurich(query) {
+      const results = [];
+      const q = query.toLowerCase();
+
+      if (!underwritingData.zurich) return results;
+
+      for (const entry of underwritingData.zurich) {
         const score = calculateScore(q, entry.disease);
         if (score > 40) {
           results.push({
@@ -570,12 +629,12 @@
       return 0;
     }
 
-    function displayResults(naneiro_results, fwd_results) {
+    function displayResults(naneiro_results, fwd_results, zurich_results) {
       const noResults = document.getElementById('noResults');
       const actions = document.getElementById('actions');
       const exclusionInfo = document.getElementById('exclusionInfo');
 
-      if (naneiro_results.length === 0 && fwd_results.length === 0) {
+      if (naneiro_results.length === 0 && fwd_results.length === 0 && zurich_results.length === 0) {
         noResults.style.display = 'block';
         document.querySelectorAll('[id^="results-"]').forEach(el => el.style.display = 'none');
         actions.style.display = 'none';
@@ -592,10 +651,11 @@
 
       // Display based on current tab selection
       if (currentTab === 'all') {
-        displayAllResults(naneiro_results, fwd_results);
+        displayAllResults(naneiro_results, fwd_results, zurich_results);
         document.getElementById('results-all').style.display = 'block';
         document.getElementById('results-naneiro').style.display = 'none';
         document.getElementById('results-fwd').style.display = 'none';
+        document.getElementById('results-zurich').style.display = 'none';
       } else if (currentTab === 'naneiro') {
         if (naneiro_results.length > 0) {
           displayNaneiro(naneiro_results);
@@ -605,6 +665,7 @@
         }
         document.getElementById('results-all').style.display = 'none';
         document.getElementById('results-fwd').style.display = 'none';
+        document.getElementById('results-zurich').style.display = 'none';
       } else if (currentTab === 'fwd') {
         if (fwd_results.length > 0) {
           displayFWD(fwd_results);
@@ -614,13 +675,25 @@
         }
         document.getElementById('results-all').style.display = 'none';
         document.getElementById('results-naneiro').style.display = 'none';
+        document.getElementById('results-zurich').style.display = 'none';
+      } else if (currentTab === 'zurich') {
+        if (zurich_results.length > 0) {
+          displayZurich(zurich_results);
+          document.getElementById('results-zurich').style.display = 'block';
+        } else {
+          noResults.style.display = 'block';
+        }
+        document.getElementById('results-all').style.display = 'none';
+        document.getElementById('results-naneiro').style.display = 'none';
+        document.getElementById('results-fwd').style.display = 'none';
       }
     }
 
-    function displayAllResults(naneiro_results, fwd_results) {
+    function displayAllResults(naneiro_results, fwd_results, zurich_results) {
       // Show/hide sections
       document.getElementById('all-naneiro-section').style.display = naneiro_results.length > 0 ? 'block' : 'none';
       document.getElementById('all-fwd-section').style.display = fwd_results.length > 0 ? 'block' : 'none';
+      document.getElementById('all-zurich-section').style.display = zurich_results.length > 0 ? 'block' : 'none';
 
       // Display なないろ results
       if (naneiro_results.length > 0) {
@@ -683,6 +756,31 @@
         });
 
         document.getElementById('count-all-fwd').textContent = fwd_results.length + ' 件';
+      }
+
+      // Display Zurich results
+      if (zurich_results.length > 0) {
+        const zurich_body = document.getElementById('resultBody-all-zurich');
+        zurich_body.innerHTML = '';
+
+        zurich_results.forEach(data => {
+          const row = document.createElement('tr');
+          const statusClass = data.judgement === '可' ? 'ok' :
+                            data.judgement === '条件付き' ? 'conditional' :
+                            data.judgement === '要確認' ? 'unknown' : 'ng';
+
+          row.innerHTML = `
+            <td><strong>${data.disease}</strong></td>
+            <td><span class="status ${statusClass}">${data.judgement || 'なし'}</span></td>
+            <td><small>${data.section || data['経過'] || 'なし'}</small></td>
+            <td><small>${data.marks || 'なし'}</small></td>
+            <td><small>p.${data.page}</small></td>
+          `;
+
+          zurich_body.appendChild(row);
+        });
+
+        document.getElementById('count-all-zurich').textContent = zurich_results.length + ' 件';
       }
     }
 
@@ -752,10 +850,37 @@
       document.getElementById('count-fwd').textContent = results.length + ' 件';
     }
 
+    function displayZurich(results) {
+      const body = document.getElementById('resultBody-zurich');
+      body.innerHTML = '';
+
+      results.forEach(data => {
+        const row = document.createElement('tr');
+        const statusClass = data.judgement === '可' ? 'ok' :
+                          data.judgement === '条件付き' ? 'conditional' :
+                          data.judgement === '要確認' ? 'unknown' : 'ng';
+
+        row.innerHTML = `
+          <td><strong>${data.disease}</strong></td>
+          <td><span class="status ${statusClass}">${data.judgement || 'なし'}</span></td>
+          <td><small>${data.section || data['経過'] || 'なし'}</small></td>
+          <td><small>${data.marks || 'なし'}</small></td>
+          <td><small>p.${data.page}</small></td>
+        `;
+
+        body.appendChild(row);
+      });
+
+      document.getElementById('count-zurich').textContent = results.length + ' 件';
+    }
+
     function clearAllTables() {
-      document.getElementById('resultBody-all').innerHTML = '';
+      document.getElementById('resultBody-all-naneiro').innerHTML = '';
+      document.getElementById('resultBody-all-fwd').innerHTML = '';
+      document.getElementById('resultBody-all-zurich').innerHTML = '';
       document.getElementById('resultBody-naneiro').innerHTML = '';
       document.getElementById('resultBody-fwd').innerHTML = '';
+      document.getElementById('resultBody-zurich').innerHTML = '';
     }
 
     function switchTab(e, tab) {
@@ -773,6 +898,8 @@
       document.getElementById('noResults').style.display = 'none';
       document.getElementById('actions').style.display = 'none';
       document.getElementById('exclusionInfo').style.display = 'none';
+      document.querySelectorAll('[id^="results-"]').forEach(el => el.style.display = 'none');
+      document.querySelector('[id^="all-zurich"]').style.display = 'none';
       clearAllTables();
     }
 
@@ -786,6 +913,10 @@
 
       lastResults.fwd.forEach(r => {
         rows.push(`FWD生命,"${r.disease}","","${r.judgement}","${r.condition}"`);
+      });
+
+      lastResults.zurich.forEach(r => {
+        rows.push(`チューリッヒ生命,"${r.disease}","${r.section || ''}","${r.judgement || ''}","ページ${r.page}"`);
       });
 
       const csv = rows.join('\n');
