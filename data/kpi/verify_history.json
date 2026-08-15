@@ -516,5 +516,68 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-15",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 1
+  },
+  "items": [
+   {
+    "name": "［第十一回］事業再構築補助金（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UbU66EAF",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度酒類業振興支援事業費補助金（第４期）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdQxMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "京都市企業立地促進制度補助金［本社・工場等新増設等支援制度］",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFhMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度】二酸化炭素排出抑制対策事業費等補助金 （国内資源循環体制構築に向けた再エネ関連製品及びベース素材の全体最適化実証事業）（第２次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdAaMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "沖縄県産業振興基金伴走支援事業",
+    "url": "https://okinawa-ric.jp/service/post-48.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
