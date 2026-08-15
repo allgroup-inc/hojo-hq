@@ -31,6 +31,7 @@ from .retention import purge_snapshots
 from .contact_log import load_contacts
 from .playbook import segment_playbook, render_html as render_playbook_html
 from .experiment import compare_naive_vs_controlled, assignment_ledger
+from .timing import churn_hazard_by_tenure, peak_window, render_html as render_hazard_html
 from .config import EXPERIMENT_TREATED_FRACTION
 from .config import CAPACITY_PER_DAY, AUC_MIN, SNAPSHOT_RETENTION_YEARS, EARLY_CHURN_MONTHS
 
@@ -249,6 +250,19 @@ def cmd_playbook(csv_path, column_map_path, contacts_path, contact_map_path,
     return rows
 
 
+def cmd_hazard(csv_path, column_map_path, out_path, as_of):
+    as_of_d = _as_of(as_of)
+    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    hz = churn_hazard_by_tenure(records)
+    render_hazard_html(hz, out_path)
+    lo, hi = peak_window(hz)
+    peak = "実績なし" if lo is None else f"契約後{lo}〜{hi}日"
+    ref = "（参考・母数不足）" if hz["reference"] else ""
+    print(f"[hazard] 早期解約{hz['total']}件{ref} 解約のヤマ={peak}"
+          f"（その手前が架電の勝負どき）→ {out_path}")
+    return hz
+
+
 def cmd_uplift(csv_path, column_map_path, contacts_path, contact_map_path, as_of,
                treated_fraction, salt):
     as_of_d = _as_of(as_of)
@@ -400,6 +414,12 @@ def main(argv=None):
     sp_ret.add_argument("--years", type=int, default=SNAPSHOT_RETENTION_YEARS)
     sp_ret.add_argument("--apply", action="store_true")
 
+    sp_hz = sub.add_parser("hazard")
+    sp_hz.add_argument("--csv", required=True)
+    sp_hz.add_argument("--column-map", required=True)
+    sp_hz.add_argument("--out", required=True)
+    sp_hz.add_argument("--as-of", required=True)
+
     sp_up = sub.add_parser("uplift")
     sp_up.add_argument("--csv", required=True)
     sp_up.add_argument("--column-map", required=True)
@@ -476,6 +496,8 @@ def main(argv=None):
         cmd_preflight(args.csv, args.column_map, args.as_of)
     elif args.cmd == "retention":
         cmd_retention(args.dir, args.as_of, args.years, args.apply)
+    elif args.cmd == "hazard":
+        cmd_hazard(args.csv, args.column_map, args.out, args.as_of)
     elif args.cmd == "uplift":
         cmd_uplift(args.csv, args.column_map, args.contacts, args.contact_map,
                    args.as_of, args.treated_fraction, args.salt)
