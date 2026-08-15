@@ -32,6 +32,7 @@ from .contact_log import load_contacts
 from .playbook import segment_playbook, render_html as render_playbook_html
 from .experiment import compare_naive_vs_controlled, assignment_ledger
 from .timing import (churn_hazard_by_tenure, peak_window, call_timing_list,
+                     contact_timing_effect,
                      render_html as render_hazard_html,
                      render_call_timing_html)
 from .config import EXPERIMENT_TREATED_FRACTION
@@ -276,6 +277,21 @@ def cmd_call_timing(csv_path, column_map_path, out_path, as_of):
     return rows
 
 
+def cmd_contact_timing(csv_path, column_map_path, contacts_path, contact_map_path, as_of):
+    as_of_d = _as_of(as_of)
+    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    contacts = load_contacts(contacts_path, load_column_map(contact_map_path))
+    out = contact_timing_effect(records, contacts, _mature_before(as_of_d))
+    print("[contact-timing] 架電時期別の早期解約率（※参考・生存者バイアスあり／因果は段階導入で確認）")
+    for r in out["rows"]:
+        ref = " 参考" if r["reference"] else ""
+        print(f"  契約後{r['lo']:>3}〜{r['hi']:<3}日: 解約{r['rate']*100:5.1f}%（n={r['n']}）{ref}")
+    nc = out["not_contacted"]
+    print(f"  未接触        : 解約{nc['rate']*100:5.1f}%（n={nc['n']}）"
+          + ("参考" if nc["reference"] else ""))
+    return out
+
+
 def cmd_uplift(csv_path, column_map_path, contacts_path, contact_map_path, as_of,
                treated_fraction, salt):
     as_of_d = _as_of(as_of)
@@ -439,6 +455,13 @@ def main(argv=None):
     sp_ct.add_argument("--out", required=True)
     sp_ct.add_argument("--as-of", required=True)
 
+    sp_cti = sub.add_parser("contact-timing")
+    sp_cti.add_argument("--csv", required=True)
+    sp_cti.add_argument("--column-map", required=True)
+    sp_cti.add_argument("--contacts", required=True)
+    sp_cti.add_argument("--contact-map", required=True)
+    sp_cti.add_argument("--as-of", required=True)
+
     sp_up = sub.add_parser("uplift")
     sp_up.add_argument("--csv", required=True)
     sp_up.add_argument("--column-map", required=True)
@@ -519,6 +542,8 @@ def main(argv=None):
         cmd_hazard(args.csv, args.column_map, args.out, args.as_of)
     elif args.cmd == "call-timing":
         cmd_call_timing(args.csv, args.column_map, args.out, args.as_of)
+    elif args.cmd == "contact-timing":
+        cmd_contact_timing(args.csv, args.column_map, args.contacts, args.contact_map, args.as_of)
     elif args.cmd == "uplift":
         cmd_uplift(args.csv, args.column_map, args.contacts, args.contact_map,
                    args.as_of, args.treated_fraction, args.salt)

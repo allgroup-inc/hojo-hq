@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from .config import (HAZARD_BUCKET_DAYS, HAZARD_CALL_LEAD_DAYS,
                      MIN_RELIABLE_N, EARLY_CHURN_MONTHS)
+from .effect_learning import _contacts_index, _mature_resolved
 
 
 def _early_churn_tenures(records):
@@ -98,6 +99,49 @@ def call_timing_list(records, as_of, hazard, lead_days=HAZARD_CALL_LEAD_DAYS):
     out = [t for t in (call_timing(r, as_of, hazard, lead_days) for r in records) if t]
     out.sort(key=lambda t: (_TIMING_ORDER.get(t["status"], 9), t["days_to_window"]))
     return out
+
+
+def _first_qualifying_tenure(record, idx):
+    """解約前・対応内容ありの接触のうち、最も早い接触の経過日数。無ければ None。"""
+    by_id, by_date = idx
+    cs = by_id.get((record.get("customer_id"), record.get("apply_id")))
+    if cs is None:
+        cs = by_date.get((record.get("customer_id"), record.get("apply_date")), [])
+    ad, cancel = record.get("apply_date"), record.get("cancel_date")
+    tenures = []
+    for c in cs:
+        cd, action = c.get("contact_date"), (c.get("action") or "").strip()
+        if cd is None or not action or ad is None:
+            continue
+        if cancel is None or cd < cancel:          # 解約後は数えない（免疫時間）
+            tenures.append((cd - ad).days)
+    return min(tenures) if tenures else None
+
+
+def contact_timing_effect(records, contacts, mature_before, bucket_days=HAZARD_BUCKET_DAYS,
+                          min_reliable=MIN_RELIABLE_N):
+    """架電時期別の早期解約率＝「どの時期の架電が効いたか」。
+
+    成熟実績のみ。各契約の“最初の効いた接触”の経過日数でバケツ分けし、早期解約率を出す。
+    未接触は別枠（ベースライン）。**接触は無作為でないため生存者バイアスが残る＝参考**。
+    因果は段階導入（experiment.py）で確認する。母数不足は reference。
+    """
+    idx = _contacts_index(contacts)
+    buckets, none_b = {}, {"n": 0, "churn": 0}
+    for r in _mature_resolved(records, mature_before):
+        churn = r.get("is_early_churn") or 0
+        t = _first_qualifying_tenure(r, idx)
+        b = none_b if (t is None or t < 0) else buckets.setdefault(t // bucket_days,
+                                                                   {"n": 0, "churn": 0})
+        b["n"] += 1
+        b["churn"] += churn
+    rows = [{"lo": k * bucket_days, "hi": (k + 1) * bucket_days, "n": v["n"], "churn": v["churn"],
+             "rate": v["churn"] / v["n"] if v["n"] else 0.0,
+             "reference": v["n"] < min_reliable} for k, v in sorted(buckets.items())]
+    none_row = {"label": "未接触", "n": none_b["n"], "churn": none_b["churn"],
+                "rate": none_b["churn"] / none_b["n"] if none_b["n"] else 0.0,
+                "reference": none_b["n"] < min_reliable}
+    return {"rows": rows, "not_contacted": none_row}
 
 
 def render_call_timing_html(rows, path, peak=(None, None)):
