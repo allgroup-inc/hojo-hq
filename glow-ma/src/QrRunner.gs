@@ -70,15 +70,18 @@ function exportQrCodesForDate() {
  * 発送日ごとのQR画像保存先フォルダを取得または新規作成する。
  * 同じ発送日で再実行しても重複フォルダを作らないことが目的。
  *
- * 権限を`drive.file`(スクリプト自身が作成したファイル・フォルダのみ)に絞っているため、
- * 名前での検索(getFoldersByName)は`drive.file`では呼び出し自体が例外になることを
- * 本番動作確認(2026-08-15)で確認した(「指定された権限では DriveApp.getFoldersByName
- * を呼び出すことができません」)。黙って空を返すのではなく処理全体が落ちるため、
- * 名前検索へのフォールバックはできない。そこで参照はスクリプトプロパティに記録した
- * フォルダID(getFolderById、検索に依存しない)のみを使い、記録が無い/失効している
- * 場合はそのまま新規作成する。
+ * 参照は次の優先順で行う:
+ *   1. スクリプトプロパティに記録したフォルダID → getFolderById(検索に依存せず最速)
+ *   2. 1が無い/失効している場合、次善策として名前で検索(getFoldersByName)
+ *   3. どちらでも見つからなければ新規作成
  *
- * 取得・作成できたフォルダのIDは毎回プロパティへ書き戻し、次回以降はそのIDで参照する。
+ * 権限は当初 `drive.file`(スクリプト自身が作成したファイル・フォルダのみ)に絞る想定
+ * だったが、本番動作確認(2026-08-15)で `DriveApp.createFolder` 自体が `drive.file` では
+ * 呼び出せず、フルの `https://www.googleapis.com/auth/drive` が必須と判明したため
+ * (Apps ScriptのDriveApp側の制約。小柳さん承認のうえ oauthScopes を変更)、
+ * 名前検索(getFoldersByName)も含めて通常どおり利用できる。
+ *
+ * 取得・作成できたフォルダのIDは毎回プロパティへ書き戻し、次回以降は1の経路で参照する。
  */
 function getOrCreateQrFolder_(targetDate) {
   var folderName = "QR_" + targetDate;
@@ -94,10 +97,15 @@ function getOrCreateQrFolder_(targetDate) {
       // 生成したQR画像がゴミ箱の中に保存され、運用者から見えなくなる。
       if (folder.isTrashed()) folder = null;
     } catch (err) {
-      // 記録済みIDのフォルダが削除された・IDが古い等。新規作成にフォールバックする。
+      // 記録済みIDのフォルダが削除された・IDが古い等。次の手段にフォールバックする。
       Logger.log("QRフォルダIDでの取得に失敗しました: " + cachedId + " — " + err);
       folder = null;
     }
+  }
+
+  if (!folder) {
+    var folders = DriveApp.getFoldersByName(folderName);
+    if (folders.hasNext()) folder = folders.next();
   }
 
   if (!folder) {
