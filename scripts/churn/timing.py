@@ -10,7 +10,8 @@
 """
 from __future__ import annotations
 
-from .config import HAZARD_BUCKET_DAYS, MIN_RELIABLE_N, EARLY_CHURN_MONTHS
+from .config import (HAZARD_BUCKET_DAYS, HAZARD_CALL_LEAD_DAYS,
+                     MIN_RELIABLE_N, EARLY_CHURN_MONTHS)
 
 
 def _early_churn_tenures(records):
@@ -60,6 +61,78 @@ def peak_window(hazard):
     if not best or best["count"] == 0:
         return (None, None)
     return (best["lo"], best["hi"])
+
+
+# 状態の並び順（架電適期＝最優先）
+_TIMING_ORDER = {"架電適期": 0, "適期前": 1, "適期後": 2}
+
+
+def call_timing(record, as_of, hazard, lead_days=HAZARD_CALL_LEAD_DAYS):
+    """継続顧客について「今が架電の効く時期か」を、解約のヤマ（ハザードピーク）から判定。
+
+    架電窓 = [ヤマ開始 - lead_days, ヤマ終了]。窓内＝架電適期／窓前＝適期前／窓後＝適期後。
+    継続中でない・ハザードにヤマが無いときは None。
+    """
+    if not record.get("is_scoreable"):
+        return None
+    ad = record.get("apply_date")
+    lo, hi = peak_window(hazard)
+    if ad is None or lo is None:
+        return None
+    tenure = (as_of - ad).days
+    window_start = lo - lead_days
+    if tenure < window_start:
+        status, days_to_window = "適期前", window_start - tenure
+    elif tenure <= hi:
+        status, days_to_window = "架電適期", 0
+    else:
+        status, days_to_window = "適期後", 0
+    return {"customer_id": record.get("customer_id"), "apply_id": record.get("apply_id"),
+            "product": record.get("product"), "agent_id": record.get("agent_id"),
+            "tenure": tenure, "peak": (lo, hi), "status": status,
+            "days_to_window": days_to_window}
+
+
+def call_timing_list(records, as_of, hazard, lead_days=HAZARD_CALL_LEAD_DAYS):
+    """継続顧客の架電適期を、架電適期→適期前（近い順）→適期後 に並べて返す。"""
+    out = [t for t in (call_timing(r, as_of, hazard, lead_days) for r in records) if t]
+    out.sort(key=lambda t: (_TIMING_ORDER.get(t["status"], 9), t["days_to_window"]))
+    return out
+
+
+def render_call_timing_html(rows, path, peak=(None, None)):
+    """架電時期リスト（営業マン向け・架電適期が先頭）をHTML出力（private/ 限定）。"""
+    import html
+    color = {"架電適期": "#F88800", "適期前": "#FFD27F", "適期後": "#EAF2F8"}
+    trs = []
+    for r in rows:
+        if r["status"] == "架電適期":
+            msg = "今が架電適期"
+        elif r["status"] == "適期前":
+            msg = f"あと{r['days_to_window']}日で適期"
+        else:
+            msg = "適期を過ぎています"
+        bg = color.get(r["status"], "#fff")
+        trs.append(
+            f'<tr style="background:{bg}"><td>{html.escape(str(r.get("customer_id") or "—"))}</td>'
+            f'<td>{html.escape(str(r.get("product")))}</td>'
+            f'<td>{html.escape(str(r.get("agent_id")))}</td>'
+            f'<td>契約後{r["tenure"]}日</td><td>{html.escape(r["status"])}</td>'
+            f'<td>{html.escape(msg)}</td></tr>')
+    pk = (f'解約のヤマは契約後 {peak[0]}〜{peak[1]}日'
+          if peak[0] is not None else 'ハザード未確定（解約実績待ち）')
+    doc = (
+        '<!doctype html><meta charset="utf-8"><title>架電時期リスト</title>'
+        '<style>body{font-family:Meiryo,"Noto Sans JP",sans-serif;padding:16px}'
+        'table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px;font-size:13px}'
+        'th{background:#00335C;color:#fff}</style>'
+        f'<h1>架電時期リスト（{len(rows)}件・架電適期が上）</h1>'
+        f'<p>{pk} ＝ その手前が架電の勝負どき。顧客連絡は人が実行。合成データ。</p>'
+        '<table><thead><tr><th>顧客ID</th><th>商品</th><th>営業</th>'
+        '<th>経過</th><th>時期</th><th>ひとこと</th></tr></thead>'
+        f'<tbody>{"".join(trs)}</tbody></table>')
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(doc)
 
 
 def render_html(hazard, path):

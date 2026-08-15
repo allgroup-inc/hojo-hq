@@ -31,7 +31,9 @@ from .retention import purge_snapshots
 from .contact_log import load_contacts
 from .playbook import segment_playbook, render_html as render_playbook_html
 from .experiment import compare_naive_vs_controlled, assignment_ledger
-from .timing import churn_hazard_by_tenure, peak_window, render_html as render_hazard_html
+from .timing import (churn_hazard_by_tenure, peak_window, call_timing_list,
+                     render_html as render_hazard_html,
+                     render_call_timing_html)
 from .config import EXPERIMENT_TREATED_FRACTION
 from .config import CAPACITY_PER_DAY, AUC_MIN, SNAPSHOT_RETENTION_YEARS, EARLY_CHURN_MONTHS
 
@@ -263,6 +265,17 @@ def cmd_hazard(csv_path, column_map_path, out_path, as_of):
     return hz
 
 
+def cmd_call_timing(csv_path, column_map_path, out_path, as_of):
+    as_of_d = _as_of(as_of)
+    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    hz = churn_hazard_by_tenure(records)
+    rows = call_timing_list(records, as_of_d, hz)
+    render_call_timing_html(rows, out_path, peak=peak_window(hz))
+    n_opt = sum(1 for r in rows if r["status"] == "架電適期")
+    print(f"[call-timing] 継続{len(rows)}件 うち架電適期{n_opt}件 → {out_path}")
+    return rows
+
+
 def cmd_uplift(csv_path, column_map_path, contacts_path, contact_map_path, as_of,
                treated_fraction, salt):
     as_of_d = _as_of(as_of)
@@ -420,6 +433,12 @@ def main(argv=None):
     sp_hz.add_argument("--out", required=True)
     sp_hz.add_argument("--as-of", required=True)
 
+    sp_ct = sub.add_parser("call-timing")
+    sp_ct.add_argument("--csv", required=True)
+    sp_ct.add_argument("--column-map", required=True)
+    sp_ct.add_argument("--out", required=True)
+    sp_ct.add_argument("--as-of", required=True)
+
     sp_up = sub.add_parser("uplift")
     sp_up.add_argument("--csv", required=True)
     sp_up.add_argument("--column-map", required=True)
@@ -498,6 +517,8 @@ def main(argv=None):
         cmd_retention(args.dir, args.as_of, args.years, args.apply)
     elif args.cmd == "hazard":
         cmd_hazard(args.csv, args.column_map, args.out, args.as_of)
+    elif args.cmd == "call-timing":
+        cmd_call_timing(args.csv, args.column_map, args.out, args.as_of)
     elif args.cmd == "uplift":
         cmd_uplift(args.csv, args.column_map, args.contacts, args.contact_map,
                    args.as_of, args.treated_fraction, args.salt)
