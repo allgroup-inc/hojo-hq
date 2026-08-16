@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沖縄M&A市場 - GLOW戦略プレゼンテーション</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', 'Meiryo', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .presentation-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .slide {
+            background: white;
+            margin-bottom: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-height: 600px;
+            padding: 60px;
+            page-break-after: always;
+            position: relative;
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .slide h1 {
+            color: #00335C;
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .slide h2 {
+            color: #00335C;
+            font-size: 36px;
+            margin-bottom: 30px;
+            font-weight: 700;
+            border-bottom: 3px solid #F88800;
+            padding-bottom: 15px;
+        }
+
+        .slide h3 {
+            color: #00335C;
+            font-size: 24px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .slide-title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #00335C 0%, #00335C 50%, #F88800 50%, #F88800 100%);
+            color: white;
+        }
+
+        .slide-title-slide h1 {
+            color: white;
+            font-size: 56px;
+            margin-bottom: 30px;
+        }
+
+        .slide-title-slide .subtitle {
+            font-size: 24px;
+            margin-bottom: 60px;
+            opacity: 0.9;
+        }
+
+        .slide-title-slide .tagline {
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        .content-two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .content-three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+        }
+
+        .stat-box {
+            background: #f0f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #F88800;
+        }
+
+        .stat-box .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00335C;
+            margin-bottom: 10px;
+        }
+
+        .stat-box .label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .advantage-card {
+            background: #fafafa;
+            padding: 25px;
+            border-radius: 8px;
+            border: 2px solid #F88800;
+            margin-bottom: 20px;
+        }
+
+        .advantage-card h4 {
+            color: #00335C;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .advantage-card p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+
+        .comparison-table th {
+            background: #00335C;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .comparison-table .glow {
+            color: #00335C;
+            font-weight: 600;
+            background: #fff9e6;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+            margin-top: 20px;
+        }
+
+        .timeline-item {
+            margin-bottom: 25px;
+            padding-left: 20px;
+            border-left: 2px solid #F88800;
+        }
+
+        .timeline-item .month {
+            font-weight: 600;
+            color: #00335C;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .timeline-item .items {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .risk-matrix {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .risk-row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .risk-label {
+            font-weight: 600;
+            color: #00335C;
+            font-size: 13px;
+            padding-right: 15px;
+            border-right: 2px solid #F88800;
+        }
+
+        .risk-content {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .psychology-box {
+            background: linear-gradient(135deg, #f0f4f8 0%, #fff9e6 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #F88800;
+        }
+
+        .psychology-box .title {
+            font-weight: 600;
+            color: #00335C;
+            margin-bottom: 8px;
+        }
+
+        .psychology-box .content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .roadmap-phase {
+            background: #f0f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #F88800;
+        }
+
+        .roadmap-phase .phase-title {
+            font-weight: 600;
+            color: #00335C;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .roadmap-phase .phase-content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .bullet-list {
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .bullet-list li {
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .highlight {
+            background: #fff9e6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .closing-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #F88800 0%, #F88800 50%, #00335C 50%, #00335C 100%);
+            color: white;
+        }
+
+        .closing-slide h2 {
+            color: white;
+            border: none;
+            font-size: 42px;
+            margin-bottom: 30px;
+        }
+
+        .closing-slide .closing-text {
+            font-size: 18px;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .closing-slide .cta {
+            background: white;
+            color: #00335C;
+            padding: 15px 40px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px 30px;
+            }
+
+            .content-two-column,
+            .content-three-column {
+                grid-template-columns: 1fr;
+            }
+
+            .slide h1 {
+                font-size: 36px;
+            }
+
+            .slide h2 {
+                font-size: 28px;
+            }
+        }
+
+        @media print {
+            .slide {
+                page-break-after: always;
+                box-shadow: none;
+                margin-bottom: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- SLIDE 1: Title -->
+        <div class="slide slide-title-slide">
+            <h1>沖縄M&A市場</h1>
+            <div class="subtitle">¥200B+ 市場への戦略的ポジショニング</div>
+            <div class="tagline">補助金・融資ニーズから経営承継まで<br>沖縄企業を総合支援するGLOWの勝ち筋</div>
+            <div class="slide-number">1 / 12</div>
+        </div>
+
+        <!-- SLIDE 2: Market Overview -->
+        <div class="slide">
+            <h2>沖縄M&A市場の規模と構造</h2>
+            <div class="content-two-column">
+                <div>
+                    <h3>市場規模</h3>
+                    <div class="stat-box">
+                        <div class="value">¥200B+</div>
+                        <div class="label">推定年間M&A市場規模</div>
+                    </div>
+                    <div class="stat-box" style="margin-top: 15px;">
+                        <div class="value">120-150件</div>
+                        <div class="label">年間推定成約数<br>（沖縄本島内）</div>
+                    </div>
+                </div>
+                <div>
+                    <h3>後継者不安の深刻度</h3>
+                    <div class="stat-box">
+                        <div class="value">74.5%</div>
+                        <div class="label">沖縄県内経営者の<br>後継者不安率</div>
+                    </div>
+                    <div class="stat-box" style="margin-top: 15px;">
+                        <div class="value">57.2%</div>
+                        <div class="label">全国平均との比較<br>（+17.3pp）</div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 40px; padding: 20px; background: #fff9e6; border-radius: 8px; border-left: 4px solid #F88800;">
+                <p style="font-size: 14px; color: #555;">⚠️ <strong>市場ギャップ：</strong> 後継者不安74.5%に対し、実際のM&A成約率は2-3%。<br>72% の経営者が「相談したいが、どこに相談したら良いか分からない」という構造的課題が存在。</p>
+            </div>
+            <div class="slide-number">2 / 12</div>
+        </div>
+
+        <!-- SLIDE 3: Market Gaps -->
+        <div class="slide">
+            <h2>既存プレイヤーの限界と市場ギャップ</h2>
+            <h3>従来型M&A企業の課題</h3>
+            <ul class="bullet-list">
+                <li>• <strong>大型案件志向：</strong> ¥3B以上の大型案件に特化。小中企業（¥100M-1B）を見落とし</li>
+                <li>• <strong>新規開拓能力の不足：</strong> 紹介案件に依存（紹介率60-80%）。新規開拓は営業力不足で失敗</li>
+                <li>• <strong>初期接触困難：</strong> 経営者は「M&A企業」の営業をブロック。信頼構築に数年要する</li>
+            </ul>
+
+            <h3 style="margin-top: 30px;">沖縄固有の課題</h3>
+            <ul class="bullet-list">
+                <li>• <strong>銀行・支援機関の限界：</strong> 地元銀行は融資判断が主。M&A仲介ノウハウなし</li>
+                <li>• <strong>士業との連携不足：</strong> 税理士・社労士は相続対策まで。事業承継・売却は専門外</li>
+                <li>• <strong>経営者の認知不足：</strong> 「事業売却＝失敗」という古い価値観が根強い</li>
+            </ul>
+            <div class="slide-number">3 / 12</div>
+        </div>
+
+        <!-- SLIDE 4: GLOW's Competitive Advantages -->
+        <div class="slide">
+            <h2>GLOW の3つの競争優位性</h2>
+            <div class="advantage-card">
+                <h4>🛡️ 優位性1：保険事業による経営基盤</h4>
+                <p>既存の保険委託事業で現在のコストが確保済み。新規開拓M&A事業に<span class="highlight">純粋な利益として</span>集中可能。競争企業は月2-5件の成約を必要とするが、GLOWは月1件の成約で収支分岐点に到達。資金効率は<span class="highlight">50-100倍</span>。</p>
+            </div>
+
+            <div class="advantage-card">
+                <h4>🏛️ 優位性2：嶺井の34年沖縄開発金融公庫キャリア</h4>
+                <p>沖縄県政策金融公庫で34年、数千社の沖縄企業と経営相談を重ねた実績。「嶺井さん」は経営者の信頼の象徴。初期接触時の<span class="highlight">面談実現率60-70%</span>。既存データベースから優良企業への<span class="highlight">直接提案が可能</span>。</p>
+            </div>
+
+            <div class="advantage-card">
+                <h4>📋 優位性3：他社にないリスト管理マネジメント</h4>
+                <p>沖縄県内企業データベースの精密な分析・セグメンテーション。年間30万件の公開データから沖縄関連企業を自動抽出・更新。後継者年齢・事業規模・収益性を組み合わせた<span class="highlight">成約確度の高いリストの継続供給</span>。</p>
+            </div>
+            <div class="slide-number">4 / 12</div>
+        </div>
+
+        <!-- SLIDE 5: Quantified Advantage -->
+        <div class="slide">
+            <h2>数値で示すGLOWの圧倒的優位性</h2>
+            <h3>収益化までの効率比較</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>指標</th>
+                    <th>GLOW</th>
+                    <th>競争企業A</th>
+                    <th>競争企業B</th>
+                </tr>
+                <tr>
+                    <td><strong>損益分岐点</strong></td>
+                    <td class="glow">月1件成約</td>
+                    <td>月2-3件成約</td>
+                    <td>月4-5件成約</td>
+                </tr>
+                <tr>
+                    <td><strong>投資回収期間</strong></td>
+                    <td class="glow">18-24ヶ月</td>
+                    <td>36-48ヶ月</td>
+                    <td>48-60ヶ月</td>
+                </tr>
+                <tr>
+                    <td><strong>初期投資必要額</strong></td>
+                    <td class="glow">¥18-27M</td>
+                    <td>¥360-540M</td>
+                    <td>¥600-864M</td>
+                </tr>
+                <tr>
+                    <td><strong>ROI（3年目）</strong></td>
+                    <td class="glow">1000-1600%</td>
+                    <td>17-29%</td>
+                    <td>12-18%</td>
+                </tr>
+            </table>
+
+            <h3 style="margin-top: 30px;">営業効率の差</h3>
+            <div class="content-two-column">
+                <div>
+                    <strong style="color: #00335C;">初期接触成功率</strong>
+                    <div style="margin-top: 10px;">
+                        <div style="margin-bottom: 10px;"><span class="highlight">GLOW 60-70%</span></div>
+                        <div>競争企業 30-40%</div>
+                        <div style="font-size: 12px; color: #999; margin-top: 5px;">嶺井ブランドによる2倍の優位</div>
+                    </div>
+                </div>
+                <div>
+                    <strong style="color: #00335C;">最終成約率</strong>
+                    <div style="margin-top: 10px;">
+                        <div style="margin-bottom: 10px;"><span class="highlight">GLOW 40-60%</span></div>
+                        <div>市場平均 2-3%</div>
+                        <div style="font-size: 12px; color: #999; margin-top: 5px;">段階的営業の仕組み化で20倍超</div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">5 / 12</div>
+        </div>
+
+        <!-- SLIDE 6: Sales Strategy -->
+        <div class="slide">
+            <h2>段階的M&A営業ファネル</h2>
+            <h3>6段階カスタマージャーニー</h3>
+
+            <div style="margin-top: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div style="background: #f0f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #F88800;">
+                        <div style="font-weight: 600; color: #00335C; margin-bottom: 8px;">STAGE 1: 認知・接触</div>
+                        <div style="font-size: 13px; color: #666;">補助金・融資情報提供→信頼構築<br>月間接触数：30-50社</div>
+                    </div>
+
+                    <div style="background: #f0f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #F88800;">
+                        <div style="font-weight: 600; color: #00335C; margin-bottom: 8px;">STAGE 2: 初回相談</div>
+                        <div style="font-size: 13px; color: #666;">嶺井による経営状況ヒアリング<br>実現率：60-70%</div>
+                    </div>
+
+                    <div style="background: #f0f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #F88800;">
+                        <div style="font-weight: 600; color: #00335C; margin-bottom: 8px;">STAGE 3: ニーズ確認</div>
+                        <div style="font-size: 13px; color: #666;">後継者・融資・売却ニーズを段階的に発掘<br>継続率：50-60%</div>
+                    </div>
+
+                    <div style="background: #f0f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #F88800;">
+                        <div style="font-weight: 600; color: #00335C; margin-bottom: 8px;">STAGE 4: 提案・検討</div>
+                        <div style="font-size: 13px; color: #666;">M&A スキーム・買い手候補の提示<br>提案受け入れ率：40-50%</div>
+                    </div>
+
+                    <div style="background: #f0f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #F88800;">
+                        <div style="font-weight: 600; color: #00335C; margin-bottom: 8px;">STAGE 5: DD・交渉</div>
+                        <div style="font-size: 13px; color: #666;">士業・銀行と連携した実務進行<br>成約まで進捗：60-80%</div>
+                    </div>
+
+                    <div style="background: #f0f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #F88800;">
+                        <div style="font-weight: 600; color: #00335C; margin-bottom: 8px;">STAGE 6: 成約・クロージング</div>
+                        <div style="font-size: 13px; color: #666;">契約・手続完了。士業への送客<br>紹介手数料・クロス売上を創出</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; padding: 15px; background: #fff9e6; border-radius: 8px; border-left: 4px solid #F88800;">
+                <strong style="color: #00335C;">実現メカニズム：</strong>
+                <p style="font-size: 13px; color: #666; margin-top: 8px;">嶺井が「経営相談」として切り込み、経営者の潜在的な後継者不安・融資ニーズを引き出す。時間をかけた信頼構築の後、自然な流れでM&Aの選択肢を提示。既存の補助金サイト・融資情報から信頼を得ているため、営業感なしで次段階に進める。</p>
+            </div>
+            <div class="slide-number">6 / 12</div>
+        </div>
+
+        <!-- SLIDE 7: Entrepreneur Psychology -->
+        <div class="slide">
+            <h2>経営者心理と意思決定トリガー</h2>
+            <h3>後継者不安への段階的アプローチ</h3>
+
+            <div class="psychology-box">
+                <div class="title">段階1：「心当たりがある」という認識</div>
+                <div class="content">後継者不安は高いが、具体的行動に至っていない状態。補助金情報や融資相談を通じた経営サポートで、相談しやすい相手として認識される土台を作る。</div>
+            </div>
+
+            <div class="psychology-box">
+                <div class="title">段階2：「誰かに相談したい」という欲求</div>
+                <div class="content">嶺井との「経営相談」という非脅威的な接触を積み重ねることで、後継者問題の相談欲求が高まる。この段階での声かけが重要。</div>
+            </div>
+
+            <div class="psychology-box">
+                <div class="title">段階3：「選択肢が欲しい」という動機</div>
+                <div class="content">子息が経営に関心を示さない、または経営悪化の兆しが見えた時、M&A・融資・後継者育成の選択肢が急に魅力的に見える。このタイミングが成約率40-60%に跳ね上がるポイント。</div>
+            </div>
+
+            <div class="psychology-box">
+                <div class="title">段階4：「実行計画が欲しい」という確信</div>
+                <div class="content">買い手候補の提示・スキーム提案で、初めて「実現可能性」が理性的に認識される。ここまで来れば成約まで60-80%の確度。</div>
+            </div>
+
+            <h3 style="margin-top: 25px;">トリガーイベント（成約確度が急上昇）</h3>
+            <ul class="bullet-list">
+                <li>• 後継者の経営離脱宣言</li>
+                <li>• 業績低迷局面（前期比マイナス）</li>
+                <li>• 自社の競争優位が剥落した兆候</li>
+                <li>• 大型顧客の喪失</li>
+                <li>• 経営者の健康悪化</li>
+            </ul>
+            <div class="slide-number">7 / 12</div>
+        </div>
+
+        <!-- SLIDE 8: Risk Assessment -->
+        <div class="slide">
+            <h2>リスク評価と対策</h2>
+            <h3>重要リスク項目</h3>
+
+            <div class="risk-matrix">
+                <div class="risk-row">
+                    <div class="risk-label">市場成熟度</div>
+                    <div class="risk-content">
+                        <strong>リスク：</strong> 年間150件市場で複数企業が参入すると過当競争に。
+                        <strong style="margin-left: 15px;">対策：</strong> 小中企業層（¥100M-1B）に特化し、他社と差別化。嶺井の既存ネットワークで先制。
+                    </div>
+                </div>
+
+                <div class="risk-row">
+                    <div class="risk-label">成約タイミング</div>
+                    <div class="risk-content">
+                        <strong>リスク：</strong> 経営者の腹が決まるまで6-12ヶ月要する場合あり。初期目標25件達成に時間がかかる可能性。
+                        <strong style="margin-left: 15px;">対策：</strong> 早期接触・段階的信頼構築による「ウォーミング期間」を短縮。月間接触30社以上で数年後の成約パイプラインを先行構築。
+                    </div>
+                </div>
+
+                <div class="risk-row">
+                    <div class="risk-label">チーム構築</div>
+                    <div class="risk-content">
+                        <strong>リスク：</strong> 嶺井依存の営業体制では、経営者の過負荷リスク。スケール時に他の営業人材が育ちにくい。
+                        <strong style="margin-left: 15px;">対策：</strong> 嶺井は「初接触・信頼構築」に特化。DD・交渉・実務は士業・銀行と分業。営業人材育成は2-3年計画で重視。
+                    </div>
+                </div>
+
+                <div class="risk-row">
+                    <div class="risk-label">買い手市場</div>
+                    <div class="risk-content">
+                        <strong>リスク：</strong> 買収候補企業（沖縄内・県外）が不足すると、売却ニーズはあるが成約に至らない。
+                        <strong style="margin-left: 15px;">対策：</strong> 初期段階から買い手ネットワーク構築。既存GLOW融資顧客の中から経営統合ニーズを発掘。県外M&A企業との提携による買い手紹介。
+                    </div>
+                </div>
+
+                <div class="risk-row">
+                    <div class="risk-label">規制・法務</div>
+                    <div class="risk-content">
+                        <strong>リスク：</strong> 資格業務（申請代行）との線引き曖昧化。沖縄県商工労働部の指導が入る可能性。
+                        <strong style="margin-left: 15px;">対策：</strong> 士業との提携構造を明確化。GLOWは「仲介」まで。申請手続は有資格者のみ。事前に県との協議・許認可取得。
+                    </div>
+                </div>
+            </div>
+            <div class="slide-number">8 / 12</div>
+        </div>
+
+        <!-- SLIDE 9: Industry-Specific Strategy -->
+        <div class="slide">
+            <h2>業界別売上規模別営業戦略</h2>
+            <h3>医療・歯科（¥100M-500M）</h3>
+            <ul class="bullet-list">
+                <li>• 後継者不安が最高峰（医科大進学者が診療所経営に興味なし）</li>
+                <li>• トリガー：医師の体力低下（50代中盤～）。年1回の検診で健康悪化を感知</li>
+                <li>• 営業アプローチ：医師会・歯科医会経由の紹介。嶺井の医療融資実績から信頼構築</li>
+                <li>• 想定成約金額：¥150M-300M（資産評価が明確）</li>
+            </ul>
+
+            <h3>建設・土木（¥200M-2B）</h3>
+            <ul class="bullet-list">
+                <li>• 業績の波が大きく、融資ニーズとセットで接触可能</li>
+                <li>• トリガー：大型工事の喪失、公共投資の削減</li>
+                <li>• 営業アプローチ：沖縄建設業協会経由。若い後継世代の都市移住に対応</li>
+                <li>• 想定成約金額：¥300M-800M（企業規模が大きい分、手数料が高い）</li>
+            </ul>
+
+            <h3>飲食・小売（¥50M-300M）</h3>
+            <ul class="bullet-list">
+                <li>• 経営者自身の消費行動・体験不足から後継者評価が低い傾向</li>
+                <li>• トリガー：新型コロナのような外的ショック、または経営者の年齢上昇（60代後半）</li>
+                <li>• 営業アプローチ：補助金サイト経由の信頼構築。融資相談から段階的に後継者問題へ</li>
+                <li>• 想定成約金額：¥100M-200M</li>
+            </ul>
+
+            <h3>農業・漁業（¥30M-200M）</h3>
+            <ul class="bullet-list">
+                <li>• 後継者不安が深刻（若年世代の業界離脱が加速）</li>
+                <li>• トリガー：市場価格の低下、異常気象による作況不良</li>
+                <li>• 営業アプローチ：農業委員会・JA経由。新しい後継者モデル（法人化・外部マネジメント）を提案</li>
+                <li>• 想定成約金額：¥30M-100M</li>
+            </ul>
+            <div class="slide-number">9 / 12</div>
+        </div>
+
+        <!-- SLIDE 10: 9-Month Roadmap -->
+        <div class="slide">
+            <h2>9ヶ月実行ロードマップ</h2>
+            <h3>PHASE 1: 基礎構築期（8月-10月）</h3>
+            <div class="roadmap-phase">
+                <div class="phase-title">目標：リスト管理体制確立・初接触50社達成</div>
+                <div class="phase-content">
+                    • リスト管理システム整備（沖縄企業30万件データベースの精密セグメンテーション）<br>
+                    • 嶺井による初接触開始（月10-15社）<br>
+                    • 補助金サイト・融資情報経由の信頼構築<br>
+                    • 月間接触目標：30-50社<br>
+                    • 初回相談継続率目標：60-70%
+                </div>
+            </div>
+
+            <h3>PHASE 2: 関係構築加速期（11月-1月）</h3>
+            <div class="roadmap-phase">
+                <div class="phase-title">目標：パイプライン形成・初成約実現</div>
+                <div class="phase-content">
+                    • 初接触企業の定期フォロー（月2回接触）<br>
+                    • 嶺井による対面相談実施（月3-5社から後継者ニーズを発掘）<br>
+                    • 買い手ネットワーク構築（既存GLOW顧客+県外M&A企業との提携）<br>
+                    • 最初の成約実現（1件達成で社内外への説得力が一変）<br>
+                    • 月間接触目標：30-50社（累計100社突破）
+                </div>
+            </div>
+
+            <h3>PHASE 3: 成約加速期（2月-4月）</h3>
+            <div class="roadmap-phase">
+                <div class="phase-title">目標：月間成約3-4件・累計25-59件達成</div>
+                <div class="phase-content">
+                    • 成約企業の事例化・社内外への発信<br>
+                    • 二次営業人材の配置（嶺井のサポートで営業を多層化）<br>
+                    • 士業・銀行との協業体制の強化<br>
+                    • 月間接触目標：100社維持<br>
+                    • 月間成約目標：3-4件（3月目標3件、4月目標4件）<br>
+                    • 年間目標達成：25-59件成約
+                </div>
+            </div>
+            <div class="slide-number">10 / 12</div>
+        </div>
+
+        <!-- SLIDE 11: Financial Projections -->
+        <div class="slide">
+            <h2>財務予測と収益シナリオ</h2>
+            <h3>前提条件</h3>
+            <ul class="bullet-list">
+                <li>• 平均成約金額：¥300M（医療・建設・小売の加重平均）</li>
+                <li>• 成約手数料率：1.5-2.5%（業界標準）⇒ 1件当たり ¥4.5M-7.5M</li>
+                <li>• 固定費月額：¥2M（嶺井給与・事務所・システム）</li>
+                <li>• 初期投資：¥18-27M（システム・人件費・営業インセンティブ）</li>
+            </ul>
+
+            <h3 style="margin-top: 25px;">12ヶ月間の収益シナリオ</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>期間</th>
+                    <th>成約件数</th>
+                    <th>成約手数料</th>
+                    <th>累計手数料</th>
+                    <th>損益</th>
+                </tr>
+                <tr>
+                    <td>1-3ヶ月（構築期）</td>
+                    <td class="glow">0-1件</td>
+                    <td>0-¥7.5M</td>
+                    <td>0-¥7.5M</td>
+                    <td>-¥18M</td>
+                </tr>
+                <tr>
+                    <td>4-6ヶ月（加速期）</td>
+                    <td class="glow">2-4件</td>
+                    <td>¥9M-30M</td>
+                    <td>¥9M-37.5M</td>
+                    <td>-¥9M～+¥10M</td>
+                </tr>
+                <tr>
+                    <td>7-12ヶ月（成長期）</td>
+                    <td class="glow">10-20件</td>
+                    <td>¥45M-150M</td>
+                    <td>¥54M-187.5M</td>
+                    <td>+¥36M～+¥169.5M</td>
+                </tr>
+            </table>
+
+            <div style="margin-top: 20px; padding: 15px; background: #f0f4f8; border-radius: 8px; border-left: 4px solid #F88800;">
+                <strong style="color: #00335C;">収支分岐点：</strong>
+                <p style="font-size: 13px; color: #666; margin-top: 8px;">月2件成約で固定費をカバー。3件成約で純利益¥1-3M。既存保険事業の基盤があるため、初期赤字は容認可能。2年目は月4-5件成約で年間¥100M超の利益を見込む。</p>
+            </div>
+            <div class="slide-number">11 / 12</div>
+        </div>
+
+        <!-- SLIDE 12: Closing -->
+        <div class="slide closing-slide">
+            <h2>¥200B市場への挑戦</h2>
+            <div class="closing-text">
+                沖縄企業の後継者不安74.5%、市場規模¥200B+。<br>
+                従来型M&A企業が見落とした小中企業層に、<br>
+                嶺井の34年の信頼と補助金・融資の導線から<br>
+                段階的に接近。<br><br>
+                保険事業による経営基盤、リスト管理による営業効率、<br>
+                嶺井ブランドによる初期接触の勝率2倍。<br><br>
+                <strong>9ヶ月で25-59件成約、月間3-4件に加速する実現可能な戦略。</strong>
+            </div>
+            <div class="cta">実行を開始する</div>
+            <div class="slide-number">12 / 12</div>
+        </div>
+    </div>
+</body>
+</html>
