@@ -28,155 +28,172 @@
 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n" +
 "<title>家計のポっ</title>\n" +
 "<style>\n" +
-"/* 家計の見直しやさんカラー: 公式ロゴ(2026-08-14 小柳さん提供)から抽出した 黄#F9C93F × 墨#221D11 */\n" +
-":root{--pop1:#2B2519;--pop2:#E8590C;--pop3:#4C9FE0;--pop4:#F9C93F;--pop5:#7CB342;--pop6:#F57C00;" +
-"--grad:linear-gradient(120deg,#FFD75E,#F9C93F 55%,#F2B71E);" +
-"--bg:#FFFDF4;--card:#ffffff;--ink:#221D11;--sub:#857A5F;--line:#F0E6C8;--ok:#2E8B57;--warn:#c25a00;--bad:#D64533;--chip:#FBF4DC}\n" +
-"@media (prefers-color-scheme: dark){:root{--bg:#1E1A10;--card:#2A2416;--ink:#F7F0DC;--sub:#C9BE9C;--line:#4A4226;--chip:#383018}}\n" +
+"/* v2.0 設計方針(2026-08-14 小柳さん): 白基調・余白8/16/32/64・ブランド色#F6C83Eは\n" +
+"   送信ボタン/フォーカス枠/現在地メニューの3箇所のみ・グラデーション禁止 */\n" +
+":root{--brand:#F6C83E;--ink:#1A1A1A;--sub:#6B6B6B;--line:#E8E8E8;--bad:#D64533}\n" +
 "*{box-sizing:border-box;margin:0;padding:0}\n" +
-"body{font-family:-apple-system,BlinkMacSystemFont,\"Hiragino Sans\",\"Noto Sans JP\",Meiryo,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:6rem}\n" +
-"header{position:sticky;top:0;z-index:20;background:var(--grad);color:#221D11;padding:0.8rem 1rem 0.6rem;box-shadow:0 2px 12px rgba(226,183,60,.5)}\n" +
-".brand{display:flex;align-items:center;gap:.5rem;min-width:0}\n" +
-".logomark{flex:none;width:2rem;height:2rem;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.15rem;box-shadow:0 2px 6px rgba(0,0,0,.18)}\n" +
-".logoimg{flex:none;width:2.4rem;height:2.4rem;border-radius:999px;background:#fff;object-fit:contain;box-shadow:0 2px 6px rgba(0,0,0,.15)}\n" +
-".brandtext{min-width:0}\n" +
-"header h1{font-size:1.05rem;letter-spacing:.05em;line-height:1.1}\n" +
-"header h1 span{color:#F9C93F;background:#221D11;border-radius:6px;padding:0 .3rem;margin-left:.1rem}\n" +
-".brandsub{font-size:.6rem;opacity:.92;letter-spacing:.08em;margin-top:.15rem}\n" +
-".topbar{display:flex;align-items:center;justify-content:space-between;gap:.5rem}\n" +
-".seg{display:flex;background:rgba(0,0,0,.10);border-radius:999px;padding:2px}\n" +
-".seg button{border:0;background:transparent;color:#221D11;padding:.35rem .9rem;border-radius:999px;font-size:.85rem;cursor:pointer}\n" +
-".seg button.on{background:#fff;color:var(--pop1);font-weight:700}\n" +
-".chips{display:flex;gap:.4rem;overflow-x:auto;padding:.6rem 1rem .2rem;-webkit-overflow-scrolling:touch}\n" +
-".chip{flex:none;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:.3rem .8rem;font-size:.8rem;cursor:pointer}\n" +
-".chip.on{background:var(--pop1);border-color:var(--pop1);color:#fff}\n" +
-".summary{display:flex;gap:.6rem;align-items:baseline;padding:.5rem 1rem .2rem;color:var(--sub);font-size:.85rem}\n" +
-".summary b{color:var(--ink);font-size:1.05rem}\n" +
-".summary .unconf b{color:var(--warn)}\n" +
-"main{padding:0.4rem 1rem}\n" +
-".daylabel{margin:.9rem 0 .3rem;font-size:.85rem;color:var(--sub);font-weight:700}\n" +
-".card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--pop4);border-radius:14px;padding:.7rem .85rem;margin:.5rem 0;display:flex;gap:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(190,150,40,.14)}\n" +
-".card .time{flex:none;text-align:center;min-width:3.4rem}\n" +
-".card .time b{display:block;font-size:1.05rem}\n" +
-".card .time small{color:var(--sub)}\n" +
-".card .body{flex:1;min-width:0}\n" +
-".card .cust{font-weight:700;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n" +
-".card .meta{color:var(--sub);font-size:.8rem;margin-top:.15rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n" +
-".badges{display:flex;gap:.35rem;margin-top:.35rem;flex-wrap:wrap}\n" +
-".pill{font-size:.7rem;border-radius:999px;padding:.12rem .55rem;border:1px solid var(--line);color:var(--sub)}\n" +
-".pill.st-予定{background:#FFF3C4;color:#8a6d00;border-color:#ffe58a}\n" +
-".pill.st-確定{background:#D9FBE8;color:var(--ok);border-color:#98efc2}\n" +
-".pill.st-実施済{background:var(--chip)}\n" +
-".pill.st-申込み{background:linear-gradient(120deg,var(--pop2),var(--pop6));color:#fff;border-color:transparent;font-weight:700}\n" +
-".pill.st-再調整中{background:#FFE7D1;color:var(--warn);border-color:#ffce9e}\n" +
-".pill.cancel{background:#FFE1E8;color:var(--bad);border-color:#ffb8ca;text-decoration:line-through}\n" +
-".pill.temp-高{border-color:var(--pop2);color:var(--pop2);font-weight:700}\n" +
-".pill.temp-中{border-color:var(--pop6);color:var(--pop6)}\n" +
-".card.done{opacity:.62}\n" +
-".empty{text-align:center;color:var(--sub);padding:2.2rem 1rem;font-size:.9rem}\n" +
-".fab{position:fixed;right:1rem;bottom:1.2rem;z-index:25;border:0;border-radius:999px;background:var(--grad);color:#221D11;font-size:.95rem;font-weight:700;padding:.9rem 1.3rem;box-shadow:0 4px 16px rgba(226,183,60,.55);cursor:pointer}\n" +
-".sheetback{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;display:none}\n" +
+"html{background:#FFFFFF}\n" +
+"body{font-family:-apple-system,BlinkMacSystemFont,\"Hiragino Sans\",\"Noto Sans JP\",Meiryo,sans-serif;background:#FFFFFF;color:var(--ink);font-size:14px;line-height:1.6}\n" +
+".wrap{max-width:900px;margin:0 auto;padding:0 24px}\n" +
+"header{border-bottom:1px solid var(--line);background:#FFFFFF;position:sticky;top:0;z-index:20}\n" +
+".topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:8px;padding-bottom:8px}\n" +
+".brand{display:flex;align-items:center;gap:8px;min-width:0}\n" +
+".logoimg{flex:none;width:32px;height:32px;border-radius:999px;object-fit:contain}\n" +
+".logomark{flex:none;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center}\n" +
+"header h1{font-size:15px;font-weight:700;line-height:1.2}\n" +
+"header h1 span{font-weight:700}\n" +
+".brandsub{font-size:10px;color:var(--sub);letter-spacing:.06em}\n" +
+".seg{display:flex;gap:8px}\n" +
+".seg button{border:0;background:none;color:var(--sub);padding:10px 8px 8px;font-size:14px;cursor:pointer;border-bottom:2px solid transparent;min-height:44px}\n" +
+".seg button.on{color:var(--ink);font-weight:700;border-bottom-color:var(--brand)}\n" +
+".toolbar{display:flex;align-items:center;gap:8px;margin-top:16px}\n" +
+".chips{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1}\n" +
+".chip{flex:none;border:1px solid var(--line);background:#FFFFFF;color:var(--ink);border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;min-height:36px}\n" +
+".chip.on{background:var(--ink);border-color:var(--ink);color:#FFFFFF}\n" +
+".btn-new{flex:none;margin-left:auto;border:1px solid var(--ink);background:#FFFFFF;color:var(--ink);border-radius:6px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;min-height:44px}\n" +
+".summary{margin-top:16px;color:var(--sub);font-size:12px}\n" +
+".summary b{color:var(--ink);font-size:14px}\n" +
+".summary .unconf b{color:var(--bad)}\n" +
+"main{margin-top:16px;padding-bottom:64px}\n" +
+"main.dim{opacity:.45;pointer-events:none}\n" +
+".daylabel{margin-top:32px;margin-bottom:8px;font-size:12px;color:var(--sub);font-weight:700}\n" +
+".row{display:flex;align-items:center;gap:16px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}\n" +
+".row:hover{background:#FAFAFA}\n" +
+".row .time{flex:none;width:52px;font-weight:700;font-variant-numeric:tabular-nums}\n" +
+".row .time small{display:block;font-weight:400;color:var(--sub);font-size:11px}\n" +
+".row .main{flex:1;min-width:0}\n" +
+".row .cust{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n" +
+".row .meta{color:var(--sub);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n" +
+".row .owner{flex:none;width:72px;font-size:12px;color:var(--sub);text-align:left}\n" +
+".row .temp{flex:none;width:44px;font-size:12px;color:var(--sub)}\n" +
+".row .temp.hot{color:var(--ink);font-weight:700}\n" +
+".row .st{flex:none;width:112px;font-size:12px;text-align:right;color:var(--sub)}\n" +
+".row .st.signed{color:var(--ink);font-weight:700}\n" +
+".row .st.cancel{color:var(--bad)}\n" +
+".row.done{opacity:.55}\n" +
+".empty{color:var(--sub);padding:32px 0;font-size:13px}\n" +
+"@media (max-width:640px){.row .owner{display:none}.row .st{width:96px}}\n" +
+"/* 分析 */\n" +
+".panel{margin-top:64px}\n" +
+".panel:first-child{margin-top:32px}\n" +
+".panel h3{font-size:14px;font-weight:700;margin-bottom:16px}\n" +
+".panel .note{color:var(--sub);font-size:11px;margin-top:16px;line-height:1.7}\n" +
+".fillrow{margin-top:8px}\n" +
+".fillrow .lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}\n" +
+".track{height:8px;border-radius:4px;background:#F0F0F0;overflow:hidden}\n" +
+".bar{height:100%;border-radius:4px;background:#8F8F8F}\n" +
+".fstep{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}\n" +
+".fstep b{font-size:15px;font-variant-numeric:tabular-nums}\n" +
+".fstep .rate{color:var(--ink);font-weight:700;margin-right:8px}\n" +
+".temprow{display:flex;align-items:center;gap:16px;margin-top:8px}\n" +
+".temprow .tlabel{flex:none;width:56px;font-size:12px;font-weight:700}\n" +
+".temprow .track{flex:1}\n" +
+".temprow .tval{flex:none;min-width:88px;text-align:right;font-size:12px;color:var(--sub)}\n" +
+".temprow .tval b{color:var(--ink);font-size:13px}\n" +
+"/* アクションシート */\n" +
+".sheetback{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:30;display:none}\n" +
 ".sheetback.open{display:block}\n" +
-".sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--card);border-radius:16px 16px 0 0;padding:1rem 1rem 1.4rem;transform:translateY(105%);transition:transform .22s ease}\n" +
+".sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:#FFFFFF;border-top:1px solid var(--line);padding:16px 24px 32px;transform:translateY(105%);transition:transform .2s ease}\n" +
 "@media (prefers-reduced-motion: reduce){.sheet{transition:none}}\n" +
 ".sheet.open{transform:translateY(0)}\n" +
-".sheet h2{font-size:.95rem;margin-bottom:.6rem}\n" +
-".sheet .grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}\n" +
-".sheet button{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:10px;padding:.7rem .4rem;font-size:.85rem;cursor:pointer}\n" +
-".sheet button.primary{background:linear-gradient(120deg,var(--pop2),var(--pop6));border-color:transparent;color:#fff;font-weight:700}\n" +
-".sheet button.danger{color:var(--bad)}\n" +
-".sheet .delayrow{display:flex;gap:.5rem;margin-top:.6rem}\n" +
-".sheet .delayrow button{flex:1;background:#FFF3C4;border-color:#ffe58a;color:#8a6d00;font-weight:700}\n" +
-".modal{position:fixed;inset:0;z-index:40;background:var(--bg);display:none;overflow-y:auto;padding:1rem}\n" +
+".sheet .inner{max-width:640px;margin:0 auto}\n" +
+".sheet h2{font-size:14px;font-weight:700;margin-bottom:16px}\n" +
+".sheet .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}\n" +
+".sheet button{border:1px solid var(--line);background:#FFFFFF;color:var(--ink);border-radius:6px;padding:0 8px;min-height:44px;font-size:13px;cursor:pointer}\n" +
+".sheet button.strong{font-weight:700;border-color:var(--ink)}\n" +
+".sheet .dangerzone{margin-top:32px;display:grid;grid-template-columns:1fr 1fr;gap:8px}\n" +
+".sheet .dangerzone button{color:var(--bad);border-color:#F3CFC9}\n" +
+".sheet .delayrow{margin-top:32px;display:flex;align-items:center;gap:8px}\n" +
+".sheet .delayrow .dlabel{font-size:12px;color:var(--sub);flex:none}\n" +
+".sheet .delayrow button{flex:1}\n" +
+".sheet .footrow{margin-top:32px;display:flex;gap:16px}\n" +
+"/* フォーム(Stripe式) */\n" +
+".modal{position:fixed;inset:0;z-index:40;background:#FFFFFF;display:none;overflow-y:auto}\n" +
 ".modal.open{display:block}\n" +
-".modal h2{font-size:1rem;margin:.3rem 0 .8rem}\n" +
-".field{margin-bottom:.7rem}\n" +
-".field label{display:block;font-size:.78rem;color:var(--sub);margin-bottom:.25rem;font-weight:700}\n" +
-".field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:.6rem .7rem;font-size:16px;background:var(--card);color:var(--ink)}\n" +
-".row2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}\n" +
-".overlapwarn{display:none;background:#fdebd7;border:1px solid #f4c894;color:#7a4a00;border-radius:10px;padding:.6rem .7rem;font-size:.82rem;margin-bottom:.7rem;line-height:1.6}\n" +
-".overlapwarn.show{display:block}\n" +
-".btnrow{display:flex;gap:.6rem;margin-top:1rem}\n" +
-".btnrow button{flex:1;border:0;border-radius:10px;padding:.85rem;font-size:.95rem;cursor:pointer}\n" +
-".btnrow .save{background:var(--grad);color:#221D11;font-weight:700}\n" +
-".btnrow .back{background:var(--chip);color:var(--ink)}\n" +
-".toast{position:fixed;left:50%;bottom:5.6rem;transform:translateX(-50%);z-index:50;background:var(--pop1);color:#fff;border-radius:999px;padding:.55rem 1.1rem;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 4px 14px rgba(34,29,17,.45)}\n" +
+".modal .inner{max-width:640px;margin:0 auto;padding:32px 24px 64px}\n" +
+".modal h2{font-size:16px;font-weight:700;margin-bottom:32px}\n" +
+".group{margin-top:32px}\n" +
+".group:first-of-type{margin-top:0}\n" +
+".glabel{font-size:12px;color:var(--sub);font-weight:700;margin-bottom:16px}\n" +
+".field{margin-top:16px}\n" +
+".field:first-child{margin-top:0}\n" +
+".field label{display:block;font-size:12px;color:var(--ink);font-weight:600;margin-bottom:8px}\n" +
+".req{display:inline-block;margin-left:8px;font-size:10px;color:var(--bad);border:1px solid var(--bad);border-radius:3px;padding:0 4px;vertical-align:1px}\n" +
+".field input,.field select,.field textarea{width:100%;min-height:44px;border:1px solid #D9D9D9;border-radius:6px;padding:10px 12px;font-size:16px;background:#FFFFFF;color:var(--ink)}\n" +
+".field textarea{min-height:64px}\n" +
+".field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(246,200,62,.28)}\n" +
+".row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end;margin-top:16px}\n" +
+".row2:first-child{margin-top:0}\n" +
+".row2 .field{margin-top:0}\n" +
+".field label{min-height:20px}\n" +
+".err{display:none;color:var(--bad);font-size:12px;margin-top:8px}\n" +
+".err.show{display:block}\n" +
+".formfoot{margin-top:32px;display:flex;gap:16px;align-items:center}\n" +
+".btn-primary{border:0;border-radius:6px;background:var(--brand);color:var(--ink);font-size:14px;font-weight:700;padding:0 24px;min-height:44px;cursor:pointer}\n" +
+".btn-ghost{border:1px solid var(--line);border-radius:6px;background:#FFFFFF;color:var(--ink);font-size:14px;padding:0 16px;min-height:44px;cursor:pointer}\n" +
+".toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%);z-index:50;background:var(--ink);color:#FFFFFF;border-radius:6px;padding:10px 16px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}\n" +
 ".toast.show{opacity:1}\n" +
-".loading{text-align:center;color:var(--sub);padding:2rem;font-size:.85rem}\n" +
-".panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.9rem;margin:.7rem 0}\n" +
-".panel h3{font-size:.85rem;margin-bottom:.6rem}\n" +
-".panel .note{color:var(--sub);font-size:.72rem;margin-top:.6rem;line-height:1.6}\n" +
-".fillrow{margin:.55rem 0}\n" +
-".fillrow .lbl{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.2rem}\n" +
-".fillrow .lbl b{font-weight:700}\n" +
-".fillrow .track{height:10px;border-radius:999px;background:var(--chip);overflow:hidden}\n" +
-".fillrow .bar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--pop4),var(--pop6))}\n" +
-".funnel{display:flex;flex-direction:column;gap:.4rem}\n" +
-".fstep{display:flex;justify-content:space-between;align-items:baseline;border-left:4px solid var(--pop1);background:var(--chip);border-radius:8px;padding:.55rem .7rem;font-size:.85rem}\n" +
-".fstep:nth-child(2){border-left-color:var(--pop3)}\n" +
-".fstep:nth-child(3){border-left-color:var(--pop2)}\n" +
-".fstep b{font-size:1.05rem}\n" +
-".fstep .rate{color:var(--pop2);font-weight:700}\n" +
-".temprow{display:flex;align-items:center;gap:.6rem;margin:.5rem 0}\n" +
-".temprow .tlabel{flex:none;width:4.6rem;font-size:.82rem;font-weight:700}\n" +
-".temprow .tlabel.t高{color:var(--pop2)}.temprow .tlabel.t中{color:var(--pop6)}.temprow .tlabel.t低{color:var(--pop3)}\n" +
-".temprow .track{flex:1;height:10px;border-radius:999px;background:var(--chip);overflow:hidden}\n" +
-".temprow .bar{height:100%;border-radius:999px}\n" +
-".temprow .bar.t高{background:linear-gradient(90deg,var(--pop2),var(--pop6))}\n" +
-".temprow .bar.t中{background:linear-gradient(90deg,var(--pop6),var(--pop4))}\n" +
-".temprow .bar.t低{background:linear-gradient(90deg,var(--pop3),var(--pop5))}\n" +
-".temprow .tval{flex:none;min-width:6.2rem;text-align:right;font-size:.8rem}\n" +
-".temprow .tval b{font-size:.95rem}\n" +
 "</style></head><body>\n" +
-"<header><div class=\"topbar\"><div class=\"brand\">" + buildLogoHtml_() + "<div class=\"brandtext\">" +
+"<header><div class=\"wrap topbar\"><div class=\"brand\">" + buildLogoHtml_() + "<div>" +
 "<h1>家計の<span>ポっ</span></h1><div class=\"brandsub\">家計の見直しやさん アポ管理</div></div></div>\n" +
-"<div class=\"seg\"><button id=\"segDay\" class=\"on\">本日</button><button id=\"segWeek\">週</button><button id=\"segStats\">分析</button></div></div></header>\n" +
-"<div class=\"chips\" id=\"chips\"><button class=\"chip\" id=\"chipMine\">自分のアポ</button></div>\n" +
+"<nav class=\"seg\"><button id=\"segDay\" class=\"on\">本日</button><button id=\"segWeek\">週</button><button id=\"segStats\">分析</button></nav></div></header>\n" +
+"<div class=\"wrap\">\n" +
+"<div class=\"toolbar\"><div class=\"chips\" id=\"chips\"><button class=\"chip\" id=\"chipMine\">自分のアポ</button></div>" +
+"<button class=\"btn-new\" id=\"fabNew\">＋ 新規アポ</button></div>\n" +
 "<div class=\"summary\" id=\"summary\"></div>\n" +
-"<main id=\"board\"><div class=\"loading\">読み込み中…</div></main>\n" +
-"<button class=\"fab\" id=\"fabNew\">+ 新規アポ</button>\n" +
+"<main id=\"board\"><div class=\"empty\">読み込み中…</div></main>\n" +
+"</div>\n" +
 "<div class=\"sheetback\" id=\"sheetBack\"></div>\n" +
-"<div class=\"sheet\" id=\"sheet\">\n" +
+"<div class=\"sheet\" id=\"sheet\"><div class=\"inner\">\n" +
 "  <h2 id=\"sheetTitle\"></h2>\n" +
 "  <div class=\"grid\">\n" +
-"    <button data-st=\"確定\">✅ 確定</button>\n" +
-"    <button data-st=\"実施済\">🏁 実施済</button>\n" +
-"    <button data-st=\"申込み\" class=\"primary\">🎉 申込み</button>\n" +
-"    <button data-st=\"再調整中\">🔁 再調整中</button>\n" +
-"    <button data-st=\"キャンセル(顧客都合)\" class=\"danger\">❌ キャンセル(顧客都合)</button>\n" +
-"    <button data-st=\"キャンセル(自社都合)\" class=\"danger\">❌ キャンセル(自社都合)</button>\n" +
+"    <button data-st=\"確定\">確定</button>\n" +
+"    <button data-st=\"実施済\">実施済</button>\n" +
+"    <button data-st=\"申込み\" class=\"strong\">申込み</button>\n" +
+"    <button data-st=\"再調整中\">再調整中</button>\n" +
 "  </div>\n" +
-"  <div class=\"delayrow\"><span style=\"align-self:center;font-size:.85rem\">⏰ 遅れそう:</span>\n" +
+"  <div class=\"delayrow\"><span class=\"dlabel\">遅れそう:</span>\n" +
 "    <button data-delay=\"15\">+15分</button><button data-delay=\"30\">+30分</button><button data-delay=\"60\">+60分</button></div>\n" +
-"  <div class=\"btnrow\"><button class=\"back\" id=\"sheetClose\">閉じる</button><button class=\"save\" id=\"sheetEdit\">✏️ 編集</button></div>\n" +
-"</div>\n" +
-"<div class=\"modal\" id=\"modal\">\n" +
+"  <div class=\"dangerzone\">\n" +
+"    <button data-st=\"キャンセル(顧客都合)\">キャンセル(顧客都合)</button>\n" +
+"    <button data-st=\"キャンセル(自社都合)\">キャンセル(自社都合)</button>\n" +
+"  </div>\n" +
+"  <div class=\"footrow\"><button class=\"btn-ghost\" id=\"sheetEdit\">編集</button><button class=\"btn-ghost\" id=\"sheetClose\">閉じる</button></div>\n" +
+"</div></div>\n" +
+"<div class=\"modal\" id=\"modal\"><div class=\"inner\">\n" +
 "  <h2 id=\"modalTitle\">新規アポ</h2>\n" +
-"  <div class=\"overlapwarn\" id=\"overlapWarn\"></div>\n" +
-"  <div class=\"row2\">\n" +
-"    <div class=\"field\"><label>日付</label><input type=\"date\" id=\"fDate\"></div>\n" +
-"    <div class=\"field\"><label>開始時刻</label><input type=\"time\" id=\"fTime\"></div>\n" +
+"  <div class=\"group\"><div class=\"glabel\">日時</div>\n" +
+"    <div class=\"row2\">\n" +
+"      <div class=\"field\"><label>日付<span class=\"req\">必須</span></label><input type=\"date\" id=\"fDate\"></div>\n" +
+"      <div class=\"field\"><label>開始時刻<span class=\"req\">必須</span></label><input type=\"time\" id=\"fTime\"></div>\n" +
+"    </div>\n" +
+"    <div class=\"row2\"><div class=\"field\"><label>所要分</label><select id=\"fDuration\"><option>30</option><option selected>60</option><option>90</option><option>120</option></select></div><div></div></div>\n" +
+"    <div class=\"err\" id=\"overlapWarn\"></div>\n" +
 "  </div>\n" +
-"  <div class=\"row2\">\n" +
-"    <div class=\"field\"><label>所要分</label><select id=\"fDuration\"><option>30</option><option selected>60</option><option>90</option><option>120</option></select></div>\n" +
-"    <div class=\"field\"><label>温度感</label><select id=\"fTemp\"></select></div>\n" +
+"  <div class=\"group\"><div class=\"glabel\">お客様</div>\n" +
+"    <div class=\"field\"><label>顧客名<span class=\"req\">必須</span></label><input type=\"text\" id=\"fCustomer\" placeholder=\"例: ◯◯株式会社 △△様\">\n" +
+"      <div class=\"err\" id=\"custErr\">顧客名を入力してください。</div></div>\n" +
+"    <div class=\"row2\">\n" +
+"      <div class=\"field\"><label>形式</label><select id=\"fFormat\"></select></div>\n" +
+"      <div class=\"field\"><label>温度感</label><select id=\"fTemp\"></select></div>\n" +
+"    </div>\n" +
+"    <div class=\"field\"><label>場所またはURL</label><input type=\"text\" id=\"fPlace\" placeholder=\"住所・店舗名・会議URL\"></div>\n" +
 "  </div>\n" +
-"  <div class=\"field\"><label>顧客名</label><input type=\"text\" id=\"fCustomer\" placeholder=\"例: ◯◯株式会社 △△様\"></div>\n" +
-"  <div class=\"row2\">\n" +
-"    <div class=\"field\"><label>形式</label><select id=\"fFormat\"></select></div>\n" +
+"  <div class=\"group\"><div class=\"glabel\">担当</div>\n" +
+"    <div class=\"row2\">\n" +
+"      <div class=\"field\"><label>担当営業<span class=\"req\">必須</span></label><select id=\"fSales\"></select></div>\n" +
+"      <div class=\"field\"><label>アポ入れ担当</label><select id=\"fSetter\"></select></div>\n" +
+"    </div>\n" +
+"  </div>\n" +
+"  <div class=\"group\"><div class=\"glabel\">その他</div>\n" +
 "    <div class=\"field\"><label>ステータス</label><select id=\"fStatus\"></select></div>\n" +
+"    <div class=\"field\"><label>メモ</label><textarea id=\"fMemo\" rows=\"2\" placeholder=\"引き継ぎ事項・注意点\"></textarea></div>\n" +
 "  </div>\n" +
-"  <div class=\"field\"><label>場所またはURL</label><input type=\"text\" id=\"fPlace\" placeholder=\"住所・店舗名・会議URL\"></div>\n" +
-"  <div class=\"row2\">\n" +
-"    <div class=\"field\"><label>担当営業</label><select id=\"fSales\"></select></div>\n" +
-"    <div class=\"field\"><label>アポ入れ担当</label><select id=\"fSetter\"></select></div>\n" +
-"  </div>\n" +
-"  <div class=\"field\"><label>メモ</label><textarea id=\"fMemo\" rows=\"2\" placeholder=\"引き継ぎ事項・注意点\"></textarea></div>\n" +
-"  <div class=\"btnrow\"><button class=\"back\" id=\"modalClose\">戻る</button><button class=\"save\" id=\"modalSave\">保存して通知</button></div>\n" +
-"</div>\n" +
+"  <div class=\"formfoot\"><button class=\"btn-primary\" id=\"modalSave\">保存して通知</button><button class=\"btn-ghost\" id=\"modalClose\">戻る</button></div>\n" +
+"</div></div>\n" +
 "<div class=\"toast\" id=\"toast\"></div>\n" +
 "<script>\n" +
-"var state = { view: 'day', owner: '', mine: false, meName: '', board: null, options: null, editingId: null, selected: null, confirmedOverlap: false };\n" +
+"var state = { view: 'day', owner: '', mine: false, meName: '', board: null, options: null, editingId: null, selected: null, confirmedOverlap: false, loaded: false };\n" +
 "function esc(text) {\n" +
 "  return String(text == null ? '' : text).replace(/[&<>\"']/g, function (ch) {\n" +
 "    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#39;' }[ch];\n" +
@@ -192,7 +209,9 @@
 "  return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);\n" +
 "}\n" +
 "function load() {\n" +
-"  $('board').innerHTML = '<div class=\"loading\">読み込み中…</div>';\n" +
+"  // 読み込み中は全体を隠さず、一覧部分だけ薄くする(初回のみ文言表示)\n" +
+"  if (state.loaded) { $('board').classList.add('dim'); }\n" +
+"  else { $('board').innerHTML = '<div class=\"empty\">読み込み中…</div>'; }\n" +
 "  if (state.view === 'stats') {\n" +
 "    google.script.run.withSuccessHandler(renderStats).withFailureHandler(fail).getStats();\n" +
 "    return;\n" +
@@ -200,57 +219,24 @@
 "  google.script.run.withSuccessHandler(renderBoard).withFailureHandler(fail)\n" +
 "    .getBoard({ view: state.view, date: todayString(), owner: effectiveOwner() });\n" +
 "}\n" +
-"function formatHours(minutes) { return (Math.round(minutes / 6) / 10) + 'h'; }\n" +
-"function formatRate(rate) { return rate === null || rate === undefined ? '—' : Math.round(rate * 100) + '%'; }\n" +
-"function renderStats(stats) {\n" +
-"  $('summary').innerHTML = '<span>本日の埋まり状況+過去30日の転換</span>';\n" +
-"  var fill = stats.fill || { owners: [], total: { bookedMinutes: 0, count: 0 } };\n" +
-"  var funnel = stats.funnel || { concluded: 0, completed: 0, signups: 0, visitRate: null, signupRate: null };\n" +
-"  var html = '<div class=\"panel\"><h3>📊 本日の埋まり状況(営業時間 9:00〜18:00 換算)</h3>';\n" +
-"  html += '<div class=\"fillrow\"><div class=\"lbl\"><span>全体</span><b>' + fill.total.count + '件・' + formatHours(fill.total.bookedMinutes) + '</b></div></div>';\n" +
-"  fill.owners.forEach(function (entry) {\n" +
-"    html += '<div class=\"fillrow\"><div class=\"lbl\"><span>' + esc(entry.owner) + '</span>' +\n" +
-"      '<b>' + entry.count + '件・' + formatHours(entry.bookedMinutes) + '(' + Math.round(entry.ratio * 100) + '%)</b></div>' +\n" +
-"      '<div class=\"track\"><div class=\"bar\" style=\"width:' + Math.round(entry.ratio * 100) + '%\"></div></div></div>';\n" +
-"  });\n" +
-"  html += '<div class=\"note\">※空き=キャンセル・再調整中を除いた予約済み時間。評価目的では使いません</div></div>';\n" +
-"  html += '<div class=\"panel\"><h3>🔀 転換ファネル(過去30日・' + esc(stats.sinceDate) + '以降・チーム全体)</h3><div class=\"funnel\">';\n" +
-"  html += '<div class=\"fstep\"><span>結果が出たアポ</span><b>' + funnel.concluded + '件</b></div>';\n" +
-"  html += '<div class=\"fstep\"><span>訪問実施(実施済+申込み)</span><span><span class=\"rate\">' + formatRate(funnel.visitRate) + '</span> <b>' + funnel.completed + '件</b></span></div>';\n" +
-"  html += '<div class=\"fstep\"><span>申込み</span><span><span class=\"rate\">' + formatRate(funnel.signupRate) + '</span> <b>' + funnel.signups + '件</b></span></div>';\n" +
-"  html += '</div><div class=\"note\">率の母数: 訪問実施率=結果が出たアポ、申込み率=訪問実施。' +\n" +
-"    (funnel.concluded < 10 ? '<br>⚠️ 件数が少ないため参考値です(母数10件未満)' : '') +\n" +
-"    '<br>※予定・確定・再調整中のアポは結果待ちのため含みません。評価目的では使いません</div></div>';\n" +
-"  var tempIcons = { '高': '🔥', '中': '⚡', '低': '❄️' };\n" +
-"  var lowTempSample = false;\n" +
-"  html += '<div class=\"panel\"><h3>🌡️ 温度感別の申込み率(過去30日・チーム全体)</h3>';\n" +
-"  (stats.byTemperature || []).forEach(function (row) {\n" +
-"    if (row.completed > 0 && row.completed < 10) lowTempSample = true;\n" +
-"    var percent = row.rate === null ? 0 : Math.round(row.rate * 100);\n" +
-"    html += '<div class=\"temprow\"><span class=\"tlabel t' + esc(row.temperature) + '\">' +\n" +
-"      (tempIcons[row.temperature] || '') + ' 温度 ' + esc(row.temperature) + '</span>' +\n" +
-"      '<div class=\"track\"><div class=\"bar t' + esc(row.temperature) + '\" style=\"width:' + percent + '%\"></div></div>' +\n" +
-"      '<span class=\"tval\"><b>' + formatRate(row.rate) + '</b><br>' + row.signups + '/' + row.completed + '件</span></div>';\n" +
-"  });\n" +
-"  html += '<div class=\"note\">母数=その温度感の訪問実施(実施済+申込み)。' +\n" +
-"    (lowTempSample ? '<br>⚠️ 母数10件未満の行は参考値です。' : '') +\n" +
-"    '<br>どんなアポを取れば決まりやすいかの改善用。評価目的では使いません</div></div>';\n" +
-"  $('board').innerHTML = html;\n" +
-"}\n" +
+"function doneLoading() { state.loaded = true; $('board').classList.remove('dim'); }\n" +
 "function effectiveOwner() { return state.mine ? state.meName : state.owner; }\n" +
-"function fail(error) { toast('エラー: ' + (error && error.message ? error.message : error)); }\n" +
+"function fail(error) { doneLoading(); toast('エラー: ' + (error && error.message ? error.message : error)); }\n" +
 "function statusClass(status) {\n" +
-"  if (status === 'キャンセル(顧客都合)' || status === 'キャンセル(自社都合)') return 'pill cancel';\n" +
-"  return 'pill st-' + status;\n" +
+"  if (status.indexOf('キャンセル') === 0) return 'st cancel';\n" +
+"  if (status === '申込み') return 'st signed';\n" +
+"  return 'st';\n" +
 "}\n" +
-"function cardHtml(apo) {\n" +
+"function rowHtml(apo) {\n" +
 "  var doneClass = (apo['ステータス'] === '実施済' || apo['ステータス'].indexOf('キャンセル') === 0) ? ' done' : '';\n" +
-"  return '<div class=\"card' + doneClass + '\" data-id=\"' + esc(apo['アポID']) + '\">' +\n" +
-"    '<div class=\"time\"><b>' + esc(apo['開始時刻']) + '</b><small>' + esc(apo['所要分']) + '分</small></div>' +\n" +
-"    '<div class=\"body\"><div class=\"cust\">' + esc(apo['顧客名']) + '</div>' +\n" +
-"    '<div class=\"meta\">' + esc(apo['形式']) + ' ' + esc(apo['場所またはURL']) + ' / 営業: ' + esc(apo['担当営業']) + '</div>' +\n" +
-"    '<div class=\"badges\"><span class=\"' + statusClass(apo['ステータス']) + '\">' + esc(apo['ステータス']) + '</span>' +\n" +
-"    '<span class=\"pill temp-' + esc(apo['温度感']) + '\">温度 ' + esc(apo['温度感']) + '</span></div></div></div>';\n" +
+"  var hotClass = apo['温度感'] === '高' ? ' hot' : '';\n" +
+"  return '<div class=\"row' + doneClass + '\" data-id=\"' + esc(apo['アポID']) + '\" tabindex=\"0\">' +\n" +
+"    '<div class=\"time\">' + esc(apo['開始時刻']) + '<small>' + esc(apo['所要分']) + '分</small></div>' +\n" +
+"    '<div class=\"main\"><div class=\"cust\">' + esc(apo['顧客名']) + '</div>' +\n" +
+"    '<div class=\"meta\">' + esc(apo['形式']) + ' ' + esc(apo['場所またはURL']) + '</div></div>' +\n" +
+"    '<div class=\"owner\">' + esc(apo['担当営業']) + '</div>' +\n" +
+"    '<div class=\"temp' + hotClass + '\">' + esc(apo['温度感']) + '</div>' +\n" +
+"    '<div class=\"' + statusClass(apo['ステータス']) + '\">' + esc(apo['ステータス']) + '</div></div>';\n" +
 "}\n" +
 "function renderBoard(board) {\n" +
 "  state.board = board; state.meName = board.meName || '';\n" +
@@ -258,19 +244,20 @@
 "  var html = '';\n" +
 "  if (state.view === 'day') {\n" +
 "    var view = board.dayView || { items: [], summary: { total: 0, unconfirmed: 0 } };\n" +
-"    $('summary').innerHTML = '<span>本日 <b>' + view.summary.total + '</b>件</span>' +\n" +
+"    $('summary').innerHTML = '<span>本日 <b>' + view.summary.total + '</b>件</span> ' +\n" +
 "      '<span class=\"unconf\">未確定 <b>' + view.summary.unconfirmed + '</b>件</span>';\n" +
-"    html = view.items.length ? view.items.map(cardHtml).join('') :\n" +
-"      '<div class=\"empty\">本日のアポはありません。<br>右下の「+ 新規アポ」から登録できます。</div>';\n" +
+"    html = view.items.length ? view.items.map(rowHtml).join('') :\n" +
+"      '<div class=\"empty\">本日のアポはありません。「＋ 新規アポ」から登録できます。</div>';\n" +
 "  } else {\n" +
 "    $('summary').innerHTML = '<span>今日から7日間</span>';\n" +
 "    (board.week || []).forEach(function (day) {\n" +
 "      html += '<div class=\"daylabel\">' + esc(day.date) + '(' + day.items.length + '件)</div>';\n" +
-"      html += day.items.length ? day.items.map(cardHtml).join('') : '<div class=\"empty\" style=\"padding:.4rem\">-</div>';\n" +
+"      html += day.items.length ? day.items.map(rowHtml).join('') : '';\n" +
 "    });\n" +
 "  }\n" +
 "  $('board').innerHTML = html;\n" +
-"  Array.prototype.forEach.call(document.querySelectorAll('.card'), function (el) {\n" +
+"  doneLoading();\n" +
+"  Array.prototype.forEach.call(document.querySelectorAll('.row'), function (el) {\n" +
 "    el.addEventListener('click', function () { openSheet(el.getAttribute('data-id')); });\n" +
 "  });\n" +
 "}\n" +
@@ -287,6 +274,42 @@
 "      state.owner = (state.owner === name) ? '' : name; state.mine = false; load();\n" +
 "    });\n" +
 "  });\n" +
+"}\n" +
+"function formatHours(minutes) { return (Math.round(minutes / 6) / 10) + 'h'; }\n" +
+"function formatRate(rate) { return rate === null || rate === undefined ? '—' : Math.round(rate * 100) + '%'; }\n" +
+"function renderStats(stats) {\n" +
+"  $('summary').innerHTML = '<span>本日の埋まり状況+過去30日の転換</span>';\n" +
+"  var fill = stats.fill || { owners: [], total: { bookedMinutes: 0, count: 0 } };\n" +
+"  var funnel = stats.funnel || { concluded: 0, completed: 0, signups: 0, visitRate: null, signupRate: null };\n" +
+"  var html = '<div class=\"panel\"><h3>本日の埋まり状況(営業時間 9:00〜18:00 換算)</h3>';\n" +
+"  html += '<div class=\"fillrow\"><div class=\"lbl\"><span>全体</span><b>' + fill.total.count + '件・' + formatHours(fill.total.bookedMinutes) + '</b></div></div>';\n" +
+"  fill.owners.forEach(function (entry) {\n" +
+"    html += '<div class=\"fillrow\"><div class=\"lbl\"><span>' + esc(entry.owner) + '</span>' +\n" +
+"      '<b>' + entry.count + '件・' + formatHours(entry.bookedMinutes) + '(' + Math.round(entry.ratio * 100) + '%)</b></div>' +\n" +
+"      '<div class=\"track\"><div class=\"bar\" style=\"width:' + Math.round(entry.ratio * 100) + '%\"></div></div></div>';\n" +
+"  });\n" +
+"  html += '<div class=\"note\">空き=キャンセル・再調整中を除いた予約済み時間。評価目的では使いません</div></div>';\n" +
+"  html += '<div class=\"panel\"><h3>転換ファネル(過去30日・' + esc(stats.sinceDate) + '以降・チーム全体)</h3>';\n" +
+"  html += '<div class=\"fstep\"><span>結果が出たアポ</span><b>' + funnel.concluded + '件</b></div>';\n" +
+"  html += '<div class=\"fstep\"><span>訪問実施(実施済+申込み)</span><span><span class=\"rate\">' + formatRate(funnel.visitRate) + '</span><b>' + funnel.completed + '件</b></span></div>';\n" +
+"  html += '<div class=\"fstep\"><span>申込み</span><span><span class=\"rate\">' + formatRate(funnel.signupRate) + '</span><b>' + funnel.signups + '件</b></span></div>';\n" +
+"  html += '<div class=\"note\">率の母数: 訪問実施率=結果が出たアポ、申込み率=訪問実施。' +\n" +
+"    (funnel.concluded < 10 ? '<br>件数が少ないため参考値です(母数10件未満)。' : '') +\n" +
+"    '<br>予定・確定・再調整中のアポは結果待ちのため含みません。評価目的では使いません</div></div>';\n" +
+"  var lowTempSample = false;\n" +
+"  html += '<div class=\"panel\"><h3>温度感別の申込み率(過去30日・チーム全体)</h3>';\n" +
+"  (stats.byTemperature || []).forEach(function (row) {\n" +
+"    if (row.completed > 0 && row.completed < 10) lowTempSample = true;\n" +
+"    var percent = row.rate === null ? 0 : Math.round(row.rate * 100);\n" +
+"    html += '<div class=\"temprow\"><span class=\"tlabel\">温度 ' + esc(row.temperature) + '</span>' +\n" +
+"      '<div class=\"track\"><div class=\"bar\" style=\"width:' + percent + '%\"></div></div>' +\n" +
+"      '<span class=\"tval\"><b>' + formatRate(row.rate) + '</b> ' + row.signups + '/' + row.completed + '件</span></div>';\n" +
+"  });\n" +
+"  html += '<div class=\"note\">母数=その温度感の訪問実施(実施済+申込み)。' +\n" +
+"    (lowTempSample ? '<br>母数10件未満の行は参考値です。' : '') +\n" +
+"    '<br>どんなアポを取れば決まりやすいかの改善用。評価目的では使いません</div></div>';\n" +
+"  $('board').innerHTML = html;\n" +
+"  doneLoading();\n" +
 "}\n" +
 "function findApo(apoId) {\n" +
 "  var pools = [];\n" +
@@ -317,6 +340,7 @@
 "    state.editingId = apo ? apo['アポID'] : null;\n" +
 "    state.confirmedOverlap = false;\n" +
 "    $('overlapWarn').classList.remove('show');\n" +
+"    $('custErr').classList.remove('show');\n" +
 "    $('modalTitle').textContent = apo ? 'アポ編集' : '新規アポ';\n" +
 "    $('fDate').value = apo ? apo['日付'] : todayString();\n" +
 "    $('fTime').value = apo ? apo['開始時刻'] : '10:00';\n" +
@@ -330,11 +354,15 @@
 "    fillSelect('fSales', options.salesStaff, apo ? apo['担当営業'] : (state.meName || ''));\n" +
 "    fillSelect('fSetter', options.setterStaff, apo ? apo['アポ入れ担当'] : (state.meName || ''));\n" +
 "    $('modal').classList.add('open');\n" +
+"    $('fDate').focus();\n" +
 "  });\n" +
 "}\n" +
 "function closeModal() { $('modal').classList.remove('open'); }\n" +
 "function save() {\n" +
-"  if (!$('fCustomer').value.trim()) { toast('顧客名を入力してください'); return; }\n" +
+"  if (!$('fCustomer').value.trim()) {\n" +
+"    $('custErr').classList.add('show'); $('fCustomer').focus(); return;\n" +
+"  }\n" +
+"  $('custErr').classList.remove('show');\n" +
 "  var payload = {\n" +
 "    'アポID': state.editingId, '日付': $('fDate').value, '開始時刻': $('fTime').value,\n" +
 "    '所要分': Number($('fDuration').value), '顧客名': $('fCustomer').value.trim(),\n" +
@@ -352,7 +380,7 @@
 "        return a['開始時刻'] + ' ' + a['顧客名'] + '様';\n" +
 "      }).join(' / ');\n" +
 "      var warn = $('overlapWarn');\n" +
-"      warn.textContent = '⚠️ ' + payload['担当営業'] + 'さんの既存アポと時間帯が重なっています: ' + lines + ' — このまま登録する場合はもう一度「保存して通知」を押してください。';\n" +
+"      warn.textContent = payload['担当営業'] + 'さんの既存アポと時間帯が重なっています(' + lines + ')。このまま保存するにはもう一度「保存して通知」を押してください。';\n" +
 "      warn.classList.add('show');\n" +
 "      return;\n" +
 "    }\n" +
@@ -377,6 +405,7 @@
 "  ['segDay', 'segWeek', 'segStats'].forEach(function (id) { $(id).classList.remove('on'); });\n" +
 "  $(buttonId).classList.add('on');\n" +
 "  $('fabNew').style.display = (view === 'stats') ? 'none' : '';\n" +
+"  state.loaded = false;\n" +
 "  load();\n" +
 "}\n" +
 "$('segDay').addEventListener('click', function () { setView('day', 'segDay'); });\n" +

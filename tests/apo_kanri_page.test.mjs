@@ -41,10 +41,10 @@ test("家計のポっ: システム名(正式表記=小さいひらがな『っ�
   assert.ok(html.includes("logomark") || html.includes("logoimg"));
 });
 
-test("家計の見直しやさんカラー: ロゴ抽出の黄×墨パレットとロゴ画像が入っている", () => {
-  assert.ok(html.includes("--grad:linear-gradient"));
-  assert.ok(html.includes("--pop4:#F9C93F"));
-  assert.ok(html.includes("--ink:#221D11"));
+test("色ルール: ブランド色#F6C83Eと文字#1A1A1A/#6B6B6B、ロゴ画像が入っている", () => {
+  assert.ok(html.includes("--brand:#F6C83E"));
+  assert.ok(html.includes("#1A1A1A"));
+  assert.ok(html.includes("#6B6B6B"));
   assert.ok(html.includes("data:image/svg+xml;base64,"));
   assert.ok(html.includes('alt="家計の見直しやさん"'));
 });
@@ -70,9 +70,20 @@ test("ダブルブッキング警告の表示領域がある", () => {
   assert.ok(html.includes("時間帯が重なって"));
 });
 
-test("ダークモード・reduced motion対応のCSSが入っている", () => {
-  assert.ok(html.includes("prefers-color-scheme"));
+test("v2設計方針: 900px中央固定・グラデーション全廃・部分ローディング・reduced motion", () => {
+  assert.ok(html.includes("max-width:900px"));
+  assert.ok(!html.includes("linear-gradient"), "グラデーションは禁止");
+  assert.ok(html.includes("dim"), "読み込み中は部分薄表示");
   assert.ok(html.includes("prefers-reduced-motion"));
+});
+
+test("v2フォーム(Stripe式): 必須タグ・ラベル上置き・エラー欄下・44px・フォーカスはブランド色のみ", () => {
+  assert.ok(html.includes(">必須<"));
+  assert.ok(!html.includes("※"), "※印は使わない");
+  assert.ok(html.includes("min-height:44px"));
+  assert.ok(html.includes("顧客名を入力してください。"));
+  assert.ok(html.includes(":focus"));
+  assert.ok(html.includes("border-color:var(--brand)"));
 });
 
 test("XSS対策: 画面側にエスケープ関数があり、innerHTMLへの生値挿入をしない前提が明示されている", () => {
