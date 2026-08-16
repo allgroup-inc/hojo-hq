@@ -16,6 +16,10 @@ hojo-hq 検証部(ケンショウ)× 100点基準❹
   NGにせず情報表示のみ(照合の可用性を外部ベンダーに依存させない)。
 - 判定が割れたときのセカンドパス: 指摘した側のAIに根拠の引用を要求し、
   引用できない・見落としだった場合は撤回させる(誤検知Issueのノイズ対策)。
+- NGの定義(議事_20260817): 掲載値が存在して原文と食い違う場合のみ。掲載値が
+  None/「要確認」はサイト上の非断定表示(絶対ルール1)なので矛盾に数えない。
+  かわりに原文に上限額の明記があれば「追加候補」として非失敗でレポート・履歴に
+  記録し、人の原文確認後に追記する昇格運用に載せる。
 - 照合履歴: 毎回の結果を data/kpi/verify_history.json に追記(同日再実行は上書き)。
   Gemini参加率も記録し、無料枠切れ等による「静かな脱落」を検知可能にする。
   NG項目の human_verdict は検証部が false_positive / true_mismatch を追記する運用。
@@ -68,8 +72,12 @@ VERDICT_SCHEMA = {
             "type": "boolean",
             "description": "ページ本文がこの制度に言及しているか(リンク切れ・別ページ検知用)",
         },
+        "amount_in_source": {
+            "type": "string",
+            "description": "掲載データの上限額がNone/「要確認」で、原文に上限額が明記されている場合のみ、その金額を原文ママで記入(追加候補として人が確認する)。それ以外は空文字",
+        },
     },
-    "required": ["consistent", "issues", "page_mentions_subsidy"],
+    "required": ["consistent", "issues", "page_mentions_subsidy", "amount_in_source"],
     "additionalProperties": False,
 }
 
@@ -98,8 +106,9 @@ GEMINI_VERDICT_SCHEMA = {
         "consistent": {"type": "BOOLEAN"},
         "issues": {"type": "ARRAY", "items": {"type": "STRING"}},
         "page_mentions_subsidy": {"type": "BOOLEAN"},
+        "amount_in_source": {"type": "STRING"},
     },
-    "required": ["consistent", "issues", "page_mentions_subsidy"],
+    "required": ["consistent", "issues", "page_mentions_subsidy", "amount_in_source"],
 }
 
 GEMINI_RECHECK_SCHEMA = {
@@ -174,7 +183,12 @@ def build_verify_prompt(item: dict, page_text: str) -> str:
         "あなたは補助金情報サイトの検証担当です。掲載データが出典ページの原文と"
         "矛盾しないか判定してください。表記ゆれ(全角半角・日付形式・万円/円表記の違い)は"
         "矛盾とみなさず、金額や日付の実質的な食い違い、制度の言及自体がない場合のみ"
-        "問題として報告してください。\n\n"
+        "問題として報告してください。\n"
+        "掲載データの値が None・空・「要確認」の項目は、サイト上では「要確認」と"
+        "表示され断定していないことを意味します(議事_20260817)。原文に値が明記されて"
+        "いても、それは「未掲載」であって矛盾ではないため issues には含めないでください。"
+        "そのかわり、上限額が未掲載で原文に上限額の明記がある場合は amount_in_source に"
+        "その金額を原文ママで記入してください。\n\n"
         f"【掲載データ】\n名称: {item.get('name')}\n締切: {item.get('deadline')}\n"
         f"上限額: {item.get('max_amount')}\n発行元: {item.get('issuer')}\n\n"
         f"【出典ページ本文(抜粋)】\n{page_text}"
@@ -191,8 +205,8 @@ def verdict_to_issues(verdict: dict) -> list[str]:
     return issues
 
 
-def verify_local_with_claude(item: dict, page_text: str, client) -> list[str]:
-    """県・公社ページをClaude(Haiku)で照合。差異のリストを返す(空=OK)。"""
+def verify_local_with_claude(item: dict, page_text: str, client) -> tuple[list[str], str]:
+    """県・公社ページをClaude(Haiku)で照合。(差異リスト, 原文で見つけた未掲載の上限額)を返す。"""
     response = client.messages.create(
         model=CLAUDE_MODEL,
         max_tokens=1024,
@@ -200,7 +214,8 @@ def verify_local_with_claude(item: dict, page_text: str, client) -> list[str]:
         messages=[{"role": "user", "content": build_verify_prompt(item, page_text)}],
     )
     text = next(b.text for b in response.content if b.type == "text")
-    return verdict_to_issues(json.loads(text))
+    verdict = json.loads(text)
+    return verdict_to_issues(verdict), (verdict.get("amount_in_source") or "").strip()
 
 
 def gemini_generate(prompt: str, schema: dict, api_key: str) -> dict | None:
@@ -243,12 +258,14 @@ def gemini_generate(prompt: str, schema: dict, api_key: str) -> dict | None:
     return None
 
 
-def verify_local_with_gemini(item: dict, page_text: str, api_key: str) -> list[str] | None:
-    """同じ原文をGeminiで独立照合。差異リストを返す(空=OK)。API障害時はNone(スキップ扱い)。"""
+def verify_local_with_gemini(item: dict, page_text: str, api_key: str) -> tuple[list[str], str] | None:
+    """同じ原文をGeminiで独立照合。(差異リスト, 原文で見つけた未掲載の上限額)。API障害時はNone。"""
     verdict = gemini_generate(
         build_verify_prompt(item, page_text), GEMINI_VERDICT_SCHEMA, api_key
     )
-    return verdict_to_issues(verdict) if verdict is not None else None
+    if verdict is None:
+        return None
+    return verdict_to_issues(verdict), (verdict.get("amount_in_source") or "").strip()
 
 
 def build_recheck_prompt(item: dict, page_text: str, issues: list[str]) -> str:
@@ -340,6 +357,7 @@ def main() -> None:
         judges: list[str] = []
         method = "jgrants" if is_jgrants else "ai"
         recheck_note = None
+        amount_note = ""  # 未掲載×原文に金額あり → 追加候補(非失敗・議事_20260817)
         if is_jgrants:
             issues = verify_jgrants(item)
         elif client or gemini_key:
@@ -352,12 +370,15 @@ def main() -> None:
                 claude_issues: list[str] | None = None
                 gemini_issues: list[str] | None = None
                 if client:
-                    claude_issues = verify_local_with_claude(item, page_text, client)
+                    claude_issues, a = verify_local_with_claude(item, page_text, client)
+                    amount_note = amount_note or a
                     judges.append("Claude")
                 if gemini_key:
                     gemini_eligible += 1
-                    gemini_issues = verify_local_with_gemini(item, page_text, gemini_key)
-                    if gemini_issues is not None:
+                    g = verify_local_with_gemini(item, page_text, gemini_key)
+                    if g is not None:
+                        gemini_issues, a = g
+                        amount_note = amount_note or a
                         gemini_joined += 1
                         judges.append("Gemini")
 
@@ -399,6 +420,11 @@ def main() -> None:
             lines.append(f"✅ OK{judged_by}: {label}")
         if recheck_note:
             lines.append(f"   ℹ {recheck_note}")
+        if amount_note and item.get("max_amount") in (None, "", "要確認"):
+            lines.append(
+                f"   ℹ 追加候補: 原文に上限額の記載あり「{amount_note[:80]}」"
+                "(掲載は要確認のまま。人の原文確認後に追記)"
+            )
 
         record = {
             "name": item.get("name"), "url": item.get("source_url"),
@@ -407,6 +433,8 @@ def main() -> None:
         }
         if recheck_note:
             record["recheck"] = recheck_note
+        if amount_note and item.get("max_amount") in (None, "", "要確認"):
+            record["amount_in_source"] = amount_note
         if issues:
             record["human_verdict"] = None  # 人が後から false_positive / true_mismatch を記入
         history_items.append(record)
