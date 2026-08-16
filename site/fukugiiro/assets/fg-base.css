@@ -1,0 +1,45 @@
+/* もらいわすれ堂 共通基底CSS(2026-08-12 読み心地総点検・ベッカイ提案の実施)
+   対象: shindan / houkoku / teisei / privacy / kit* / area*(LPは独自デザインのため対象外)
+   方針: ここには「全ページで同一であるべきもの」だけを置く。ページ固有の調整は各ページの
+   inline <style>(このファイルの後に読み込まれ、上書きできる)に残す。
+   色・字体の変更はこの1ファイルで全ページに波及する。 */
+
+:root{
+  --fg-primary:#D2694A;      /* くすみ珊瑚(主役) */
+  --fg-primary-deep:#B9502F; /* 琉球赤瓦(押下時) */
+  --fg-accent:#F2C14E;       /* 沖縄の日差し */
+  --fg-deep:#1F5C45;         /* 深い葉 */
+  --fg-ink:#3B322B;          /* 墨(やわらかい) */
+  --fg-bg:#FBF5EC;           /* 漆喰アイボリー */
+  --fg-card:#FFFDF9;
+  --fg-muted:#8B7C6E;        /* 温かいトープ */
+  --fg-line:#EEE1D0;         /* 温かい罫 */
+  --fg-cta:#22382A;          /* LINEボタン */
+  --fg-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  font-size:17px;line-height:1.9;color:var(--fg-ink);background:var(--fg-bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;
+  word-break:auto-phrase;overflow-wrap:anywhere}
+a{color:var(--fg-primary)}
+.note{font-size:.85rem;color:var(--fg-muted)}
+.note--long{text-align:left!important}
+.status{display:inline-block;font-size:.78rem;background:#FBEED0;border-radius:999px;padding:2px 10px;color:#7a5b00}
+.status.ok{background:#E7F3EC;color:#0F5138}
+.disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
+.footlinks a{display:inline-block;padding:6px 2px;white-space:nowrap}
+/* サイトヘッダー(全ページ共通) */
+.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
+.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;
+  font-weight:600;color:var(--fg-primary-deep);text-decoration:none;font-size:1.05rem}
+.siteheader .hlogo img{width:30px;height:30px}
+.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
+@media(max-width:560px){.siteheader nav a{font-size:.74rem;padding:5px 6px}}
+@media print{.siteheader{display:none!important}body{background:#fff}}
+
+/* Instagram補助導線(2026-08-16 小柳さん承認。LINEが主役CVのため控えめに) */
+.iglink{display:inline-block;font-size:.82rem;color:var(--fg-muted);padding:6px 2px;text-decoration:underline}
+.ignav{display:inline-flex;align-items:center;justify-content:center;padding:8px;min-width:36px;min-height:36px;color:var(--fg-primary-deep);border-radius:8px}

@@ -54,13 +54,13 @@ test("対応履歴ログの対応相手(RESPONDENT_TYPES)が設計書5.2節の3�
   assert.deepEqual(schema.RESPONDENT_TYPES, ["オーナー社長本人", "経理・総務等の窓口担当", "未接触"]);
 });
 
-test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種+連絡不要受領+工程遷移イベント+入電と一致する", () => {
+test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種+連絡不要受領+工程遷移イベント+入電+関係メモ更新と一致する", () => {
   const expected = [
     "手紙送付", "電話", "入電", "ゆんたく相談実施", "面談実施", "紹介受領", "ミカタ接点確認",
     "レターURLアクセス", "返信", "資料請求",
     "提案(M&A)", "提案(不動産)", "提案(法人保険)",
     "成約", "見送り", "ナーチャリング配信", "連絡不要受領",
-    "NDA締結", "意向表明受領", "DD開始"
+    "NDA締結", "意向表明受領", "DD開始", "関係メモ更新"
   ];
   assert.deepEqual(schema.INTERACTION_TYPES, expected);
 });
@@ -68,10 +68,17 @@ test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種+�
 test("レター下書きタブの名称・見出し・種別・ステータスが定義されている", () => {
   assert.equal(schema.LETTER_DRAFT_SHEET_NAME, "レター下書き");
   assert.deepEqual(schema.LETTER_DRAFT_HEADERS, [
-    "下書きID", "企業ID", "種別", "生成日時", "本文", "ステータス"
+    "下書きID", "企業ID", "種別", "生成日時", "本文", "ステータス", "発送日"
   ]);
   assert.deepEqual(schema.LETTER_DRAFT_TYPES, ["初回DM", "ナーチャリング配信"]);
   assert.deepEqual(schema.LETTER_DRAFT_STATUSES, ["下書き", "送付済み", "見送り"]);
+});
+
+test("レター下書きタブの「発送日」列が末尾に追加されている", () => {
+  assert.equal(
+    schema.LETTER_DRAFT_HEADERS[schema.LETTER_DRAFT_HEADERS.length - 1],
+    "発送日"
+  );
 });
 
 test("ダッシュボードタブの名称・プレースホルダー見出しが定義されている", () => {
@@ -111,11 +118,51 @@ test("後継者状況の選択肢(SUCCESSOR_STATUS_TYPES)があり/なし/不明
   assert.deepEqual(schema.SUCCESSOR_STATUS_TYPES, ["あり", "なし", "不明"]);
 });
 
-test("企業マスタに窓口担当者名・携帯番号列が末尾に追加されている(Phase 13)", () => {
+test("企業マスタに窓口担当者名・携帯番号列が追加されている(Phase 13)", () => {
   assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("窓口担当者名") !== -1);
   assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("携帯番号") !== -1);
+});
+
+test("スタッフタブに管理画面Web App用のメールアドレス列が末尾に追加されている(Phase 18a)", () => {
+  assert.ok(schema.STAFF_HEADERS.indexOf("メールアドレス") !== -1);
+  assert.deepEqual(
+    schema.STAFF_HEADERS.slice(-1),
+    ["メールアドレス"]
+  );
+});
+
+test("パートナー対応履歴ログのタブ名・見出しが定義されている(紹介パートナー開拓状況ビュー)", () => {
+  assert.equal(schema.PARTNER_INTERACTION_LOG_SHEET_NAME, "パートナー対応履歴ログ");
+  assert.deepEqual(schema.PARTNER_INTERACTION_LOG_HEADERS, [
+    "履歴ID", "パートナーID", "日付", "対応者", "内容メモ", "次回アクション"
+  ]);
+});
+
+test("紹介実績ログのタブ名・見出しが定義されている(紹介パートナー開拓状況ビュー)", () => {
+  assert.equal(schema.REFERRAL_RECORD_SHEET_NAME, "紹介実績ログ");
+  assert.deepEqual(schema.REFERRAL_RECORD_HEADERS, [
+    "実績ID", "パートナーID", "紹介日", "対象企業ID", "紹介料率", "契約内容メモ", "成約有無"
+  ]);
+});
+
+test("企業マスタに事前選定ランク・事前選定スコア列が末尾に追加されている", () => {
+  assert.ok(schema.COMPANY_MASTER_HEADERS.includes("事前選定ランク"));
+  assert.ok(schema.COMPANY_MASTER_HEADERS.includes("事前選定スコア"));
   assert.deepEqual(
     schema.COMPANY_MASTER_HEADERS.slice(-2),
-    ["窓口担当者名", "携帯番号"]
+    ["事前選定ランク", "事前選定スコア"]
   );
+});
+
+test("事前選定リスト・事前選定_未一致タブの名称・見出しが定義されている", () => {
+  assert.equal(schema.PRE_SCREENING_STAGING_SHEET_NAME, "事前選定リスト");
+  assert.equal(schema.PRE_SCREENING_MISMATCH_SHEET_NAME, "事前選定_未一致");
+  assert.deepEqual(schema.PRE_SCREENING_MISMATCH_HEADERS, ["会社名", "記録日時"]);
+});
+
+test("QR生成結果タブの名称・見出しが定義されている", () => {
+  assert.equal(schema.QR_RESULT_SHEET_NAME, "QR生成結果");
+  assert.deepEqual(schema.QR_RESULT_HEADERS, [
+    "企業ID", "会社名", "発送日", "トラッキングURL", "QR画像リンク", "ステータス"
+  ]);
 });

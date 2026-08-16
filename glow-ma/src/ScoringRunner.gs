@@ -4,7 +4,8 @@
  * (将来的には日次の時間主導トリガーに登録して自動実行することを想定しているが、
  *  トリガー登録自体は本Planの範囲外。)
  *
- * 企業マスタの「初期スコア」= 属性スコア(業種+規模+代表者年齢) + 流入ルートボーナス
+ * 企業マスタの「初期スコア」= 属性スコア(業種+規模+代表者年齢) + 事前選定スコア(外部評価。
+ * 空欄なら0) + 流入ルートボーナス
  * 「反応スコア」= 対応履歴ログの反応イベントの合算(GlowScoring.calculateReactionScore)
  * 「総合スコア」= 初期スコア + 反応スコア、「ランク」= 総合スコアからA〜Dを判定
  *
@@ -49,7 +50,9 @@ function recalculateAllScores() {
 
     records.forEach(function (record) {
       var interactionRows = interactionsByCompanyId[record["企業ID"]] || [];
-      var initialScore = GlowScoring.calculateAttributeScore(record) + GlowScoring.calculateRouteBonus(record["流入ルート"]);
+      var initialScore = GlowScoring.calculateAttributeScore(record)
+        + GlowScoring.calculatePreScreeningScore(record)
+        + GlowScoring.calculateRouteBonus(record["流入ルート"]);
       var reactionScore = GlowScoring.calculateReactionScore(interactionRows);
       var totalScore = initialScore + reactionScore;
 

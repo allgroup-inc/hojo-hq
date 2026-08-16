@@ -24,6 +24,9 @@ var IMPORT_COLUMN_MAP = {
   // 将来、取り込み元リストにDNC(連絡不要)情報の列が追加された場合は、
   // "連絡不要": "<実データの見出し>" をここに追加すればよい(csvImport.jsが自動で真偽値へ変換する)。
   // 現時点の実リストにはこの列がないため、デフォルトではマッピングしない。
+  // 将来、取り込み元リストに事前選定ランク・事前選定スコアの列がある場合は、
+  // "事前選定ランク": "<実データの見出し>", "事前選定スコア": "<実データの見出し>" を
+  // ここに追加すればよい(csvImport.jsの汎用マッピング処理がそのまま対応する)。
 };
 var STAGING_SHEET_NAME = "インポート待ち";
 
@@ -117,16 +120,44 @@ function readCompanyRecords_(sheet) {
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
   var headers = GlowSchema.COMPANY_MASTER_HEADERS;
+  var idIndex = headers.indexOf("企業ID");
   var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
-  return values.map(function (row) {
+  var records = [];
+  var skippedWithDataCount = 0;
+  values.forEach(function (row) {
+    // 企業マスタの列(電話番号のセル形式・連絡不要チェックボックス・後継者状況の
+    // プルダウンなど)はensureTab_で将来の入力に備えてシート全体(getMaxRows()分)に
+    // あらかじめ書式・入力規則を設定している。Apps Scriptはこの「書式だけの空セル」も
+    // getLastRow()の対象に含めてしまうため、実データが無くても書式が及ぶ行数分だけ
+    // 空の行が返ってくる。企業IDが空の行は実データではないため読み飛ばす
+    // (本番運用2026-08-10で発見。readPartnerInteractionsByPartnerId_等と同じガード)。
+    // ただし、企業IDが空でも他の列に値がある行は「人が入力途中の行」の可能性がある。
+    // writeCompanyRecords_の一括書き戻しで消えてしまうため、件数をログに残す
+    // (最終レビュー2026-08-10 I5)。
+    if (!row[idIndex]) {
+      // 未チェックのチェックボックス列はfalseを返すため、空セル扱いにする
+      // (そうしないと書式だけの空行がすべて「入力途中」と誤検知される)。
+      var hasOtherValue = row.some(function (cell) {
+        return cell !== "" && cell !== null && cell !== undefined && cell !== false;
+      });
+      if (hasOtherValue) skippedWithDataCount++;
+      return;
+    }
     var record = {};
     headers.forEach(function (header, i) {
       record[header] = row[i];
     });
     record["流入ルート"] = record["流入ルート"] ? String(record["流入ルート"]).split("、") : [];
     record["提案商品"] = record["提案商品"] ? String(record["提案商品"]).split("、") : [];
-    return record;
+    records.push(record);
   });
+  if (skippedWithDataCount > 0) {
+    Logger.log(
+      skippedWithDataCount + "件の企業ID未設定の行をスキップしました" +
+      "(データ入力中の可能性があるため確認してください)"
+    );
+  }
+  return records;
 }
 
 function writeCompanyRecords_(sheet, records) {

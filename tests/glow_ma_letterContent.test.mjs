@@ -68,6 +68,14 @@ test("buildLetterPrompt: 業種が未設定でもエラーにならない", () =
   assert.match(prompt, /テスト商事株式会社/);
 });
 
+test("buildLetterPrompt: humanizer準拠のAIっぽさ回避指示(定型フレーズ・絵文字・単調な語尾の禁止)を含む", () => {
+  const record = { 会社名: "テスト商事株式会社", 業種: "建設業", 流入ルート: ["②手紙DM"] };
+  const prompt = letterContent.buildLetterPrompt(record, "https://example.com/track?id=C000001", letterContent.DEFAULT_CONFIG);
+  assert.match(prompt, /定型の書き出し/);
+  assert.match(prompt, /絵文字/);
+  assert.match(prompt, /語尾/);
+});
+
 test("selectNurturingTargets: ステージ・ランク・接触間隔の条件を満たす企業のみ抽出する", () => {
   const records = [
     { 企業ID: "C1", 現在ステージ: "関係構築中", ランク: "B", 最終接触日: "2026-01-01" }, // 対象

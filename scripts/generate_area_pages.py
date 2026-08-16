@@ -13,51 +13,39 @@ site/fukugiiro/area/<slug>/index.html に生成する。fetch後に毎回再生�
 import json
 import os
 import shutil
+import sys
 from datetime import datetime, timezone, timedelta
+
+sys.path.insert(0, os.path.dirname(__file__))
+from fg_seo import MUNIS, MUNI_SLUG, breadcrumb_jsonld, canonical_tag, ogp_tags
 
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA = os.path.join(BASE, "data", "fukugiiro", "seido.json")
 OUT_DIR = os.path.join(BASE, "site", "fukugiiro", "area")
 
-MUNIS = [
-    ("那覇市", "naha"), ("宜野湾市", "ginowan"), ("石垣市", "ishigaki"), ("浦添市", "urasoe"),
-    ("名護市", "nago"), ("糸満市", "itoman"), ("沖縄市", "okinawa"), ("豊見城市", "tomigusuku"),
-    ("うるま市", "uruma"), ("宮古島市", "miyakojima"), ("南城市", "nanjo"), ("国頭村", "kunigami"),
-    ("大宜味村", "ogimi"), ("東村", "higashi"), ("今帰仁村", "nakijin"), ("本部町", "motobu"),
-    ("恩納村", "onna"), ("宜野座村", "ginoza"), ("金武町", "kin"), ("伊江村", "ie"),
-    ("読谷村", "yomitan"), ("嘉手納町", "kadena"), ("北谷町", "chatan"), ("北中城村", "kitanakagusuku"),
-    ("中城村", "nakagusuku"), ("西原町", "nishihara"), ("与那原町", "yonabaru"), ("南風原町", "haebaru"),
-    ("渡嘉敷村", "tokashiki"), ("座間味村", "zamami"), ("粟国村", "aguni"), ("渡名喜村", "tonaki"),
-    ("南大東村", "minamidaito"), ("北大東村", "kitadaito"), ("伊平屋村", "iheya"), ("伊是名村", "izena"),
-    ("久米島町", "kumejima"), ("八重瀬町", "yaese"), ("多良間村", "tarama"), ("竹富町", "taketomi"),
-    ("与那国町", "yonaguni"),
-]
-
 STYLE = """
-:root{--fg-primary:#B9502F;--fg-accent:#F2B705;--fg-deep:#1A6B52;--fg-ink:#1F2A2E;--fg-bg:#FFFBF4;--fg-card:#fff;--fg-muted:#5C6B70;--fg-line:#EBE2D4}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:18px;line-height:1.8;color:var(--fg-ink);background:var(--fg-bg)}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:auto-phrase;overflow-wrap:anywhere}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
-h1{font-size:1.35rem;margin-bottom:8px}
-.note{font-size:.85rem;color:var(--fg-muted)}
-.btn{display:block;max-width:420px;margin:20px auto;padding:16px 24px;min-height:44px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700}
-.card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px;margin:14px 0}
+h1{font-size:1.4rem;margin-bottom:8px;line-height:1.5}
+.btn{display:block;max-width:440px;margin:20px auto;padding:17px 24px;min-height:44px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem;box-shadow:var(--fg-shadow)}
+.btn:active{background:var(--fg-primary-deep)}
+.card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:18px;margin:14px 0;box-shadow:var(--fg-shadow)}
 .card h2{font-size:1.05rem;margin-bottom:4px}
-.card a{color:var(--fg-primary)}
-.status{font-size:.8rem;background:#fff3cd;border-radius:4px;padding:1px 8px;color:#7a5b00}
-.disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
+.card .trust{background:#EFF5F0;border:1px solid #D5E5DA;border-radius:12px;padding:12px 14px;font-size:.9rem;color:#1F4534;margin:12px 0}
+.linebtn{display:block;max-width:460px;margin:18px auto;padding:16px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
+.linebtn span{display:block;font-size:.8rem;font-weight:600;opacity:.95;margin-top:2px}
+.disclaimer{background:#F6EADB;border-radius:12px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 ul.areas{list-style:none;columns:2;gap:12px}
 ul.areas li{margin-bottom:8px}
+ul.seidolist{list-style:none;columns:1}
+ul.seidolist li{margin:0;border-bottom:1px dashed var(--fg-line);break-inside:avoid}
+ul.seidolist a{display:block;padding:8px 0}
+ul.areas a{display:inline-block;padding:8px 4px}
+.card a{display:inline-block;padding:4px 0;white-space:nowrap}
+@media(min-width:900px){ul.seidolist{columns:2;column-gap:28px}}
 .cardgrid{display:grid;gap:14px}
 @media(min-width:900px){.wrap{max-width:900px}.cardgrid{grid-template-columns:1fr 1fr}ul.areas{columns:3}}
-a{color:var(--fg-primary)}
-.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
-.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
-.siteheader .hlogo img{width:30px;height:30px}
-.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
-.siteheader nav a.hline{background:#06C755;color:#fff;font-weight:700}
 """
 
 HEADER = '''<header class="siteheader">
@@ -66,7 +54,8 @@ HEADER = '''<header class="siteheader">
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
-    <a class="hline" href="https://allgroup-inc.github.io/hojo-hq/go/fg-area/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-area/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
   </nav>
 </header>'''
 
@@ -77,7 +66,9 @@ def esc(s):
 
 def area_jsonld(muni, groups):
     """市町村ページの構造化データ: 掲載制度を CollectionPage + ItemList(GovernmentService)で列挙。
-    事実(制度名・提供元・対象地域・公式URL)のみ。金額など未確定値は入れない(正確性最優先)。"""
+    事実(制度名・提供元・対象地域・公式URL)のみ。金額など未確定値は入れない(正確性最優先)。
+    2026-08-10 SEO裁定: ItemListは市町村+県の制度に絞る(全国38件は41ページ共通のため
+    重複シグナルを避け、ページ固有性を構造化データ側でも示す)。"""
     elements = []
     pos = 1
     for group in groups:
@@ -103,8 +94,16 @@ def area_jsonld(muni, groups):
             + json.dumps(data, ensure_ascii=False) + "\n</script>")
 
 
-def page(title, desc, body, updated, depth=2, head_extra=""):
+def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
     rel = "../" * depth
+    # フッター: depthに応じて正しい相対パスを組む(一覧ページが別ブランドのミカタへ飛ぶバグの修正・2026-08-12)
+    if depth == 1:
+        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップへ</a></p><p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ig_click\')">Instagramで最新情報を見る ›</a></p>'
+    else:
+        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップへ</a></p><p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ig_click\')">Instagramで最新情報を見る ›</a></p>'
+    seo = ""
+    if canon_path is not None:
+        seo = canonical_tag(canon_path) + "\n" + ogp_tags(title, desc, canon_path) + "\n"
     return f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -112,8 +111,12 @@ def page(title, desc, body, updated, depth=2, head_extra=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
-<link rel="icon" type="image/svg+xml" href="{rel}assets/icon.svg">
+{seo}<link rel="icon" type="image/svg+xml" href="{rel}assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
 {head_extra}
+<link rel="stylesheet" href="{rel}assets/fg-base.css">
 <style>{STYLE}</style>
 </head>
 <body>
@@ -122,8 +125,8 @@ def page(title, desc, body, updated, depth=2, head_extra=""):
 {HEADER}
 <div class="wrap">
 {body}
-<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
-<p style="margin-top:16px"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
+<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: {esc(updated)}(毎日自動更新) / もらいわすれ堂(運営: 株式会社フクギイロ)</div>
+{footer_links}
 </div>
 </body>
 </html>
@@ -134,12 +137,38 @@ def muni_page(muni, items, updated):
     local = [it for it in items if it["area"] == muni]
     pref = [it for it in items if it["area"] == "沖縄県"]
     national = [it for it in items if it["area"] == "全国"]
+    shown = local + pref + national
+    verified_n = sum(1 for it in shown if it.get("verified") is True)
+    # 単一CV(LINE登録)。締切は「約1か月前」表現で統一(3層ルール準拠)。
+    line_cta = (
+        '<a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-area/" '
+        'target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'line_add_click\')">'
+        f'💬 {esc(muni)}で使える制度の締切をLINEで受け取る'
+        '<span>締切の約1か月前にお知らせ・新しい制度が増えたときも(無料)</span></a>'
+    )
+    # 導入文を市町村ごとに固有化(掲載件数・代表制度名入り。41ページの文面重複を下げる)
+    examples = [it["name"] for it in (local + pref)][:3]
+    ex_txt = "・".join(esc(x) for x in examples)
+    total = len(shown)
+    if local:
+        intro = (f'{esc(muni)}の制度{len(local)}件と沖縄県{len(pref)}件・国{len(national)}件をあわせた'
+                 f'計{total}件から、ご家庭向けのものをまとめています。')
+    else:
+        intro = (f'沖縄県の制度{len(pref)}件と国の制度{len(national)}件の計{total}件から、'
+                 f'{esc(muni)}にお住まいのご家庭が使える可能性のあるものをまとめています。')
     body = [
         f"<h1>{esc(muni)}にお住まいの方が使える可能性のある給付金・手当</h1>",
-        f'<p class="note">国・県・{esc(muni)}の制度から、ご家庭向けのものをまとめています。あなたの世帯にあてはまるものは3分診断でしぼり込めます。</p>',
-        '<a class="btn" href="../../shindan/">3分でもらい忘れ診断をはじめる</a>',
+        f'<p class="note">{intro}あなたの世帯にあてはまるものは3分診断でしぼり込めます。</p>',
     ]
-    sections = [(f"{muni}の制度", local), ("沖縄県の制度", pref), ("全国(国)の制度", national)]
+    if verified_n:
+        body.append(
+            f'<div class="trust">✓ このうち <strong>{verified_n}件</strong> は、'
+            f'{esc(muni)}や国・県の公式ページと照合して掲載しています(確認済み)。'
+            '金額の目安など一部「要確認」の項目は、公式ページのリンクからご確認いただけます。</div>'
+        )
+    body.append('<a class="btn" href="../../shindan/">3分でもらい忘れ診断をはじめる</a>')
+    # 市町村・県の制度=カード(このページの固有コンテンツ)
+    sections = [(f"{muni}の制度", local), ("沖縄県の制度", pref)]
     for label, group in sections:
         if not group and label.startswith(muni):
             body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>{esc(label)}</h2>")
@@ -150,7 +179,12 @@ def muni_page(muni, items, updated):
         body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>{esc(label)}({len(group)}件)</h2>")
         body.append('<div class="cardgrid">')
         for it in group:
-            badge = ' <span class="status">要確認</span>' if it.get("status") == "要確認" else ""
+            if it.get("verified") is True:
+                badge = ' <span class="status ok">✓ 公式と照合済み</span>'
+            elif it.get("status") == "要確認":
+                badge = ' <span class="status">要確認</span>'
+            else:
+                badge = ""
             body.append(
                 '<div class="card">'
                 f"<h2>{esc(it['name'])}{badge}</h2>"
@@ -161,10 +195,31 @@ def muni_page(muni, items, updated):
                 "</div>"
             )
         body.append('</div>')
-    title = f"{muni}の給付金・手当まとめ | もらいわすれ堂"
-    desc = f"{muni}にお住まいの世帯が使える可能性のある給付金・手当のまとめ。3分の無料診断で、あなたの世帯にあてはまる制度がわかります。"
-    ld = area_jsonld(muni, [local, pref, national])
-    return page(title, desc, "\n".join(body), updated, head_extra=ld)
+    # 全国(国)の制度=リンクリスト(41ページ共通のため全文カードにせず重複率を下げる。
+    # 詳細は各申請準備シートに集約 — 2026-08-10 SEO裁定)
+    if national:
+        body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>全国(国)の制度({len(national)}件)</h2>")
+        body.append(f'<p class="note">国の制度は全国共通です。それぞれの申請準備シートで、{esc(muni)}の窓口に行く前の準備(持ち物・電話で聞くこと)を確認できます。</p>')
+        body.append('<ul class="seidolist">')
+        for it in national:
+            mark = "✓ " if it.get("verified") is True else ""
+            body.append(f'<li><a href="../../kit/{esc(it["id"])}/">{mark}{esc(it["name"])}</a></li>')
+        body.append('</ul>')
+    # ページ末にもLINE誘導(締切の見逃し防止=登録特典)
+    body.append(
+        f'<p class="note" style="margin-top:22px;text-align:center">'
+        f'{esc(muni)}で新しい制度が増えたときや、締切が近づいたときに、LINEでそっとお知らせします。</p>'
+    )
+    body.append(line_cta)
+    title = f"{muni}の給付金・手当まとめ({total}件)|申請方法と窓口|もらいわすれ堂"
+    desc = (f"{muni}にお住まいの世帯が使える可能性のある給付金・手当{total}件のまとめ。"
+            + (f"{ex_txt}など、" if ex_txt else "")
+            + f"国・沖縄県・{muni}の制度を公式ページと照合して掲載。無料・匿名の3分診断つき。")
+    slug = MUNI_SLUG[muni]
+    ld = area_jsonld(muni, [local, pref])
+    crumbs = breadcrumb_jsonld([("もらいわすれ堂", ""), ("市町村別まとめ", "area/"), (muni, None)])
+    return page(title, desc, "\n".join(body), updated, head_extra=ld + "\n" + crumbs,
+                canon_path=f"area/{slug}/")
 
 
 def index_page(updated):
@@ -177,7 +232,12 @@ def index_page(updated):
         f'<ul class="areas">{lis}</ul>'
         '<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'
     )
-    return page("沖縄県 市町村別の給付金・手当まとめ | もらいわすれ堂", "沖縄県41市町村別の給付金・手当まとめ。", body, updated, depth=1)
+    return page(
+        "沖縄県 市町村別の給付金・手当まとめ(41市町村)|もらいわすれ堂",
+        "那覇市・沖縄市・うるま市・宜野湾市など沖縄県41市町村ごとに、こども医療費助成・児童手当・ひとり親支援などの給付金・手当をまとめて確認できます。公式ページと照合して掲載。無料・匿名の3分診断つき。",
+        body, updated, depth=1,
+        head_extra=breadcrumb_jsonld([("もらいわすれ堂", ""), ("市町村別まとめ", None)]),
+        canon_path="area/")
 
 
 def main():

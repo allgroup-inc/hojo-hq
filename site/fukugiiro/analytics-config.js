@@ -2,3 +2,6 @@
 window.FG_ANALYTICS = {provider: "plausible", domain: "allgroup-inc.github.io"};
 /* LINE公式アカウント友だち追加URL(2026-07-24 開設・小柳遥さん) */
 window.FG_LINE_URL = "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/"; /* lin.ee直貼り禁止: 変更は scripts/generate_go_pages.py */
+/* LINEベーシックID: 設定すると「もらえた報告」がワンタップ送信になる(未設定時はコピー方式)
+   2026-08-10 小柳さん共有(manager.line.biz のURLで確認: @634vbptr)。@は付けない */
+window.FG_LINE_OA_ID = "634vbptr";

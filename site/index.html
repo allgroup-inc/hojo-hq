@@ -56,8 +56,11 @@
   .serif{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;}
   /* 日本語の折り返しを文節単位にする(2026-08-04 小柳さん指示。未対応ブラウザは通常折返し)。
      body全体に掛けると初期レイアウトが約1.7秒かかりLighthouse Performanceを大きく落とすため、
-     効果が見える見出し・ヒーロー・診断UI・モーダル(開くまでレイアウトされない)に限定する(2026-08-05) */
-  h1,h2,h3,h4,h5,.oath,.sub,.live-badge,.hero-cta,.glow-about-btn,.form-guide,.unlock p,.glow-card{word-break:auto-phrase;}
+     効果が見える見出し・ヒーロー・診断UI・モーダル(開くまでレイアウトされない)に限定する(2026-08-05)。
+     その限定でもカード・CTA等の繰り返し要素まで含めるとStyle&Layoutが約1.2秒かかり
+     Performance 0.88まで退行した(Issue #10・実測: 全適用0.88/h1-h3のみ0.98-0.99)。
+     見出し以外の泣き別れは手動の<span class="nowrap">で個別対応する(2026-08-17) */
+  h1,h2,h3{word-break:auto-phrase;}
 
   /* ===== ヘッドライン主導のフルスクリーン構成 ===== */
   section{
@@ -90,9 +93,11 @@
     font-weight:900;
     letter-spacing:var(--ls-head);
     line-height:var(--lh-head);
-    text-wrap:balance;
   }
-  h1{font-size:clamp(1.9rem,6.6vw,5.2rem);}
+  /* text-wrap:balanceはh1(1箇所)のみ。h2はページ内に6回出現し、それぞれが
+     複数回のレイアウト再計算を伴うためLighthouse Performance(TBT)を大きく
+     悪化させる(実測: TBT 640ms→40ms, Performance 0.83→0.98。2026-08-09) */
+  h1{font-size:clamp(1.9rem,6.6vw,5.2rem);text-wrap:balance;}
   .nowrap{white-space:nowrap;}
   .sp{display:none;}
   @media (max-width:640px){.sp{display:block;}}
@@ -514,6 +519,16 @@
   .glow-vision small{display:block;margin-top:1.2em;padding-top:1.1em;font-size:.88em;font-weight:500;
     color:rgba(255,255,255,.88);border-top:1px solid rgba(255,255,255,.25);}
   @media(max-width:640px){.glow-vision small br{display:none;}}
+  /* 目的別にさがす(2026-08-10 小柳さん決裁A・pSEO内部リンク) */
+  .themes-nav{background:#f4f7fa;padding:44px 20px 48px;text-align:center;}
+  .themes-nav h2{color:#00335c;font-size:1.35rem;margin:0 0 .4em;}
+  .tn-sub{color:#5a6b78;font-size:.9rem;margin:0 0 1.3em;}
+  .tn-links{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:640px;margin:0 auto;}
+  .tn-links a{display:inline-block;background:#fff;color:#00335c;font-weight:700;font-size:.92rem;
+    border:1px solid #dbe5ee;border-radius:24px;padding:.6em 1.3em;text-decoration:none;
+    transition:transform .15s,box-shadow .15s;}
+  .tn-links a:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,51,92,.12);
+    border-color:var(--kin);}
   /* 相談の流れ(2026-08-04 相談転換③) */
   .consult-flow{margin-top:var(--sp-4);padding:var(--sp-3);border-radius:14px;
     background:#fff;border:1px solid #e2e9f0;border-top:4px solid var(--kin);text-align:center;}
@@ -708,7 +723,7 @@
     <div id="shokei-banner" class="shokei-banner" hidden>
       <strong>事業の引き継ぎ・後継に使える補助金</strong>があります。
       専門家への相談費用なども補助対象になる制度です。
-      <a href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E4%BA%8B%E6%A5%AD%E6%89%BF%E7%B6%99%E7%9B%B8%E8%AB%87%E3%80%91" target="_blank" rel="noopener" class="shokei-link">引き継ぎの無料相談はこちら</a>
+      <a href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E5%BC%95%E3%81%8D%E7%B6%99%E3%81%8E%E3%81%AE%E3%81%94%E7%9B%B8%E8%AB%87%E3%80%91" target="_blank" rel="noopener" class="shokei-link">引き継ぎの無料相談はこちら</a>
     </div>
     <div id="result-list"></div>
     <p class="result-note">締切アラート(約1か月前から)を受け取るには、LINE登録(無料)をどうぞ。</p>
@@ -801,6 +816,20 @@
     </details>
   </div>
   <p class="updated rv">データ最終更新:<span id="updated-at">—</span>(1日4回自動更新)</p>
+</section>
+
+<!-- 目的別にさがす(2026-08-10 小柳さん決裁A) -->
+<section class="themes-nav">
+  <h2 class="rv">目的別にさがす</h2>
+  <p class="tn-sub rv">「何に使いたいか」から、いま募集中の制度を一覧できます(毎日更新)。</p>
+  <div class="tn-links rv">
+    <a href="themes/setsubi/">設備投資</a>
+    <a href="themes/it/">IT・デジタル化</a>
+    <a href="themes/shoene/">省エネ・脱炭素</a>
+    <a href="themes/koyou/">雇用・人材</a>
+    <a href="themes/sogyo/">創業</a>
+    <a href="themes/shokei/">事業承継・M&amp;A</a>
+  </div>
 </section>
 
 <!-- CTA -->
@@ -897,7 +926,7 @@
 
 <footer>
   <div><strong>沖縄企業のミカタ</strong> — 運営:株式会社GLOW</div>
-  
+  <div>対面でじっくり経営の相談をしたい方へ: <a href="https://allgroup-inc.github.io/yuntaku-lp/" style="color:inherit;text-decoration:underline;">ゆんたく経営相談室</a></div>
   <div>最新情報は必ず各制度の公式サイトでご確認ください。</div>
 </footer>
 

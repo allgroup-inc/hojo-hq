@@ -7,21 +7,36 @@ name: gas-setup
 on:
   workflow_dispatch: {}
 
+# 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
+concurrency:
+  group: gas-setup
+  cancel-in-progress: false
+
 jobs:
   set-admin:
     runs-on: ubuntu-latest
     steps:
       - name: Set ADMIN_USER_ID on GAS
+        # curlはGASの302リダイレクトでPOSTが化けるため、healthcheckと同じurllib方式を使う
         env:
           GAS_LEDGER_ENDPOINT: ${{ secrets.GAS_LEDGER_ENDPOINT }}
           GAS_LEDGER_TOKEN: ${{ secrets.GAS_LEDGER_TOKEN }}
           LINE_ADMIN_USER_ID: ${{ secrets.LINE_ADMIN_USER_ID }}
         run: |
-          if [ -z "$GAS_LEDGER_ENDPOINT" ] || [ -z "$GAS_LEDGER_TOKEN" ] || [ -z "$LINE_ADMIN_USER_ID" ]; then
-            echo "必要なSecretsが未設定です"; exit 1
-          fi
-          res=$(curl -sL -X POST "$GAS_LEDGER_ENDPOINT" \
-            -H "Content-Type: application/json" \
-            -d "{\"diag\":\"setprop\",\"token\":\"$GAS_LEDGER_TOKEN\",\"key\":\"ADMIN_USER_ID\",\"value\":\"$LINE_ADMIN_USER_ID\"}")
-          echo "response: $res"
-          echo "$res" | grep -q '"ok":true' || { echo "設定失敗(v1.4が未デプロイの可能性)"; exit 1; }
+          python3 - <<'EOF'
+          import json, os, sys, urllib.request
+          ep = os.environ.get("GAS_LEDGER_ENDPOINT", "")
+          tk = os.environ.get("GAS_LEDGER_TOKEN", "")
+          ad = os.environ.get("LINE_ADMIN_USER_ID", "")
+          if not (ep and tk and ad):
+              sys.exit("必要なSecretsが未設定です")
+          payload = json.dumps({"diag": "setprop", "token": tk,
+                                "key": "ADMIN_USER_ID", "value": ad}).encode("utf-8")
+          req = urllib.request.Request(ep, data=payload, method="POST",
+                                       headers={"Content-Type": "application/json"})
+          body = urllib.request.urlopen(req, timeout=30).read().decode("utf-8")
+          print("response:", body[:200])
+          if '"ok":true' not in body.replace(" ", ""):
+              sys.exit("設定失敗(v1.4が未デプロイの可能性)")
+          print("ADMIN_USER_ID 設定完了")
+          EOF

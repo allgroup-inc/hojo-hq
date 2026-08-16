@@ -96,6 +96,25 @@ def fetch_counts(api_key, site_id, period, api_base):
     return counts
 
 
+def fetch_prop_breakdown(api_key, site_id, period, api_base, event_name, prop):
+    """特定イベントのカスタムプロパティ別内訳(例: line_add_click の pos別)。
+    失敗しても本体を止めない(呼び出し側で握る)。"""
+    qs = urllib.parse.urlencode({
+        "site_id": site_id, "period": period,
+        "property": f"event:props:{prop}", "metrics": "events", "limit": "50",
+        "filters": f"event:name=={event_name}",
+    })
+    url = api_base.rstrip("/") + "/api/v1/stats/breakdown?" + qs
+    req = urllib.request.Request(url, headers={"Authorization": "Bearer " + api_key})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        data = json.load(r)
+    out = {}
+    for row in data.get("results", []):
+        key = row.get(prop) or "(none)"
+        out[key] = int(row.get("events", 0) or 0)
+    return out
+
+
 def _r(x):
     return None if x is None else round(x, 4)
 
@@ -150,8 +169,24 @@ def main():
         print("[info] ファネル取得をスキップ(週次レポは確認先表示にフォールバック)")
         return 0
     fn = build_funnel(counts)
+    # LINE誘導の入口別内訳とリダイレクト突合(2026-08-10 裁定・第2着手の計測)。
+    # クリック(line_add_click pos別)と中間ページ到達(line_redirect channel別)を並記し、
+    # クリック後の脱落を週次で監視できるようにする。取得失敗は本体に影響させない。
+    line_detail = {}
+    try:
+        line_detail["click_by_pos"] = fetch_prop_breakdown(
+            api_key, site_id, period, api_base, "line_add_click", "pos")
+    except Exception as e:
+        print(f"[warn] pos内訳の取得失敗(継続): {type(e).__name__}")
+    try:
+        line_detail["redirect_by_channel"] = fetch_prop_breakdown(
+            api_key, site_id, period, api_base, "line_redirect", "channel")
+    except Exception as e:
+        print(f"[warn] channel内訳の取得失敗(継続): {type(e).__name__}")
     out = {"schema_version": 1, "updated_at": date.today().isoformat(),
            "period": period, "source": "plausible-stats-api"}
+    if line_detail:
+        out["line_detail"] = line_detail
     out.update(fn)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:

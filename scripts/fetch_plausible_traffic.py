@@ -50,8 +50,10 @@ def load():
     }
 
 
-def fetch_aggregate(api_key, site_id, period, api_base, page_glob=None):
+def fetch_aggregate(api_key, site_id, period, api_base, page_glob=None, date=None):
     params = {"site_id": site_id, "period": period, "metrics": METRICS}
+    if date:
+        params["date"] = date
     if page_glob:
         params["filters"] = "event:page==" + page_glob
     url = api_base.rstrip("/") + "/api/v1/stats/aggregate?" + urllib.parse.urlencode(params)
@@ -142,6 +144,19 @@ def main():
     except Exception as e:  # noqa: BLE001
         print(f"[warn] もらいわすれ堂の絞り込み取得に失敗: {type(e).__name__}")
         entry["moradou"] = None
+
+    # 全期間の累計(公開2026-07-23〜今日)。「今まで何人見たか」に正確に答えるための実測。
+    # 失敗しても週次記録は継続(all_timeは前回値のまま)。
+    try:
+        today = datetime.now(JST).strftime("%Y-%m-%d")
+        at_domain = fetch_aggregate(api_key, site_id, "custom", api_base, date=f"2026-07-23,{today}")
+        at_moradou = fetch_aggregate(api_key, site_id, "custom", api_base, page_glob=glob, date=f"2026-07-23,{today}")
+        state["all_time"] = {"since": "2026-07-23", "as_of": today,
+                             "domain_visitors": at_domain.get("visitors"),
+                             "moradou_visitors": at_moradou.get("visitors"),
+                             "moradou_pageviews": at_moradou.get("pageviews")}
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] 全期間累計の取得に失敗(継続): {type(e).__name__}")
 
     # 同日エントリは上書き(重複追記を避ける)
     state["history"] = [h for h in state.get("history", []) if h.get("date") != entry["date"]]

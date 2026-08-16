@@ -1,0 +1,221 @@
+/* LP側スタイルの打ち消し */
+.film .scene{padding:0}
+.film .scene p{margin:0}
+.tinyhead{z-index:60}
+
+
+/* ===== 固定ヘッダー ===== */
+.tinyhead{position:fixed;top:0;left:0;right:0;z-index:90;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;pointer-events:none}
+.tinyhead .hl{display:flex;align-items:center;gap:8px;font-family:"Shippori Mincho",serif;font-weight:600;font-size:1rem;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.3);pointer-events:auto;text-decoration:none;transition:color .8s ease}
+.tinyhead .hl svg{width:28px;height:28px}
+.tinyhead .skip{pointer-events:auto;font-size:.78rem;color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.5);border-radius:999px;padding:7px 14px;background:rgba(0,0,0,.12);backdrop-filter:blur(4px);transition:color .8s ease,border-color .8s ease,background .8s ease}
+.tinyhead.on-light .hl{color:var(--coral-deep);text-shadow:none}
+.tinyhead.on-light .skip{color:var(--ink);border-color:var(--line);background:rgba(255,255,255,.6)}
+
+/* ===== フィルム: 夜→朝 一枚のグラデーション(8シーン) ===== */
+.film{position:relative;
+  background:linear-gradient(180deg,
+    #101B1A 0%,
+    #131E1D 8%,
+    #182828 16%,
+    #1F3838 25%,
+    #2B4846 33%,
+    #3C5A55 40%,
+    #7A7E66 46%,
+    #C98E6C 52%,
+    #E7B98F 58%,
+    #F3DCC0 65%,
+    #FBF5EC 73%,
+    #FBF5EC 100%)}
+.scene{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.scene .copy{position:relative;z-index:6;text-align:center;padding:0 24px;max-width:760px}
+.copy p{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;line-height:2.1;
+  word-break:keep-all;overflow-wrap:anywhere;letter-spacing:.1em}
+.rise{opacity:0;transform:translateY(26px);transition:opacity 1.6s ease,transform 1.6s ease}
+.in .rise{opacity:1;transform:none}
+.rise.d1{transition-delay:.5s}.rise.d2{transition-delay:1.1s}.rise.d3{transition-delay:1.7s}
+/* 「沖縄です。」宣言: 映画タイトル風(字間が締まりながら現れる) */
+.stmt{opacity:0;letter-spacing:.5em;transition:opacity 2.4s ease,letter-spacing 2.4s ease}
+.in .stmt{opacity:1;letter-spacing:.14em}
+.stmt-l{font-size:clamp(1.5rem,5.2vw,2.5rem)}
+.stmt-s{font-size:clamp(1.15rem,4vw,1.9rem)}
+.dark-t{color:#FFF7EA;text-shadow:0 2px 24px rgba(8,18,18,.6)}
+.warm-t{color:#FFF7EA;text-shadow:0 2px 20px rgba(90,50,25,.45)}
+/* シーンごとのゆっくりズーム(動画風) */
+.kb{position:absolute;inset:0;transform:scale(1.07);transition:transform 22s ease-out;transform-origin:50% 72%}
+.in .kb{transform:scale(1)}
+/* 星・雲・光の粒 */
+.hoshi{position:absolute;border-radius:50%;background:#EFE3C8;animation:tw 3.4s ease-in-out infinite alternate;z-index:1}
+@keyframes tw{from{opacity:.1}to{opacity:.85}}
+.cloud{position:absolute;border-radius:50%;filter:blur(20px);background:rgba(255,235,214,.10);z-index:1}
+.c1{width:46vmin;height:9vmin;animation:cloudmove 52s linear infinite}
+.c2{width:34vmin;height:7vmin;animation:cloudmove 64s linear infinite reverse}
+@keyframes cloudmove{from{transform:translateX(-16vw)}to{transform:translateX(116vw)}}
+.mote{position:absolute;border-radius:50%;background:var(--sun);opacity:.4;animation:float 9s ease-in-out infinite alternate;z-index:1}
+@keyframes float{from{transform:translateY(12px)}to{transform:translateY(-26px)}}
+/* 影絵(シルエット) */
+.sil{position:absolute;z-index:3;opacity:.94}
+.sil svg{display:block;width:100%;height:auto}
+.sil path,.sil circle,.sil rect,.sil ellipse{fill:#0B1514}
+.sil.dawns path,.sil.dawns circle,.sil.dawns rect,.sil.dawns ellipse{fill:#3D2B20}
+
+/* ===== S1: 146万人(夜・集落の灯り) ===== */
+.milky{position:absolute;width:130%;height:34vmin;left:-15%;top:6%;transform:rotate(-14deg);
+  background:linear-gradient(90deg,rgba(238,228,200,0),rgba(238,228,200,.09) 30%,rgba(214,226,214,.13) 55%,rgba(238,228,200,.07) 78%,rgba(238,228,200,0));filter:blur(10px);z-index:1}
+.moon{position:absolute;top:11%;right:15%;width:9vmin;height:9vmin;border-radius:50%;background:#F4E6C4;box-shadow:0 0 44px 10px rgba(244,230,196,.4);opacity:.95;z-index:2}
+.moon::after{content:"";position:absolute;top:12%;left:6%;width:78%;height:78%;border-radius:50%;background:#152422;opacity:.16}
+.shooting{position:absolute;top:14%;left:-8%;width:14vmin;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,rgba(255,244,214,0),#FFF4D6);transform:rotate(16deg);opacity:0;z-index:2;
+  animation:shoot 8.5s ease-in 2.2s infinite}
+@keyframes shoot{0%{opacity:0;transform:translate(0,0) rotate(16deg)}3%{opacity:.9}9%{opacity:0;transform:translate(64vw,19vw) rotate(16deg)}100%{opacity:0;transform:translate(64vw,19vw) rotate(16deg)}}
+.island{position:absolute;left:0;right:0;bottom:0;height:26vh;z-index:2}
+.island svg{width:100%;height:100%}
+.vlight{position:absolute;width:4px;height:4px;border-radius:50%;background:#F7C96E;box-shadow:0 0 8px 2px rgba(247,201,110,.55);animation:tw 4.2s ease-in-out infinite alternate;z-index:3}
+.flora{position:absolute;bottom:12vh;z-index:4;opacity:.95}
+.flora svg{display:block;height:32vh;width:auto}
+.flora.left{left:-4vw}
+.flora .sway{transform-origin:88% 92%;animation:sway 7s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-1.6deg)}to{transform:rotate(1.8deg)}}
+.s1 .sub{margin-top:1.2em;font-size:clamp(.85rem,2.6vw,1rem)!important;letter-spacing:.22em!important;color:#E9D8BC!important;font-weight:500!important}
+/* 前口上(映画の導入) */
+.pretitle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:8;pointer-events:none}
+.pretitle p{font-family:"Shippori Mincho",serif;font-weight:500;font-size:clamp(.95rem,3vw,1.2rem);letter-spacing:.3em;color:#E9DCC2;opacity:0;animation:pre 2.8s ease .3s forwards}
+@keyframes pre{0%{opacity:0}18%{opacity:1}66%{opacity:1}100%{opacity:0}}
+.s1 .stmt{transition-delay:2.5s}
+.s1 .sub{transition-delay:3.1s!important}
+/* ビジョンの光 */
+.sunburst{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);width:90vmin;height:90vmin;border-radius:50%;z-index:1;
+  background:radial-gradient(circle,rgba(246,203,116,.5) 0%,rgba(246,203,116,.22) 34%,rgba(246,203,116,0) 66%);
+  opacity:0;transition:opacity 2.6s ease 1.6s}
+.s7.in .sunburst{opacity:1;animation:glowp 6s ease-in-out 4s infinite alternate}
+.scrollcue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:7;color:#FFF3E0;font-size:.72rem;letter-spacing:.3em;text-align:center;opacity:.85}
+.scrollcue::after{content:"";display:block;width:1px;height:38px;background:linear-gradient(180deg,#FFF3E0,transparent);margin:8px auto 0;animation:cue 2.2s ease-in-out infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ===== S4: 美しい(朝焼けの海) ===== */
+.glow{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);width:62vmin;height:62vmin;border-radius:50%;
+  background:radial-gradient(circle,#F7D488 0%,rgba(247,196,110,.5) 34%,rgba(231,169,102,0) 70%);
+  animation:glowp 7s ease-in-out infinite alternate;filter:blur(2px);z-index:1}
+@keyframes glowp{from{opacity:.6;transform:translateX(-50%) scale(.96)}to{opacity:1;transform:translateX(-50%) scale(1.05)}}
+.risingsun{position:absolute;left:50%;bottom:10%;transform:translateX(-50%) translateY(10vmin);width:12vmin;height:12vmin;border-radius:50%;background:#F6CB74;box-shadow:0 0 46px 10px rgba(246,203,116,.55);z-index:1;transition:transform 4.5s cubic-bezier(.2,.6,.3,1)}
+.in .risingsun{transform:translateX(-50%) translateY(0)}
+.dawnsea{position:absolute;left:0;right:0;bottom:-8vh;height:26vh;z-index:2;opacity:.45;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 40%,#000 62%,transparent 96%);
+  mask-image:linear-gradient(180deg,transparent 0%,#000 40%,#000 62%,transparent 96%)}
+.wave{position:absolute;left:-60%;width:220%;height:110px}
+.wave svg{width:100%;height:100%}
+.w2{animation:drift 22s linear infinite reverse;bottom:14px;opacity:.6}
+.w3{animation:drift 30s linear infinite;bottom:-16px;opacity:.85}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-27%)}}
+.bird{position:absolute;z-index:4;opacity:0;animation:fly 16s linear infinite}
+.bird svg{width:5.5vmin;height:auto}
+.bird path{stroke:#5C4634;stroke-width:5;fill:none;stroke-linecap:round}
+.b2{animation-delay:5s}.b2 svg{width:4vmin}
+.b3{animation-delay:9.5s}.b3 svg{width:3vmin}
+@keyframes fly{0%{opacity:0;transform:translate(-8vw,4vh)}6%{opacity:.85}50%{transform:translate(52vw,-2vh)}94%{opacity:.85}100%{opacity:0;transform:translate(112vw,-6vh)}}
+.bird .flap{animation:flap .7s ease-in-out infinite alternate;transform-origin:center}
+@keyframes flap{from{transform:scaleY(.6)}to{transform:scaleY(1.15)}}
+
+/* ===== S6: 問題(静かな朝) ===== */
+.s6 .copy p{color:#6d5c4d}
+.s6 .q1{font-size:clamp(1.2rem,4.2vw,1.9rem);color:var(--ink)!important}
+.s6 .q2{font-size:clamp(1rem,3.2vw,1.35rem);margin-top:1.4em}
+
+/* ===== S7: ビジョン ===== */
+.s7{flex-direction:column;gap:22px}
+.s7 .logo{width:clamp(300px,72vmin,560px);height:auto;position:relative;z-index:5}
+.s7 .vision{font-size:clamp(1.5rem,5.6vw,2.5rem);color:var(--coral-deep);letter-spacing:.12em}
+.s7 .vision span{opacity:0;display:inline-block;transform:translateY(.5em);transition:opacity 1s ease,transform 1s ease}
+.s7.in .vision span{opacity:1;transform:none}
+.s7 .wm{font-size:clamp(1.05rem,3.4vw,1.4rem);color:var(--ink);letter-spacing:.14em}
+.arc{fill:none;stroke-width:6;stroke-linecap:round;stroke-dasharray:70;stroke-dashoffset:70}
+.s7.in .arc{animation:draw 1.6s ease forwards}
+.s7.in .a2{animation-delay:.35s}.s7.in .a3{animation-delay:.7s}
+@keyframes draw{to{stroke-dashoffset:0}}
+.petal{opacity:0;transition:opacity .9s ease}
+.s7.in .petal{opacity:1;transition-delay:1.5s}
+
+/* ===== S8: 笑顔の写真の壁 ===== */
+.s8{flex-direction:column}
+.faces{position:absolute;inset:0;z-index:1}
+.photo{position:absolute;background:#fff;padding:5px 5px 20px;border-radius:5px;
+  box-shadow:0 8px 22px rgba(90,60,40,.16);
+  opacity:0;transform:translate(-50%,-50%) rotate(var(--r,0deg)) scale(.4);
+  transition:opacity .8s ease,transform .8s cubic-bezier(.34,1.5,.64,1)}
+.s8.in .photo{opacity:1;transform:translate(-50%,-50%) rotate(var(--r,0deg)) scale(1)}
+.photo .ph{width:100%;aspect-ratio:4/4.6;border-radius:3px;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.photo .ph::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.5),rgba(255,255,255,0) 55%)}
+.photo .cap{position:absolute;left:0;right:0;bottom:3px;text-align:center;font-family:"Shippori Mincho",serif;font-size:9px;color:#8B7C6E;letter-spacing:.05em}
+.photo .tag2{font-size:8px;white-space:nowrap;color:rgba(255,255,255,.95);background:rgba(59,50,43,.42);border-radius:999px;padding:1px 6px;z-index:2;letter-spacing:.04em}
+@media(max-width:560px){.photo{width:calc(var(--w) * .74)!important;padding-bottom:15px}.photo .cap{font-size:7.5px;bottom:2px}.photo .tag2{font-size:6.8px}}
+.photo .bob{animation:bob 6s ease-in-out infinite alternate}
+@keyframes bob{from{transform:translateY(2px)}to{transform:translateY(-4px)}}
+.s8 .haze{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:120vmin;height:58vmin;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(251,245,236,.9) 30%,rgba(251,245,236,.6) 55%,rgba(251,245,236,0) 76%);z-index:5}
+.s8 .copy p.main{font-size:clamp(1.3rem,4.6vw,2rem);color:var(--ink)}
+.s8 .copy p.main .em{color:var(--coral-deep)}
+.s8 .sub2{margin-top:1em;font-size:clamp(.9rem,2.9vw,1.1rem)!important;color:var(--muted)!important;letter-spacing:.14em!important}
+.s8 .cta{display:block;width:100%;max-width:420px;margin:22px auto 0;padding:18px 24px;background:var(--coral);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-size:1.08rem;font-weight:700;transition:transform .15s ease;font-family:"Noto Sans JP",sans-serif}
+.s8 .cta:hover{transform:translateY(-2px)}
+.s8 .micro{font-size:.8rem;color:var(--muted);letter-spacing:.06em}
+
+/* ===== 接続部 ===== */
+.bridge{background:var(--card);border-top:1px solid var(--line);padding:56px 20px;text-align:center}
+.bridge h2{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.3rem;margin-bottom:.6em}
+.bridge p{color:var(--muted);font-size:.92rem;line-height:1.9;max-width:640px;margin:0 auto 1em}
+.bridge .navnote{display:grid;gap:10px;max-width:560px;margin:18px auto 0}
+.bridge .navnote div{background:var(--sand);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:.88rem}
+.protonote{background:#FFF8E8;border:1px solid #EAD9A8;border-radius:14px;max-width:640px;margin:26px auto 0;padding:16px 18px;font-size:.82rem;color:#6b5a2a;text-align:left;line-height:1.8}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .rise,.stmt,.s7 .vision span,.petal,.photo{opacity:1!important;transform:none!important;letter-spacing:.14em!important}
+  .arc{stroke-dashoffset:0!important}
+  .risingsun{transform:translateX(-50%) translateY(0)!important}
+  .kb{transform:none!important}
+}
+
+/* ===== S4 実写背景(海) ===== */
+.photoback{position:absolute;inset:0;z-index:0}
+.photoback img{width:100%;height:100%;object-fit:cover;display:block}
+.photoback::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(190,130,95,.6) 0%,rgba(226,175,130,.38) 48%,rgba(243,220,192,.8) 100%)}
+/* ===== 実用レイヤーへの世界観接続(内容不変・衣替えのみ) ===== */
+main section h2{letter-spacing:.12em}
+.hero h1{letter-spacing:.08em}
+.prise{opacity:0;transform:translateY(18px);transition:opacity 1.1s ease,transform 1.1s ease}
+.prise.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.prise{opacity:1!important;transform:none!important}}
+
+/* S4 実写主役化(本物の太陽・海に置き換え) */
+.s4x .risingsun,.s4x .glow,.s4x .dawnsea{display:none}
+.s4x .photoback::after{background:linear-gradient(180deg,rgba(110,65,40,.32) 0%,rgba(170,105,70,.14) 46%,rgba(243,220,192,.78) 100%)}
+.s4x .photoback::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at 50% 38%,rgba(70,45,30,.30),transparent 62%)}
+
+/* S1 実写主役化(本物の街の灯り) */
+.s1 .island,.s1 #vlights{display:none}
+.s1 .photoback::after{background:linear-gradient(180deg,rgba(16,27,26,.58) 0%,rgba(16,27,26,.22) 42%,rgba(16,27,26,.30) 70%,rgba(19,30,29,.78) 100%)}
+
+/* S2 実写主役化(浜辺の三線・夕景を夜に溶かす) */
+.s2 .sil{display:none}
+.s2 .photoback img{filter:saturate(.92) brightness(.9)}
+.s2 .photoback::after{background:linear-gradient(180deg,rgba(24,40,40,.74) 0%,rgba(24,40,40,.22) 38%,rgba(24,40,40,.30) 62%,rgba(31,56,56,.78) 100%)}
+.s2 .photoback::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at 50% 36%,rgba(15,28,28,.30),transparent 60%)}
+
+/* S3 実写主役化(収穫のゆいまーる・昼を夜明け前に溶かす) */
+.s3 .sil{display:none}
+.s3 .photoback img{filter:saturate(.88) brightness(.82)}
+.s3 .photoback::after{background:linear-gradient(180deg,rgba(43,72,70,.78) 0%,rgba(43,72,70,.26) 40%,rgba(60,90,85,.34) 64%,rgba(60,90,85,.80) 100%)}
+.s3 .photoback::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at 50% 34%,rgba(20,38,36,.32),transparent 60%)}
+
+/* シーン写真の上下をフィルムの一枚グラデーションに溶かす(ディゾルブ) */
+.photoback{-webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 38%,#000 62%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0%,#000 38%,#000 62%,transparent 100%)}
+
+/* S8: 浅いウィンドウでも写真が文字周りの余白を保てるように */
+.s8{min-height:max(100vh,900px)}
+
+/* PCワイド時のトリミング基準を顔に合わせる */
+.s2 .photoback img{object-position:38% 10%}
+.s3 .photoback img{object-position:50% 26%}

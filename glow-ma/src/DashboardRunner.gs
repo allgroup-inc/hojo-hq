@@ -137,12 +137,35 @@ function readPartnerRecords_(sheet) {
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
   var headers = GlowSchema.PARTNER_MASTER_HEADERS;
+  var idIndex = headers.indexOf("パートナーID");
   var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
-  return values.map(function (row) {
+  var records = [];
+  var skippedWithDataCount = 0;
+  values.forEach(function (row) {
+    // readCompanyRecords_と同じ理由(ensureTab_が書式をシート全体に適用するため
+    // getLastRow()が実データ行数より大きくなる)で、パートナーIDが空の行を読み飛ばす
+    // (本番運用2026-08-10で発見)。
+    // ただし他の列に値がある行は「人が入力途中の行」の可能性があるため件数をログに残す
+    // (最終レビュー2026-08-10 I5)。未チェックのチェックボックス列はfalseを返すため
+    // 空セル扱いにする。
+    if (!row[idIndex]) {
+      var hasOtherValue = row.some(function (cell) {
+        return cell !== "" && cell !== null && cell !== undefined && cell !== false;
+      });
+      if (hasOtherValue) skippedWithDataCount++;
+      return;
+    }
     var record = {};
     headers.forEach(function (header, i) {
       record[header] = row[i];
     });
-    return record;
+    records.push(record);
   });
+  if (skippedWithDataCount > 0) {
+    Logger.log(
+      skippedWithDataCount + "件のパートナーID未設定の行をスキップしました" +
+      "(データ入力中の可能性があるため確認してください)"
+    );
+  }
+  return records;
 }

@@ -4,12 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>個人情報保護方針 | もらいわすれ堂</title>
+<link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/privacy/">
 <meta name="description" content="もらいわすれ堂(運営: 株式会社フクギイロ)の個人情報保護方針。3分診断はお使いの端末の中だけで動き、回答は当社へ送信しません。取得するのはLINE登録者の識別子と、Cookieを使わない匿名のアクセス統計だけです。">
 <link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../assets/fg-base.css">
 <style>
-:root{--fg-primary:#B9502F;--fg-accent:#F2B705;--fg-deep:#1A6B52;--fg-ink:#1F2A2E;--fg-bg:#FFFBF4;--fg-card:#fff;--fg-muted:#5C6B70;--fg-line:#EBE2D4}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:18px;line-height:1.9;color:var(--fg-ink);background:var(--fg-bg)}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
 @media(min-width:900px){.wrap{max-width:780px}}
 h1{font-size:1.4rem;margin-bottom:6px}
@@ -24,17 +27,13 @@ th,td{border:1px solid var(--fg-line);padding:8px 10px;text-align:left;vertical-
 th{background:#f4f1e8}
 .pill{display:inline-block;font-size:.78rem;background:#e8f3ee;color:var(--fg-deep);border-radius:4px;padding:1px 8px;font-weight:700}
 .pill.no{background:#fff3cd;color:#7a5b00}
-a{color:var(--fg-primary)}
-.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
-.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--fg-primary);text-decoration:none;font-size:1rem}
-.siteheader .hlogo img{width:30px;height:30px}
-.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
-.siteheader nav a.hline{background:#06C755;color:#fff;font-weight:700}
 .contact{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:16px 18px;margin:16px 0}
 .contact dt{font-weight:700;font-size:.88rem;color:var(--fg-muted);margin-top:8px}
 .contact dd{margin:0 0 4px}
-.btn{display:block;max-width:420px;margin:20px auto 6px;padding:14px 24px;min-height:44px;background:#06C755;color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700}
+.btn{display:block;max-width:420px;margin:20px auto 6px;padding:14px 24px;min-height:44px;background:#22382A;color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tablewrap table{min-width:560px}
+.pill{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -46,7 +45,8 @@ a{color:var(--fg-primary)}
     <a href="../shindan/">3分診断</a>
     <a href="../area/">市町村</a>
     <a href="../kit/">準備シート</a>
-    <a class="hline" href="../../go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a href="../../go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
   </nav>
 </header>
 <div class="wrap">
@@ -67,12 +67,12 @@ a{color:var(--fg-primary)}
 </ul>
 
 <h2>2. 取得する情報・取得しない情報</h2>
-<table>
+<div class="tablewrap"><table>
 <tr><th>経路</th><th>情報</th><th>取得</th><th>使いみち</th></tr>
 <tr><td>3分診断</td><td>お住まいの市町村・世帯構成・お子さんの年齢帯・ライフイベント・住まいの状況</td><td><span class="pill no">取得しません</span></td><td>端末内で「使える可能性のある制度」を判定するためだけに使用。回答はお使いのブラウザ内(ローカル保存)にのみ残り、当社へ送信されません。ブラウザのデータ消去でいつでも削除できます。</td></tr>
 <tr><td>LINE登録</td><td>LINEの識別子・表示名など(LINEプラットフォーム上の情報)</td><td><span class="pill">取得します</span></td><td>締切リマインド・申請手順・受給フォローのお知らせ配信(登録者のみ)</td></tr>
 <tr><td>アクセス解析</td><td>ページの閲覧状況の匿名統計(Cookie不使用・個人を特定しません)</td><td><span class="pill">取得します</span><br>(個人特定なし)</td><td>サイトの改善と、「届いていない支援」の匿名分析</td></tr>
-</table>
+</table></div>
 
 <h2>3. 受け取らない情報</h2>
 <p>診断・LINE配信といったサービスのご利用にあたり、氏名・正確な住所(番地)・電話番号・メールアドレス・マイナンバー・口座情報、および病名などの要配慮個人情報は取得しません。<br>障がい・医療に関わる制度は「該当の可能性がある窓口のご案内」までとし、症状などの入力はお願いしません。</p>
@@ -97,13 +97,13 @@ a{color:var(--fg-primary)}
 </ul>
 
 <h2>6. Cookie・アクセス解析について</h2>
-<p>当サイトのアクセス解析は Cookie を使いません。個人を特定できる情報を集めず、どのページがよく読まれているかといった匿名の統計だけを扱います。</p>
+<p>当サイトのアクセス解析は Cookieを使いません。個人を特定できる情報を集めず、どのページがよく読まれているかといった匿名の統計だけを扱います。</p>
 
 <h2>7. 保存期間・削除・開示等のご請求</h2>
 <ul>
 <li>診断の回答: 当社サーバーには保存しません(お使いの端末内のみ)。端末側の記録はご自身でいつでも消去できます。</li>
 <li>LINEの識別子・配信関連データ: ブロック・退会をされた場合、90日以内に当社側の紐づけを削除します。</li>
-<li>ご本人からの利用停止・削除・開示等のご請求は、下記のお問い合わせ窓口(LINE または メール)で承り、30日以内に対応します。</li>
+<li>ご本人からの利用停止・削除・開示等のご請求は、下記のお問い合わせ窓口(LINEまたはメール)で承り、30日以内に対応します。</li>
 </ul>
 
 <h2>8. 安全管理</h2>
@@ -127,6 +127,7 @@ a{color:var(--fg-primary)}
 
 <p class="note">制定日: 2026年7月27日 / 最終改定日: 2026年7月30日</p>
 <p style="margin-top:16px"><a href="../">もらいわすれ堂 トップへ</a></p>
+<p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
 </div>
 </body>
 </html>

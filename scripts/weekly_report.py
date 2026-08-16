@@ -14,6 +14,7 @@ hojo-hq — 週次レポート(小柳さんのLINEへ毎週月曜8:00 JSTに配�
 import json
 import os
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -47,6 +48,9 @@ def section_site():
                   "&period=7d&metrics=visitors,pageviews", h)["results"]
         lines = [f"🌐 サイト(7日間)",
                  f"・訪問者: {agg['visitors']['value']}人 / 閲覧: {agg['pageviews']['value']}PV"]
+    except urllib.error.HTTPError as e:
+        # ステータスコードまで残す(2026-08-07: 401調査で「HTTPError」だけでは原因特定に往復が要った)
+        return f"🌐 サイト: 取得不可(HTTP {e.code})"
     except Exception as e:  # noqa: BLE001
         return f"🌐 サイト: 取得不可({type(e).__name__})"
     try:
@@ -68,6 +72,22 @@ def _pct(x):
     return "-" if x is None else f"{round(x * 100)}%"
 
 
+FUNNEL_STALE_DAYS = 3
+
+
+def funnel_stale_warning(updated_at, today):
+    """fetch側はAPI失敗時にexit 0して古いfunnel.jsonを残す設計のため、
+    レポート側で鮮度を判定する(実例: 2026-08-02のデータが8/7に「直近7d」として配信された)。
+    3日以上前または日付不明なら警告行、新しければ None を返す。"""
+    try:
+        age = (today - datetime.strptime(updated_at, "%Y-%m-%d").date()).days
+    except (TypeError, ValueError):
+        return f"⚠️ データ取得日が不明({updated_at!r})。古い可能性あり"
+    if age >= FUNNEL_STALE_DAYS:
+        return f"⚠️ データは{updated_at}時点(取得失敗のため古い可能性)"
+    return None
+
+
 def section_funnel():
     try:
         with open(FUNNEL_PATH, encoding="utf-8") as f:
@@ -86,6 +106,9 @@ def section_funnel():
     lines.append(f"・診断実行→LINEタップ: {_pct(kr.get('line_cvr'))}")
     if wd:
         lines.append(f"・最大離脱: {wd['label']}({_pct(wd['drop_rate'])})")
+    warn = funnel_stale_warning(fn.get("updated_at"), datetime.now(JST).date())
+    if warn:
+        lines.append(warn)
     return "\n".join(lines)
 
 
@@ -170,6 +193,8 @@ def section_note():
 
         lines.append(f"・フォロワー: {v('followers', '人')} / メンバー: {v('members', '人')}"
                      f" / 今月売上: {v('monthly_sales_yen', '円')}")
+        # うごくAIレシピの在庫監視はここに入れない(2026-08-09 小柳さん指示のLINE分離。
+        # 専用LINE(AIRECIPE_LINE_*)の下書き通知に在庫本数を同梱する方式に変更)
         return "\n".join(lines)
     except Exception as e:  # noqa: BLE001
         return f"📝 note運営: 取得不可({type(e).__name__})"

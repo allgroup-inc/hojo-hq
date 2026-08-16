@@ -5,10 +5,10 @@
 
 ## hojo-hqはALLGROUP共通スキルの「本店」(2026-08-07〜)
 以下の6つは、特定の事業に依存しない汎用スキルなので、hojo-hqを本店として他の業務
-リポジトリ(hikari-hq/hikari-lp/hikari-report/kakei-hq/report-hq/go/allgroup-site等)が
+リポジトリ(hikari-hq/hikari-lp/hikari-report/kakei-hq/okinawa-villa/report-hq/go/allgroup-site等)が
 ここから同期する運用にしている。
 
-- hojo-hqオリジナル: `humanizer` / `resilient-agent-design` / `mindshare-arbitrage`
+- hojo-hqオリジナル: `humanizer` / `resilient-agent-design` / `mindshare-arbitrage` / `multi-ai-crosscheck` / `context-limit-handoff` / `feature-factory` / `hojo-lighthouse-triage`
 - hojo-hqが選定してvendoring済みのOSS: `taste-skill` / `last30days` / `social-media-skills`
 
 - 新しいALLGROUP共通スキルを追加/更新するときは、まずここ(hojo-hq)に反映する
@@ -84,6 +84,10 @@ Claude が毎回思い出す必要がないようスキル化したもの。ベ�
 - `humanizer` — SNS投稿・LINE配信・サイトコピーなど対外文面の最後の仕上げで必ず使う。AIっぽさ(定型フレーズ・過剰な絵文字/強調)を除き、憲法トーン(専門用語をやさしく翻訳)の自然な日本語に整える(事実情報・CV導線は変えない)。
 - `resilient-agent-design` — cron・定期ワークフロー・無人稼働の自動化を新規設計/レビューするとき、または「壊れる・重複する・止まらない」トラブル時に使う。4層設計(Trigger/Workflow/Agent/Guardrail)と壊れにくい設計の7原則(判断だけAIへ・状態は外部保存・べき等性・リトライ上限・権限は最小から・Hookと監視・分業は慎重に)、実行方式の選び方を提供。
 - `mindshare-arbitrage` — SNS投稿・note記事のネタ探し〜生成〜投稿を仕組み化するとき。他の場で伸びた型を自分の言葉で翻訳する考え方と、発見→レビュー→生成→スライド化→承認投稿→分析学習の6段パイプライン(人が関わるのはレビューと承認投稿の2箇所だけ)。生成工程は`humanizer`と連携するwriter→humanizer→criticループを使う。
+- `multi-ai-crosscheck` — 複数AI(Claude+Gemini等)による独立クロスチェックを設計・実装・レビューするとき。独立性・保守的マージ・割れたら根拠引用の再確認・参加率と履歴の台帳化という4原則の型(参照実装: scripts/verify_sources.py)。
+- `context-limit-handoff` — 会話が「コンテキストウィンドウがいっぱいです」の警告を出したとき。作業状態をgit等の外部に持たせ、コンパクト化・巻き戻し・新セッションのどれを選んでも作業を失わないための判断フローを提供。
+- `feature-factory` — 1人開発でも複数エージェントに役割分担させて機能追加を進めるとき。調査→ストーリー→仕様→実装(分業)→検証の役割分担チェーンと、CLAUDE.mdを土台にした再現性の作り方を提供。`subagent-driven-development`/`writing-plans`/`brainstorming`/`test-driven-development`(Superpowers)を実行エンジンとして使う前提のオーケストレーション層。
+- `hojo-lighthouse-triage`(ALLGROUP共通) — GitHub ActionsのLighthouseワークフローの失敗通知・自動起票Issueに対応するとき。Claude Code環境からは本番URLやGitHub Actionsアーティファクトに直接アクセスできないことが多いため、ローカルに事前installされたChromium+Lighthouseで実測再現してから原因特定・修正する手順を提供(2026-08-09、hojo-hqでtext-wrap:balanceのTBT悪化を実測で特定した際に確立)。Lighthouse CIを使っていないリポジトリでは出番なし。
 
 同じパターンの姉妹スキルとして `glow-ma-triangle-review`(GLOW M&A向け)もある。
 

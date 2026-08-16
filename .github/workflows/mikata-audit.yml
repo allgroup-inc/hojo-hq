@@ -6,6 +6,7 @@ name: mikata-audit
 
 on:
   push:
+    branches: [main]  # 作業ブランチへのbot混入防止(resilient-agent-design監査 2026-08-07)
     paths:
       - "scripts/audit_sources_mikata.py"
       - ".github/workflows/mikata-audit.yml"
@@ -13,6 +14,11 @@ on:
     # 週次(月曜 06:00 JST = 日曜 21:00 UTC)— 収集対象ソースのrobots方針変更を検知
     - cron: "0 21 * * 0"
   workflow_dispatch: {}
+
+# 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
+concurrency:
+  group: mikata-audit
+  cancel-in-progress: false
 
 permissions:
   contents: write

@@ -5,10 +5,16 @@ on:
     # 毎週月曜 09:00 JST(= 日曜 00:00 UTC)。yui.md「週次レポートは毎週月曜」
     - cron: "0 0 * * 1"
   push:
+    branches: [main]  # 作業ブランチへのbot混入防止(resilient-agent-design監査 2026-08-07)
     paths:
       - "scripts/weekly_report_fukugiiro.py"
       - ".github/workflows/fukugiiro-weekly-report.yml"
   workflow_dispatch: {}
+
+# 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
+concurrency:
+  group: fukugiiro-weekly-report
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -38,6 +44,21 @@ jobs:
       - name: 週次レポート生成(統括ユイさん)
         run: python scripts/weekly_report_fukugiiro.py
 
+      - name: IG投稿画像の生成準備(pillow+フォント)
+        continue-on-error: true
+        run: |
+          pip install pillow
+          sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends fonts-noto-cjk
+          mkdir -p ~/.fonts
+          curl -fsSL -o ~/.fonts/ShipporiMincho-SemiBold.ttf https://raw.githubusercontent.com/google/fonts/main/ofl/shipporimincho/ShipporiMincho-SemiBold.ttf || true
+
+      - name: 遥さんボード生成(今週のIG投稿案・完成画像つき)
+        # data/fukugiiro/ig_neta.json(拡充ループが更新)→ 画像5枚+site/staff/haruka/
+        continue-on-error: true
+        run: |
+          python scripts/generate_ig_images_fukugiiro.py || true
+          python scripts/generate_haruka_board.py
+
       - name: Commit report
         run: |
           git config user.name "hojo-hq-bot"
@@ -45,9 +66,19 @@ jobs:
           git add reports/fukugiiro
           [ -f data/fukugiiro/funnel.json ] && git add data/fukugiiro/funnel.json || true
           [ -f data/kpi/site_traffic.json ] && git add data/kpi/site_traffic.json || true
+          [ -f site/staff/haruka/index.html ] && git add site/staff/haruka || true
           git diff --cached --quiet || git commit -m "auto: もらいわすれ堂 週次レポート $(date '+%Y-%m-%d')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
           for i in 1 2 3; do
             git pull --rebase origin main && git push && break
             echo "push retry $i"; sleep 5
           done
+
+      - name: 遥さんへLINE通知(投稿案が届いた合図)
+        # もらいわすれ堂OAの直送Secretsがある場合のみ送信。ミカタOAは使わない
+        # (2026-08-11 小柳さん指摘: フクギイロとGLOWは別会社・別ブランドのため)。
+        continue-on-error: true
+        env:
+          FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN }}
+          HARUKA_LINE_USER_ID: ${{ secrets.HARUKA_LINE_USER_ID }}
+        run: python scripts/notify_haruka.py

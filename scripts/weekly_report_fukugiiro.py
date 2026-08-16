@@ -83,6 +83,21 @@ _MANUAL_FUNNEL = """## 2. ファネル(Plausibleで確認 → 数値を記入)
 *転換率(完了÷開始、シート÷完了)を毎週ここに残すと、離脱段が一目でわかります。*"""
 
 
+FUNNEL_STALE_DAYS = 3
+
+
+def funnel_stale_warning(updated_at, today):
+    """fetch側はAPI失敗時にexit 0して古いfunnel.jsonを残す設計のため、
+    レポート側で鮮度を判定する。3日以上前または日付不明なら警告行、新しければ None。"""
+    try:
+        age = (today - datetime.strptime(updated_at, "%Y-%m-%d").date()).days
+    except (TypeError, ValueError):
+        return f"⚠️ データ取得日が不明({updated_at!r})。古い可能性あり"
+    if age >= FUNNEL_STALE_DAYS:
+        return f"⚠️ データは{updated_at}時点(取得失敗のため古い可能性)"
+    return None
+
+
 def render_funnel_section(funnel):
     """funnel あれば自動集計セクション、無ければ手動フォールバックを返す。"""
     if not funnel or not funnel.get("stages"):
@@ -96,17 +111,80 @@ def render_funnel_section(funnel):
     wd = funnel.get("worst_drop")
     worst_line = (f"**最大離脱**: {wd['label']}(−{_pct(wd['drop_rate'])})← 今週ここが一番落ちている傾向。"
                   if wd else "**最大離脱**: 算出に十分なデータがまだありません。")
+    warn = funnel_stale_warning(funnel.get("updated_at"), datetime.now(JST).date())
+    warn_line = f"\n{warn}\n" if warn else ""
+    # 小標本ガード(ウタガイ条件3): 診断完了n<30の間は転換率で施策効果を断定しない
+    complete_n = next((s["count"] for s in funnel["stages"] if s["key"] == "shindan_complete"), 0)
+    small_n = (f"\n⚠️ 診断完了 n={complete_n}(<30)のため、転換率の増減で施策効果を断定しない"
+               "(n≥30到達まで判断保留 — 2026-08-10 三名体制裁定)。\n" if complete_n < 30 else "")
+    # LINE誘導の入口別クリック × 中間ページ到達の突合(クリック後の脱落監視)
+    ld = funnel.get("line_detail") or {}
+    ld_lines = ""
+    if ld:
+        pos = ld.get("click_by_pos") or {}
+        ch = ld.get("redirect_by_channel") or {}
+        pos_txt = " / ".join(f"{k}: {v}" for k, v in sorted(pos.items())) or "データなし"
+        ch_txt = " / ".join(f"{k}: {v}" for k, v in sorted(ch.items())) or "データなし"
+        ld_lines = (f"\nLINE誘導クリック(入口別): {pos_txt}\n"
+                    f"中間ページ到達(line_redirect): {ch_txt}"
+                    "(クリック数と到達数の差=クリック後の脱落)\n")
     return (
         f"## 2. ファネル(自動取得 — Plausible Stats API / 直近{funnel.get('period','7d')})\n\n"
-        f"更新: {funnel.get('updated_at','-')}。集計値のみ(個人識別子なし)。\n\n"
+        f"更新: {funnel.get('updated_at','-')}。集計値のみ(個人識別子なし)。\n{warn_line}\n"
         "| 段 | 件数 | 前段比 | 離脱率 |\n|---|---|---|---|\n"
         f"{rows}\n\n"
-        f"{worst_line}\n\n"
+        f"{worst_line}\n{small_n}\n"
         f"**診断完了→LINE誘導**: {_pct(kr.get('line_cvr'))}(KPI 30%) / "
-        f"**完了率**: {_pct(kr.get('finish_rate'))} / **0件率**: {_pct(kr.get('zero_rate'))}\n\n"
+        f"**完了率**: {_pct(kr.get('finish_rate'))} / **0件率**: {_pct(kr.get('zero_rate'))}\n"
+        f"{ld_lines}\n"
         f"補助: 準備シート {eng.get('kit_click',0)} / 受給ずみ {eng.get('seido_done_mark',0)} / "
         f"受給報告 {eng.get('jukyu_report_click',0)} / 0件 {eng.get('shindan_zero',0)}"
     )
+
+
+KPI_DIR = os.path.join(BASE, "data", "kpi")
+
+# 北極星4本の必要ペース(週あたり)。12ヶ月目標を52週で割った定常値。
+NS_PACE = {"site_weekly": 2308, "jukyu_weekly": 19, "ig_weekly": 20, "line_weekly": 192}
+
+
+def north_star_section(jukyu):
+    """北極星4本の「現在地 × 必要ペース」表(2026-08-10 三名体制裁定で追加)。
+    自動で取れる数字だけを書き、取れないものは理由(未接続・経路なし)を明記して
+    存在しない数字を作らない(正確性最優先)。"""
+    # ❶ サイト訪問(Plausible自動取得: moradou=もらいわすれ堂ページのみ)
+    v1 = "計測データなし"
+    try:
+        with open(os.path.join(KPI_DIR, "site_traffic.json"), encoding="utf-8") as f:
+            st = json.load(f)
+        h = (st.get("history") or [])[-1]
+        mo = h.get("moradou") or {}
+        if mo.get("visitors") is not None:
+            v1 = f"週{mo['visitors']}人({h.get('date','')}時点・7日間)"
+    except Exception:
+        pass
+    # ❸ IGフォロワー
+    v3 = "未接続(トークン共有待ち)"
+    try:
+        with open(os.path.join(KPI_DIR, "moradou_ig_followers.json"), encoding="utf-8") as f:
+            ig = json.load(f)
+        hist = ig.get("history") or []
+        if hist:
+            v3 = f"{hist[-1].get('followers','?')}人({hist[-1].get('date','')}時点)"
+    except Exception:
+        pass
+    v2 = f"{jukyu.get('households', 0)}世帯(検証済みのみ)"
+    v4 = "計測経路なし(LINE公式のトークン共有待ち。data/kpi/line_followers.json はミカタ用で別物)"
+    return f"""### 北極星4本の現在地 × 必要ペース
+
+| 北極星 | 現在地 | 12ヶ月目標 | 必要ペース(週) |
+|---|---|---|---|
+| ❶ サイト訪問 | {v1} | 月10,000人 | 約{NS_PACE['site_weekly']:,}人 |
+| ❷ 受給報告 | {v2} | 1,000件 | 約{NS_PACE['jukyu_weekly']}件 |
+| ❸ IGフォロワー | {v3} | 1,000人 | 約{NS_PACE['ig_weekly']}人 |
+| ❹ LINE友だち | {v4} | 10,000人 | 約{NS_PACE['line_weekly']}人 |
+
+*取れない数字は空欄ではなく理由を書く(未接続=小柳さんのトークン共有待ち)。ペースは12ヶ月÷52週の定常値。*"""
 
 
 def daicho_summary():
@@ -206,6 +284,7 @@ def main():
     households = jukyu.get("households", 0)
     funnel = load_funnel()
     funnel_section = render_funnel_section(funnel)
+    ns_section = north_star_section(jukyu)
     bottleneck, nextaction = pick_bottleneck(db, jukyu, keisai, funnel)
 
     daicho_txt = (
@@ -228,7 +307,9 @@ def main():
 
 *yui.md原則: 施策は1ヶ月に1つしか変えない / 迷ったら「受給完了に近づくか」で判断。*
 
-## 1. 北極星 — 実受給額 / 支援世帯
+## 1. 北極星 — 4目標の現在地と実受給額
+
+{ns_section}
 
 | 指標 | 今週 | 状態 |
 |---|---|---|

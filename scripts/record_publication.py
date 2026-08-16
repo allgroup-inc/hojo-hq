@@ -41,10 +41,22 @@ def find_article(article_id: str):
 
 
 def extract_hooks(text: str):
-    """記事ヘッダーのX告知文パック(A/B/C)を抽出する。"""
+    """記事ヘッダーのX告知文パック(A/B/C)を抽出する。
+
+    2形式に対応(2026-08-08: 自動生成が【パターンA】形式のため抽出0件→X告知
+    スキップになった不具合の修正):
+      旧: `A(数字): 告知文`(1行)
+      新: `【パターンA: 数字フック】` の次行から空行/次パターンまでが本文
+    告知文は1行に正規化(GITHUB_OUTPUTのkey=value形式のため)。URLはリプ欄に
+    貼る型なので、本文中の「(記事URL)」プレースホルダーは除去する。
+    """
     hooks = {}
     for m in re.finditer(r"^([ABC])\([^)]*\):\s*(.+)$", text, flags=re.M):
         hooks[m.group(1).lower()] = m.group(2).strip()
+    for m in re.finditer(r"^【パターン([ABC])[^】]*】\n((?:(?!【|\n\n).+\n?)+)", text, flags=re.M):
+        body = " ".join(ln.strip() for ln in m.group(2).strip().splitlines())
+        body = body.replace("→(記事URL)", "").replace("(記事URL)", "").strip(" →")
+        hooks.setdefault(m.group(1).lower(), body)
     return hooks
 
 
@@ -67,8 +79,11 @@ def main():
     text = open(path, encoding="utf-8").read()
     today = datetime.now(JST).date().isoformat()
 
-    if f"published: {args.url}" in text:
-        print("skip=already_recorded")
+    # べき等性ガード: 同じURLが記録済みなら、X告知を含む後続の副作用をすべて止める
+    # (idempotency_key = 記事ID+公開URL。二重実行してもX二重投稿・二重課金にならない)
+    already = f"published: {args.url}" in text
+    if already:
+        print("already=1")
     else:
         record = (
             f"<!-- published: {args.url} {today}(記録: publish-recordワークフロー)\n"
@@ -79,10 +94,14 @@ def main():
         open(path, "w", encoding="utf-8").write(record + text)
 
     # お題キューの更新(該当IDがあれば)
+    topic_found = False
+    x_already = False
     try:
         topics = json.load(open(TOPICS_PATH, encoding="utf-8"))
         for t in topics.get("queue", []):
             if t.get("id") == args.id:
+                topic_found = True
+                x_already = bool(t.get("x_post_url"))
                 t["status"] = "published"
                 t["published_url"] = args.url
                 t["published_at"] = today
@@ -90,13 +109,21 @@ def main():
     except FileNotFoundError:
         pass
 
-    hooks = extract_hooks(text)
-    announce = hooks.get(args.hook) or hooks.get("a") or ""
-    # 誇大表現の機械検査(規程3-3。告知文にも適用)
-    for w in ("必ず", "絶対", "誰でも", "楽して", "確実に稼"):
-        if w in announce:
-            print(f"エラー: 告知文に禁止語({w})。手動で文面を直してください", file=sys.stderr)
-            return 1
+    # X告知のべき等性キーは x_post_url(X側の実行記録。2026-08-08改定)。
+    # - お題に x_post_url あり → 投稿済みなので告知を出さない(二重投稿防止)
+    # - キューに無い記事(手動執筆の旧記事)は published 記録の有無で代用
+    # これにより「公開記録は済んだがX投稿だけ失敗/スキップ」の状態から、再実行で
+    # X投稿だけをやり直せる(記録の二重追記は already ガードが引き続き防ぐ)
+    suppress_x = x_already or (already and not topic_found)
+    announce = ""
+    if not suppress_x:
+        hooks = extract_hooks(text)
+        announce = hooks.get(args.hook) or hooks.get("a") or ""
+        # 誇大表現の機械検査(規程3-3。告知文にも適用)
+        for w in ("必ず", "絶対", "誰でも", "楽して", "確実に稼"):
+            if w in announce:
+                print(f"エラー: 告知文に禁止語({w})。手動で文面を直してください", file=sys.stderr)
+                return 1
 
     title_m = re.search(r"^# (.+)$", text, flags=re.M)
     print(f"article={os.path.relpath(path, BASE)}")

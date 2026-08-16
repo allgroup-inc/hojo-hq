@@ -1,0 +1,127 @@
+name: airecipe-draft
+
+# 「うごくAIレシピ」note下書きの自動生成+実行検証(docs/うごくAIレシピ_設計.md)。
+# 毎週火・金 09:35 JST にお題キューから1本、レシピ生成→プロンプトを実際に実行(検証)→
+# 実行ログ付き記事を組版してコミットし、小柳さんへLINE通知する。
+# noteへの「公開」は人間がコピペで行う(noteに投稿公式APIがなく、非公式手段は使わない)。
+# 生成・検証に失敗したらお題は持ち越し(捏造フォールバックなし)でワークフローが失敗し、LINEで気づける。
+
+on:
+  schedule:
+    # JST 火・金 09:35(= UTC 0:35)。既存枠(月09:35/09:50・毎月1日09:40・8日22日09:35・月水金10:05)と重ねない
+    - cron: "35 0 * * 2,5"
+    # リトライ枠 10:35 JST(GitHubのcronは混雑時に飛ぶことがある。同日ガードがあるため二重生成はしない)
+    - cron: "35 1 * * 2,5"
+  workflow_dispatch:
+    inputs:
+      topic_id:
+        description: "お題ID(省略時はキュー先頭のpending)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: airecipe-draft
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # 専用LINE(2026-08-09 小柳さん指示: 他事業のLINEと分離)。未設定の間は通知をスキップし、
+    # ログに警告を出す(下書き生成自体は止めない)。設定手順: docs/うごくAIレシピ_LINE開設キット.md
+    env:
+      AIRECIPE_LINE_TOKEN: ${{ secrets.AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN }}
+      AIRECIPE_LINE_TO: ${{ secrets.AIRECIPE_LINE_ADMIN_USER_ID }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          pip install anthropic pillow
+          sudo apt-get install -y -q fonts-ipafont-gothic > /dev/null || true
+
+      - name: Generate & verify recipe
+        id: gen
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "${{ github.event.inputs.topic_id }}" ]; then
+            python scripts/generate_airecipe.py --preview --topic-id "${{ github.event.inputs.topic_id }}" >> "$GITHUB_OUTPUT"
+          else
+            python scripts/generate_airecipe.py --preview >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate eyecatch(見出し画像)
+        if: steps.gen.outputs.status == 'ok'
+        env:
+          EYECATCH: ${{ steps.gen.outputs.eyecatch }}
+          TITLE: ${{ steps.gen.outputs.title }}
+        run: |
+          python scripts/generate_airecipe_assets.py --eyecatch "$TITLE" --out "assets/airecipe/$EYECATCH"
+
+      - name: Commit draft & queue
+        if: steps.gen.outputs.status == 'ok'
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add posts/airecipe data/airecipe_topics.json assets/airecipe
+          git diff --cached --quiet || git commit -m "auto: うごくAIレシピ 下書き ${{ steps.gen.outputs.stem }}(実行検証済み)"
+          for i in 1 2 3; do
+            git pull --rebase origin ${{ github.ref_name }} && git push origin HEAD:${{ github.ref_name }} && break
+            echo "push retry $i"; sleep 5
+          done
+
+      - name: 専用LINE未設定の警告
+        if: env.AIRECIPE_LINE_TOKEN == '' || env.AIRECIPE_LINE_TO == ''
+        run: |
+          echo "::warning::AIレシピ専用LINEが未設定のため通知をスキップしました。下書きは posts/airecipe/ に生成済みです。設定手順: docs/うごくAIレシピ_LINE開設キット.md(AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN / AIRECIPE_LINE_ADMIN_USER_ID)"
+
+      - name: LINE通知(下書き完成)
+        if: steps.gen.outputs.status == 'ok' && env.AIRECIPE_LINE_TOKEN != '' && env.AIRECIPE_LINE_TO != ''
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.AIRECIPE_LINE_ADMIN_USER_ID }}
+          message: |
+            🍳【AIレシピ】実行検証済みの下書きができました
+
+            ${{ steps.gen.outputs.title }}
+
+            ━━━ 公開手順(約5分) ━━━
+            ①下のリンクを開いて内容を一読(実行ログが載っているか確認)
+            https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/posts/airecipe/${{ steps.gen.outputs.stem }}.md
+            ②「Raw」表示で全文コピー(冒頭のタイトル別案・X告知ブロックは削除)
+            ③noteの新規記事に貼り付け、「ここから先が有料パートです」の直後に有料ラインを設定して公開
+            ④見出し画像はここからダウンロードして設定(自動生成済み):
+            https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/assets/airecipe/${{ steps.gen.outputs.eyecatch }}
+
+            未公開の在庫: ${{ steps.gen.outputs.stock }}本
+            ${{ steps.gen.outputs.stockwarn }}
+            気になる点があれば公開せず、そのままご相談ください。
+
+      - name: LINE通知(キュー空/スキップ)
+        if: steps.gen.outputs.status == 'empty_queue' && env.AIRECIPE_LINE_TOKEN != '' && env.AIRECIPE_LINE_TO != ''
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.AIRECIPE_LINE_ADMIN_USER_ID }}
+          message: |
+            🍳【AIレシピ】お題キューが空になりました
+            data/airecipe_topics.json にお題を追加してください(チャットで「お題を10本補充して」でもOKです)
+
+      - name: LINE通知(失敗時)
+        if: failure() && env.AIRECIPE_LINE_TOKEN != '' && env.AIRECIPE_LINE_TO != ''
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.AIRECIPE_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.AIRECIPE_LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【AIレシピ】自動生成・検証が失敗しました(お題は持ち越し。捏造はしません)
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

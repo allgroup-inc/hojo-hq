@@ -1,0 +1,79 @@
+name: x-post
+
+# 結果マガ(@kekka_mag)の単発X投稿(記事公開の告知以外: 実績報告・つなぎ投稿など)。
+# publish-recordのX告知と同じ post_x_announce.py を使う手動ワークフロー。
+# 運用ルール: 1日1本まで/リンクは本文に入れずリプ欄へ/禁止語検査あり。
+# 公式APIの告知投稿のみ(自動返信・自動フォローはしない)。
+
+on:
+  workflow_dispatch:
+    inputs:
+      text:
+        description: "投稿本文(リンクは入れない)"
+        required: true
+      reply_url:
+        description: "リプ欄にぶら下げるURL"
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: x-post
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 禁止語検査(規程3-3)
+        env:
+          TEXT: ${{ github.event.inputs.text }}
+        run: |
+          python3 - <<'EOF'
+          import os, sys
+          text = os.environ["TEXT"]
+          for w in ("必ず", "絶対", "誰でも", "楽して", "確実に稼"):
+              if w in text:
+                  print(f"::error::投稿本文に禁止語({w})が含まれています", file=sys.stderr)
+                  sys.exit(1)
+          print("禁止語なし")
+          EOF
+
+      - name: X投稿(本文+リプ欄URL)
+        id: xpost
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+        run: |
+          pip install -q tweepy
+          python scripts/post_x_announce.py \
+            --text "${{ github.event.inputs.text }}" \
+            --reply-url "${{ github.event.inputs.reply_url }}" >> "$GITHUB_OUTPUT"
+
+      - name: LINE通知(完了)
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【結果マガ】X投稿が完了しました
+            ${{ steps.xpost.outputs.posted }}
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【結果マガ】X投稿ワークフローが失敗しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

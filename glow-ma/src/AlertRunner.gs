@@ -5,16 +5,56 @@
  * 1. Apps Scriptエディタの「プロジェクトの設定」→「スクリプト プロパティ」で
  *    SLACK_WEBHOOK_URL を設定する(コードにWebhook URLを直接書かない)
  * 2. Apps Scriptエディタの「トリガー」画面で runDailyAlerts を時間主導トリガー
- *    (毎日 朝など)に手動登録する(トリガー登録自体は本ファイルでは行わない)
+ *    (毎日 朝など)に手動登録する(トリガー登録自体は本ファイルでは行わない)。
+ *    このとき「エラー通知設定」を必ず「毎回通知」にする(README「耐障害性」章を参照)。
  * 3. 即時アラート(Speed to Lead)を有効にするため、Apps Scriptエディタで
  *    installInteractionLogEditTrigger を実行する(冪等なので安全に再実行できる)
  *
  * 実行すると、企業マスタ全件から GlowAlerting.buildDailyAlertList で
  * 掘り起こし対象を抽出し、ランク・ネクストベストアクションとともにSlackへ通知する。
+ *
+ * 耐障害性(2026-08-07 resilient-agent-design + glow-ma-triangle-review確定):
+ * - べき等性: 同じ日に二重実行されても、Slackへの二重送信を防ぐ(Script Propertiesに
+ *   送信完了日を記録し、当日分が完了済みならスキップする)。正当な再送(Slack障害からの
+ *   復旧後の再送信等)が必要な場合は forceResendDailyAlerts を実行すること。
+ * - リトライ: Slack送信が一時的に失敗した場合(429/5xx/ネットワーク例外)は最大3回、
+ *   2秒→10秒のバックオフで再試行する。認証エラー等の恒久的な失敗は再試行しない。
+ * - 可視化: 最終送信日・最終エラーをScript Propertiesに残す。全リトライが尽きた場合は
+ *   例外をthrowし、GASのトリガー失敗通知(オーナーへのメール)を発火させる。
  */
 var MAX_ALERT_LINES = 50;
+var SCRIPT_PROP_LAST_ALERT_SENT_DATE = "LAST_DAILY_ALERT_SENT_DATE";
+var SCRIPT_PROP_LAST_ALERT_ERROR = "LAST_DAILY_ALERT_ERROR";
+var SCRIPT_PROP_LAST_ALERT_ERROR_AT = "LAST_DAILY_ALERT_ERROR_AT";
 
 function runDailyAlerts() {
+  runDailyAlerts_(false);
+}
+
+/**
+ * runDailyAlerts のべき等性ガードを無視して強制的に再送する。
+ * Slack障害からの復旧後など、本日分をもう一度送り直したい場合に
+ * Apps Scriptエディタから手動で実行する。
+ */
+function forceResendDailyAlerts() {
+  runDailyAlerts_(true);
+}
+
+function runDailyAlerts_(forceResend) {
+  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  var scriptProperties = PropertiesService.getScriptProperties();
+
+  if (!forceResend) {
+    var lastSentDate = scriptProperties.getProperty(SCRIPT_PROP_LAST_ALERT_SENT_DATE);
+    if (GlowResilience.isAlreadyCompletedToday(lastSentDate, todayString)) {
+      Logger.log(
+        "本日分の掘り起こしアラートは送信済みのためスキップしました(" + todayString + ")。" +
+        "再送したい場合は forceResendDailyAlerts を実行してください。"
+      );
+      return;
+    }
+  }
+
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
   if (!companySheet) {
@@ -22,7 +62,6 @@ function runDailyAlerts() {
   }
 
   var records = readCompanyRecords_(companySheet);
-  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
   var alerts = GlowAlerting.buildDailyAlertList(records, todayString);
 
   var unscoredCount = GlowAlerting.countUnscoredCompanies(records);
@@ -32,6 +71,7 @@ function runDailyAlerts() {
 
   if (alerts.length === 0) {
     Logger.log("本日の掘り起こし対象はありません。");
+    scriptProperties.setProperty(SCRIPT_PROP_LAST_ALERT_SENT_DATE, todayString);
     return;
   }
 
@@ -44,10 +84,47 @@ function runDailyAlerts() {
     lines.push("…ほか " + (alerts.length - MAX_ALERT_LINES) + "件");
   }
   var message = "【本日の掘り起こし対象】" + alerts.length + "件\n" + lines.join("\n");
-  postToSlack_(message);
+
+  try {
+    postToSlackWithRetry_(message);
+  } catch (error) {
+    scriptProperties.setProperty(SCRIPT_PROP_LAST_ALERT_ERROR, String(error));
+    scriptProperties.setProperty(SCRIPT_PROP_LAST_ALERT_ERROR_AT, todayString);
+    throw error;
+  }
+
+  scriptProperties.setProperty(SCRIPT_PROP_LAST_ALERT_SENT_DATE, todayString);
   Logger.log("掘り起こしアラート送信完了: " + alerts.length + "件");
 }
 
+/**
+ * postToSlack_ を最大3回まで再試行するラッパー。
+ * 429/5xx/ネットワーク例外のみ再試行し、それ以外(Webhook URL誤り等の設定不備で
+ * 発生する4xx)は再試行せず即座にthrowする(resilient-agent-design原則⑤)。
+ */
+function postToSlackWithRetry_(message) {
+  return GlowResilience.withRetry(
+    function () { return postToSlack_(message); },
+    {
+      maxAttempts: 3,
+      backoffMs: [2000, 10000],
+      sleepFn: Utilities.sleep,
+      isRetryable: function (error) {
+        return !error.statusCode || GlowResilience.isRetryableHttpStatus(error.statusCode);
+      },
+      onRetry: function (error, attempt) {
+        Logger.log("Slack通知を再試行します(" + attempt + "回目失敗): " + error);
+      }
+    }
+  );
+}
+
+/**
+ * SLACK_WEBHOOK_URL が未設定の場合は「設定されていないだけ」として通知をスキップする
+ * (再試行しても直らないため postToSlackWithRetry_ の対象外の正常系)。
+ * Webhook呼び出し自体が失敗した場合は、responseCode を持つ Error を throw して
+ * 呼び出し元(postToSlackWithRetry_)にリトライ可否の判断を委ねる。
+ */
 function postToSlack_(message) {
   var webhookUrl = PropertiesService.getScriptProperties().getProperty("SLACK_WEBHOOK_URL");
   if (!webhookUrl) {
@@ -62,9 +139,11 @@ function postToSlack_(message) {
   });
   var responseCode = response.getResponseCode();
   if (responseCode < 200 || responseCode >= 300) {
-    Logger.log(
+    var error = new Error(
       "Slackへの通知に失敗しました(HTTP " + responseCode + "): " + response.getContentText()
     );
+    error.statusCode = responseCode;
+    throw error;
   }
 }
 
@@ -103,7 +182,7 @@ function handleInteractionLogEdit(e) {
   var companyId = rowValues[headers.indexOf("企業ID")];
 
   var companyName = lookupCompanyName_(companyId);
-  postToSlack_(
+  postToSlackWithRetry_(
     "【即時アラート】" + companyName + "(" + companyId + ") が反応しました(" + newType + ")。至急対応してください。"
   );
 }

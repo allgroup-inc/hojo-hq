@@ -14,7 +14,8 @@
     "初期スコア", "反応スコア", "総合スコア", "ランク",
     "最終接触日", "次回アクション予定日", "次回アクション内容",
     "担当者", "登録日", "備考",
-    "電話番号", "連絡不要", "後継者状況", "関係メモ", "窓口担当者名", "携帯番号"
+    "電話番号", "連絡不要", "後継者状況", "関係メモ", "窓口担当者名", "携帯番号",
+    "事前選定ランク", "事前選定スコア"
   ];
 
   var INTERACTION_LOG_SHEET_NAME = "対応履歴ログ";
@@ -27,7 +28,7 @@
     "レターURLアクセス", "返信", "資料請求",
     "提案(M&A)", "提案(不動産)", "提案(法人保険)",
     "成約", "見送り", "ナーチャリング配信", "連絡不要受領",
-    "NDA締結", "意向表明受領", "DD開始"
+    "NDA締結", "意向表明受領", "DD開始", "関係メモ更新"
   ];
 
   var RESPONDENT_TYPES = ["オーナー社長本人", "経理・総務等の窓口担当", "未接触"];
@@ -45,7 +46,7 @@
 
   var LETTER_DRAFT_SHEET_NAME = "レター下書き";
   var LETTER_DRAFT_HEADERS = [
-    "下書きID", "企業ID", "種別", "生成日時", "本文", "ステータス"
+    "下書きID", "企業ID", "種別", "生成日時", "本文", "ステータス", "発送日"
   ];
   var LETTER_DRAFT_TYPES = ["初回DM", "ナーチャリング配信"];
   var LETTER_DRAFT_STATUSES = ["下書き", "送付済み", "見送り"];
@@ -58,6 +59,30 @@
     "記録日時", "対象企業数",
     "ランクA_滞留企業数", "ランクB_滞留企業数", "ランクC_滞留企業数", "ランクD_滞留企業数",
     "掘り起こし待ち件数合計", "成約企業数", "連絡不要企業数", "長期検討企業数"
+  ];
+
+  var STAFF_SHEET_NAME = "スタッフ";
+  // Slack User ID の調べ方: Slackで対象社員のプロフィールを開き「その他」→
+  // 「メンバーIDをコピー」(U から始まる文字列)。メールアドレスではない。
+  var STAFF_HEADERS = ["氏名", "Slack User ID", "有効", "メールアドレス"];
+
+  var PARTNER_INTERACTION_LOG_SHEET_NAME = "パートナー対応履歴ログ";
+  var PARTNER_INTERACTION_LOG_HEADERS = [
+    "履歴ID", "パートナーID", "日付", "対応者", "内容メモ", "次回アクション"
+  ];
+
+  var REFERRAL_RECORD_SHEET_NAME = "紹介実績ログ";
+  var REFERRAL_RECORD_HEADERS = [
+    "実績ID", "パートナーID", "紹介日", "対象企業ID", "紹介料率", "契約内容メモ", "成約有無"
+  ];
+
+  var PRE_SCREENING_STAGING_SHEET_NAME = "事前選定リスト";
+  var PRE_SCREENING_MISMATCH_SHEET_NAME = "事前選定_未一致";
+  var PRE_SCREENING_MISMATCH_HEADERS = ["会社名", "記録日時"];
+
+  var QR_RESULT_SHEET_NAME = "QR生成結果";
+  var QR_RESULT_HEADERS = [
+    "企業ID", "会社名", "発送日", "トラッキングURL", "QR画像リンク", "ステータス"
   ];
 
   var api = {
@@ -79,7 +104,18 @@
     DASHBOARD_SHEET_NAME: DASHBOARD_SHEET_NAME,
     DASHBOARD_PLACEHOLDER_HEADERS: DASHBOARD_PLACEHOLDER_HEADERS,
     DASHBOARD_HISTORY_SHEET_NAME: DASHBOARD_HISTORY_SHEET_NAME,
-    DASHBOARD_HISTORY_HEADERS: DASHBOARD_HISTORY_HEADERS
+    DASHBOARD_HISTORY_HEADERS: DASHBOARD_HISTORY_HEADERS,
+    STAFF_SHEET_NAME: STAFF_SHEET_NAME,
+    STAFF_HEADERS: STAFF_HEADERS,
+    PARTNER_INTERACTION_LOG_SHEET_NAME: PARTNER_INTERACTION_LOG_SHEET_NAME,
+    PARTNER_INTERACTION_LOG_HEADERS: PARTNER_INTERACTION_LOG_HEADERS,
+    REFERRAL_RECORD_SHEET_NAME: REFERRAL_RECORD_SHEET_NAME,
+    REFERRAL_RECORD_HEADERS: REFERRAL_RECORD_HEADERS,
+    PRE_SCREENING_STAGING_SHEET_NAME: PRE_SCREENING_STAGING_SHEET_NAME,
+    PRE_SCREENING_MISMATCH_SHEET_NAME: PRE_SCREENING_MISMATCH_SHEET_NAME,
+    PRE_SCREENING_MISMATCH_HEADERS: PRE_SCREENING_MISMATCH_HEADERS,
+    QR_RESULT_SHEET_NAME: QR_RESULT_SHEET_NAME,
+    QR_RESULT_HEADERS: QR_RESULT_HEADERS
   };
 
   if (typeof module !== "undefined" && module.exports) {

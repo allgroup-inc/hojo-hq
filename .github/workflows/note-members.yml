@@ -5,9 +5,11 @@ name: note-members
 # 生成→コミット→LINE通知。noteメンバーシップ記事への貼り付けは人間が行う。
 
 on:
-  schedule:
-    # JST 月 09:50(= UTC 月 0:50)
-    - cron: "50 0 * * 1"
+  # 定期実行は停止中(2026-08-09 小柳さん指示によるnote路線転換。
+  # 議事: docs/議事_note新路線_うごくAIレシピ_2026-08-09.md。再開時は下のscheduleを戻すだけ)
+  # schedule:
+  #   # JST 月 09:50(= UTC 月 0:50)
+  #   - cron: "50 0 * * 1"
   workflow_dispatch: {}
 
 permissions:
@@ -20,6 +22,7 @@ concurrency:
 jobs:
   members:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 
@@ -50,8 +53,8 @@ jobs:
       - name: LINE通知
         uses: ./.github/actions/line-notify
         with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
           message: |
             👥【ミカタ】メンバー限定「AI編集長週報」下書きができました
 
@@ -67,8 +70,8 @@ jobs:
         if: failure()
         uses: ./.github/actions/line-notify
         with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
           message: |
             🚨【ミカタ】AI編集長週報の自動生成が失敗しました
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

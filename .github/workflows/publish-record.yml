@@ -58,8 +58,11 @@ jobs:
             echo "push retry $i"; sleep 5
           done
 
-      - name: Post X announce(シークレット設定時のみ)
+      # 二重投稿ガード: X投稿済み(お題のx_post_url記録あり)なら record_publication.py が
+      # announce を空にする。announce が空の間はこのステップは走らない
+      - name: Post X announce(シークレット設定時のみ・未投稿のときのみ)
         id: xpost
+        if: steps.rec.outputs.announce != ''
         env:
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
@@ -70,6 +73,19 @@ jobs:
           python scripts/post_x_announce.py \
             --text "${{ steps.rec.outputs.announce }}" \
             --reply-url "${{ steps.rec.outputs.url }}" >> "$GITHUB_OUTPUT"
+
+      - name: X投稿URLをお題キューに記録(監査ログ)
+        if: startsWith(steps.xpost.outputs.posted, 'https://')
+        run: |
+          python scripts/record_x_post.py \
+            --id "${{ github.event.inputs.article_id }}" \
+            --x-url "${{ steps.xpost.outputs.posted }}"
+          git add data/tanpatsu_topics.json
+          git diff --cached --quiet || git commit -m "auto: X告知記録 ${{ github.event.inputs.article_id }}"
+          for i in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            echo "push retry $i"; sleep 5
+          done
 
       - name: LINE通知(完了)
         uses: ./.github/actions/line-notify
@@ -82,7 +98,7 @@ jobs:
             ${{ steps.rec.outputs.title }}
             ${{ steps.rec.outputs.url }}
 
-            X告知: ${{ steps.xpost.outputs.posted && '自動投稿しました' || '未投稿(Xシークレット未設定)。下の文面を投稿し、リプ欄に記事URLを貼ってください' }}
+            X告知: ${{ steps.rec.outputs.already == '1' && '記録済みのためスキップ(二重投稿防止)' || (steps.xpost.outputs.posted && '自動投稿しました' || '未投稿(Xシークレット未設定)。下の文面を投稿し、リプ欄に記事URLを貼ってください') }}
             ${{ steps.xpost.outputs.posted }}
             ━━━━━━━━
             ${{ steps.rec.outputs.announce }}
