@@ -1,0 +1,569 @@
+<title>後確認コンソール</title>
+<style>
+/* --------------------------------------------------------------
+   後確認コンソール
+   ブランド色は下の --brand 1行のみ。差し替えはここだけで完結する。
+   使用箇所は「送信ボタン」「選択中の入力欄の枠」「現在地メニュー」の3つ。
+   -------------------------------------------------------------- */
+:root{
+  color-scheme: light;
+
+  /* ▼▼ 家計の見直しやさんのメインカラーが分かり次第、この1行だけ差し替える ▼▼
+     現在は仮置き(沖縄企業のミカタのネイビー #00335C)。正式な色は要確認。 */
+  --brand:#00335C;
+  --brand-glow:rgba(0,51,92,.14);
+
+  --bg:#FFFFFF;
+  --text:#1A1A1A;
+  --muted:#6B6B6B;
+  --line:#E5E5E5;
+  --line-strong:#D4D4D4;
+  --danger:#C0392B;
+  --field:#FFFFFF;
+  --hover:#FAFAFA;
+
+  --s1:8px; --s2:16px; --s4:32px; --s8:64px;
+
+  --font:"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Yu Gothic",Meiryo,system-ui,sans-serif;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font);
+  font-size:14px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--brand); outline-offset:2px; border-radius:2px}
+
+/* ---------- 現在地メニュー ---------- */
+.topbar{border-bottom:1px solid var(--line)}
+.topbar-inner{
+  max-width:900px; margin:0 auto; padding:0 var(--s4);
+  display:flex; align-items:baseline; gap:var(--s4);
+}
+.wordmark{font-size:13px; font-weight:600; letter-spacing:.04em; padding:14px 0; white-space:nowrap}
+.nav{display:flex; gap:var(--s4); margin-left:auto}
+.nav button{
+  appearance:none; background:none; border:0; padding:14px 0;
+  font:inherit; font-size:13px; color:var(--muted); cursor:pointer;
+  border-bottom:2px solid transparent; margin-bottom:-1px;
+}
+.nav button:hover{color:var(--text)}
+.nav button[aria-current="page"]{color:var(--brand); border-bottom-color:var(--brand); font-weight:600}
+.nav .count{font-variant-numeric:tabular-nums; color:var(--muted); font-weight:400}
+
+/* ---------- レイアウト ---------- */
+main{max-width:900px; margin:0 auto; padding:var(--s4) var(--s4) 96px}
+.view[hidden]{display:none}
+h1{font-size:20px; font-weight:600; letter-spacing:.01em; margin:0; text-wrap:balance}
+h2{font-size:14px; font-weight:600; margin:0}
+.lede{color:var(--muted); font-size:13px; margin:var(--s1) 0 0}
+.stack-8>*+*{margin-top:var(--s1)}
+.stack-16>*+*{margin-top:var(--s2)}
+.stack-32>*+*{margin-top:var(--s4)}
+.stack-64>*+*{margin-top:var(--s8)}
+.rule{border:0; border-top:1px solid var(--line); margin:0}
+
+/* ---------- 絞り込み ---------- */
+.filters{display:flex; flex-wrap:wrap; gap:var(--s2); align-items:flex-end}
+.filters .field{margin:0}
+.hint{color:var(--muted); font-size:12px; margin-left:auto; align-self:center}
+kbd{
+  font:inherit; font-size:11px; border:1px solid var(--line-strong); border-radius:3px;
+  padding:1px 5px; color:var(--muted); background:var(--hover);
+}
+
+/* ---------- 入力欄 ---------- */
+.field{display:flex; flex-direction:column; gap:6px}
+.field label{font-size:12px; color:var(--muted); display:flex; align-items:center; gap:var(--s1)}
+.req{
+  font-size:10px; line-height:1.6; color:var(--text); background:#F0F0F0;
+  border-radius:3px; padding:0 5px; letter-spacing:.04em; font-weight:600;
+}
+input[type=text],input[type=tel],input[type=date],input[type=datetime-local],select,textarea{
+  font:inherit; font-size:14px; color:var(--text); background:var(--field);
+  border:1px solid var(--line-strong); border-radius:6px;
+  min-height:44px; padding:10px 12px; width:100%;
+  transition:border-color .12s, box-shadow .12s;
+}
+textarea{min-height:88px; resize:vertical; line-height:1.6}
+select{min-height:44px; padding-right:var(--s4)}
+input:focus,select:focus,textarea:focus{
+  outline:none; border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-glow);
+}
+input[aria-invalid="true"],textarea[aria-invalid="true"]{border-color:var(--danger)}
+input[aria-invalid="true"]:focus,textarea[aria-invalid="true"]:focus{box-shadow:0 0 0 3px rgba(192,57,43,.14)}
+.error{color:var(--danger); font-size:12px; line-height:1.6}
+.error:empty{display:none}
+.assist{color:var(--muted); font-size:12px}
+.row{display:flex; gap:var(--s2); flex-wrap:wrap}
+.row>*{flex:1 1 200px}
+.w-narrow{max-width:220px}
+.w-mid{max-width:320px}
+
+/* ラジオは行で並べる(クリック数を減らすため選択肢は開かない) */
+.choices{display:flex; gap:var(--s4); flex-wrap:wrap; padding-top:6px}
+.choice{display:flex; align-items:center; gap:var(--s1); font-size:14px; cursor:pointer; min-height:32px}
+.choice input{width:16px; height:16px; min-height:0; accent-color:var(--brand); margin:0}
+
+/* ---------- ボタン ---------- */
+.actions{display:flex; align-items:center; gap:var(--s2)}
+.btn{
+  font:inherit; font-size:14px; font-weight:600; cursor:pointer;
+  border-radius:6px; min-height:44px; padding:0 20px; border:1px solid transparent;
+  display:inline-flex; align-items:center; gap:var(--s1);
+}
+.btn-primary{background:var(--brand); color:#FFFFFF}
+.btn-primary:hover{filter:brightness(1.12)}
+.btn-quiet{background:none; color:var(--muted); border-color:transparent; padding:0 var(--s1)}
+.btn-quiet:hover{color:var(--text)}
+.btn-danger{
+  background:none; color:var(--danger); border-color:var(--line-strong);
+  font-weight:400; min-height:36px; padding:0 14px; font-size:13px;
+}
+.btn-danger:hover{border-color:var(--danger)}
+.btn-inline{
+  font:inherit; font-size:12px; background:none; border:1px solid var(--line-strong);
+  border-radius:4px; padding:2px 8px; cursor:pointer; color:var(--text); white-space:nowrap;
+}
+.btn-inline:hover{border-color:var(--text)}
+.danger-zone{display:flex; align-items:baseline; gap:var(--s2); flex-wrap:wrap}
+.danger-zone p{margin:0; color:var(--muted); font-size:12px}
+
+/* ---------- 一覧表(行を詰める) ---------- */
+.table-wrap{overflow-x:auto; transition:opacity .12s}
+.table-wrap[aria-busy="true"]{opacity:.45}
+table{border-collapse:collapse; width:100%; font-size:13px; line-height:1.5}
+caption{text-align:left; color:var(--muted); font-size:12px; padding-bottom:var(--s1)}
+th{
+  text-align:left; font-weight:600; font-size:11px; color:var(--muted);
+  letter-spacing:.06em; padding:0 10px 6px; white-space:nowrap;
+  border-bottom:1px solid var(--line);
+}
+td{padding:5px 10px; border-bottom:1px solid var(--line); vertical-align:middle; white-space:nowrap}
+tbody tr:hover{background:var(--hover)}
+.num{font-variant-numeric:tabular-nums}
+.id{font-variant-numeric:tabular-nums; letter-spacing:.02em}
+td.name{white-space:normal; min-width:7em}
+/* 対応が必要な行だけ、左に赤の細い帯 */
+tr.attention td:first-child{box-shadow:inset 2px 0 0 var(--danger)}
+.state{font-size:12px}
+.state-done{color:var(--text); font-weight:600}
+.state-wait{color:var(--muted)}
+.state-alert{color:var(--danger); font-weight:600}
+.sub{color:var(--muted); font-size:11px}
+.empty{color:var(--muted); font-size:13px; padding:var(--s4) 0}
+.foot-note{color:var(--muted); font-size:12px}
+
+/* ---------- 保存後の合図 ---------- */
+.toast{color:var(--text); font-size:13px; border-left:2px solid var(--brand); padding-left:12px}
+.toast[hidden]{display:none}
+
+@media (max-width:720px){
+  .topbar-inner,main{padding-left:var(--s2); padding-right:var(--s2)}
+  .nav{gap:var(--s2)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <span class="wordmark">後確認コンソール</span>
+    <nav class="nav" aria-label="画面">
+      <button type="button" data-view="list" aria-current="page">後確認一覧</button>
+      <button type="button" data-view="entry">記録する</button>
+      <button type="button" data-view="calls">電話リスト <span class="count" id="callCount">4</span></button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== 一覧 ===================== -->
+  <section class="view stack-64" id="view-list">
+    <div class="stack-32">
+      <div>
+        <h1>後確認一覧</h1>
+        <p class="lede">申込みごとの後確認の状態。赤は今日中に手を打つ行です。</p>
+      </div>
+
+      <div class="filters">
+        <div class="field w-mid">
+          <label for="q">検索(申込ID・お客様名・携帯番号)</label>
+          <input type="text" id="q" autocomplete="off" placeholder="例: A-10428">
+        </div>
+        <div class="field w-narrow">
+          <label for="state">状態</label>
+          <select id="state">
+            <option value="">すべて</option>
+            <option value="要対応">要対応のみ</option>
+            <option value="未送信">未送信</option>
+            <option value="送信済">送信済(返信待ち)</option>
+            <option value="承認">承認済</option>
+            <option value="要確認">要確認</option>
+            <option value="送信失敗">送信失敗</option>
+          </select>
+        </div>
+        <p class="hint"><kbd>/</kbd> 検索へ移動　<kbd>N</kbd> 記録する</p>
+      </div>
+
+      <div class="table-wrap" id="listWrap">
+        <table>
+          <caption id="listCaption">12件</caption>
+          <thead>
+            <tr>
+              <th scope="col">申込ID</th>
+              <th scope="col">お客様</th>
+              <th scope="col">携帯番号</th>
+              <th scope="col">状態</th>
+              <th scope="col">送信</th>
+              <th scope="col">返信</th>
+              <th scope="col">経過</th>
+              <th scope="col"><span class="sub">操作</span></th>
+            </tr>
+          </thead>
+          <tbody id="listBody"></tbody>
+        </table>
+      </div>
+      <p class="foot-note" id="listNote"></p>
+    </div>
+
+    <div class="stack-16">
+      <hr class="rule">
+      <p class="foot-note">表示しているのはすべて架空のダミーデータです。実際のお客様情報はこの画面には入っていません。</p>
+    </div>
+  </section>
+
+  <!-- ===================== 記録する ===================== -->
+  <section class="view stack-64" id="view-entry" hidden>
+    <div class="stack-32">
+      <div>
+        <h1>後確認を記録する</h1>
+        <p class="lede">1件あたり15秒で終わる並びにしています。Tabキーだけで上から下まで入力できます。</p>
+      </div>
+
+      <p class="toast" id="toast" hidden></p>
+
+      <form id="entryForm" novalidate class="stack-64">
+
+        <div class="stack-16">
+          <h2>申込みの特定</h2>
+          <div class="row">
+            <div class="field w-narrow">
+              <label for="f-id">申込ID <span class="req">必須</span></label>
+              <input type="text" id="f-id" name="id" autocomplete="off" placeholder="A-10431">
+              <p class="error" id="e-id"></p>
+            </div>
+            <div class="field w-narrow">
+              <label for="f-date">受付日 <span class="req">必須</span></label>
+              <input type="date" id="f-date" name="date" value="2026-08-14">
+              <p class="error" id="e-date"></p>
+            </div>
+            <div class="field w-mid">
+              <label for="f-name">契約者名 <span class="req">必須</span></label>
+              <input type="text" id="f-name" name="name" autocomplete="off" placeholder="沖縄 太郎">
+              <p class="error" id="e-name"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack-16">
+          <h2>連絡先</h2>
+          <div class="row">
+            <div class="field w-mid">
+              <label for="f-tel">携帯番号 <span class="req">必須</span></label>
+              <input type="tel" id="f-tel" name="tel" autocomplete="off" inputmode="numeric" placeholder="09012345678">
+              <p class="error" id="e-tel"></p>
+              <p class="assist">ハイフンは入れても入れなくても構いません。</p>
+            </div>
+            <div class="field w-mid">
+              <label for="f-send">送信予定</label>
+              <select id="f-send" name="send">
+                <option value="next">次の定期送信にのせる(本日15:00)</option>
+                <option value="tomorrow">翌営業日の10:00</option>
+                <option value="hold">送らない(電話で確認する)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack-16">
+          <h2>確認の結果</h2>
+          <div class="field">
+            <label for="m-sms">確認方法</label>
+            <div class="choices" role="radiogroup" aria-label="確認方法">
+              <label class="choice"><input type="radio" name="method" id="m-sms" value="sms" checked> ショートメールの返信</label>
+              <label class="choice"><input type="radio" name="method" id="m-tel" value="tel"> 電話</label>
+              <label class="choice"><input type="radio" name="method" id="m-none" value="none"> まだ取れていない</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="f-reply">お客様の返信・発言(そのまま書き写す)</label>
+            <textarea id="f-reply" name="reply" placeholder="はい"></textarea>
+            <p class="error" id="e-reply"></p>
+            <p class="assist">言い換えずに原文のまま残します。あとから「何に対する了承だったか」を説明するための記録です。</p>
+          </div>
+          <div class="field w-mid">
+            <label for="f-ver">送った文面</label>
+            <select id="f-ver" name="ver">
+              <option value="v3">v3(2026-08-01〜 現行)</option>
+              <option value="v2">v2(2026-07-01〜2026-07-31)</option>
+              <option value="v1">v1(〜2026-06-30)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-memo">備考</label>
+            <input type="text" id="f-memo" name="memo" autocomplete="off" placeholder="折り返し希望など">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">保存して次を入力</button>
+          <button type="button" class="btn btn-quiet" id="clearBtn">入力を消す</button>
+          <span class="assist"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> でも保存</span>
+        </div>
+      </form>
+    </div>
+
+    <div class="stack-16">
+      <hr class="rule">
+      <div class="danger-zone">
+        <button type="button" class="btn btn-danger" id="deleteBtn">この申込みの記録を削除</button>
+        <p>削除すると承認の証跡ごと消えます。取り消せません。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 電話リスト ===================== -->
+  <section class="view stack-64" id="view-calls" hidden>
+    <div class="stack-32">
+      <div>
+        <h1>電話リスト</h1>
+        <p class="lede">ショートメールを送って2日たっても返信がない申込みです。上から順にかけてください。</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>4件 ／ 2026-08-14 09:00 時点</caption>
+          <thead>
+            <tr>
+              <th scope="col">申込ID</th>
+              <th scope="col">お客様</th>
+              <th scope="col">携帯番号</th>
+              <th scope="col">送信日時</th>
+              <th scope="col">経過</th>
+              <th scope="col">状況</th>
+              <th scope="col"><span class="sub">操作</span></th>
+            </tr>
+          </thead>
+          <tbody id="callBody"></tbody>
+        </table>
+      </div>
+      <p class="foot-note">同じ携帯番号で未完了が2件以上ある申込みは、返信があっても自動では承認しません。必ず電話で申込みを特定してください。</p>
+    </div>
+
+    <div class="stack-16">
+      <hr class="rule">
+      <p class="foot-note">表示しているのはすべて架空のダミーデータです。</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ---------------- ダミーデータ(すべて架空) ---------------- */
+var ROWS = [
+  {id:"A-10428", name:"沖縄 太郎",   tel:"090-****-1182", state:"要確認",  sent:"08-12 15:00", reply:"内容について質問があります", days:2, act:"電話で確認"},
+  {id:"A-10427", name:"那覇 花子",   tel:"080-****-3410", state:"送信失敗", sent:"08-12 15:00", reply:"—",                     days:2, act:"番号を直す"},
+  {id:"A-10425", name:"浦添 一郎",   tel:"090-****-7755", state:"送信済",  sent:"08-11 10:00", reply:"—",                     days:3, act:"電話する"},
+  {id:"A-10424", name:"糸満 みどり", tel:"080-****-2098", state:"送信済",  sent:"08-11 10:00", reply:"—",                     days:3, act:"電話する"},
+  {id:"A-10430", name:"宜野湾 健",   tel:"090-****-6631", state:"未送信",  sent:"—",           reply:"—",                     days:0, act:"—"},
+  {id:"A-10429", name:"名護 さより", tel:"080-****-4417", state:"未送信",  sent:"—",           reply:"—",                     days:0, act:"—"},
+  {id:"A-10426", name:"豊見城 学",   tel:"090-****-9023", state:"送信済",  sent:"08-13 15:00", reply:"—",                     days:1, act:"—"},
+  {id:"A-10423", name:"うるま 京子", tel:"080-****-5586", state:"承認",    sent:"08-11 10:00", reply:"はい",                   days:3, act:"—", via:"SMS"},
+  {id:"A-10422", name:"南城 隆",     tel:"090-****-1304", state:"承認",    sent:"08-11 10:00", reply:"はい",                   days:3, act:"—", via:"SMS"},
+  {id:"A-10421", name:"読谷 あゆみ", tel:"080-****-8872", state:"承認",    sent:"08-08 15:00", reply:"了承しました(電話)",     days:6, act:"—", via:"電話"},
+  {id:"A-10420", name:"石垣 誠",     tel:"090-****-2245", state:"承認",    sent:"08-08 15:00", reply:"はい",                   days:6, act:"—", via:"SMS"},
+  {id:"A-10419", name:"金武 千夏",   tel:"080-****-6690", state:"承認",    sent:"08-07 10:00", reply:"はい",                   days:7, act:"—", via:"SMS"}
+];
+var ALERT = {"要確認":1, "送信失敗":1};
+
+function stateCell(r){
+  var cls = ALERT[r.state] ? "state-alert" : (r.state === "承認" ? "state-done" : "state-wait");
+  var label = r.state;
+  if (r.state === "承認" && r.via) label = "承認 (" + r.via + ")";
+  if (r.state === "送信済" && r.days >= 2) { cls = "state-alert"; label = "返信なし " + r.days + "日"; }
+  return '<span class="state ' + cls + '">' + label + '</span>';
+}
+function needsAction(r){
+  return !!ALERT[r.state] || (r.state === "送信済" && r.days >= 2);
+}
+
+var listBody = document.getElementById("listBody");
+var listWrap = document.getElementById("listWrap");
+var listCaption = document.getElementById("listCaption");
+var listNote = document.getElementById("listNote");
+
+function render(){
+  var q = document.getElementById("q").value.trim().toLowerCase();
+  var st = document.getElementById("state").value;
+
+  var rows = ROWS.filter(function(r){
+    var hit = !q || (r.id + r.name + r.tel).toLowerCase().indexOf(q) >= 0;
+    if (!hit) return false;
+    if (!st) return true;
+    if (st === "要対応") return needsAction(r);
+    if (st === "承認") return r.state === "承認";
+    return r.state === st;
+  });
+
+  listBody.innerHTML = rows.map(function(r){
+    return '<tr class="' + (needsAction(r) ? "attention" : "") + '">' +
+      '<td class="id">' + r.id + '</td>' +
+      '<td class="name">' + r.name + '</td>' +
+      '<td class="num">' + r.tel + '</td>' +
+      '<td>' + stateCell(r) + '</td>' +
+      '<td class="num sub">' + r.sent + '</td>' +
+      '<td class="sub">' + r.reply + '</td>' +
+      '<td class="num sub">' + (r.days ? r.days + "日" : "—") + '</td>' +
+      '<td>' + (needsAction(r) ? '<button type="button" class="btn-inline">' + r.act + '</button>' : '<span class="sub">—</span>') +
+      '</td></tr>';
+  }).join("");
+
+  if (!rows.length){
+    listBody.innerHTML = '<tr><td colspan="8" class="empty">条件に合う申込みはありません。検索語か状態を変えてください。</td></tr>';
+  }
+  listCaption.textContent = rows.length + "件";
+  var n = ROWS.filter(needsAction).length;
+  listNote.textContent = n ? ("今日中に手を打つ行が " + n + " 件あります。") : "対応が必要な行はありません。";
+}
+
+/* 絞り込み中は表だけを薄くする(画面全体は隠さない) */
+var timer = null;
+function reload(){
+  listWrap.setAttribute("aria-busy","true");
+  clearTimeout(timer);
+  timer = setTimeout(function(){
+    render();
+    listWrap.setAttribute("aria-busy","false");
+  }, 160);
+}
+document.getElementById("q").addEventListener("input", reload);
+document.getElementById("state").addEventListener("change", reload);
+render();
+
+/* 電話リスト */
+document.getElementById("callBody").innerHTML = ROWS.filter(needsAction).map(function(r){
+  return '<tr class="attention">' +
+    '<td class="id">' + r.id + '</td>' +
+    '<td class="name">' + r.name + '</td>' +
+    '<td class="num">' + r.tel + '</td>' +
+    '<td class="num sub">' + r.sent + '</td>' +
+    '<td class="num"><span class="state-alert">' + r.days + '日</span></td>' +
+    '<td class="sub">' + (r.reply === "—" ? "返信なし" : r.reply) + '</td>' +
+    '<td><button type="button" class="btn-inline" data-goto="' + r.id + '">結果を記録</button></td>' +
+    '</tr>';
+}).join("");
+
+/* ---------------- 画面の切り替え ---------------- */
+var views = {list:"view-list", entry:"view-entry", calls:"view-calls"};
+function show(name){
+  Object.keys(views).forEach(function(k){
+    document.getElementById(views[k]).hidden = (k !== name);
+  });
+  document.querySelectorAll(".nav button").forEach(function(b){
+    if (b.dataset.view === name) b.setAttribute("aria-current","page");
+    else b.removeAttribute("aria-current");
+  });
+  if (name === "entry") document.getElementById("f-id").focus();
+  if (name === "list") document.getElementById("q").focus();
+}
+document.querySelectorAll(".nav button").forEach(function(b){
+  b.addEventListener("click", function(){ show(b.dataset.view); });
+});
+document.getElementById("callBody").addEventListener("click", function(e){
+  var b = e.target.closest("[data-goto]");
+  if (!b) return;
+  show("entry");
+  document.getElementById("f-id").value = b.dataset.goto;
+  document.getElementById("m-tel").checked = true;
+  document.getElementById("f-reply").focus();
+});
+
+/* ---------------- 入力チェック ---------------- */
+var form = document.getElementById("entryForm");
+var toast = document.getElementById("toast");
+
+function setError(id, msg){
+  var input = document.getElementById("f-" + id);
+  var slot  = document.getElementById("e-" + id);
+  slot.textContent = msg || "";
+  if (msg){ input.setAttribute("aria-invalid","true"); input.setAttribute("aria-describedby","e-"+id); }
+  else { input.removeAttribute("aria-invalid"); input.removeAttribute("aria-describedby"); }
+  return !msg;
+}
+
+function validate(){
+  var ok = true, first = null;
+  var v = function(id, msg){ if(!setError(id, msg)){ ok = false; if(!first) first = document.getElementById("f-"+id); } };
+
+  var id = form.id.value.trim();
+  v("id", !id ? "申込IDを入力してください。" : (/^[A-Za-z]-\d{5}$/.test(id) ? "" : "申込IDは「A-10431」の形式で入力してください。"));
+  v("date", form.date.value ? "" : "受付日を入力してください。");
+  v("name", form.name.value.trim() ? "" : "契約者名を入力してください。");
+
+  var tel = form.tel.value.replace(/[-\s]/g, "");
+  v("tel", !tel ? "携帯番号を入力してください。" : (/^0[789]0\d{8}$/.test(tel) ? "" : "携帯番号は090・080・070ではじまる11桁で入力してください。"));
+
+  var method = form.querySelector('input[name="method"]:checked').value;
+  v("reply", (method !== "none" && !form.reply.value.trim()) ? "お客様の返信をそのまま書き写してください。空欄のままでは承認の記録になりません。" : "");
+
+  if (first) first.focus();
+  return ok;
+}
+
+form.addEventListener("submit", function(e){
+  e.preventDefault();
+  toast.hidden = true;
+  if (!validate()) return;
+  var id = form.id.value.trim();
+  form.reset();
+  document.getElementById("f-date").value = "2026-08-14";
+  ["id","date","name","tel","reply"].forEach(function(k){ setError(k, ""); });
+  toast.textContent = id + " を保存しました。続けて次の申込みを入力できます。";
+  toast.hidden = false;
+  document.getElementById("f-id").focus();
+});
+
+form.addEventListener("keydown", function(e){
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") form.requestSubmit();
+});
+
+document.getElementById("clearBtn").addEventListener("click", function(){
+  form.reset();
+  document.getElementById("f-date").value = "2026-08-14";
+  ["id","date","name","tel","reply"].forEach(function(k){ setError(k, ""); });
+  toast.hidden = true;
+  document.getElementById("f-id").focus();
+});
+
+document.getElementById("deleteBtn").addEventListener("click", function(){
+  var id = form.id.value.trim() || "この申込み";
+  if (confirm(id + " の後確認の記録を削除します。承認の証跡も消え、取り消せません。よろしいですか。")) {
+    toast.textContent = id + " の記録を削除しました。";
+    toast.hidden = false;
+  }
+});
+
+/* ---------------- キーボード ---------------- */
+document.addEventListener("keydown", function(e){
+  var t = e.target.tagName;
+  if (t === "INPUT" || t === "TEXTAREA" || t === "SELECT") return;
+  if (e.key === "/"){ e.preventDefault(); show("list"); document.getElementById("q").focus(); }
+  if (e.key === "n" || e.key === "N"){ e.preventDefault(); show("entry"); }
+});
+</script>
