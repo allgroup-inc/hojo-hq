@@ -454,5 +454,197 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-14",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 2,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和７年度補正 業務産業用蓄電システム導入支援事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY4mMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和5年沖縄建設産業グローバル化支援業務委託に係る企画提案書等の募集",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010165.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "よろず支援拠点事業 生産性向上支援センター",
+    "url": "https://okinawa-ric.jp/service/post-58-1.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度子育て【改修型】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSFMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度】INPIT外国出願補助金（中間手続補助）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXmVMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
+ },
+ {
+  "date": "2026-08-15",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 1
+  },
+  "items": [
+   {
+    "name": "［第十一回］事業再構築補助金（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UbU66EAF",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度酒類業振興支援事業費補助金（第４期）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdQxMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "京都市企業立地促進制度補助金［本社・工場等新増設等支援制度］",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFhMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度】二酸化炭素排出抑制対策事業費等補助金 （国内資源循環体制構築に向けた再エネ関連製品及びベース素材の全体最適化実証事業）（第２次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdAaMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "沖縄県産業振興基金伴走支援事業",
+    "url": "https://okinawa-ric.jp/service/post-48.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
+ },
+ {
+  "date": "2026-08-16",
+  "sample": 5,
+  "ng": 1,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 1
+  },
+  "items": [
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【近畿支部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYucMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度　天然ガス利用設備による強靱性向上対策事業費補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDcMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "沖縄ものづくり製品開発・技術導入支援事業",
+    "url": "https://okinawa-ric.jp/service/post-18.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": false,
+    "issues": [
+     "Gemini: 出典ページ本文には補助額の上限として「1,200万円以内(初年度) 1,200万円以内(翌年度)」との記載がありますが、掲載データの上限額はNoneとなっています。",
+     "Gemini: 根拠引用: ①補助額：1,200万円以内(初年度) 1,200万円以内(翌年度)"
+    ],
+    "human_verdict": null
+   },
+   {
+    "name": "民放ラジオ難聴解消支援事業（令和８年度公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXENMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(グリーンボンド/グリーンローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd5XMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
