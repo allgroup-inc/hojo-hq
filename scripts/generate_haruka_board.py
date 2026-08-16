@@ -33,9 +33,10 @@ def main():
 <div class="card">
   <div class="no">案{it['no']}</div>
   <h2>{esc(it['title'])}</h2>
+  <img class="igimg" src="img/ig{it['no']}.png" alt="投稿画像 案{it['no']}">
+  <p class="hint">🖼 画像はこのまま使えます: 長押し(PCは右クリック)→保存→Instagramへ</p>
   <div class="cap" id="cap{it['no']}">{esc(cap_full)}</div>
   <button class="copy" data-t="cap{it['no']}">キャプションをコピー</button>
-  <p class="hint">🖼 画像の方向性: {esc(it.get('image_hint',''))}</p>
   <p class="caution">⚠️ 投稿前の注意: {esc(it.get('caution',''))}<br>
   出典(発信前にここで最終確認): <a href="{esc(it.get('source_url',''))}" rel="noopener" target="_blank">公式ページを開く</a></p>
 </div>""")
@@ -69,10 +70,11 @@ h2{{font-size:1.02rem;margin-bottom:10px;line-height:1.5}}
 <div class="wrap">
 <h1>🌈 今週のIG投稿案({esc(d.get('week',''))})</h1>
 <p class="sub">更新: {esc(d.get('updated_at',''))} / 毎週月曜に自動更新 / このページは検索に載らない内部ページです</p>
-<div class="howto"><strong>遥さんへの使い方</strong><br>
-① 使いたい案の「キャプションをコピー」を押す → Instagramに貼る<br>
-② 画像は「画像の方向性」を参考に(Canva等)。⚠️の注意だけ守ってください<br>
-③ 投稿したら/却下は、LINEで「案1 投稿した」「案4 なし」のように番号で返信</div>
+<div class="howto"><strong>遥さんの3分ルーティン(投稿画像も完成品です)</strong><br>
+① 画像を長押しで保存 → ② 「キャプションをコピー」→ ③ Instagramに投稿(画像+キャプション貼り付け)<br>
+④ 投稿したら、LINEで「案1 投稿した」と番号だけ返信(使わない案は「案4 なし」)<br>
+⭐ 目安は<strong>週2本(火・金の20時ごろ)</strong>。⚠️の注意だけ守れば、どの案を選ぶかは遥さんにお任せです<br>
+🎨 画像やキャプションを直したいときは、そのままLINEで一言ください(次週から反映します)</div>
 {''.join(cards)}
 <p class="sub">投稿の最終判断は遥さん・小柳さんにお任せします(ここは提案まで)。文面の相談はチャットへいつでもどうぞ。</p>
 </div>
