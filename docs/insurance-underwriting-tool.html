@@ -3,29 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>保険引き受け目安検索 - なないろ生命 × FWD生命 × チューリッヒ生命</title>
-  <script src="https://cdn.jsdelivr.net/npm/wanakana@5.3.0/dist/wanakana.umd.js"></script>
+  <title>保険引き受け目安検索</title>
   <style>
-    :root {
-      --navy: #00335C;
-      --orange: #F88800;
-      --yellow: #F9A825;
-      --light: #FFFBF4;
-      --text: #333;
-      --success: #2e7d32;
-      --warning: #e65100;
-      --danger: #c62828;
-      --space-xs: 4px;
-      --space-sm: 8px;
-      --space-md: 16px;
-      --space-lg: 32px;
-      --space-xl: 64px;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, Segoe UI, "Noto Sans JP", sans-serif;
-      background: linear-gradient(135deg, var(--light) 0%, #f5f0ea 100%);
-      color: var(--text);
+      font-family: "Segoe UI", "Noto Sans JP", sans-serif;
+      background: linear-gradient(135deg, #FFFBF4 0%, #f5f0ea 100%);
       padding: 20px;
       min-height: 100vh;
     }
@@ -34,21 +21,32 @@
       margin: 0 auto;
       background: white;
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       overflow: hidden;
     }
     header {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--orange) 100%);
+      background: linear-gradient(135deg, #00335C 0%, #F88800 100%);
       color: white;
-      padding: var(--space-xl) var(--space-lg);
+      padding: 64px 32px;
       text-align: center;
     }
-    h1 { font-size: 32px; margin-bottom: var(--space-md); font-weight: 700; letter-spacing: -0.5px; }
-    .subtitle { font-size: 16px; opacity: 0.95; margin-top: var(--space-md); line-height: 1.5; }
-    .version-info { font-size: 13px; opacity: 0.85; margin-top: var(--space-md); border-top: 1px solid rgba(255,255,255,0.2); padding-top: var(--space-md); }
-    .main { padding: var(--space-xl); }
-    .search-section { margin-bottom: var(--space-xl); }
-    .search-box { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); }
+    h1 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .subtitle {
+      font-size: 16px;
+      opacity: 0.95;
+    }
+    .main {
+      padding: 64px 32px;
+    }
+    .search-box {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
     input[type="text"] {
       flex: 1;
       padding: 16px 16px;
@@ -57,157 +55,160 @@
       border-radius: 6px;
       font-size: 16px;
       font-family: inherit;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      background: white;
+      transition: all 0.25s;
     }
     input[type="text"]:focus {
       outline: none;
-      border-color: var(--yellow);
-      box-shadow: 0 0 0 3px rgba(249,168,37,0.15);
+      border-color: #F9A825;
+      box-shadow: 0 0 0 4px rgba(249, 168, 37, 0.2);
       background: #fffbf4;
     }
-    button {
+    .btn {
       padding: 16px 28px;
-      background: var(--yellow);
-      color: white;
+      min-height: 48px;
       border: none;
       border-radius: 6px;
-      cursor: pointer;
       font-size: 16px;
       font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
       font-family: inherit;
-      transition: all 0.3s;
-      min-width: 100px;
-      box-shadow: 0 2px 8px rgba(249,168,37,0.2);
     }
-    button:hover {
+    .btn-primary {
+      background: #F9A825;
+      color: white;
+      box-shadow: 0 2px 8px rgba(249, 168, 37, 0.2);
+    }
+    .btn-primary:hover {
       background: #f5951a;
+      box-shadow: 0 4px 16px rgba(249, 168, 37, 0.3);
       transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(249,168,37,0.3);
     }
-    button.secondary {
+    .btn-secondary {
       background: #999;
-      min-width: 80px;
+      color: white;
     }
-    button.secondary:hover { background: #777; }
-    .tabs {
-      display: flex;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-lg);
+    .btn-secondary:hover {
+      background: #777;
+    }
+    .tabs-container {
+      margin-bottom: 32px;
       border-bottom: 2px solid #f0f0f0;
+      display: flex;
+      gap: 8px;
     }
     .tab-btn {
       padding: 16px 24px;
       background: none;
       border: none;
       border-bottom: 3px solid transparent;
-      color: #888;
-      cursor: pointer;
       font-size: 16px;
       font-weight: 600;
-      font-family: inherit;
+      cursor: pointer;
+      color: #888;
       transition: all 0.25s;
+      font-family: inherit;
     }
     .tab-btn:hover {
-      color: var(--navy);
+      color: #00335C;
     }
     .tab-btn.active {
-      color: var(--yellow);
-      border-bottom-color: var(--yellow);
+      color: #F9A825;
+      border-bottom-color: #F9A825;
       font-weight: 700;
     }
-    .results {
+    .tab-content {
       display: none;
-      margin-top: var(--space-lg);
     }
-    .results.active { display: block; }
+    .tab-content.active {
+      display: block;
+    }
+    .results-section {
+      margin-bottom: 32px;
+      padding-bottom: 32px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .results-section:last-child {
+      border-bottom: none;
+    }
     .results-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: var(--space-lg);
-      padding-bottom: var(--space-md);
-      border-bottom: 2px solid #f0f0f0;
+      margin-bottom: 16px;
     }
     .results-title {
       font-size: 18px;
       font-weight: 700;
-      color: var(--navy);
+      color: #00335C;
     }
-    .results-count {
-      background: var(--yellow);
+    .badge {
+      background: #F9A825;
       color: white;
       padding: 6px 14px;
       border-radius: 20px;
       font-size: 13px;
       font-weight: 700;
-      box-shadow: 0 2px 8px rgba(249,168,37,0.2);
+      box-shadow: 0 2px 8px rgba(249, 168, 37, 0.2);
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: var(--space-lg);
       font-size: 14px;
     }
-    th, td {
+    th {
+      background: #00335C;
+      color: white;
       padding: 16px 14px;
       text-align: left;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    th {
-      background: var(--navy);
-      color: white;
       font-weight: 700;
       font-size: 13px;
-      letter-spacing: 0.3px;
     }
-    tr:hover { background: #fafbf4; }
-    .status {
+    td {
+      padding: 16px 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    tr:hover {
+      background: #fafbf4;
+    }
+    .status-badge {
       display: inline-block;
       padding: 6px 10px;
       border-radius: 4px;
       font-size: 12px;
       font-weight: 700;
     }
-    .status.ok { background: #e8f5e9; color: var(--success); }
-    .status.conditional { background: #fff3e0; color: var(--warning); }
-    .status.ng { background: #ffebee; color: var(--danger); }
-    .status.unknown { background: #f5f5f5; color: #616161; }
+    .status-ok {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .status-conditional {
+      background: #fff3e0;
+      color: #e65100;
+    }
+    .status-ng {
+      background: #ffebee;
+      color: #c62828;
+    }
+    .status-unknown {
+      background: #f5f5f5;
+      color: #616161;
+    }
     .no-results {
       text-align: center;
       color: #aaa;
-      padding: var(--space-xl) var(--space-lg);
+      padding: 64px 32px;
       font-size: 16px;
     }
     .actions {
-      display: flex;
-      gap: var(--space-md);
-      margin-top: var(--space-lg);
-      justify-content: center;
+      display: none;
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 2px solid #f0f0f0;
     }
-    .action-btn {
-      padding: 12px 20px;
-      font-size: 14px;
-      font-weight: 600;
-      background: #f5f5f5;
-      color: var(--text);
-      border: 1px solid #e0e0e0;
-    }
-    .action-btn:hover {
-      background: #f0f0f0;
-      border-color: var(--yellow);
-      color: var(--yellow);
-    }
-    @media (max-width: 768px) {
-      .container { border-radius: 8px; }
-      .main { padding: var(--space-lg); }
-      header { padding: var(--space-lg) var(--space-md); }
-      h1 { font-size: 26px; }
-      table { font-size: 13px; }
-      th, td { padding: var(--space-md) var(--space-sm); }
-      .search-box { flex-direction: column; }
-      button { width: 100%; }
-      .tab-btn { padding: 12px 16px; font-size: 15px; }
+    .actions.active {
+      display: block;
     }
   </style>
 </head>
@@ -216,154 +217,147 @@
     <header>
       <h1>保険引き受け目安検索</h1>
       <p class="subtitle">患者の病名から、保険会社ごとの引き受け見込みを検索</p>
-      <div class="version-info">3社統合版（なないろ生命・FWD生命・チューリッヒ生命）</div>
     </header>
 
     <div class="main">
-      <div class="search-section">
-        <div class="search-box">
-          <input
-            type="text"
-            id="diseaseInput"
-            placeholder="病名を入力（例：がん、糖尿病、心筋梗塞）"
-            autocomplete="off"
-          >
-          <button onclick="search()">検索</button>
-          <button class="secondary" onclick="clearSearch()">クリア</button>
-        </div>
+      <div class="search-box">
+        <input
+          type="text"
+          id="diseaseInput"
+          placeholder="病名を入力（例：がん、糖尿病、心筋梗塞）"
+          autocomplete="off"
+        />
+        <button class="btn btn-primary" onclick="search()">検索</button>
+        <button class="btn btn-secondary" onclick="clearSearch()">クリア</button>
       </div>
 
-      <div class="tabs">
+      <div class="tabs-container">
         <button class="tab-btn active" onclick="switchTab(event, 'all')">すべて</button>
         <button class="tab-btn" onclick="switchTab(event, 'naneiro')">なないろ生命</button>
         <button class="tab-btn" onclick="switchTab(event, 'fwd')">FWD生命</button>
         <button class="tab-btn" onclick="switchTab(event, 'zurich')">チューリッヒ生命</button>
       </div>
 
-      <div id="results-all" class="results active">
-        <div id="all-naneiro-section" style="display:none;">
+      <!-- TAB: すべて -->
+      <div id="tab-all" class="tab-content active">
+        <div id="all-naneiro" class="results-section" style="display: none;">
           <div class="results-header">
             <span class="results-title">なないろ生命</span>
-            <span class="results-count" id="count-all-naneiro">0 件</span>
+            <span class="badge" id="badge-all-naneiro">0 件</span>
           </div>
-          <table id="resultTable-all-naneiro">
+          <table id="table-all-naneiro">
             <thead>
               <tr>
                 <th>病名</th>
                 <th>状態</th>
-                <th>対応商品と判定</th>
+                <th>判定</th>
                 <th>ページ</th>
               </tr>
             </thead>
-            <tbody id="resultBody-all-naneiro"></tbody>
+            <tbody id="tbody-all-naneiro"></tbody>
           </table>
         </div>
 
-        <div id="all-fwd-section" style="display:none; margin-top:40px;">
+        <div id="all-fwd" class="results-section" style="display: none;">
           <div class="results-header">
             <span class="results-title">FWD生命</span>
-            <span class="results-count" id="count-all-fwd">0 件</span>
+            <span class="badge" id="badge-all-fwd">0 件</span>
           </div>
-          <table id="resultTable-all-fwd">
+          <table id="table-all-fwd">
             <thead>
               <tr>
                 <th>病名</th>
                 <th>引き受け判定</th>
                 <th>条件・詳細</th>
-                <th>死亡保険</th>
-                <th>医療保険</th>
-                <th>特約</th>
-                <th>告知ポイント</th>
+                <th>ページ</th>
               </tr>
             </thead>
-            <tbody id="resultBody-all-fwd"></tbody>
+            <tbody id="tbody-all-fwd"></tbody>
           </table>
         </div>
 
-        <div id="all-zurich-section" style="display:none; margin-top:40px;">
+        <div id="all-zurich" class="results-section" style="display: none;">
           <div class="results-header">
             <span class="results-title">チューリッヒ生命</span>
-            <span class="results-count" id="count-all-zurich">0 件</span>
+            <span class="badge" id="badge-all-zurich">0 件</span>
           </div>
-          <table id="resultTable-all-zurich">
+          <table id="table-all-zurich">
             <thead>
               <tr>
                 <th>病名</th>
                 <th>引き受け判定</th>
                 <th>状態・経過</th>
-                <th>対応商品</th>
                 <th>ページ</th>
               </tr>
             </thead>
-            <tbody id="resultBody-all-zurich"></tbody>
+            <tbody id="tbody-all-zurich"></tbody>
           </table>
         </div>
       </div>
 
-      <div id="results-naneiro" class="results">
+      <!-- TAB: なないろ生命 -->
+      <div id="tab-naneiro" class="tab-content">
         <div class="results-header">
           <span class="results-title">なないろ生命</span>
-          <span class="results-count" id="count-naneiro">0 件</span>
+          <span class="badge" id="badge-naneiro">0 件</span>
         </div>
-        <table id="resultTable-naneiro">
+        <table id="table-naneiro">
           <thead>
             <tr>
               <th>病名</th>
               <th>状態</th>
-              <th>対応商品と判定</th>
+              <th>判定</th>
               <th>ページ</th>
             </tr>
           </thead>
-          <tbody id="resultBody-naneiro"></tbody>
+          <tbody id="tbody-naneiro"></tbody>
         </table>
       </div>
 
-      <div id="results-fwd" class="results">
+      <!-- TAB: FWD生命 -->
+      <div id="tab-fwd" class="tab-content">
         <div class="results-header">
           <span class="results-title">FWD生命</span>
-          <span class="results-count" id="count-fwd">0 件</span>
+          <span class="badge" id="badge-fwd">0 件</span>
         </div>
-        <table id="resultTable-fwd">
+        <table id="table-fwd">
           <thead>
             <tr>
               <th>病名</th>
               <th>引き受け判定</th>
               <th>条件・詳細</th>
-              <th>死亡保険</th>
-              <th>医療保険</th>
-              <th>特約</th>
-              <th>告知ポイント</th>
+              <th>ページ</th>
             </tr>
           </thead>
-          <tbody id="resultBody-fwd"></tbody>
+          <tbody id="tbody-fwd"></tbody>
         </table>
       </div>
 
-      <div id="results-zurich" class="results">
+      <!-- TAB: チューリッヒ生命 -->
+      <div id="tab-zurich" class="tab-content">
         <div class="results-header">
           <span class="results-title">チューリッヒ生命</span>
-          <span class="results-count" id="count-zurich">0 件</span>
+          <span class="badge" id="badge-zurich">0 件</span>
         </div>
-        <table id="resultTable-zurich">
+        <table id="table-zurich">
           <thead>
             <tr>
               <th>病名</th>
               <th>引き受け判定</th>
               <th>状態・経過</th>
-              <th>対応商品</th>
               <th>ページ</th>
             </tr>
           </thead>
-          <tbody id="resultBody-zurich"></tbody>
+          <tbody id="tbody-zurich"></tbody>
         </table>
       </div>
 
-      <div id="noResults" class="no-results" style="display:none;">
+      <div id="noResults" class="no-results" style="display: none;">
         <p><strong>該当する病名が見つかりませんでした</strong></p>
       </div>
 
-      <div class="actions" id="actions" style="display:none;">
-        <button class="action-btn" onclick="downloadCSV()">結果をCSVダウンロード</button>
+      <div id="actions" class="actions">
+        <button class="btn btn-primary" onclick="downloadCSV()">結果をCSVダウンロード</button>
       </div>
     </div>
   </div>
@@ -377,239 +371,282 @@
       try {
         const response = await fetch('./docs/insurance/underwriting_full.json');
         underwritingData = await response.json();
+        console.log('データ読み込み成功');
       } catch (e) {
         console.error('JSON読み込みエラー:', e);
+        alert('データの読み込みに失敗しました。');
       }
     }
 
     function search() {
-      const input = document.getElementById('diseaseInput').value.trim();
-      if (!input) return;
+      if (!underwritingData) {
+        alert('データがまだ読み込まれていません。');
+        return;
+      }
 
-      const naneiro_results = searchNaneiro(input);
-      const fwd_results = searchFWD(input);
-      const zurich_results = searchZurich(input);
+      const query = document.getElementById('diseaseInput').value.trim();
+      if (!query) {
+        alert('病名を入力してください。');
+        return;
+      }
 
-      lastResults = { naneiro: naneiro_results, fwd: fwd_results, zurich: zurich_results };
-      displayResults(naneiro_results, fwd_results, zurich_results);
-      document.getElementById('actions').style.display = 'block';
+      const naneiro = searchInsurer(query, underwritingData.naneiro || []);
+      const fwd = searchInsurer(query, underwritingData.fwd || []);
+      const zurich = searchInsurer(query, underwritingData.zurich || []);
+
+      lastResults = { naneiro, fwd, zurich };
+
+      displayAll(naneiro, fwd, zurich);
+      displayNaneiro(naneiro);
+      displayFWD(fwd);
+      displayZurich(zurich);
+
+      document.getElementById('actions').classList.add('active');
+      showTab('all');
     }
 
-    function searchNaneiro(query) {
-      const results = [];
+    function searchInsurer(query, data) {
       const q = query.toLowerCase();
-      if (!underwritingData.naneiro) return results;
+      const results = [];
 
-      for (const entry of underwritingData.naneiro) {
-        const score = calculateScore(q, entry.disease);
+      for (const entry of data) {
+        const disease = (entry.disease || '').toLowerCase();
+        let score = 0;
+
+        if (disease === q) score = 100;
+        else if (disease.includes(q)) score = 90;
+        else if (q.includes(disease)) score = 80;
+        else {
+          const words = disease.split(/[\s・（）()]/);
+          if (words.some(w => w === q)) score = 85;
+          else if (words.some(w => w.includes(q))) score = 70;
+        }
+
         if (score > 40) {
-          results.push({ ...entry, score: score });
+          results.push({ ...entry, score });
         }
       }
+
       return results.sort((a, b) => b.score - a.score);
     }
 
-    function searchFWD(query) {
-      const results = [];
-      const q = query.toLowerCase();
-      if (!underwritingData.fwd) return results;
-
-      for (const entry of underwritingData.fwd) {
-        const score = calculateScore(q, entry.disease);
-        if (score > 40) {
-          results.push({ ...entry, score: score });
-        }
+    function displayAll(naneiro, fwd, zurich) {
+      // なないろ生命
+      if (naneiro.length > 0) {
+        document.getElementById('all-naneiro').style.display = 'block';
+        const tbody = document.getElementById('tbody-all-naneiro');
+        tbody.innerHTML = '';
+        naneiro.forEach(row => {
+          const tr = document.createElement('tr');
+          const hasOK = Object.values(row.marks || {}).some(m => m === '○');
+          const statusClass = hasOK ? 'status-ok' : 'status-conditional';
+          const statusText = hasOK ? '可' : '条件付き';
+          tr.innerHTML = `
+            <td><strong>${row.disease}</strong></td>
+            <td><small>${row.state || 'なし'}</small></td>
+            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            <td><small>p.${row.page}</small></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        document.getElementById('badge-all-naneiro').textContent = naneiro.length + ' 件';
+      } else {
+        document.getElementById('all-naneiro').style.display = 'none';
       }
-      return results.sort((a, b) => b.score - a.score);
-    }
 
-    function searchZurich(query) {
-      const results = [];
-      const q = query.toLowerCase();
-      if (!underwritingData.zurich) return results;
-
-      for (const entry of underwritingData.zurich) {
-        const score = calculateScore(q, entry.disease);
-        if (score > 40) {
-          results.push({ ...entry, score: score });
-        }
+      // FWD生命
+      if (fwd.length > 0) {
+        document.getElementById('all-fwd').style.display = 'block';
+        const tbody = document.getElementById('tbody-all-fwd');
+        tbody.innerHTML = '';
+        fwd.forEach(row => {
+          const tr = document.createElement('tr');
+          const statusClass = row.judgement === '可' ? 'status-ok' :
+                            row.judgement === '条件付き' ? 'status-conditional' : 'status-ng';
+          tr.innerHTML = `
+            <td><strong>${row.disease}</strong></td>
+            <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
+            <td><small>${row.condition || 'なし'}</small></td>
+            <td><small>p.${row.page}</small></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        document.getElementById('badge-all-fwd').textContent = fwd.length + ' 件';
+      } else {
+        document.getElementById('all-fwd').style.display = 'none';
       }
-      return results.sort((a, b) => b.score - a.score);
-    }
 
-    function calculateScore(query, target) {
-      const t = target.toLowerCase();
-      const q = query.toLowerCase();
-
-      if (t === q) return 100;
-      if (t.includes(q)) return 90;
-      if (q.includes(t)) return 80;
-
-      try {
-        const tKata = wanakana.toKatakana(t);
-        const qKata = wanakana.toKatakana(q);
-        if (tKata === qKata) return 100;
-        if (tKata.includes(qKata)) return 90;
-        if (qKata.includes(tKata)) return 80;
-      } catch (e) {}
-
-      const words = t.split(/[\s・（）()]/);
-      if (words.some(w => w === q)) return 85;
-      if (words.some(w => w.includes(q))) return 70;
-
-      return 0;
-    }
-
-    function displayResults(naneiro_results, fwd_results, zurich_results) {
-      const noResults = document.getElementById('noResults');
-
-      if (currentTab === 'all') {
-        displayAllResults(naneiro_results, fwd_results, zurich_results);
-        document.getElementById('results-all').style.display = 'block';
-        noResults.style.display = 'none';
-      } else if (currentTab === 'naneiro') {
-        displayNaneiro(naneiro_results);
-        document.getElementById('results-naneiro').style.display = 'block';
-        noResults.style.display = naneiro_results.length === 0 ? 'block' : 'none';
-      } else if (currentTab === 'fwd') {
-        displayFWD(fwd_results);
-        document.getElementById('results-fwd').style.display = 'block';
-        noResults.style.display = fwd_results.length === 0 ? 'block' : 'none';
-      } else if (currentTab === 'zurich') {
-        displayZurich(zurich_results);
-        document.getElementById('results-zurich').style.display = 'block';
-        noResults.style.display = zurich_results.length === 0 ? 'block' : 'none';
+      // チューリッヒ生命
+      if (zurich.length > 0) {
+        document.getElementById('all-zurich').style.display = 'block';
+        const tbody = document.getElementById('tbody-all-zurich');
+        tbody.innerHTML = '';
+        zurich.forEach(row => {
+          const tr = document.createElement('tr');
+          const statusClass = row.judgement === '可' ? 'status-ok' :
+                            row.judgement === '条件付き' ? 'status-conditional' :
+                            row.judgement === '要確認' ? 'status-unknown' : 'status-ng';
+          tr.innerHTML = `
+            <td><strong>${row.disease}</strong></td>
+            <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
+            <td><small>${row['経過'] || row.section || 'なし'}</small></td>
+            <td><small>p.${row.page}</small></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        document.getElementById('badge-all-zurich').textContent = zurich.length + ' 件';
+      } else {
+        document.getElementById('all-zurich').style.display = 'none';
       }
     }
 
-    function displayAllResults(naneiro_results, fwd_results, zurich_results) {
-      document.getElementById('all-naneiro-section').style.display = naneiro_results.length > 0 ? 'block' : 'none';
-      document.getElementById('all-fwd-section').style.display = fwd_results.length > 0 ? 'block' : 'none';
-      document.getElementById('all-zurich-section').style.display = zurich_results.length > 0 ? 'block' : 'none';
+    function displayNaneiro(data) {
+      const tbody = document.getElementById('tbody-naneiro');
+      tbody.innerHTML = '';
 
-      if (naneiro_results.length > 0) displayNaneiro(naneiro_results, true);
-      if (fwd_results.length > 0) displayFWD(fwd_results, true);
-      if (zurich_results.length > 0) displayZurich(zurich_results, true);
-    }
+      if (data.length === 0) {
+        document.getElementById('noResults').style.display = 'block';
+        return;
+      }
 
-    function displayNaneiro(results, isAll = false) {
-      const body = isAll ? document.getElementById('resultBody-all-naneiro') : document.getElementById('resultBody-naneiro');
-      const count = isAll ? document.getElementById('count-all-naneiro') : document.getElementById('count-naneiro');
-      body.innerHTML = '';
+      document.getElementById('noResults').style.display = 'none';
 
-      results.forEach(data => {
-        const row = document.createElement('tr');
-        const hasOK = Object.values(data.marks || {}).some(m => m === '○');
-        const statusClass = hasOK ? 'ok' : 'conditional';
-        row.innerHTML = `
-          <td><strong>${data.disease}</strong></td>
-          <td><small>${data.state || 'なし'}</small></td>
-          <td><span class="status ${statusClass}">${hasOK ? '可' : '条件付き'}</span></td>
-          <td><small>p.${data.page}</small></td>
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        const hasOK = Object.values(row.marks || {}).some(m => m === '○');
+        const statusClass = hasOK ? 'status-ok' : 'status-conditional';
+        const statusText = hasOK ? '可' : '条件付き';
+        tr.innerHTML = `
+          <td><strong>${row.disease}</strong></td>
+          <td><small>${row.state || 'なし'}</small></td>
+          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          <td><small>p.${row.page}</small></td>
         `;
-        body.appendChild(row);
+        tbody.appendChild(tr);
       });
 
-      count.textContent = results.length + ' 件';
+      document.getElementById('badge-naneiro').textContent = data.length + ' 件';
     }
 
-    function displayFWD(results, isAll = false) {
-      const body = isAll ? document.getElementById('resultBody-all-fwd') : document.getElementById('resultBody-fwd');
-      const count = isAll ? document.getElementById('count-all-fwd') : document.getElementById('count-fwd');
-      body.innerHTML = '';
+    function displayFWD(data) {
+      const tbody = document.getElementById('tbody-fwd');
+      tbody.innerHTML = '';
 
-      results.forEach(data => {
-        const row = document.createElement('tr');
-        const statusClass = data.judgement === '可' ? 'ok' :
-                          data.judgement === '条件付き' ? 'conditional' : 'ng';
-        row.innerHTML = `
-          <td><strong>${data.disease}</strong></td>
-          <td><span class="status ${statusClass}">${data.judgement || 'なし'}</span></td>
-          <td><small>${data.condition || 'なし'}</small></td>
-          <td><small>${data['死亡保険'] || ''}</small></td>
-          <td><small>${data['医療保険'] || ''}</small></td>
-          <td><small>${data['特約'] || ''}</small></td>
-          <td><small>${data['ポイント'] || ''}</small></td>
+      if (data.length === 0) {
+        document.getElementById('noResults').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('noResults').style.display = 'none';
+
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        const statusClass = row.judgement === '可' ? 'status-ok' :
+                          row.judgement === '条件付き' ? 'status-conditional' : 'status-ng';
+        tr.innerHTML = `
+          <td><strong>${row.disease}</strong></td>
+          <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
+          <td><small>${row.condition || 'なし'}</small></td>
+          <td><small>p.${row.page}</small></td>
         `;
-        body.appendChild(row);
+        tbody.appendChild(tr);
       });
 
-      count.textContent = results.length + ' 件';
+      document.getElementById('badge-fwd').textContent = data.length + ' 件';
     }
 
-    function displayZurich(results, isAll = false) {
-      const body = isAll ? document.getElementById('resultBody-all-zurich') : document.getElementById('resultBody-zurich');
-      const count = isAll ? document.getElementById('count-all-zurich') : document.getElementById('count-zurich');
-      body.innerHTML = '';
+    function displayZurich(data) {
+      const tbody = document.getElementById('tbody-zurich');
+      tbody.innerHTML = '';
 
-      results.forEach(data => {
-        const row = document.createElement('tr');
-        const statusClass = data.judgement === '可' ? 'ok' :
-                          data.judgement === '条件付き' ? 'conditional' :
-                          data.judgement === '要確認' ? 'unknown' : 'ng';
-        row.innerHTML = `
-          <td><strong>${data.disease}</strong></td>
-          <td><span class="status ${statusClass}">${data.judgement || 'なし'}</span></td>
-          <td><small>${data['経過'] || data.section || 'なし'}</small></td>
-          <td><small>${data.marks || 'なし'}</small></td>
-          <td><small>p.${data.page}</small></td>
+      if (data.length === 0) {
+        document.getElementById('noResults').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('noResults').style.display = 'none';
+
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        const statusClass = row.judgement === '可' ? 'status-ok' :
+                          row.judgement === '条件付き' ? 'status-conditional' :
+                          row.judgement === '要確認' ? 'status-unknown' : 'status-ng';
+        tr.innerHTML = `
+          <td><strong>${row.disease}</strong></td>
+          <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
+          <td><small>${row['経過'] || row.section || 'なし'}</small></td>
+          <td><small>p.${row.page}</small></td>
         `;
-        body.appendChild(row);
+        tbody.appendChild(tr);
       });
 
-      count.textContent = results.length + ' 件';
+      document.getElementById('badge-zurich').textContent = data.length + ' 件';
     }
 
-    function switchTab(e, tab) {
-      currentTab = tab;
+    function switchTab(e, tabName) {
+      currentTab = tabName;
+
+      // タブボタンのアクティブ状態を変更
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       e.target.classList.add('active');
 
-      document.querySelectorAll('[id^="results-"]').forEach(el => el.style.display = 'none');
-      document.getElementById('results-' + tab).style.display = 'block';
+      // タブコンテンツを表示
+      showTab(tabName);
+    }
 
-      if (lastResults.naneiro.length > 0 || lastResults.fwd.length > 0 || lastResults.zurich.length > 0) {
-        displayResults(lastResults.naneiro, lastResults.fwd, lastResults.zurich);
-      }
+    function showTab(tabName) {
+      document.querySelectorAll('[id^="tab-"]').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.getElementById('tab-' + tabName).classList.add('active');
     }
 
     function clearSearch() {
       document.getElementById('diseaseInput').value = '';
       document.getElementById('noResults').style.display = 'none';
-      document.getElementById('actions').style.display = 'none';
-      document.querySelectorAll('[id^="results-"]').forEach(el => el.style.display = 'none');
-      document.getElementById('resultBody-naneiro').innerHTML = '';
-      document.getElementById('resultBody-fwd').innerHTML = '';
-      document.getElementById('resultBody-zurich').innerHTML = '';
-      document.getElementById('resultBody-all-naneiro').innerHTML = '';
-      document.getElementById('resultBody-all-fwd').innerHTML = '';
-      document.getElementById('resultBody-all-zurich').innerHTML = '';
+      document.getElementById('actions').classList.remove('active');
+
+      // すべてのテーブルをクリア
+      ['tbody-naneiro', 'tbody-fwd', 'tbody-zurich',
+       'tbody-all-naneiro', 'tbody-all-fwd', 'tbody-all-zurich'].forEach(id => {
+        document.getElementById(id).innerHTML = '';
+      });
+
+      // すべての結果セクションを非表示
+      ['all-naneiro', 'all-fwd', 'all-zurich'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+
+      lastResults = { naneiro: [], fwd: [], zurich: [] };
+      showTab('all');
     }
 
     function downloadCSV() {
-      const rows = ['保険会社,病名,状態,判定,詳細'];
+      const rows = ['保険会社,病名,状態,判定'];
 
       lastResults.naneiro.forEach(r => {
-        const statusStr = Object.values(r.marks || {}).some(m => m === '○') ? '可' : '条件付き';
-        rows.push(`なないろ生命,"${r.disease}","${r.state}","${statusStr}","ページ${r.page}"`);
+        const hasOK = Object.values(r.marks || {}).some(m => m === '○');
+        const status = hasOK ? '可' : '条件付き';
+        rows.push(`なないろ生命,"${r.disease}","${r.state}","${status}"`);
       });
 
       lastResults.fwd.forEach(r => {
-        rows.push(`FWD生命,"${r.disease}","${r.condition || ''}","${r.judgement || ''}","ページ${r.page}"`);
+        rows.push(`FWD生命,"${r.disease}","${r.condition || ''}","${r.judgement || ''}"`);
       });
 
       lastResults.zurich.forEach(r => {
-        rows.push(`チューリッヒ生命,"${r.disease}","${r['経過'] || ''}","${r.judgement || ''}","ページ${r.page}"`);
+        rows.push(`チューリッヒ生命,"${r.disease}","${r['経過'] || ''}","${r.judgement || ''}"`);
       });
 
       const csv = rows.join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `insurance-results-${new Date().toISOString().split('T')[0]}.csv`;
+      link.download = 'insurance-results.csv';
       link.click();
     }
 
+    // 初期化
     init();
   </script>
 </body>
