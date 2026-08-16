@@ -39,6 +39,7 @@ INFRA_REPOS=(report-hq go allgroup-site)
 # ALLGROUP共通スキル(本店=hojo-hq)。ここに追加するとdrift防止対象が増える。
 # social-media系8スキルは検出仕様(.claude/skills直下のみ走査)のためフラット配置(2026-08-07修正)
 ALLGROUP_SKILL_NAMES=(humanizer resilient-agent-design mindshare-arbitrage multi-ai-crosscheck context-limit-handoff feature-factory hojo-lighthouse-triage taste-skill last30days
+  go-link-discipline explainer-video-production
   caption-writer carousel-writer content-calendar hashtag-strategy hook-writer
   instagram-growth platform-specs-and-validation thread-writer)
 ALLGROUP_LICENSE_NAMES=(TASTE-SKILL-LICENSE LAST30DAYS-LICENSE SOCIAL-MEDIA-SKILLS-LICENSE)
@@ -77,7 +78,15 @@ update_repo() {
   for n in "${ALLGROUP_LICENSE_NAMES[@]}"; do
     [ -f "$TMP/hq/.claude/skills/$n" ] && cp "$TMP/hq/.claude/skills/$n" "$D/.claude/skills/$n"
   done
+  # カスタムスラッシュコマンド(本店=hojo-hq の .claude/commands をそのまま配布)
+  # 本店に commands が無い間は完全なno-op(既存を消さない)。実体は必ず本店に置くこと。
+  if [ -d "$TMP/hq/.claude/commands" ]; then
+    mkdir -p "$D/.claude/commands"
+    cp -r "$TMP/hq/.claude/commands/." "$D/.claude/commands/"
+  fi
+
   git -C "$D" add .claude/skills
+  [ -d "$D/.claude/commands" ] && git -C "$D" add .claude/commands
   if git -C "$D" diff --cached --quiet; then echo "[$repo] up to date"; return; fi
   if [ "$DRY_RUN" = "1" ]; then echo "[$repo] DRY_RUN: $(git -C "$D" diff --cached --name-only | wc -l) files changed"; git -C "$D" reset -q; return; fi
   git -C "$D" commit -q -m "chore: update vendored skills (superpowers + marketingskills + ALLGROUP共通)"
