@@ -49,6 +49,7 @@ CVはLINE登録の1点のみ(締切アラートが登録特典)。
 - 整形: Claude API → JSON(schema: docs/data-schema.md)
 - 公開: 静的HTML + GitHub Pages(org: allgroup-inc)
 - 通知: LINE公式アカウント + Power Automate(締切アラート配信)
+- パフォーマンス規律: `word-break:auto-phrase`・`text-wrap:balance`等のレイアウト系CSSは**見出し(h1〜h3)限定**。適用範囲を広げる変更はLighthouseローカル実測(hojo-lighthouse-triageスキル)とセットで行う(2026-08-05・08-12の2度、繰り返し要素への適用でPerformance退行→Issue #10)
 
 ## マルチAI連携(2026-08-06 小柳さん決裁)
 - 原文照合(verify-sources)は Claude に加え **Gemini でも独立照合するダブルチェック方式**。どちらか一方が矛盾を検知したら NG(要確認)扱い(Secrets: GEMINI_API_KEY。未設定時は従来のClaude単独照合)
