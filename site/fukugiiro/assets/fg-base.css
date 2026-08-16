@@ -42,3 +42,4 @@ a{color:var(--fg-primary)}
 
 /* Instagram補助導線(2026-08-16 小柳さん承認。LINEが主役CVのため控えめに) */
 .iglink{display:inline-block;font-size:.82rem;color:var(--fg-muted);padding:6px 2px;text-decoration:underline}
+.ignav{display:inline-flex;align-items:center;justify-content:center;padding:8px;min-width:36px;min-height:36px;color:var(--fg-primary-deep);border-radius:8px}
