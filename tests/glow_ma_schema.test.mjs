@@ -118,13 +118,9 @@ test("後継者状況の選択肢(SUCCESSOR_STATUS_TYPES)があり/なし/不明
   assert.deepEqual(schema.SUCCESSOR_STATUS_TYPES, ["あり", "なし", "不明"]);
 });
 
-test("企業マスタに窓口担当者名・携帯番号列が末尾に追加されている(Phase 13)", () => {
+test("企業マスタに窓口担当者名・携帯番号列が追加されている(Phase 13)", () => {
   assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("窓口担当者名") !== -1);
   assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("携帯番号") !== -1);
-  assert.deepEqual(
-    schema.COMPANY_MASTER_HEADERS.slice(-2),
-    ["窓口担当者名", "携帯番号"]
-  );
 });
 
 test("スタッフタブに管理画面Web App用のメールアドレス列が末尾に追加されている(Phase 18a)", () => {
@@ -146,5 +142,27 @@ test("紹介実績ログのタブ名・見出しが定義されている(紹介�
   assert.equal(schema.REFERRAL_RECORD_SHEET_NAME, "紹介実績ログ");
   assert.deepEqual(schema.REFERRAL_RECORD_HEADERS, [
     "実績ID", "パートナーID", "紹介日", "対象企業ID", "紹介料率", "契約内容メモ", "成約有無"
+  ]);
+});
+
+test("企業マスタに事前選定ランク・事前選定スコア列が末尾に追加されている", () => {
+  assert.ok(schema.COMPANY_MASTER_HEADERS.includes("事前選定ランク"));
+  assert.ok(schema.COMPANY_MASTER_HEADERS.includes("事前選定スコア"));
+  assert.deepEqual(
+    schema.COMPANY_MASTER_HEADERS.slice(-2),
+    ["事前選定ランク", "事前選定スコア"]
+  );
+});
+
+test("事前選定リスト・事前選定_未一致タブの名称・見出しが定義されている", () => {
+  assert.equal(schema.PRE_SCREENING_STAGING_SHEET_NAME, "事前選定リスト");
+  assert.equal(schema.PRE_SCREENING_MISMATCH_SHEET_NAME, "事前選定_未一致");
+  assert.deepEqual(schema.PRE_SCREENING_MISMATCH_HEADERS, ["会社名", "記録日時"]);
+});
+
+test("QR生成結果タブの名称・見出しが定義されている", () => {
+  assert.equal(schema.QR_RESULT_SHEET_NAME, "QR生成結果");
+  assert.deepEqual(schema.QR_RESULT_HEADERS, [
+    "企業ID", "会社名", "発送日", "トラッキングURL", "QR画像リンク", "ステータス"
   ]);
 });

@@ -44,10 +44,6 @@
 /* シーンごとのゆっくりズーム(動画風) */
 .kb{position:absolute;inset:0;transform:scale(1.07);transition:transform 22s ease-out;transform-origin:50% 72%}
 .in .kb{transform:scale(1)}
-/* 実写指定チップ */
-.filmchip{position:absolute;right:14px;bottom:14px;z-index:7;font-size:.68rem;letter-spacing:.06em;
-  color:rgba(255,255,255,.9);background:rgba(20,30,28,.34);border:1px solid rgba(255,255,255,.25);
-  border-radius:999px;padding:4px 12px;backdrop-filter:blur(3px)}
 /* 星・雲・光の粒 */
 .hoshi{position:absolute;border-radius:50%;background:#EFE3C8;animation:tw 3.4s ease-in-out infinite alternate;z-index:1}
 @keyframes tw{from{opacity:.1}to{opacity:.85}}
@@ -83,10 +79,10 @@
 .s1 .sub{margin-top:1.2em;font-size:clamp(.85rem,2.6vw,1rem)!important;letter-spacing:.22em!important;color:#E9D8BC!important;font-weight:500!important}
 /* 前口上(映画の導入) */
 .pretitle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:8;pointer-events:none}
-.pretitle p{font-family:"Shippori Mincho",serif;font-weight:500;font-size:clamp(.95rem,3vw,1.2rem);letter-spacing:.3em;color:#E9DCC2;opacity:0;animation:pre 6.5s ease 1s forwards}
+.pretitle p{font-family:"Shippori Mincho",serif;font-weight:500;font-size:clamp(.95rem,3vw,1.2rem);letter-spacing:.3em;color:#E9DCC2;opacity:0;animation:pre 2.8s ease .3s forwards}
 @keyframes pre{0%{opacity:0}18%{opacity:1}66%{opacity:1}100%{opacity:0}}
-.s1 .stmt{transition-delay:6.2s}
-.s1 .sub{transition-delay:7.4s!important}
+.s1 .stmt{transition-delay:2.5s}
+.s1 .sub{transition-delay:3.1s!important}
 /* ビジョンの光 */
 .sunburst{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);width:90vmin;height:90vmin;border-radius:50%;z-index:1;
   background:radial-gradient(circle,rgba(246,203,116,.5) 0%,rgba(246,203,116,.22) 34%,rgba(246,203,116,0) 66%);
@@ -127,7 +123,7 @@
 
 /* ===== S7: ビジョン ===== */
 .s7{flex-direction:column;gap:22px}
-.s7 .logo{width:clamp(120px,26vmin,190px);height:auto;position:relative;z-index:5}
+.s7 .logo{width:clamp(300px,72vmin,560px);height:auto;position:relative;z-index:5}
 .s7 .vision{font-size:clamp(1.5rem,5.6vw,2.5rem);color:var(--coral-deep);letter-spacing:.12em}
 .s7 .vision span{opacity:0;display:inline-block;transform:translateY(.5em);transition:opacity 1s ease,transform 1s ease}
 .s7.in .vision span{opacity:1;transform:none}

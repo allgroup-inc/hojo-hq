@@ -16,27 +16,23 @@
 <link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "もらいわすれ堂", "item": "https://allgroup-inc.github.io/hojo-hq/fukugiiro/"}, {"@type": "ListItem", "position": 2, "name": "申請準備シート"}]}
 </script>
+<link rel="stylesheet" href="../assets/fg-base.css">
 <style>
-:root{--fg-primary:#D2694A;--fg-primary-deep:#B9502F;--fg-accent:#F2C14E;--fg-deep:#1F5C45;--fg-ink:#3B322B;--fg-bg:#FBF5EC;--fg-card:#FFFDF9;--fg-muted:#8B7C6E;--fg-line:#EEE1D0;--fg-cta:#22382A;--fg-shadow:0 1px 2px rgba(0,0,0,.04)}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:17px;line-height:1.9;color:var(--fg-ink);background:var(--fg-bg);-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
 h1{font-size:1.35rem;margin-bottom:4px;line-height:1.5}
 h2{font-size:1.05rem;margin:24px 0 8px;border-left:6px solid var(--fg-accent);padding-left:.5em}
-.note{font-size:.85rem;color:var(--fg-muted)}
 .box{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:16px 18px;margin:10px 0;box-shadow:var(--fg-shadow)}
-.status{display:inline-block;font-size:.78rem;background:#FBEED0;border-radius:999px;padding:2px 10px;color:#7a5b00}
-.status.ok{background:#E7F3EC;color:#0F5138}
 .goal{background:linear-gradient(180deg,#FDF5E6 0%,var(--fg-card) 100%);border:1px solid var(--fg-accent);border-radius:12px;padding:16px 18px;margin:12px 0}
 .goal p{margin:6px 0}
 /* 5ステップ工程表(画面のみ・伴走) */
 .track{list-style:none;counter-reset:st}
-.track li{position:relative;padding:12px 0 12px 46px;border-bottom:1px dashed var(--fg-line)}
+.track li{position:relative;padding:12px 0 12px 46px;border-bottom:1px dashed var(--fg-line);counter-increment:st}
+.track .n::before{content:counter(st)}
 .track li:last-child{border-bottom:none}
 .track label{display:flex;align-items:flex-start;gap:10px;cursor:pointer}
 .track input[type=checkbox]{width:24px;height:24px;min-width:24px;margin-top:3px;accent-color:var(--fg-deep)}
@@ -65,17 +61,11 @@ ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through
 .btns button,.btns a{flex:1;display:block;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
 .btns .primary{background:var(--fg-primary);color:#fff}
 .linebtn{display:block;max-width:440px;margin:8px auto 0;padding:14px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
-.disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
-a{color:var(--fg-primary)}
-.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
-.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;color:var(--fg-primary-deep);text-decoration:none;font-size:1.05rem}
-.siteheader .hlogo img{width:30px;height:30px}
-.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
 @media(min-width:900px){.wrap{max-width:820px}}
-@media(max-width:560px){.siteheader nav a{font-size:.74rem;padding:5px 6px}}
 /* 印刷=電話台本+持ち物+窓口ひとこと+メモの1枚に圧縮。工程表・申請後・LINEは画面のみ。 */
-@media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}}
+@media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:.8em;word-break:break-all}
+  .memo{min-height:56px;resize:none}}
 </style>
 </head>
 <body>
@@ -88,156 +78,52 @@ a{color:var(--fg-primary)}
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
   </nav>
 </header>
 <div class="wrap">
 
-<h1>申請ナビ一覧</h1>
-<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請ナビを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで、印刷してそのまま窓口へ。どれが自分に合うかわからないときは、まず3分診断からどうぞ。</p>
+<h1>申請準備シート一覧</h1>
+<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで、印刷してそのまま窓口へ。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>
-<div class="box"><ul style="list-style:none"><li style="margin-bottom:8px"><a href="fk-kuni-jidoteate/">児童手当</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-jidofuyoteate/">児童扶養手当</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-shussan-ichijikin/">出産育児一時金</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-ikuji-kyufu/">育児休業給付(雇用保険)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-jukyo-kakuho/">住居確保給付金</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-kogaku-ryoyo/">高額療養費制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-shugaku-shien/">高等教育の修学支援新制度(授業料等減免・給付型奨学金)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-hitorioya-shien/">ひとり親家庭への支援制度(全体案内)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-ninpu-shien/">妊婦のための支援給付・伴走型相談支援</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-shugakushienkin-koko/">高等学校等就学支援金</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-shogaku-kyufukin-koko/">高校生等奨学給付金</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-kyushokusha-shien/">求職者支援制度(職業訓練受講給付金)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-seikatsu-konkyu/">生活困窮者自立支援制度(相談窓口)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-kyoiku-kunren/">教育訓練給付金</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-hoiku-mushoka/">幼児教育・保育の無償化</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-tokubetsu-jifute/">特別児童扶養手当</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-shogaiji-fukushi/">障害児福祉手当</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-tokubetsu-shogaisha/">特別障害者手当</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-jiritsushien-iryo/">自立支援医療(医療費の自己負担軽減)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-koyohoken-kihonteate/">雇用保険の基本手当(失業給付)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-kaigokyugyo-kyufu/">介護休業給付金(雇用保険)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-rousai/">労災保険の給付(仕事中・通勤中のけが・病気)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-seikatsu-hogo/">生活保護制度(相談窓口)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-nenkin-kyufukin/">年金生活者支援給付金</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-saigai-choui/">災害弔慰金・災害援護資金など(被災時の支援)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-shugaku-enjo/">就学援助(小・中学生の学用品費・給食費など)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-tokushi-shorei/">特別支援教育就学奨励費</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-safetynet-jutaku/">住宅セーフティネット制度(住宅確保要配慮者の入居支援)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-kosodate-green/">子育てグリーン住宅支援事業(新築・リフォーム補助)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-boshi-fushi-kafu-shikin/">母子父子寡婦福祉資金貸付金</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-hitorioya-jutaku-shikin/">沖縄県ひとり親家庭住宅支援資金貸付</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-hitorioya-kurashi-ouen/">沖縄県ひとり親家庭暮らし応援事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-kenei-jutaku/">沖縄県営住宅</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-senshiniryo-funin/">沖縄県 先進医療不妊治療費助成事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-fuiku-kensa/">沖縄県 不育症検査費用助成事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-kodomo-iryohi/">沖縄県 こども医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-boshi-fushi-iryohi/">沖縄県 母子及び父子家庭等医療費助成事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-judo-shinshin-iryohi/">沖縄県 重度心身障害者医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-nanbyo-iryohi/">沖縄県 特定医療費(指定難病)助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-naha-kodomo-iryo/">那覇市 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-naha-shugaku-enjo/">那覇市 就学援助</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-naha-sango-care/">那覇市 産後ケア事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-okinawa-kodomo-iryo/">沖縄市 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-okinawa-shugaku-enjo/">沖縄市 就学援助(準要保護児童生徒)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-okinawa-sango-care/">沖縄市 産後ケア事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-uruma-kodomo-iryo/">うるま市 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-uruma-shugaku-enjo/">うるま市 就学援助制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-uruma-boshi-iryo/">うるま市 母子及び父子家庭等医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-uruma-sango-care/">うるま市 産後ケア事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-urasoe-kodomo-iryo/">浦添市 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-urasoe-shugaku-enjo/">浦添市 就学援助</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-urasoe-kyushoku/">浦添市 学校給食費の無償化(令和8年度)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-urasoe-sango-care/">浦添市 産後ケア事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ginowan-kodomo-iryo/">宜野湾市 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ginowan-kyushoku/">宜野湾市 学校給食費の助成(小学生半額・食材費補助)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-tomigusuku-kodomo-iryo/">豊見城市 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-tomigusuku-kodomo-iryo-2/">豊見城市 こども医療費助成貸付制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-haebaru-kodomo-iryo/">南風原町 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-haebaru-shogai-iryo/">南風原町 重度心身障がい者(児)医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-miyakojima-kodomo-iryo/">宮古島市 こども医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-miyakojima-sango-care/">宮古島市 産後ケア事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ishigaki-kodomo-iryo/">石垣市 こども医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ishigaki-shugaku-enjo/">石垣市 就学援助</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ishigaki-shingaku-shien/">石垣市 児童生徒進学等支援金給付事業</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-nago-kodomo-iryo/">名護市 こども医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-nago-famisapo/">名護市 ファミリー・サポート・センター</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-shussan-ouen/">出産・子育て応援給付金(妊婦のための支援給付・伴走型相談支援)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-hisaisha-saiken/">被災者生活再建支援金</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-hello-training/">ハロートレーニング(公共職業訓練・求職者支援訓練)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-josei-sodan/">女性相談支援センター(困難な問題を抱える女性への支援)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-kokuho-genmen/">国民健康保険料(税)の軽減・減免</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-chiiki-houkatsu/">地域包括支援センター(高齢者の総合相談・生活支援の窓口)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-kashitsuke/">生活福祉資金貸付制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-kokunen-menjo/">国民年金保険料の免除・納付猶予制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-boshi-jiritsu-kyufu/">母子家庭等自立支援給付金(自立支援教育訓練給付金・高等職業訓練促進給付金)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-tsugakuhi/">沖縄県遠距離等通学費補助金</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-itoman-kodomo-iryo/">糸満市 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-itoman-shugaku-enjo/">糸満市 就学援助制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-nanjo-kodomo-iryo/">南城市 子ども医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-nanjo-sango-care/">南城市 産後ケア事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-yaese-kodomo-iryo/">八重瀬町 子ども医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-yaese-kyushoku/">八重瀬町 学校給食費の無償化(令和8年度)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-yaese-shugaku-enjo/">八重瀬町 就学援助制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-nishihara-kodomo-iryo/">西原町 こども医療費助成事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-nishihara-boshi-iryo/">西原町 母子父子家庭等医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-yonabaru-kodomo-iryo/">与那原町 こども医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-yonabaru-sango-care/">与那原町 産後ケア事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-yomitan-kodomo-iryo/">読谷村 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-yomitan-kyushoku/">読谷村 学校給食費の補助(無償化)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-yomitan-boshi-iryo/">読谷村 母子及び父子家庭等医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-chatan-kodomo-iryo/">北谷町 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-chatan-boshi-iryo/">北谷町 母子及び父子家庭等医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kadena-kodomo-iryo/">嘉手納町 子ども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kadena-kyushoku/">嘉手納町 学校給食費の無償化</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kitanakagusuku-kodomo-iryo/">北中城村 子ども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kitanakagusuku-kyushoku/">北中城村 学校給食費補助金交付事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kitanakagusuku-shugaku-enjo/">北中城村 就学援助制度(要保護・準要保護)</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-nakagusuku-kodomo-iryo/">中城村 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-nakagusuku-boshi-iryo/">中城村 母子及び父子家庭等医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kunigami-kodomo-iryo/">国頭村 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-higashi-kodomo-iryo/">東村 こども医療費助成</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-ogimi-sango-care/">大宜味村 産後ケア事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ogimi-shugaku-enjo/">大宜味村 就学援助</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-nakijin-kodomo-iryo/">今帰仁村 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-nakijin-kyushoku/">今帰仁村 学校給食費無償化支援</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-motobu-kodomo-iryo/">本部町 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-motobu-sango-care/">本部町 産後ケア事業</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-onna-kodomo-iryo/">恩納村 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-onna-shugaku-enjo/">恩納村 就学援助</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kumejima-kodomo-iryo/">久米島町 こども医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kumejima-shussan-josei/">久米島町 出産助成金・出産奨励金</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-taketomi-tokou-iryo/">竹富町 こどもの通院にかかる渡航費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-taketomi-kodomo-iryo/">竹富町 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-yonaguni-shogaku/">与那国町 貸与型及び給付型奨学金基金</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ie-kodomo-iryo/">伊江村 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-kin-kodomo-iryo/">金武町 こども医療費助成制度</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ginoza-kyushoku/">宜野座村 給食費無償化</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-ginoza-kodomo-iryo/">宜野座村 こども医療費助成</a> <span class="status ok">✓ 確認済み</span></li>
-<li style="margin-bottom:8px"><a href="fk-minamidaito-shussan-iwai/">南大東村 出産祝い金</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-minamidaito-kodomo-iryo/">南大東村 こども医療費助成</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-kitadaito-shussan-iwai/">北大東村 出産お祝い金</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-kitadaito-tosen-hojo/">北大東村 こどもの通院に係る渡船運賃補助制度</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-kitadaito-kodomo-iryo/">北大東村 こども医療費助成</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-kitadaito-ninpu-tokohi/">北大東村 妊婦健康診査の渡航費・宿泊費助成</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-iheya-kodomo-iryo/">伊平屋村 子ども医療費助成制度</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-iheya-tsuinhi-shien/">伊平屋村 離島患者等通院費支援事業</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-iheya-kokosei-kotsuhi/">伊平屋村 高校生保護者交通費負担軽減補助金</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-izena-kodomo-iryo/">伊是名村 こども医療費助成</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-izena-shussan-iwai/">伊是名村 出産祝い金</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-izena-tsuinhi-shien/">伊是名村 患者等通院費支援事業</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-tarama-shussei-iwai/">多良間村 出生祝金</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-tarama-jutaku-shorei/">多良間村 定住促進住宅建築等奨励金</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-tarama-kodomo-iryo/">多良間村 こども医療費の無料化(高校生まで)</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-tokashiki-nyuyoji-iryo/">渡嘉敷村 乳幼児医療費助成事業</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-tokashiki-sango-care/">渡嘉敷村 産後ケア事業</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-tokashiki-kokosei-iryo/">渡嘉敷村 離島高校生医療費助成</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-zamami-shussan-josei/">座間味村 出産助成金</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-zamami-kodomo-iryo/">座間味村 こども医療費助成</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-zamami-hoikuryo-keigen/">座間味村 幼稚園入園料・保育料の軽減</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-zamami-tokosen-hojo/">座間味村 長期・定期治療の渡航船賃の半額補助</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-aguni-tsuinhi-josei/">粟国村 離島患者等通院費助成事業</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-aguni-kokosei-shugaku/">粟国村 離島高校生就学支援</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-aguni-boshi-iryo/">粟国村 母子及び父子家庭等医療費助成事業</a> <span class="status">要確認</span></li>
+<h2 style='font-size:1.1rem;margin-top:20px'>全国の制度(48件)</h2><p class='note'>お住まいがどこでも対象になる可能性があります</p><div class='box'><ul style='list-style:none'><li style="margin-bottom:8px"><a href="fk-kuni-jidoteate/">児童手当</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-jidofuyoteate/">児童扶養手当</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-shussan-ichijikin/">出産育児一時金</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-ikuji-kyufu/">育児休業給付(雇用保険)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-jukyo-kakuho/">住居確保給付金</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-kogaku-ryoyo/">高額療養費制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-shugaku-shien/">高等教育の修学支援新制度(授業料等減免・給付型奨学金)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-hitorioya-shien/">ひとり親家庭への支援制度(全体案内)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-ninpu-shien/">妊婦のための支援給付・伴走型相談支援</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-shugakushienkin-koko/">高等学校等就学支援金</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-shogaku-kyufukin-koko/">高校生等奨学給付金</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-kyushokusha-shien/">求職者支援制度(職業訓練受講給付金)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-seikatsu-konkyu/">生活困窮者自立支援制度(相談窓口)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-kyoiku-kunren/">教育訓練給付金</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-hoiku-mushoka/">幼児教育・保育の無償化</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-tokubetsu-jifute/">特別児童扶養手当</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-shogaiji-fukushi/">障害児福祉手当</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-tokubetsu-shogaisha/">特別障害者手当</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-jiritsushien-iryo/">自立支援医療(医療費の自己負担軽減)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-koyohoken-kihonteate/">雇用保険の基本手当(失業給付)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-kaigokyugyo-kyufu/">介護休業給付金(雇用保険)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-rousai/">労災保険の給付(仕事中・通勤中のけが・病気)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-seikatsu-hogo/">生活保護制度(相談窓口)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-nenkin-kyufukin/">年金生活者支援給付金</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-saigai-choui/">災害弔慰金・災害援護資金など(被災時の支援)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-shugaku-enjo/">就学援助(小・中学生の学用品費・給食費など)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-tokushi-shorei/">特別支援教育就学奨励費</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-safetynet-jutaku/">住宅セーフティネット制度(住宅確保要配慮者の入居支援)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-kosodate-green/">子育てグリーン住宅支援事業(新築・リフォーム補助)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-shussan-ouen/">出産・子育て応援給付金(妊婦のための支援給付・伴走型相談支援)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-hisaisha-saiken/">被災者生活再建支援金</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-hello-training/">ハロートレーニング(公共職業訓練・求職者支援訓練)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-josei-sodan/">女性相談支援センター(困難な問題を抱える女性への支援)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-kokuho-genmen/">国民健康保険料(税)の軽減・減免</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-chiiki-houkatsu/">地域包括支援センター(高齢者の総合相談・生活支援の窓口)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-kashitsuke/">生活福祉資金貸付制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-kokunen-menjo/">国民年金保険料の免除・納付猶予制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-boshi-jiritsu-kyufu/">母子家庭等自立支援給付金(自立支援教育訓練給付金・高等職業訓練促進給付金)</a> <span class="status ok">✓ 公式と照合済み</span></li>
 <li style="margin-bottom:8px"><a href="fk-kuni-shobyo-teate/">傷病手当金</a> <span class="status">要確認</span></li>
 <li style="margin-bottom:8px"><a href="fk-kuni-shussan-teate/">出産手当金</a> <span class="status">要確認</span></li>
 <li style="margin-bottom:8px"><a href="fk-kuni-maisoryo/">埋葬料・埋葬費(健康保険)/葬祭費(国保・後期高齢者)</a> <span class="status">要確認</span></li>
@@ -247,16 +133,129 @@ a{color:var(--fg-primary)}
 <li style="margin-bottom:8px"><a href="fk-kuni-shoni-mansei/">小児慢性特定疾病医療費助成</a> <span class="status">要確認</span></li>
 <li style="margin-bottom:8px"><a href="fk-kuni-nyuin-shokuji-gengaku/">入院時食事療養費の標準負担額減額(住民税非課税世帯など)</a> <span class="status">要確認</span></li>
 <li style="margin-bottom:8px"><a href="fk-kuni-iryohi-kojo/">医療費控除(セルフメディケーション税制含む)</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-kuni-koki-korei-hokenryo-keigen/">後期高齢者医療制度の保険料軽減</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-ken-shiritsu-shogaku-kyufu/">沖縄県 私立高等学校等奨学のための給付金</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-kunigami-nyugaku-iwaikin/">国頭村 入学祝金・卒業祝金(定住支援)</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-higashi-kyushoku-josei/">東村 学校給食費の助成</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-higashi-shussan-iwaikin/">東村 出産祝金</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-higashi-influenza-josei/">東村 インフルエンザ予防接種費用助成</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-kuni-koki-korei-hokenryo-keigen/">後期高齢者医療制度の保険料軽減</a> <span class="status">要確認</span></li></ul></div>
+<h2 style='font-size:1.1rem;margin-top:20px'>沖縄県の制度(12件)</h2><p class='note'>沖縄県にお住まいの方向けです</p><div class='box'><ul style='list-style:none'><li style="margin-bottom:8px"><a href="fk-ken-boshi-fushi-kafu-shikin/">母子父子寡婦福祉資金貸付金</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ken-hitorioya-jutaku-shikin/">沖縄県ひとり親家庭住宅支援資金貸付</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ken-hitorioya-kurashi-ouen/">沖縄県ひとり親家庭暮らし応援事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ken-kenei-jutaku/">沖縄県営住宅</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ken-senshiniryo-funin/">沖縄県 先進医療不妊治療費助成事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ken-fuiku-kensa/">沖縄県 不育症検査費用助成事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ken-kodomo-iryohi/">沖縄県 こども医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ken-boshi-fushi-iryohi/">沖縄県 母子及び父子家庭等医療費助成事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ken-judo-shinshin-iryohi/">沖縄県 重度心身障害者医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ken-nanbyo-iryohi/">沖縄県 特定医療費(指定難病)助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ken-tsugakuhi/">沖縄県遠距離等通学費補助金</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ken-shiritsu-shogaku-kyufu/">沖縄県 私立高等学校等奨学のための給付金</a> <span class="status">要確認</span></li></ul></div>
+<h2 style='font-size:1.1rem;margin-top:20px'>市町村の制度(107件)</h2><p class='note'>お住まいの市町村名から探せます(市町村ページからも見られます)</p><div class='box'><ul style='list-style:none'><li style="margin-bottom:8px"><a href="fk-uruma-kodomo-iryo/">うるま市 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-uruma-shugaku-enjo/">うるま市 就学援助制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-uruma-boshi-iryo/">うるま市 母子及び父子家庭等医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-uruma-sango-care/">うるま市 産後ケア事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-yonabaru-kodomo-iryo/">与那原町 こども医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-yonabaru-sango-care/">与那原町 産後ケア事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-yonaguni-haken-hojo/">与那国町 児童生徒の派遣費補助金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-yonaguni-shogaku/">与那国町 貸与型及び給付型奨学金基金</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-yonaguni-judo-iryohi/">与那国町 重度心身障害者(児)医療費助成</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-yonaguni-rito-kokosei-hogosha/">与那国町 離島高校生保護者負担軽減補助金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-nakagusuku-kodomo-iryo/">中城村 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-nakagusuku-boshi-iryo/">中城村 母子及び父子家庭等医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kumejima-kodomo-iryo/">久米島町 こども医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kumejima-shussan-josei/">久米島町 出産助成金・出産奨励金</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-nakijin-kodomo-iryo/">今帰仁村 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-nakijin-kyushoku/">今帰仁村 学校給食費無償化支援</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-iheya-kodomo-iryo/">伊平屋村 子ども医療費助成制度</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-iheya-tsuinhi-shien/">伊平屋村 離島患者等通院費支援事業</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-iheya-kokosei-kotsuhi/">伊平屋村 高校生保護者交通費負担軽減補助金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-izena-kodomo-iryo/">伊是名村 こども医療費助成</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-izena-shussan-iwai/">伊是名村 出産祝い金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-izena-tsuinhi-shien/">伊是名村 患者等通院費支援事業</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-ie-kodomo-iryo/">伊江村 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
 <li style="margin-bottom:8px"><a href="fk-ie-kosodate-shienkin/">伊江村 子育て支援金(出産祝金)</a> <span class="status">要確認</span></li>
-<li style="margin-bottom:8px"><a href="fk-kin-shugaku-enjo/">金武町 就学援助</a> <span class="status">要確認</span></li></ul></div>
-<div class="disclaimer">最終更新: 2026-08-11 10:23(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
-<p style="margin-top:16px"><a href="../index.html">もらいわすれ堂 トップ</a></p>
+<li style="margin-bottom:8px"><a href="fk-iejima-gakushi-taiyo/">伊江村 学資費用貸与</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-yaese-kodomo-iryo/">八重瀬町 子ども医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-yaese-kyushoku/">八重瀬町 学校給食費の無償化(令和8年度)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-yaese-shugaku-enjo/">八重瀬町 就学援助制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kitanakagusuku-kodomo-iryo/">北中城村 子ども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kitanakagusuku-kyushoku/">北中城村 学校給食費補助金交付事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kitanakagusuku-shugaku-enjo/">北中城村 就学援助制度(要保護・準要保護)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kitadaito-tosen-hojo/">北大東村 こどもの通院に係る渡船運賃補助制度</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-kitadaito-kodomo-iryo/">北大東村 こども医療費助成</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-kitadaito-shussan-iwai/">北大東村 出産お祝い金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-kitadaito-ninpu-tokohi/">北大東村 妊婦健康診査の渡航費・宿泊費助成</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-chatan-kodomo-iryo/">北谷町 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-chatan-boshi-iryo/">北谷町 母子及び父子家庭等医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-nanjo-kodomo-iryo/">南城市 子ども医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-nanjo-sango-care/">南城市 産後ケア事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-minamidaito-kodomo-iryo/">南大東村 こども医療費助成</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-minamidaito-shussan-iwai/">南大東村 出産祝い金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-haebaru-kodomo-iryo/">南風原町 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-haebaru-shogai-iryo/">南風原町 重度心身障がい者(児)医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-nago-kodomo-iryo/">名護市 こども医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-nago-famisapo/">名護市 ファミリー・サポート・センター</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kadena-kodomo-iryo/">嘉手納町 子ども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kadena-kyushoku/">嘉手納町 学校給食費の無償化</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kunigami-kodomo-iryo/">国頭村 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kunigami-nyugaku-iwaikin/">国頭村 入学祝金・卒業祝金(定住支援)</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-kunigami-shussan-iwaikin/">国頭村 出産祝金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-kunigami-kekkon-iwaikin/">国頭村 結婚祝金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-tarama-kodomo-iryo/">多良間村 こども医療費の無料化(高校生まで)</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-tarama-shussei-iwai/">多良間村 出生祝金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-tarama-jutaku-shorei/">多良間村 定住促進住宅建築等奨励金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-ogimi-shugaku-enjo/">大宜味村 就学援助</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ogimi-sango-care/">大宜味村 産後ケア事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ginoza-kodomo-iryo/">宜野座村 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ginoza-kyushoku/">宜野座村 給食費無償化</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ginowan-kodomo-iryo/">宜野湾市 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ginowan-kyushoku/">宜野湾市 学校給食費の助成(小学生半額・食材費補助)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-miyakojima-kodomo-iryo/">宮古島市 こども医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-miyakojima-sango-care/">宮古島市 産後ケア事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-zamami-kodomo-iryo/">座間味村 こども医療費助成</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-zamami-shussan-josei/">座間味村 出産助成金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-zamami-hoikuryo-keigen/">座間味村 幼稚園入園料・保育料の軽減</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-zamami-tokosen-hojo/">座間味村 長期・定期治療の渡航船賃の半額補助</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-onna-kodomo-iryo/">恩納村 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-onna-shugaku-enjo/">恩納村 就学援助</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-motobu-kodomo-iryo/">本部町 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-motobu-sango-care/">本部町 産後ケア事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-higashi-kodomo-iryo/">東村 こども医療費助成</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-higashi-influenza-josei/">東村 インフルエンザ予防接種費用助成</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-higashi-shussan-iwaikin/">東村 出産祝金</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-higashi-kyushoku-josei/">東村 学校給食費の助成</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-okinawa-kodomo-iryo/">沖縄市 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-okinawa-shugaku-enjo/">沖縄市 就学援助(準要保護児童生徒)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-okinawa-sango-care/">沖縄市 産後ケア事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-urasoe-kodomo-iryo/">浦添市 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-urasoe-kyushoku/">浦添市 学校給食費の無償化(令和8年度)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-urasoe-shugaku-enjo/">浦添市 就学援助</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-urasoe-sango-care/">浦添市 産後ケア事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-tokashiki-nyuyoji-iryo/">渡嘉敷村 乳幼児医療費助成事業</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-tokashiki-sango-care/">渡嘉敷村 産後ケア事業</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-tokashiki-kokosei-iryo/">渡嘉敷村 離島高校生医療費助成</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-ishigaki-kodomo-iryo/">石垣市 こども医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-ishigaki-shingaku-shien/">石垣市 児童生徒進学等支援金給付事業</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-ishigaki-shugaku-enjo/">石垣市 就学援助</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-taketomi-tokou-iryo/">竹富町 こどもの通院にかかる渡航費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-taketomi-kodomo-iryo/">竹富町 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-aguni-boshi-iryo/">粟国村 母子及び父子家庭等医療費助成事業</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-aguni-tsuinhi-josei/">粟国村 離島患者等通院費助成事業</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-aguni-kokosei-shugaku/">粟国村 離島高校生就学支援</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-itoman-kodomo-iryo/">糸満市 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-itoman-shugaku-enjo/">糸満市 就学援助制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-nishihara-kodomo-iryo/">西原町 こども医療費助成事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-nishihara-boshi-iryo/">西原町 母子父子家庭等医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-yomitan-kodomo-iryo/">読谷村 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-yomitan-kyushoku/">読谷村 学校給食費の補助(無償化)</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-yomitan-boshi-iryo/">読谷村 母子及び父子家庭等医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-tomigusuku-kodomo-iryo/">豊見城市 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-tomigusuku-kodomo-iryo-2/">豊見城市 こども医療費助成貸付制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-naha-kodomo-iryo/">那覇市 こども医療費助成</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-naha-shugaku-enjo/">那覇市 就学援助</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-naha-sango-care/">那覇市 産後ケア事業</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kin-kodomo-iryo/">金武町 こども医療費助成制度</a> <span class="status ok">✓ 公式と照合済み</span></li>
+<li style="margin-bottom:8px"><a href="fk-kin-shugaku-enjo/">金武町 就学援助</a> <span class="status">要確認</span></li>
+<li style="margin-bottom:8px"><a href="fk-kin-boshi-fushi-iryohi/">金武町 母子及び父子家庭等医療費助成制度</a> <span class="status">要確認</span></li></ul></div>
+<div class="disclaimer">最終更新: 2026-08-16 18:19(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
+<p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップ</a></p>
+<p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
 
 </div>
 </body>

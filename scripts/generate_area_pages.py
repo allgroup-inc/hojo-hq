@@ -25,37 +25,27 @@ DATA = os.path.join(BASE, "data", "fukugiiro", "seido.json")
 OUT_DIR = os.path.join(BASE, "site", "fukugiiro", "area")
 
 STYLE = """
-:root{--fg-primary:#D2694A;--fg-primary-deep:#B9502F;--fg-accent:#F2C14E;--fg-deep:#1F5C45;--fg-ink:#3B322B;--fg-bg:#FBF5EC;--fg-card:#FFFDF9;--fg-muted:#8B7C6E;--fg-line:#EEE1D0;--fg-cta:#22382A;--fg-shadow:0 1px 2px rgba(0,0,0,.04)}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:17px;line-height:1.9;color:var(--fg-ink);background:var(--fg-bg);-webkit-font-smoothing:antialiased}
-h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:auto-phrase;overflow-wrap:anywhere}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
 h1{font-size:1.4rem;margin-bottom:8px;line-height:1.5}
-.note{font-size:.85rem;color:var(--fg-muted)}
 .btn{display:block;max-width:440px;margin:20px auto;padding:17px 24px;min-height:44px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem;box-shadow:var(--fg-shadow)}
 .btn:active{background:var(--fg-primary-deep)}
 .card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:18px;margin:14px 0;box-shadow:var(--fg-shadow)}
 .card h2{font-size:1.05rem;margin-bottom:4px}
-.card a{color:var(--fg-primary)}
-.status{display:inline-block;font-size:.78rem;background:#FBEED0;border-radius:999px;padding:2px 10px;color:#7a5b00}
-.status.ok{background:#E7F3EC;color:#0F5138}
-.trust{background:#EFF5F0;border:1px solid #D5E5DA;border-radius:12px;padding:12px 14px;font-size:.9rem;color:#1F4534;margin:12px 0}
+.card .trust{background:#EFF5F0;border:1px solid #D5E5DA;border-radius:12px;padding:12px 14px;font-size:.9rem;color:#1F4534;margin:12px 0}
 .linebtn{display:block;max-width:460px;margin:18px auto;padding:16px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
 .linebtn span{display:block;font-size:.8rem;font-weight:600;opacity:.95;margin-top:2px}
 .disclaimer{background:#F6EADB;border-radius:12px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 ul.areas{list-style:none;columns:2;gap:12px}
 ul.areas li{margin-bottom:8px}
 ul.seidolist{list-style:none;columns:1}
-ul.seidolist li{margin-bottom:8px;border-bottom:1px dashed var(--fg-line);padding-bottom:6px}
+ul.seidolist li{margin:0;border-bottom:1px dashed var(--fg-line);break-inside:avoid}
+ul.seidolist a{display:block;padding:8px 0}
+ul.areas a{display:inline-block;padding:8px 4px}
+.card a{display:inline-block;padding:4px 0;white-space:nowrap}
 @media(min-width:900px){ul.seidolist{columns:2;column-gap:28px}}
 .cardgrid{display:grid;gap:14px}
 @media(min-width:900px){.wrap{max-width:900px}.cardgrid{grid-template-columns:1fr 1fr}ul.areas{columns:3}}
-a{color:var(--fg-primary)}
-.siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}
-.siteheader .hlogo{display:flex;align-items:center;gap:8px;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;color:var(--fg-primary-deep);text-decoration:none;font-size:1.05rem}
-.siteheader .hlogo img{width:30px;height:30px}
-.siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-.siteheader nav a{font-size:.8rem;color:var(--fg-ink);text-decoration:none;padding:6px 8px;border-radius:6px}
 """
 
 HEADER = '''<header class="siteheader">
@@ -65,6 +55,7 @@ HEADER = '''<header class="siteheader">
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-area/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
   </nav>
 </header>'''
 
@@ -105,6 +96,11 @@ def area_jsonld(muni, groups):
 
 def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
     rel = "../" * depth
+    # フッター: depthに応じて正しい相対パスを組む(一覧ページが別ブランドのミカタへ飛ぶバグの修正・2026-08-12)
+    if depth == 1:
+        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップへ</a></p><p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ig_click\')">Instagramで最新情報を見る ›</a></p>'
+    else:
+        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップへ</a></p><p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ig_click\')">Instagramで最新情報を見る ›</a></p>'
     seo = ""
     if canon_path is not None:
         seo = canonical_tag(canon_path) + "\n" + ogp_tags(title, desc, canon_path) + "\n"
@@ -118,8 +114,9 @@ def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
 {seo}<link rel="icon" type="image/svg+xml" href="{rel}assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
 {head_extra}
+<link rel="stylesheet" href="{rel}assets/fg-base.css">
 <style>{STYLE}</style>
 </head>
 <body>
@@ -128,8 +125,8 @@ def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
 {HEADER}
 <div class="wrap">
 {body}
-<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
-<p style="margin-top:16px"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
+<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: {esc(updated)}(毎日自動更新) / もらいわすれ堂(運営: 株式会社フクギイロ)</div>
+{footer_links}
 </div>
 </body>
 </html>
@@ -154,15 +151,14 @@ def muni_page(muni, items, updated):
     ex_txt = "・".join(esc(x) for x in examples)
     total = len(shown)
     if local:
-        intro = (f'{esc(muni)}の制度{len(local)}件と、沖縄県{len(pref)}件・国{len(national)}件をあわせた'
+        intro = (f'{esc(muni)}の制度{len(local)}件と沖縄県{len(pref)}件・国{len(national)}件をあわせた'
                  f'計{total}件から、ご家庭向けのものをまとめています。')
     else:
         intro = (f'沖縄県の制度{len(pref)}件と国の制度{len(national)}件の計{total}件から、'
-                 f'{esc(muni)}にお住まいのご家庭が使える可能性のあるものをまとめています'
-                 f'({esc(muni)}独自の制度は確認がとれたものから順に追加します)。')
+                 f'{esc(muni)}にお住まいのご家庭が使える可能性のあるものをまとめています。')
     body = [
         f"<h1>{esc(muni)}にお住まいの方が使える可能性のある給付金・手当</h1>",
-        f'<p class="note">{intro} あなたの世帯にあてはまるものは3分診断でしぼり込めます。</p>',
+        f'<p class="note">{intro}あなたの世帯にあてはまるものは3分診断でしぼり込めます。</p>',
     ]
     if verified_n:
         body.append(
@@ -184,7 +180,7 @@ def muni_page(muni, items, updated):
         body.append('<div class="cardgrid">')
         for it in group:
             if it.get("verified") is True:
-                badge = ' <span class="status ok">✓ 確認済み</span>'
+                badge = ' <span class="status ok">✓ 公式と照合済み</span>'
             elif it.get("status") == "要確認":
                 badge = ' <span class="status">要確認</span>'
             else:

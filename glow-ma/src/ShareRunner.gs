@@ -18,6 +18,9 @@
  *    「氏名」「Slack User ID」を入力し、「有効」列にチェックを入れる。
  *    Slack User IDの調べ方: Slackで対象社員のプロフィールを開き
  *    「その他」→「メンバーIDをコピー」(Uから始まる文字列。メールアドレスではない)
+ *    なお、管理画面Web Appの🤝連携ボタンから本機能を使うには requireAdminAccess_
+ *    による管理者確認を通過する必要があるため、「メールアドレス」欄も入力し
+ *    「有効」列にチェックを入れておくこと(AdminRunner.gsのスタッフ許可リストと共通)
  * 5. `clasp push` で最新コードを反映する。スプレッドシートを開き直すと
  *    メニューバーに「GLOW台帳」が追加される
  *
@@ -39,6 +42,7 @@ function onOpen() {
     .createMenu("GLOW台帳")
     .addItem("選択中の企業を連携する", "showShareDialog")
     .addItem("発送日でCSV出力", "exportShippingCsvForDate")
+    .addItem("発送日でQR出力", "exportQrCodesForDate")
     .addToUi();
 }
 
@@ -94,6 +98,7 @@ function readActiveStaff_(ss) {
  * 1人への送信失敗が他の宛先への送信を止めないよう、宛先ごとに障害を隔離する。
  */
 function shareCompanyWithStaff(companyId, staffIds, note) {
+  requireAdminAccess_();
   if (!staffIds || staffIds.length === 0) {
     throw new Error("連携先が選択されていません。");
   }

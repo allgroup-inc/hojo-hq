@@ -21,6 +21,85 @@
     return global.GlowAlerting;
   }
 
+  function computeUrgency(company, todayString) {
+    if (company["連絡不要"] === true) return "none";
+    var nextDate = company["次回アクション予定日"];
+    if (!nextDate) return "untouched";
+    var diffDays = getGlowAlerting_().daysBetween(todayString, nextDate);
+    if (diffDays === null) return "untouched";
+    if (diffDays <= 0) return "overdue";
+    if (diffDays <= 3) return "soon";
+    return "ok";
+  }
+
+  function buildKpiSummary(companies, todayString) {
+    var list = companies || [];
+    var byRank = { A: 0, B: 0, C: 0, D: 0 };
+    var overdueOrUntouched = 0;
+    var hot = 0;
+    var deal = 0;
+    var dealStages = ["提案中", "案件化"];
+    list.forEach(function (company) {
+      var rank = company["ランク"];
+      if (byRank[rank] !== undefined) byRank[rank]++;
+      var urgency = computeUrgency(company, todayString);
+      if (urgency === "overdue" || urgency === "untouched") overdueOrUntouched++;
+      if (company["本日反応あり"]) hot++;
+      if (dealStages.indexOf(company["現在ステージ"]) !== -1) deal++;
+    });
+    var stale = getGlowAlerting_().buildStaleList(list, todayString).length;
+    return {
+      total: list.length,
+      overdueOrUntouched: overdueOrUntouched,
+      hot: hot,
+      byRank: byRank,
+      deal: deal,
+      stale: stale
+    };
+  }
+
+  function buildOwnerWorkload(companies, todayString) {
+    var counts = {};
+    var order = [];
+    (companies || []).forEach(function (company) {
+      var owner = company["担当者"];
+      if (!owner) return;
+      if (!counts[owner]) {
+        counts[owner] = { owner: owner, total: 0, overdueOrUntouched: 0 };
+        order.push(owner);
+      }
+      counts[owner].total++;
+      var urgency = computeUrgency(company, todayString);
+      if (urgency === "overdue" || urgency === "untouched") counts[owner].overdueOrUntouched++;
+    });
+    return order.map(function (owner) { return counts[owner]; })
+      .sort(function (a, b) { return b.total - a.total; });
+  }
+
+  var URGENCY_ORDER_ = { untouched: 0, overdue: 1, soon: 2, ok: 3, none: 4 };
+
+  function buildNextActionQueue(companies, todayString, limit) {
+    var max = typeof limit === "number" ? limit : 8;
+    var candidates = (companies || [])
+      .map(function (company) {
+        var urgency = computeUrgency(company, todayString);
+        var withUrgency = {};
+        Object.keys(company).forEach(function (key) { withUrgency[key] = company[key]; });
+        withUrgency["次回アクション予定日"] = normalizeDateForDisplay(company["次回アクション予定日"]);
+        withUrgency.urgency = urgency;
+        return withUrgency;
+      })
+      .filter(function (company) {
+        return company["本日反応あり"] || company.urgency === "overdue" ||
+          company.urgency === "untouched" || company.urgency === "soon";
+      });
+    candidates.sort(function (a, b) {
+      if (!!a["本日反応あり"] !== !!b["本日反応あり"]) return a["本日反応あり"] ? -1 : 1;
+      return URGENCY_ORDER_[a.urgency] - URGENCY_ORDER_[b.urgency];
+    });
+    return candidates.slice(0, max);
+  }
+
   function formatDate_(date) {
     var year = date.getFullYear();
     var month = String(date.getMonth() + 1).padStart(2, "0");
@@ -65,7 +144,10 @@
     return match && match.name ? match.name : "不明";
   }
 
-  var COMPANY_LIST_FIELDS = ["企業ID", "会社名", "ランク", "現在ステージ", "次回アクション予定日", "担当者"];
+  var COMPANY_LIST_FIELDS = [
+    "企業ID", "会社名", "ランク", "現在ステージ", "次回アクション予定日", "担当者",
+    "業種", "所在地", "流入ルート", "提案商品"
+  ];
   var DEFAULT_LIST_LIMIT = 100;
 
   function pickCompanyListFields_(company) {
@@ -74,12 +156,14 @@
       picked[field] = company[field] !== undefined ? company[field] : "";
     });
     picked["次回アクション予定日"] = normalizeDateForDisplay(company["次回アクション予定日"]);
+    picked["流入ルート"] = company["流入ルート"] || [];
+    picked["提案商品"] = company["提案商品"] || [];
     return picked;
   }
 
   function hasAnyFilter(filters) {
     var f = filters || {};
-    return !!(String(f.search || "").trim() || f.rank || f.stage || f.owner);
+    return !!(String(f.search || "").trim() || f.rank || f.stage || f.owner || f.route || f.product);
   }
 
   function applyCompanyFilters(companies, filters) {
@@ -94,6 +178,8 @@
       if (f.rank && company["ランク"] !== f.rank) return false;
       if (f.stage && company["現在ステージ"] !== f.stage) return false;
       if (f.owner && company["担当者"] !== f.owner) return false;
+      if (f.route && (company["流入ルート"] || []).indexOf(f.route) === -1) return false;
+      if (f.product && (company["提案商品"] || []).indexOf(f.product) === -1) return false;
       return true;
     });
   }
@@ -178,7 +264,11 @@
     sortInteractionsByDateDesc: sortInteractionsByDateDesc,
     normalizeDateForDisplay: normalizeDateForDisplay,
     buildPartnerListRows: buildPartnerListRows,
-    normalizeReferralRecords: normalizeReferralRecords
+    normalizeReferralRecords: normalizeReferralRecords,
+    computeUrgency: computeUrgency,
+    buildKpiSummary: buildKpiSummary,
+    buildOwnerWorkload: buildOwnerWorkload,
+    buildNextActionQueue: buildNextActionQueue
   };
 
   if (typeof module !== "undefined" && module.exports) {

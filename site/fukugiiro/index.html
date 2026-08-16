@@ -17,7 +17,7 @@
 <meta name="theme-color" content="#FBF5EC">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
 <style>
 :root{
   /* もらいわすれ堂 リニューアル(2026-08 島の陽だまり)。旧ブランド色は深みとして継承 */
@@ -66,6 +66,10 @@ section{padding:52px 0}
 .btn:hover{transform:translateY(-2px)}
 .btn:active{transform:translateY(0);background:var(--coral-deep)}
 .note{font-size:.85rem;color:var(--muted);line-height:1.75}
+.note--long{text-align:left!important}
+.iglink{display:inline-block;font-size:.82rem;color:#F3D7C7;padding:6px 2px;text-decoration:underline}
+.ignav{display:inline-flex;align-items:center;justify-content:center;padding:8px;min-width:36px;min-height:36px;color:var(--coral-deep);border-radius:8px}
+.ignav:hover{background:var(--sand-2)}
 .microtrust{font-size:.82rem;color:var(--muted);text-align:center;margin-top:10px}
 .microtrust.on-green{color:#eafff2}
 strong{font-weight:700}
@@ -177,7 +181,7 @@ details[open] summary{margin-bottom:.5em;color:var(--coral-deep)}
 footer{background:#3B322B;color:#e6ddd2;padding:44px 0;font-size:.9rem;text-align:center}
 footer .mincho{color:#fff;font-size:1.1rem}
 footer .fvision{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;color:#F2C14E;font-size:.95rem;letter-spacing:.08em;margin-bottom:10px}
-footer a{color:#F3D7C7}
+footer a{color:#F3D7C7;display:inline-block;padding:4px 2px}
 footer .fwrap p{margin-bottom:6px}
 /* sticky CTA (mobile) */
 .sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(251,245,236,.97);
@@ -228,7 +232,6 @@ footer .fwrap p{margin-bottom:6px}
       <p class="stmt stmt-l dark-t">146万人が、<br>住んでいるのが沖縄です。</p>
       <p class="rise d2 sub">— あの灯りのひとつひとつに、暮らしがある —</p>
     </div>
-    <div class="filmchip">実写: 沖縄の街の灯り(PIXTA)</div>
     <div class="scrollcue">ゆっくり、下へ</div>
   </section>
 
@@ -265,7 +268,6 @@ footer .fwrap p{margin-bottom:6px}
       <p class="stmt stmt-s dark-t">出会いを大事にし、<br>伝統を紡ぐのが沖縄です。</p>
       <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#C9D2C6;font-weight:500">いちゃりばちょーでー<br>一度会えば、みな兄弟。</p>
     </div>
-    <div class="filmchip">実写: 浜辺で三線を笑い合う(PIXTA)</div>
   </section>
 
   <!-- S3: 助け合う(夜明け前・ゆいまーる) -->
@@ -294,7 +296,6 @@ footer .fwrap p{margin-bottom:6px}
       <p class="stmt stmt-s dark-t">困ったときは、<br>助け合うのが沖縄です。</p>
       <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#D8DCC9;font-weight:500">ゆいまーる —— 結いの心。</p>
     </div>
-    <div class="filmchip">実写: 紅芋掘りを手伝い合う親子(PIXTA)</div>
   </section>
 
   <!-- S4: 美しい(朝焼けの海) -->
@@ -326,7 +327,6 @@ footer .fwrap p{margin-bottom:6px}
     <div class="copy" style="transform:translateY(-6vh)">
       <p class="stmt stmt-l warm-t">なにより、<br>美しいのが沖縄です。</p>
     </div>
-    <div class="filmchip">実写: 沖縄の海と朝日(PIXTA)</div>
   </section>
 
   <!-- S6: そんな沖縄に(問題→希望) -->
@@ -379,12 +379,13 @@ footer .fwrap p{margin-bottom:6px}
 <!-- ===== フィルムここまで。以下、実用レイヤー ===== -->
 
 <header class="siteheader" id="honmon">
-  <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="32" height="32">もらいわすれ堂</a>
+  <a class="hlogo" href="./"><img src="assets/icon.svg" alt="" width="32" height="32">もらいわすれ堂</a>
   <nav>
-    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
-    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
-    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
-    <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a href="shindan/">3分診断</a>
+    <a href="area/">市町村</a>
+    <a href="kit/">準備シート</a>
+    <a href="../go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
   </nav>
 </header>
 <main>
@@ -409,11 +410,11 @@ footer .fwrap p{margin-bottom:6px}
   <div class="wrap">
     <div class="loss">
       <h2>こんな「もらい忘れ」、していませんか?</h2>
-      <p class="note" style="margin-bottom:6px">「うちは対象外かも」と思って、調べないうちに締切を過ぎてしまう。<br>それが、いちばんもったいない“もらい忘れ”です。</p>
+      <p class="note" style="margin-bottom:6px">「うちは対象外かも」と思って、調べないうちに締切を過ぎてしまう。<br>それが、いちばんもったいない<span style="white-space:nowrap">“もらい忘れ”です。</span></p>
       <div class="miss">
-        <div>児童手当<span>対象が高校生年代まで拡大(2024年10月〜)。対象かも(要確認)</span></div>
+        <div>児童手当<span>対象が高校生年代まで拡大<span style="white-space:nowrap">(2024年10月〜)</span>。対象かも<span style="white-space:nowrap">(要確認)</span></span></div>
         <div>出産育児一時金<span>健康保険に入っていれば対象かも(要確認)</span></div>
-        <div>ひとり親家庭の支援<span>手当・就学・医療など、入口いろいろ(要確認)</span></div>
+        <div>ひとり親家庭の支援<span>手当・就学・医療など、入口いろいろ<span style="white-space:nowrap">(要確認)</span></span></div>
       </div>
       <a class="btn" href="shindan/" style="margin-top:18px">対象かどうか、3分で調べる</a>
       <p class="microtrust">無料 ・ 匿名 ・ 登録不要</p>
@@ -426,16 +427,16 @@ footer .fwrap p{margin-bottom:6px}
     <div class="story">
       <h2>なぜ「もらいわすれ堂」を始めたのか</h2>
       <p class="founder">もらいわすれ堂に、大きなことはできません。<br>沖縄で暮らすあなたの給料を、直接あげることはできない。<br>景気を変えることも、明日の暮らしを一気に楽にすることもできません。</p>
-      <p>でも、どうしてもずっと思っている事があります。<br>国も、県も、市町村も、沖縄県民のために制度をちゃんと用意してくれている。<br>受け取れるはずのささえが、確かにそこにある。</p>
+      <p>でも、どうしてもずっと思っていることがあります。<br>国も、県も、市町村も、沖縄県民のために制度をちゃんと用意して<span style="white-space:nowrap">くれている。</span><br>受け取れるはずのささえが、確かにそこにある。</p>
       <p>なのに「知らなかった」というだけで、その手が届かないまま終わってしまう人がいる。</p>
       <p class="cry">── これが、本当にくやしい。</p>
-      <p>だから私たちは、シンプルにその情報を <strong>正しく・早く・無料で</strong> 届けます。</p>
+      <p>だから私たちは、シンプルにその情報を<strong>正しく・早く・無料で</strong>届けます。</p>
       <p>むずかしい制度の言葉を、あなたの暮らしの言葉に翻訳して、<br>「あなたが受け取るまで、いっしょに」歩きます。</p>
       <p>一人が本来のささえにつながるたび、<br>沖縄の未来は少しずつ明るくなる。私たちは、そう本気で信じています。</p>
       <p class="vision">とどけ、沖縄のみらいへ。</p>
       <p class="tag" style="margin-bottom:.6em">もらいわすれ堂は、この想いひとつで動いています。</p>
       <p>お約束していることがあります。<br>制度の情報は、かならず公式ページと照らし合わせること。<br>確認できないことは「要確認」と正直に表示し、断定しないこと。<br>診断は<strong>匿名で使え、ずっと無料</strong>であること。<br>申請の代行はしませんが、必要なときは提携する専門家におつなぎします。</p>
-      <p>「フクギ」は、沖縄の集落を台風から守ってきた防風林の木です。<br>運営する<strong>株式会社フクギイロ</strong>は、<strong>「県民の家計を守る防風林でありたい」</strong>という願いを社名にしました。<br>もらいわすれ堂は、その最初の一歩です。<span class="by">— もらいわすれ堂 運営より</span></p>
+      <p>「フクギ」は、沖縄の集落を台風から守ってきた防風林の木です。<br>運営する<strong>株式会社フクギイロ</strong>は、<strong>「県民の家計を守る防風林でありたい」</strong>という願いを社名にしました。<br>もらいわすれ堂は、その最初の<span style="white-space:nowrap">一歩です。</span><span class="by">— もらいわすれ堂 運営より</span></p>
     </div>
   </div>
 </section>
@@ -453,7 +454,7 @@ footer .fwrap p{margin-bottom:6px}
       <div class="stat" id="jukyu-stat" style="display:none">
         <span class="num" id="jukyu-count">—</span>
         <div class="lbl">「もらえた」のご報告(検証済み)</div>
-        <div class="note" style="margin-top:6px;font-size:.8rem;text-align:center">利用者からの受給報告のうち、公式制度と突合できた世帯数</div>
+        <div class="note" style="margin-top:6px;font-size:.8rem;text-align:center">利用者からの受給報告のうち、公式の制度と照らし合わせて確認できた世帯数</div>
       </div>
     </div>
   </div>
@@ -464,14 +465,14 @@ footer .fwrap p{margin-bottom:6px}
     <h2>もらいわすれ堂は<br>「情報サイト」では<span class="em">ありません</span></h2>
     <ol class="steps">
       <li><strong>3分診断</strong><br>ご家族の状況にあてはまる可能性のある制度と、おおよその金額の目安がわかります。</li>
-      <li><strong>申請のかんたん化</strong><br>制度ごとの「申請準備シート」(持ち物チェックリスト・窓口でのひとこと・メモ欄つき)を印刷して、そのまま窓口へ。<br>書くのはご本人ですが、準備はぜんぶここで終わります。</li>
-      <li><strong>入金確認までフォロー</strong><br>締切の約1か月前にお知らせ。<br>「振り込まれた」までを一緒に見届けます。</li>
+      <li><strong>申請のかんたん化</strong><br>制度ごとの「<span style="white-space:nowrap">申請準備シート</span>」を印刷して、そのまま<span style="white-space:nowrap">窓口へ。</span><br>(持ち物チェックリスト・窓口でのひとこと・メモ欄つき)<br>書くのはご本人ですが、準備はぜんぶここで終わります。</li>
+      <li><strong>入金確認までフォロー</strong><br>締切の約1か月前からお知らせ。<br>「振り込まれた」までを一緒に見届けます。</li>
     </ol>
-    <p class="note" style="margin-top:14px">※ 申請手続きの代行は行いません。専門家のサポートが必要な場合は、提携する専門家(社会保険労務士・行政書士など)におつなぎします。</p>
+    <p class="note note--long" style="margin-top:14px">※ 申請手続きの代行は行いません。専門家のサポートが必要な場合は、提携する専門家(社会保険労務士・行政書士など)におつなぎします。</p>
     <div class="navcards" style="margin-top:22px">
       <a class="navcard" href="area/">市町村でさがす ›<span>お住まいの街のまとめ</span></a>
       <a class="navcard" href="kit/">申請準備シート ›<span>持ち物リスト・印刷して窓口へ</span></a>
-      <a class="navcard" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで受け取る ›<span>締切の約1か月前にお知らせ(無料)</span></a>
+      <a class="navcard" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで受け取る ›<span>締切の約1か月前からお知らせ(無料)</span></a>
     </div>
   </div>
 </section>
@@ -481,7 +482,7 @@ footer .fwrap p{margin-bottom:6px}
     <div class="story">
       <h2 style="margin-bottom:.4em">「振り込まれました」を教えてください</h2>
       <p style="margin-bottom:14px">あなたが実際に受け取れた金額のご報告が、次の県民の「もらい忘れ」を防ぎます。<br>いただいた報告は、検証できたぶんだけを実績として公開していきます。<br><strong>制度名とおおよその金額だけ</strong>で大丈夫。お名前や口座番号はうかがいません。</p>
-      <a class="btn" href="houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_top')">受け取れたことを報告する(匿名・無料)</a>
+      <a class="btn" href="houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_top')">受け取れたことを報告する<span style="white-space:nowrap">(匿名・無料)</span></a>
       <p class="note" style="margin-top:12px">報告は任意です。いただいた金額は個人が特定できない形で集計・公開します。</p>
     </div>
   </div>
@@ -489,11 +490,11 @@ footer .fwrap p{margin-bottom:6px}
 
 <section>
   <div class="wrap">
-    <h2>こんな「もらい忘れ」</h2>
+    <h2>たとえば、こんな制度を掲載しています</h2>
     <div class="cards" id="seido-cards">
       <div class="card"><h3>制度情報を準備中です</h3><p class="note">検証が完了した制度から順に掲載します。</p></div>
     </div>
-    <p class="note" style="margin-top:14px">掲載内容は各制度の公式ページと照合しています。最終的な受給の可否は各窓口の判断となります。不明な点は「要確認」と表示し、断定しません。</p>
+    <p class="note note--long" style="margin-top:14px">掲載内容は各制度の公式ページと照合しています。最終的な受給の可否は各窓口の判断となります。不明な点は「要確認」と表示し、断定しません。</p>
   </div>
 </section>
 
@@ -515,7 +516,7 @@ footer .fwrap p{margin-bottom:6px}
     <span class="eyebrow">Q &amp; A</span>
     <h2>よくあるご質問</h2>
     <details><summary>本当に無料ですか?</summary>
-      <p>はい。沖縄県にお住まいの方は、診断もフォローもすべて無料です。<br>運営費用は、企業向けサービスなど法人のお客様からいただいています。</p></details>
+      <p>はい。沖縄県にお住まいの方は、診断もフォローもすべて無料です。<br>運営費用は、法人向けサービスなど企業のお客様からいただいています。</p></details>
     <details><summary>なぜ無料でできるのですか?</summary>
       <p>私たちは「県民のみなさんからお金をいただかない」ことを、運営の原則にしています。<br>運営会社(株式会社フクギイロ)の法人向けサービスなどの収益で運営しています。</p></details>
     <details><summary>申請を代わりにやってもらえますか?</summary>
@@ -528,7 +529,7 @@ footer .fwrap p{margin-bottom:6px}
 <section class="line-sec">
   <div class="wrap">
     <h2>LINEで「もらい忘れ」を防ぐ</h2>
-    <p>あなたの地域・条件に合う制度の締切を、<strong>約1か月前</strong>にLINEでお知らせします。<br>新しい制度が増えたときも、お知らせします。</p>
+    <p>あなたの地域・条件に合う制度の締切を、<strong style="white-space:nowrap">約1か月前</strong>からLINEでお知らせします。<br>新しい制度が増えたときも、<span style="white-space:nowrap">お知らせします。</span></p>
     <a class="btn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" style="margin-top:10px" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで締切通知を受け取る(無料)</a>
     <p class="microtrust on-green">無料 ・ 診断は匿名 ・ 通知はいつでも停止できます</p>
   </div>
@@ -537,7 +538,7 @@ footer .fwrap p{margin-bottom:6px}
 
 <div class="sticky-cta">
   <a href="shindan/">私の“もらい忘れ”を3分で調べる(無料)</a>
-  <span class="mt">匿名・登録不要ではじめられます</span>
+  <span class="mt">匿名 ・ 登録不要ではじめられます</span>
 </div>
 
 <footer>
@@ -545,10 +546,11 @@ footer .fwrap p{margin-bottom:6px}
     <p class="mincho"><strong>もらいわすれ堂</strong> — あなたが受け取るまで、いっしょに。</p>
     <p class="fvision">とどけ、沖縄のみらいへ。</p>
     <p>運営: 株式会社フクギイロ</p>
-    <p>フクギは、沖縄の集落を台風から守ってきた防風林の木。<br>県民のみなさんの家計を守る防風林でありたい、という願いを社名にしました。</p>
+    <p>フクギは、沖縄の集落を台風から守ってきた<span style="white-space:nowrap">防風林の木。</span><br>県民のみなさんの家計を守る防風林でありたい、という願いを社名にしました。</p>
     <p style="margin-top:14px"><a href="area/">市町村別の給付金・手当まとめ</a> ・ <a href="kit/">申請準備シート一覧</a></p>
     <p style="margin-top:6px"><a href="privacy/">個人情報保護方針</a> ・ <a href="teisei/">情報の訂正・ご指摘</a></p>
   </div>
+  <p style="margin-top:6px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
 </footer>
 
 <script type="application/ld+json">
@@ -559,7 +561,7 @@ footer .fwrap p{margin-bottom:6px}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
- {"@type":"Question","name":"本当に無料ですか?","acceptedAnswer":{"@type":"Answer","text":"はい。沖縄県にお住まいの方は、診断もフォローもすべて無料です。運営費用は法人のお客様からいただいています。"}},
+ {"@type":"Question","name":"本当に無料ですか?","acceptedAnswer":{"@type":"Answer","text":"はい。沖縄県にお住まいの方は、診断もフォローもすべて無料です。運営費用は法人向けサービスなど企業のお客様からいただいています。"}},
  {"@type":"Question","name":"なぜ無料でできるのですか?","acceptedAnswer":{"@type":"Answer","text":"「県民のみなさんからお金をいただかない」ことを運営の原則にしています。運営会社(株式会社フクギイロ)の法人向けサービスなどの収益で運営しています。"}},
  {"@type":"Question","name":"申請を代わりにやってもらえますか?","acceptedAnswer":{"@type":"Answer","text":"申請手続きの代行は行っていません。必要書類のチェックリストや窓口のご案内で、ご自身での申請をできる限りかんたんにします。専門家が必要な場合は提携先をご紹介します。"}},
  {"@type":"Question","name":"診断で個人情報を入力する必要はありますか?","acceptedAnswer":{"@type":"Answer","text":"いいえ。お名前・住所・電話番号の入力は不要です。市町村名やご家族の人数など、診断に必要な最小限のことだけをおたずねします。"}}
@@ -600,7 +602,7 @@ footer .fwrap p{margin-bottom:6px}
         a.href = it.source_url; a.rel = "noopener"; a.textContent = "公式ページで確認";
         d.appendChild(h); d.appendChild(p);
         if(it.verified === true){
-          var ok = document.createElement("span"); ok.className="status ok"; ok.textContent="✓ 確認済み";
+          var ok = document.createElement("span"); ok.className="status ok"; ok.textContent="✓ 公式と照合済み";
           d.appendChild(ok); d.appendChild(document.createTextNode(" "));
         } else if(it.status === "要確認"){
           var s = document.createElement("span"); s.className="status"; s.textContent="要確認";

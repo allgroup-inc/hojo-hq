@@ -37,3 +37,6 @@ glow-ma/data/
 .claude/skills/kakei-compliance/
 .claude/skills/kakei-gatekeeper-kpi/
 .claude/skills/report-gyoren-ops/
+
+# ローカル動作確認用のデータコピー(本番は update.yml が cp -r data site/data で毎回生成)
+site/data/

@@ -1,25 +1,27 @@
 # LINE会話ボット(会社情報収集) — 議事20260730 議題1「併用で採用」の実装
 
-> ✅ **v1.2 稼働中(2026-07-30 実機テスト合格)** / 🔜 **v1.4 準備済み(下のコード)・貼り替え待ち**
+> ✅ **v1.5 稼働中(2026-08-12 実機確認)** / 🔜 **v1.6 準備済み(下のコード)・貼り替え待ち**
+> **v1.6の追加点(2026-08-12 テスター2人目のFB反映)**: (a)相談受付時に**よくある相談の分類4択**(補助金を知りたい/申請のやり方/資金繰り・お金/その他)を先に提示→選ぶと急ぎ/折返しの2択へ。知識がない方でも選ぶだけで相談でき、**分類データが台帳に貯まる**(貯まったら業態別の「よくある問い合わせ提示」に進化させる) (b)**会社情報登録に「業態(ボタン選択)」と「電話番号(任意・スキップ可)」を追加**→台帳の業種列とP列に記録
+> ハマりどころ追加: デプロイ時に「新しいデプロイ」を作ると別ID(未使用)に載ってしまう。必ず**本番デプロイ(AKfycbx6SYv…)を選んで✏️→新バージョン**で更新すること(2026-08-12に別デプロイ事故→復旧済み)
+> **v1.5の追加点(2026-08-12 テスターFB反映・小柳さん発案)**: (a)相談受付後に**2択ボタン**(クイックリプライ)「担当からの折返しでOK/急ぎで話を聞きたい」→ 選択を台帳に記録=**緊急度データが貯まる**。急ぎは🔥付きで通知され、連絡先・都合の時間を促す (b)**専門家相談の表記ゆれ対応**: 【】なし・文中に含まれる場合でも反応し、GASが一元返信(**管理画面のキーワード応答はオフにすること=二重返信防止**)
 > v1.3の追加点: 会話の最後に**内容確認ステップ**(復唱→「はい」で記録)。雑談や質問文が会社名として台帳に誤記録されるのを防ぐ(議事_20260731 論点1)。
 > **v1.4の追加点(2026-08-04 小柳さん決裁・相談転換③)**: 「相談」を含むメッセージの**一次受付**。自動で (a)お客様へ受付返信 (b)**小柳さんのLINEへ即時通知** (c)台帳へ経路`line-consult`で記録(P列にメッセージ本文)。フローは「ボット一次対応→小柳さん確認→嶺井さんへつなぐ→訪問」。ADMIN_USER_IDは貼り替え後に技術部がActionsから自動設定する(手作業不要)
 > 実装済み機能: ①会話収集(3問+確認→台帳 経路line-chat) ②サイトフォーム一括送信の自動解析(line-form) ③通常メッセージへの受付返信(Default一律応答はOFF・ボットが代役) ④diag遠隔診断(SHARED_TOKEN必須・healthcheckが毎朝死活監視) ⑤相談一次受付(v1.4)
 > セットアップのハマりどころ: (a)LINEの「検証」ボタンはGASの302仕様で必ず失敗するが実動作は正常 (b)コード更新は「デプロイ→デプロイを管理→本番デプロイ(AKfycbx6SYv…)→✏️→**新バージョン**→デプロイ」で反映(「新しいデプロイ」はURLが変わるので使わない) (c)UrlFetchApp等の新権限追加時はGoogle再承認が必要。承認ポップアップがブロックされ無反応になったら、script.google.comのポップアップ許可+myaccount.google.com/connectionsで旧承認を削除→エディタで▷実行→「外部サービスへの接続」を含めて許可
 
-## v1.4への更新手順(小柳さん・5分)
+## v1.6への更新手順(小柳さん・3分)
 
-1. スプレッドシート「ミカタ企業台帳」→ 拡張機能 → Apps Script
-2. エディタで **Ctrl+A → Delete** → 下の完全版コードを貼り付け → **Ctrl+S**
-3. **「デプロイ」→「デプロイを管理」→ 本番デプロイ(IDがAKfycbx6SYv…のもの)を選択 → ✏️ → バージョン「新バージョン」→ デプロイ**
-4. LINEで `【会社情報登録】`→3問→**確認画面→「はい」**→台帳に行が増えれば完了
-5. 貼り替えたら「v1.4貼った」と一言ください → 技術部がADMIN_USER_IDを自動設定し、「相談」と送って小柳さんのLINEに通知が届くまで確認します
-6. (相談返信用) LINE公式アカウントの設定で「チャット」がONになっているか確認。ONならスマホのLINE公式アカウントアプリからお客様へ直接返信できます
+1. Apps Scriptを開く: https://script.google.com/u/0/home/projects/16VqJx4oSLFSd1kT_tT2WZBVkmJCTZhaQbqCp2a4TEd_Qr1eKQ8WDKpsj/edit
+2. エディタで **Ctrl+A → Ctrl+V**(コードは技術部がクリップボードに用意) → **Ctrl+S**
+3. **「デプロイ」→「デプロイを管理」→ 本番デプロイ(IDがAKfycbx6SYv…のもの)を選択 → ✏️ → バージョン「新バージョン」→ デプロイ**(⚠️「新しいデプロイ」は使わない)
+4. テスト(スマホで): 「相談」と送る → **分類4択ボタン** → どれか押す → **急ぎ/折返し2択** の二段で出れば成功。【会社情報登録】も試すと ④業態ボタン ⑤電話番号(スキップ可) が増えています
+5. 終わったら「v1.6貼った」と一言ください
 
-## コード(完全版 v1.4・コード.gsをこれで置き換え)
+## コード(完全版 v1.6・コード.gsをこれで置き換え)
 
 ```javascript
 /**
- * ミカタ企業台帳 受信エンドポイント(統合版 v1.4)
+ * ミカタ企業台帳 受信エンドポイント(統合版 v1.5)
  * ① 診断ページ(LIFF)からのPOST → 台帳に1行追記
  * ② LINE Webhook(会話ボット) → 会社名/代表者名/所在地を聞き取り、確認の上で台帳に追記
  * ③ サイトのフォーム一括送信(【会社情報登録】+3行)も解析して台帳に自動記録
@@ -27,6 +29,12 @@
  * ⑤ diag: 技術部の遠隔診断用(SHARED_TOKEN必須)
  * ⑥ 相談一次受付(v1.4): 「相談」を含むメッセージ → 受付返信+管理者へ即時通知+台帳記録
  *    (2026-08-04 小柳さん決裁: ボット一次対応 → 小柳さん確認 → 嶺井さんへつなぐ → 訪問)
+ * ⑦ 進め方2択(v1.5): 受付後にクイックリプライ「折返しでOK/急ぎ」→ 緊急度を台帳記録・
+ *    急ぎは🔥通知。専門家相談は表記ゆれ(【】なし・文中)でも反応しGASが一元返信
+ *    (管理画面のキーワード応答はオフにする)
+ * ⑧ v1.6(テスター2人目FB): 相談は先に「分類4択」→次に「急ぎ/折返し2択」の二段導線。
+ *    会社情報登録に業態(選択式)+電話番号(任意)を追加。分類・業態は台帳に貯まり、
+ *    将来「同じ業態の方からよくある相談は◯◯」の提示に使う
  */
 const SHEET_NAME = '台帳';
 const HEADERS = [
@@ -42,10 +50,28 @@ const RECEIPT_MSG =
   '補助金や経営のことで聞きたいことがあれば、「相談」と一言送ってください。無料で、売り込みもしません。';
 const CONSULT_MSG =
   'ご相談を受け付けました🌺\n' +
-  '担当が内容を確認して、1営業日以内にこのLINEへ返信します。\n\n' +
-  'よろしければ、聞きたいことを続けて送っておいてください。' +
-  '(例: 「設備を入れ替えたいが使える制度はあるか」など)\n\n' +
+  'どんなご相談か、近いものを下のボタンから選んでください。\n' +
+  '(そのまま文章で送っていただいてもOKです)\n\n' +
   '※相談は無料です。申請の代行はできませんが、準備の進め方のご案内や、合う専門家のご紹介までお手伝いします。';
+// 相談の分類4択(v1.6): 知識がなくても選ぶだけ。選択は台帳に貯まり業態別提示の材料になる
+const CONSULT_CATS = [
+  ['使える補助金を知りたい', '使える補助金を知りたい'],
+  ['申請のやり方を知りたい', '申請のやり方を知りたい'],
+  ['資金繰り・お金のこと', '資金繰り・お金のこと'],
+  ['その他のこと', 'その他のこと'],
+];
+// 進め方2択(v1.5): [ボタンの表示, 送信されるテキスト]。選択は台帳に記録され緊急度データになる
+const CONSULT_CHOICES = [
+  ['担当からの折返しでOK', '折返し希望'],
+  ['急ぎで話を聞きたい', '急ぎで相談したい'],
+];
+// 業態の選択肢(v1.6・サイトの診断と同じ区分)
+const BIZ_CHOICES = [
+  ['飲食・宿泊', '飲食・宿泊'], ['小売・卸売', '小売・卸売'],
+  ['建設', '建設'], ['製造', '製造'],
+  ['情報通信・IT', '情報通信・IT'], ['医療・福祉', '医療・福祉'],
+  ['サービス', 'サービス'], ['その他', 'その他'],
+];
 
 function doPost(e) {
   let body;
@@ -175,14 +201,28 @@ function routeMessage_(userId, text, replyToken) {
       cache.put(key, JSON.stringify(st), CONV_TTL_SEC);
       reply_(replyToken, '③ 最後に「所在地の市町村」をお願いします(例: 那覇市)');
     } else if (st.step === 'city') {
+      // v1.6: 業態をボタン選択(テスターFB: 選択式で時間短縮+データ化)
+      st.city = t; st.step = 'biz';
+      cache.put(key, JSON.stringify(st), CONV_TTL_SEC);
+      reply_(replyToken, '④ 業態を下から選んでください(近いものでOKです)', BIZ_CHOICES);
+    } else if (st.step === 'biz') {
+      st.biz = t; st.step = 'tel';
+      cache.put(key, JSON.stringify(st), CONV_TTL_SEC);
+      reply_(replyToken,
+        '⑤ お電話番号をお願いします(任意です。入力したくない場合は「スキップ」を押してください)',
+        [['スキップ', 'スキップ']]);
+    } else if (st.step === 'tel') {
       // v1.3: すぐ記録せず、内容を復唱して確認を取る(雑談等の誤記録防止)
-      st.city = t; st.step = 'confirm';
+      st.tel = (t === 'スキップ') ? '' : t;
+      st.step = 'confirm';
       cache.put(key, JSON.stringify(st), CONV_TTL_SEC);
       reply_(replyToken,
         '内容の確認です😊\n\n' +
         '会社名：' + st.company + '\n' +
         '代表者名：' + st.ceo + '\n' +
-        '所在地：' + st.city + '\n\n' +
+        '所在地：' + st.city + '\n' +
+        '業態：' + (st.biz || '未選択') + '\n' +
+        '電話：' + (st.tel || '(未記入)') + '\n\n' +
         'この内容でよろしければ「はい」、\n直す場合は「やり直す」と送ってください');
     } else if (st.step === 'confirm') {
       if (t === 'はい' || t === 'ハイ' || t === 'OK' || t === 'ok') {
@@ -191,7 +231,8 @@ function routeMessage_(userId, text, replyToken) {
         getSheet_().appendRow([
           new Date(), userId, profile.displayName || '',
           st.company || '', st.ceo || '', st.city || '',
-          st.city || '', '', '', '', '', 0, '', '', 'line-chat',
+          st.city || '', st.biz || '', '', '', '', 0, '', '', 'line-chat',
+          st.tel ? 'TEL: ' + st.tel : '',
         ]);
         reply_(replyToken,
           '登録ありがとうございます!✅\n' +
@@ -208,10 +249,32 @@ function routeMessage_(userId, text, replyToken) {
     return;
   }
 
-  // キーワード応答(専門家相談・事業承継相談)は管理画面の自動応答が返信する。
-  // v1.4: 返信は任せるが、小柳さんへの通知と台帳記録はこちらで行う
-  if (/^【?(専門家相談|事業承継相談)】?$/.test(t)) {
-    recordConsult_(userId, t, null);
+  // ⑧ 相談の分類4択の受信(v1.6): 分類を台帳に記録→進め方2択へ誘導
+  if (CONSULT_CATS.some(function (c) { return c[1] === t; })) {
+    logConsultCategory_(userId, t);
+    reply_(replyToken,
+      '「' + t + '」ですね、ありがとうございます。\n進め方を下から選んでください👇',
+      CONSULT_CHOICES);
+    return;
+  }
+
+  // ⑦ 進め方2択の受信(v1.5): 緊急度を台帳に記録。急ぎは🔥で優先通知
+  if (t === '折返し希望') {
+    logConsultChoice_(userId, '折返し希望');
+    reply_(replyToken, '承知しました。1営業日以内に、担当からこのLINEへ折り返します🌺');
+    return;
+  }
+  if (t === '急ぎで相談したい') {
+    logConsultChoice_(userId, '急ぎ');
+    reply_(replyToken,
+      'お急ぎとのこと、承知しました。担当からできるだけ早くご連絡します。\n' +
+      'つながりやすい電話番号か、ご都合のよい時間帯をこのまま送っていただけるとスムーズです。');
+    return;
+  }
+
+  // 専門家相談(v1.5: 【】なし・文中でも反応。返信もGASが担当=管理画面のキーワード応答はオフ)
+  if (/専門家相談|事業承継相談|引き継ぎのご相談/.test(t)) {
+    recordConsult_(userId, t, replyToken, '専門家相談');
     return;
   }
 
@@ -232,8 +295,8 @@ function routeMessage_(userId, text, replyToken) {
   reply_(replyToken, RECEIPT_MSG);
 }
 
-/* ⑥ 相談の一次受付: 受付返信+小柳さんへ即時通知+台帳に経路line-consultで記録 */
-function recordConsult_(userId, text, replyToken) {
+/* ⑥ 相談の一次受付: 受付返信(2択ボタン付き)+小柳さんへ即時通知+台帳に経路line-consultで記録 */
+function recordConsult_(userId, text, replyToken, kind) {
   const profile = getProfile_(userId);
   const name = profile.displayName || '(表示名なし)';
   // 相談モード(6時間): この間の続きのメッセージも管理者へ転送する
@@ -243,13 +306,40 @@ function recordConsult_(userId, text, replyToken) {
     new Date(), userId, name,
     '', '', '', '', '', '', '', '', 0, '', '', 'line-consult', text,
   ]);
-  if (replyToken) reply_(replyToken, CONSULT_MSG);
+  if (replyToken) reply_(replyToken, CONSULT_MSG, CONSULT_CATS);
   notifyAdmin_(
-    '📞【相談の一次受付】\n' +
+    '📞【' + (kind || '相談') + 'の一次受付】\n' +
     'お名前: ' + name + '\n' +
     '内容: ' + text + '\n\n' +
     '台帳に記録済み(経路line-consult)。\n' +
     '返信はLINE公式アカウントアプリのチャットから。対応後、必要なら嶺井さんへおつなぎください。');
+}
+
+/* ⑧ 相談の分類の記録(v1.6): 台帳P列「分類: ◯◯」。通知は出さない(受付・緊急度と重複させない) */
+function logConsultCategory_(userId, cat) {
+  const profile = getProfile_(userId);
+  const name = profile.displayName || '(表示名なし)';
+  CacheService.getScriptCache().put('consult_' + userId, '1', 21600);
+  getSheet_().appendRow([
+    new Date(), userId, name,
+    '', '', '', '', '', '', '', '', 0, '', '', 'line-consult', '分類: ' + cat,
+  ]);
+}
+
+/* ⑦ 進め方2択の記録: 緊急度を台帳へ(P列「選択: ◯◯」)。急ぎは🔥で優先通知 */
+function logConsultChoice_(userId, choice) {
+  const profile = getProfile_(userId);
+  const name = profile.displayName || '(表示名なし)';
+  CacheService.getScriptCache().put('consult_' + userId, '1', 21600);
+  getSheet_().appendRow([
+    new Date(), userId, name,
+    '', '', '', '', '', '', '', '', 0, '', '', 'line-consult', '選択: ' + choice,
+  ]);
+  notifyAdmin_(
+    (choice === '急ぎ'
+      ? '🔥【相談・お急ぎ】優先対応をお願いします\n'
+      : '⏱【相談・折返し希望】1営業日以内の折返しで大丈夫です\n') +
+    'お名前: ' + name);
 }
 
 /* 管理者(小柳さん)のLINEへプッシュ通知。ADMIN_USER_ID未設定時は静かにスキップ */
@@ -267,15 +357,22 @@ function notifyAdmin_(text) {
   });
 }
 
-function reply_(replyToken, text) {
+function reply_(replyToken, text, quick) {
   const token = PropertiesService.getScriptProperties()
     .getProperty('LINE_CHANNEL_ACCESS_TOKEN');
   if (!token || !replyToken) return;
+  const msg = { type: 'text', text: text };
+  // v1.5: クイックリプライ(返信欄の上に出る選択ボタン)。quick=[[表示, 送信テキスト], ...]
+  if (quick && quick.length) {
+    msg.quickReply = { items: quick.map(function (q) {
+      return { type: 'action', action: { type: 'message', label: q[0], text: q[1] } };
+    }) };
+  }
   UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply', {
     method: 'post',
     contentType: 'application/json',
     headers: { Authorization: 'Bearer ' + token },
-    payload: JSON.stringify({ replyToken: replyToken, messages: [{ type: 'text', text: text }] }),
+    payload: JSON.stringify({ replyToken: replyToken, messages: [msg] }),
     muteHttpExceptions: true,
   });
 }

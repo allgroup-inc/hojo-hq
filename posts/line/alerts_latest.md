@@ -1,8 +1,8 @@
 # LINE配信下書き: 締切アラート(約1か月前から / 締切3層ルール準拠)
 
-- 生成日: 2026-08-11(毎日自動更新)
-- LINEアラート対象(残り7〜29日): 23件
-- 7日未満(予告切替・配信で急かさない): 6件 → 末尾の予告文を使用
+- 生成日: 2026-08-16(毎日自動更新)
+- LINEアラート対象(残り7〜29日): 21件
+- 7日未満(予告切替・配信で急かさない): 8件 → 末尾の予告文を使用
 - 使い方: 下の本文をそのまま LINE Official Account Manager のメッセージ配信へ。
 
 ---
@@ -13,34 +13,34 @@
 早めの準備で、間に合わせましょう。
 
 🟠 まもなく締切(7〜14日) — 9件
-■ 令和8年度沖縄県スタートアップ起業支援金の公募開始
-　2026-08-19(残り8日)
-　https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1021963.html
-■ 「ポスト5G情報通信システム基盤強化研究開発事業／AI用データセンターにおけるソフトウェア技術ニーズ分析とテストベッド運営基盤に関する調査」の公募
-　2026-08-21(残り10日)
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDckaMAD
-■ 「省電力・高速情報処理を実現するフロンティア技術等に関する俯瞰調査」の公募
-　2026-08-21(残り10日)
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdNyMAL
-■ スタートアップ等を活用した農林水産分野の課題解決事業補助金
-　2026-08-21(残り10日)
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdNjMAL
+■ 「ポスト5G情報通信システム基盤強化研究開発事業／フィジカルAIに向けた再帰的自己改善型AIに関する研究開発事業」の公募
+　2026-08-24(残り8日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdQnMAL
+■ 令和8年度 洋上風力発電人材育成事業費補助金（第2次公募）
+　2026-08-24(残り8日) / 上限5億円
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDb8QMAT
+■ 【第二回公募】令和8年度災害時に備えた社会的重要インフラへの自衛的な燃料備蓄の推進事業費補助金
+　2026-08-25(残り9日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdR2MAL
+■ 令和８年度_グリーンスローモビリティ等導入促進事業
+　2026-08-25(残り9日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDKZFMA5
 　…ほか5件は一覧へ
 
-🟢 準備をはじめる(15〜29日) — 14件
-■ 【令和8年度】DX型CO2削減対策実行支援事業
-　2026-08-26(残り15日) / 上限200万円
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaMLMA1
-■ 【令和8年度】省CO2型システムへの改修支援事業
-　2026-08-26(残り15日) / 上限5億円
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaMQMA1
-■ 【令和８年度】二酸化炭素排出抑制対策事業費等補助金 （国内資源循環体制構築に向けた再エネ関連製品及びベース素材の全体最適化実証事業）（第２次公募）
-　2026-08-26(残り15日)
-　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdAaMAL
-■ 令和8年度 市内事業者アジア戦略実証支援事業 補助金
-　2026-08-26(残り15日)
-　https://www.city.naha.okinawa.jp/business/kigyouricchi/1003642/1012419.html
-　…ほか10件は一覧へ
+🟢 準備をはじめる(15〜29日) — 12件
+■ 【６次公募】令和7年度補正予算 中堅・中小・スタートアップの賃上げに向けた省力化等の大規模成長投資補助金
+　2026-08-31(残り15日) / 上限50億円
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcfDMAT
+■ 令和8年度地熱発電の資源量調査事業費助成金交付事業_第3回
+　2026-08-31(残り15日) / 上限100億円
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdjkMAD
+■ GX地域共創補助金2026
+　2026-09-01(残り16日) / 上限250億円
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdJhMAL
+■ 令和８年度　天然ガス利用設備による強靱性向上対策事業費補助金
+　2026-09-01(残り16日)
+　https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDcMAP
+　…ほか8件は一覧へ
 
 💡 電子申請には gBizIDプライム が必要な制度が多いです。オンライン申請(マイナンバーカード)なら速やかに、書類の郵送申請は審査に最大1か月かかります。
 
@@ -51,7 +51,7 @@
 
 ## 7日未満の制度(予告切替) — 配信で使う場合はこちらの文面
 ```
-⏳ 締切目前の公募が6件あります。
+⏳ 締切目前の公募が8件あります。
 いまから書類を整えるのは大変なので、無理は禁物。
 次の公募に備えて【gBizIDプライム】を先に用意しておきましょう(オンライン申請なら速やかに発行、郵送は最大1か月)。
 制度一覧 → https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert
