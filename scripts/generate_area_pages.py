@@ -97,9 +97,9 @@ def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
     rel = "../" * depth
     # フッター: depthに応じて正しい相対パスを組む(一覧ページが別ブランドのミカタへ飛ぶバグの修正・2026-08-12)
     if depth == 1:
-        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップへ</a></p>'
+        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップへ</a></p><p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ig_click\')">Instagramで最新情報を見る ›</a></p>'
     else:
-        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップへ</a></p>'
+        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップへ</a></p><p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ig_click\')">Instagramで最新情報を見る ›</a></p>'
     seo = ""
     if canon_path is not None:
         seo = canonical_tag(canon_path) + "\n" + ogp_tags(title, desc, canon_path) + "\n"
