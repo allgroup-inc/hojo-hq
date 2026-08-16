@@ -345,24 +345,68 @@
         <button class="tab-btn active" onclick="switchTab(event, 'all')">すべて</button>
         <button class="tab-btn" onclick="switchTab(event, 'naneiro')">なないろ生命</button>
         <button class="tab-btn" onclick="switchTab(event, 'fwd')">FWD生命</button>
+        <button class="tab-btn" onclick="switchTab(event, 'zurich')">チューリッヒ生命</button>
       </div>
 
       <div id="results-all" class="results active">
-        <div class="results-header">
-          <span class="results-title">検索結果（全社）</span>
-          <span class="results-count" id="count-all">0 件</span>
+        <div id="all-naneiro-section" style="display:none;">
+          <div class="results-header">
+            <span class="results-title">なないろ生命</span>
+            <span class="results-count" id="count-all-naneiro">0 件</span>
+          </div>
+          <table id="resultTable-all-naneiro">
+            <thead>
+              <tr>
+                <th>病名</th>
+                <th>状態</th>
+                <th>対応商品と判定</th>
+                <th>ページ</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody-all-naneiro"></tbody>
+          </table>
         </div>
-        <table id="resultTable-all">
-          <thead>
-            <tr>
-              <th>保険会社</th>
-              <th>病名</th>
-              <th>引き受け判定</th>
-              <th>詳細</th>
-            </tr>
-          </thead>
-          <tbody id="resultBody-all"></tbody>
-        </table>
+
+        <div id="all-fwd-section" style="display:none; margin-top:40px;">
+          <div class="results-header">
+            <span class="results-title">FWD生命</span>
+            <span class="results-count" id="count-all-fwd">0 件</span>
+          </div>
+          <table id="resultTable-all-fwd">
+            <thead>
+              <tr>
+                <th>病名</th>
+                <th>引き受け判定</th>
+                <th>条件・詳細</th>
+                <th>死亡保険</th>
+                <th>医療保険</th>
+                <th>特約</th>
+                <th>生活支援特則等</th>
+                <th>告知ポイント</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody-all-fwd"></tbody>
+          </table>
+        </div>
+
+        <div id="all-zurich-section" style="display:none; margin-top:40px;">
+          <div class="results-header">
+            <span class="results-title">チューリッヒ生命</span>
+            <span class="results-count" id="count-all-zurich">0 件</span>
+          </div>
+          <table id="resultTable-all-zurich">
+            <thead>
+              <tr>
+                <th>病名</th>
+                <th>引き受け判定</th>
+                <th>状態・経過</th>
+                <th>対応商品</th>
+                <th>ページ</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody-all-zurich"></tbody>
+          </table>
+        </div>
       </div>
 
       <div id="results-naneiro" class="results">
@@ -394,10 +438,33 @@
               <th>病名</th>
               <th>引き受け判定</th>
               <th>条件・詳細</th>
+              <th>死亡保険</th>
+              <th>医療保険</th>
+              <th>特約</th>
+              <th>生活支援特則等</th>
               <th>告知ポイント</th>
             </tr>
           </thead>
           <tbody id="resultBody-fwd"></tbody>
+        </table>
+      </div>
+
+      <div id="results-zurich" class="results">
+        <div class="results-header">
+          <span class="results-title">チューリッヒ生命</span>
+          <span class="results-count" id="count-zurich">0 件</span>
+        </div>
+        <table id="resultTable-zurich">
+          <thead>
+            <tr>
+              <th>病名</th>
+              <th>引き受け判定</th>
+              <th>状態・経過</th>
+              <th>対応商品</th>
+              <th>ページ</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody-zurich"></tbody>
         </table>
       </div>
 
@@ -410,6 +477,21 @@
         <button class="action-btn" onclick="downloadCSV()">結果をCSV</button>
       </div>
 
+      <div id="exclusionInfo" style="display:none; background: #f5f5f5; border-left: 4px solid #F88800; padding: 15px; margin-top: 20px; border-radius: 4px; font-size: 13px;">
+        <strong style="color: #F88800;">部位不担保（対象外の部位）について</strong><br>
+        <p style="margin-top: 8px; color: #666;">各保険会社では特定の病状や部位について、保険の対象外となる場合があります。詳細は以下のPDFをご参照ください：</p>
+        <div style="margin-top: 10px;">
+          <div style="margin-bottom: 8px;">
+            <strong>FWD生命</strong><br>
+            <small>「体況に関する引受けの目安 Vol.13.0（2026年6月改訂）」のページ205をご参照ください。</small>
+          </div>
+          <div>
+            <strong>なないろ生命</strong><br>
+            <small>「お引受のめやす（2026年4月作成）」のページ8をご参照ください。</small>
+          </div>
+        </div>
+      </div>
+
       <div class="disclaimer">
         <strong>重要な注意事項</strong><br>
         本検索結果は参考情報です。引き受け判定ではありません。最終判定は各保険会社の引き受け審査部にお問い合わせください。複数傷病がある場合の判定は保険会社により異なります。
@@ -420,13 +502,19 @@
   <script>
     let underwritingData = null;
     let currentTab = 'all';
-    let lastResults = { naneiro: [], fwd: [] };
+    let lastResults = { naneiro: [], fwd: [], zurich: [] };
 
     async function loadData() {
       try {
-        const response = await fetch('/hojo-hq/docs/insurance/underwriting_full.json');
+        const response = await fetch('./insurance/underwriting_full.json');
         underwritingData = await response.json();
         console.log('データ読み込み完了:', underwritingData._source);
+
+        // Debug: Show sample FWD data structure
+        if (underwritingData.fwd && underwritingData.fwd.length > 0) {
+          console.log('FWDサンプルデータ:', underwritingData.fwd[0]);
+          console.log('FWDデータキー:', Object.keys(underwritingData.fwd[0]));
+        }
 
         const info = document.getElementById('versionInfo');
         info.innerHTML = `
@@ -453,9 +541,10 @@
 
       const naneiro_results = searchNaneiro(input);
       const fwd_results = searchFWD(input);
+      const zurich_results = searchZurich(input);
 
-      lastResults = { naneiro: naneiro_results, fwd: fwd_results };
-      displayResults(naneiro_results, fwd_results);
+      lastResults = { naneiro: naneiro_results, fwd: fwd_results, zurich: zurich_results };
+      displayResults(naneiro_results, fwd_results, zurich_results);
     }
 
     function searchNaneiro(query) {
@@ -480,6 +569,25 @@
       const q = query.toLowerCase();
 
       for (const entry of underwritingData.fwd) {
+        const score = calculateScore(q, entry.disease);
+        if (score > 40) {
+          results.push({
+            ...entry,
+            score: score
+          });
+        }
+      }
+
+      return results.sort((a, b) => b.score - a.score);
+    }
+
+    function searchZurich(query) {
+      const results = [];
+      const q = query.toLowerCase();
+
+      if (!underwritingData.zurich) return results;
+
+      for (const entry of underwritingData.zurich) {
         const score = calculateScore(q, entry.disease);
         if (score > 40) {
           results.push({
@@ -521,29 +629,33 @@
       return 0;
     }
 
-    function displayResults(naneiro_results, fwd_results) {
+    function displayResults(naneiro_results, fwd_results, zurich_results) {
       const noResults = document.getElementById('noResults');
       const actions = document.getElementById('actions');
+      const exclusionInfo = document.getElementById('exclusionInfo');
 
-      if (naneiro_results.length === 0 && fwd_results.length === 0) {
+      if (naneiro_results.length === 0 && fwd_results.length === 0 && zurich_results.length === 0) {
         noResults.style.display = 'block';
         document.querySelectorAll('[id^="results-"]').forEach(el => el.style.display = 'none');
         actions.style.display = 'none';
+        exclusionInfo.style.display = 'none';
         clearAllTables();
         return;
       }
 
       noResults.style.display = 'none';
       actions.style.display = 'flex';
+      exclusionInfo.style.display = 'block';
 
       clearAllTables();
 
       // Display based on current tab selection
       if (currentTab === 'all') {
-        displayAllResults(naneiro_results, fwd_results);
+        displayAllResults(naneiro_results, fwd_results, zurich_results);
         document.getElementById('results-all').style.display = 'block';
         document.getElementById('results-naneiro').style.display = 'none';
         document.getElementById('results-fwd').style.display = 'none';
+        document.getElementById('results-zurich').style.display = 'none';
       } else if (currentTab === 'naneiro') {
         if (naneiro_results.length > 0) {
           displayNaneiro(naneiro_results);
@@ -553,6 +665,7 @@
         }
         document.getElementById('results-all').style.display = 'none';
         document.getElementById('results-fwd').style.display = 'none';
+        document.getElementById('results-zurich').style.display = 'none';
       } else if (currentTab === 'fwd') {
         if (fwd_results.length > 0) {
           displayFWD(fwd_results);
@@ -562,50 +675,113 @@
         }
         document.getElementById('results-all').style.display = 'none';
         document.getElementById('results-naneiro').style.display = 'none';
+        document.getElementById('results-zurich').style.display = 'none';
+      } else if (currentTab === 'zurich') {
+        if (zurich_results.length > 0) {
+          displayZurich(zurich_results);
+          document.getElementById('results-zurich').style.display = 'block';
+        } else {
+          noResults.style.display = 'block';
+        }
+        document.getElementById('results-all').style.display = 'none';
+        document.getElementById('results-naneiro').style.display = 'none';
+        document.getElementById('results-fwd').style.display = 'none';
       }
     }
 
-    function displayAllResults(naneiro_results, fwd_results) {
-      const body = document.getElementById('resultBody-all');
-      body.innerHTML = '';
+    function displayAllResults(naneiro_results, fwd_results, zurich_results) {
+      // Show/hide sections
+      document.getElementById('all-naneiro-section').style.display = naneiro_results.length > 0 ? 'block' : 'none';
+      document.getElementById('all-fwd-section').style.display = fwd_results.length > 0 ? 'block' : 'none';
+      document.getElementById('all-zurich-section').style.display = zurich_results.length > 0 ? 'block' : 'none';
 
-      const combined = [
-        ...naneiro_results.map(r => ({ company: 'なないろ生命', data: r, type: 'naneiro' })),
-        ...fwd_results.map(r => ({ company: 'FWD生命', data: r, type: 'fwd' }))
-      ];
+      // Display なないろ results
+      if (naneiro_results.length > 0) {
+        const naneiro_body = document.getElementById('resultBody-all-naneiro');
+        naneiro_body.innerHTML = '';
 
-      combined.forEach(item => {
-        const row = document.createElement('tr');
-        const data = item.data;
-
-        if (item.type === 'naneiro') {
+        naneiro_results.forEach(data => {
+          const row = document.createElement('tr');
           const statusStr = Object.values(data.marks).some(m => m === '○') ? '可' :
                            Object.values(data.marks).some(m => m === '★') ? '条件付き' : '不可';
           const statusClass = statusStr === '可' ? 'ok' : statusStr === '条件付き' ? 'conditional' : 'ng';
 
+          const marksList = Object.entries(data.marks)
+            .filter(([k, v]) => v !== '')
+            .map(([k, v]) => `<div class="mark-item"><span>${k}</span><span class="mark-symbol">${v}</span></div>`)
+            .join('');
+
+          const remarksHtml = data.remarks ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid #ddd; font-size:12px; color:#d32f2f;"><strong>備考:</strong> ${data.remarks}</div>` : '';
+
           row.innerHTML = `
-            <td>${item.company}</td>
-            <td>${data.disease}</td>
-            <td><span class="status ${statusClass}">${statusStr}</span></td>
-            <td><small>状態: ${data.state}<br>ページ: ${data.page}</small></td>
+            <td><strong>${data.disease}</strong></td>
+            <td>${data.state}</td>
+            <td>
+              <span class="status ${statusClass}" style="margin-bottom:8px; display:block; width:fit-content;">${statusStr}</span>
+              <div class="marks-list">${marksList || 'データなし'}</div>
+              ${remarksHtml}
+            </td>
+            <td><small>p.${data.page}</small></td>
           `;
-        } else {
+
+          naneiro_body.appendChild(row);
+        });
+
+        document.getElementById('count-all-naneiro').textContent = naneiro_results.length + ' 件';
+      }
+
+      // Display FWD results
+      if (fwd_results.length > 0) {
+        const fwd_body = document.getElementById('resultBody-all-fwd');
+        fwd_body.innerHTML = '';
+
+        fwd_results.forEach(data => {
+          const row = document.createElement('tr');
           const statusClass = data.judgement === '可' ? 'ok' :
                             data.judgement === '条件付き' ? 'conditional' :
                             data.judgement === '要確認' ? 'unknown' : 'ng';
 
           row.innerHTML = `
-            <td>${item.company}</td>
-            <td>${data.disease}</td>
+            <td><strong>${data.disease}</strong></td>
             <td><span class="status ${statusClass}">${data.judgement}</span></td>
             <td><small>${data.condition || 'なし'}</small></td>
+            <td><small>${data['死亡保険'] || 'なし'}</small></td>
+            <td><small>${data['医療保険'] || 'なし'}</small></td>
+            <td><small>${data['特約'] || 'なし'}</small></td>
+            <td><small>${data['生活支援特則等'] || 'なし'}</small></td>
+            <td><small style="color: #d32f2f; font-weight: 600;">${data['ポイント'] || 'なし'}</small></td>
           `;
-        }
 
-        body.appendChild(row);
-      });
+          fwd_body.appendChild(row);
+        });
 
-      document.getElementById('count-all').textContent = combined.length + ' 件';
+        document.getElementById('count-all-fwd').textContent = fwd_results.length + ' 件';
+      }
+
+      // Display Zurich results
+      if (zurich_results.length > 0) {
+        const zurich_body = document.getElementById('resultBody-all-zurich');
+        zurich_body.innerHTML = '';
+
+        zurich_results.forEach(data => {
+          const row = document.createElement('tr');
+          const statusClass = data.judgement === '可' ? 'ok' :
+                            data.judgement === '条件付き' ? 'conditional' :
+                            data.judgement === '要確認' ? 'unknown' : 'ng';
+
+          row.innerHTML = `
+            <td><strong>${data.disease}</strong></td>
+            <td><span class="status ${statusClass}">${data.judgement || 'なし'}</span></td>
+            <td><small>${data.section || data['経過'] || 'なし'}</small></td>
+            <td><small>${data.marks || 'なし'}</small></td>
+            <td><small>p.${data.page}</small></td>
+          `;
+
+          zurich_body.appendChild(row);
+        });
+
+        document.getElementById('count-all-zurich').textContent = zurich_results.length + ' 件';
+      }
     }
 
     function displayNaneiro(results) {
@@ -646,19 +822,26 @@
       const body = document.getElementById('resultBody-fwd');
       body.innerHTML = '';
 
+      console.log('displayFWD called with', results.length, 'results');
+      if (results.length > 0) {
+        console.log('First FWD result:', results[0]);
+      }
+
       results.forEach(data => {
         const row = document.createElement('tr');
         const statusClass = data.judgement === '可' ? 'ok' :
                           data.judgement === '条件付き' ? 'conditional' :
                           data.judgement === '要確認' ? 'unknown' : 'ng';
 
-        const pointStyle = data.ポイント ? 'color: #d32f2f; font-weight: 600;' : '';
-
         row.innerHTML = `
           <td><strong>${data.disease}</strong></td>
           <td><span class="status ${statusClass}">${data.judgement}</span></td>
           <td><small>${data.condition || 'なし'}</small></td>
-          <td><small style="${pointStyle}">${data.ポイント || 'なし'}</small></td>
+          <td><small>${data['死亡保険'] || 'なし'}</small></td>
+          <td><small>${data['医療保険'] || 'なし'}</small></td>
+          <td><small>${data['特約'] || 'なし'}</small></td>
+          <td><small>${data['生活支援特則等'] || 'なし'}</small></td>
+          <td><small style="color: #d32f2f; font-weight: 600;">${data['ポイント'] || 'なし'}</small></td>
         `;
 
         body.appendChild(row);
@@ -667,10 +850,37 @@
       document.getElementById('count-fwd').textContent = results.length + ' 件';
     }
 
+    function displayZurich(results) {
+      const body = document.getElementById('resultBody-zurich');
+      body.innerHTML = '';
+
+      results.forEach(data => {
+        const row = document.createElement('tr');
+        const statusClass = data.judgement === '可' ? 'ok' :
+                          data.judgement === '条件付き' ? 'conditional' :
+                          data.judgement === '要確認' ? 'unknown' : 'ng';
+
+        row.innerHTML = `
+          <td><strong>${data.disease}</strong></td>
+          <td><span class="status ${statusClass}">${data.judgement || 'なし'}</span></td>
+          <td><small>${data.section || data['経過'] || 'なし'}</small></td>
+          <td><small>${data.marks || 'なし'}</small></td>
+          <td><small>p.${data.page}</small></td>
+        `;
+
+        body.appendChild(row);
+      });
+
+      document.getElementById('count-zurich').textContent = results.length + ' 件';
+    }
+
     function clearAllTables() {
-      document.getElementById('resultBody-all').innerHTML = '';
+      document.getElementById('resultBody-all-naneiro').innerHTML = '';
+      document.getElementById('resultBody-all-fwd').innerHTML = '';
+      document.getElementById('resultBody-all-zurich').innerHTML = '';
       document.getElementById('resultBody-naneiro').innerHTML = '';
       document.getElementById('resultBody-fwd').innerHTML = '';
+      document.getElementById('resultBody-zurich').innerHTML = '';
     }
 
     function switchTab(e, tab) {
@@ -687,6 +897,9 @@
       document.getElementById('diseaseInput').value = '';
       document.getElementById('noResults').style.display = 'none';
       document.getElementById('actions').style.display = 'none';
+      document.getElementById('exclusionInfo').style.display = 'none';
+      document.querySelectorAll('[id^="results-"]').forEach(el => el.style.display = 'none');
+      document.querySelector('[id^="all-zurich"]').style.display = 'none';
       clearAllTables();
     }
 
@@ -700,6 +913,10 @@
 
       lastResults.fwd.forEach(r => {
         rows.push(`FWD生命,"${r.disease}","","${r.judgement}","${r.condition}"`);
+      });
+
+      lastResults.zurich.forEach(r => {
+        rows.push(`チューリッヒ生命,"${r.disease}","${r.section || ''}","${r.judgement || ''}","ページ${r.page}"`);
       });
 
       const csv = rows.join('\n');
