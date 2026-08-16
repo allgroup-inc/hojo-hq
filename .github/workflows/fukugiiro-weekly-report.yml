@@ -44,10 +44,20 @@ jobs:
       - name: 週次レポート生成(統括ユイさん)
         run: python scripts/weekly_report_fukugiiro.py
 
-      - name: 遥さんボード生成(今週のIG投稿案)
-        # data/fukugiiro/ig_neta.json(拡充ループが更新)→ site/staff/haruka/(robots除外の内部ページ)
+      - name: IG投稿画像の生成準備(pillow+フォント)
         continue-on-error: true
-        run: python scripts/generate_haruka_board.py
+        run: |
+          pip install pillow
+          sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends fonts-noto-cjk
+          mkdir -p ~/.fonts
+          curl -fsSL -o ~/.fonts/ShipporiMincho-SemiBold.ttf https://raw.githubusercontent.com/google/fonts/main/ofl/shipporimincho/ShipporiMincho-SemiBold.ttf || true
+
+      - name: 遥さんボード生成(今週のIG投稿案・完成画像つき)
+        # data/fukugiiro/ig_neta.json(拡充ループが更新)→ 画像5枚+site/staff/haruka/
+        continue-on-error: true
+        run: |
+          python scripts/generate_ig_images_fukugiiro.py || true
+          python scripts/generate_haruka_board.py
 
       - name: Commit report
         run: |
