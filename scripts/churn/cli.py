@@ -31,6 +31,7 @@ from .retention import purge_snapshots
 from .contact_log import load_contacts
 from .playbook import segment_playbook, render_html as render_playbook_html
 from .experiment import compare_naive_vs_controlled, assignment_ledger
+from .transitions import status_transitions, render_html as render_transitions_html
 from .timing import (churn_hazard_by_tenure, peak_window, call_timing_list,
                      contact_timing_effect,
                      render_html as render_hazard_html,
@@ -254,6 +255,21 @@ def cmd_playbook(csv_path, column_map_path, contacts_path, contact_map_path,
     return rows
 
 
+def cmd_transitions(prev_csv, curr_csv, column_map_path, out_path, as_of):
+    as_of_d = _as_of(as_of)
+    cmap = load_column_map(column_map_path)
+    prev = load_records(prev_csv, cmap, as_of_d)
+    curr = load_records(curr_csv, cmap, as_of_d)
+    # 保全接触の代理: Ⅳの「済」（未収案内で話した）フラグ。精密には接触日つき保全ログが望ましい
+    contacted = {(r.get("customer_id"), r.get("apply_id")) for r in curr if r.get("unpaid_contacted")}
+    t = status_transitions(prev, curr, contacted_keys=contacted)
+    render_transitions_html(t, out_path)
+    rr = "算出不能" if t["recovery_rate"] is None else f"{t['recovery_rate']*100:.1f}%"
+    print(f"[transitions] 救えた{t['救えた']} / 失った{t['失った']} / 未収残{t['継続(未収残)']} "
+          f"立て直し率{rr} → {out_path}")
+    return t
+
+
 def cmd_hazard(csv_path, column_map_path, out_path, as_of):
     as_of_d = _as_of(as_of)
     records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
@@ -450,6 +466,13 @@ def main(argv=None):
     sp_hz.add_argument("--out", required=True)
     sp_hz.add_argument("--as-of", required=True)
 
+    sp_tr = sub.add_parser("transitions")
+    sp_tr.add_argument("--prev", required=True, help="前月スナップショットCSV")
+    sp_tr.add_argument("--curr", required=True, help="当月スナップショットCSV")
+    sp_tr.add_argument("--column-map", required=True)
+    sp_tr.add_argument("--out", required=True)
+    sp_tr.add_argument("--as-of", required=True)
+
     sp_ct = sub.add_parser("call-timing")
     sp_ct.add_argument("--csv", required=True)
     sp_ct.add_argument("--column-map", required=True)
@@ -541,6 +564,8 @@ def main(argv=None):
         cmd_retention(args.dir, args.as_of, args.years, args.apply)
     elif args.cmd == "hazard":
         cmd_hazard(args.csv, args.column_map, args.out, args.as_of)
+    elif args.cmd == "transitions":
+        cmd_transitions(args.prev, args.curr, args.column_map, args.out, args.as_of)
     elif args.cmd == "call-timing":
         cmd_call_timing(args.csv, args.column_map, args.out, args.as_of)
     elif args.cmd == "contact-timing":
