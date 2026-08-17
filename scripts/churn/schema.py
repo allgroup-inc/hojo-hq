@@ -4,6 +4,7 @@ from datetime import date
 
 from .config import AGE_BANDS, AMOUNT_EDGES, AMOUNT_LABELS, EARLY_CHURN_MONTHS
 from .dates import has_reached_months, is_within_months
+from .status import status_scope
 
 
 def bin_age(age):
@@ -67,7 +68,28 @@ def normalize_record(raw, column_map, as_of):
     is_early_churn = None
     is_resolved = False
     is_scoreable = False
-    if cancel_date is not None and apply_date is not None:
+    # 現ステータス（実データ）: docs/churn/現ステータス分類ルール.md
+    status_val = _get(raw, column_map, "status")
+    status_category = None
+    in_scope = True
+    excluded_reason = None
+    date_missing = False
+    payment_route = _get(raw, column_map, "payment_route")
+
+    if status_val is not None and str(status_val).strip():
+        sc = status_scope(status_val, apply_date, cancel_date, as_of, EARLY_CHURN_MONTHS)
+        status_category = sc["category"]
+        in_scope = sc["in_scope"]
+        excluded_reason = sc["excluded_reason"]
+        date_missing = sc["date_missing"]
+        is_resolved = sc["is_resolved"]
+        is_scoreable = sc["is_continuing"]
+        if sc["is_resolved"]:
+            is_early_churn = 1 if sc["is_early_churn"] else 0
+        # 成立済など早期解約でない場合、着金日は解約日ではない → downstream用にNone化
+        if sc["category"] != "早期解約":
+            cancel_date = None
+    elif cancel_date is not None and apply_date is not None:
         is_resolved = True
         is_early_churn = 1 if is_within_months(apply_date, cancel_date, EARLY_CHURN_MONTHS) else 0
     elif apply_date is not None:
@@ -99,4 +121,10 @@ def normalize_record(raw, column_map, as_of):
         "is_early_churn": is_early_churn,
         "is_resolved": is_resolved,
         "is_scoreable": is_scoreable,
+        # 現ステータス由来（実データ）。status列が無ければ status_category=None・in_scope=True
+        "status_category": status_category,
+        "in_scope": in_scope,
+        "excluded_reason": excluded_reason,
+        "date_missing": date_missing,
+        "payment_route": payment_route,
     }

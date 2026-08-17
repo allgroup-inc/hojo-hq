@@ -23,7 +23,7 @@ from .followups import list_followups, render_html as render_followups_html
 from .karte_effect import contact_effect
 from .console import generate as generate_console
 from .triage import classify, triage, render_html as render_today_html
-from .cohort import cohort_rows, overall_rate, render_html as render_cohort_html
+from .cohort import cohort_rows, overall_rate, excluded_summary, render_html as render_cohort_html
 from .snapshot import snapshot as do_snapshot
 from .preflight import preflight_report
 from .pipeline import run_pipeline
@@ -179,7 +179,8 @@ def cmd_console(app_csv, app_map, inter_csv, inter_map, model_path, out_dir, as_
     res["list_html"] = list_html_path
     # 3%スコアボード（コホート）と「今日の要接触」も同ディレクトリへ
     cohorts = cohort_rows(apps, as_of_d, model=model)
-    render_cohort_html(cohorts, overall_rate(cohorts), os.path.join(out_dir, "cohort.html"))
+    render_cohort_html(cohorts, overall_rate(cohorts), os.path.join(out_dir, "cohort.html"),
+                       excluded=excluded_summary(apps))
     today, carry, stats = triage(classify(apps, model, as_of_d), CAPACITY_PER_DAY)
     render_today_html(today, carry, stats, os.path.join(out_dir, "today.html"), CAPACITY_PER_DAY)
     res["cohort_html"] = os.path.join(out_dir, "cohort.html")
@@ -195,7 +196,7 @@ def cmd_cohort(csv_path, column_map_path, out_path, as_of, model_path=None):
     model = load_model(model_path) if model_path else None
     rows = cohort_rows(records, as_of_d, model=model)
     ov = overall_rate(rows)
-    render_cohort_html(rows, ov, out_path)
+    render_cohort_html(rows, ov, out_path, excluded=excluded_summary(records))
     shown = "算出不能" if ov["rate"] is None else f"{ov['rate']*100:.1f}%"
     print(f"[cohort] 全体早期解約率(成熟分) {shown} 目標3% "
           f"({ov['churn']}/{ov['resolved']}) → {out_path}")

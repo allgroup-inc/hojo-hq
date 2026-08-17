@@ -63,6 +63,32 @@ class TestCohort(unittest.TestCase):
         self.assertIsNone(o["rate"])        # 算出不能（0%と断定しない）
 
 
+class TestScopeExclusion(unittest.TestCase):
+    def _r(self, apply, early, resolved=True, in_scope=True, cat="早期解約", reason=None):
+        return {"apply_date": apply, "is_resolved": resolved, "is_early_churn": early,
+                "in_scope": in_scope, "status_category": cat, "excluded_reason": reason}
+
+    def test_out_of_scope_excluded_from_rate(self):
+        from scripts.churn.cohort import excluded_summary
+        recs = [self._r(date(2025, 1, 5), 1), self._r(date(2025, 1, 6), 0)]      # in scope
+        recs += [self._r(date(2025, 1, 7), 0, in_scope=False, cat="対象外", reason="死亡")]
+        recs += [self._r(date(2025, 1, 8), 0, in_scope=False, cat="母集団外")]
+        rows = cohort_rows(recs, AS_OF)
+        row = {r["ym"]: r for r in rows}["2025-01"]
+        self.assertEqual(row["total"], 2)        # in_scope の2件のみ（対象外・母集団外は除外）
+        self.assertEqual(row["rate"], 0.5)       # 1/2
+        summ = excluded_summary(recs)
+        self.assertEqual(summ["対象外"], 1)
+        self.assertEqual(summ["母集団外"], 1)
+        self.assertEqual(summ["by_reason"]["死亡"], 1)
+
+    def test_records_without_scope_field_are_included(self):
+        # status無し（合成/従来）レコードは in_scope キーが無い → 従来どおり全件対象
+        recs = [rec(date(2025, 1, 5), True, 1), rec(date(2025, 1, 6), True, 0)]
+        row = {r["ym"]: r for r in cohort_rows(recs, AS_OF)}["2025-01"]
+        self.assertEqual(row["total"], 2)
+
+
 class TestProjectedLanding(unittest.TestCase):
     def _model(self):
         # X商品=解約多・Y商品=解約なし で学習 → 継続中Xは高リスクと推計される

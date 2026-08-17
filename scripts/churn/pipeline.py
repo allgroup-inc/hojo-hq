@@ -33,7 +33,7 @@ from .fit import fit_model
 from .evaluate import backtest
 from .report_list import build_rows, render_csv, render_html as render_list_html
 from .triage import classify, triage, render_html as render_today_html
-from .cohort import cohort_rows, overall_rate, render_html as render_cohort_html
+from .cohort import cohort_rows, overall_rate, excluded_summary, render_html as render_cohort_html
 from .snapshot import snapshot as do_snapshot
 from .config import AUC_MIN, CAPACITY_PER_DAY
 
@@ -144,7 +144,8 @@ def run_pipeline(csv_path, column_map_path, out_dir, as_of, split, run_date,
     _save_state(out_dir, run_date, state)
 
     cohorts = cohort_rows(records, as_of, model=model)
-    render_cohort_html(cohorts, overall_rate(cohorts), os.path.join(out_dir, "cohort.html"))
+    render_cohort_html(cohorts, overall_rate(cohorts), os.path.join(out_dir, "cohort.html"),
+                       excluded=excluded_summary(records))
     state["completed_steps"].append("cohort")
     _save_state(out_dir, run_date, state)
 

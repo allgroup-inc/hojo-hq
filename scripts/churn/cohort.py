@@ -38,6 +38,8 @@ def cohort_rows(records, as_of, min_reliable=MIN_RELIABLE_N, model=None):
         ad = r.get("apply_date")
         if not ad:
             continue
+        if r.get("in_scope", True) is False:
+            continue  # 対象外(死亡/CO/告知解除)・母集団外・不明は率の分母から除外（件数は別途併記）
         g = groups.setdefault(_ym(ad), {"total": 0, "resolved": 0, "churn": 0, "members": []})
         g["total"] += 1
         g["members"].append(r)
@@ -63,6 +65,26 @@ def cohort_rows(records, as_of, min_reliable=MIN_RELIABLE_N, model=None):
     return rows
 
 
+def excluded_summary(records):
+    """率の分母から除外したレコードの件数併記用（小柳さん決裁2026-08-17「除外＋件数併記」）。
+
+    対象外(死亡/クーリングオフ/告知解除)・母集団外・不明の件数と、対象外の理由別内訳を返す。
+    status列の無い（従来/合成）レコードは in_scope 既定Trueなので全て0件になる。
+    """
+    summ = {"対象外": 0, "母集団外": 0, "不明": 0, "by_reason": {}, "total_excluded": 0}
+    for r in records:
+        if r.get("in_scope", True) is not False:
+            continue
+        cat = r.get("status_category")
+        if cat in ("対象外", "母集団外", "不明"):
+            summ[cat] += 1
+        summ["total_excluded"] += 1
+        if cat == "対象外":
+            reason = r.get("excluded_reason") or "その他"
+            summ["by_reason"][reason] = summ["by_reason"].get(reason, 0) + 1
+    return summ
+
+
 def overall_rate(rows):
     """全体の早期解約率（観測中コホートを除いた成熟分のみ）。成熟データ皆無なら rate=None（0%と断定しない）。"""
     res = sum(r["resolved"] for r in rows if not r["observing"])
@@ -70,8 +92,12 @@ def overall_rate(rows):
     return {"resolved": res, "churn": churn, "rate": (churn / res) if res else None}
 
 
-def render_html(rows, overall, path, target=0.03):
-    """コホート表＋全体率と目標ラインをHTML出力（表示層・出力は private/ 限定）。"""
+def render_html(rows, overall, path, target=0.03, excluded=None):
+    """コホート表＋全体率と目標ラインをHTML出力（表示層・出力は private/ 限定）。
+
+    excluded に excluded_summary(records) を渡すと、率の分母から除外した件数を併記する
+    （小柳さん決裁「除外＋件数併記」）。
+    """
     import html
     trs = []
     for r in rows:
@@ -95,6 +121,18 @@ def render_html(rows, overall, path, target=0.03):
         o = overall["rate"] * 100
         head = (f'全体 <b>{o:.1f}%</b> ／ 目標 {target*100:.0f}%（差 {o-target*100:+.1f}pt）'
                 f' ／ 成熟 {overall["churn"]}/{overall["resolved"]}件')
+    excl_html = ""
+    if excluded and excluded.get("total_excluded"):
+        parts = []
+        for r, n in excluded.get("by_reason", {}).items():
+            parts.append(f"{html.escape(str(r))}{n}")
+        if excluded.get("母集団外"):
+            parts.append(f"母集団外{excluded['母集団外']}")
+        if excluded.get("不明"):
+            parts.append(f"不明{excluded['不明']}")
+        excl_html = (f'<p style="font-size:12px;color:#6B6B6B">率の分母から除外 '
+                     f'{excluded["total_excluded"]}件（{" / ".join(parts)}）'
+                     f'＝保全で防げない離脱・未成立。除外の事実を明示（決裁2026-08-17）。</p>')
     doc = (
         '<!doctype html><meta charset="utf-8"><title>早期解約率コホート</title>'
         '<style>body{font-family:Meiryo,"Noto Sans JP",sans-serif;padding:16px}'
@@ -102,6 +140,7 @@ def render_html(rows, overall, path, target=0.03):
         'th{background:#00335C;color:#fff}</style>'
         f'<h1>早期解約率 コホート（成熟分のみ）</h1>'
         f'<p>{head}</p>'
+        f'{excl_html}'
         '<p style="font-size:12px;color:#888">観測中(6ヶ月未確定)は確定率を出さず全体からも除外。'
         '「着地見込」はコホート全員の予測リスク平均＝較正前提の前向き推計・参考（確定値ではない）。'
         '少件数は参考。合成データ。</p>'
