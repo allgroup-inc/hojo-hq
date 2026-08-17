@@ -183,7 +183,7 @@ def verify_file(path, today=None):
 # (LINE下書きの違反でInstagram投稿まで巻き添えで止めない)。
 TARGET_GROUPS = {
     "sns":  ("posts/launch/*.md", "posts/carousel/caption.md"),
-    "line": ("posts/line/alerts_latest.md",),
+    "line": ("posts/line/*.md",),
 }
 
 
