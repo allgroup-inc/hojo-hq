@@ -40,7 +40,8 @@ INFRA_REPOS=(report-hq go allgroup-site)
 # social-media系8スキルは検出仕様(.claude/skills直下のみ走査)のためフラット配置(2026-08-07修正)
 ALLGROUP_SKILL_NAMES=(humanizer resilient-agent-design mindshare-arbitrage multi-ai-crosscheck context-limit-handoff feature-factory hojo-lighthouse-triage taste-skill last30days
   caption-writer carousel-writer content-calendar hashtag-strategy hook-writer
-  instagram-growth platform-specs-and-validation thread-writer)
+  instagram-growth platform-specs-and-validation thread-writer
+  go-link-discipline explainer-video-production)
 ALLGROUP_LICENSE_NAMES=(TASTE-SKILL-LICENSE LAST30DAYS-LICENSE SOCIAL-MEDIA-SKILLS-LICENSE)
 
 echo "==> cloning upstreams"
@@ -71,12 +72,22 @@ update_repo() {
   fi
   # ALLGROUP共通スキル(本店=hojo-hq、全repo対象。hojo-hq自身は自分自身と同期するだけなので実質no-op)
   for n in "${ALLGROUP_SKILL_NAMES[@]}"; do
-    [ -d "$TMP/hq/.claude/skills/$n" ] || continue
+    # 本店に実体が無い=静かな脱落。黙ってskipせず必ず警告を出す(沈黙は成功と見分けがつかない)
+    [ -d "$TMP/hq/.claude/skills/$n" ] || { echo "[$repo] !! MISSING at 本店: skills/$n (配布されません)"; continue; }
     rm -rf "$D/.claude/skills/$n"; cp -r "$TMP/hq/.claude/skills/$n" "$D/.claude/skills/$n"
   done
   for n in "${ALLGROUP_LICENSE_NAMES[@]}"; do
     [ -f "$TMP/hq/.claude/skills/$n" ] && cp "$TMP/hq/.claude/skills/$n" "$D/.claude/skills/$n"
   done
+  # カスタムスラッシュコマンド(本店=hojo-hq の .claude/commands/ を全repoへ配布)
+  # 2026-08-17追加: skillsだけ同期しコマンドが未配布のまま気づかれなかったため対象に含める
+  if [ -d "$TMP/hq/.claude/commands" ]; then
+    mkdir -p "$D/.claude/commands"
+    cp -r "$TMP/hq/.claude/commands/." "$D/.claude/commands/"
+    git -C "$D" add .claude/commands
+  else
+    echo "[$repo] !! MISSING at 本店: .claude/commands/ (スラッシュコマンドは未配布)"
+  fi
   git -C "$D" add .claude/skills
   if git -C "$D" diff --cached --quiet; then echo "[$repo] up to date"; return; fi
   if [ "$DRY_RUN" = "1" ]; then echo "[$repo] DRY_RUN: $(git -C "$D" diff --cached --name-only | wc -l) files changed"; git -C "$D" reset -q; return; fi
