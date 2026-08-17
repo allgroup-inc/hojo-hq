@@ -56,6 +56,7 @@ jobs:
           for i in 1 2 3; do
             git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
             echo "push retry $i"; sleep 5
+            [ "$i" = "3" ] && { echo "::error::pushが3回とも失敗しました。データは保存されていません"; exit 1; }
           done
 
       # 二重投稿ガード: X投稿済み(お題のx_post_url記録あり)なら record_publication.py が
@@ -85,6 +86,7 @@ jobs:
           for i in 1 2 3; do
             git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
             echo "push retry $i"; sleep 5
+            [ "$i" = "3" ] && { echo "::error::pushが3回とも失敗しました。データは保存されていません"; exit 1; }
           done
 
       - name: LINE通知(完了)

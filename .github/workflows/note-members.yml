@@ -48,6 +48,7 @@ jobs:
           for i in 1 2 3; do
             git pull --rebase origin main && git push && break
             echo "push retry $i"; sleep 5
+            [ "$i" = "3" ] && { echo "::error::pushが3回とも失敗しました。データは保存されていません"; exit 1; }
           done
 
       - name: LINE通知

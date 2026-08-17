@@ -22,6 +22,7 @@ concurrency:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   audit:
@@ -46,4 +47,33 @@ jobs:
           for i in 1 2 3; do
             git pull --rebase origin main && git push && break
             echo "push retry $i"; sleep 5
+            [ "$i" = "3" ] && { echo "::error::pushが3回とも失敗しました。データは保存されていません"; exit 1; }
           done
+
+      # ── 失敗時: 黙って止まらないようIssueを起票(resilient-agent-design ⑦ 静かな脱落の防止)
+      #    2026-08-17点検で追加。この3本だけ失敗通知が無く、止まっても誰も気づかない状態だった。
+      - name: Open or update issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh label create automation-failure --color B60205 \
+            --description "定期実行ワークフローの失敗(自動起票)" 2>/dev/null || true
+          title="⚠️ mikata-audit が失敗しました"
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          {
+            echo "定期実行ワークフロー \`mikata-audit\` が失敗しました。"
+            echo ""
+            echo "**止まると何が起きるか**: 収集対象サイトのrobots.txt方針変更を検知できなくなる(憲法 絶対ルール2の裏付けが止まる)"
+            echo ""
+            echo "- 実行ログ: $run_url"
+            echo "- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')"
+          } > issue_body.md
+          existing=$(gh issue list --state open --label automation-failure \
+            --search "$title in:title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file issue_body.md
+          else
+            gh issue create --label automation-failure --title "$title" --body-file issue_body.md
+          fi

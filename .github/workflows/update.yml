@@ -93,6 +93,7 @@ jobs:
             git pull --rebase -X theirs origin main && git push && break
             git rebase --abort 2>/dev/null || true
             echo "push retry $i"; sleep 5
+            [ "$i" = "3" ] && { echo "::error::pushが3回とも失敗しました。データは保存されていません"; exit 1; }
           done
 
       - name: Setup Pages
