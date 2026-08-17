@@ -1,7 +1,8 @@
 import unittest
 from datetime import date
 from scripts.churn import fit
-from scripts.churn.triage import triage, classify, PRIORITY, recommend_action
+from scripts.churn.triage import (triage, classify, PRIORITY, recommend_action,
+                                  contact_channel)
 
 AS_OF = date(2026, 8, 1)
 
@@ -49,6 +50,19 @@ class TestTriage(unittest.TestCase):
         self.assertIn("初回のごあいさつ", recommend_action("初動"))
         # 口座不備は再設定を促す文言を足す
         self.assertIn("口座不備", recommend_action("未収2連続", account_issue=True))
+
+    def test_visit_channel_escalation(self):
+        # 高リスク×守れる金額大 → 訪問。金額小 or 非高リスクは架電
+        self.assertEqual(contact_channel("high", 150000, "高リスク"), "訪問")
+        self.assertEqual(contact_channel("high", 5000, "高リスク"), "架電")   # 金額小
+        self.assertEqual(contact_channel("low", 150000, "初動"), "架電")      # 非高リスク
+        # 未払消滅目前×守れる金額大は帯によらず訪問
+        self.assertEqual(contact_channel("med", 150000, "未払消滅目前"), "訪問")
+
+    def test_recommend_action_visit_prefix(self):
+        a = recommend_action("未払消滅目前", channel="訪問")
+        self.assertIn("訪問", a)
+        self.assertIn("消滅目前", a)
 
     def test_classify_enriches_recommendation_and_stage(self):
         r = {"is_scoreable": True, "customer_id": "U1", "apply_id": None,

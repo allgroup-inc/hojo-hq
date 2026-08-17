@@ -10,25 +10,37 @@ from .triggers import (prevention_trigger, initial_contact_trigger, unpaid_trigg
                        _recent_streak)
 from .effect_learning import _contacts_index
 from .value import saveable as _saveable
+from .config import VISIT_SAVEABLE_MIN
 
-# きっかけ → 営業向け「今日の一手」（提案。最終判断は人。営業別スコアは出さない）
-_ACTION = {
-    "未払消滅目前": "至急架電＋コンビニ用紙で入金依頼（消滅目前）",
-    "未収2連続": "架電で入金確認",
-    "不着": "初回引落の不着を架電確認",
-    "遅延": "支払いの遅れを架電確認",
+# きっかけ → 「今日やること（手段抜きの論点）」。手段(架電/訪問)は contact_channel が決める
+_TOPIC = {
+    "未払消滅目前": "入金のご相談＋コンビニ用紙（消滅目前）",
+    "未収2連続": "入金確認",
+    "不着": "初回引落の不着を確認",
+    "遅延": "支払いの遅れを確認",
     "口座確認": "引落口座を確認",
     "初動": "初回のごあいさつ・状況確認",
-    "高リスク": "様子伺いの連絡",
+    "高リスク": "様子伺い",
 }
 
 
-def recommend_action(trigger, account_issue=False, streak=0):
-    """きっかけ（＋口座不備）から営業向けの“ひとこと”を返す。あくまで提案・最終判断は人。"""
-    base = _ACTION.get(trigger, "状況確認")
+def contact_channel(band, saveable, trigger, saveable_min=VISIT_SAVEABLE_MIN):
+    """接触手段を決める。高リスク×守れる金額大（または未払消滅目前×大）は「訪問」、他は「架電」。
+
+    訪問は重コストなので「守れる金額×リスク」が高い人に絞る（しきい値=小柳さん決裁事項）。
+    """
+    high_value = (saveable or 0) >= saveable_min
+    high_stakes = band == "high" or trigger == "未払消滅目前"
+    return "訪問" if (high_value and high_stakes) else "架電"
+
+
+def recommend_action(trigger, account_issue=False, streak=0, channel="架電"):
+    """きっかけ（＋口座不備・接触手段）から営業向けの“ひとこと”を返す。提案・最終判断は人。"""
+    topic = _TOPIC.get(trigger, "状況確認")
     if account_issue and trigger in ("未払消滅目前", "未収2連続", "口座確認", "不着", "遅延"):
-        base += "／口座不備の再設定"
-    return base
+        topic += "／口座不備の再設定"
+    verb = "訪問して挨拶＋" if channel == "訪問" else "架電で"
+    return verb + topic
 
 # きっかけの優先度（小さいほど先）。小柳さん決裁 2026-08-17:
 # 未払消滅目前(3ヶ月連続未収・4ヶ月目で消滅)＞不着＞遅延＞未収2連続＞口座確認＞初動＞高リスク。
@@ -74,14 +86,15 @@ def classify(records, model, as_of, contacts=None):
             trig = "高リスク"
         streak = _recent_streak(r.get("unpaid_months", []), as_of)
         account_issue = bool(r.get("unpaid_account_issue"))
+        sv = _saveable(s["risk"], r.get("amount"))
+        channel = contact_channel(s["band"], sv, trig)
         cands.append({
             "customer_id": r.get("customer_id"), "apply_id": r.get("apply_id"),
             "product": r.get("product"), "agent_id": r.get("agent_id"),
             "trigger": trig, "risk": s["risk"], "risk_pct": display_pct(s["risk"]),
-            "band": s["band"], "hit_factors": s["hit_factors"],
-            "saveable": _saveable(s["risk"], r.get("amount")),
-            "unpaid_streak": streak, "account_issue": account_issue,
-            "recommendation": recommend_action(trig, account_issue, streak),
+            "band": s["band"], "hit_factors": s["hit_factors"], "saveable": sv,
+            "unpaid_streak": streak, "account_issue": account_issue, "channel": channel,
+            "recommendation": recommend_action(trig, account_issue, streak, channel),
         })
     return cands
 
@@ -116,6 +129,7 @@ def render_html(today, carry, stats, path, capacity):
             f'<td>{html.escape(str(c.get("product")))}</td>'
             f'<td>{html.escape(stage_txt)}</td>'
             f'<td>{c["risk_pct"]}%</td><td>{c["saveable"]:,.0f}円</td>'
+            f'<td>{html.escape(str(c.get("channel", "架電")))}</td>'
             f'<td>{html.escape(str(c.get("recommendation", "")))}</td></tr>')
     carry_note = (
         f'キャパ{capacity}件/日 超過 {stats["carry_count"]}件は翌日へ繰り越し'
@@ -130,7 +144,8 @@ def render_html(today, carry, stats, path, capacity):
         f'<p>{carry_note}。優先度：未払消滅目前＞不着＞遅延＞未収2連続＞口座確認＞初動＞高リスク、各内で守れる金額順。'
         '顧客連絡は人が実行。合成データ。</p>'
         '<table><thead><tr><th>#</th><th>きっかけ</th><th>顧客ID</th><th>商品</th>'
-        '<th>状態</th><th>リスク</th><th>守れる金額</th><th>今日の一手（提案）</th></tr></thead>'
+        '<th>状態</th><th>リスク</th><th>守れる金額</th><th>手段</th>'
+        '<th>今日の一手（提案）</th></tr></thead>'
         f'<tbody>{"".join(trs)}</tbody></table>')
     with open(path, "w", encoding="utf-8") as f:
         f.write(doc)
