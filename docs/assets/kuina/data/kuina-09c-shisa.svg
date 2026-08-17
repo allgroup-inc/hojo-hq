@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 沖縄企業のミカタ / ヤンバルクイナ 展開データ -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 170 170" width="850" height="850">
+  <g>
+<g fill="#C87A45"><circle cx="160.0" cy="100.0" r="21"/><circle cx="148.5" cy="135.3" r="21"/><circle cx="118.5" cy="157.1" r="21"/><circle cx="81.5" cy="157.1" r="21"/><circle cx="51.5" cy="135.3" r="21"/><circle cx="40.0" cy="100.0" r="21"/><circle cx="51.5" cy="64.7" r="21"/><circle cx="81.5" cy="42.9" r="21"/><circle cx="118.5" cy="42.9" r="21"/><circle cx="148.5" cy="64.7" r="21"/><circle cx="100" cy="100" r="58"/></g>
+<g stroke="#8A4E22" stroke-width="3.4" stroke-linecap="round" opacity=".8"><path d="M152.0,100.0 L176.0,100.0"/><path d="M142.1,130.6 L161.5,144.7"/><path d="M116.1,149.5 L123.5,172.3"/><path d="M83.9,149.5 L76.5,172.3"/><path d="M57.9,130.6 L38.5,144.7"/><path d="M48.0,100.0 L24.0,100.0"/><path d="M57.9,69.4 L38.5,55.3"/><path d="M83.9,50.5 L76.5,27.7"/><path d="M116.1,50.5 L123.5,27.7"/><path d="M142.1,69.4 L161.5,55.3"/></g>
+<circle cx="100" cy="100" r="51" fill="#8A7549" stroke="#221E1A" stroke-width="5"/>
+<ellipse cx="100" cy="112" rx="41" ry="32" fill="#221E1A"/>
+<g stroke="#FFF7E6" stroke-width="7" stroke-linecap="round" fill="none"><path d="M91,88 Q79,84 67,89"/><path d="M109,88 Q121,84 133,89"/></g>
+<circle cx="83" cy="106" r="12.5" fill="#FFF7E6"/><circle cx="117" cy="106" r="12.5" fill="#FFF7E6"/>
+<circle cx="83" cy="108" r="7.6" fill="#221E1A"/><circle cx="117" cy="108" r="7.6" fill="#221E1A"/>
+<circle cx="80" cy="104" r="3.2" fill="#FFF7E6"/><circle cx="114" cy="104" r="3.2" fill="#FFF7E6"/>
+<path d="M90,118 Q100,113 110,118 L104,135 Q100,139 96,135 Z" fill="#E23B24" stroke="#221E1A" stroke-width="3.5" stroke-linejoin="round"/>
+  </g>
+</svg>

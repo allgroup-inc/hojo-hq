@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 沖縄企業のミカタ / ヤンバルクイナ 入稿データ. 背景透過. 文字はアウトライン化済み. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="8 86 190 90" width="1140" height="540">
+  <defs>
+    <clipPath id="ju"><ellipse cx="122" cy="126" rx="19" ry="23"/></clipPath>
+    <clipPath id="ad"><ellipse cx="172" cy="120" rx="21" ry="27"/></clipPath>
+  </defs>
+  <path d="M10,150 L190,150" stroke="#CFCFC4" stroke-width="2"/>
+  <g><ellipse cx="30" cy="128" rx="15" ry="19" fill="#EFE6D2" stroke="#221E1A" stroke-width="4"/>
+    <g fill="#B9AF95"><circle cx="26" cy="122" r="2.2"/><circle cx="34" cy="130" r="1.8"/><circle cx="28" cy="136" r="1.6"/></g></g>
+  <g><circle cx="74" cy="128" r="19" fill="#221E1A"/>
+    <circle cx="68" cy="124" r="4" fill="#FFF7E6"/><circle cx="80" cy="124" r="4" fill="#FFF7E6"/>
+    <circle cx="68" cy="125" r="2.4" fill="#221E1A"/><circle cx="80" cy="125" r="2.4" fill="#221E1A"/>
+    <path d="M70,132 L78,132 L74,138 Z" fill="#E23B24"/>
+    <g stroke="#E23B24" stroke-width="3.5" stroke-linecap="round"><path d="M69,146 L69,151"/><path d="M79,146 L79,151"/></g></g>
+  <g><ellipse cx="122" cy="126" rx="19" ry="23" fill="#6B6252"/>
+    <g clip-path="url(#ju)"><path d="M100,134 Q122,124 144,134 L144,156 L100,156 Z" fill="#E4DCC8"/></g>
+    <ellipse cx="122" cy="126" rx="19" ry="23" fill="none" stroke="#221E1A" stroke-width="4"/>
+    <ellipse cx="122" cy="115" rx="15" ry="12" fill="#221E1A"/>
+    <path d="M112,106 Q122,103 132,106" stroke="#E4DCC8" stroke-width="3" stroke-linecap="round" fill="none" opacity=".85"/>
+    <circle cx="116" cy="116" r="5" fill="#FFF7E6"/><circle cx="128" cy="116" r="5" fill="#FFF7E6"/>
+    <circle cx="116" cy="117" r="3" fill="#221E1A"/><circle cx="128" cy="117" r="3" fill="#221E1A"/>
+    <path d="M118,122 L126,122 L122,130 Z" fill="#E23B24"/>
+    <g stroke="#E23B24" stroke-width="4" stroke-linecap="round"><path d="M117,147 L117,153"/><path d="M127,147 L127,153"/></g></g>
+  <g><ellipse cx="172" cy="120" rx="21" ry="27" fill="#8A7549"/>
+    <g clip-path="url(#ad)"><path d="M148,128 Q172,116 196,128 L196,152 L148,152 Z" fill="#FFF7E6"/>
+      <g fill="#221E1A"><rect x="148" y="132" width="48" height="3.5" rx="1.7"/><rect x="148" y="141" width="48" height="3.5" rx="1.7"/></g></g>
+    <ellipse cx="172" cy="120" rx="21" ry="27" fill="none" stroke="#221E1A" stroke-width="4.5"/>
+    <ellipse cx="172" cy="108" rx="16" ry="14" fill="#221E1A"/>
+    <path d="M161,99 Q172,95 183,99" stroke="#FFF7E6" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <circle cx="165" cy="110" r="5.5" fill="#FFF7E6"/><circle cx="179" cy="110" r="5.5" fill="#FFF7E6"/>
+    <circle cx="165" cy="111" r="3.4" fill="#221E1A"/><circle cx="179" cy="111" r="3.4" fill="#221E1A"/>
+    <path d="M167,116 L177,116 L172,125 Z" fill="#E23B24"/>
+    <g stroke="#E23B24" stroke-width="4.5" stroke-linecap="round"><path d="M166,145 L166,154"/><path d="M178,145 L178,154"/></g></g>
+  <g font-family="Helvetica,Arial,sans-serif" font-size="9" fill="#8A8A80" text-anchor="middle">
+    <text x="30" y="166">EGG</text><text x="74" y="166">CHICK</text><text x="122" y="166">JUVENILE</text><text x="172" y="166">ADULT</text></g>
+</svg>
