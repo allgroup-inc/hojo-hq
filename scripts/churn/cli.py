@@ -30,6 +30,7 @@ from .pipeline import run_pipeline
 from .retention import purge_snapshots
 from .contact_log import load_contacts
 from .playbook import segment_playbook, render_html as render_playbook_html
+from .dialog import dialog_effect, render_html as render_dialog_html
 from .experiment import compare_naive_vs_controlled, assignment_ledger
 from .transitions import status_transitions, render_html as render_transitions_html
 from .timing import (churn_hazard_by_tenure, peak_window, call_timing_list,
@@ -240,6 +241,19 @@ def _mature_before(as_of, months=EARLY_CHURN_MONTHS):
     idx = as_of.year * 12 + (as_of.month - 1) - months
     day = min(as_of.day, 28)  # 月末差異を避ける
     return date(idx // 12, idx % 12 + 1, day)
+
+
+def cmd_dialog(csv_path, column_map_path, contacts_path, contact_map_path,
+               out_path, as_of, field):
+    as_of_d = _as_of(as_of)
+    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    contacts = load_contacts(contacts_path, load_column_map(contact_map_path))
+    rows = dialog_effect(records, contacts, _mature_before(as_of_d), field=field)
+    labels = {"approach": "返し方", "concern": "懸念", "medium": "接触手段"}
+    render_dialog_html(rows, out_path, field_label=labels.get(field, field))
+    print(f"[dialog] {field}別 {len(rows)}種 → {out_path}"
+          + ("（対話ログ未整備＝母数0）" if not rows else ""))
+    return rows
 
 
 def cmd_playbook(csv_path, column_map_path, contacts_path, contact_map_path,
@@ -495,6 +509,15 @@ def main(argv=None):
     sp_up.add_argument("--treated-fraction", type=float, default=EXPERIMENT_TREATED_FRACTION)
     sp_up.add_argument("--salt", default="")
 
+    sp_dlg = sub.add_parser("dialog")
+    sp_dlg.add_argument("--csv", required=True)
+    sp_dlg.add_argument("--column-map", required=True)
+    sp_dlg.add_argument("--contacts", required=True)
+    sp_dlg.add_argument("--contact-map", required=True)
+    sp_dlg.add_argument("--out", required=True)
+    sp_dlg.add_argument("--as-of", required=True)
+    sp_dlg.add_argument("--field", default="approach", choices=["approach", "concern", "medium"])
+
     sp_pb = sub.add_parser("playbook")
     sp_pb.add_argument("--csv", required=True)
     sp_pb.add_argument("--column-map", required=True)
@@ -573,6 +596,9 @@ def main(argv=None):
     elif args.cmd == "uplift":
         cmd_uplift(args.csv, args.column_map, args.contacts, args.contact_map,
                    args.as_of, args.treated_fraction, args.salt)
+    elif args.cmd == "dialog":
+        cmd_dialog(args.csv, args.column_map, args.contacts, args.contact_map,
+                   args.out, args.as_of, args.field)
     elif args.cmd == "playbook":
         cmd_playbook(args.csv, args.column_map, args.contacts, args.contact_map,
                      args.out, args.as_of, args.segment)

@@ -1,6 +1,8 @@
 """保全アクションログ（結果記録）の取込。
 
 列: 顧客ID・契約日・接触日・対応内容・結果区分・顧客反応（column_mapで対応づけ）。
+訪問保全の対話ログ拡張（任意）: 接触手段(medium=架電/訪問)・懸念(concern)・返し方/対話内容(approach)・
+次アクション(next_action)。主観を減らすため選択式タグ中心が望ましい（docs/churn/訪問保全と教育ループ設計）。
 クローズドループ（docs/churn/クローズドループ設計.md）の入力。実データは private/ 限定・審査後。
 """
 from __future__ import annotations
@@ -28,5 +30,10 @@ def load_contacts(path, column_map):
             "action": (_get(row, column_map, "action") or ""),
             "result": (_get(row, column_map, "result") or ""),
             "reaction": (_get(row, column_map, "reaction") or ""),
+            # 対話ログ拡張（任意・未マップなら空）
+            "medium": (_get(row, column_map, "medium") or ""),
+            "concern": (_get(row, column_map, "concern") or ""),
+            "approach": (_get(row, column_map, "approach") or ""),
+            "next_action": (_get(row, column_map, "next_action") or ""),
         })
     return out
