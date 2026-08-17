@@ -115,7 +115,10 @@ def validate_recipe(r):
         if not isinstance(t, str) or len(t) > 40:
             errors.append("title_altsが不正/長すぎ")
             break
-    joined = json.dumps(r, ensure_ascii=False)
+    # 禁止語検査は読者向けの文のみ。prompt_text(AIへの指示文)内の「必ずJSON形式で」等は
+    # 読者への誇大表現ではないため対象外(2026-08-17 監査議事。8/11の失敗の再発防止)
+    reader_facing = {k: v for k, v in r.items() if k != "prompt_text"}
+    joined = json.dumps(reader_facing, ensure_ascii=False)
     hits = banned_hits(joined)
     if hits:
         errors.append("禁止語: " + "/".join(hits))
@@ -145,12 +148,15 @@ def call_claude(client, system, user, max_tokens):
     return "".join(b.text for b in resp.content if getattr(b, "type", "") == "text").strip()
 
 
-def generate_recipe(client, topic):
+def generate_recipe(client, topic, feedback=None):
     user = (
         f"お題: {topic['theme']}\n"
         f"想定読者と使いどころ: {topic['use_case']}\n"
         f"sample_input(検証に使う入力例):\n{topic['sample_input']}"
     )
+    if feedback:
+        user += ("\n\n【重要】前回の出力は次の理由で不合格でした。全て修正した完全版を出力してください:\n- "
+                 + "\n- ".join(feedback))
     raw = call_claude(client, RECIPE_SYSTEM, user, max_tokens=3000)
     return parse_json_loose(raw)
 
@@ -258,7 +264,9 @@ def build_article(recipe, topic, verify_output, date):
     # 最終チェック: 必須文言と禁止語(組版後の全文に対して)
     if VERIFY_NOTICE not in article:
         raise RuntimeError("検証明記の文言が記事にない")
-    hits = banned_hits(article)
+    # プロンプト本文と実行ログ(AI向け指示とその出力)を除いた読者向けの文だけを検査
+    reader_text = article.replace(recipe["prompt_text"], "").replace(excerpt, "")
+    hits = banned_hits(reader_text)
     if hits:
         raise RuntimeError("組版後の記事に禁止語: " + "/".join(hits))
     return article
@@ -322,7 +330,12 @@ def main():
         recipe = generate_recipe(client, topic)
         errors = validate_recipe(recipe)
         if errors:
-            raise SystemExit("バリデーション失敗(お題は持ち越し): " + " / ".join(errors))
+            # 不合格理由を渡して再生成1回まで(resilient-agent-design: 上限つきリトライ。
+            # 2026-08-17 監査議事。それでも不合格なら持ち越し=捏造しない)
+            recipe = generate_recipe(client, topic, feedback=errors)
+            errors = validate_recipe(recipe)
+        if errors:
+            raise SystemExit("バリデーション失敗・再生成でも不合格(お題は持ち越し): " + " / ".join(errors))
         verify_output = run_verification(client, recipe, topic)
 
     article = build_article(recipe, topic, verify_output, today)

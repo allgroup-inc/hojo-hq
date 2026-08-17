@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: write
+  issues: write  # 専用LINE未設定時の失敗フォールバック通知(2026-08-17 監査。沈黙禁止)
 
 concurrency:
   group: airecipe-draft
@@ -115,6 +116,18 @@ jobs:
           message: |
             🍳【AIレシピ】お題キューが空になりました
             data/airecipe_topics.json にお題を追加してください(チャットで「お題を10本補充して」でもOKです)
+
+      - name: 失敗をIssueに記録(専用LINE未設定時のフォールバック)
+        # 2026-08-11の教訓: 通知先が無いまま失敗すると誰も気づかない(実際に2回失敗が3日間沈黙した)。
+        # 通知手段が無い自動化の失敗は、必ず見える場所(Issue)に残す
+        if: failure() && (env.AIRECIPE_LINE_TOKEN == '' || env.AIRECIPE_LINE_TO == '')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --repo "${{ github.repository }}" \
+            --title "🚨 airecipe-draft 失敗(run ${{ github.run_id }})" \
+            --body "うごくAIレシピの自動生成・検証が失敗しました(お題は持ち越し・捏造なし)。専用LINEが未設定のためIssueで通知しています。設定手順: docs/うごくAIレシピ_LINE開設キット.md
+          ログ: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: LINE通知(失敗時)
         if: failure() && env.AIRECIPE_LINE_TOKEN != '' && env.AIRECIPE_LINE_TO != ''
