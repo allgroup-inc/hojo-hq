@@ -8,7 +8,7 @@
   <circle cx="120" cy="120" r="114" fill="#00335C"/>
   <circle cx="120" cy="120" r="107" fill="none" stroke="#F4EAD5" stroke-width="3.5"/>
   <text font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="21" letter-spacing="4" fill="#F4EAD5">
-    <textPath href="#arc" startOffset="50%" text-anchor="middle">YANBARU</textPath>
+    <textPath href="#arc" startOffset="50.73%" text-anchor="middle">YANBARU</textPath>
   </text>
   <g transform="translate(120,118) scale(1.619) translate(-120,-116)">
     <circle cx="120" cy="116" r="42" fill="#F4EAD5" stroke="#00335C" stroke-width="5"/>

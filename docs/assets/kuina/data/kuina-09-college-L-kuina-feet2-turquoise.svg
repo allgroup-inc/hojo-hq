@@ -5,23 +5,23 @@
     <path id="arc" d="M36,120 A84,84 0 0 1 204,120"/>
     <clipPath id="hd"><circle cx="120" cy="116" r="42"/></clipPath>
   </defs>
-  <circle cx="120" cy="120" r="114" fill="#00335C"/>
+  <circle cx="120" cy="120" r="114" fill="#0E6670"/>
   <circle cx="120" cy="120" r="104" fill="none" stroke="#F4EAD5" stroke-width="3.5"/>
   <text font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="23" letter-spacing="4.5" fill="#F4EAD5">
     <textPath href="#arc" startOffset="50.85%" text-anchor="middle">YANBARU</textPath>
   </text>
   <g transform="translate(120,110) scale(1.286) translate(-120,-116)">
-    <circle cx="120" cy="116" r="42" fill="#F4EAD5" stroke="#00335C" stroke-width="5"/>
+    <circle cx="120" cy="116" r="42" fill="#F4EAD5" stroke="#0E6670" stroke-width="5"/>
     <g clip-path="url(#hd)">
-      <ellipse cx="120" cy="122" rx="37" ry="30" fill="#00335C"/>
+      <ellipse cx="120" cy="122" rx="37" ry="30" fill="#0E6670"/>
       <g stroke="#F4EAD5" stroke-width="7" stroke-linecap="round" fill="none">
         <path d="M113,110 Q102,107 91,112"/><path d="M127,110 Q138,107 149,112"/>
       </g>
     </g>
-    <circle cx="120" cy="116" r="42" fill="none" stroke="#00335C" stroke-width="5"/>
+    <circle cx="120" cy="116" r="42" fill="none" stroke="#0E6670" stroke-width="5"/>
     <circle cx="105" cy="126" r="10" fill="#F4EAD5"/><circle cx="135" cy="126" r="10" fill="#F4EAD5"/>
-    <circle cx="106" cy="128.4" r="6.4" fill="#00335C"/><circle cx="136" cy="128.4" r="6.4" fill="#00335C"/>
-    <path d="M112,129 Q120,125 128,129 L123,144 Q120,148 117,144 Z" fill="#E23B24" stroke="#00335C" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="106" cy="128.4" r="6.4" fill="#0E6670"/><circle cx="136" cy="128.4" r="6.4" fill="#0E6670"/>
+    <path d="M112,129 Q120,125 128,129 L123,144 Q120,148 117,144 Z" fill="#E23B24" stroke="#0E6670" stroke-width="3" stroke-linejoin="round"/>
   </g>
   <rect x="44" y="178" width="152" height="30" rx="3" fill="#E23B24" stroke="#F4EAD5" stroke-width="3"/>
   <text x="123.50" y="199" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="17" letter-spacing="7" fill="#F4EAD5">KUINA</text>
