@@ -55,6 +55,7 @@ HEADER = '''<header class="siteheader">
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-area/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
   </nav>
 </header>'''
 
@@ -97,9 +98,9 @@ def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
     rel = "../" * depth
     # フッター: depthに応じて正しい相対パスを組む(一覧ページが別ブランドのミカタへ飛ぶバグの修正・2026-08-12)
     if depth == 1:
-        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップへ</a></p>'
+        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップへ</a></p><p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ig_click\')">Instagramで最新情報を見る ›</a></p>'
     else:
-        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップへ</a></p>'
+        footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">市町村一覧へ</a> ・ <a href="../../index.html">もらいわすれ堂 トップへ</a></p><p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ig_click\')">Instagramで最新情報を見る ›</a></p>'
     seo = ""
     if canon_path is not None:
         seo = canonical_tag(canon_path) + "\n" + ogp_tags(title, desc, canon_path) + "\n"
@@ -189,8 +190,9 @@ def muni_page(muni, items, updated):
                 f"<h2>{esc(it['name'])}{badge}</h2>"
                 f'<p class="note">{esc(it["target_household"])}</p>'
                 f'<p class="note">窓口: {esc(it["how_to_apply"])}</p>'
+                f'<p style="display:flex;gap:16px;flex-wrap:wrap;margin:0">'
                 f'<a href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する</a>'
-                f' ・ <a href="../../kit/{esc(it["id"])}/">申請準備シート</a>'
+                f'<a href="../../kit/{esc(it["id"])}/">申請準備シート</a></p>'
                 "</div>"
             )
         body.append('</div>')
@@ -227,7 +229,8 @@ def index_page(updated):
     )
     body = (
         "<h1>市町村別 給付金・手当まとめ</h1>"
-        '<p class="note">お住まいの市町村を選んでください。</p>'
+        '<p class="note">お住まいの市町村を選んでください。'
+        '状況から探したい方は<a href="../life/">ライフイベント別まとめ</a>もどうぞ。</p>'
         f'<ul class="areas">{lis}</ul>'
         '<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'
     )

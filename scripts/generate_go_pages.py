@@ -40,6 +40,7 @@ CHANNELS = {
     "card":       {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: 紙配布(QRカード・催事・紹介)"},
     # ── もらいわすれ堂/フクギイロ(小柳遥さん・2026-07-24開設) ──
     "fg-top":     {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: トップページ"},
+    "fg-life":    {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: ライフイベント別ページ"},
     "fg-area":    {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 市町村ページ"},
     "fg-kit":     {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 制度キットページ"},
     "fg-shindan": {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 診断ページ"},

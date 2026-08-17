@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-08-18 02:29",
+ "generated_at": "2026-08-18 04:11",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 7,
- "count": 20,
+ "count": 21,
  "items": [
   {
    "id": "a0WJ200000CDdR2MAL",
@@ -176,6 +176,16 @@
    "max_amount": 15000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdQxMAL",
    "tag": "okinawa"
+  },
+  {
+   "id": "a0WJ200000CDO8eMAH",
+   "name": "交通システムの省CO2 化に向けた設備整備事業（鉄道事業等におけるネットワーク型低炭素化促進事業）（二次公募）",
+   "deadline": "2026-09-14",
+   "days_left": 27,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDO8eMAH",
+   "tag": "nationwide"
   },
   {
    "id": "a0WJ200000CDd5SMAT",

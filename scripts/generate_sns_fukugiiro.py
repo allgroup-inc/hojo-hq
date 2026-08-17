@@ -44,6 +44,15 @@ HOOKS = {
 
 def seido_post(idx, it):
     hook = next((HOOKS[ev] for ev in it["life_events"] if ev in HOOKS), "沖縄のご家庭へ")
+    # 書き出しは4パターンを順繰り(humanizer: 8制度すべて同じ「知っていますか?」を避ける。
+    # idxで決定的=再生成しても同じ文になる)
+    openers = [
+        f"「{it['name']}」を知っていますか?",
+        f"「{it['name']}」、聞いたことはありますか?",
+        f"沖縄には「{it['name']}」という制度があります。",
+        f"あてはまるなら受け取れる、「{it['name']}」。",
+    ]
+    opener = openers[(idx - 1) % len(openers)]
     return f"""# 制度紹介 {idx:02d}: {it['name']}
 
 ## 画像テキスト
@@ -53,7 +62,7 @@ def seido_post(idx, it):
 
 ## キャプション
 【{hook}】
-「{it['name']}」を知っていますか?
+{opener}
 
 {it['target_household']}。
 

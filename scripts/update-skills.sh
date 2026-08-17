@@ -10,6 +10,9 @@
 #     taste-skill / last30days / social-media-skills (hojo-hqが選定してvendoring済みのOSS)
 #     ※本店(hojo-hq)側でこれらを更新したら、他repoは本スクリプトの再実行だけで追従する。
 #       スキルがrepoごとにズレることを防ぐのが目的なので、内容を各repo側で個別に書き換えない。
+#   - カスタムスラッシュコマンド (.claude/commands/、全repo対象。2026-08-17〜)
+#     全38個が汎用の応答スタイル指定コマンドなので、フォルダごと丸ごと同期する
+#     (skillsと違い個別選定リストは持たない。repo固有のコマンドができたら要見直し)。
 # 触らないもの(各リポジトリ固有の手書き資産):
 #   - 各事業固有のカスタムスキル (hojo-accuracy-check等の hojo-* / hikari-* / kakei-* / report-* / go-*)
 #   - .agents/product-marketing.md
@@ -34,11 +37,11 @@ resolve() { local r="$1"; [ -d "$BASE/$r/.git" ] && echo "$BASE/$r" || echo "/ho
 
 # マーケ系(Superpowers + marketing 48)。他は Superpowers のみ。全repo共通でALLGROUPスキルも同期。
 MARKETING_REPOS=(hojo-hq hikari-hq hikari-lp hikari-report kakei-hq okinawa-villa)
-INFRA_REPOS=(report-hq go allgroup-site)
+INFRA_REPOS=(report-hq go allgroup-site enlife-mikomi skl-venue-hq hojo-signal)  # hojo-signalはfukugiiro org（要clone: fukugiiro/hojo-signal）
 
 # ALLGROUP共通スキル(本店=hojo-hq)。ここに追加するとdrift防止対象が増える。
 # social-media系8スキルは検出仕様(.claude/skills直下のみ走査)のためフラット配置(2026-08-07修正)
-ALLGROUP_SKILL_NAMES=(humanizer resilient-agent-design mindshare-arbitrage multi-ai-crosscheck context-limit-handoff feature-factory hojo-lighthouse-triage taste-skill last30days
+ALLGROUP_SKILL_NAMES=(humanizer resilient-agent-design mindshare-arbitrage multi-ai-crosscheck context-limit-handoff feature-factory hojo-lighthouse-triage go-link-discipline taste-skill last30days
   caption-writer carousel-writer content-calendar hashtag-strategy hook-writer
   instagram-growth platform-specs-and-validation thread-writer)
 ALLGROUP_LICENSE_NAMES=(TASTE-SKILL-LICENSE LAST30DAYS-LICENSE SOCIAL-MEDIA-SKILLS-LICENSE)
@@ -77,10 +80,14 @@ update_repo() {
   for n in "${ALLGROUP_LICENSE_NAMES[@]}"; do
     [ -f "$TMP/hq/.claude/skills/$n" ] && cp "$TMP/hq/.claude/skills/$n" "$D/.claude/skills/$n"
   done
-  git -C "$D" add .claude/skills
+  # カスタムスラッシュコマンド(本店=hojo-hq、フォルダごと丸ごと同期)
+  if [ -d "$TMP/hq/.claude/commands" ]; then
+    rm -rf "$D/.claude/commands"; cp -r "$TMP/hq/.claude/commands" "$D/.claude/commands"
+  fi
+  git -C "$D" add .claude/skills .claude/commands
   if git -C "$D" diff --cached --quiet; then echo "[$repo] up to date"; return; fi
   if [ "$DRY_RUN" = "1" ]; then echo "[$repo] DRY_RUN: $(git -C "$D" diff --cached --name-only | wc -l) files changed"; git -C "$D" reset -q; return; fi
-  git -C "$D" commit -q -m "chore: update vendored skills (superpowers + marketingskills + ALLGROUP共通)"
+  git -C "$D" commit -q -m "chore: update vendored skills + commands (superpowers + marketingskills + ALLGROUP共通)"
   local d=2; for a in 1 2 3 4 5; do git -C "$D" push origin main -q && { echo "[$repo] pushed"; return; }; git -C "$D" fetch origin main -q; git -C "$D" rebase origin/main -q || git -C "$D" rebase --abort -q; sleep $d; d=$((d*2)); done
   echo "[$repo] PUSH FAILED"
 }

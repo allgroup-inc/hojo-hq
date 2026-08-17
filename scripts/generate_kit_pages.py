@@ -92,6 +92,15 @@ ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through
 .btns button,.btns a{flex:1;display:block;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
 .btns .primary{background:var(--fg-primary);color:#fff}
 .linebtn{display:block;max-width:440px;margin:8px auto 0;padding:14px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
+.smartbox{background:#EAF5F0;border:1px solid #B7E0CF;border-radius:12px;padding:14px 16px;margin:10px 0;color:#0F5138}
+.smartbox strong{color:#0F5138}
+.copybtn{display:inline-block;padding:10px 16px;min-height:44px;border-radius:10px;border:2px solid var(--fg-deep);background:#fff;color:var(--fg-deep);font:inherit;font-size:.92rem;font-weight:700;cursor:pointer}
+.copybtn.copied{background:var(--fg-deep);color:#fff}
+details.conbini{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:0;margin:10px 0}
+details.conbini summary{cursor:pointer;padding:13px 16px;font-weight:700;color:var(--fg-ink);list-style-position:inside}
+details.conbini .inner{padding:0 16px 14px;border-top:1px dashed var(--fg-line)}
+details.conbini ol{margin:10px 0 6px;padding-left:1.4em}
+details.conbini li{margin:8px 0}
 @media(min-width:900px){.wrap{max-width:820px}}
 /* 印刷=電話台本+持ち物+窓口ひとこと+メモの1枚に圧縮。工程表・申請後・LINEは画面のみ。 */
 @media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}
@@ -106,6 +115,7 @@ HEADER = '''<header class="siteheader">
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
   </nav>
 </header>'''
 
@@ -167,6 +177,31 @@ def page(title, desc, body, depth=2, head_extra="", canon_path=None):
 
 KIT_JS = """
 <script>
+// シートの定型文コピー(個人のメモ・チェック状態は含めない — 議事_20260817 ウタガイ条件)
+var FK_SHEET_TEXT = __SHEET__;
+function fkFlash(btn, label){
+  var t = btn.textContent;
+  btn.textContent = label; btn.classList.add("copied");
+  setTimeout(function(){ btn.textContent = t; btn.classList.remove("copied"); }, 1800);
+}
+function fkCopy(text, btn, ev){
+  function done(){ fkFlash(btn, "コピーしました ✓"); if (window.fgTrack) fgTrack(ev); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, function(){ fkCopyFallback(text); done(); });
+  } else { fkCopyFallback(text); done(); }
+}
+function fkCopyFallback(text){
+  var ta = document.createElement("textarea");
+  ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand("copy"); } catch(e){}
+  document.body.removeChild(ta);
+}
+function fkCopySheet(btn){ fkCopy(FK_SHEET_TEXT, btn, "kit_copy"); }
+function fkCopySay(btn){
+  var el = document.getElementById("mado-say");
+  fkCopy(el ? el.textContent.trim() : "", btn, "kit_copy_say");
+}
 (function(){
   var KEY = "fk_kit___ID__";
   var saved = {c:[], m:{}, s:[]};
@@ -304,6 +339,28 @@ def kit_page(it, updated):
   <a href="{src}" rel="noopener" onclick="if(window.fgTrack)fgTrack('kit_official')">公式ページで最新を確認</a>
 </div>
 
+<div class="smartbox screen-only">
+  <p><strong>印刷できなくても、大丈夫です。</strong><br>
+  このページをスマホで開いたまま、あなたのメモ代わりに窓口で使えます。チェックとメモはこの端末に残ります。</p>
+  <p style="margin-top:10px"><button class="copybtn" id="copy-sheet" onclick="fkCopySheet(this)">このシートをコピーして手元に残す</button></p>
+  <p class="note" style="color:#0F5138;margin-top:8px">コピーしたら、LINEのメモやトークに貼りつけておくと、電波の弱い窓口でもすぐ開けます。
+  <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')" style="color:#0F5138;font-weight:700">もらいわすれ堂のLINE</a>に貼っていただければ、そのまま締切のお知らせも受け取れます(無料)。</p>
+</div>
+
+<details class="conbini no-print screen-only" ontoggle="if(this.open&&window.fgTrack)fgTrack('kit_conbini')">
+  <summary>プリンターがないとき — コンビニで印刷するかんたん手順</summary>
+  <div class="inner">
+    <ol>
+      <li>上の「印刷して持っていく」を押して、プリンターのかわりに<strong>「PDFとして保存」</strong>を選びます(iPhoneは共有ボタン→「プリント」からでも保存できます)</li>
+      <li><strong>セブンイレブン</strong>なら「かんたんnetprint」アプリ(会員登録なしで使えます)、<strong>ファミリーマート・ローソン</strong>なら「ネットワークプリント」アプリに、そのPDFを登録します</li>
+      <li>表示された<strong>受付番号</strong>を、お店のコピー機(マルチコピー機)に入力して印刷します。A4白黒で1枚20円前後が目安です(機種や時期で変わることがあります)</li>
+    </ol>
+    <p class="note">くわしい手順・料金は各サービスの公式ページでご確認ください:
+    <a href="https://www.printing.ne.jp/" rel="noopener" target="_blank">netprint(セブンイレブン)</a> ・
+    <a href="https://networkprint.ne.jp/" rel="noopener" target="_blank">ネットワークプリント(ファミマ・ローソン)</a></p>
+  </div>
+</details>
+
 <section class="screen-only">
 <h2>申請までの5ステップ</h2>
 <p class="note">チェックすると、この端末に残ります。次に開いたとき「どこまで進んだか」がわかります。</p>
@@ -346,8 +403,9 @@ def kit_page(it, updated):
 <h2>③ 窓口での会話(このとおりでOK)</h2>
 <div class="madoguchi">
   <p>まず、こう言います:</p>
-  <p style="margin:6px 0;font-size:1.02rem">「<strong>{name}</strong>について教えてください。対象になるか確認したいです」</p>
-  <p class="note" style="color:#0F5138">これだけ言えば、あとは職員の方が案内してくれます。</p>
+  <p style="margin:6px 0;font-size:1.02rem" id="mado-say">「<strong>{name}</strong>について教えてください。対象になるか確認したいです」</p>
+  <p class="note" style="color:#0F5138">これだけ言えば、あとは職員の方が案内してくれます。言葉で伝えにくいときは、この画面をそのまま見せても大丈夫です。</p>
+  <p class="screen-only" style="margin-top:8px"><button class="copybtn" onclick="fkCopySay(this)">このひとことをコピーする</button></p>
   <p style="margin-top:10px">そして、こちらからこの3つを聞いておきます:</p>
   <ul class="ask">
     <li>締切はいつまでですか？</li>
@@ -382,8 +440,25 @@ def kit_page(it, updated):
 </div>
 <div class="disclaimer">このシートは公式情報に基づく「準備のご案内」です。持ち物は一般的な例で、市町村により異なります。受給できるかどうかの最終判断は各窓口で行われます。<br>申請書の作成代行・代筆は行っていません(ご本人が記入します)。<br>専門家のサポートが必要な場合は、提携の専門家(社会保険労務士・行政書士など)をご紹介します。<br>最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)/ 出典: <a href="{src}" rel="noopener">公式ページ</a></div>
 <p style="margin-top:16px" class="no-print footlinks">{area_link}<a href="../index.html">申請準備シート一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../teisei/">情報の訂正</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
+<p class="no-print" style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
 """
-    body += KIT_JS.replace("__ID__", it["id"])
+    # コピー用の定型文(制度名・持ち物例・セリフ・URLのみ。個人のメモ・チェック状態は含めない)
+    sheet_lines = [
+        f"【{it['name']} 申請準備シート|もらいわすれ堂】",
+        f"▼受け取れるかもしれない方: {it.get('target_household','')}",
+        f"▼行き先(窓口): {it.get('how_to_apply','')}",
+        "▼持ち物(よくある例・市町村で変わります):",
+    ]
+    sheet_lines += [f"・{x}" for x in CORE_ITEMS] + [f"・{x}" for x in event_items]
+    sheet_lines += [
+        "▼窓口でのひとこと:",
+        f"「{it['name']}について教えてください。対象になるか確認したいです」",
+        "▼行く前に電話で聞く3つ: ①受付時間と場所 ②私の場合の持ち物 ③申請書と締切",
+        f"くわしくは: https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/{it['id']}/",
+        "※金額・締切は公式ページと窓口でご確認ください",
+    ]
+    sheet_text = json.dumps("\n".join(sheet_lines), ensure_ascii=False)
+    body += KIT_JS.replace("__ID__", it["id"]).replace("__SHEET__", sheet_text)
     # 制度名が地域名で始まる場合は前置しない(「北谷町 北谷町 こども医療費助成」の二重表記防止)
     if area in MUNI_SLUG and not it["name"].startswith(area):
         title = f"{area} {it['name']}の申請方法・持ち物・窓口|もらいわすれ堂"
@@ -394,7 +469,7 @@ def kit_page(it, updated):
     else:
         title = f"{it['name']}の申請方法・持ち物・窓口(沖縄)|もらいわすれ堂"
     desc = (f"{it['name']}の申請に必要な持ち物リスト・窓口での聞き方・電話で確認する3つのこと。"
-            "印刷してそのまま窓口に持っていける無料の申請準備シート(代行はせず、準備を伴走します)。")
+            "スマホのままでも、印刷しても窓口で使える無料の申請準備シート(代行はせず、準備を伴走します)。")
     faq = faq_jsonld([
         (f"{it['name']}の対象になるのはどんな人ですか?",
          f"{it.get('target_household','')}(最終的に対象かどうかは、公式ページと窓口で確認できます)"),
@@ -410,13 +485,16 @@ def kit_page(it, updated):
 
 def index_page(items, updated):
     def line(it):
+        # 一覧では「照合済み」は✓だけに圧縮(176件の縦の壁と視覚ノイズを減らす・議事_20260817組版)
         if it.get("verified") is True:
-            b = ' <span class="status ok">✓ 公式と照合済み</span>'
+            b = ' <span class="status ok" title="公式と照合済み" style="padding:1px 7px">✓</span>'
         elif it.get("status") == "要確認":
-            b = ' <span class="status">要確認</span>'
+            b = ' <span class="status" style="font-size:.72rem;padding:1px 7px">要確認</span>'
         else:
             b = ""
-        return f'<li style="margin-bottom:8px"><a href="{esc(it["id"])}/">{esc(it["name"])}</a>{b}</li>'
+        return (f'<li style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;'
+                f'border-bottom:1px dashed var(--fg-line)">'
+                f'<a href="{esc(it["id"])}/" style="display:inline-block;padding:9px 0;line-height:1.55">{esc(it["name"])}</a>{b}</li>')
     # 全国/沖縄県/市町村の3区分で表示(160件のフラット一覧は探しにくいため・2026-08-12 小柳さん委任裁定)
     national = [it for it in items if it.get("area") == "全国"]
     pref = [it for it in items if it.get("area") == "沖縄県"]
@@ -439,11 +517,12 @@ def index_page(items, updated):
     sections_html = "\n".join(sections)
     body = f"""
 <h1>申請準備シート一覧</h1>
-<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで、印刷してそのまま窓口へ。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
+<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで。<strong>スマホで開いたまま窓口で使えます</strong>(印刷して持っていくのもOK。プリンターがない方向けにコンビニ印刷の手順も各シートにあります)。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>
 {sections_html}
 <div class="disclaimer">最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
 <p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップ</a></p>
+<p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
 """
     return page(
         "沖縄の給付金・手当の申請準備シート一覧(持ち物・窓口・電話の聞き方)|もらいわすれ堂",

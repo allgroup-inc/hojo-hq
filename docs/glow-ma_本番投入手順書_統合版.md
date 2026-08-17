@@ -185,8 +185,11 @@ D章の`installLetterDraftEditTrigger`実行後、実データ投入前にテス
       を追加してから再デプロイする~~ → **この手順はもう当てはまらない。絶対にそのまま実行しないこと。**
       レター発送QR機能の対応(2026-08-13)で `glow-ma/src/appsscript.json` には既に
       `oauthScopes` が明示宣言されており、`userinfo.email` もその中に含まれている
-      (現在の中身は `drive.file` / `spreadsheets` / `script.external_request` /
-      `script.scriptapp` / `script.container.ui` / `userinfo.email` の6件)。
+      (現在の中身は `drive` / `spreadsheets` / `script.external_request` /
+      `script.scriptapp` / `script.container.ui` / `userinfo.email` の6件。
+      `drive` は当初 `drive.file` に絞る想定だったが、`DriveApp.createFolder` が
+      `drive.file` では動作しないことが本番動作確認2026-08-15で判明したため、
+      小柳さんの承認のうえフルスコープへ変更した)。
       上記の記述どおりに `oauthScopes` を書き換えると6件の配列が1件に置き換わり、
       シート・Drive・外部リクエスト・トリガー・メニューUIが同時に壊れる。
       まず現物の `glow-ma/src/appsscript.json` を開き、`userinfo.email` が

@@ -1,38 +1,38 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-09",
+  "updated_at": "2026-08-16",
   "period": "7d",
   "source": "plausible-stats-api",
   "stages": [
     {
       "key": "hojo_shindan_start",
       "label": "診断開始",
-      "count": 6,
+      "count": 4,
       "cvr_from_prev": null,
       "drop_rate": null
     },
     {
       "key": "hojo_shindan_complete",
       "label": "診断実行(結果表示)",
-      "count": 16,
-      "cvr_from_prev": 2.6666666666666665,
-      "drop_rate": -1.6666666666666665
+      "count": 9,
+      "cvr_from_prev": 2.25,
+      "drop_rate": -1.25
     },
     {
       "key": "line_tap",
       "label": "LINE誘導タップ",
-      "count": 4,
-      "cvr_from_prev": 0.25,
-      "drop_rate": 0.75
+      "count": 1,
+      "cvr_from_prev": 0.1111111111111111,
+      "drop_rate": 0.8888888888888888
     }
   ],
   "key_rates": {
-    "complete_rate": 2.6666666666666665,
-    "line_cvr": 0.25
+    "complete_rate": 2.25,
+    "line_cvr": 0.1111111111111111
   },
   "worst_drop": {
     "stage": "line_tap",
     "label": "診断実行(結果表示)→LINE誘導タップ",
-    "drop_rate": 0.75
+    "drop_rate": 0.8888888888888888
   }
 }

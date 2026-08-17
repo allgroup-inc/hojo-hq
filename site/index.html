@@ -56,8 +56,11 @@
   .serif{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;}
   /* 日本語の折り返しを文節単位にする(2026-08-04 小柳さん指示。未対応ブラウザは通常折返し)。
      body全体に掛けると初期レイアウトが約1.7秒かかりLighthouse Performanceを大きく落とすため、
-     効果が見える見出し・ヒーロー・診断UI・モーダル(開くまでレイアウトされない)に限定する(2026-08-05) */
-  h1,h2,h3,h4,h5,.oath,.sub,.live-badge,.hero-cta,.glow-about-btn,.form-guide,.unlock p,.glow-card{word-break:auto-phrase;}
+     効果が見える見出し・ヒーロー・診断UI・モーダル(開くまでレイアウトされない)に限定する(2026-08-05)。
+     その限定でもカード・CTA等の繰り返し要素まで含めるとStyle&Layoutが約1.2秒かかり
+     Performance 0.88まで退行した(Issue #10・実測: 全適用0.88/h1-h3のみ0.98-0.99)。
+     見出し以外の泣き別れは手動の<span class="nowrap">で個別対応する(2026-08-17) */
+  h1,h2,h3{word-break:auto-phrase;}
 
   /* ===== ヘッドライン主導のフルスクリーン構成 ===== */
   section{

@@ -67,6 +67,9 @@ section{padding:52px 0}
 .btn:active{transform:translateY(0);background:var(--coral-deep)}
 .note{font-size:.85rem;color:var(--muted);line-height:1.75}
 .note--long{text-align:left!important}
+.iglink{display:inline-block;font-size:.82rem;color:#F3D7C7;padding:6px 2px;text-decoration:underline}
+.ignav{display:inline-flex;align-items:center;justify-content:center;padding:8px;min-width:36px;min-height:36px;color:var(--coral-deep);border-radius:8px}
+.ignav:hover{background:var(--sand-2)}
 .microtrust{font-size:.82rem;color:var(--muted);text-align:center;margin-top:10px}
 .microtrust.on-green{color:#eafff2}
 strong{font-weight:700}
@@ -139,7 +142,7 @@ strong{font-weight:700}
 .steps li strong{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.08rem;color:var(--ink)}
 /* navcards */
 .navcards{display:grid;grid-template-columns:1fr;gap:12px;max-width:760px;margin-left:auto;margin-right:auto}
-@media(min-width:640px){.navcards{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:640px){.navcards{grid-template-columns:repeat(2,1fr)}}
 .navcard{display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff;
   border:1.5px solid var(--blush);border-radius:16px;padding:18px 14px;text-decoration:none;color:var(--coral-deep);
   font-weight:700;box-shadow:var(--shadow-sm);transition:transform .15s ease,border-color .15s ease}
@@ -382,6 +385,7 @@ footer .fwrap p{margin-bottom:6px}
     <a href="area/">市町村</a>
     <a href="kit/">準備シート</a>
     <a href="../go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
   </nav>
 </header>
 <main>
@@ -467,6 +471,7 @@ footer .fwrap p{margin-bottom:6px}
     <p class="note note--long" style="margin-top:14px">※ 申請手続きの代行は行いません。専門家のサポートが必要な場合は、提携する専門家(社会保険労務士・行政書士など)におつなぎします。</p>
     <div class="navcards" style="margin-top:22px">
       <a class="navcard" href="area/">市町村でさがす ›<span>お住まいの街のまとめ</span></a>
+      <a class="navcard" href="life/">状況からさがす ›<span>出産・子育て・医療費・失業など</span></a>
       <a class="navcard" href="kit/">申請準備シート ›<span>持ち物リスト・印刷して窓口へ</span></a>
       <a class="navcard" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで受け取る ›<span>締切の約1か月前からお知らせ(無料)</span></a>
     </div>
@@ -543,9 +548,10 @@ footer .fwrap p{margin-bottom:6px}
     <p class="fvision">とどけ、沖縄のみらいへ。</p>
     <p>運営: 株式会社フクギイロ</p>
     <p>フクギは、沖縄の集落を台風から守ってきた<span style="white-space:nowrap">防風林の木。</span><br>県民のみなさんの家計を守る防風林でありたい、という願いを社名にしました。</p>
-    <p style="margin-top:14px"><a href="area/">市町村別の給付金・手当まとめ</a> ・ <a href="kit/">申請準備シート一覧</a></p>
+    <p style="margin-top:14px"><a href="area/">市町村別の給付金・手当まとめ</a> ・ <a href="life/">ライフイベント別まとめ</a> ・ <a href="kit/">申請準備シート一覧</a></p>
     <p style="margin-top:6px"><a href="privacy/">個人情報保護方針</a> ・ <a href="teisei/">情報の訂正・ご指摘</a></p>
   </div>
+  <p style="margin-top:6px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
 </footer>
 
 <script type="application/ld+json">
