@@ -172,6 +172,8 @@ test("音声ログ処理状況のシート名・ヘッダー・ステータス�
   assert.ok(Array.isArray(schema.LINE_VOICE_LOG_STATUSES));
   assert.ok(schema.LINE_VOICE_LOG_STATUSES.includes("受信済み"));
   assert.ok(schema.LINE_VOICE_LOG_STATUSES.includes("確定"));
+  // 二重処理を防ぐ確保(claim)用の一時ステータス
+  assert.ok(schema.LINE_VOICE_LOG_STATUSES.includes("処理中"));
 });
 
 test("スタッフのヘッダーにLINE User ID列が追加されている", () => {

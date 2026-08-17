@@ -63,17 +63,34 @@
     return DEFAULT_RESPONDENT_TYPE;
   }
 
+  var FORMULA_PREFIX_PATTERN = /^[=+\-@]/;
+
+  /**
+   * スプレッドシートのセルに書き込む自由記述テキストを無害化する。
+   * Googleスプレッドシートは "=" "+" "-" "@" で始まる値を数式として解釈するため、
+   * 文字起こし結果や会社名がそのまま数式になって内容が壊れる(あるいは意図しない
+   * 参照が入る)ことを防ぐ。該当する場合のみ先頭にアポストロフィを付けて文字列扱いにする。
+   * 既にサニタイズ済みの値("'"始まり)を再度通しても何も起きない(冪等)。
+   */
+  function sanitizeSheetText(value) {
+    if (value === null || value === undefined) return "";
+    var text = String(value);
+    if (FORMULA_PREFIX_PATTERN.test(text)) return "'" + text;
+    return text;
+  }
+
   /**
    * 対応履歴ログへ書き込む1行分の配列を、INTERACTION_LOG_HEADERSの並び順で組み立てる。
    * logIdはGAS側でUtilities.getUuid()を使って生成し、"H-"を付けて渡すこと(Node側では
    * UUID生成手段がないため、この関数はID生成の責務を持たない)。
+   * 自由記述の内容メモ・次回アクションは数式として解釈されないようサニタイズする。
    */
   function buildInteractionLogRow(logId, companyId, todayString, staffName, interactionType, respondentType, contentMemo, nextAction) {
     return [
       logId, companyId, todayString, staffName,
       normalizeInteractionType(interactionType),
       normalizeRespondentType(respondentType),
-      contentMemo || "", nextAction || ""
+      sanitizeSheetText(contentMemo), sanitizeSheetText(nextAction)
     ];
   }
 
@@ -90,7 +107,7 @@
     var nameIndex = headers.indexOf("会社名");
     return headers.map(function (header, index) {
       if (index === idIndex) return companyId;
-      if (index === nameIndex) return companyName;
+      if (index === nameIndex) return sanitizeSheetText(companyName);
       if (index === dncIndex) return false;
       return "";
     });
@@ -178,13 +195,17 @@
 
   /**
    * 対応履歴ログへ書き込む直前の最終確認プロンプトを組み立てる。
+   * 種別・対応相手は、buildInteractionLogRowが書き込み時に行うのと同じ正規化を
+   * ここでも通す。正規化しないまま表示すると、担当者は「雑談」と表示された内容を
+   * 確認したのに、実際には既定値の「面談実施」が記録される、という食い違いが起きる
+   * (正確性最優先。CLAUDE.md絶対ルール1)。正規化は冪等なので二重適用しても問題ない。
    */
   function buildFinalConfirmPrompt(processId, companyName, interactionType, respondentType, contentMemo, nextAction) {
     var text = [
       "以下の内容で記録します。よろしいですか?",
       "会社名: " + companyName,
-      "種別: " + interactionType,
-      "対応相手: " + respondentType,
+      "種別: " + normalizeInteractionType(interactionType),
+      "対応相手: " + normalizeRespondentType(respondentType),
       "内容メモ: " + contentMemo,
       "次回アクション: " + (nextAction || "(なし)")
     ].join("\n");
@@ -217,10 +238,19 @@
     return "前の記録がまだ完了していません。LINE上のボタンで確定または取り消しをしてから、次の録音を送ってください。";
   }
 
+  /**
+   * 二重タップ・Webhookの再送などで、既に処理済み(または取り消し済み)の記録に対する
+   * ボタン操作が届いたときの案内。重複書き込みを防いだうえで、無言にしないために返す。
+   */
+  function buildAlreadyHandledMessage() {
+    return "この記録はすでに処理済みか、無効になっています。";
+  }
+
   var api = {
     matchCompanyCandidates: matchCompanyCandidates,
     normalizeInteractionType: normalizeInteractionType,
     normalizeRespondentType: normalizeRespondentType,
+    sanitizeSheetText: sanitizeSheetText,
     buildInteractionLogRow: buildInteractionLogRow,
     buildNewCompanyRow: buildNewCompanyRow,
     ACK_MESSAGE_TEXT: ACK_MESSAGE_TEXT,
@@ -239,7 +269,8 @@
     buildDiscardMessage: buildDiscardMessage,
     buildProcessingErrorMessage: buildProcessingErrorMessage,
     buildStaffNotFoundMessage: buildStaffNotFoundMessage,
-    buildAlreadyProcessingMessage: buildAlreadyProcessingMessage
+    buildAlreadyProcessingMessage: buildAlreadyProcessingMessage,
+    buildAlreadyHandledMessage: buildAlreadyHandledMessage
   };
 
   if (typeof module !== "undefined" && module.exports) {

@@ -142,3 +142,59 @@ test("buildCompletionMessage / buildDiscardMessage: 固定文言を返す", () =
   assert.ok(lineVoiceLogContent.buildStaffNotFoundMessage().length > 0);
   assert.ok(lineVoiceLogContent.buildAlreadyProcessingMessage().length > 0);
 });
+
+test("sanitizeSheetText: 数式と解釈される先頭文字はアポストロフィで無害化する", () => {
+  assert.equal(lineVoiceLogContent.sanitizeSheetText("=SUM(A1:A2)"), "'=SUM(A1:A2)");
+  assert.equal(lineVoiceLogContent.sanitizeSheetText("+1-800-000"), "'+1-800-000");
+  assert.equal(lineVoiceLogContent.sanitizeSheetText("-来週再訪問"), "'-来週再訪問");
+  assert.equal(lineVoiceLogContent.sanitizeSheetText("@ここから"), "'@ここから");
+});
+
+test("sanitizeSheetText: 通常のテキストはそのまま返す(空値は空文字)", () => {
+  assert.equal(lineVoiceLogContent.sanitizeSheetText("沖縄建設"), "沖縄建設");
+  assert.equal(lineVoiceLogContent.sanitizeSheetText(""), "");
+  assert.equal(lineVoiceLogContent.sanitizeSheetText(null), "");
+  assert.equal(lineVoiceLogContent.sanitizeSheetText(undefined), "");
+});
+
+test("sanitizeSheetText: 二重適用しても増殖しない(冪等)", () => {
+  const once = lineVoiceLogContent.sanitizeSheetText("=A1");
+  assert.equal(lineVoiceLogContent.sanitizeSheetText(once), once);
+});
+
+test("buildInteractionLogRow: 内容メモ・次回アクションをサニタイズする", () => {
+  const row = lineVoiceLogContent.buildInteractionLogRow(
+    "H-test-2", "C000001", "2026-08-17", "嶺井忍", "電話", "オーナー社長本人", "=1+1", "@来週"
+  );
+  const headers = schema.INTERACTION_LOG_HEADERS;
+  assert.equal(row[headers.indexOf("内容メモ")], "'=1+1");
+  assert.equal(row[headers.indexOf("次回アクション")], "'@来週");
+});
+
+test("buildNewCompanyRow: 会社名をサニタイズする", () => {
+  const row = lineVoiceLogContent.buildNewCompanyRow("C000009", "=cmd");
+  const headers = schema.COMPANY_MASTER_HEADERS;
+  assert.equal(row[headers.indexOf("会社名")], "'=cmd");
+});
+
+test("buildFinalConfirmPrompt: 種別・対応相手は記録時と同じ正規化後の値を表示する", () => {
+  const prompt = lineVoiceLogContent.buildFinalConfirmPrompt(
+    "P-1", "沖縄建設", "雑談", "不明な人物", "見積の話", "来週再訪問"
+  );
+  // Geminiの生の値(雑談 / 不明な人物)ではなく、実際に記録される既定値が表示されること
+  assert.ok(prompt.text.includes("種別: 面談実施"));
+  assert.ok(prompt.text.includes("対応相手: 経理・総務等の窓口担当"));
+  assert.ok(!prompt.text.includes("雑談"));
+  assert.ok(!prompt.text.includes("不明な人物"));
+
+  const row = lineVoiceLogContent.buildInteractionLogRow(
+    "H-test-3", "C000001", "2026-08-17", "嶺井忍", "雑談", "不明な人物", "見積の話", "来週再訪問"
+  );
+  const headers = schema.INTERACTION_LOG_HEADERS;
+  assert.equal(row[headers.indexOf("種別")], "面談実施");
+  assert.equal(row[headers.indexOf("対応相手")], "経理・総務等の窓口担当");
+});
+
+test("buildAlreadyHandledMessage: 処理済み案内の固定文言を返す", () => {
+  assert.equal(lineVoiceLogContent.buildAlreadyHandledMessage(), "この記録はすでに処理済みか、無効になっています。");
+});
