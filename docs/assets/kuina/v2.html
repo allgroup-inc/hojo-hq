@@ -1,0 +1,347 @@
+<title>クイナ十の起点</title>
+<style>
+  :root{
+    --ground:#E9EDE7; --surface:#F6F8F4; --sunk:#DDE4DA;
+    --ink:#1C231C; --muted:#63705F; --line:#C6D0C2;
+    --accent:#C1361C; --deep:#1F3A2C; --code-bg:#1D241D; --code-ink:#D6DED2;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#141A14; --surface:#1D241D; --sunk:#0E120E;
+      --ink:#E2E8DE; --muted:#94A18F; --line:#333D31;
+      --accent:#E4674A; --deep:#8FBFA3; --code-bg:#0E120E; --code-ink:#C9D3C4;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#141A14; --surface:#1D241D; --sunk:#0E120E;
+    --ink:#E2E8DE; --muted:#94A18F; --line:#333D31;
+    --accent:#E4674A; --deep:#8FBFA3; --code-bg:#0E120E; --code-ink:#C9D3C4;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic","Noto Sans JP",Meiryo,system-ui,sans-serif;
+    font-size:16px; line-height:1.85;
+  }
+  .wrap{max-width:900px; margin:0 auto; padding:56px 24px 100px; display:flex; flex-direction:column; gap:56px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .eyebrow{font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+  h1{font-size:clamp(30px,5.4vw,46px); line-height:1.22; letter-spacing:-.025em; font-weight:800; margin:10px 0 0; text-wrap:balance}
+  h2{font-size:clamp(20px,3vw,25px); line-height:1.4; letter-spacing:-.01em; font-weight:800; margin:0; text-wrap:balance}
+  p{margin:0; max-width:64ch}
+  .lede{color:var(--muted); font-size:17px; margin-top:16px}
+  header{border-bottom:2px solid var(--ink); padding-bottom:30px}
+
+  /* the diagnosis block */
+  .diag{background:var(--surface); border:1px solid var(--line); padding:24px 26px; display:flex; flex-direction:column; gap:16px}
+  .flow{
+    font-family:ui-monospace,Menlo,monospace; font-size:13px; line-height:2.1;
+    background:var(--sunk); padding:16px 18px; overflow-x:auto; white-space:pre; color:var(--muted);
+  }
+
+  /* case list */
+  .cases{display:flex; flex-direction:column; gap:0}
+  .case{display:grid; grid-template-columns:150px 1fr; gap:0 28px; border-top:1px solid var(--line); padding:30px 0}
+  .rail{display:flex; flex-direction:column; gap:10px}
+  .num{font-family:ui-monospace,Menlo,monospace; font-size:30px; font-weight:700; line-height:1; color:var(--accent); font-variant-numeric:tabular-nums}
+  .fact{font-size:12.5px; line-height:1.7; color:var(--muted); border-left:2px solid var(--line); padding-left:11px}
+  .fact b{display:block; font-family:ui-monospace,Menlo,monospace; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; font-weight:400; margin-bottom:3px; color:var(--muted); opacity:.75}
+  .body{display:flex; flex-direction:column; gap:14px; min-width:0}
+  .kicker{font-size:14.5px}
+  pre{
+    margin:0; background:var(--code-bg); color:var(--code-ink); padding:16px 18px;
+    font-family:ui-monospace,Menlo,monospace; font-size:12px; line-height:1.75;
+    overflow-x:auto; white-space:pre; border-radius:2px;
+  }
+  .tip{font-size:13px; color:var(--muted)}
+  .tip strong{color:var(--accent); font-weight:700}
+
+  /* proof strip */
+  .proofs{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px}
+  .proof{background:var(--surface); border:1px solid var(--line); padding:20px; display:flex; flex-direction:column; align-items:center; gap:14px}
+  .proof svg{width:100%; max-width:180px; height:auto; display:block}
+  .proof small{font-family:ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.09em; color:var(--muted); text-align:center}
+
+  table{border-collapse:collapse; width:100%; font-size:14px}
+  th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top}
+  th{font-family:ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); font-weight:400}
+  .scroll{overflow-x:auto}
+
+  .note{background:var(--surface); border-left:3px solid var(--accent); padding:18px 22px; display:flex; flex-direction:column; gap:10px; font-size:14.5px}
+  .note strong{color:var(--accent)}
+  ul{margin:0; padding-left:1.15em; max-width:64ch} li{margin-bottom:7px}
+  @media (max-width:620px){ .case{grid-template-columns:1fr; gap:16px} }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Yanbaru kuina / concept study v2</div>
+  <h1>クイナ 十の起点</h1>
+  <p class="lede">前回の10案は、実は発想が1本しかありませんでした。今回は起点そのものを10通りに割り直しています。結果として、キャラクターですらない案が3本入りました。</p>
+</header>
+
+<section class="diag">
+  <div class="eyebrow">診断</div>
+  <h2>前回、変えていたのは表面だけだった</h2>
+  <p>ちいかわ風・サンリオ風・ソフビ風……と10通りに振ったつもりでしたが、その全部が同じ一本の道を通っていました。</p>
+  <div class="flow">実物の鳥  →  幼児図式で可愛くする  →  画風だけ10通りに振る
+                                    ↑ ここしか動いていない</div>
+  <p>だから10案を並べても「同じ絵の描き分け」に見えます。今回は最初の矢印から作り直します。素材にするのは見た目ではなく<strong>事実</strong>です。</p>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:18px">
+  <div class="eyebrow">証明</div>
+  <h2>キャラを描かない案が成立する</h2>
+  <p>起点を変えると、そもそも「可愛い鳥の絵」にならない案が出てきます。この3本は前回の10案からは絶対に出てきません。</p>
+  <div class="proofs">
+    <div class="proof">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-label="足跡だけの構成">
+        <g stroke="#5C5340" stroke-width="4" stroke-linecap="round" fill="none">
+          <g transform="translate(52,178) rotate(12)"><path d="M0,0 L-11,-15"/><path d="M0,0 L0,-19"/><path d="M0,0 L11,-15"/><path d="M0,0 L0,6"/></g>
+          <g transform="translate(88,142) rotate(-8)" opacity=".88"><path d="M0,0 L-11,-15"/><path d="M0,0 L0,-19"/><path d="M0,0 L11,-15"/><path d="M0,0 L0,6"/></g>
+          <g transform="translate(112,104) rotate(14)" opacity=".7"><path d="M0,0 L-11,-15"/><path d="M0,0 L0,-19"/><path d="M0,0 L11,-15"/><path d="M0,0 L0,6"/></g>
+          <g transform="translate(146,70) rotate(-6)" opacity=".48"><path d="M0,0 L-11,-15"/><path d="M0,0 L0,-19"/><path d="M0,0 L11,-15"/><path d="M0,0 L0,6"/></g>
+          <g transform="translate(168,36) rotate(10)" opacity=".26"><path d="M0,0 L-11,-15"/><path d="M0,0 L0,-19"/><path d="M0,0 L11,-15"/><path d="M0,0 L0,6"/></g>
+        </g>
+        <g transform="translate(40,96) rotate(-32)">
+          <path d="M0,0 C11,-14 11,-38 0,-52 C-11,-38 -11,-14 0,0 Z" fill="#8A7549"/>
+          <path d="M0,2 L0,-50" stroke="#5C5340" stroke-width="2.4" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <small>案10 — 不在<br>本体を一切描かない</small>
+    </div>
+    <div class="proof">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-label="葉の陰から覗く構成">
+        <defs><clipPath id="above"><rect x="0" y="0" width="200" height="176"/></clipPath></defs>
+        <g clip-path="url(#above)">
+          <circle cx="100" cy="98" r="46" fill="#8A7549" stroke="#221E1A" stroke-width="7"/>
+          <ellipse cx="100" cy="112" rx="36" ry="30" fill="#221E1A"/>
+          <g stroke="#FFF7E6" stroke-width="7" stroke-linecap="round" fill="none">
+            <path d="M92,92 Q80,89 68,94"/><path d="M108,92 Q120,89 132,94"/>
+          </g>
+          <circle cx="84" cy="106" r="12" fill="#FFF7E6"/><circle cx="116" cy="106" r="12" fill="#FFF7E6"/>
+          <circle cx="84" cy="108" r="7.5" fill="#221E1A"/><circle cx="116" cy="108" r="7.5" fill="#221E1A"/>
+          <circle cx="81" cy="104" r="3" fill="#FFF7E6"/><circle cx="113" cy="104" r="3" fill="#FFF7E6"/>
+        </g>
+        <path d="M8,158 Q100,102 192,158 Q100,206 8,158 Z" fill="#2F5B3A" stroke="#1F3A2C" stroke-width="5" stroke-linejoin="round"/>
+        <g stroke="#4A7A54" stroke-width="2.6" stroke-linecap="round" fill="none">
+          <path d="M14,158 L186,158"/><path d="M60,150 L74,138"/><path d="M100,146 L100,132"/><path d="M140,150 L126,138"/>
+        </g>
+      </svg>
+      <small>案1 — かくれんぼ<br>全身を見せない</small>
+    </div>
+    <div class="proof">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-label="鳴き声のタイポグラフィ構成">
+        <g font-family="'Hiragino Sans','Yu Gothic','Noto Sans JP',Meiryo,sans-serif" font-weight="800" font-size="40" fill="#1C231C" letter-spacing="1">
+          <text x="20" y="56">キョッ</text><text x="20" y="104">キョッ</text><text x="20" y="152">キョッ</text>
+        </g>
+        <path d="M150,168 Q158,160 164,164" stroke="#1C231C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <g transform="translate(160,168) scale(0.115)">
+          <path d="M120,22 C88,22 66,44 66,74 C66,92 58,100 52,112 C44,130 44,160 54,180 C66,202 92,214 120,214 C148,214 174,202 186,180 C196,160 196,130 188,112 C182,100 174,92 174,74 C174,44 152,22 120,22 Z" fill="#1C231C"/>
+          <g stroke="#1C231C" stroke-width="16" stroke-linecap="round"><path d="M104,206 L104,244"/><path d="M136,206 L136,244"/></g>
+        </g>
+      </svg>
+      <small>案4 — 声だけ<br>文字が主役、鳥は隅の記号</small>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div class="eyebrow">起点の材料</div>
+  <h2>見た目ではなく事実を使う</h2>
+  <div class="scroll"><table>
+    <tr><th>事実</th><th>何に化けるか</th></tr>
+    <tr><td>1981年まで新種として記載されていなかった</td><td>隠れるのが上手い＝全身を見せない</td></tr>
+    <tr><td>飛べないのに夜は木に登って寝る</td><td>昼と夜で状態が変わる</td></tr>
+    <tr><td>島に天敵がいなかったため飛翔能力を捨てた</td><td>欠陥ではなく最適化＝専門性</td></tr>
+    <tr><td>早朝に鋭く鳴く</td><td>声が主役＝タイポグラフィ</td></tr>
+    <tr><td>雛は全身が真っ黒で親と似ていない</td><td>成長段階シリーズ</td></tr>
+    <tr><td>つがいで行動し鳴き交わす</td><td>1体で完成させない</td></tr>
+    <tr><td>やんばるの3村にしかいない</td><td>存在証明＝標識・書類</td></tr>
+    <tr><td>地上を歩き回って餌を探す</td><td>擬人化の向きを逆にする</td></tr>
+    <tr><td>丸くて茶色い体</td><td>沖縄の物と形が重なる＝見立て</td></tr>
+    <tr><td>警戒心が強くすぐ姿を消す</td><td>本体を描かない＝不在</td></tr>
+  </table></div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:8px">
+  <div class="eyebrow">10案</div>
+  <h2>起点 → 帰結 → プロンプト</h2>
+  <div class="cases">
+
+    <div class="case">
+      <div class="rail"><div class="num">01</div><div class="fact"><b>起点</b>1981年まで新種として記載されていなかった</div></div>
+      <div class="body">
+        <h2>かくれんぼ</h2>
+        <p class="kicker">本質は「隠れるのが上手い」。だから全身を見せない。グッズの縁・折り目・縫い目から半分だけ出す。全部見せないほうが記憶に残り、「見つけた人だけが分かる」から所有欲が出る。</p>
+        <pre>A hide-and-seek sticker design: only part of an Okinawa rail is visible,
+peeking out from behind a large fan-shaped kuba palm leaf that fills most
+of the frame. Just one eye with its white eyebrow stripe, and the tip of a
+vermilion beak, emerge from the leaf's edge. The bird's body is entirely
+hidden. Flat vector illustration, deep forest green leaf, 3 colors, thick
+clean outline, generous empty space. The leaf itself is the die-cut shape.
+1:1 square, transparent background.</pre>
+        <p class="tip">展開 — 葉 / 木の根 / 標識の裏 / ポケットの口 の4種で「どこかにいる」シリーズ</p>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="rail"><div class="num">02</div><div class="fact"><b>起点</b>飛べないのに夜は木に登って寝る</div></div>
+      <div class="body">
+        <h2>昼と夜</h2>
+        <p class="kicker">1日の中で2つの状態を持つキャラ。昼は地面を走り目が開いている、夜は枝の上で丸まり目を閉じている。ステッカーは2枚1組、Tシャツは前身頃が昼で背中が夜。</p>
+        <pre>[DAY] A flat vector illustration of a small flightless bird striding fast
+across sunlit forest floor litter, body horizontal, legs mid-stride, alert
+open eyes, sharp shadow beneath. Bright warm palette, 4 flat colors.
+
+[NIGHT] The same bird in the same style, now perched high on a bare branch,
+body compressed into a round ball, eyes closed, feet gripping the branch,
+against a deep indigo sky with a thin crescent moon. Cool palette,
+4 flat colors. Identical character, identical line weight, matched pair.</pre>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="rail"><div class="num">03</div><div class="fact"><b>起点</b>島に天敵がいなかったため飛翔能力を捨てた</div></div>
+      <div class="body">
+        <h2>地上専門</h2>
+        <p class="kicker">「飛べない」を弱さではなく専門性として描く。職能・制服・肩書き。自虐ではなく誇り。前回の脱力自虐案と同じ事実から、正反対の性格が出る。</p>
+        <pre>A confident mascot bird wearing a numbered athletics bib and running shoes
+on its long red legs, in a low sprinter's start position on a running
+track, eyes locked forward. Bold sports-poster illustration, three flat
+colors plus black, strong diagonal composition, halftone texture on the
+track. The short useless wings are tucked back deliberately, like an
+athlete's arms. 1:1 square.</pre>
+        <p class="tip">コピー — GROUND CREW / 陸上専門 / NO WINGS NEEDED</p>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="rail"><div class="num">04</div><div class="fact"><b>起点</b>早朝に鋭く鳴く</div></div>
+      <div class="body">
+        <h2>声だけ</h2>
+        <p class="kicker">キャラを主役にしない。文字とオノマトペが主役で、鳥は隅の小さな記号。大人が着られる数少ない案。</p>
+        <pre>A typographic T-shirt design. Large bold Japanese onomatopoeia
+"キョッ キョッ キョッ" stacked in three lines, in a heavy condensed
+brush-like typeface, filling the frame. A very small flat silhouette of a
+flightless bird stands at the bottom right, tiny by comparison, with a
+small speech tail connecting it to the text. Two colors only: black type
+on natural cream. Generous margins. Screen-print aesthetic. 1:1 square.</pre>
+        <p class="tip"><strong>Ideogram 3.0 一択。</strong>文字が主役なので、他モデルは日本語を破綻させる</p>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="rail"><div class="num">05</div><div class="fact"><b>起点</b>雛は全身が真っ黒で親と似ていない</div></div>
+      <div class="body">
+        <h2>黒い雛</h2>
+        <p class="kicker">成長段階シリーズ。卵 → 黒い雛 → 若鳥 → 成鳥。同じ絵柄で4枚出せるので、ステッカーの収集欲を作れる。</p>
+        <pre>A four-stage growth chart of one character, arranged left to right on a
+plain background: (1) a plain speckled egg, (2) a completely jet-black
+round downy chick with tiny red legs and two dot eyes, (3) a lanky
+juvenile with the white eyebrow stripe just appearing, (4) the full adult
+with olive back, black face, barred belly, vermilion beak and legs.
+Identical flat vector style, identical line weight and consistent scale
+relationship across all four. Museum specimen chart layout with a thin
+baseline and small labels. 16:9.</pre>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="rail"><div class="num">06</div><div class="fact"><b>起点</b>つがいで行動し鳴き交わす</div></div>
+      <div class="body">
+        <h2>つがい</h2>
+        <p class="kicker">1体で完成させない。2体1組で、片方だけだと欠けている。ペアグッズ・贈り物・相棒。ステッカーは2枚に切り分ける前提で1枚に描く。</p>
+        <pre>Two identical flat vector birds facing each other in profile, mirrored,
+beaks almost touching, standing on a single thin ground line. Between them
+a small empty gap where a word could sit. Minimal, symmetrical, two flat
+colors plus vermilion accents. The composition must feel incomplete if
+either bird is removed. Wide 2:1 format, designed to be split into two
+separate die-cut stickers.</pre>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="rail"><div class="num">07</div><div class="fact"><b>起点</b>やんばるの3村にしかいない</div></div>
+      <div class="body">
+        <h2>標識</h2>
+        <p class="kicker">キャラを描かず、その存在を証明する標識・書類をグッズにする。道路標識、住民票、表札、座標。役所文書の様式美をそのまま使う。</p>
+        <pre>A yellow diamond road warning sign in Japanese roadside style, thick black
+border, with a bold black silhouette of a flightless running bird in the
+center. Beneath the sign, small precise text reads "国頭村". Flat vector,
+exactly three colors (safety yellow, black, white), with the weathered
+look of a real metal sign. Centered, plain background. 1:1 square.</pre>
+        <p class="tip"><strong>注意。</strong>実在の道路標識に酷似させると誤認を招く。角の丸み・書体・比率をわざと変えること</p>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="rail"><div class="num">08</div><div class="fact"><b>起点</b>地上を歩き回って餌を探す</div></div>
+      <div class="body">
+        <h2>働くクイナ</h2>
+        <p class="kicker">鳥を人に近づけるのではなく、沖縄で働く人の格好を鳥に着せる。擬人化の向きを逆にする。10案で唯一、企業のミカタの文脈と直結する。</p>
+        <pre>A mascot bird wearing a short-sleeved Okinawan kariyushi shirt with a
+hibiscus pattern, a name badge on the chest, standing straight with a
+small clipboard held under one stubby wing. Friendly professional
+expression. Flat vector, clean outline, 5 flat colors, plain background.
+The clothing is drawn with more detail than the bird, which stays
+simplified. Full body, front facing. 1:1 square.</pre>
+        <p class="tip">展開 — 作業着 / 白衣 / 板前 / 漁師 / スーツ で職業シリーズ</p>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="rail"><div class="num">09</div><div class="fact"><b>起点</b>丸くて茶色い体</div></div>
+      <div class="body">
+        <h2>見立て</h2>
+        <p class="kicker">鳥として描かず、沖縄の物と形を融合させる。一目で「沖縄」と「鳥」が同時に伝わり、説明がいらない。</p>
+        <pre>A visual pun illustration: a round golden-brown Okinawan sata andagi
+doughnut with its characteristic cracked split top, but it has two tiny
+red bird legs underneath, a small vermilion beak, and two dot eyes with a
+white eyebrow stripe. It is walking. Deadpan, no other decoration. Flat
+vector, 4 colors, thick outline, plain background. 1:1 square,
+sticker-ready.</pre>
+        <p class="tip">展開 — サーターアンダギー / 島らっきょう / シーサー / ちんすこう</p>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="rail"><div class="num">10</div><div class="fact"><b>起点</b>警戒心が強くすぐ姿を消す</div></div>
+      <div class="body">
+        <h2>不在</h2>
+        <p class="kicker">キャラクターを一切描かない。足跡、抜けた羽根、揺れた草だけ。「さっきまでここにいた」。10案でいちばん大人向けで、いちばんTシャツとして着やすい。</p>
+        <pre>A minimal design showing only evidence, no animal. A trail of three-toed
+bird footprints crosses the frame diagonally, pressed into soft mud, each
+print slightly different, fading toward the top. One small olive-brown
+feather lies beside the trail. Nothing else. Two flat colors on natural
+cream, generous negative space, subtle paper texture. Quiet, understated,
+adult. 1:1 square.</pre>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:14px;border-top:2px solid var(--ink);padding-top:30px">
+  <div class="eyebrow">選び方</div>
+  <h2>推奨は 01・08・10 の3本</h2>
+  <div class="scroll"><table>
+    <tr><th>目的</th><th>案</th></tr>
+    <tr><td>いちばん記憶に残る</td><td>01 かくれんぼ / 10 不在</td></tr>
+    <tr><td>大人が着られる</td><td>04 声だけ / 10 不在</td></tr>
+    <tr><td>収集させたい</td><td>05 黒い雛 / 09 見立て</td></tr>
+    <tr><td>企業のミカタ文脈で使う</td><td>08 働くクイナ</td></tr>
+    <tr><td>贈り物・ペア需要</td><td>06 つがい</td></tr>
+    <tr><td>ご当地土産として強い</td><td>07 標識 / 09 見立て</td></tr>
+  </table></div>
+  <p>01は記憶に残り、08は事業文脈に直結し、10は最も単価が取れて在庫リスクが低い(2色1版)。性格が完全に割れているので、3本並べれば方向性の判断がつきます。</p>
+  <div class="note">
+    <p><strong>前回の10案は捨てなくて構いません。</strong>順序が逆だっただけです。正しくは v2 で「何を伝えるか」を決めてから、v1 で「どう描くか」を決める。</p>
+  </div>
+  <div class="note">
+    <p><strong>表現上の注意。</strong>ヤンバルクイナは国の天然記念物・絶滅危惧IA類です。轢死は現実の保護課題なので、案10の足跡にタイヤ痕を併置しないこと。案07は実在の道路標識に酷似させないこと。生成後は既存の公式マスコットと似ていないか目視確認してください。</p>
+  </div>
+</section>
+
+</div>
