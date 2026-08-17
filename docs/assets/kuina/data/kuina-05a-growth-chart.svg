@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 沖縄企業のミカタ / ヤンバルクイナ 入稿データ. 背景は白 #FFFFFF. 透過が必要なときは id="bg" の rect を削除. 文字はアウトライン化済み. -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="8 86 190 90" width="1140" height="540">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="2.56 85.59 200.88 89.73" width="1600" height="715">
   <defs>
     <clipPath id="ju"><ellipse cx="122" cy="126" rx="19" ry="23"/></clipPath>
     <clipPath id="ad"><ellipse cx="172" cy="120" rx="21" ry="27"/></clipPath>
   </defs>
-  <rect id="bg" x="8" y="86" width="190" height="90" fill="#FFFFFF"/>
+  <rect id="bg" x="2.56" y="85.59" width="200.88" height="89.73" fill="#FFFFFF"/>
   <path d="M10,150 L190,150" stroke="#CFCFC4" stroke-width="2"/>
   <g><ellipse cx="30" cy="128" rx="15" ry="19" fill="#EFE6D2" stroke="#221E1A" stroke-width="4"/>
     <g fill="#B9AF95"><circle cx="26" cy="122" r="2.2"/><circle cx="34" cy="130" r="1.8"/><circle cx="28" cy="136" r="1.6"/></g></g>
