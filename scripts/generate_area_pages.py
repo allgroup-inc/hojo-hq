@@ -228,7 +228,8 @@ def index_page(updated):
     )
     body = (
         "<h1>市町村別 給付金・手当まとめ</h1>"
-        '<p class="note">お住まいの市町村を選んでください。</p>'
+        '<p class="note">お住まいの市町村を選んでください。'
+        '状況から探したい方は<a href="../life/">ライフイベント別まとめ</a>もどうぞ。</p>'
         f'<ul class="areas">{lis}</ul>'
         '<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'
     )

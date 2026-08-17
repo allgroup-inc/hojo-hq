@@ -29,9 +29,9 @@ def rank(url_path):
         return "1.0", "daily"
     if url_path in ("/fukugiiro/", "/fukugiiro/shindan/"):
         return "0.9", "daily"
-    if url_path in ("/fukugiiro/area/", "/fukugiiro/kit/"):
+    if url_path in ("/fukugiiro/area/", "/fukugiiro/kit/", "/fukugiiro/life/"):
         return "0.7", "daily"
-    if url_path.startswith("/fukugiiro/area/"):
+    if url_path.startswith("/fukugiiro/area/") or url_path.startswith("/fukugiiro/life/"):
         return "0.6", "weekly"
     if url_path.startswith("/fukugiiro/kit/"):
         return "0.5", "weekly"

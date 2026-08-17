@@ -11,6 +11,7 @@ on:
       - "scripts/kensho_fukugiiro.py"
       - "scripts/generate_area_pages.py"
       - "scripts/generate_kit_pages.py"
+      - "scripts/generate_life_pages.py"
       - "scripts/generate_sitemap.py"
       - ".github/workflows/fukugiiro-fetch.yml"
   workflow_dispatch: {}
@@ -46,6 +47,7 @@ jobs:
         run: |
           python scripts/generate_area_pages.py
           python scripts/generate_kit_pages.py
+          python scripts/generate_life_pages.py
           python scripts/generate_sitemap.py
           python scripts/check_lp_fukugiiro.py
 
