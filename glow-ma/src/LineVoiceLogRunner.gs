@@ -56,13 +56,18 @@ function parseLineWebhookBody_(e) {
 }
 
 /**
- * 音声メッセージのみをこの時点で処理する。postback(ボタン操作)の処理はTask 7で
- * この関数に分岐を追加する。
+ * 音声メッセージとpostback(ボタン操作)の両方をここで振り分ける。
  */
 function handleLineEvent_(event) {
   if (event.type === "message" && event.message && event.message.type === "audio") {
     handleAudioMessage_(event);
+    return;
   }
+  if (event.type === "postback") {
+    handleLinePostback_(event);
+    return;
+  }
+  // テキストメッセージ・フォロー等、音声・postback以外のイベントは今回のスコープ外のため無視する
 }
 
 /**
@@ -417,4 +422,131 @@ function linePush_(lineUserId, specs) {
   if (responseCode < 200 || responseCode >= 300) {
     Logger.log("LINEへのプッシュ送信に失敗しました(HTTP " + responseCode + "): " + response.getContentText());
   }
+}
+
+/**
+ * postback(ボタン操作)イベントの処理。data文字列からaction/processId/valueを取り出し、
+ * 対応する処理へ振り分ける。processIdに一致する「音声ログ処理状況」の行が無い場合
+ * (二重タップ・古いボタン操作等)はエラーメッセージのみ返す。
+ */
+function handleLinePostback_(event) {
+  var lineUserId = event.source && event.source.userId;
+  var replyToken = event.replyToken;
+  var parsed = GlowLineVoiceLogContent.parsePostbackData(event.postback && event.postback.data);
+  if (!lineUserId || !replyToken || !parsed.action || !parsed.processId) return;
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var record = readVoiceLogRows_(ss).filter(function (r) { return r["処理ID"] === parsed.processId; })[0];
+  if (!record) {
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildProcessingErrorMessage()]);
+    return;
+  }
+
+  if (parsed.action === GlowLineVoiceLogContent.POSTBACK_ACTIONS.SELECT_COMPANY) {
+    handleCompanySelectionPostback_(ss, replyToken, record, parsed.value);
+    return;
+  }
+  if (parsed.action === GlowLineVoiceLogContent.POSTBACK_ACTIONS.NEW_COMPANY_CONFIRM) {
+    handleNewCompanyConfirmPostback_(ss, replyToken, record, parsed.value);
+    return;
+  }
+  if (parsed.action === GlowLineVoiceLogContent.POSTBACK_ACTIONS.FINAL_CONFIRM) {
+    handleFinalConfirmPostback_(ss, replyToken, record, parsed.value);
+    return;
+  }
+}
+
+function handleCompanySelectionPostback_(ss, replyToken, record, selectedValue) {
+  if (selectedValue === GlowLineVoiceLogContent.NOT_FOUND_VALUE) {
+    updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "新規企業確認待ち" });
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildNewCompanyConfirmPrompt(record["処理ID"], record["会社名候補"] || "(不明)")]);
+    return;
+  }
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+  var company = companies.filter(function (c) { return c["企業ID"] === selectedValue; })[0];
+  var companyName = company ? company["会社名"] : selectedValue;
+  updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "最終確認待ち", "企業ID": selectedValue });
+  lineReply_(replyToken, [GlowLineVoiceLogContent.buildFinalConfirmPrompt(
+    record["処理ID"], companyName, record["種別候補"], record["対応相手候補"], record["内容メモ"], record["次回アクション"]
+  )]);
+}
+
+function handleNewCompanyConfirmPostback_(ss, replyToken, record, answer) {
+  if (answer !== GlowLineVoiceLogContent.YES_VALUE) {
+    updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "破棄" });
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildDiscardMessage()]);
+    return;
+  }
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  if (!companySheet) {
+    updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "エラー", "エラー内容": "企業マスタタブが見つかりません" });
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildProcessingErrorMessage()]);
+    return;
+  }
+  var companies = readCompanyRecords_(companySheet);
+  var newCompanyId = GlowCsvImport.buildCompanyId(GlowDedupe.nextSequenceNumber(companies));
+  var companyName = record["会社名候補"] || "(社名不明)";
+  var newRow = GlowLineVoiceLogContent.buildNewCompanyRow(newCompanyId, companyName);
+
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(30000)) {
+    updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "エラー", "エラー内容": "企業マスタのロック取得に失敗しました" });
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildProcessingErrorMessage()]);
+    return;
+  }
+  try {
+    var nextRow = companySheet.getLastRow() + 1;
+    companySheet.getRange(nextRow, 1, 1, GlowSchema.COMPANY_MASTER_HEADERS.length).setValues([newRow]);
+  } finally {
+    lock.releaseLock();
+  }
+
+  updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "最終確認待ち", "企業ID": newCompanyId });
+  lineReply_(replyToken, [GlowLineVoiceLogContent.buildFinalConfirmPrompt(
+    record["処理ID"], companyName, record["種別候補"], record["対応相手候補"], record["内容メモ"], record["次回アクション"]
+  )]);
+}
+
+function handleFinalConfirmPostback_(ss, replyToken, record, answer) {
+  if (answer !== GlowLineVoiceLogContent.CONFIRM_VALUE) {
+    updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "破棄" });
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildDiscardMessage()]);
+    return;
+  }
+
+  var staffName = resolveStaffNameByLineUserId_(ss, record["LINEユーザーID"]);
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  if (!logSheet || !staffName) {
+    updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "エラー", "エラー内容": "対応履歴ログタブまたは担当者が見つかりません" });
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildProcessingErrorMessage()]);
+    return;
+  }
+
+  var logId = "H-" + Utilities.getUuid();
+  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  var row = GlowLineVoiceLogContent.buildInteractionLogRow(
+    logId, record["企業ID"], todayString, staffName,
+    record["種別候補"], record["対応相手候補"], record["内容メモ"], record["次回アクション"]
+  );
+
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(30000)) {
+    updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "エラー", "エラー内容": "対応履歴ログのロック取得に失敗しました" });
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildProcessingErrorMessage()]);
+    return;
+  }
+  try {
+    var nextRow = logSheet.getLastRow() + 1;
+    logSheet.getRange(nextRow, 1, 1, GlowSchema.INTERACTION_LOG_HEADERS.length).setValues([row]);
+  } finally {
+    lock.releaseLock();
+  }
+
+  updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "確定" });
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+  var company = companies.filter(function (c) { return c["企業ID"] === record["企業ID"]; })[0];
+  var companyName = company ? company["会社名"] : (record["会社名候補"] || "");
+  lineReply_(replyToken, [GlowLineVoiceLogContent.buildCompletionMessage(companyName)]);
 }
