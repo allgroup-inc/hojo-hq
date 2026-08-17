@@ -2,7 +2,7 @@
   "customer_id": "顧客ID",
   "apply_id": "顧客ID",
   "apply_date": "契約日",
-  "cancel_date": "＜要確認_解約日の列_徳元メール回答待ち＞",
+  "cancel_date": "初回保険料着金日",
   "product": "申し込み商品",
   "channel": "リスト種類",
   "apply_form": "申込方法",
@@ -12,5 +12,6 @@
   "area": "市町村",
   "agent_id": "営業担当者",
   "debit_due": "初回引落予定日",
-  "debit_result": "＜要確認_現ステータスから導出＞"
+  "status": "現ステータス",
+  "payment_route": "払込経路"
 }
