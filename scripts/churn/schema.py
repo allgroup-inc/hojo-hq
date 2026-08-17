@@ -132,6 +132,7 @@ def normalize_record(raw, column_map, as_of):
         "payment_route": payment_route,
         # Ⅳ列（未収履歴）由来。unpaid_band は要因（繰り返し未収＝高リスク）
         "unpaid_count": up["unpaid_count"],
+        "unpaid_months": up["unpaid_months"],
         "unpaid_band": bin_unpaid_count(up["unpaid_count"]),
         "unpaid_contacted": up["contacted"],
         "unpaid_konbini": up["konbini_sent"],

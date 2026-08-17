@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from scripts.churn.triggers import (
     prevention_trigger, prevention_candidates,
     initial_contact_trigger, initial_contact_candidates,
+    unpaid_trigger,
 )
 from scripts.churn.effect_learning import _contacts_index
 
@@ -101,6 +102,36 @@ class TestInitialContact(unittest.TestCase):
                 orec(customer_id="N3", apply_date=AS_OF - timedelta(days=30))]
         got = initial_contact_candidates(recs, [], AS_OF, days=14)
         self.assertEqual([(r["customer_id"], t) for r, t in got], [("N1", "初動")])
+
+
+def urec(months, scoreable=True):
+    return {"is_scoreable": scoreable, "unpaid_months": months}
+
+
+class TestUnpaidTrigger(unittest.TestCase):
+    def test_three_consecutive_is_imminent(self):
+        # 直近3ヶ月連続未収（5・6・7月）→ 4ヶ月目で消滅 → 未払消滅目前
+        r = urec([(2026, 7), (2026, 6), (2026, 5)])
+        self.assertEqual(unpaid_trigger(r, AS_OF), "未払消滅目前")
+
+    def test_two_consecutive(self):
+        r = urec([(2026, 7), (2026, 6)])
+        self.assertEqual(unpaid_trigger(r, AS_OF), "未収2連続")
+
+    def test_one_month_no_trigger(self):
+        self.assertIsNone(unpaid_trigger(urec([(2026, 7)]), AS_OF))
+
+    def test_gap_breaks_streak(self):
+        # 7月と5月（6月なし）→ 連続は1 → トリガーなし
+        self.assertIsNone(unpaid_trigger(urec([(2026, 7), (2026, 5)]), AS_OF))
+
+    def test_not_scoreable(self):
+        self.assertIsNone(unpaid_trigger(urec([(2026, 7), (2026, 6), (2026, 5)], scoreable=False), AS_OF))
+
+    def test_year_boundary(self):
+        # 2025-12 と 2026-01 が連続（年跨ぎ）。as_of 2026-02 なら直近2連続
+        r = urec([(2026, 1), (2025, 12)])
+        self.assertEqual(unpaid_trigger(r, date(2026, 2, 1)), "未収2連続")
 
 
 if __name__ == "__main__":

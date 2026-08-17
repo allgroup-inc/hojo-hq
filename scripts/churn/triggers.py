@@ -81,3 +81,28 @@ def initial_contact_candidates(records, contacts, as_of, days=INITIAL_CONTACT_DA
         if initial_contact_trigger(r, idx, as_of, days) is not None:
             out.append((r, "初動"))
     return out
+
+
+def _recent_streak(unpaid_months, as_of):
+    """as_of 直近から連続する未収月数（年跨ぎ対応）。年欠損の月(year=None)は timeline に載せない。"""
+    idx = {y * 12 + (m - 1) for (y, m) in unpaid_months if y}
+    cur = as_of.year * 12 + (as_of.month - 1)
+    s = 0
+    while (cur - 1 - s) in idx:   # 直近月(as_of-1)から遡って連続
+        s += 1
+    return s
+
+
+def unpaid_trigger(record, as_of):
+    """継続中契約の未収連鎖トリガー。3ヶ月連続=未払消滅目前（4ヶ月連続で消滅）、2ヶ月連続=未収2連続。
+
+    「未払消滅（4ヶ月連続未払で契約消滅）を消滅前に止める」ための先回り検知（docs/churn/連動アイデア）。
+    """
+    if not record.get("is_scoreable"):
+        return None
+    streak = _recent_streak(record.get("unpaid_months", []), as_of)
+    if streak >= 3:
+        return "未払消滅目前"
+    if streak == 2:
+        return "未収2連続"
+    return None

@@ -27,10 +27,21 @@ class TestTriage(unittest.TestCase):
         self.assertEqual(stats["carry_max_saveable"], 2.0)  # 繰り越しの最高“守れる金額”
 
     def test_priority_map_order(self):
+        self.assertLess(PRIORITY["未払消滅目前"], PRIORITY["不着"])   # 消滅目前が最上位
         self.assertLess(PRIORITY["不着"], PRIORITY["遅延"])
-        self.assertLess(PRIORITY["遅延"], PRIORITY["口座確認"])
+        self.assertLess(PRIORITY["遅延"], PRIORITY["未収2連続"])
+        self.assertLess(PRIORITY["未収2連続"], PRIORITY["口座確認"])
         self.assertLess(PRIORITY["口座確認"], PRIORITY["初動"])
         self.assertLess(PRIORITY["初動"], PRIORITY["高リスク"])
+
+    def test_classify_picks_unpaid_imminent(self):
+        r = {"is_scoreable": True, "customer_id": "U1", "apply_id": None,
+             "apply_date": date(2026, 7, 1), "product": "医療", "agent_id": "S1",
+             "amount": 5000, "debit_result": "", "account_daily": "はい", "debit_due": None,
+             "unpaid_months": [(2026, 7), (2026, 6), (2026, 5)]}
+        model = fit.fit_model([])
+        cands = classify([r], model, AS_OF)
+        self.assertIn("未払消滅目前", [c["trigger"] for c in cands])
 
     def test_classify_picks_up_initial_when_contacts_given(self):
         # 契約後3日・未接触の継続契約 → contacts を渡すと「初動」きっかけが立つ
