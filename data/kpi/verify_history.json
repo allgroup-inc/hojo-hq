@@ -646,5 +646,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-17",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "「海外研究者招へい事業（STeP JAPAN）」2027年度海外招へい研究者受入機関の募集",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaooMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「ポスト5G情報通信システム基盤強化研究開発事業／フィジカルAIに向けた再帰的自己改善型AIに関する研究開発事業」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdQnMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "小規模事業者持続化補助金＜共同・協業型＞ 第３回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcQOMA1",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【九州監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY9BMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【関東監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY88MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
