@@ -14,14 +14,21 @@
  *         試験で立てた連絡不要フラグは必ず元に戻す(finallyで復旧)。
  */
 
-// 期待値: scoring.jsのDEFAULT_CONFIGから導出した、属性スコアのみの企業(反応履歴なし)の答え。
-// 建設業・介護を含む業種はhigh(20点)、障害福祉のみはmid(10点)。ランク閾値はA:70/B:40/C:15。
+// 期待値: 初期スコア = 属性スコア(業種+規模+代表者年齢) + 事前選定スコア + 流入ルートボーナス。
+// 建設業・介護を含む業種はhigh(20点)、障害福祉のみはmid(10点)。流入ルートは全件②手紙DM(0点)。
+// 事前選定スコアは元リストの「仮スコア」を取り込んだもの(建設リストは30〜37点前後)。
+// ランク閾値はA:70/B:40/C:15。
+//
+// 注意: 期待値は元データ(GLOW_開拓リスト第1弾_建設業1500社.xlsx の仮スコア列)と
+// 突き合わせて確定した実測ベースの値。属性スコアだけで期待値を組むと事前選定スコア分だけ
+// ズレるため、この表を直すときは必ず元データの仮スコアを確認すること
+// (2026-08-17 フェーズA試験の初回実行で、期待値側の作り方が誤っていた反省)。
 var PHASE_A_EXPECTED_SCORES = [
-  { id: "C000001", industryContains: "建設", expectedInitial: 20, expectedRank: "C" },
-  { id: "C000750", industryContains: "建設", expectedInitial: 20, expectedRank: "C" },
-  { id: "C001500", industryContains: "建設", expectedInitial: 20, expectedRank: "C" },
-  { id: "C001502", industryContains: "介護", expectedInitial: 20, expectedRank: "C" },
-  { id: "C003210", industryContains: "福祉", expectedInitial: 10, expectedRank: "D" }
+  { id: "C000001", note: "太田建設(業種20+仮スコア37)", expectedInitial: 57, expectedRank: "B" },
+  { id: "C000750", note: "五和工業(業種20+仮スコア37)", expectedInitial: 57, expectedRank: "B" },
+  { id: "C001500", note: "きみ山工業(業種20+仮スコア30)", expectedInitial: 50, expectedRank: "B" },
+  { id: "C001502", note: "ケアセンターきらめき(介護20+仮スコア35)", expectedInitial: 55, expectedRank: "B" },
+  { id: "C003210", note: "がじまる福祉会(障害福祉10+仮スコア7)", expectedInitial: 17, expectedRank: "C" }
 ];
 
 var PHASE_A_DNC_TEST_PREFIX = "H-DNCTEST-";
@@ -123,7 +130,7 @@ function verifyScores_() {
     var ok = actualInitial === exp.expectedInitial && actualRank === exp.expectedRank;
     if (ok) passed++;
     details.push(
-      exp.id + ": " + (ok ? "OK" : "NG") +
+      exp.id + " " + (exp.note || "") + ": " + (ok ? "OK" : "NG") +
       " 初期スコア " + actualInitial + "(期待 " + exp.expectedInitial + ")" +
       " / ランク " + actualRank + "(期待 " + exp.expectedRank + ")"
     );
