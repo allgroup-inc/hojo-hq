@@ -57,6 +57,14 @@ class TestScope(unittest.TestCase):
         self.assertTrue(s["is_early_churn"])
         self.assertTrue(s["date_missing"])
 
+    def test_any_early_churn_no_date_is_churn_not_survivor(self):
+        # 未払消滅・失効中・CAN も解約日欠損で「生存者」に混ぜない（KPI過小防止）
+        for st in ("未払消滅", "失効中", "成立後CAN【解約】", "解約予定【成立後】"):
+            s = status_scope(st, AD, None, AS_OF)
+            self.assertTrue(s["is_early_churn"], st)
+            self.assertTrue(s["is_resolved"], st)
+            self.assertTrue(s["date_missing"], st)
+
     def test_death_is_excluded(self):
         s = status_scope("死亡解約", AD, date(2026, 3, 1), AS_OF)
         self.assertFalse(s["in_scope"])

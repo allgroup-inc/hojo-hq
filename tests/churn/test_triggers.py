@@ -128,6 +128,12 @@ class TestUnpaidTrigger(unittest.TestCase):
     def test_not_scoreable(self):
         self.assertIsNone(unpaid_trigger(urec([(2026, 7), (2026, 6), (2026, 5)], scoreable=False), AS_OF))
 
+    def test_matured_continuing_any_tenure(self):
+        # 6ヶ月超の成立済(is_scoreable=False)でも、継続なら未払消滅目前を拾う（消滅は任意テニュア）
+        r = {"is_scoreable": False, "status_category": "継続",
+             "unpaid_months": [(2026, 7), (2026, 6), (2026, 5)]}
+        self.assertEqual(unpaid_trigger(r, AS_OF), "未払消滅目前")
+
     def test_year_boundary(self):
         # 2025-12 と 2026-01 が連続（年跨ぎ）。as_of 2026-02 なら直近2連続
         r = urec([(2026, 1), (2025, 12)])

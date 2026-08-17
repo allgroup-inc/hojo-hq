@@ -94,11 +94,14 @@ def _recent_streak(unpaid_months, as_of):
 
 
 def unpaid_trigger(record, as_of):
-    """継続中契約の未収連鎖トリガー。3ヶ月連続=未払消滅目前（4ヶ月連続で消滅）、2ヶ月連続=未収2連続。
+    """継続契約の未収連鎖トリガー。3ヶ月連続=未払消滅目前（4ヶ月連続で消滅）、2ヶ月連続=未収2連続。
 
     「未払消滅（4ヶ月連続未払で契約消滅）を消滅前に止める」ための先回り検知（docs/churn/連動アイデア）。
+    未払消滅は**契約テニュアに関係なく**起きるため、6ヶ月未満(is_scoreable)に限定せず、継続中の契約
+    （現ステータス＝継続、または status 無しの合成/従来レコードでは is_scoreable）を広く対象にする。
     """
-    if not record.get("is_scoreable"):
+    active = record.get("is_scoreable") or record.get("status_category") == "継続"
+    if not active:
         return None
     streak = _recent_streak(record.get("unpaid_months", []), as_of)
     if streak >= 3:

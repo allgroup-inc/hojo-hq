@@ -35,9 +35,6 @@ OUT_OF_SCOPE_STATUSES = {
     "受注後CAN【受渡未】", "不成立【引受前】",
 }
 
-# 初回引落前に落ちた系（解約日欠損でも早期解約と扱う）
-_PRE_PAYMENT_CHURN = {"不成立【引受後CAN】", "不成立【引受後未入金】"}
-
 
 def _norm(status):
     return (status or "").strip()
@@ -72,10 +69,11 @@ def status_scope(status, apply_date, cancel_date, as_of, months=EARLY_CHURN_MONT
 
     if cat == "早期解約":
         if cancel_date is None:
-            # 解約日欠損。初回引落前に落ちた系は早期解約として救い、監査フラグを立てる
+            # 解約日欠損でも現ステータスが解約を示す＝churn。生存者に混ぜない（KPIを過小にしない）。
+            # 6ヶ月内かは日付が無く確定できないが、これらは初回引落前後の離脱が大半＝早期扱い＋監査フラグ。
             out["is_resolved"] = True
             out["date_missing"] = True
-            out["is_early_churn"] = _norm(status) in _PRE_PAYMENT_CHURN
+            out["is_early_churn"] = True
         elif apply_date is not None:
             out["is_resolved"] = True
             out["is_early_churn"] = is_within_months(apply_date, cancel_date, months)

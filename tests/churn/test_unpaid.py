@@ -22,6 +22,7 @@ class TestParseUnpaid(unittest.TestCase):
         self.assertTrue(u["account_issue"])              # ★
         self.assertTrue(u["contacted"])
         self.assertEqual(u["unpaid_count"], 1)           # (None,5)
+        self.assertFalse(u["parse_ok"])                  # 年欠損は連鎖判定から漏れる→監査フラグ
 
     def test_two_years(self):
         u = parse_unpaid("未26①未25⑫")

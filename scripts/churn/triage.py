@@ -25,23 +25,28 @@ def classify(records, model, as_of, contacts=None):
     idx = _contacts_index(contacts) if contacts is not None else None
     cands = []
     for r in records:
+        up = unpaid_trigger(r, as_of)          # 未払消滅目前/未収2連続 or None（任意テニュア）
         if not r.get("is_scoreable"):
-            continue
-        prev = prevention_trigger(r, as_of)   # 不着/遅延/口座確認 or None
-        up = unpaid_trigger(r, as_of)          # 未払消滅目前/未収2連続 or None
-        # 優先度どおりに1つ選ぶ
-        if up == "未払消滅目前":
-            trig = up
-        elif prev in ("不着", "遅延"):
-            trig = prev
-        elif up == "未収2連続":
-            trig = up
-        elif prev == "口座確認":
-            trig = prev
-        elif idx is not None and initial_contact_trigger(r, idx, as_of) is not None:
-            trig = "初動"
+            # 早期枠(<6mo)外でも、未払消滅の恐れは拾う（消滅は任意テニュアで起きる）
+            if up in ("未払消滅目前", "未収2連続"):
+                trig = up
+            else:
+                continue
         else:
-            trig = None
+            prev = prevention_trigger(r, as_of)   # 不着/遅延/口座確認 or None
+            # 優先度どおりに1つ選ぶ
+            if up == "未払消滅目前":
+                trig = up
+            elif prev in ("不着", "遅延"):
+                trig = prev
+            elif up == "未収2連続":
+                trig = up
+            elif prev == "口座確認":
+                trig = prev
+            elif idx is not None and initial_contact_trigger(r, idx, as_of) is not None:
+                trig = "初動"
+            else:
+                trig = None
         s = score_record(r, model)
         if trig is None:
             if s["band"] != "high":

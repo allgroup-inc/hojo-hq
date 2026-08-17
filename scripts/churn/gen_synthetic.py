@@ -46,16 +46,24 @@ _CIRCLED = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫"
 
 
 def _iv_string(rng, unpaid_count, as_of, account_issue):
-    """Ⅳ列（口座振替の未収履歴）を合成。未<年>+○囲み月＋●/済/★。未収0なら空。"""
+    """Ⅳ列（口座振替の未収履歴）を合成。未<年>+○囲み月＋●/済/★。未収0なら空。
+
+    直近で「引落が終わった月」= as_of.month-1 から遡る（当月はまだ引落未到来）。年跨ぎは
+    年ごとに 未<yy> を出し直す（parse_unpaid / _recent_streak と整合させ、連鎖判定を正しく発火させる）。
+    """
     if unpaid_count <= 0:
         return ""
-    prefix = ("●" if rng.random() < 0.5 else "") + ("済" if rng.random() < 0.6 else "")
-    s = prefix + "未" + f"{as_of.year % 100:02d}"
+    s = ("●" if rng.random() < 0.5 else "") + ("済" if rng.random() < 0.6 else "")
     y, m = as_of.year, as_of.month
-    for k in range(unpaid_count):
-        mm = m - k
+    last_year = None
+    for k in range(1, unpaid_count + 1):   # as_of.month-1 から遡る
+        mm, yy = m - k, y
         while mm <= 0:
             mm += 12
+            yy -= 1
+        if yy != last_year:
+            s += "未" + f"{yy % 100:02d}"
+            last_year = yy
         s += _CIRCLED[mm - 1]
     if account_issue:
         s += "★"

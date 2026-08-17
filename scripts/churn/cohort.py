@@ -70,6 +70,8 @@ def excluded_summary(records):
 
     対象外(死亡/クーリングオフ/告知解除)・母集団外・不明の件数と、対象外の理由別内訳を返す。
     status列の無い（従来/合成）レコードは in_scope 既定Trueなので全て0件になる。
+    ※ status.scope_summary と目的は近いが入力が異なる（あちらは現ステータス文字列、こちらは
+      正規化済みレコードで in_scope の上書きを尊重）。集計軸を変えるときは両方を見直すこと。
     """
     summ = {"対象外": 0, "母集団外": 0, "不明": 0, "by_reason": {}, "total_excluded": 0}
     for r in records:

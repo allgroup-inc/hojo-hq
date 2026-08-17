@@ -43,6 +43,8 @@ def parse_unpaid(cell):
             m = _CIRCLED[c]
             if 1 <= m <= 12:
                 months.add((cur_year, m))
+                if cur_year is None:
+                    out["parse_ok"] = False   # 年が取れない月＝timelineに載らず連鎖判定から漏れる→監査へ
             else:
                 out["parse_ok"] = False   # 月として不正（⑬以上）
             i += 1

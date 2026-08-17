@@ -43,6 +43,16 @@ class TestTriage(unittest.TestCase):
         cands = classify([r], model, AS_OF)
         self.assertIn("未払消滅目前", [c["trigger"] for c in cands])
 
+    def test_classify_includes_matured_continuing_with_streak(self):
+        # 6ヶ月超の成立済(is_scoreable=False)でも、未払消滅目前なら今日の要接触に載せる
+        r = {"is_scoreable": False, "status_category": "継続", "customer_id": "M1",
+             "apply_id": None, "product": "医療", "agent_id": "S1", "amount": 5000,
+             "debit_result": "", "account_daily": "はい", "debit_due": None,
+             "unpaid_months": [(2026, 7), (2026, 6), (2026, 5)]}
+        model = fit.fit_model([])
+        cands = classify([r], model, AS_OF)
+        self.assertEqual([c["trigger"] for c in cands], ["未払消滅目前"])
+
     def test_classify_picks_up_initial_when_contacts_given(self):
         # 契約後3日・未接触の継続契約 → contacts を渡すと「初動」きっかけが立つ
         r = {"is_scoreable": True, "customer_id": "N1", "apply_id": None,
