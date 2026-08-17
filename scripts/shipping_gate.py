@@ -22,7 +22,8 @@ hojo-hq — 出荷ゲートの通過記録と検査(運用規程1-3の実装)
 
 使い方:
   python scripts/shipping_gate.py --check posts/launch/01_launch.md
-  python scripts/shipping_gate.py --check-all        # 対外文面をまとめて検査(CI用)
+  python scripts/shipping_gate.py --check-group sns  # 配信経路ごとに検査(CI用・sns/line)
+  python scripts/shipping_gate.py --check-all        # 対外文面をまとめて検査
   python scripts/shipping_gate.py --self-test
 """
 import glob
@@ -178,21 +179,25 @@ def verify_file(path, today=None):
 # ---------------------------------------------------------------- 一括検査(CI用)
 
 # 対外に出る文面。ここに載っていないものは検査されないので、新しい出力先を作ったら足す。
-TARGET_GLOBS = (
-    "posts/launch/*.md",
-    "posts/carousel/caption.md",
-)
+# グループを分けているのは、配信経路ごとに独立して止めるため
+# (LINE下書きの違反でInstagram投稿まで巻き添えで止めない)。
+TARGET_GROUPS = {
+    "sns":  ("posts/launch/*.md", "posts/carousel/caption.md"),
+    "line": ("posts/line/alerts_latest.md",),
+}
 
 
-def collect_targets(base=BASE):
+def collect_targets(base=BASE, group=None):
+    globs = TARGET_GROUPS[group] if group else tuple(
+        g for gs in TARGET_GROUPS.values() for g in gs)
     out = []
-    for g in TARGET_GLOBS:
+    for g in globs:
         out.extend(sorted(glob.glob(os.path.join(base, g))))
     return out
 
 
-def check_all(base=BASE, today=None):
-    targets = collect_targets(base)
+def check_all(base=BASE, today=None, group=None):
+    targets = collect_targets(base, group)
     if not targets:
         print("[warn] 検査対象が1件も見つかりません(生成器を先に実行してください)")
         return 0
@@ -295,6 +300,14 @@ def self_test():
     ok, pr, _ = verify("本文のみ", today=today, label="posts/launch/01.md")
     check("label", not ok and pr[0].startswith("posts/launch/01.md: "), f"got {pr}")
 
+    # 8) 配信経路グループ(LINEの違反でSNS投稿を巻き添えにしない分離)
+    check("group.names", set(TARGET_GROUPS) == {"sns", "line"}, f"got {set(TARGET_GROUPS)}")
+    sns_t = collect_targets(group="sns")
+    line_t = collect_targets(group="line")
+    check("group.disjoint", not (set(sns_t) & set(line_t)))
+    check("group.all_is_union", set(collect_targets()) == set(sns_t) | set(line_t))
+    check("group.sns_found", len(sns_t) >= 1, f"got {len(sns_t)}")
+
     if failed:
         print(f"自己テスト失敗: {failed} 件")
         return 1
@@ -307,6 +320,13 @@ def main():
         return self_test()
     if "--check-all" in sys.argv:
         return check_all()
+    if "--check-group" in sys.argv:
+        i = sys.argv.index("--check-group")
+        name = sys.argv[i + 1] if i + 1 < len(sys.argv) else ""
+        if name not in TARGET_GROUPS:
+            print(f"[ng] 不明なグループ「{name}」。使えるのは: {', '.join(TARGET_GROUPS)}")
+            return 2
+        return check_all(group=name)
     args = [a for a in sys.argv[1:] if a != "--check"]
     if not args:
         print(__doc__)

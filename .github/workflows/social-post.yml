@@ -92,7 +92,7 @@ jobs:
       - name: 出荷ゲートの検査(未通過なら投稿しない)
         run: |
           python scripts/shipping_gate.py --self-test
-          python scripts/shipping_gate.py --check-all
+          python scripts/shipping_gate.py --check-group sns
 
       - name: Post to Facebook / Instagram
         env:
