@@ -88,3 +88,57 @@ test("buildNewCompanyRow: 企業ID・会社名以外は空欄、連絡不要はf
     assert.equal(value, "");
   });
 });
+
+test("buildPostbackData / parsePostbackData: 往復できる", () => {
+  const data = lineVoiceLogContent.buildPostbackData("selectCompany", "P-123", "C000001");
+  const parsed = lineVoiceLogContent.parsePostbackData(data);
+  assert.deepEqual(parsed, { action: "selectCompany", processId: "P-123", value: "C000001" });
+});
+
+test("buildPostbackData: 値に&や=が含まれてもエンコードされ壊れない", () => {
+  const data = lineVoiceLogContent.buildPostbackData("selectCompany", "P-1", "A&B=C");
+  const parsed = lineVoiceLogContent.parsePostbackData(data);
+  assert.equal(parsed.value, "A&B=C");
+});
+
+test("buildCompanySelectionPrompt: 候補+見つからないボタンを含む", () => {
+  const candidates = [
+    { "企業ID": "C000001", "会社名": "沖縄建設" },
+    { "企業ID": "C000002", "会社名": "沖縄建設工業" }
+  ];
+  const prompt = lineVoiceLogContent.buildCompanySelectionPrompt("P-1", candidates);
+  assert.equal(prompt.options.length, 3);
+  assert.equal(prompt.options[2].label, "見つからない");
+  const parsed = lineVoiceLogContent.parsePostbackData(prompt.options[0].data);
+  assert.equal(parsed.value, "C000001");
+  assert.equal(parsed.action, lineVoiceLogContent.POSTBACK_ACTIONS.SELECT_COMPANY);
+});
+
+test("buildCompanySelectionPrompt: 会社名が長い場合はボタンのラベルを20文字以内に切り詰める", () => {
+  const longName = "とてもとても長い名前の株式会社沖縄総合建設不動産開発コンサルティング";
+  const prompt = lineVoiceLogContent.buildCompanySelectionPrompt("P-1", [{ "企業ID": "C000001", "会社名": longName }]);
+  assert.ok(prompt.options[0].label.length <= 20);
+});
+
+test("buildNewCompanyConfirmPrompt: Yes/Noボタンを含む", () => {
+  const prompt = lineVoiceLogContent.buildNewCompanyConfirmPrompt("P-1", "テスト商事");
+  assert.equal(prompt.options.length, 2);
+  assert.ok(prompt.text.includes("テスト商事"));
+});
+
+test("buildFinalConfirmPrompt: 入力内容がテキストに含まれる", () => {
+  const prompt = lineVoiceLogContent.buildFinalConfirmPrompt(
+    "P-1", "沖縄建設", "電話", "オーナー社長本人", "見積の話", "来週再訪問"
+  );
+  assert.ok(prompt.text.includes("沖縄建設"));
+  assert.ok(prompt.text.includes("見積の話"));
+  assert.equal(prompt.options.length, 2);
+});
+
+test("buildCompletionMessage / buildDiscardMessage: 固定文言を返す", () => {
+  assert.ok(lineVoiceLogContent.buildCompletionMessage("沖縄建設").includes("沖縄建設"));
+  assert.ok(lineVoiceLogContent.buildDiscardMessage().length > 0);
+  assert.ok(lineVoiceLogContent.buildProcessingErrorMessage().length > 0);
+  assert.ok(lineVoiceLogContent.buildStaffNotFoundMessage().length > 0);
+  assert.ok(lineVoiceLogContent.buildAlreadyProcessingMessage().length > 0);
+});

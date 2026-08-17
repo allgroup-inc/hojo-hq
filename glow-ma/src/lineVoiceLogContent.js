@@ -96,12 +96,150 @@
     });
   }
 
+  var ACK_MESSAGE_TEXT = "録音、届きました。少々お待ちください。";
+  var MAX_LABEL_LENGTH = 20;
+
+  var POSTBACK_ACTIONS = {
+    SELECT_COMPANY: "selectCompany",
+    NEW_COMPANY_CONFIRM: "newCompanyConfirm",
+    FINAL_CONFIRM: "finalConfirm"
+  };
+
+  var NOT_FOUND_VALUE = "NOT_FOUND";
+  var YES_VALUE = "YES";
+  var NO_VALUE = "NO";
+  var CONFIRM_VALUE = "CONFIRM";
+  var DISCARD_VALUE = "DISCARD";
+
+  function truncateLabel_(label) {
+    var text = String(label || "");
+    if (text.length <= MAX_LABEL_LENGTH) return text;
+    return text.slice(0, MAX_LABEL_LENGTH - 1) + "…";
+  }
+
+  /**
+   * buildPostbackDataで組み立てたdata文字列を{action, processId, value}に戻す。
+   * 形式が壊れている場合は該当キーがundefinedのオブジェクトを返す(呼び出し元が
+   * 必須キーの有無を見て不正なpostbackとして扱う)。
+   */
+  function parsePostbackData(dataString) {
+    var result = {};
+    String(dataString || "").split("&").forEach(function (pair) {
+      var parts = pair.split("=");
+      if (parts.length !== 2) return;
+      result[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
+    });
+    return result;
+  }
+
+  /**
+   * ボタン(postback)に埋め込むdata文字列を組み立てる。
+   * 形式: "action=<action>&processId=<processId>&value=<value>"
+   */
+  function buildPostbackData(action, processId, value) {
+    return "action=" + encodeURIComponent(action) +
+      "&processId=" + encodeURIComponent(processId) +
+      "&value=" + encodeURIComponent(value);
+  }
+
+  /**
+   * 候補企業が複数ある場合の選択プロンプトを組み立てる(純粋なデータ構造。実際の
+   * LINE Quick Reply JSON形式への変換はGAS側(LineVoiceLogRunner.gs)で行う)。
+   */
+  function buildCompanySelectionPrompt(processId, candidates) {
+    var options = candidates.map(function (candidate) {
+      return {
+        label: truncateLabel_(candidate["会社名"]),
+        data: buildPostbackData(POSTBACK_ACTIONS.SELECT_COMPANY, processId, candidate["企業ID"])
+      };
+    });
+    options.push({
+      label: "見つからない",
+      data: buildPostbackData(POSTBACK_ACTIONS.SELECT_COMPANY, processId, NOT_FOUND_VALUE)
+    });
+    return {
+      text: "話された会社名に近い企業が複数見つかりました。どの企業ですか?",
+      options: options
+    };
+  }
+
+  /**
+   * 一致する企業が見つからなかった場合の、新規登録確認プロンプトを組み立てる。
+   */
+  function buildNewCompanyConfirmPrompt(processId, spokenName) {
+    return {
+      text: "「" + spokenName + "」は企業マスタに見つかりませんでした。新規企業として登録しますか?",
+      options: [
+        { label: "はい、登録する", data: buildPostbackData(POSTBACK_ACTIONS.NEW_COMPANY_CONFIRM, processId, YES_VALUE) },
+        { label: "いいえ", data: buildPostbackData(POSTBACK_ACTIONS.NEW_COMPANY_CONFIRM, processId, NO_VALUE) }
+      ]
+    };
+  }
+
+  /**
+   * 対応履歴ログへ書き込む直前の最終確認プロンプトを組み立てる。
+   */
+  function buildFinalConfirmPrompt(processId, companyName, interactionType, respondentType, contentMemo, nextAction) {
+    var text = [
+      "以下の内容で記録します。よろしいですか?",
+      "会社名: " + companyName,
+      "種別: " + interactionType,
+      "対応相手: " + respondentType,
+      "内容メモ: " + contentMemo,
+      "次回アクション: " + (nextAction || "(なし)")
+    ].join("\n");
+    return {
+      text: text,
+      options: [
+        { label: "この内容で記録する", data: buildPostbackData(POSTBACK_ACTIONS.FINAL_CONFIRM, processId, CONFIRM_VALUE) },
+        { label: "取り消す(録音し直す)", data: buildPostbackData(POSTBACK_ACTIONS.FINAL_CONFIRM, processId, DISCARD_VALUE) }
+      ]
+    };
+  }
+
+  function buildCompletionMessage(companyName) {
+    return companyName + "の対応履歴として記録しました。";
+  }
+
+  function buildDiscardMessage() {
+    return "取り消しました。もう一度録音してください。";
+  }
+
+  function buildProcessingErrorMessage() {
+    return "うまく処理できませんでした。もう一度録音してください。";
+  }
+
+  function buildStaffNotFoundMessage() {
+    return "担当者が特定できませんでした。管理者に「スタッフ」タブへの登録を依頼してください。";
+  }
+
+  function buildAlreadyProcessingMessage() {
+    return "前の記録がまだ完了していません。LINE上のボタンで確定または取り消しをしてから、次の録音を送ってください。";
+  }
+
   var api = {
     matchCompanyCandidates: matchCompanyCandidates,
     normalizeInteractionType: normalizeInteractionType,
     normalizeRespondentType: normalizeRespondentType,
     buildInteractionLogRow: buildInteractionLogRow,
-    buildNewCompanyRow: buildNewCompanyRow
+    buildNewCompanyRow: buildNewCompanyRow,
+    ACK_MESSAGE_TEXT: ACK_MESSAGE_TEXT,
+    POSTBACK_ACTIONS: POSTBACK_ACTIONS,
+    NOT_FOUND_VALUE: NOT_FOUND_VALUE,
+    YES_VALUE: YES_VALUE,
+    NO_VALUE: NO_VALUE,
+    CONFIRM_VALUE: CONFIRM_VALUE,
+    DISCARD_VALUE: DISCARD_VALUE,
+    buildPostbackData: buildPostbackData,
+    parsePostbackData: parsePostbackData,
+    buildCompanySelectionPrompt: buildCompanySelectionPrompt,
+    buildNewCompanyConfirmPrompt: buildNewCompanyConfirmPrompt,
+    buildFinalConfirmPrompt: buildFinalConfirmPrompt,
+    buildCompletionMessage: buildCompletionMessage,
+    buildDiscardMessage: buildDiscardMessage,
+    buildProcessingErrorMessage: buildProcessingErrorMessage,
+    buildStaffNotFoundMessage: buildStaffNotFoundMessage,
+    buildAlreadyProcessingMessage: buildAlreadyProcessingMessage
   };
 
   if (typeof module !== "undefined" && module.exports) {
