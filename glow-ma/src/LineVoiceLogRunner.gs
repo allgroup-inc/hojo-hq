@@ -152,6 +152,11 @@ function handleAudioMessage_(event) {
 
   var staffName = resolveStaffNameByLineUserId_(ss, lineUserId);
   debugLog_("handleAudioMessage_: lineUserId=" + lineUserId + " staffName=" + staffName);
+  try {
+    PropertiesService.getScriptProperties().setProperty("LAST_LINE_USER_ID", lineUserId);
+  } catch (error) {
+    // 確認用ログの書き込み失敗は無視する(本処理に影響させない)
+  }
   if (!staffName) {
     lineReply_(replyToken, [GlowLineVoiceLogContent.buildStaffNotFoundMessage()]);
     return;
