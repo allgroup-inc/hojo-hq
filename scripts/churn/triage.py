@@ -6,9 +6,29 @@
 from __future__ import annotations
 
 from .score import score_record, display_pct
-from .triggers import prevention_trigger, initial_contact_trigger, unpaid_trigger
+from .triggers import (prevention_trigger, initial_contact_trigger, unpaid_trigger,
+                       _recent_streak)
 from .effect_learning import _contacts_index
 from .value import saveable as _saveable
+
+# きっかけ → 営業向け「今日の一手」（提案。最終判断は人。営業別スコアは出さない）
+_ACTION = {
+    "未払消滅目前": "至急架電＋コンビニ用紙で入金依頼（消滅目前）",
+    "未収2連続": "架電で入金確認",
+    "不着": "初回引落の不着を架電確認",
+    "遅延": "支払いの遅れを架電確認",
+    "口座確認": "引落口座を確認",
+    "初動": "初回のごあいさつ・状況確認",
+    "高リスク": "様子伺いの連絡",
+}
+
+
+def recommend_action(trigger, account_issue=False, streak=0):
+    """きっかけ（＋口座不備）から営業向けの“ひとこと”を返す。あくまで提案・最終判断は人。"""
+    base = _ACTION.get(trigger, "状況確認")
+    if account_issue and trigger in ("未払消滅目前", "未収2連続", "口座確認", "不着", "遅延"):
+        base += "／口座不備の再設定"
+    return base
 
 # きっかけの優先度（小さいほど先）。小柳さん決裁 2026-08-17:
 # 未払消滅目前(3ヶ月連続未収・4ヶ月目で消滅)＞不着＞遅延＞未収2連続＞口座確認＞初動＞高リスク。
@@ -52,19 +72,25 @@ def classify(records, model, as_of, contacts=None):
             if s["band"] != "high":
                 continue  # どのトリガーも高リスクもなければ候補でない
             trig = "高リスク"
+        streak = _recent_streak(r.get("unpaid_months", []), as_of)
+        account_issue = bool(r.get("unpaid_account_issue"))
         cands.append({
             "customer_id": r.get("customer_id"), "apply_id": r.get("apply_id"),
             "product": r.get("product"), "agent_id": r.get("agent_id"),
             "trigger": trig, "risk": s["risk"], "risk_pct": display_pct(s["risk"]),
             "band": s["band"], "hit_factors": s["hit_factors"],
             "saveable": _saveable(s["risk"], r.get("amount")),
+            "unpaid_streak": streak, "account_issue": account_issue,
+            "recommendation": recommend_action(trig, account_issue, streak),
         })
     return cands
 
 
 def triage(candidates, capacity):
     """優先度→守れる金額順に並べ、キャパで today / carry に分ける。繰り越しは件数・最高額を明示。"""
-    ordered = sorted(candidates, key=lambda c: (PRIORITY.get(c["trigger"], 99), -c["saveable"]))
+    # 帯内は 未収連続が長い順 → 守れる金額順（消滅が近い人を先に）
+    ordered = sorted(candidates, key=lambda c: (PRIORITY.get(c["trigger"], 99),
+                                                -c.get("unpaid_streak", 0), -c["saveable"]))
     today = ordered[:capacity]
     carry = ordered[capacity:]
     stats = {
@@ -80,11 +106,17 @@ def render_html(today, carry, stats, path, capacity):
     import html
     trs = []
     for i, c in enumerate(today, 1):
+        stage = c.get("unpaid_streak", 0)
+        stage_txt = f"未収{stage}ヶ月" if stage else "—"
+        if c.get("account_issue"):
+            stage_txt += "・口座不備"
         trs.append(
             f'<tr><td>{i}</td><td>{html.escape(str(c["trigger"]))}</td>'
             f'<td>{html.escape(str(c.get("customer_id") or "—"))}</td>'
             f'<td>{html.escape(str(c.get("product")))}</td>'
-            f'<td>{c["risk_pct"]}%</td><td>{c["saveable"]:,.0f}円</td></tr>')
+            f'<td>{html.escape(stage_txt)}</td>'
+            f'<td>{c["risk_pct"]}%</td><td>{c["saveable"]:,.0f}円</td>'
+            f'<td>{html.escape(str(c.get("recommendation", "")))}</td></tr>')
     carry_note = (
         f'キャパ{capacity}件/日 超過 {stats["carry_count"]}件は翌日へ繰り越し'
         f'（最高“守れる金額” {stats["carry_max_saveable"]:,.0f}円）'
@@ -98,7 +130,7 @@ def render_html(today, carry, stats, path, capacity):
         f'<p>{carry_note}。優先度：未払消滅目前＞不着＞遅延＞未収2連続＞口座確認＞初動＞高リスク、各内で守れる金額順。'
         '顧客連絡は人が実行。合成データ。</p>'
         '<table><thead><tr><th>#</th><th>きっかけ</th><th>顧客ID</th><th>商品</th>'
-        '<th>リスク</th><th>守れる金額</th></tr></thead>'
+        '<th>状態</th><th>リスク</th><th>守れる金額</th><th>今日の一手（提案）</th></tr></thead>'
         f'<tbody>{"".join(trs)}</tbody></table>')
     with open(path, "w", encoding="utf-8") as f:
         f.write(doc)
