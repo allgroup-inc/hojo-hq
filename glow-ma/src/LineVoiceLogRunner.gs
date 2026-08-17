@@ -61,12 +61,34 @@ function doPost(e) {
 
   (body.events || []).forEach(function (event) {
     try {
+      debugLog_("doPost event received: type=" + event.type +
+        " messageType=" + (event.message && event.message.type) +
+        " userId=" + (event.source && event.source.userId) +
+        " replyToken=" + event.replyToken);
       handleLineEvent_(event);
     } catch (error) {
+      debugLog_("doPost event error: " + error);
       Logger.log("LINEイベントの処理に失敗しました: " + error);
     }
   });
   return ContentService.createTextOutput("");
+}
+
+/**
+ * [一時的な動作確認用] 直近のイベント処理・LINE返信の結果をスクリプトプロパティ
+ * LAST_DEBUG_LOG に書き込む。ブラウザの実行ログ画面が不安定なため、
+ * Apps Scriptエディタの「プロジェクトの設定」→「スクリプト プロパティ」から
+ * いつでも確認できるようにするための暫定対応。動作確認が終わったら削除すること。
+ */
+function debugLog_(message) {
+  try {
+    PropertiesService.getScriptProperties().setProperty(
+      "LAST_DEBUG_LOG",
+      Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss") + " " + message
+    );
+  } catch (error) {
+    // 確認用ログの書き込み失敗は無視する(本処理に影響させない)
+  }
 }
 
 function parseLineWebhookBody_(e) {
@@ -129,6 +151,7 @@ function handleAudioMessage_(event) {
   }
 
   var staffName = resolveStaffNameByLineUserId_(ss, lineUserId);
+  debugLog_("handleAudioMessage_: lineUserId=" + lineUserId + " staffName=" + staffName);
   if (!staffName) {
     lineReply_(replyToken, [GlowLineVoiceLogContent.buildStaffNotFoundMessage()]);
     return;
@@ -372,6 +395,7 @@ function lineReply_(replyToken, specs) {
     muteHttpExceptions: true
   });
   var responseCode = response.getResponseCode();
+  debugLog_("lineReply_: HTTP " + responseCode + " body=" + response.getContentText());
   if (responseCode < 200 || responseCode >= 300) {
     Logger.log("LINEへの返信送信に失敗しました(HTTP " + responseCode + "): " + response.getContentText());
   }
