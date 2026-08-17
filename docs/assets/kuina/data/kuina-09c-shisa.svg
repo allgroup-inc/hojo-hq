@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 沖縄企業のミカタ / ヤンバルクイナ 展開データ -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="15 15 170 170" width="850" height="850">
+  <rect id="bg" x="15" y="15" width="170" height="170" fill="#FFFFFF"/>
+
   <g>
 <g fill="#C87A45"><circle cx="160.0" cy="100.0" r="21"/><circle cx="148.5" cy="135.3" r="21"/><circle cx="118.5" cy="157.1" r="21"/><circle cx="81.5" cy="157.1" r="21"/><circle cx="51.5" cy="135.3" r="21"/><circle cx="40.0" cy="100.0" r="21"/><circle cx="51.5" cy="64.7" r="21"/><circle cx="81.5" cy="42.9" r="21"/><circle cx="118.5" cy="42.9" r="21"/><circle cx="148.5" cy="64.7" r="21"/><circle cx="100" cy="100" r="58"/></g>
 <g stroke="#8A4E22" stroke-width="3.4" stroke-linecap="round" opacity=".8"><path d="M152.0,100.0 L176.0,100.0"/><path d="M142.1,130.6 L161.5,144.7"/><path d="M116.1,149.5 L123.5,172.3"/><path d="M83.9,149.5 L76.5,172.3"/><path d="M57.9,130.6 L38.5,144.7"/><path d="M48.0,100.0 L24.0,100.0"/><path d="M57.9,69.4 L38.5,55.3"/><path d="M83.9,50.5 L76.5,27.7"/><path d="M116.1,50.5 L123.5,27.7"/><path d="M142.1,69.4 L161.5,55.3"/></g>

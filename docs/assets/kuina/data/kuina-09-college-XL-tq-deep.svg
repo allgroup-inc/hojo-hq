@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 沖縄企業のミカタ / ヤンバルクイナ カレッジロゴ 入稿データ. 背景透過. -->
+<!-- 沖縄企業のミカタ / ヤンバルクイナ カレッジロゴ 入稿データ. 背景は白 #FFFFFF. 透過が必要なときは id="bg" の rect を削除. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="720" height="720">
   <defs>
     <path id="arc" d="M33,120 A87,87 0 0 1 207,120"/>
     <clipPath id="hd"><circle cx="120" cy="116" r="42"/></clipPath>
   </defs>
+  <rect id="bg" x="0" y="0" width="240" height="240" fill="#FFFFFF"/>
   <circle cx="120" cy="120" r="114" fill="#14746E"/>
   <circle cx="120" cy="120" r="107" fill="none" stroke="#F4EAD5" stroke-width="3.5"/>
   <text font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="21" letter-spacing="4" fill="#F4EAD5">
