@@ -26,10 +26,18 @@ try:
 except Exception:
     pass
 
+import shipping_gate
+
 JST = timezone(timedelta(hours=9))
 BASE_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(BASE_DIR, "..", "data", "subsidies.json")
 OUT_DIR = os.path.join(BASE_DIR, "..", "posts", "launch")
+
+# 出荷ゲート(運用規程1-3)の通過日。**本ファイルのキャプション文面を書き換えたら必ず更新する。**
+# 更新せずに放置すると shipping_gate.MAX_AGE_DAYS を超えた時点で自動投稿が止まる(フェイルクローズ)。
+# 2026-08-17: 全10投稿を accuracy-check(出典・件数はdata由来)/ deadline-alert(「約1か月前から」で統一)/
+#             humanizer(定型句・過剰な絵文字なし)で確認。
+GATE_CHECKED = "2026-08-17"
 # UTM付き(ヒロメさんのUTM運用: instagram/social/launch)。プロフィールリンクにも同URLを使用
 SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch"
 
@@ -175,7 +183,8 @@ def write_post(n, slug, role, img_title, img_sub, img_number, caption, source, b
 
 ## 出典
 {source}
-"""
+
+{shipping_gate.render_stamp("scripts/generate_sns.py(SNS部・ヒロメさん)", GATE_CHECKED)}"""
     with open(path, "w", encoding="utf-8") as f:
         f.write(body)
     return fname

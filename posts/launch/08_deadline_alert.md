@@ -15,3 +15,8 @@
 
 ## 出典
 https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch
+
+## 出荷ゲート
+- gates: accuracy-check, deadline-alert, humanizer
+- checked: 2026-08-17
+- by: scripts/generate_sns.py(SNS部・ヒロメさん)

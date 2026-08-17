@@ -27,6 +27,8 @@ import urllib.parse
 import urllib.request
 from datetime import date, datetime, timedelta, timezone
 
+import shipping_gate
+
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
@@ -97,6 +99,25 @@ def extract_caption(md_path):
     return m.group(1).strip()
 
 
+def gate_or_die(md_path):
+    """出荷ゲート(運用規程1-3)の通過記録を確認する。無ければ**投稿しない**。
+
+    resilient-agent-design: 確認できないときは進めずに止まる(フェイルクローズ)。
+    黙ってスキップせず異常終了させ、GitHub Actionsを赤くして気づけるようにする。
+    """
+    ok, problems, warnings = shipping_gate.verify_file(md_path)
+    for w in warnings:
+        print(f"[warn] 出荷ゲート: {w}")
+    if ok:
+        return
+    print("[ng] 出荷ゲート未通過のため投稿を中止します(運用規程1-3)")
+    for p in problems:
+        print(f"  - {p}")
+    print("  対応: 文面を hojo-accuracy-check → hojo-deadline-alert → humanizer で見直し、")
+    print("        生成器の GATE_CHECKED を更新してから再実行してください")
+    raise SystemExit(1)
+
+
 def api(path, params):
     data = urllib.parse.urlencode(params).encode("utf-8")
     req = urllib.request.Request(GRAPH + path, data=data, method="POST")
@@ -126,14 +147,20 @@ def main():
         print(f"caption_head={caption.splitlines()[0]}")
         if slide_urls:
             print(f"slides={len(slide_urls)}")
+        # 出荷ゲートの見込みも先に出す(投稿段階で落ちる前に気づけるように)
+        gate_ok, _, _ = shipping_gate.verify_file(md)
+        print(f"gate={'ok' if gate_ok else 'ng'}")
         return
 
     print(f"[info] {now} JST / 本日の投稿素材: {stem}")
     print(f"[info] 画像: {image_url}")
     print("[info] キャプション先頭: " + caption.splitlines()[0])
 
+    # 出荷ゲート: 通過記録が無い/古い/禁止表現がある文面は外に出さない
+    gate_or_die(md)
+
     if dry:
-        print("[ok] dry-run: 選定とキャプション抽出のみ実施(投稿なし)")
+        print("[ok] dry-run: 出荷ゲート通過・選定とキャプション抽出のみ実施(投稿なし)")
         return
 
     page_id = os.environ.get("FB_PAGE_ID", "")

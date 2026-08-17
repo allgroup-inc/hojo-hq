@@ -30,6 +30,16 @@ def main():
     ap.add_argument("--reply-url", required=True)
     args = ap.parse_args()
 
+    # 出荷ゲート(運用規程1-3): X本文はファイルを持たないため、機械で検査できる層だけ適用する
+    # (禁止表現・lin.ee直貼り)。引っかかったら投稿しない。
+    import shipping_gate
+    bad = shipping_gate.check_forbidden(args.text)
+    if bad:
+        print("[ng] 出荷ゲート未通過のためX投稿を中止します(運用規程1-3)")
+        for b in bad:
+            print(f"  - {b}")
+        return 1
+
     keys = {k: os.environ.get(k) for k in ("X_API_KEY", "X_API_SECRET", "X_ACCESS_TOKEN", "X_ACCESS_SECRET")}
     if not all(keys.values()):
         missing = [k for k, v in keys.items() if not v]

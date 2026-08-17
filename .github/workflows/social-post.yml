@@ -86,6 +86,14 @@ jobs:
         with:
           python-version: "3.12"
 
+      # 出荷ゲート(運用規程1-3)。本日の投稿1本は post_social.py 側でも検査するが、
+      # ここでは対外文面を全件見る(金曜のカルーセル等、当日以外の素材の腐りも検知する)。
+      # 失敗すると下の「LINE通知(失敗時)」が飛ぶ = 黙って止まらない。
+      - name: 出荷ゲートの検査(未通過なら投稿しない)
+        run: |
+          python scripts/shipping_gate.py --self-test
+          python scripts/shipping_gate.py --check-all
+
       - name: Post to Facebook / Instagram
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
