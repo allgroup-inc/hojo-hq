@@ -233,3 +233,188 @@ function lineReply_(replyToken, specs) {
     Logger.log("LINEへの返信送信に失敗しました(HTTP " + responseCode + "): " + response.getContentText());
   }
 }
+
+/**
+ * processQueuedVoiceLogs をインストール型の時間主導トリガーとして1分間隔で登録する。
+ * 冪等: 実行時にまず同じハンドラ関数を指す既存トリガーをすべて削除してから
+ * 新規登録するため、重複登録を心配せずに安全に再実行できる(ShippingRunner.gsの
+ * installLetterDraftEditTriggerと同じパターン)。
+ */
+function installVoiceLogProcessingTrigger() {
+  var existingTriggers = ScriptApp.getProjectTriggers();
+  existingTriggers.forEach(function (trigger) {
+    if (trigger.getHandlerFunction() === "processQueuedVoiceLogs") {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+  ScriptApp.newTrigger("processQueuedVoiceLogs")
+    .timeBased()
+    .everyMinutes(1)
+    .create();
+  Logger.log("音声ログ処理用の1分間隔トリガーを登録しました。");
+}
+
+/**
+ * 「受信済み」ステータスの音声ログを1件ずつ処理する。1件の失敗が他の未処理分を
+ * 止めないよう、失敗した行は「エラー」ステータスに更新し、次の行の処理を続ける
+ * (LetterRunner.gs等と同じ障害隔離の方針)。
+ */
+function processQueuedVoiceLogs() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var pending = readVoiceLogRows_(ss).filter(function (record) { return record["ステータス"] === "受信済み"; });
+  pending.forEach(function (record) {
+    try {
+      processOneVoiceLog_(ss, record);
+    } catch (error) {
+      Logger.log("音声ログの処理に失敗しました(処理ID " + record["処理ID"] + "): " + error);
+      updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "エラー", "エラー内容": String(error) });
+      linePush_(record["LINEユーザーID"], [GlowLineVoiceLogContent.buildProcessingErrorMessage()]);
+    }
+  });
+}
+
+function processOneVoiceLog_(ss, record) {
+  var audioBlob = fetchLineAudioContent_(record["LINEメッセージID"]);
+  var extracted = callGeminiForVoiceLog_(audioBlob);
+  updateVoiceLogRow_(ss, record.sheetRow, {
+    "ステータス": "文字起こし済み",
+    "会社名候補": extracted.companyName || "",
+    "種別候補": extracted.interactionType || "",
+    "対応相手候補": extracted.respondentType || "",
+    "内容メモ": extracted.contentMemo || "",
+    "次回アクション": extracted.nextAction || ""
+  });
+
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+  var candidates = GlowLineVoiceLogContent.matchCompanyCandidates(companies, extracted.companyName);
+
+  var lineUserId = record["LINEユーザーID"];
+  var pushSpecs;
+  if (candidates.length === 1) {
+    updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "最終確認待ち", "企業ID": candidates[0]["企業ID"] });
+    pushSpecs = [GlowLineVoiceLogContent.buildFinalConfirmPrompt(
+      record["処理ID"], candidates[0]["会社名"], extracted.interactionType, extracted.respondentType,
+      extracted.contentMemo, extracted.nextAction
+    )];
+  } else if (candidates.length > 1) {
+    updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "企業選択待ち" });
+    pushSpecs = [GlowLineVoiceLogContent.buildCompanySelectionPrompt(record["処理ID"], candidates)];
+  } else {
+    updateVoiceLogRow_(ss, record.sheetRow, { "ステータス": "新規企業確認待ち" });
+    pushSpecs = [GlowLineVoiceLogContent.buildNewCompanyConfirmPrompt(record["処理ID"], extracted.companyName || "(不明)")];
+  }
+  linePush_(lineUserId, pushSpecs);
+}
+
+function fetchLineAudioContent_(messageId) {
+  var token = PropertiesService.getScriptProperties().getProperty("LINE_CHANNEL_ACCESS_TOKEN");
+  if (!token) {
+    throw new Error("LINE_CHANNEL_ACCESS_TOKEN が未設定です。スクリプト プロパティで設定してください。");
+  }
+  var response = UrlFetchApp.fetch("https://api-data.line.me/v2/bot/message/" + messageId + "/content", {
+    headers: { Authorization: "Bearer " + token },
+    muteHttpExceptions: true
+  });
+  if (response.getResponseCode() !== 200) {
+    throw new Error("LINEから音声データの取得に失敗しました(HTTP " + response.getResponseCode() + ")");
+  }
+  return response.getBlob();
+}
+
+function callGeminiForVoiceLog_(audioBlob) {
+  return GlowResilience.withRetry(
+    function () { return callGeminiForVoiceLogOnce_(audioBlob); },
+    {
+      maxAttempts: 3,
+      backoffMs: [2000, 10000],
+      sleepFn: Utilities.sleep,
+      isRetryable: function (error) {
+        return !!error.statusCode && GlowResilience.isRetryableHttpStatus(error.statusCode);
+      },
+      onRetry: function (error, attempt) {
+        Logger.log("Gemini API呼び出しを再試行します(" + attempt + "回目失敗): " + error);
+      }
+    }
+  );
+}
+
+function callGeminiForVoiceLogOnce_(audioBlob) {
+  var apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY が未設定です。スクリプト プロパティで設定してください。");
+  }
+  var payload = {
+    contents: [{
+      parts: [
+        { text: buildGeminiPrompt_() },
+        { inline_data: { mime_type: audioBlob.getContentType() || "audio/m4a", data: Utilities.base64Encode(audioBlob.getBytes()) } }
+      ]
+    }]
+  };
+  var response = UrlFetchApp.fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey,
+    {
+      method: "post",
+      contentType: "application/json",
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    }
+  );
+  var responseCode = response.getResponseCode();
+  if (responseCode < 200 || responseCode >= 300) {
+    var error = new Error("Gemini APIの呼び出しに失敗しました(ステータスコード " + responseCode + "): " + response.getContentText());
+    error.statusCode = responseCode;
+    throw error;
+  }
+  var body = JSON.parse(response.getContentText());
+  var text = body.candidates && body.candidates[0] && body.candidates[0].content &&
+    body.candidates[0].content.parts && body.candidates[0].content.parts[0] &&
+    body.candidates[0].content.parts[0].text;
+  if (!text) {
+    throw new Error("Gemini APIのレスポンスからテキストを取得できませんでした。");
+  }
+  return parseGeminiExtractionResult_(text);
+}
+
+function buildGeminiPrompt_() {
+  return "この音声は、営業担当者が企業訪問後に残した口頭のメモです。以下のJSON形式のみを出力してください" +
+    "(説明文やコードブロックの記号は付けないこと):\n" +
+    "{\"companyName\": \"話された会社名\", " +
+    "\"interactionType\": \"" + GlowSchema.INTERACTION_TYPES.join("/") + "のいずれか\", " +
+    "\"respondentType\": \"" + GlowSchema.RESPONDENT_TYPES.join("/") + "のいずれか\", " +
+    "\"contentMemo\": \"話の内容の要約(2〜3文程度)\", " +
+    "\"nextAction\": \"次にやるべきこと(無ければ空文字)\"}";
+}
+
+function parseGeminiExtractionResult_(text) {
+  var cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
+  var parsed = JSON.parse(cleaned);
+  return {
+    companyName: parsed.companyName || "",
+    interactionType: parsed.interactionType || "",
+    respondentType: parsed.respondentType || "",
+    contentMemo: parsed.contentMemo || "",
+    nextAction: parsed.nextAction || ""
+  };
+}
+
+function linePush_(lineUserId, specs) {
+  var token = PropertiesService.getScriptProperties().getProperty("LINE_CHANNEL_ACCESS_TOKEN");
+  if (!token) {
+    Logger.log("LINE_CHANNEL_ACCESS_TOKEN が未設定のため、LINEへのプッシュ送信を送れませんでした。");
+    return;
+  }
+  var messages = specs.map(buildLineMessagePayload_);
+  var response = UrlFetchApp.fetch("https://api.line.me/v2/bot/message/push", {
+    method: "post",
+    contentType: "application/json",
+    headers: { Authorization: "Bearer " + token },
+    payload: JSON.stringify({ to: lineUserId, messages: messages }),
+    muteHttpExceptions: true
+  });
+  var responseCode = response.getResponseCode();
+  if (responseCode < 200 || responseCode >= 300) {
+    Logger.log("LINEへのプッシュ送信に失敗しました(HTTP " + responseCode + "): " + response.getContentText());
+  }
+}
