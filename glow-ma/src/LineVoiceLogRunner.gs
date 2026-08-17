@@ -330,7 +330,7 @@ function callGeminiForVoiceLog_(audioBlob) {
       backoffMs: [2000, 10000],
       sleepFn: Utilities.sleep,
       isRetryable: function (error) {
-        return !!error.statusCode && GlowResilience.isRetryableHttpStatus(error.statusCode);
+        return !error.statusCode || GlowResilience.isRetryableHttpStatus(error.statusCode);
       },
       onRetry: function (error, attempt) {
         Logger.log("Gemini API呼び出しを再試行します(" + attempt + "回目失敗): " + error);
