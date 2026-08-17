@@ -83,5 +83,10 @@ node --test tests/apo_kanri_*.test.mjs
 ```
 
 純ロジック(schema / apoAccess / apoCore / apoNotify / apoPage / resilience)は
-Nodeテストで検証済み(46件)。GAS依存の `ApoRunner.gs` / `SheetSetup.gs` は
+Nodeテストで検証済み。GAS依存の `ApoRunner.gs` / `SheetSetup.gs` は
 ロジックを持たない薄い層に限定している。CI: `.github/workflows/apo-kanri-ci.yml`。
+
+**出荷ゲート(2026-08-17追加)**: 本番投入前・大規模改修後は、実装とは独立に
+`/review`(code-reviewスキル)を通すこと。2026-08-17の初回レビューで、テスト全パス状態でも
+認証の致命バグ含む10件が見つかった実績がある(点検記録:
+docs/家計のポっ_スキル点検_2026-08-17.md)。
