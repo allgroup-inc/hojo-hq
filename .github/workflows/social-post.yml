@@ -40,6 +40,14 @@ jobs:
         id: pick
         run: python scripts/post_social.py --preview >> "$GITHUB_OUTPUT"
 
+      # humanizer自動検査(2026-08-17 小柳さん決裁・決裁キュー14.c)。
+      # 報告のみで投稿は止めない: 結果を下のプレビューLINEに1行添えて、判断は承認者に委ねる。
+      - name: 文面チェック(humanizer・報告のみ)
+        id: hcheck
+        run: |
+          python scripts/check_humanizer.py --gh-output --stem "${{ steps.pick.outputs.stem }}" >> "$GITHUB_OUTPUT"
+          python scripts/check_humanizer.py || true
+
       - name: LINEでデザイン確認を送る(画像つき・小柳さんへ)
         env:
           TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
@@ -47,12 +55,14 @@ jobs:
           IMG: ${{ steps.pick.outputs.image }}
           STEM: ${{ steps.pick.outputs.stem }}
           HEAD: ${{ steps.pick.outputs.caption_head }}
+          HCHECK: ${{ steps.hcheck.outputs.hcheck }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           MSG="🖼【ミカタ】本日のSNS投稿デザイン確認
 
           ☝️上の画像が本日の投稿です
           文頭: ${HEAD}
+          ${HCHECK}
 
           ━━━ 投稿してOKなら ━━━
           ①下のリンクを開く
