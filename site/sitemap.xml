@@ -493,6 +493,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-ken-hitorioya-sodan/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-ken-judo-shinshin-iryohi/</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
@@ -775,6 +781,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-kuni-nhk-menjo/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-kuni-ninpu-shien/</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
@@ -961,6 +973,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-nago-horitsu-sodan/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-nago-kodomo-iryo/</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
@@ -973,7 +991,19 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-naha-kokuho-genmen/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-naha-sango-care/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-naha-shimin-sodan/</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -1063,6 +1093,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-okinawashi-hoikuryo/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-onna-kodomo-iryo/</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
@@ -1130,6 +1166,24 @@
   </url>
   <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-tomigusuku-kodomo-iryo/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-tonaki-kodomo-iryo/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-tonaki-ninpu-senpaku/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-tonaki-shussan-josei/</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
