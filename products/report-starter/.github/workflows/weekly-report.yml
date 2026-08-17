@@ -9,9 +9,15 @@ on:
 permissions:
   contents: write
 
+# 手動実行と定期実行が重なっても二重実行しない(前の実行を待つ)
+concurrency:
+  group: weekly-report
+  cancel-in-progress: false
+
 jobs:
   report:
     runs-on: ubuntu-latest
+    timeout-minutes: 15   # ハング時の安全弁(通常は数分で終わる)
     steps:
       - uses: actions/checkout@v4
 
@@ -36,4 +42,5 @@ jobs:
           git add reports
           git diff --cached --quiet && echo "変更なし" && exit 0
           git commit -m "auto: weekly report $(date -u +%Y-%m-%d)"
+          git pull --rebase
           git push

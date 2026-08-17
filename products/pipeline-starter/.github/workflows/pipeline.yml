@@ -19,6 +19,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 15   # ハング時の安全弁(通常は数分で終わる)
     steps:
       - uses: actions/checkout@v4
 
@@ -52,4 +53,5 @@ jobs:
           git add data site
           git diff --cached --quiet && echo "変更なし" && exit 0
           git commit -m "auto: update data & site ($(date -u +%Y-%m-%dT%H:%MZ))"
+          git pull --rebase
           git push

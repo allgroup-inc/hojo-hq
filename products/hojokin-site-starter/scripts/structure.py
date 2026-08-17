@@ -20,6 +20,11 @@ ROOT = Path(__file__).resolve().parent.parent
 PENDING_DIR = ROOT / "data" / "raw" / "pending"
 DONE_DIR = ROOT / "data" / "raw" / "done"
 ITEMS_DIR = ROOT / "data" / "items"
+FAILED_DIR = ROOT / "data" / "raw" / "failed"
+
+# 同一アイテムの失敗上限。超えたら data/raw/failed/ に隔離し、無限リトライと
+# API費用の垂れ流しを防ぐ(隔離されたファイルは中身を確認して手動で戻す)
+MAX_ITEM_RETRIES = 3
 
 # 品質重視なら claude-opus-5(既定)。費用を抑えたい場合は
 # 環境変数 ANTHROPIC_MODEL=claude-haiku-4-5 などで差し替え可能。
@@ -80,7 +85,14 @@ def main() -> int:
         try:
             data = structure_item(client, schema, raw)
         except Exception as e:
-            print(f"  ! 失敗(次回再試行されます): {e}")
+            raw["_retries"] = raw.get("_retries", 0) + 1
+            path.write_text(json.dumps(raw, ensure_ascii=False, indent=1), encoding="utf-8")
+            if raw["_retries"] >= MAX_ITEM_RETRIES:
+                FAILED_DIR.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(path), FAILED_DIR / path.name)
+                print(f"  ! {MAX_ITEM_RETRIES}回失敗したため隔離しました(data/raw/failed/): {e}")
+            else:
+                print(f"  ! 失敗 {raw['_retries']}/{MAX_ITEM_RETRIES} 回目(次回再試行されます): {e}")
             failed += 1
             continue
         # 機械転記優先: 収集時に確定している値でAI出力を上書きする
@@ -99,7 +111,12 @@ def main() -> int:
         ok += 1
 
     print(f"構造化 完了 {ok} 件 / 失敗 {failed} 件")
-    return 0  # 失敗分はpendingに残り次回リトライ
+    if ok == 0 and failed > 0:
+        # 全件失敗はAPIキー切れ等の恒久障害の可能性が高い。Actionsを失敗させて
+        # GitHubからリポジトリ所有者へ通知を届かせる(静かな更新停止を防ぐ)
+        print("エラー: 全件失敗しました。APIキーの有効性・残高を確認してください")
+        return 1
+    return 0  # 一部失敗はpendingに残り次回リトライ
 
 
 if __name__ == "__main__":
