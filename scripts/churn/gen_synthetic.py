@@ -40,6 +40,26 @@ FORM_W = {"電話": 0.10, "WEB": 0.06, "郵送": 0.0, "対面": -0.07}
 PRODUCT_W = {"医療女性": 0.06, "がん": 0.04, "医療": 0.02,
              "収入保障": 0.0, "終身": -0.03, "学資": -0.07}
 AGENT_W = {"OK-07": 0.13, "OK-06": 0.04, "OK-01": -0.06}
+# 未収回数（Ⅳ列）の早期解約への効き。繰り返し未収ほど高リスク＝unpaid_band factorの検証用シグナル。
+UNPAID_W = {0: -0.03, 1: 0.06, 2: 0.16, 3: 0.26}
+_CIRCLED = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫"
+
+
+def _iv_string(rng, unpaid_count, as_of, account_issue):
+    """Ⅳ列（口座振替の未収履歴）を合成。未<年>+○囲み月＋●/済/★。未収0なら空。"""
+    if unpaid_count <= 0:
+        return ""
+    prefix = ("●" if rng.random() < 0.5 else "") + ("済" if rng.random() < 0.6 else "")
+    s = prefix + "未" + f"{as_of.year % 100:02d}"
+    y, m = as_of.year, as_of.month
+    for k in range(unpaid_count):
+        mm = m - k
+        while mm <= 0:
+            mm += 12
+        s += _CIRCLED[mm - 1]
+    if account_issue:
+        s += "★"
+    return s
 
 
 def churn_prob(rng, product, channel, form, amount, age, agent):
@@ -99,20 +119,30 @@ def build_records(rng):
             contract = rand_date(rng, date(2024, 7, 1), date(2026, 7, 20))
             order = contract - timedelta(days=rng.randint(1, 20))
 
+            # 払込経路と未収履歴（Ⅳ）。未収は口座振替のみ。繰り返し未収ほど高リスク。
+            payment = rng.choices(["口座振替", "クレジットカード", "コンビニ"], weights=[70, 22, 8])[0]
+            unpaid_count = (rng.choices([0, 1, 2, 3], weights=[68, 15, 10, 7])[0]
+                            if payment == "口座振替" else 0)
+            account_issue = payment == "口座振替" and unpaid_count > 0 and rng.random() < 0.3
+
             p = churn_prob(rng, product, channel, form, amount, age, agent)
+            p += UNPAID_W[min(unpaid_count, 3)]
             # 保全アクション（結果記録）: 4割の契約に保全接触。対応内容ごとに早期解約率が下がる（デモ用の効き）。
             contacted = rng.random() < 0.4
             action = rng.choice(list(ACT_EFFECT)) if contacted else None
             p_adj = min(max(p - (ACT_EFFECT[action] if contacted else 0.0), 0.02), 0.85)
             churned = rng.random() < p_adj
             cancel = None
-            status = "継続中"
+            status = "成立済"   # 継続（現ステータス実値）
             if churned:
                 # 契約から6ヶ月以内のどこかで解約。as-of超なら未観測＝継続中扱い
                 cd = contract + timedelta(days=rng.randint(15, 175))
                 if cd <= AS_OF:
                     cancel = cd
-                    status = "解約"
+                    if payment == "口座振替" and unpaid_count >= 2:
+                        status = rng.choice(["未払消滅", "不成立【引受後未入金】"])  # 未収起因
+                    else:
+                        status = "成立後CAN【解約】"  # 自発解約
             if contacted:
                 # 接触日: 契約後3〜45日。解約より前（免疫時間バイアスを避ける）。未来の接触は記録しない
                 contact_day = contract + timedelta(days=rng.randint(3, 45))
@@ -146,7 +176,8 @@ def build_records(rng):
                 "order_date": order, "contract_date": contract,
                 "cancel_date": cancel, "status": status, "debit_result": debit,
                 "account_daily": account, "debit_due": due,
-                "payment": rng.choice(PAYMENTS), "insurer": rng.choice(INSURERS),
+                "payment": payment, "insurer": rng.choice(INSURERS),
+                "iv": _iv_string(rng, unpaid_count, AS_OF, account_issue),
             })
 
     # 放置検知(要フォロー)デモ：高リスク条件・継続中・接触なしを固定注入
@@ -160,11 +191,27 @@ def build_records(rng):
             "gender": rng.choice(GENDERS), "area": rng.choice(AREAS),
             "birth": _birth_from_age(rng, 26),
             "order_date": contract - timedelta(days=5), "contract_date": contract,
-            "cancel_date": None, "status": "継続中",
+            "cancel_date": None, "status": "成立済",
             "debit_result": ("不着" if k in (1, 4) else "遅延" if k == 2 else "成功"),
             "account_daily": "いいえ",
             "debit_due": (contract + timedelta(days=30)).isoformat(),
-            "payment": "コンビニ", "insurer": "A生命",
+            "payment": "口座振替", "insurer": "A生命",
+            "iv": _iv_string(rng, 2 if k in (1, 4) else 1, AS_OF, k == 1),
+        })
+
+    # 対象外・母集団外デモ（率の分母から除外＋件数併記を見せる）
+    for st in ("死亡解約", "契約取り消し【成立後】", "取消・解除【成立後】", "謝絶", "PL申込【送信前】"):
+        apply_id += 1
+        recs.append({
+            "customer_id": f"C8{apply_id % 1000:03d}", "apply_id": f"A{apply_id}",
+            "product": "医療", "channel": "紹介", "form": "対面",
+            "agent": "OK-02", "amount": 3000, "age": 40,
+            "gender": rng.choice(GENDERS), "area": rng.choice(AREAS),
+            "birth": _birth_from_age(rng, 40),
+            "order_date": date(2025, 1, 5), "contract_date": date(2025, 1, 10),
+            "cancel_date": (date(2025, 3, 1) if "取" in st or "解" in st or "死" in st else None),
+            "status": st, "debit_result": "", "account_daily": "はい",
+            "debit_due": "", "payment": "口座振替", "insurer": "B損保", "iv": "",
         })
 
     # 未紐付(顧客ID欠損)デモ：黙って母集団から消さないことを示す
@@ -176,9 +223,9 @@ def build_records(rng):
             "agent": "OK-03", "amount": 3000, "age": 30,
             "gender": "男性", "area": "那覇市", "birth": _birth_from_age(rng, 30),
             "order_date": date(2026, 6, 10), "contract_date": date(2026, 6, 15),
-            "cancel_date": None, "status": "継続中", "debit_result": "成功",
+            "cancel_date": None, "status": "成立済", "debit_result": "成功",
             "account_daily": "はい", "debit_due": "2026-07-15",
-            "payment": "口座振替", "insurer": "B損保",
+            "payment": "口座振替", "insurer": "B損保", "iv": "",
         })
     return recs, actions
 
@@ -210,7 +257,7 @@ def write_real(recs, path):
     契約日=開始日 / 初回保険料着金日=解約日（継続中は空欄）。"""
     cols = ["営業担当者", "顧客ID", "現ステータス", "受注日", "契約日", "生年月日",
             "年齢", "住所　県", "申し込み商品", "保険料￥", "払込経路", "申込方法",
-            "年", "月", "日", "市町村", "契：性別", "保険会社", "リスト種類",
+            "年", "月", "日", "市町村", "Ⅳ", "契：性別", "保険会社", "リスト種類",
             "初回保険料着金日", "初回引落結果", "口座普段使い", "引落予定日"]
     with open(path, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=cols)
@@ -225,7 +272,8 @@ def write_real(recs, path):
                 "保険料￥": r["amount"], "払込経路": r["payment"],
                 "申込方法": r["form"],
                 "年": c.year, "月": c.month, "日": c.day,
-                "市町村": r["area"], "契：性別": r["gender"],
+                "市町村": r["area"], "Ⅳ": r.get("iv", ""),
+                "契：性別": r["gender"],
                 "保険会社": r["insurer"], "リスト種類": r["channel"],
                 "初回保険料着金日": _d(r["cancel_date"]),
                 "初回引落結果": r.get("debit_result", ""),
