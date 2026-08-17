@@ -5,6 +5,7 @@ from datetime import date
 from .config import AGE_BANDS, AMOUNT_EDGES, AMOUNT_LABELS, EARLY_CHURN_MONTHS
 from .dates import has_reached_months, is_within_months
 from .status import status_scope
+from .unpaid import parse_unpaid, bin_unpaid_count
 
 
 def bin_age(age):
@@ -75,6 +76,8 @@ def normalize_record(raw, column_map, as_of):
     excluded_reason = None
     date_missing = False
     payment_route = _get(raw, column_map, "payment_route")
+    # Ⅳ列（口座振替の未収履歴）。未マップなら count=0 / band="0"
+    up = parse_unpaid(_get(raw, column_map, "unpaid"))
 
     if status_val is not None and str(status_val).strip():
         sc = status_scope(status_val, apply_date, cancel_date, as_of, EARLY_CHURN_MONTHS)
@@ -127,4 +130,10 @@ def normalize_record(raw, column_map, as_of):
         "excluded_reason": excluded_reason,
         "date_missing": date_missing,
         "payment_route": payment_route,
+        # Ⅳ列（未収履歴）由来。unpaid_band は要因（繰り返し未収＝高リスク）
+        "unpaid_count": up["unpaid_count"],
+        "unpaid_band": bin_unpaid_count(up["unpaid_count"]),
+        "unpaid_contacted": up["contacted"],
+        "unpaid_konbini": up["konbini_sent"],
+        "unpaid_account_issue": up["account_issue"],
     }

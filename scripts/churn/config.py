@@ -10,9 +10,10 @@ AGE_BANDS = [(0, 19, "〜10代"), (20, 29, "20代"), (30, 39, "30代"),
 AMOUNT_EDGES = [3000, 10000, 30000]
 AMOUNT_LABELS = ["〜3千", "3千〜1万", "1万〜3万", "3万〜"]
 
-# リスク要因として使う内部項目
+# リスク要因として使う内部項目。unpaid_band＝Ⅳ列由来の未収回数（繰り返し未収＝高リスク）。
+# 実データ(現ステータス/Ⅳ)が無い合成・従来レコードでは unpaid_band="0" となり中立（影響なし）。
 FACTOR_FIELDS = ["product", "channel", "apply_form", "amount_band",
-                 "age_band", "gender", "area", "agent_id"]
+                 "age_band", "gender", "area", "agent_id", "unpaid_band"]
 
 # 学習のスムージング強度（大きいほど少件数を全体平均へ強く引き寄せる）
 SMOOTHING_K = 30

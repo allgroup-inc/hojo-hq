@@ -13,5 +13,6 @@
   "agent_id": "営業担当者",
   "debit_due": "初回引落予定日",
   "status": "現ステータス",
-  "payment_route": "払込経路"
+  "payment_route": "払込経路",
+  "unpaid": "Ⅳ"
 }

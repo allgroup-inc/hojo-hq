@@ -53,6 +53,20 @@ class TestSchemaStatus(unittest.TestCase):
         self.assertFalse(r["in_scope"])
         self.assertEqual(r["status_category"], "母集団外")
 
+    def test_unpaid_column_parsed_into_record(self):
+        cmap = dict(CMAP, unpaid="Ⅳ")
+        row = raw("成立済"); row["Ⅳ"] = "●未26⑦⑥済未26⑥"
+        r = normalize_record(row, cmap, AS_OF)
+        self.assertEqual(r["unpaid_count"], 2)
+        self.assertEqual(r["unpaid_band"], "2+")
+        self.assertTrue(r["unpaid_contacted"])
+        self.assertTrue(r["unpaid_konbini"])
+
+    def test_no_unpaid_column_defaults_zero(self):
+        r = normalize_record(raw("成立済"), CMAP, AS_OF)   # Ⅳ未マップ
+        self.assertEqual(r["unpaid_count"], 0)
+        self.assertEqual(r["unpaid_band"], "0")
+
     def test_backward_compatible_without_status(self):
         # status列が無いcolumn_mapなら従来どおり（cancel_date基準）
         cmap = {k: v for k, v in CMAP.items() if k != "status"}
