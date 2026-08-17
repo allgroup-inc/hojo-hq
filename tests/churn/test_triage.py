@@ -74,11 +74,12 @@ class TestTriage(unittest.TestCase):
         self.assertTrue(c["account_issue"])
         self.assertIn("消滅目前", c["recommendation"])
 
-    def test_triage_orders_by_streak_within_band(self):
-        cands = [{"trigger": "未払消滅目前", "saveable": 100.0, "unpaid_streak": 3},
-                 {"trigger": "未払消滅目前", "saveable": 100.0, "unpaid_streak": 5}]
+    def test_triage_orders_by_saveable_within_band(self):
+        # 帯内は守れる金額順（streakは二次キーにしない＝不着等を金額順から外さない）
+        cands = [{"trigger": "未払消滅目前", "saveable": 50.0, "unpaid_streak": 5},
+                 {"trigger": "未払消滅目前", "saveable": 300.0, "unpaid_streak": 3}]
         today, _, _ = triage(cands, capacity=10)
-        self.assertEqual([c["unpaid_streak"] for c in today], [5, 3])  # 連続が長い方を先に
+        self.assertEqual([c["saveable"] for c in today], [300.0, 50.0])
 
     def test_classify_includes_matured_continuing_with_streak(self):
         # 6ヶ月超の成立済(is_scoreable=False)でも、未払消滅目前なら今日の要接触に載せる

@@ -62,7 +62,8 @@ class TestContactLogExtended(unittest.TestCase):
                    "C1,2025-01-01,2025-02-01,保全,訪問,保険料負担,家計の見直し提案,再訪問\n")
         with tempfile.TemporaryDirectory() as d:
             p = os.path.join(d, "log.csv")
-            open(p, "w", encoding="utf-8").write(content)
+            with open(p, "w", encoding="utf-8") as f:
+                f.write(content)
             rows = load_contacts(p, cmap)
         r = rows[0]
         self.assertEqual(r["medium"], "訪問")

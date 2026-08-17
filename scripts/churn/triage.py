@@ -34,7 +34,7 @@ def contact_channel(band, saveable, trigger, saveable_min=VISIT_SAVEABLE_MIN):
     return "訪問" if (high_value and high_stakes) else "架電"
 
 
-def recommend_action(trigger, account_issue=False, streak=0, channel="架電"):
+def recommend_action(trigger, account_issue=False, channel="架電"):
     """きっかけ（＋口座不備・接触手段）から営業向けの“ひとこと”を返す。提案・最終判断は人。"""
     topic = _TOPIC.get(trigger, "状況確認")
     if account_issue and trigger in ("未払消滅目前", "未収2連続", "口座確認", "不着", "遅延"):
@@ -94,16 +94,16 @@ def classify(records, model, as_of, contacts=None):
             "trigger": trig, "risk": s["risk"], "risk_pct": display_pct(s["risk"]),
             "band": s["band"], "hit_factors": s["hit_factors"], "saveable": sv,
             "unpaid_streak": streak, "account_issue": account_issue, "channel": channel,
-            "recommendation": recommend_action(trig, account_issue, streak, channel),
+            "recommendation": recommend_action(trig, account_issue, channel),
         })
     return cands
 
 
 def triage(candidates, capacity):
     """優先度→守れる金額順に並べ、キャパで today / carry に分ける。繰り越しは件数・最高額を明示。"""
-    # 帯内は 未収連続が長い順 → 守れる金額順（消滅が近い人を先に）
-    ordered = sorted(candidates, key=lambda c: (PRIORITY.get(c["trigger"], 99),
-                                                -c.get("unpaid_streak", 0), -c["saveable"]))
+    # 帯内は「守れる金額」順（未収連続数はきっかけ自体が表すので二次キーにしない：帯内で
+    # streakを優先すると不着等が金額順から外れ、消滅済み(streak≥4)を救える目前より上げてしまう）
+    ordered = sorted(candidates, key=lambda c: (PRIORITY.get(c["trigger"], 99), -c["saveable"]))
     today = ordered[:capacity]
     carry = ordered[capacity:]
     stats = {
@@ -119,10 +119,12 @@ def render_html(today, carry, stats, path, capacity):
     import html
     trs = []
     for i, c in enumerate(today, 1):
-        stage = c.get("unpaid_streak", 0)
-        stage_txt = f"未収{stage}ヶ月" if stage else "—"
+        parts = []
+        if c.get("trigger") in ("未払消滅目前", "未収2連続") and c.get("unpaid_streak"):
+            parts.append(f"未収{c['unpaid_streak']}ヶ月")   # 未収連鎖トリガーのときだけ「未収」表記
         if c.get("account_issue"):
-            stage_txt += "・口座不備"
+            parts.append("口座不備")
+        stage_txt = "・".join(parts) if parts else "—"
         trs.append(
             f'<tr><td>{i}</td><td>{html.escape(str(c["trigger"]))}</td>'
             f'<td>{html.escape(str(c.get("customer_id") or "—"))}</td>'

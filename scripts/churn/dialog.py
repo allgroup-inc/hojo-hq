@@ -11,25 +11,13 @@
 from __future__ import annotations
 
 from .config import MIN_RELIABLE_N
-from .effect_learning import _contacts_index, _mature_resolved
+from .effect_learning import _contacts_index, _mature_resolved, _qualifying_contacts
 
 
 def _qualifying_values(record, idx, field):
     """解約前・当該タグが非空の接触の、field 値リスト（免疫時間・空タグ除外）。"""
-    by_id, by_date = idx
-    cs = by_id.get((record.get("customer_id"), record.get("apply_id")))
-    if cs is None:
-        cs = by_date.get((record.get("customer_id"), record.get("apply_date")), [])
-    cancel = record.get("cancel_date")
-    out = []
-    for c in cs:
-        cd = c.get("contact_date")
-        val = (c.get(field) or "").strip()
-        if cd is None or not val:
-            continue
-        if cancel is None or cd < cancel:
-            out.append(val)
-    return out
+    return [v for c in _qualifying_contacts(record, idx)
+            if (v := (c.get(field) or "").strip())]
 
 
 def dialog_effect(records, contacts, mature_before, field="approach",

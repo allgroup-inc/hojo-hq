@@ -12,24 +12,16 @@
 from __future__ import annotations
 
 from .config import MIN_RELIABLE_N
-from .effect_learning import _contacts_index, _mature_resolved
+from .effect_learning import _contacts_index, _mature_resolved, _qualifying_contacts
 
 
 def _qualifying_pairs(record, idx, f1, f2):
     """解約前・f1とf2の両方が非空の接触から (f1値, f2値) の並び（免疫時間・空タグ除外）。"""
-    by_id, by_date = idx
-    cs = by_id.get((record.get("customer_id"), record.get("apply_id")))
-    if cs is None:
-        cs = by_date.get((record.get("customer_id"), record.get("apply_date")), [])
-    cancel = record.get("cancel_date")
     out = []
-    for c in cs:
-        cd = c.get("contact_date")
+    for c in _qualifying_contacts(record, idx):
         v1 = (c.get(f1) or "").strip()
         v2 = (c.get(f2) or "").strip()
-        if cd is None or not v1 or not v2:
-            continue
-        if cancel is None or cd < cancel:
+        if v1 and v2:
             out.append((v1, v2))
     return out
 

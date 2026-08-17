@@ -32,9 +32,10 @@ def _contacts_index(contacts):
     return by_id, by_date
 
 
-def _qualifying_actions(record, idx):
-    """解約前の接触のみ（免疫時間除外）の対応内容リストを返す。
-    突合は (顧客ID, apply_id) 優先＝同日複数契約の二重計上を避ける。無ければ (顧客ID, 契約日)。"""
+def _qualifying_contacts(record, idx):
+    """解約前（免疫時間除外）・接触日ありの接触リスト。フィールドの非空判定は呼び出し側で行う。
+    突合は (顧客ID, apply_id) 優先＝同日複数契約の二重計上を避ける。無ければ (顧客ID, 契約日)。
+    dialog/talkscript もこれを再利用する（免疫時間・突合ロジックの一元化）。"""
     by_id, by_date = idx
     cs = by_id.get((record.get("customer_id"), record.get("apply_id")))
     if cs is None:
@@ -43,12 +44,17 @@ def _qualifying_actions(record, idx):
     out = []
     for c in cs:
         cd = c.get("contact_date")
-        action = (c.get("action") or "").strip()
-        if cd is None or not action:      # 日付なし・対応内容が空の接触は数えない
+        if cd is None:                     # 接触日なしは数えない
             continue
         if cancel is None or cd < cancel:  # 解約後の接触は数えない（免疫時間除外）
-            out.append(action)
+            out.append(c)
     return out
+
+
+def _qualifying_actions(record, idx):
+    """解約前の接触のうち対応内容が非空のもののリスト（免疫時間除外）。"""
+    return [a for c in _qualifying_contacts(record, idx)
+            if (a := (c.get("action") or "").strip())]
 
 
 def _rate(recs):
