@@ -55,11 +55,20 @@ jobs:
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
-          git add data/fukugiiro/seido.json docs/フクギイロ_突合レポート.md site/fukugiiro/area site/fukugiiro/kit site/sitemap.xml site/robots.txt
+          git add data/fukugiiro/seido.json docs/フクギイロ_突合レポート.md site/fukugiiro/area site/fukugiiro/kit site/fukugiiro/life site/sitemap.xml site/robots.txt
           git diff --cached --quiet || git commit -m "auto: fukugiiro seido update $(date '+%Y-%m-%d %H:%M')"
+          # addリスト外の生成残骸が pull --rebase を妨げないよう作業ツリーを掃除
+          # (2026-08-17: life追加漏れ+未ステージ残骸でpullが3回失敗→無言でコミット消失した事故の再発防止)
+          git checkout -- . 2>/dev/null || true
+          git clean -fd site 2>/dev/null || true
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
+          pushed=0
           for i in 1 2 3; do
-            git pull --rebase -X theirs origin main && git push origin main && break
+            git pull --rebase -X theirs origin main && git push origin main && pushed=1 && break
             git rebase --abort 2>/dev/null || true
             echo "push retry $i"; sleep 5
           done
+          if [ "$pushed" != "1" ]; then
+            echo "::error::再構築結果のpushに失敗(無言のコミット消失を防ぐため失敗扱い)"
+            exit 1
+          fi
