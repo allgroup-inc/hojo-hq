@@ -32,6 +32,7 @@ gate の値: 「点線・未検証」→(ゲート合格で)「実線・検証�
 """
 import json
 import os
+import random
 import re
 import sys
 from datetime import datetime, timezone, timedelta
@@ -42,7 +43,10 @@ SUBSIDIES = os.path.join(BASE, "data", "subsidies.json")
 STOCK = os.path.join(BASE, "data", "personal", "stock_status.json")
 FUKUGIIRO_LATEST = os.path.join(BASE, "reports", "fukugiiro", "latest.md")
 KESSAI = os.path.join(BASE, "docs", "決裁キュー.md")
+WORKFLOWS = os.path.join(BASE, ".github", "workflows")
 OUT_DIR = os.path.join(BASE, "reports", "integrated")
+
+AUDIT_SAMPLE_N = 3    # CLAUDE.md 三名体制ルール5 / 運用規程G2: 週次で無作為3件を再点検
 
 KPI_KEISAI = 150      # CLAUDE.md 支持KPI: 掲載制度数 常時150件以上
 KPI_FRESH_HOURS = 24  # CLAUDE.md 支持KPI: 更新遅延24時間以内
@@ -191,7 +195,8 @@ def parse_kessai(txt, today=None):
     unchecked = [re.sub(r"^\s*-\s*\[ \]\s*", "", ln).strip()
                  for ln in txt.splitlines() if re.match(r"^\s*-\s*\[ \]", ln)]
     if not unchecked:
-        return {"count": 0, "oldest_item": None, "oldest_date": None, "stale_days": None}
+        return {"count": 0, "items": [], "oldest_item": None,
+                "oldest_date": None, "stale_days": None}
     dated = []
     for item in unchecked:
         m = DATE_RE.search(item)
@@ -208,6 +213,7 @@ def parse_kessai(txt, today=None):
         oldest_date, oldest_item, stale = None, unchecked[0], None
     return {
         "count": len(unchecked),
+        "items": unchecked,          # §4の無作為点検プールに使う
         "oldest_item": oldest_item,
         "oldest_date": oldest_date.isoformat() if oldest_date else None,
         "stale_days": stale,
@@ -247,6 +253,61 @@ def load_kessai(path=KESSAI):
             return parse_kessai(f.read())
     except Exception:
         return None
+
+
+# ---------------------------------------------------------------- 監査所見(独立監査)
+
+def list_scheduled_workflows(path=WORKFLOWS):
+    """cron定期実行のワークフロー一覧(= L3/L4自動運転。無作為点検の対象プール)。
+
+    読めない場合は空リストを返す(レポート全体は落とさない)。
+    """
+    out = []
+    try:
+        for fn in sorted(os.listdir(path)):
+            if not fn.endswith((".yml", ".yaml")):
+                continue
+            with open(os.path.join(path, fn), encoding="utf-8") as f:
+                txt = f.read()
+            if re.search(r"^\s*schedule:", txt, re.M) and "cron:" in txt:
+                out.append(fn)
+    except Exception:
+        return []
+    return out
+
+
+def pick_audit_targets(week_tag, workflows, kessai_items, n=AUDIT_SAMPLE_N):
+    """今週の無作為点検3件を**決定性**で選ぶ(週番号がシード)。
+
+    同じ週なら何度生成しても同じ3件になる(べき等)。週が変われば組み合わせが変わる。
+    resilient-agent-design: 乱数を実行時刻に依存させない(再生成で結果がぶれない)。
+    """
+    pool = [("定期実行", w) for w in (workflows or [])]
+    pool += [("決裁キュー", _shorten(i)) for i in (kessai_items or [])]
+    if not pool:
+        return []
+    return random.Random(week_tag).sample(pool, min(n, len(pool)))
+
+
+def render_audit_section(targets, week_tag):
+    head = ("## 4. 監査所見(独立監査・タダスさん)— 今週の無作為点検\n"
+            "\n選定は週番号シードの決定性抽出(同じ週なら何度生成しても同じ対象=べき等)。\n")
+    if not targets:
+        return head + "\n点検対象プールが空でした(定期実行・決裁キューのどちらも読めず)。ファイルを直接確認してください。\n"
+    rows = "\n".join(
+        f"| {i} | {kind} | {name} | — (未記入) |"
+        for i, (kind, name) in enumerate(targets, 1)
+    )
+    return (
+        head
+        + f"\n| # | 種別 | 点検対象 | 所見(監査が記入) |\n|---|---|---|---|\n{rows}\n"
+        + "\n点検の観点(3役で見る):\n"
+        + "1. **スイシン** — 意図どおり動いているか(直近の実行ログ・出力物)\n"
+        + "2. **ウタガイ** — 壊れても気づけるか(失敗時に通知/停止するか。黙って成功扱いになっていないか)\n"
+        + "3. **ベッカイ** — そもそも必要か(止めても誰も困らないものが動き続けていないか)\n"
+        + f"\n記入先: `reports/integrated/{week_tag}_weekly.md` の本表(latest.md は翌週上書きされます)。\n"
+        + "**所見が2週連続で未記入なら、監査が名前だけになっている合図**です(統括経由で小柳さんへ上申)。\n"
+    )
 
 
 # ---------------------------------------------------------------- レポート組み立て
@@ -300,7 +361,8 @@ def render_grp_section(db, fukugiiro):
     return "\n".join(lines)
 
 
-def build_report(now=None, db=None, fukugiiro=None, stock=None, stock_err=None, kessai=None):
+def build_report(now=None, db=None, fukugiiro=None, stock=None, stock_err=None,
+                 kessai=None, audit=None):
     now = now or datetime.now(JST)
     week_tag = now.strftime("%G-W%V")  # ISO週(例: 2026-W32)
     return week_tag, f"""# 統合週次レポート {week_tag}(ループ1・計器盤)
@@ -318,6 +380,8 @@ def build_report(now=None, db=None, fukugiiro=None, stock=None, stock_err=None, 
 
 {render_kessai_section(kessai)}
 
+{render_audit_section(audit, week_tag)}
+
 ---
 
 ## 人間の次アクション(この週の依頼)
@@ -326,6 +390,7 @@ def build_report(now=None, db=None, fukugiiro=None, stock=None, stock_err=None, 
 2. Grp信号(§1)で🔴🟡が出ている行を1つだけ確認する(全部見ない — ボトルネックだけ)
 3. 個人ストック(§2)で件数が動いたら data/personal/stock_status.json の contracts を更新
    (金額は書かない — 件数とゲート状態のみ)
+4. 監査所見(§4)が2週連続で未記入なら、監査が回っていない合図として扱う
 
 *本レポートは統合初号機(ループ1)。エンライフ・GLOWの自動集計化と早期警報の閾値(ループ3)は次の接続。*
 """
@@ -337,8 +402,11 @@ def main():
     fukugiiro = load_fukugiiro_latest()
     stock, stock_err = load_stock()
     kessai = load_kessai()
+    audit = pick_audit_targets(now.strftime("%G-W%V"),
+                               list_scheduled_workflows(),
+                               (kessai or {}).get("items"))
 
-    week_tag, md = build_report(now, db, fukugiiro, stock, stock_err, kessai)
+    week_tag, md = build_report(now, db, fukugiiro, stock, stock_err, kessai, audit)
 
     os.makedirs(OUT_DIR, exist_ok=True)
     path = os.path.join(OUT_DIR, f"{week_tag}_weekly.md")
@@ -350,7 +418,8 @@ def main():
     print(f"  ミカタ掲載{(db or {}).get('count','?')}件 / "
           f"もらいわすれ堂転記{'OK' if fukugiiro and fukugiiro.get('bottleneck') else 'スキップ'} / "
           f"個人ストック{'表示' if stock else ('拒否' if stock_err else '未計測')} / "
-          f"決裁キュー未チェック{(kessai or {}).get('count','?')}件")
+          f"決裁キュー未チェック{(kessai or {}).get('count','?')}件 / "
+          f"監査の無作為点検{len(audit)}件")
 
 
 # ---------------------------------------------------------------- 自己テスト
@@ -444,10 +513,31 @@ def self_test():
     check("fresh.late", freshness("2026-07-29 06:00", now)[0].startswith("⚠"))
     check("fresh.unknown", freshness("こわれた日付", now)[0] == "不明")
 
-    # 5) レポート全体が入力欠損でも組み立てられる(安全なスキップ)
+    # 5) 監査の無作為点検(決定性・べき等・欠損時の安全動作)
+    wfs = ["a.yml", "b.yml", "c.yml", "d.yml"]
+    items = ["決裁1", "決裁2", "決裁3"]
+    t1 = pick_audit_targets("2026-W33", wfs, items)
+    t2 = pick_audit_targets("2026-W33", wfs, items)
+    check("audit.size", len(t1) == 3, f"got {len(t1)}")
+    check("audit.deterministic", t1 == t2, f"{t1} != {t2}")       # 同じ週=同じ3件(べき等)
+    check("audit.no_dup", len({n for _, n in t1}) == 3, f"got {t1}")
+    check("audit.rotates", pick_audit_targets("2026-W34", wfs, items) != t1)  # 週が変われば入れ替わる
+    check("audit.pool_small", len(pick_audit_targets("2026-W33", ["only.yml"], [])) == 1)
+    check("audit.pool_empty", pick_audit_targets("2026-W33", [], []) == [])
+    check("audit.render_empty", "プールが空" in render_audit_section([], "2026-W33"))
+    rendered = render_audit_section(t1, "2026-W33")
+    check("audit.render_blank", "(未記入)" in rendered and "2週連続" in rendered)
+    check("audit.render_week", "2026-W33_weekly.md" in rendered)
+    check("audit.workflows_missing", list_scheduled_workflows("/nonexistent/path") == [])
+    # 実リポジトリの定期実行を1本以上拾えること(プールが枯れていない確認)
+    check("audit.workflows_real", len(list_scheduled_workflows()) >= 1,
+          f"got {len(list_scheduled_workflows())}")
+
+    # 6) レポート全体が入力欠損でも組み立てられる(安全なスキップ)
     tag, md = build_report(now=datetime(2026, 8, 3, 9, 0, tzinfo=JST))
     check("report.week_tag", tag == "2026-W32", f"got {tag}")
     check("report.builds", "統合週次レポート" in md and "スキップ" in md and "未計測" in md)
+    check("report.audit_section", "## 4. 監査所見" in md)
     for tok in ("万円", "手取り額", "@"):  # 金額・PIIらしき断片が欠損時レポートに出ないこと
         check(f"report.clean:{tok}", tok not in md)
 
