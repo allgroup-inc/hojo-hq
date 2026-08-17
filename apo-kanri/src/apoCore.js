@@ -150,17 +150,22 @@
     }));
   }
 
+  function getApoSchema_() {
+    if (typeof module !== "undefined" && module.exports) {
+      return require("./schema.js");
+    }
+    return global.ApoSchema;
+  }
+
   /**
    * 変更履歴・変更通知用の差分文字列。値が変わった列だけを「列名: 旧→新」で連結する。
-   * 列の並びは比較しやすいよう旧レコードのキー順ではなくスキーマ順(newRecordのキー順)に依存
-   * しないよう、両者のキーの和集合を走査する。
+   * 走査対象は**スキーマのアポ予定列のみ**(タイムスタンプ2列を除く)。
+   * クライアントのペイロードには confirmedOverlap 等の内部フラグが混ざるため、
+   * キーの和集合を走査すると内部フラグが差分・Slack通知に漏れる(2026-08-17レビュー指摘#2)。
    */
   function buildChangeDiff(oldRecord, newRecord) {
-    var keys = [];
-    [oldRecord, newRecord].forEach(function (record) {
-      Object.keys(record || {}).forEach(function (key) {
-        if (keys.indexOf(key) === -1 && DIFF_EXCLUDED_COLUMNS.indexOf(key) === -1) keys.push(key);
-      });
+    var keys = getApoSchema_().APPOINTMENT_HEADERS.filter(function (key) {
+      return DIFF_EXCLUDED_COLUMNS.indexOf(key) === -1;
     });
     var parts = [];
     keys.forEach(function (key) {

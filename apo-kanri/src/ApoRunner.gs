@@ -181,7 +181,8 @@ function saveAppointment(payload) {
       var oldRecord = findAppointmentById_(appointments, payload["アポID"]);
       if (!oldRecord) throw new Error("対象のアポが見つかりません: " + payload["アポID"]);
       var diff = ApoCore.buildChangeDiff(oldRecord, payload);
-      updateAppointmentRow_(payload);
+      updateAppointmentRow_(payload, oldRecord);
+      var notified = false;
       if (diff) {
         appendHistory_(payload["アポID"], operator, "変更", diff);
         var message = buildStatusAwareMessage_(payload, oldRecord["ステータス"], diff, mention);
@@ -192,17 +193,18 @@ function saveAppointment(payload) {
           message += "\n" + ApoNotify.buildSubstituteSection(
             ApoCore.buildSubstituteCandidates(appointments, payload, ApoAccess.listSalesStaff(staffRows)));
         }
-        notifySafely_(payload["アポID"], operator, "変更", message);
+        notified = notifySafely_(payload["アポID"], operator, "変更", message);
       }
-      return { ok: true, apoId: payload["アポID"] };
+      return { ok: true, apoId: payload["アポID"], notified: notified };
     }
 
     var apoId = generateUniqueApoId_(appointments);
     payload["アポID"] = apoId;
     appendAppointmentRow_(payload);
     appendHistory_(apoId, operator, "新規", ApoCore.buildChangeDiff({}, payload));
-    notifySafely_(apoId, operator, "新規", ApoNotify.buildNewAppointmentMessage(payload, mention));
-    return { ok: true, apoId: apoId };
+    var newNotified = notifySafely_(apoId, operator, "新規",
+      ApoNotify.buildNewAppointmentMessage(payload, mention));
+    return { ok: true, apoId: apoId, notified: newNotified };
   } finally {
     lock.releaseLock();
   }
@@ -211,6 +213,11 @@ function saveAppointment(payload) {
 /**
  * カードのアクションシートからのステータスだけの更新(2タップ操作)。
  * 履歴・通知は saveAppointment の編集と同じ扱いにする。
+ *
+ * キャンセル系・再調整中から稼働ステータスへ戻す場合だけはダブルブッキング検知を
+ * 生かす(confirmedOverlapを立てない)。空いた枠に別アポが入っている可能性があるため
+ * (2026-08-17レビュー指摘#5)。重複があれば saveAppointment が {ok:false} を返し、
+ * 画面側が「編集から確認」を促す。
  */
 function updateStatus(apoId, status) {
   requireApoAccess_();
@@ -220,35 +227,48 @@ function updateStatus(apoId, status) {
   var appointments = readAppointments_();
   var record = findAppointmentById_(appointments, apoId);
   if (!record) throw new Error("対象のアポが見つかりません: " + apoId);
+  var INACTIVE = ["キャンセル(顧客都合)", "キャンセル(自社都合)", "再調整中"];
+  var reactivating = INACTIVE.indexOf(record["ステータス"]) !== -1 &&
+    INACTIVE.indexOf(status) === -1;
   var updated = {};
   Object.keys(record).forEach(function (key) { updated[key] = record[key]; });
   updated["ステータス"] = status;
-  updated.confirmedOverlap = true;
+  updated.confirmedOverlap = !reactivating;
   return saveAppointment(updated);
 }
 
 /**
- * 遅れそうワンタップ連絡。操作者(営業)の本日・現時刻以降のアポを抽出し、
+ * 遅れそうワンタップ連絡。タップされたカードのアポを起点に、**そのアポの担当営業**の
+ * 同日・そのアポ開始時刻以降のアポ(タップしたアポ自身を含む)を抽出し、
  * 各アポのアポ入れ担当へSlack通知する。アポの時刻は変更しない
  * (設計書 三名体制裁定①: 判断は人間・通知のみ)。
+ *
+ * 2026-08-17レビュー指摘#3#4の再設計: 以前は「操作者=遅れる営業」とみなして現在時刻以降を
+ * 見ていたため、アポ入れ係が営業のカードから押すと誤った人物の遅延として通知され、
+ * 開始時刻を過ぎた当該アポ自身も対象から漏れていた。apoIdを受け取り、遅れる人=
+ * そのアポの担当営業・起点時刻=そのアポの開始時刻に変更。
  */
-function reportDelay(minutes) {
+function reportDelay(minutes, apoId) {
   requireApoAccess_();
   var staffRows = readStaffRows_();
   var operator = ApoAccess.resolveStaffName(Session.getActiveUser().getEmail(), staffRows);
-  var today = ApoCore.normalizeDateString(new Date());
-  var nowTime = Utilities.formatDate(new Date(), "Asia/Tokyo", "HH:mm");
-  var targets = ApoCore.buildDelayTargets(readAppointments_(), operator, today, nowTime);
+  var appointments = readAppointments_();
+  var anchor = apoId ? findAppointmentById_(appointments, apoId) : null;
+  var salesName = anchor ? anchor["担当営業"] : operator;
+  var date = anchor ? anchor["日付"] : ApoCore.normalizeDateString(new Date());
+  var fromTime = anchor ? anchor["開始時刻"]
+    : Utilities.formatDate(new Date(), "Asia/Tokyo", "HH:mm");
+  var targets = ApoCore.buildDelayTargets(appointments, salesName, date, fromTime);
   var mentionResolver = function (setterName) {
     var setter = ApoAccess.findStaffByName(setterName, staffRows);
     return ApoNotify.formatMention(setter && setter.slackUserId, setterName);
   };
-  var firstApoId = targets.length > 0 ? targets[0]["アポID"] : "-";
-  appendHistory_(firstApoId, operator, "遅延連絡",
-    "+" + minutes + "分遅れ見込み(影響しうる後続アポ " + targets.length + "件)");
-  notifySafely_(firstApoId, operator, "遅延連絡",
-    ApoNotify.buildDelayMessage(operator, minutes, targets, mentionResolver));
-  return { ok: true, targetCount: targets.length };
+  var historyApoId = anchor ? anchor["アポID"] : (targets.length > 0 ? targets[0]["アポID"] : "-");
+  appendHistory_(historyApoId, operator, "遅延連絡",
+    salesName + "さん +" + minutes + "分遅れ見込み(影響しうるアポ " + targets.length + "件)");
+  var notified = notifySafely_(historyApoId, operator, "遅延連絡",
+    ApoNotify.buildDelayMessage(salesName, minutes, targets, mentionResolver));
+  return { ok: true, targetCount: targets.length, notified: notified };
 }
 
 // ---- 内部ヘルパー ----
@@ -280,7 +300,7 @@ function appendAppointmentRow_(payload) {
   sheet.appendRow(payloadToRow_(payload));
 }
 
-function updateAppointmentRow_(payload) {
+function updateAppointmentRow_(payload, existingRecord) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet()
     .getSheetByName(ApoSchema.APPOINTMENT_SHEET_NAME);
   var lastRow = sheet.getLastRow();
@@ -289,8 +309,7 @@ function updateAppointmentRow_(payload) {
   var ids = sheet.getRange(2, idColumn, lastRow - 1, 1).getValues();
   for (var i = 0; i < ids.length; i++) {
     if (ids[i][0] === payload["アポID"]) {
-      var existing = readAppointments_()[i];
-      payload["登録日時"] = existing ? existing["登録日時"] : nowStamp_();
+      payload["登録日時"] = (existingRecord && existingRecord["登録日時"]) || nowStamp_();
       payload["最終更新日時"] = nowStamp_();
       sheet.getRange(i + 2, 1, 1, ApoSchema.APPOINTMENT_HEADERS.length)
         .setValues([payloadToRow_(payload)]);
@@ -325,13 +344,16 @@ function buildStatusAwareMessage_(payload, oldStatus, diff, mention) {
 
 /**
  * Slack通知。失敗しても保存は成功扱い(保存が正・通知は従)。失敗は変更履歴に記録する。
+ * 戻り値: 実際に送信できたら true。スキップ・失敗は false(画面のトースト文言が
+ * 「通知済み」と偽らないための実績フラグ。2026-08-17レビュー指摘#10)。
  */
 function notifySafely_(apoId, operator, operation, message) {
   try {
-    postToApoSlack_(message);
+    return postToApoSlack_(message);
   } catch (error) {
     Logger.log("Slack通知に失敗しました: " + error);
     appendHistory_(apoId, operator, operation, "Slack通知失敗: " + error);
+    return false;
   }
 }
 
@@ -339,9 +361,9 @@ function postToApoSlack_(message) {
   var webhookUrl = PropertiesService.getScriptProperties().getProperty("SLACK_WEBHOOK_URL");
   if (!webhookUrl) {
     Logger.log("SLACK_WEBHOOK_URL が未設定のため通知をスキップしました: " + message);
-    return;
+    return false;
   }
-  ApoResilience.withRetry(function () {
+  return ApoResilience.withRetry(function () {
     var response = UrlFetchApp.fetch(webhookUrl, {
       method: "post",
       contentType: "application/json",
@@ -354,6 +376,7 @@ function postToApoSlack_(message) {
       error.statusCode = code;
       throw error;
     }
+    return true;
   }, {
     isRetryable: function (error) {
       return ApoResilience.isRetryableHttpStatus(error.statusCode || 0);

@@ -138,6 +138,14 @@ test("buildChangeDiff: 変更列だけを 旧→新 形式でまとめる。差�
   assert.equal(core.buildChangeDiff(oldRecord, apo({})), "");
 });
 
+test("buildChangeDiff: スキーマ外のキー(confirmedOverlap等の内部フラグ)は差分に漏れない", () => {
+  const oldRecord = apo({});
+  const newRecord = apo({});
+  newRecord.confirmedOverlap = true;
+  newRecord.somethingElse = "x";
+  assert.equal(core.buildChangeDiff(oldRecord, newRecord), "");
+});
+
 test("buildChangeDiff: 登録日時・最終更新日時は差分に含めない", () => {
   const oldRecord = apo({ "登録日時": "x", "最終更新日時": "x" });
   const newRecord = apo({ "登録日時": "y", "最終更新日時": "y" });

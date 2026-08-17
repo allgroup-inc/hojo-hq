@@ -330,10 +330,22 @@
 "    .withFailureHandler(fail).getFormOptions();\n" +
 "}\n" +
 "function fillSelect(id, values, current) {\n" +
-"  $(id).innerHTML = values.map(function (value) {\n" +
+"  // 編集対象の現担当が無効化済みでも選択肢に残す(勝手に別人へ付け替えない)\n" +
+"  var list = values.slice();\n" +
+"  if (current && list.indexOf(current) === -1) list.unshift(current);\n" +
+"  $(id).innerHTML = list.map(function (value) {\n" +
 "    return '<option' + (value === current ? ' selected' : '') + '>' + esc(value) + '</option>';\n" +
 "  }).join('');\n" +
 "}\n" +
+"// 日時・担当営業を変えたら重複確認をやり直す(前回の「確認済み」を持ち越さない)\n" +
+"['fDate', 'fTime', 'fDuration', 'fSales'].forEach(function (id) {\n" +
+"  document.addEventListener('change', function (event) {\n" +
+"    if (event.target && event.target.id === id) {\n" +
+"      state.confirmedOverlap = false;\n" +
+"      $('overlapWarn').classList.remove('show');\n" +
+"    }\n" +
+"  });\n" +
+"});\n" +
 "function openModal(apo) {\n" +
 "  ensureOptions(function () {\n" +
 "    var options = state.options;\n" +
@@ -384,21 +396,32 @@
 "      warn.classList.add('show');\n" +
 "      return;\n" +
 "    }\n" +
-"    closeModal(); closeSheet(); toast('保存しました。Slackに通知済みです'); load();\n" +
+"    closeModal(); closeSheet();\n" +
+"    toast(result && result.notified ? '保存しました。Slackに通知しました' : '保存しました(Slack通知なし)');\n" +
+"    load();\n" +
 "  }).withFailureHandler(function (error) { $('modalSave').disabled = false; fail(error); })\n" +
 "    .saveAppointment(payload);\n" +
 "}\n" +
 "function quickStatus(status) {\n" +
 "  if (!state.selected) return;\n" +
 "  closeSheet();\n" +
-"  google.script.run.withSuccessHandler(function () { toast('「' + status + '」に更新し、Slackへ通知しました'); load(); })\n" +
-"    .withFailureHandler(fail).updateStatus(state.selected['アポID'], status);\n" +
+"  google.script.run.withSuccessHandler(function (result) {\n" +
+"    if (result && !result.ok && result.overlapWarning) {\n" +
+"      toast('時間帯が重なるため更新していません。「編集」から内容を確認してください');\n" +
+"      load(); return;\n" +
+"    }\n" +
+"    toast(result && result.notified ? '「' + status + '」に更新し、Slackへ通知しました'\n" +
+"      : '「' + status + '」に更新しました(Slack通知なし)');\n" +
+"    load();\n" +
+"  }).withFailureHandler(fail).updateStatus(state.selected['アポID'], status);\n" +
 "}\n" +
 "function reportDelayMinutes(minutes) {\n" +
+"  var apoId = state.selected ? state.selected['アポID'] : null;\n" +
 "  closeSheet();\n" +
 "  google.script.run.withSuccessHandler(function (result) {\n" +
-"    toast('遅れ連絡を送信しました(影響しうる後続アポ ' + result.targetCount + '件)');\n" +
-"  }).withFailureHandler(fail).reportDelay(minutes);\n" +
+"    toast((result && result.notified ? '遅れ連絡を送信しました' : '遅れ連絡を記録しました(Slack通知なし)') +\n" +
+"      '(影響しうるアポ ' + result.targetCount + '件)');\n" +
+"  }).withFailureHandler(fail).reportDelay(minutes, apoId);\n" +
 "}\n" +
 "function setView(view, buttonId) {\n" +
 "  state.view = view;\n" +

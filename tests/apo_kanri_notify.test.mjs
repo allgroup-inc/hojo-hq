@@ -99,6 +99,15 @@ test("buildSubstituteSection: オンラインの前後アポには地図リン�
   assert.ok(section.includes("オンライン"));
 });
 
+test("buildSubstituteSection: 場所名のSlackメタ文字(| < > &)をエスケープしてリンクを壊さない", () => {
+  const candidates = [
+    { owner: "営業二郎", before: { "開始時刻": "13:00", "場所またはURL": "県庁前ビル3F|会議室A&B <西口>", "形式": "訪問" }, after: null }
+  ];
+  const section = notify.buildSubstituteSection(candidates);
+  assert.ok(section.includes("県庁前ビル3F¦会議室A&amp;B &lt;西口&gt;"));
+  assert.ok(!section.includes("会議室A&B"));
+});
+
 test("buildSubstituteSection: 候補0件なら空き営業なしの文面、最大5名まで", () => {
   assert.ok(notify.buildSubstituteSection([]).includes("空いている営業がいません"));
   const many = Array.from({ length: 8 }, (_, i) => ({ owner: "営業" + i, before: null, after: null }));

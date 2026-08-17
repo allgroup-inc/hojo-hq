@@ -68,6 +68,13 @@
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(place);
   }
 
+  // Slackのリンク記法 <URL|表示名> は & < > がメタ文字、| はラベル区切り。
+  // 自由入力の場所名をそのまま入れると記法が壊れるためエスケープする(2026-08-17レビュー指摘#9)
+  function escSlackLabel_(text) {
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/\|/g, "¦");
+  }
+
   function describeAdjacent_(label, record) {
     if (!record) return null;
     var place = record["場所またはURL"] || "";
@@ -75,8 +82,8 @@
     if (record["形式"] === "オンライン" || /^https?:\/\//.test(place)) {
       placeText = "オンライン";
     } else if (place) {
-      // Slackのリンク記法 <URL|表示名>。地図はリンクを開くだけで、位置情報は取得しない
-      placeText = "<" + mapsSearchUrl_(place) + "|" + place + ">";
+      // 地図はリンクを開くだけで、位置情報は取得しない
+      placeText = "<" + mapsSearchUrl_(place) + "|" + escSlackLabel_(place) + ">";
     } else {
       placeText = "場所未記入";
     }
