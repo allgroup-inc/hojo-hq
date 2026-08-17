@@ -64,7 +64,10 @@
   var STAFF_SHEET_NAME = "スタッフ";
   // Slack User ID の調べ方: Slackで対象社員のプロフィールを開き「その他」→
   // 「メンバーIDをコピー」(U から始まる文字列)。メールアドレスではない。
-  var STAFF_HEADERS = ["氏名", "Slack User ID", "有効", "メールアドレス"];
+  // LINE User ID の調べ方: LINE公式アカウントの管理画面から事前に一覧取得する方法が
+  // ないため、対象社員が最初に音声を送った際にGAS側の実行ログへ出力されたIDを
+  // 人間が転記する(glow-ma/src/LineVoiceLogRunner.gs参照)。
+  var STAFF_HEADERS = ["氏名", "Slack User ID", "有効", "メールアドレス", "LINE User ID"];
 
   var PARTNER_INTERACTION_LOG_SHEET_NAME = "パートナー対応履歴ログ";
   var PARTNER_INTERACTION_LOG_HEADERS = [
@@ -83,6 +86,17 @@
   var QR_RESULT_SHEET_NAME = "QR生成結果";
   var QR_RESULT_HEADERS = [
     "企業ID", "会社名", "発送日", "トラッキングURL", "QR画像リンク", "ステータス"
+  ];
+
+  var LINE_VOICE_LOG_SHEET_NAME = "音声ログ処理状況";
+  var LINE_VOICE_LOG_HEADERS = [
+    "処理ID", "LINEユーザーID", "LINEメッセージID", "ステータス",
+    "受信日時", "会社名候補", "企業ID",
+    "種別候補", "対応相手候補", "内容メモ", "次回アクション", "エラー内容"
+  ];
+  var LINE_VOICE_LOG_STATUSES = [
+    "受信済み", "文字起こし済み", "企業選択待ち", "新規企業確認待ち",
+    "最終確認待ち", "確定", "破棄", "エラー"
   ];
 
   var api = {
@@ -115,7 +129,10 @@
     PRE_SCREENING_MISMATCH_SHEET_NAME: PRE_SCREENING_MISMATCH_SHEET_NAME,
     PRE_SCREENING_MISMATCH_HEADERS: PRE_SCREENING_MISMATCH_HEADERS,
     QR_RESULT_SHEET_NAME: QR_RESULT_SHEET_NAME,
-    QR_RESULT_HEADERS: QR_RESULT_HEADERS
+    QR_RESULT_HEADERS: QR_RESULT_HEADERS,
+    LINE_VOICE_LOG_SHEET_NAME: LINE_VOICE_LOG_SHEET_NAME,
+    LINE_VOICE_LOG_HEADERS: LINE_VOICE_LOG_HEADERS,
+    LINE_VOICE_LOG_STATUSES: LINE_VOICE_LOG_STATUSES
   };
 
   if (typeof module !== "undefined" && module.exports) {
