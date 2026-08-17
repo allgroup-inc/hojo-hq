@@ -1,0 +1,215 @@
+<title>ヤンバルクイナ試作三案</title>
+<style>
+  :root{
+    --ground:#EDEEE7; --surface:#F8F8F3; --sunk:#E2E4DA;
+    --ink:#22251F; --muted:#6B6F64; --line:#CFD2C6;
+    --accent:#C8351D; --olive:#8A7549; --navy:#00335C; --cream:#FFF7E6;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#191B15; --surface:#22251E; --sunk:#12140F;
+      --ink:#E9EAE1; --muted:#9AA091; --line:#383C31;
+      --accent:#EE5C3E; --olive:#A68C57; --navy:#4E7EA8; --cream:#FFF7E6;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#191B15; --surface:#22251E; --sunk:#12140F;
+    --ink:#E9EAE1; --muted:#9AA091; --line:#383C31;
+    --accent:#EE5C3E; --olive:#A68C57; --navy:#4E7EA8; --cream:#FFF7E6;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic","Noto Sans JP",Meiryo,system-ui,sans-serif;
+    font-size:16px; line-height:1.85; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding:56px 24px 96px; display:flex; flex-direction:column; gap:64px}
+  .eyebrow{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
+  }
+  h1{font-size:clamp(30px,5vw,44px); line-height:1.25; letter-spacing:-.02em; font-weight:800; margin:8px 0 0; text-wrap:balance}
+  h2{font-size:clamp(21px,3vw,26px); line-height:1.4; letter-spacing:-.01em; font-weight:800; margin:0; text-wrap:balance}
+  h3{font-size:14px; font-weight:800; margin:0 0 6px; letter-spacing:.02em}
+  p{margin:0; max-width:62ch}
+  .lede{color:var(--muted); font-size:17px; margin-top:14px}
+
+  header{border-bottom:2px solid var(--ink); padding-bottom:28px}
+
+  /* contact sheet */
+  .sheet{display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--line); border:1px solid var(--line)}
+  .sheet figure{margin:0; background:var(--surface); padding:22px 12px 16px; display:flex; flex-direction:column; align-items:center; gap:12px}
+  .sheet svg{width:100%; max-width:150px; height:auto}
+  .sheet figcaption{font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.1em; color:var(--muted)}
+
+  /* candidate blocks */
+  .cand{display:flex; flex-direction:column; gap:24px; border-top:1px solid var(--line); padding-top:32px}
+  .cand-head{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+  .tag{
+    font-family:ui-monospace,Menlo,monospace; font-size:12px; font-weight:700;
+    letter-spacing:.08em; color:var(--surface); background:var(--ink);
+    padding:3px 9px; border-radius:2px; flex:none;
+  }
+  .stages{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:16px}
+  .stage{
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+    gap:0; padding:26px 18px; min-height:230px; border:1px solid var(--line); position:relative;
+  }
+  .stage svg{width:100%; max-width:160px; height:auto; display:block}
+  .stage span{
+    position:absolute; top:8px; left:10px;
+    font-family:ui-monospace,Menlo,monospace; font-size:10px; letter-spacing:.1em;
+  }
+  .g-white{background:#FFFFFF} .g-white span{color:#8A8F82}
+  .g-navy{background:#00335C} .g-navy span{color:#8FB3CE}
+  .g-sticker{background:var(--sunk)} .g-sticker span{color:var(--muted)}
+  .g-sticker .die{background:#fff; border-radius:14px; padding:14px 16px; box-shadow:0 2px 10px rgba(0,0,0,.18)}
+
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:28px}
+  .spec{display:flex; flex-direction:column; gap:10px}
+  .spec dl{margin:0; display:grid; grid-template-columns:auto 1fr; gap:4px 14px; font-size:14px}
+  .spec dt{color:var(--muted); font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.08em; padding-top:5px}
+  .spec dd{margin:0; font-variant-numeric:tabular-nums}
+
+  /* size check */
+  .sizes{display:flex; align-items:flex-end; gap:34px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--line); padding:26px 24px}
+  .sizes div{display:flex; flex-direction:column; align-items:center; gap:10px}
+  .sizes svg{height:auto; display:block}
+  .sizes small{font-family:ui-monospace,Menlo,monospace; font-size:10px; letter-spacing:.08em; color:var(--muted)}
+
+  .note{background:var(--surface); border-left:3px solid var(--accent); padding:18px 22px; display:flex; flex-direction:column; gap:10px}
+  .note strong{color:var(--accent)}
+  ul{margin:0; padding-left:1.15em; max-width:62ch}
+  li{margin-bottom:6px}
+  @media (max-width:640px){ .cols{grid-template-columns:1fr} .sheet{grid-template-columns:1fr} }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Okinawa rail / mascot study</div>
+  <h1>ヤンバルクイナ 試作三案</h1>
+  <p class="lede">プロンプト集の10方向から、まず出すべき3本をベクターで起こしました。すべて同じ素体（黒い面・白い眉線・腹の横縞・朱の嘴と脚）を共有しているので、どれを選んでも同じキャラクターとして展開できます。</p>
+</header>
+
+<section style="display:flex;flex-direction:column;gap:18px">
+  <div class="eyebrow">一覧</div>
+  <div class="sheet">
+    <figure>
+      <svg viewBox="0 0 240 272" xmlns="http://www.w3.org/2000/svg"><defs><path id="a3" d="M120,22 C88,22 66,44 66,74 C66,92 58,100 52,112 C44,130 44,160 54,180 C66,202 92,214 120,214 C148,214 174,202 186,180 C196,160 196,130 188,112 C182,100 174,92 174,74 C174,44 152,22 120,22 Z"/><clipPath id="b3"><use href="#a3"/></clipPath><clipPath id="c3"><path d="M40,140 Q120,116 200,140 L200,250 L40,250 Z"/></clipPath><clipPath id="d3"><ellipse cx="120" cy="140" rx="58" ry="86"/></clipPath></defs><g stroke="#E23B24" stroke-width="11" stroke-linecap="round" fill="none"><path d="M104,202 L104,236"/><path d="M136,202 L136,236"/></g><g stroke="#E23B24" stroke-width="6.5" stroke-linecap="round" fill="none"><path d="M104,237 L86,250"/><path d="M104,237 L104,255"/><path d="M104,237 L122,250"/><path d="M136,237 L118,250"/><path d="M136,237 L136,255"/><path d="M136,237 L154,250"/></g><use href="#a3" fill="#8A7549"/><g clip-path="url(#b3)"><ellipse cx="120" cy="84" rx="44" ry="40" fill="#221E1A"/><g stroke="#FFF7E6" stroke-width="9" stroke-linecap="round" fill="none"><path d="M110,66 Q94,63 78,70"/><path d="M130,66 Q146,63 162,70"/></g><path d="M40,140 Q120,116 200,140 L200,250 L40,250 Z" fill="#FFF7E6"/><g clip-path="url(#c3)"><g clip-path="url(#d3)" fill="#221E1A"><rect x="36" y="154" width="168" height="7" rx="3.5"/><rect x="36" y="174" width="168" height="7" rx="3.5"/><rect x="36" y="194" width="168" height="7" rx="3.5"/></g></g></g><use href="#a3" fill="none" stroke="#221E1A" stroke-width="8" stroke-linejoin="round"/><circle cx="98" cy="86" r="14" fill="#FFF7E6"/><circle cx="142" cy="86" r="14" fill="#FFF7E6"/><circle cx="98" cy="88.5" r="9" fill="#221E1A"/><circle cx="142" cy="88.5" r="9" fill="#221E1A"/><circle cx="95" cy="84" r="3.8" fill="#FFF7E6"/><circle cx="139" cy="84" r="3.8" fill="#FFF7E6"/><path d="M110,88 Q120,83 130,88 L124,106 Q120,110 116,106 Z" fill="#E23B24" stroke="#221E1A" stroke-width="4" stroke-linejoin="round"/></svg>
+      <figcaption>03 / YURU-CHARA</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 320 272" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="h4"><circle cx="160" cy="152" r="46"/></clipPath><clipPath id="l4"><circle cx="142" cy="160" r="11"/></clipPath><clipPath id="r4"><circle cx="178" cy="160" r="11"/></clipPath></defs><text x="160" y="46" text-anchor="middle" font-family="'Hiragino Sans','Yu Gothic','Noto Sans JP',Meiryo,sans-serif" font-size="30" font-weight="700" fill="#45403A">とべないので、</text><text x="160" y="86" text-anchor="middle" font-family="'Hiragino Sans','Yu Gothic','Noto Sans JP',Meiryo,sans-serif" font-size="30" font-weight="700" fill="#45403A">はしります。</text><g stroke="#C9634C" stroke-width="9" stroke-linecap="round" fill="none"><path d="M136,222 L112,248"/><path d="M184,222 L208,248"/><path d="M112,248 L98,244"/><path d="M112,248 L104,256"/><path d="M208,248 L222,244"/><path d="M208,248 L216,256"/></g><g fill="#8B7C5C" stroke="#45403A" stroke-width="7" stroke-linejoin="round"><path d="M108,182 C84,186 60,198 56,210 C72,216 98,208 112,198 Z"/><path d="M212,182 C236,186 260,198 264,210 C248,216 222,208 208,198 Z"/></g><ellipse cx="160" cy="194" rx="80" ry="44" fill="#9C8D6C" stroke="#45403A" stroke-width="7"/><ellipse cx="160" cy="210" rx="73" ry="33" fill="#F3EEE2"/><g fill="#45403A"><rect x="100" y="204" width="120" height="6" rx="3"/><rect x="106" y="220" width="108" height="6" rx="3"/></g><ellipse cx="160" cy="194" rx="80" ry="44" fill="none" stroke="#45403A" stroke-width="7"/><circle cx="160" cy="152" r="46" fill="#9C8D6C" stroke="#45403A" stroke-width="7"/><g clip-path="url(#h4)"><ellipse cx="160" cy="163" rx="32" ry="25" fill="#45403A"/><g stroke="#F3EEE2" stroke-width="7" stroke-linecap="round" fill="none"><path d="M152,144 Q140,142 128,147"/><path d="M168,144 Q180,142 192,147"/></g></g><circle cx="160" cy="152" r="46" fill="none" stroke="#45403A" stroke-width="7"/><circle cx="142" cy="160" r="11" fill="#F3EEE2"/><circle cx="178" cy="160" r="11" fill="#F3EEE2"/><g clip-path="url(#l4)"><rect x="128" y="146" width="30" height="14" fill="#45403A"/></g><g clip-path="url(#r4)"><rect x="164" y="146" width="30" height="14" fill="#45403A"/></g><circle cx="142" cy="164" r="5" fill="#45403A"/><circle cx="178" cy="164" r="5" fill="#45403A"/><path d="M152,170 Q160,166 168,170 L163,183 Q160,186 157,183 Z" fill="#C9634C" stroke="#45403A" stroke-width="3.5" stroke-linejoin="round"/><g fill="#C9C3B4"><ellipse cx="216" cy="140" rx="9" ry="6"/><ellipse cx="234" cy="126" rx="6" ry="4"/><ellipse cx="247" cy="116" rx="4" ry="2.6"/></g></svg>
+      <figcaption>04 / DEADPAN</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"><defs><path id="a9" d="M40,120 A80,80 0 0 1 200,120"/><clipPath id="h9"><circle cx="120" cy="116" r="42"/></clipPath></defs><circle cx="120" cy="120" r="114" fill="#00335C"/><circle cx="120" cy="120" r="102" fill="none" stroke="#F4EAD5" stroke-width="4"/><text font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="26" letter-spacing="5" fill="#F4EAD5"><textPath href="#a9" startOffset="50%" text-anchor="middle">YANBARU</textPath></text><circle cx="120" cy="116" r="42" fill="#F4EAD5" stroke="#00335C" stroke-width="5"/><g clip-path="url(#h9)"><ellipse cx="120" cy="124" rx="35" ry="28" fill="#00335C"/><g stroke="#F4EAD5" stroke-width="7" stroke-linecap="round" fill="none"><path d="M112,109 Q100,106 88,111"/><path d="M128,109 Q140,106 152,111"/></g></g><circle cx="120" cy="116" r="42" fill="none" stroke="#00335C" stroke-width="5"/><circle cx="105" cy="124" r="10" fill="#F4EAD5"/><circle cx="135" cy="124" r="10" fill="#F4EAD5"/><circle cx="106" cy="126" r="6" fill="#00335C"/><circle cx="136" cy="126" r="6" fill="#00335C"/><path d="M112,127 Q120,123 128,127 L123,142 Q120,146 117,142 Z" fill="#E23B24" stroke="#00335C" stroke-width="3" stroke-linejoin="round"/><rect x="40" y="180" width="160" height="30" rx="3" fill="#E23B24" stroke="#F4EAD5" stroke-width="3"/><text x="120" y="201" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="17" letter-spacing="4" fill="#F4EAD5">KUINA F.C.</text></svg>
+      <figcaption>09 / COLLEGE</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="cand">
+  <div class="cand-head"><span class="tag">方向 03</span><h2>ゆるキャラ・着ぐるみ型</h2></div>
+  <div class="cols">
+    <p>いちばん潰しが効く一本。太い輪郭と4色構成で、遠目でも小サイズでも判別できます。配布ステッカー、のぼり、商工会や自治体との協業まで、そのまま持っていける体裁です。差し色をネイビーとオレンジに差し替えれば、企業のミカタ文脈にも寄せられます。</p>
+    <div class="spec">
+      <dl>
+        <dt>色数</dt><dd>4色（黒・オリーブ・生成り・朱）</dd>
+        <dt>印刷</dt><dd>シルク4版 / DTF いずれも可</dd>
+        <dt>最小</dt><dd>25mm まで判別可</dd>
+        <dt>用途</dt><dd>ステッカー・胸ワンポイント・のぼり</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="stages">
+    <div class="stage g-white"><span>WHITE TEE</span>
+      <svg viewBox="0 0 240 272" xmlns="http://www.w3.org/2000/svg"><use href="#a3" fill="#8A7549"/><g clip-path="url(#b3)"><ellipse cx="120" cy="84" rx="44" ry="40" fill="#221E1A"/><g stroke="#FFF7E6" stroke-width="9" stroke-linecap="round" fill="none"><path d="M110,66 Q94,63 78,70"/><path d="M130,66 Q146,63 162,70"/></g><path d="M40,140 Q120,116 200,140 L200,250 L40,250 Z" fill="#FFF7E6"/><g clip-path="url(#c3)"><g clip-path="url(#d3)" fill="#221E1A"><rect x="36" y="154" width="168" height="7" rx="3.5"/><rect x="36" y="174" width="168" height="7" rx="3.5"/><rect x="36" y="194" width="168" height="7" rx="3.5"/></g></g></g><use href="#a3" fill="none" stroke="#221E1A" stroke-width="8" stroke-linejoin="round"/><g stroke="#E23B24" stroke-width="11" stroke-linecap="round" fill="none"><path d="M104,208 L104,236"/><path d="M136,208 L136,236"/></g><g stroke="#E23B24" stroke-width="6.5" stroke-linecap="round" fill="none"><path d="M104,237 L86,250"/><path d="M104,237 L104,255"/><path d="M104,237 L122,250"/><path d="M136,237 L118,250"/><path d="M136,237 L136,255"/><path d="M136,237 L154,250"/></g><circle cx="98" cy="86" r="14" fill="#FFF7E6"/><circle cx="142" cy="86" r="14" fill="#FFF7E6"/><circle cx="98" cy="88.5" r="9" fill="#221E1A"/><circle cx="142" cy="88.5" r="9" fill="#221E1A"/><circle cx="95" cy="84" r="3.8" fill="#FFF7E6"/><circle cx="139" cy="84" r="3.8" fill="#FFF7E6"/><path d="M110,88 Q120,83 130,88 L124,106 Q120,110 116,106 Z" fill="#E23B24" stroke="#221E1A" stroke-width="4" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="stage g-navy"><span>NAVY TEE</span>
+      <svg viewBox="0 0 240 272" xmlns="http://www.w3.org/2000/svg"><use href="#a3" fill="#8A7549"/><g clip-path="url(#b3)"><ellipse cx="120" cy="84" rx="44" ry="40" fill="#221E1A"/><g stroke="#FFF7E6" stroke-width="9" stroke-linecap="round" fill="none"><path d="M110,66 Q94,63 78,70"/><path d="M130,66 Q146,63 162,70"/></g><path d="M40,140 Q120,116 200,140 L200,250 L40,250 Z" fill="#FFF7E6"/><g clip-path="url(#c3)"><g clip-path="url(#d3)" fill="#221E1A"><rect x="36" y="154" width="168" height="7" rx="3.5"/><rect x="36" y="174" width="168" height="7" rx="3.5"/><rect x="36" y="194" width="168" height="7" rx="3.5"/></g></g></g><use href="#a3" fill="none" stroke="#FFF7E6" stroke-width="8" stroke-linejoin="round"/><g stroke="#F88800" stroke-width="11" stroke-linecap="round" fill="none"><path d="M104,208 L104,236"/><path d="M136,208 L136,236"/></g><g stroke="#F88800" stroke-width="6.5" stroke-linecap="round" fill="none"><path d="M104,237 L86,250"/><path d="M104,237 L104,255"/><path d="M104,237 L122,250"/><path d="M136,237 L118,250"/><path d="M136,237 L136,255"/><path d="M136,237 L154,250"/></g><circle cx="98" cy="86" r="14" fill="#FFF7E6"/><circle cx="142" cy="86" r="14" fill="#FFF7E6"/><circle cx="98" cy="88.5" r="9" fill="#221E1A"/><circle cx="142" cy="88.5" r="9" fill="#221E1A"/><circle cx="95" cy="84" r="3.8" fill="#FFF7E6"/><circle cx="139" cy="84" r="3.8" fill="#FFF7E6"/><path d="M110,88 Q120,83 130,88 L124,106 Q120,110 116,106 Z" fill="#F88800" stroke="#221E1A" stroke-width="4" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="stage g-sticker"><span>DIE-CUT</span>
+      <div class="die"><svg viewBox="0 0 240 272" width="120" xmlns="http://www.w3.org/2000/svg"><use href="#a3" fill="#8A7549"/><g clip-path="url(#b3)"><ellipse cx="120" cy="84" rx="44" ry="40" fill="#221E1A"/><g stroke="#FFF7E6" stroke-width="9" stroke-linecap="round" fill="none"><path d="M110,66 Q94,63 78,70"/><path d="M130,66 Q146,63 162,70"/></g><path d="M40,140 Q120,116 200,140 L200,250 L40,250 Z" fill="#FFF7E6"/><g clip-path="url(#c3)"><g clip-path="url(#d3)" fill="#221E1A"><rect x="36" y="154" width="168" height="7" rx="3.5"/><rect x="36" y="174" width="168" height="7" rx="3.5"/><rect x="36" y="194" width="168" height="7" rx="3.5"/></g></g></g><use href="#a3" fill="none" stroke="#221E1A" stroke-width="8" stroke-linejoin="round"/><g stroke="#E23B24" stroke-width="11" stroke-linecap="round" fill="none"><path d="M104,208 L104,236"/><path d="M136,208 L136,236"/></g><g stroke="#E23B24" stroke-width="6.5" stroke-linecap="round" fill="none"><path d="M104,237 L86,250"/><path d="M104,237 L104,255"/><path d="M104,237 L122,250"/><path d="M136,237 L118,250"/><path d="M136,237 L136,255"/><path d="M136,237 L154,250"/></g><circle cx="98" cy="86" r="14" fill="#FFF7E6"/><circle cx="142" cy="86" r="14" fill="#FFF7E6"/><circle cx="98" cy="88.5" r="9" fill="#221E1A"/><circle cx="142" cy="88.5" r="9" fill="#221E1A"/><circle cx="95" cy="84" r="3.8" fill="#FFF7E6"/><circle cx="139" cy="84" r="3.8" fill="#FFF7E6"/><path d="M110,88 Q120,83 130,88 L124,106 Q120,110 116,106 Z" fill="#E23B24" stroke="#221E1A" stroke-width="4" stroke-linejoin="round"/></svg></div>
+    </div>
+  </div>
+</section>
+
+<section class="cand">
+  <div class="cand-head"><span class="tag">方向 04</span><h2>脱力・自虐型</h2></div>
+  <div class="cols">
+    <p>「飛べない」という、この鳥だけが生まれつき持っている欠点を正面から使う一本。愛されるキャラは例外なく隙を持っています。ここが当たるとしたらこの案です。コピーが主役になるので、絵は余白を空けて、言葉に主役を渡す設計にしています。</p>
+    <div class="spec">
+      <dl>
+        <dt>色数</dt><dd>4色（墨・くすみオリーブ・生成り・煉瓦）</dd>
+        <dt>印刷</dt><dd>白Tにシルク4版が最適</dd>
+        <dt>差替</dt><dd>コピーだけ替えてシリーズ化</dd>
+        <dt>用途</dt><dd>Tシャツ主役・PC貼りステッカー</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="stages">
+    <div class="stage g-white" style="min-height:200px"><span>WHITE TEE</span>
+      <svg viewBox="0 0 320 272" style="max-width:230px" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="h4b"><circle cx="160" cy="152" r="46"/></clipPath><clipPath id="l4b"><circle cx="142" cy="160" r="11"/></clipPath><clipPath id="r4b"><circle cx="178" cy="160" r="11"/></clipPath></defs><text x="160" y="46" text-anchor="middle" font-family="'Hiragino Sans','Yu Gothic','Noto Sans JP',Meiryo,sans-serif" font-size="30" font-weight="700" fill="#45403A">とべないので、</text><text x="160" y="86" text-anchor="middle" font-family="'Hiragino Sans','Yu Gothic','Noto Sans JP',Meiryo,sans-serif" font-size="30" font-weight="700" fill="#45403A">はしります。</text><g stroke="#C9634C" stroke-width="9" stroke-linecap="round" fill="none"><path d="M136,222 L112,248"/><path d="M184,222 L208,248"/><path d="M112,248 L98,244"/><path d="M112,248 L104,256"/><path d="M208,248 L222,244"/><path d="M208,248 L216,256"/></g><g fill="#8B7C5C" stroke="#45403A" stroke-width="7" stroke-linejoin="round"><path d="M108,182 C84,186 60,198 56,210 C72,216 98,208 112,198 Z"/><path d="M212,182 C236,186 260,198 264,210 C248,216 222,208 208,198 Z"/></g><ellipse cx="160" cy="194" rx="80" ry="44" fill="#9C8D6C" stroke="#45403A" stroke-width="7"/><ellipse cx="160" cy="210" rx="73" ry="33" fill="#F3EEE2"/><g fill="#45403A"><rect x="100" y="204" width="120" height="6" rx="3"/><rect x="106" y="220" width="108" height="6" rx="3"/></g><ellipse cx="160" cy="194" rx="80" ry="44" fill="none" stroke="#45403A" stroke-width="7"/><circle cx="160" cy="152" r="46" fill="#9C8D6C" stroke="#45403A" stroke-width="7"/><g clip-path="url(#h4b)"><ellipse cx="160" cy="163" rx="32" ry="25" fill="#45403A"/><g stroke="#F3EEE2" stroke-width="7" stroke-linecap="round" fill="none"><path d="M152,144 Q140,142 128,147"/><path d="M168,144 Q180,142 192,147"/></g></g><circle cx="160" cy="152" r="46" fill="none" stroke="#45403A" stroke-width="7"/><circle cx="142" cy="160" r="11" fill="#F3EEE2"/><circle cx="178" cy="160" r="11" fill="#F3EEE2"/><g clip-path="url(#l4b)"><rect x="128" y="146" width="30" height="14" fill="#45403A"/></g><g clip-path="url(#r4b)"><rect x="164" y="146" width="30" height="14" fill="#45403A"/></g><circle cx="142" cy="164" r="5" fill="#45403A"/><circle cx="178" cy="164" r="5" fill="#45403A"/><path d="M152,170 Q160,166 168,170 L163,183 Q160,186 157,183 Z" fill="#C9634C" stroke="#45403A" stroke-width="3.5" stroke-linejoin="round"/><g fill="#C9C3B4"><ellipse cx="216" cy="140" rx="9" ry="6"/><ellipse cx="234" cy="126" rx="6" ry="4"/><ellipse cx="247" cy="116" rx="4" ry="2.6"/></g></svg>
+    </div>
+    <div class="stage g-sticker" style="min-height:200px"><span>DIE-CUT</span>
+      <div class="die"><svg viewBox="40 100 240 172" width="180" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="h4c"><circle cx="160" cy="152" r="46"/></clipPath><clipPath id="l4c"><circle cx="142" cy="160" r="11"/></clipPath><clipPath id="r4c"><circle cx="178" cy="160" r="11"/></clipPath></defs><g stroke="#C9634C" stroke-width="9" stroke-linecap="round" fill="none"><path d="M136,222 L112,248"/><path d="M184,222 L208,248"/><path d="M112,248 L98,244"/><path d="M112,248 L104,256"/><path d="M208,248 L222,244"/><path d="M208,248 L216,256"/></g><g fill="#8B7C5C" stroke="#45403A" stroke-width="7" stroke-linejoin="round"><path d="M108,182 C84,186 60,198 56,210 C72,216 98,208 112,198 Z"/><path d="M212,182 C236,186 260,198 264,210 C248,216 222,208 208,198 Z"/></g><ellipse cx="160" cy="194" rx="80" ry="44" fill="#9C8D6C" stroke="#45403A" stroke-width="7"/><ellipse cx="160" cy="210" rx="73" ry="33" fill="#F3EEE2"/><g fill="#45403A"><rect x="100" y="204" width="120" height="6" rx="3"/><rect x="106" y="220" width="108" height="6" rx="3"/></g><ellipse cx="160" cy="194" rx="80" ry="44" fill="none" stroke="#45403A" stroke-width="7"/><circle cx="160" cy="152" r="46" fill="#9C8D6C" stroke="#45403A" stroke-width="7"/><g clip-path="url(#h4c)"><ellipse cx="160" cy="163" rx="32" ry="25" fill="#45403A"/><g stroke="#F3EEE2" stroke-width="7" stroke-linecap="round" fill="none"><path d="M152,144 Q140,142 128,147"/><path d="M168,144 Q180,142 192,147"/></g></g><circle cx="160" cy="152" r="46" fill="none" stroke="#45403A" stroke-width="7"/><circle cx="142" cy="160" r="11" fill="#F3EEE2"/><circle cx="178" cy="160" r="11" fill="#F3EEE2"/><g clip-path="url(#l4c)"><rect x="128" y="146" width="30" height="14" fill="#45403A"/></g><g clip-path="url(#r4c)"><rect x="164" y="146" width="30" height="14" fill="#45403A"/></g><circle cx="142" cy="164" r="5" fill="#45403A"/><circle cx="178" cy="164" r="5" fill="#45403A"/><path d="M152,170 Q160,166 168,170 L163,183 Q160,186 157,183 Z" fill="#C9634C" stroke="#45403A" stroke-width="3.5" stroke-linejoin="round"/><g fill="#C9C3B4"><ellipse cx="216" cy="140" rx="9" ry="6"/><ellipse cx="234" cy="126" rx="6" ry="4"/><ellipse cx="247" cy="116" rx="4" ry="2.6"/></g></svg></div>
+    </div>
+  </div>
+  <div class="note">
+    <p><strong>コピー差し替え案。</strong>絵はそのまま、言葉だけ替えて横展開できます。「羽はある。使わないだけ。」「本日、地上勤務。」「走れるので、問題ない。」</p>
+  </div>
+</section>
+
+<section class="cand">
+  <div class="cand-head"><span class="tag">方向 09</span><h2>カレッジロゴ型</h2></div>
+  <div class="cols">
+    <p>Tシャツとして単価を取れるのはこの系統。頭部だけの紋章にして版数を3色に抑えているので、シルク印刷にもキャップの刺繍にも落ちます。文字は生成AIに描かせず、パスとして持っているため破綻しません。地名は KUNIGAMI / OKINAWA などに差し替え可能です。</p>
+    <div class="spec">
+      <dl>
+        <dt>色数</dt><dd>3色（ネイビー・生成り・朱）</dd>
+        <dt>印刷</dt><dd>シルク3版 / 刺繍可</dd>
+        <dt>文字</dt><dd>ベクター。アウトライン化済み前提</dd>
+        <dt>用途</dt><dd>胸ワンポイント・バック大・キャップ</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="stages">
+    <div class="stage g-white"><span>WHITE TEE</span>
+      <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"><defs><path id="a9b" d="M40,120 A80,80 0 0 1 200,120"/><clipPath id="h9b"><circle cx="120" cy="116" r="42"/></clipPath></defs><circle cx="120" cy="120" r="114" fill="#00335C"/><circle cx="120" cy="120" r="102" fill="none" stroke="#F4EAD5" stroke-width="4"/><text font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="26" letter-spacing="5" fill="#F4EAD5"><textPath href="#a9b" startOffset="50%" text-anchor="middle">YANBARU</textPath></text><circle cx="120" cy="116" r="42" fill="#F4EAD5" stroke="#00335C" stroke-width="5"/><g clip-path="url(#h9b)"><ellipse cx="120" cy="124" rx="35" ry="28" fill="#00335C"/><g stroke="#F4EAD5" stroke-width="7" stroke-linecap="round" fill="none"><path d="M112,109 Q100,106 88,111"/><path d="M128,109 Q140,106 152,111"/></g></g><circle cx="120" cy="116" r="42" fill="none" stroke="#00335C" stroke-width="5"/><circle cx="105" cy="124" r="10" fill="#F4EAD5"/><circle cx="135" cy="124" r="10" fill="#F4EAD5"/><circle cx="106" cy="126" r="6" fill="#00335C"/><circle cx="136" cy="126" r="6" fill="#00335C"/><path d="M112,127 Q120,123 128,127 L123,142 Q120,146 117,142 Z" fill="#E23B24" stroke="#00335C" stroke-width="3" stroke-linejoin="round"/><rect x="40" y="180" width="160" height="30" rx="3" fill="#E23B24" stroke="#F4EAD5" stroke-width="3"/><text x="120" y="201" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="17" letter-spacing="4" fill="#F4EAD5">KUINA F.C.</text></svg>
+    </div>
+    <div class="stage g-navy"><span>NAVY TEE / 反転</span>
+      <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"><defs><path id="a9c" d="M40,120 A80,80 0 0 1 200,120"/><clipPath id="h9c"><circle cx="120" cy="116" r="42"/></clipPath></defs><circle cx="120" cy="120" r="114" fill="#F4EAD5"/><circle cx="120" cy="120" r="102" fill="none" stroke="#00335C" stroke-width="4"/><text font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="26" letter-spacing="5" fill="#00335C"><textPath href="#a9c" startOffset="50%" text-anchor="middle">YANBARU</textPath></text><circle cx="120" cy="116" r="42" fill="#00335C" stroke="#F4EAD5" stroke-width="5"/><g clip-path="url(#h9c)"><ellipse cx="120" cy="124" rx="35" ry="28" fill="#F4EAD5"/><g stroke="#00335C" stroke-width="7" stroke-linecap="round" fill="none"><path d="M112,109 Q100,106 88,111"/><path d="M128,109 Q140,106 152,111"/></g></g><circle cx="120" cy="116" r="42" fill="none" stroke="#F4EAD5" stroke-width="5"/><circle cx="105" cy="124" r="10" fill="#00335C"/><circle cx="135" cy="124" r="10" fill="#00335C"/><circle cx="106" cy="126" r="6" fill="#F4EAD5"/><circle cx="136" cy="126" r="6" fill="#F4EAD5"/><path d="M112,127 Q120,123 128,127 L123,142 Q120,146 117,142 Z" fill="#E23B24" stroke="#F4EAD5" stroke-width="3" stroke-linejoin="round"/><rect x="40" y="180" width="160" height="30" rx="3" fill="#E23B24" stroke="#00335C" stroke-width="3"/><text x="120" y="201" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="17" letter-spacing="4" fill="#F4EAD5">KUINA F.C.</text></svg>
+    </div>
+    <div class="stage g-sticker"><span>DIE-CUT</span>
+      <div class="die"><svg viewBox="0 0 240 240" width="120" xmlns="http://www.w3.org/2000/svg"><defs><path id="a9d" d="M40,120 A80,80 0 0 1 200,120"/><clipPath id="h9d"><circle cx="120" cy="116" r="42"/></clipPath></defs><circle cx="120" cy="120" r="114" fill="#00335C"/><circle cx="120" cy="120" r="102" fill="none" stroke="#F4EAD5" stroke-width="4"/><text font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="26" letter-spacing="5" fill="#F4EAD5"><textPath href="#a9d" startOffset="50%" text-anchor="middle">YANBARU</textPath></text><circle cx="120" cy="116" r="42" fill="#F4EAD5" stroke="#00335C" stroke-width="5"/><g clip-path="url(#h9d)"><ellipse cx="120" cy="124" rx="35" ry="28" fill="#00335C"/><g stroke="#F4EAD5" stroke-width="7" stroke-linecap="round" fill="none"><path d="M112,109 Q100,106 88,111"/><path d="M128,109 Q140,106 152,111"/></g></g><circle cx="120" cy="116" r="42" fill="none" stroke="#00335C" stroke-width="5"/><circle cx="105" cy="124" r="10" fill="#F4EAD5"/><circle cx="135" cy="124" r="10" fill="#F4EAD5"/><circle cx="106" cy="126" r="6" fill="#00335C"/><circle cx="136" cy="126" r="6" fill="#00335C"/><path d="M112,127 Q120,123 128,127 L123,142 Q120,146 117,142 Z" fill="#E23B24" stroke="#00335C" stroke-width="3" stroke-linejoin="round"/><rect x="40" y="180" width="160" height="30" rx="3" fill="#E23B24" stroke="#F4EAD5" stroke-width="3"/><text x="120" y="201" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-weight="700" font-size="17" letter-spacing="4" fill="#F4EAD5">KUINA F.C.</text></svg></div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+  <div class="eyebrow">縮小テスト</div>
+  <h2>5cmで潰れないか</h2>
+  <p>ステッカーの実寸はだいたい50〜70mm。ここで潰れる線は本番でも潰れます。方向03を実寸相当まで落としたものです。</p>
+  <div class="sizes">
+    <div><svg viewBox="0 0 240 272" width="160" xmlns="http://www.w3.org/2000/svg"><use href="#a3" fill="#8A7549"/><g clip-path="url(#b3)"><ellipse cx="120" cy="84" rx="44" ry="40" fill="#221E1A"/><g stroke="#FFF7E6" stroke-width="9" stroke-linecap="round" fill="none"><path d="M110,66 Q94,63 78,70"/><path d="M130,66 Q146,63 162,70"/></g><path d="M40,140 Q120,116 200,140 L200,250 L40,250 Z" fill="#FFF7E6"/><g clip-path="url(#c3)"><g clip-path="url(#d3)" fill="#221E1A"><rect x="36" y="154" width="168" height="7" rx="3.5"/><rect x="36" y="174" width="168" height="7" rx="3.5"/><rect x="36" y="194" width="168" height="7" rx="3.5"/></g></g></g><use href="#a3" fill="none" stroke="#221E1A" stroke-width="8" stroke-linejoin="round"/><g stroke="#E23B24" stroke-width="11" stroke-linecap="round" fill="none"><path d="M104,208 L104,236"/><path d="M136,208 L136,236"/></g><g stroke="#E23B24" stroke-width="6.5" stroke-linecap="round" fill="none"><path d="M104,237 L86,250"/><path d="M104,237 L104,255"/><path d="M104,237 L122,250"/><path d="M136,237 L118,250"/><path d="M136,237 L136,255"/><path d="M136,237 L154,250"/></g><circle cx="98" cy="86" r="14" fill="#FFF7E6"/><circle cx="142" cy="86" r="14" fill="#FFF7E6"/><circle cx="98" cy="88.5" r="9" fill="#221E1A"/><circle cx="142" cy="88.5" r="9" fill="#221E1A"/><circle cx="95" cy="84" r="3.8" fill="#FFF7E6"/><circle cx="139" cy="84" r="3.8" fill="#FFF7E6"/><path d="M110,88 Q120,83 130,88 L124,106 Q120,110 116,106 Z" fill="#E23B24" stroke="#221E1A" stroke-width="4" stroke-linejoin="round"/></svg><small>100mm 相当</small></div>
+    <div><svg viewBox="0 0 240 272" width="80" xmlns="http://www.w3.org/2000/svg"><use href="#a3" fill="#8A7549"/><g clip-path="url(#b3)"><ellipse cx="120" cy="84" rx="44" ry="40" fill="#221E1A"/><g stroke="#FFF7E6" stroke-width="9" stroke-linecap="round" fill="none"><path d="M110,66 Q94,63 78,70"/><path d="M130,66 Q146,63 162,70"/></g><path d="M40,140 Q120,116 200,140 L200,250 L40,250 Z" fill="#FFF7E6"/><g clip-path="url(#c3)"><g clip-path="url(#d3)" fill="#221E1A"><rect x="36" y="154" width="168" height="7" rx="3.5"/><rect x="36" y="174" width="168" height="7" rx="3.5"/><rect x="36" y="194" width="168" height="7" rx="3.5"/></g></g></g><use href="#a3" fill="none" stroke="#221E1A" stroke-width="8" stroke-linejoin="round"/><g stroke="#E23B24" stroke-width="11" stroke-linecap="round" fill="none"><path d="M104,208 L104,236"/><path d="M136,208 L136,236"/></g><g stroke="#E23B24" stroke-width="6.5" stroke-linecap="round" fill="none"><path d="M104,237 L86,250"/><path d="M104,237 L104,255"/><path d="M104,237 L122,250"/><path d="M136,237 L118,250"/><path d="M136,237 L136,255"/><path d="M136,237 L154,250"/></g><circle cx="98" cy="86" r="14" fill="#FFF7E6"/><circle cx="142" cy="86" r="14" fill="#FFF7E6"/><circle cx="98" cy="88.5" r="9" fill="#221E1A"/><circle cx="142" cy="88.5" r="9" fill="#221E1A"/><circle cx="95" cy="84" r="3.8" fill="#FFF7E6"/><circle cx="139" cy="84" r="3.8" fill="#FFF7E6"/><path d="M110,88 Q120,83 130,88 L124,106 Q120,110 116,106 Z" fill="#E23B24" stroke="#221E1A" stroke-width="4" stroke-linejoin="round"/></svg><small>50mm 相当</small></div>
+    <div><svg viewBox="0 0 240 272" width="42" xmlns="http://www.w3.org/2000/svg"><use href="#a3" fill="#8A7549"/><g clip-path="url(#b3)"><ellipse cx="120" cy="84" rx="44" ry="40" fill="#221E1A"/><g stroke="#FFF7E6" stroke-width="9" stroke-linecap="round" fill="none"><path d="M110,66 Q94,63 78,70"/><path d="M130,66 Q146,63 162,70"/></g><path d="M40,140 Q120,116 200,140 L200,250 L40,250 Z" fill="#FFF7E6"/><g clip-path="url(#c3)"><g clip-path="url(#d3)" fill="#221E1A"><rect x="36" y="154" width="168" height="7" rx="3.5"/><rect x="36" y="174" width="168" height="7" rx="3.5"/><rect x="36" y="194" width="168" height="7" rx="3.5"/></g></g></g><use href="#a3" fill="none" stroke="#221E1A" stroke-width="8" stroke-linejoin="round"/><g stroke="#E23B24" stroke-width="11" stroke-linecap="round" fill="none"><path d="M104,208 L104,236"/><path d="M136,208 L136,236"/></g><g stroke="#E23B24" stroke-width="6.5" stroke-linecap="round" fill="none"><path d="M104,237 L86,250"/><path d="M104,237 L104,255"/><path d="M104,237 L122,250"/><path d="M136,237 L118,250"/><path d="M136,237 L136,255"/><path d="M136,237 L154,250"/></g><circle cx="98" cy="86" r="14" fill="#FFF7E6"/><circle cx="142" cy="86" r="14" fill="#FFF7E6"/><circle cx="98" cy="88.5" r="9" fill="#221E1A"/><circle cx="142" cy="88.5" r="9" fill="#221E1A"/><circle cx="95" cy="84" r="3.8" fill="#FFF7E6"/><circle cx="139" cy="84" r="3.8" fill="#FFF7E6"/><path d="M110,88 Q120,83 130,88 L124,106 Q120,110 116,106 Z" fill="#E23B24" stroke="#221E1A" stroke-width="4" stroke-linejoin="round"/></svg><small>25mm 相当</small></div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:14px;border-top:2px solid var(--ink);padding-top:28px">
+  <div class="eyebrow">決めていただきたいこと</div>
+  <h2>次の一手</h2>
+  <ul>
+    <li>3案のうち、先に進める1本（複数可）。ここが決まれば表情シート9種とポーズシートに展開します。</li>
+    <li>名前。<strong>クイナん / トコトコ / やんばるん / クーイ</strong> のいずれか、または別案。3〜4音が覚えられる上限です。</li>
+    <li>ステッカーを先に出すか、Tシャツを先に出すか。ステッカーのほうが原価も検証コストも低く、反応を見てからTシャツに回せます。</li>
+  </ul>
+  <div class="note">
+    <p><strong>商品化の前に必ず。</strong>国頭村・沖縄県・環境省などの既存ヤンバルクイナ公式マスコットと酷似していないか画像検索で目視確認し、名称を本格運用するなら J-PlatPat で先行商標を確認してください。ヤンバルクイナは国の天然記念物・絶滅危惧種のため、轢死を想起させる表現（走る絵に車を併置するなど）は避けています。</p>
+  </div>
+</section>
+
+</div>

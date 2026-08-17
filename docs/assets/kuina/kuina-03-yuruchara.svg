@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 272" width="240" height="272">
+  <defs>
+    <path id="bd3" d="M120,22 C88,22 66,44 66,74 C66,92 58,100 52,112 C44,130 44,160 54,180 C66,202 92,214 120,214 C148,214 174,202 186,180 C196,160 196,130 188,112 C182,100 174,92 174,74 C174,44 152,22 120,22 Z"/>
+    <clipPath id="cb3"><use href="#bd3"/></clipPath>
+    <clipPath id="cw3"><path d="M40,140 Q120,116 200,140 L200,250 L40,250 Z"/></clipPath>
+    <clipPath id="cin3"><ellipse cx="120" cy="140" rx="58" ry="86"/></clipPath>
+  </defs>
+
+  <!-- legs -->
+  <g stroke="#E23B24" stroke-width="11" stroke-linecap="round" fill="none">
+    <path d="M104,202 L104,236"/><path d="M136,202 L136,236"/>
+  </g>
+  <g stroke="#E23B24" stroke-width="6.5" stroke-linecap="round" fill="none">
+    <path d="M104,237 L86,250"/><path d="M104,237 L104,255"/><path d="M104,237 L122,250"/>
+    <path d="M136,237 L118,250"/><path d="M136,237 L136,255"/><path d="M136,237 L154,250"/>
+  </g>
+
+  <!-- body -->
+  <use href="#bd3" fill="#8A7549"/>
+  <g clip-path="url(#cb3)">
+    <ellipse cx="120" cy="84" rx="44" ry="40" fill="#221E1A"/>
+    <g stroke="#FFF7E6" stroke-width="9" stroke-linecap="round" fill="none">
+      <path d="M110,66 Q94,63 78,70"/>
+      <path d="M130,66 Q146,63 162,70"/>
+    </g>
+    <path d="M40,140 Q120,116 200,140 L200,250 L40,250 Z" fill="#FFF7E6"/>
+    <g clip-path="url(#cw3)"><g clip-path="url(#cin3)" fill="#221E1A">
+      <rect x="36" y="154" width="168" height="7" rx="3.5"/>
+      <rect x="36" y="174" width="168" height="7" rx="3.5"/>
+      <rect x="36" y="194" width="168" height="7" rx="3.5"/>
+    </g></g>
+  </g>
+  <use href="#bd3" fill="none" stroke="#221E1A" stroke-width="8" stroke-linejoin="round"/>
+
+  <!-- eyes -->
+  <circle cx="98" cy="86" r="14" fill="#FFF7E6"/>
+  <circle cx="142" cy="86" r="14" fill="#FFF7E6"/>
+  <circle cx="98" cy="88.5" r="9" fill="#221E1A"/>
+  <circle cx="142" cy="88.5" r="9" fill="#221E1A"/>
+  <circle cx="95" cy="84" r="3.8" fill="#FFF7E6"/>
+  <circle cx="139" cy="84" r="3.8" fill="#FFF7E6"/>
+
+  <!-- beak -->
+  <path d="M110,88 Q120,83 130,88 L124,106 Q120,110 116,106 Z" fill="#E23B24" stroke="#221E1A" stroke-width="4" stroke-linejoin="round"/>
+</svg>

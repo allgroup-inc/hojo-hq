@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 272" width="320" height="272">
+  <defs>
+    <clipPath id="hd4"><circle cx="160" cy="152" r="46"/></clipPath>
+    <clipPath id="eyeL4"><circle cx="142" cy="160" r="11"/></clipPath>
+    <clipPath id="eyeR4"><circle cx="178" cy="160" r="11"/></clipPath>
+  </defs>
+
+  <text x="160" y="46" text-anchor="middle" font-family="'Hiragino Sans','Yu Gothic','Noto Sans JP',Meiryo,sans-serif" font-size="30" fill="#45403A">とべないので、</text>
+  <text x="160" y="86" text-anchor="middle" font-family="'Hiragino Sans','Yu Gothic','Noto Sans JP',Meiryo,sans-serif" font-size="30" fill="#45403A">はしります。</text>
+
+  <!-- legs splayed back -->
+  <g stroke="#C9634C" stroke-width="9" stroke-linecap="round" fill="none">
+    <path d="M136,222 L112,248"/><path d="M184,222 L208,248"/>
+    <path d="M112,248 L98,244"/><path d="M112,248 L104,256"/>
+    <path d="M208,248 L222,244"/><path d="M208,248 L216,256"/>
+  </g>
+
+  <!-- splayed wings -->
+  <g fill="#8B7C5C" stroke="#45403A" stroke-width="7" stroke-linejoin="round">
+    <path d="M108,182 C84,186 60,198 56,210 C72,216 98,208 112,198 Z"/>
+    <path d="M212,182 C236,186 260,198 264,210 C248,216 222,208 208,198 Z"/>
+  </g>
+
+  <!-- flattened body -->
+  <ellipse cx="160" cy="194" rx="80" ry="44" fill="#9C8D6C" stroke="#45403A" stroke-width="7"/>
+  <ellipse cx="160" cy="210" rx="73" ry="33" fill="#F3EEE2"/>
+  <g fill="#45403A">
+    <rect x="100" y="204" width="120" height="6" rx="3"/>
+    <rect x="106" y="220" width="108" height="6" rx="3"/>
+  </g>
+  <ellipse cx="160" cy="194" rx="80" ry="44" fill="none" stroke="#45403A" stroke-width="7"/>
+
+  <!-- head resting low -->
+  <circle cx="160" cy="152" r="46" fill="#9C8D6C" stroke="#45403A" stroke-width="7"/>
+  <g clip-path="url(#hd4)">
+    <ellipse cx="160" cy="163" rx="32" ry="25" fill="#45403A"/>
+    <g stroke="#F3EEE2" stroke-width="7" stroke-linecap="round" fill="none">
+      <path d="M152,144 Q140,142 128,147"/>
+      <path d="M168,144 Q180,142 192,147"/>
+    </g>
+  </g>
+  <circle cx="160" cy="152" r="46" fill="none" stroke="#45403A" stroke-width="7"/>
+
+  <!-- half-lidded eyes -->
+  <circle cx="142" cy="160" r="11" fill="#F3EEE2"/>
+  <circle cx="178" cy="160" r="11" fill="#F3EEE2"/>
+  <g clip-path="url(#eyeL4)"><rect x="128" y="146" width="30" height="14" fill="#45403A"/></g>
+  <g clip-path="url(#eyeR4)"><rect x="164" y="146" width="30" height="14" fill="#45403A"/></g>
+  <circle cx="142" cy="164" r="5" fill="#45403A"/>
+  <circle cx="178" cy="164" r="5" fill="#45403A"/>
+
+  <!-- beak -->
+  <path d="M152,170 Q160,166 168,170 L163,183 Q160,186 157,183 Z" fill="#C9634C" stroke="#45403A" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <!-- sigh -->
+  <g fill="#C9C3B4">
+    <ellipse cx="216" cy="140" rx="9" ry="6"/>
+    <ellipse cx="234" cy="126" rx="6" ry="4"/>
+    <ellipse cx="247" cy="116" rx="4" ry="2.6"/>
+  </g>
+</svg>
