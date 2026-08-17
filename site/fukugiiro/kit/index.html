@@ -61,6 +61,15 @@ ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through
 .btns button,.btns a{flex:1;display:block;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
 .btns .primary{background:var(--fg-primary);color:#fff}
 .linebtn{display:block;max-width:440px;margin:8px auto 0;padding:14px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
+.smartbox{background:#EAF5F0;border:1px solid #B7E0CF;border-radius:12px;padding:14px 16px;margin:10px 0;color:#0F5138}
+.smartbox strong{color:#0F5138}
+.copybtn{display:inline-block;padding:10px 16px;min-height:44px;border-radius:10px;border:2px solid var(--fg-deep);background:#fff;color:var(--fg-deep);font:inherit;font-size:.92rem;font-weight:700;cursor:pointer}
+.copybtn.copied{background:var(--fg-deep);color:#fff}
+details.conbini{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:0;margin:10px 0}
+details.conbini summary{cursor:pointer;padding:13px 16px;font-weight:700;color:var(--fg-ink);list-style-position:inside}
+details.conbini .inner{padding:0 16px 14px;border-top:1px dashed var(--fg-line)}
+details.conbini ol{margin:10px 0 6px;padding-left:1.4em}
+details.conbini li{margin:8px 0}
 @media(min-width:900px){.wrap{max-width:820px}}
 /* 印刷=電話台本+持ち物+窓口ひとこと+メモの1枚に圧縮。工程表・申請後・LINEは画面のみ。 */
 @media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}
@@ -84,7 +93,7 @@ ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through
 <div class="wrap">
 
 <h1>申請準備シート一覧</h1>
-<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで、印刷してそのまま窓口へ。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
+<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで。<strong>スマホで開いたまま窓口で使えます</strong>(印刷して持っていくのもOK。プリンターがない方向けにコンビニ印刷の手順も各シートにあります)。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>
 <h2 style='font-size:1.1rem;margin-top:20px'>全国の制度(49件)</h2><p class='note'>お住まいがどこでも対象になる可能性があります</p><div class='box'><ul style='list-style:none'><li style="margin-bottom:8px"><a href="fk-kuni-jidoteate/">児童手当</a> <span class="status ok">✓ 公式と照合済み</span></li>
 <li style="margin-bottom:8px"><a href="fk-kuni-jidofuyoteate/">児童扶養手当</a> <span class="status ok">✓ 公式と照合済み</span></li>
