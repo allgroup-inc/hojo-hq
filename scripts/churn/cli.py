@@ -31,6 +31,7 @@ from .retention import purge_snapshots
 from .contact_log import load_contacts
 from .playbook import segment_playbook, render_html as render_playbook_html
 from .dialog import dialog_effect, render_html as render_dialog_html
+from .talkscript import concern_playbook, render_html as render_talkscript_html
 from .experiment import compare_naive_vs_controlled, assignment_ledger
 from .transitions import status_transitions, render_html as render_transitions_html
 from .timing import (churn_hazard_by_tenure, peak_window, call_timing_list,
@@ -241,6 +242,17 @@ def _mature_before(as_of, months=EARLY_CHURN_MONTHS):
     idx = as_of.year * 12 + (as_of.month - 1) - months
     day = min(as_of.day, 28)  # 月末差異を避ける
     return date(idx // 12, idx % 12 + 1, day)
+
+
+def cmd_talkscript(csv_path, column_map_path, contacts_path, contact_map_path, out_path, as_of):
+    as_of_d = _as_of(as_of)
+    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    contacts = load_contacts(contacts_path, load_column_map(contact_map_path))
+    rows = concern_playbook(records, contacts, _mature_before(as_of_d))
+    render_talkscript_html(rows, out_path)
+    print(f"[talkscript] 懸念{len(rows)}種の教育カード → {out_path}"
+          + ("（対話ログ未整備＝母数0）" if not rows else ""))
+    return rows
 
 
 def cmd_dialog(csv_path, column_map_path, contacts_path, contact_map_path,
@@ -509,6 +521,14 @@ def main(argv=None):
     sp_up.add_argument("--treated-fraction", type=float, default=EXPERIMENT_TREATED_FRACTION)
     sp_up.add_argument("--salt", default="")
 
+    sp_ts = sub.add_parser("talkscript")
+    sp_ts.add_argument("--csv", required=True)
+    sp_ts.add_argument("--column-map", required=True)
+    sp_ts.add_argument("--contacts", required=True)
+    sp_ts.add_argument("--contact-map", required=True)
+    sp_ts.add_argument("--out", required=True)
+    sp_ts.add_argument("--as-of", required=True)
+
     sp_dlg = sub.add_parser("dialog")
     sp_dlg.add_argument("--csv", required=True)
     sp_dlg.add_argument("--column-map", required=True)
@@ -596,6 +616,9 @@ def main(argv=None):
     elif args.cmd == "uplift":
         cmd_uplift(args.csv, args.column_map, args.contacts, args.contact_map,
                    args.as_of, args.treated_fraction, args.salt)
+    elif args.cmd == "talkscript":
+        cmd_talkscript(args.csv, args.column_map, args.contacts, args.contact_map,
+                       args.out, args.as_of)
     elif args.cmd == "dialog":
         cmd_dialog(args.csv, args.column_map, args.contacts, args.contact_map,
                    args.out, args.as_of, args.field)
