@@ -445,10 +445,8 @@ except Exception as _e:  # モジュールが無くても既存シードで動�
     print(f"[info] EXTRA_SEEDS 読み込みスキップ: {_e}")
 
 # 一時非公開エリア(2026-08-18 小柳さん指示・議事_20260818_沖縄市うるま市一時非公開.md)。
-# ここに入れた市町村の「市独自制度」は seido.json に載らず、area/kit/life/診断すべてから消える
-# (国・県の制度は各市町村ページに引き続き表示される)。戻すときはこのリストを空にして
-# fukugiiro-fetch を再実行するだけ。データ(シード)は削除しない。
-HIDDEN_AREAS = ["沖縄市", "うるま市"]
+# 管理は fg_seo.HIDDEN_MUNIS の1箇所(市独自制度・市町村ページ・一覧・診断すべてに効く)。
+from fg_seo import HIDDEN_MUNIS as HIDDEN_AREAS
 
 _robots_cache = {}
 
