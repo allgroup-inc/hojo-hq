@@ -407,36 +407,39 @@ function lineReply_(replyToken, specs) {
 }
 
 /**
+ * [運用ヘルパー] LINEのクイックリプライ(ボタン)は直近1件のメッセージにしか
+ * 表示されず、担当者が間に別のメッセージを送るとボタンが消えてしまう。
+ * その場合に、詰まっている「最終確認待ち」の行の確認メッセージ(ボタン付き)を
+ * 再送する。Apps Scriptエディタの「実行」ボタンは引数を渡せないため、
+ * 引数を省略すると「最終確認待ち」の全行を対象に再送する。特定の担当者だけに
+ * 絞りたい場合は、エディタ上で一時的に引数付きで呼び出すこと
+ * (例: resendFinalConfirmMessage("U3f9b7635be50b3ea7342114fa4f7836a") )。
+ */
+function resendFinalConfirmMessage(lineUserId) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var targets = readVoiceLogRows_(ss).filter(function (r) {
+    return r["ステータス"] === "最終確認待ち" && (!lineUserId || r["LINEユーザーID"] === lineUserId);
+  });
+  if (targets.length === 0) {
+    Logger.log("「最終確認待ち」の行が見つかりませんでした(lineUserId=" + (lineUserId || "指定なし") + ")。");
+    return;
+  }
+  targets.forEach(function (record) {
+    var pushSpec = GlowLineVoiceLogContent.buildFinalConfirmPrompt(
+      record["処理ID"], record["会社名候補"], record["種別候補"], record["対応相手候補"],
+      record["内容メモ"], record["次回アクション"]
+    );
+    linePush_(record["LINEユーザーID"], [pushSpec]);
+    Logger.log("再送しました(処理ID " + record["処理ID"] + ")。");
+  });
+}
+
+/**
  * processQueuedVoiceLogs をインストール型の時間主導トリガーとして1分間隔で登録する。
  * 冪等: 実行時にまず同じハンドラ関数を指す既存トリガーをすべて削除してから
  * 新規登録するため、重複登録を心配せずに安全に再実行できる(ShippingRunner.gsの
  * installLetterDraftEditTriggerと同じパターン)。
  */
-/**
- * [運用ヘルパー] LINEのクイックリプライ(ボタン)は直近1件のメッセージにしか
- * 表示されず、担当者が間に別のメッセージを送るとボタンが消えてしまう。
- * その場合、指定したLINEユーザーIDの「最終確認待ち」の行があれば、
- * 同じ確認メッセージ(ボタン付き)を再送する。Apps Scriptエディタから
- * lineUserIdを引数に指定して手動実行する
- * (例: resendFinalConfirmMessage("U3f9b7635be50b3ea7342114fa4f7836a") )。
- */
-function resendFinalConfirmMessage(lineUserId) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var record = readVoiceLogRows_(ss).filter(function (r) {
-    return r["LINEユーザーID"] === lineUserId && r["ステータス"] === "最終確認待ち";
-  })[0];
-  if (!record) {
-    Logger.log("「最終確認待ち」の行が見つかりませんでした(lineUserId=" + lineUserId + ")。");
-    return;
-  }
-  var pushSpec = GlowLineVoiceLogContent.buildFinalConfirmPrompt(
-    record["処理ID"], record["会社名候補"], record["種別候補"], record["対応相手候補"],
-    record["内容メモ"], record["次回アクション"]
-  );
-  linePush_(record["LINEユーザーID"], [pushSpec]);
-  Logger.log("再送しました(処理ID " + record["処理ID"] + ")。");
-}
-
 function installVoiceLogProcessingTrigger() {
   var existingTriggers = ScriptApp.getProjectTriggers();
   existingTriggers.forEach(function (trigger) {
