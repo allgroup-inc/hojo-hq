@@ -52,6 +52,7 @@ CVはLINE登録の1点のみ(締切アラートが登録特典)。
 - 公開: 静的HTML + GitHub Pages(org: allgroup-inc)
 - 通知: LINE公式アカウント + Power Automate(締切アラート配信)
 - パフォーマンス規律: `word-break:auto-phrase`・`text-wrap:balance`等のレイアウト系CSSは**見出し(h1〜h3)限定**。適用範囲を広げる変更はLighthouseローカル実測(hojo-lighthouse-triageスキル)とセットで行う(2026-08-05・08-12の2度、繰り返し要素への適用でPerformance退行→Issue #10)
+- GAS Web App規律: スタッフ許可リスト認証(`Session.getActiveUser()`照合)を使うWeb Appは、デプロイの実行ユーザーを**「ウェブアプリケーションにアクセスしているユーザー」にする**(個人Gmail運用で「自分」にするとメールが空になり所有者以外全員が締め出される。2026-08-17 apo-kanriレビュー#1で本番投入前に検出)。本番投入・大規模改修の前に独立実行の`/review`(code-review)を通すこと
 - 監査・横断レビューは必ず`git fetch origin main`した最新版を対象にする。ローカル作業ブランチがmainから乖離した状態で判定すると、既に解決済みの問題を「未解決」と誤報告し、逆に新たな問題を見落とす(組織総点検2026-08-17で、526コミット遅れたブランチ上での点検が前提を何度も覆した実例あり)
 
 ## マルチAI連携(2026-08-06 小柳さん決裁)
