@@ -181,12 +181,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/okinawa/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/onna/</loc>
     <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
@@ -224,12 +218,6 @@
   </url>
   <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/urasoe/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/uruma/</loc>
     <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -1117,36 +1105,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-okinawa-kodomo-iryo/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-okinawa-sango-care/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-okinawa-shugaku-enjo/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-okinawashi-hoikuryo/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-okinawashi-reform/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-onna-kodomo-iryo/</loc>
     <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
@@ -1268,42 +1226,6 @@
   </url>
   <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-urasoe-shugaku-enjo/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-uruma-boshi-iryo/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-uruma-hochouki/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-uruma-jokaso/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-uruma-kodomo-iryo/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-uruma-sango-care/</loc>
-    <lastmod>2026-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-uruma-shugaku-enjo/</loc>
     <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
