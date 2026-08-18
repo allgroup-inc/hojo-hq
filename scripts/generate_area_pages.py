@@ -190,8 +190,9 @@ def muni_page(muni, items, updated):
                 f"<h2>{esc(it['name'])}{badge}</h2>"
                 f'<p class="note">{esc(it["target_household"])}</p>'
                 f'<p class="note">窓口: {esc(it["how_to_apply"])}</p>'
+                f'<p style="display:flex;gap:16px;flex-wrap:wrap;margin:0">'
                 f'<a href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する</a>'
-                f' ・ <a href="../../kit/{esc(it["id"])}/">申請準備シート</a>'
+                f'<a href="../../kit/{esc(it["id"])}/">申請準備シート</a></p>'
                 "</div>"
             )
         body.append('</div>')
@@ -228,7 +229,8 @@ def index_page(updated):
     )
     body = (
         "<h1>市町村別 給付金・手当まとめ</h1>"
-        '<p class="note">お住まいの市町村を選んでください。</p>'
+        '<p class="note">お住まいの市町村を選んでください。'
+        '状況から探したい方は<a href="../life/">ライフイベント別まとめ</a>もどうぞ。</p>'
         f'<ul class="areas">{lis}</ul>'
         '<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'
     )

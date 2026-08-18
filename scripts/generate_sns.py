@@ -26,10 +26,18 @@ try:
 except Exception:
     pass
 
+import shipping_gate
+
 JST = timezone(timedelta(hours=9))
 BASE_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(BASE_DIR, "..", "data", "subsidies.json")
 OUT_DIR = os.path.join(BASE_DIR, "..", "posts", "launch")
+
+# 出荷ゲート(運用規程1-3)の通過日。**本ファイルのキャプション文面を書き換えたら必ず更新する。**
+# 更新せずに放置すると shipping_gate.MAX_AGE_DAYS を超えた時点で自動投稿が止まる(フェイルクローズ)。
+# 2026-08-17: 全10投稿を accuracy-check(出典・件数はdata由来)/ deadline-alert(「約1か月前から」で統一)/
+#             humanizer(定型句・過剰な絵文字なし)で確認。
+GATE_CHECKED = "2026-08-17"
 # UTM付き(ヒロメさんのUTM運用: instagram/social/launch)。プロフィールリンクにも同URLを使用
 SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch"
 
@@ -175,7 +183,8 @@ def write_post(n, slug, role, img_title, img_sub, img_number, caption, source, b
 
 ## 出典
 {source}
-"""
+
+{shipping_gate.render_stamp("scripts/generate_sns.py(SNS部・ヒロメさん)", GATE_CHECKED)}"""
     with open(path, "w", encoding="utf-8") as f:
         f.write(body)
     return fname
@@ -230,17 +239,28 @@ def main():
     ))
 
     # 2〜4) 締切30日以上先の制度(近い順)
+    # 書き出しは3パターンを順繰り(humanizer: 同一文の反復を避ける。番号順で決定的=再生成しても同じ)
+    seido_openers = [
+        "📣 締切まで残り{dl}日。いまなら準備が間に合います。",
+        "締切まで残り{dl}日。書類の準備、ここから始めれば間に合います。",
+        "残り{dl}日。この制度、見逃していませんか?",
+    ]
+    seido_closers = [
+        "詳細・申請は原文で👇",
+        "公募要領の原文はこちら👇",
+        "申請できるかは原文で確認を👇",
+    ]
     for i, it in enumerate(seido3, start=2):
         dl = days_left(it, today)
         num = f"締切まで残り{dl}日" if dl is not None else "募集中"
         cap = (
-            f"📣 締切まで残り{dl}日。いまなら準備が間に合います。\n"
+            seido_openers[(i - 2) % len(seido_openers)].format(dl=dl) + "\n"
             f"【募集中】{it['name']}\n"
             f"🗓 {deadline_line(it, today)}\n"
             f"💰 {amount_text(it.get('max_amount'))}\n"
             f"🏝 実施主体：{it.get('issuer') or '要確認'}\n"
             "沖縄の事業者も、要件に合えば申請できます。準備の時間も取りやすい制度です。\n"
-            f"詳細・申請は原文で👇\n{it['source_url']}\n"
+            f"{seido_closers[(i - 2) % len(seido_closers)]}\n{it['source_url']}\n"
             f"{DISCLAIMER}"
         )
         made.append(write_post(
@@ -296,10 +316,11 @@ def main():
         img_number="3ステップ",
         caption=(
             "補助金探しに、夜の時間を使わなくてよくなります。\n"
-            "🔎 ① 簡単な診断で条件を選ぶ\n"
-            "📋 ② あなたの会社が使えるかもしれない制度を表示\n"
-            "📲 ③ LINE登録で締切アラートを受け取る\n"
-            "気になる制度を見逃さないための、かんたんな流れです。"
+            "使い方はかんたん。市町村と業種を選ぶだけの30秒診断で、"
+            "御社が使えそうな制度が出てきます。\n"
+            "あとはLINEに登録しておけば、気になる制度の締切を"
+            "約1か月前からお知らせします📲\n"
+            "探すのは、私たちの仕事です。"
         ),
         source=SITE_URL,
     ))
@@ -328,9 +349,9 @@ def main():
         img_sub="沖縄企業のミカタ",
         img_number=f"掲載 {count}件",
         caption=(
-            "「うちに使える制度、あるのかな」— 30秒でわかります。\n"
+            "「うちに使える制度、あるのかな」。30秒でわかります。\n"
             "沖縄の事業者のための、補助金・助成金ナビ。会社名の入力は不要です🌺\n"
-            f"まずは無料のLINE登録から👇\n{SITE_URL}"
+            f"診断も登録も無料です👇\n{SITE_URL}"
         ),
         source=SITE_URL,
     ))

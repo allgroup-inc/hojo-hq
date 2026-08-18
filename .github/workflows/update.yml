@@ -149,3 +149,24 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  # 出荷ゲート(運用規程1-3)。LINE配信の下書きは人がコピペして配信するため、
+  # 生成器が下書きの先頭に警告を入れる(人向け)のに加えて、ここでCIを赤くする(気づき用)。
+  # 別ジョブにしているのは、文面の違反でデータ取得・サイト公開まで巻き添えにしないため。
+  shipping-gate:
+    needs: fetch-and-deploy
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main   # 上のジョブがコミットした最新の下書きを見る
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: LINE配信下書きの出荷ゲート検査
+        run: |
+          python scripts/shipping_gate.py --self-test
+          python scripts/shipping_gate.py --check-group line

@@ -6,12 +6,12 @@
 <meta name="robots" content="noindex">
 <title>LINEへ移動中…</title>
 <script>
-  // 計測(Plausible manual・Cookieなし)。送るのは line_redirect と channel のみ。
+  // 計測(Plausible manual・Cookieなし)。送るのはイベント名と channel のみ。
   window.plausible = window.plausible || function () {
     (window.plausible.q = window.plausible.q || []).push(arguments);
   };
   window.plausible("line_redirect", { props: { channel: "fg-jukyu" } });
-  // 計測送信の猶予(400ms)後にLINEへ転送。計測が失敗しても必ず転送する。
+  // 計測送信の猶予(400ms)後に転送。計測が失敗しても必ず転送する。
   setTimeout(function () { window.location.replace("https://lin.ee/7fH7vDQ"); }, 400);
 </script>
 <script defer data-domain="allgroup-inc.github.io" src="https://plausible.io/js/script.manual.js"></script>

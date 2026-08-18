@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 hojo-hq — /go/ 中間リンクページ生成
-(.claude/skills/go-link-discipline 準拠: 計測 line_redirect+channel → 約0.4秒 → LINEへ転送)
+(.claude/skills/go-link-discipline 準拠: 計測イベント+channel → 約0.4秒 → 転送先へ)
 
 - lin.ee は直接貼らず、必ず /go/<チャネル>/ を経由する
 - 転送先の変更は下の CHANNELS を書き換えて本スクリプトを再実行(一括変更)
@@ -26,6 +26,11 @@ PLAUSIBLE_DOMAIN = "allgroup-inc.github.io"  # analytics-config.js と同一(小
 REDIRECT_MS = 400
 
 # チャネル定義(転送先を変えるときはここだけ編集して再実行)
+# 既定は「LINEへ転送」。転送先がLINEでないチャネルは event と dest_name を必ず上書きする
+# (go-link-discipline: line_redirect のまま流用するとLINE登録数が水増しされ、KGIを見誤る)。
+DEFAULT_EVENT = "line_redirect"
+DEFAULT_DEST_NAME = "LINE"
+
 CHANNELS = {
     # ── 沖縄企業のミカタ(@345pqedv) ──
     "site":       {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: サイト最下部CTA"},
@@ -35,6 +40,7 @@ CHANNELS = {
     "card":       {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: 紙配布(QRカード・催事・紹介)"},
     # ── もらいわすれ堂/フクギイロ(小柳遥さん・2026-07-24開設) ──
     "fg-top":     {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: トップページ"},
+    "fg-life":    {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: ライフイベント別ページ"},
     "fg-area":    {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 市町村ページ"},
     "fg-kit":     {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 制度キットページ"},
     "fg-shindan": {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 診断ページ"},
@@ -47,14 +53,14 @@ TEMPLATE = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
-<title>LINEへ移動中…</title>
+<title>{dest_name}へ移動中…</title>
 <script>
-  // 計測(Plausible manual・Cookieなし)。送るのは line_redirect と channel のみ。
+  // 計測(Plausible manual・Cookieなし)。送るのはイベント名と channel のみ。
   window.plausible = window.plausible || function () {{
     (window.plausible.q = window.plausible.q || []).push(arguments);
   }};
-  window.plausible("line_redirect", {{ props: {{ channel: "{channel}" }} }});
-  // 計測送信の猶予({ms}ms)後にLINEへ転送。計測が失敗しても必ず転送する。
+  window.plausible("{event}", {{ props: {{ channel: "{channel}" }} }});
+  // 計測送信の猶予({ms}ms)後に転送。計測が失敗しても必ず転送する。
   setTimeout(function () {{ window.location.replace("{dest}"); }}, {ms});
 </script>
 <script defer data-domain="{domain}" src="https://plausible.io/js/script.manual.js"></script>
@@ -66,7 +72,7 @@ TEMPLATE = """<!DOCTYPE html>
 </style>
 </head>
 <body>
-<p>LINEへ移動しています…</p>
+<p>{dest_name}へ移動しています…</p>
 <p>自動で切り替わらない場合は <a href="{dest}">こちらをタップ</a></p>
 </body>
 </html>
@@ -74,20 +80,29 @@ TEMPLATE = """<!DOCTYPE html>
 
 README = """# /go/ 中間リンク(lin.ee直貼り禁止)
 
-各導線 → `/go/<チャネル>/` → Plausibleに `line_redirect`(+channel) を記録 → LINEへ自動転送。
+各導線 → `/go/<チャネル>/` → Plausibleに計測イベント(+channel)を記録 → 転送先へ自動転送。
 直貼りすると ①経路計測 ②転送先の一括変更 ができなくなるため、**lin.ee は必ずここを経由**する。
 
 ## チャネル一覧
 {rows}
 
-## 転送先(LINE)を変えるとき
+## 転送先を変えるとき
 1. `scripts/generate_go_pages.py` の CHANNELS の dest を書き換える
 2. `python scripts/generate_go_pages.py` を実行(全ページ再生成)
 3. commit & push → デプロイ後、主要チャネルで実際に転送されるか確認
 
 ## チャネルを追加するとき
 CHANNELS に1行足して再実行するだけ(計測→転送の構造は共通テンプレート)。
-Plausible では `line_redirect` イベントの `channel` プロパティで経路別に集計できる。
+Plausible では計測イベントの `channel` プロパティで経路別に集計できる。
+
+**転送先がLINEでないチャネルは `event` と `dest_name` を必ず指定する。**
+既定のまま(`line_redirect`)にすると、その導線のクリックがLINE登録として集計され、
+KGI(LINE登録1,000社)の現在地を見誤る。例:
+
+```python
+"yoyaku": {{"dest": "<予約ページURL>", "label": "面談予約(LINE内)",
+           "event": "yoyaku_click", "dest_name": "予約ページ"}},
+```
 """
 
 
@@ -96,7 +111,11 @@ def main():
     for ch, cfg in CHANNELS.items():
         d = os.path.join(GO_DIR, ch)
         os.makedirs(d, exist_ok=True)
-        html = TEMPLATE.format(channel=ch, dest=cfg["dest"], ms=REDIRECT_MS, domain=PLAUSIBLE_DOMAIN)
+        html = TEMPLATE.format(
+            channel=ch, dest=cfg["dest"], ms=REDIRECT_MS, domain=PLAUSIBLE_DOMAIN,
+            event=cfg.get("event", DEFAULT_EVENT),
+            dest_name=cfg.get("dest_name", DEFAULT_DEST_NAME),
+        )
         with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
             f.write(html)
         made.append(ch)
