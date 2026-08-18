@@ -20,3 +20,8 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 
 ## 出典
 https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1021963.html
+
+## 出荷ゲート
+- gates: accuracy-check, deadline-alert, humanizer
+- checked: 2026-08-17
+- by: scripts/generate_sns.py(SNS部・ヒロメさん)

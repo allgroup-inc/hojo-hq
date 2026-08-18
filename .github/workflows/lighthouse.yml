@@ -54,6 +54,13 @@ jobs:
             echo "- 実行(スコア詳細とレポートはArtifacts参照): $run_url"
             echo "- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')"
             echo "- 閾値設定: .github/lighthouserc.json"
+            echo ""
+            echo "## 対応する人へ(AIエージェント含む)"
+            echo ""
+            echo "**まず \`hojo-lighthouse-triage\` スキルを読んでから着手すること。**"
+            echo "Claude Code 環境からは本番URLにも上のArtifactsにも直接アクセスできないことが多い。"
+            echo "上のリンクを開こうとして詰まるのが定番の時間の溶かし方なので、"
+            echo "スキルの手順に従って**ローカルでスコアを実測してから**原因を特定する。"
           } > issue_body.md
           existing=$(gh issue list --state open --label lighthouse \
             --json number --jq '.[0].number')

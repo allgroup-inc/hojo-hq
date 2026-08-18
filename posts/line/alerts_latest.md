@@ -56,3 +56,8 @@
 次の公募に備えて【gBizIDプライム】を先に用意しておきましょう(オンライン申請なら速やかに発行、郵送は最大1か月)。
 制度一覧 → https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert
 ```
+
+## 出荷ゲート
+- gates: accuracy-check, deadline-alert, humanizer
+- checked: 2026-08-17
+- by: scripts/generate_line_alerts.py(LINE部・ツナグさん)

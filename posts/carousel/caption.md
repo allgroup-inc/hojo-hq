@@ -26,3 +26,8 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 - 令和８年度　水力発電導入促進支援事業費補助金（既存設備有効活用強化支援事業）公募: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYcpMAH
 - 小規模事業者持続化補助金＜共同・協業型＞ 第３回公募: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcQOMA1
 - ［第六回以降］事業再構築補助金（共同申請者）: https://www.jgrants-portal.go.jp/subsidy/a0W2x000007Cos5EAC
+
+## 出荷ゲート
+- gates: accuracy-check, deadline-alert, humanizer
+- checked: 2026-08-17
+- by: scripts/generate_carousel.py(SNS部・ヒロメさん)

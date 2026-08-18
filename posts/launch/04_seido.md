@@ -20,3 +20,8 @@ https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczgMAD
 
 ## 出典
 https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczgMAD
+
+## 出荷ゲート
+- gates: accuracy-check, deadline-alert, humanizer
+- checked: 2026-08-17
+- by: scripts/generate_sns.py(SNS部・ヒロメさん)
