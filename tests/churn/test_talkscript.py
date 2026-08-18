@@ -38,6 +38,23 @@ class TestConcernPlaybook(unittest.TestCase):
         # 次点に様子見が入る
         self.assertIn("様子見", [a["approach"] for a in card["alternatives"]])
 
+    def test_thin_lucky_cell_does_not_outrank_well_evidenced(self):
+        # 「確実」= n=25 で解約1/25(4%)、「まぐれ」= n=2 で解約0/2(0%)。
+        # 生率だと まぐれ(0%) が勝つが、少数の偶然で「効いた型」に祭り上げてはいけない。
+        # 確信をもって低い（Wilson上限が低い）確実を best に選ぶ。
+        recs, cons = [], []
+        for i in range(25):
+            cid = f"S{i}"
+            recs.append(R(cid, 1 if i == 0 else 0, date(2025, 3, 1) if i == 0 else None))
+            cons.append(K(cid, date(2025, 2, 1), "手続き不明", "確実"))
+        for i in range(2):
+            cid = f"L{i}"
+            recs.append(R(cid, 0))
+            cons.append(K(cid, date(2025, 2, 1), "手続き不明", "まぐれ"))
+        card = {r["concern"]: r for r in concern_playbook(recs, cons, MB)}["手続き不明"]
+        self.assertEqual(card["best_approach"], "確実")
+        self.assertIn("まぐれ", [a["approach"] for a in card["alternatives"]])
+
     def test_post_cancel_pair_not_counted(self):
         recs = [R("X", 1, date(2025, 3, 1))]
         cons = [K("X", date(2025, 4, 1), "必要性", "再説明")]        # 解約後

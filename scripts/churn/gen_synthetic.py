@@ -103,6 +103,17 @@ def _birth_from_age(rng, age):
 # 学習デモで「効いた一手」を再現するため。実データではなく合成の仕込み。
 ACT_EFFECT = {"減額提案": 0.12, "口座確認": 0.12, "再説明": 0.06, "給付案内": 0.03, "安心コール": 0.02}
 
+# 対話ログ（訪問保全）のデモ用シグナル。教育ループ（dialog/talkscript）を合成データで実演するため。
+# 懸念（顧客の不安）＝セグメント。返し方（対話の型）＝早期解約率への効き（乗算係数）。実データではなく合成の仕込み。
+# 係数は解約確率への倍率（<1で抑止、1.0で無効=様子見）。小標本でも順位が学習で復元できるよう強めに分離。
+CONCERNS = ["保険料負担", "必要性の疑問", "家計不安", "商品理解", "手続き不明"]
+APPROACH_FACTOR = {"家計の見直し提案": 0.35, "減額の提示": 0.50, "再説明・納得": 0.75,
+                   "給付事例の紹介": 1.10, "様子見": 1.60}
+# 懸念ごとに特に効く返し方（マッチで追加の抑止）。教育カード「この懸念にはこの返し方」の仕込み。
+CONCERN_MATCH_FACTOR = 0.55
+CONCERN_BEST = {"保険料負担": "家計の見直し提案", "必要性の疑問": "給付事例の紹介",
+                "家計不安": "減額の提示", "商品理解": "再説明・納得", "手続き不明": "再説明・納得"}
+
 
 def build_records(rng):
     """内部正規形のレコード群＋保全アクションログを作る（レイアウト非依存）。"""
@@ -135,10 +146,24 @@ def build_records(rng):
 
             p = churn_prob(rng, product, channel, form, amount, age, agent)
             p += UNPAID_W[min(unpaid_count, 3)]
-            # 保全アクション（結果記録）: 4割の契約に保全接触。対応内容ごとに早期解約率が下がる（デモ用の効き）。
+            # 保全アクション（結果記録）: 4割の契約に保全接触。対応内容（加算）＋返し方（乗算）で早期解約率が下がる（デモ用の効き）。
             contacted = rng.random() < 0.4
             action = rng.choice(list(ACT_EFFECT)) if contacted else None
-            p_adj = min(max(p - (ACT_EFFECT[action] if contacted else 0.0), 0.02), 0.85)
+            concern = rng.choice(CONCERNS) if contacted else None
+            # 返し方は懸念に応じて熟練担当が寄せる（現場は既にある程度テーラリング）。
+            # 「効いた型」の実績が matched セルに集まり、教育カードが復元できるようにする仕込み。
+            approach = None
+            if contacted:
+                best = CONCERN_BEST[concern]
+                others = [a for a in APPROACH_FACTOR if a != best]
+                approach = (best if rng.random() < 0.45
+                            else rng.choice(others))
+            medium = rng.choices(["架電", "訪問"], weights=[85, 15])[0] if contacted else None
+            p_after_act = max(p - (ACT_EFFECT[action] if contacted else 0.0), 0.02)
+            factor = (APPROACH_FACTOR[approach]
+                      * (CONCERN_MATCH_FACTOR if CONCERN_BEST[concern] == approach else 1.0)
+                      ) if contacted else 1.0
+            p_adj = min(p_after_act * factor, 0.90)
             churned = rng.random() < p_adj
             cancel = None
             status = "成立済"   # 継続（現ステータス実値）
@@ -161,8 +186,11 @@ def build_records(rng):
                 if contact_day <= AS_OF:
                     reaction = rng.choices(["継続", "検討中", "解約意向"],
                                            weights=([30, 30, 40] if churned else [60, 30, 10]))[0]
+                    next_action = rng.choice(["再訪問", "架電フォロー", "様子見", "完了"])
                     actions.append({"顧客ID": cid, "契約日": contract.isoformat(),
                                     "接触日": contact_day.isoformat(), "対応内容": action,
+                                    "接触手段": medium, "懸念": concern, "返し方": approach,
+                                    "次アクション": next_action,
                                     "結果区分": "つながった", "顧客反応": reaction})
             # 初回引落結果・口座普段使い・引落予定日：継続中かつ直近半年の契約だけ値が入る
             # （古い契約は上書きで消える想定）。高リスクほど不着/遅延・口座問題が出やすい（デモ用シグナル）。
@@ -331,7 +359,8 @@ def gen(out_dir, seed, layout):
         write_example(recs, app_path)
     n_inter = write_interactions(recs, inter_path, rng)
     with open(act_path, "w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["顧客ID", "契約日", "接触日", "対応内容", "結果区分", "顧客反応"])
+        w = csv.DictWriter(f, fieldnames=["顧客ID", "契約日", "接触日", "対応内容", "接触手段",
+                                          "懸念", "返し方", "次アクション", "結果区分", "顧客反応"])
         w.writeheader()
         w.writerows(actions)
     print(f"[gen] レイアウト={layout} 申込 {len(recs)}件 / 接触 {n_inter}件 / "

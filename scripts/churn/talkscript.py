@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from .config import MIN_RELIABLE_N
 from .effect_learning import _contacts_index, _mature_resolved, _qualifying_contacts
+from .experiment import wilson_interval
 
 
 def _qualifying_pairs(record, idx, f1, f2):
@@ -44,11 +45,14 @@ def concern_playbook(records, contacts, mature_before,
         concerns.setdefault(con, []).append({
             "approach": app, "n": b["n"], "churn": b["churn"],
             "rate": b["churn"] / b["n"] if b["n"] else 0.0,
+            # 早期解約率のWilson上限（不確実性ペナルティ）。少数の偶然0%を「効いた型」に祭り上げない。
+            "rate_ub": wilson_interval(b["churn"], b["n"])[1],
             "reference": b["n"] < min_reliable})
 
     rows = []
     for con, apps in sorted(concerns.items()):
-        apps.sort(key=lambda a: (a["rate"], -a["n"]))   # 効いた順・母数多い順
+        # 「確信をもって低い」順＝Wilson上限が低い順・母数多い順（生率ではない）。
+        apps.sort(key=lambda a: (a["rate_ub"], -a["n"]))
         best = apps[0]
         rows.append({
             "concern": con, "best_approach": best["approach"], "rate": best["rate"],
