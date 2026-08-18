@@ -412,6 +412,31 @@ function lineReply_(replyToken, specs) {
  * 新規登録するため、重複登録を心配せずに安全に再実行できる(ShippingRunner.gsの
  * installLetterDraftEditTriggerと同じパターン)。
  */
+/**
+ * [運用ヘルパー] LINEのクイックリプライ(ボタン)は直近1件のメッセージにしか
+ * 表示されず、担当者が間に別のメッセージを送るとボタンが消えてしまう。
+ * その場合、指定したLINEユーザーIDの「最終確認待ち」の行があれば、
+ * 同じ確認メッセージ(ボタン付き)を再送する。Apps Scriptエディタから
+ * lineUserIdを引数に指定して手動実行する
+ * (例: resendFinalConfirmMessage("U3f9b7635be50b3ea7342114fa4f7836a") )。
+ */
+function resendFinalConfirmMessage(lineUserId) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var record = readVoiceLogRows_(ss).filter(function (r) {
+    return r["LINEユーザーID"] === lineUserId && r["ステータス"] === "最終確認待ち";
+  })[0];
+  if (!record) {
+    Logger.log("「最終確認待ち」の行が見つかりませんでした(lineUserId=" + lineUserId + ")。");
+    return;
+  }
+  var pushSpec = GlowLineVoiceLogContent.buildFinalConfirmPrompt(
+    record["処理ID"], record["会社名候補"], record["種別候補"], record["対応相手候補"],
+    record["内容メモ"], record["次回アクション"]
+  );
+  linePush_(record["LINEユーザーID"], [pushSpec]);
+  Logger.log("再送しました(処理ID " + record["処理ID"] + ")。");
+}
+
 function installVoiceLogProcessingTrigger() {
   var existingTriggers = ScriptApp.getProjectTriggers();
   existingTriggers.forEach(function (trigger) {
