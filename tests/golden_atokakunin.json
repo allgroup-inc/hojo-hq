@@ -116,6 +116,108 @@
     {"name": "知らないエラーを勝手に再試行しない(人へ)", "kind": "何かよくわからないエラー", "expect": "human"}
   ],
 
+  "call_list_order": [
+    {"name": "送信失敗→要確認→返信なし の順にかける",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-003", "tel_key": "T-c", "state": "送信済", "sent_at": "2026-08-14 10:00"},
+       {"order_id": "A-002", "tel_key": "T-b", "state": "要確認", "sent_at": "2026-08-16 10:00"},
+       {"order_id": "A-001", "tel_key": "T-a", "state": "送信失敗", "sent_at": "2026-08-17 08:00"}
+     ],
+     "expect": ["A-001", "A-002", "A-003"]},
+
+    {"name": "同じ状態なら経過の長い順",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-010", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-15 09:00"},
+       {"order_id": "A-011", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-11 09:00"},
+       {"order_id": "A-012", "tel_key": "T-c", "state": "送信済", "sent_at": "2026-08-13 09:00"}
+     ],
+     "expect": ["A-011", "A-012", "A-010"]},
+
+    {"name": "経過も同じなら申込ID順で固定する(毎朝の並びを変えない)",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-022", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-15 09:00"},
+       {"order_id": "A-020", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-15 09:00"},
+       {"order_id": "A-021", "tel_key": "T-c", "state": "送信済", "sent_at": "2026-08-15 09:00"}
+     ],
+     "expect": ["A-020", "A-021", "A-022"]},
+
+    {"name": "承認済・未送信・期限切れは載せない",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-030", "tel_key": "T-a", "state": "承認_SMS", "sent_at": "2026-08-10 09:00"},
+       {"order_id": "A-031", "tel_key": "T-b", "state": "承認_電話", "sent_at": "2026-08-10 09:00"},
+       {"order_id": "A-032", "tel_key": "T-c", "state": "未送信"},
+       {"order_id": "A-033", "tel_key": "T-d", "state": "期限切れ", "sent_at": "2026-08-01 09:00"},
+       {"order_id": "A-034", "tel_key": "T-e", "state": "送信済", "sent_at": "2026-08-14 09:00"}
+     ],
+     "expect": ["A-034"]},
+
+    {"name": "2日に満たない返信待ちは載せない",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-040", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-16 09:00"},
+       {"order_id": "A-041", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-15 09:00"}
+     ],
+     "expect": ["A-041"]},
+
+    {"name": "期限間近は送信失敗より先にかける(取り返しがつかない順)",
+     "_note": "送信失敗は急ぐが期限まで7日ある。期限が明日の件は今日かけないと手遅れになる",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-090", "tel_key": "T-a", "state": "送信失敗", "sent_at": "2026-08-17 08:00"},
+       {"order_id": "A-091", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-11 09:00"}
+     ],
+     "expect": ["A-091", "A-090"]},
+
+    {"name": "期限間近どうしなら通常の優先度で並ぶ",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-100", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-11 09:00"},
+       {"order_id": "A-101", "tel_key": "T-b", "state": "送信失敗", "sent_at": "2026-08-10 09:00"}
+     ],
+     "expect": ["A-101", "A-100"]},
+
+    {"name": "対象が無ければ空",
+     "now": "2026-08-17 09:00", "records": [], "expect": []}
+  ],
+
+  "call_list_flags": [
+    {"name": "同じ番号で未完了2件なら両方に「申込の特定が必要」を立てる",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-050", "tel_key": "T-same", "state": "送信済", "sent_at": "2026-08-14 09:00"},
+       {"order_id": "A-051", "tel_key": "T-same", "state": "送信済", "sent_at": "2026-08-14 09:00"}
+     ],
+     "expect": [["A-050", true, false], ["A-051", true, false]]},
+
+    {"name": "番号が違えば特定フラグは立たない",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-060", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-14 09:00"},
+       {"order_id": "A-061", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-14 09:00"}
+     ],
+     "expect": [["A-060", false, false], ["A-061", false, false]]},
+
+    {"name": "承認済の同番号は未完了に数えない(特定フラグを立てない)",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-070", "tel_key": "T-same", "state": "送信済", "sent_at": "2026-08-14 09:00"},
+       {"order_id": "A-071", "tel_key": "T-same", "state": "承認_SMS", "sent_at": "2026-08-10 09:00"}
+     ],
+     "expect": [["A-070", false, false]]},
+
+    {"name": "期限(7日)の1日前から期限間近を立てる",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-080", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-11 09:00"},
+       {"order_id": "A-081", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-12 09:00"}
+     ],
+     "expect": [["A-080", false, true], ["A-081", false, false]]}
+  ],
+
   "review_candidates": [
     {"name": "3件以上そろった短い語だけを候補にする",
      "replies": ["ハイ", "ハイ", "ハイ", "承知", "承知"],

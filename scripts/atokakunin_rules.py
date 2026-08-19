@@ -117,6 +117,88 @@ def is_expired(record, now, expire_days=DEFAULT_EXPIRE_DAYS):
     return (now - parse_dt(record["sent_at"])) >= timedelta(days=expire_days)
 
 
+# ── 3.2 電話リスト(毎朝これを見て上から順にかける) ──────────
+# 台帳がスプレッドシートでもkintoneでも、載せる条件と並べ方は同じ。
+# だから台帳の種類(Q2-1)が決まる前にここだけ先に作れる。
+#
+# **このリストに氏名は載らない。** 担当者が見る画面で、申込IDをキーに台帳側の氏名・
+# 電話番号を引いて表示する。リスト自体は公開リポジトリで扱える形に保つ。
+
+# 優先度: 小さいほど先にかける
+_PRIORITY = {
+    "送信失敗": 0,   # 届いていない。放置すると永久に届かないので最優先で番号を直す
+    "要確認": 1,     # 返信は来ている=お客様は返事を待っている
+    "送信済": 2,     # 返信なし。経過の長い順に追いかける
+}
+_REASON = {
+    "送信失敗": "ショートメールが届いていません。番号を確認してかけ直してください",
+    "要確認": "返信は来ていますが承認と判定できませんでした。原文を読んでからかけてください",
+    "送信済": "送信から{days}日、返信がありません",
+}
+
+
+def build_call_list(records, now, wait_days=DEFAULT_CALL_AFTER_DAYS,
+                    expire_days=DEFAULT_EXPIRE_DAYS):
+    """電話をかける対象を、かける順に並べて返す。
+
+    並び順: **まず期限間近**(今日かけないと間に合わない)、次に ①送信失敗 ②要確認
+    ③返信なし(経過の長い順)。同条件なら申込ID順で固定する
+    (毎朝の並びが実行のたびに変わると、担当者が「どこまでかけたか」を見失うため)。
+
+    期限間近を最上位に置く理由: 送信失敗は急ぐが期限まで日数がある。期限が明日の件は
+    今日かけなければ手遅れになる。「取り返しがつかない順」に並べる。
+    """
+    rows = []
+    open_keys = [r.get("tel_key") for r in records
+                 if r.get("state") in ("未送信", "送信済", "要確認", "送信失敗")]
+
+    for r in records:
+        if not needs_call(r, now, wait_days):
+            continue
+        state = r.get("state")
+        days = 0
+        if r.get("sent_at"):
+            days = (now - parse_dt(r["sent_at"])).days
+        rows.append({
+            "order_id": r["order_id"],
+            "tel_key": r.get("tel_key"),
+            "state": state,
+            "waited_days": days,
+            "reason": _REASON.get(state, "確認が必要です").format(days=days),
+            # 同じ番号で未完了が2件以上 = どの申込への返事か特定できない。
+            # 電話で必ず申込を特定してから了承を取る(自動承認は別途 can_auto_approve が塞いでいる)
+            "needs_identity_check": not can_auto_approve(r.get("tel_key"), open_keys),
+            # 期限切れが目前。今日かけないと間に合わない
+            "expiring_soon": bool(r.get("sent_at")) and (expire_days - days) <= 1,
+        })
+
+    rows.sort(key=lambda x: (0 if x["expiring_soon"] else 1,
+                             _PRIORITY.get(x["state"], 9),
+                             -x["waited_days"],
+                             x["order_id"]))
+    return rows
+
+
+def render_call_list(rows):
+    """電話リストをタブ区切りの文字列にする(印刷・貼り付け用)。
+
+    氏名・電話番号は含めない。担当者の画面で申込IDから台帳を引いて表示する。
+    """
+    header = "順\t申込ID\t経過\t要対応\t理由"
+    lines = [header]
+    for i, r in enumerate(rows, 1):
+        marks = []
+        if r["needs_identity_check"]:
+            marks.append("申込の特定が必要")
+        if r["expiring_soon"]:
+            marks.append("期限間近")
+        lines.append(f'{i}\t{r["order_id"]}\t{r["waited_days"]}日\t'
+                     f'{"/".join(marks) if marks else "—"}\t{r["reason"]}')
+    if not rows:
+        lines.append("(本日かける対象はありません)")
+    return "\n".join(lines)
+
+
 # ── 3.5 承認語の見直し材料をつくる ────────────────────────
 # Q6(「はい」以外の返信の扱い)は「既定のまま2週間走らせ、実際に来た返信文を見てから
 # 承認語を決める」と確定(2026-08-17 小柳さん)。その"見直し"を実行させるための道具。
@@ -237,9 +319,18 @@ def self_test():
     failed += _run_section(
         golden, "review_candidates",
         lambda c: _as_expected(review_candidates(c["replies"], c.get("min_count", 3))))
+    # 電話リストは「並び順」と「フラグ」を別々に確かめる
+    failed += _run_section(
+        golden, "call_list_order",
+        lambda c: [r["order_id"] for r in build_call_list(c["records"], parse_dt(c["now"]))])
+    failed += _run_section(
+        golden, "call_list_flags",
+        lambda c: [[r["order_id"], r["needs_identity_check"], r["expiring_soon"]]
+                   for r in build_call_list(c["records"], parse_dt(c["now"]))])
 
     for k in ("reply_judgment", "auto_approve", "after_reply", "call_list",
-              "expire", "send_gate", "error_class", "retry_delay", "review_candidates"):
+              "expire", "send_gate", "error_class", "retry_delay", "review_candidates",
+              "call_list_order", "call_list_flags"):
         total += len(golden.get(k, []))
 
     # 判定器そのものの前提が崩れていないかの確認(ゴールデンセットの取りこぼし防止)
