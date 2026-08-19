@@ -119,6 +119,22 @@ def imminent_lapse_uplift(records, min_streak=3, treated_fraction=EXPERIMENT_TRE
     return out
 
 
+def relapse_uplift(records, treated_fraction=EXPERIMENT_TREATED_FRACTION,
+                   salt="", min_reliable=MIN_RELIABLE_N):
+    """決定1（再発監視の効果検証）。
+
+    再発履歴（未収エピソード≥2＝解消をはさんで再び未収）を持つ契約だけを対象に、先行/後発の
+    早期解約率差を uplift で測る。割付ランダム化で因果。**優先度順への組込みは、ここで効果が
+    確認できてから**（決定ブリーフ 決定1）。合成データには再発への介入が仕込まれていないので
+    diff≒0＝「効果なし/参考」が正しい。"""
+    from .relapse import unpaid_episodes
+    target = [r for r in records
+              if len(unpaid_episodes(r.get("unpaid_months") or [])) >= 2]
+    out = uplift(target, treated_fraction, salt, min_reliable)
+    out["n_target"] = len(target)
+    return out
+
+
 def compare_naive_vs_controlled(records, contacts, mature_before,
                                 treated_fraction=EXPERIMENT_TREATED_FRACTION, salt="",
                                 min_reliable=MIN_RELIABLE_N):

@@ -17,6 +17,26 @@ from .triggers import unpaid_trigger
 from .config import MIN_RELIABLE_N, CAPACITY_PER_DAY
 
 
+def retained_premium(records, as_of):
+    """守れた累積保険料（決定3・LTV補助KPI）＝継続中契約の これまでの継続月数 × 月額保険料 の総和。
+
+    「引き止めの口実にしない」ため、主KPIは継続率・これは従（決定ブリーフ 決定3）。観測値のみ・射影しない。
+    対象は 母集団内かつ継続中（現ステータス＝継続 or is_scoreable）で、契約日・保険料があるもの。
+    """
+    total = 0
+    for r in records:
+        if r.get("in_scope", True) is False:
+            continue
+        if not (r.get("status_category") == "継続" or r.get("is_scoreable")):
+            continue
+        ad, amt = r.get("apply_date"), r.get("amount")
+        if ad is None or not amt:
+            continue
+        months = max(0, (as_of - ad).days // 30)
+        total += months * amt
+    return int(total)
+
+
 def dashboard_summary(records, as_of, model, capacity=CAPACITY_PER_DAY):
     """ダッシュボードの見出し数字をまとめて返す（既存の集計関数を呼ぶだけ）。"""
     rows = cohort_rows(records, as_of, model=model)
@@ -34,6 +54,7 @@ def dashboard_summary(records, as_of, model, capacity=CAPACITY_PER_DAY):
         "relapse_count": len(relapse_candidates(records, as_of)),
         "imminent_count": sum(1 for r in records
                               if unpaid_trigger(r, as_of) == "未払消滅目前"),
+        "retained_premium": retained_premium(records, as_of),
     }
 
 
@@ -72,6 +93,8 @@ def render_index(summary, links, path, target=0.03):
               "一度解消→また未収", "#F88800"),
         _card("解約の山（A2）", f'{len(peaks)}つ',
               f'契約後 {peak_txt}', "#00335C"),
+        _card("守れた累積保険料（LTV補助）", f'{summary["retained_premium"]:,}円',
+              "継続月数×月額の総和・主KPIは継続率", "#1E8449"),
         _card("除外（母集団外/対象外）", f'{exc["total_excluded"]}件',
               "率の分母から除外・件数併記", "#6B6B6B"),
     ])

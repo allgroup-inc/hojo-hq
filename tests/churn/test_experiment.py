@@ -7,6 +7,7 @@ from datetime import date
 from scripts.churn.experiment import (
     assign_arm, wilson_interval, uplift, assignment_ledger,
     compare_naive_vs_controlled, max_consecutive_streak, imminent_lapse_uplift,
+    relapse_uplift,
 )
 
 
@@ -153,6 +154,31 @@ class TestImminentLapseUplift(unittest.TestCase):
                  "unpaid_months": [(2026, 7)]}]
         out = imminent_lapse_uplift(recs, min_streak=3)
         self.assertEqual(out["n_treat"] + out["n_ctrl"], 0)
+
+
+class TestRelapseUplift(unittest.TestCase):
+    """決定1: 再発履歴(未収エピソード>=2)だけを対象に、先行/後発の早期解約率差を測る。"""
+    def test_restricts_to_relapse_population(self):
+        recs = []
+        for i in range(60):
+            cid = f"R{i}"
+            arm = assign_arm(cid)
+            churn = 0 if arm == "先行" else 1
+            # 5月未収→7月未収（6月に解消のギャップ）＝再発履歴（2エピソード）
+            recs.append({"customer_id": cid, "is_resolved": True, "is_early_churn": churn,
+                         "unpaid_months": [(2026, 5), (2026, 7)]})
+        # 単発エピソード（連続のみ）＝対象外・全員解約
+        for i in range(40):
+            recs.append({"customer_id": f"C{i}", "is_resolved": True, "is_early_churn": 1,
+                         "unpaid_months": [(2026, 6), (2026, 7)]})
+        out = relapse_uplift(recs)
+        self.assertEqual(out["n_treat"] + out["n_ctrl"], 60)   # 再発60件のみ
+        self.assertGreater(out["diff"], 0.0)
+
+    def test_no_relapse_is_empty(self):
+        recs = [{"customer_id": "C1", "is_resolved": True, "is_early_churn": 1,
+                 "unpaid_months": [(2026, 6), (2026, 7)]}]   # 連続のみ＝再発でない
+        self.assertEqual(relapse_uplift(recs)["n_treat"], 0)
 
 
 if __name__ == "__main__":

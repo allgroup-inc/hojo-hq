@@ -2,7 +2,7 @@ import unittest
 from datetime import date
 
 from scripts.churn import fit
-from scripts.churn.dashboard import dashboard_summary
+from scripts.churn.dashboard import dashboard_summary, retained_premium
 
 AS_OF = date(2026, 8, 1)
 
@@ -36,8 +36,21 @@ class TestDashboardSummary(unittest.TestCase):
     def test_keys_present(self):
         s = dashboard_summary([rec("A")], AS_OF, fit.fit_model([]))
         for k in ("overall", "excluded", "today_total", "peaks",
-                  "relapse_count", "imminent_count"):
+                  "relapse_count", "imminent_count", "retained_premium"):
             self.assertIn(k, s)
+
+
+class TestRetainedPremium(unittest.TestCase):
+    def test_continuing_tenure_times_amount(self):
+        # 契約2026-05-01→as_of2026-08-01＝約92日=3ヶ月・月額5000 → 15000
+        r = rec("A", apply_d=date(2026, 5, 1), amount=5000)
+        self.assertEqual(retained_premium([r], AS_OF), 15000)
+
+    def test_excludes_out_of_scope_and_non_continuing(self):
+        out = dict(rec("X", apply_d=date(2026, 5, 1)), in_scope=False)
+        churned = dict(rec("Y", apply_d=date(2026, 5, 1)),
+                       is_scoreable=False, status_category="早期解約")
+        self.assertEqual(retained_premium([out, churned], AS_OF), 0)
 
 
 if __name__ == "__main__":

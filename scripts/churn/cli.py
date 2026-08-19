@@ -422,6 +422,22 @@ def cmd_imminent_uplift(csv_path, column_map_path, as_of, treated_fraction, salt
     return o
 
 
+def cmd_relapse_uplift(csv_path, column_map_path, as_of, treated_fraction, salt):
+    """決定1: 再発履歴(未収エピソード>=2)だけの段階導入 uplift（再発監視の効果検証土台）。"""
+    from .experiment import relapse_uplift
+    as_of_d = _as_of(as_of)
+    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    o = relapse_uplift(records, treated_fraction=treated_fraction, salt=salt)
+    ref = "（参考・母数不足）" if o["reference"] else ""
+    lo, hi = o["diff_ci"]
+    sig = "（0を含む＝有意でない）" if lo <= 0 <= hi else "（0を跨がない＝有意に減少）"
+    print(f"[relapse-uplift] 再発(エピソード>=2)={o['n_target']}件")
+    print(f"  介入(先行){o['rate_treat']:.1%}(n={o['n_treat']}) / "
+          f"対照(後発){o['rate_ctrl']:.1%}(n={o['n_ctrl']}){ref}")
+    print(f"  早期解約の減少 diff={o['diff']:+.1%} 95%CI[{lo:+.1%}, {hi:+.1%}]{sig}")
+    return o
+
+
 def cmd_retention(snapshots_dir, as_of, years, apply):
     rep = purge_snapshots(snapshots_dir, _as_of(as_of), years, apply)
     mode = "実削除" if apply else "ドライラン（消しません）"
@@ -606,6 +622,13 @@ def main(argv=None):
     sp_iu.add_argument("--salt", default="")
     sp_iu.add_argument("--min-streak", type=int, default=3)
 
+    sp_ru = sub.add_parser("relapse-uplift")   # 決定1: 再発監視の効果検証
+    sp_ru.add_argument("--csv", required=True)
+    sp_ru.add_argument("--column-map", required=True)
+    sp_ru.add_argument("--as-of", required=True)
+    sp_ru.add_argument("--treated-fraction", type=float, default=EXPERIMENT_TREATED_FRACTION)
+    sp_ru.add_argument("--salt", default="")
+
     sp_ts = sub.add_parser("talkscript")
     sp_ts.add_argument("--csv", required=True)
     sp_ts.add_argument("--column-map", required=True)
@@ -705,6 +728,9 @@ def main(argv=None):
     elif args.cmd == "imminent-uplift":
         cmd_imminent_uplift(args.csv, args.column_map, args.as_of,
                             args.treated_fraction, args.salt, args.min_streak)
+    elif args.cmd == "relapse-uplift":
+        cmd_relapse_uplift(args.csv, args.column_map, args.as_of,
+                           args.treated_fraction, args.salt)
     elif args.cmd == "uplift":
         cmd_uplift(args.csv, args.column_map, args.contacts, args.contact_map,
                    args.as_of, args.treated_fraction, args.salt)
