@@ -78,5 +78,30 @@ class TestSchema(unittest.TestCase):
         self.assertIsNone(r["debit_due"])
 
 
+class TestEmptyCustomerId(unittest.TestCase):
+    """顧客ID列がマップされていて値が空＝管理画面のID漏れ（徳元さん 2026-08-18）。
+    母集団から外す（in_scope=False）＋件数は excluded_reason で併記。採点・学習に入れない。"""
+    CMAP = dict(COLUMN_MAP, customer_id="顧客ID")
+
+    def test_empty_customer_id_excluded(self):
+        raw_row = raw(); raw_row["顧客ID"] = ""   # ID漏れ
+        r = schema.normalize_record(raw_row, self.CMAP, date(2026, 8, 1))
+        self.assertFalse(r["in_scope"])
+        self.assertEqual(r["excluded_reason"], "顧客ID空")
+        self.assertFalse(r["is_resolved"])
+        self.assertFalse(r["is_scoreable"])
+
+    def test_present_customer_id_in_scope(self):
+        raw_row = raw(); raw_row["顧客ID"] = "C1"
+        r = schema.normalize_record(raw_row, self.CMAP, date(2026, 8, 1))
+        self.assertTrue(r["in_scope"])
+        self.assertIsNone(r["excluded_reason"])
+
+    def test_unmapped_customer_id_unaffected(self):
+        # 顧客ID未マップ（従来フロー）は除外しない（後方互換）
+        r = schema.normalize_record(raw(), COLUMN_MAP, date(2026, 8, 1))
+        self.assertTrue(r["in_scope"])
+
+
 if __name__ == "__main__":
     unittest.main()

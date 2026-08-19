@@ -56,7 +56,8 @@ class TestPreflight(unittest.TestCase):
         self.assertEqual(rep["n_total"], 3)
         self.assertEqual(rep["n_unlinked"], 1)
         self.assertEqual(rep["n_resolved"], 2)      # C1(解約)・C2(成熟生存)
-        self.assertEqual(rep["n_scoreable"], 1)     # 2026-07 継続中
+        # 3行目は顧客ID空（未紐付）＝母集団外に除外 → 継続中だが scoreable に数えない（徳元さん 2026-08-18）
+        self.assertEqual(rep["n_scoreable"], 0)
 
     def test_report_is_pii_free_and_serializable(self):
         csv = _write(self.d, FULL_HEADER, ["C1,2025-01-01,医療,ネット,単発,5000,25,女,那覇,S1,2025-03-01,負担"])

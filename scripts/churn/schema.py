@@ -92,6 +92,7 @@ def normalize_record(raw, column_map, as_of):
         # 成立済など早期解約でない場合、着金日は解約日ではない → downstream用にNone化
         if sc["category"] != "早期解約":
             cancel_date = None
+
     elif cancel_date is not None and apply_date is not None:
         is_resolved = True
         is_early_churn = 1 if is_within_months(apply_date, cancel_date, EARLY_CHURN_MONTHS) else 0
@@ -101,6 +102,19 @@ def normalize_record(raw, column_map, as_of):
             is_early_churn = 0  # 6ヶ月生存
         else:
             is_scoreable = True  # 継続中・6ヶ月未満 = これから手を打てる
+
+    # 顧客ID列がマップされていて値が空＝管理画面のID漏れ（徳元さん 2026-08-18）。
+    # 上の分類結果を上書きして母集団から外す（採点・学習に入れない）。件数は excluded_reason で併記。
+    # 未マップ（従来フロー）は判定できないので除外しない（後方互換）。
+    cid_col = column_map.get("customer_id")
+    if cid_col is not None and not str(raw.get(cid_col) or "").strip():
+        in_scope = False
+        excluded_reason = "顧客ID空"
+        status_category = "母集団外"   # ID漏れ＝そもそも母集団でない（現ステータス値は無意味）
+        is_resolved = False
+        is_scoreable = False
+        is_early_churn = None
+        cancel_date = None
 
     return {
         "customer_id": _get(raw, column_map, "customer_id"),
