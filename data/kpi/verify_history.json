@@ -770,5 +770,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-19",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "いわき市診療所開設・承継支援補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXK4MAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(ソーシャルボンド/ソーシャルローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdA6MAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【農林水産省】中山間地域所得確保推進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDCMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和8年度地熱発電の資源量調査事業費助成金交付事業_第3回",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdjkMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度_Scope3排出量削減のための企業間連携による省CO2設備投資促進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDNDnMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
