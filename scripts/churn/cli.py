@@ -49,6 +49,13 @@ def _as_of(value):
     return date(y, m, d)
 
 
+def _warn_if_unpaid_unmapped(column_map):
+    """Ⅳ(未収)列が未マップだと再発・未払消滅の件数が黙って0になる → 警告（0を実績と誤読させない）。"""
+    if "unpaid" not in column_map:
+        print("[注意] column_map に unpaid(Ⅳ) が無いため、未払消滅目前・再発は 0 になります"
+              "（未収履歴が読めていません。実績0と誤解しないでください）")
+
+
 def cmd_fit(csv_path, column_map_path, model_path, as_of):
     cmap = load_column_map(column_map_path)
     records = load_records(csv_path, cmap, _as_of(as_of))
@@ -303,7 +310,9 @@ def cmd_dashboard(csv_path, column_map_path, out_dir, as_of, capacity):
     from .relapse import relapse_candidates, render_html as render_relapse_html
     as_of_d = _as_of(as_of)
     os.makedirs(out_dir, exist_ok=True)
-    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    cmap = load_column_map(column_map_path)
+    _warn_if_unpaid_unmapped(cmap)
+    records = load_records(csv_path, cmap, as_of_d)
     model = fit_model(records)
     # 各詳細ページ
     rows = cohort_rows(records, as_of_d, model=model)
@@ -333,7 +342,9 @@ def cmd_relapse(csv_path, column_map_path, out_path, as_of):
     """A3: 再発監視リスト（一度解消した未収がまた出た継続契約）。"""
     from .relapse import relapse_candidates, render_html as render_relapse_html
     as_of_d = _as_of(as_of)
-    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    cmap = load_column_map(column_map_path)
+    _warn_if_unpaid_unmapped(cmap)
+    records = load_records(csv_path, cmap, as_of_d)
     rows = relapse_candidates(records, as_of_d)
     render_relapse_html(rows, out_path)
     print(f"[relapse] 再発監視 {len(rows)}件（未収の再発回数が多い順）→ {out_path}")
@@ -409,7 +420,9 @@ def cmd_imminent_uplift(csv_path, column_map_path, as_of, treated_fraction, salt
     """A1: 未払消滅目前(最長未収連続>=min_streak)だけの段階導入 uplift。"""
     from .experiment import imminent_lapse_uplift
     as_of_d = _as_of(as_of)
-    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    cmap = load_column_map(column_map_path)
+    _warn_if_unpaid_unmapped(cmap)
+    records = load_records(csv_path, cmap, as_of_d)
     o = imminent_lapse_uplift(records, min_streak=min_streak,
                               treated_fraction=treated_fraction, salt=salt)
     ref = "（参考・母数不足）" if o["reference"] else ""
@@ -426,7 +439,9 @@ def cmd_relapse_uplift(csv_path, column_map_path, as_of, treated_fraction, salt)
     """決定1: 再発履歴(未収エピソード>=2)だけの段階導入 uplift（再発監視の効果検証土台）。"""
     from .experiment import relapse_uplift
     as_of_d = _as_of(as_of)
-    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    cmap = load_column_map(column_map_path)
+    _warn_if_unpaid_unmapped(cmap)
+    records = load_records(csv_path, cmap, as_of_d)
     o = relapse_uplift(records, treated_fraction=treated_fraction, salt=salt)
     ref = "（参考・母数不足）" if o["reference"] else ""
     lo, hi = o["diff_ci"]
