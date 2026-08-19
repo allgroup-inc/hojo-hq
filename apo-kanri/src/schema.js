@@ -20,7 +20,13 @@
   var APPOINTMENT_HEADERS = [
     "アポID", "日付", "開始時刻", "所要分", "顧客名", "形式", "場所またはURL",
     "担当営業", "アポ入れ担当", "温度感", "ステータス", "メモ",
-    "登録日時", "最終更新日時"
+    "登録日時", "最終更新日時",
+    "アポ種別", "紹介元"
+  ];
+  // 再訪と新規では決まり方がまったく違うため、混ぜた平均値は改善判断に使えない。
+  // 種別ごとに申込み率を出せるようにする(2026-08-19 小柳さん決裁)。
+  var APPOINTMENT_KINDS = [
+    "再訪(既存)", "新規(紹介)", "新規(ご家族)", "新規(その他)"
   ];
   var APPOINTMENT_FORMATS = ["訪問", "来店", "オンライン"];
   var TEMPERATURES = ["高", "中", "低"];
@@ -43,6 +49,7 @@
     APPOINTMENT_SHEET_NAME: APPOINTMENT_SHEET_NAME,
     APPOINTMENT_HEADERS: APPOINTMENT_HEADERS,
     APPOINTMENT_FORMATS: APPOINTMENT_FORMATS,
+    APPOINTMENT_KINDS: APPOINTMENT_KINDS,
     TEMPERATURES: TEMPERATURES,
     APPOINTMENT_STATUSES: APPOINTMENT_STATUSES,
     HISTORY_SHEET_NAME: HISTORY_SHEET_NAME,

@@ -60,10 +60,13 @@ h1,h2,.lead,.act{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif}
 /* ヘッダー */
 .masthead{display:flex;align-items:center;gap:12px}
 .mark{flex:none;width:48px;height:48px}
-h1{font-size:24px;font-weight:700;line-height:1.2;letter-spacing:.01em}
+h1{font-size:24px;font-weight:700;line-height:1.2;letter-spacing:.01em;display:flex;align-items:center;gap:6px}
+/* 「ポっ」は黄色の丸にオレンジ文字。黄色地で読める濃さのオレンジを選ぶ */
 h1 .po{
-  background:var(--ink);color:var(--brand);
-  border-radius:6px;padding:0 6px;margin-left:2px;
+  display:inline-flex;align-items:center;justify-content:center;
+  width:46px;height:46px;border-radius:50%;
+  background:var(--brand);color:#B23C06;
+  font-size:20px;letter-spacing:-.06em;
 }
 .who{font-size:12px;color:var(--sub);letter-spacing:.06em;margin-top:2px}
 .lead{
@@ -220,6 +223,18 @@ a:focus-visible,.row:focus-visible{outline:2px solid var(--focus);outline-offset
         <div class="when">電話でアポが取れた</div>
         <div class="do">右上の <span class="key">＋ 新規アポ</span> → 入力 → <span class="key">保存して通知</span></div>
         <div class="then">担当営業のSlackに「新規アポ」が飛びます。続けて何件も入れるときは「保存して続けて登録」を押すと、日付と担当を引き継いだまま次を入力できます。</div>
+      </div>
+
+      <div class="row">
+        <div class="when">前に訪問したお客様に架電して、自分でアポを取った</div>
+        <div class="do">同じく <span class="key">＋ 新規アポ</span>。アポ種別は <span class="key">再訪(既存)</span> を選ぶ</div>
+        <div class="then">担当営業とアポ入れ担当は、最初から自分になっています。そのまま保存でかまいません。</div>
+      </div>
+
+      <div class="row">
+        <div class="when">お客様の紹介・ご家族の新規アポ</div>
+        <div class="do">アポ種別で <span class="key">新規(紹介)</span> か <span class="key">新規(ご家族)</span> を選ぶ → 出てきた「紹介元」に一言</div>
+        <div class="then">「◯◯様のご紹介」と書いておくと、後から誰の紹介だったか辿れます。分析タブでは、再訪と新規を分けた申込み率が出ます。</div>
       </div>
 
       <div class="row">

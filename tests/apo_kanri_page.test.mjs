@@ -28,6 +28,16 @@ test("分析タブ: 埋まり状況・転換ファネル・評価非利用の注
   assert.ok(html.includes("件数が少ないため参考値"));
 });
 
+test("アポ種別: 入力欄・紹介元・分析パネルが配線されている", () => {
+  assert.ok(html.includes("アポ種別"));
+  assert.ok(html.includes("fKind"));
+  assert.ok(html.includes("紹介元"));
+  assert.ok(html.includes("fReferrer"));
+  assert.ok(html.includes("syncReferrerField"), "再訪では紹介元を隠す");
+  assert.ok(html.includes("byKind"));
+  assert.ok(html.includes("アポ種別別の申込み率"));
+});
+
 test("分析タブ: 温度感別の申込み率パネルがある(母数併記・参考値注記)", () => {
   assert.ok(html.includes("温度感別の申込み率"));
   assert.ok(html.includes("byTemperature"));
