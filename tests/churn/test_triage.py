@@ -91,6 +91,16 @@ class TestTriage(unittest.TestCase):
         cands = classify([r], model, AS_OF)
         self.assertEqual([c["trigger"] for c in cands], ["未払消滅目前"])
 
+    def test_classify_excludes_empty_id_even_with_unpaid_streak(self):
+        # 顧客ID空＝母集団外(is_scoreable=False かつ status_category!="継続")。
+        # 3ヶ月未収の連続があっても、ID漏れの行は今日の要接触に載せない（打ち手を打てないため）。
+        r = {"is_scoreable": False, "status_category": "母集団外", "customer_id": "",
+             "apply_id": None, "product": "医療", "agent_id": "S1", "amount": 5000,
+             "debit_result": "", "account_daily": "はい", "debit_due": None,
+             "unpaid_months": [(2026, 7), (2026, 6), (2026, 5)]}
+        model = fit.fit_model([])
+        self.assertEqual(classify([r], model, AS_OF), [])
+
     def test_classify_picks_up_initial_when_contacts_given(self):
         # 契約後3日・未接触の継続契約 → contacts を渡すと「初動」きっかけが立つ
         r = {"is_scoreable": True, "customer_id": "N1", "apply_id": None,

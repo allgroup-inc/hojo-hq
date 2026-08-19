@@ -343,7 +343,10 @@ def cmd_uplift(csv_path, column_map_path, contacts_path, contact_map_path, as_of
     contacts = load_contacts(contacts_path, load_column_map(contact_map_path))
     out = compare_naive_vs_controlled(records, contacts, _mature_before(as_of_d),
                                       treated_fraction=treated_fraction, salt=salt)
-    led = assignment_ledger([r.get("customer_id") for r in records], treated_fraction, salt)
+    # 台帳は母集団内・顧客ID有りのみ（顧客ID空＝母集団外は先行/後発に数えない・空IDは同一アームに偏る）
+    led_ids = [r["customer_id"] for r in records
+               if r.get("in_scope", True) is not False and (r.get("customer_id") or "").strip()]
+    led = assignment_ledger(led_ids, treated_fraction, salt)
     c = out["controlled"]
     ref = "（参考・母数不足）" if c["reference"] else ""
     print(f"[uplift] 段階導入台帳 先行{led['先行']}/後発{led['後発']}（計{led['total']}）")
