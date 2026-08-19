@@ -675,22 +675,39 @@
     }
 
     function displayAll(naneiro, fwd, zurich) {
+      // ヘルパー関数: 信頼度アイコン・色を取得
+      const getConfidenceDisplay = (row) => {
+        const confidence = row.confidence_level || '中';
+        const icon = confidence === '高' ? '✅' : confidence === '中' ? '⚠️' : '❌';
+        const bg = confidence === '高' ? '#e8f5e9' : confidence === '中' ? '#fff3e0' : '#ffebee';
+        return { icon, bg };
+      };
+
       // なないろ生命
       if (naneiro.length > 0) {
         document.getElementById('all-naneiro').style.display = 'block';
         const tbody = document.getElementById('tbody-all-naneiro');
         tbody.innerHTML = '';
         naneiro.forEach(row => {
-          const tr = document.createElement('tr');
           const hasOK = Object.values(row.marks || {}).some(m => m === '○');
-          const statusClass = hasOK ? 'status-ok' : 'status-conditional';
           const statusText = hasOK ? '可' : '条件付き';
-          tr.innerHTML = `
-            <td><strong>${row.disease}</strong></td>
-            <td><small>${row.state || 'なし'}</small></td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          const { icon, bg } = getConfidenceDisplay(row);
+          const conditionText = row.condition_text || row.state || '';
+          const requiresConfirm = row.requires_confirmation || false;
+
+          const tr = document.createElement('tr');
+          tr.style.borderLeft = `4px solid ${bg}`;
+
+          let htmlContent = `<td><strong>${row.disease}</strong>`;
+          if (requiresConfirm) {
+            htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+          }
+          htmlContent += `</td>
+            <td><small>${conditionText || 'なし'}</small></td>
+            <td><span class="status-badge" style="background:${bg}">${icon} ${statusText}</span></td>
             <td><small>p.${row.page}</small></td>
           `;
+          tr.innerHTML = htmlContent;
           tbody.appendChild(tr);
         });
         document.getElementById('badge-all-naneiro').textContent = naneiro.length + ' 件';
@@ -704,15 +721,23 @@
         const tbody = document.getElementById('tbody-all-fwd');
         tbody.innerHTML = '';
         fwd.forEach(row => {
+          const { icon, bg } = getConfidenceDisplay(row);
+          const conditionText = row.condition_text || row.condition || '';
+          const requiresConfirm = row.requires_confirmation || false;
+
           const tr = document.createElement('tr');
-          const statusClass = row.judgement === '可' ? 'status-ok' :
-                            row.judgement === '条件付き' ? 'status-conditional' : 'status-ng';
-          tr.innerHTML = `
-            <td><strong>${row.disease}</strong></td>
-            <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
-            <td><small>${row.condition || 'なし'}</small></td>
+          tr.style.borderLeft = `4px solid ${bg}`;
+
+          let htmlContent = `<td><strong>${row.disease}</strong>`;
+          if (requiresConfirm) {
+            htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+          }
+          htmlContent += `</td>
+            <td><span class="status-badge" style="background:${bg}">${icon} ${row.judgement || 'なし'}</span></td>
+            <td><small>${conditionText || 'なし'}</small></td>
             <td><small>p.${row.page}</small></td>
           `;
+          tr.innerHTML = htmlContent;
           tbody.appendChild(tr);
         });
         document.getElementById('badge-all-fwd').textContent = fwd.length + ' 件';
@@ -726,16 +751,23 @@
         const tbody = document.getElementById('tbody-all-zurich');
         tbody.innerHTML = '';
         zurich.forEach(row => {
+          const { icon, bg } = getConfidenceDisplay(row);
+          const conditionText = row.condition_text || row['経過'] || row.section || '';
+          const requiresConfirm = row.requires_confirmation || false;
+
           const tr = document.createElement('tr');
-          const statusClass = row.judgement === '可' ? 'status-ok' :
-                            row.judgement === '条件付き' ? 'status-conditional' :
-                            row.judgement === '要確認' ? 'status-unknown' : 'status-ng';
-          tr.innerHTML = `
-            <td><strong>${row.disease}</strong></td>
-            <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
-            <td><small>${row['経過'] || row.section || 'なし'}</small></td>
+          tr.style.borderLeft = `4px solid ${bg}`;
+
+          let htmlContent = `<td><strong>${row.disease}</strong>`;
+          if (requiresConfirm) {
+            htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+          }
+          htmlContent += `</td>
+            <td><span class="status-badge" style="background:${bg}">${icon} ${row.judgement || 'なし'}</span></td>
+            <td><small>${conditionText || 'なし'}</small></td>
             <td><small>p.${row.page}</small></td>
           `;
+          tr.innerHTML = htmlContent;
           tbody.appendChild(tr);
         });
         document.getElementById('badge-all-zurich').textContent = zurich.length + ' 件';
@@ -756,16 +788,30 @@
       document.getElementById('noResults').style.display = 'none';
 
       data.forEach(row => {
-        const tr = document.createElement('tr');
         const hasOK = Object.values(row.marks || {}).some(m => m === '○');
         const statusClass = hasOK ? 'status-ok' : 'status-conditional';
         const statusText = hasOK ? '可' : '条件付き';
-        tr.innerHTML = `
-          <td><strong>${row.disease}</strong></td>
-          <td><small>${row.state || 'なし'}</small></td>
-          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+        const judgement = row.judgement || statusText;
+        const confidence = row.confidence_level || '中';
+        const confidenceIcon = confidence === '高' ? '✅' : confidence === '中' ? '⚠️' : '❌';
+        const confidenceBg = confidence === '高' ? '#e8f5e9' : confidence === '中' ? '#fff3e0' : '#ffebee';
+        const conditionText = row.condition_text || row.state || '';
+        const requiresConfirm = row.requires_confirmation || false;
+
+        const tr = document.createElement('tr');
+        tr.style.borderLeft = `4px solid ${confidenceBg}`;
+
+        let htmlContent = `
+          <td><strong>${row.disease}</strong>`;
+        if (requiresConfirm) {
+          htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+        }
+        htmlContent += `</td>
+          <td><span class="status-badge" style="background:${confidenceBg}">${confidenceIcon} ${judgement}</span></td>
+          <td><small>${conditionText || 'なし'}</small></td>
           <td><small>p.${row.page}</small></td>
         `;
+        tr.innerHTML = htmlContent;
         tbody.appendChild(tr);
       });
 
@@ -784,15 +830,28 @@
       document.getElementById('noResults').style.display = 'none';
 
       data.forEach(row => {
-        const tr = document.createElement('tr');
         const statusClass = row.judgement === '可' ? 'status-ok' :
                           row.judgement === '条件付き' ? 'status-conditional' : 'status-ng';
-        tr.innerHTML = `
-          <td><strong>${row.disease}</strong></td>
-          <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
-          <td><small>${row.condition || 'なし'}</small></td>
+        const confidence = row.confidence_level || '中';
+        const confidenceIcon = confidence === '高' ? '✅' : confidence === '中' ? '⚠️' : '❌';
+        const confidenceBg = confidence === '高' ? '#e8f5e9' : confidence === '中' ? '#fff3e0' : '#ffebee';
+        const conditionText = row.condition_text || row.condition || '';
+        const requiresConfirm = row.requires_confirmation || false;
+
+        const tr = document.createElement('tr');
+        tr.style.borderLeft = `4px solid ${confidenceBg}`;
+
+        let htmlContent = `
+          <td><strong>${row.disease}</strong>`;
+        if (requiresConfirm) {
+          htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+        }
+        htmlContent += `</td>
+          <td><span class="status-badge" style="background:${confidenceBg}">${confidenceIcon} ${row.judgement || 'なし'}</span></td>
+          <td><small>${conditionText || 'なし'}</small></td>
           <td><small>p.${row.page}</small></td>
         `;
+        tr.innerHTML = htmlContent;
         tbody.appendChild(tr);
       });
 
@@ -811,16 +870,29 @@
       document.getElementById('noResults').style.display = 'none';
 
       data.forEach(row => {
-        const tr = document.createElement('tr');
         const statusClass = row.judgement === '可' ? 'status-ok' :
                           row.judgement === '条件付き' ? 'status-conditional' :
                           row.judgement === '要確認' ? 'status-unknown' : 'status-ng';
-        tr.innerHTML = `
-          <td><strong>${row.disease}</strong></td>
-          <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
-          <td><small>${row['経過'] || row.section || 'なし'}</small></td>
+        const confidence = row.confidence_level || '中';
+        const confidenceIcon = confidence === '高' ? '✅' : confidence === '中' ? '⚠️' : '❌';
+        const confidenceBg = confidence === '高' ? '#e8f5e9' : confidence === '中' ? '#fff3e0' : '#ffebee';
+        const conditionText = row.condition_text || row['経過'] || row.section || '';
+        const requiresConfirm = row.requires_confirmation || false;
+
+        const tr = document.createElement('tr');
+        tr.style.borderLeft = `4px solid ${confidenceBg}`;
+
+        let htmlContent = `
+          <td><strong>${row.disease}</strong>`;
+        if (requiresConfirm) {
+          htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+        }
+        htmlContent += `</td>
+          <td><span class="status-badge" style="background:${confidenceBg}">${confidenceIcon} ${row.judgement || 'なし'}</span></td>
+          <td><small>${conditionText || 'なし'}</small></td>
           <td><small>p.${row.page}</small></td>
         `;
+        tr.innerHTML = htmlContent;
         tbody.appendChild(tr);
       });
 
