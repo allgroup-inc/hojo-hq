@@ -93,6 +93,18 @@ def rand_date(rng, start, end):
     return start + timedelta(days=rng.randint(0, span))
 
 
+# 解約が集中する日数の山（中心, ばらつき, 重み）。初回引落≈33/2回目≈63/3回目≈93/6ヶ月の壁≈162日。
+# 「第2の山」を合成データで見せるための仕込み（実データではなく体裁）。
+_CHURN_PEAKS = [(33, 6, 45), (63, 6, 22), (93, 6, 13), (162, 7, 20)]
+
+
+def _churn_day(rng):
+    """解約までの日数を、引落サイクル・6ヶ月の壁に山を持つ混合分布から引く（15〜175にクランプ）。"""
+    i = rng.choices(range(len(_CHURN_PEAKS)), weights=[w for *_, w in _CHURN_PEAKS])[0]
+    center, sd, _ = _CHURN_PEAKS[i]
+    return max(15, min(175, int(round(rng.gauss(center, sd)))))
+
+
 def _birth_from_age(rng, age):
     """年齢からそれっぽい生年月日を作る（体裁用。モデルは使わない）。"""
     y = AS_OF.year - age
@@ -168,8 +180,8 @@ def build_records(rng):
             cancel = None
             status = "成立済"   # 継続（現ステータス実値）
             if churned:
-                # 契約から6ヶ月以内のどこかで解約。as-of超なら未観測＝継続中扱い
-                cd = contract + timedelta(days=rng.randint(15, 175))
+                # 契約から6ヶ月以内で解約。初回/2回目/3回目引落・6ヶ月の壁に山ができる（第2の山のデモ用）
+                cd = contract + timedelta(days=_churn_day(rng))
                 if cd <= AS_OF:
                     cancel = cd
                     if payment == "口座振替" and unpaid_count >= 2:

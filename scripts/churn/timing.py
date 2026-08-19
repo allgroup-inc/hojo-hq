@@ -64,6 +64,26 @@ def peak_window(hazard):
     return (best["lo"], best["hi"])
 
 
+def peak_windows(hazard, min_count=1, min_share=0.0):
+    """解約の「山」（局所極大）を経過日順に返す。**第1の山だけでなく第2・第3の山**も拾う（A2）。
+
+    早期解約は初回引落だけでなく2・3回目引落や6ヶ月の壁で再燃する。単一の peak_window では
+    最大の山しか見えないので、各局所極大をリストで返し、山の手前ごとに先回りできるようにする。
+    局所極大 = 左より大きく右以上（平坦の先頭側だけ採る＝二重計上しない）。ノイズは min_count で除外。
+    """
+    rows = hazard.get("rows", [])
+    peaks = []
+    for i, r in enumerate(rows):
+        c = r["count"]
+        if c < min_count or r["share"] < min_share:
+            continue
+        left = rows[i - 1]["count"] if i > 0 else None
+        right = rows[i + 1]["count"] if i + 1 < len(rows) else None
+        if (left is None or c > left) and (right is None or c >= right):
+            peaks.append({"lo": r["lo"], "hi": r["hi"], "count": c, "share": r["share"]})
+    return peaks
+
+
 # 状態の並び順（架電適期＝最優先）
 _TIMING_ORDER = {"架電適期": 0, "適期前": 1, "適期後": 2}
 
@@ -179,24 +199,31 @@ def render_call_timing_html(rows, path, peak=(None, None)):
         f.write(doc)
 
 
-def render_html(hazard, path):
-    """解約ハザード曲線をHTML出力（表示層・出力は private/ 限定）。"""
+def render_html(hazard, path, min_peak_count=MIN_RELIABLE_N // 4):
+    """解約ハザード曲線をHTML出力（第2の山も明示・表示層・出力は private/ 限定）。"""
     import html
-    pk = peak_window(hazard)
+    peaks = peak_windows(hazard, min_count=max(1, min_peak_count))
+    peak_keys = {(p["lo"], p["hi"]): i + 1 for i, p in enumerate(peaks)}  # (lo,hi)->山番号
     trs = []
     max_share = max((r["share"] for r in hazard["rows"]), default=0.0) or 1.0
     for r in hazard["rows"]:
-        if r["count"] == 0 and r["cum_share"] in (0.0, 1.0) and r["lo"] > 0 and r["cum_share"] == 1.0:
+        if r["count"] == 0 and r["cum_share"] == 1.0 and r["lo"] > 0:
             continue  # 末尾の空バケツは省略（見やすさ）
         bar_w = int(round(r["share"] / max_share * 200))
-        mark = " ◀ヤマ" if (r["lo"], r["hi"]) == pk else ""
+        n = peak_keys.get((r["lo"], r["hi"]))
+        mark = f' ◀第{n}の山' if n else ""
         trs.append(
             f'<tr><td>{r["lo"]}〜{r["hi"]}日{html.escape(mark)}</td><td>{r["count"]}</td>'
             f'<td>{r["share"]*100:.1f}%</td><td>{r["cum_share"]*100:.1f}%</td>'
             f'<td><div style="background:#F88800;height:12px;width:{bar_w}px"></div></td></tr>')
     ref = '（※母数不足＝参考）' if hazard["reference"] else ''
-    pk_txt = (f'解約のヤマは契約後 <b>{pk[0]}〜{pk[1]}日</b> ＝ その手前が架電の勝負どき'
-              if pk[0] is not None else '解約実績がまだありません')
+    if peaks:
+        yama = "／".join(f'第{i+1}の山 {p["lo"]}〜{p["hi"]}日' for i, p in enumerate(peaks))
+        pk_txt = (f'解約の山は <b>{html.escape(yama)}</b>。'
+                  '初回引落だけでなく<b>2・3回目の引落や6ヶ月の壁</b>でも再燃する＝'
+                  '<b>各山の手前が先回りの勝負どき</b>')
+    else:
+        pk_txt = '解約実績がまだありません'
     doc = (
         '<!doctype html><meta charset="utf-8"><title>解約ハザード曲線</title>'
         '<style>body{font-family:Meiryo,"Noto Sans JP",sans-serif;padding:16px}'

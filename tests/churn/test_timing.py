@@ -1,7 +1,7 @@
 import unittest
 from datetime import date
 
-from scripts.churn.timing import churn_hazard_by_tenure, peak_window
+from scripts.churn.timing import churn_hazard_by_tenure, peak_window, peak_windows
 
 
 def churner(days):
@@ -49,6 +49,29 @@ class TestHazard(unittest.TestCase):
         recs = [churner(5), churner(10), churner(12), churner(40)]  # bkt0 が最多
         h = churn_hazard_by_tenure(recs, bucket_days=15)
         self.assertEqual(peak_window(h), (0, 15))
+
+
+class TestPeakWindows(unittest.TestCase):
+    def test_finds_multiple_local_maxima(self):
+        # bkt0=3(山1), bkt1=0(谷), bkt2=2(山2・第2の山), bkt3=0 → 山は2つ
+        recs = ([churner(2), churner(5), churner(10)]      # bkt0=3
+                + [churner(32), churner(38)])              # bkt2=2 (30-45)
+        h = churn_hazard_by_tenure(recs, bucket_days=15)
+        pks = peak_windows(h, min_count=1)
+        self.assertEqual([(p["lo"], p["hi"]) for p in pks], [(0, 15), (30, 45)])
+
+    def test_plateau_not_double_counted(self):
+        # bkt0=2, bkt1=2(平坦) → 山は1つ（先頭側）だけ
+        recs = [churner(2), churner(5), churner(20), churner(25)]
+        h = churn_hazard_by_tenure(recs, bucket_days=15)
+        pks = peak_windows(h, min_count=1)
+        self.assertEqual([(p["lo"], p["hi"]) for p in pks], [(0, 15)])
+
+    def test_min_count_filters_noise(self):
+        recs = [churner(2), churner(5), churner(10),        # bkt0=3
+                churner(35)]                                # bkt2=1（ノイズ）
+        h = churn_hazard_by_tenure(recs, bucket_days=15)
+        self.assertEqual([(p["lo"], p["hi"]) for p in peak_windows(h, min_count=2)], [(0, 15)])
 
 
 if __name__ == "__main__":

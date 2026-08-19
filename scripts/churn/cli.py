@@ -34,11 +34,11 @@ from .dialog import dialog_effect, render_html as render_dialog_html
 from .talkscript import concern_playbook, render_html as render_talkscript_html
 from .experiment import compare_naive_vs_controlled, assignment_ledger
 from .transitions import status_transitions, render_html as render_transitions_html
-from .timing import (churn_hazard_by_tenure, peak_window, call_timing_list,
+from .timing import (churn_hazard_by_tenure, peak_window, peak_windows, call_timing_list,
                      contact_timing_effect,
                      render_html as render_hazard_html,
                      render_call_timing_html)
-from .config import EXPERIMENT_TREATED_FRACTION
+from .config import EXPERIMENT_TREATED_FRACTION, MIN_RELIABLE_N
 from .config import CAPACITY_PER_DAY, AUC_MIN, SNAPSHOT_RETENTION_YEARS, EARLY_CHURN_MONTHS
 
 
@@ -301,11 +301,11 @@ def cmd_hazard(csv_path, column_map_path, out_path, as_of):
     records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
     hz = churn_hazard_by_tenure(records)
     render_hazard_html(hz, out_path)
-    lo, hi = peak_window(hz)
-    peak = "実績なし" if lo is None else f"契約後{lo}〜{hi}日"
+    pks = peak_windows(hz, min_count=max(1, MIN_RELIABLE_N // 4))
+    yama = "／".join(f"第{i+1}の山{p['lo']}〜{p['hi']}日" for i, p in enumerate(pks)) or "実績なし"
     ref = "（参考・母数不足）" if hz["reference"] else ""
-    print(f"[hazard] 早期解約{hz['total']}件{ref} 解約のヤマ={peak}"
-          f"（その手前が架電の勝負どき）→ {out_path}")
+    print(f"[hazard] 早期解約{hz['total']}件{ref} 解約の山={yama}"
+          f"（初回だけでなく2・3回目引落や6ヶ月の壁でも再燃＝各山の手前が先回りどき）→ {out_path}")
     return hz
 
 
