@@ -136,3 +136,9 @@ GitHub Actions(週次cron: fukugiiro-weekly-report.yml に統合)
 - 変更: `scripts/fetch_plausible_funnel.py`(新規)/ `scripts/weekly_report_fukugiiro.py`(修正)/ `.github/workflows/fukugiiro-weekly-report.yml`(修正)/ `tests/golden_funnel.json`(新規)。
 - ブランチ: `claude/okinawa-disposable-income-plan-axxs6v`(直近の jukyu 統合修正の上に積む)。
 - キー登録前でもマージ可能(未設定時フォールバックで無害)。キー登録後、初回 Actions 実行で funnel.json が生成され自動反映される。
+
+---
+
+> **三名体制の議事について(2026-08-17 点検で追記)**: 本設計書は、三名体制の議事本体(3役の議論・ウタガイの反対理由)がgit内に保存されていない状態で決定された。
+> 実装後に議事を書くと「結論を知ったうえでの後付けウタガイ」になり規程の趣旨を損なうため、遡っての作成は行わず事実として記録する。
+> 再発防止は `scripts/check_triangle_review.py`(CI: docs-governance)で担保。経緯は `docs/失敗台帳.md` FK-003 および `docs/議事_20260817_点検3件_管理本部着手とスキル体制.md` 論点②。
