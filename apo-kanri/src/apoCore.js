@@ -259,32 +259,53 @@
   }
 
   /**
+   * 内訳別の申込み率を作る共通処理。dimensionKey の値ごとに
+   * 訪問実施(実施済+申込み)を母数、申込みを分子として率を出す。
+   * 母数0は率null(0%や100%と断定しない)。定義されていない値の行は無視する。
+   */
+  function buildBreakdownStats_(appointments, options, dimensionKey, order, labelKey) {
+    var sinceDate = (options || {}).sinceDate || "";
+    var byValue = {};
+    order.forEach(function (value) {
+      var entry = { completed: 0, signups: 0 };
+      entry[labelKey] = value;
+      byValue[value] = entry;
+    });
+    validAppointments_(appointments).forEach(function (record) {
+      if (sinceDate && normalizeDateString(record["日付"]) < sinceDate) return;
+      var status = record["ステータス"];
+      if (status !== "実施済" && status !== "申込み") return;
+      var entry = byValue[record[dimensionKey]];
+      if (!entry) return;
+      entry.completed += 1;
+      if (status === "申込み") entry.signups += 1;
+    });
+    return order.map(function (value) {
+      var entry = byValue[value];
+      entry.rate = entry.completed > 0 ? entry.signups / entry.completed : null;
+      return entry;
+    });
+  }
+
+  /**
+   * アポ種別(再訪/新規紹介/新規ご家族/新規その他)別の申込み率。
+   * 再訪と新規は決まり方が違うため、混ぜた平均では改善判断ができない
+   * (2026-08-19 小柳さん決裁)。チーム全体のみ・個人別は出さない。
+   */
+  function buildKindStats(appointments, options) {
+    return buildBreakdownStats_(appointments, options, "アポ種別",
+      getApoSchema_().APPOINTMENT_KINDS, "kind");
+  }
+
+  /**
    * 温度感別の申込み率(高・中・低の順で固定)。チーム全体のみ・個人別は出さない。
    * 母数 = その温度感の訪問実施(実施済+申込み)。母数0は率null(断定しない)。
    * 「どんなアポを取れば決まるか」をアポ入れ側の改善につなげるための指標
    * (2026-08-14 小柳さん採用)。
    */
   function buildTemperatureStats(appointments, options) {
-    var sinceDate = (options || {}).sinceDate || "";
-    var order = ["高", "中", "低"];
-    var byTemp = {};
-    order.forEach(function (temperature) {
-      byTemp[temperature] = { temperature: temperature, completed: 0, signups: 0 };
-    });
-    validAppointments_(appointments).forEach(function (record) {
-      if (sinceDate && normalizeDateString(record["日付"]) < sinceDate) return;
-      var status = record["ステータス"];
-      if (status !== "実施済" && status !== "申込み") return;
-      var entry = byTemp[record["温度感"]];
-      if (!entry) return;
-      entry.completed += 1;
-      if (status === "申込み") entry.signups += 1;
-    });
-    return order.map(function (temperature) {
-      var entry = byTemp[temperature];
-      entry.rate = entry.completed > 0 ? entry.signups / entry.completed : null;
-      return entry;
-    });
+    return buildBreakdownStats_(appointments, options, "温度感",
+      ["高", "中", "低"], "temperature");
   }
 
   /**
@@ -350,6 +371,7 @@
     buildFillStats: buildFillStats,
     buildConversionStats: buildConversionStats,
     buildTemperatureStats: buildTemperatureStats,
+    buildKindStats: buildKindStats,
     buildSubstituteCandidates: buildSubstituteCandidates
   };
 
