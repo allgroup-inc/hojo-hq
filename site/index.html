@@ -733,6 +733,7 @@
     </div>
     <div id="result-list"></div>
     <p class="result-note">締切アラート(約1か月前から)を受け取るには、LINE登録(無料)をどうぞ。</p>
+    <a class="register-btn" id="result-line-cta" href="go/shindan/" target="_blank" rel="noopener" hidden>LINEで無料登録する</a>
     <div id="insurance-banner" class="insurance-banner" hidden>
       <strong>経営課題が「人件費管理」「リスク対策」なら</strong>、
       あわせて保険の引き受け目安も確認できます。
@@ -1243,6 +1244,11 @@
     if(regOpenBtn)regOpenBtn.hidden=!member;
     var resultNote=document.querySelector('.result-note');
     if(resultNote)resultNote.hidden=member;
+    // 非会員は診断結果に必ず1つ以上のLINE導線を出す(結果件数が少なくロックカード/
+    // pot-ctaが出ないケースだと導線が0個になっていた穴を埋める。channelはpot-cta/
+    // unlock-btnと同じgo/shindan/なので、既存のCVR計測(診断→LINE誘導タップ)がそのまま使える)
+    var resultLineCta=document.getElementById('result-line-cta');
+    if(resultLineCta)resultLineCta.hidden=member;
     document.getElementById('match-result').hidden=false;
     var _rn=document.getElementById('restored-note');
     if(_rn)_rn.remove();
