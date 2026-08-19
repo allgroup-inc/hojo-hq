@@ -176,6 +176,15 @@ test("音声ログ処理状況のシート名・ヘッダー・ステータス�
   assert.ok(schema.LINE_VOICE_LOG_STATUSES.includes("処理中"));
 });
 
+test("CTI通話履歴タブの名称・見出しが定義されている", () => {
+  assert.equal(schema.CTI_CALL_LOG_SHEET_NAME, "CTI通話履歴");
+  assert.deepEqual(schema.CTI_CALL_LOG_HEADERS, [
+    "通話ID", "group_callid", "通話日時", "種別", "電話番号",
+    "マッチ企業ID", "マッチ企業名", "発信者(BlueBeanオペレーター名)",
+    "通話ステータス", "備考(BlueBeanノート)", "対応履歴ログ記録"
+  ]);
+});
+
 test("スタッフのヘッダーにLINE User ID列が追加されている", () => {
   assert.deepEqual(schema.STAFF_HEADERS, ["氏名", "Slack User ID", "有効", "メールアドレス", "LINE User ID"]);
 });

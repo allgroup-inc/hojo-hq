@@ -3,8 +3,8 @@
  * Apps Scriptエディタの関数選択で ensureLedgerTabs を選び、実行ボタンで手動実行する。
  * 実行すると「企業マスタ」「対応履歴ログ」「紹介パートナーマスタ」「設定」
  * 「レター下書き」「ダッシュボード」「ダッシュボード履歴」「スタッフ」
- * 「パートナー対応履歴ログ」「紹介実績ログ」「QR生成結果」「音声ログ処理状況」の
- * 12タブが(存在しなければ)作成され、1行目に見出しが設定される。
+ * 「パートナー対応履歴ログ」「紹介実績ログ」「QR生成結果」「音声ログ処理状況」
+ * 「CTI通話履歴」の13タブが(存在しなければ)作成され、1行目に見出しが設定される。
  * 対応履歴ログの「種別」「対応相手」列、レター下書きの「ステータス」列には、
  * 表記ゆれによる集計漏れを防ぐためプルダウン入力規則を設定する。
  * 企業マスタの「電話番号」列は先頭ゼロ落ちを防ぐためプレーンテキスト形式を強制し、
@@ -34,6 +34,7 @@ function ensureLedgerTabs() {
   ensureTab_(ss, GlowSchema.REFERRAL_RECORD_SHEET_NAME, GlowSchema.REFERRAL_RECORD_HEADERS);
   ensureTab_(ss, GlowSchema.QR_RESULT_SHEET_NAME, GlowSchema.QR_RESULT_HEADERS);
   ensureTab_(ss, GlowSchema.LINE_VOICE_LOG_SHEET_NAME, GlowSchema.LINE_VOICE_LOG_HEADERS);
+  ensureTab_(ss, GlowSchema.CTI_CALL_LOG_SHEET_NAME, GlowSchema.CTI_CALL_LOG_HEADERS);
 }
 
 function ensureTab_(spreadsheet, sheetName, headers) {

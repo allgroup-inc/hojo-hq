@@ -88,6 +88,18 @@
     "企業ID", "会社名", "発送日", "トラッキングURL", "QR画像リンク", "ステータス"
   ];
 
+  var CTI_CALL_LOG_SHEET_NAME = "CTI通話履歴";
+  // BlueBean(顧客発着信履歴出力API)から取得した通話履歴の記録タブ。
+  // 「group_callid」列は同一通話の再取得を防ぐための一意キー(CtiRunner.gs参照)。
+  // 「対応履歴ログ記録」列は「記録済み」(対応履歴ログへ自動追記した)/「未記録」
+  // (未マッチ、または通話ステータスがキャンセル等で対象外)のいずれか
+  // (docs/議事_20260819_BlueBean CTI連携.md参照: 完了かつ一意マッチのみ自動記録)。
+  var CTI_CALL_LOG_HEADERS = [
+    "通話ID", "group_callid", "通話日時", "種別", "電話番号",
+    "マッチ企業ID", "マッチ企業名", "発信者(BlueBeanオペレーター名)",
+    "通話ステータス", "備考(BlueBeanノート)", "対応履歴ログ記録"
+  ];
+
   var LINE_VOICE_LOG_SHEET_NAME = "音声ログ処理状況";
   var LINE_VOICE_LOG_HEADERS = [
     "処理ID", "LINEユーザーID", "LINEメッセージID", "ステータス",
@@ -134,7 +146,9 @@
     QR_RESULT_HEADERS: QR_RESULT_HEADERS,
     LINE_VOICE_LOG_SHEET_NAME: LINE_VOICE_LOG_SHEET_NAME,
     LINE_VOICE_LOG_HEADERS: LINE_VOICE_LOG_HEADERS,
-    LINE_VOICE_LOG_STATUSES: LINE_VOICE_LOG_STATUSES
+    LINE_VOICE_LOG_STATUSES: LINE_VOICE_LOG_STATUSES,
+    CTI_CALL_LOG_SHEET_NAME: CTI_CALL_LOG_SHEET_NAME,
+    CTI_CALL_LOG_HEADERS: CTI_CALL_LOG_HEADERS
   };
 
   if (typeof module !== "undefined" && module.exports) {
