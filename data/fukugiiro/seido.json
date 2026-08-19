@@ -1,6 +1,6 @@
 {
- "updated_at": "2026-08-19 18:25",
- "count": 183,
+ "updated_at": "2026-08-19 20:21",
+ "count": 188,
  "items": [
   {
    "id": "fk-kuni-jidoteate",
@@ -22,7 +22,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-jidofuyoteate",
@@ -45,7 +45,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-shussan-ichijikin",
@@ -67,7 +67,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-ikuji-kyufu",
@@ -91,7 +91,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-jukyo-kakuho",
@@ -115,7 +115,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-kogaku-ryoyo",
@@ -137,7 +137,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-shugaku-shien",
@@ -159,7 +159,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-hitorioya-shien",
@@ -185,7 +185,7 @@
    "verified_by": "kensho(突合レポート○・match_tokens修正後)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-ninpu-shien",
@@ -207,7 +207,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-shugakushienkin-koko",
@@ -229,7 +229,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-shogaku-kyufukin-koko",
@@ -252,7 +252,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-kyushokusha-shien",
@@ -276,7 +276,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-seikatsu-konkyu",
@@ -302,7 +302,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-kyoiku-kunren",
@@ -324,7 +324,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-hoiku-mushoka",
@@ -350,7 +350,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-tokubetsu-jifute",
@@ -376,7 +376,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-shogaiji-fukushi",
@@ -402,7 +402,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-tokubetsu-shogaisha",
@@ -427,7 +427,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-jiritsushien-iryo",
@@ -453,7 +453,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-koyohoken-kihonteate",
@@ -478,7 +478,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-kaigokyugyo-kyufu",
@@ -504,7 +504,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-rousai",
@@ -529,7 +529,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-seikatsu-hogo",
@@ -554,7 +554,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-nenkin-kyufukin",
@@ -579,7 +579,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-saigai-choui",
@@ -604,7 +604,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-shugaku-enjo",
@@ -630,7 +630,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-tokushi-shorei",
@@ -656,7 +656,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-safetynet-jutaku",
@@ -682,7 +682,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 国土交通省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-kosodate-green",
@@ -708,7 +708,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 国土交通省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-boshi-fushi-kafu-shikin",
@@ -735,7 +735,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-hitorioya-jutaku-shikin",
@@ -762,7 +762,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-hitorioya-kurashi-ouen",
@@ -789,7 +789,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-kenei-jutaku",
@@ -815,7 +815,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-senshiniryo-funin",
@@ -841,7 +841,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-fuiku-kensa",
@@ -867,7 +867,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-kodomo-iryohi",
@@ -893,7 +893,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-boshi-fushi-iryohi",
@@ -921,7 +921,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-judo-shinshin-iryohi",
@@ -948,7 +948,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-nanbyo-iryohi",
@@ -974,7 +974,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-naha-kodomo-iryo",
@@ -998,7 +998,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-naha-shugaku-enjo",
@@ -1023,7 +1023,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-naha-sango-care",
@@ -1047,7 +1047,80 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
+  },
+  {
+   "id": "fk-okinawa-kodomo-iryo",
+   "name": "沖縄市 こども医療費助成",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て",
+    "病気・けが"
+   ],
+   "issuer": "沖縄市",
+   "area": "沖縄市",
+   "target_household": "沖縄市に住み健康保険に加入している18歳(年度末)までのお子さんがいる世帯が対象となる可能性があります(令和7年4月〜拡大・所得制限なし)",
+   "how_to_apply": "沖縄市 こども家庭課(市役所2階)の窓口・マイナポータル",
+   "source_url": "https://www.city.okinawa.okinawa.jp/k028/kosodate/kosodateshien/iryouhijosei/213/18583.html",
+   "deadline_type": "常時",
+   "assume_reachable": true,
+   "verified": true,
+   "amount_note": "18歳(18歳に達した日以後最初の3月31日)までの通院・入院の医療費(保険診療分)を助成。所得制限はありません(要確認)",
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: 沖縄市ウェブサイト",
+   "fetched_at": "2026-08-19 20:21"
+  },
+  {
+   "id": "fk-okinawa-shugaku-enjo",
+   "name": "沖縄市 就学援助(準要保護児童生徒)",
+   "category": "教育",
+   "life_events": [
+    "入園・入学",
+    "子育て",
+    "低所得・生活苦"
+   ],
+   "issuer": "沖縄市",
+   "area": "沖縄市",
+   "target_household": "経済的な理由でお困りの、市立小・中学校に通うお子さんの保護者世帯が対象となる可能性があります",
+   "how_to_apply": "沖縄市教育委員会(学務の担当課)の窓口",
+   "source_url": "https://www.city.okinawa.okinawa.jp/k066/contents/p00002.html",
+   "deadline_type": "年度内",
+   "assume_reachable": true,
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: 沖縄市ウェブサイト",
+   "fetched_at": "2026-08-19 20:21"
+  },
+  {
+   "id": "fk-okinawa-sango-care",
+   "name": "沖縄市 産後ケア事業",
+   "category": "医療・健康",
+   "life_events": [
+    "妊娠・出産",
+    "子育て"
+   ],
+   "issuer": "沖縄市",
+   "area": "沖縄市",
+   "target_household": "沖縄市に住む、産後の心身のケアや育児サポートが必要なお母さんと赤ちゃんの世帯が対象となる可能性があります",
+   "how_to_apply": "沖縄市 母子保健の担当窓口(委託医療機関・助産院を利用)",
+   "source_url": "https://www.city.okinawa.okinawa.jp/k029-001/kosodate/ninshinshussan/ninsanfushien/20290.html",
+   "deadline_type": "常時",
+   "assume_reachable": true,
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: 沖縄市ウェブサイト",
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-uruma-kodomo-iryo",
@@ -1071,7 +1144,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-uruma-shugaku-enjo",
@@ -1096,7 +1169,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-uruma-boshi-iryo",
@@ -1125,7 +1198,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-uruma-sango-care",
@@ -1149,7 +1222,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-urasoe-kodomo-iryo",
@@ -1173,7 +1246,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-urasoe-shugaku-enjo",
@@ -1198,7 +1271,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-urasoe-kyushoku",
@@ -1226,7 +1299,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-urasoe-sango-care",
@@ -1250,7 +1323,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ginowan-kodomo-iryo",
@@ -1279,7 +1352,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ginowan-kyushoku",
@@ -1304,7 +1377,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tomigusuku-kodomo-iryo",
@@ -1333,7 +1406,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tomigusuku-kodomo-iryo-2",
@@ -1362,7 +1435,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-haebaru-kodomo-iryo",
@@ -1391,7 +1464,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 南風原町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-haebaru-shogai-iryo",
@@ -1420,7 +1493,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 南風原町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-miyakojima-kodomo-iryo",
@@ -1449,7 +1522,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宮古島市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-miyakojima-sango-care",
@@ -1473,7 +1546,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宮古島市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ishigaki-kodomo-iryo",
@@ -1502,7 +1575,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ishigaki-shugaku-enjo",
@@ -1527,7 +1600,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ishigaki-shingaku-shien",
@@ -1552,7 +1625,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nago-kodomo-iryo",
@@ -1581,7 +1654,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 名護市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nago-famisapo",
@@ -1606,7 +1679,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 名護市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-shussan-ouen",
@@ -1630,7 +1703,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-hisaisha-saiken",
@@ -1658,7 +1731,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 内閣府ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-hello-training",
@@ -1686,7 +1759,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-josei-sodan",
@@ -1709,7 +1782,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-kokuho-genmen",
@@ -1733,7 +1806,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-chiiki-houkatsu",
@@ -1756,7 +1829,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-kashitsuke",
@@ -1780,7 +1853,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-kokunen-menjo",
@@ -1804,7 +1877,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 日本年金機構ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-boshi-jiritsu-kyufu",
@@ -1829,7 +1902,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-tsugakuhi",
@@ -1854,7 +1927,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-itoman-kodomo-iryo",
@@ -1882,7 +1955,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-itoman-shugaku-enjo",
@@ -1907,7 +1980,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nanjo-kodomo-iryo",
@@ -1931,7 +2004,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 南城市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nanjo-sango-care",
@@ -1955,7 +2028,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 南城市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yaese-kodomo-iryo",
@@ -1979,7 +2052,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 八重瀬町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yaese-kyushoku",
@@ -2007,7 +2080,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 八重瀬町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yaese-shugaku-enjo",
@@ -2032,7 +2105,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 八重瀬町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nishihara-kodomo-iryo",
@@ -2056,7 +2129,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 西原町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nishihara-boshi-iryo",
@@ -2085,7 +2158,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 西原町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yonabaru-kodomo-iryo",
@@ -2109,7 +2182,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 与那原町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yonabaru-sango-care",
@@ -2133,7 +2206,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 与那原町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yomitan-kodomo-iryo",
@@ -2161,7 +2234,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 読谷村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yomitan-kyushoku",
@@ -2186,7 +2259,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 読谷村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yomitan-boshi-iryo",
@@ -2215,7 +2288,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 読谷村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-chatan-kodomo-iryo",
@@ -2243,7 +2316,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 北谷町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-chatan-boshi-iryo",
@@ -2272,7 +2345,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 北谷町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kadena-kodomo-iryo",
@@ -2300,7 +2373,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 嘉手納町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kadena-kyushoku",
@@ -2325,7 +2398,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 嘉手納町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kitanakagusuku-kodomo-iryo",
@@ -2353,7 +2426,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 北中城村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kitanakagusuku-kyushoku",
@@ -2382,7 +2455,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 北中城村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kitanakagusuku-shugaku-enjo",
@@ -2407,7 +2480,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 北中城村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nakagusuku-kodomo-iryo",
@@ -2431,7 +2504,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 中城村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nakagusuku-boshi-iryo",
@@ -2460,7 +2533,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 中城村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kunigami-kodomo-iryo",
@@ -2488,7 +2561,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 国頭村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-higashi-kodomo-iryo",
@@ -2512,7 +2585,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 東村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ogimi-sango-care",
@@ -2536,7 +2609,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 大宜味村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ogimi-shugaku-enjo",
@@ -2564,7 +2637,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 大宜味村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nakijin-kodomo-iryo",
@@ -2588,7 +2661,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 今帰仁村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nakijin-kyushoku",
@@ -2616,7 +2689,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 今帰仁村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-motobu-kodomo-iryo",
@@ -2640,7 +2713,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 本部町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-motobu-sango-care",
@@ -2664,7 +2737,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 本部町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-onna-kodomo-iryo",
@@ -2692,7 +2765,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 恩納村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-onna-shugaku-enjo",
@@ -2720,7 +2793,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 恩納村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kumejima-kodomo-iryo",
@@ -2744,7 +2817,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 久米島町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kumejima-shussan-josei",
@@ -2771,7 +2844,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 久米島町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-taketomi-tokou-iryo",
@@ -2799,7 +2872,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 竹富町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-taketomi-kodomo-iryo",
@@ -2823,7 +2896,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 竹富町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yonaguni-shogaku",
@@ -2850,7 +2923,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 与那国町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ie-kodomo-iryo",
@@ -2874,7 +2947,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 伊江村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kin-kodomo-iryo",
@@ -2898,7 +2971,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 金武町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ginoza-kyushoku",
@@ -2922,7 +2995,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宜野座村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ginoza-kodomo-iryo",
@@ -2946,7 +3019,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宜野座村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-minamidaito-shussan-iwai",
@@ -2969,7 +3042,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 南大東村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-minamidaito-kodomo-iryo",
@@ -2997,7 +3070,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 南大東村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kitadaito-shussan-iwai",
@@ -3020,7 +3093,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 北大東村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kitadaito-tosen-hojo",
@@ -3044,7 +3117,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 北大東村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kitadaito-kodomo-iryo",
@@ -3072,7 +3145,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 北大東村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kitadaito-ninpu-tokohi",
@@ -3095,7 +3168,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 北大東村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-iheya-kodomo-iryo",
@@ -3123,7 +3196,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊平屋村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-iheya-tsuinhi-shien",
@@ -3147,7 +3220,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊平屋村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-iheya-kokosei-kotsuhi",
@@ -3171,7 +3244,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊平屋村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-izena-kodomo-iryo",
@@ -3199,7 +3272,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊是名村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-izena-shussan-iwai",
@@ -3222,7 +3295,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊是名村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-izena-tsuinhi-shien",
@@ -3246,7 +3319,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊是名村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tarama-shussei-iwai",
@@ -3269,7 +3342,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 多良間村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tarama-jutaku-shorei",
@@ -3292,7 +3365,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 多良間村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tarama-kodomo-iryo",
@@ -3320,7 +3393,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 多良間村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tokashiki-nyuyoji-iryo",
@@ -3348,7 +3421,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡嘉敷村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tokashiki-sango-care",
@@ -3372,7 +3445,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡嘉敷村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tokashiki-kokosei-iryo",
@@ -3401,7 +3474,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡嘉敷村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-zamami-shussan-josei",
@@ -3424,7 +3497,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 座間味村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-zamami-kodomo-iryo",
@@ -3452,7 +3525,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 座間味村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-zamami-hoikuryo-keigen",
@@ -3476,7 +3549,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 座間味村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-zamami-tokosen-hojo",
@@ -3500,7 +3573,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 座間味村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-aguni-tsuinhi-josei",
@@ -3524,7 +3597,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 粟国村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-aguni-kokosei-shugaku",
@@ -3548,7 +3621,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 粟国村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-aguni-boshi-iryo",
@@ -3577,7 +3650,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 粟国村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-shobyo-teate",
@@ -3603,7 +3676,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-shussan-teate",
@@ -3629,7 +3702,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-maisoryo",
@@ -3651,7 +3724,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-kogaku-kaigo-service",
@@ -3678,7 +3751,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 市区町村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-kogaku-iryo-kaigo-gassan",
@@ -3705,7 +3778,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 各医療保険者ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-kaigo-jutaku-kaishu",
@@ -3727,7 +3800,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 市区町村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-shoni-mansei",
@@ -3750,7 +3823,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 都道府県・指定都市・中核市等ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-nyuin-shokuji-gengaku",
@@ -3777,7 +3850,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-iryohi-kojo",
@@ -3803,7 +3876,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 国ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-koki-korei-hokenryo-keigen",
@@ -3829,7 +3902,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 都道府県の後期高齢者医療広域連合・市区町村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-shiritsu-shogaku-kyufu",
@@ -3857,7 +3930,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kunigami-nyugaku-iwaikin",
@@ -3881,7 +3954,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 国頭村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-higashi-kyushoku-josei",
@@ -3909,7 +3982,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 東村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-higashi-shussan-iwaikin",
@@ -3932,7 +4005,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 東村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-higashi-influenza-josei",
@@ -3956,7 +4029,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 東村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ie-kosodate-shienkin",
@@ -3980,7 +4053,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊江村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kin-shugaku-enjo",
@@ -4005,7 +4078,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 金武町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yonaguni-judo-iryohi",
@@ -4033,7 +4106,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 与那国町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yonaguni-haken-hojo",
@@ -4056,7 +4129,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 与那国町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-yonaguni-rito-kokosei-hogosha",
@@ -4084,7 +4157,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 与那国町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kunigami-shussan-iwaikin",
@@ -4107,7 +4180,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 国頭村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kunigami-kekkon-iwaikin",
@@ -4130,7 +4203,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 国頭村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-iejima-gakushi-taiyo",
@@ -4153,7 +4226,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊江村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kin-boshi-fushi-iryohi",
@@ -4182,7 +4255,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 金武町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tonaki-kodomo-iryo",
@@ -4206,7 +4279,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡名喜村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tonaki-shussan-josei",
@@ -4229,7 +4302,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡名喜村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tonaki-ninpu-senpaku",
@@ -4252,7 +4325,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡名喜村ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-naha-kokuho-genmen",
@@ -4282,7 +4355,32 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
+  },
+  {
+   "id": "fk-okinawashi-hoikuryo",
+   "name": "沖縄市 保育料の軽減(多子世帯・非課税世帯など)",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "入園・入学",
+    "低所得・生活苦"
+   ],
+   "issuer": "沖縄市",
+   "area": "沖縄市",
+   "target_household": "きょうだいで保育所等を利用する多子世帯や市民税非課税世帯など、保育料・副食費の軽減対象となる世帯が対象となる可能性があります",
+   "how_to_apply": "沖縄市役所 保育・幼稚園課の窓口",
+   "source_url": "https://www.city.okinawa.okinawa.jp/k027-003/kosodate/hoikuen/nyuusho/894.html",
+   "deadline_type": "常時",
+   "assume_reachable": true,
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 沖縄市ウェブサイト",
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ken-hitorioya-sodan",
@@ -4306,7 +4404,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nago-horitsu-sodan",
@@ -4329,7 +4427,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 名護市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-naha-shimin-sodan",
@@ -4352,7 +4450,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-nhk-menjo",
@@ -4376,7 +4474,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: NHKウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-hosougu",
@@ -4399,7 +4497,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-kuni-nichijo-yougu",
@@ -4427,7 +4525,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-naha-hochouki",
@@ -4452,7 +4550,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-uruma-hochouki",
@@ -4477,7 +4575,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-tomigusuku-hochouki",
@@ -4502,7 +4600,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-nishihara-hochouki",
@@ -4527,7 +4625,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 西原町ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-urasoe-kaigo-yohin",
@@ -4551,7 +4649,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-ginowan-kinkyu-tsuho",
@@ -4575,7 +4673,30 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
+  },
+  {
+   "id": "fk-okinawashi-reform",
+   "name": "沖縄市 住宅リフォーム支援事業補助金",
+   "category": "住まい",
+   "life_events": [
+    "住宅取得・引越"
+   ],
+   "issuer": "沖縄市",
+   "area": "沖縄市",
+   "target_household": "沖縄市内に住民登録があり、対象住宅にお住まい(予定を含む)で、市税等の滞納がない世帯が対象となる可能性があります(年度事業・募集枠あり)",
+   "how_to_apply": "沖縄市 建築の担当課の窓口",
+   "source_url": "https://www.city.okinawa.okinawa.jp/k042/contents/p00027.html",
+   "deadline_type": "要確認",
+   "assume_reachable": true,
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 沖縄市ウェブサイト",
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-uruma-jokaso",
@@ -4598,7 +4719,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-itoman-gesuido",
@@ -4621,7 +4742,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   },
   {
    "id": "fk-miyakojima-gesuido",
@@ -4644,7 +4765,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宮古島市ウェブサイト",
-   "fetched_at": "2026-08-19 18:25"
+   "fetched_at": "2026-08-19 20:21"
   }
  ]
 }
