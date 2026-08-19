@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-08-19 09:57",
+ "generated_at": "2026-08-19 15:08",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 9,
- "count": 19,
+ "count": 20,
  "items": [
   {
    "id": "a0WJ200000CDaMLMA1",
@@ -145,6 +145,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdKuMAL",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDe7xMAD",
+   "name": "令和８年度運輸部門におけるエネルギーの使用合理化・非化石エネルギー転換推進事業費補助金（内航船革新的運航効率化・非化石エネルギー転換推進事業）（三次公募）",
+   "deadline": "2026-09-09",
+   "days_left": 21,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 500000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe7xMAD",
    "tag": "nationwide"
   },
   {
