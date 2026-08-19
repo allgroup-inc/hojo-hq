@@ -116,6 +116,85 @@
     {"name": "知らないエラーを勝手に再試行しない(人へ)", "kind": "何かよくわからないエラー", "expect": "human"}
   ],
 
+  "review_candidates": [
+    {"name": "3件以上そろった短い語だけを候補にする",
+     "replies": ["ハイ", "ハイ", "ハイ", "承知", "承知"],
+     "expect": {"candidates": [["ハイ", 3]], "needs_human_read": 2}},
+
+    {"name": "件数が多い順に並ぶ",
+     "replies": ["OK", "OK", "OK", "ハイ", "ハイ", "ハイ", "ハイ"],
+     "expect": {"candidates": [["ハイ", 4], ["OK", 3]], "needs_human_read": 0}},
+
+    {"name": "同数なら語順で安定させる(出現順が逆でも並びは同じ)",
+     "_note": "出現順(いろ→あい)と期待する並び(あい→いろ)を逆にしてある。ここを揃えると並べ替えの有無を検出できない",
+     "replies": ["いろ", "いろ", "いろ", "あい", "あい", "あい"],
+     "expect": {"candidates": [["あい", 3], ["いろ", 3]], "needs_human_read": 0}},
+
+    {"name": "すでに承認語のものは候補に出さない",
+     "replies": ["はい", "はい", "はい", "はい"],
+     "expect": {"candidates": [], "needs_human_read": 0}},
+
+    {"name": "長文は候補にせず人が読む対象にする",
+     "replies": ["はい、内容を確認しました。よろしくお願いします", "ハイ", "ハイ", "ハイ"],
+     "expect": {"candidates": [["ハイ", 3]], "needs_human_read": 1}},
+
+    {"name": "長文は何件そろっても候補にしない",
+     "_note": "頻度しきい値ではなく長さで弾いていることを確かめる(3件そろえてある)",
+     "replies": ["はい、内容を確認しました。よろしくお願いします",
+                 "はい、内容を確認しました。よろしくお願いします",
+                 "はい、内容を確認しました。よろしくお願いします"],
+     "expect": {"candidates": [], "needs_human_read": 3}},
+
+    {"name": "上限ちょうどの長さは候補にする(境界)",
+     "replies": ["わかりました", "わかりました", "わかりました"],
+     "expect": {"candidates": [["わかりました", 3]], "needs_human_read": 0}},
+
+    {"name": "上限を1文字超えたら候補にしない(境界)",
+     "replies": ["わかりましたよ", "わかりましたよ", "わかりましたよ"],
+     "expect": {"candidates": [], "needs_human_read": 3}},
+
+    {"name": "半角数字を含む返信は候補にしない(電話番号等の混入を防ぐ)",
+     "_note": "携帯番号の形をした文字列は、たとえ架空でもここに書かない。長さフィルタで先に弾かれて数字フィルタの検証にならないうえ、CIのPII混入チェックに引っかかるため。短い数字列で数字フィルタだけを確かめる",
+     "replies": ["0912", "0912", "0912", "ハイ", "ハイ", "ハイ"],
+     "expect": {"candidates": [["ハイ", 3]], "needs_human_read": 3}},
+
+    {"name": "全角数字も候補にしない",
+     "replies": ["１２３４", "１２３４", "１２３４"],
+     "expect": {"candidates": [], "needs_human_read": 3}},
+
+    {"name": "疑問符つきは候補にせず人が読む",
+     "replies": ["これは何?", "これは何?", "これは何?"],
+     "expect": {"candidates": [], "needs_human_read": 3}},
+
+    {"name": "全角の疑問符も同じ扱い",
+     "replies": ["何ですか？", "何ですか？", "何ですか？"],
+     "expect": {"candidates": [], "needs_human_read": 3}},
+
+    {"name": "空文字は数えない",
+     "replies": ["", "   ", "　"],
+     "expect": {"candidates": [], "needs_human_read": 0}},
+
+    {"name": "未受信(None)は人が読む対象",
+     "replies": [null, null],
+     "expect": {"candidates": [], "needs_human_read": 2}},
+
+    {"name": "前後の空白は落としてから数える",
+     "replies": [" ハイ", "ハイ ", "　ハイ　"],
+     "expect": {"candidates": [["ハイ", 3]], "needs_human_read": 0}},
+
+    {"name": "2件しか無い語は候補にせず、件数は人が読む側に積む",
+     "replies": ["ハイ", "ハイ"],
+     "expect": {"candidates": [], "needs_human_read": 2}},
+
+    {"name": "min_countを上げると候補が絞られる",
+     "replies": ["ハイ", "ハイ", "ハイ", "ハイ"], "min_count": 5,
+     "expect": {"candidates": [], "needs_human_read": 4}},
+
+    {"name": "返信が1件も無ければ何も出ない",
+     "replies": [],
+     "expect": {"candidates": [], "needs_human_read": 0}}
+  ],
+
   "retry_delay": [
     {"name": "1回目は30秒待つ", "attempt": 1, "expect": 30},
     {"name": "2回目は2分待つ", "attempt": 2, "expect": 120},

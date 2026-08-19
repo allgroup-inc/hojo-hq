@@ -117,6 +117,48 @@ def is_expired(record, now, expire_days=DEFAULT_EXPIRE_DAYS):
     return (now - parse_dt(record["sent_at"])) >= timedelta(days=expire_days)
 
 
+# ── 3.5 承認語の見直し材料をつくる ────────────────────────
+# Q6(「はい」以外の返信の扱い)は「既定のまま2週間走らせ、実際に来た返信文を見てから
+# 承認語を決める」と確定(2026-08-17 小柳さん)。その"見直し"を実行させるための道具。
+# **この関数は候補を人に提示するだけで、承認語を自動で増やすことは決してしない。**
+# 了承の意味を機械が勝手に広げないため(誤承認は取り返しがつかない)。
+_HAS_DIGIT = tuple("0123456789０１２３４５６７８９")
+_QUESTION = ("?", "？")
+
+
+def review_candidates(replies, min_count=3, max_len=6, accept_words=DEFAULT_ACCEPT_WORDS):
+    """要確認になった返信文から、承認語に追加する候補を頻度順で返す。
+
+    返り値: {"candidates": [(語, 件数), ...], "needs_human_read": 件数}
+    candidates に載るのは「短く・数字を含まず・疑問符が無い」ものだけ。
+    それ以外は needs_human_read に数え、**人が原文を読む**対象として残す。
+
+    数字を除くのは、お客様が電話番号や生年月日を返信に書いてくる場合があるため
+    (候補一覧に個人情報を持ち出さない)。
+    """
+    counts = {}
+    needs_human = 0
+    for raw in replies:
+        if raw is None:
+            needs_human += 1
+            continue
+        t = raw.strip(_TRIM)
+        if not t or t in accept_words:
+            continue
+        if (len(t) > max_len
+                or any(d in t for d in _HAS_DIGIT)
+                or any(q in t for q in _QUESTION)):
+            needs_human += 1
+            continue
+        counts[t] = counts.get(t, 0) + 1
+
+    # 件数の多い順。同数なら語順で安定させる(実行のたびに並びが変わらないように)
+    ranked = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    candidates = [(w, c) for w, c in ranked if c >= min_count]
+    needs_human += sum(c for w, c in ranked if c < min_count)
+    return {"candidates": candidates, "needs_human_read": needs_human}
+
+
 # ── 4. 送信してよいかの門番(ガードレール) ─────────────────
 def can_send(order_id, now, already_sent_ids, sent_today,
              window=DEFAULT_SEND_WINDOW, daily_limit=DEFAULT_DAILY_LIMIT):
@@ -154,6 +196,12 @@ def retry_delay_seconds(attempt):
 
 
 # ── self-test ───────────────────────────────────────────
+def _as_expected(result):
+    """タプルの配列をリストに直す(JSONの期待値と比較できる形にそろえるだけ)。"""
+    return {"candidates": [list(x) for x in result["candidates"]],
+            "needs_human_read": result["needs_human_read"]}
+
+
 def _run_section(golden, key, fn):
     failed = 0
     for case in golden.get(key, []):
@@ -185,9 +233,13 @@ def self_test():
                                               c["already_sent_ids"], c["sent_today"])[0])
     failed += _run_section(golden, "error_class", lambda c: classify_error(c["kind"]))
     failed += _run_section(golden, "retry_delay", lambda c: retry_delay_seconds(c["attempt"]))
+    # JSONに配列で書いた期待値をタプルに直してから比較する
+    failed += _run_section(
+        golden, "review_candidates",
+        lambda c: _as_expected(review_candidates(c["replies"], c.get("min_count", 3))))
 
     for k in ("reply_judgment", "auto_approve", "after_reply", "call_list",
-              "expire", "send_gate", "error_class", "retry_delay"):
+              "expire", "send_gate", "error_class", "retry_delay", "review_candidates"):
         total += len(golden.get(k, []))
 
     # 判定器そのものの前提が崩れていないかの確認(ゴールデンセットの取りこぼし防止)

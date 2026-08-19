@@ -60,6 +60,20 @@ jobs:
             exit 1
           fi
           cp /tmp/orig.py scripts/atokakunin_rules.py
+          python - <<'PY'
+          import io
+          p = "scripts/atokakunin_rules.py"
+          s = io.open(p, encoding="utf-8").read()
+          old = 'any(d in t for d in _HAS_DIGIT)'
+          assert old in s, "変異の適用先が見つかりません(実装が変わった可能性)"
+          io.open(p, "w", encoding="utf-8").write(s.replace(old, 'False', 1))
+          PY
+          if python scripts/atokakunin_rules.py --self-test > /dev/null 2>&1; then
+            cp /tmp/orig.py scripts/atokakunin_rules.py
+            echo "::error::承認語候補の数字フィルタを外してもself-testが通りました。PII混入を防げていません"
+            exit 1
+          fi
+          cp /tmp/orig.py scripts/atokakunin_rules.py
           echo "変異テスト合格: 壊すと確かに落ちます"
 
       # 個人情報がゴールデンセットに混入していないかの確認
