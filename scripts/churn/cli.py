@@ -296,6 +296,39 @@ def cmd_transitions(prev_csv, curr_csv, column_map_path, out_path, as_of):
     return t
 
 
+def cmd_dashboard(csv_path, column_map_path, out_dir, as_of, capacity):
+    """保全ダッシュボード：各詳細HTMLを out_dir に生成し、見出しをindex.htmlに束ねる。"""
+    import os
+    from .dashboard import dashboard_summary, render_index
+    from .relapse import relapse_candidates, render_html as render_relapse_html
+    as_of_d = _as_of(as_of)
+    os.makedirs(out_dir, exist_ok=True)
+    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    model = fit_model(records)
+    # 各詳細ページ
+    rows = cohort_rows(records, as_of_d, model=model)
+    render_cohort_html(rows, overall_rate(rows), os.path.join(out_dir, "cohort.html"),
+                       excluded=excluded_summary(records))
+    today, carry, stats = triage(classify(records, model, as_of_d), capacity)
+    render_today_html(today, carry, stats, os.path.join(out_dir, "today.html"), capacity)
+    render_hazard_html(churn_hazard_by_tenure(records), os.path.join(out_dir, "hazard.html"))
+    render_relapse_html(relapse_candidates(records, as_of_d),
+                        os.path.join(out_dir, "relapse.html"))
+    # 見出し集約
+    summary = dashboard_summary(records, as_of_d, model, capacity=capacity)
+    links = [("3%スコアボード（早期解約率）", "cohort.html"),
+             ("今日の要接触（優先度順）", "today.html"),
+             ("解約の山ハザード（A2・各山の手前が先回りどき）", "hazard.html"),
+             ("再発監視（A3）", "relapse.html")]
+    render_index(summary, links, os.path.join(out_dir, "index.html"))
+    r = summary["overall"]["rate"]
+    rate_txt = "－" if r is None else f"{r*100:.1f}%"
+    print(f"[dashboard] 早期解約率{rate_txt} / 今日{summary['today_total']}件 / "
+          f"未払消滅目前{summary['imminent_count']} / 再発{summary['relapse_count']} / "
+          f"山{len(summary['peaks'])}つ → {os.path.join(out_dir, 'index.html')}")
+    return summary
+
+
 def cmd_relapse(csv_path, column_map_path, out_path, as_of):
     """A3: 再発監視リスト（一度解消した未収がまた出た継続契約）。"""
     from .relapse import relapse_candidates, render_html as render_relapse_html
@@ -536,6 +569,13 @@ def main(argv=None):
     sp_rl.add_argument("--out", required=True)
     sp_rl.add_argument("--as-of", required=True)
 
+    sp_db = sub.add_parser("dashboard")       # 保全ダッシュボード（集約ビュー）
+    sp_db.add_argument("--csv", required=True)
+    sp_db.add_argument("--column-map", required=True)
+    sp_db.add_argument("--out-dir", required=True)
+    sp_db.add_argument("--as-of", required=True)
+    sp_db.add_argument("--capacity", type=int, default=CAPACITY_PER_DAY)
+
     sp_ct = sub.add_parser("call-timing")
     sp_ct.add_argument("--csv", required=True)
     sp_ct.add_argument("--column-map", required=True)
@@ -656,6 +696,8 @@ def main(argv=None):
         cmd_transitions(args.prev, args.curr, args.column_map, args.out, args.as_of)
     elif args.cmd == "relapse-watch":
         cmd_relapse(args.csv, args.column_map, args.out, args.as_of)
+    elif args.cmd == "dashboard":
+        cmd_dashboard(args.csv, args.column_map, args.out_dir, args.as_of, args.capacity)
     elif args.cmd == "call-timing":
         cmd_call_timing(args.csv, args.column_map, args.out, args.as_of)
     elif args.cmd == "contact-timing":
