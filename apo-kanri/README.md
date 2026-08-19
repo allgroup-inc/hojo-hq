@@ -47,9 +47,14 @@
 1. **スプレッドシート新規作成**: Googleドライブで「アポ管理台帳」を新規作成する。
    共有相手はアポ管理のスタッフのみ(glow-ma台帳と共有設定を分ける)
 2. **GASプロジェクト紐付け**: スプレッドシートの 拡張機能 > Apps Script でプロジェクト作成
-3. **コード反映**: `npm install -g @google/clasp`(未導入時)→ `clasp login` →
-   `apo-kanri/.clasp.json.example` を `apo-kanri/.clasp.json` にコピーして scriptId を書き換え →
-   `cd apo-kanri && clasp push`
+3. **コード反映**: 次のどちらか
+   - clasp: `npm install -g @google/clasp` → `clasp login` →
+     `apo-kanri/.clasp.json.example` を `apo-kanri/.clasp.json` にコピーして scriptId を書き換え →
+     `cd apo-kanri && clasp push`
+   - コピペ: `apo-kanri/dist/apo-kanri-bundle.gs`(8ファイルを1つにまとめた自動生成物)を
+     `コード.gs` に貼り、`src/appsscript.json` をマニフェストに貼る。計2回のコピペで済む。
+     **src を変更したら `node scripts/build_apo_bundle.mjs` で再生成すること**
+     (同期ずれは tests/apo_kanri_bundle.test.mjs がCIで検出する)
 4. **タブ作成**: Apps Scriptエディタで `ensureApoTabs` を一度実行(冪等・何度でも安全)
 5. **スタッフ登録**: 「スタッフ」タブに全利用者の 氏名 / Slack User ID / 有効✔ /
    メールアドレス / 役割(アポ入れ・営業・両方)を入力
