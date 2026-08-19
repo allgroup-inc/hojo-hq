@@ -83,40 +83,6 @@ test("buildConversionStats: 母数0のとき率はnull(0%や100%と断定しな�
   assert.equal(stats.signupRate, null);
 });
 
-test("buildKindStats: アポ種別ごとに訪問実施数・申込み数・申込み率を返す(スキーマ順)", () => {
-  const list = [
-    apo({ "アポ種別": "新規(紹介)", "ステータス": "申込み" }),
-    apo({ "アポ種別": "新規(紹介)", "ステータス": "申込み" }),
-    apo({ "アポ種別": "新規(紹介)", "ステータス": "実施済" }),
-    apo({ "アポ種別": "再訪(既存)", "ステータス": "実施済" }),
-    apo({ "アポ種別": "再訪(既存)", "ステータス": "申込み" }),
-    apo({ "アポ種別": "再訪(既存)", "ステータス": "キャンセル(顧客都合)" }),
-    apo({ "アポ種別": "新規(ご家族)", "ステータス": "予定" })
-  ];
-  const rows = core.buildKindStats(list, {});
-  assert.deepEqual(rows.map((r) => r.kind),
-    ["再訪(既存)", "新規(紹介)", "新規(ご家族)", "新規(その他)"]);
-  const shokai = rows.find((r) => r.kind === "新規(紹介)");
-  assert.equal(shokai.completed, 3);
-  assert.equal(shokai.signups, 2);
-  assert.ok(Math.abs(shokai.rate - 2 / 3) < 1e-9);
-  const saihou = rows.find((r) => r.kind === "再訪(既存)");
-  assert.equal(saihou.completed, 2);
-  assert.equal(saihou.signups, 1);
-  assert.equal(saihou.rate, 0.5);
-});
-
-test("buildKindStats: 訪問実施ゼロの種別は率null・種別未入力は集計しない・sinceDateで絞れる", () => {
-  const rows = core.buildKindStats([
-    apo({ "アポ種別": "", "ステータス": "申込み" }),
-    apo({ "アポ種別": "新規(紹介)", "ステータス": "申込み", "日付": "2026-07-01" })
-  ], { sinceDate: "2026-08-01" });
-  rows.forEach((row) => {
-    assert.equal(row.completed, 0);
-    assert.equal(row.rate, null);
-  });
-});
-
 test("buildTemperatureStats: 温度感ごとに訪問実施数・申込み数・申込み率を返す(高中低の順)", () => {
   const list = [
     apo({ "温度感": "高", "ステータス": "実施済" }),

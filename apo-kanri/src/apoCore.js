@@ -288,16 +288,6 @@
   }
 
   /**
-   * アポ種別(再訪/新規紹介/新規ご家族/新規その他)別の申込み率。
-   * 再訪と新規は決まり方が違うため、混ぜた平均では改善判断ができない
-   * (2026-08-19 小柳さん決裁)。チーム全体のみ・個人別は出さない。
-   */
-  function buildKindStats(appointments, options) {
-    return buildBreakdownStats_(appointments, options, "アポ種別",
-      getApoSchema_().APPOINTMENT_KINDS, "kind");
-  }
-
-  /**
    * 温度感別の申込み率(高・中・低の順で固定)。チーム全体のみ・個人別は出さない。
    * 母数 = その温度感の訪問実施(実施済+申込み)。母数0は率null(断定しない)。
    * 「どんなアポを取れば決まるか」をアポ入れ側の改善につなげるための指標
@@ -371,7 +361,6 @@
     buildFillStats: buildFillStats,
     buildConversionStats: buildConversionStats,
     buildTemperatureStats: buildTemperatureStats,
-    buildKindStats: buildKindStats,
     buildSubstituteCandidates: buildSubstituteCandidates
   };
 

@@ -50,7 +50,6 @@ function applyValidations_(ss) {
   setDropdown_(apoSheet, ApoSchema.APPOINTMENT_HEADERS, "形式", ApoSchema.APPOINTMENT_FORMATS, maxRows);
   setDropdown_(apoSheet, ApoSchema.APPOINTMENT_HEADERS, "温度感", ApoSchema.TEMPERATURES, maxRows);
   setDropdown_(apoSheet, ApoSchema.APPOINTMENT_HEADERS, "ステータス", ApoSchema.APPOINTMENT_STATUSES, maxRows);
-  setDropdown_(apoSheet, ApoSchema.APPOINTMENT_HEADERS, "アポ種別", ApoSchema.APPOINTMENT_KINDS, maxRows);
 }
 
 function setDropdown_(sheet, headers, columnName, values, maxRows) {

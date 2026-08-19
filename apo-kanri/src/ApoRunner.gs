@@ -133,8 +133,7 @@ function getStats() {
     sinceDate: since,
     fill: ApoCore.buildFillStats(appointments, today, ApoAccess.listSalesStaff(staffRows)),
     funnel: ApoCore.buildConversionStats(appointments, { sinceDate: since }),
-    byTemperature: ApoCore.buildTemperatureStats(appointments, { sinceDate: since }),
-    byKind: ApoCore.buildKindStats(appointments, { sinceDate: since })
+    byTemperature: ApoCore.buildTemperatureStats(appointments, { sinceDate: since })
   };
 }
 
@@ -146,8 +145,7 @@ function getFormOptions() {
     setterStaff: ApoAccess.listSetterStaff(staffRows),
     formats: ApoSchema.APPOINTMENT_FORMATS,
     temperatures: ApoSchema.TEMPERATURES,
-    statuses: ApoSchema.APPOINTMENT_STATUSES,
-    kinds: ApoSchema.APPOINTMENT_KINDS
+    statuses: ApoSchema.APPOINTMENT_STATUSES
   };
 }
 

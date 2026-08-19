@@ -101,7 +101,6 @@
 ".fstep .rate{color:var(--ink);font-weight:700;margin-right:8px}\n" +
 ".temprow{display:flex;align-items:center;gap:16px;margin-top:8px}\n" +
 ".temprow .tlabel{flex:none;width:56px;font-size:12px;font-weight:700}\n" +
-".temprow .tlabel.wide{width:104px}\n" +
 ".temprow .track{flex:1}\n" +
 ".temprow .tval{flex:none;min-width:88px;text-align:right;font-size:12px;color:var(--sub)}\n" +
 ".temprow .tval b{color:var(--ink);font-size:13px}\n" +
@@ -189,10 +188,6 @@
 "    <div class=\"field\"><label>顧客名<span class=\"req\">必須</span></label><input type=\"text\" id=\"fCustomer\" placeholder=\"例: ◯◯株式会社 △△様\">\n" +
 "      <div class=\"err\" id=\"custErr\">顧客名を入力してください。</div></div>\n" +
 "    <div class=\"row2\">\n" +
-"      <div class=\"field\"><label>アポ種別</label><select id=\"fKind\"></select></div>\n" +
-"      <div class=\"field\" id=\"referrerField\"><label>紹介元</label><input type=\"text\" id=\"fReferrer\" placeholder=\"例: ◯◯様のご紹介\"></div>\n" +
-"    </div>\n" +
-"    <div class=\"row2\">\n" +
 "      <div class=\"field\"><label>形式</label><select id=\"fFormat\"></select></div>\n" +
 "      <div class=\"field\"><label>温度感</label><select id=\"fTemp\"></select></div>\n" +
 "    </div>\n" +
@@ -254,8 +249,7 @@
 "  return '<div class=\"row' + doneClass + '\" data-id=\"' + esc(apo['アポID']) + '\" tabindex=\"0\">' +\n" +
 "    '<div class=\"time\">' + esc(apo['開始時刻']) + '<small>' + esc(apo['所要分']) + '分</small></div>' +\n" +
 "    '<div class=\"main\"><div class=\"cust\">' + esc(apo['顧客名']) + '</div>' +\n" +
-"    '<div class=\"meta\">' + (apo['アポ種別'] ? esc(apo['アポ種別']) + ' / ' : '') +\n" +
-"    esc(apo['形式']) + ' ' + esc(apo['場所またはURL']) + '</div></div>' +\n" +
+"    '<div class=\"meta\">' + esc(apo['形式']) + ' ' + esc(apo['場所またはURL']) + '</div></div>' +\n" +
 "    '<div class=\"owner\">' + esc(apo['担当営業']) + '</div>' +\n" +
 "    '<div class=\"temp' + hotClass + '\">' + esc(apo['温度感']) + '</div>' +\n" +
 "    '<div class=\"' + statusClass(apo['ステータス']) + '\">' + esc(apo['ステータス']) + '</div></div>';\n" +
@@ -318,18 +312,6 @@
 "  html += '<div class=\"note\">率の母数: 訪問実施率=結果が出たアポ、申込み率=訪問実施。' +\n" +
 "    (funnel.concluded < 10 ? '<br>件数が少ないため参考値です(母数10件未満)。' : '') +\n" +
 "    '<br>予定・確定・再調整中のアポは結果待ちのため含みません。評価目的では使いません</div></div>';\n" +
-"  var lowKindSample = false;\n" +
-"  html += '<div class=\"panel\"><h3>アポ種別別の申込み率(過去30日・チーム全体)</h3>';\n" +
-"  (stats.byKind || []).forEach(function (row) {\n" +
-"    if (row.completed > 0 && row.completed < 10) lowKindSample = true;\n" +
-"    var kindPercent = row.rate === null ? 0 : Math.round(row.rate * 100);\n" +
-"    html += '<div class=\"temprow\"><span class=\"tlabel wide\">' + esc(row.kind) + '</span>' +\n" +
-"      '<div class=\"track\"><div class=\"bar\" style=\"width:' + kindPercent + '%\"></div></div>' +\n" +
-"      '<span class=\"tval\"><b>' + formatRate(row.rate) + '</b> ' + row.signups + '/' + row.completed + '件</span></div>';\n" +
-"  });\n" +
-"  html += '<div class=\"note\">母数=その種別の訪問実施(実施済+申込み)。' +\n" +
-"    (lowKindSample ? '<br>母数10件未満の行は参考値です。' : '') +\n" +
-"    '<br>再訪と新規は決まり方が違うため分けて見ます。どこに時間を寄せるかの判断用で、評価目的では使いません</div></div>';\n" +
 "  var lowTempSample = false;\n" +
 "  html += '<div class=\"panel\"><h3>温度感別の申込み率(過去30日・チーム全体)</h3>';\n" +
 "  (stats.byTemperature || []).forEach(function (row) {\n" +
@@ -394,9 +376,6 @@
 "    $('fCustomer').value = apo ? apo['顧客名'] : '';\n" +
 "    $('fPlace').value = apo ? apo['場所またはURL'] : '';\n" +
 "    $('fMemo').value = apo ? apo['メモ'] : '';\n" +
-"    $('fReferrer').value = apo ? (apo['紹介元'] || '') : '';\n" +
-"    fillSelect('fKind', options.kinds, apo ? apo['アポ種別'] : options.kinds[0]);\n" +
-"    syncReferrerField();\n" +
 "    fillSelect('fTemp', options.temperatures, apo ? apo['温度感'] : '中');\n" +
 "    fillSelect('fFormat', options.formats, apo ? apo['形式'] : '訪問');\n" +
 "    fillSelect('fStatus', options.statuses, apo ? apo['ステータス'] : '予定');\n" +
@@ -407,15 +386,6 @@
 "  });\n" +
 "}\n" +
 "function closeModal() { $('modal').classList.remove('open'); }\n" +
-"// 紹介元は新規のときだけ意味があるので、再訪では隠して入力欄を減らす\n" +
-"function syncReferrerField() {\n" +
-"  var isNew = $('fKind').value.indexOf('新規') === 0;\n" +
-"  $('referrerField').style.visibility = isNew ? '' : 'hidden';\n" +
-"  if (!isNew) $('fReferrer').value = '';\n" +
-"}\n" +
-"document.addEventListener('change', function (event) {\n" +
-"  if (event.target && event.target.id === 'fKind') syncReferrerField();\n" +
-"});\n" +
 /* keepOpen=true で「保存して続けて登録」。日付・担当・形式は引き継ぎ、顧客名・場所・メモだけ
    空にしてフォームを開いたままにする(1日100件入力の連続登録でクリック数を減らすため)。
    引き継いだ日付・担当営業のまま次を登録するので、重複確認フラグは毎回リセットする。 */
@@ -430,7 +400,6 @@
 "    '形式': $('fFormat').value, '場所またはURL': $('fPlace').value.trim(),\n" +
 "    '担当営業': $('fSales').value, 'アポ入れ担当': $('fSetter').value,\n" +
 "    '温度感': $('fTemp').value, 'ステータス': $('fStatus').value, 'メモ': $('fMemo').value,\n" +
-"    'アポ種別': $('fKind').value, '紹介元': $('fReferrer').value.trim(),\n" +
 "    confirmedOverlap: state.confirmedOverlap\n" +
 "  };\n" +
 "  setSaveDisabled(true);\n" +
@@ -452,7 +421,7 @@
 "      state.confirmedOverlap = false;\n" +
 "      $('overlapWarn').classList.remove('show');\n" +
 "      $('modalTitle').textContent = '新規アポ';\n" +
-"      ['fCustomer', 'fPlace', 'fMemo', 'fReferrer'].forEach(function (id) { $(id).value = ''; });\n" +
+"      ['fCustomer', 'fPlace', 'fMemo'].forEach(function (id) { $(id).value = ''; });\n" +
 "      $('fStatus').value = '予定';\n" +
 "      $('fCustomer').focus();\n" +
 "      toast(notice + ' 続けて登録できます');\n" +
