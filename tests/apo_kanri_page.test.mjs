@@ -41,6 +41,20 @@ test("家計のポっ: システム名(正式表記=小さいひらがな『っ�
   assert.ok(html.includes("logomark") || html.includes("logoimg"));
 });
 
+test("連続登録: 「保存して続けて登録」ボタンがあり、save(true)に配線されている", () => {
+  assert.ok(html.includes("保存して続けて登録"));
+  assert.ok(html.includes("modalSaveNext"));
+  assert.ok(html.includes("save(true)"));
+  assert.ok(html.includes("save(false)"));
+  assert.ok(html.includes("続けて登録できます"), "保存後にフォームが開いたままの案内");
+});
+
+test("ホーム画面追加: apple-touch-icon(PNG)とアプリ名が設定されている", () => {
+  assert.ok(html.includes('rel="apple-touch-icon"'));
+  assert.ok(html.includes("data:image/png;base64,"));
+  assert.ok(html.includes('name="apple-mobile-web-app-title"'));
+});
+
 test("色ルール: ブランド色#F6C83Eと文字#1A1A1A/#6B6B6B、ロゴ画像が入っている", () => {
   assert.ok(html.includes("--brand:#F6C83E"));
   assert.ok(html.includes("#1A1A1A"));
