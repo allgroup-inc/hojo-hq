@@ -45,11 +45,12 @@ UNPAID_W = {0: -0.03, 1: 0.06, 2: 0.16, 3: 0.26}
 _CIRCLED = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫"
 
 
-def _iv_string(rng, unpaid_count, as_of, account_issue):
+def _iv_string(rng, unpaid_count, as_of, account_issue, relapse=False):
     """Ⅳ列（口座振替の未収履歴）を合成。未<年>+○囲み月＋●/済/★。未収0なら空。
 
     直近で「引落が終わった月」= as_of.month-1 から遡る（当月はまだ引落未到来）。年跨ぎは
     年ごとに 未<yy> を出し直す（parse_unpaid / _recent_streak と整合させ、連鎖判定を正しく発火させる）。
+    relapse=True のとき、解消のギャップ(1ヶ月)をはさんで**さらに古い月**に1回の未収を足す＝再発履歴。
     """
     if unpaid_count <= 0:
         return ""
@@ -65,6 +66,14 @@ def _iv_string(rng, unpaid_count, as_of, account_issue):
             s += "未" + f"{yy % 100:02d}"
             last_year = yy
         s += _CIRCLED[mm - 1]
+    if relapse:
+        # 直近ブロックの1ヶ月手前(=解消)をはさんだ、さらに古い月に単発の未収（再発の履歴）。
+        mm, yy = m - (unpaid_count + 2), y
+        while mm <= 0:
+            mm += 12
+            yy -= 1
+        s += "未" + f"{yy % 100:02d}" + _CIRCLED[mm - 1]   # 年prefixを必ず出し文脈を確定
+        last_year = yy
     if account_issue:
         s += "★"
     return s
@@ -155,6 +164,8 @@ def build_records(rng):
             unpaid_count = (rng.choices([0, 1, 2, 3], weights=[68, 15, 10, 7])[0]
                             if payment == "口座振替" else 0)
             account_issue = payment == "口座振替" and unpaid_count > 0 and rng.random() < 0.3
+            # 再発（A3）: 一度解消した後また未収に戻った履歴を一部に仕込む（口座振替・未収ありの35%）
+            relapse = payment == "口座振替" and unpaid_count >= 1 and rng.random() < 0.35
 
             p = churn_prob(rng, product, channel, form, amount, age, agent)
             p += UNPAID_W[min(unpaid_count, 3)]
@@ -225,7 +236,7 @@ def build_records(rng):
                 "cancel_date": cancel, "status": status, "debit_result": debit,
                 "account_daily": account, "debit_due": due,
                 "payment": payment, "insurer": rng.choice(INSURERS),
-                "iv": _iv_string(rng, unpaid_count, AS_OF, account_issue),
+                "iv": _iv_string(rng, unpaid_count, AS_OF, account_issue, relapse),
             })
 
     # 放置検知(要フォロー)デモ：高リスク条件・継続中・接触なしを固定注入

@@ -296,6 +296,17 @@ def cmd_transitions(prev_csv, curr_csv, column_map_path, out_path, as_of):
     return t
 
 
+def cmd_relapse(csv_path, column_map_path, out_path, as_of):
+    """A3: 再発監視リスト（一度解消した未収がまた出た継続契約）。"""
+    from .relapse import relapse_candidates, render_html as render_relapse_html
+    as_of_d = _as_of(as_of)
+    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    rows = relapse_candidates(records, as_of_d)
+    render_relapse_html(rows, out_path)
+    print(f"[relapse] 再発監視 {len(rows)}件（未収の再発回数が多い順）→ {out_path}")
+    return rows
+
+
 def cmd_hazard(csv_path, column_map_path, out_path, as_of):
     as_of_d = _as_of(as_of)
     records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
@@ -519,6 +530,12 @@ def main(argv=None):
     sp_tr.add_argument("--out", required=True)
     sp_tr.add_argument("--as-of", required=True)
 
+    sp_rl = sub.add_parser("relapse-watch")   # A3: 再発監視
+    sp_rl.add_argument("--csv", required=True)
+    sp_rl.add_argument("--column-map", required=True)
+    sp_rl.add_argument("--out", required=True)
+    sp_rl.add_argument("--as-of", required=True)
+
     sp_ct = sub.add_parser("call-timing")
     sp_ct.add_argument("--csv", required=True)
     sp_ct.add_argument("--column-map", required=True)
@@ -637,6 +654,8 @@ def main(argv=None):
         cmd_hazard(args.csv, args.column_map, args.out, args.as_of)
     elif args.cmd == "transitions":
         cmd_transitions(args.prev, args.curr, args.column_map, args.out, args.as_of)
+    elif args.cmd == "relapse-watch":
+        cmd_relapse(args.csv, args.column_map, args.out, args.as_of)
     elif args.cmd == "call-timing":
         cmd_call_timing(args.csv, args.column_map, args.out, args.as_of)
     elif args.cmd == "contact-timing":
