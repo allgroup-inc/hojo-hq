@@ -359,3 +359,81 @@ test("buildDealStageProgressSummary: 日付が不正/空の対応履歴は集計
   assert.equal(ndaStage["滞留企業数"], 1);
   assert.equal(ndaStage["平均滞留日数"], 30);
 });
+
+test("buildExitConversionSummary: 紹介ルートの企業が当月に「面談実施」で記録されると1件カウントする", () => {
+  const companyRecords = [{ 企業ID: "C1", 流入ルート: ["①紹介"] }];
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "2026-08-05", 種別: "面談実施" }
+  ];
+  const summary = dashboard.buildExitConversionSummary(interactionRecords, companyRecords, "2026-08-19", dashboard.DEFAULT_CONFIG);
+  assert.equal(summary["GLOW接続件数(当月・提携部)"], 1);
+});
+
+test("buildExitConversionSummary: 紹介ルート以外(手紙DM・ミカタ経由)の企業は対象外", () => {
+  const companyRecords = [
+    { 企業ID: "C1", 流入ルート: ["②手紙DM"] },
+    { 企業ID: "C2", 流入ルート: ["③ミカタ経由"] }
+  ];
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "2026-08-05", 種別: "面談実施" },
+    { 企業ID: "C2", 日付: "2026-08-06", 種別: "面談実施" }
+  ];
+  const summary = dashboard.buildExitConversionSummary(interactionRecords, companyRecords, "2026-08-19", dashboard.DEFAULT_CONFIG);
+  assert.equal(summary["GLOW接続件数(当月・提携部)"], 0);
+});
+
+test("buildExitConversionSummary: 種別が「面談実施」以外の対応履歴はカウントしない", () => {
+  const companyRecords = [{ 企業ID: "C1", 流入ルート: ["①紹介"] }];
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "2026-08-05", 種別: "電話" },
+    { 企業ID: "C1", 日付: "2026-08-06", 種別: "提案(M&A)" }
+  ];
+  const summary = dashboard.buildExitConversionSummary(interactionRecords, companyRecords, "2026-08-19", dashboard.DEFAULT_CONFIG);
+  assert.equal(summary["GLOW接続件数(当月・提携部)"], 0);
+});
+
+test("buildExitConversionSummary: 前月以前の「面談実施」は当月の集計に含めない", () => {
+  const companyRecords = [{ 企業ID: "C1", 流入ルート: ["①紹介"] }];
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "2026-07-31", 種別: "面談実施" }
+  ];
+  const summary = dashboard.buildExitConversionSummary(interactionRecords, companyRecords, "2026-08-19", dashboard.DEFAULT_CONFIG);
+  assert.equal(summary["GLOW接続件数(当月・提携部)"], 0);
+});
+
+test("buildExitConversionSummary: 対応履歴が空配列なら0件", () => {
+  const summary = dashboard.buildExitConversionSummary([], [], "2026-08-19", dashboard.DEFAULT_CONFIG);
+  assert.equal(summary["GLOW接続件数(当月・提携部)"], 0);
+});
+
+test("buildExitConversionSummary: 複数の流入ルートを持つ企業でも①紹介が含まれていれば対象になる", () => {
+  const companyRecords = [{ 企業ID: "C1", 流入ルート: ["①紹介", "②手紙DM"] }];
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "2026-08-05", 種別: "面談実施" }
+  ];
+  const summary = dashboard.buildExitConversionSummary(interactionRecords, companyRecords, "2026-08-19", dashboard.DEFAULT_CONFIG);
+  assert.equal(summary["GLOW接続件数(当月・提携部)"], 1);
+});
+
+test("buildExitConversionSummary: 企業マスタに存在しない企業IDの対応履歴は対象外", () => {
+  const companyRecords = [{ 企業ID: "C1", 流入ルート: ["①紹介"] }];
+  const interactionRecords = [
+    { 企業ID: "C999", 日付: "2026-08-05", 種別: "面談実施" }
+  ];
+  const summary = dashboard.buildExitConversionSummary(interactionRecords, companyRecords, "2026-08-19", dashboard.DEFAULT_CONFIG);
+  assert.equal(summary["GLOW接続件数(当月・提携部)"], 0);
+});
+
+test("buildExitConversionSummary: 同月内の複数件は正しく合計される", () => {
+  const companyRecords = [
+    { 企業ID: "C1", 流入ルート: ["①紹介"] },
+    { 企業ID: "C2", 流入ルート: ["①紹介"] }
+  ];
+  const interactionRecords = [
+    { 企業ID: "C1", 日付: "2026-08-01", 種別: "面談実施" },
+    { 企業ID: "C2", 日付: "2026-08-19", 種別: "面談実施" }
+  ];
+  const summary = dashboard.buildExitConversionSummary(interactionRecords, companyRecords, "2026-08-19", dashboard.DEFAULT_CONFIG);
+  assert.equal(summary["GLOW接続件数(当月・提携部)"], 2);
+  assert.equal(summary["対象月"], "2026-08");
+});

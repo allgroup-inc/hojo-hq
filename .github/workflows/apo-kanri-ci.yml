@@ -1,0 +1,30 @@
+name: apo-kanri-ci
+
+on:
+  push:
+    paths:
+      - "apo-kanri/**"
+      - "tests/apo_kanri_*.test.mjs"
+  pull_request:
+    paths:
+      - "apo-kanri/**"
+      - "tests/apo_kanri_*.test.mjs"
+  workflow_dispatch: {}
+
+# 同時実行禁止(glow-ma-ciと同方針): 並走によるrebase衝突の予防。後続は待機。
+concurrency:
+  group: apo-kanri-ci
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: アポ管理コンソール ロジック単体テスト
+        run: node --test tests/apo_kanri_*.test.mjs

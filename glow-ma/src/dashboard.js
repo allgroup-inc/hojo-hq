@@ -234,6 +234,46 @@
     });
   }
 
+  // 出口2(GLOW接続)の判定基準(2026-08-19 三名体制で確定): 流入ルート「①紹介」の企業について、
+  // 対応履歴ログに種別「面談実施」が記録された時点を1件とみなす。CLAUDE.mdの真のKPI
+  // (出口転換 月10件=LINE部5件+提携部5件)のうち、提携部側の実績を可視化する。
+  // 士業送客・保険クロス(LINE部側)は沖縄企業のミカタ側の別システムで管理されており、
+  // 本関数の集計対象外(docs/議事_20260818_開拓効率化アイデア出し.md 論点3参照)。
+  var GLOW_CONNECTION_INTERACTION_TYPE = "面談実施";
+
+  function buildExitConversionSummary(interactionRecords, companyRecords, todayValue, config) {
+    config = config || DEFAULT_CONFIG;
+    var alerting = getGlowAlerting_();
+    var referralRoute = (alerting.DEFAULT_CONFIG && alerting.DEFAULT_CONFIG.referralRoute) || "①紹介";
+    var today = alerting.toDate(todayValue);
+    var isReferralCompanyId = {};
+    (companyRecords || []).forEach(function (record) {
+      var routes = record["流入ルート"] || [];
+      if (routes.indexOf(referralRoute) !== -1) {
+        isReferralCompanyId[record["企業ID"]] = true;
+      }
+    });
+    var count = 0;
+    if (today) {
+      (interactionRecords || []).forEach(function (record) {
+        if (record["種別"] !== GLOW_CONNECTION_INTERACTION_TYPE) return;
+        if (!isReferralCompanyId[record["企業ID"]]) return;
+        var recordDate = alerting.toDate(record["日付"]);
+        if (!recordDate) return;
+        if (recordDate.getFullYear() === today.getFullYear() && recordDate.getMonth() === today.getMonth()) {
+          count++;
+        }
+      });
+    }
+    var monthLabel = today
+      ? today.getFullYear() + "-" + (today.getMonth() + 1 < 10 ? "0" : "") + (today.getMonth() + 1)
+      : "";
+    return {
+      "対象月": monthLabel,
+      "GLOW接続件数(当月・提携部)": count
+    };
+  }
+
   var PARTNER_SUMMARY_FIELDS = ["名称", "累計紹介数", "成約数", "関係性ランク", "提供済み情報ログ", "逆紹介履歴"];
 
   var MIN_REFERRALS_FOR_CONVERSION_RATE = 3;
@@ -266,6 +306,8 @@
     buildHistorySnapshot: buildHistorySnapshot,
     buildDealStageProgressSummary: buildDealStageProgressSummary,
     DEAL_STAGE_TYPES: DEAL_STAGE_TYPES,
+    buildExitConversionSummary: buildExitConversionSummary,
+    GLOW_CONNECTION_INTERACTION_TYPE: GLOW_CONNECTION_INTERACTION_TYPE,
     countUnclassifiedCompanies: countUnclassifiedCompanies,
     formatPartnerSummary: formatPartnerSummary,
     PARTNER_SUMMARY_FIELDS: PARTNER_SUMMARY_FIELDS

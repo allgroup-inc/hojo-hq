@@ -444,6 +444,10 @@ try:
 except Exception as _e:  # モジュールが無くても既存シードで動く
     print(f"[info] EXTRA_SEEDS 読み込みスキップ: {_e}")
 
+# 一時非公開エリア(2026-08-18 小柳さん指示・議事_20260818_沖縄市うるま市一時非公開.md)。
+# 管理は fg_seo.HIDDEN_MUNIS の1箇所(市独自制度・市町村ページ・一覧・診断すべてに効く)。
+from fg_seo import HIDDEN_MUNIS as HIDDEN_AREAS
+
 _robots_cache = {}
 
 
@@ -477,6 +481,10 @@ def main():
     now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
     items, skipped = [], []
     for seed in SEEDS:
+        if seed.get("area") in HIDDEN_AREAS:
+            skipped.append((seed["name"], "一時非公開(HIDDEN_AREAS)"))
+            print(f"SKIP(hidden): {seed['name']}")
+            continue
         url = seed["source_url"]
         if not robots_ok(url):
             skipped.append((seed["name"], "robots.txt不許可"))

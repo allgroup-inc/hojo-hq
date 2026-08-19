@@ -38,6 +38,7 @@ CHANNELS = {
     "ig":         {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: Instagramプロフィール"},
     "fb":         {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: Facebookページ"},
     "card":       {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: 紙配布(QRカード・催事・紹介)"},
+    "insurance-shindan": {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: 保険引き受け目安検索(LINE登録CTA)"},
     # ── もらいわすれ堂/フクギイロ(小柳遥さん・2026-07-24開設) ──
     "fg-top":     {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: トップページ"},
     "fg-life":    {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: ライフイベント別ページ"},

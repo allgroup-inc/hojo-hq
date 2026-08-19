@@ -3,18 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>保険引き受け目安検索</title>
+  <title>保険引き受け目安検索 | 業種・規模から引き受け可能な保険をチェック</title>
+  <meta name="description" content="患者の病名から3社（なないろ生命・FWD生命・チューリッヒ生命）の生命保険引き受け判定を検索。加入OK・条件付き・加入不可を一覧表示。">
+  <meta name="theme-color" content="#00335C">
   <style>
+    :root {
+      /* ── Design Tokens: Colors ── */
+      --color-primary: #00335C;
+      --color-accent: #F9A825;
+      --color-success: #2e7d32;
+      --color-warning: #e65100;
+      --color-error: #c62828;
+      --color-neutral-50: #f5f5f5;
+      --color-neutral-100: #efefef;
+      --color-neutral-200: #e0e0e0;
+      --color-neutral-700: #555;
+      --color-neutral-900: #1a1a1a;
+      --color-bg-light: #FFFBF4;
+
+      /* ── Design Tokens: Spacing (8px grid) ── */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      /* ── Design Tokens: Typography ── */
+      --font-family: "Segoe UI", "Noto Sans JP", sans-serif;
+      --font-size-xs: 12px;
+      --font-size-sm: 14px;
+      --font-size-md: 16px;
+      --font-size-lg: 18px;
+      --font-size-xl: 24px;
+      --font-size-2xl: 32px;
+      --font-weight-normal: 400;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: "Segoe UI", "Noto Sans JP", sans-serif;
-      background: linear-gradient(135deg, #FFFBF4 0%, #f5f0ea 100%);
-      padding: 20px;
+      font-family: var(--font-family);
+      background: linear-gradient(135deg, var(--color-bg-light) 0%, #f5f0ea 100%);
+      padding: var(--space-md);
       min-height: 100vh;
+      color: var(--color-neutral-900);
+      line-height: 1.6;
+    }
+
+    /* ── Focus visible for keyboard navigation ── */
+    *:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
     }
     .container {
       max-width: 1200px;
@@ -24,191 +73,351 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       overflow: hidden;
     }
+
     header {
-      background: linear-gradient(135deg, #00335C 0%, #F88800 100%);
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
       color: white;
-      padding: 64px 32px;
+      padding: var(--space-xl);
       text-align: center;
     }
+
     h1 {
-      font-size: 36px;
-      font-weight: 700;
-      margin-bottom: 16px;
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      margin-bottom: var(--space-md);
     }
+
     .subtitle {
-      font-size: 16px;
+      font-size: var(--font-size-md);
       opacity: 0.95;
     }
+
     .main {
-      padding: 64px 32px;
+      padding: var(--space-xl);
     }
+
+    /* ── Form ── */
+    form {
+      margin-bottom: var(--space-lg);
+    }
+
+    .form-group {
+      margin-bottom: var(--space-lg);
+    }
+
+    label {
+      display: block;
+      font-weight: var(--font-weight-semibold);
+      margin-bottom: var(--space-sm);
+      font-size: var(--font-size-md);
+    }
+
+    small {
+      display: block;
+      color: var(--color-neutral-700);
+      font-size: var(--font-size-xs);
+      margin-top: var(--space-sm);
+    }
+
     .search-box {
       display: flex;
-      gap: 16px;
-      margin-bottom: 32px;
+      gap: var(--space-md);
+      flex-wrap: wrap;
     }
+
     input[type="text"] {
       flex: 1;
-      padding: 16px 16px;
+      min-width: 200px;
+      padding: var(--space-md);
       min-height: 48px;
-      border: 2px solid #e0e0e0;
+      border: 2px solid var(--color-neutral-200);
       border-radius: 6px;
-      font-size: 16px;
+      font-size: var(--font-size-md);
       font-family: inherit;
       transition: all 0.25s;
+      color: var(--color-neutral-900);
     }
-    input[type="text"]:focus {
-      outline: none;
-      border-color: #F9A825;
+
+    input[type="text"]:hover {
+      border-color: var(--color-neutral-700);
+    }
+
+    input[type="text"]:focus-visible {
+      border-color: var(--color-accent);
       box-shadow: 0 0 0 4px rgba(249, 168, 37, 0.2);
-      background: #fffbf4;
+      background: var(--color-bg-light);
+      outline: none;
     }
+
+    input[type="text"]::placeholder {
+      color: var(--color-neutral-700);
+      opacity: 0.6;
+    }
+
     .btn {
-      padding: 16px 28px;
+      padding: var(--space-md) var(--space-lg);
       min-height: 48px;
       border: none;
       border-radius: 6px;
-      font-size: 16px;
-      font-weight: 700;
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-bold);
       cursor: pointer;
       transition: all 0.25s;
       font-family: inherit;
+      white-space: nowrap;
     }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .btn-primary {
-      background: #F9A825;
+      background: var(--color-accent);
       color: white;
       box-shadow: 0 2px 8px rgba(249, 168, 37, 0.2);
     }
-    .btn-primary:hover {
+
+    .btn-primary:hover:not(:disabled) {
       background: #f5951a;
       box-shadow: 0 4px 16px rgba(249, 168, 37, 0.3);
       transform: translateY(-2px);
     }
+
     .btn-secondary {
-      background: #999;
+      background: var(--color-neutral-700);
       color: white;
     }
-    .btn-secondary:hover {
-      background: #777;
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--color-neutral-900);
     }
-    .tabs-container {
-      margin-bottom: 32px;
-      border-bottom: 2px solid #f0f0f0;
+    /* ── Tabs (ARIA) ── */
+    [role="tablist"] {
+      margin-bottom: var(--space-lg);
+      border-bottom: 2px solid var(--color-neutral-100);
       display: flex;
-      gap: 8px;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
     }
-    .tab-btn {
-      padding: 16px 24px;
+
+    [role="tab"] {
+      padding: var(--space-md) var(--space-lg);
       background: none;
       border: none;
       border-bottom: 3px solid transparent;
-      font-size: 16px;
-      font-weight: 600;
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-semibold);
       cursor: pointer;
-      color: #888;
+      color: var(--color-neutral-700);
       transition: all 0.25s;
       font-family: inherit;
     }
-    .tab-btn:hover {
-      color: #00335C;
+
+    [role="tab"]:hover {
+      color: var(--color-primary);
+      background: var(--color-neutral-50);
     }
-    .tab-btn.active {
-      color: #F9A825;
-      border-bottom-color: #F9A825;
-      font-weight: 700;
+
+    [role="tab"][aria-selected="true"] {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      font-weight: var(--font-weight-bold);
     }
-    .tab-content {
+
+    [role="tabpanel"] {
       display: none;
     }
-    .tab-content.active {
+
+    [role="tabpanel"][aria-hidden="false"] {
       display: block;
     }
     .results-section {
-      margin-bottom: 32px;
-      padding-bottom: 32px;
-      border-bottom: 2px solid #f0f0f0;
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-lg);
+      border-bottom: 2px solid var(--color-neutral-100);
     }
+
     .results-section:last-child {
       border-bottom: none;
     }
+
     .results-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: var(--space-md);
     }
+
     .results-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #00335C;
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-primary);
     }
+
+    /* ── Badge ── */
     .badge {
-      background: #F9A825;
+      background: var(--color-accent);
       color: white;
-      padding: 6px 14px;
+      padding: var(--space-sm) var(--space-md);
       border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
       box-shadow: 0 2px 8px rgba(249, 168, 37, 0.2);
     }
+
+    /* ── Data Table ── */
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 14px;
+      font-size: var(--font-size-sm);
     }
+
     th {
-      background: #00335C;
+      background: var(--color-primary);
       color: white;
-      padding: 16px 14px;
+      padding: var(--space-md) var(--space-sm);
       text-align: left;
-      font-weight: 700;
-      font-size: 13px;
+      font-weight: var(--font-weight-bold);
+      font-size: var(--font-size-xs);
+      word-break: break-word;
     }
+
     td {
-      padding: 16px 14px;
-      border-bottom: 1px solid #f0f0f0;
+      padding: var(--space-md) var(--space-sm);
+      border-bottom: 1px solid var(--color-neutral-100);
+      color: var(--color-neutral-900);
     }
-    tr:hover {
-      background: #fafbf4;
+
+    tbody tr:hover {
+      background: var(--color-neutral-50);
     }
+
+    /* ── Status Badges ── */
     .status-badge {
       display: inline-block;
-      padding: 6px 10px;
+      padding: var(--space-sm) var(--space-sm);
       border-radius: 4px;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-bold);
+      text-transform: uppercase;
     }
+
     .status-ok {
       background: #e8f5e9;
-      color: #2e7d32;
+      color: #1b5e20;
     }
+
     .status-conditional {
       background: #fff3e0;
       color: #e65100;
     }
+
     .status-ng {
       background: #ffebee;
-      color: #c62828;
+      color: #b71c1c;
     }
+
     .status-unknown {
-      background: #f5f5f5;
-      color: #616161;
+      background: var(--color-neutral-100);
+      color: #424242;
     }
     .no-results {
       text-align: center;
-      color: #aaa;
-      padding: 64px 32px;
-      font-size: 16px;
+      color: var(--color-neutral-700);
+      padding: var(--space-xl);
+      font-size: var(--font-size-md);
+      background: var(--color-neutral-50);
+      border-radius: 6px;
     }
+
+    .no-results strong {
+      color: var(--color-neutral-900);
+    }
+
     .actions {
       display: none;
       text-align: center;
-      margin-top: 32px;
-      padding-top: 32px;
-      border-top: 2px solid #f0f0f0;
+      margin-top: var(--space-lg);
+      padding-top: var(--space-lg);
+      border-top: 2px solid var(--color-neutral-100);
     }
+
     .actions.active {
       display: block;
+    }
+
+    /* ── Responsive Design ── */
+    @media (max-width: 768px) {
+      .container {
+        border-radius: 8px;
+      }
+
+      header {
+        padding: var(--space-lg) var(--space-md);
+      }
+
+      h1 {
+        font-size: var(--font-size-xl);
+      }
+
+      .main {
+        padding: var(--space-lg) var(--space-md);
+      }
+
+      .search-box {
+        flex-direction: column;
+      }
+
+      input[type="text"] {
+        min-width: 100%;
+      }
+
+      [role="tablist"] {
+        gap: var(--space-xs);
+      }
+
+      [role="tab"] {
+        padding: var(--space-sm) var(--space-md);
+        font-size: var(--font-size-sm);
+      }
+
+      table {
+        font-size: var(--font-size-xs);
+      }
+
+      th, td {
+        padding: var(--space-sm) var(--space-xs);
+      }
+    }
+
+    /* ── Reduced Motion ── */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* ── High Contrast Mode ── */
+    @media (prefers-contrast: more) {
+      input[type="text"] {
+        border-width: 3px;
+      }
+
+      .btn {
+        border: 2px solid currentColor;
+      }
+
+      [role="tab"][aria-selected="true"] {
+        border-bottom-width: 4px;
+      }
     }
   </style>
 </head>
@@ -219,27 +428,60 @@
       <p class="subtitle">患者の病名から、保険会社ごとの引き受け見込みを検索</p>
     </header>
 
-    <div class="main">
-      <div class="search-box">
-        <input
-          type="text"
-          id="diseaseInput"
-          placeholder="病名を入力（例：がん、糖尿病、心筋梗塞）"
-          autocomplete="off"
-        />
-        <button class="btn btn-primary" onclick="search()">検索</button>
-        <button class="btn btn-secondary" onclick="clearSearch()">クリア</button>
-      </div>
+    <main class="main">
+      <form id="searchForm" role="search" aria-label="病名検索フォーム">
+        <div class="form-group">
+          <label for="diseaseInput">検索する病名を入力してください</label>
+          <div class="search-box">
+            <input
+              type="text"
+              id="diseaseInput"
+              placeholder="例：がん、糖尿病、心筋梗塞"
+              autocomplete="off"
+              aria-describedby="diseaseHint"
+            />
+            <small id="diseaseHint">医学用語・一般名 両対応。複数キーワード対応</small>
+          </div>
+          <div class="search-box">
+            <button type="button" class="btn btn-primary" onclick="search()">検索する</button>
+            <button type="button" class="btn btn-secondary" onclick="clearSearch()">クリアしる</button>
+          </div>
+        </div>
+      </form>
 
-      <div class="tabs-container">
-        <button class="tab-btn active" onclick="switchTab(event, 'all')">すべて</button>
-        <button class="tab-btn" onclick="switchTab(event, 'naneiro')">なないろ生命</button>
-        <button class="tab-btn" onclick="switchTab(event, 'fwd')">FWD生命</button>
-        <button class="tab-btn" onclick="switchTab(event, 'zurich')">チューリッヒ生命</button>
+      <div role="tablist" aria-label="保険会社別検索結果">
+        <button
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel-all"
+          id="tab-all-btn"
+          onclick="switchTab(event, 'all')"
+        >すべて</button>
+        <button
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-naneiro"
+          id="tab-naneiro-btn"
+          onclick="switchTab(event, 'naneiro')"
+        >なないろ生命</button>
+        <button
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-fwd"
+          id="tab-fwd-btn"
+          onclick="switchTab(event, 'fwd')"
+        >FWD生命</button>
+        <button
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-zurich"
+          id="tab-zurich-btn"
+          onclick="switchTab(event, 'zurich')"
+        >チューリッヒ生命</button>
       </div>
 
       <!-- TAB: すべて -->
-      <div id="tab-all" class="tab-content active">
+      <div id="panel-all" role="tabpanel" aria-labelledby="tab-all-btn" aria-hidden="false">
         <div id="all-naneiro" class="results-section" style="display: none;">
           <div class="results-header">
             <span class="results-title">なないろ生命</span>
@@ -296,7 +538,7 @@
       </div>
 
       <!-- TAB: なないろ生命 -->
-      <div id="tab-naneiro" class="tab-content">
+      <div id="panel-naneiro" role="tabpanel" aria-labelledby="tab-naneiro-btn" aria-hidden="true">
         <div class="results-header">
           <span class="results-title">なないろ生命</span>
           <span class="badge" id="badge-naneiro">0 件</span>
@@ -315,7 +557,7 @@
       </div>
 
       <!-- TAB: FWD生命 -->
-      <div id="tab-fwd" class="tab-content">
+      <div id="panel-fwd" role="tabpanel" aria-labelledby="tab-fwd-btn" aria-hidden="true">
         <div class="results-header">
           <span class="results-title">FWD生命</span>
           <span class="badge" id="badge-fwd">0 件</span>
@@ -334,7 +576,7 @@
       </div>
 
       <!-- TAB: チューリッヒ生命 -->
-      <div id="tab-zurich" class="tab-content">
+      <div id="panel-zurich" role="tabpanel" aria-labelledby="tab-zurich-btn" aria-hidden="true">
         <div class="results-header">
           <span class="results-title">チューリッヒ生命</span>
           <span class="badge" id="badge-zurich">0 件</span>
@@ -352,14 +594,16 @@
         </table>
       </div>
 
-      <div id="noResults" class="no-results" style="display: none;">
+      <div id="noResults" class="no-results" role="status" aria-live="polite" style="display: none;">
         <p><strong>該当する病名が見つかりませんでした</strong></p>
       </div>
 
-      <div id="actions" class="actions">
-        <button class="btn btn-primary" onclick="downloadCSV()">結果をCSVダウンロード</button>
+      <div id="actions" class="actions" role="region" aria-label="検索結果のアクション">
+        <button class="btn btn-primary" onclick="downloadCSV()" aria-label="検索結果をCSV形式でダウンロード">
+          📥 結果をCSVダウンロード
+        </button>
       </div>
-    </div>
+    </main>
   </div>
 
   <script>
@@ -431,22 +675,39 @@
     }
 
     function displayAll(naneiro, fwd, zurich) {
+      // ヘルパー関数: 信頼度アイコン・色を取得
+      const getConfidenceDisplay = (row) => {
+        const confidence = row.confidence_level || '中';
+        const icon = confidence === '高' ? '✅' : confidence === '中' ? '⚠️' : '❌';
+        const bg = confidence === '高' ? '#e8f5e9' : confidence === '中' ? '#fff3e0' : '#ffebee';
+        return { icon, bg };
+      };
+
       // なないろ生命
       if (naneiro.length > 0) {
         document.getElementById('all-naneiro').style.display = 'block';
         const tbody = document.getElementById('tbody-all-naneiro');
         tbody.innerHTML = '';
         naneiro.forEach(row => {
-          const tr = document.createElement('tr');
           const hasOK = Object.values(row.marks || {}).some(m => m === '○');
-          const statusClass = hasOK ? 'status-ok' : 'status-conditional';
           const statusText = hasOK ? '可' : '条件付き';
-          tr.innerHTML = `
-            <td><strong>${row.disease}</strong></td>
-            <td><small>${row.state || 'なし'}</small></td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          const { icon, bg } = getConfidenceDisplay(row);
+          const conditionText = row.condition_text || row.state || '';
+          const requiresConfirm = row.requires_confirmation || false;
+
+          const tr = document.createElement('tr');
+          tr.style.borderLeft = `4px solid ${bg}`;
+
+          let htmlContent = `<td><strong>${row.disease}</strong>`;
+          if (requiresConfirm) {
+            htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+          }
+          htmlContent += `</td>
+            <td><small>${conditionText || 'なし'}</small></td>
+            <td><span class="status-badge" style="background:${bg}">${icon} ${statusText}</span></td>
             <td><small>p.${row.page}</small></td>
           `;
+          tr.innerHTML = htmlContent;
           tbody.appendChild(tr);
         });
         document.getElementById('badge-all-naneiro').textContent = naneiro.length + ' 件';
@@ -460,15 +721,23 @@
         const tbody = document.getElementById('tbody-all-fwd');
         tbody.innerHTML = '';
         fwd.forEach(row => {
+          const { icon, bg } = getConfidenceDisplay(row);
+          const conditionText = row.condition_text || row.condition || '';
+          const requiresConfirm = row.requires_confirmation || false;
+
           const tr = document.createElement('tr');
-          const statusClass = row.judgement === '可' ? 'status-ok' :
-                            row.judgement === '条件付き' ? 'status-conditional' : 'status-ng';
-          tr.innerHTML = `
-            <td><strong>${row.disease}</strong></td>
-            <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
-            <td><small>${row.condition || 'なし'}</small></td>
+          tr.style.borderLeft = `4px solid ${bg}`;
+
+          let htmlContent = `<td><strong>${row.disease}</strong>`;
+          if (requiresConfirm) {
+            htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+          }
+          htmlContent += `</td>
+            <td><span class="status-badge" style="background:${bg}">${icon} ${row.judgement || 'なし'}</span></td>
+            <td><small>${conditionText || 'なし'}</small></td>
             <td><small>p.${row.page}</small></td>
           `;
+          tr.innerHTML = htmlContent;
           tbody.appendChild(tr);
         });
         document.getElementById('badge-all-fwd').textContent = fwd.length + ' 件';
@@ -482,16 +751,23 @@
         const tbody = document.getElementById('tbody-all-zurich');
         tbody.innerHTML = '';
         zurich.forEach(row => {
+          const { icon, bg } = getConfidenceDisplay(row);
+          const conditionText = row.condition_text || row['経過'] || row.section || '';
+          const requiresConfirm = row.requires_confirmation || false;
+
           const tr = document.createElement('tr');
-          const statusClass = row.judgement === '可' ? 'status-ok' :
-                            row.judgement === '条件付き' ? 'status-conditional' :
-                            row.judgement === '要確認' ? 'status-unknown' : 'status-ng';
-          tr.innerHTML = `
-            <td><strong>${row.disease}</strong></td>
-            <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
-            <td><small>${row['経過'] || row.section || 'なし'}</small></td>
+          tr.style.borderLeft = `4px solid ${bg}`;
+
+          let htmlContent = `<td><strong>${row.disease}</strong>`;
+          if (requiresConfirm) {
+            htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+          }
+          htmlContent += `</td>
+            <td><span class="status-badge" style="background:${bg}">${icon} ${row.judgement || 'なし'}</span></td>
+            <td><small>${conditionText || 'なし'}</small></td>
             <td><small>p.${row.page}</small></td>
           `;
+          tr.innerHTML = htmlContent;
           tbody.appendChild(tr);
         });
         document.getElementById('badge-all-zurich').textContent = zurich.length + ' 件';
@@ -512,16 +788,30 @@
       document.getElementById('noResults').style.display = 'none';
 
       data.forEach(row => {
-        const tr = document.createElement('tr');
         const hasOK = Object.values(row.marks || {}).some(m => m === '○');
         const statusClass = hasOK ? 'status-ok' : 'status-conditional';
         const statusText = hasOK ? '可' : '条件付き';
-        tr.innerHTML = `
-          <td><strong>${row.disease}</strong></td>
-          <td><small>${row.state || 'なし'}</small></td>
-          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+        const judgement = row.judgement || statusText;
+        const confidence = row.confidence_level || '中';
+        const confidenceIcon = confidence === '高' ? '✅' : confidence === '中' ? '⚠️' : '❌';
+        const confidenceBg = confidence === '高' ? '#e8f5e9' : confidence === '中' ? '#fff3e0' : '#ffebee';
+        const conditionText = row.condition_text || row.state || '';
+        const requiresConfirm = row.requires_confirmation || false;
+
+        const tr = document.createElement('tr');
+        tr.style.borderLeft = `4px solid ${confidenceBg}`;
+
+        let htmlContent = `
+          <td><strong>${row.disease}</strong>`;
+        if (requiresConfirm) {
+          htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+        }
+        htmlContent += `</td>
+          <td><span class="status-badge" style="background:${confidenceBg}">${confidenceIcon} ${judgement}</span></td>
+          <td><small>${conditionText || 'なし'}</small></td>
           <td><small>p.${row.page}</small></td>
         `;
+        tr.innerHTML = htmlContent;
         tbody.appendChild(tr);
       });
 
@@ -540,15 +830,28 @@
       document.getElementById('noResults').style.display = 'none';
 
       data.forEach(row => {
-        const tr = document.createElement('tr');
         const statusClass = row.judgement === '可' ? 'status-ok' :
                           row.judgement === '条件付き' ? 'status-conditional' : 'status-ng';
-        tr.innerHTML = `
-          <td><strong>${row.disease}</strong></td>
-          <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
-          <td><small>${row.condition || 'なし'}</small></td>
+        const confidence = row.confidence_level || '中';
+        const confidenceIcon = confidence === '高' ? '✅' : confidence === '中' ? '⚠️' : '❌';
+        const confidenceBg = confidence === '高' ? '#e8f5e9' : confidence === '中' ? '#fff3e0' : '#ffebee';
+        const conditionText = row.condition_text || row.condition || '';
+        const requiresConfirm = row.requires_confirmation || false;
+
+        const tr = document.createElement('tr');
+        tr.style.borderLeft = `4px solid ${confidenceBg}`;
+
+        let htmlContent = `
+          <td><strong>${row.disease}</strong>`;
+        if (requiresConfirm) {
+          htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+        }
+        htmlContent += `</td>
+          <td><span class="status-badge" style="background:${confidenceBg}">${confidenceIcon} ${row.judgement || 'なし'}</span></td>
+          <td><small>${conditionText || 'なし'}</small></td>
           <td><small>p.${row.page}</small></td>
         `;
+        tr.innerHTML = htmlContent;
         tbody.appendChild(tr);
       });
 
@@ -567,16 +870,29 @@
       document.getElementById('noResults').style.display = 'none';
 
       data.forEach(row => {
-        const tr = document.createElement('tr');
         const statusClass = row.judgement === '可' ? 'status-ok' :
                           row.judgement === '条件付き' ? 'status-conditional' :
                           row.judgement === '要確認' ? 'status-unknown' : 'status-ng';
-        tr.innerHTML = `
-          <td><strong>${row.disease}</strong></td>
-          <td><span class="status-badge ${statusClass}">${row.judgement || 'なし'}</span></td>
-          <td><small>${row['経過'] || row.section || 'なし'}</small></td>
+        const confidence = row.confidence_level || '中';
+        const confidenceIcon = confidence === '高' ? '✅' : confidence === '中' ? '⚠️' : '❌';
+        const confidenceBg = confidence === '高' ? '#e8f5e9' : confidence === '中' ? '#fff3e0' : '#ffebee';
+        const conditionText = row.condition_text || row['経過'] || row.section || '';
+        const requiresConfirm = row.requires_confirmation || false;
+
+        const tr = document.createElement('tr');
+        tr.style.borderLeft = `4px solid ${confidenceBg}`;
+
+        let htmlContent = `
+          <td><strong>${row.disease}</strong>`;
+        if (requiresConfirm) {
+          htmlContent += `<br><small style="color:#e65100">⚠️ 公式確認推奨</small>`;
+        }
+        htmlContent += `</td>
+          <td><span class="status-badge" style="background:${confidenceBg}">${confidenceIcon} ${row.judgement || 'なし'}</span></td>
+          <td><small>${conditionText || 'なし'}</small></td>
           <td><small>p.${row.page}</small></td>
         `;
+        tr.innerHTML = htmlContent;
         tbody.appendChild(tr);
       });
 
@@ -586,24 +902,71 @@
     function switchTab(e, tabName) {
       currentTab = tabName;
 
-      // タブボタンのアクティブ状態を変更
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      e.target.classList.add('active');
+      // すべてのタブボタンのaria-selectedを更新
+      document.querySelectorAll('[role="tab"]').forEach(btn => {
+        btn.setAttribute('aria-selected', 'false');
+        btn.tabIndex = -1;
+      });
 
-      // タブコンテンツを表示
-      showTab(tabName);
+      // クリックされたボタンをアクティブにする
+      const activeBtn = document.getElementById(`tab-${tabName}-btn`);
+      activeBtn.setAttribute('aria-selected', 'true');
+      activeBtn.tabIndex = 0;
+      activeBtn.focus();
+
+      // すべてのtabpanelのaria-hiddenを更新
+      document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
+        panel.setAttribute('aria-hidden', 'true');
+      });
+
+      // アクティブなパネルを表示
+      const activePanel = document.getElementById(`panel-${tabName}`);
+      activePanel.setAttribute('aria-hidden', 'false');
+
+      // アナウンスメント用のlive regionを更新
+      const announcer = document.createElement('div');
+      announcer.setAttribute('role', 'status');
+      announcer.setAttribute('aria-live', 'polite');
+      announcer.setAttribute('aria-atomic', 'true');
+      announcer.style.position = 'absolute';
+      announcer.style.left = '-10000px';
+      const tabNames = { all: 'すべて', naneiro: 'なないろ生命', fwd: 'FWD生命', zurich: 'チューリッヒ生命' };
+      announcer.textContent = `${tabNames[tabName]}タブを開きました`;
+      document.body.appendChild(announcer);
+      setTimeout(() => announcer.remove(), 1000);
     }
 
     function showTab(tabName) {
-      document.querySelectorAll('[id^="tab-"]').forEach(el => {
-        el.classList.remove('active');
-      });
-      document.getElementById('tab-' + tabName).classList.add('active');
+      // 互換性のため、switchTabと同じ処理を実行
+      const btn = document.getElementById(`tab-${tabName}-btn`);
+      if (btn) {
+        btn.setAttribute('aria-selected', 'true');
+        btn.tabIndex = 0;
+
+        document.querySelectorAll('[role="tab"]').forEach(t => {
+          if (t !== btn) {
+            t.setAttribute('aria-selected', 'false');
+            t.tabIndex = -1;
+          }
+        });
+      }
+
+      const panel = document.getElementById(`panel-${tabName}`);
+      if (panel) {
+        panel.setAttribute('aria-hidden', 'false');
+
+        document.querySelectorAll('[role="tabpanel"]').forEach(p => {
+          if (p !== panel) {
+            p.setAttribute('aria-hidden', 'true');
+          }
+        });
+      }
     }
 
     function clearSearch() {
       document.getElementById('diseaseInput').value = '';
       document.getElementById('noResults').style.display = 'none';
+      document.getElementById('diseaseInput').focus();
       document.getElementById('actions').classList.remove('active');
 
       // すべてのテーブルをクリア
@@ -645,6 +1008,39 @@
       link.download = 'insurance-results.csv';
       link.click();
     }
+
+    // タブのキーボード操作（矢印キー）
+    document.addEventListener('DOMContentLoaded', () => {
+      const tablist = document.querySelector('[role="tablist"]');
+      const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+      const tabNames = ['all', 'naneiro', 'fwd', 'zurich'];
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('keydown', (e) => {
+          let targetTab = null;
+
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            targetTab = tabs[index === 0 ? tabs.length - 1 : index - 1];
+          } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            targetTab = tabs[index === tabs.length - 1 ? 0 : index + 1];
+          } else if (e.key === 'Home') {
+            e.preventDefault();
+            targetTab = tabs[0];
+          } else if (e.key === 'End') {
+            e.preventDefault();
+            targetTab = tabs[tabs.length - 1];
+          }
+
+          if (targetTab) {
+            const nextIndex = tabs.indexOf(targetTab);
+            const nextTabName = tabNames[nextIndex];
+            showTab(nextTabName);
+          }
+        });
+      });
+    });
 
     // 初期化
     init();

@@ -30,6 +30,14 @@ MUNIS = [
 ]
 MUNI_SLUG = dict(MUNIS)
 
+# 一時非公開の市町村(2026-08-18 小柳さん指示・クレーム等ではない・後ほど復活予定。
+# 議事_20260818_沖縄市うるま市一時非公開.md)。市独自制度の掲載(fetch_fukugiiro)に加え、
+# 市町村ページの生成・一覧・診断の選択肢からも除外する。
+# 戻すときはこのリストを空にして fukugiiro-fetch を再実行(+診断のMUNIS配列を復元)。
+HIDDEN_MUNIS = ["沖縄市", "うるま市"]
+# 公開対象の市町村(ジェネレーターはこちらを使う)
+VISIBLE_MUNIS = [(n, s) for n, s in MUNIS if n not in HIDDEN_MUNIS]
+
 
 def _esc(s):
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
