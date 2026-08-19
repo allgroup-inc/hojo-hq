@@ -708,5 +708,129 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-18",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "沖縄物流デジタル技術活用推進事業",
+    "url": "https://okinawa-ric.jp/service/logidigi.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【中部監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuXMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "GX地域共創補助金2026",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdJhMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "京都市企業立地促進制度補助金［お試し立地支援制度］",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFiMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "2026年度第2回「新エネルギー等のシーズ発掘・事業化に向けた技術研究開発事業」（未来型新エネ実証制度）の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdA1MAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
+ },
+ {
+  "date": "2026-08-19",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "いわき市診療所開設・承継支援補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXK4MAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(ソーシャルボンド/ソーシャルローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdA6MAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【農林水産省】中山間地域所得確保推進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDCMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和8年度地熱発電の資源量調査事業費助成金交付事業_第3回",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdjkMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度_Scope3排出量削減のための企業間連携による省CO2設備投資促進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDNDnMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]

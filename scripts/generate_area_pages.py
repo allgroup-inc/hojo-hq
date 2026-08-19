@@ -17,7 +17,7 @@ import sys
 from datetime import datetime, timezone, timedelta
 
 sys.path.insert(0, os.path.dirname(__file__))
-from fg_seo import MUNIS, MUNI_SLUG, breadcrumb_jsonld, canonical_tag, ogp_tags
+from fg_seo import HIDDEN_MUNIS, MUNI_SLUG, VISIBLE_MUNIS, breadcrumb_jsonld, canonical_tag, ogp_tags
 
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
@@ -225,7 +225,7 @@ def muni_page(muni, items, updated):
 
 def index_page(updated):
     lis = "\n".join(
-        f'<li><a href="{slug}/">{esc(name)}</a></li>' for name, slug in MUNIS
+        f'<li><a href="{slug}/">{esc(name)}</a></li>' for name, slug in VISIBLE_MUNIS
     )
     body = (
         "<h1>市町村別 給付金・手当まとめ</h1>"
@@ -235,8 +235,8 @@ def index_page(updated):
         '<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'
     )
     return page(
-        "沖縄県 市町村別の給付金・手当まとめ(41市町村)|もらいわすれ堂",
-        "那覇市・沖縄市・うるま市・宜野湾市など沖縄県41市町村ごとに、こども医療費助成・児童手当・ひとり親支援などの給付金・手当をまとめて確認できます。公式ページと照合して掲載。無料・匿名の3分診断つき。",
+        f"沖縄県 市町村別の給付金・手当まとめ({len(VISIBLE_MUNIS)}市町村)|もらいわすれ堂",
+        "那覇市・宜野湾市・浦添市・名護市など沖縄県の市町村ごとに、こども医療費助成・児童手当・ひとり親支援などの給付金・手当をまとめて確認できます。公式ページと照合して掲載。無料・匿名の3分診断つき。",
         body, updated, depth=1,
         head_extra=breadcrumb_jsonld([("もらいわすれ堂", ""), ("市町村別まとめ", None)]),
         canon_path="area/")
@@ -246,6 +246,7 @@ def main():
     with open(DATA, encoding="utf-8") as f:
         db = json.load(f)
     items = [it for it in db["items"]]
+    items = [it for it in items if it.get("area") not in HIDDEN_MUNIS]  # 一時非公開(議事20260818)
     updated = db.get("updated_at", "")
 
     if os.path.isdir(OUT_DIR):
@@ -253,12 +254,12 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     with open(os.path.join(OUT_DIR, "index.html"), "w", encoding="utf-8") as f:
         f.write(index_page(updated))
-    for name, slug in MUNIS:
+    for name, slug in VISIBLE_MUNIS:
         d = os.path.join(OUT_DIR, slug)
         os.makedirs(d, exist_ok=True)
         with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
             f.write(muni_page(name, items, updated))
-    print(f"生成完了: 市町村{len(MUNIS)}ページ+一覧1ページ(制度{len(items)}件から)")
+    print(f"生成完了: 市町村{len(VISIBLE_MUNIS)}ページ+一覧1ページ(制度{len(items)}件から)")
 
 
 if __name__ == "__main__":

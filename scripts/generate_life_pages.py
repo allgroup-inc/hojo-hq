@@ -16,7 +16,7 @@ import sys
 from datetime import timezone, timedelta
 
 sys.path.insert(0, os.path.dirname(__file__))
-from fg_seo import breadcrumb_jsonld, canonical_tag, faq_jsonld, ogp_tags
+from fg_seo import HIDDEN_MUNIS, breadcrumb_jsonld, canonical_tag, faq_jsonld, ogp_tags
 
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
@@ -249,6 +249,8 @@ def main():
     with open(DATA, encoding="utf-8") as f:
         db = json.load(f)
     items = db["items"]
+    # 一時非公開市町村の制度は、古いseido.jsonからも漏らさない(二重防御・議事20260818)
+    items = [it for it in items if it.get("area") not in HIDDEN_MUNIS]
     updated = db.get("updated_at", "")
 
     if os.path.isdir(OUT_DIR):

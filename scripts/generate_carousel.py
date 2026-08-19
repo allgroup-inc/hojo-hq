@@ -28,10 +28,17 @@ try:
 except Exception:
     pass
 
+import shipping_gate
+
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA_PATH = os.path.join(BASE, "data", "subsidies.json")
 OUT_DIR = os.path.join(BASE, "posts", "carousel")
+
+# 出荷ゲート(運用規程1-3)の通過日。**キャプション文面を書き換えたら必ず更新する。**
+# 2026-08-17: accuracy-check(締切・金額・出典URLはdata由来)/ deadline-alert(30日以上先のみ掲載)/
+#             humanizer(定型句なし)で確認。
+GATE_CHECKED = "2026-08-17"
 SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=carousel"
 
 W, H = 1080, 1350  # IG推奨4:5(画面占有が最大)
@@ -263,7 +270,9 @@ def main():
     lines += [f"- {it['name']}: {it['source_url']}" for it in top5]
     with open(os.path.join(OUT_DIR, "caption.md"), "w", encoding="utf-8") as f:
         f.write("## キャプション\n" + "\n".join(lines[:-len(top5) - 1]) + "\n\n"
-                + "\n".join(lines[-len(top5) - 1:]) + "\n")
+                + "\n".join(lines[-len(top5) - 1:]) + "\n\n"
+                + shipping_gate.render_stamp(
+                    "scripts/generate_carousel.py(SNS部・ヒロメさん)", GATE_CHECKED))
     print(f"[ok] カルーセル7枚+キャプションを posts/carousel/ に生成(基準日 {today})")
     for it in top5:
         print("  -", it["name"][:40], it["deadline"])

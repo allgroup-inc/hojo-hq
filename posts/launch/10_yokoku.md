@@ -9,7 +9,7 @@
 ## キャプション
 ⏳ 締切が目前の制度は、いま慌てて申請すると要件を満たせないことも。
 次の公募に備えて、国の電子申請(jGrants)で使う【GビズIDプライム】を用意しておきましょう。マイナンバーカードとスマホがあれば、オンライン申請なら24時間365日、速やかに発行されます（書類の郵送申請は審査に最大1か月）。
-例）令和8年度沖縄県スタートアップ起業支援金の公募開始（締切：2026-08-19（残り2日））
+例）令和8年度沖縄県スタートアップ起業支援金の公募開始（締切：2026-08-19（本日締切））
 参考: https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1021963.html
 今回が難しくても、備えておけば次のチャンスをつかめます。
 制度一覧はこちら👇
@@ -20,3 +20,8 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 
 ## 出典
 https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1021963.html
+
+## 出荷ゲート
+- gates: accuracy-check, deadline-alert, humanizer
+- checked: 2026-08-17
+- by: scripts/generate_sns.py(SNS部・ヒロメさん)

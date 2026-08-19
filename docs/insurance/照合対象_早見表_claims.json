@@ -1,0 +1,26 @@
+{
+  "_meta": {
+    "purpose": "勝てるくん3社リサーチの原文照合スプリント第1弾(振り分け早見表9行の根拠)",
+    "created": "2026-08-17",
+    "rule": "決裁キュー⑥第一段階(2026-08-17 小柳さん承認): 公開情報の照合のみにマルチAIを使用。顧客情報は一切含めない",
+    "note": "verified の値は scripts/insurance/verify_insurance_research.py が更新する。手動で書き換えない"
+  },
+  "claims": [
+    {"id": "N1", "company": "なないろ生命", "url": "https://www.nanairolife.co.jp/products/medical_superwide/", "claim": "なないろメディカルスーパーワイド(引受基準緩和型)は告知項目が2項目のみで、給付金の支払削減期間がない"},
+    {"id": "N2", "company": "なないろ生命", "url": "https://www.nanairolife.co.jp/products/cancer_treatment/", "claim": "なないろがん治療保険 極は、がん治療サポート給付金として治療月の診療報酬点数×3円を給付し、1か月の支払限度額は10万/20万/30万円から選択、通算4,000万円まで、自由診療の抗がん剤治療は24回限度"},
+    {"id": "N3", "company": "なないろ生命", "url": "https://www.nanairolife.co.jp/faq/faq-544/", "claim": "なないろがん一時金保険には、がん診断A型=180日に1回を限度に回数無制限、がん診断B型=1年に1回の型がある"},
+    {"id": "N4", "company": "なないろ生命", "url": "https://www.nanairolife.co.jp/products/cancer/", "claim": "非喫煙者区分料率の基準は過去1年以内に喫煙していないこと"},
+    {"id": "F1", "company": "FWD生命", "url": "https://www.fwdlife.co.jp/life-insurance/mib-dp0001/", "claim": "FWD収入保障には非喫煙者優良体/喫煙者優良体/非喫煙者標準体/喫煙者標準体の4つの保険料率区分があり、優良体等の適用には過去15か月以内の健康診断・人間ドック結果の提出が必要"},
+    {"id": "F2", "company": "FWD生命", "url": "https://www.fwdlife.co.jp/life-insurance/mib/", "claim": "FWD収入保障の生活支援特則では、高度障害に加え、身体障害者福祉法の1〜4級の障害者手帳交付、公的介護保険の要介護1以上でも年金が支払われる"},
+    {"id": "F3", "company": "FWD生命", "url": "https://www.fwdlife.co.jp/content/brand/gan-best-gold/", "claim": "FWDがんベスト・ゴールドのがん診断給付金は1年に1回を限度に回数無制限で支払われる"},
+    {"id": "F4", "company": "FWD生命", "url": "https://household.fwdlife.co.jp/content/brand/fwd-cancer/", "claim": "FWDがんベスト・ゴールドの抗がん剤治療給付金(がん治療給付金特約)は、所定の抗がん剤・ホルモン剤治療のための入院または通院で最高30万円、同一月1回限度・回数無制限"},
+    {"id": "F5", "company": "FWD生命", "url": "https://www.fwdlife.co.jp/medical-insurance/fwd-si-medical/", "claim": "FWD医療引受緩和は告知書の3つの質問すべてに「いいえ」なら申込可能"},
+    {"id": "F6", "company": "FWD生命", "url": "https://www.fwdlife.co.jp/content/knowledge-gan/gan04.html", "claim": "FWDのがん保険は保険期間の始期から90日間は保障対象外で、91日目が責任開始日"},
+    {"id": "Z1", "company": "チューリッヒ生命", "url": "https://www.zurichlife.co.jp/product/category_iryo/shushiniryodx", "claim": "終身医療保険プレミアムZはストレス性疾病延長入院特約(Z03)の付加により、統合失調症・気分障害・摂食障害などのストレス性疾病による入院を主契約と合算して1入院365日まで延長保障する"},
+    {"id": "Z2", "company": "チューリッヒ生命", "url": "https://www.zurichlife.co.jp/product/category_iryo/shushiniryodx", "claim": "終身医療保険プレミアムZの1入院支払限度日数は30日型・60日型・120日型・365日型から選択でき、通算1,095日限度。健康還付給付金特約により継続10日以上の入院がなければ3年ごとまたは5年ごとに入院給付日額の10倍が支払われる"},
+    {"id": "Z3", "company": "チューリッヒ生命", "url": "https://www.zurichlife.co.jp/product/kurasuplusz", "claim": "くらすプラスZは、同一月に入院と医師指示の在宅療養が合計10日以上の短期給付と、60日を超える就業不能状態の長期給付(月10〜30万円)の2層構成で、所定の精神疾患(ストレス性疾病)による就業不能もカバーする"},
+    {"id": "Z4", "company": "チューリッヒ生命", "url": "https://www.zurichlife.co.jp/product/category_iryo/kanwa", "claim": "終身医療保険プレミアムZ ワイド(引受基準緩和型)の告知項目は基本3つで、付加する特約によって最大5つ"},
+    {"id": "Z5", "company": "チューリッヒ生命", "url": "https://www.zurichlife.co.jp/product/category_gan/caution", "claim": "終身ガン治療保険プレミアムZのガン保障の責任開始期は契約日を含めて91日目からで、90日以内にがんと診断確定された場合は契約が無効になる"},
+    {"id": "Z6", "company": "チューリッヒ生命", "url": "https://www.zurichlife.co.jp/faq/constructer/kaiyaku/other/01", "claim": "チューリッヒ生命のクーリング・オフ期間は31日以内"}
+  ]
+}

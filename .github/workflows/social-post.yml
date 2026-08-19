@@ -96,12 +96,23 @@ jobs:
         with:
           python-version: "3.12"
 
+      # 出荷ゲート(運用規程1-3)。本日の投稿1本は post_social.py 側でも検査するが、
+      # ここでは対外文面を全件見る(金曜のカルーセル等、当日以外の素材の腐りも検知する)。
+      # 失敗すると下の「LINE通知(失敗時)」が飛ぶ = 黙って止まらない。
+      - name: 出荷ゲートの検査(未通過なら投稿しない)
+        run: |
+          python scripts/shipping_gate.py --self-test
+          python scripts/shipping_gate.py --check-group sns
+
       - name: Post to Facebook / Instagram
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
-        run: python scripts/post_social.py
+        # --stem で「プレビューで承認された素材」を名指しする。渡さないと投稿側が
+        # 再選定してしまい、承認から日付をまたいだ場合に別の投稿が出る
+        # (2026-08-14金 カルーセル承認 → 08-15土 通常投稿。監査2026-W34 §4)。
+        run: python scripts/post_social.py --stem "${{ needs.preview.outputs.stem }}"
 
       # 二重投稿防止のstate(data/social_post_state.json)は投稿の成否に関わらず
       # 必ずコミットする(片方だけ成功→job再実行でもう片方が二重投稿されるのを防ぐため)。

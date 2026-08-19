@@ -29,9 +29,17 @@ try:
 except Exception:
     pass
 
+import shipping_gate
+
 JST = timezone(timedelta(hours=9))
 BASE_DIR = os.path.dirname(__file__)
 DATA_PATH = os.path.join(BASE_DIR, "..", "data", "subsidies.json")
+
+# 出荷ゲート(運用規程1-3)の通過日。**本ファイルの配信文面を書き換えたら必ず更新する。**
+# 2026-08-17: accuracy-check(締切・金額・出典URLはdata由来/「必ず原文でご確認ください」を明記)/
+#             deadline-alert(3層ルール: 30日以上=SNSのみ・7〜29日=LINE・7日未満=予告切替)/
+#             humanizer(急かす表現・過剰な絵文字なし)で確認。
+GATE_CHECKED = "2026-08-17"
 OUT_MD = os.path.join(BASE_DIR, "..", "posts", "line", "alerts_latest.md")
 OUT_JSON = os.path.join(BASE_DIR, "..", "data", "line_alerts.json")
 SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert"
@@ -139,8 +147,27 @@ def main():
     else:
         lines += ["(該当なし)"]
     lines += ["```", ""]
+
+    # ── 出荷ゲート(運用規程1-3)──
+    # 配信するのは人(ツナグさん)なので、機械が止められるのは「下書きの見え方」まで。
+    # 違反があれば通過記録を付けず、**人が最初に読む先頭**に警告を出す(フェイルクローズ)。
+    body_text = "\n".join(lines)
+    violations = shipping_gate.check_forbidden(body_text)
+    if violations:
+        warn = ["> ⚠️ **この下書きは配信しないでください(出荷ゲート未通過)**", ">"]
+        warn += [f"> - {v}" for v in violations]
+        warn += ["> ", "> 文面を修正し `scripts/generate_line_alerts.py` を実行し直してください。", ""]
+        lines = [lines[0], ""] + warn + lines[1:]
+    else:
+        lines += [shipping_gate.render_stamp(
+            "scripts/generate_line_alerts.py(LINE部・ツナグさん)", GATE_CHECKED)]
+
     with open(OUT_MD, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
+    if violations:
+        print(f"[ng] 出荷ゲート未通過({len(violations)}件)。下書き先頭に警告を入れました:")
+        for v in violations:
+            print(f"  - {v}")
 
     # ── 構造化JSON ──
     def tier_of(days):

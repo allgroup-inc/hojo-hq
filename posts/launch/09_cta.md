@@ -3,7 +3,7 @@
 ## 画像に載せる文言
 - タイトル: まずは、LINE登録から。
 - サブ: 沖縄企業のミカタ
-- 数字: 掲載 145件
+- 数字: 掲載 146件
 
 ## キャプション
 「うちに使える制度、あるのかな」。30秒でわかります。
@@ -15,3 +15,8 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 
 ## 出典
 https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch
+
+## 出荷ゲート
+- gates: accuracy-check, deadline-alert, humanizer
+- checked: 2026-08-17
+- by: scripts/generate_sns.py(SNS部・ヒロメさん)
