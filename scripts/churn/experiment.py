@@ -89,6 +89,36 @@ def uplift(records, treated_fraction=EXPERIMENT_TREATED_FRACTION, salt="",
     }
 
 
+def max_consecutive_streak(unpaid_months):
+    """未収月 (年, 月) の集合から、最長の連続月数を返す（年跨ぎ対応・重複除去）。
+
+    未払消滅は「4ヶ月連続未払」で起きる。ある契約が過去に何ヶ月連続で未収だったかを、
+    A1（未払消滅目前の保全）の対象抽出に使う。"""
+    if not unpaid_months:
+        return 0
+    ordinals = sorted({y * 12 + (m - 1) for (y, m) in unpaid_months})
+    best = run = 1
+    for prev, cur in zip(ordinals, ordinals[1:]):
+        run = run + 1 if cur == prev + 1 else 1
+        best = max(best, run)
+    return best
+
+
+def imminent_lapse_uplift(records, min_streak=3, treated_fraction=EXPERIMENT_TREATED_FRACTION,
+                          salt="", min_reliable=MIN_RELIABLE_N):
+    """A1（未払消滅の根絶）の効果測定。
+
+    最長未収連続 >= min_streak（＝未払消滅目前を経験した）契約だけを対象に、先行/後発の
+    早期解約率差を uplift で測る。**割付でランダム化するため因果**（生存者バイアスなし）。
+    合成データには A1 の介入（手続き支援）が仕込まれていないので diff≒0＝「効果なし/参考」が正しい。
+    実データで先行群に手続き支援を当てて初めて差が出る、という読み方をする。"""
+    target = [r for r in records
+              if max_consecutive_streak(r.get("unpaid_months") or []) >= min_streak]
+    out = uplift(target, treated_fraction, salt, min_reliable)
+    out["n_target"] = len(target)
+    return out
+
+
 def compare_naive_vs_controlled(records, contacts, mature_before,
                                 treated_fraction=EXPERIMENT_TREATED_FRACTION, salt="",
                                 min_reliable=MIN_RELIABLE_N):

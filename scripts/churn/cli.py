@@ -361,6 +361,23 @@ def cmd_uplift(csv_path, column_map_path, contacts_path, contact_map_path, as_of
     return out
 
 
+def cmd_imminent_uplift(csv_path, column_map_path, as_of, treated_fraction, salt, min_streak):
+    """A1: 未払消滅目前(最長未収連続>=min_streak)だけの段階導入 uplift。"""
+    from .experiment import imminent_lapse_uplift
+    as_of_d = _as_of(as_of)
+    records = load_records(csv_path, load_column_map(column_map_path), as_of_d)
+    o = imminent_lapse_uplift(records, min_streak=min_streak,
+                              treated_fraction=treated_fraction, salt=salt)
+    ref = "（参考・母数不足）" if o["reference"] else ""
+    lo, hi = o["diff_ci"]
+    sig = "（0を含む＝有意でない）" if lo <= 0 <= hi else "（0を跨がない＝有意に減少）"
+    print(f"[imminent-uplift] 未払消滅目前(連続>={min_streak})={o['n_target']}件")
+    print(f"  介入(先行){o['rate_treat']:.1%}(n={o['n_treat']}) / "
+          f"対照(後発){o['rate_ctrl']:.1%}(n={o['n_ctrl']}){ref}")
+    print(f"  早期解約の減少 diff={o['diff']:+.1%} 95%CI[{lo:+.1%}, {hi:+.1%}]{sig}")
+    return o
+
+
 def cmd_retention(snapshots_dir, as_of, years, apply):
     rep = purge_snapshots(snapshots_dir, _as_of(as_of), years, apply)
     mode = "実削除" if apply else "ドライラン（消しません）"
@@ -524,6 +541,14 @@ def main(argv=None):
     sp_up.add_argument("--treated-fraction", type=float, default=EXPERIMENT_TREATED_FRACTION)
     sp_up.add_argument("--salt", default="")
 
+    sp_iu = sub.add_parser("imminent-uplift")   # A1: 未払消滅目前だけの段階導入
+    sp_iu.add_argument("--csv", required=True)
+    sp_iu.add_argument("--column-map", required=True)
+    sp_iu.add_argument("--as-of", required=True)
+    sp_iu.add_argument("--treated-fraction", type=float, default=EXPERIMENT_TREATED_FRACTION)
+    sp_iu.add_argument("--salt", default="")
+    sp_iu.add_argument("--min-streak", type=int, default=3)
+
     sp_ts = sub.add_parser("talkscript")
     sp_ts.add_argument("--csv", required=True)
     sp_ts.add_argument("--column-map", required=True)
@@ -616,6 +641,9 @@ def main(argv=None):
         cmd_call_timing(args.csv, args.column_map, args.out, args.as_of)
     elif args.cmd == "contact-timing":
         cmd_contact_timing(args.csv, args.column_map, args.contacts, args.contact_map, args.as_of)
+    elif args.cmd == "imminent-uplift":
+        cmd_imminent_uplift(args.csv, args.column_map, args.as_of,
+                            args.treated_fraction, args.salt, args.min_streak)
     elif args.cmd == "uplift":
         cmd_uplift(args.csv, args.column_map, args.contacts, args.contact_map,
                    args.as_of, args.treated_fraction, args.salt)

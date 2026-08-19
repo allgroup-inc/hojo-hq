@@ -6,7 +6,7 @@ from datetime import date
 
 from scripts.churn.experiment import (
     assign_arm, wilson_interval, uplift, assignment_ledger,
-    compare_naive_vs_controlled,
+    compare_naive_vs_controlled, max_consecutive_streak, imminent_lapse_uplift,
 )
 
 
@@ -109,6 +109,50 @@ class TestCompare(unittest.TestCase):
         self.assertIn("controlled", out)
         self.assertEqual(out["conclusion_uses"], "controlled")
         self.assertGreater(out["controlled"]["diff"], 0.0)
+
+
+class TestMaxStreak(unittest.TestCase):
+    def test_counts_longest_consecutive_run(self):
+        # (2026,5),(6),(7) は3連続。(2026,2) は離れている＝別run
+        self.assertEqual(max_consecutive_streak(
+            [(2026, 2), (2026, 5), (2026, 6), (2026, 7)]), 3)
+
+    def test_year_wrap_consecutive(self):
+        self.assertEqual(max_consecutive_streak([(2025, 12), (2026, 1)]), 2)
+
+    def test_empty_and_single(self):
+        self.assertEqual(max_consecutive_streak([]), 0)
+        self.assertEqual(max_consecutive_streak([(2026, 7)]), 1)
+
+    def test_dedupes(self):
+        self.assertEqual(max_consecutive_streak([(2026, 7), (2026, 7), (2026, 8)]), 2)
+
+
+class TestImminentLapseUplift(unittest.TestCase):
+    """A1: 未払消滅目前(最長未収連続>=3)だけを対象に先行/後発の早期解約率差を測る。"""
+    def test_restricts_to_streak_population(self):
+        recs = []
+        # streak>=3（対象）: 先行=解約なし / 後発=解約 を仕込む
+        for i in range(60):
+            cid = f"S{i}"
+            arm = assign_arm(cid)
+            churn = 0 if arm == "先行" else 1
+            recs.append({"customer_id": cid, "is_resolved": True, "is_early_churn": churn,
+                         "unpaid_months": [(2026, 5), (2026, 6), (2026, 7)]})
+        # streak<3（対象外・全員解約）＝結果に混ざってはいけない
+        for i in range(40):
+            recs.append({"customer_id": f"N{i}", "is_resolved": True, "is_early_churn": 1,
+                         "unpaid_months": [(2026, 7)]})
+        out = imminent_lapse_uplift(recs, min_streak=3)
+        # 対象は streak>=3 の60件のみ（100件ではない）
+        self.assertEqual(out["n_treat"] + out["n_ctrl"], 60)
+        self.assertGreater(out["diff"], 0.0)   # 後発の方が解約多い＝先行で減った
+
+    def test_no_target_is_empty(self):
+        recs = [{"customer_id": "N1", "is_resolved": True, "is_early_churn": 1,
+                 "unpaid_months": [(2026, 7)]}]
+        out = imminent_lapse_uplift(recs, min_streak=3)
+        self.assertEqual(out["n_treat"] + out["n_ctrl"], 0)
 
 
 if __name__ == "__main__":
