@@ -1,59 +1,56 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-17",
+  "updated_at": "2026-08-20",
   "period": "7d",
   "source": "plausible-stats-api",
   "line_detail": {
     "click_by_pos": {},
     "redirect_by_channel": {
-      "ig": 7,
-      "card": 4,
-      "fg-shindan": 1,
-      "shindan": 1
+      "ig": 6
     }
   },
   "stages": [
     {
       "key": "shindan_start",
       "label": "診断開始",
-      "count": 10,
+      "count": 15,
       "cvr_from_prev": null,
       "drop_rate": null
     },
     {
       "key": "shindan_step_q2",
       "label": "Q2到達",
-      "count": 6,
-      "cvr_from_prev": 0.6,
-      "drop_rate": 0.4
+      "count": 8,
+      "cvr_from_prev": 0.5333333333333333,
+      "drop_rate": 0.4666666666666667
     },
     {
       "key": "shindan_step_q3",
       "label": "Q3到達",
       "count": 3,
-      "cvr_from_prev": 0.5,
-      "drop_rate": 0.5
+      "cvr_from_prev": 0.375,
+      "drop_rate": 0.625
     },
     {
       "key": "shindan_step_q4",
       "label": "Q4到達",
-      "count": 6,
-      "cvr_from_prev": 2.0,
-      "drop_rate": -1.0
+      "count": 8,
+      "cvr_from_prev": 2.6666666666666665,
+      "drop_rate": -1.6666666666666665
     },
     {
       "key": "shindan_step_q5",
       "label": "Q5到達",
-      "count": 6,
-      "cvr_from_prev": 1.0,
-      "drop_rate": 0.0
+      "count": 7,
+      "cvr_from_prev": 0.875,
+      "drop_rate": 0.125
     },
     {
       "key": "shindan_complete",
       "label": "診断完了(1件以上)",
-      "count": 5,
-      "cvr_from_prev": 0.8333333333333334,
-      "drop_rate": 0.16666666666666663
+      "count": 6,
+      "cvr_from_prev": 0.8571428571428571,
+      "drop_rate": 0.1428571428571429
     },
     {
       "key": "line_add_click",
@@ -70,9 +67,9 @@
     "shindan_zero": 1
   },
   "key_rates": {
-    "finish_rate": 0.6,
+    "finish_rate": 0.4666666666666667,
     "line_cvr": 0.0,
-    "zero_rate": 0.16666666666666666
+    "zero_rate": 0.14285714285714285
   },
   "worst_drop": {
     "stage": "line_add_click",
