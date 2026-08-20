@@ -832,5 +832,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-20",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "申請練習用補助金【補助金の支払いはありません】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDJWIMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "交通システムの省CO2 化に向けた設備整備事業（鉄道事業等におけるネットワーク型低炭素化促進事業）（二次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDO8eMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度　水力発電導入促進支援事業費補助金（既存設備有効活用強化支援事業）公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYcpMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【中国監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuhMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【倉敷市】実証実験サポート事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY6KMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
