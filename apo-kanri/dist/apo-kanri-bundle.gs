@@ -605,6 +605,8 @@
  * ブラウザ相当のGAS(global.ApoNotify)とNode(module.exports)の両方で動くUMD形式。
  * Node側は tests/apo_kanri_notify.test.mjs で検証される。
  *
+ * 顧客名には敬称を足さない。現場は「サンプル商店 田中様」のように敬称込みで入力するため、
+ * こちらで「様」を付けると「田中様様」になる(2026-08-19 リハーサルで検出)。
  * 通知は5種限定(新規・変更・キャンセル・申込み・遅れそう)。リマインダー等は作らない
  * (設計書 三名体制裁定④: 通知過多で肝心の遅延通知が埋もれるのを防ぐ)。
  * 文面は通知一覧のプレビューで読み切れるよう、1行目に結論を置く。
@@ -627,24 +629,24 @@
   }
 
   function buildNewAppointmentMessage(apo, mention) {
-    return "📅 新規アポ " + describeSlot_(apo) + " " + apo["顧客名"] + "様\n" +
+    return "📅 新規アポ " + describeSlot_(apo) + " " + apo["顧客名"] + "\n" +
       "・" + describePlace_(apo) + " / 温度感: " + apo["温度感"] + "\n" +
       "・担当営業: " + mention + "(アポ入れ: " + apo["アポ入れ担当"] + ")";
   }
 
   function buildChangeMessage(apo, diff, mention) {
-    return "🔁 アポ変更 " + apo["顧客名"] + "様(" + describeSlot_(apo) + ")\n" +
+    return "🔁 アポ変更 " + apo["顧客名"] + "(" + describeSlot_(apo) + ")\n" +
       "・変更: " + diff + "\n" +
       "・担当営業: " + mention;
   }
 
   function buildCancelMessage(apo, status, mention) {
-    return "❌ " + status + " " + apo["顧客名"] + "様(" + describeSlot_(apo) + ")\n" +
+    return "❌ " + status + " " + apo["顧客名"] + "(" + describeSlot_(apo) + ")\n" +
       "・担当営業: " + mention + "(アポ入れ: " + apo["アポ入れ担当"] + ")";
   }
 
   function buildSignupMessage(apo, mention) {
-    return "🎉 申込み " + apo["顧客名"] + "様!\n" +
+    return "🎉 申込み " + apo["顧客名"] + "!\n" +
       "・" + describeSlot_(apo) + " / 担当営業: " + mention;
   }
 
@@ -659,7 +661,7 @@
       return head + "\n・本日このあとに影響するアポはありません";
     }
     var lines = targets.map(function (apo) {
-      return "・" + apo["開始時刻"] + " " + apo["顧客名"] + "様 → " +
+      return "・" + apo["開始時刻"] + " " + apo["顧客名"] + " → " +
         mentionResolver(apo["アポ入れ担当"]) + " 調整要否の確認をお願いします";
     });
     return head + "(影響しうる後続アポ " + targets.length + "件)\n" + lines.join("\n");
@@ -930,7 +932,8 @@
 "  </div>\n" +
 "  <div class=\"group\"><div class=\"glabel\">担当</div>\n" +
 "    <div class=\"row2\">\n" +
-"      <div class=\"field\"><label>担当営業<span class=\"req\">必須</span></label><select id=\"fSales\"></select></div>\n" +
+"      <div class=\"field\"><label>担当営業<span class=\"req\">必須</span></label><select id=\"fSales\"></select>\n" +
+"        <div class=\"err\" id=\"salesErr\">担当営業を選んでください。</div></div>\n" +
 "      <div class=\"field\"><label>アポ入れ担当</label><select id=\"fSetter\"></select></div>\n" +
 "    </div>\n" +
 "  </div>\n" +
@@ -1085,13 +1088,17 @@
 "  google.script.run.withSuccessHandler(function (options) { state.options = options; callback(); })\n" +
 "    .withFailureHandler(fail).getFormOptions();\n" +
 "}\n" +
-"function fillSelect(id, values, current) {\n" +
+"function fillSelect(id, values, current, placeholder) {\n" +
 "  // 編集対象の現担当が無効化済みでも選択肢に残す(勝手に別人へ付け替えない)\n" +
 "  var list = values.slice();\n" +
 "  if (current && list.indexOf(current) === -1) list.unshift(current);\n" +
-"  $(id).innerHTML = list.map(function (value) {\n" +
+"  var html = list.map(function (value) {\n" +
 "    return '<option' + (value === current ? ' selected' : '') + '>' + esc(value) + '</option>';\n" +
 "  }).join('');\n" +
+"  if (placeholder && !current) {\n" +
+"    html = '<option value=\"\" selected>' + esc(placeholder) + '</option>' + html;\n" +
+"  }\n" +
+"  $(id).innerHTML = html;\n" +
 "}\n" +
 "// 日時・担当営業を変えたら重複確認をやり直す(前回の「確認済み」を持ち越さない)\n" +
 "['fDate', 'fTime', 'fDuration', 'fSales'].forEach(function (id) {\n" +
@@ -1109,6 +1116,7 @@
 "    state.confirmedOverlap = false;\n" +
 "    $('overlapWarn').classList.remove('show');\n" +
 "    $('custErr').classList.remove('show');\n" +
+"    $('salesErr').classList.remove('show');\n" +
 "    $('modalTitle').textContent = apo ? 'アポ編集' : '新規アポ';\n" +
 "    $('fDate').value = apo ? apo['日付'] : todayString();\n" +
 "    $('fTime').value = apo ? apo['開始時刻'] : '10:00';\n" +
@@ -1119,8 +1127,12 @@
 "    fillSelect('fTemp', options.temperatures, apo ? apo['温度感'] : '中');\n" +
 "    fillSelect('fFormat', options.formats, apo ? apo['形式'] : '訪問');\n" +
 "    fillSelect('fStatus', options.statuses, apo ? apo['ステータス'] : '予定');\n" +
-"    fillSelect('fSales', options.salesStaff, apo ? apo['担当営業'] : (state.meName || ''));\n" +
-"    fillSelect('fSetter', options.setterStaff, apo ? apo['アポ入れ担当'] : (state.meName || ''));\n" +
+/* 初期値は「自分がその役割に該当するときだけ自分」。アポ入れ係が新規登録したとき、
+   担当営業に自分(アポ入れ係)が入ってしまう事故を防ぐ(2026-08-19 リハーサルで検出) */
+"    fillSelect('fSales', options.salesStaff,\n" +
+"      apo ? apo['担当営業'] : (options.salesStaff.indexOf(state.meName) >= 0 ? state.meName : ''), '選んでください');\n" +
+"    fillSelect('fSetter', options.setterStaff,\n" +
+"      apo ? apo['アポ入れ担当'] : (options.setterStaff.indexOf(state.meName) >= 0 ? state.meName : ''), '選んでください');\n" +
 "    $('modal').classList.add('open');\n" +
 "    $('fDate').focus();\n" +
 "  });\n" +
@@ -1134,6 +1146,11 @@
 "    $('custErr').classList.add('show'); $('fCustomer').focus(); return;\n" +
 "  }\n" +
 "  $('custErr').classList.remove('show');\n" +
+"  // 担当営業が空だと通知先が決まらず、連携が成立しない\n" +
+"  if (!$('fSales').value) {\n" +
+"    $('salesErr').classList.add('show'); $('fSales').focus(); return;\n" +
+"  }\n" +
+"  $('salesErr').classList.remove('show');\n" +
 "  var payload = {\n" +
 "    'アポID': state.editingId, '日付': $('fDate').value, '開始時刻': $('fTime').value,\n" +
 "    '所要分': Number($('fDuration').value), '顧客名': $('fCustomer').value.trim(),\n" +

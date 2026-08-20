@@ -2,6 +2,8 @@
  * ブラウザ相当のGAS(global.ApoNotify)とNode(module.exports)の両方で動くUMD形式。
  * Node側は tests/apo_kanri_notify.test.mjs で検証される。
  *
+ * 顧客名には敬称を足さない。現場は「サンプル商店 田中様」のように敬称込みで入力するため、
+ * こちらで「様」を付けると「田中様様」になる(2026-08-19 リハーサルで検出)。
  * 通知は5種限定(新規・変更・キャンセル・申込み・遅れそう)。リマインダー等は作らない
  * (設計書 三名体制裁定④: 通知過多で肝心の遅延通知が埋もれるのを防ぐ)。
  * 文面は通知一覧のプレビューで読み切れるよう、1行目に結論を置く。
@@ -24,24 +26,24 @@
   }
 
   function buildNewAppointmentMessage(apo, mention) {
-    return "📅 新規アポ " + describeSlot_(apo) + " " + apo["顧客名"] + "様\n" +
+    return "📅 新規アポ " + describeSlot_(apo) + " " + apo["顧客名"] + "\n" +
       "・" + describePlace_(apo) + " / 温度感: " + apo["温度感"] + "\n" +
       "・担当営業: " + mention + "(アポ入れ: " + apo["アポ入れ担当"] + ")";
   }
 
   function buildChangeMessage(apo, diff, mention) {
-    return "🔁 アポ変更 " + apo["顧客名"] + "様(" + describeSlot_(apo) + ")\n" +
+    return "🔁 アポ変更 " + apo["顧客名"] + "(" + describeSlot_(apo) + ")\n" +
       "・変更: " + diff + "\n" +
       "・担当営業: " + mention;
   }
 
   function buildCancelMessage(apo, status, mention) {
-    return "❌ " + status + " " + apo["顧客名"] + "様(" + describeSlot_(apo) + ")\n" +
+    return "❌ " + status + " " + apo["顧客名"] + "(" + describeSlot_(apo) + ")\n" +
       "・担当営業: " + mention + "(アポ入れ: " + apo["アポ入れ担当"] + ")";
   }
 
   function buildSignupMessage(apo, mention) {
-    return "🎉 申込み " + apo["顧客名"] + "様!\n" +
+    return "🎉 申込み " + apo["顧客名"] + "!\n" +
       "・" + describeSlot_(apo) + " / 担当営業: " + mention;
   }
 
@@ -56,7 +58,7 @@
       return head + "\n・本日このあとに影響するアポはありません";
     }
     var lines = targets.map(function (apo) {
-      return "・" + apo["開始時刻"] + " " + apo["顧客名"] + "様 → " +
+      return "・" + apo["開始時刻"] + " " + apo["顧客名"] + " → " +
         mentionResolver(apo["アポ入れ担当"]) + " 調整要否の確認をお願いします";
     });
     return head + "(影響しうる後続アポ " + targets.length + "件)\n" + lines.join("\n");

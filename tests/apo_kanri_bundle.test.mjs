@@ -37,3 +37,24 @@ test("GAS側で名前空間が globalThis に登録される形になってい�
     assert.ok(bundle.includes(ns), ns + " の登録が必要");
   });
 });
+
+/* デモ版(お試し版)も src から生成しているため、同じく同期を検査する */
+import { buildDemo } from "../scripts/build_apo_demo.mjs";
+import { readFileSync as readDemo, existsSync as existsDemo } from "node:fs";
+import { fileURLToPath as toPathDemo } from "node:url";
+
+const DEMO_FILE = toPathDemo(new URL("../apo-kanri/dist/apo-kanri-demo.html", import.meta.url));
+
+test("デモ版が存在し、src と一致する(src を直したら再生成が必要)", () => {
+  assert.ok(existsDemo(DEMO_FILE), "node scripts/build_apo_demo.mjs を実行してください");
+  assert.equal(readDemo(DEMO_FILE, "utf8"), buildDemo(),
+    "apo-kanri/src を変更したら `node scripts/build_apo_demo.mjs` で再生成してコミットしてください");
+});
+
+test("デモ版はデモと分かる表示があり、実Slackへは送らない", () => {
+  const demo = readDemo(DEMO_FILE, "utf8");
+  assert.ok(demo.includes("保存されません・実際のSlackにも送りません"));
+  assert.ok(demo.includes("Slackにはこう飛びます"));
+  assert.ok(demo.includes("demo://slack"), "Webhookはダミーのまま");
+  assert.ok(!demo.includes("hooks.slack.com"), "実際のWebhook URLを含めない");
+});
