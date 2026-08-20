@@ -338,6 +338,26 @@ def cmd_dashboard(csv_path, column_map_path, out_dir, as_of, capacity):
     return summary
 
 
+def cmd_console_serve(csv_path, column_map_path, contacts_out, contact_map_path,
+                      as_of, capacity, host, port):
+    """保全コンソール（記録一体）をローカルで起動。データはこのPC内・外部サービス不使用。"""
+    from http.server import HTTPServer
+    from .console_app import make_handler
+    as_of_d = _as_of(as_of)
+    cmap = load_column_map(column_map_path)
+    _warn_if_unpaid_unmapped(cmap)
+    contact_map = load_column_map(contact_map_path)
+    handler = make_handler(csv_path, cmap, contacts_out, contact_map, as_of_d, capacity)
+    srv = HTTPServer((host, port), handler)
+    print(f"[console] http://{host}:{port}/ で起動（Ctrl+Cで停止）。記録は {contacts_out} に追記されます。")
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        print("\n[console] 停止しました。")
+    finally:
+        srv.server_close()
+
+
 def cmd_relapse(csv_path, column_map_path, out_path, as_of):
     """A3: 再発監視リスト（一度解消した未収がまた出た継続契約）。"""
     from .relapse import relapse_candidates, render_html as render_relapse_html
@@ -607,6 +627,16 @@ def main(argv=None):
     sp_db.add_argument("--as-of", required=True)
     sp_db.add_argument("--capacity", type=int, default=CAPACITY_PER_DAY)
 
+    sp_cs = sub.add_parser("console-serve")   # 保全コンソール（記録一体・ローカル）
+    sp_cs.add_argument("--csv", required=True)
+    sp_cs.add_argument("--column-map", required=True)
+    sp_cs.add_argument("--contacts-out", required=True, help="対応記録の追記先CSV（private/）")
+    sp_cs.add_argument("--contact-map", required=True)
+    sp_cs.add_argument("--as-of", required=True)
+    sp_cs.add_argument("--capacity", type=int, default=CAPACITY_PER_DAY)
+    sp_cs.add_argument("--host", default="127.0.0.1")
+    sp_cs.add_argument("--port", type=int, default=8000)
+
     sp_ct = sub.add_parser("call-timing")
     sp_ct.add_argument("--csv", required=True)
     sp_ct.add_argument("--column-map", required=True)
@@ -734,6 +764,9 @@ def main(argv=None):
         cmd_transitions(args.prev, args.curr, args.column_map, args.out, args.as_of)
     elif args.cmd == "relapse-watch":
         cmd_relapse(args.csv, args.column_map, args.out, args.as_of)
+    elif args.cmd == "console-serve":
+        cmd_console_serve(args.csv, args.column_map, args.contacts_out, args.contact_map,
+                          args.as_of, args.capacity, args.host, args.port)
     elif args.cmd == "dashboard":
         cmd_dashboard(args.csv, args.column_map, args.out_dir, args.as_of, args.capacity)
     elif args.cmd == "call-timing":

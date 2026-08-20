@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 import csv
+import os
 
 from .schema import parse_date
 
@@ -14,6 +15,27 @@ from .schema import parse_date
 def _get(row, cmap, key):
     col = cmap.get(key)
     return row.get(col) if col else None
+
+
+# 追記時の列の並び（system key）。column_map にあるものだけ、この順で列を作る。
+_WRITE_ORDER = ["customer_id", "apply_id", "apply_date", "contact_date", "medium",
+                "action", "concern", "approach", "result", "reaction", "next_action"]
+
+
+def append_contact(path, column_map, values):
+    """対応記録を1件、ログCSVに追記する（無ければヘッダ付きで新規作成）。
+
+    保全コンソール（記録一体）の書き込み口。values は system key の dict、列名は column_map で対応。
+    churn-pii-guard: 実データの出力先は private/ 限定・統制環境。公開リポには置かない。
+    """
+    keys = [k for k in _WRITE_ORDER if k in column_map]
+    header = [column_map[k] for k in keys]
+    exists = os.path.exists(path)
+    with open(path, "a", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        if not exists:
+            w.writerow(header)
+        w.writerow([str(values.get(k, "") or "") for k in keys])
 
 
 def load_contacts(path, column_map):
