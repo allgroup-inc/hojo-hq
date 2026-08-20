@@ -41,6 +41,23 @@ test("アポ予定はアポIDが先頭列で、必須列がそろっている", 
   });
 });
 
+test("顧客ID(物件管理システムとの名寄せキー)を末尾に持つ", () => {
+  assert.ok(schema.APPOINTMENT_HEADERS.includes("顧客ID"));
+  assert.equal(
+    schema.APPOINTMENT_HEADERS[schema.APPOINTMENT_HEADERS.length - 1],
+    "顧客ID",
+    "列追加は末尾のみ(途中挿入は既存データが列ズレする)"
+  );
+});
+
+test("リード管理の項目は持たない(物件管理システムの領分)", () => {
+  ["アポ種別", "紹介元", "電話番号", "架電結果"].forEach((forbidden) => {
+    assert.ok(!schema.APPOINTMENT_HEADERS.includes(forbidden),
+      forbidden + " は本システムの守備範囲外");
+  });
+  assert.equal(schema.APPOINTMENT_KINDS, undefined);
+});
+
 test("ステータスは設計書どおり7種", () => {
   assert.deepEqual(schema.APPOINTMENT_STATUSES, [
     "予定", "確定", "実施済", "申込み",

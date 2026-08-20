@@ -79,6 +79,12 @@ test("本日/週切替・自分のアポ絞り込み・新規アポボタンが�
   assert.ok(html.includes("新規アポ"));
 });
 
+test("0件表示: 絞り込み中の0件と、本当に予定なしを区別する", () => {
+  assert.ok(html.includes("絞り込み中"));
+  assert.ok(html.includes("絞り込みを解除すると全員分が見られます"));
+  assert.ok(html.includes("本日のアポはありません"));
+});
+
 test("ダブルブッキング警告の表示領域がある", () => {
   assert.ok(html.includes("overlap"));
   assert.ok(html.includes("時間帯が重なって"));
