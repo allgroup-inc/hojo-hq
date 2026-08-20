@@ -8,7 +8,8 @@
 リポジトリ(hikari-hq/hikari-lp/hikari-report/kakei-hq/okinawa-villa/report-hq/go/allgroup-site等)が
 ここから同期する運用にしている。
 
-- hojo-hqオリジナル: `humanizer` / `resilient-agent-design` / `mindshare-arbitrage` / `multi-ai-crosscheck` / `context-limit-handoff` / `feature-factory` / `hojo-lighthouse-triage`
+- hojo-hqオリジナル: `humanizer` / `resilient-agent-design` / `mindshare-arbitrage` / `multi-ai-crosscheck` / `context-limit-handoff` / `feature-factory` / `hojo-lighthouse-triage` / `kgi-ksf-kpi-cascade` / `lean-app-validation`
+  (`go-link-discipline`・`explainer-video-production`は公開リポジトリでの機密扱い履歴があり、三名体制レビューの結果「保留・上申」のまま小柳さんの最終判断待ち。詳細はセッション内の審査プロンプト参照。判断が出るまでこの一覧・同期対象には含めない)
 - hojo-hqが選定してvendoring済みのOSS: `taste-skill` / `last30days` / `social-media-skills`
 
 - 新しいALLGROUP共通スキルを追加/更新するときは、まずここ(hojo-hq)に反映する
@@ -88,6 +89,8 @@ Claude が毎回思い出す必要がないようスキル化したもの。ベ�
 - `context-limit-handoff` — 会話が「コンテキストウィンドウがいっぱいです」の警告を出したとき。作業状態をgit等の外部に持たせ、コンパクト化・巻き戻し・新セッションのどれを選んでも作業を失わないための判断フローを提供。
 - `feature-factory` — 1人開発でも複数エージェントに役割分担させて機能追加を進めるとき。調査→ストーリー→仕様→実装(分業)→検証の役割分担チェーンと、CLAUDE.mdを土台にした再現性の作り方を提供。`subagent-driven-development`/`writing-plans`/`brainstorming`/`test-driven-development`(Superpowers)を実行エンジンとして使う前提のオーケストレーション層。
 - `hojo-lighthouse-triage`(ALLGROUP共通) — GitHub ActionsのLighthouseワークフローの失敗通知・自動起票Issueに対応するとき。Claude Code環境からは本番URLやGitHub Actionsアーティファクトに直接アクセスできないことが多いため、ローカルに事前installされたChromium+Lighthouseで実測再現してから原因特定・修正する手順を提供(2026-08-09、hojo-hqでtext-wrap:balanceのTBT悪化を実測で特定した際に確立)。Lighthouse CIを使っていないリポジトリでは出番なし。
+- `kgi-ksf-kpi-cascade`(ALLGROUP共通) — 新しいプロジェクト/事業の目標を設計するとき、または既存の目標が「掲げているだけで行動に落ちていない」ように見えるとき。KGI(最終ゴール)→KSF(成功のカギ)→KPI(進捗の数値)→Action(具体的行動)の逆算チェーンを組み立て、KPIを掛け合わせるとKGIの数字に戻るかまで検算する手順を提供(2026-08-17導入)。このリポジトリのCLAUDE.md「KGI/KPI」節が適用例。
+- `lean-app-validation`(ALLGROUP共通) — 新しいアプリ・ツール・デジタル商品のアイデアを発掘・検証するとき。ゼロから発明せず伸びている巨大市場の1%を狙う・レビュー等の不満から改善点を見つける・作る前にマーケで需要を確認する、という検証手順を提供(2026-08-19導入)。`products/`配下の新商品検討で使える。
 
 同じパターンの姉妹スキルとして `glow-ma-triangle-review`(GLOW M&A向け)もある。
 

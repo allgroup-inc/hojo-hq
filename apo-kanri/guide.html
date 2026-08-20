@@ -1,0 +1,331 @@
+<title>家計のポっ 使い方</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#FFFFFF;
+  --ground:#FBF8F1;
+  --ink:#221D11;
+  --sub:#6E6455;
+  --rule:#EDE6D6;
+  --brand:#F6C83E;
+  --brand-ink:#6B5200;
+  --stop:#C0392B;
+  --focus:#221D11;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#241F14;
+    --ground:#1A160E;
+    --ink:#F5EFE0;
+    --sub:#B5A88F;
+    --rule:#3B3222;
+    --brand:#F6C83E;
+    --brand-ink:#241F14;
+    --stop:#E8705F;
+    --focus:#F6C83E;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#241F14;
+  --ground:#1A160E;
+  --ink:#F5EFE0;
+  --sub:#B5A88F;
+  --rule:#3B3222;
+  --brand:#F6C83E;
+  --brand-ink:#241F14;
+  --stop:#E8705F;
+  --focus:#F6C83E;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Noto Sans JP",-apple-system,BlinkMacSystemFont,"Hiragino Sans",Meiryo,sans-serif;
+  font-size:16px;
+  line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+.sheet{
+  max-width:560px;
+  margin:0 auto;
+  background:var(--paper);
+  min-height:100vh;
+  padding:32px 24px 64px;
+}
+h1,h2,.lead,.act{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif}
+
+/* ヘッダー */
+.masthead{display:flex;align-items:center;gap:12px}
+.mark{flex:none;width:48px;height:48px}
+h1{font-size:24px;font-weight:700;line-height:1.2;letter-spacing:.01em;display:flex;align-items:center;gap:6px}
+/* 「ポっ」は黄色の丸にオレンジ文字。黄色地で読める濃さのオレンジを選ぶ */
+h1 .po{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:46px;height:46px;border-radius:50%;
+  background:var(--brand);color:#B23C06;
+  font-size:20px;letter-spacing:-.06em;
+}
+.who{font-size:12px;color:var(--sub);letter-spacing:.06em;margin-top:2px}
+.lead{
+  margin-top:16px;font-size:15px;color:var(--sub);line-height:1.8;
+  text-wrap:pretty;
+}
+
+/* セクション */
+section{margin-top:64px}
+h2{
+  font-size:17px;font-weight:700;
+  padding-bottom:8px;border-bottom:2px solid var(--brand);
+  display:inline-block;
+  text-wrap:balance;
+}
+.note{font-size:13px;color:var(--sub);margin-top:16px;line-height:1.8}
+
+/* 3つだけ */
+.three{margin-top:24px;display:flex;flex-direction:column;gap:16px}
+.three .item{display:flex;gap:16px;align-items:flex-start}
+.three .badge{
+  flex:none;width:32px;height:32px;border-radius:999px;
+  background:var(--brand);color:var(--brand-ink);
+  font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+.three .body{flex:1;min-width:0}
+.three .act{font-size:16px;font-weight:700;line-height:1.5}
+.three .why{font-size:14px;color:var(--sub);line-height:1.7;margin-top:2px}
+
+/* 場面表 */
+.rows{margin-top:8px}
+.row{padding:16px 0;border-bottom:1px solid var(--rule)}
+.row:last-child{border-bottom:0}
+.when{font-size:15px;font-weight:700;line-height:1.5}
+.do{
+  font-size:14px;margin-top:8px;line-height:1.7;
+  padding-left:16px;border-left:3px solid var(--brand);
+}
+.then{font-size:13px;color:var(--sub);margin-top:8px;line-height:1.7}
+.key{
+  display:inline-block;background:var(--brand);color:var(--brand-ink);
+  border-radius:4px;padding:0 6px;font-weight:700;font-size:13px;
+  white-space:nowrap;
+}
+
+/* 通知 */
+.pings{margin-top:16px;display:flex;flex-direction:column;gap:12px}
+.ping{display:flex;gap:12px;font-size:14px;line-height:1.7}
+.ping .tag{
+  flex:none;min-width:88px;font-weight:700;font-size:13px;
+}
+.ping .desc{color:var(--sub)}
+
+/* やらないこと */
+.stops{margin-top:16px;display:flex;flex-direction:column;gap:16px}
+.stop{padding-left:16px;border-left:3px solid var(--stop)}
+.stop .head{font-size:15px;font-weight:700;color:var(--stop);line-height:1.5}
+.stop .desc{font-size:14px;color:var(--sub);line-height:1.7;margin-top:2px}
+
+/* 困ったとき */
+.help{margin-top:16px;font-size:15px;line-height:1.9}
+.help dt{font-weight:700;margin-top:16px}
+.help dt:first-child{margin-top:0}
+.help dd{color:var(--sub);font-size:14px;line-height:1.7}
+
+footer{
+  margin-top:64px;padding-top:16px;border-top:1px solid var(--rule);
+  font-size:12px;color:var(--sub);line-height:1.8;
+}
+a{color:var(--ink)}
+a:focus-visible,.row:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:400px){
+  .sheet{padding:24px 16px 64px}
+  h1{font-size:21px}
+}
+</style>
+
+<div class="sheet">
+
+  <header class="masthead">
+    <svg class="mark" viewBox="0 0 100 100" role="img" aria-label="家計の見直しやさん">
+      <circle cx="50" cy="50" r="50" fill="#F6C83E"/>
+      <circle cx="50" cy="50" r="45.5" fill="#FFFFFF"/>
+      <circle cx="50" cy="50" r="43" fill="#F6C83E"/>
+      <g clip-path="inset(0 round 50%)">
+        <path d="M-5 88 Q50 62 105 88 L105 105 L-5 105 Z" fill="#FFFFFF"/>
+      </g>
+      <g stroke="#221D11" fill="none" stroke-linecap="round">
+        <circle cx="68" cy="18" r="5" stroke-width="2"/>
+        <g stroke-width="1.7">
+          <line x1="68" y1="7" x2="68" y2="10.6"/><line x1="68" y1="25.4" x2="68" y2="29"/>
+          <line x1="57" y1="18" x2="60.6" y2="18"/><line x1="75.4" y1="18" x2="79" y2="18"/>
+          <line x1="60.2" y1="10.2" x2="62.8" y2="12.8"/><line x1="73.2" y1="23.2" x2="75.8" y2="25.8"/>
+          <line x1="60.2" y1="25.8" x2="62.8" y2="23.2"/><line x1="73.2" y1="12.8" x2="75.8" y2="10.2"/>
+        </g>
+      </g>
+      <path d="M50 12 L78 37.5 L78 73 L22 73 L22 37.5 Z" fill="#FFFFFF"/>
+      <g stroke="#221D11" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round" fill="none">
+        <path d="M22 37.5 L22 73 L78 73 L78 37.5"/>
+        <path d="M14 44 L50 12 L86 44"/>
+        <line x1="34" y1="38.5" x2="66" y2="38.5"/>
+        <line x1="44.5" y1="46" x2="44.5" y2="51"/>
+        <line x1="55.5" y1="46" x2="55.5" y2="51"/>
+        <path d="M39 55.5 Q50 67 61 55.5"/>
+      </g>
+    </svg>
+    <div>
+      <h1>家計の<span class="po">ポっ</span></h1>
+      <div class="who">家計の見直しやさん アポ管理</div>
+    </div>
+  </header>
+
+  <p class="lead">
+    アポの連携を、口頭やチャットからここに一本化します。<br>
+    入力した内容は、担当の営業さんへ自動でSlackに飛びます。
+  </p>
+
+  <section>
+    <h2>まず、この3つだけ</h2>
+    <div class="three">
+      <div class="item">
+        <div class="badge">1</div>
+        <div class="body">
+          <div class="act">アポが取れたら「＋新規アポ」</div>
+          <div class="why">日時・顧客名・場所・担当営業を入れて保存。担当の営業さんに通知が飛びます。</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="badge">2</div>
+        <div class="body">
+          <div class="act">状況が変わったらカードをタップ</div>
+          <div class="why">確定・実施済・申込み・キャンセルは、開いてタップするだけ。2回で終わります。</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="badge">3</div>
+        <div class="body">
+          <div class="act">前が長引いたら「遅れそう」</div>
+          <div class="why">+15分・+30分・+60分から選ぶだけ。後ろのアポの担当者に連絡が届きます。</div>
+        </div>
+      </div>
+    </div>
+    <p class="note">この3つを覚えれば、あとは触っていれば分かります。</p>
+  </section>
+
+  <section>
+    <h2>こんなとき、こうする</h2>
+    <div class="rows">
+
+      <div class="row">
+        <div class="when">電話でアポが取れた</div>
+        <div class="do">右上の <span class="key">＋ 新規アポ</span> → 入力 → <span class="key">保存して通知</span></div>
+        <div class="then">担当営業のSlackに「新規アポ」が飛びます。続けて何件も入れるときは「保存して続けて登録」を押すと、日付と担当を引き継いだまま次を入力できます。</div>
+      </div>
+
+      <div class="row">
+        <div class="when">前に訪問したお客様に架電して、自分でアポを取った</div>
+        <div class="do">同じく <span class="key">＋ 新規アポ</span>。アポ種別は <span class="key">再訪(既存)</span> を選ぶ</div>
+        <div class="then">担当営業とアポ入れ担当は、最初から自分になっています。そのまま保存でかまいません。</div>
+      </div>
+
+      <div class="row">
+        <div class="when">お客様の紹介・ご家族の新規アポ</div>
+        <div class="do">アポ種別で <span class="key">新規(紹介)</span> か <span class="key">新規(ご家族)</span> を選ぶ → 出てきた「紹介元」に一言</div>
+        <div class="then">「◯◯様のご紹介」と書いておくと、後から誰の紹介だったか辿れます。分析タブでは、再訪と新規を分けた申込み率が出ます。</div>
+      </div>
+
+      <div class="row">
+        <div class="when">お客様から日時変更の連絡が来た</div>
+        <div class="do">そのアポをタップ → <span class="key">編集</span> → 日時を直して保存</div>
+        <div class="then">「10:00→14:00」のように、変わった箇所だけがSlackに流れます。誰が何を変えたかは履歴に残ります。</div>
+      </div>
+
+      <div class="row">
+        <div class="when">訪問が終わった / 申込みになった</div>
+        <div class="do">アポをタップ → <span class="key">実施済</span> または <span class="key">申込み</span></div>
+        <div class="then">タップした時点で反映。申込みはチームに共有されます。ここを押しておくと、分析タブの数字が正しくなります。</div>
+      </div>
+
+      <div class="row">
+        <div class="when">前のアポが長引いて、次に遅れそう</div>
+        <div class="do">遅れそうなアポをタップ → <span class="key">遅れそう</span> → 分数を選ぶ</div>
+        <div class="then">その営業さんの後ろのアポを担当している人に、Slackで連絡が飛びます。<strong>アポの時間は自動では変わりません。</strong>お客様への連絡と時間の変更は、これまでどおり人が判断します。</div>
+      </div>
+
+      <div class="row">
+        <div class="when">キャンセルになった</div>
+        <div class="do">アポをタップ → <span class="key">キャンセル(顧客都合)</span> か <span class="key">キャンセル(自社都合)</span></div>
+        <div class="then">空いた時間に動ける営業さんの候補が、前後の訪問先つきでSlackに出ます。誰に行ってもらうかは人が決めて、いつもどおり声をかけてください。</div>
+      </div>
+
+      <div class="row">
+        <div class="when">同じ営業さんに時間が重なってしまった</div>
+        <div class="do">保存したときに警告が出ます。内容を確認して、それでよければもう一度保存</div>
+        <div class="then">警告は出ますが、登録は止めません。あえて重ねたい場合もあるからです。</div>
+      </div>
+
+      <div class="row">
+        <div class="when">今日の全体の動きを知りたい</div>
+        <div class="do">開くだけ。上の <span class="key">本日</span> が最初に出ます</div>
+        <div class="then">全員分が時刻順に並びます。「自分のアポ」や担当者名を押すと絞り込めます。先の予定は「週」、埋まり具合や申込み率は「分析」で見られます。</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Slackに飛ぶのはこの5つだけ</h2>
+    <div class="pings">
+      <div class="ping"><span class="tag">新規アポ</span><span class="desc">登録したとき。担当営業あて</span></div>
+      <div class="ping"><span class="tag">アポ変更</span><span class="desc">日時や内容を直したとき。変わった箇所だけ</span></div>
+      <div class="ping"><span class="tag">キャンセル</span><span class="desc">空いた枠と、動ける営業さんの候補つき</span></div>
+      <div class="ping"><span class="tag">申込み</span><span class="desc">決まったとき</span></div>
+      <div class="ping"><span class="tag">遅れそう</span><span class="desc">影響しそうな後ろのアポの担当者あて</span></div>
+    </div>
+    <p class="note">毎朝のお知らせや、しつこいリマインダーは送りません。流れてきたら、何か起きたときです。</p>
+  </section>
+
+  <section>
+    <h2>やらないこと</h2>
+    <div class="stops">
+      <div class="stop">
+        <div class="head">スプレッドシートを直接いじらない</div>
+        <div class="desc">画面から操作すれば、履歴も通知も自動で残ります。シートを直接書き換えると、誰にも伝わらないうえ履歴にも残りません。</div>
+      </div>
+      <div class="stop">
+        <div class="head">口頭やチャットだけで済ませない</div>
+        <div class="desc">ここに入っていないアポは、他の人からは存在しないのと同じです。まず入れてから、必要なら口頭で補足を。</div>
+      </div>
+      <div class="stop">
+        <div class="head">お客様の電話番号は入れない</div>
+        <div class="desc">この台帳では連絡先を持ちません。お客様への連絡は、これまでどおりの手段でお願いします。</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>困ったとき</h2>
+    <dl class="help">
+      <dt>「アクセス権がありません」と出る</dt>
+      <dd>登録されているGoogleアカウントと、いま開いているアカウントが違う可能性があります。小柳さんに声をかけてください。</dd>
+
+      <dt>最初に確認画面が出た</dt>
+      <dd>「詳細」→「移動」→「許可」で進んでください。初回だけです。</dd>
+
+      <dt>ホーム画面に置きたい</dt>
+      <dd>スマホの共有メニューから「ホーム画面に追加」。ロゴのアイコンで並びます。</dd>
+
+      <dt>押しにくい・分かりにくいところがある</dt>
+      <dd>そのままチャンネルに書いてください。雑な書き方で大丈夫です。直せるものから直します。</dd>
+    </dl>
+  </section>
+
+  <footer>
+    名前は「家計のポっ」——小さい「っ」がひらがなです。<br>
+    アポの数字は、道具がうまく回っているかを見るためのものです。個人の評価には使いません。
+  </footer>
+
+</div>

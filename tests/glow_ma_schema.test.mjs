@@ -123,12 +123,8 @@ test("企業マスタに窓口担当者名・携帯番号列が追加されて�
   assert.ok(schema.COMPANY_MASTER_HEADERS.indexOf("携帯番号") !== -1);
 });
 
-test("スタッフタブに管理画面Web App用のメールアドレス列が末尾に追加されている(Phase 18a)", () => {
+test("スタッフタブに管理画面Web App用のメールアドレス列が追加されている(Phase 18a)", () => {
   assert.ok(schema.STAFF_HEADERS.indexOf("メールアドレス") !== -1);
-  assert.deepEqual(
-    schema.STAFF_HEADERS.slice(-1),
-    ["メールアドレス"]
-  );
 });
 
 test("パートナー対応履歴ログのタブ名・見出しが定義されている(紹介パートナー開拓状況ビュー)", () => {
@@ -165,4 +161,30 @@ test("QR生成結果タブの名称・見出しが定義されている", () => 
   assert.deepEqual(schema.QR_RESULT_HEADERS, [
     "企業ID", "会社名", "発送日", "トラッキングURL", "QR画像リンク", "ステータス"
   ]);
+});
+
+test("音声ログ処理状況のシート名・ヘッダー・ステータス一覧が定義されている", () => {
+  assert.equal(schema.LINE_VOICE_LOG_SHEET_NAME, "音声ログ処理状況");
+  assert.ok(Array.isArray(schema.LINE_VOICE_LOG_HEADERS));
+  assert.equal(schema.LINE_VOICE_LOG_HEADERS.length, 12);
+  assert.ok(schema.LINE_VOICE_LOG_HEADERS.includes("処理ID"));
+  assert.ok(schema.LINE_VOICE_LOG_HEADERS.includes("LINEユーザーID"));
+  assert.ok(Array.isArray(schema.LINE_VOICE_LOG_STATUSES));
+  assert.ok(schema.LINE_VOICE_LOG_STATUSES.includes("受信済み"));
+  assert.ok(schema.LINE_VOICE_LOG_STATUSES.includes("確定"));
+  // 二重処理を防ぐ確保(claim)用の一時ステータス
+  assert.ok(schema.LINE_VOICE_LOG_STATUSES.includes("処理中"));
+});
+
+test("CTI通話履歴タブの名称・見出しが定義されている", () => {
+  assert.equal(schema.CTI_CALL_LOG_SHEET_NAME, "CTI通話履歴");
+  assert.deepEqual(schema.CTI_CALL_LOG_HEADERS, [
+    "通話ID", "group_callid", "通話日時", "種別", "電話番号",
+    "マッチ企業ID", "マッチ企業名", "発信者(BlueBeanオペレーター名)",
+    "通話ステータス", "備考(BlueBeanノート)", "対応履歴ログ記録"
+  ]);
+});
+
+test("スタッフのヘッダーにLINE User ID列が追加されている", () => {
+  assert.deepEqual(schema.STAFF_HEADERS, ["氏名", "Slack User ID", "有効", "メールアドレス", "LINE User ID"]);
 });

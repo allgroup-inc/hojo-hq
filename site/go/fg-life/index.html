@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>LINEへ移動中…</title>
+<script>
+  // 計測(Plausible manual・Cookieなし)。送るのはイベント名と channel のみ。
+  window.plausible = window.plausible || function () {
+    (window.plausible.q = window.plausible.q || []).push(arguments);
+  };
+  window.plausible("line_redirect", { props: { channel: "fg-life" } });
+  // 計測送信の猶予(400ms)後に転送。計測が失敗しても必ず転送する。
+  setTimeout(function () { window.location.replace("https://lin.ee/7fH7vDQ"); }, 400);
+</script>
+<script defer data-domain="allgroup-inc.github.io" src="https://plausible.io/js/script.manual.js"></script>
+<style>
+  body{font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;
+    background:#00335c;color:#F7F5F1;display:flex;flex-direction:column;gap:16px;
+    align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:24px;}
+  a{color:#F88800;font-weight:700;}
+</style>
+</head>
+<body>
+<p>LINEへ移動しています…</p>
+<p>自動で切り替わらない場合は <a href="https://lin.ee/7fH7vDQ">こちらをタップ</a></p>
+</body>
+</html>

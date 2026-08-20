@@ -142,7 +142,7 @@ strong{font-weight:700}
 .steps li strong{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.08rem;color:var(--ink)}
 /* navcards */
 .navcards{display:grid;grid-template-columns:1fr;gap:12px;max-width:760px;margin-left:auto;margin-right:auto}
-@media(min-width:640px){.navcards{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:640px){.navcards{grid-template-columns:repeat(2,1fr)}}
 .navcard{display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff;
   border:1.5px solid var(--blush);border-radius:16px;padding:18px 14px;text-decoration:none;color:var(--coral-deep);
   font-weight:700;box-shadow:var(--shadow-sm);transition:transform .15s ease,border-color .15s ease}
@@ -471,6 +471,7 @@ footer .fwrap p{margin-bottom:6px}
     <p class="note note--long" style="margin-top:14px">※ 申請手続きの代行は行いません。専門家のサポートが必要な場合は、提携する専門家(社会保険労務士・行政書士など)におつなぎします。</p>
     <div class="navcards" style="margin-top:22px">
       <a class="navcard" href="area/">市町村でさがす ›<span>お住まいの街のまとめ</span></a>
+      <a class="navcard" href="life/">状況からさがす ›<span>出産・子育て・医療費・失業など</span></a>
       <a class="navcard" href="kit/">申請準備シート ›<span>持ち物リスト・印刷して窓口へ</span></a>
       <a class="navcard" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで受け取る ›<span>締切の約1か月前からお知らせ(無料)</span></a>
     </div>
@@ -479,11 +480,11 @@ footer .fwrap p{margin-bottom:6px}
 
 <section style="padding-top:0">
   <div class="wrap">
-    <div class="story">
+    <div class="story" style="text-align:center">
       <h2 style="margin-bottom:.4em">「振り込まれました」を教えてください</h2>
-      <p style="margin-bottom:14px">あなたが実際に受け取れた金額のご報告が、次の県民の「もらい忘れ」を防ぎます。<br>いただいた報告は、検証できたぶんだけを実績として公開していきます。<br><strong>制度名とおおよその金額だけ</strong>で大丈夫。お名前や口座番号はうかがいません。</p>
+      <p style="margin-bottom:14px;text-align:center">あなたが実際に受け取れた金額のご報告が、次の県民の「もらい忘れ」を防ぎます。<br>いただいた報告は、検証できたぶんだけを実績として公開していきます。<br><strong>制度名とおおよその金額だけ</strong>で大丈夫。お名前や口座番号はうかがいません。</p>
       <a class="btn" href="houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_top')">受け取れたことを報告する<span style="white-space:nowrap">(匿名・無料)</span></a>
-      <p class="note" style="margin-top:12px">報告は任意です。いただいた金額は個人が特定できない形で集計・公開します。</p>
+      <p class="note" style="margin-top:12px;text-align:center">報告は任意です。いただいた金額は個人が特定できない形で集計・公開します。</p>
     </div>
   </div>
 </section>
@@ -547,7 +548,7 @@ footer .fwrap p{margin-bottom:6px}
     <p class="fvision">とどけ、沖縄のみらいへ。</p>
     <p>運営: 株式会社フクギイロ</p>
     <p>フクギは、沖縄の集落を台風から守ってきた<span style="white-space:nowrap">防風林の木。</span><br>県民のみなさんの家計を守る防風林でありたい、という願いを社名にしました。</p>
-    <p style="margin-top:14px"><a href="area/">市町村別の給付金・手当まとめ</a> ・ <a href="kit/">申請準備シート一覧</a></p>
+    <p style="margin-top:14px"><a href="area/">市町村別の給付金・手当まとめ</a> ・ <a href="life/">ライフイベント別まとめ</a> ・ <a href="kit/">申請準備シート一覧</a></p>
     <p style="margin-top:6px"><a href="privacy/">個人情報保護方針</a> ・ <a href="teisei/">情報の訂正・ご指摘</a></p>
   </div>
   <p style="margin-top:6px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>

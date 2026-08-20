@@ -29,6 +29,12 @@ a{color:var(--fg-primary)}
 .status.ok{background:#E7F3EC;color:#0F5138}
 .disclaimer{background:#f4f1e8;border-radius:10px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 .footlinks a{display:inline-block;padding:6px 2px;white-space:nowrap}
+/* PCでの本文行長(2026-08-17 組版総仕上げ・議事参照)。
+   背景のない「裸の段落」だけを全角約41字に抑える(箱・カードの中は対象外)。
+   max-widthのみで文節分割系CSSではない(性能規律に非該当)。 */
+@media(min-width:900px){
+  .wrap>p,.wrap>p.note,.wrap>section>p,.wrap>section>p.note{max-width:41em}
+}
 /* サイトヘッダー(全ページ共通) */
 .siteheader{position:sticky;top:0;z-index:50;background:rgba(255,251,244,.96);border-bottom:1px solid var(--fg-line);
   display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;flex-wrap:wrap}

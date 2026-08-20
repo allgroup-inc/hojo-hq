@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""三名体制の議事がgitに保存されているかを検査する(失敗台帳 FK-003 の対策)。
+"""三名体制の議事がgitに保存されているかを検査する(失敗台帳 FK-005 の対策)。
 
 背景:
     CLAUDE.md 三名体制運営規程3 は「ウタガイ役の反対理由が記録されていない議事は無効」
@@ -11,6 +11,11 @@
     会話記録はコンテキスト上限で消える。設計書には裁定だけが残り、ウタガイが実際に
     何に反対したのかを後から検証できない。これは context-limit-handoff スキルが
     禁じている「作業状態を会話に置く」そのもの。
+
+検査の範囲(2026-08-17 小柳さん決裁と整合):
+    議事が必須なのは①小柳さん決裁が要る事項 ②不可逆な変更 の2類型のみ。よってこの検査は
+    「三名体制レビューを実施したと本文で述べている文書」だけを対象にし、可逆な技術作業の
+    設計書に議事を要求しない。**やったと言っているのに議事が無い**状態だけを落とす。
 
 正しい保存の型(いずれか):
     A. ペアの議事ファイル `<同名>-triangle-review.md` を置く
@@ -40,9 +45,7 @@ VOLATILE = re.compile(r"議事[^\n]{0,40}(会話記録|本セッションの記�
 UTAGAI_MIN_CHARS = 40
 
 KNOWN_GAPS = {
-    # 2026-08-17 点検で検出。台帳 FK-003。
-    "2026-07-25-nobishiro-shindan-backend-design.md": "レビュー痕跡なし(規程運用の初期)",
-    "2026-07-26-plausible-funnel-autoimport-design.md": "レビュー痕跡なし(規程運用の初期)",
+    # 2026-08-17 点検で検出。台帳 FK-005。
     "2026-07-26-shindan-apply-guidance-brushup-design.md": "議事の保存先なし(規程運用の初期)",
     "2026-08-09-glow-ma-partner-development-design.md": "裁定1〜4のみ転記・議事本体なし",
     "2026-08-09-glow-ma-partner-pipeline-view-design.md": "上流設計書の裁定を参照するのみ",
@@ -50,7 +53,9 @@ KNOWN_GAPS = {
     "2026-08-10-glow-ma-phase18b-company-memo-edit-design.md": "議事を会話記録に委ねた",
     "2026-08-11-glow-ma-pre-screening-score-import-design.md": "議事を会話記録に委ねた",
     "2026-08-13-glow-ma-admin-console-v2-design.md": "決定事項のみ転記・議事本体なし",
-    "2026-08-13-glow-ma-letter-qr-fulfillment-design.md": "三名体制の言及なし(レビュー痕跡なし)",
+    # 2026-08-20 main取り込み時に検出(家計のポっチャットの設計書)。当該チャットへ
+    # 議事の保存を依頼するまでの暫定。解消したらこの行を消すこと。
+    "2026-08-14-apo-kanri-v2-ui-design.md": "他チャットの設計書・議事の所在が未確認",
 }
 
 
@@ -91,9 +96,16 @@ def has_path_reference(text):
     return False
 
 
+# 2026-08-17の点検でこの検査自身が付けた注記ブロック。これ自体が「三名体制」の語を
+# 含むため、除外しないと注記を付けたこと自体が検出対象になる(自己言及の誤検知)。
+ANNOTATION = "> **三名体制の議事について(2026-08-17 点検で追記)**"
+
+
 def audit(path):
     """問題があれば理由の文字列、無ければ None を返す。"""
     text = path.read_text(encoding="utf-8")
+    if ANNOTATION in text:
+        text = text[: text.index(ANNOTATION)]
 
     if path.stem.endswith("-triangle-review"):
         missing = [r for r in ROLES if r not in text]
@@ -105,12 +117,10 @@ def audit(path):
         return None
 
     if "三名体制" not in text:
-        # レビューに一言も触れていない設計書。意思決定を伴う以上、議事が要る
-        # (CLAUDE.md「意思決定を伴う企画・方針 → 三名体制」)
-        if path.stem.endswith("-design") and not (
-            has_pair_file(path) or has_path_reference(text)
-        ):
-            return "設計書だが三名体制レビューの痕跡がない(意思決定には議事が要る)"
+        # 議事が必須なのは①小柳さん決裁事項 ②不可逆な変更 の2類型のみ
+        # (2026-08-17 小柳さん決裁・CLAUDE.md 三名体制 第8項)。
+        # 可逆な技術作業まで一律に要求すると決裁に反して速度を落とすため、
+        # レビューに言及していない設計書はこの検査の対象外とする。
         return None
 
     # 揮発参照は最優先でNG。他に参照があっても、議事本体が会話にある時点で検証できない
@@ -140,7 +150,7 @@ def main():
         if problem is None:
             continue
         if path.name in KNOWN_GAPS:
-            allowed.append(f"  - {path.name}: {KNOWN_GAPS[path.name]} [既知・台帳FK-003]")
+            allowed.append(f"  - {path.name}: {KNOWN_GAPS[path.name]} [既知・台帳FK-005]")
         else:
             violations.append(f"  - {path.name}: {problem}")
 
@@ -160,7 +170,7 @@ def main():
             "  A. ペアの `<同名>-triangle-review.md` を置く\n"
             "  B. 実在する `*-triangle-review.md` のパスを本文から参照する\n"
             "  C. 設計書の本文に3役をそのまま残す(軽量版=3役×各1行でも可)\n"
-            "参照: .claude/skills/hojo-triangle-review / docs/失敗台帳.md FK-003"
+            "参照: .claude/skills/hojo-triangle-review / docs/失敗台帳.md FK-005"
         )
         return 1
 

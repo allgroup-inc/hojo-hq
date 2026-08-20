@@ -1,0 +1,40 @@
+# 勝てるくん: 3社公開情報リサーチの原文照合(手動実行)
+# 決裁: 2026-08-17 小柳さん(決裁キュー⑥第一段階: 公開情報のみ・顧客情報は扱わない)
+# 実行: Actions タブ → insurance-verify → Run workflow。四半期のP7更新後にも再実行する。
+# Secrets: ANTHROPIC_API_KEY(必須)/ GEMINI_API_KEY(任意。未設定ならClaude単独+参加率0を記録)
+name: insurance-verify
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insurance-verify
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install anthropic
+      - name: Run verification (Claude + Gemini double check)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python scripts/insurance/verify_insurance_research.py
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/insurance/照合結果_早見表_latest.json docs/insurance/照合レポート_早見表.md
+          git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "auto: 勝てるくん原文照合レポート更新 $(date +%Y-%m-%d)"
+          for i in 1 2 3; do git push && exit 0; git pull --rebase; done
+          exit 1

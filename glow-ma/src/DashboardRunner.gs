@@ -14,6 +14,10 @@
  * - 工程別滞留状況(NDA締結/意向表明受領/DD開始)
  * - 担当者別ワークロード(保有企業数・Aランク保有数・掘り起こし待ち件数)
  * - 長期検討企業一覧(標準サイクルの2倍以上、最終接触が無い企業)
+ * - 出口転換実績(当月・提携部): 真のKPI(出口転換 月10件=LINE部5件+提携部5件)のうち
+ *   提携部側(流入ルート「①紹介」の企業が「面談実施」に至った件数)の可視化。LINE部側
+ *   (士業送客・保険クロス)は沖縄企業のミカタ側の別システムで管理されており対象外
+ *   (docs/議事_20260818_開拓効率化アイデア出し.md 論点3参照)。
  * これに加えて、「ダッシュボード履歴」タブに主要指標のスナップショットを1行追記する
  * (こちらは「ダッシュボード」タブと異なり、実行のたびに内容を消さず積み上げる)。
  *
@@ -64,6 +68,7 @@ function updateDashboard() {
     var ownerWorkload = GlowDashboard.buildOwnerWorkloadSummary(records, todayString, GlowDashboard.DEFAULT_CONFIG);
     var staleList = GlowAlerting.buildStaleList(records, todayString);
     var historySnapshot = GlowDashboard.buildHistorySnapshot(records, todayString, GlowDashboard.DEFAULT_CONFIG);
+    var exitConversion = GlowDashboard.buildExitConversionSummary(interactionRecords, records, todayString, GlowDashboard.DEFAULT_CONFIG);
 
     dashboardSheet.clearContents();
     var row = 1;
@@ -101,6 +106,10 @@ function updateDashboard() {
     row = writeDashboardSection_(dashboardSheet, row, "長期検討企業一覧(標準サイクルの2倍以上、最終接触が無い企業)",
       ["企業ID", "会社名", "ランク", "最終接触からの経過日数"],
       staleList.map(function (s) { return [s["企業ID"], s["会社名"], s["ランク"], s["最終接触からの経過日数"]]; }));
+    row++;
+    row = writeDashboardSection_(dashboardSheet, row, "出口転換実績(当月・提携部。LINE部側はミカタ側の別システムで管理)",
+      ["対象月", "GLOW接続件数(当月・提携部)"],
+      [[exitConversion["対象月"], exitConversion["GLOW接続件数(当月・提携部)"]]]);
     row++;
 
     historySheet.appendRow([

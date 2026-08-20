@@ -1,8 +1,13 @@
 name: lighthouse
 
-# 100点基準❷: Lighthouse4項目(Performance/Accessibility/Best Practices/SEO)95点以上を
-# 毎日自動計測。閾値割れは Issue を自動起票し、回復したら自動クローズする。
+# 100点基準❷: Lighthouse4項目(Performance/Accessibility/Best Practices/SEO)を毎日自動計測。
+# 閾値割れは Issue を自動起票し、回復したら自動クローズする。
 # 閾値設定: .github/lighthouserc.json
+# ── 閾値の経緯(2026-08-17 小柳さん決裁・Issue #10 の3択でb案採用)──
+# Performanceのみ 0.85(計測対象=トップLP。映画風ワンページ構造の初回レイアウト
+# コスト930msが残り、CSS最適化(PR#205)後もローカル0.97/本番CI0.86で乖離するため。
+# 毎日の赤CI=オオカミ少年化を止める)。他3カテゴリは 0.95 を維持。
+# LPを深く軽量化リファクタした場合は 0.95 へ戻すことを再検討する(見直し期限 2027-02-17)。
 
 on:
   schedule:
@@ -44,15 +49,18 @@ jobs:
             --description "Lighthouseスコアが基準(95)未達" 2>/dev/null || true
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           {
-            echo "自動検知: Lighthouseスコアが基準(4項目95以上)を下回りました。"
+            echo "自動検知: Lighthouseスコアが基準(閾値: .github/lighthouserc.json)を下回りました。"
             echo ""
             echo "- 実行(スコア詳細とレポートはArtifacts参照): $run_url"
             echo "- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')"
             echo "- 閾値設定: .github/lighthouserc.json"
             echo ""
-            echo "**対応手順**: \`.claude/skills/hojo-lighthouse-triage\` に従うこと。"
-            echo "Claude Code環境からは本番URL・Artifactsに直接届かない前提で、"
-            echo "まずローカル再現でスコアを実測してから原因を特定する(推測で直さない)。"
+            echo "## 対応する人へ(AIエージェント含む)"
+            echo ""
+            echo "**まず \`hojo-lighthouse-triage\` スキルを読んでから着手すること。**"
+            echo "Claude Code 環境からは本番URLにも上のArtifactsにも直接アクセスできないことが多い。"
+            echo "上のリンクを開こうとして詰まるのが定番の時間の溶かし方なので、"
+            echo "スキルの手順に従って**ローカルでスコアを実測してから**原因を特定する。"
           } > issue_body.md
           existing=$(gh issue list --state open --label lighthouse \
             --json number --jq '.[0].number')
@@ -61,7 +69,7 @@ jobs:
             echo "既存Issue #$existing に追記しました"
           else
             gh issue create --label lighthouse \
-              --title "📉 Lighthouse基準未達: 4項目95以上を下回りました" \
+              --title "📉 Lighthouse基準未達: 閾値を下回りました" \
               --body-file issue_body.md
           fi
 
@@ -74,6 +82,6 @@ jobs:
           open=$(gh issue list --state open --label lighthouse \
             --json number --jq '.[].number' 2>/dev/null || true)
           for n in $open; do
-            gh issue comment "$n" --body "✅ 直近の計測で4項目95以上に回復しました。自動クローズします。"
+            gh issue comment "$n" --body "✅ 直近の計測で基準(閾値: .github/lighthouserc.json)に回復しました。自動クローズします。"
             gh issue close "$n"
           done

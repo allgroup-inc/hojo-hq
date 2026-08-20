@@ -56,8 +56,11 @@
   .serif{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;}
   /* 日本語の折り返しを文節単位にする(2026-08-04 小柳さん指示。未対応ブラウザは通常折返し)。
      body全体に掛けると初期レイアウトが約1.7秒かかりLighthouse Performanceを大きく落とすため、
-     効果が見える見出し・ヒーロー・診断UI・モーダル(開くまでレイアウトされない)に限定する(2026-08-05) */
-  h1,h2,h3,h4,h5,.oath,.sub,.live-badge,.hero-cta,.glow-about-btn,.form-guide,.unlock p,.glow-card{word-break:auto-phrase;}
+     効果が見える見出し・ヒーロー・診断UI・モーダル(開くまでレイアウトされない)に限定する(2026-08-05)。
+     その限定でもカード・CTA等の繰り返し要素まで含めるとStyle&Layoutが約1.2秒かかり
+     Performance 0.88まで退行した(Issue #10・実測: 全適用0.88/h1-h3のみ0.98-0.99)。
+     見出し以外の泣き別れは手動の<span class="nowrap">で個別対応する(2026-08-17) */
+  h1,h2,h3{word-break:auto-phrase;}
 
   /* ===== ヘッドライン主導のフルスクリーン構成 ===== */
   section{
@@ -283,6 +286,12 @@
   }
   .shokei-banner strong{color:var(--kin);}
   .shokei-link{color:var(--kin);font-weight:700;display:inline-block;margin-top:.4rem;}
+  .insurance-banner{
+    margin-top:var(--sp-2);padding:var(--sp-3);border-radius:14px;
+    background:var(--fukamidori);color:var(--shiro);font-size:.95rem;line-height:1.8;
+  }
+  .insurance-banner strong{color:var(--kin);}
+  .insurance-link{color:var(--kin);font-weight:700;display:inline-block;margin-top:.4rem;}
   .card{
     margin-top:var(--sp-2);padding:var(--sp-3);border-radius:14px;background:#fff;
     border:1px solid rgba(0,51,92,.15);box-shadow:0 4px 16px rgba(0,51,92,.06);
@@ -439,9 +448,9 @@
 
   /* 結果カードの出現(フェード+上昇)。表示順はJSで70msずつ遅延 */
   @keyframes cardIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
-  #result-list .card,#result-list .unlock,.shokei-banner{animation:cardIn .5s ease both;}
+  #result-list .card,#result-list .unlock,.shokei-banner,.insurance-banner{animation:cardIn .5s ease both;}
   @media (prefers-reduced-motion:reduce){
-    #result-list .card,#result-list .unlock,.shokei-banner{animation:none;}
+    #result-list .card,#result-list .unlock,.shokei-banner,.insurance-banner{animation:none;}
   }
 
   footer{
@@ -724,6 +733,11 @@
     </div>
     <div id="result-list"></div>
     <p class="result-note">締切アラート(約1か月前から)を受け取るには、LINE登録(無料)をどうぞ。</p>
+    <div id="insurance-banner" class="insurance-banner" hidden>
+      <strong>経営課題が「人件費管理」「リスク対策」なら</strong>、
+      あわせて保険の引き受け目安も確認できます。
+      <a href="./insurance-underwriting-tool.html" target="_blank" rel="noopener" class="insurance-link">業種・規模から、加入できる保険をチェック</a>
+    </div>
     <button type="button" class="register-btn" id="reg-open">貴社専用の制度通知を受け取る(会社情報を登録)</button>
     <div id="reg-form" class="reg-form" hidden>
       <p class="reg-head">約30秒で完了。下のボタンを押すと<strong>LINEアプリが開き、入力内容が書き込まれたメッセージが用意されます</strong>。あとはLINE側の送信ボタンを押すだけです。</p>
@@ -1084,6 +1098,7 @@
     hits=hits.slice(0,10);
 
     document.getElementById('shokei-banner').hidden=!shokeiSignal;
+    document.getElementById('insurance-banner').hidden=hits.length===0;
     animateCount(document.getElementById('result-count'),hits.length);
 
     // 総額ポテンシャル(参考値): 表示中の制度のうち上限額公表分の単純合計

@@ -17,7 +17,7 @@ import sys
 from datetime import datetime, timezone, timedelta
 
 sys.path.insert(0, os.path.dirname(__file__))
-from fg_seo import MUNIS, MUNI_SLUG, breadcrumb_jsonld, canonical_tag, ogp_tags
+from fg_seo import HIDDEN_MUNIS, MUNI_SLUG, VISIBLE_MUNIS, breadcrumb_jsonld, canonical_tag, ogp_tags
 
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
@@ -135,9 +135,12 @@ def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
 
 def muni_page(muni, items, updated):
     local = [it for it in items if it["area"] == muni]
+    # 沖縄県の制度は市町村ページに混ぜない(2026-08-19 小柳さん指示:
+    # 「那覇市の内容を見ようとすると下に沖縄県の制度も出てくるので一緒に掲載しないように」。
+    # 県の制度は準備シート一覧・ライフイベント別に集約し、本ページからは案内リンクのみ)
     pref = [it for it in items if it["area"] == "沖縄県"]
     national = [it for it in items if it["area"] == "全国"]
-    shown = local + pref + national
+    shown = local + national
     verified_n = sum(1 for it in shown if it.get("verified") is True)
     # 単一CV(LINE登録)。締切は「約1か月前」表現で統一(3層ルール準拠)。
     line_cta = (
@@ -147,14 +150,14 @@ def muni_page(muni, items, updated):
         '<span>締切の約1か月前にお知らせ・新しい制度が増えたときも(無料)</span></a>'
     )
     # 導入文を市町村ごとに固有化(掲載件数・代表制度名入り。41ページの文面重複を下げる)
-    examples = [it["name"] for it in (local + pref)][:3]
+    examples = [it["name"] for it in local][:3]
     ex_txt = "・".join(esc(x) for x in examples)
     total = len(shown)
     if local:
-        intro = (f'{esc(muni)}の制度{len(local)}件と沖縄県{len(pref)}件・国{len(national)}件をあわせた'
+        intro = (f'{esc(muni)}の制度{len(local)}件と、全国共通の国の制度{len(national)}件の'
                  f'計{total}件から、ご家庭向けのものをまとめています。')
     else:
-        intro = (f'沖縄県の制度{len(pref)}件と国の制度{len(national)}件の計{total}件から、'
+        intro = (f'全国共通の国の制度{len(national)}件から、'
                  f'{esc(muni)}にお住まいのご家庭が使える可能性のあるものをまとめています。')
     body = [
         f"<h1>{esc(muni)}にお住まいの方が使える可能性のある給付金・手当</h1>",
@@ -167,8 +170,8 @@ def muni_page(muni, items, updated):
             '金額の目安など一部「要確認」の項目は、公式ページのリンクからご確認いただけます。</div>'
         )
     body.append('<a class="btn" href="../../shindan/">3分でもらい忘れ診断をはじめる</a>')
-    # 市町村・県の制度=カード(このページの固有コンテンツ)
-    sections = [(f"{muni}の制度", local), ("沖縄県の制度", pref)]
+    # 市町村の制度のみカード表示(県の制度は混ぜない・2026-08-19)
+    sections = [(f"{muni}の制度", local)]
     for label, group in sections:
         if not group and label.startswith(muni):
             body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>{esc(label)}</h2>")
@@ -190,8 +193,9 @@ def muni_page(muni, items, updated):
                 f"<h2>{esc(it['name'])}{badge}</h2>"
                 f'<p class="note">{esc(it["target_household"])}</p>'
                 f'<p class="note">窓口: {esc(it["how_to_apply"])}</p>'
+                f'<p style="display:flex;gap:16px;flex-wrap:wrap;margin:0">'
                 f'<a href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する</a>'
-                f' ・ <a href="../../kit/{esc(it["id"])}/">申請準備シート</a>'
+                f'<a href="../../kit/{esc(it["id"])}/">申請準備シート</a></p>'
                 "</div>"
             )
         body.append('</div>')
@@ -205,6 +209,11 @@ def muni_page(muni, items, updated):
             mark = "✓ " if it.get("verified") is True else ""
             body.append(f'<li><a href="../../kit/{esc(it["id"])}/">{mark}{esc(it["name"])}</a></li>')
         body.append('</ul>')
+    # 県の制度への案内(本ページには掲載しない)
+    if pref:
+        body.append(f'<p class="note" style="margin-top:14px">沖縄県の制度({len(pref)}件)は'
+                    '<a href="../../kit/">申請準備シート一覧</a>と'
+                    '<a href="../../life/">ライフイベント別まとめ</a>でご覧いただけます。</p>')
     # ページ末にもLINE誘導(締切の見逃し防止=登録特典)
     body.append(
         f'<p class="note" style="margin-top:22px;text-align:center">'
@@ -214,9 +223,9 @@ def muni_page(muni, items, updated):
     title = f"{muni}の給付金・手当まとめ({total}件)|申請方法と窓口|もらいわすれ堂"
     desc = (f"{muni}にお住まいの世帯が使える可能性のある給付金・手当{total}件のまとめ。"
             + (f"{ex_txt}など、" if ex_txt else "")
-            + f"国・沖縄県・{muni}の制度を公式ページと照合して掲載。無料・匿名の3分診断つき。")
+            + f"国と{muni}の制度を公式ページと照合して掲載。無料・匿名の3分診断つき。")
     slug = MUNI_SLUG[muni]
-    ld = area_jsonld(muni, [local, pref])
+    ld = area_jsonld(muni, [local])
     crumbs = breadcrumb_jsonld([("もらいわすれ堂", ""), ("市町村別まとめ", "area/"), (muni, None)])
     return page(title, desc, "\n".join(body), updated, head_extra=ld + "\n" + crumbs,
                 canon_path=f"area/{slug}/")
@@ -224,17 +233,18 @@ def muni_page(muni, items, updated):
 
 def index_page(updated):
     lis = "\n".join(
-        f'<li><a href="{slug}/">{esc(name)}</a></li>' for name, slug in MUNIS
+        f'<li><a href="{slug}/">{esc(name)}</a></li>' for name, slug in VISIBLE_MUNIS
     )
     body = (
         "<h1>市町村別 給付金・手当まとめ</h1>"
-        '<p class="note">お住まいの市町村を選んでください。</p>'
+        '<p class="note">お住まいの市町村を選んでください。'
+        '状況から探したい方は<a href="../life/">ライフイベント別まとめ</a>もどうぞ。</p>'
         f'<ul class="areas">{lis}</ul>'
         '<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'
     )
     return page(
-        "沖縄県 市町村別の給付金・手当まとめ(41市町村)|もらいわすれ堂",
-        "那覇市・沖縄市・うるま市・宜野湾市など沖縄県41市町村ごとに、こども医療費助成・児童手当・ひとり親支援などの給付金・手当をまとめて確認できます。公式ページと照合して掲載。無料・匿名の3分診断つき。",
+        f"沖縄県 市町村別の給付金・手当まとめ({len(VISIBLE_MUNIS)}市町村)|もらいわすれ堂",
+        "那覇市・宜野湾市・浦添市・名護市など沖縄県の市町村ごとに、こども医療費助成・児童手当・ひとり親支援などの給付金・手当をまとめて確認できます。公式ページと照合して掲載。無料・匿名の3分診断つき。",
         body, updated, depth=1,
         head_extra=breadcrumb_jsonld([("もらいわすれ堂", ""), ("市町村別まとめ", None)]),
         canon_path="area/")
@@ -244,6 +254,7 @@ def main():
     with open(DATA, encoding="utf-8") as f:
         db = json.load(f)
     items = [it for it in db["items"]]
+    items = [it for it in items if it.get("area") not in HIDDEN_MUNIS]  # 一時非公開(議事20260818)
     updated = db.get("updated_at", "")
 
     if os.path.isdir(OUT_DIR):
@@ -251,12 +262,12 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     with open(os.path.join(OUT_DIR, "index.html"), "w", encoding="utf-8") as f:
         f.write(index_page(updated))
-    for name, slug in MUNIS:
+    for name, slug in VISIBLE_MUNIS:
         d = os.path.join(OUT_DIR, slug)
         os.makedirs(d, exist_ok=True)
         with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
             f.write(muni_page(name, items, updated))
-    print(f"生成完了: 市町村{len(MUNIS)}ページ+一覧1ページ(制度{len(items)}件から)")
+    print(f"生成完了: 市町村{len(VISIBLE_MUNIS)}ページ+一覧1ページ(制度{len(items)}件から)")
 
 
 if __name__ == "__main__":
