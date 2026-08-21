@@ -111,7 +111,11 @@
 
     {"name": "架電禁止でなければ従来どおり送れる",
      "order_id": "A-10439", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 0,
-     "record": {"order_id": "A-10439", "state": "未送信"}, "expect": true}
+     "record": {"order_id": "A-10439", "state": "未送信"}, "expect": true},
+
+    {"name": "後確認が不要になった申込にはSMSも送らない",
+     "order_id": "A-10440", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 0,
+     "record": {"order_id": "A-10440", "state": "未送信", "atokakunin_required": false}, "expect": false}
   ],
 
   "error_class": [
@@ -215,6 +219,29 @@
      ],
      "expect": []},
 
+    {"name": "後確認が不要になった申込は追いかけない(取下げ等)",
+     "_note": "起点は申込完了。申込から成立までの間に申込自体が無くなることがある",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-140", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-14 09:00", "atokakunin_required": false},
+       {"order_id": "A-141", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-14 09:00"}
+     ],
+     "expect": ["A-141"]},
+
+    {"name": "不要フラグは期限間近より先に効く",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-150", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-10 09:00", "atokakunin_required": false}
+     ],
+     "expect": []},
+
+    {"name": "フラグが無ければ従来どおり必要とみなす(既定は必要)",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-160", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-14 09:00"}
+     ],
+     "expect": ["A-160"]},
+
     {"name": "対象が無ければ空",
      "now": "2026-08-17 09:00", "records": [], "expect": []}
   ],
@@ -237,6 +264,13 @@
      "records": [
        {"order_id": "A-220", "state": "承認_電話", "do_not_call": true},
        {"order_id": "A-221", "state": "承認_SMS", "do_not_call": true}
+     ],
+     "expect": []},
+
+    {"name": "架電禁止でも後確認が不要になったなら一覧に出さない",
+     "_note": "追いかける理由が消えているので、人が判断する対象でもなくなる",
+     "records": [
+       {"order_id": "A-240", "state": "送信済", "do_not_call": true, "atokakunin_required": false}
      ],
      "expect": []},
 

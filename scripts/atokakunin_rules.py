@@ -105,13 +105,28 @@ def is_do_not_call(record):
     return bool(record.get("do_not_call")) or record.get("list_status") == "対象外"
 
 
+def still_required(record):
+    """この申込に、まだ後確認が必要か。
+
+    後確認の起点は**申込完了**(2026-08-18 小柳さん確定。成立ではない)。
+    申込から成立までの間に、その申込自体が無くなることがある(取下げ等)。
+    無くなった申込を追いかけ続けると、お客様に不要な連絡をし、担当者の手間も増える。
+
+    ❹保全CRM側が `atokakunin_required` を False にした時点で追跡をやめる。
+    **共通語彙に「申込が成立に至らなかった場合」の言葉が無いため、
+    こちらで状態名を作らずフラグで受ける**(ステータスの言葉を言い換えないため)。
+    正式な語彙が決まったら、ここをその語彙で判定する形に置き換える。
+    """
+    return record.get("atokakunin_required", True) is not False
+
+
 def needs_call(record, now, wait_days=DEFAULT_CALL_AFTER_DAYS):
     """送信からwait_days経っても返信がない=電話リストに載せる。
 
     送信失敗・要確認は返信を待つ意味がないので、経過日数によらず即座に対象。
-    ただし架電禁止は何より先に効く。
+    ただし架電禁止と「後確認がもう不要」は何より先に効く。
     """
-    if is_do_not_call(record):
+    if is_do_not_call(record) or not still_required(record):
         return False
     state = record.get("state")
     if state in ("承認_SMS", "承認_電話", "期限切れ"):
@@ -202,7 +217,8 @@ def build_excluded_list(records):
         {"order_id": r["order_id"], "state": r.get("state"),
          "reason": "架電禁止・アポ禁のため自動化の対象外。後確認は未了"}
         for r in records
-        if is_do_not_call(r) and r.get("state") not in ("承認_SMS", "承認_電話")
+        if is_do_not_call(r) and still_required(r)
+        and r.get("state") not in ("承認_SMS", "承認_電話")
     ]
     rows.sort(key=lambda x: x["order_id"])
     return rows
@@ -279,6 +295,8 @@ def can_send(order_id, now, already_sent_ids, sent_today,
     理由を必ず返すのは、送らなかった日に「なぜ0件だったか」を後から説明できるようにするため。
     沈黙(0件)は「対象なし」とも「壊れて拾えていない」とも読めてしまう。
     """
+    if record is not None and not still_required(record):
+        return False, "後確認はもう不要(申込が取り下げ等で無くなった)"
     if record is not None and is_do_not_call(record):
         # 架電禁止の方へ機械が一斉送信するのは、電話をかけるより始末が悪い。
         # 自動化からは外し、保全部が人として判断する対象へ回す(build_excluded_listを見ること)。
