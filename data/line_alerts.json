@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-08-21 10:01",
+ "generated_at": "2026-08-21 10:42",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 11,
- "count": 17,
+ "count": 18,
  "items": [
   {
    "id": "a0WJ200000CDPbMMAX",
@@ -55,6 +55,16 @@
    "tier": "まもなく締切(7〜14日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDcMAP",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDdu5MAD",
+   "name": "「バーチャルエコノミーにおける社会実装に向けた戦略検討、グローバルベンチマーク調査及び提供財の社会実装への取組提言」の公募",
+   "deadline": "2026-09-04",
+   "days_left": 14,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdu5MAD",
    "tag": "nationwide"
   },
   {
