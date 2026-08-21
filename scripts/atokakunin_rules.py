@@ -105,6 +105,14 @@ def is_do_not_call(record):
     return bool(record.get("do_not_call")) or record.get("list_status") == "対象外"
 
 
+def is_expiring_soon(record, now, expire_days=DEFAULT_EXPIRE_DAYS):
+    """期限が目前(残り1日以下)か。かけ直し希望より優先させるために使う。"""
+    if not record.get("sent_at"):
+        return False
+    days = (now - parse_dt(record["sent_at"])).days
+    return (expire_days - days) <= 1
+
+
 def still_required(record):
     """この申込に、まだ後確認が必要か。
 
@@ -128,6 +136,11 @@ def needs_call(record, now, wait_days=DEFAULT_CALL_AFTER_DAYS):
     """
     if is_do_not_call(record) or not still_required(record):
         return False
+    # お客様が「この日にかけて」と言った日より前には出さない。
+    # ただし期限が目前なら、待っていると手遅れになるので出す(取り返しがつかない順)。
+    nxt = record.get("next_call_at")
+    if nxt and now < parse_dt(nxt) and not is_expiring_soon(record, now):
+        return False
     state = record.get("state")
     if state in ("承認_SMS", "承認_電話", "期限切れ"):
         return False
@@ -142,6 +155,66 @@ def is_expired(record, now, expire_days=DEFAULT_EXPIRE_DAYS):
     if record.get("state") in ("承認_SMS", "承認_電話") or not record.get("sent_at"):
         return False
     return (now - parse_dt(record["sent_at"])) >= timedelta(days=expire_days)
+
+
+# ── 3.1 電話の結果を受ける(押すだけで終わらせる) ───────────
+# 共通認識【1】入力は仕事の副産物にする / 人の入力が要るなら選択肢を押すだけにする。
+# 担当者が手で書くのは原則ゼロ。下の4つのどれかを押せば、状態も次回の予定も決まる。
+CALL_OUTCOMES = ("了承", "不在", "かけ直し希望", "拒否")
+
+DEFAULT_MAX_ABSENT = 3      # 仮。何回まで不在を追うかは未回答(担当者へ質問中)
+DEFAULT_ABSENT_RETRY_DAYS = 1
+
+
+def apply_call_outcome(record, outcome, now,
+                       callback_at=None,
+                       max_absent=DEFAULT_MAX_ABSENT,
+                       absent_retry_days=DEFAULT_ABSENT_RETRY_DAYS):
+    """電話の結果から、次の状態と次回いつかけるかを決める。
+
+    返り値: {"state", "next_call_at", "absent_count", "needs_human", "note"}
+    next_call_at は "YYYY-MM-DD HH:MM" 文字列か None。
+
+    **知らない結果を勝手に解釈しない。** 想定外は人へ回す(誤って承認にしない)。
+    """
+    absent = int(record.get("absent_count", 0))
+    base = {"state": record.get("state"), "next_call_at": record.get("next_call_at"),
+            "absent_count": absent, "needs_human": False, "note": ""}
+
+    if outcome == "了承":
+        base.update(state="承認_電話", next_call_at=None,
+                    note="電話で了承を取得。承認者と日時を記録すること")
+        return base
+
+    if outcome == "不在":
+        absent += 1
+        base["absent_count"] = absent
+        if absent >= max_absent:
+            # 追い続けても繋がらない。機械の仕事はここまでで、人が判断する
+            base.update(state="要確認", next_call_at=None, needs_human=True,
+                        note=f"不在が{absent}回。これ以上は自動で追わない")
+        else:
+            nxt = now + timedelta(days=absent_retry_days)
+            base.update(next_call_at=nxt.strftime("%Y-%m-%d %H:%M"),
+                        note=f"不在{absent}回目。翌日かけ直す")
+        return base
+
+    if outcome == "かけ直し希望":
+        if not callback_at:
+            # 日時を聞けていないのに希望だけ記録すると、そのまま埋もれる
+            base.update(needs_human=True, note="かけ直しの日時が入っていない")
+            return base
+        base.update(next_call_at=callback_at, note="お客様の希望日時にかけ直す")
+        return base
+
+    if outcome == "拒否":
+        # 「後確認が取れなかった申込をどうするか」は業務判断。機械で決めない
+        base.update(state="要確認", next_call_at=None, needs_human=True,
+                    note="後確認の了承が得られていない。業務側の判断が要る")
+        return base
+
+    base.update(needs_human=True, note=f"想定外の結果: {outcome}")
+    return base
 
 
 # ── 3.2 電話リスト(毎朝これを見て上から順にかける) ──────────
@@ -196,7 +269,7 @@ def build_call_list(records, now, wait_days=DEFAULT_CALL_AFTER_DAYS,
             # 電話で必ず申込を特定してから了承を取る(自動承認は別途 can_auto_approve が塞いでいる)
             "needs_identity_check": not can_auto_approve(r.get("tel_key"), open_keys),
             # 期限切れが目前。今日かけないと間に合わない
-            "expiring_soon": bool(r.get("sent_at")) and (expire_days - days) <= 1,
+            "expiring_soon": is_expiring_soon(r, now, expire_days),
         })
 
     rows.sort(key=lambda x: (0 if x["expiring_soon"] else 1,
@@ -330,6 +403,12 @@ def retry_delay_seconds(attempt):
 
 
 # ── self-test ───────────────────────────────────────────
+def _outcome_expected(r):
+    """noteは文言変更で揺れるので、判定に効く4項目だけを比較する。"""
+    return {"state": r["state"], "next_call_at": r["next_call_at"],
+            "absent_count": r["absent_count"], "needs_human": r["needs_human"]}
+
+
 def _as_expected(result):
     """タプルの配列をリストに直す(JSONの期待値と比較できる形にそろえるだけ)。"""
     return {"candidates": [list(x) for x in result["candidates"]],
@@ -368,6 +447,10 @@ def self_test():
                                               record=c.get("record"))[0])
     failed += _run_section(golden, "excluded_list",
                            lambda c: [r["order_id"] for r in build_excluded_list(c["records"])])
+    failed += _run_section(
+        golden, "call_outcome",
+        lambda c: _outcome_expected(apply_call_outcome(
+            c["record"], c["outcome"], parse_dt(c["now"]), callback_at=c.get("callback_at"))))
     failed += _run_section(golden, "error_class", lambda c: classify_error(c["kind"]))
     failed += _run_section(golden, "retry_delay", lambda c: retry_delay_seconds(c["attempt"]))
     # JSONに配列で書いた期待値をタプルに直してから比較する
@@ -385,7 +468,7 @@ def self_test():
 
     for k in ("reply_judgment", "auto_approve", "after_reply", "call_list",
               "expire", "send_gate", "error_class", "retry_delay", "review_candidates",
-              "call_list_order", "call_list_flags", "excluded_list"):
+              "call_list_order", "call_list_flags", "excluded_list", "call_outcome"):
         total += len(golden.get(k, []))
 
     # 判定器そのものの前提が崩れていないかの確認(ゴールデンセットの取りこぼし防止)

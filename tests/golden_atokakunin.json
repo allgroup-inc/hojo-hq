@@ -242,8 +242,75 @@
      ],
      "expect": ["A-160"]},
 
+    {"name": "かけ直し希望の日時より前は電話リストに出さない",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-170", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-14 09:00", "next_call_at": "2026-08-19 14:00"},
+       {"order_id": "A-171", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-14 09:00"}
+     ],
+     "expect": ["A-171"]},
+
+    {"name": "かけ直し希望の日時を過ぎたら出す",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-180", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-14 09:00", "next_call_at": "2026-08-16 14:00"}
+     ],
+     "expect": ["A-180"]},
+
+    {"name": "期限が目前なら、かけ直し希望の日時より前でも出す",
+     "_note": "待っていると手遅れになる。取り返しがつかない順を優先する",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-190", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-11 09:00", "next_call_at": "2026-08-25 14:00"}
+     ],
+     "expect": ["A-190"]},
+
     {"name": "対象が無ければ空",
      "now": "2026-08-17 09:00", "records": [], "expect": []}
+  ],
+
+  "call_outcome": [
+    {"name": "了承をもらえたら承認(電話)。次回の予定は消す",
+     "now": "2026-08-17 10:00", "outcome": "了承",
+     "record": {"state": "送信済", "absent_count": 0},
+     "expect": {"state": "承認_電話", "next_call_at": null, "absent_count": 0, "needs_human": false}},
+
+    {"name": "不在1回目は翌日にかけ直す",
+     "now": "2026-08-17 10:00", "outcome": "不在",
+     "record": {"state": "送信済", "absent_count": 0},
+     "expect": {"state": "送信済", "next_call_at": "2026-08-18 10:00", "absent_count": 1, "needs_human": false}},
+
+    {"name": "不在2回目もまだ自動で追う",
+     "now": "2026-08-17 10:00", "outcome": "不在",
+     "record": {"state": "送信済", "absent_count": 1},
+     "expect": {"state": "送信済", "next_call_at": "2026-08-18 10:00", "absent_count": 2, "needs_human": false}},
+
+    {"name": "不在3回目で自動追跡をやめ、人に回す",
+     "_note": "3回は仮の値。何回まで追うかは担当者に質問中",
+     "now": "2026-08-17 10:00", "outcome": "不在",
+     "record": {"state": "送信済", "absent_count": 2},
+     "expect": {"state": "要確認", "next_call_at": null, "absent_count": 3, "needs_human": true}},
+
+    {"name": "かけ直し希望は、その日時まで出さない",
+     "now": "2026-08-17 10:00", "outcome": "かけ直し希望", "callback_at": "2026-08-19 14:00",
+     "record": {"state": "送信済", "absent_count": 0},
+     "expect": {"state": "送信済", "next_call_at": "2026-08-19 14:00", "absent_count": 0, "needs_human": false}},
+
+    {"name": "かけ直し希望なのに日時が無ければ人に回す(埋もれさせない)",
+     "now": "2026-08-17 10:00", "outcome": "かけ直し希望",
+     "record": {"state": "送信済", "absent_count": 0},
+     "expect": {"state": "送信済", "next_call_at": null, "absent_count": 0, "needs_human": true}},
+
+    {"name": "拒否は機械で決めず人に回す",
+     "_note": "後確認が取れなかった申込をどうするかは業務判断",
+     "now": "2026-08-17 10:00", "outcome": "拒否",
+     "record": {"state": "送信済", "absent_count": 0},
+     "expect": {"state": "要確認", "next_call_at": null, "absent_count": 0, "needs_human": true}},
+
+    {"name": "想定外の結果を勝手に解釈しない",
+     "now": "2026-08-17 10:00", "outcome": "なんとなく良い感じだった",
+     "record": {"state": "送信済", "absent_count": 0},
+     "expect": {"state": "送信済", "next_call_at": null, "absent_count": 0, "needs_human": true}}
   ],
 
   "excluded_list": [
