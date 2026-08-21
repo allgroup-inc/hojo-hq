@@ -1,6 +1,7 @@
 {
   "customer_id": "顧客ID",
   "apply_id": "顧客ID",
+  "policy_number": "証券番号",
   "apply_date": "契約日",
   "cancel_date": "初回保険料着金日",
   "product": "申し込み商品",

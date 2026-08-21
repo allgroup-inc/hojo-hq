@@ -119,6 +119,9 @@ def normalize_record(raw, column_map, as_of):
     return {
         "customer_id": _get(raw, column_map, "customer_id"),
         "apply_id": _get(raw, column_map, "apply_id"),
+        # 証券番号（軸 2026-08-19）：保険会社の月次解約データと自社申込を繋ぐ唯一の鍵。
+        # 氏名は表記ゆれで繋がらない。申込時に控える運用を今日から（過去分は遡れない）。
+        "policy_number": (_get(raw, column_map, "policy_number") or ""),
         "apply_date": apply_date,
         "product": (_get(raw, column_map, "product") or "不明"),
         "channel": (_get(raw, column_map, "channel") or "不明"),

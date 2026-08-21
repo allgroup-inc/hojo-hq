@@ -77,6 +77,15 @@ class TestSchema(unittest.TestCase):
         self.assertEqual(r["debit_result"], "")
         self.assertIsNone(r["debit_due"])
 
+    def test_policy_number_read_when_mapped(self):
+        cmap = dict(COLUMN_MAP, policy_number="証券番号")
+        r = schema.normalize_record(raw(証券番号="ABC-12345"), cmap, date(2026, 8, 1))
+        self.assertEqual(r["policy_number"], "ABC-12345")
+
+    def test_policy_number_blank_when_unmapped(self):
+        r = schema.normalize_record(raw(), COLUMN_MAP, date(2026, 8, 1))
+        self.assertEqual(r["policy_number"], "")
+
 
 class TestEmptyCustomerId(unittest.TestCase):
     """顧客ID列がマップされていて値が空＝管理画面のID漏れ（徳元さん 2026-08-18）。
