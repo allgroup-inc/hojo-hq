@@ -13,6 +13,12 @@
     ]
   },
   "permissions": {
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "mcp__claude-code-remote__add_repo",
+      "mcp__claude-code-remote__list_repos",
+      "mcp__bf7c680d-5fdc-5ef4-b4a0-abadb619bf0a__add_repo",
+      "mcp__bf7c680d-5fdc-5ef4-b4a0-abadb619bf0a__list_repos"
+    ]
   }
 }
