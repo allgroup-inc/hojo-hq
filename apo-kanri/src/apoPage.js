@@ -162,16 +162,16 @@
 "<div class=\"sheet\" id=\"sheet\"><div class=\"inner\">\n" +
 "  <h2 id=\"sheetTitle\"></h2>\n" +
 "  <div class=\"grid\">\n" +
-"    <button data-st=\"確定\">確定</button>\n" +
-"    <button data-st=\"実施済\">実施済</button>\n" +
-"    <button data-st=\"申込み\" class=\"strong\">申込み</button>\n" +
-"    <button data-st=\"再調整中\">再調整中</button>\n" +
+"    <button data-st=\"アポ確定\">アポ確定</button>\n" +
+"    <button data-st=\"訪問済\">訪問済</button>\n" +
+"    <button data-st=\"申込\" class=\"strong\">申込</button>\n" +
+"    <button data-st=\"スケジュール調整中\">日程を組み直す</button>\n" +
 "  </div>\n" +
 "  <div class=\"delayrow\"><span class=\"dlabel\">遅れそう:</span>\n" +
 "    <button data-delay=\"15\">+15分</button><button data-delay=\"30\">+30分</button><button data-delay=\"60\">+60分</button></div>\n" +
 "  <div class=\"dangerzone\">\n" +
-"    <button data-st=\"キャンセル(顧客都合)\">キャンセル(顧客都合)</button>\n" +
-"    <button data-st=\"キャンセル(自社都合)\">キャンセル(自社都合)</button>\n" +
+"    <button data-st=\"差し戻し\" data-reason=\"顧客都合\">差し戻し(顧客都合)</button>\n" +
+"    <button data-st=\"差し戻し\" data-reason=\"自社都合\">差し戻し(自社都合)</button>\n" +
 "  </div>\n" +
 "  <div class=\"footrow\"><button class=\"btn-ghost\" id=\"sheetEdit\">編集</button><button class=\"btn-ghost\" id=\"sheetClose\">閉じる</button></div>\n" +
 "</div></div>\n" +
@@ -245,11 +245,11 @@
 "function fail(error) { doneLoading(); toast('エラー: ' + (error && error.message ? error.message : error)); }\n" +
 "function statusClass(status) {\n" +
 "  if (status.indexOf('キャンセル') === 0) return 'st cancel';\n" +
-"  if (status === '申込み') return 'st signed';\n" +
+"  if (status === '申込') return 'st signed';\n" +
 "  return 'st';\n" +
 "}\n" +
 "function rowHtml(apo) {\n" +
-"  var doneClass = (apo['ステータス'] === '実施済' || apo['ステータス'].indexOf('キャンセル') === 0) ? ' done' : '';\n" +
+"  var doneClass = (apo['ステータス'] === '訪問済' || apo['ステータス'] === '差し戻し') ? ' done' : '';\n" +
 "  var hotClass = apo['温度感'] === '高' ? ' hot' : '';\n" +
 "  return '<div class=\"row' + doneClass + '\" data-id=\"' + esc(apo['アポID']) + '\" tabindex=\"0\">' +\n" +
 "    '<div class=\"time\">' + esc(apo['開始時刻']) + '<small>' + esc(apo['所要分']) + '分</small></div>' +\n" +
@@ -313,13 +313,13 @@
 "  html += '<div class=\"note\">空き=キャンセル・再調整中を除いた予約済み時間。評価目的では使いません</div></div>';\n" +
 "  html += '<div class=\"panel\"><h3>転換ファネル(過去30日・' + esc(stats.sinceDate) + '以降・チーム全体)</h3>';\n" +
 "  html += '<div class=\"fstep\"><span>結果が出たアポ</span><b>' + funnel.concluded + '件</b></div>';\n" +
-"  html += '<div class=\"fstep\"><span>訪問実施(実施済+申込み)</span><span><span class=\"rate\">' + formatRate(funnel.visitRate) + '</span><b>' + funnel.completed + '件</b></span></div>';\n" +
-"  html += '<div class=\"fstep\"><span>申込み</span><span><span class=\"rate\">' + formatRate(funnel.signupRate) + '</span><b>' + funnel.signups + '件</b></span></div>';\n" +
-"  html += '<div class=\"note\">率の母数: 訪問実施率=結果が出たアポ、申込み率=訪問実施。' +\n" +
+"  html += '<div class=\"fstep\"><span>訪問実施(訪問済+申込)</span><span><span class=\"rate\">' + formatRate(funnel.visitRate) + '</span><b>' + funnel.completed + '件</b></span></div>';\n" +
+"  html += '<div class=\"fstep\"><span>申込</span><span><span class=\"rate\">' + formatRate(funnel.signupRate) + '</span><b>' + funnel.signups + '件</b></span></div>';\n" +
+"  html += '<div class=\"note\">率の母数: 訪問実施率=結果が出たアポ、申込率=訪問実施。' +\n" +
 "    (funnel.concluded < 10 ? '<br>件数が少ないため参考値です(母数10件未満)。' : '') +\n" +
 "    '<br>予定・確定・再調整中のアポは結果待ちのため含みません。評価目的では使いません</div></div>';\n" +
 "  var lowKindSample = false;\n" +
-"  html += '<div class=\"panel\"><h3>アポ種別別の申込み率(過去30日・チーム全体)</h3>';\n" +
+"  html += '<div class=\"panel\"><h3>アポ種別別の申込率(過去30日・チーム全体)</h3>';\n" +
 "  (stats.byKind || []).forEach(function (row) {\n" +
 "    if (row.completed > 0 && row.completed < 10) lowKindSample = true;\n" +
 "    var kindPercent = row.rate === null ? 0 : Math.round(row.rate * 100);\n" +
@@ -327,11 +327,11 @@
 "      '<div class=\"track\"><div class=\"bar\" style=\"width:' + kindPercent + '%\"></div></div>' +\n" +
 "      '<span class=\"tval\"><b>' + formatRate(row.rate) + '</b> ' + row.signups + '/' + row.completed + '件</span></div>';\n" +
 "  });\n" +
-"  html += '<div class=\"note\">母数=その種別の訪問実施(実施済+申込み)。' +\n" +
+"  html += '<div class=\"note\">母数=その種別の訪問実施(訪問済+申込)。' +\n" +
 "    (lowKindSample ? '<br>母数10件未満の行は参考値です。' : '') +\n" +
 "    '<br>再訪と新規は決まり方が違うため分けて見ます。どこに時間を寄せるかの判断用で、評価目的では使いません</div></div>';\n" +
 "  var lowTempSample = false;\n" +
-"  html += '<div class=\"panel\"><h3>温度感別の申込み率(過去30日・チーム全体)</h3>';\n" +
+"  html += '<div class=\"panel\"><h3>温度感別の申込率(過去30日・チーム全体)</h3>';\n" +
 "  (stats.byTemperature || []).forEach(function (row) {\n" +
 "    if (row.completed > 0 && row.completed < 10) lowTempSample = true;\n" +
 "    var percent = row.rate === null ? 0 : Math.round(row.rate * 100);\n" +
@@ -339,7 +339,7 @@
 "      '<div class=\"track\"><div class=\"bar\" style=\"width:' + percent + '%\"></div></div>' +\n" +
 "      '<span class=\"tval\"><b>' + formatRate(row.rate) + '</b> ' + row.signups + '/' + row.completed + '件</span></div>';\n" +
 "  });\n" +
-"  html += '<div class=\"note\">母数=その温度感の訪問実施(実施済+申込み)。' +\n" +
+"  html += '<div class=\"note\">母数=その温度感の訪問実施(訪問済+申込)。' +\n" +
 "    (lowTempSample ? '<br>母数10件未満の行は参考値です。' : '') +\n" +
 "    '<br>どんなアポを取れば決まりやすいかの改善用。評価目的では使いません</div></div>';\n" +
 "  $('board').innerHTML = html;\n" +
@@ -399,7 +399,7 @@
 "    syncReferrerField();\n" +
 "    fillSelect('fTemp', options.temperatures, apo ? apo['温度感'] : '中');\n" +
 "    fillSelect('fFormat', options.formats, apo ? apo['形式'] : '訪問');\n" +
-"    fillSelect('fStatus', options.statuses, apo ? apo['ステータス'] : '予定');\n" +
+"    fillSelect('fStatus', options.statuses, apo ? apo['ステータス'] : 'スケジュール調整中');\n" +
 "    fillSelect('fSales', options.salesStaff, apo ? apo['担当営業'] : (state.meName || ''));\n" +
 "    fillSelect('fSetter', options.setterStaff, apo ? apo['アポ入れ担当'] : (state.meName || ''));\n" +
 "    $('modal').classList.add('open');\n" +
@@ -453,7 +453,7 @@
 "      $('overlapWarn').classList.remove('show');\n" +
 "      $('modalTitle').textContent = '新規アポ';\n" +
 "      ['fCustomer', 'fPlace', 'fMemo', 'fReferrer'].forEach(function (id) { $(id).value = ''; });\n" +
-"      $('fStatus').value = '予定';\n" +
+"      $('fStatus').value = 'スケジュール調整中';\n" +
 "      $('fCustomer').focus();\n" +
 "      toast(notice + ' 続けて登録できます');\n" +
 "      load();\n" +
@@ -469,7 +469,7 @@
 "  $('modalSave').disabled = disabled;\n" +
 "  $('modalSaveNext').disabled = disabled;\n" +
 "}\n" +
-"function quickStatus(status) {\n" +
+"function quickStatus(status, reason) {\n" +
 "  if (!state.selected) return;\n" +
 "  closeSheet();\n" +
 "  google.script.run.withSuccessHandler(function (result) {\n" +
@@ -480,7 +480,7 @@
 "    toast(result && result.notified ? '「' + status + '」に更新し、Slackへ通知しました'\n" +
 "      : '「' + status + '」に更新しました(Slack通知なし)');\n" +
 "    load();\n" +
-"  }).withFailureHandler(fail).updateStatus(state.selected['アポID'], status);\n" +
+"  }).withFailureHandler(fail).updateStatus(state.selected['アポID'], status, reason || '');\n" +
 "}\n" +
 "function reportDelayMinutes(minutes) {\n" +
 "  var apoId = state.selected ? state.selected['アポID'] : null;\n" +
@@ -509,7 +509,7 @@
 "$('modalSave').addEventListener('click', function () { save(false); });\n" +
 "$('modalSaveNext').addEventListener('click', function () { save(true); });\n" +
 "Array.prototype.forEach.call(document.querySelectorAll('[data-st]'), function (el) {\n" +
-"  el.addEventListener('click', function () { quickStatus(el.getAttribute('data-st')); });\n" +
+"  el.addEventListener('click', function () { quickStatus(el.getAttribute('data-st'), el.getAttribute('data-reason')); });\n" +
 "});\n" +
 "Array.prototype.forEach.call(document.querySelectorAll('[data-delay]'), function (el) {\n" +
 "  el.addEventListener('click', function () { reportDelayMinutes(Number(el.getAttribute('data-delay'))); });\n" +

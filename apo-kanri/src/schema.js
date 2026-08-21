@@ -21,7 +21,11 @@
     "アポID", "日付", "開始時刻", "所要分", "顧客名", "形式", "場所またはURL",
     "担当営業", "アポ入れ担当", "温度感", "ステータス", "メモ",
     "登録日時", "最終更新日時",
-    "アポ種別", "紹介元"
+    "アポ種別", "紹介元",
+    // 共通認識(1つのアプリ・5つの入口)への対応。列は末尾のみ追加すること。
+    // 顧客ID: 顧客台帳(kakei-crm)の KM-000001 形式への参照。氏名・住所の正はあちら側。
+    // 差し戻し理由: 旧「キャンセル(顧客都合/自社都合)」の区別をステータスから理由列へ移した。
+    "顧客ID", "差し戻し理由"
   ];
   // 再訪と新規では決まり方がまったく違うため、混ぜた平均値は改善判断に使えない。
   // 種別ごとに申込み率を出せるようにする(2026-08-19 小柳さん決裁)。
@@ -30,10 +34,13 @@
   ];
   var APPOINTMENT_FORMATS = ["訪問", "来店", "オンライン"];
   var TEMPERATURES = ["高", "中", "低"];
+  // 共通語彙(軸の共通認識)に準拠。言い換えないこと。
+  // ❷が持つ: スケジュール調整中 / アポ確定 ・ ❸: 訪問済 ・ ❹: 申込 ・ ❶へ返却: 差し戻し
+  // 旧「再調整中」は「スケジュール調整中 + 日時なし」で表現する(議事_20260821)。
   var APPOINTMENT_STATUSES = [
-    "予定", "確定", "実施済", "申込み",
-    "キャンセル(顧客都合)", "キャンセル(自社都合)", "再調整中"
+    "スケジュール調整中", "アポ確定", "訪問済", "申込", "差し戻し"
   ];
+  var CANCEL_REASONS = ["顧客都合", "自社都合"];
 
   var HISTORY_SHEET_NAME = "変更履歴";
   var HISTORY_HEADERS = ["履歴ID", "アポID", "日時", "操作者", "操作", "変更内容"];
@@ -52,6 +59,7 @@
     APPOINTMENT_KINDS: APPOINTMENT_KINDS,
     TEMPERATURES: TEMPERATURES,
     APPOINTMENT_STATUSES: APPOINTMENT_STATUSES,
+    CANCEL_REASONS: CANCEL_REASONS,
     HISTORY_SHEET_NAME: HISTORY_SHEET_NAME,
     HISTORY_HEADERS: HISTORY_HEADERS,
     HISTORY_OPERATIONS: HISTORY_OPERATIONS,

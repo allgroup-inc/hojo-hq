@@ -16,7 +16,7 @@ const APO = {
   "担当営業": "営業一郎",
   "アポ入れ担当": "アポ花子",
   "温度感": "高",
-  "ステータス": "予定"
+  "ステータス": "スケジュール調整中"
 };
 
 test("formatMention: Slack User IDがあれば <@U...>、なければ氏名", () => {
@@ -45,14 +45,14 @@ test("buildChangeMessage: 差分が本文に入る", () => {
 });
 
 test("buildCancelMessage: キャンセル種別が本文に入る", () => {
-  const msg = notify.buildCancelMessage(APO, "キャンセル(顧客都合)", "<@U001>");
-  assert.ok(msg.includes("キャンセル(顧客都合)"));
+  const msg = notify.buildCancelMessage(APO, "差し戻し", "<@U001>");
+  assert.ok(msg.includes("差し戻し"));
   assert.ok(msg.includes("テスト商店"));
 });
 
-test("buildSignupMessage: 申込みの祝いと顧客名が入る", () => {
+test("buildSignupMessage: 申込の祝いと顧客名が入る", () => {
   const msg = notify.buildSignupMessage(APO, "<@U001>");
-  assert.ok(msg.includes("申込み"));
+  assert.ok(msg.includes("申込"));
   assert.ok(msg.includes("テスト商店"));
 });
 

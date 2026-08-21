@@ -17,7 +17,7 @@ function apo(overrides) {
     "担当営業": "営業一郎",
     "アポ入れ担当": "アポ花子",
     "温度感": "高",
-    "ステータス": "予定",
+    "ステータス": "スケジュール調整中",
     "メモ": ""
   }, overrides || {});
 }
@@ -52,10 +52,10 @@ test("sortAppointments: 日付→開始時刻→顧客名の昇順", () => {
 
 test("buildDayView: 指定日のみ・時刻順・サマリー付き(未確定=予定/再調整中)", () => {
   const list = [
-    apo({ "アポID": "a", "開始時刻": "13:00", "ステータス": "確定" }),
-    apo({ "アポID": "b", "開始時刻": "09:00", "ステータス": "予定" }),
+    apo({ "アポID": "a", "開始時刻": "13:00", "ステータス": "アポ確定" }),
+    apo({ "アポID": "b", "開始時刻": "09:00", "ステータス": "スケジュール調整中" }),
     apo({ "アポID": "c", "日付": "2026-08-15" }),
-    apo({ "アポID": "d", "開始時刻": "11:00", "ステータス": "再調整中" })
+    apo({ "アポID": "d", "開始時刻": "11:00", "ステータス": "スケジュール調整中" })
   ];
   const view = core.buildDayView(list, "2026-08-14", null);
   assert.deepEqual(view.items.map((a) => a["アポID"]), ["b", "d", "a"]);
@@ -108,14 +108,22 @@ test("detectOverlap: 隣接(10:00-11:00と11:00-12:00)は重複ではない", ()
   assert.deepEqual(core.detectOverlap(list, candidate), []);
 });
 
-test("detectOverlap: キャンセル・再調整中は対象外、自分自身も除外(編集時)", () => {
+test("detectOverlap: 差し戻し・開始時刻なしは対象外、自分自身も除外(編集時)", () => {
   const list = [
-    apo({ "アポID": "a", "ステータス": "キャンセル(顧客都合)" }),
-    apo({ "アポID": "b", "ステータス": "再調整中" }),
+    apo({ "アポID": "a", "ステータス": "差し戻し" }),
+    apo({ "アポID": "b", "ステータス": "スケジュール調整中", "開始時刻": "" }),
     apo({ "アポID": "self" })
   ];
   const candidate = apo({ "アポID": "self" });
   assert.deepEqual(core.detectOverlap(list, candidate), []);
+});
+
+// 議事_20260821: 共通語彙は❷に2値しか許さないため、旧「予定(枠を押さえる)」と
+// 旧「再調整中(押さえない)」の違いは開始時刻の有無で表す。仮日程でも枠は押さえる。
+test("detectOverlap: スケジュール調整中でも開始時刻があれば枠を押さえる", () => {
+  const list = [apo({ "アポID": "kari", "ステータス": "スケジュール調整中" })];
+  const found = core.detectOverlap(list, apo({ "アポID": "new" }));
+  assert.deepEqual(found.map((a) => a["アポID"]), ["kari"]);
 });
 
 test("buildDelayTargets: 同一営業の同日・指定時刻以降だけを時刻順で返す", () => {
@@ -123,7 +131,7 @@ test("buildDelayTargets: 同一営業の同日・指定時刻以降だけを時�
     apo({ "アポID": "past", "開始時刻": "09:00" }),
     apo({ "アポID": "b", "開始時刻": "16:00" }),
     apo({ "アポID": "a", "開始時刻": "14:00" }),
-    apo({ "アポID": "cancelled", "開始時刻": "15:00", "ステータス": "キャンセル(顧客都合)" }),
+    apo({ "アポID": "cancelled", "開始時刻": "15:00", "ステータス": "差し戻し" }),
     apo({ "アポID": "other", "開始時刻": "15:00", "担当営業": "両方次郎" })
   ];
   const targets = core.buildDelayTargets(list, "営業一郎", "2026-08-14", "13:00");
@@ -132,9 +140,9 @@ test("buildDelayTargets: 同一営業の同日・指定時刻以降だけを時�
 
 test("buildChangeDiff: 変更列だけを 旧→新 形式でまとめる。差分なしは空文字", () => {
   const oldRecord = apo({});
-  const newRecord = apo({ "開始時刻": "14:00", "ステータス": "確定" });
+  const newRecord = apo({ "開始時刻": "14:00", "ステータス": "アポ確定" });
   const diff = core.buildChangeDiff(oldRecord, newRecord);
-  assert.equal(diff, "開始時刻: 10:00→14:00 / ステータス: 予定→確定");
+  assert.equal(diff, "開始時刻: 10:00→14:00 / ステータス: スケジュール調整中→アポ確定");
   assert.equal(core.buildChangeDiff(oldRecord, apo({})), "");
 });
 

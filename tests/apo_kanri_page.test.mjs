@@ -35,11 +35,11 @@ test("アポ種別: 入力欄・紹介元・分析パネルが配線されてい
   assert.ok(html.includes("fReferrer"));
   assert.ok(html.includes("syncReferrerField"), "再訪では紹介元を隠す");
   assert.ok(html.includes("byKind"));
-  assert.ok(html.includes("アポ種別別の申込み率"));
+  assert.ok(html.includes("アポ種別別の申込率"));
 });
 
-test("分析タブ: 温度感別の申込み率パネルがある(母数併記・参考値注記)", () => {
-  assert.ok(html.includes("温度感別の申込み率"));
+test("分析タブ: 温度感別の申込率パネルがある(母数併記・参考値注記)", () => {
+  assert.ok(html.includes("温度感別の申込率"));
   assert.ok(html.includes("byTemperature"));
   assert.ok(html.includes("母数10件未満の行は参考値"));
 });
@@ -74,8 +74,8 @@ test("色ルール: ブランド色#F6C83Eと文字#1A1A1A/#6B6B6B、ロゴ画�
 });
 
 test("ステータス7種と遅れそうボタンが画面に定義されている", () => {
-  ["予定", "確定", "実施済", "申込み", "キャンセル(顧客都合)",
-    "キャンセル(自社都合)", "再調整中"].forEach((status) => {
+  ["スケジュール調整中", "アポ確定", "訪問済", "申込", "差し戻し",
+    "差し戻し", "スケジュール調整中"].forEach((status) => {
     assert.ok(html.includes(status), status + " が必要");
   });
   assert.ok(html.includes("遅れそう"));

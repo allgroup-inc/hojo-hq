@@ -188,10 +188,9 @@ function saveAppointment(payload) {
       if (diff) {
         appendHistory_(payload["アポID"], operator, "変更", diff);
         var message = buildStatusAwareMessage_(payload, oldRecord["ステータス"], diff, mention);
-        // キャンセルで枠が空いたら、代打候補(GPSレス・2026-08-14決裁)を通知に添える。
+        // ❶へ差し戻して枠が空いたら、代打候補(GPSレス・2026-08-14決裁)を通知に添える。
         // 位置情報は取得せず、前後アポの場所を提示するだけ。行かせる判断・連絡は人間が行う
-        if (payload["ステータス"].indexOf("キャンセル") === 0 &&
-            oldRecord["ステータス"].indexOf("キャンセル") !== 0) {
+        if (payload["ステータス"] === "差し戻し" && oldRecord["ステータス"] !== "差し戻し") {
           message += "\n" + ApoNotify.buildSubstituteSection(
             ApoCore.buildSubstituteCandidates(appointments, payload, ApoAccess.listSalesStaff(staffRows)));
         }
@@ -221,21 +220,32 @@ function saveAppointment(payload) {
  * (2026-08-17レビュー指摘#5)。重複があれば saveAppointment が {ok:false} を返し、
  * 画面側が「編集から確認」を促す。
  */
-function updateStatus(apoId, status) {
+function updateStatus(apoId, status, reason) {
   requireApoAccess_();
   if (ApoSchema.APPOINTMENT_STATUSES.indexOf(status) === -1) {
     throw new Error("不正なステータスです: " + status);
   }
+  if (reason && ApoSchema.CANCEL_REASONS.indexOf(reason) === -1) {
+    throw new Error("不正な差し戻し理由です: " + reason);
+  }
   var appointments = readAppointments_();
   var record = findAppointmentById_(appointments, apoId);
   if (!record) throw new Error("対象のアポが見つかりません: " + apoId);
-  var INACTIVE = ["キャンセル(顧客都合)", "キャンセル(自社都合)", "再調整中"];
-  var reactivating = INACTIVE.indexOf(record["ステータス"]) !== -1 &&
-    INACTIVE.indexOf(status) === -1;
+  // 枠を押さえていない状態(差し戻し済み・開始時刻なし)から戻すときだけ、
+  // ダブルブッキング検知をやり直す(議事_20260821: 占有判定は日時の有無で見る)
+  var wasInactive = record["ステータス"] === "差し戻し" ||
+    !ApoCore.normalizeTimeString(record["開始時刻"]);
   var updated = {};
   Object.keys(record).forEach(function (key) { updated[key] = record[key]; });
   updated["ステータス"] = status;
-  updated.confirmedOverlap = !reactivating;
+  if (status === "差し戻し") {
+    updated["差し戻し理由"] = reason || "";
+  } else if (status === "スケジュール調整中") {
+    // 日程の組み直し。開始時刻を空にして枠を解放する(日付は目安として残す)
+    updated["開始時刻"] = "";
+  }
+  var stillInactive = status === "差し戻し" || !ApoCore.normalizeTimeString(updated["開始時刻"]);
+  updated.confirmedOverlap = !(wasInactive && !stillInactive);
   return saveAppointment(updated);
 }
 
@@ -331,14 +341,14 @@ function appendHistory_(apoId, operator, operation, detail) {
 }
 
 /**
- * ステータス変化に応じて通知種別を出し分ける(申込み🎉/キャンセル❌/その他は変更🔁)。
+ * ステータス変化に応じて通知種別を出し分ける(申込🎉/差し戻し❌/その他は変更🔁)。
  */
 function buildStatusAwareMessage_(payload, oldStatus, diff, mention) {
   var newStatus = payload["ステータス"];
   if (newStatus !== oldStatus) {
-    if (newStatus === "申込み") return ApoNotify.buildSignupMessage(payload, mention);
-    if (newStatus.indexOf("キャンセル") === 0) {
-      return ApoNotify.buildCancelMessage(payload, newStatus, mention);
+    if (newStatus === "申込") return ApoNotify.buildSignupMessage(payload, mention);
+    if (newStatus === "差し戻し") {
+      return ApoNotify.buildCancelMessage(payload, payload["差し戻し理由"], mention);
     }
   }
   return ApoNotify.buildChangeMessage(payload, diff, mention);

@@ -2,7 +2,7 @@
  * ブラウザ相当のGAS(global.ApoNotify)とNode(module.exports)の両方で動くUMD形式。
  * Node側は tests/apo_kanri_notify.test.mjs で検証される。
  *
- * 通知は5種限定(新規・変更・キャンセル・申込み・遅れそう)。リマインダー等は作らない
+ * 通知は5種限定(新規・変更・キャンセル・申込・遅れそう)。リマインダー等は作らない
  * (設計書 三名体制裁定④: 通知過多で肝心の遅延通知が埋もれるのを防ぐ)。
  * 文面は通知一覧のプレビューで読み切れるよう、1行目に結論を置く。
  */
@@ -35,13 +35,15 @@
       "・担当営業: " + mention;
   }
 
-  function buildCancelMessage(apo, status, mention) {
-    return "❌ " + status + " " + apo["顧客名"] + "様(" + describeSlot_(apo) + ")\n" +
+  // reason は「顧客都合」「自社都合」。未指定でも文面が壊れないようにする。
+  function buildCancelMessage(apo, reason, mention) {
+    var label = reason ? "差し戻し(" + reason + ")" : "差し戻し";
+    return "❌ " + label + " " + apo["顧客名"] + "様(" + describeSlot_(apo) + ")\n" +
       "・担当営業: " + mention + "(アポ入れ: " + apo["アポ入れ担当"] + ")";
   }
 
   function buildSignupMessage(apo, mention) {
-    return "🎉 申込み " + apo["顧客名"] + "様!\n" +
+    return "🎉 申込 " + apo["顧客名"] + "様!\n" +
       "・" + describeSlot_(apo) + " / 担当営業: " + mention;
   }
 
