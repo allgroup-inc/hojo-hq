@@ -10,7 +10,10 @@
  * 3. Slackで通知チャンネル用の Incoming Webhook を発行し、Apps Scriptエディタの
  *    「プロジェクトの設定」→「スクリプト プロパティ」で SLACK_WEBHOOK_URL に設定する
  *    (コードにWebhook URLを直接書かない。未設定時は通知をスキップしログのみ)
- * 4. 「デプロイ」→「新しいデプロイ」→種類「ウェブアプリ」。実行ユーザー: 自分。
+ * 4. 「デプロイ」→「新しいデプロイ」→種類「ウェブアプリ」。
+ *    次のユーザーとして実行: **「ウェブアプリケーションにアクセスしているユーザー」**
+ *    (「自分」にすると Session.getActiveUser().getEmail() が空になり、所有者以外が
+ *     全員締め出される。個人Gmail運用での必須設定。2026-08-17 レビュー#1)
  *    アクセスできるユーザー: 「Googleアカウントを持つ全員」
  * 5. デプロイURLをスタッフタブに登録した人へ共有する(スマホのホーム画面に追加推奨)
  *
@@ -186,10 +189,9 @@ function saveAppointment(payload) {
       if (diff) {
         appendHistory_(payload["アポID"], operator, "変更", diff);
         var message = buildStatusAwareMessage_(payload, oldRecord["ステータス"], diff, mention);
-        // キャンセルで枠が空いたら、代打候補(GPSレス・2026-08-14決裁)を通知に添える。
+        // 差し戻しで枠が空いたら、代打候補(GPSレス・2026-08-14決裁)を通知に添える。
         // 位置情報は取得せず、前後アポの場所を提示するだけ。行かせる判断・連絡は人間が行う
-        if (payload["ステータス"].indexOf("キャンセル") === 0 &&
-            oldRecord["ステータス"].indexOf("キャンセル") !== 0) {
+        if (payload["ステータス"] === "差し戻し" && oldRecord["ステータス"] !== "差し戻し") {
           message += "\n" + ApoNotify.buildSubstituteSection(
             ApoCore.buildSubstituteCandidates(appointments, payload, ApoAccess.listSalesStaff(staffRows)));
         }
@@ -213,26 +215,36 @@ function saveAppointment(payload) {
 /**
  * カードのアクションシートからのステータスだけの更新(2タップ操作)。
  * 履歴・通知は saveAppointment の編集と同じ扱いにする。
+ * returnReason は「差し戻し」のときだけ使う(顧客都合/自社都合)。
  *
- * キャンセル系・再調整中から稼働ステータスへ戻す場合だけはダブルブッキング検知を
+ * 差し戻し・対象外から稼働ステータスへ戻す場合だけはダブルブッキング検知を
  * 生かす(confirmedOverlapを立てない)。空いた枠に別アポが入っている可能性があるため
  * (2026-08-17レビュー指摘#5)。重複があれば saveAppointment が {ok:false} を返し、
  * 画面側が「編集から確認」を促す。
  */
-function updateStatus(apoId, status) {
+function updateStatus(apoId, status, returnReason) {
   requireApoAccess_();
   if (ApoSchema.APPOINTMENT_STATUSES.indexOf(status) === -1) {
     throw new Error("不正なステータスです: " + status);
   }
+  // ❸❹が持つステータスを❷から書き換えない(2026-08-21 軸の裁定②)。
+  // 連携が通るまでの暫定期間だけ RESULT_INPUT_MODE = "許可" で通す。
+  if (ApoSchema.HANDED_OFF_STATUSES.indexOf(status) !== -1 &&
+      ApoSchema.RESULT_INPUT_MODE !== "許可") {
+    throw new Error("「" + status + "」は対面営業マン物件管理システム側で更新してください。");
+  }
+  if (status === "差し戻し" && ApoSchema.RETURN_REASONS.indexOf(returnReason) === -1) {
+    throw new Error("差し戻しには理由(顧客都合/自社都合)が必要です。");
+  }
   var appointments = readAppointments_();
   var record = findAppointmentById_(appointments, apoId);
   if (!record) throw new Error("対象のアポが見つかりません: " + apoId);
-  var INACTIVE = ["キャンセル(顧客都合)", "キャンセル(自社都合)", "再調整中"];
-  var reactivating = INACTIVE.indexOf(record["ステータス"]) !== -1 &&
-    INACTIVE.indexOf(status) === -1;
+  var reactivating = ApoSchema.SLOT_FREED_STATUSES.indexOf(record["ステータス"]) !== -1 &&
+    ApoSchema.SLOT_FREED_STATUSES.indexOf(status) === -1;
   var updated = {};
   Object.keys(record).forEach(function (key) { updated[key] = record[key]; });
   updated["ステータス"] = status;
+  updated["差し戻し理由"] = status === "差し戻し" ? returnReason : "";
   updated.confirmedOverlap = !reactivating;
   return saveAppointment(updated);
 }
@@ -329,15 +341,13 @@ function appendHistory_(apoId, operator, operation, detail) {
 }
 
 /**
- * ステータス変化に応じて通知種別を出し分ける(申込み🎉/キャンセル❌/その他は変更🔁)。
+ * ステータス変化に応じて通知種別を出し分ける(申込🎉/差し戻し❌/その他は変更🔁)。
  */
 function buildStatusAwareMessage_(payload, oldStatus, diff, mention) {
   var newStatus = payload["ステータス"];
   if (newStatus !== oldStatus) {
-    if (newStatus === "申込み") return ApoNotify.buildSignupMessage(payload, mention);
-    if (newStatus.indexOf("キャンセル") === 0) {
-      return ApoNotify.buildCancelMessage(payload, newStatus, mention);
-    }
+    if (newStatus === "申込") return ApoNotify.buildSignupMessage(payload, mention);
+    if (newStatus === "差し戻し") return ApoNotify.buildReturnMessage(payload, mention);
   }
   return ApoNotify.buildChangeMessage(payload, diff, mention);
 }

@@ -16,7 +16,7 @@ const APO = {
   "担当営業": "営業一郎",
   "アポ入れ担当": "アポ花子",
   "温度感": "高",
-  "ステータス": "予定"
+  "ステータス": "スケジュール調整中"
 };
 
 test("formatMention: Slack User IDがあれば <@U...>、なければ氏名", () => {
@@ -44,15 +44,23 @@ test("buildChangeMessage: 差分が本文に入る", () => {
   assert.ok(msg.includes("テスト商店"));
 });
 
-test("buildCancelMessage: キャンセル種別が本文に入る", () => {
-  const msg = notify.buildCancelMessage(APO, "キャンセル(顧客都合)", "<@U001>");
-  assert.ok(msg.includes("キャンセル(顧客都合)"));
+test("buildReturnMessage: 差し戻し理由が本文に入り、枠が空いたことも伝える", () => {
+  const msg = notify.buildReturnMessage(
+    Object.assign({}, APO, { "差し戻し理由": "自社都合" }), "<@U001>");
+  assert.ok(msg.includes("差し戻し(自社都合)"));
   assert.ok(msg.includes("テスト商店"));
+  assert.ok(msg.includes("この枠は空きました"));
 });
 
-test("buildSignupMessage: 申込みの祝いと顧客名が入る", () => {
+// 理由なしで差し戻された行(シート直接編集など)でも文面が壊れないこと
+test("buildReturnMessage: 理由が空でも「理由未記入」と出して黙って隠さない", () => {
+  const msg = notify.buildReturnMessage(APO, "<@U001>");
+  assert.ok(msg.includes("理由未記入"));
+});
+
+test("buildSignupMessage: 申込の祝いと顧客名が入る", () => {
   const msg = notify.buildSignupMessage(APO, "<@U001>");
-  assert.ok(msg.includes("申込み"));
+  assert.ok(msg.includes("申込"));
   assert.ok(msg.includes("テスト商店"));
 });
 

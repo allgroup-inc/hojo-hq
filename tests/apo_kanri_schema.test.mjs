@@ -41,13 +41,24 @@ test("アポ予定はアポIDが先頭列で、必須列がそろっている", 
   });
 });
 
-test("顧客ID(物件管理システムとの名寄せキー)を末尾に持つ", () => {
+/* 列の並びそのものを固定する。読み書きはヘッダー名ではなく列位置に依存するため、
+   途中に1列挿し込むと既存データが全部ズレる。追加は必ず末尾で、この配列も末尾に足す */
+test("アポ予定の列は並び順ごと固定(追加は末尾のみ)", () => {
+  assert.deepEqual(schema.APPOINTMENT_HEADERS, [
+    "アポID", "日付", "開始時刻", "所要分", "顧客名", "形式", "場所またはURL",
+    "担当営業", "アポ入れ担当", "温度感", "ステータス", "メモ",
+    "登録日時", "最終更新日時", "顧客ID", "差し戻し理由"
+  ]);
+});
+
+/* 名寄せキーは当面アセンドの顧客id(軸の裁定①)。KM- は名寄せの親統合で採番が動くため、
+   カットオーバーまで焼き付けない。読み取り時に resolve API で引く */
+test("名寄せキーの列を持つ。KM-形式の列は今は作らない(採番が動くため)", () => {
   assert.ok(schema.APPOINTMENT_HEADERS.includes("顧客ID"));
-  assert.equal(
-    schema.APPOINTMENT_HEADERS[schema.APPOINTMENT_HEADERS.length - 1],
-    "顧客ID",
-    "列追加は末尾のみ(途中挿入は既存データが列ズレする)"
-  );
+  ["KM顧客ID", "KM-ID", "顧客番号"].forEach((premature) => {
+    assert.ok(!schema.APPOINTMENT_HEADERS.includes(premature),
+      premature + " はカットオーバーまで作らない");
+  });
 });
 
 test("リード管理の項目は持たない(物件管理システムの領分)", () => {
@@ -58,11 +69,41 @@ test("リード管理の項目は持たない(物件管理システムの領分)
   assert.equal(schema.APPOINTMENT_KINDS, undefined);
 });
 
-test("ステータスは設計書どおり7種", () => {
+/* ステータスは5システム共通語彙。言い換え禁止(共通の約束【4】)。
+   ここを勝手に増やす・言い換えると、❶❸❹との突き合わせが壊れる */
+test("ステータスは5システム共通語彙(言い換え禁止)", () => {
   assert.deepEqual(schema.APPOINTMENT_STATUSES, [
-    "予定", "確定", "実施済", "申込み",
-    "キャンセル(顧客都合)", "キャンセル(自社都合)", "再調整中"
+    "スケジュール調整中", "アポ確定",
+    "訪問済", "追客中", "申込", "成立", "保全中",
+    "差し戻し", "対象外"
   ]);
+});
+
+test("❷が書き換えてよいのは自分の持ち場だけ。訪問済以降は❸❹が持つ", () => {
+  assert.deepEqual(schema.OWNED_STATUSES,
+    ["スケジュール調整中", "アポ確定", "差し戻し", "対象外"]);
+  assert.deepEqual(schema.HANDED_OFF_STATUSES,
+    ["訪問済", "追客中", "申込", "成立", "保全中"]);
+  // 2つを足すと全体になる(どちらにも属さない・両方に属すステータスを作らない)
+  assert.deepEqual(
+    schema.OWNED_STATUSES.concat(schema.HANDED_OFF_STATUSES).sort(),
+    schema.APPOINTMENT_STATUSES.slice().sort());
+});
+
+/* 差し戻しの理由は「ステータスの言い換え」ではなく属性として持つ(軸の裁定③)。
+   自社都合=他の見込み客に使えたはずの訪問枠を捨てた損失。顧客都合と混ぜると見えない */
+test("差し戻し理由は顧客都合/自社都合の2種で、ステータスとは別の列で持つ", () => {
+  assert.deepEqual(schema.RETURN_REASONS, ["顧客都合", "自社都合"]);
+  assert.ok(schema.APPOINTMENT_HEADERS.includes("差し戻し理由"));
+  schema.RETURN_REASONS.forEach((reason) => {
+    assert.ok(!schema.APPOINTMENT_STATUSES.includes(reason),
+      reason + " をステータスに混ぜない");
+  });
+});
+
+test("訪問枠が空くのは差し戻し・対象外だけ(調整中は枠を押さえる)", () => {
+  assert.deepEqual(schema.SLOT_FREED_STATUSES, ["差し戻し", "対象外"]);
+  assert.ok(!schema.SLOT_FREED_STATUSES.includes("スケジュール調整中"));
 });
 
 test("スタッフの役割・形式・温度感・履歴操作の選択肢が定義されている", () => {

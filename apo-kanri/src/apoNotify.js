@@ -4,7 +4,7 @@
  *
  * 顧客名には敬称を足さない。現場は「サンプル商店 田中様」のように敬称込みで入力するため、
  * こちらで「様」を付けると「田中様様」になる(2026-08-19 リハーサルで検出)。
- * 通知は5種限定(新規・変更・キャンセル・申込み・遅れそう)。リマインダー等は作らない
+ * 通知は5種限定(新規・変更・差し戻し・申込・遅れそう)。リマインダー等は作らない
  * (設計書 三名体制裁定④: 通知過多で肝心の遅延通知が埋もれるのを防ぐ)。
  * 文面は通知一覧のプレビューで読み切れるよう、1行目に結論を置く。
  */
@@ -37,13 +37,20 @@
       "・担当営業: " + mention;
   }
 
-  function buildCancelMessage(apo, status, mention) {
-    return "❌ " + status + " " + apo["顧客名"] + "(" + describeSlot_(apo) + ")\n" +
-      "・担当営業: " + mention + "(アポ入れ: " + apo["アポ入れ担当"] + ")";
+  /**
+   * 差し戻し(訪問に至らず❶へ返却)の通知。理由(顧客都合/自社都合)を必ず本文に出す。
+   * 自社都合は「他の見込み客に使えたはずの訪問枠を捨てた」最も高くつく損失のため、
+   * 顧客都合と一目で見分けがつく必要がある(2026-08-21 軸の裁定③)。
+   */
+  function buildReturnMessage(apo, mention) {
+    var reason = apo["差し戻し理由"] ? "(" + apo["差し戻し理由"] + ")" : "(理由未記入)";
+    return "❌ 差し戻し" + reason + " " + apo["顧客名"] + "(" + describeSlot_(apo) + ")\n" +
+      "・担当営業: " + mention + "(アポ入れ: " + apo["アポ入れ担当"] + ")\n" +
+      "・この枠は空きました。❶で組み直しになります";
   }
 
   function buildSignupMessage(apo, mention) {
-    return "🎉 申込み " + apo["顧客名"] + "!\n" +
+    return "🎉 申込 " + apo["顧客名"] + "!\n" +
       "・" + describeSlot_(apo) + " / 担当営業: " + mention;
   }
 
@@ -93,7 +100,7 @@
   }
 
   /**
-   * キャンセル通知に付ける代打候補セクション(GPSレス版)。
+   * 差し戻し通知に付ける代打候補セクション(GPSレス版)。
    * candidates は ApoCore.buildSubstituteCandidates の戻り値。表示は最大5名。
    * どの候補に行ってもらうかの判断・連絡は人間が行う(自動アサインはしない)。
    */
@@ -118,7 +125,7 @@
     buildSubstituteSection: buildSubstituteSection,
     buildNewAppointmentMessage: buildNewAppointmentMessage,
     buildChangeMessage: buildChangeMessage,
-    buildCancelMessage: buildCancelMessage,
+    buildReturnMessage: buildReturnMessage,
     buildSignupMessage: buildSignupMessage,
     buildDelayMessage: buildDelayMessage
   };

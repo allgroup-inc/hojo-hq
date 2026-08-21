@@ -9,8 +9,13 @@
 (function (global) {
   "use strict";
 
-  var CANCELLED_OR_PENDING = ["キャンセル(顧客都合)", "キャンセル(自社都合)", "再調整中"];
-  var UNCONFIRMED_STATUSES = ["予定", "再調整中"];
+  // 訪問枠が空くステータスの定義は schema.js に一本置き(2箇所に持つと必ずズレる)。
+  // GASは読み込み順が保証されないため、モジュール評価時ではなく呼び出し時に引く。
+  function slotFreed_(status) {
+    return getApoSchema_().SLOT_FREED_STATUSES.indexOf(status) !== -1;
+  }
+  // 旧「再調整中」は共通語彙に無く「スケジュール調整中」へ統合された(2026-08-21 軸の裁定)
+  var UNCONFIRMED_STATUSES = ["スケジュール調整中"];
   // 差分通知の対象外(システムが自動で書く列)
   var DIFF_EXCLUDED_COLUMNS = ["登録日時", "最終更新日時"];
 
@@ -113,7 +118,7 @@
 
   /**
    * ダブルブッキング判定: 同一担当営業・同一日付で時間帯([開始, 開始+所要分))が交差する
-   * アポを返す。キャンセル系・再調整中は「その時間は空く」ため対象外。
+   * アポを返す。差し戻し・対象外は「その時間は空く」ため対象外。
    * candidate 自身のアポIDは除外する(編集時に自分と重複判定しないため)。
    * 隣接(10:00-11:00 と 11:00-12:00)は重複ではない。
    */
@@ -126,7 +131,7 @@
       if (record["アポID"] === candidate["アポID"]) return false;
       if (record["担当営業"] !== candidate["担当営業"]) return false;
       if (normalizeDateString(record["日付"]) !== candidateDate) return false;
-      if (CANCELLED_OR_PENDING.indexOf(record["ステータス"]) !== -1) return false;
+      if (slotFreed_(record["ステータス"])) return false;
       var start = timeToMinutes_(record["開始時刻"]);
       if (start === null) return false;
       var end = start + (Number(record["所要分"]) || 60);
@@ -135,7 +140,7 @@
   }
 
   /**
-   * 遅れそう連絡の通知対象: 当該営業の同日・fromTime以降のアポ(キャンセル系除く)。
+   * 遅れそう連絡の通知対象: 当該営業の同日・fromTime以降のアポ(差し戻し・対象外を除く)。
    * 時刻の自動変更はしない(設計書 三名体制裁定①: 判断は人間・通知のみ)。
    */
   function buildDelayTargets(appointments, salesOwner, dateString, fromTimeString) {
@@ -143,7 +148,7 @@
     return sortAppointments((appointments || []).filter(function (record) {
       if (record["担当営業"] !== salesOwner) return false;
       if (normalizeDateString(record["日付"]) !== dateString) return false;
-      if (CANCELLED_OR_PENDING.slice(0, 2).indexOf(record["ステータス"]) !== -1) return false;
+      if (slotFreed_(record["ステータス"])) return false;
       var start = timeToMinutes_(record["開始時刻"]);
       if (start === null) return false;
       return fromMinutes === null || start >= fromMinutes;
@@ -187,8 +192,8 @@
 
   // 埋まり状況の営業時間窓(9:00〜18:00 = 540分)。将来変えたくなったら設定タブ化を検討
   var WORKDAY_MINUTES = 540;
-  // 「その時間が埋まっている」とみなすステータス(キャンセル系・再調整中は空き扱い)
-  var BOOKED_STATUSES = ["予定", "確定", "実施済", "申込み"];
+  // 「その時間が埋まっている」とみなすステータス(差し戻し・対象外だけが空き扱い)
+  var BOOKED_STATUSES = ["スケジュール調整中", "アポ確定", "訪問済", "追客中", "申込", "成立", "保全中"];
 
   /**
    * 本日の埋まり状況: 営業ごとの予約済み分数・件数・埋まり率(営業時間窓に対する割合)。
@@ -228,10 +233,17 @@
     };
   }
 
+  // 訪問に至ったとみなすステータス / 申込に至ったとみなすステータス。
+  // ★定義は軸が一元管理する(2026-08-21 裁定②:「❷が独自に数えないでください」)。
+  //   ❷と❸が別々に数えると必ずズレ、どちらが正しいかの議論になって両方信用されなくなる。
+  //   下記は軸から正式定義が届くまでの**暫定**。届いたら差し替える(画面にも暫定と明示)。
+  var VISITED_STATUSES = ["訪問済", "追客中", "申込", "成立", "保全中"];
+  var SIGNED_STATUSES = ["申込", "成立", "保全中"];
+
   /**
    * 転換ファネル(チーム全体のみ。営業マン別は評価誤用リスクのため見送り):
-   * - 母数 = 結果が出たアポ(実施済+申込み+キャンセル2種)。予定・確定・再調整中は除外
-   * - 訪問実施率 = (実施済+申込み) ÷ 母数 / 申込み率 = 申込み ÷ (実施済+申込み)
+   * - 母数 = 結果が出たアポ(訪問に至った + 差し戻し)。調整中・確定・対象外は除外
+   * - 訪問実施率 = 訪問に至った ÷ 母数 / 申込率 = 申込に至った ÷ 訪問に至った
    * 母数0のときは率をnullで返す(0%や100%と断定しない。表示側は「—」にする)。
    */
   function buildConversionStats(appointments, options) {
@@ -242,12 +254,12 @@
     validAppointments_(appointments).forEach(function (record) {
       if (sinceDate && normalizeDateString(record["日付"]) < sinceDate) return;
       var status = record["ステータス"];
-      var isCompleted = status === "実施済" || status === "申込み";
-      var isCancelled = status === "キャンセル(顧客都合)" || status === "キャンセル(自社都合)";
-      if (!isCompleted && !isCancelled) return;
+      var isCompleted = VISITED_STATUSES.indexOf(status) !== -1;
+      var isReturned = status === "差し戻し";
+      if (!isCompleted && !isReturned) return;
       concluded += 1;
       if (isCompleted) completed += 1;
-      if (status === "申込み") signups += 1;
+      if (SIGNED_STATUSES.indexOf(status) !== -1) signups += 1;
     });
     return {
       concluded: concluded,
@@ -259,8 +271,8 @@
   }
 
   /**
-   * 内訳別の申込み率を作る共通処理。dimensionKey の値ごとに
-   * 訪問実施(実施済+申込み)を母数、申込みを分子として率を出す。
+   * 内訳別の申込率を作る共通処理。dimensionKey の値ごとに
+   * 訪問に至ったアポを母数、申込に至ったアポを分子として率を出す。
    * 母数0は率null(0%や100%と断定しない)。定義されていない値の行は無視する。
    */
   function buildBreakdownStats_(appointments, options, dimensionKey, order, labelKey) {
@@ -274,11 +286,11 @@
     validAppointments_(appointments).forEach(function (record) {
       if (sinceDate && normalizeDateString(record["日付"]) < sinceDate) return;
       var status = record["ステータス"];
-      if (status !== "実施済" && status !== "申込み") return;
+      if (VISITED_STATUSES.indexOf(status) === -1) return;
       var entry = byValue[record[dimensionKey]];
       if (!entry) return;
       entry.completed += 1;
-      if (status === "申込み") entry.signups += 1;
+      if (SIGNED_STATUSES.indexOf(status) !== -1) entry.signups += 1;
     });
     return order.map(function (value) {
       var entry = byValue[value];
@@ -288,8 +300,8 @@
   }
 
   /**
-   * 温度感別の申込み率(高・中・低の順で固定)。チーム全体のみ・個人別は出さない。
-   * 母数 = その温度感の訪問実施(実施済+申込み)。母数0は率null(断定しない)。
+   * 温度感別の申込率(高・中・低の順で固定)。チーム全体のみ・個人別は出さない。
+   * 母数 = その温度感で訪問に至ったアポ。母数0は率null(断定しない)。
    * 「どんなアポを取れば決まるか」をアポ入れ側の改善につなげるための指標
    * (2026-08-14 小柳さん採用)。
    */
@@ -299,26 +311,26 @@
   }
 
   /**
-   * 代打候補(GPSレス版・2026-08-14 小柳さん決裁): アポがキャンセルになった枠に対し、
+   * 代打候補(GPSレス版・2026-08-14 小柳さん決裁): アポが差し戻しになった枠に対し、
    * その時間帯が空いている営業を「同日の直前・直後のアポ(時刻・場所)」付きで返す。
    * 位置情報は一切取得しない。どの候補が近いかの判断は、前後の場所を見た人間が行う。
    * 並び順: 前後にアポがある(現場に出ている)営業を先頭に。元の担当営業は候補外。
    */
-  function buildSubstituteCandidates(appointments, cancelledApo, salesStaffNames) {
-    var dateString = normalizeDateString(cancelledApo["日付"]);
-    var windowStart = timeToMinutes_(cancelledApo["開始時刻"]);
+  function buildSubstituteCandidates(appointments, returnedApo, salesStaffNames) {
+    var dateString = normalizeDateString(returnedApo["日付"]);
+    var windowStart = timeToMinutes_(returnedApo["開始時刻"]);
     if (windowStart === null) return [];
-    var windowEnd = windowStart + (Number(cancelledApo["所要分"]) || 60);
+    var windowEnd = windowStart + (Number(returnedApo["所要分"]) || 60);
 
     var sameDayActive = validAppointments_(appointments).filter(function (record) {
-      if (record["アポID"] === cancelledApo["アポID"]) return false;
+      if (record["アポID"] === returnedApo["アポID"]) return false;
       if (normalizeDateString(record["日付"]) !== dateString) return false;
       return BOOKED_STATUSES.indexOf(record["ステータス"]) !== -1;
     });
 
     var candidates = [];
     (salesStaffNames || []).forEach(function (owner) {
-      if (owner === cancelledApo["担当営業"]) return;
+      if (owner === returnedApo["担当営業"]) return;
       var mine = sameDayActive.filter(function (record) { return record["担当営業"] === owner; });
       var isBusy = mine.some(function (record) {
         var start = timeToMinutes_(record["開始時刻"]);

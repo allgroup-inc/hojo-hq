@@ -34,21 +34,57 @@
     "アポID", "日付", "開始時刻", "所要分", "顧客名", "形式", "場所またはURL",
     "担当営業", "アポ入れ担当", "温度感", "ステータス", "メモ",
     "登録日時", "最終更新日時",
-    // 対面営業マン物件管理システムとの名寄せキー(アセンドの顧客ID)。
-    // 2026-08-19 連携合意: 実施済/申込みの結果を先方APIへ返す際の突き合わせに使う。
+    // 名寄せキー。**当面の保存はアセンドの顧客id**(2026-08-21 軸の裁定①)。
+    // KM-000001 は名寄せの親統合で採番が動くため、確定前に焼き付けると全部ずれる。
+    // KM- は読み取り時に resolve API で引き、カットオーバーで焼き付けてから不変にする。
     // **フォームには出さない**(営業に手入力させない=タップを増やさない)。
-    // 自動連携(先方からの登録)が通るまでは空のまま。
-    "顧客ID"
+    // 自動連携(❶または❸からの登録)が通るまでは空のまま。
+    "顧客ID",
+    // 差し戻しの理由(顧客都合/自社都合)。ステータスは共通語彙のまま、理由は属性で持つ
+    // (2026-08-21 軸の裁定③)。自社都合は「他の見込み客に使えたはずの訪問枠を捨てた」
+    // 最も高くつく損失であり、顧客都合と混ぜると見えなくなるため必ず分ける。
+    // **人事評価に使わないこと**(使われると全部「顧客都合」になり項目が嘘になる)。
+    "差し戻し理由"
   ];
   // ※アポ種別(再訪/新規紹介/新規ご家族)と紹介元は、リードがどこから来たかの属性であり
   //   「対面営業マン物件管理システム」の領分。本システムは予定を回すことに専念する
   //   (2026-08-19 小柳さん指摘で撤去。引き渡し: docs/連携メモ_20260819_対面営業マン物件管理システム.md)
   var APPOINTMENT_FORMATS = ["訪問", "来店", "オンライン"];
   var TEMPERATURES = ["高", "中", "低"];
+
+  /* ステータスは5システム共通語彙。言い換え禁止(共通の約束【4】)。
+   * 旧語彙からの読み替え(2026-08-21 軸の裁定②③で移行。本番未投入のためデータ移行は不要):
+   *   予定 / 再調整中          → スケジュール調整中
+   *   確定                     → アポ確定
+   *   実施済                   → 訪問済(❸が持つ。❷は読むだけ)
+   *   申込み                   → 申込(❹が持つ。❷は読むだけ)
+   *   キャンセル(顧客都合)   → 差し戻し + 差し戻し理由「顧客都合」
+   *   キャンセル(自社都合)   → 差し戻し + 差し戻し理由「自社都合」
+   */
+
+  // ❷(このシステム)が書き換えてよいステータス。
+  // 差し戻し=訪問に至らず❶へ返却。対象外=架電禁止・アポ禁(持ち場と無関係に最優先)。
+  var OWNED_STATUSES = ["スケジュール調整中", "アポ確定", "差し戻し", "対象外"];
+  // ❸❹が持つステータス。❷は**読むだけ**(2026-08-21 軸の裁定②:
+  // 「持つ(書き換える)」と「見る(読む)」は別物。共通仕様が禁じているのは書き換え)。
+  var HANDED_OFF_STATUSES = ["訪問済", "追客中", "申込", "成立", "保全中"];
   var APPOINTMENT_STATUSES = [
-    "予定", "確定", "実施済", "申込み",
-    "キャンセル(顧客都合)", "キャンセル(自社都合)", "再調整中"
+    "スケジュール調整中", "アポ確定",
+    "訪問済", "追客中", "申込", "成立", "保全中",
+    "差し戻し", "対象外"
   ];
+  var RETURN_REASONS = ["顧客都合", "自社都合"];
+  /* 訪問枠が空くステータス。差し戻し=❶へ返却、対象外=架電禁止/アポ禁。
+   * これ以外(調整中を含む)は枠を押さえている扱い。調整の途中で他アポに枠を取られると
+   * 調整そのものが破綻するため、流れたら差し戻しにして明示的に空ける。 */
+  var SLOT_FREED_STATUSES = ["差し戻し", "対象外"];
+
+  /* ❷から訪問結果(訪問済/申込 等)を書き換えられるかの切替。
+   * 軸の裁定②は「編集不可にする」。ただし**❸からの結果連携が通るまで禁止にすると、
+   * 誰も結果を入れられずファネルが真っ暗になる**ため、連携が通るまでは "許可"。
+   * ❸連携の実装と同じリリースで "禁止" に倒す(それが裁定の完成形)。
+   */
+  var RESULT_INPUT_MODE = "許可";
 
   var HISTORY_SHEET_NAME = "変更履歴";
   var HISTORY_HEADERS = ["履歴ID", "アポID", "日時", "操作者", "操作", "変更内容"];
@@ -66,6 +102,11 @@
     APPOINTMENT_FORMATS: APPOINTMENT_FORMATS,
     TEMPERATURES: TEMPERATURES,
     APPOINTMENT_STATUSES: APPOINTMENT_STATUSES,
+    OWNED_STATUSES: OWNED_STATUSES,
+    HANDED_OFF_STATUSES: HANDED_OFF_STATUSES,
+    RETURN_REASONS: RETURN_REASONS,
+    SLOT_FREED_STATUSES: SLOT_FREED_STATUSES,
+    RESULT_INPUT_MODE: RESULT_INPUT_MODE,
     HISTORY_SHEET_NAME: HISTORY_SHEET_NAME,
     HISTORY_HEADERS: HISTORY_HEADERS,
     HISTORY_OPERATIONS: HISTORY_OPERATIONS,
@@ -237,8 +278,13 @@
 (function (global) {
   "use strict";
 
-  var CANCELLED_OR_PENDING = ["キャンセル(顧客都合)", "キャンセル(自社都合)", "再調整中"];
-  var UNCONFIRMED_STATUSES = ["予定", "再調整中"];
+  // 訪問枠が空くステータスの定義は schema.js に一本置き(2箇所に持つと必ずズレる)。
+  // GASは読み込み順が保証されないため、モジュール評価時ではなく呼び出し時に引く。
+  function slotFreed_(status) {
+    return getApoSchema_().SLOT_FREED_STATUSES.indexOf(status) !== -1;
+  }
+  // 旧「再調整中」は共通語彙に無く「スケジュール調整中」へ統合された(2026-08-21 軸の裁定)
+  var UNCONFIRMED_STATUSES = ["スケジュール調整中"];
   // 差分通知の対象外(システムが自動で書く列)
   var DIFF_EXCLUDED_COLUMNS = ["登録日時", "最終更新日時"];
 
@@ -341,7 +387,7 @@
 
   /**
    * ダブルブッキング判定: 同一担当営業・同一日付で時間帯([開始, 開始+所要分))が交差する
-   * アポを返す。キャンセル系・再調整中は「その時間は空く」ため対象外。
+   * アポを返す。差し戻し・対象外は「その時間は空く」ため対象外。
    * candidate 自身のアポIDは除外する(編集時に自分と重複判定しないため)。
    * 隣接(10:00-11:00 と 11:00-12:00)は重複ではない。
    */
@@ -354,7 +400,7 @@
       if (record["アポID"] === candidate["アポID"]) return false;
       if (record["担当営業"] !== candidate["担当営業"]) return false;
       if (normalizeDateString(record["日付"]) !== candidateDate) return false;
-      if (CANCELLED_OR_PENDING.indexOf(record["ステータス"]) !== -1) return false;
+      if (slotFreed_(record["ステータス"])) return false;
       var start = timeToMinutes_(record["開始時刻"]);
       if (start === null) return false;
       var end = start + (Number(record["所要分"]) || 60);
@@ -363,7 +409,7 @@
   }
 
   /**
-   * 遅れそう連絡の通知対象: 当該営業の同日・fromTime以降のアポ(キャンセル系除く)。
+   * 遅れそう連絡の通知対象: 当該営業の同日・fromTime以降のアポ(差し戻し・対象外を除く)。
    * 時刻の自動変更はしない(設計書 三名体制裁定①: 判断は人間・通知のみ)。
    */
   function buildDelayTargets(appointments, salesOwner, dateString, fromTimeString) {
@@ -371,7 +417,7 @@
     return sortAppointments((appointments || []).filter(function (record) {
       if (record["担当営業"] !== salesOwner) return false;
       if (normalizeDateString(record["日付"]) !== dateString) return false;
-      if (CANCELLED_OR_PENDING.slice(0, 2).indexOf(record["ステータス"]) !== -1) return false;
+      if (slotFreed_(record["ステータス"])) return false;
       var start = timeToMinutes_(record["開始時刻"]);
       if (start === null) return false;
       return fromMinutes === null || start >= fromMinutes;
@@ -415,8 +461,8 @@
 
   // 埋まり状況の営業時間窓(9:00〜18:00 = 540分)。将来変えたくなったら設定タブ化を検討
   var WORKDAY_MINUTES = 540;
-  // 「その時間が埋まっている」とみなすステータス(キャンセル系・再調整中は空き扱い)
-  var BOOKED_STATUSES = ["予定", "確定", "実施済", "申込み"];
+  // 「その時間が埋まっている」とみなすステータス(差し戻し・対象外だけが空き扱い)
+  var BOOKED_STATUSES = ["スケジュール調整中", "アポ確定", "訪問済", "追客中", "申込", "成立", "保全中"];
 
   /**
    * 本日の埋まり状況: 営業ごとの予約済み分数・件数・埋まり率(営業時間窓に対する割合)。
@@ -456,10 +502,17 @@
     };
   }
 
+  // 訪問に至ったとみなすステータス / 申込に至ったとみなすステータス。
+  // ★定義は軸が一元管理する(2026-08-21 裁定②:「❷が独自に数えないでください」)。
+  //   ❷と❸が別々に数えると必ずズレ、どちらが正しいかの議論になって両方信用されなくなる。
+  //   下記は軸から正式定義が届くまでの**暫定**。届いたら差し替える(画面にも暫定と明示)。
+  var VISITED_STATUSES = ["訪問済", "追客中", "申込", "成立", "保全中"];
+  var SIGNED_STATUSES = ["申込", "成立", "保全中"];
+
   /**
    * 転換ファネル(チーム全体のみ。営業マン別は評価誤用リスクのため見送り):
-   * - 母数 = 結果が出たアポ(実施済+申込み+キャンセル2種)。予定・確定・再調整中は除外
-   * - 訪問実施率 = (実施済+申込み) ÷ 母数 / 申込み率 = 申込み ÷ (実施済+申込み)
+   * - 母数 = 結果が出たアポ(訪問に至った + 差し戻し)。調整中・確定・対象外は除外
+   * - 訪問実施率 = 訪問に至った ÷ 母数 / 申込率 = 申込に至った ÷ 訪問に至った
    * 母数0のときは率をnullで返す(0%や100%と断定しない。表示側は「—」にする)。
    */
   function buildConversionStats(appointments, options) {
@@ -470,12 +523,12 @@
     validAppointments_(appointments).forEach(function (record) {
       if (sinceDate && normalizeDateString(record["日付"]) < sinceDate) return;
       var status = record["ステータス"];
-      var isCompleted = status === "実施済" || status === "申込み";
-      var isCancelled = status === "キャンセル(顧客都合)" || status === "キャンセル(自社都合)";
-      if (!isCompleted && !isCancelled) return;
+      var isCompleted = VISITED_STATUSES.indexOf(status) !== -1;
+      var isReturned = status === "差し戻し";
+      if (!isCompleted && !isReturned) return;
       concluded += 1;
       if (isCompleted) completed += 1;
-      if (status === "申込み") signups += 1;
+      if (SIGNED_STATUSES.indexOf(status) !== -1) signups += 1;
     });
     return {
       concluded: concluded,
@@ -487,8 +540,8 @@
   }
 
   /**
-   * 内訳別の申込み率を作る共通処理。dimensionKey の値ごとに
-   * 訪問実施(実施済+申込み)を母数、申込みを分子として率を出す。
+   * 内訳別の申込率を作る共通処理。dimensionKey の値ごとに
+   * 訪問に至ったアポを母数、申込に至ったアポを分子として率を出す。
    * 母数0は率null(0%や100%と断定しない)。定義されていない値の行は無視する。
    */
   function buildBreakdownStats_(appointments, options, dimensionKey, order, labelKey) {
@@ -502,11 +555,11 @@
     validAppointments_(appointments).forEach(function (record) {
       if (sinceDate && normalizeDateString(record["日付"]) < sinceDate) return;
       var status = record["ステータス"];
-      if (status !== "実施済" && status !== "申込み") return;
+      if (VISITED_STATUSES.indexOf(status) === -1) return;
       var entry = byValue[record[dimensionKey]];
       if (!entry) return;
       entry.completed += 1;
-      if (status === "申込み") entry.signups += 1;
+      if (SIGNED_STATUSES.indexOf(status) !== -1) entry.signups += 1;
     });
     return order.map(function (value) {
       var entry = byValue[value];
@@ -516,8 +569,8 @@
   }
 
   /**
-   * 温度感別の申込み率(高・中・低の順で固定)。チーム全体のみ・個人別は出さない。
-   * 母数 = その温度感の訪問実施(実施済+申込み)。母数0は率null(断定しない)。
+   * 温度感別の申込率(高・中・低の順で固定)。チーム全体のみ・個人別は出さない。
+   * 母数 = その温度感で訪問に至ったアポ。母数0は率null(断定しない)。
    * 「どんなアポを取れば決まるか」をアポ入れ側の改善につなげるための指標
    * (2026-08-14 小柳さん採用)。
    */
@@ -527,26 +580,26 @@
   }
 
   /**
-   * 代打候補(GPSレス版・2026-08-14 小柳さん決裁): アポがキャンセルになった枠に対し、
+   * 代打候補(GPSレス版・2026-08-14 小柳さん決裁): アポが差し戻しになった枠に対し、
    * その時間帯が空いている営業を「同日の直前・直後のアポ(時刻・場所)」付きで返す。
    * 位置情報は一切取得しない。どの候補が近いかの判断は、前後の場所を見た人間が行う。
    * 並び順: 前後にアポがある(現場に出ている)営業を先頭に。元の担当営業は候補外。
    */
-  function buildSubstituteCandidates(appointments, cancelledApo, salesStaffNames) {
-    var dateString = normalizeDateString(cancelledApo["日付"]);
-    var windowStart = timeToMinutes_(cancelledApo["開始時刻"]);
+  function buildSubstituteCandidates(appointments, returnedApo, salesStaffNames) {
+    var dateString = normalizeDateString(returnedApo["日付"]);
+    var windowStart = timeToMinutes_(returnedApo["開始時刻"]);
     if (windowStart === null) return [];
-    var windowEnd = windowStart + (Number(cancelledApo["所要分"]) || 60);
+    var windowEnd = windowStart + (Number(returnedApo["所要分"]) || 60);
 
     var sameDayActive = validAppointments_(appointments).filter(function (record) {
-      if (record["アポID"] === cancelledApo["アポID"]) return false;
+      if (record["アポID"] === returnedApo["アポID"]) return false;
       if (normalizeDateString(record["日付"]) !== dateString) return false;
       return BOOKED_STATUSES.indexOf(record["ステータス"]) !== -1;
     });
 
     var candidates = [];
     (salesStaffNames || []).forEach(function (owner) {
-      if (owner === cancelledApo["担当営業"]) return;
+      if (owner === returnedApo["担当営業"]) return;
       var mine = sameDayActive.filter(function (record) { return record["担当営業"] === owner; });
       var isBusy = mine.some(function (record) {
         var start = timeToMinutes_(record["開始時刻"]);
@@ -607,7 +660,7 @@
  *
  * 顧客名には敬称を足さない。現場は「サンプル商店 田中様」のように敬称込みで入力するため、
  * こちらで「様」を付けると「田中様様」になる(2026-08-19 リハーサルで検出)。
- * 通知は5種限定(新規・変更・キャンセル・申込み・遅れそう)。リマインダー等は作らない
+ * 通知は5種限定(新規・変更・差し戻し・申込・遅れそう)。リマインダー等は作らない
  * (設計書 三名体制裁定④: 通知過多で肝心の遅延通知が埋もれるのを防ぐ)。
  * 文面は通知一覧のプレビューで読み切れるよう、1行目に結論を置く。
  */
@@ -640,13 +693,20 @@
       "・担当営業: " + mention;
   }
 
-  function buildCancelMessage(apo, status, mention) {
-    return "❌ " + status + " " + apo["顧客名"] + "(" + describeSlot_(apo) + ")\n" +
-      "・担当営業: " + mention + "(アポ入れ: " + apo["アポ入れ担当"] + ")";
+  /**
+   * 差し戻し(訪問に至らず❶へ返却)の通知。理由(顧客都合/自社都合)を必ず本文に出す。
+   * 自社都合は「他の見込み客に使えたはずの訪問枠を捨てた」最も高くつく損失のため、
+   * 顧客都合と一目で見分けがつく必要がある(2026-08-21 軸の裁定③)。
+   */
+  function buildReturnMessage(apo, mention) {
+    var reason = apo["差し戻し理由"] ? "(" + apo["差し戻し理由"] + ")" : "(理由未記入)";
+    return "❌ 差し戻し" + reason + " " + apo["顧客名"] + "(" + describeSlot_(apo) + ")\n" +
+      "・担当営業: " + mention + "(アポ入れ: " + apo["アポ入れ担当"] + ")\n" +
+      "・この枠は空きました。❶で組み直しになります";
   }
 
   function buildSignupMessage(apo, mention) {
-    return "🎉 申込み " + apo["顧客名"] + "!\n" +
+    return "🎉 申込 " + apo["顧客名"] + "!\n" +
       "・" + describeSlot_(apo) + " / 担当営業: " + mention;
   }
 
@@ -696,7 +756,7 @@
   }
 
   /**
-   * キャンセル通知に付ける代打候補セクション(GPSレス版)。
+   * 差し戻し通知に付ける代打候補セクション(GPSレス版)。
    * candidates は ApoCore.buildSubstituteCandidates の戻り値。表示は最大5名。
    * どの候補に行ってもらうかの判断・連絡は人間が行う(自動アサインはしない)。
    */
@@ -721,7 +781,7 @@
     buildSubstituteSection: buildSubstituteSection,
     buildNewAppointmentMessage: buildNewAppointmentMessage,
     buildChangeMessage: buildChangeMessage,
-    buildCancelMessage: buildCancelMessage,
+    buildReturnMessage: buildReturnMessage,
     buildSignupMessage: buildSignupMessage,
     buildDelayMessage: buildDelayMessage
   };
@@ -816,6 +876,8 @@
 ".row .temp{flex:none;width:44px;font-size:12px;color:var(--sub)}\n" +
 ".row .temp.hot{color:var(--ink);font-weight:700}\n" +
 ".row .st{flex:none;width:112px;font-size:12px;text-align:right;color:var(--sub)}\n" +
+// 差し戻し理由は別行に落とす(「差し戻し自社都合」と続けて読ませない)
+".row .st small{display:block;font-size:11px;opacity:.75}\n" +
 ".row .st.signed{color:var(--ink);font-weight:700}\n" +
 ".row .st.cancel{color:var(--bad)}\n" +
 ".row.done{opacity:.55}\n" +
@@ -898,16 +960,21 @@
 "<div class=\"sheet\" id=\"sheet\"><div class=\"inner\">\n" +
 "  <h2 id=\"sheetTitle\"></h2>\n" +
 "  <div class=\"grid\">\n" +
-"    <button data-st=\"確定\">確定</button>\n" +
-"    <button data-st=\"実施済\">実施済</button>\n" +
-"    <button data-st=\"申込み\" class=\"strong\">申込み</button>\n" +
-"    <button data-st=\"再調整中\">再調整中</button>\n" +
+"    <button data-st=\"アポ確定\">アポ確定</button>\n" +
+"    <button data-st=\"スケジュール調整中\">調整中に戻す</button>\n" +
+/* 訪問済・申込は❸❹が持つ語。❷は本来「見るだけ」(2026-08-21 軸の裁定②)。
+   ❸からの結果連携が通るまでの暫定でここに置き、通ったら丸ごと消して表示専用にする。 */
+"    <button data-st=\"訪問済\">訪問済</button>\n" +
+"    <button data-st=\"申込\" class=\"strong\">申込</button>\n" +
 "  </div>\n" +
 "  <div class=\"delayrow\"><span class=\"dlabel\">遅れそう:</span>\n" +
 "    <button data-delay=\"15\">+15分</button><button data-delay=\"30\">+30分</button><button data-delay=\"60\">+60分</button></div>\n" +
+/* 差し戻し=訪問に至らず❶へ返却。理由は別項目(2026-08-21 軸の裁定③)。
+   自社都合は「他の見込み客に使えたはずの訪問枠を捨てた」最も高くつく損失のため、
+   顧客都合と必ず別ボタンにする。※この数字を人事評価に使わないこと */
 "  <div class=\"dangerzone\">\n" +
-"    <button data-st=\"キャンセル(顧客都合)\">キャンセル(顧客都合)</button>\n" +
-"    <button data-st=\"キャンセル(自社都合)\">キャンセル(自社都合)</button>\n" +
+"    <button data-st=\"差し戻し\" data-reason=\"顧客都合\">差し戻し(顧客都合)</button>\n" +
+"    <button data-st=\"差し戻し\" data-reason=\"自社都合\">差し戻し(自社都合)</button>\n" +
 "  </div>\n" +
 "  <div class=\"footrow\"><button class=\"btn-ghost\" id=\"sheetEdit\">編集</button><button class=\"btn-ghost\" id=\"sheetClose\">閉じる</button></div>\n" +
 "</div></div>\n" +
@@ -976,13 +1043,16 @@
 "function doneLoading() { state.loaded = true; $('board').classList.remove('dim'); }\n" +
 "function effectiveOwner() { return state.mine ? state.meName : state.owner; }\n" +
 "function fail(error) { doneLoading(); toast('エラー: ' + (error && error.message ? error.message : error)); }\n" +
+"var HANDED_OFF = ['訪問済', '追客中', '申込', '成立', '保全中'];\n" +
+"var SLOT_FREED = ['差し戻し', '対象外'];\n" +
 "function statusClass(status) {\n" +
-"  if (status.indexOf('キャンセル') === 0) return 'st cancel';\n" +
-"  if (status === '申込み') return 'st signed';\n" +
+"  if (SLOT_FREED.indexOf(status) >= 0) return 'st cancel';\n" +
+"  if (status === '申込' || status === '成立') return 'st signed';\n" +
 "  return 'st';\n" +
 "}\n" +
 "function rowHtml(apo) {\n" +
-"  var doneClass = (apo['ステータス'] === '実施済' || apo['ステータス'].indexOf('キャンセル') === 0) ? ' done' : '';\n" +
+"  var status = apo['ステータス'];\n" +
+"  var doneClass = (status === '訪問済' || SLOT_FREED.indexOf(status) >= 0) ? ' done' : '';\n" +
 "  var hotClass = apo['温度感'] === '高' ? ' hot' : '';\n" +
 "  return '<div class=\"row' + doneClass + '\" data-id=\"' + esc(apo['アポID']) + '\" tabindex=\"0\">' +\n" +
 "    '<div class=\"time\">' + esc(apo['開始時刻']) + '<small>' + esc(apo['所要分']) + '分</small></div>' +\n" +
@@ -990,7 +1060,9 @@
 "    '<div class=\"meta\">' + esc(apo['形式']) + ' ' + esc(apo['場所またはURL']) + '</div></div>' +\n" +
 "    '<div class=\"owner\">' + esc(apo['担当営業']) + '</div>' +\n" +
 "    '<div class=\"temp' + hotClass + '\">' + esc(apo['温度感']) + '</div>' +\n" +
-"    '<div class=\"' + statusClass(apo['ステータス']) + '\">' + esc(apo['ステータス']) + '</div></div>';\n" +
+"    '<div class=\"' + statusClass(status) + '\">' + esc(status) +\n" +
+"      (status === '差し戻し' && apo['差し戻し理由'] ? '<small>' + esc(apo['差し戻し理由']) + '</small>' : '') +\n" +
+"    '</div></div>';\n" +
 "}\n" +
 "function renderBoard(board) {\n" +
 "  state.board = board; state.meName = board.meName || '';\n" +
@@ -1047,16 +1119,19 @@
 "      '<b>' + entry.count + '件・' + formatHours(entry.bookedMinutes) + '(' + Math.round(entry.ratio * 100) + '%)</b></div>' +\n" +
 "      '<div class=\"track\"><div class=\"bar\" style=\"width:' + Math.round(entry.ratio * 100) + '%\"></div></div></div>';\n" +
 "  });\n" +
-"  html += '<div class=\"note\">空き=キャンセル・再調整中を除いた予約済み時間。評価目的では使いません</div></div>';\n" +
+"  html += '<div class=\"note\">空き=差し戻し・対象外を除いた予約済み時間。評価目的では使いません</div></div>';\n" +
 "  html += '<div class=\"panel\"><h3>転換ファネル(過去30日・' + esc(stats.sinceDate) + '以降・チーム全体)</h3>';\n" +
 "  html += '<div class=\"fstep\"><span>結果が出たアポ</span><b>' + funnel.concluded + '件</b></div>';\n" +
-"  html += '<div class=\"fstep\"><span>訪問実施(実施済+申込み)</span><span><span class=\"rate\">' + formatRate(funnel.visitRate) + '</span><b>' + funnel.completed + '件</b></span></div>';\n" +
-"  html += '<div class=\"fstep\"><span>申込み</span><span><span class=\"rate\">' + formatRate(funnel.signupRate) + '</span><b>' + funnel.signups + '件</b></span></div>';\n" +
-"  html += '<div class=\"note\">率の母数: 訪問実施率=結果が出たアポ、申込み率=訪問実施。' +\n" +
+"  html += '<div class=\"fstep\"><span>訪問に至った</span><span><span class=\"rate\">' + formatRate(funnel.visitRate) + '</span><b>' + funnel.completed + '件</b></span></div>';\n" +
+"  html += '<div class=\"fstep\"><span>申込に至った</span><span><span class=\"rate\">' + formatRate(funnel.signupRate) + '</span><b>' + funnel.signups + '件</b></span></div>';\n" +
+/* 定義は軸が一元管理する(2026-08-21 裁定②)。❷と❸が別々に数えるとズレて
+   両方の数字が信用されなくなるため、暫定であることを画面にも出す */
+"  html += '<div class=\"note\"><b>この定義は暫定です</b>(正式な数え方は軸が一元管理。届き次第差し替えます)。' +\n" +
+"    '<br>率の母数: 訪問実施率=結果が出たアポ、申込率=訪問に至った件数。' +\n" +
 "    (funnel.concluded < 10 ? '<br>件数が少ないため参考値です(母数10件未満)。' : '') +\n" +
-"    '<br>予定・確定・再調整中のアポは結果待ちのため含みません。評価目的では使いません</div></div>';\n" +
+"    '<br>調整中・アポ確定は結果待ちのため含みません。評価目的では使いません</div></div>';\n" +
 "  var lowTempSample = false;\n" +
-"  html += '<div class=\"panel\"><h3>温度感別の申込み率(過去30日・チーム全体)</h3>';\n" +
+"  html += '<div class=\"panel\"><h3>温度感別の申込率(過去30日・チーム全体)</h3>';\n" +
 "  (stats.byTemperature || []).forEach(function (row) {\n" +
 "    if (row.completed > 0 && row.completed < 10) lowTempSample = true;\n" +
 "    var percent = row.rate === null ? 0 : Math.round(row.rate * 100);\n" +
@@ -1064,7 +1139,7 @@
 "      '<div class=\"track\"><div class=\"bar\" style=\"width:' + percent + '%\"></div></div>' +\n" +
 "      '<span class=\"tval\"><b>' + formatRate(row.rate) + '</b> ' + row.signups + '/' + row.completed + '件</span></div>';\n" +
 "  });\n" +
-"  html += '<div class=\"note\">母数=その温度感の訪問実施(実施済+申込み)。' +\n" +
+"  html += '<div class=\"note\">母数=その温度感で訪問に至ったアポ。' +\n" +
 "    (lowTempSample ? '<br>母数10件未満の行は参考値です。' : '') +\n" +
 "    '<br>どんなアポを取れば決まりやすいかの改善用。評価目的では使いません</div></div>';\n" +
 "  $('board').innerHTML = html;\n" +
@@ -1126,7 +1201,7 @@
 "    $('fMemo').value = apo ? apo['メモ'] : '';\n" +
 "    fillSelect('fTemp', options.temperatures, apo ? apo['温度感'] : '中');\n" +
 "    fillSelect('fFormat', options.formats, apo ? apo['形式'] : '訪問');\n" +
-"    fillSelect('fStatus', options.statuses, apo ? apo['ステータス'] : '予定');\n" +
+"    fillSelect('fStatus', options.statuses, apo ? apo['ステータス'] : 'スケジュール調整中');\n" +
 /* 初期値は「自分がその役割に該当するときだけ自分」。アポ入れ係が新規登録したとき、
    担当営業に自分(アポ入れ係)が入ってしまう事故を防ぐ(2026-08-19 リハーサルで検出) */
 "    fillSelect('fSales', options.salesStaff,\n" +
@@ -1179,7 +1254,7 @@
 "      $('overlapWarn').classList.remove('show');\n" +
 "      $('modalTitle').textContent = '新規アポ';\n" +
 "      ['fCustomer', 'fPlace', 'fMemo'].forEach(function (id) { $(id).value = ''; });\n" +
-"      $('fStatus').value = '予定';\n" +
+"      $('fStatus').value = 'スケジュール調整中';\n" +
 "      $('fCustomer').focus();\n" +
 "      toast(notice + ' 続けて登録できます');\n" +
 "      load();\n" +
@@ -1195,7 +1270,7 @@
 "  $('modalSave').disabled = disabled;\n" +
 "  $('modalSaveNext').disabled = disabled;\n" +
 "}\n" +
-"function quickStatus(status) {\n" +
+"function quickStatus(status, reason) {\n" +
 "  if (!state.selected) return;\n" +
 "  closeSheet();\n" +
 "  google.script.run.withSuccessHandler(function (result) {\n" +
@@ -1203,10 +1278,11 @@
 "      toast('時間帯が重なるため更新していません。「編集」から内容を確認してください');\n" +
 "      load(); return;\n" +
 "    }\n" +
-"    toast(result && result.notified ? '「' + status + '」に更新し、Slackへ通知しました'\n" +
-"      : '「' + status + '」に更新しました(Slack通知なし)');\n" +
+"    var label = status + (reason ? '(' + reason + ')' : '');\n" +
+"    toast(result && result.notified ? '「' + label + '」に更新し、Slackへ通知しました'\n" +
+"      : '「' + label + '」に更新しました(Slack通知なし)');\n" +
 "    load();\n" +
-"  }).withFailureHandler(fail).updateStatus(state.selected['アポID'], status);\n" +
+"  }).withFailureHandler(fail).updateStatus(state.selected['アポID'], status, reason || '');\n" +
 "}\n" +
 "function reportDelayMinutes(minutes) {\n" +
 "  var apoId = state.selected ? state.selected['アポID'] : null;\n" +
@@ -1235,7 +1311,9 @@
 "$('modalSave').addEventListener('click', function () { save(false); });\n" +
 "$('modalSaveNext').addEventListener('click', function () { save(true); });\n" +
 "Array.prototype.forEach.call(document.querySelectorAll('[data-st]'), function (el) {\n" +
-"  el.addEventListener('click', function () { quickStatus(el.getAttribute('data-st')); });\n" +
+"  el.addEventListener('click', function () {\n" +
+"    quickStatus(el.getAttribute('data-st'), el.getAttribute('data-reason'));\n" +
+"  });\n" +
 "});\n" +
 "Array.prototype.forEach.call(document.querySelectorAll('[data-delay]'), function (el) {\n" +
 "  el.addEventListener('click', function () { reportDelayMinutes(Number(el.getAttribute('data-delay'))); });\n" +
@@ -1330,7 +1408,10 @@ function setDropdown_(sheet, headers, columnName, values, maxRows) {
  * 3. Slackで通知チャンネル用の Incoming Webhook を発行し、Apps Scriptエディタの
  *    「プロジェクトの設定」→「スクリプト プロパティ」で SLACK_WEBHOOK_URL に設定する
  *    (コードにWebhook URLを直接書かない。未設定時は通知をスキップしログのみ)
- * 4. 「デプロイ」→「新しいデプロイ」→種類「ウェブアプリ」。実行ユーザー: 自分。
+ * 4. 「デプロイ」→「新しいデプロイ」→種類「ウェブアプリ」。
+ *    次のユーザーとして実行: **「ウェブアプリケーションにアクセスしているユーザー」**
+ *    (「自分」にすると Session.getActiveUser().getEmail() が空になり、所有者以外が
+ *     全員締め出される。個人Gmail運用での必須設定。2026-08-17 レビュー#1)
  *    アクセスできるユーザー: 「Googleアカウントを持つ全員」
  * 5. デプロイURLをスタッフタブに登録した人へ共有する(スマホのホーム画面に追加推奨)
  *
@@ -1506,10 +1587,9 @@ function saveAppointment(payload) {
       if (diff) {
         appendHistory_(payload["アポID"], operator, "変更", diff);
         var message = buildStatusAwareMessage_(payload, oldRecord["ステータス"], diff, mention);
-        // キャンセルで枠が空いたら、代打候補(GPSレス・2026-08-14決裁)を通知に添える。
+        // 差し戻しで枠が空いたら、代打候補(GPSレス・2026-08-14決裁)を通知に添える。
         // 位置情報は取得せず、前後アポの場所を提示するだけ。行かせる判断・連絡は人間が行う
-        if (payload["ステータス"].indexOf("キャンセル") === 0 &&
-            oldRecord["ステータス"].indexOf("キャンセル") !== 0) {
+        if (payload["ステータス"] === "差し戻し" && oldRecord["ステータス"] !== "差し戻し") {
           message += "\n" + ApoNotify.buildSubstituteSection(
             ApoCore.buildSubstituteCandidates(appointments, payload, ApoAccess.listSalesStaff(staffRows)));
         }
@@ -1533,26 +1613,36 @@ function saveAppointment(payload) {
 /**
  * カードのアクションシートからのステータスだけの更新(2タップ操作)。
  * 履歴・通知は saveAppointment の編集と同じ扱いにする。
+ * returnReason は「差し戻し」のときだけ使う(顧客都合/自社都合)。
  *
- * キャンセル系・再調整中から稼働ステータスへ戻す場合だけはダブルブッキング検知を
+ * 差し戻し・対象外から稼働ステータスへ戻す場合だけはダブルブッキング検知を
  * 生かす(confirmedOverlapを立てない)。空いた枠に別アポが入っている可能性があるため
  * (2026-08-17レビュー指摘#5)。重複があれば saveAppointment が {ok:false} を返し、
  * 画面側が「編集から確認」を促す。
  */
-function updateStatus(apoId, status) {
+function updateStatus(apoId, status, returnReason) {
   requireApoAccess_();
   if (ApoSchema.APPOINTMENT_STATUSES.indexOf(status) === -1) {
     throw new Error("不正なステータスです: " + status);
   }
+  // ❸❹が持つステータスを❷から書き換えない(2026-08-21 軸の裁定②)。
+  // 連携が通るまでの暫定期間だけ RESULT_INPUT_MODE = "許可" で通す。
+  if (ApoSchema.HANDED_OFF_STATUSES.indexOf(status) !== -1 &&
+      ApoSchema.RESULT_INPUT_MODE !== "許可") {
+    throw new Error("「" + status + "」は対面営業マン物件管理システム側で更新してください。");
+  }
+  if (status === "差し戻し" && ApoSchema.RETURN_REASONS.indexOf(returnReason) === -1) {
+    throw new Error("差し戻しには理由(顧客都合/自社都合)が必要です。");
+  }
   var appointments = readAppointments_();
   var record = findAppointmentById_(appointments, apoId);
   if (!record) throw new Error("対象のアポが見つかりません: " + apoId);
-  var INACTIVE = ["キャンセル(顧客都合)", "キャンセル(自社都合)", "再調整中"];
-  var reactivating = INACTIVE.indexOf(record["ステータス"]) !== -1 &&
-    INACTIVE.indexOf(status) === -1;
+  var reactivating = ApoSchema.SLOT_FREED_STATUSES.indexOf(record["ステータス"]) !== -1 &&
+    ApoSchema.SLOT_FREED_STATUSES.indexOf(status) === -1;
   var updated = {};
   Object.keys(record).forEach(function (key) { updated[key] = record[key]; });
   updated["ステータス"] = status;
+  updated["差し戻し理由"] = status === "差し戻し" ? returnReason : "";
   updated.confirmedOverlap = !reactivating;
   return saveAppointment(updated);
 }
@@ -1649,15 +1739,13 @@ function appendHistory_(apoId, operator, operation, detail) {
 }
 
 /**
- * ステータス変化に応じて通知種別を出し分ける(申込み🎉/キャンセル❌/その他は変更🔁)。
+ * ステータス変化に応じて通知種別を出し分ける(申込🎉/差し戻し❌/その他は変更🔁)。
  */
 function buildStatusAwareMessage_(payload, oldStatus, diff, mention) {
   var newStatus = payload["ステータス"];
   if (newStatus !== oldStatus) {
-    if (newStatus === "申込み") return ApoNotify.buildSignupMessage(payload, mention);
-    if (newStatus.indexOf("キャンセル") === 0) {
-      return ApoNotify.buildCancelMessage(payload, newStatus, mention);
-    }
+    if (newStatus === "申込") return ApoNotify.buildSignupMessage(payload, mention);
+    if (newStatus === "差し戻し") return ApoNotify.buildReturnMessage(payload, mention);
   }
   return ApoNotify.buildChangeMessage(payload, diff, mention);
 }
