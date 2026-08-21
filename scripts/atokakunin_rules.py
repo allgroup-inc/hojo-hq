@@ -96,11 +96,23 @@ def decide_after_reply(record, reply_text, open_tel_keys, accept_words=DEFAULT_A
 
 
 # ── 3. 電話リスト / 期限切れ ──────────────────────────────
+def is_do_not_call(record):
+    """架電禁止・アポ禁(対象外)か。
+
+    共通仕様: **架電禁止は持ち場と無関係に最優先で効く。どこにいても発信しない。**
+    この判定は他のどの条件よりも先に効かせる(経過日数・期限・状態を一切見ない)。
+    """
+    return bool(record.get("do_not_call")) or record.get("list_status") == "対象外"
+
+
 def needs_call(record, now, wait_days=DEFAULT_CALL_AFTER_DAYS):
     """送信からwait_days経っても返信がない=電話リストに載せる。
 
     送信失敗・要確認は返信を待つ意味がないので、経過日数によらず即座に対象。
+    ただし架電禁止は何より先に効く。
     """
+    if is_do_not_call(record):
+        return False
     state = record.get("state")
     if state in ("承認_SMS", "承認_電話", "期限切れ"):
         return False
@@ -179,6 +191,23 @@ def build_call_list(records, now, wait_days=DEFAULT_CALL_AFTER_DAYS,
     return rows
 
 
+def build_excluded_list(records):
+    """架電禁止で自動化から外した中で、まだ後確認が済んでいないものを返す。
+
+    **黙って消さないための一覧。** 架電禁止だからといって後確認の必要が消えるわけではない。
+    自動では触らないが、保全部が人として判断できるよう必ず表に出す
+    (沈黙は成功と見分けがつかない)。
+    """
+    rows = [
+        {"order_id": r["order_id"], "state": r.get("state"),
+         "reason": "架電禁止・アポ禁のため自動化の対象外。後確認は未了"}
+        for r in records
+        if is_do_not_call(r) and r.get("state") not in ("承認_SMS", "承認_電話")
+    ]
+    rows.sort(key=lambda x: x["order_id"])
+    return rows
+
+
 def render_call_list(rows):
     """電話リストをタブ区切りの文字列にする(印刷・貼り付け用)。
 
@@ -243,12 +272,17 @@ def review_candidates(replies, min_count=3, max_len=6, accept_words=DEFAULT_ACCE
 
 # ── 4. 送信してよいかの門番(ガードレール) ─────────────────
 def can_send(order_id, now, already_sent_ids, sent_today,
-             window=DEFAULT_SEND_WINDOW, daily_limit=DEFAULT_DAILY_LIMIT):
+             window=DEFAULT_SEND_WINDOW, daily_limit=DEFAULT_DAILY_LIMIT,
+             record=None):
     """送ってよいかを判定し、(可否, 理由)で返す。
 
     理由を必ず返すのは、送らなかった日に「なぜ0件だったか」を後から説明できるようにするため。
     沈黙(0件)は「対象なし」とも「壊れて拾えていない」とも読めてしまう。
     """
+    if record is not None and is_do_not_call(record):
+        # 架電禁止の方へ機械が一斉送信するのは、電話をかけるより始末が悪い。
+        # 自動化からは外し、保全部が人として判断する対象へ回す(build_excluded_listを見ること)。
+        return False, "架電禁止・アポ禁の対象(自動送信しない。人が判断する)"
     if order_id in already_sent_ids:
         return False, "二重送信の防止(この申込IDは送信済)"
     if not (window[0] <= now.hour < window[1]):
@@ -312,7 +346,10 @@ def self_test():
                            lambda c: is_expired(c["record"], parse_dt(c["now"])))
     failed += _run_section(golden, "send_gate",
                            lambda c: can_send(c["order_id"], parse_dt(c["now"]),
-                                              c["already_sent_ids"], c["sent_today"])[0])
+                                              c["already_sent_ids"], c["sent_today"],
+                                              record=c.get("record"))[0])
+    failed += _run_section(golden, "excluded_list",
+                           lambda c: [r["order_id"] for r in build_excluded_list(c["records"])])
     failed += _run_section(golden, "error_class", lambda c: classify_error(c["kind"]))
     failed += _run_section(golden, "retry_delay", lambda c: retry_delay_seconds(c["attempt"]))
     # JSONに配列で書いた期待値をタプルに直してから比較する
@@ -330,7 +367,7 @@ def self_test():
 
     for k in ("reply_judgment", "auto_approve", "after_reply", "call_list",
               "expire", "send_gate", "error_class", "retry_delay", "review_candidates",
-              "call_list_order", "call_list_flags"):
+              "call_list_order", "call_list_flags", "excluded_list"):
         total += len(golden.get(k, []))
 
     # 判定器そのものの前提が崩れていないかの確認(ゴールデンセットの取りこぼし防止)

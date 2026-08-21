@@ -99,7 +99,19 @@
     {"name": "1日の上限に達したら止める",
      "order_id": "A-10435", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 100, "expect": false},
     {"name": "上限の1件手前なら送れる",
-     "order_id": "A-10436", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 99, "expect": true}
+     "order_id": "A-10436", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 99, "expect": true},
+
+    {"name": "架電禁止の方には自動送信もしない(条件が揃っていても送らない)",
+     "order_id": "A-10437", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 0,
+     "record": {"order_id": "A-10437", "state": "未送信", "do_not_call": true}, "expect": false},
+
+    {"name": "対象外(list_status)も同じく送らない",
+     "order_id": "A-10438", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 0,
+     "record": {"order_id": "A-10438", "state": "未送信", "list_status": "対象外"}, "expect": false},
+
+    {"name": "架電禁止でなければ従来どおり送れる",
+     "order_id": "A-10439", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 0,
+     "record": {"order_id": "A-10439", "state": "未送信"}, "expect": true}
   ],
 
   "error_class": [
@@ -180,8 +192,57 @@
      ],
      "expect": ["A-101", "A-100"]},
 
+    {"name": "架電禁止は何より先に効く(期限間近でも電話リストに載せない)",
+     "_note": "共通仕様: 架電禁止は持ち場と無関係に最優先。どこにいても発信しない",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-110", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-10 09:00", "do_not_call": true},
+       {"order_id": "A-111", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-14 09:00"}
+     ],
+     "expect": ["A-111"]},
+
+    {"name": "架電禁止は送信失敗でも電話リストに載せない",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-120", "tel_key": "T-a", "state": "送信失敗", "sent_at": "2026-08-17 08:00", "do_not_call": true}
+     ],
+     "expect": []},
+
+    {"name": "対象外(list_status)も架電禁止と同じに扱う",
+     "now": "2026-08-17 09:00",
+     "records": [
+       {"order_id": "A-130", "tel_key": "T-a", "state": "要確認", "sent_at": "2026-08-15 09:00", "list_status": "対象外"}
+     ],
+     "expect": []},
+
     {"name": "対象が無ければ空",
      "now": "2026-08-17 09:00", "records": [], "expect": []}
+  ],
+
+  "excluded_list": [
+    {"name": "架電禁止で後確認が未了のものは、黙って消さず一覧に出す",
+     "records": [
+       {"order_id": "A-200", "state": "送信済", "do_not_call": true},
+       {"order_id": "A-201", "state": "送信済"}
+     ],
+     "expect": ["A-200"]},
+
+    {"name": "対象外(list_status)も同じ扱い",
+     "records": [
+       {"order_id": "A-210", "state": "未送信", "list_status": "対象外"}
+     ],
+     "expect": ["A-210"]},
+
+    {"name": "架電禁止でも承認済なら一覧に出さない(もう用事がない)",
+     "records": [
+       {"order_id": "A-220", "state": "承認_電話", "do_not_call": true},
+       {"order_id": "A-221", "state": "承認_SMS", "do_not_call": true}
+     ],
+     "expect": []},
+
+    {"name": "架電禁止が無ければ空",
+     "records": [{"order_id": "A-230", "state": "送信済"}],
+     "expect": []}
   ],
 
   "call_list_flags": [
