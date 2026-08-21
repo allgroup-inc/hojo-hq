@@ -160,3 +160,123 @@ test("buildChangeDiff: 登録日時・最終更新日時は差分に含めない
   const newRecord = apo({ "登録日時": "y", "最終更新日時": "y" });
   assert.equal(core.buildChangeDiff(oldRecord, newRecord), "");
 });
+
+/* ---- 今日やること(要対応の浮上)・埋まっていない訪問枠 ----
+ * 新しい入力を1つも増やさず、既存の列だけから導けることを固定する。
+ * 「放置されているものが自動で浮上する」が5システム共通の前提【4】。
+ */
+
+const TODAY = "2026-08-14";
+const attn = (list, options) =>
+  core.buildAttentionList(list, Object.assign({ today: TODAY, now: "12:00" }, options));
+
+test("buildAttentionList: 訪問時間が終わって猶予も過ぎたのに結果が入っていないアポを最優先で出す", () => {
+  const list = [
+    apo({ "アポID": "done", "開始時刻": "09:00", "所要分": 60, "ステータス": "訪問済" }),
+    apo({ "アポID": "pending", "開始時刻": "09:00", "所要分": 60, "担当営業": "営業二郎", "ステータス": "アポ確定" }),
+    apo({ "アポID": "soon", "開始時刻": "11:30", "所要分": 60, "ステータス": "アポ確定" })
+  ];
+  const items = attn(list);
+  assert.deepEqual(items.map((i) => i.apo["アポID"]), ["pending"]);
+  assert.equal(items[0].kind, "result");
+});
+
+test("buildAttentionList: 猶予中(終了直後)はまだ出さない。押させるのは一息ついてから", () => {
+  const list = [apo({ "アポID": "justEnded", "開始時刻": "10:00", "所要分": 60, "ステータス": "アポ確定" })];
+  assert.equal(attn(list, { now: "11:10" }).length, 0);
+  assert.equal(attn(list, { now: "12:31" })[0].kind, "result");
+});
+
+test("buildAttentionList: 過去のアポも結果待ちとして出るが、さかのぼりすぎない(古すぎる分は出さない)", () => {
+  const list = [
+    apo({ "アポID": "yesterday", "日付": "2026-08-13", "ステータス": "アポ確定" }),
+    apo({ "アポID": "ancient", "日付": "2026-06-01", "ステータス": "アポ確定" })
+  ];
+  assert.deepEqual(attn(list).map((i) => i.apo["アポID"]), ["yesterday"]);
+});
+
+test("buildAttentionList: 差し戻し・対象外は手当て不要なので出さない", () => {
+  const list = [
+    apo({ "アポID": "a", "日付": "2026-08-13", "ステータス": "差し戻し" }),
+    apo({ "アポID": "b", "日付": "2026-08-13", "ステータス": "対象外" })
+  ];
+  assert.deepEqual(attn(list), []);
+});
+
+test("buildAttentionList: 訪問日が迫っているのに未確定・行き先が空のアポを出す", () => {
+  const list = [
+    apo({ "アポID": "unconf", "日付": "2026-08-15", "開始時刻": "10:00", "ステータス": "スケジュール調整中" }),
+    apo({ "アポID": "noplace", "日付": "2026-08-15", "開始時刻": "13:00", "場所またはURL": "", "ステータス": "アポ確定" }),
+    apo({ "アポID": "online", "日付": "2026-08-15", "開始時刻": "15:00", "形式": "オンライン", "場所またはURL": "", "ステータス": "アポ確定" }),
+    apo({ "アポID": "faraway", "日付": "2026-08-31", "ステータス": "スケジュール調整中" })
+  ];
+  const items = attn(list);
+  // オンラインは行き先が要らない。遠い先の未確定は毎日出続けると見なくなるので射程外
+  assert.deepEqual(items.map((i) => i.apo["アポID"]), ["unconf", "noplace"]);
+  assert.deepEqual(items.map((i) => i.kind), ["unconfirmed", "place"]);
+});
+
+test("buildAttentionList: 担当営業が空なら通知が誰にも届かないので出す", () => {
+  const list = [apo({ "アポID": "x", "日付": "2026-08-15", "担当営業": "", "ステータス": "アポ確定" })];
+  const items = attn(list);
+  assert.equal(items[0].kind, "owner");
+  assert.ok(items[0].reason.includes("誰にも"));
+});
+
+test("buildAttentionList: 時間の重なりは1組につき1回だけ出す(同じ組を2行にしない)", () => {
+  const list = [
+    apo({ "アポID": "a", "日付": "2026-08-15", "開始時刻": "10:00", "所要分": 60, "ステータス": "アポ確定" }),
+    apo({ "アポID": "b", "日付": "2026-08-15", "開始時刻": "10:30", "所要分": 60, "ステータス": "アポ確定" })
+  ];
+  const overlaps = attn(list).filter((i) => i.kind === "overlap");
+  assert.equal(overlaps.length, 1);
+});
+
+test("buildAttentionList: 担当営業で絞り込める(自分の分だけ見る)", () => {
+  const list = [
+    apo({ "アポID": "mine", "開始時刻": "09:00", "ステータス": "アポ確定" }),
+    apo({ "アポID": "other", "開始時刻": "09:00", "担当営業": "営業二郎", "ステータス": "アポ確定" })
+  ];
+  assert.deepEqual(attn(list, { owner: "営業一郎" }).map((i) => i.apo["アポID"]), ["mine"]);
+});
+
+test("buildOpenSlots: 営業時間の中の空き時間を営業ごとに返す(前後の端も含む)", () => {
+  const list = [apo({ "担当営業": "営業一郎", "開始時刻": "10:00", "所要分": 60, "ステータス": "アポ確定" })];
+  const days = core.buildOpenSlots(list, TODAY, ["営業一郎"], { days: 1, minGapMinutes: 60 });
+  assert.equal(days.length, 1);
+  assert.deepEqual(days[0].slots.map((s) => s.from + "-" + s.to), ["09:00-10:00", "11:00-18:00"]);
+});
+
+test("buildOpenSlots: 短すぎる隙間は空きとして出さない(移動も入らない時間を勧めない)", () => {
+  const list = [
+    apo({ "担当営業": "営業一郎", "開始時刻": "09:00", "所要分": 60, "ステータス": "アポ確定" }),
+    apo({ "担当営業": "営業一郎", "開始時刻": "10:30", "所要分": 450, "ステータス": "アポ確定" })
+  ];
+  const days = core.buildOpenSlots(list, TODAY, ["営業一郎"], { days: 1, minGapMinutes: 90 });
+  assert.deepEqual(days[0].slots, []);
+});
+
+test("buildOpenSlots: 差し戻し・対象外の枠は空きとして出す(枠が空いた=入れられる)", () => {
+  const list = [apo({ "担当営業": "営業一郎", "開始時刻": "10:00", "所要分": 60, "ステータス": "差し戻し" })];
+  const days = core.buildOpenSlots(list, TODAY, ["営業一郎"], { days: 1, minGapMinutes: 60 });
+  assert.deepEqual(days[0].slots.map((s) => s.from + "-" + s.to), ["09:00-18:00"]);
+});
+
+test("buildOpenSlots: アポが重なっていても空きを二重に数えない", () => {
+  const list = [
+    apo({ "担当営業": "営業一郎", "開始時刻": "10:00", "所要分": 120, "ステータス": "アポ確定" }),
+    apo({ "担当営業": "営業一郎", "開始時刻": "10:30", "所要分": 60, "ステータス": "アポ確定" })
+  ];
+  const days = core.buildOpenSlots(list, TODAY, ["営業一郎"], { days: 1, minGapMinutes: 60 });
+  assert.deepEqual(days[0].slots.map((s) => s.from + "-" + s.to), ["09:00-10:00", "12:00-18:00"]);
+});
+
+test("buildAttentionList: すでに始まった時間の重なりは出さない(直しようがないものを並べない)", () => {
+  const past = [
+    apo({ "アポID": "a", "開始時刻": "09:00", "所要分": 60, "ステータス": "訪問済" }),
+    apo({ "アポID": "b", "開始時刻": "09:30", "所要分": 60, "ステータス": "訪問済" })
+  ];
+  assert.deepEqual(attn(past, { now: "12:00" }).filter((i) => i.kind === "overlap"), []);
+  // まだ始まっていない重なりは出す
+  assert.equal(attn(past, { now: "08:00" }).filter((i) => i.kind === "overlap").length, 1);
+});

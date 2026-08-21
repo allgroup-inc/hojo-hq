@@ -107,6 +107,8 @@ function getBoard(params) {
   var appointments = readAppointments_();
   var staffRows = readStaffRows_();
   var meName = ApoAccess.resolveStaffName(Session.getActiveUser().getEmail(), staffRows);
+  var salesStaff = ApoAccess.listSalesStaff(staffRows);
+  var today = ApoCore.normalizeDateString(new Date());
   return {
     date: date,
     dayView: ApoCore.buildDayView(appointments, date, owner),
@@ -116,9 +118,23 @@ function getBoard(params) {
         : appointments,
       date
     ),
-    salesStaff: ApoAccess.listSalesStaff(staffRows),
+    // 「今日やること」。開いた時点で手当てが要るものが出ている状態にする(探させない)
+    attention: ApoCore.buildAttentionList(appointments, {
+      today: today,
+      now: Utilities.formatDate(new Date(), "Asia/Tokyo", "HH:mm"),
+      owner: owner
+    }),
+    // 埋まっていない訪問枠。明日から数えるのは、今日の空きはもう埋められないため
+    openSlots: ApoCore.buildOpenSlots(appointments, addDaysString_(today, 1),
+      owner ? [owner] : salesStaff, { days: 7, minGapMinutes: 90 }),
+    salesStaff: salesStaff,
     meName: meName
   };
+}
+
+function addDaysString_(dateString, days) {
+  var parts = dateString.split("-").map(Number);
+  return ApoCore.normalizeDateString(new Date(parts[0], parts[1] - 1, parts[2] + days));
 }
 
 /**

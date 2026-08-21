@@ -360,8 +360,184 @@
     });
   }
 
+  // 営業時間の窓。空き枠の計算と埋まり率の分母に使う
+  var WORKDAY_START = "09:00";
+  var WORKDAY_END = "18:00";
+  // 「まもなく訪問日」とみなす日数。当日+2日先までを手当ての射程にする
+  // (それ以上先を出すと毎日ずっと出続けて、見なくなる)
+  var IMMINENT_DAYS = 2;
+  // 訪問終了から何分過ぎたら「結果が入っていない」と数えるか。
+  // 訪問直後に押させると現場の手間になるので、終わって一息つく余裕を見る
+  var RESULT_GRACE_MINUTES = 90;
+  // 結果待ちを何日さかのぼって出すか。無制限にすると初日から壁のような一覧になり、
+  // 「多すぎて見ない」= 埋もれるのと同じ状態になる
+  var RESULT_LOOKBACK_DAYS = 14;
+
+  function diffDays_(fromDateString, toDateString) {
+    var a = fromDateString.split("-").map(Number);
+    var b = toDateString.split("-").map(Number);
+    var ms = new Date(b[0], b[1] - 1, b[2]) - new Date(a[0], a[1] - 1, a[2]);
+    return Math.round(ms / 86400000);
+  }
+
+  /**
+   * 「今日やること」= 手当てが要るアポの一覧(2026-08-21 追加)。
+   *
+   * 新しい入力は一切増やさず、すでにある列だけから導く。放置されているものを人の記憶に
+   * 頼らず浮上させることが目的(共通の前提【4】)。
+   * options: { today: "yyyy-MM-dd", now: "HH:mm", owner: 絞り込む担当営業名 }
+   *
+   * 種別と並び順(緊急な順):
+   *   result  結果が入っていない(訪問したのか差し戻しか分からない = 最も埋もれる)
+   *   overlap 同じ営業の時間が重なっている
+   *   unconfirmed 訪問日が迫っているのにスケジュール調整中のまま
+   *   place   訪問・来店なのに行き先が空のまま訪問日が迫っている
+   *   owner   担当営業が空(通知が誰にも飛ばない)
+   */
+  function buildAttentionList(appointments, options) {
+    var opts = options || {};
+    var today = opts.today || "";
+    var nowMinutes = timeToMinutes_(opts.now || "23:59");
+    /* シート全体ではなく、手当てが要りうる期間だけを見る。台帳は日々増え続けるので、
+       全行を毎回走査すると画面を開くたびに遅くなる(共通の前提【6】待たせない)。 */
+    var live = validAppointments_(appointments).filter(function (record) {
+      if (slotFreed_(record["ステータス"])) return false;
+      if (opts.owner && record["担当営業"] !== opts.owner) return false;
+      if (!today) return true;
+      var days = diffDays_(today, normalizeDateString(record["日付"]));
+      return days >= -RESULT_LOOKBACK_DAYS;
+    });
+    // 重なりの照合は総当たりになるため、まだ手当てできる未来分だけに絞ってから行う
+    var upcoming = live.filter(function (record) {
+      return !today || diffDays_(today, normalizeDateString(record["日付"])) >= 0;
+    });
+
+    var items = [];
+    var seenOverlap = {};
+    live.forEach(function (record) {
+      var date = normalizeDateString(record["日付"]);
+      var days = today ? diffDays_(today, date) : 0;
+      var status = record["ステータス"];
+      var start = timeToMinutes_(record["開始時刻"]);
+      var end = start === null ? null : start + (Number(record["所要分"]) || 60);
+
+      // 1. 結果が入っていない(訪問時間が終わって猶予も過ぎたのに、まだ❷の持ち場のまま)
+      var isPending = ["スケジュール調整中", "アポ確定"].indexOf(status) !== -1;
+      var elapsed = days < 0 || (days === 0 && end !== null &&
+        nowMinutes >= end + RESULT_GRACE_MINUTES);
+      if (isPending && elapsed && days >= -RESULT_LOOKBACK_DAYS) {
+        items.push({ kind: "result", apo: record,
+          reason: days === 0 ? "本日の訪問時間が終わっています"
+            : (-days) + "日前のアポです" });
+        return; // 1件につき1つだけ出す。同じ行が何度も並ぶと一覧が読めなくなる
+      }
+      if (days < 0) return; // 過去のアポで結果待ち以外は手当てのしようがない
+
+      // 2. 担当営業が空(通知先が決まらない。フォームでは必須だがシート直接編集で起きうる)
+      if (!record["担当営業"]) {
+        items.push({ kind: "owner", apo: record, reason: "通知が誰にも届きません" });
+        return;
+      }
+      // 3. 訪問日が迫っているのに未確定
+      if (status === "スケジュール調整中" && days <= IMMINENT_DAYS) {
+        items.push({ kind: "unconfirmed", apo: record,
+          reason: days === 0 ? "本日です" : days + "日後です" });
+        return;
+      }
+      // 4. 行き先が空(オンラインは場所が要らないので対象外)
+      if (record["形式"] !== "オンライン" && !record["場所またはURL"] && days <= IMMINENT_DAYS) {
+        items.push({ kind: "place", apo: record,
+          reason: days === 0 ? "本日なのに行き先が空です" : "行き先が空です" });
+      }
+    });
+
+    // 5. 時間の重なり(両方のアポを1組として1回だけ出す)。
+    // すでに始まってしまった重なりは手当てのしようがないので出さない
+    // (出すと「もう終わったこと」で一覧が埋まり、直せるものが埋もれる)
+    upcoming.forEach(function (record) {
+      var recordDays = today ? diffDays_(today, normalizeDateString(record["日付"])) : 0;
+      var recordStart = timeToMinutes_(record["開始時刻"]);
+      if (recordDays === 0 && recordStart !== null && recordStart <= nowMinutes) return;
+      detectOverlap(upcoming, record).forEach(function (other) {
+        var pair = [record["アポID"], other["アポID"]].sort().join("|");
+        if (seenOverlap[pair]) return;
+        seenOverlap[pair] = true;
+        items.push({ kind: "overlap", apo: record,
+          reason: other["開始時刻"] + " " + other["顧客名"] + " と重なっています" });
+      });
+    });
+
+    var order = { result: 0, overlap: 1, unconfirmed: 2, place: 3, owner: 4 };
+    return items.sort(function (a, b) {
+      if (order[a.kind] !== order[b.kind]) return order[a.kind] - order[b.kind];
+      var da = normalizeDateString(a.apo["日付"]);
+      var db = normalizeDateString(b.apo["日付"]);
+      if (da !== db) return da < db ? -1 : 1;
+      return normalizeTimeString(a.apo["開始時刻"]) < normalizeTimeString(b.apo["開始時刻"]) ? -1 : 1;
+    });
+  }
+
+  /**
+   * 埋まっていない訪問枠(2026-08-21 追加)。営業ごとに、営業時間の中で
+   * minGapMinutes 以上つながっている空き時間を返す。アポ入れ担当が
+   * 「誰の・いつなら入れられるか」を探さずに見られるようにするためのもの。
+   * options: { days: 何日分, minGapMinutes: 何分以上を空きとみなすか }
+   */
+  function buildOpenSlots(appointments, startDateString, salesStaffNames, options) {
+    var opts = options || {};
+    var days = opts.days || 7;
+    var minGap = opts.minGapMinutes || 90;
+    var dayStart = timeToMinutes_(WORKDAY_START);
+    var dayEnd = timeToMinutes_(WORKDAY_END);
+    var booked = validAppointments_(appointments).filter(function (record) {
+      return BOOKED_STATUSES.indexOf(record["ステータス"]) !== -1;
+    });
+
+    var result = [];
+    for (var d = 0; d < days; d++) {
+      var date = addDays_(startDateString, d);
+      var slots = [];
+      (salesStaffNames || []).forEach(function (owner) {
+        var spans = booked.filter(function (record) {
+          return record["担当営業"] === owner && normalizeDateString(record["日付"]) === date;
+        }).map(function (record) {
+          var start = timeToMinutes_(record["開始時刻"]);
+          return start === null ? null
+            : { start: start, end: start + (Number(record["所要分"]) || 60) };
+        }).filter(Boolean).sort(function (a, b) { return a.start - b.start; });
+
+        var cursor = dayStart;
+        spans.forEach(function (span) {
+          if (span.start - cursor >= minGap) {
+            slots.push({ owner: owner, from: minutesToTime_(cursor), to: minutesToTime_(span.start),
+              minutes: span.start - cursor, allDay: false });
+          }
+          cursor = Math.max(cursor, span.end);
+        });
+        if (dayEnd - cursor >= minGap) {
+          slots.push({ owner: owner, from: minutesToTime_(cursor), to: minutesToTime_(dayEnd),
+            minutes: dayEnd - cursor, allDay: cursor === dayStart });
+        }
+      });
+      // 全員が終日空いている日は、人数分のチップを並べても情報が増えない。
+      // 1行にたたむ(見るものが多い日とそうでない日に差が付かないと、読み飛ばされる)
+      var names = (salesStaffNames || []);
+      var allOpen = names.length > 0 && names.every(function (owner) {
+        return slots.some(function (slot) { return slot.owner === owner && slot.allDay; });
+      });
+      result.push({ date: date, slots: slots, allOpen: allOpen });
+    }
+    return result;
+  }
+
+  function minutesToTime_(minutes) {
+    return pad2_(Math.floor(minutes / 60)) + ":" + pad2_(minutes % 60);
+  }
+
   var api = {
     generateApoId: generateApoId,
+    buildAttentionList: buildAttentionList,
+    buildOpenSlots: buildOpenSlots,
     normalizeDateString: normalizeDateString,
     normalizeTimeString: normalizeTimeString,
     sortAppointments: sortAppointments,

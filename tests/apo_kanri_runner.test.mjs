@@ -205,3 +205,16 @@ test("getBoard: 本日ビューとスタッフ一覧・本人名が返る", () =
   assert.deepEqual(board.salesStaff, ["営業一郎", "営業二郎"]);
   assert.equal(board.meName, "アポ花子");
 });
+
+/* getBoard は「今日やること」と「埋まっていない訪問枠」まで含めて返す。
+ * 画面側で別途取りに行くと、開いてから出るまでに間が空く(共通の前提【6】待たせない)。 */
+test("getBoard: 手当てが要るものと空き枠を同じ応答で返す(2回取りに行かせない)", () => {
+  env.sheets[ApoSchema.APPOINTMENT_SHEET_NAME].appendRow(apoRow(baseApo()));
+  const board = env.context.getBoard({ view: "day" });
+  assert.ok(Array.isArray(board.attention), "attention を返す");
+  assert.ok(Array.isArray(board.openSlots), "openSlots を返す");
+  assert.equal(board.openSlots.length, 7, "明日から7日分");
+  // 空き枠は今日ではなく明日から(今日の空きはもう埋められない)
+  const today = ApoCore.normalizeDateString(new Date());
+  assert.notEqual(board.openSlots[0].date, today);
+});

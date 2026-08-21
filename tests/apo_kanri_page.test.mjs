@@ -109,3 +109,22 @@ test("v2フォーム(Stripe式): 必須タグ・ラベル上置き・エラー�
 test("XSS対策: 画面側にエスケープ関数があり、innerHTMLへの生値挿入をしない前提が明示されている", () => {
   assert.ok(html.includes("function esc("));
 });
+
+test("本日ビューに「手当てが要るもの」と「埋まっていない訪問枠」が出る", () => {
+  assert.ok(html.includes("手当てが要るもの"));
+  assert.ok(html.includes("埋まっていない訪問枠"));
+  // 0件のときに空欄にせず「ありません」と書く(読み込み失敗と見分けられるように)
+  assert.ok(html.includes("いまのところありません"));
+  assert.ok(html.includes("まとまった空きはありません"));
+});
+
+test("手当ての種別ラベルが日本語で、そのまま読める", () => {
+  ["結果待ち", "重なり", "未確定", "行き先なし", "担当なし"].forEach((label) => {
+    assert.ok(html.includes(label), label + " のラベルが必要");
+  });
+});
+
+test("本日の一覧に現在時刻の線と空き時間を挟む(時間の流れが読めるように)", () => {
+  assert.ok(html.includes("の空き"));
+  assert.ok(html.includes("nowLineHtml"));
+});

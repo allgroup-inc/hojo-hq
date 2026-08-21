@@ -76,8 +76,8 @@
 ".row .cust{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n" +
 ".row .meta{color:var(--sub);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n" +
 ".row .owner{flex:none;width:72px;font-size:12px;color:var(--sub);text-align:left}\n" +
-".row .temp{flex:none;width:44px;font-size:12px;color:var(--sub)}\n" +
-".row .temp.hot{color:var(--ink);font-weight:700}\n" +
+".row .meta .t{display:inline-block;min-width:14px}\n" +
+".row .meta .t.hot{color:var(--ink);font-weight:700}\n" +
 ".row .st{flex:none;width:112px;font-size:12px;text-align:right;color:var(--sub)}\n" +
 // 差し戻し理由は別行に落とす(「差し戻し自社都合」と続けて読ませない)
 ".row .st small{display:block;font-size:11px;opacity:.75}\n" +
@@ -85,9 +85,36 @@
 ".row .st.cancel{color:var(--bad)}\n" +
 ".row.done{opacity:.55}\n" +
 ".empty{color:var(--sub);padding:32px 0;font-size:13px}\n" +
+"/* 今日やること(要対応)・空き枠 */\n" +
+/* 見出しは1行・件数つき。0件のときは「ありません」と出して、
+   何も無いのか読み込めていないのかを迷わせない */
+".attn{margin-top:16px;border:1px solid var(--line);border-radius:6px;padding:16px}\n" +
+".attn h3{font-size:13px;font-weight:700;margin-bottom:8px}\n" +
+".attn h3 span{color:var(--bad)}\n" +
+".attn .none{color:var(--sub);font-size:12px}\n" +
+".arow{display:flex;align-items:baseline;gap:8px;padding:8px 0;border-top:1px solid var(--line);cursor:pointer;font-size:13px}\n" +
+".arow:hover{background:#FAFAFA}\n" +
+".arow .tag{flex:none;font-size:11px;font-weight:700;color:var(--bad)}\n" +
+".arow .when{flex:none;font-size:12px;color:var(--sub);font-variant-numeric:tabular-nums}\n" +
+".arow .who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n" +
+".arow .why{flex:none;font-size:12px;color:var(--sub)}\n" +
+".attn .more{padding-top:8px;font-size:12px;color:var(--sub)}\n" +
+/* 空き時間は行の間に薄く挟む。予定と同じ濃さで出すと予定が読みにくくなる */
+".gap{display:flex;align-items:center;gap:16px;padding:4px 0;color:var(--sub);font-size:11px}\n" +
+".gap .time{flex:none;width:52px}\n" +
+".now{display:flex;align-items:center;gap:8px;padding:2px 0}\n" +
+".now .lbl{flex:none;width:52px;font-size:11px;font-weight:700;color:var(--bad);font-variant-numeric:tabular-nums}\n" +
+".now .line{flex:1;height:1px;background:var(--bad);opacity:.5}\n" +
+".slotday{margin-top:16px}\n" +
+".slotday .d{font-size:12px;font-weight:700;margin-bottom:4px}\n" +
+".slot{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:4px 8px;margin:0 8px 8px 0;font-size:12px}\n" +
+".slot b{font-weight:700}\n" +
+".slot.allopen{color:var(--sub)}\n" +
 /* 狭い画面では担当者チップが「新規アポ」ボタンに切られて読めなくなるため、
    ボタンを上段・チップを下段に折り返す */
-"@media (max-width:640px){.row .owner{display:none}.row .st{width:96px}" +
+/* 「スケジュール調整中」は9文字あり、96px・12pxだと必ず2行に折れて行が不揃いになる。
+   語は言い換えられない(共通語彙)ので、幅と文字サイズで1行に収める */
+"@media (max-width:640px){.row .owner{display:none}.row .st{width:106px;font-size:11px}" +
 ".toolbar{flex-wrap:wrap}.btn-new{order:1}.chips{order:2;flex-basis:100%;padding-bottom:4px}}\n" +
 "/* 分析 */\n" +
 ".panel{margin-top:64px}\n" +
@@ -259,13 +286,69 @@
 "  var hotClass = apo['温度感'] === '高' ? ' hot' : '';\n" +
 "  return '<div class=\"row' + doneClass + '\" data-id=\"' + esc(apo['アポID']) + '\" tabindex=\"0\">' +\n" +
 "    '<div class=\"time\">' + esc(apo['開始時刻']) + '<small>' + esc(apo['所要分']) + '分</small></div>' +\n" +
+/* 温度感は独立列をやめてメタ行へ移した。スマホで顧客名が「サンプル商店…」と
+   切れていたため、右側の固定幅列を1つ減らして名前に幅を渡す
+   (2026-08-21 実機のスクリーンショットで検出) */
 "    '<div class=\"main\"><div class=\"cust\">' + esc(apo['顧客名']) + '</div>' +\n" +
-"    '<div class=\"meta\">' + esc(apo['形式']) + ' ' + esc(apo['場所またはURL']) + '</div></div>' +\n" +
+"    '<div class=\"meta\"><span class=\"t' + hotClass + '\">' + esc(apo['温度感']) + '</span> ' +\n" +
+"      esc(apo['形式']) + ' ' + esc(apo['場所またはURL']) + '</div></div>' +\n" +
 "    '<div class=\"owner\">' + esc(apo['担当営業']) + '</div>' +\n" +
-"    '<div class=\"temp' + hotClass + '\">' + esc(apo['温度感']) + '</div>' +\n" +
 "    '<div class=\"' + statusClass(status) + '\">' + esc(status) +\n" +
 "      (status === '差し戻し' && apo['差し戻し理由'] ? '<small>' + esc(apo['差し戻し理由']) + '</small>' : '') +\n" +
 "    '</div></div>';\n" +
+"}\n" +
+"var ATTN_LABEL = { result: '結果待ち', overlap: '重なり', unconfirmed: '未確定',\n" +
+"  place: '行き先なし', owner: '担当なし' };\n" +
+"var ATTN_MAX = 8;\n" +
+/* 「今日やること」。開いたら最初に出ている状態にする(探させない・検索させない)。
+   0件なら0件と書く。空欄のままだと読み込み失敗と見分けがつかない */
+"function renderAttention(list) {\n" +
+"  var items = list || [];\n" +
+"  var html = '<div class=\"attn\"><h3>手当てが要るもの <span>' + items.length + '件</span></h3>';\n" +
+"  if (!items.length) {\n" +
+"    return html + '<div class=\"none\">いまのところありません。</div></div>';\n" +
+"  }\n" +
+"  items.slice(0, ATTN_MAX).forEach(function (item) {\n" +
+"    var apo = item.apo;\n" +
+"    html += '<div class=\"arow\" data-id=\"' + esc(apo['アポID']) + '\" tabindex=\"0\">' +\n" +
+"      '<span class=\"tag\">' + esc(ATTN_LABEL[item.kind] || item.kind) + '</span>' +\n" +
+"      '<span class=\"when\">' + esc(shortDate(apo['日付'])) + ' ' + esc(apo['開始時刻']) + '</span>' +\n" +
+"      '<span class=\"who\">' + esc(apo['顧客名']) + '</span>' +\n" +
+"      '<span class=\"why\">' + esc(item.reason) + '</span></div>';\n" +
+"  });\n" +
+"  if (items.length > ATTN_MAX) {\n" +
+"    html += '<div class=\"more\">ほか ' + (items.length - ATTN_MAX) + '件(上から順に片付けてください)</div>';\n" +
+"  }\n" +
+"  return html + '</div>';\n" +
+"}\n" +
+"function shortDate(dateString) {\n" +
+"  var parts = String(dateString || '').split('-');\n" +
+"  return parts.length === 3 ? Number(parts[1]) + '/' + Number(parts[2]) : dateString;\n" +
+"}\n" +
+/* 埋まっていない訪問枠。今日の空きはもう埋められないので明日から出す */
+"function renderOpenSlots(days) {\n" +
+"  var withSlots = (days || []).filter(function (d) { return d.slots.length; });\n" +
+"  var html = '<div class=\"panel\"><h3>埋まっていない訪問枠(明日から7日・90分以上)</h3>';\n" +
+"  if (!withSlots.length) {\n" +
+"    return html + '<div class=\"none\">まとまった空きはありません。</div></div>';\n" +
+"  }\n" +
+"  withSlots.forEach(function (day) {\n" +
+"    html += '<div class=\"slotday\"><div class=\"d\">' + esc(shortDate(day.date)) + '(' + esc(weekdayOf(day.date)) + ')</div>';\n" +
+"    if (day.allOpen) {\n" +
+"      html += '<span class=\"slot allopen\">全員終日あき</span>';\n" +
+"    } else {\n" +
+"      day.slots.forEach(function (slot) {\n" +
+"        html += '<span class=\"slot\"><b>' + esc(slot.owner) + '</b> ' +\n" +
+"          (slot.allDay ? '終日' : esc(slot.from) + '–' + esc(slot.to)) + '</span>';\n" +
+"      });\n" +
+"    }\n" +
+"    html += '</div>';\n" +
+"  });\n" +
+"  return html + '</div>';\n" +
+"}\n" +
+"function weekdayOf(dateString) {\n" +
+"  var parts = String(dateString).split('-').map(Number);\n" +
+"  return ['日','月','火','水','木','金','土'][new Date(parts[0], parts[1] - 1, parts[2]).getDay()];\n" +
 "}\n" +
 "function renderBoard(board) {\n" +
 "  state.board = board; state.meName = board.meName || '';\n" +
@@ -275,13 +358,15 @@
 "    var view = board.dayView || { items: [], summary: { total: 0, unconfirmed: 0 } };\n" +
 "    $('summary').innerHTML = '<span>本日 <b>' + view.summary.total + '</b>件</span> ' +\n" +
 "      '<span class=\"unconf\">未確定 <b>' + view.summary.unconfirmed + '</b>件</span>';\n" +
-"    html = view.items.length ? view.items.map(rowHtml).join('') :\n" +
+"    html = renderAttention(board.attention);\n" +
+"    html += view.items.length ? dayListHtml(view.items) :\n" +
 /* 0件の理由を区別して出す。絞り込み中の0件を「本日はアポなし」と表示すると、
    実際には他の人のアポがあるのに「今日は誰も予定がない」と誤解される
    (物件管理システムから共有された同型の事故: 所属未設定→0件表示→データが消えたと誤解) */
 "      '<div class=\"empty\">' + (effectiveOwner()\n" +
 "        ? esc(effectiveOwner()) + 'さんの本日のアポは0件です(絞り込み中)。<br>上の絞り込みを解除すると全員分が見られます。'\n" +
 "        : '本日のアポはありません。「＋ 新規アポ」から登録できます。') + '</div>';\n" +
+"    html += renderOpenSlots(board.openSlots);\n" +
 "  } else {\n" +
 "    $('summary').innerHTML = '<span>今日から7日間</span>';\n" +
 "    (board.week || []).forEach(function (day) {\n" +
@@ -291,9 +376,46 @@
 "  }\n" +
 "  $('board').innerHTML = html;\n" +
 "  doneLoading();\n" +
-"  Array.prototype.forEach.call(document.querySelectorAll('.row'), function (el) {\n" +
+"  Array.prototype.forEach.call(document.querySelectorAll('.row, .arow'), function (el) {\n" +
 "    el.addEventListener('click', function () { openSheet(el.getAttribute('data-id')); });\n" +
 "  });\n" +
+"}\n" +
+/* 本日の一覧は、行を並べるだけでなく「いま何時か」「どこが空いているか」を挟む。
+   時間の流れが読めないと、朝礼で段取りを決められない */
+"function dayListHtml(items) {\n" +
+"  var now = nowMinutes();\n" +
+"  var placed = false;\n" +
+"  var cursor = null;\n" +
+"  var html = '';\n" +
+"  items.forEach(function (apo) {\n" +
+"    var start = toMinutes(apo['開始時刻']);\n" +
+"    if (!placed && start !== null && start > now) { html += nowLineHtml(); placed = true; }\n" +
+"    if (cursor !== null && start !== null && start - cursor >= 60) {\n" +
+"      html += '<div class=\"gap\"><span class=\"time\">' + esc(toTime(cursor)) + '</span>' +\n" +
+"        '<span>' + formatGap(start - cursor) + 'の空き</span></div>';\n" +
+"    }\n" +
+"    html += rowHtml(apo);\n" +
+"    if (start !== null) {\n" +
+"      cursor = Math.max(cursor === null ? 0 : cursor, start + (Number(apo['所要分']) || 60));\n" +
+"    }\n" +
+"  });\n" +
+"  if (!placed) { html += nowLineHtml(); }\n" +
+"  return html;\n" +
+"}\n" +
+"function nowLineHtml() {\n" +
+"  return '<div class=\"now\"><span class=\"lbl\">' + esc(toTime(nowMinutes())) + '</span><span class=\"line\"></span></div>';\n" +
+"}\n" +
+"function nowMinutes() { var d = new Date(); return d.getHours() * 60 + d.getMinutes(); }\n" +
+"function toMinutes(text) {\n" +
+"  var m = String(text || '').match(/^(\\d{1,2}):(\\d{2})/);\n" +
+"  return m ? Number(m[1]) * 60 + Number(m[2]) : null;\n" +
+"}\n" +
+"function toTime(minutes) {\n" +
+"  return ('0' + Math.floor(minutes / 60)).slice(-2) + ':' + ('0' + (minutes % 60)).slice(-2);\n" +
+"}\n" +
+"function formatGap(minutes) {\n" +
+"  var h = Math.floor(minutes / 60), m = minutes % 60;\n" +
+"  return (h ? h + '時間' : '') + (m ? m + '分' : '');\n" +
 "}\n" +
 "function renderChips(salesStaff) {\n" +
 "  var container = $('chips');\n" +
