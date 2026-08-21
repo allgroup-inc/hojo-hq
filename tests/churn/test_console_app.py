@@ -25,10 +25,10 @@ class TestRenderConsole(unittest.TestCase):
         self.assertNotIn('name="concern" required', h)  # 懸念は任意
         self.assertIn("任意", h)
 
-    def test_stale_flag_shown(self):
-        today = [{"customer_id": "C1", "trigger": "高リスク", "flags": ["20日放置"]}]
+    def test_flag_shown(self):
+        today = [{"customer_id": "C1", "trigger": "高リスク", "flags": ["解約意向・次アクション無し"]}]
         h = render_console(today, date(2026, 8, 18))
-        self.assertIn("20日放置", h)
+        self.assertIn("解約意向・次アクション無し", h)
 
     def test_saved_marker_only_on_saved_row(self):
         today = [{"customer_id": "C1", "trigger": "不着"},
@@ -44,21 +44,32 @@ class TestRenderConsole(unittest.TestCase):
 class TestAnnotateFlags(unittest.TestCase):
     AS_OF = date(2026, 8, 20)
 
-    def test_stale_after_threshold(self):
+    def test_churn_intent_without_next_action_is_top_flag(self):
+        # 解約意向を聞いたのに次アクション無し＝日数無関係・最優先
         today = [{"customer_id": "C1", "trigger": "高リスク"}]
-        contacts = [{"customer_id": "C1", "contact_date": date(2026, 8, 1)}]  # 19日前
-        out = annotate_flags(today, contacts, self.AS_OF, stale_days=14)
-        self.assertIn("19日放置", out[0]["flags"])
+        contacts = [{"customer_id": "C1", "contact_date": date(2026, 8, 19),
+                     "result": "解約意向", "next_action": ""}]
+        self.assertIn("解約意向・次アクション無し",
+                      annotate_flags(today, contacts, self.AS_OF)[0]["flags"])
+
+    def test_churn_intent_with_next_action_no_flag(self):
+        contacts = [{"customer_id": "C1", "contact_date": date(2026, 8, 19),
+                     "result": "解約意向", "next_action": "再架電"}]
+        self.assertEqual(annotate_flags([{"customer_id": "C1"}], contacts, self.AS_OF)[0]["flags"], [])
+
+    def test_long_no_contact_flag(self):
+        # 90日以上の未接触＝長期未接触（14日のような短間隔では出さない）
+        contacts = [{"customer_id": "C1", "contact_date": date(2026, 5, 1),
+                     "result": "検討中", "next_action": "様子見"}]   # 111日前
+        self.assertIn("111日未接触", annotate_flags([{"customer_id": "C1"}], contacts, self.AS_OF)[0]["flags"])
 
     def test_recent_contact_no_flag(self):
-        today = [{"customer_id": "C1", "trigger": "不着"}]
-        contacts = [{"customer_id": "C1", "contact_date": date(2026, 8, 18)}]  # 2日前
-        self.assertEqual(annotate_flags(today, contacts, self.AS_OF)[0]["flags"], [])
+        contacts = [{"customer_id": "C1", "contact_date": date(2026, 8, 1),
+                     "result": "検討中", "next_action": "再架電"}]   # 19日前=90日未満
+        self.assertEqual(annotate_flags([{"customer_id": "C1"}], contacts, self.AS_OF)[0]["flags"], [])
 
-    def test_never_contacted_no_stale_flag(self):
-        # 未接触は「放置」ではない（これから接触するため）＝フラグなし
-        out = annotate_flags([{"customer_id": "C1", "trigger": "初動"}], [], self.AS_OF)
-        self.assertEqual(out[0]["flags"], [])
+    def test_never_contacted_no_flag(self):
+        self.assertEqual(annotate_flags([{"customer_id": "C1"}], [], self.AS_OF)[0]["flags"], [])
 
 
 if __name__ == "__main__":

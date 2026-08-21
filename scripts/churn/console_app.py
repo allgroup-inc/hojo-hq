@@ -14,30 +14,35 @@ from .contact_log import append_contact
 from .config import STALE_CONTACT_DAYS
 
 
-def _last_contact_map(contacts, as_of):
-    """顧客ID → 最後の接触日（as_of以前）。放置判定に使う。"""
+def _last_contact(contacts, as_of):
+    """顧客ID → 最後の接触レコード（as_of以前）。要フォロー判定に使う。"""
     last = {}
     for c in contacts or []:
         cid, cd = c.get("customer_id"), c.get("contact_date")
-        if cid and cd and cd <= as_of and (cid not in last or cd > last[cid]):
-            last[cid] = cd
+        if cid and cd and cd <= as_of and (cid not in last or cd > last[cid]["contact_date"]):
+            last[cid] = c
     return last
 
 
 def annotate_flags(today, contacts, as_of, stale_days=STALE_CONTACT_DAYS):
-    """今日の要接触に「◯日放置」フラグを足す（確定版: 放置が自動で浮上）。
+    """今日の要接触に「要フォロー」フラグを足す（軸 2026-08-19：日数でなく"やることが済んでいない"で出す）。
 
-    一度接触した後、stale_days 日以上さわっていない継続客に「◯日放置」。優先度順は変えず表示のみ。
+    ・**解約意向を聞いたのに次アクション無し**＝日数無関係・最優先（放置してはいけない）。
+    ・前回接触から stale_days（既定90日）以上＝**長期未接触**（既契約者に現実的な間隔）。
+    14日のような短間隔では既契約者がほぼ全員警告に出て無意味化するため使わない。優先度順は変えず表示のみ。
     """
-    last = _last_contact_map(contacts, as_of)
+    last = _last_contact(contacts, as_of)
     out = []
     for c in today:
         flags = list(c.get("flags") or [])
         lc = last.get(c.get("customer_id"))
         if lc is not None:
-            d = (as_of - lc).days
-            if d >= stale_days:
-                flags.append(f"{d}日放置")
+            if lc.get("result") == "解約意向" and not (lc.get("next_action") or "").strip():
+                flags.append("解約意向・次アクション無し")   # 最優先・日数無関係
+            else:
+                d = (as_of - lc["contact_date"]).days
+                if d >= stale_days:
+                    flags.append(f"{d}日未接触")
         out.append(dict(c, flags=flags))
     return out
 
@@ -102,7 +107,7 @@ def render_console(today, as_of, saved_cid=None):
         'th{background:#00335C;color:#fff}select,button{font-size:12px}</style>'
         f'<h1>保全コンソール（{as_of}）— 今日の要接触 {len(today)}件</h1>'
         '<p style="font-size:12px;color:#6B6B6B">上から順に架電し、<b>結果を選んで保存（1タップ）</b>。'
-        '懸念・返し方は分かるときだけ「＋詳しく記録」から。⚠️は放置（要フォロー）。'
+        '懸念・返し方は分かるときだけ「＋詳しく記録」から。⚠️は要フォロー（解約意向に次アクション無し・長期未接触）。'
         '記録はこのPC内に貯まります。連絡は人が実行・督促にしない・成績評価に使わない。</p>'
         '<table><thead><tr><th>顧客ID</th><th>きっかけ</th><th>手段</th><th>守れる金額</th>'
         '<th>おすすめの一手</th><th>対応の記録（結果を選んで保存）</th></tr></thead>'
