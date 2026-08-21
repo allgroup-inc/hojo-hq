@@ -11,6 +11,35 @@ import html
 import urllib.parse
 
 from .contact_log import append_contact
+from .config import STALE_CONTACT_DAYS
+
+
+def _last_contact_map(contacts, as_of):
+    """顧客ID → 最後の接触日（as_of以前）。放置判定に使う。"""
+    last = {}
+    for c in contacts or []:
+        cid, cd = c.get("customer_id"), c.get("contact_date")
+        if cid and cd and cd <= as_of and (cid not in last or cd > last[cid]):
+            last[cid] = cd
+    return last
+
+
+def annotate_flags(today, contacts, as_of, stale_days=STALE_CONTACT_DAYS):
+    """今日の要接触に「◯日放置」フラグを足す（確定版: 放置が自動で浮上）。
+
+    一度接触した後、stale_days 日以上さわっていない継続客に「◯日放置」。優先度順は変えず表示のみ。
+    """
+    last = _last_contact_map(contacts, as_of)
+    out = []
+    for c in today:
+        flags = list(c.get("flags") or [])
+        lc = last.get(c.get("customer_id"))
+        if lc is not None:
+            d = (as_of - lc).days
+            if d >= stale_days:
+                flags.append(f"{d}日放置")
+        out.append(dict(c, flags=flags))
+    return out
 
 # 記録の選択肢（保全記録_かんたん入力様式 と同じ）。手打ちを減らす。
 PICKLISTS = {
@@ -25,44 +54,58 @@ _LABELS = {"medium": "手段", "concern": "懸念", "approach": "返し方",
            "result": "結果", "next_action": "次アクション"}
 
 
-def _select(name, options):
-    opts = "".join(f'<option value="{html.escape(o)}">{html.escape(o)}</option>' for o in options)
-    return (f'<label style="font-size:12px">{_LABELS[name]}'
-            f'<select name="{name}" style="margin:0 6px 0 2px">{opts}</select></label>')
+def _select(name, options, required=False):
+    opts = ['<option value="">—</option>'] if not required else []
+    opts += [f'<option value="{html.escape(o)}">{html.escape(o)}</option>' for o in options]
+    tag = " 任意" if not required else ""
+    req = " required" if required else ""
+    return (f'<label style="font-size:12px">{_LABELS[name]}{tag}'
+            f'<select name="{name}"{req} style="margin:0 6px 0 2px">{"".join(opts)}</select></label>')
 
 
 def render_console(today, as_of, saved_cid=None):
-    """今日の要接触＋各行に対応記録フォーム（選択式）を出す。today は triage の候補並び。"""
+    """今日の要接触＋各行に対応記録フォームを出す。**結果のみ必須・他は任意**（1タップで記録）。
+
+    放置フラグ（annotate_flags で付与した「◯日放置」）があれば行に表示（確定版: 放置が浮上）。
+    """
     rows = []
     for c in today:
         cid = str(c.get("customer_id") or "—")
         trig = html.escape(str(c.get("trigger", "")))
+        flags = "".join(f'<span style="background:#C0392B;color:#fff;border-radius:3px;'
+                        f'padding:1px 5px;margin-left:4px;font-size:11px">⚠️{html.escape(str(f))}</span>'
+                        for f in (c.get("flags") or []))
         ch = html.escape(str(c.get("channel", "架電")))
         save = c.get("saveable")
         save_txt = f"{int(save):,}円" if save else "—"
         rec = html.escape(str(c.get("recommendation", "")))
-        selects = "".join(_select(k, PICKLISTS[k]) for k in
-                          ("medium", "concern", "approach", "result", "next_action"))
+        # 結果だけ必須（1タップ）／懸念・返し方・手段・次アクションは任意（分かるときだけ）
+        primary = _select("result", PICKLISTS["result"], required=True)
+        extras = "".join(_select(k, PICKLISTS[k]) for k in
+                         ("medium", "concern", "approach", "next_action"))
         just_saved = ' ✅記録しました' if cid == str(saved_cid) else ""
         rows.append(
-            '<tr><td style="white-space:nowrap">' + html.escape(cid) + '</td>'
+            '<tr><td style="white-space:nowrap">' + html.escape(cid) + flags + '</td>'
             f'<td>{trig}</td><td>{ch}</td><td style="text-align:right">{save_txt}</td>'
             f'<td style="font-size:12px">{rec}</td>'
             '<td><form method="post" action="/record" style="margin:0">'
             f'<input type="hidden" name="customer_id" value="{html.escape(cid)}">'
-            + selects +
-            '<button type="submit" style="margin-left:6px">保存</button>'
-            f'<span style="color:#1E8449">{just_saved}</span></form></td></tr>')
+            f'<b>{primary}</b><button type="submit" style="margin:0 6px">保存</button>'
+            f'<span style="color:#1E8449">{just_saved}</span>'
+            f'<details style="margin-top:2px"><summary style="font-size:11px;color:#6B6B6B;cursor:pointer">'
+            f'＋詳しく記録（任意）</summary>{extras}</details>'
+            '</form></td></tr>')
     doc = (
         '<!doctype html><meta charset="utf-8"><title>保全コンソール</title>'
         '<style>body{font-family:Meiryo,"Noto Sans JP",sans-serif;padding:16px}'
         'table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px;font-size:13px}'
         'th{background:#00335C;color:#fff}select,button{font-size:12px}</style>'
         f'<h1>保全コンソール（{as_of}）— 今日の要接触 {len(today)}件</h1>'
-        '<p style="font-size:12px;color:#6B6B6B">上から順に架電し、その場で対応を記録（選ぶだけ）→保存。'
+        '<p style="font-size:12px;color:#6B6B6B">上から順に架電し、<b>結果を選んで保存（1タップ）</b>。'
+        '懸念・返し方は分かるときだけ「＋詳しく記録」から。⚠️は放置（要フォロー）。'
         '記録はこのPC内に貯まります。連絡は人が実行・督促にしない・成績評価に使わない。</p>'
         '<table><thead><tr><th>顧客ID</th><th>きっかけ</th><th>手段</th><th>守れる金額</th>'
-        '<th>おすすめの一手</th><th>対応の記録</th></tr></thead>'
+        '<th>おすすめの一手</th><th>対応の記録（結果を選んで保存）</th></tr></thead>'
         f'<tbody>{"".join(rows)}</tbody></table>')
     return doc
 
@@ -77,12 +120,21 @@ def _today_list(csv_path, column_map, as_of, capacity):
     return today
 
 
+def _load_contacts_safe(path, contact_map):
+    """記録ログ（放置判定用）を読む。無ければ空。"""
+    import os
+    from .contact_log import load_contacts
+    return load_contacts(path, contact_map) if os.path.exists(path) else []
+
+
 def make_handler(csv_path, column_map, contacts_out, contact_map, as_of, capacity):
     from http.server import BaseHTTPRequestHandler
 
     class Handler(BaseHTTPRequestHandler):
         def _page(self, saved_cid=None):
             today = _today_list(csv_path, column_map, as_of, capacity)
+            contacts = _load_contacts_safe(contacts_out, contact_map)
+            today = annotate_flags(today, contacts, as_of)   # ◯日放置を付与
             body = render_console(today, as_of, saved_cid).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
