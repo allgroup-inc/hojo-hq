@@ -534,8 +534,129 @@
     return pad2_(Math.floor(minutes / 60)) + ":" + pad2_(minutes % 60);
   }
 
+  /**
+   * 本日の全体表(2026-08-21 追加)。営業ごとに、営業時間を横軸にした帯を返す。
+   * 誰がいつ動いていて、どこが空いているかを一目で見るためのもの。
+   * 位置と幅は営業時間窓に対する%で返し、描画側は数字を持たない。
+   * options: { now: "HH:mm" }
+   */
+  function buildDayTimeline(appointments, dateString, salesStaffNames, options) {
+    var opts = options || {};
+    var dayStart = timeToMinutes_(WORKDAY_START);
+    var dayEnd = timeToMinutes_(WORKDAY_END);
+    var span = dayEnd - dayStart;
+    var nowMinutes = timeToMinutes_(opts.now || "");
+
+    var today = validAppointments_(appointments).filter(function (record) {
+      return normalizeDateString(record["日付"]) === dateString &&
+        record["ステータス"] !== "対象外";
+    });
+
+    var names = (salesStaffNames || []).slice();
+    today.forEach(function (record) {
+      var owner = record["担当営業"] || "(担当なし)";
+      if (names.indexOf(owner) === -1) names.push(owner);
+    });
+
+    var rows = names.map(function (owner) {
+      var mine = sortAppointments(today.filter(function (record) {
+        return (record["担当営業"] || "(担当なし)") === owner;
+      }));
+      var bars = mine.map(function (record) {
+        var start = timeToMinutes_(record["開始時刻"]);
+        if (start === null) return null;
+        var end = start + (Number(record["所要分"]) || 60);
+        // 営業時間の外にはみ出すアポも、端で切って必ず見えるようにする
+        var from = Math.max(dayStart, Math.min(start, dayEnd));
+        var to = Math.max(dayStart, Math.min(end, dayEnd));
+        return {
+          apoId: record["アポID"],
+          customer: record["顧客名"],
+          time: normalizeTimeString(record["開始時刻"]),
+          status: record["ステータス"],
+          outcome: classifyOutcome_(record, dateString, nowMinutes),
+          left: ((from - dayStart) / span) * 100,
+          width: Math.max(((to - from) / span) * 100, 2)
+        };
+      }).filter(Boolean);
+      return { owner: owner, bars: bars };
+    });
+
+    var hours = [];
+    for (var m = dayStart; m <= dayEnd; m += 60) {
+      hours.push({ label: minutesToTime_(m), left: ((m - dayStart) / span) * 100 });
+    }
+    return {
+      date: dateString,
+      hours: hours,
+      rows: rows,
+      nowLeft: (nowMinutes !== null && nowMinutes >= dayStart && nowMinutes <= dayEnd)
+        ? ((nowMinutes - dayStart) / span) * 100 : null
+    };
+  }
+
+  /* 1件のアポが「今どういう状態か」を5つに束ねる。
+   * 訪問済/申込の判定は転換ファネルと同じ定数を使う(❷が独自に数えないため。
+   * 2つ持つと必ずズレて、どちらが正しいかの議論になる)。 */
+  function classifyOutcome_(record, dateString, nowMinutes) {
+    var status = record["ステータス"];
+    if (SIGNED_STATUSES.indexOf(status) !== -1) return "signed";
+    if (VISITED_STATUSES.indexOf(status) !== -1) return "visited";
+    if (status === "差し戻し") return "returned";
+    var start = timeToMinutes_(record["開始時刻"]);
+    var end = start === null ? null : start + (Number(record["所要分"]) || 60);
+    if (nowMinutes !== null && end !== null && nowMinutes >= end + RESULT_GRACE_MINUTES) {
+      return "pending";
+    }
+    return "ahead";
+  }
+
+  var OUTCOME_KEYS = ["ahead", "pending", "visited", "signed", "returned"];
+
+  /**
+   * 本日の結果集計(2026-08-21 追加)。営業ごとと全体の件数を返す。
+   * これから / 結果待ち / 訪問済 / 申込 / 差し戻し の5つ。
+   * ※評価目的では使わない(v1.1三名体制裁定・軸の裁定③と同じ理由)。
+   */
+  function buildDayResultStats(appointments, dateString, salesStaffNames, options) {
+    var nowMinutes = timeToMinutes_((options || {}).now || "");
+    var today = validAppointments_(appointments).filter(function (record) {
+      return normalizeDateString(record["日付"]) === dateString &&
+        record["ステータス"] !== "対象外";
+    });
+    var names = (salesStaffNames || []).slice();
+    today.forEach(function (record) {
+      var owner = record["担当営業"] || "(担当なし)";
+      if (names.indexOf(owner) === -1) names.push(owner);
+    });
+
+    function emptyCounts_() {
+      var counts = { total: 0 };
+      OUTCOME_KEYS.forEach(function (key) { counts[key] = 0; });
+      return counts;
+    }
+    var totals = emptyCounts_();
+    var owners = names.map(function (owner) {
+      var counts = emptyCounts_();
+      today.forEach(function (record) {
+        if ((record["担当営業"] || "(担当なし)") !== owner) return;
+        var outcome = classifyOutcome_(record, dateString, nowMinutes);
+        counts[outcome] += 1;
+        counts.total += 1;
+        totals[outcome] += 1;
+        totals.total += 1;
+      });
+      counts.owner = owner;
+      return counts;
+    });
+    return { date: dateString, owners: owners, totals: totals };
+  }
+
   var api = {
     generateApoId: generateApoId,
+    buildDayTimeline: buildDayTimeline,
+    buildDayResultStats: buildDayResultStats,
+    OUTCOME_KEYS: OUTCOME_KEYS,
     buildAttentionList: buildAttentionList,
     buildOpenSlots: buildOpenSlots,
     normalizeDateString: normalizeDateString,

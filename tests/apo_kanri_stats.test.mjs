@@ -154,3 +154,80 @@ test("buildConversionStats: sinceDate以降の日付だけを集計する", () =
   assert.equal(stats.concluded, 1);
   assert.equal(stats.signups, 0);
 });
+
+/* ---- 本日の全体表(営業×時間の帯)と結果集計 ---- */
+
+const DAY = "2026-08-14";
+
+test("buildDayTimeline: 営業ごとに帯を返し、位置と幅は営業時間に対する割合で出す", () => {
+  const list = [apo({ "担当営業": "営業一郎", "開始時刻": "09:00", "所要分": 60, "ステータス": "アポ確定" })];
+  const timeline = core.buildDayTimeline(list, DAY, ["営業一郎", "営業二郎"], { now: "12:00" });
+  assert.deepEqual(timeline.rows.map((r) => r.owner), ["営業一郎", "営業二郎"]);
+  const bar = timeline.rows[0].bars[0];
+  // 9:00〜18:00(540分)の先頭1時間 = 左端0%・幅は約11%
+  assert.equal(bar.left, 0);
+  assert.ok(Math.abs(bar.width - (60 / 540) * 100) < 0.001);
+  assert.equal(timeline.rows[1].bars.length, 0, "アポゼロの営業も行として出す");
+  assert.equal(timeline.hours.length, 10, "9時から18時まで1時間ごとの目盛り");
+});
+
+test("buildDayTimeline: 営業時間の外にはみ出すアポも端で切って必ず見える", () => {
+  const list = [apo({ "担当営業": "営業一郎", "開始時刻": "08:00", "所要分": 120, "ステータス": "アポ確定" })];
+  const bar = core.buildDayTimeline(list, DAY, ["営業一郎"], {}).rows[0].bars[0];
+  assert.equal(bar.left, 0);
+  assert.ok(bar.width > 0);
+});
+
+test("buildDayTimeline: 対象外(架電禁止・アポ禁)は枠を占めないので出さない", () => {
+  const list = [apo({ "担当営業": "営業一郎", "ステータス": "対象外" })];
+  assert.deepEqual(core.buildDayTimeline(list, DAY, ["営業一郎"], {}).rows[0].bars, []);
+});
+
+test("buildDayTimeline: スタッフ表にない担当営業も行として出す(黙って消さない)", () => {
+  const list = [apo({ "担当営業": "退職済 太郎", "ステータス": "アポ確定" })];
+  const owners = core.buildDayTimeline(list, DAY, ["営業一郎"], {}).rows.map((r) => r.owner);
+  assert.deepEqual(owners, ["営業一郎", "退職済 太郎"]);
+});
+
+test("buildDayTimeline: 担当営業が空でも行が消えず「(担当なし)」に集まる", () => {
+  const list = [apo({ "担当営業": "", "ステータス": "アポ確定" })];
+  const owners = core.buildDayTimeline(list, DAY, [], {}).rows.map((r) => r.owner);
+  assert.deepEqual(owners, ["(担当なし)"]);
+});
+
+test("buildDayResultStats: これから/結果待ち/訪問済/申込/差し戻しの5つに束ねて数える", () => {
+  const list = [
+    apo({ "担当営業": "営業一郎", "開始時刻": "09:00", "所要分": 60, "ステータス": "アポ確定" }),
+    apo({ "担当営業": "営業一郎", "開始時刻": "16:00", "所要分": 60, "ステータス": "アポ確定" }),
+    apo({ "担当営業": "営業一郎", "開始時刻": "10:00", "所要分": 60, "ステータス": "訪問済" }),
+    apo({ "担当営業": "営業二郎", "開始時刻": "11:00", "所要分": 60, "ステータス": "申込" }),
+    apo({ "担当営業": "営業二郎", "開始時刻": "13:00", "所要分": 60, "ステータス": "差し戻し" })
+  ];
+  const stats = core.buildDayResultStats(list, DAY, ["営業一郎", "営業二郎"], { now: "14:00" });
+  const ichiro = stats.owners[0];
+  assert.equal(ichiro.pending, 1, "9時のアポは終わって猶予も過ぎたのに結果がない");
+  assert.equal(ichiro.ahead, 1, "16時のアポはまだこれから");
+  assert.equal(ichiro.visited, 1);
+  assert.equal(ichiro.total, 3);
+  assert.equal(stats.owners[1].signed, 1);
+  assert.equal(stats.owners[1].returned, 1);
+  assert.equal(stats.totals.total, 5);
+});
+
+test("buildDayResultStats: 成立・保全中も申込として数える(ファネルと同じ定義を使う)", () => {
+  const list = [
+    apo({ "担当営業": "営業一郎", "ステータス": "成立" }),
+    apo({ "担当営業": "営業一郎", "ステータス": "保全中" }),
+    apo({ "担当営業": "営業一郎", "ステータス": "追客中" })
+  ];
+  const stats = core.buildDayResultStats(list, DAY, ["営業一郎"], { now: "18:00" });
+  assert.equal(stats.totals.signed, 2);
+  assert.equal(stats.totals.visited, 1);
+});
+
+test("buildDayResultStats: アポゼロでも営業は行として出る(0件と分かる)", () => {
+  const stats = core.buildDayResultStats([], DAY, ["営業一郎"], { now: "12:00" });
+  assert.equal(stats.owners.length, 1);
+  assert.equal(stats.owners[0].total, 0);
+  assert.equal(stats.totals.total, 0);
+});

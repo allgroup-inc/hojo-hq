@@ -55,7 +55,9 @@
 "font-size:15px;font-weight:700;letter-spacing:-.06em}\n" +
 ".brandsub{font-size:10px;color:var(--sub);letter-spacing:.06em}\n" +
 ".seg{display:flex;gap:8px}\n" +
-".seg button{border:0;background:none;color:var(--sub);padding:10px 8px 8px;font-size:14px;cursor:pointer;border-bottom:2px solid transparent;min-height:44px}\n" +
+".seg button{border:0;background:none;color:var(--sub);padding:10px 8px 8px;font-size:14px;cursor:pointer;border-bottom:2px solid transparent;min-height:44px;white-space:nowrap}\n" +
+/* タブが4つあるとスマホで2行に折れる。折り返しは禁止して、幅は詰める */
+"@media (max-width:640px){.seg{gap:2px}.seg button{padding:10px 6px 8px;font-size:13px}}\n" +
 ".seg button.on{color:var(--ink);font-weight:700;border-bottom-color:var(--brand)}\n" +
 ".toolbar{display:flex;align-items:center;gap:8px;margin-top:16px}\n" +
 ".chips{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1}\n" +
@@ -110,6 +112,43 @@
 ".slot{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:4px 8px;margin:0 8px 8px 0;font-size:12px}\n" +
 ".slot b{font-weight:700}\n" +
 ".slot.allopen{color:var(--sub)}\n" +
+"/* 全体表(営業 × 時間の帯 + 結果の表) */\n" +
+/* 横に広いので、この枠の中だけ横スクロールさせる。本体は横に動かさない */
+".tlwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}\n" +
+".tl{min-width:900px}\n" +
+/* スマホでは名前欄を詰めて、1画面に映る時間帯を増やす(それでも横スクロールは残る) */
+"@media (max-width:640px){.tl{min-width:640px}.tlhead{margin-left:56px}.tlrow .who{width:56px;font-size:11px}}\n" +
+".scrollhint{display:none;color:var(--sub);font-size:11px;margin-bottom:4px}\n" +
+"@media (max-width:640px){.scrollhint{display:block}}\n" +
+".tlhead{display:flex;align-items:center;height:20px;margin-left:88px;position:relative;color:var(--sub);font-size:11px}\n" +
+".tlhead span{position:absolute;transform:translateX(-50%);font-variant-numeric:tabular-nums}\n" +
+".tlrow{display:flex;align-items:center;height:32px;border-top:1px solid var(--line)}\n" +
+".tlrow .who{flex:none;width:88px;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px}\n" +
+".tltrack{position:relative;flex:1;height:24px;background:#FAFAFA;border-radius:4px}\n" +
+/* 時間の目盛りを薄い縦線で。予定より目立たせない */
+".tltrack .tick{position:absolute;top:0;bottom:0;width:1px;background:#EFEFEF}\n" +
+".tltrack .nowline{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--bad);opacity:.6;border-radius:1px}\n" +
+/* クラス名は .tlbar。分析タブの棒グラフが .bar を先に使っており、
+   同じ名前にすると背景色が混ざる(2026-08-21 実機で検出) */
+".tlbar{position:absolute;top:2px;height:20px;border-radius:4px;border:1px solid var(--line);background:#FFFFFF;color:var(--ink);font-size:11px;line-height:18px;padding:0 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;box-sizing:border-box}\n" +
+".tlbar:hover{border-color:var(--ink)}\n" +
+/* 結果は色ではなく、まず文字と枠線で分かるようにする(色だけに頼らない) */
+".tlbar.ahead{border-color:#C9C9C9}\n" +
+".tlbar.pending{border-color:var(--bad);color:var(--bad)}\n" +
+".tlbar.visited{background:#F2F2F2}\n" +
+".tlbar.signed{background:var(--brand);border-color:var(--brand);font-weight:700}\n" +
+/* 斜線ハッチはグラデーション扱いになり設計方針に反する(自動テストが検出)。
+   破線の枠と取り消し線で「この枠は流れた」と分かるようにする */
+".tlbar.returned{border-style:dashed;color:var(--sub);text-decoration:line-through}\n" +
+".rtable{width:100%;max-width:600px;border-collapse:collapse;margin-top:16px;font-size:12px}\n" +
+".rtable th,.rtable td{padding:8px 4px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}\n" +
+".rtable th:first-child,.rtable td:first-child{text-align:left;font-weight:700}\n" +
+".rtable thead th{color:var(--sub);font-weight:400;white-space:nowrap}\n" +
+".rtable tfoot td{font-weight:700;border-top:1px solid var(--ink)}\n" +
+".rtable td.zero{color:#C9C9C9}\n" +
+".rtable td.alert{color:var(--bad);font-weight:700}\n" +
+".legend{margin-top:16px;color:var(--sub);font-size:11px;line-height:1.9}\n" +
+".legend i{font-style:normal;display:inline-block;border:1px solid var(--line);border-radius:3px;padding:0 6px;margin-right:4px}\n" +
 /* 狭い画面では担当者チップが「新規アポ」ボタンに切られて読めなくなるため、
    ボタンを上段・チップを下段に折り返す */
 /* 「スケジュール調整中」は9文字あり、96px・12pxだと必ず2行に折れて行が不揃いになる。
@@ -179,7 +218,8 @@
 "</style></head><body>\n" +
 "<header><div class=\"wrap topbar\"><div class=\"brand\">" + buildLogoHtml_() + "<div>" +
 "<h1>家計の<span>ポっ</span></h1><div class=\"brandsub\">家計の見直しやさん アポ管理</div></div></div>\n" +
-"<nav class=\"seg\"><button id=\"segDay\" class=\"on\">本日</button><button id=\"segWeek\">週</button><button id=\"segStats\">分析</button></nav></div></header>\n" +
+"<nav class=\"seg\"><button id=\"segDay\" class=\"on\">本日</button><button id=\"segBoard\">全体</button>" +
+"<button id=\"segWeek\">週</button><button id=\"segStats\">分析</button></nav></div></header>\n" +
 "<div class=\"wrap\">\n" +
 "<div class=\"toolbar\"><div class=\"chips\" id=\"chips\"><button class=\"chip\" id=\"chipMine\">自分のアポ</button></div>" +
 "<button class=\"btn-new\" id=\"fabNew\">＋ 新規アポ</button></div>\n" +
@@ -267,6 +307,11 @@
 "    google.script.run.withSuccessHandler(renderStats).withFailureHandler(fail).getStats();\n" +
 "    return;\n" +
 "  }\n" +
+"  if (state.view === 'dayboard') {\n" +
+"    google.script.run.withSuccessHandler(renderDayBoard).withFailureHandler(fail)\n" +
+"      .getDayBoard({ date: todayString() });\n" +
+"    return;\n" +
+"  }\n" +
 "  google.script.run.withSuccessHandler(renderBoard).withFailureHandler(fail)\n" +
 "    .getBoard({ view: state.view, date: todayString(), owner: effectiveOwner() });\n" +
 "}\n" +
@@ -349,6 +394,69 @@
 "function weekdayOf(dateString) {\n" +
 "  var parts = String(dateString).split('-').map(Number);\n" +
 "  return ['日','月','火','水','木','金','土'][new Date(parts[0], parts[1] - 1, parts[2]).getDay()];\n" +
+"}\n" +
+"var OUTCOMES = [\n" +
+"  { key: 'ahead', label: 'これから' },\n" +
+"  { key: 'pending', label: '結果待ち' },\n" +
+"  { key: 'visited', label: '訪問済' },\n" +
+"  { key: 'signed', label: '申込' },\n" +
+"  { key: 'returned', label: '差し戻し' }\n" +
+"];\n" +
+/* 全体表: 上に営業×時間の帯、下に結果の表。朝礼・夕礼で1画面を見ながら話すためのもの */
+"function renderDayBoard(data) {\n" +
+"  var tl = data.timeline, res = data.results;\n" +
+"  $('summary').innerHTML = '<span>' + esc(shortDate(data.date)) + '(' + esc(weekdayOf(data.date)) + ')の全体 <b>' +\n" +
+"    res.totals.total + '</b>件</span>';\n" +
+"  var html = '<div class=\"panel\"><h3>誰がいつ動くか(9:00〜18:00)</h3>' +\n" +
+"    '<div class=\"scrollhint\">← 横にスクロールすると夕方まで見られます</div>' +\n" +
+"    '<div class=\"tlwrap\"><div class=\"tl\">';\n" +
+"  html += '<div class=\"tlhead\">';\n" +
+"  tl.hours.forEach(function (h, index) {\n" +
+"    var shift = index === 0 ? '0' : (index === tl.hours.length - 1 ? '-100%' : '-50%');\n" +
+"    html += '<span style=\"left:' + h.left + '%;transform:translateX(' + shift + ')\">' +\n" +
+"      esc(h.label) + '</span>';\n" +
+"  });\n" +
+"  html += '</div>';\n" +
+"  tl.rows.forEach(function (row) {\n" +
+"    html += '<div class=\"tlrow\"><div class=\"who\">' + esc(row.owner) + '</div><div class=\"tltrack\">';\n" +
+"    tl.hours.forEach(function (h) {\n" +
+"      html += '<div class=\"tick\" style=\"left:' + h.left + '%\"></div>';\n" +
+"    });\n" +
+"    if (tl.nowLeft !== null) { html += '<div class=\"nowline\" style=\"left:' + tl.nowLeft + '%\"></div>'; }\n" +
+"    row.bars.forEach(function (bar) {\n" +
+"      html += '<div class=\"tlbar ' + bar.outcome + '\" data-id=\"' + esc(bar.apoId) + '\" tabindex=\"0\"' +\n" +
+"        ' title=\"' + esc(bar.time + ' ' + bar.customer + '(' + bar.status + ')') + '\"' +\n" +
+"        ' style=\"left:' + bar.left + '%;width:' + bar.width + '%\">' + esc(bar.customer) + '</div>';\n" +
+"    });\n" +
+"    html += '</div></div>';\n" +
+"  });\n" +
+"  html += '</div></div>';\n" +
+"  html += '<div class=\"legend\">' + OUTCOMES.map(function (o) {\n" +
+"    return '<i class=\"tlbar ' + o.key + '\" style=\"position:static\">' + esc(o.label) + '</i>';\n" +
+"  }).join(' ') + '<br>帯をタップするとそのアポが開きます。縦の赤い線がいまの時刻です。</div></div>';\n" +
+/* 表は密に。0件は薄く、結果待ちだけ赤で立てる(見るべき1列がすぐ分かるように) */
+"  html += '<div class=\"panel\"><h3>本日の結果</h3><table class=\"rtable\"><thead><tr><th>営業</th>' +\n" +
+"    OUTCOMES.map(function (o) { return '<th>' + esc(o.label) + '</th>'; }).join('') +\n" +
+"    '<th>合計</th></tr></thead><tbody>';\n" +
+"  res.owners.forEach(function (row) {\n" +
+"    html += '<tr>' + '<td>' + esc(row.owner) + '</td>' +\n" +
+"      OUTCOMES.map(function (o) {\n" +
+"        var value = row[o.key];\n" +
+"        var cls = value === 0 ? ' class=\"zero\"' : (o.key === 'pending' ? ' class=\"alert\"' : '');\n" +
+"        return '<td' + cls + '>' + value + '</td>';\n" +
+"      }).join('') +\n" +
+"      '<td' + (row.total === 0 ? ' class=\"zero\"' : '') + '>' + row.total + '</td></tr>';\n" +
+"  });\n" +
+"  html += '</tbody><tfoot><tr><td>全体</td>' +\n" +
+"    OUTCOMES.map(function (o) { return '<td>' + res.totals[o.key] + '</td>'; }).join('') +\n" +
+"    '<td>' + res.totals.total + '</td></tr></tfoot></table>';\n" +
+"  html += '<div class=\"note\"><b>結果待ち</b>は訪問時間が終わって90分過ぎても結果が入っていないもの。' +\n" +
+"    'ここが減っていれば、その日の記録は追いついています。<br>評価目的では使いません</div></div>';\n" +
+"  $('board').innerHTML = html;\n" +
+"  doneLoading();\n" +
+"  Array.prototype.forEach.call(document.querySelectorAll('.tlbar[data-id]'), function (el) {\n" +
+"    el.addEventListener('click', function () { openSheet(el.getAttribute('data-id')); });\n" +
+"  });\n" +
 "}\n" +
 "function renderBoard(board) {\n" +
 "  state.board = board; state.meName = board.meName || '';\n" +
@@ -619,13 +727,17 @@
 "}\n" +
 "function setView(view, buttonId) {\n" +
 "  state.view = view;\n" +
-"  ['segDay', 'segWeek', 'segStats'].forEach(function (id) { $(id).classList.remove('on'); });\n" +
+"  ['segDay', 'segBoard', 'segWeek', 'segStats'].forEach(function (id) { $(id).classList.remove('on'); });\n" +
 "  $(buttonId).classList.add('on');\n" +
 "  $('fabNew').style.display = (view === 'stats') ? 'none' : '';\n" +
+/* 全体表は「全体」を見る面。担当者チップを残すと、絞り込んだ状態を全体だと
+   読み違える(0件表示の事故と同じ型) */
+"  $('chips').style.display = (view === 'dayboard') ? 'none' : '';\n" +
 "  state.loaded = false;\n" +
 "  load();\n" +
 "}\n" +
 "$('segDay').addEventListener('click', function () { setView('day', 'segDay'); });\n" +
+"$('segBoard').addEventListener('click', function () { setView('dayboard', 'segBoard'); });\n" +
 "$('segWeek').addEventListener('click', function () { setView('week', 'segWeek'); });\n" +
 "$('segStats').addEventListener('click', function () { setView('stats', 'segStats'); });\n" +
 "$('fabNew').addEventListener('click', function () { openModal(null); });\n" +

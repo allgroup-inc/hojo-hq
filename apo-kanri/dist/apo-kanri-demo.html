@@ -22,7 +22,8 @@ header h1{font-size:15px;font-weight:700;line-height:1.2;display:flex;align-item
 header h1 span{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--brand);color:#B23C06;font-size:15px;font-weight:700;letter-spacing:-.06em}
 .brandsub{font-size:10px;color:var(--sub);letter-spacing:.06em}
 .seg{display:flex;gap:8px}
-.seg button{border:0;background:none;color:var(--sub);padding:10px 8px 8px;font-size:14px;cursor:pointer;border-bottom:2px solid transparent;min-height:44px}
+.seg button{border:0;background:none;color:var(--sub);padding:10px 8px 8px;font-size:14px;cursor:pointer;border-bottom:2px solid transparent;min-height:44px;white-space:nowrap}
+@media (max-width:640px){.seg{gap:2px}.seg button{padding:10px 6px 8px;font-size:13px}}
 .seg button.on{color:var(--ink);font-weight:700;border-bottom-color:var(--brand)}
 .toolbar{display:flex;align-items:center;gap:8px;margin-top:16px}
 .chips{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1}
@@ -73,6 +74,35 @@ main.dim{opacity:.45;pointer-events:none}
 .slot{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:4px 8px;margin:0 8px 8px 0;font-size:12px}
 .slot b{font-weight:700}
 .slot.allopen{color:var(--sub)}
+/* 全体表(営業 × 時間の帯 + 結果の表) */
+.tlwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+.tl{min-width:900px}
+@media (max-width:640px){.tl{min-width:640px}.tlhead{margin-left:56px}.tlrow .who{width:56px;font-size:11px}}
+.scrollhint{display:none;color:var(--sub);font-size:11px;margin-bottom:4px}
+@media (max-width:640px){.scrollhint{display:block}}
+.tlhead{display:flex;align-items:center;height:20px;margin-left:88px;position:relative;color:var(--sub);font-size:11px}
+.tlhead span{position:absolute;transform:translateX(-50%);font-variant-numeric:tabular-nums}
+.tlrow{display:flex;align-items:center;height:32px;border-top:1px solid var(--line)}
+.tlrow .who{flex:none;width:88px;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px}
+.tltrack{position:relative;flex:1;height:24px;background:#FAFAFA;border-radius:4px}
+.tltrack .tick{position:absolute;top:0;bottom:0;width:1px;background:#EFEFEF}
+.tltrack .nowline{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--bad);opacity:.6;border-radius:1px}
+.tlbar{position:absolute;top:2px;height:20px;border-radius:4px;border:1px solid var(--line);background:#FFFFFF;color:var(--ink);font-size:11px;line-height:18px;padding:0 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer;box-sizing:border-box}
+.tlbar:hover{border-color:var(--ink)}
+.tlbar.ahead{border-color:#C9C9C9}
+.tlbar.pending{border-color:var(--bad);color:var(--bad)}
+.tlbar.visited{background:#F2F2F2}
+.tlbar.signed{background:var(--brand);border-color:var(--brand);font-weight:700}
+.tlbar.returned{border-style:dashed;color:var(--sub);text-decoration:line-through}
+.rtable{width:100%;max-width:600px;border-collapse:collapse;margin-top:16px;font-size:12px}
+.rtable th,.rtable td{padding:8px 4px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+.rtable th:first-child,.rtable td:first-child{text-align:left;font-weight:700}
+.rtable thead th{color:var(--sub);font-weight:400;white-space:nowrap}
+.rtable tfoot td{font-weight:700;border-top:1px solid var(--ink)}
+.rtable td.zero{color:#C9C9C9}
+.rtable td.alert{color:var(--bad);font-weight:700}
+.legend{margin-top:16px;color:var(--sub);font-size:11px;line-height:1.9}
+.legend i{font-style:normal;display:inline-block;border:1px solid var(--line);border-radius:3px;padding:0 6px;margin-right:4px}
 @media (max-width:640px){.row .owner{display:none}.row .st{width:106px;font-size:11px}.toolbar{flex-wrap:wrap}.btn-new{order:1}.chips{order:2;flex-basis:100%;padding-bottom:4px}}
 /* 分析 */
 .panel{margin-top:64px}
@@ -136,7 +166,7 @@ main.dim{opacity:.45;pointer-events:none}
 .toast.show{opacity:1}
 </style></head><body>
 <header><div class="wrap topbar"><div class="brand"><img class="logoimg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8ZGVmcz4KICAgIDxjbGlwUGF0aCBpZD0iYyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDMiLz48L2NsaXBQYXRoPgogIDwvZGVmcz4KICA8IS0tIOS6jOmHjeODquODs+OCsDog6buE44Oq44Oz44KwK+eZveOBrumamemWkyvpu4Tjg4fjgqPjgrnjgq8gLS0+CiAgPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNTAiIGZpbGw9IiNGNkM4M0UiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NS41IiBmaWxsPSIjZmZmZmZmIi8+CiAgPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDMiIGZpbGw9IiNGNkM4M0UiLz4KICA8ZyBjbGlwLXBhdGg9InVybCgjYykiPgogICAgPHBhdGggZD0iTS01IDg4IFE1MCA2MiAxMDUgODggTDEwNSAxMDUgTC01IDEwNSBaIiBmaWxsPSIjZmZmZmZmIi8+CiAgICA8cGF0aCBkPSJNMjQgOTAuNSBRNTAgOTUuNSA3NiA4OC41IiBmaWxsPSJub25lIiBzdHJva2U9IiNGNkM4M0UiIHN0cm9rZS13aWR0aD0iMi40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8L2c+CiAgPCEtLSDlpKrpmb0o44GK44GG44Gh44Gu5b6M44KN44Gr5o+P44GPPeWxi+agueOBp+S4gOmDqOmaoOOCjOOCiykgLS0+CiAgPGcgc3Ryb2tlPSIjMjIxRDExIiBmaWxsPSJub25lIj4KICAgIDxjaXJjbGUgY3g9IjY4IiBjeT0iMTgiIHI9IjUiIHN0cm9rZS13aWR0aD0iMiIvPgogICAgPGcgc3Ryb2tlLXdpZHRoPSIxLjciIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+CiAgICAgIDxsaW5lIHgxPSI2OCIgeTE9IjciICB4Mj0iNjgiIHkyPSIxMC42Ii8+CiAgICAgIDxsaW5lIHgxPSI2OCIgeTE9IjI1LjQiIHgyPSI2OCIgeTI9IjI5Ii8+CiAgICAgIDxsaW5lIHgxPSI1NyIgeTE9IjE4IiB4Mj0iNjAuNiIgeTI9IjE4Ii8+CiAgICAgIDxsaW5lIHgxPSI3NS40IiB5MT0iMTgiIHgyPSI3OSIgeTI9IjE4Ii8+CiAgICAgIDxsaW5lIHgxPSI2MC4yIiB5MT0iMTAuMiIgeDI9IjYyLjgiIHkyPSIxMi44Ii8+CiAgICAgIDxsaW5lIHgxPSI3My4yIiB5MT0iMjMuMiIgeDI9Ijc1LjgiIHkyPSIyNS44Ii8+CiAgICAgIDxsaW5lIHgxPSI2MC4yIiB5MT0iMjUuOCIgeDI9IjYyLjgiIHkyPSIyMy4yIi8+CiAgICAgIDxsaW5lIHgxPSI3My4yIiB5MT0iMTIuOCIgeDI9Ijc1LjgiIHkyPSIxMC4yIi8+CiAgICA8L2c+CiAgPC9nPgogIDwhLS0g44GK44GG44GhKOeZveWhl+OCiuOBruS6lOinkuW9oivou5Ljga7lh7rjgZ/lsYvmoLnnt5opIC0tPgogIDxwYXRoIGQ9Ik01MCAxMiBMNzggMzcuNSBMNzggNzMgTDIyIDczIEwyMiAzNy41IFoiIGZpbGw9IiNmZmZmZmYiLz4KICA8ZyBzdHJva2U9IiMyMjFEMTEiIHN0cm9rZS13aWR0aD0iMi44IiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiPgogICAgPHBhdGggZD0iTTIyIDM3LjUgTDIyIDczIEw3OCA3MyBMNzggMzcuNSIvPgogICAgPHBhdGggZD0iTTE0IDQ0IEw1MCAxMiBMODYgNDQiLz4KICA8L2c+CiAgPCEtLSDjgYvjgYogLS0+CiAgPGcgc3Ryb2tlPSIjMjIxRDExIiBzdHJva2Utd2lkdGg9IjIuOCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBmaWxsPSJub25lIj4KICAgIDxsaW5lIHgxPSIzNCIgeTE9IjM4LjUiIHgyPSI2NiIgeTI9IjM4LjUiLz4KICAgIDxsaW5lIHgxPSI0NC41IiB5MT0iNDYiIHgyPSI0NC41IiB5Mj0iNTEiLz4KICAgIDxsaW5lIHgxPSI1NS41IiB5MT0iNDYiIHgyPSI1NS41IiB5Mj0iNTEiLz4KICAgIDxwYXRoIGQ9Ik0zOSA1NS41IFE1MCA2NyA2MSA1NS41Ii8+CiAgPC9nPgogIDx0ZXh0IHg9IjUwIiB5PSI4MiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IidIaXJhZ2lubyBTYW5zJywnTm90byBTYW5zIEpQJyxNZWlyeW8sc2Fucy1zZXJpZiIgZm9udC1zaXplPSI3LjYiIGZvbnQtd2VpZ2h0PSI4MDAiIGZpbGw9IiMyMjFEMTEiPuWutuioiOOBruimi+ebtOOBl+OChOOBleOCkzwvdGV4dD4KPC9zdmc+Cg==" alt="家計の見直しやさん"><div><h1>家計の<span>ポっ</span></h1><div class="brandsub">家計の見直しやさん アポ管理</div></div></div>
-<nav class="seg"><button id="segDay" class="on">本日</button><button id="segWeek">週</button><button id="segStats">分析</button></nav></div></header>
+<nav class="seg"><button id="segDay" class="on">本日</button><button id="segBoard">全体</button><button id="segWeek">週</button><button id="segStats">分析</button></nav></div></header>
 <div class="wrap">
 <div class="toolbar"><div class="chips" id="chips"><button class="chip" id="chipMine">自分のアポ</button></div><button class="btn-new" id="fabNew">＋ 新規アポ</button></div>
 <div class="summary" id="summary"></div>
@@ -979,8 +1009,129 @@ main.dim{opacity:.45;pointer-events:none}
     return pad2_(Math.floor(minutes / 60)) + ":" + pad2_(minutes % 60);
   }
 
+  /**
+   * 本日の全体表(2026-08-21 追加)。営業ごとに、営業時間を横軸にした帯を返す。
+   * 誰がいつ動いていて、どこが空いているかを一目で見るためのもの。
+   * 位置と幅は営業時間窓に対する%で返し、描画側は数字を持たない。
+   * options: { now: "HH:mm" }
+   */
+  function buildDayTimeline(appointments, dateString, salesStaffNames, options) {
+    var opts = options || {};
+    var dayStart = timeToMinutes_(WORKDAY_START);
+    var dayEnd = timeToMinutes_(WORKDAY_END);
+    var span = dayEnd - dayStart;
+    var nowMinutes = timeToMinutes_(opts.now || "");
+
+    var today = validAppointments_(appointments).filter(function (record) {
+      return normalizeDateString(record["日付"]) === dateString &&
+        record["ステータス"] !== "対象外";
+    });
+
+    var names = (salesStaffNames || []).slice();
+    today.forEach(function (record) {
+      var owner = record["担当営業"] || "(担当なし)";
+      if (names.indexOf(owner) === -1) names.push(owner);
+    });
+
+    var rows = names.map(function (owner) {
+      var mine = sortAppointments(today.filter(function (record) {
+        return (record["担当営業"] || "(担当なし)") === owner;
+      }));
+      var bars = mine.map(function (record) {
+        var start = timeToMinutes_(record["開始時刻"]);
+        if (start === null) return null;
+        var end = start + (Number(record["所要分"]) || 60);
+        // 営業時間の外にはみ出すアポも、端で切って必ず見えるようにする
+        var from = Math.max(dayStart, Math.min(start, dayEnd));
+        var to = Math.max(dayStart, Math.min(end, dayEnd));
+        return {
+          apoId: record["アポID"],
+          customer: record["顧客名"],
+          time: normalizeTimeString(record["開始時刻"]),
+          status: record["ステータス"],
+          outcome: classifyOutcome_(record, dateString, nowMinutes),
+          left: ((from - dayStart) / span) * 100,
+          width: Math.max(((to - from) / span) * 100, 2)
+        };
+      }).filter(Boolean);
+      return { owner: owner, bars: bars };
+    });
+
+    var hours = [];
+    for (var m = dayStart; m <= dayEnd; m += 60) {
+      hours.push({ label: minutesToTime_(m), left: ((m - dayStart) / span) * 100 });
+    }
+    return {
+      date: dateString,
+      hours: hours,
+      rows: rows,
+      nowLeft: (nowMinutes !== null && nowMinutes >= dayStart && nowMinutes <= dayEnd)
+        ? ((nowMinutes - dayStart) / span) * 100 : null
+    };
+  }
+
+  /* 1件のアポが「今どういう状態か」を5つに束ねる。
+   * 訪問済/申込の判定は転換ファネルと同じ定数を使う(❷が独自に数えないため。
+   * 2つ持つと必ずズレて、どちらが正しいかの議論になる)。 */
+  function classifyOutcome_(record, dateString, nowMinutes) {
+    var status = record["ステータス"];
+    if (SIGNED_STATUSES.indexOf(status) !== -1) return "signed";
+    if (VISITED_STATUSES.indexOf(status) !== -1) return "visited";
+    if (status === "差し戻し") return "returned";
+    var start = timeToMinutes_(record["開始時刻"]);
+    var end = start === null ? null : start + (Number(record["所要分"]) || 60);
+    if (nowMinutes !== null && end !== null && nowMinutes >= end + RESULT_GRACE_MINUTES) {
+      return "pending";
+    }
+    return "ahead";
+  }
+
+  var OUTCOME_KEYS = ["ahead", "pending", "visited", "signed", "returned"];
+
+  /**
+   * 本日の結果集計(2026-08-21 追加)。営業ごとと全体の件数を返す。
+   * これから / 結果待ち / 訪問済 / 申込 / 差し戻し の5つ。
+   * ※評価目的では使わない(v1.1三名体制裁定・軸の裁定③と同じ理由)。
+   */
+  function buildDayResultStats(appointments, dateString, salesStaffNames, options) {
+    var nowMinutes = timeToMinutes_((options || {}).now || "");
+    var today = validAppointments_(appointments).filter(function (record) {
+      return normalizeDateString(record["日付"]) === dateString &&
+        record["ステータス"] !== "対象外";
+    });
+    var names = (salesStaffNames || []).slice();
+    today.forEach(function (record) {
+      var owner = record["担当営業"] || "(担当なし)";
+      if (names.indexOf(owner) === -1) names.push(owner);
+    });
+
+    function emptyCounts_() {
+      var counts = { total: 0 };
+      OUTCOME_KEYS.forEach(function (key) { counts[key] = 0; });
+      return counts;
+    }
+    var totals = emptyCounts_();
+    var owners = names.map(function (owner) {
+      var counts = emptyCounts_();
+      today.forEach(function (record) {
+        if ((record["担当営業"] || "(担当なし)") !== owner) return;
+        var outcome = classifyOutcome_(record, dateString, nowMinutes);
+        counts[outcome] += 1;
+        counts.total += 1;
+        totals[outcome] += 1;
+        totals.total += 1;
+      });
+      counts.owner = owner;
+      return counts;
+    });
+    return { date: dateString, owners: owners, totals: totals };
+  }
+
   var api = {
     generateApoId: generateApoId,
+    buildDayTimeline: buildDayTimeline,
+    buildDayResultStats: buildDayResultStats,
+    OUTCOME_KEYS: OUTCOME_KEYS,
     buildAttentionList: buildAttentionList,
     buildOpenSlots: buildOpenSlots,
     normalizeDateString: normalizeDateString,
@@ -1413,6 +1564,24 @@ function addDaysString_(dateString, days) {
 }
 
 /**
+ * 全体表タブ用: 本日の営業×時間の帯と、結果の集計(これから/結果待ち/訪問済/申込/差し戻し)。
+ * 朝礼・夕礼で1画面を見ながら段取りを決めるためのもの。※評価目的では使わない。
+ */
+function getDayBoard(params) {
+  requireApoAccess_();
+  var options = params || {};
+  var date = options.date || ApoCore.normalizeDateString(new Date());
+  var appointments = readAppointments_();
+  var salesStaff = ApoAccess.listSalesStaff(readStaffRows_());
+  var now = Utilities.formatDate(new Date(), "Asia/Tokyo", "HH:mm");
+  return {
+    date: date,
+    timeline: ApoCore.buildDayTimeline(appointments, date, salesStaff, { now: now }),
+    results: ApoCore.buildDayResultStats(appointments, date, salesStaff, { now: now })
+  };
+}
+
+/**
  * 分析タブ用の集計: 本日の埋まり状況(営業別)+過去30日の転換ファネル(チーム全体のみ)。
  * 営業マン別の転換率は評価誤用リスクのため返さない(v1.1三名体制裁定)。
  */
@@ -1697,7 +1866,7 @@ function postToApoSlack_(message) {
       withSuccessHandler: function (fn) { ok = fn; return proxy; },
       withFailureHandler: function (fn) { ng = fn; return proxy; }
     };
-    ["getBoard", "getStats", "getFormOptions", "saveAppointment", "updateStatus", "reportDelay"]
+    ["getBoard", "getDayBoard", "getStats", "getFormOptions", "saveAppointment", "updateStatus", "reportDelay"]
       .forEach(function (name) {
         proxy[name] = function () {
           var args = Array.prototype.slice.call(arguments);
@@ -1736,6 +1905,11 @@ function load() {
   else { $('board').innerHTML = '<div class="empty">読み込み中…</div>'; }
   if (state.view === 'stats') {
     google.script.run.withSuccessHandler(renderStats).withFailureHandler(fail).getStats();
+    return;
+  }
+  if (state.view === 'dayboard') {
+    google.script.run.withSuccessHandler(renderDayBoard).withFailureHandler(fail)
+      .getDayBoard({ date: todayString() });
     return;
   }
   google.script.run.withSuccessHandler(renderBoard).withFailureHandler(fail)
@@ -1814,6 +1988,67 @@ function renderOpenSlots(days) {
 function weekdayOf(dateString) {
   var parts = String(dateString).split('-').map(Number);
   return ['日','月','火','水','木','金','土'][new Date(parts[0], parts[1] - 1, parts[2]).getDay()];
+}
+var OUTCOMES = [
+  { key: 'ahead', label: 'これから' },
+  { key: 'pending', label: '結果待ち' },
+  { key: 'visited', label: '訪問済' },
+  { key: 'signed', label: '申込' },
+  { key: 'returned', label: '差し戻し' }
+];
+function renderDayBoard(data) {
+  var tl = data.timeline, res = data.results;
+  $('summary').innerHTML = '<span>' + esc(shortDate(data.date)) + '(' + esc(weekdayOf(data.date)) + ')の全体 <b>' +
+    res.totals.total + '</b>件</span>';
+  var html = '<div class="panel"><h3>誰がいつ動くか(9:00〜18:00)</h3>' +
+    '<div class="scrollhint">← 横にスクロールすると夕方まで見られます</div>' +
+    '<div class="tlwrap"><div class="tl">';
+  html += '<div class="tlhead">';
+  tl.hours.forEach(function (h, index) {
+    var shift = index === 0 ? '0' : (index === tl.hours.length - 1 ? '-100%' : '-50%');
+    html += '<span style="left:' + h.left + '%;transform:translateX(' + shift + ')">' +
+      esc(h.label) + '</span>';
+  });
+  html += '</div>';
+  tl.rows.forEach(function (row) {
+    html += '<div class="tlrow"><div class="who">' + esc(row.owner) + '</div><div class="tltrack">';
+    tl.hours.forEach(function (h) {
+      html += '<div class="tick" style="left:' + h.left + '%"></div>';
+    });
+    if (tl.nowLeft !== null) { html += '<div class="nowline" style="left:' + tl.nowLeft + '%"></div>'; }
+    row.bars.forEach(function (bar) {
+      html += '<div class="tlbar ' + bar.outcome + '" data-id="' + esc(bar.apoId) + '" tabindex="0"' +
+        ' title="' + esc(bar.time + ' ' + bar.customer + '(' + bar.status + ')') + '"' +
+        ' style="left:' + bar.left + '%;width:' + bar.width + '%">' + esc(bar.customer) + '</div>';
+    });
+    html += '</div></div>';
+  });
+  html += '</div></div>';
+  html += '<div class="legend">' + OUTCOMES.map(function (o) {
+    return '<i class="tlbar ' + o.key + '" style="position:static">' + esc(o.label) + '</i>';
+  }).join(' ') + '<br>帯をタップするとそのアポが開きます。縦の赤い線がいまの時刻です。</div></div>';
+  html += '<div class="panel"><h3>本日の結果</h3><table class="rtable"><thead><tr><th>営業</th>' +
+    OUTCOMES.map(function (o) { return '<th>' + esc(o.label) + '</th>'; }).join('') +
+    '<th>合計</th></tr></thead><tbody>';
+  res.owners.forEach(function (row) {
+    html += '<tr>' + '<td>' + esc(row.owner) + '</td>' +
+      OUTCOMES.map(function (o) {
+        var value = row[o.key];
+        var cls = value === 0 ? ' class="zero"' : (o.key === 'pending' ? ' class="alert"' : '');
+        return '<td' + cls + '>' + value + '</td>';
+      }).join('') +
+      '<td' + (row.total === 0 ? ' class="zero"' : '') + '>' + row.total + '</td></tr>';
+  });
+  html += '</tbody><tfoot><tr><td>全体</td>' +
+    OUTCOMES.map(function (o) { return '<td>' + res.totals[o.key] + '</td>'; }).join('') +
+    '<td>' + res.totals.total + '</td></tr></tfoot></table>';
+  html += '<div class="note"><b>結果待ち</b>は訪問時間が終わって90分過ぎても結果が入っていないもの。' +
+    'ここが減っていれば、その日の記録は追いついています。<br>評価目的では使いません</div></div>';
+  $('board').innerHTML = html;
+  doneLoading();
+  Array.prototype.forEach.call(document.querySelectorAll('.tlbar[data-id]'), function (el) {
+    el.addEventListener('click', function () { openSheet(el.getAttribute('data-id')); });
+  });
 }
 function renderBoard(board) {
   state.board = board; state.meName = board.meName || '';
@@ -2072,13 +2307,15 @@ function reportDelayMinutes(minutes) {
 }
 function setView(view, buttonId) {
   state.view = view;
-  ['segDay', 'segWeek', 'segStats'].forEach(function (id) { $(id).classList.remove('on'); });
+  ['segDay', 'segBoard', 'segWeek', 'segStats'].forEach(function (id) { $(id).classList.remove('on'); });
   $(buttonId).classList.add('on');
   $('fabNew').style.display = (view === 'stats') ? 'none' : '';
+  $('chips').style.display = (view === 'dayboard') ? 'none' : '';
   state.loaded = false;
   load();
 }
 $('segDay').addEventListener('click', function () { setView('day', 'segDay'); });
+$('segBoard').addEventListener('click', function () { setView('dayboard', 'segBoard'); });
 $('segWeek').addEventListener('click', function () { setView('week', 'segWeek'); });
 $('segStats').addEventListener('click', function () { setView('stats', 'segStats'); });
 $('fabNew').addEventListener('click', function () { openModal(null); });

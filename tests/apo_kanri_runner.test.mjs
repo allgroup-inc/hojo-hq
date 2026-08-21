@@ -218,3 +218,18 @@ test("getBoard: 手当てが要るものと空き枠を同じ応答で返す(2�
   const today = ApoCore.normalizeDateString(new Date());
   assert.notEqual(board.openSlots[0].date, today);
 });
+
+test("getDayBoard: 本日の帯と結果集計を返す", () => {
+  env.sheets[ApoSchema.APPOINTMENT_SHEET_NAME].appendRow(apoRow(baseApo()));
+  const data = env.context.getDayBoard({ date: "2026-08-17" });
+  assert.ok(data.timeline, "timeline を返す");
+  assert.ok(data.results, "results を返す");
+  assert.equal(data.results.totals.total, 1);
+  // アポゼロの営業も行として残す(誰が空いているかが分からなくなるため)
+  assert.ok(data.timeline.rows.length >= 1);
+});
+
+test("getDayBoard: 許可リストにないユーザーは弾く(多層防御)", () => {
+  env = buildEnv({ activeEmail: "stranger@example.com" });
+  assert.throws(() => env.context.getDayBoard({}), /権限がありません/);
+});

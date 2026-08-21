@@ -138,6 +138,24 @@ function addDaysString_(dateString, days) {
 }
 
 /**
+ * 全体表タブ用: 本日の営業×時間の帯と、結果の集計(これから/結果待ち/訪問済/申込/差し戻し)。
+ * 朝礼・夕礼で1画面を見ながら段取りを決めるためのもの。※評価目的では使わない。
+ */
+function getDayBoard(params) {
+  requireApoAccess_();
+  var options = params || {};
+  var date = options.date || ApoCore.normalizeDateString(new Date());
+  var appointments = readAppointments_();
+  var salesStaff = ApoAccess.listSalesStaff(readStaffRows_());
+  var now = Utilities.formatDate(new Date(), "Asia/Tokyo", "HH:mm");
+  return {
+    date: date,
+    timeline: ApoCore.buildDayTimeline(appointments, date, salesStaff, { now: now }),
+    results: ApoCore.buildDayResultStats(appointments, date, salesStaff, { now: now })
+  };
+}
+
+/**
  * 分析タブ用の集計: 本日の埋まり状況(営業別)+過去30日の転換ファネル(チーム全体のみ)。
  * 営業マン別の転換率は評価誤用リスクのため返さない(v1.1三名体制裁定)。
  */

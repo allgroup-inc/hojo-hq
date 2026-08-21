@@ -173,7 +173,7 @@ const RUN_STUB = String.raw`
       withSuccessHandler: function (fn) { ok = fn; return proxy; },
       withFailureHandler: function (fn) { ng = fn; return proxy; }
     };
-    ["getBoard", "getStats", "getFormOptions", "saveAppointment", "updateStatus", "reportDelay"]
+    ["getBoard", "getDayBoard", "getStats", "getFormOptions", "saveAppointment", "updateStatus", "reportDelay"]
       .forEach(function (name) {
         proxy[name] = function () {
           var args = Array.prototype.slice.call(arguments);

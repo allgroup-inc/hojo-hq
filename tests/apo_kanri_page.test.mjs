@@ -128,3 +128,27 @@ test("本日の一覧に現在時刻の線と空き時間を挟む(時間の流�
   assert.ok(html.includes("の空き"));
   assert.ok(html.includes("nowLineHtml"));
 });
+
+test("全体タブがあり、営業×時間の帯と本日の結果表が出る", () => {
+  assert.ok(html.includes('id="segBoard"'));
+  assert.ok(html.includes("誰がいつ動くか"));
+  assert.ok(html.includes("本日の結果"));
+  ["これから", "結果待ち", "訪問済", "申込", "差し戻し"].forEach((label) => {
+    assert.ok(html.includes(label), label + " の列が必要");
+  });
+});
+
+/* 帯のクラス名が分析タブの棒グラフ(.bar)と衝突すると背景色が混ざる。
+   2026-08-21 に実際に踏んだので、名前が分かれていることを固定する */
+test("全体表の帯は .tlbar を使う(分析タブの .bar と衝突させない)", () => {
+  assert.ok(html.includes(".tlbar{"));
+  assert.ok(!html.includes('class=\\"bar \''), "帯に .bar を使わない");
+});
+
+test("全体表では担当者チップを隠す(絞り込んだ状態を全体と読み違えさせない)", () => {
+  assert.ok(html.includes("view === 'dayboard'"));
+});
+
+test("横に広い表は、その枠の中だけ横スクロールさせる(本体は横に動かさない)", () => {
+  assert.ok(html.includes(".tlwrap{overflow-x:auto"));
+});
