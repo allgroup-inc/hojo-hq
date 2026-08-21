@@ -66,7 +66,7 @@ function baseApo(overrides) {
   return Object.assign({
     "アポID": "APO-20260817-AAAA", "日付": "2026-08-17", "開始時刻": "10:00", "所要分": 60,
     "顧客名": "テスト商店", "形式": "訪問", "場所またはURL": "那覇市", "担当営業": "営業一郎",
-    "アポ入れ担当": "アポ花子", "温度感": "高", "ステータス": "確定", "メモ": "",
+    "アポ入れ担当": "アポ花子", "温度感": "高", "ステータス": "アポ確定", "メモ": "",
     "登録日時": "2026-08-16 09:00:00", "最終更新日時": "2026-08-16 09:00:00"
   }, overrides || {});
 }
@@ -156,18 +156,18 @@ test("ダブルブッキング: confirmedOverlapなしなら保存されず警�
 
 test("キャンセル操作: 通知に代打候補(空いている営業)が付く", () => {
   env.sheets[ApoSchema.APPOINTMENT_SHEET_NAME].appendRow(apoRow(baseApo()));
-  const result = env.context.updateStatus("APO-20260817-AAAA", "キャンセル(顧客都合)");
+  const result = env.context.updateStatus("APO-20260817-AAAA", "差し戻し");
   assert.equal(result.ok, true);
   assert.equal(env.slackPosts.length, 1);
-  assert.ok(env.slackPosts[0].includes("キャンセル(顧客都合)"));
+  assert.ok(env.slackPosts[0].includes("差し戻し"));
   assert.ok(env.slackPosts[0].includes("代打候補"));
   assert.ok(env.slackPosts[0].includes("営業二郎"));
 });
 
 test("キャンセルからの復帰: 空いた枠が埋まっていたら重複警告で止まる(素通りしない)", () => {
-  env.sheets[ApoSchema.APPOINTMENT_SHEET_NAME].appendRow(apoRow(baseApo({ "ステータス": "キャンセル(顧客都合)" })));
+  env.sheets[ApoSchema.APPOINTMENT_SHEET_NAME].appendRow(apoRow(baseApo({ "ステータス": "差し戻し" })));
   env.sheets[ApoSchema.APPOINTMENT_SHEET_NAME].appendRow(apoRow(baseApo({ "アポID": "APO-20260817-BBBB", "顧客名": "後から入れた件" })));
-  const result = env.context.updateStatus("APO-20260817-AAAA", "確定");
+  const result = env.context.updateStatus("APO-20260817-AAAA", "アポ確定");
   assert.equal(result.ok, false);
   assert.ok(result.overlapWarning.length >= 1);
 });
