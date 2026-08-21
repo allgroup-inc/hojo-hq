@@ -41,7 +41,7 @@
     "顧客ID", "差し戻し理由"
   ];
   // 再訪と新規では決まり方がまったく違うため、混ぜた平均値は改善判断に使えない。
-  // 種別ごとに申込み率を出せるようにする(2026-08-19 小柳さん決裁)。
+  // 種別ごとに申込率を出せるようにする(2026-08-19 小柳さん決裁)。
   var APPOINTMENT_KINDS = [
     "再訪(既存)", "新規(紹介)", "新規(ご家族)", "新規(その他)"
   ];
@@ -474,7 +474,7 @@
 
   /**
    * 転換ファネル(チーム全体のみ。営業マン別は評価誤用リスクのため見送り):
-   * - 母数 = 結果が出たアポ(訪問済+申込+キャンセル2種)。予定・確定・再調整中は除外
+   * - 母数 = 結果が出たアポ(訪問済+申込+差し戻し)。スケジュール調整中・アポ確定は結果待ちのため除外
    * - 訪問実施率 = (訪問済+申込) ÷ 母数 / 申込率 = 申込 ÷ (訪問済+申込)
    * 母数0のときは率をnullで返す(0%や100%と断定しない。表示側は「—」にする)。
    */
@@ -1074,14 +1074,14 @@
 "      '<b>' + entry.count + '件・' + formatHours(entry.bookedMinutes) + '(' + Math.round(entry.ratio * 100) + '%)</b></div>' +\n" +
 "      '<div class=\"track\"><div class=\"bar\" style=\"width:' + Math.round(entry.ratio * 100) + '%\"></div></div></div>';\n" +
 "  });\n" +
-"  html += '<div class=\"note\">空き=キャンセル・再調整中を除いた予約済み時間。評価目的では使いません</div></div>';\n" +
+"  html += '<div class=\"note\">空き=開始時刻が入っているアポの合計(差し戻しは除く)。評価目的では使いません</div></div>';\n" +
 "  html += '<div class=\"panel\"><h3>転換ファネル(過去30日・' + esc(stats.sinceDate) + '以降・チーム全体)</h3>';\n" +
 "  html += '<div class=\"fstep\"><span>結果が出たアポ</span><b>' + funnel.concluded + '件</b></div>';\n" +
 "  html += '<div class=\"fstep\"><span>訪問実施(訪問済+申込)</span><span><span class=\"rate\">' + formatRate(funnel.visitRate) + '</span><b>' + funnel.completed + '件</b></span></div>';\n" +
 "  html += '<div class=\"fstep\"><span>申込</span><span><span class=\"rate\">' + formatRate(funnel.signupRate) + '</span><b>' + funnel.signups + '件</b></span></div>';\n" +
 "  html += '<div class=\"note\">率の母数: 訪問実施率=結果が出たアポ、申込率=訪問実施。' +\n" +
 "    (funnel.concluded < 10 ? '<br>件数が少ないため参考値です(母数10件未満)。' : '') +\n" +
-"    '<br>予定・確定・再調整中のアポは結果待ちのため含みません。評価目的では使いません</div></div>';\n" +
+"    '<br>スケジュール調整中・アポ確定のアポは結果待ちのため含みません。評価目的では使いません</div></div>';\n" +
 "  var lowKindSample = false;\n" +
 "  html += '<div class=\"panel\"><h3>アポ種別別の申込率(過去30日・チーム全体)</h3>';\n" +
 "  (stats.byKind || []).forEach(function (row) {\n" +
@@ -1574,7 +1574,7 @@ function saveAppointment(payload) {
  * カードのアクションシートからのステータスだけの更新(2タップ操作)。
  * 履歴・通知は saveAppointment の編集と同じ扱いにする。
  *
- * キャンセル系・再調整中から稼働ステータスへ戻す場合だけはダブルブッキング検知を
+ * 差し戻し済み・開始時刻なしから稼働状態へ戻す場合だけはダブルブッキング検知を
  * 生かす(confirmedOverlapを立てない)。空いた枠に別アポが入っている可能性があるため
  * (2026-08-17レビュー指摘#5)。重複があれば saveAppointment が {ok:false} を返し、
  * 画面側が「編集から確認」を促す。
