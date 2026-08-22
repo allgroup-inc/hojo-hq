@@ -1766,12 +1766,22 @@
 "    setSaveDisabled(false);\n" +
 "    if (result && result.overlapWarning && result.overlapWarning.length && !result.ok) {\n" +
 "      state.confirmedOverlap = true;\n" +
+/* 顧客名に敬称を足さない。現場は敬称込みで入力するため「田中様様」になる。
+   通知側は 2026-08-19 に直したが、この警告文に残っていた
+   (2026-08-22 連続登録の実測で再発を検出)。
+   押すボタンも、実際に押されたほうを名指しする。連続登録の最中に
+   「保存して通知を押せ」と出ると手が止まる。
+   さらに、連続登録中は画面下の保存ボタン付近を見ているため、フォーム上部の
+   警告に気づかず「押したのに保存されていない」が起きる。必ず視界に入れる */
 "      var lines = result.overlapWarning.map(function (a) {\n" +
-"        return a['開始時刻'] + ' ' + a['顧客名'] + '様';\n" +
+"        return a['開始時刻'] + ' ' + a['顧客名'];\n" +
 "      }).join(' / ');\n" +
 "      var warn = $('overlapWarn');\n" +
-"      warn.textContent = payload['担当営業'] + 'さんの既存アポと時間帯が重なっています(' + lines + ')。このまま保存するにはもう一度「保存して通知」を押してください。';\n" +
+"      var pressed = keepOpen ? '保存して続けて登録' : '保存して通知';\n" +
+"      warn.textContent = payload['担当営業'] + 'さんの既存アポと時間帯が重なっています(' +\n" +
+"        lines + ')。このまま登録するには、もう一度「' + pressed + '」を押してください。';\n" +
 "      warn.classList.add('show');\n" +
+"      if (warn.scrollIntoView) { warn.scrollIntoView({ block: 'center' }); }\n" +
 "      return;\n" +
 "    }\n" +
 "    var notice = result && result.notified ? '保存しました。Slackに通知しました' : '保存しました(Slack通知なし)';\n" +
