@@ -64,6 +64,8 @@ main.dim{opacity:.45;pointer-events:none}
 .arow .who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .arow .why{flex:none;font-size:12px;color:var(--sub)}
 .attn .more{padding-top:8px;font-size:12px;color:var(--sub)}
+.attn .breakdown{padding-bottom:8px;font-size:12px;color:var(--sub)}
+.attn .breakdown b{color:var(--ink)}
 .gap{display:flex;align-items:center;gap:16px;padding:4px 0;color:var(--sub);font-size:11px}
 .gap .time{flex:none;width:52px}
 .now{display:flex;align-items:center;gap:8px;padding:2px 0}
@@ -2026,7 +2028,21 @@ function renderAttention(list) {
   if (!items.length) {
     return html + '<div class="none">いまのところありません。</div></div>';
   }
-  items.slice(0, ATTN_MAX).forEach(function (item) {
+  var counts = {};
+  items.forEach(function (item) { counts[item.kind] = (counts[item.kind] || 0) + 1; });
+  var ORDER = ['result', 'overlap', 'unconfirmed', 'place', 'owner'];
+  html += '<div class="breakdown">' + ORDER.filter(function (k) { return counts[k]; })
+    .map(function (k) { return esc(ATTN_LABEL[k]) + ' <b>' + counts[k] + '</b>'; }).join('・') + '</div>';
+  var picked = [];
+  ORDER.forEach(function (kind) {
+    var first = items.filter(function (item) { return item.kind === kind; })[0];
+    if (first && picked.length < ATTN_MAX) { picked.push(first); }
+  });
+  items.forEach(function (item) {
+    if (picked.length < ATTN_MAX && picked.indexOf(item) === -1) { picked.push(item); }
+  });
+  picked.sort(function (a, b) { return items.indexOf(a) - items.indexOf(b); });
+  picked.forEach(function (item) {
     var apo = item.apo;
     html += '<div class="arow" data-id="' + esc(apo['アポID']) + '" tabindex="0">' +
       '<span class="tag">' + esc(ATTN_LABEL[item.kind] || item.kind) + '</span>' +
@@ -2034,8 +2050,9 @@ function renderAttention(list) {
       '<span class="who">' + esc(apo['顧客名']) + '</span>' +
       '<span class="why">' + esc(item.reason) + '</span></div>';
   });
-  if (items.length > ATTN_MAX) {
-    html += '<div class="more">ほか ' + (items.length - ATTN_MAX) + '件(上から順に片付けてください)</div>';
+  if (items.length > picked.length) {
+    html += '<div class="more">ここに出しているのは ' + picked.length + '件です' +
+      '(残り ' + (items.length - picked.length) + '件は、片付けると出てきます)</div>';
   }
   return html + '</div>';
 }

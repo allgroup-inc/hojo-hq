@@ -167,3 +167,16 @@ test("重複警告は、実際に押したボタンを名指しして、画面�
   // 上部に出た警告に気づかず「押したのに保存されない」が起きるのを防ぐ
   assert.ok(html.includes("warn.scrollIntoView"));
 });
+
+/* 上限8件で単純に上から切ると、夕方に「結果待ち」が増えたとき「担当なし」
+   (通知が誰にも届かない)が押し出されて消えていた。
+   件数の多い定型作業が、まれな事故を隠してはいけない。2026-08-22 現場の質問から検出。 */
+test("手当ての一覧は、種類ごとに最低1件を確保してから残りの枠を埋める", () => {
+  assert.ok(html.includes("var ORDER = ['result', 'overlap', 'unconfirmed', 'place', 'owner']"));
+  assert.ok(html.includes("picked.length < ATTN_MAX"), "上限内で種類ごとに1件確保する");
+});
+
+test("手当ての一覧に種類ごとの件数を出す(上限で切られていることが分かるように)", () => {
+  assert.ok(html.includes('class="breakdown"'));
+  assert.ok(html.includes("ここに出しているのは"), "何件出しているかを明示する");
+});

@@ -101,6 +101,8 @@
 ".arow .who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n" +
 ".arow .why{flex:none;font-size:12px;color:var(--sub)}\n" +
 ".attn .more{padding-top:8px;font-size:12px;color:var(--sub)}\n" +
+".attn .breakdown{padding-bottom:8px;font-size:12px;color:var(--sub)}\n" +
+".attn .breakdown b{color:var(--ink)}\n" +
 /* 空き時間は行の間に薄く挟む。予定と同じ濃さで出すと予定が読みにくくなる */
 ".gap{display:flex;align-items:center;gap:16px;padding:4px 0;color:var(--sub);font-size:11px}\n" +
 ".gap .time{flex:none;width:52px}\n" +
@@ -353,7 +355,27 @@
 "  if (!items.length) {\n" +
 "    return html + '<div class=\"none\">いまのところありません。</div></div>';\n" +
 "  }\n" +
-"  items.slice(0, ATTN_MAX).forEach(function (item) {\n" +
+/* 種類ごとの件数を必ず出す。上限8件で切ると「8件しか無いのか、8件までしか
+   見えていないのか」が分からない(2026-08-22 現場から「8件なんですか?」と質問が出た)。
+   数だけでも全部見せれば、切られていることが自分で分かる */
+"  var counts = {};\n" +
+"  items.forEach(function (item) { counts[item.kind] = (counts[item.kind] || 0) + 1; });\n" +
+"  var ORDER = ['result', 'overlap', 'unconfirmed', 'place', 'owner'];\n" +
+"  html += '<div class=\"breakdown\">' + ORDER.filter(function (k) { return counts[k]; })\n" +
+"    .map(function (k) { return esc(ATTN_LABEL[k]) + ' <b>' + counts[k] + '</b>'; }).join('・') + '</div>';\n" +
+/* 種類ごとに最低1件は必ず見せてから、残りの枠を埋める。
+   単純に上から8件だと、夕方に「結果待ち」が増えたとき「担当なし」(通知が誰にも
+   届かない)が押し出されて消えていた。件数の多い定型作業が、まれな事故を隠してしまう */
+"  var picked = [];\n" +
+"  ORDER.forEach(function (kind) {\n" +
+"    var first = items.filter(function (item) { return item.kind === kind; })[0];\n" +
+"    if (first && picked.length < ATTN_MAX) { picked.push(first); }\n" +
+"  });\n" +
+"  items.forEach(function (item) {\n" +
+"    if (picked.length < ATTN_MAX && picked.indexOf(item) === -1) { picked.push(item); }\n" +
+"  });\n" +
+"  picked.sort(function (a, b) { return items.indexOf(a) - items.indexOf(b); });\n" +
+"  picked.forEach(function (item) {\n" +
 "    var apo = item.apo;\n" +
 "    html += '<div class=\"arow\" data-id=\"' + esc(apo['アポID']) + '\" tabindex=\"0\">' +\n" +
 "      '<span class=\"tag\">' + esc(ATTN_LABEL[item.kind] || item.kind) + '</span>' +\n" +
@@ -361,8 +383,9 @@
 "      '<span class=\"who\">' + esc(apo['顧客名']) + '</span>' +\n" +
 "      '<span class=\"why\">' + esc(item.reason) + '</span></div>';\n" +
 "  });\n" +
-"  if (items.length > ATTN_MAX) {\n" +
-"    html += '<div class=\"more\">ほか ' + (items.length - ATTN_MAX) + '件(上から順に片付けてください)</div>';\n" +
+"  if (items.length > picked.length) {\n" +
+"    html += '<div class=\"more\">ここに出しているのは ' + picked.length + '件です' +\n" +
+"      '(残り ' + (items.length - picked.length) + '件は、片付けると出てきます)</div>';\n" +
 "  }\n" +
 "  return html + '</div>';\n" +
 "}\n" +
