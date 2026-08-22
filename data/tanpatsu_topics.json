@@ -57,7 +57,7 @@
       "title_hint": "開封率の経営学 — 顧客リストの「数」より「熱」をお金に変えた実例研究",
       "angle": "フォロワー数・リスト数でなく開封率・熱量が収益の源泉であることを、世界の実測値(開封率44〜65%の媒体の収益)から示し、自社のLINE・メルマガ運用の点検手順に翻訳する",
       "paid_price": 1280,
-      "status": "drafted",
+      "status": "published",
       "facts": [
         {
           "claim": "Substackのニュースレター平均開封率は44%で、メール業界平均の約2倍とされる",
@@ -90,7 +90,9 @@
           "date": "2026-08-04リサーチ"
         }
       ],
-      "drafted_at": "2026-08-22"
+      "drafted_at": "2026-08-22",
+      "published_url": "https://note.com/kekka_mag/n/n76bd8eed1fb2",
+      "published_at": "2026-08-22"
     },
     {
       "id": "14",
