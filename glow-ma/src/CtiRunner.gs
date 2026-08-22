@@ -20,6 +20,11 @@
  * 3. installCtiSyncTrigger を1度だけ実行し、1時間おきの同期トリガーを登録する
  *    (BlueBeanの架電はキャンペーン単位でまとまって行われるため、LINE音声ログ(1分間隔)ほど
  *    高頻度なポーリングは不要という判断。頻度を変えたい場合は everyHours(1) を調整する)
+ *
+ * BlueBean APIの呼び出しが失敗した場合(認証情報の変更等)、AlertRunner.gsが既に使っている
+ * SLACK_WEBHOOK_URL(スクリプト プロパティ)経由でSlackにも通知する。無言のまま同期が
+ * 止まり続けることを防ぐための仕組みで、新しいプロパティの追加は不要(未設定の場合は
+ * Slack通知だけスキップされ、実行ログへの記録は従来どおり行われる)。
  */
 function syncCtiCallHistory() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -47,9 +52,21 @@ function syncCtiCallHistory() {
       Utilities.formatDate(new Date(Date.now() - 24 * 60 * 60 * 1000), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
     var endDate = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
 
-    var apiResponse = callBlueBeanApi_(startDate, endDate);
-    if (apiResponse.result !== "OK") {
-      throw new Error("BlueBean APIがエラーを返しました: " + JSON.stringify(apiResponse));
+    var apiResponse;
+    try {
+      apiResponse = callBlueBeanApi_(startDate, endDate);
+      if (apiResponse.result !== "OK") {
+        throw new Error("BlueBean APIがエラーを返しました: " + JSON.stringify(apiResponse));
+      }
+    } catch (error) {
+      // BLUEBEAN_USERNAME/PASSWORDは人間の管理者アカウントと共用のため、パスワード変更等で
+      // 無言のまま止まりうる(docs/議事_20260819_BlueBean CTI連携.md参照)。実行ログだけに
+      // 頼らず、Slackにも通知して気づけるようにする(resilient-agent-design原則: 無言の失敗を作らない)。
+      postToSlackWithRetry_(
+        "⚠️ BlueBean CTI通話履歴の同期に失敗しました。認証情報(BLUEBEAN_USERNAME/PASSWORD)が" +
+        "変更されていないか確認してください。エラー: " + error
+      );
+      throw error;
     }
     var calls = GlowCtiContent.flattenBlueBeanCalls(apiResponse);
 
