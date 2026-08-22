@@ -24,10 +24,14 @@ FORBIDDEN = [
     "tests/apo_kanri_",            # 同上のテスト
     "scripts/build_apo_bundle",    # 同上のビルド
     "scripts/churn/",              # 保全CRM(早期解約リスク)
+    "apps/retention/",             # 同上(kakei-crm 側の置き場所)
+    "atokakunin",                  # 送信型後確認(SMS)
+    "apps/confirmation/",          # 同上(kakei-crm 側の置き場所)
     "家計のポっ",
     "面談予約表",
     "アポ管理",
     "顧客カルテ",
+    "後確認",
 ]
 
 # 例外。移設したことを案内する文書など、名前に禁止語を含むが置いてよいもの。
@@ -77,6 +81,8 @@ def selftest():
         ("docs/家計のポっ_本番投入手順書.md", True),
         ("docs/面談予約表_指示の出し方ガイド_2026-08-14.md", True),
         ("scripts/churn/score.py", True),
+        ("scripts/atokakunin_rules.py", True),
+        ("docs/後確認SMS_段取り_2026-08-18.md", True),
         # 置いてよいもの
         ("docs/移設済み_アポ管理と営業指名_2026-08-22.md", False),
         ("site/index.html", False),
