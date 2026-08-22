@@ -811,6 +811,9 @@ CTI(BlueBean/ソフツー)の通話履歴を、`顧客発着信履歴出力API`(
    手紙の返信用封筒に記載したGLOW管理番号の架電キャンペーンを指すBlueBeanの作業グループID)
 2. `ensureLedgerTabs`を実行し、「CTI通話履歴」タブを作成する
 3. `installCtiSyncTrigger`を1度だけ実行し、1時間間隔の同期トリガーを登録する
+4. **(必須設定)** Apps Scriptエディタの「トリガー」画面で、`syncCtiCallHistory`トリガーの
+   編集メニューから「失敗通知の設定」を「毎回通知を受け取る」に設定する(AlertRunner.gsと
+   同じ理由。Slack自体の長時間ダウン等、コード内の通知だけでは検知できない単一障害点への対策)
 
 **現時点の制約:**
 - `BLUEBEAN_USERNAME`/`BLUEBEAN_PASSWORD`は現状、人間の管理者がBlueBean管理画面へログインする

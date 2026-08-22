@@ -20,6 +20,9 @@
  * 3. installCtiSyncTrigger を1度だけ実行し、1時間おきの同期トリガーを登録する
  *    (BlueBeanの架電はキャンペーン単位でまとまって行われるため、LINE音声ログ(1分間隔)ほど
  *    高頻度なポーリングは不要という判断。頻度を変えたい場合は everyHours(1) を調整する)
+ * 4. (必須設定) Apps Scriptエディタの「トリガー」画面で、syncCtiCallHistoryトリガーの
+ *    編集メニューから「失敗通知の設定」を「毎回通知を受け取る」に設定する(AlertRunner.gsと
+ *    同じ理由。Slack自体の長時間ダウン等、コード内の通知だけでは検知できない単一障害点への対策)
  *
  * BlueBean APIの呼び出しが失敗した場合(認証情報の変更等)、AlertRunner.gsが既に使っている
  * SLACK_WEBHOOK_URL(スクリプト プロパティ)経由でSlackにも通知する。無言のまま同期が
