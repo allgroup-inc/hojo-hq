@@ -1,0 +1,101 @@
+name: x-taiken
+
+# 結果マガ(@kekka_mag)のX体験共有投稿の自動生成→自動投稿(2026-08-23 小柳さん決裁で解禁)。
+# 議事: docs/議事_20260823_X体験共有解禁と運営実録.md
+# 運用ルール: 1日1本(同日重複ガードで機械化)/リンク・ハッシュタグなし/公式APIのみ/
+#   数字は台帳(kekka_kpi.json等)の実数のみ(生成側の数字ガードで機械検査)。
+# 素材: data/kekka_x_material.json(週次運転で補充。空なら投稿せず警告のみ)。
+# cron本枠が混雑でスキップされることがあるため+1時間のリトライ枠あり(ニドナシ#5と同じ対策。
+# 同日重複ガードがあるので二重投稿にはならない)。
+
+on:
+  schedule:
+    - cron: "5 12 * * 1,4"   # 月・木 21:05 JST(本枠)
+    - cron: "5 13 * * 1,4"   # 月・木 22:05 JST(リトライ枠)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: x-taiken
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 体験共有投稿の生成(機械ガード: 禁止語・実数照合・同日重複・長さ)
+        id: gen
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          pip install -q anthropic
+          python scripts/generate_x_taiken.py >> "$GITHUB_OUTPUT"
+
+      - name: X投稿(リンクなし・出荷ゲート再検査つき)
+        id: xpost
+        if: steps.gen.outputs.generated == '1'
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+        run: |
+          pip install -q tweepy
+          python scripts/post_x_announce.py \
+            --text "$(cat data/kekka_x_taiken_draft.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: 投稿記録(ログ追記+素材消込)とコミット
+        if: startsWith(steps.xpost.outputs.posted, 'https://')
+        run: |
+          python scripts/generate_x_taiken.py --record \
+            --url "${{ steps.xpost.outputs.posted }}" \
+            --material-id "${{ steps.gen.outputs.material_id }}" \
+            --text "$(cat data/kekka_x_taiken_draft.txt)"
+          rm -f data/kekka_x_taiken_draft.txt
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add data/kekka_x_log.json data/kekka_x_material.json
+          git diff --cached --quiet || git commit -m "auto: X体験共有投稿の記録 ${{ steps.gen.outputs.material_id }}"
+          for i in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            echo "push retry $i"; sleep 5
+          done
+
+      - name: LINE通知(投稿完了)
+        if: startsWith(steps.xpost.outputs.posted, 'https://')
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【結果マガ】X体験共有を自動投稿しました
+            ${{ steps.xpost.outputs.posted }}
+            (問題があればXアプリから削除できます。素材の補充は週次運転で行います)
+
+      - name: LINE通知(素材切れの警告)
+        if: steps.gen.outputs.skipped == 'no_material'
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            ⚠【結果マガ】X体験共有の素材キューが空のため今日は投稿しませんでした
+            (次の週次運転で補充します)
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【結果マガ】X体験共有ワークフローが失敗しました(投稿はされていません)
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
