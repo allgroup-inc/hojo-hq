@@ -27,7 +27,9 @@ except Exception:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--text", required=True)
-    ap.add_argument("--reply-url", required=True)
+    # 体験共有投稿(x-taiken)はリンクなしのためreply-urlは任意(2026-08-23決裁)。
+    # 告知投稿では従来どおり必須運用(リンクは本文でなくリプ欄)
+    ap.add_argument("--reply-url", default="")
     args = ap.parse_args()
 
     # 出荷ゲート(運用規程1-3): X本文はファイルを持たないため、機械で検査できる層だけ適用する
@@ -56,7 +58,8 @@ def main():
     )
     main_post = client.create_tweet(text=args.text)
     tweet_id = main_post.data["id"]
-    client.create_tweet(text=args.reply_url, in_reply_to_tweet_id=tweet_id)
+    if args.reply_url:
+        client.create_tweet(text=args.reply_url, in_reply_to_tweet_id=tweet_id)
     print(f"posted=https://x.com/kekka_mag/status/{tweet_id}")
     return 0
 
