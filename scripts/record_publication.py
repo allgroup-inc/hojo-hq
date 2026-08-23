@@ -119,6 +119,21 @@ def main():
     if not suppress_x:
         hooks = extract_hooks(text)
         announce = hooks.get(args.hook) or hooks.get("a") or ""
+        # プレースホルダー検知ガード(2026-08-23 お題13で指示文がそのままX実投稿された
+        # 不具合の対策=ニドナシ台帳#16)。生成テンプレの指示文・未記入マーカーが
+        # 告知文に混入していたら、成功扱いにせず失敗させて人間に知らせる
+        placeholder_markers = (
+            "(記事の", "(事例から", "(読者の",  # 旧build_xpackのデフォルト指示文
+            "を1つ引用して", "を1行で紹介", "問いかけ形式で",
+        )
+        for marker in placeholder_markers:
+            if marker in announce:
+                print(
+                    f"エラー: 告知文がプレースホルダーのままです(検知: {marker})。"
+                    "お題に x_hook_a/b/c を登録するか、x-postワークフローで手動投稿してください",
+                    file=sys.stderr,
+                )
+                return 1
         # 誇大表現の機械検査(規程3-3。告知文にも適用)
         for w in ("必ず", "絶対", "誰でも", "楽して", "確実に稼"):
             if w in announce:
