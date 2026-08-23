@@ -1018,5 +1018,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-23",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【北海道監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY7tMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【応募事業者】令和８年度 プラスチック等資源循環システム構築実証事業　＜三次公募＞",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdqyMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "［第十回］事業再構築補助金（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000GMgXBEA1",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（19次締切）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDTzMMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "電波遮へい対策事業（トンネル）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000003QZLqEAO",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
