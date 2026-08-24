@@ -5,8 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
 <title>LINEへ移動中…</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TQMX3MPFSR"></script>
 <script>
-  setTimeout(function () { window.location.replace("https://lin.ee/sh4bTUe"); }, 50);
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag("js", new Date());
+  gtag("config", "G-TQMX3MPFSR", { transport_type: "beacon" });
+  var fgDone = false;
+  function fgGo() { if (fgDone) return; fgDone = true; window.location.replace("https://lin.ee/sh4bTUe"); }
+  // 送るのはイベント名と channel のみ(個人識別子なし)
+  gtag("event", "line_redirect", { channel: "site", transport_type: "beacon",
+    event_callback: fgGo, event_timeout: 400 });
+  setTimeout(fgGo, 400);
 </script>
 <style>
   body{font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;
