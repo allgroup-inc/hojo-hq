@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-08-24 09:59",
+ "generated_at": "2026-08-24 15:18",
  "alert_window": [
   7,
   29
  ],
- "soon_closed_count": 9,
- "count": 20,
+ "soon_closed_count": 7,
+ "count": 21,
  "items": [
   {
    "id": "a0WJ200000CDcfDMAT",
@@ -85,6 +85,16 @@
    "tier": "まもなく締切(7〜14日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdA1MAL",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDeA1MAL",
+   "name": "「競争的な水素サプライチェーン構築に向けた技術開発事業／総合調査研究／水素キャリアに係る船陸インターフェースの国際標準化に向けた基礎調査」の公募",
+   "deadline": "2026-09-07",
+   "days_left": 14,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeA1MAL",
    "tag": "nationwide"
   },
   {
