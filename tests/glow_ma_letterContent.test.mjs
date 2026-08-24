@@ -76,6 +76,47 @@ test("buildLetterPrompt: humanizer準拠のAIっぽさ回避指示(定型フレ�
   assert.match(prompt, /語尾/);
 });
 
+test("selectInitialOutreachTargets: 現在ステージが未接触の企業のみ、ランク→総合スコア降順で抽出する", () => {
+  const records = [
+    { 企業ID: "C1", 現在ステージ: "未接触", ランク: "B", 総合スコア: 50 },
+    { 企業ID: "C2", 現在ステージ: "未接触", ランク: "A", 総合スコア: 30 },
+    { 企業ID: "C3", 現在ステージ: "未接触", ランク: "A", 総合スコア: 90 },
+    { 企業ID: "C4", 現在ステージ: "関係構築中", ランク: "A", 総合スコア: 100 } // ステージ対象外
+  ];
+  const targets = letterContent.selectInitialOutreachTargets(records);
+  assert.deepEqual(targets.map((r) => r["企業ID"]), ["C3", "C2", "C1"]);
+});
+
+test("selectInitialOutreachTargets: 連絡不要の企業は対象外", () => {
+  const records = [
+    { 企業ID: "C1", 現在ステージ: "未接触", ランク: "A", 総合スコア: 90, 連絡不要: true }
+  ];
+  assert.deepEqual(letterContent.selectInitialOutreachTargets(records), []);
+});
+
+test("selectInitialOutreachTargets: ランク未分類の企業は最後に回す", () => {
+  const records = [
+    { 企業ID: "C1", 現在ステージ: "未接触", ランク: "", 総合スコア: 999 },
+    { 企業ID: "C2", 現在ステージ: "未接触", ランク: "D", 総合スコア: 1 }
+  ];
+  const targets = letterContent.selectInitialOutreachTargets(records);
+  assert.deepEqual(targets.map((r) => r["企業ID"]), ["C2", "C1"]);
+});
+
+test("selectInitialOutreachTargets: limitを渡すと上位limit件だけ返す", () => {
+  const records = [
+    { 企業ID: "C1", 現在ステージ: "未接触", ランク: "A", 総合スコア: 90 },
+    { 企業ID: "C2", 現在ステージ: "未接触", ランク: "A", 総合スコア: 80 },
+    { 企業ID: "C3", 現在ステージ: "未接触", ランク: "A", 総合スコア: 70 }
+  ];
+  const targets = letterContent.selectInitialOutreachTargets(records, 2);
+  assert.deepEqual(targets.map((r) => r["企業ID"]), ["C1", "C2"]);
+});
+
+test("selectInitialOutreachTargets: 対象企業がなければ空配列", () => {
+  assert.deepEqual(letterContent.selectInitialOutreachTargets([]), []);
+});
+
 test("selectNurturingTargets: ステージ・ランク・接触間隔の条件を満たす企業のみ抽出する", () => {
   const records = [
     { 企業ID: "C1", 現在ステージ: "関係構築中", ランク: "B", 最終接触日: "2026-01-01" }, // 対象

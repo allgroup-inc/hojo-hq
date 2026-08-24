@@ -116,6 +116,10 @@ Claude APIで、企業ごとの提案順序(紹介ルートは直接M&A、それ
 **使い方**
 
 - 1社分の初回DM下書きを作る: `generateLetterDraftForCompany("<企業ID>")` を実行する
+- 初回の手紙送付リスト(現在ステージ=未接触の企業を、ランク→総合スコア降順で上位から)を
+  まとめて作る: `generateInitialDraftsForTopRankedCompanies(150)` のように件数を指定して
+  実行する(省略時は150件=Tier1相当。`docs/glow-ma_守り部審査記録.md`参照)。既に下書き済みの
+  企業は再実行しても重複生成されない
 - ナーチャリング対象企業(関係構築中以降・ランクB以下・最終接触から90日以上)
   全件分の下書きをまとめて作る: `generateNurturingDraftsForEligibleCompanies` を実行する
 - レターに載せるURLは `<TRACKING_BASE_URLのWeb App>?id=<企業ID>` の形になる。

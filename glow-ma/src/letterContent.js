@@ -74,6 +74,30 @@
     return lines.join("\n");
   }
 
+  var INITIAL_OUTREACH_RANK_ORDER = ["A", "B", "C", "D"];
+
+  /**
+   * 初回DM(手紙第1便)を送る対象を選定する。「現在ステージ」が未接触、かつ連絡不要でない
+   * 企業を、ランク(A→D、未分類は最後)→総合スコア降順の順に並べ、上位limit件を返す
+   * (limit省略時は該当企業全件)。
+   */
+  function selectInitialOutreachTargets(records, limit, config) {
+    config = config || DEFAULT_CONFIG;
+    var eligible = (records || []).filter(function (record) {
+      if (record["連絡不要"] === true) return false;
+      return record["現在ステージ"] === "未接触";
+    });
+    var sorted = eligible.slice().sort(function (a, b) {
+      var rankA = INITIAL_OUTREACH_RANK_ORDER.indexOf(a["ランク"]);
+      if (rankA === -1) rankA = INITIAL_OUTREACH_RANK_ORDER.length;
+      var rankB = INITIAL_OUTREACH_RANK_ORDER.indexOf(b["ランク"]);
+      if (rankB === -1) rankB = INITIAL_OUTREACH_RANK_ORDER.length;
+      if (rankA !== rankB) return rankA - rankB;
+      return (Number(b["総合スコア"]) || 0) - (Number(a["総合スコア"]) || 0);
+    });
+    return typeof limit === "number" ? sorted.slice(0, limit) : sorted;
+  }
+
   function selectNurturingTargets(records, todayValue, config) {
     config = config || DEFAULT_CONFIG;
     var nurturing = config.nurturing || DEFAULT_CONFIG.nurturing;
@@ -96,6 +120,7 @@
     determineLeadProduct: determineLeadProduct,
     buildTrackingUrl: buildTrackingUrl,
     buildLetterPrompt: buildLetterPrompt,
+    selectInitialOutreachTargets: selectInitialOutreachTargets,
     selectNurturingTargets: selectNurturingTargets
   };
 

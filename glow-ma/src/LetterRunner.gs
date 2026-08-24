@@ -10,6 +10,9 @@
  *    一時的に `generateLetterDraftForCompany("C000001");` のような呼び出し行を足して実行する
  * 4. ナーチャリング対象全件分をまとめて生成する場合は generateNurturingDraftsForEligibleCompanies
  *    を実行する
+ * 5. 初回の手紙送付リスト(まだ未接触の企業、ランク・スコア上位)をまとめて生成する場合は
+ *    generateInitialDraftsForTopRankedCompanies(150) のように件数を指定して実行する
+ *    (省略時は150件=Tier1相当)。生成済みの企業は再実行しても重複生成されない。
  *
  * 生成された下書きは「レター下書き」タブに追記される。ステータスは常に
  * 「下書き」で作成され、自動送信は行わない。必ず人が内容を確認してから送付すること。
@@ -26,6 +29,90 @@
  */
 var SCRIPT_PROP_LAST_NURTURING_FAILURES = "LAST_NURTURING_DRAFT_FAILURES";
 var SCRIPT_PROP_LAST_NURTURING_RUN_AT = "LAST_NURTURING_DRAFT_RUN_AT";
+var SCRIPT_PROP_LAST_INITIAL_OUTREACH_FAILURES = "LAST_INITIAL_OUTREACH_FAILURES";
+var SCRIPT_PROP_LAST_INITIAL_OUTREACH_RUN_AT = "LAST_INITIAL_OUTREACH_RUN_AT";
+var DEFAULT_INITIAL_OUTREACH_LIMIT = 150; // Tier1相当(docs/glow-ma_守り部審査記録.md参照)
+
+/**
+ * 初回DM(手紙第1便)の下書きを、まだ一度もアプローチしていない企業(現在ステージ=未接触)の
+ * 中から、ランク→総合スコア降順の上位limit件(省略時は150件、Tier1相当)分まとめて生成する。
+ * generateNurturingDraftsForEligibleCompaniesと同じく、1社の失敗が残りの処理を止めない
+ * (障害隔離)。同じ企業に既に初回DM下書きが存在する場合は再生成せずスキップする
+ * (再実行しても重複生成・Claude API費用の重複発生をしないための冪等化)。
+ */
+function generateInitialDraftsForTopRankedCompanies(limit) {
+  var effectiveLimit = typeof limit === "number" ? limit : DEFAULT_INITIAL_OUTREACH_LIMIT;
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  if (!companySheet) {
+    throw new Error("企業マスタタブが見つかりません。先に ensureLedgerTabs を実行してください。");
+  }
+  var records = readCompanyRecords_(companySheet);
+  var targets = GlowLetterContent.selectInitialOutreachTargets(records, effectiveLimit);
+  var existingDraftCompanyIds = readExistingInitialDraftCompanyIds_(ss);
+
+  var generatedCount = 0;
+  var skippedCount = 0;
+  var failures = [];
+  targets.forEach(function (record) {
+    if (existingDraftCompanyIds[record["企業ID"]]) {
+      skippedCount++;
+      return;
+    }
+    try {
+      writeLetterDraft_(record, GlowSchema.LETTER_DRAFT_TYPES[0]);
+      generatedCount++;
+    } catch (error) {
+      Logger.log("初回DM下書き生成に失敗したためスキップします: " + record["企業ID"] + " — " + error);
+      failures.push(record["企業ID"] + ": " + error);
+    }
+  });
+
+  var scriptProperties = PropertiesService.getScriptProperties();
+  scriptProperties.setProperty(
+    SCRIPT_PROP_LAST_INITIAL_OUTREACH_RUN_AT,
+    Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm")
+  );
+  if (failures.length > 0) {
+    scriptProperties.setProperty(SCRIPT_PROP_LAST_INITIAL_OUTREACH_FAILURES, failures.join(" / "));
+  } else {
+    scriptProperties.deleteProperty(SCRIPT_PROP_LAST_INITIAL_OUTREACH_FAILURES);
+  }
+
+  Logger.log(
+    "初回DM下書き生成完了(対象上位" + effectiveLimit + "件中): 新規生成 " + generatedCount +
+    "件 / 生成済みのためスキップ " + skippedCount + "件 / 失敗 " + failures.length + "件"
+  );
+  if (failures.length > 0) {
+    throw new Error(
+      failures.length + "件の企業で初回DM下書き生成に失敗しました(詳細はログとScript Properties[" +
+      SCRIPT_PROP_LAST_INITIAL_OUTREACH_FAILURES + "]を参照)。成功した" + generatedCount + "件の下書きは保存済みです。"
+    );
+  }
+}
+
+/**
+ * 「レター下書き」タブに既に「初回DM」種別の下書きが存在する企業IDの集合を返す
+ * (generateInitialDraftsForTopRankedCompaniesの冪等化に使う)。
+ */
+function readExistingInitialDraftCompanyIds_(ss) {
+  var draftSheet = ss.getSheetByName(GlowSchema.LETTER_DRAFT_SHEET_NAME);
+  if (!draftSheet) return {};
+  var lastRow = draftSheet.getLastRow();
+  if (lastRow < 2) return {};
+  var headers = GlowSchema.LETTER_DRAFT_HEADERS;
+  var companyIdIndex = headers.indexOf("企業ID");
+  var typeIndex = headers.indexOf("種別");
+  var values = draftSheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  var ids = {};
+  values.forEach(function (row) {
+    if (row[typeIndex] === GlowSchema.LETTER_DRAFT_TYPES[0] && row[companyIdIndex]) {
+      ids[row[companyIdIndex]] = true;
+    }
+  });
+  return ids;
+}
+
 function generateLetterDraftForCompany(companyId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
