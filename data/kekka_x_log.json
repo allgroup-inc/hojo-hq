@@ -1,0 +1,4 @@
+{
+  "_readme": "結果マガ(@kekka_mag)のX投稿ログ。体験共有投稿(x-taikenワークフロー)が追記する。generate_x_taiken.pyの同日重複ガード(1日1本ルールの機械化)がこのログとお題キューのx_posted_atを参照する",
+  "posts": []
+}

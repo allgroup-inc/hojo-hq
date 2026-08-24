@@ -1,0 +1,53 @@
+name: x-maintenance
+
+# 結果マガ(@kekka_mag)の誤投稿の削除(公式API・自アカウントのみ)。
+# 削除は不可逆のため手動起動のみ。対象IDは小柳さん決裁済みのものに限る
+# (例: 2026-08-22のプレースホルダー告知=ニドナシ台帳#16。2026-08-23決裁)。
+
+on:
+  workflow_dispatch:
+    inputs:
+      tweet_ids:
+        description: "削除するポストID(カンマ区切り・決裁済みのもののみ)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: ポスト削除
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+        run: |
+          pip install -q tweepy
+          python scripts/delete_x_post.py --ids "${{ github.event.inputs.tweet_ids }}"
+
+      - name: LINE通知(完了)
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【結果マガ】Xポストを削除しました: ${{ github.event.inputs.tweet_ids }}
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【結果マガ】Xポスト削除に失敗しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

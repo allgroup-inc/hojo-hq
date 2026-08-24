@@ -176,21 +176,28 @@ noteの有料単発記事の下書きを1本書いてください。
 
 
 def build_xpack(title, t):
+    # x_hookが未登録のパターンは出力しない(プレースホルダー指示文を書くと、
+    # record_publication.pyがそのままX告知として抽出・実投稿してしまう。
+    # 2026-08-23 お題13で実投稿に至った不具合の対策=ニドナシ台帳#16)
     price = t.get("paid_price", 980)
-    return f"""📣 X告知文パック(公開後、記事URLを足して使う。1日1本まで)
-
-【パターンA: 数字フック】
-{t.get('x_hook_a', '(記事の冒頭の数字を1つ引用して驚きを短く)')}
-詳しくはnoteに書きました({price}円)→(記事URL)
-
-【パターンB: 学びの共有】
-{t.get('x_hook_b', '(事例から抽出した「型」を1行で紹介)')}
-出典つきで整理しました→(記事URL)
-
-【パターンC: 問いかけ】
-{t.get('x_hook_c', '(読者の悩みを問いかけ形式で)')}
-世界の公表事例を調べてまとめました→(記事URL)
-"""
+    patterns = [
+        ("A", "数字フック", t.get("x_hook_a"), f"詳しくはnoteに書きました({price}円)→(記事URL)"),
+        ("B", "学びの共有", t.get("x_hook_b"), "出典つきで整理しました→(記事URL)"),
+        ("C", "問いかけ", t.get("x_hook_c"), "世界の公表事例を調べてまとめました→(記事URL)"),
+    ]
+    blocks = [
+        f"【パターン{key}: {label}】\n{hook}\n{tail}"
+        for key, label, hook, tail in patterns
+        if hook
+    ]
+    if not blocks:
+        # 【パターン】マーカーを含めない(record_publicationに抽出させないため)
+        return (
+            "⚠ X告知文が未登録のお題です。このままではX告知は自動投稿されません。\n"
+            "  公開前に data/tanpatsu_topics.json の当該お題へ x_hook_a/b/c を登録して\n"
+            "  再生成するか、公開後に x-post ワークフローで手動投稿してください。\n"
+        )
+    return "📣 X告知文パック(公開後、記事URLを足して使う。1日1本まで)\n\n" + "\n\n".join(blocks) + "\n"
 
 
 def generate_body(t):

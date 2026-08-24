@@ -1,6 +1,6 @@
 # 企業のミカタ robots.txt 自動監査結果
 
-最終実行: 2026-08-17 06:21 JST / 実行: GitHub Actions(mikata-audit.yml)/ スクリプト: scripts/audit_sources_mikata.py
+最終実行: 2026-08-24 06:22 JST / 実行: GitHub Actions(mikata-audit.yml)/ スクリプト: scripts/audit_sources_mikata.py
 
 > これは機械による事実確認。**収集可否の最終判定は、利用規約審査と合わせて守り部が docs/守り部審査記録.md で行う。**
 > ○=代表パス許可 / ×=不可(手動運用へ) / ?=手動確認要
