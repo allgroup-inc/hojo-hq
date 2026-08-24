@@ -6,7 +6,9 @@ hojo-hq — /go/ 中間リンクページ生成
 
 - lin.ee は直接貼らず、必ず /go/<チャネル>/ を経由する
 - 転送先の変更は下の CHANNELS を書き換えて本スクリプトを再実行(一括変更)
-- 計測は fukugiiro と同じ Plausible(Cookieなし・イベント名とチャネルのみ送信)
+- 計測は fukugiiro と同じ GA4(2026-08-24 小柳さん決裁でPlausibleから切替。
+  議事: docs/議事_20260824_計測GA4切替.md)。イベント名とチャネルのみ送信。
+  GA4_MEASUREMENT_ID が空の間は計測タグを出さない(転送のみ・外部送信ゼロ)
 
 使い方: python scripts/generate_go_pages.py
 出力:   site/go/<channel>/index.html + site/go/README.md
@@ -22,7 +24,8 @@ except Exception:
 BASE_DIR = os.path.dirname(__file__)
 GO_DIR = os.path.join(BASE_DIR, "..", "site", "go")
 
-PLAUSIBLE_DOMAIN = "allgroup-inc.github.io"  # analytics-config.js と同一(小柳さん決裁済み)
+# GA4測定ID(analytics-config.js と同一の値にする)。空の間は計測なしで転送のみ。
+GA4_MEASUREMENT_ID = ""
 REDIRECT_MS = 400
 
 # チャネル定義(転送先を変えるときはここだけ編集して再実行)
@@ -55,16 +58,7 @@ TEMPLATE = """<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
 <title>{dest_name}へ移動中…</title>
-<script>
-  // 計測(Plausible manual・Cookieなし)。送るのはイベント名と channel のみ。
-  window.plausible = window.plausible || function () {{
-    (window.plausible.q = window.plausible.q || []).push(arguments);
-  }};
-  window.plausible("{event}", {{ props: {{ channel: "{channel}" }} }});
-  // 計測送信の猶予({ms}ms)後に転送。計測が失敗しても必ず転送する。
-  setTimeout(function () {{ window.location.replace("{dest}"); }}, {ms});
-</script>
-<script defer data-domain="{domain}" src="https://plausible.io/js/script.manual.js"></script>
+{analytics}
 <style>
   body{{font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;
     background:#00335c;color:#F7F5F1;display:flex;flex-direction:column;gap:16px;
@@ -79,9 +73,30 @@ TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
+# GA4計測つき: beacon送信+event_callbackで「送信でき次第すぐ転送」。
+# gtag.jsが{ms}ms内に読み込めなくても必ず転送する(計測より転送優先)。
+ANALYTICS_GA4 = """<script async src="https://www.googletagmanager.com/gtag/js?id={mid}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {{ dataLayer.push(arguments); }}
+  gtag("js", new Date());
+  gtag("config", "{mid}", {{ transport_type: "beacon" }});
+  var fgDone = false;
+  function fgGo() {{ if (fgDone) return; fgDone = true; window.location.replace("{dest}"); }}
+  // 送るのはイベント名と channel のみ(個人識別子なし)
+  gtag("event", "{event}", {{ channel: "{channel}", transport_type: "beacon",
+    event_callback: fgGo, event_timeout: {ms} }});
+  setTimeout(fgGo, {ms});
+</script>"""
+
+# 計測なし(GA4_MEASUREMENT_ID未設定の間): 外部送信ゼロで即転送
+ANALYTICS_NONE = """<script>
+  setTimeout(function () {{ window.location.replace("{dest}"); }}, 50);
+</script>"""
+
 README = """# /go/ 中間リンク(lin.ee直貼り禁止)
 
-各導線 → `/go/<チャネル>/` → Plausibleに計測イベント(+channel)を記録 → 転送先へ自動転送。
+各導線 → `/go/<チャネル>/` → GA4に計測イベント(+channel)を記録 → 転送先へ自動転送。
 直貼りすると ①経路計測 ②転送先の一括変更 ができなくなるため、**lin.ee は必ずここを経由**する。
 
 ## チャネル一覧
@@ -94,7 +109,7 @@ README = """# /go/ 中間リンク(lin.ee直貼り禁止)
 
 ## チャネルを追加するとき
 CHANNELS に1行足して再実行するだけ(計測→転送の構造は共通テンプレート)。
-Plausible では計測イベントの `channel` プロパティで経路別に集計できる。
+GA4 では計測イベントの `channel` パラメータで経路別に集計できる。
 
 **転送先がLINEでないチャネルは `event` と `dest_name` を必ず指定する。**
 既定のまま(`line_redirect`)にすると、その導線のクリックがLINE登録として集計され、
@@ -112,9 +127,14 @@ def main():
     for ch, cfg in CHANNELS.items():
         d = os.path.join(GO_DIR, ch)
         os.makedirs(d, exist_ok=True)
+        if GA4_MEASUREMENT_ID:
+            analytics = ANALYTICS_GA4.format(
+                mid=GA4_MEASUREMENT_ID, dest=cfg["dest"], ms=REDIRECT_MS,
+                channel=ch, event=cfg.get("event", DEFAULT_EVENT))
+        else:
+            analytics = ANALYTICS_NONE.format(dest=cfg["dest"])
         html = TEMPLATE.format(
-            channel=ch, dest=cfg["dest"], ms=REDIRECT_MS, domain=PLAUSIBLE_DOMAIN,
-            event=cfg.get("event", DEFAULT_EVENT),
+            channel=ch, dest=cfg["dest"], analytics=analytics,
             dest_name=cfg.get("dest_name", DEFAULT_DEST_NAME),
         )
         with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:

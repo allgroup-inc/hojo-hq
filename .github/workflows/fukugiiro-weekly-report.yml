@@ -41,6 +41,16 @@ jobs:
           PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
         run: python scripts/fetch_plausible_traffic.py
 
+      # GA4版(2026-08-24 小柳さん決裁で切替。Secrets 2つが揃うまでは何もしない)
+      - name: サイトのアクセス総量取得 GA4(Secretsが有れば)
+        continue-on-error: true
+        env:
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
+        run: |
+          if [ -n "$GA4_PROPERTY_ID" ] && [ -n "$GA4_SA_JSON" ]; then pip install -q google-auth; fi
+          python scripts/fetch_ga4_traffic.py
+
       - name: 週次レポート生成(統括ユイさん)
         run: python scripts/weekly_report_fukugiiro.py
 
