@@ -1,0 +1,74 @@
+name: line-admin-push
+
+# 管理者(小柳さん)のLINEへ、posts/images/ の画像を送るユーティリティ。
+# デザイン確認・成果物の共有用。宛先は管理者のみ(一斉配信はしない)。
+# 手動実行(workflow_dispatch)専用。LINEのpushは1回につき最大5メッセージのため、
+# 画像は最大4枚+説明テキスト1通で送る。
+
+on:
+  workflow_dispatch:
+    inputs:
+      files:
+        description: "送る画像ファイル名(posts/images/内・カンマ区切り・最大4)"
+        required: true
+        default: "02_seido.png,03_seido.png,04_seido.png,05_shokei.png"
+      note:
+        description: "画像に添える一言(省略可)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: line-admin-push
+  cancel-in-progress: false
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: LINEへ画像を送る(管理者のみ)
+        env:
+          TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          TO: ${{ secrets.LINE_ADMIN_USER_ID }}
+          FILES: ${{ inputs.files }}
+          NOTE: ${{ inputs.note }}
+        run: |
+          set -e
+          if [ -z "$TOKEN" ] || [ -z "$TO" ]; then
+            echo "::error::LINE_CHANNEL_ACCESS_TOKEN / LINE_ADMIN_USER_ID が未設定です"
+            exit 1
+          fi
+          RAW="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/posts/images"
+          msgs="[]"
+          count=0
+          IFS=',' read -ra ARR <<< "$FILES"
+          for f in "${ARR[@]}"; do
+            f=$(echo "$f" | xargs)  # trim
+            [ -z "$f" ] && continue
+            count=$((count+1))
+            if [ "$count" -gt 4 ]; then
+              echo "::warning::画像は最大4枚まで。$f 以降はスキップしました"
+              break
+            fi
+            url="$RAW/$f"
+            # 実在チェック(存在しないURLを送るとLINE側で画像が壊れて見える)
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$url")
+            if [ "$code" != "200" ]; then
+              echo "::error::$url が取得できません(HTTP $code)"
+              exit 1
+            fi
+            msgs=$(echo "$msgs" | jq --arg u "$url" \
+              '. + [{type:"image", originalContentUrl:$u, previewImageUrl:$u}]')
+          done
+          if [ -n "$NOTE" ]; then
+            msgs=$(echo "$msgs" | jq --arg t "$NOTE" '. + [{type:"text", text:$t}]')
+          fi
+          jq -n --arg to "$TO" --argjson m "$msgs" '{to:$to, messages:$m}' > payload.json
+          curl -sf -X POST https://api.line.me/v2/bot/message/push \
+            -H "Authorization: Bearer $TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d @payload.json
+          echo "送信完了: $count 枚"
