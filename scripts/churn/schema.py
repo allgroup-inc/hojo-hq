@@ -56,6 +56,9 @@ def _get(raw, column_map, key):
 
 def normalize_record(raw, column_map, as_of):
     apply_date = parse_date(_get(raw, column_map, "apply_date"))
+    # 成立日（軸 2026-08-19：申込≠成立）。徳元さん確認=申込日と成立日は別々に抽出可能。
+    # 早期解約は本来「成立から」数える（軸の超短期/短期解約）。当面の判定基準は既存のまま・値は保持し移行に備える。
+    settle_date = parse_date(_get(raw, column_map, "settle_date"))
     cancel_date = parse_date(_get(raw, column_map, "cancel_date"))
     try:
         # 引落予定日は自由記述（「毎月27日」等）があり得る。解釈不能はNoneに落とし全読込を止めない
@@ -123,6 +126,7 @@ def normalize_record(raw, column_map, as_of):
         # 氏名は表記ゆれで繋がらない。申込時に控える運用を今日から（過去分は遡れない）。
         "policy_number": (_get(raw, column_map, "policy_number") or ""),
         "apply_date": apply_date,
+        "settle_date": settle_date,   # 成立日（申込≠成立・軸定義の解約起点。移行に備え保持）
         "product": (_get(raw, column_map, "product") or "不明"),
         "channel": (_get(raw, column_map, "channel") or "不明"),
         "apply_form": (_get(raw, column_map, "apply_form") or "不明"),

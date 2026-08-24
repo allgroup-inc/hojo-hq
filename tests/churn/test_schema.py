@@ -86,6 +86,15 @@ class TestSchema(unittest.TestCase):
         r = schema.normalize_record(raw(), COLUMN_MAP, date(2026, 8, 1))
         self.assertEqual(r["policy_number"], "")
 
+    def test_settle_date_read_when_mapped(self):
+        cmap = dict(COLUMN_MAP, settle_date="成立日")
+        r = schema.normalize_record(raw(成立日="2026-02-10"), cmap, date(2026, 8, 1))
+        self.assertEqual(r["settle_date"], date(2026, 2, 10))
+
+    def test_settle_date_none_when_unmapped(self):
+        r = schema.normalize_record(raw(), COLUMN_MAP, date(2026, 8, 1))
+        self.assertIsNone(r["settle_date"])
+
 
 class TestEmptyCustomerId(unittest.TestCase):
     """顧客ID列がマップされていて値が空＝管理画面のID漏れ（徳元さん 2026-08-18）。
