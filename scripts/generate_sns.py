@@ -263,13 +263,17 @@ def main():
             f"{seido_closers[(i - 2) % len(seido_closers)]}\n{it['source_url']}\n"
             f"{DISCLAIMER}"
         )
+        # 画像は制度名が主役(2026-08-24 小柳さん指摘「何の補助金かが分かりにくい」対応):
+        # タイトル=制度名の全文(描画側が3行以内に自動折返し・縮小)、
+        # サブ=金額(何がもらえるかの実利)、「いま募集中」は右上バッジへ
         made.append(write_post(
             i, "seido", f"締切が近い制度({i-1}/3・30日以上先)",
-            img_title="いま募集中の補助金",
-            img_sub=shorten_name(it["name"]),
+            img_title=shorten_name(it["name"], limit=60),
+            img_sub=amount_text(it.get("max_amount")),
             img_number=num,
             caption=cap,
             source=it["source_url"],
+            badge="いま募集中",
         ))
 
     # 5) 事業承継(shokei)
@@ -284,13 +288,15 @@ def main():
             f"制度の詳細・申請は原文で👇\n{shokei['source_url']}\n"
             f"{DISCLAIMER}"
         )
+        # こちらも制度名を主役に(テーマ名は右上バッジへ移す)
         made.append(write_post(
             5, "shokei", "事業承継・M&A",
-            img_title="事業承継・M&Aを考えるなら",
-            img_sub=shorten_name(shokei["name"]),
+            img_title=shorten_name(shokei["name"], limit=60),
+            img_sub=amount_text(shokei.get("max_amount")),
             img_number=num,
             caption=cap,
             source=shokei["source_url"],
+            badge="事業承継・M&A",
         ))
 
     # 6) なぜ無料か

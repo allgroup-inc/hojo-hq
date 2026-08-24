@@ -133,6 +133,26 @@ def wrap(draw, s, f, max_w):
     return lines
 
 
+def fit_wrap(draw, s, bold, max_w, start, min_size, max_lines):
+    """折り返し前提の自動縮小: 行数がmax_lines以下に収まるサイズを探す。
+
+    制度名の正式名称は長い(40〜60字)ため、1行に丸めると「令和8年度…」の
+    ように何の制度か分からなくなる(2026-08-24 小柳さん指摘)。
+    全文を複数行で見せ、それでも収まらない場合のみ末尾を「…」にする。
+    """
+    size = start
+    while size >= min_size:
+        f = font(bold, size)
+        lines = wrap(draw, s, f, max_w)
+        if len(lines) <= max_lines:
+            return f, lines
+        size -= 4
+    f = font(bold, min_size)
+    lines = wrap(draw, s, f, max_w)[:max_lines]
+    lines[-1] = lines[-1][:-1] + "…"
+    return f, lines
+
+
 def gradient_bg():
     img = Image.new("RGB", (W, H), BG_TOP)
     top, bot = BG_TOP, BG_BOTTOM
@@ -190,10 +210,10 @@ def render(post, out_path):
         d.text((PAD, y), post["number"], font=nf, fill=GOLD)
         y += nf.size + 40
 
-    # タイトル(白・太)
+    # タイトル(白・太)。制度名の全文が入るため、3行以内に収まるよう自動縮小する
     if post["title"]:
-        tf = font(True, 66)
-        for ln in wrap(d, post["title"], tf, max_w):
+        tf, tlines = fit_wrap(d, post["title"], True, max_w, start=66, min_size=40, max_lines=3)
+        for ln in tlines:
             d.text((PAD, y), ln, font=tf, fill=WHITE)
             y += int(tf.size * 1.28)
         y += 16
