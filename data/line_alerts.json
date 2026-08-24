@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-08-24 03:23",
+ "generated_at": "2026-08-24 09:30",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 9,
- "count": 17,
+ "count": 20,
  "items": [
   {
    "id": "a0WJ200000CDcfDMAT",
@@ -175,6 +175,36 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDb6JMAT",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDdmfMAD",
+   "name": "令和８年度　熱利活用事業（単年度事業分）　第３次公募　【　廃棄物処理施設を核とした地域循環共生圏構築促進事業　】",
+   "deadline": "2026-09-18",
+   "days_left": 25,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdmfMAD",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDdmVMAT",
+   "name": "令和８年度　電力利活用事業（単年度事業分）　第３次公募　【　廃棄物処理施設を核とした地域循環共生圏構築促進事業　】",
+   "deadline": "2026-09-18",
+   "days_left": 25,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdmVMAT",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDdmpMAD",
+   "name": "令和８年度　ＦＳ調査事業　第３次公募　【　廃棄物処理施設を核とした地域循環共生圏構築促進事業　】",
+   "deadline": "2026-09-18",
+   "days_left": 25,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdmpMAD",
    "tag": "nationwide"
   }
  ]
