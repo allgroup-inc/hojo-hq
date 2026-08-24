@@ -1080,5 +1080,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-24",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "休廃止鉱山の鉱害防止に係るエネルギー使用合理化事業費補助金（令和８年度）【中国監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYvnMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（19次締切）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDTzMMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "2026年度「木質バイオマス燃料等の安定的・効率的な供給・利用システム構築支援事業」の第２回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtWMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度酒類業振興支援事業費補助金（第５期）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdRmMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和７年度補正 ディマンドリスポンスの拡大に向けたIoT化推進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY5GMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
