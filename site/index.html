@@ -1395,25 +1395,17 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js',new Date());
   gtag('config',GA_ID,{transport_type:'beacon'});
-  // Plausible manual queue(script.js は load後に読み込むため、先にqueueを用意しておく。
-  // 個人識別子は送らずイベント名のみ。集計は scripts/fetch_hojo_funnel.py 参照)
+  // Plausibleは2026-08-24に停止(402ロック→GA4切替決裁。議事: docs/議事_20260824_計測GA4切替.md)。
+  // 読み込みは撤去済み。既存のwindow.plausible(...)呼び出しが落ちないようスタブだけ残す。
   window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments);};
-  // 表示速度(Lighthouse 95+)を守るための解析タグ2段階読込(2026-08-05):
-  // ① Plausible(cookieなし・約2KB)= load後すぐ。週次レポートの訪問者数の一次ソースなので
-  //    全訪問(操作なしの直帰含む)を必ずカウントする。
-  // ② gtag.js + Clarity = 最初の操作(タップ/スクロール/キー)で読み込む。
+  // 表示速度(Lighthouse)を守るための解析タグ遅延読込(2026-08-05設計を維持):
+  // gtag.js + Clarity = 最初の操作(タップ/スクロール/キー)で読み込む。
   //    - GA4のファネルイベント(diagnosis_start/diagnosis_run/line_cta_click等)は全て操作起点で、
   //      dataLayerにキューされるため欠落しない。page_viewも操作があれば送信される。
+  //    - 既知の限界: 操作なしの直帰はGA4に載らない(Plausible停止後の未計測分)。
   //    - Clarityは操作の録画が目的なので、無操作セッションを録らなくても実質的な損失はない。
   //    - Clarityのサードパーティcookie(clarity.ms/c.bing.com)がBest Practicesを0.79に落としていた。
   //      無操作の計測時には読み込まれないため、実ユーザーの計測を保ったまま基準を満たせる。
-  window.addEventListener('load',function(){
-    var ps=document.createElement('script');
-    ps.defer=true;
-    ps.setAttribute('data-domain','allgroup-inc.github.io');
-    ps.src='https://plausible.io/js/script.js';
-    document.head.appendChild(ps);
-  });
   var TAGS_LOADED=false;
   function loadHeavyTags(){
     if(TAGS_LOADED)return;

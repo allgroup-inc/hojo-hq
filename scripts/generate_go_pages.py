@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(__file__)
 GO_DIR = os.path.join(BASE_DIR, "..", "site", "go")
 
 # GA4測定ID(analytics-config.js と同一の値にする)。空の間は計測なしで転送のみ。
-GA4_MEASUREMENT_ID = ""
+GA4_MEASUREMENT_ID = "G-TQMX3MPFSR"
 REDIRECT_MS = 400
 
 # チャネル定義(転送先を変えるときはここだけ編集して再実行)
