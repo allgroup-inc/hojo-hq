@@ -42,7 +42,6 @@ function onOpen() {
     .createMenu("GLOW台帳")
     .addItem("選択中の企業を連携する", "showShareDialog")
     .addItem("発送日でCSV出力", "exportShippingCsvForDate")
-    .addItem("発送日でQR出力", "exportQrCodesForDate")
     .addSeparator()
     .addItem("G1フェーズA試験を実行", "showPhaseATestDialog")
     .addToUi();

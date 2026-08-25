@@ -156,13 +156,6 @@ test("事前選定リスト・事前選定_未一致タブの名称・見出し�
   assert.deepEqual(schema.PRE_SCREENING_MISMATCH_HEADERS, ["会社名", "記録日時"]);
 });
 
-test("QR生成結果タブの名称・見出しが定義されている", () => {
-  assert.equal(schema.QR_RESULT_SHEET_NAME, "QR生成結果");
-  assert.deepEqual(schema.QR_RESULT_HEADERS, [
-    "企業ID", "会社名", "発送日", "トラッキングURL", "QR画像リンク", "ステータス"
-  ]);
-});
-
 test("音声ログ処理状況のシート名・ヘッダー・ステータス一覧が定義されている", () => {
   assert.equal(schema.LINE_VOICE_LOG_SHEET_NAME, "音声ログ処理状況");
   assert.ok(Array.isArray(schema.LINE_VOICE_LOG_HEADERS));
