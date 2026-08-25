@@ -25,6 +25,7 @@ from datetime import datetime, timezone, timedelta
 
 sys.path.insert(0, os.path.dirname(__file__))
 from validate_fukugiiro import validate  # noqa: E402
+from fg_combine import apply_default_combine  # noqa: E402 併給注意の自動付与(2026-08-25 小柳さん指示)
 
 JST = timezone(timedelta(hours=9))
 UA = "hojo-hq-bot/1.0 (+https://allgroup-inc.github.io/hojo-hq; contact: bot@en-life.co.jp)"
@@ -512,6 +513,8 @@ def main():
             "notes": "出典: " + seed["issuer"].split("(")[0] + "ウェブサイト",
             "fetched_at": now,
         })
+        # 併給(ダブり)注意: リスクグループ該当でシードに combine が無ければ既定文を付与
+        apply_default_combine(item)
         items.append(item)
         print(f"OK: {seed['name']}")
 
