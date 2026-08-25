@@ -71,20 +71,25 @@ function runPhaseATest() {
   var repaired = repairInteractionLogHeader_();
   report.push("[0] 対応履歴ログ見出し: " + (repaired ? "修復した" : "正常"));
 
-  // --- 1. スコアリング ---
-  recalculateAllScores();
-  var scoreResult = verifyScores_();
-  report.push("[1] スコアリング: " + scoreResult.passed + "/" + scoreResult.total + "件 一致");
-  scoreResult.details.forEach(function (line) { report.push("      " + line); });
+  var scoreResult, dncResult;
+  try {
+    // --- 1. スコアリング ---
+    recalculateAllScores();
+    scoreResult = verifyScores_();
+    report.push("[1] スコアリング: " + scoreResult.passed + "/" + scoreResult.total + "件 一致");
+    scoreResult.details.forEach(function (line) { report.push("      " + line); });
 
-  // --- 2. DNC ---
-  var dncResult = runDncTest_();
-  report.push("[2] DNC(連絡不要): 試験50社中 " + dncResult.flaggedCount + "社にフラグが立った");
-  report.push("      伝播による追加: " + dncResult.propagatedExtra + "社(同一電話番号の関連会社)");
-
-  // --- 3. 後片付け ---
-  var cleaned = cleanupPhaseATestData_();
-  report.push("[3] 後片付け: 試験履歴 " + cleaned.removedLogs + "行を削除 / 連絡不要フラグ " + cleaned.resetFlags + "件を復旧");
+    // --- 2. DNC ---
+    dncResult = runDncTest_();
+    report.push("[2] DNC(連絡不要): 試験50社中 " + dncResult.flaggedCount + "社にフラグが立った");
+    report.push("      伝播による追加: " + dncResult.propagatedExtra + "社(同一電話番号の関連会社)");
+  } finally {
+    // ステップ1・2の途中で例外が起きても、試験データ(H-DNCTEST-*行・連絡不要フラグ)を
+    // 本番データに残したまま止まらないよう、後片付けは必ず実行する
+    // (2026-08-25 ❶レビューで追加。元の実装は正常終了時しか後片付けが走らなかった)。
+    var cleaned = cleanupPhaseATestData_();
+    report.push("[3] 後片付け: 試験履歴 " + cleaned.removedLogs + "行を削除 / 連絡不要フラグ " + cleaned.resetFlags + "件を復旧");
+  }
 
   var allPassed = scoreResult.passed === scoreResult.total
     && dncResult.flaggedCount === PHASE_A_DNC_TEST_COUNT;
