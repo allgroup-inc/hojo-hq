@@ -126,6 +126,14 @@ def validate(data, today=None):
         e, w = check_item(item, idx, today)
         errors.extend(e)
         warnings.extend(w)
+
+    # 併給(ダブり)注意の付け漏れ検査(2026-08-25 小柳さん指示の安全網)。
+    # 通常は fetch 側の自動付与でゼロになる。ここで出たら自動付与の配線が外れたサイン。
+    try:
+        from fg_combine import missing_combine_warnings  # noqa: PLC0415
+        warnings.extend(missing_combine_warnings(items))
+    except ImportError:
+        warnings.append("fg_combine が見つからないため併給チェックを実行できない")
     return errors, warnings
 
 
