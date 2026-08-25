@@ -50,9 +50,9 @@ html,body{background:#000;width:1080px;height:1920px;overflow:hidden}
 @keyframes riseOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-30px)}}
 @keyframes twinkle{from{opacity:.16}to{opacity:.95}}
 
-/* ===== S1: 夜の集落(0-8.8s) ===== */
-.s1{opacity:1;animation:fadeOut 1.2s ease 7.6s both}
-.s1 .kb{animation:kb1 9s linear 0s both}
+/* ===== S1: 夜の集落(0-12.2s) ===== */
+.s1{opacity:1;animation:fadeOut 1.4s ease 10.8s both}
+.s1 .kb{animation:kb1 12.4s linear 0s both}
 @keyframes kb1{from{transform:scale(1.16) translateY(-24px)}to{transform:scale(1.03) translateY(10px)}}
 .s1 .shade{background:linear-gradient(180deg,rgba(6,12,22,.72) 0%,rgba(8,14,24,.28) 46%,rgba(5,10,16,.78) 100%)}
 .s1 .moon{position:absolute;top:210px;right:150px;width:110px;height:110px;border-radius:50%;z-index:3;
@@ -61,7 +61,7 @@ html,body{background:#000;width:1080px;height:1920px;overflow:hidden}
 .star{position:absolute;border-radius:50%;background:#FFF6DE;z-index:2;animation:twinkle 1.6s ease-in-out infinite alternate}
 .shoot{position:absolute;top:330px;left:150px;width:230px;height:3px;z-index:3;opacity:0;border-radius:3px;
   background:linear-gradient(90deg,rgba(255,250,230,0),#FFF9E4);transform:rotate(16deg);
-  animation:shoot 1.15s ease-out 4.5s both}
+  animation:shoot 1.15s ease-out 6s both}
 @keyframes shoot{0%{opacity:0;transform:rotate(16deg) translate(0,0)}12%{opacity:.95}
   100%{opacity:0;transform:rotate(16deg) translate(400px,115px)}}
 .island{position:absolute;left:0;right:0;bottom:0;height:340px;z-index:3}
@@ -71,53 +71,53 @@ html,body{background:#000;width:1080px;height:1920px;overflow:hidden}
 .pretitle{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:7}
 .pretitle p{font-family:'Shippori Mincho',serif;font-weight:600;font-size:44px;color:#EFEAD9;letter-spacing:.3em;
   text-shadow:0 2px 24px rgba(0,0,0,.6);
-  animation:rise 1.5s cubic-bezier(.2,.7,.3,1) .4s both,riseOut .9s ease 2.9s forwards}
-.s1 .copy .stmt{animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 3.9s both}
-.s1 .copy .sub{animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 5s both}
+  animation:rise 1.8s cubic-bezier(.2,.7,.3,1) .4s both,riseOut 1s ease 3.9s forwards}
+.s1 .copy .stmt{animation:rise 2.2s cubic-bezier(.2,.7,.3,1) 5s both}
+.s1 .copy .sub{animation:rise 2.2s cubic-bezier(.2,.7,.3,1) 6.4s both}
 
-/* ===== S2: 三線と赤瓦(7.8-15.4s) ===== */
-.s2{animation:fadeIn 1.2s ease 7.8s both,fadeOut 1.2s ease 14.2s forwards}
-.s2 .kb{animation:kb2 7.8s linear 7.8s both}
+/* ===== S2: 三線と赤瓦(11-19.6s) ===== */
+.s2{animation:fadeIn 1.4s ease 11s both,fadeOut 1.4s ease 18.2s forwards}
+.s2 .kb{animation:kb2 8.6s linear 11s both}
 @keyframes kb2{from{transform:scale(1.04)}to{transform:scale(1.13) translateY(-16px)}}
 .s2 .shade{background:linear-gradient(180deg,rgba(10,14,26,.62) 0%,rgba(12,16,26,.24) 50%,rgba(8,12,20,.72) 100%)}
-.s2 .copy .stmt{animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 9.7s both}
-.s2 .copy .sub{animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 10.9s both}
+.s2 .copy .stmt{animation:rise 2.2s cubic-bezier(.2,.7,.3,1) 12.9s both}
+.s2 .copy .sub{animation:rise 2.2s cubic-bezier(.2,.7,.3,1) 14.3s both}
 
-/* ===== S3: ゆいまーる(14.4-22.4s) ===== */
-.s3{animation:fadeIn 1.2s ease 14.4s both,fadeOut 1.2s ease 21.2s forwards}
-.s3 .kb{animation:kb3 8.2s linear 14.4s both}
+/* ===== S3: ゆいまーる(18.4-27s) ===== */
+.s3{animation:fadeIn 1.4s ease 18.4s both,fadeOut 1.4s ease 25.6s forwards}
+.s3 .kb{animation:kb3 8.6s linear 18.4s both}
 @keyframes kb3{from{transform:scale(1.14) translateX(16px)}to{transform:scale(1.03) translateX(-14px)}}
 .s3 .shade{background:linear-gradient(180deg,rgba(14,16,26,.58) 0%,rgba(16,18,26,.22) 52%,rgba(10,12,20,.7) 100%)}
-.s3 .copy .stmt{animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 16.3s both}
-.s3 .copy .sub{animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 17.5s both}
+.s3 .copy .stmt{animation:rise 2.2s cubic-bezier(.2,.7,.3,1) 20.3s both}
+.s3 .copy .sub{animation:rise 2.2s cubic-bezier(.2,.7,.3,1) 21.7s both}
 
-/* ===== S4: 朝焼けの海(21.4-28.6s) ===== */
-.s4{animation:fadeIn 1.2s ease 21.4s both,fadeOut 1.4s ease 27.2s forwards}
-.s4 .kb{animation:kb4 7.4s linear 21.4s both}
+/* ===== S4: 朝焼けの海(25.8-33.8s) ===== */
+.s4{animation:fadeIn 1.4s ease 25.8s both,fadeOut 1.4s ease 32.4s forwards}
+.s4 .kb{animation:kb4 8s linear 25.8s both}
 @keyframes kb4{from{transform:scale(1.12)}to{transform:scale(1.02)}}
 .s4 .shade{background:linear-gradient(180deg,rgba(60,32,26,.30) 0%,rgba(90,44,26,.10) 45%,rgba(50,24,18,.44) 100%)}
 .s4 .glow{position:absolute;left:50%;top:56%;width:900px;height:900px;transform:translate(-50%,-50%);z-index:2;
   background:radial-gradient(circle,rgba(255,196,110,.5) 0%,rgba(255,170,90,.16) 42%,transparent 68%);
-  animation:glowUp 6s ease 21.6s both}
+  animation:glowUp 6s ease 26s both}
 @keyframes glowUp{from{opacity:.25}to{opacity:1}}
 .bird{position:absolute;z-index:4;width:74px;opacity:.85}
 .bird svg{width:100%;height:auto}
 .bird path{fill:none;stroke:#2A1712;stroke-width:5;stroke-linecap:round}
-.b1{top:520px;left:-90px;animation:fly1 7.4s linear 21.4s both}
-.b2{top:640px;left:-150px;width:56px;animation:fly1 7.4s linear 21.9s both}
-.b3{top:430px;left:-40px;width:46px;animation:fly1 7.4s linear 22.3s both}
+.b1{top:520px;left:-90px;animation:fly1 8s linear 25.8s both}
+.b2{top:640px;left:-150px;width:56px;animation:fly1 8s linear 26.3s both}
+.b3{top:430px;left:-40px;width:46px;animation:fly1 8s linear 26.7s both}
 @keyframes fly1{from{transform:translateX(0) translateY(0)}
   50%{transform:translateX(560px) translateY(-40px)}
   to{transform:translateX(1220px) translateY(-58px)}}
-.s4 .copy .stmt{animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 23.3s both}
+.s4 .copy .stmt{animation:rise 2.2s cubic-bezier(.2,.7,.3,1) 27.9s both}
 
-/* ===== S5: 眠っているささえ(27.4-38.4s) ===== */
+/* ===== S5: 眠っているささえ(32.6-44.4s) ===== */
 .s5{background:linear-gradient(180deg,#2E2A26 0%,#3A332C 46%,#2A2622 100%);
-  animation:fadeIn 1.4s ease 27.4s both,fadeOut 1.2s ease 37.2s forwards;flex-direction:column}
+  animation:fadeIn 1.4s ease 32.6s both,fadeOut 1.4s ease 43s forwards;flex-direction:column}
 .s5 .lamp{position:absolute;top:-160px;left:50%;transform:translateX(-50%);width:1200px;height:900px;z-index:1;
   background:radial-gradient(ellipse 55% 60% at 50% 0%,rgba(255,214,150,.30) 0%,rgba(255,200,130,.08) 55%,transparent 75%)}
 .envwrap{position:relative;z-index:3;width:520px;height:400px;margin-bottom:110px;
-  animation:envIn 1.6s cubic-bezier(.2,.7,.3,1) 28.5s both}
+  animation:envIn 1.6s cubic-bezier(.2,.7,.3,1) 33.8s both}
 @keyframes envIn{from{opacity:0;transform:translateY(60px) rotate(-7deg)}to{opacity:1;transform:translateY(0) rotate(-4deg)}}
 .env{position:absolute;inset:40px 10px 60px;background:#FBF6EA;border-radius:14px;box-shadow:0 30px 70px rgba(0,0,0,.45)}
 .env:before{content:"";position:absolute;left:0;right:0;top:0;height:0;
@@ -129,55 +129,87 @@ html,body{background:#000;width:1080px;height:1920px;overflow:hidden}
   color:rgba(185,80,47,.85);font-family:'Shippori Mincho',serif;font-weight:600;font-size:30px;transform:rotate(9deg)}
 .s5 .copy{display:flex;flex-direction:column;gap:58px}
 .s5 .t1{font-size:54px;color:#F6EFDF;letter-spacing:.1em;line-height:1.9;
-  animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 29.3s both}
+  animation:rise 2s cubic-bezier(.2,.7,.3,1) 34.6s both}
 .s5 .t2{font-size:42px;color:#DCD3C2;letter-spacing:.08em;line-height:2.05;
-  animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 31.7s both}
+  animation:rise 2s cubic-bezier(.2,.7,.3,1) 37.2s both}
 .s5 .t3{font-size:48px;color:#F5B98C;letter-spacing:.1em;line-height:1.95;font-weight:700;
-  animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 34.5s both}
+  animation:rise 2s cubic-bezier(.2,.7,.3,1) 40s both}
 
-/* ===== S6: サイト紹介(37.4-50.4s) ===== */
+/* ===== S6: サイト紹介+タップ誘導(43.2-58.8s) ===== */
 .s6{background:linear-gradient(180deg,#FFFBF4 0%,#FBEFE2 60%,#F7E7D6 100%);
-  animation:fadeIn 1.4s ease 37.4s both,fadeOut 1.2s ease 49.2s forwards;flex-direction:column;justify-content:flex-start}
+  animation:fadeIn 1.4s ease 43.2s both,fadeOut 1.4s ease 57.4s forwards;flex-direction:column;justify-content:flex-start}
 .s6 .head{margin-top:104px;text-align:center;z-index:5;
-  animation:rise 1.6s cubic-bezier(.2,.7,.3,1) 38.4s both}
+  animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 44.2s both}
 .s6 .head .hh{font-family:'Shippori Mincho',serif;font-weight:600;font-size:56px;color:var(--sumi);letter-spacing:.1em;line-height:1.75}
 .s6 .head .hh em{font-style:normal;color:var(--shu)}
 .phone{position:relative;margin-top:64px;width:500px;height:1010px;border-radius:64px;background:#2B2B30;z-index:4;
   box-shadow:0 44px 110px rgba(90,60,40,.35),0 8px 26px rgba(90,60,40,.25);
-  animation:phoneIn 1.8s cubic-bezier(.2,.7,.3,1) 38.8s both}
+  animation:phoneIn 1.8s cubic-bezier(.2,.7,.3,1) 44.6s both}
 @keyframes phoneIn{from{opacity:0;transform:translateY(90px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 .phone .screen{position:absolute;inset:16px;border-radius:50px;overflow:hidden;background:#FFFBF4}
 .phone .notch{position:absolute;top:30px;left:50%;transform:translateX(-50%);width:150px;height:34px;border-radius:20px;background:#2B2B30;z-index:6}
 .phone .screen img{display:block;width:468px;height:auto;
-  animation:lpscroll 10.6s cubic-bezier(.45,.02,.5,1) 39.6s both}
-@keyframes lpscroll{from{transform:translateY(0)}to{transform:translateY(-1122px)}}
+  animation:lpscroll 7.4s cubic-bezier(.45,.02,.5,1) 45.6s both}
+/* 下までゆっくり見せてから、CTAボタンの位置(-320px)まで戻って止まる */
+@keyframes lpscroll{0%{transform:translateY(0)}56%{transform:translateY(-1122px)}
+  64%{transform:translateY(-1122px)}88%{transform:translateY(-320px)}100%{transform:translateY(-320px)}}
+/* タップ誘導(スクロール停止後) */
+.taplabel{position:absolute;left:50%;top:432px;transform:translateX(-50%);z-index:7;
+  background:var(--shu);color:#FFFBF4;font-family:'Noto Sans JP',sans-serif;font-weight:700;
+  font-size:30px;letter-spacing:.1em;padding:14px 30px;border-radius:40px;white-space:nowrap;
+  box-shadow:0 10px 26px rgba(90,40,20,.3);
+  animation:tapin .9s cubic-bezier(.2,1.3,.4,1) 53.2s both}
+.taplabel:after{content:"";position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);
+  border-left:13px solid transparent;border-right:13px solid transparent;border-top:14px solid var(--shu)}
+@keyframes tapin{from{opacity:0;transform:translateX(-50%) translateY(24px) scale(.85)}
+  to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+.tapfinger{position:absolute;left:0;top:0;width:52px;height:52px;border-radius:50%;z-index:8;
+  background:rgba(31,42,46,.6);border:4px solid #FFFBF4;box-shadow:0 8px 20px rgba(0,0,0,.3);
+  animation:finger 3.2s cubic-bezier(.3,.6,.3,1) 53.6s both}
+/* 右下から現れる → ボタンへ移動 → 2回押す(1本のタイムラインに統合) */
+@keyframes finger{0%{opacity:0;transform:translate(360px,780px) scale(1)}
+  12%{opacity:1}
+  40%{transform:translate(208px,539px) scale(1)}
+  47%{transform:translate(208px,539px) scale(.72)}
+  55%{transform:translate(208px,539px) scale(1)}
+  72%{transform:translate(208px,539px) scale(1)}
+  78%{transform:translate(208px,539px) scale(.72)}
+  86%{transform:translate(208px,539px) scale(1)}
+  100%{opacity:1;transform:translate(208px,539px) scale(1)}}
+.tapring{position:absolute;left:204px;top:535px;width:60px;height:60px;border-radius:50%;z-index:7;
+  border:5px solid var(--shu);opacity:0;
+  animation:ring 1s ease-out 55.15s forwards,ring 1s ease-out 56.25s forwards}
+@keyframes ring{0%{opacity:.85;transform:scale(.6)}100%{opacity:0;transform:scale(2.6)}}
+.tapflash{position:absolute;left:66px;top:532px;width:336px;height:66px;border-radius:33px;z-index:6;
+  background:#FFFBF4;opacity:0;animation:flash .55s ease 55.2s forwards,flash .55s ease 56.3s forwards}
+@keyframes flash{0%{opacity:0}40%{opacity:.5}100%{opacity:0}}
 .s6 .caps{position:absolute;left:0;right:0;bottom:96px;display:flex;flex-direction:column;gap:34px;z-index:5;text-align:center}
 .s6 .cap{font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:42px;color:var(--sumi);letter-spacing:.08em}
 .s6 .cap .maru{color:var(--shu)}
-.s6 .cap1{animation:rise 1.5s cubic-bezier(.2,.7,.3,1) 40.6s both}
-.s6 .cap2{animation:rise 1.5s cubic-bezier(.2,.7,.3,1) 43.4s both}
+.s6 .cap1{animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 46.8s both}
+.s6 .cap2{animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 49.8s both}
 .s6 .cap3{font-weight:500;font-size:36px;color:#6B625A;letter-spacing:.16em;
-  animation:rise 1.5s cubic-bezier(.2,.7,.3,1) 46.2s both}
+  animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 52s both}
 
-/* ===== S7: 虹ロゴ完成(49.4-62s) ===== */
-.s7{background:var(--shikkui);animation:fadeIn 1.4s ease 49.4s both;flex-direction:column}
+/* ===== S7: 虹ロゴ完成(57.6-71s) ===== */
+.s7{background:var(--shikkui);animation:fadeIn 1.4s ease 57.6s both;flex-direction:column}
 .s7 .burst{position:absolute;left:50%;top:44%;width:1500px;height:1500px;transform:translate(-50%,-50%);
   background:radial-gradient(circle,rgba(245,206,110,.22) 0%,rgba(245,206,110,.06) 45%,transparent 66%);
-  animation:fadeIn 2.5s ease 52.5s both}
+  animation:fadeIn 2.5s ease 60.6s both}
 .logo{width:760px;height:auto;position:relative;z-index:5;margin-top:-170px}
 .arc{fill:none;stroke-width:6;stroke-linecap:round;stroke-dasharray:70;stroke-dashoffset:70}
-.a1{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 50.7s both}
-.a2{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 51.15s both}
-.a3{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 51.6s both}
+.a1{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 58.9s both}
+.a2{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 59.35s both}
+.a3{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 59.8s both}
 @keyframes draw{to{stroke-dashoffset:0}}
-.sun{transform-origin:46px 12.5px;animation:sunpop 1s cubic-bezier(.2,1.5,.4,1) 53.5s both}
+.sun{transform-origin:46px 12.5px;animation:sunpop 1s cubic-bezier(.2,1.5,.4,1) 61.7s both}
 @keyframes sunpop{from{opacity:0;transform:scale(.2)}55%{opacity:1;transform:scale(1.14)}to{opacity:1;transform:scale(1)}}
 .s7 .vision{font-family:'Shippori Mincho',serif;font-weight:600;font-size:60px;color:var(--shu);letter-spacing:.16em;
-  margin-top:96px;z-index:5;animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 55.1s both}
+  margin-top:96px;z-index:5;animation:rise 1.9s cubic-bezier(.2,.7,.3,1) 63.3s both}
 .s7 .wm{font-family:'Shippori Mincho',serif;font-weight:700;font-size:104px;color:var(--shu);letter-spacing:.12em;
-  margin-top:74px;z-index:5;animation:rise 1.9s cubic-bezier(.2,.7,.3,1) 56.9s both}
+  margin-top:74px;z-index:5;animation:rise 2.1s cubic-bezier(.2,.7,.3,1) 65.1s both}
 .s7 .tag{font-family:'Noto Sans JP',sans-serif;font-weight:500;font-size:36px;color:var(--umi);letter-spacing:.24em;
-  margin-top:64px;z-index:5;animation:rise 1.7s cubic-bezier(.2,.7,.3,1) 58.6s both}
+  margin-top:64px;z-index:5;animation:rise 1.9s cubic-bezier(.2,.7,.3,1) 66.8s both}
 </style>
 </head>
 <body>
@@ -261,7 +293,13 @@ html,body{background:#000;width:1080px;height:1920px;overflow:hidden}
     </div>
     <div class="phone">
       <div class="notch"></div>
-      <div class="screen"><img src="lp-shot.png" alt="もらいわすれ堂のサイト画面"></div>
+      <div class="screen">
+        <img src="lp-shot.png" alt="もらいわすれ堂のサイト画面">
+        <div class="tapflash"></div>
+        <div class="taplabel">まずは、ここをタップ</div>
+        <div class="tapfinger"></div>
+        <div class="tapring"></div>
+      </div>
     </div>
     <div class="caps">
       <p class="cap cap1"><span class="maru">3分の診断</span>で、あなたの世帯の<br>“もらい忘れ”が見つかるかもしれません</p>
@@ -314,7 +352,7 @@ html,body{background:#000;width:1080px;height:1920px;overflow:hidden}
     vl.appendChild(s);
   }
 })();
-window.FILM_DURATION = 62;
+window.FILM_DURATION = 71;
 </script>
 </body>
 </html>
