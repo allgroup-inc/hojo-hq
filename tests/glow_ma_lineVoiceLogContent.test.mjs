@@ -50,6 +50,26 @@ test("normalizeRespondentType: 既知の対応相手はそのまま返す", () =
   assert.equal(lineVoiceLogContent.normalizeRespondentType("オーナー社長本人"), "オーナー社長本人");
 });
 
+test("isRespondentUncertain: Geminiが「不明」と返した場合はtrue", () => {
+  assert.equal(lineVoiceLogContent.isRespondentUncertain("不明"), true);
+});
+
+test("isRespondentUncertain: 既知の対応相手や無関係な文字列はfalse", () => {
+  assert.equal(lineVoiceLogContent.isRespondentUncertain("オーナー社長本人"), false);
+  assert.equal(lineVoiceLogContent.isRespondentUncertain("不明な人物"), false);
+  assert.equal(lineVoiceLogContent.isRespondentUncertain(""), false);
+  assert.equal(lineVoiceLogContent.isRespondentUncertain(undefined), false);
+});
+
+test("buildFinalConfirmPrompt: 対応相手が「不明」の場合は訂正を促す注意書きを付ける", () => {
+  const prompt = lineVoiceLogContent.buildFinalConfirmPrompt(
+    "P-2", "沖縄建設", "面談実施", "不明", "見積の話", ""
+  );
+  assert.ok(prompt.text.includes("対応相手: 経理・総務等の窓口担当"));
+  assert.ok(prompt.text.includes("⚠️"));
+  assert.ok(prompt.text.includes("スプレッドシートで訂正"));
+});
+
 test("normalizeRespondentType: 未知の値は既定値(経理・総務等の窓口担当)にフォールバックする", () => {
   assert.equal(lineVoiceLogContent.normalizeRespondentType("不明な人物"), "経理・総務等の窓口担当");
 });

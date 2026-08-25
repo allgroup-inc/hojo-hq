@@ -601,7 +601,9 @@ function buildGeminiPrompt_() {
     "(説明文やコードブロックの記号は付けないこと):\n" +
     "{\"companyName\": \"話された会社名\", " +
     "\"interactionType\": \"" + GlowSchema.INTERACTION_TYPES.join("/") + "のいずれか\", " +
-    "\"respondentType\": \"" + GlowSchema.RESPONDENT_TYPES.join("/") + "のいずれか\", " +
+    "\"respondentType\": \"" + GlowSchema.RESPONDENT_TYPES.join("/") +
+      "のいずれか。音声だけでは相手がオーナー社長本人か窓口担当か判別できない場合は、" +
+      "推測で決めつけず「不明」と正直に出力すること\", " +
     "\"contentMemo\": \"話の内容の要約(2〜3文程度)\", " +
     "\"nextAction\": \"次にやるべきこと(無ければ空文字)\"}";
 }

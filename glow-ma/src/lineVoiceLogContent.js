@@ -63,6 +63,19 @@
     return DEFAULT_RESPONDENT_TYPE;
   }
 
+  var RESPONDENT_UNCERTAIN_VALUE = "不明";
+
+  /**
+   * Geminiが対応相手を「不明」(音声だけではオーナー社長本人か窓口担当か判別できない)と
+   * 返したかどうかを判定する。「対応相手」は反応スコアに直結する項目(オーナー社長本人は
+   * +15点)のため、判定が曖昧なまま既定値へ静かにフォールバックさせず、最終確認メッセージで
+   * 人に注意喚起する(2026-08-26 ❸事業構成&ゆんたくからの指摘。実例: 録音だけでは
+   * 社長本人か窓口担当か判別しきれないケースがある)。
+   */
+  function isRespondentUncertain(candidateRespondent) {
+    return candidateRespondent === RESPONDENT_UNCERTAIN_VALUE;
+  }
+
   var FORMULA_PREFIX_PATTERN = /^[=+\-@]/;
 
   /**
@@ -201,11 +214,16 @@
    * (正確性最優先。CLAUDE.md絶対ルール1)。正規化は冪等なので二重適用しても問題ない。
    */
   function buildFinalConfirmPrompt(processId, companyName, interactionType, respondentType, contentMemo, nextAction) {
+    var respondentLine = "対応相手: " + normalizeRespondentType(respondentType);
+    if (isRespondentUncertain(respondentType)) {
+      respondentLine += "(⚠️音声だけでは判定できませんでした。オーナー社長ご本人だった場合は" +
+        "対応履歴ログのスコアに影響するため、確定後にスプレッドシートで訂正してください)";
+    }
     var text = [
       "以下の内容で記録します。よろしいですか?",
       "会社名: " + companyName,
       "種別: " + normalizeInteractionType(interactionType),
-      "対応相手: " + normalizeRespondentType(respondentType),
+      respondentLine,
       "内容メモ: " + contentMemo,
       "次回アクション: " + (nextAction || "(なし)")
     ].join("\n");
@@ -250,6 +268,7 @@
     matchCompanyCandidates: matchCompanyCandidates,
     normalizeInteractionType: normalizeInteractionType,
     normalizeRespondentType: normalizeRespondentType,
+    isRespondentUncertain: isRespondentUncertain,
     sanitizeSheetText: sanitizeSheetText,
     buildInteractionLogRow: buildInteractionLogRow,
     buildNewCompanyRow: buildNewCompanyRow,
