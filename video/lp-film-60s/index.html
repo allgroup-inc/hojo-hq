@@ -133,7 +133,23 @@ html,body{background:#000;width:1080px;height:1920px;overflow:hidden}
 .s5 .t2{font-size:42px;color:#DCD3C2;letter-spacing:.08em;line-height:2.05;
   animation:rise 2s cubic-bezier(.2,.7,.3,1) 37.2s both}
 .s5 .t3{font-size:48px;color:#F5B98C;letter-spacing:.1em;line-height:1.95;font-weight:700;
-  animation:rise 2s cubic-bezier(.2,.7,.3,1) 40s both}
+  animation:rise 2s cubic-bezier(.2,.7,.3,1) 40s both,t3glow 2.8s ease 40.8s both}
+/* 「すこし明るくなる」で文字がふわっと灯る */
+@keyframes t3glow{
+  0%{color:#F5B98C;text-shadow:none}
+  45%{color:#FFE6BC;text-shadow:0 0 26px rgba(255,208,130,.95),0 0 64px rgba(255,180,90,.6)}
+  100%{color:#FFDCA8;text-shadow:0 0 16px rgba(255,205,125,.65),0 0 44px rgba(255,180,90,.4)}}
+/* 部屋全体もすこしだけ明るくなる */
+.s5 .akari{position:absolute;left:50%;top:66%;width:1400px;height:1100px;transform:translate(-50%,-50%);z-index:2;
+  background:radial-gradient(ellipse 50% 42% at 50% 50%,rgba(255,204,130,.22) 0%,rgba(255,190,110,.08) 55%,transparent 75%);
+  animation:fadeIn 3.2s ease 40.8s both}
+/* 光の粒(ホタルのように順に灯る) */
+.spark{position:absolute;border-radius:50%;background:#FFE2AE;z-index:4;opacity:0;
+  box-shadow:0 0 16px 5px rgba(255,210,140,.65);animation:sparkpop 2.4s ease-in-out both}
+@keyframes sparkpop{0%{opacity:0;transform:scale(.2) translateY(14px)}
+  35%{opacity:.95;transform:scale(1) translateY(0)}
+  70%{opacity:.55;transform:scale(.85) translateY(-14px)}
+  100%{opacity:0;transform:scale(.5) translateY(-26px)}}
 
 /* ===== S6: サイト紹介+タップ誘導(43.2-58.8s) ===== */
 .s6{background:linear-gradient(180deg,#FFFBF4 0%,#FBEFE2 60%,#F7E7D6 100%);
@@ -271,6 +287,14 @@ html,body{background:#000;width:1080px;height:1920px;overflow:hidden}
   <!-- S5: 眠っているささえ -->
   <section class="scene s5">
     <div class="lamp"></div>
+    <div class="akari"></div>
+    <span class="spark" style="left:190px;top:1330px;width:9px;height:9px;animation-delay:41.2s"></span>
+    <span class="spark" style="left:880px;top:1420px;width:7px;height:7px;animation-delay:41.6s"></span>
+    <span class="spark" style="left:320px;top:1650px;width:8px;height:8px;animation-delay:42s"></span>
+    <span class="spark" style="left:760px;top:1610px;width:10px;height:10px;animation-delay:42.3s"></span>
+    <span class="spark" style="left:140px;top:1520px;width:6px;height:6px;animation-delay:42.7s"></span>
+    <span class="spark" style="left:930px;top:1560px;width:8px;height:8px;animation-delay:43s"></span>
+    <span class="spark" style="left:540px;top:1280px;width:7px;height:7px;animation-delay:43.3s"></span>
     <div class="envwrap">
       <div class="env">
         <span class="line" style="top:170px;width:210px"></span>
