@@ -1,26 +1,12 @@
 {
- "updated_at": "2026-08-25 10:42",
- "count": 139,
+ "updated_at": "2026-08-25 15:39",
+ "count": 162,
  "by_tag": {
-  "nationwide": 107,
+  "nationwide": 130,
   "okinawa": 24,
   "shokei": 8
  },
  "items": [
-  {
-   "id": "a0WJ200000CDKZFMA5",
-   "name": "令和８年度_グリーンスローモビリティ等導入促進事業",
-   "issuer": "",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 0,
-   "deadline": "2026-08-25",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDKZFMA5",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
-   "status": "募集中"
-  },
   {
    "id": "a0WJ200000CDdR2MAL",
    "name": "【第二回公募】令和8年度災害時に備えた社会的重要インフラへの自衛的な燃料備蓄の推進事業費補助金",
@@ -32,13 +18,27 @@
    "deadline": "2026-08-25",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdR2MAL",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDKZFMA5",
+   "name": "令和８年度_グリーンスローモビリティ等導入促進事業",
+   "issuer": "二酸化炭素排出抑制対策事業費等補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2026-08-25",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDKZFMA5",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDdAaMAL",
    "name": "【令和８年度】二酸化炭素排出抑制対策事業費等補助金 （国内資源循環体制構築に向けた再エネ関連製品及びベース素材の全体最適化実証事業）（第２次公募）",
-   "issuer": "",
+   "issuer": "令和８年度二酸化炭素排出抑制対策事業費等補助金 （地域共生型廃棄物発電等導入促進事業 （うち地域の廃棄物を活用した地域エネルギー創出事業））",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -46,7 +46,7 @@
    "deadline": "2026-08-26",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdAaMAL",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -60,7 +60,7 @@
    "deadline": "2026-08-26",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaMLMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -74,7 +74,7 @@
    "deadline": "2026-08-26",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaMQMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -89,13 +89,13 @@
    "source_url": "https://www.city.naha.okinawa.jp/business/kigyouricchi/1003642/1012419.html",
    "tag": "okinawa",
    "source": "那覇市(企業支援)",
-   "fetched_at": "2026-08-25 10:42",
+   "fetched_at": "2026-08-25 15:38",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDPbMMAX",
    "name": "［第十三回］事業再構築補助金_成長分野進出枠、コロナ回復加速枠（交付申請等）",
-   "issuer": "",
+   "issuer": "事業再構築補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -103,21 +103,7 @@
    "deadline": "2026-08-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDPbMMAX",
    "tag": "shokei",
-   "fetched_at": "2026-08-25 10:39",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDdjkMAD",
-   "name": "令和8年度地熱発電の資源量調査事業費助成金交付事業_第3回",
-   "issuer": "",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 9999999999,
-   "deadline": "2026-08-31",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdjkMAD",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -131,7 +117,21 @@
    "deadline": "2026-08-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcfDMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDdjkMAD",
+   "name": "令和8年度地熱発電の資源量調査事業費助成金交付事業_第3回",
+   "issuer": "",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 9999999999,
+   "deadline": "2026-08-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdjkMAD",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -145,7 +145,7 @@
    "deadline": "2026-09-01",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDcMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -159,7 +159,7 @@
    "deadline": "2026-09-01",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdJhMAL",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -173,7 +173,7 @@
    "deadline": "2026-09-04",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDctfMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -187,35 +187,7 @@
    "deadline": "2026-09-04",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdu5MAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDd5cMAD",
-   "name": "2026年度第2回「新エネルギー等のシーズ発掘・事業化に向けた技術研究開発事業」（新エネ中小・スタートアップ支援制度）の公募",
-   "issuer": "P10020_新エネルギー等のシーズ発掘・事業化に向けた技術研究開発事業",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 0,
-   "deadline": "2026-09-07",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd5cMAD",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDdA1MAL",
-   "name": "2026年度第2回「新エネルギー等のシーズ発掘・事業化に向けた技術研究開発事業」（未来型新エネ実証制度）の公募",
-   "issuer": "P10020_新エネルギー等のシーズ発掘・事業化に向けた技術研究開発事業",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 0,
-   "deadline": "2026-09-07",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdA1MAL",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:37",
    "status": "募集中"
   },
   {
@@ -229,7 +201,35 @@
    "deadline": "2026-09-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdNKMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDd5cMAD",
+   "name": "2026年度第2回「新エネルギー等のシーズ発掘・事業化に向けた技術研究開発事業」（新エネ中小・スタートアップ支援制度）の公募",
+   "issuer": "P10020_新エネルギー等のシーズ発掘・事業化に向けた技術研究開発事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2026-09-07",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd5cMAD",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDdA1MAL",
+   "name": "2026年度第2回「新エネルギー等のシーズ発掘・事業化に向けた技術研究開発事業」（未来型新エネ実証制度）の公募",
+   "issuer": "P10020_新エネルギー等のシーズ発掘・事業化に向けた技術研究開発事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2026-09-07",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdA1MAL",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -243,7 +243,7 @@
    "deadline": "2026-09-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeA1MAL",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -257,7 +257,7 @@
    "deadline": "2026-09-08",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdKuMAL",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -271,7 +271,7 @@
    "deadline": "2026-09-09",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdQxMAL",
    "tag": "okinawa",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -285,21 +285,7 @@
    "deadline": "2026-09-09",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe7xMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDO8eMAH",
-   "name": "交通システムの省CO2 化に向けた設備整備事業（鉄道事業等におけるネットワーク型低炭素化促進事業）（二次公募）",
-   "issuer": "",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 0,
-   "deadline": "2026-09-14",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDO8eMAH",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -313,7 +299,7 @@
    "deadline": "2026-09-14",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYlTMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -327,7 +313,21 @@
    "deadline": "2026-09-14",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd5SMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDO8eMAH",
+   "name": "交通システムの省CO2 化に向けた設備整備事業（鉄道事業等におけるネットワーク型低炭素化促進事業）（二次公募）",
+   "issuer": "二酸化炭素排出抑制対策事業費等補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2026-09-14",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDO8eMAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -341,21 +341,7 @@
    "deadline": "2026-09-15",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdqyMAD",
    "tag": "okinawa",
-   "fetched_at": "2026-08-25 10:40",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDb6JMAT",
-   "name": "【令和７年度】二酸化炭素排出抑制対策事業費等補助金（水インフラにおける脱炭素化推進事業）［四次公募］",
-   "issuer": "建築物等のZEB化・省CO2化普及加速事業",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 0,
-   "deadline": "2026-09-18",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDb6JMAT",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -369,7 +355,7 @@
    "deadline": "2026-09-18",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdmVMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -383,7 +369,7 @@
    "deadline": "2026-09-18",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdmfMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -397,7 +383,21 @@
    "deadline": "2026-09-18",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdmpMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDb6JMAT",
+   "name": "【令和７年度】二酸化炭素排出抑制対策事業費等補助金（水インフラにおける脱炭素化推進事業）［四次公募］",
+   "issuer": "建築物等のZEB化・省CO2化普及加速事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2026-09-18",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDb6JMAT",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -411,7 +411,7 @@
    "deadline": "2026-09-25",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcODMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -425,13 +425,83 @@
    "deadline": "2026-09-25",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczgMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYkCMAX",
+   "name": "③太陽光パネルリサイクル設備導入事業（バリューチェーン）【令和７年度（補正予算）第４次公募及び令和８年度第３次公募】",
+   "issuer": "プラスチック資源・金属資源等のバリューチェーン脱炭素化 のための高度化設備導入等促進事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 7297000000,
+   "deadline": "2026-09-25",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYkCMAX",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYjRMAX",
+   "name": "②化石資源由来プラスチックを代替する再生可能資源由来素材 の省CO2型製造設備導入事業（バリューチェーン）【令和７年度（補正予算）第４次公募及び令和８年度第３次公募】",
+   "issuer": "プラスチック資源・金属資源等のバリューチェーン脱炭素化 のための高度化設備導入等促進事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 7297000000,
+   "deadline": "2026-09-25",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYjRMAX",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYkHMAX",
+   "name": "④リチウム蓄電池リサイクル設備導入事業（バリューチェーン）【令和７年度（補正予算）第４次公募及び令和８年度第３次公募】",
+   "issuer": "プラスチック資源・金属資源等のバリューチェーン脱炭素化 のための高度化設備導入等促進事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 7297000000,
+   "deadline": "2026-09-25",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYkHMAX",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYk0MAH",
+   "name": "⑤金属破砕・選別設備導入事業（バリューチェーン）【令和７年度（補正予算）第４次公募及び第８年度第３次公募】",
+   "issuer": "プラスチック資源・金属資源等のバリューチェーン脱炭素化 のための高度化設備導入等促進事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 7297000000,
+   "deadline": "2026-09-25",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYk0MAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYiwMAH",
+   "name": "①省CO2型プラスチック高度リサイクル設備導入事業（バリューチェーン）【令和７年度（補正予算）４次公募及び令和８年度３次公募】",
+   "issuer": "プラスチック資源・金属資源等のバリューチェーン脱炭素化 のための高度化設備導入等促進事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 7297000000,
+   "deadline": "2026-09-25",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYiwMAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDTzMMAX",
    "name": "【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（19次締切）",
-   "issuer": "",
+   "issuer": "ものづくり補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -439,7 +509,7 @@
    "deadline": "2026-09-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDTzMMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -453,7 +523,7 @@
    "deadline": "2026-09-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYcpMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -467,13 +537,13 @@
    "deadline": "2026-09-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtWMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0W2x000004PhCHEA0",
    "name": "令和8年度 生放送字幕番組普及促進助成金（第３期）",
-   "issuer": "",
+   "issuer": "令和8年度情報通信利用促進支援事業費補助金 （字幕・解説・手話番組等の制作・普及促進）",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -481,7 +551,21 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000004PhCHEA0",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDcQOMA1",
+   "name": "小規模事業者持続化補助金＜共同・協業型＞ 第３回公募",
+   "issuer": "小規模事業者持続化補助金＜共同・協業型＞",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 30000000,
+   "deadline": "2026-09-30",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcQOMA1",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -495,7 +579,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdRHMA1",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -509,7 +593,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcy9MAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -523,7 +607,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbq0MAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -537,21 +621,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZ2OMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDcQOMA1",
-   "name": "小規模事業者持続化補助金＜共同・協業型＞ 第３回公募",
-   "issuer": "",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 30000000,
-   "deadline": "2026-09-30",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcQOMA1",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -565,7 +635,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaT7MAL",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -579,7 +649,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdjzMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -593,7 +663,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtRMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -607,7 +677,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbpvMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -621,7 +691,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtbMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -635,7 +705,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtgMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -649,7 +719,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtlMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -663,7 +733,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtvMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -677,7 +747,7 @@
    "deadline": "2026-09-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdu0MAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -691,7 +761,7 @@
    "deadline": "2026-10-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdRmMAL",
    "tag": "okinawa",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -705,7 +775,7 @@
    "deadline": "2026-10-08",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaooMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -719,7 +789,7 @@
    "deadline": "2026-10-09",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdnJMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -733,7 +803,7 @@
    "deadline": "2026-10-12",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000007Cos5EAC",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -747,13 +817,13 @@
    "deadline": "2026-10-22",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYaFMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDPyeMAH",
    "name": "［第十三回］事業再構築補助金_GX進出類型（交付申請等）",
-   "issuer": "",
+   "issuer": "事業再構築補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -761,7 +831,7 @@
    "deadline": "2026-10-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDPyeMAH",
    "tag": "shokei",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -775,21 +845,7 @@
    "deadline": "2026-10-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYzVMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDaotMAD",
-   "name": "【令和８年度】二酸化炭素排出抑制対策事業費等補助金（再エネ等由来水素を活用した自立・分散型エネルギーシステム構築等事業）",
-   "issuer": "再エネ等由来水素を活用した自立・分散型エネルギーシステム構築等事業",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 300000000,
-   "deadline": "2026-10-30",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaotMAD",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -803,7 +859,7 @@
    "deadline": "2026-10-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZ1GMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -817,7 +873,21 @@
    "deadline": "2026-10-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZ04MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDaotMAD",
+   "name": "【令和８年度】二酸化炭素排出抑制対策事業費等補助金（再エネ等由来水素を活用した自立・分散型エネルギーシステム構築等事業）",
+   "issuer": "再エネ等由来水素を活用した自立・分散型エネルギーシステム構築等事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 300000000,
+   "deadline": "2026-10-30",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaotMAD",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -831,7 +901,7 @@
    "deadline": "2026-10-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczHMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -845,7 +915,7 @@
    "deadline": "2026-10-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczMMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -860,7 +930,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1039661.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-08-25 10:41",
+   "fetched_at": "2026-08-25 15:38",
    "status": "募集中"
   },
   {
@@ -874,13 +944,13 @@
    "deadline": "2026-10-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY4mMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDYbNMAX",
    "name": "エイジフレンドリー補助金",
-   "issuer": "",
+   "issuer": "エイジフレンドリー補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -888,13 +958,13 @@
    "deadline": "2026-10-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYbNMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDNDnMAP",
    "name": "令和８年度_Scope3排出量削減のための企業間連携による省CO2設備投資促進事業",
-   "issuer": "",
+   "issuer": "脱炭素成長型経済構造移行推進対策費補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -902,7 +972,7 @@
    "deadline": "2026-11-13",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDNDnMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -916,7 +986,7 @@
    "deadline": "2026-11-13",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZDHMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -930,7 +1000,7 @@
    "deadline": "2026-11-20",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd3OMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -944,7 +1014,7 @@
    "deadline": "2026-11-20",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd3YMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -958,7 +1028,7 @@
    "deadline": "2026-11-27",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYzQMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -972,7 +1042,7 @@
    "deadline": "2026-11-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY5GMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -986,35 +1056,7 @@
    "deadline": "2026-11-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZzQMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDYEGMA5",
-   "name": "【令和８年度】働き方改革推進支援助成金",
-   "issuer": "",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "300名以下",
-   "max_amount": 13700000,
-   "deadline": "2026-11-30",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYEGMA5",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDXyuMAH",
-   "name": "令和8年度　資源循環分野の脱炭素化促進事業",
-   "issuer": "令和8年度 資源循環分野の脱炭素化促進事業",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 44000000,
-   "deadline": "2026-11-30",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXyuMAH",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1028,7 +1070,7 @@
    "deadline": "2026-11-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDderMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1042,7 +1084,7 @@
    "deadline": "2026-11-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDa1gMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1056,7 +1098,35 @@
    "deadline": "2026-11-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDa1bMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYEGMA5",
+   "name": "【令和８年度】働き方改革推進支援助成金",
+   "issuer": "",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "300名以下",
+   "max_amount": 13700000,
+   "deadline": "2026-11-30",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYEGMA5",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDXyuMAH",
+   "name": "令和8年度　資源循環分野の脱炭素化促進事業",
+   "issuer": "令和8年度 資源循環分野の脱炭素化促進事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 44000000,
+   "deadline": "2026-11-30",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXyuMAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1070,7 +1140,7 @@
    "deadline": "2026-12-01",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDCMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1084,7 +1154,7 @@
    "deadline": "2026-12-03",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbyjMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1098,7 +1168,7 @@
    "deadline": "2026-12-14",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXmVMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1112,27 +1182,27 @@
    "deadline": "2026-12-18",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYBxMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
-   "id": "a0WJ200000CDHQZMA5",
-   "name": "在宅人工呼吸器使用難病患者非常用電源設備整備事業補助金",
-   "issuer": "",
+   "id": "a0WJ200000CDYC7MAP",
+   "name": "【令和８年度】ＰＣＢ汚染変圧器高効率化補助金",
+   "issuer": "令和８年度ＰＣＢ汚染変圧器高効率化補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
-   "max_amount": 0,
-   "deadline": "2026-12-28",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDHQZMA5",
+   "max_amount": 1000000,
+   "deadline": "2026-12-18",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYC7MAP",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDVkeMAH",
    "name": "【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（20次締切）",
-   "issuer": "",
+   "issuer": "ものづくり補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1140,13 +1210,13 @@
    "deadline": "2026-12-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDVkeMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDY6KMAX",
    "name": "【倉敷市】実証実験サポート事業",
-   "issuer": "",
+   "issuer": "実証実験補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1154,7 +1224,21 @@
    "deadline": "2026-12-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY6KMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDHQZMA5",
+   "name": "在宅人工呼吸器使用難病患者非常用電源設備整備事業補助金",
+   "issuer": "在宅人工呼吸器使用難病患者非常用電源設備整備事業補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2026-12-28",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDHQZMA5",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1168,13 +1252,13 @@
    "deadline": "2026-12-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY7KMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDWZ9MAP",
    "name": "令和７年度補正予算　商用車等の電動化促進事業",
-   "issuer": "",
+   "issuer": "脱炭素成長型経済構造移行推進対策費補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1182,7 +1266,7 @@
    "deadline": "2027-01-15",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDWZ9MAP",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1196,35 +1280,21 @@
    "deadline": "2027-01-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYq2MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
-   "id": "a0WJ200000CDYSPMA5",
-   "name": "令和８年度子育て【宅配ボックス】",
-   "issuer": "子育て支援型共同住宅推進事業",
-   "target_area": "全国",
+   "id": "a0WJ200000CDXRpMAP",
+   "name": "令和７年度（補正）　商用車等の電動化促進事業（建設機械）",
+   "issuer": "脱炭素成長型経済構造移行推進対策費補助金",
+   "target_area": "全国 / 北海道 / 青森県 / 岩手県 / 宮城県 / 秋田県 / 山形県 / 福島県 / 茨城県 / 栃木県 / 群馬県 / 埼玉県 / 千葉県 / 東京都 / 神奈川県 / 新潟県 / 山梨県 / 長野県 / 富山県 / 石川県 / 福井県 / 岐阜県 / 静岡県 / 愛知県 / 三重県 / 滋賀県 / 京都府 / 大阪府 / 兵庫県 / 奈良県 / 和歌山県 / 鳥取県 / 島根県 / 岡山県 / 広島県 / 山口県 / 徳島県 / 香川県 / 愛媛県 / 高知県 / 福岡県 / 佐賀県 / 長崎県 / 熊本県 / 大分県 / 宮崎県 / 鹿児島県 / 沖縄県",
    "target_biz": "",
    "employees": "従業員数の制約なし",
-   "max_amount": 0,
+   "max_amount": 1431000000,
    "deadline": "2027-01-29",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSPMA5",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDdPBMA1",
-   "name": "【令和８年度】ハイブリッド及び天然ガストラック・バス導入支援事業（環境配慮型先進トラック・バス導入加速事業）",
-   "issuer": "令和８年度ハイブリッド連節バス導入支援事業",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 0,
-   "deadline": "2027-01-29",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdPBMA1",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXRpMAP",
+   "tag": "okinawa",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1238,21 +1308,35 @@
    "deadline": "2027-01-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZDCMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
-   "id": "a0WJ200000CDXRpMAP",
-   "name": "令和７年度（補正）　商用車等の電動化促進事業（建設機械）",
-   "issuer": "",
-   "target_area": "全国 / 北海道 / 青森県 / 岩手県 / 宮城県 / 秋田県 / 山形県 / 福島県 / 茨城県 / 栃木県 / 群馬県 / 埼玉県 / 千葉県 / 東京都 / 神奈川県 / 新潟県 / 山梨県 / 長野県 / 富山県 / 石川県 / 福井県 / 岐阜県 / 静岡県 / 愛知県 / 三重県 / 滋賀県 / 京都府 / 大阪府 / 兵庫県 / 奈良県 / 和歌山県 / 鳥取県 / 島根県 / 岡山県 / 広島県 / 山口県 / 徳島県 / 香川県 / 愛媛県 / 高知県 / 福岡県 / 佐賀県 / 長崎県 / 熊本県 / 大分県 / 宮崎県 / 鹿児島県 / 沖縄県",
+   "id": "a0WJ200000CDYSPMA5",
+   "name": "令和８年度子育て【宅配ボックス】",
+   "issuer": "子育て支援型共同住宅推進事業",
+   "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
-   "max_amount": 1431000000,
+   "max_amount": 0,
    "deadline": "2027-01-29",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXRpMAP",
-   "tag": "okinawa",
-   "fetched_at": "2026-08-25 10:40",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSPMA5",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDdPBMA1",
+   "name": "【令和８年度】ハイブリッド及び天然ガストラック・バス導入支援事業（環境配慮型先進トラック・バス導入加速事業）",
+   "issuer": "令和８年度ハイブリッド連節バス導入支援事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2027-01-29",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdPBMA1",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1266,7 +1350,7 @@
    "deadline": "2027-02-26",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSFMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1280,7 +1364,7 @@
    "deadline": "2027-02-26",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSAMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1295,13 +1379,13 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010156.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-08-25 10:41",
+   "fetched_at": "2026-08-25 15:38",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDL8JMAX",
    "name": "令和６年度補正予算　商用車等の電動化促進事業",
-   "issuer": "",
+   "issuer": "脱炭素成長型経済構造移行推進対策費補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1309,13 +1393,13 @@
    "deadline": "2027-02-28",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDL8JMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDd5XMAT",
    "name": "令和８年度SDGsファイナンス支援事業補助金(グリーンボンド/グリーンローン)",
-   "issuer": "",
+   "issuer": "令和８年度SDGsファイナンスに係る補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1323,27 +1407,13 @@
    "deadline": "2027-03-19",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd5XMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDd9wMAD",
-   "name": "令和８年度SDGsファイナンス支援事業補助金(ブルーボンド/ブルーローン)",
-   "issuer": "",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 5000000,
-   "deadline": "2027-03-19",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9wMAD",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDd9xMAD",
    "name": "令和８年度SDGsファイナンス支援事業補助金(トランジションボンド/トランジションローン)",
-   "issuer": "",
+   "issuer": "令和８年度SDGsファイナンスに係る補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1351,13 +1421,13 @@
    "deadline": "2027-03-19",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9xMAD",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDdA6MAL",
    "name": "令和８年度SDGsファイナンス支援事業補助金(ソーシャルボンド/ソーシャルローン)",
-   "issuer": "",
+   "issuer": "令和８年度SDGsファイナンスに係る補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1365,13 +1435,41 @@
    "deadline": "2027-03-19",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdA6MAL",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDdABMA1",
+   "name": "令和８年度SDGsファイナンス支援事業補助金(個人向けSDGs預金)",
+   "issuer": "令和８年度SDGsファイナンスに係る補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 1000000,
+   "deadline": "2027-03-19",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdABMA1",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDd9wMAD",
+   "name": "令和８年度SDGsファイナンス支援事業補助金(ブルーボンド/ブルーローン)",
+   "issuer": "令和８年度SDGsファイナンスに係る補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 5000000,
+   "deadline": "2027-03-19",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9wMAD",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDX4vMAH",
    "name": "【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（21次締切）",
-   "issuer": "",
+   "issuer": "ものづくり補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1379,77 +1477,49 @@
    "deadline": "2027-03-23",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDX4vMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
-   "id": "a0WJ200000CDXORMA5",
-   "name": "地上基幹放送ネットワーク整備等事業（令和７年度補正予算及び令和８年度当初予算）",
-   "issuer": "放送ネットワーク整備支援事業費補助金（地上基幹放送ネットワーク整備事業）",
+   "id": "a0WJ200000CDY7yMAH",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【東北支部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
-   "max_amount": 0,
+   "max_amount": 1123811000,
    "deadline": "2027-03-31",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXORMA5",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY7yMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
-   "id": "a0WJ200000CDXFjMAP",
-   "name": "地上基幹放送等に関する耐災害性強化支援事業（令和８年度公募）",
-   "issuer": "地上基幹放送等に関する耐災害性強化支援事業",
+   "id": "a0WJ200000CDY7tMAH",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【北海道監督部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
-   "max_amount": 0,
+   "max_amount": 1123811000,
    "deadline": "2027-03-31",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFjMAP",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY7tMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
-   "id": "a0WJ200000CDXENMA5",
-   "name": "民放ラジオ難聴解消支援事業（令和８年度公募）",
-   "issuer": "民放ラジオ難聴解消支援事業",
+   "id": "a0WJ200000CDY88MAH",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【関東監督部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
-   "max_amount": 0,
+   "max_amount": 1123811000,
    "deadline": "2027-03-31",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXENMA5",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY88MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDYCrMAP",
-   "name": "【内閣府】地方創生に資する利子補給制度（金融支援）",
-   "issuer": "地方創生支援利子補給金",
-   "target_area": "全国",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 0,
-   "deadline": "2027-03-31",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYCrMAP",
-   "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
-   "status": "募集中"
-  },
-  {
-   "id": "a0WJ200000CDOsKMAX",
-   "name": "携帯電話等エリア整備事業",
-   "issuer": "無線システム普及支援事業費等事業（携帯電話等エリア整備事業）",
-   "target_area": "全国 / 北海道 / 青森県 / 岩手県 / 宮城県 / 秋田県 / 山形県 / 福島県 / 茨城県 / 栃木県 / 群馬県 / 埼玉県 / 千葉県 / 東京都 / 神奈川県 / 新潟県 / 山梨県 / 長野県 / 富山県 / 石川県 / 福井県 / 岐阜県 / 静岡県 / 愛知県 / 三重県 / 滋賀県 / 京都府 / 大阪府 / 兵庫県 / 奈良県 / 和歌山県 / 鳥取県 / 島根県 / 岡山県 / 広島県 / 山口県 / 徳島県 / 香川県 / 愛媛県 / 高知県 / 福岡県 / 佐賀県 / 長崎県 / 熊本県 / 大分県 / 宮崎県 / 鹿児島県 / 沖縄県",
-   "target_biz": "",
-   "employees": "従業員数の制約なし",
-   "max_amount": 0,
-   "deadline": "2027-03-31",
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDOsKMAX",
-   "tag": "okinawa",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1463,7 +1533,119 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSUMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDY89MAH",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【近畿支部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 1123811000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY89MAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDY8DMAX",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【中部監督部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 1123811000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY8DMAX",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDY91MAH",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【中国監督部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 1123811000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY91MAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDY9BMAX",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【九州監督部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 1123811000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY9BMAX",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDXORMA5",
+   "name": "地上基幹放送ネットワーク整備等事業（令和７年度補正予算及び令和８年度当初予算）",
+   "issuer": "放送ネットワーク整備支援事業費補助金（地上基幹放送ネットワーク整備事業）",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXORMA5",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDY96MAH",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【四国支部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 1123811000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY96MAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYuIMAX",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【東北支部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 2212849000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuIMAX",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYu3MAH",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【北海道監督部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 2212849000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYu3MAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1477,7 +1659,35 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSKMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYuSMAX",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【関東監督部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 2212849000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuSMAX",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYuhMAH",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【中国監督部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 2212849000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuhMAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1491,7 +1701,35 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYviMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYucMAH",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【近畿支部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 2212849000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYucMAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYumMAH",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【四国支部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 2212849000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYumMAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1505,7 +1743,21 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYvnMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYurMAH",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【九州監督部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 2212849000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYurMAH",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1519,7 +1771,77 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY72MAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYuXMAX",
+   "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【中部監督部】",
+   "issuer": "休廃止鉱山鉱害防止等工事費補助金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 2212849000,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuXMAX",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDXFjMAP",
+   "name": "地上基幹放送等に関する耐災害性強化支援事業（令和８年度公募）",
+   "issuer": "地上基幹放送等に関する耐災害性強化支援事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFjMAP",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDXENMA5",
+   "name": "民放ラジオ難聴解消支援事業（令和８年度公募）",
+   "issuer": "民放ラジオ難聴解消支援事業",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXENMA5",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDYCrMAP",
+   "name": "【内閣府】地方創生に資する利子補給制度（金融支援）",
+   "issuer": "地方創生支援利子補給金",
+   "target_area": "全国",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYCrMAP",
+   "tag": "nationwide",
+   "fetched_at": "2026-08-25 15:36",
+   "status": "募集中"
+  },
+  {
+   "id": "a0WJ200000CDOsKMAX",
+   "name": "携帯電話等エリア整備事業",
+   "issuer": "無線システム普及支援事業費等事業（携帯電話等エリア整備事業）",
+   "target_area": "全国 / 北海道 / 青森県 / 岩手県 / 宮城県 / 秋田県 / 山形県 / 福島県 / 茨城県 / 栃木県 / 群馬県 / 埼玉県 / 千葉県 / 東京都 / 神奈川県 / 新潟県 / 山梨県 / 長野県 / 富山県 / 石川県 / 福井県 / 岐阜県 / 静岡県 / 愛知県 / 三重県 / 滋賀県 / 京都府 / 大阪府 / 兵庫県 / 奈良県 / 和歌山県 / 鳥取県 / 島根県 / 岡山県 / 広島県 / 山口県 / 徳島県 / 香川県 / 愛媛県 / 高知県 / 福岡県 / 佐賀県 / 長崎県 / 熊本県 / 大分県 / 宮崎県 / 鹿児島県 / 沖縄県",
+   "target_biz": "",
+   "employees": "従業員数の制約なし",
+   "max_amount": 0,
+   "deadline": "2027-03-31",
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDOsKMAX",
+   "tag": "okinawa",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1533,7 +1855,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000003QZLqEAO",
    "tag": "okinawa",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1547,7 +1869,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFhMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1561,7 +1883,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFfMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1575,7 +1897,7 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFgMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1589,13 +1911,13 @@
    "deadline": "2027-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFiMAP",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDYimMAH",
    "name": "【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（22次締切）",
-   "issuer": "",
+   "issuer": "ものづくり補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1603,13 +1925,13 @@
    "deadline": "2027-06-30",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYimMAH",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDdtMMAT",
    "name": "【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（23次締切）",
-   "issuer": "",
+   "issuer": "ものづくり補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1617,7 +1939,7 @@
    "deadline": "2028-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtMMAT",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1631,7 +1953,7 @@
    "deadline": "2028-05-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UaiqSEAR",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1645,7 +1967,7 @@
    "deadline": "2029-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDNhQMAX",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1659,13 +1981,13 @@
    "deadline": "2030-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXK4MAP",
    "tag": "shokei",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDJWIMA5",
    "name": "申請練習用補助金【補助金の支払いはありません】",
-   "issuer": "",
+   "issuer": "申請練習用制度【補助金の支払いはありません】",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1673,7 +1995,7 @@
    "deadline": "2030-03-31",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDJWIMA5",
    "tag": "nationwide",
-   "fetched_at": "2026-08-25 10:40",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1687,7 +2009,7 @@
    "deadline": "2031-01-21",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000GMgXBEA1",
    "tag": "shokei",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1701,7 +2023,7 @@
    "deadline": "2031-06-12",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UbU66EAF",
    "tag": "shokei",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1715,13 +2037,13 @@
    "deadline": "2032-03-07",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ2000000qhOQMAY",
    "tag": "shokei",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
    "id": "a0WJ200000CDQEJMA5",
    "name": "［第十三回］事業再構築補助金_促進上乗せ措置（交付申請等）",
-   "issuer": "",
+   "issuer": "事業再構築補助金",
    "target_area": "全国",
    "target_biz": "",
    "employees": "従業員数の制約なし",
@@ -1729,7 +2051,7 @@
    "deadline": "2032-10-29",
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDQEJMA5",
    "tag": "shokei",
-   "fetched_at": "2026-08-25 10:39",
+   "fetched_at": "2026-08-25 15:36",
    "status": "募集中"
   },
   {
@@ -1744,7 +2066,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1034726.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-08-25 10:41",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1759,7 +2081,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1023850.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-08-25 10:41",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1774,7 +2096,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010151/index.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-08-25 10:41",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1789,7 +2111,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010165.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-08-25 10:41",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1804,7 +2126,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010146.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-08-25 10:41",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1819,7 +2141,7 @@
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1029292.html",
    "tag": "okinawa",
    "source": "沖縄県(産業・公募補助金)",
-   "fetched_at": "2026-08-25 10:41",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1834,7 +2156,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-48.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-08-25 10:42",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1849,7 +2171,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-55.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-08-25 10:42",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1864,7 +2186,7 @@
    "source_url": "https://okinawa-ric.jp/service/logidigi.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-08-25 10:42",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1879,7 +2201,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-32-1.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-08-25 10:42",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1894,7 +2216,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-18.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-08-25 10:42",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1909,7 +2231,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-3.html",
    "tag": "shokei",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-08-25 10:42",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1924,7 +2246,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-53.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-08-25 10:42",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1939,7 +2261,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-58-1.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-08-25 10:42",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1954,7 +2276,7 @@
    "source_url": "https://okinawa-ric.jp/service/post-56.html",
    "tag": "okinawa",
    "source": "沖縄県産業振興公社",
-   "fetched_at": "2026-08-25 10:42",
+   "fetched_at": "2026-08-25 15:38",
    "status": "要確認"
   },
   {
@@ -1969,12 +2291,12 @@
    "source_url": "https://www.city.naha.okinawa.jp/business/kigyouricchi/1003642/1012539.html",
    "tag": "okinawa",
    "source": "那覇市(企業支援)",
-   "fetched_at": "2026-08-25 10:42",
+   "fetched_at": "2026-08-25 15:39",
    "status": "要確認"
   }
  ],
  "by_source": {
-  "jGrants": 120,
+  "jGrants": 143,
   "那覇市(企業支援)": 2,
   "沖縄県(産業・公募補助金)": 8,
   "沖縄県産業振興公社": 9
