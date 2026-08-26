@@ -150,9 +150,9 @@ html,body{background:#FFFBF4;width:1080px;height:1920px;overflow:hidden}
 .s4 .capC{animation:rise 1.6s cubic-bezier(.2,.7,.3,1) 54.6s both,riseOut .8s ease 60.2s forwards}
 .s4 .capD{animation:rise 1.6s cubic-bezier(.2,.7,.3,1) 61s both}
 
-/* ===== S5: STEP4 みまもる(65-75s) ===== */
+/* ===== S5: STEP4 みまもる — なぜLINE登録?(65-79.6s) ===== */
 .s5{background:linear-gradient(180deg,#FBF0DF 0%,#F6E4CB 60%,#F0D9B9 100%);
-  animation:fadeIn 1.4s ease 65s both,fadeOut 1.4s ease 73.6s forwards}
+  animation:fadeIn 1.4s ease 65s both,fadeOut 1.4s ease 78.2s forwards}
 .s5 .stepbadge{position:absolute;top:96px;left:0;right:0;justify-content:center;margin:0;
   animation:rise 1.6s cubic-bezier(.2,.7,.3,1) 66s both}
 .s5 .table2{position:absolute;left:0;right:0;bottom:0;height:430px;background:linear-gradient(180deg,#C79A6B 0%,#A8794C 100%)}
@@ -171,13 +171,53 @@ html,body{background:#FFFBF4;width:1080px;height:1920px;overflow:hidden}
 .notif .dot{width:22px;height:22px;border-radius:7px;background:var(--shu)}
 .notif .nm{font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:22px;color:var(--sumi)}
 .notif .nb{font-family:'Noto Sans JP',sans-serif;font-weight:500;font-size:21px;line-height:1.6;color:#4A443E}
-.s5 .caps .cap{font-family:'Shippori Mincho',serif;font-weight:600;font-size:46px;letter-spacing:.08em}
-.s5 .cap1{animation:rise 1.9s cubic-bezier(.2,.7,.3,1) 68s both}
-.s5 .cap2{font-size:36px!important;color:#FBF3E4!important;
-  animation:rise 1.9s cubic-bezier(.2,.7,.3,1) 70.4s both}
+.notif2{top:270px;animation:notifin 1.2s cubic-bezier(.2,1.2,.4,1) 71s both}
+.s5 .caps .cap{font-family:'Shippori Mincho',serif;font-weight:600;font-size:44px;letter-spacing:.08em;
+  text-shadow:0 2px 14px rgba(251,240,223,.9)}
+/* なぜLINE?を3枚で順に(1枠入れ替え) */
+.s5 .capL1{animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 67s both,riseOut .8s ease 70.4s forwards}
+.s5 .capL2{font-size:40px!important;
+  animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 71s both,riseOut .8s ease 74.6s forwards}
+.s5 .capL3{animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 75.2s both}
+.s5 .capL3 .maru,.s5 .capL1 .maru{color:var(--shu)}
+
+/* ===== S5b: 「振り込まれました」のこえ(78.6-93.2s) ===== */
+.s5b{background:var(--shikkui);justify-content:flex-start;
+  animation:fadeIn 1.4s ease 78.6s both,fadeOut 1.4s ease 94.6s forwards}
+.s5b .hd{margin-top:120px;font-family:'Shippori Mincho',serif;font-weight:700;font-size:60px;
+  color:var(--sumi);letter-spacing:.1em;z-index:5;
+  animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 79.6s both}
+.s5b .hd .maru{color:var(--shu)}
+.s5b .glow3{position:absolute;left:50%;top:42%;width:1200px;height:1200px;transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(245,206,110,.26) 0%,rgba(245,206,110,.07) 50%,transparent 70%);
+  animation:fadeIn 2s ease 80.4s both}
+.koe{position:absolute;left:50%;width:560px;padding:30px 40px;border-radius:28px;background:#fff;z-index:4;
+  box-shadow:0 16px 40px rgba(90,60,40,.22);display:flex;align-items:center;gap:22px}
+.koe .qd{flex:none;width:30px;height:30px;border-radius:10px;background:var(--shu)}
+.koe .qt{font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:34px;color:var(--sumi);letter-spacing:.06em}
+.koe:after{content:"";position:absolute;left:60px;bottom:-16px;
+  border-left:14px solid transparent;border-right:14px solid transparent;border-top:18px solid #fff}
+@keyframes koein{0%{opacity:0;transform:translateX(-50%) translateY(56px) scale(.88)}
+  60%{opacity:1;transform:translateX(-50%) translateY(-6px) scale(1.02)}
+  100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+.k1{top:450px;margin-left:-150px;animation:koein 1.1s cubic-bezier(.2,1.1,.4,1) 80.2s both}
+.k2{top:670px;margin-left:150px;animation:koein 1.1s cubic-bezier(.2,1.1,.4,1) 81.8s both}
+.k3{top:890px;margin-left:-110px;animation:koein 1.1s cubic-bezier(.2,1.1,.4,1) 83.4s both}
+.s5b .spark2{position:absolute;border-radius:50%;background:#F5CE6E;z-index:3;opacity:0;
+  box-shadow:0 0 16px 5px rgba(245,206,110,.6);animation:sparkup 2.6s ease-in-out both}
+@keyframes sparkup{0%{opacity:0;transform:scale(.2) translateY(12px)}
+  35%{opacity:.9;transform:scale(1) translateY(0)}100%{opacity:0;transform:scale(.55) translateY(-30px)}}
+.s5b .caps .cap{font-family:'Shippori Mincho',serif;font-weight:600;font-size:44px;letter-spacing:.08em}
+.s5b .caps .cap .maru{color:var(--shu)}
+.s5b .capV1{animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 80.6s both,riseOut .8s ease 83.6s forwards}
+.s5b .capV2{font-size:40px!important;
+  animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 84.2s both,riseOut .8s ease 87.4s forwards}
+.s5b .capV3{font-size:42px!important;
+  animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 88s both,riseOut .8s ease 90.8s forwards}
+.s5b .capV4{animation:rise 1.8s cubic-bezier(.2,.7,.3,1) 91.4s both}
 
 /* ===== S6: まとめ(74.5-80.2s) ===== */
-.s6{background:var(--shikkui);animation:fadeIn 1.2s ease 74.5s both,fadeOut 1.2s ease 79s forwards}
+.s6{background:var(--shikkui);animation:fadeIn 1.2s ease 95.4s both,fadeOut 1.2s ease 100.2s forwards}
 .s6 .w{font-family:'Shippori Mincho',serif;font-weight:600;font-size:80px;color:var(--sumi);letter-spacing:.2em;
   display:flex;align-items:center;gap:36px}
 .s6 .w i{font-style:normal;font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:30px;color:#FFFBF4;
@@ -186,30 +226,30 @@ html,body{background:#FFFBF4;width:1080px;height:1920px;overflow:hidden}
 @keyframes wordin{0%{opacity:0;transform:translateY(34px)}
   60%{opacity:1;transform:translateY(0);text-shadow:0 0 30px rgba(242,193,78,.85)}
   100%{opacity:1;transform:translateY(0);text-shadow:0 0 14px rgba(242,193,78,.35)}}
-.s6 .w1{animation:wordin 1.5s ease 75.2s both}
-.s6 .w2{animation:wordin 1.5s ease 76.1s both}
-.s6 .w3{animation:wordin 1.5s ease 77s both}
-.s6 .w4{animation:wordin 1.5s ease 77.9s both}
+.s6 .w1{animation:wordin 1.5s ease 96.2s both}
+.s6 .w2{animation:wordin 1.5s ease 97.1s both}
+.s6 .w3{animation:wordin 1.5s ease 98s both}
+.s6 .w4{animation:wordin 1.5s ease 98.9s both}
 
 /* ===== S7: 虹ロゴ(79.4-92s・第一弾と同一の構成) ===== */
-.s7{background:var(--shikkui);animation:fadeIn 1.4s ease 79.4s both}
+.s7{background:var(--shikkui);animation:fadeIn 1.4s ease 100.8s both}
 .s7 .burst{position:absolute;left:50%;top:44%;width:1500px;height:1500px;transform:translate(-50%,-50%);
   background:radial-gradient(circle,rgba(245,206,110,.22) 0%,rgba(245,206,110,.06) 45%,transparent 66%);
-  animation:fadeIn 2.5s ease 82.5s both}
+  animation:fadeIn 2.5s ease 103.9s both}
 .logo{width:760px;height:auto;position:relative;z-index:5;margin-top:-170px}
 .arc{fill:none;stroke-width:6;stroke-linecap:round;stroke-dasharray:70;stroke-dashoffset:70}
-.a1{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 80.8s both}
-.a2{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 81.25s both}
-.a3{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 81.7s both}
+.a1{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 102.2s both}
+.a2{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 102.65s both}
+.a3{animation:draw 1.7s cubic-bezier(.45,.05,.35,1) 103.1s both}
 @keyframes draw{to{stroke-dashoffset:0}}
-.sun{transform-origin:46px 12.5px;animation:sunpop 1s cubic-bezier(.2,1.5,.4,1) 83.6s both}
+.sun{transform-origin:46px 12.5px;animation:sunpop 1s cubic-bezier(.2,1.5,.4,1) 105s both}
 @keyframes sunpop{from{opacity:0;transform:scale(.2)}55%{opacity:1;transform:scale(1.14)}to{opacity:1;transform:scale(1)}}
 .s7 .vision{font-family:'Shippori Mincho',serif;font-weight:600;font-size:60px;color:var(--shu);letter-spacing:.16em;
-  margin-top:96px;z-index:5;animation:rise 1.9s cubic-bezier(.2,.7,.3,1) 85.2s both}
+  margin-top:96px;z-index:5;animation:rise 1.9s cubic-bezier(.2,.7,.3,1) 106.6s both}
 .s7 .wm{font-family:'Shippori Mincho',serif;font-weight:700;font-size:104px;color:var(--shu);letter-spacing:.12em;
-  margin-top:74px;z-index:5;animation:rise 2.1s cubic-bezier(.2,.7,.3,1) 87s both}
+  margin-top:74px;z-index:5;animation:rise 2.1s cubic-bezier(.2,.7,.3,1) 108.4s both}
 .s7 .tag{font-family:'Noto Sans JP',sans-serif;font-weight:500;font-size:36px;color:var(--umi);letter-spacing:.24em;
-  margin-top:64px;z-index:5;animation:rise 1.9s cubic-bezier(.2,.7,.3,1) 88.6s both}
+  margin-top:64px;z-index:5;animation:rise 1.9s cubic-bezier(.2,.7,.3,1) 110s both}
 </style>
 </head>
 <body>
@@ -306,10 +346,34 @@ html,body{background:#FFFBF4;width:1080px;height:1920px;overflow:hidden}
         <div class="nh"><span class="dot"></span><span class="nm">もらいわすれ堂</span></div>
         <p class="nb">締切の約1か月前から、<br>お知らせします</p>
       </div>
+      <div class="notif notif2">
+        <div class="nh"><span class="dot"></span><span class="nm">もらいわすれ堂</span></div>
+        <p class="nb">新しい制度が増えました</p>
+      </div>
     </div>
-    <div class="caps">
-      <p class="cap cap1">締切の<span class="maru">約1か月前</span>から、LINEでお知らせ</p>
-      <p class="cap cap2">「振り込まれました」の報告が、<br>つぎの誰かの安心になります</p>
+    <div class="caps swap">
+      <p class="cap capL1">制度は、<span class="maru">増えたり変わったり</span>します</p>
+      <p class="cap capL2">LINEに登録しておくと、新しい制度や、<br>締切が近づいた制度をお知らせできます</p>
+      <p class="cap capL3">締切の<span class="maru">約1か月前</span>から。<br>準備の時間が、ちゃんと残ります</p>
+    </div>
+  </section>
+
+  <!-- S5b: 「振り込まれました」のこえ -->
+  <section class="scene s5b">
+    <p class="hd">「<span class="maru">振り込まれました</span>」のこえ</p>
+    <div class="glow3"></div>
+    <div class="koe k1"><span class="qd"></span><span class="qt">振り込まれました</span></div>
+    <div class="koe k2"><span class="qd"></span><span class="qt">受け取れました</span></div>
+    <div class="koe k3"><span class="qd"></span><span class="qt">振り込まれました</span></div>
+    <span class="spark2" style="left:220px;top:560px;width:9px;height:9px;animation-delay:84.4s"></span>
+    <span class="spark2" style="left:860px;top:520px;width:7px;height:7px;animation-delay:85.2s"></span>
+    <span class="spark2" style="left:790px;top:980px;width:8px;height:8px;animation-delay:86s"></span>
+    <span class="spark2" style="left:250px;top:1060px;width:7px;height:7px;animation-delay:86.8s"></span>
+    <div class="caps swap">
+      <p class="cap capV1">受け取れたら、<br>「<span class="maru">振り込まれました</span>」とひと言</p>
+      <p class="cap capV2">その報告が、“ほんとうに受け取れた”<br>という<span class="maru">実例</span>になります</p>
+      <p class="cap capV3">つぎに調べる誰かが、<br><span class="maru">安心して申請できる</span>ように</p>
+      <p class="cap capV4">ゆいまーる —<br>あなたのひと言が、<span class="maru">みんなのささえ</span>に</p>
     </div>
   </section>
 
@@ -341,6 +405,6 @@ html,body{background:#FFFBF4;width:1080px;height:1920px;overflow:hidden}
   </section>
 
 </div>
-<script>window.FILM_DURATION = 92;</script>
+<script>window.FILM_DURATION = 113;</script>
 </body>
 </html>
