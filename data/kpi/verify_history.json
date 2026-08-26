@@ -1204,5 +1204,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-26",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和8年度沖縄県奨学金代理返還支援事業",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010156.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "民放ラジオ難聴解消支援事業（令和８年度公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXENMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "申請練習用補助金【補助金の支払いはありません】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDJWIMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度 脱炭素成長型経済構造移行推進対策費補助金（自律型資源循環システム強靱化促進事業）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYlTMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【東北支部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuIMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
