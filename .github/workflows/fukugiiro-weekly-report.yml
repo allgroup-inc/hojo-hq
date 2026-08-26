@@ -68,6 +68,8 @@ jobs:
         run: |
           python scripts/generate_ig_images_fukugiiro.py || true
           python scripts/generate_haruka_board.py
+          # LPのIG投稿プレビュー(軽量サムネ)を今週の投稿画像から再生成(2026-08-26 IG導線強化)
+          python scripts/generate_ig_thumbs.py || true
 
       - name: Commit report
         run: |
@@ -77,6 +79,7 @@ jobs:
           [ -f data/fukugiiro/funnel.json ] && git add data/fukugiiro/funnel.json || true
           [ -f data/kpi/site_traffic.json ] && git add data/kpi/site_traffic.json || true
           [ -f site/staff/haruka/index.html ] && git add site/staff/haruka || true
+          [ -d site/fukugiiro/assets/ig ] && git add site/fukugiiro/assets/ig || true
           git diff --cached --quiet || git commit -m "auto: もらいわすれ堂 週次レポート $(date '+%Y-%m-%d')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
           for i in 1 2 3; do
