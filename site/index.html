@@ -733,11 +733,6 @@
     </div>
     <div id="result-list"></div>
     <p class="result-note">締切アラート(約1か月前から)を受け取るには、LINE登録(無料)をどうぞ。</p>
-    <div id="insurance-banner" class="insurance-banner" hidden>
-      <strong>経営課題が「人件費管理」「リスク対策」なら</strong>、
-      あわせて保険の引き受け目安も確認できます。
-      <a href="./insurance-underwriting-tool.html" target="_blank" rel="noopener" class="insurance-link">業種・規模から、加入できる保険をチェック</a>
-    </div>
     <button type="button" class="register-btn" id="reg-open">貴社専用の制度通知を受け取る(会社情報を登録)</button>
     <div id="reg-form" class="reg-form" hidden>
       <p class="reg-head">約30秒で完了。下のボタンを押すと<strong>LINEアプリが開き、入力内容が書き込まれたメッセージが用意されます</strong>。あとはLINE側の送信ボタンを押すだけです。</p>
@@ -1098,7 +1093,6 @@
     hits=hits.slice(0,10);
 
     document.getElementById('shokei-banner').hidden=!shokeiSignal;
-    document.getElementById('insurance-banner').hidden=hits.length===0;
     animateCount(document.getElementById('result-count'),hits.length);
 
     // 総額ポテンシャル(参考値): 表示中の制度のうち上限額公表分の単純合計

@@ -32,6 +32,13 @@ FORBIDDEN = [
     "アポ管理",
     "顧客カルテ",
     "後確認",
+    # 引受目安(2026-08-24 小柳さん決裁で公開終了)。
+    # 3社の原本に「代理店様限り」等の取扱制限があり、公開リポジトリに置けない。
+    # 移設先は pamphlet-shelf(非公開)。
+    "insurance-underwriting-tool",
+    "underwriting_full",
+    "お引受のめやす",
+    "引受けの目安",
 ]
 
 # 例外。移設したことを案内する文書など、名前に禁止語を含むが置いてよいもの。
@@ -83,10 +90,12 @@ def selftest():
         ("scripts/churn/score.py", True),
         ("scripts/atokakunin_rules.py", True),
         ("docs/後確認SMS_段取り_2026-08-18.md", True),
+        ("insurance-underwriting-tool.html", True),   # 2026-08-24 公開終了(代理店限定資料由来)
+        ("docs/insurance/underwriting_full.json", True),
+        ("【なないろ生命】お引受のめやす(2026.4)公開用 (6).pdf", True),
         # 置いてよいもの
         ("docs/移設済み_アポ管理と営業指名_2026-08-22.md", False),
         ("site/index.html", False),
-        ("insurance-underwriting-tool.html", False),  # 引受目安は公開ツールとして維持
         ("glow-ma/src/schema.js", False),
         ("docs/決裁キュー.md", False),
     ]
