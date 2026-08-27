@@ -1,0 +1,33 @@
+name: type-shindan-ci
+
+on:
+  push:
+    paths:
+      - "site/type-shindan/**"
+      - "site/go/type-shindan/**"
+      - "tests/type-shindan.test.mjs"
+      - ".github/workflows/type-shindan-ci.yml"
+  pull_request:
+    paths:
+      - "site/type-shindan/**"
+      - "site/go/type-shindan/**"
+      - "tests/type-shindan.test.mjs"
+      - ".github/workflows/type-shindan-ci.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: type-shindan-ci
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: 経営者タイプ診断 検証(ケンショウ/マモリ ゲート)
+        run: node --test tests/type-shindan.test.mjs

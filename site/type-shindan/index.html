@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<!-- 公開判断は小柳さん決裁待ち(docs/議事_20260827_タイプ診断の仕組み化.md)。
+     決裁までは noindex のまま・サイト内からリンクしない -->
+<title>経営者タイプ診断(16タイプ)| 沖縄企業のミカタ</title>
+<meta name="description" content="12の質問で、あなたの経営スタイルと相性がよさそうな補助金・助成金のテーマがわかる無料診断。登録不要・約1分。">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TQMX3MPFSR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag("js", new Date());
+  gtag("config", "G-TQMX3MPFSR", { transport_type: "beacon" });
+</script>
+<style>
+:root{--navy:#00335C;--orange:#F88800;--ink:#1F2A33;--bg:#F7F8FA;--card:#fff;--line:#DDE3EA;--muted:#5C6B78}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  font-size:17px;line-height:1.8;color:var(--ink);background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto;padding:0 20px}
+header{background:var(--navy);color:#fff;padding:14px 0}
+header .wrap{display:flex;align-items:center;justify-content:space-between}
+header a{color:#fff;text-decoration:none;font-weight:800}
+header .back{font-size:.8rem;font-weight:400;opacity:.9}
+h1{font-size:1.45rem;color:var(--navy);word-break:auto-phrase;text-wrap:balance}
+h2{font-size:1.2rem;color:var(--navy);word-break:auto-phrase;text-wrap:balance}
+section{padding:32px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;margin-top:18px}
+.note{font-size:.82rem;color:var(--muted)}
+.badge{display:inline-block;background:#FFF3E2;color:#9A5600;border-radius:999px;
+  padding:2px 12px;font-size:.8rem;font-weight:700;margin-bottom:8px}
+.btn{display:block;width:100%;padding:15px;border:none;border-radius:999px;cursor:pointer;
+  font-size:1rem;font-weight:700;font-family:inherit}
+.btn-start{background:var(--orange);color:#fff;margin-top:18px}
+.btn-opt{background:#fff;color:var(--navy);border:2px solid var(--navy);margin-top:12px;text-align:left;
+  padding:14px 18px;line-height:1.6}
+.btn-opt:hover{background:#EAF1F8}
+.btn-line{background:#06C755;color:#fff;text-align:center;text-decoration:none;margin-top:16px}
+.btn-sub{background:none;border:none;color:var(--muted);font-size:.85rem;margin-top:14px;cursor:pointer;
+  text-decoration:underline;font-family:inherit}
+.progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin-bottom:6px}
+.progress i{display:block;height:100%;background:var(--orange);transition:width .25s}
+.q-count{font-size:.8rem;color:var(--muted);text-align:right}
+.q-text{font-size:1.1rem;font-weight:700;margin:14px 0 6px}
+.r-code{font-size:.85rem;color:var(--muted);letter-spacing:.15em}
+.r-name{font-size:1.5rem;font-weight:800;color:var(--navy);word-break:auto-phrase;text-wrap:balance}
+.r-tag{color:var(--orange);font-weight:700;margin:4px 0 12px}
+.r-sec{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+.r-sec b{color:var(--navy)}
+.theme-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.theme-links a{display:inline-block;background:#EAF1F8;color:var(--navy);font-weight:700;
+  text-decoration:none;border-radius:999px;padding:8px 16px;font-size:.9rem}
+.disclaimer{background:#FFF8EC;border:1px solid #F2DFC0;border-radius:10px;padding:14px;
+  font-size:.8rem;color:#6B5A3E;margin-top:18px}
+footer{background:var(--navy);color:#DCE4EC;padding:26px 0;font-size:.8rem;text-align:center}
+footer a{color:#fff}
+[hidden]{display:none !important}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a href="../">沖縄企業のミカタ</a>
+    <a class="back" href="../">← 制度一覧へ</a>
+  </div>
+</header>
+<main>
+<section class="wrap">
+
+  <!-- 導入 -->
+  <div id="view-intro">
+    <span class="badge">無料・登録不要・約1分</span>
+    <h1>経営者タイプ診断</h1>
+    <p>12の質問に直感で答えるだけ。あなたの経営スタイルを16タイプから判定して、相性がよさそうな補助金・助成金のテーマをご案内します。</p>
+    <div class="card">
+      <p><b>わかること</b></p>
+      <p>・あなたの経営タイプ(強みと、つい後回しにしがちなこと)<br>
+         ・相性がよさそうな制度テーマ(毎日更新の募集中一覧へご案内)<br>
+         ・タイプ別・補助金との上手な付き合い方</p>
+      <button type="button" class="btn btn-start" id="start-btn">診断をはじめる</button>
+      <p class="note" style="margin-top:10px">回答内容が外部に送信されることはありません(結果のタイプ集計のみ・個人を特定する情報は送りません)。</p>
+    </div>
+  </div>
+
+  <!-- 質問 -->
+  <div id="view-quiz" hidden>
+    <div class="progress"><i id="bar" style="width:0%"></i></div>
+    <p class="q-count"><span id="q-no">1</span> / <span id="q-total">12</span></p>
+    <div class="card">
+      <p class="q-text" id="q-text"></p>
+      <button type="button" class="btn btn-opt" id="opt-0"></button>
+      <button type="button" class="btn btn-opt" id="opt-1"></button>
+      <button type="button" class="btn-sub" id="back-btn" hidden>← ひとつ前の質問に戻る</button>
+    </div>
+  </div>
+
+  <!-- 結果 -->
+  <div id="view-result" hidden>
+    <div class="card">
+      <p class="r-code">あなたのタイプ: <span id="r-code"></span></p>
+      <p class="r-name" id="r-name"></p>
+      <p class="r-tag" id="r-tagline"></p>
+      <p id="r-desc"></p>
+      <div class="r-sec"><b>強み</b><p id="r-strength"></p></div>
+      <div class="r-sec"><b>つい後回しにしがちなこと</b><p id="r-caution"></p></div>
+      <div class="r-sec">
+        <b>相性がよさそうな制度テーマ</b>
+        <p class="note">いま募集中の制度を毎日更新で一覧できます。</p>
+        <div class="theme-links" id="r-themes"></div>
+      </div>
+      <div class="r-sec"><b>補助金との上手な付き合い方</b><p id="r-advice"></p></div>
+    </div>
+    <div class="card">
+      <h2>あなたのタイプに合う公募を、見逃さない</h2>
+      <p>気になる公募は、締切の約1か月前からLINEでお知らせします。書類やgBizIDの準備が間に合ううちに動けます。</p>
+      <a class="btn btn-line" href="../go/type-shindan/" target="_blank" rel="noopener">LINEで無料登録する</a>
+      <p class="note" style="margin-top:8px">登録は10秒。いつでも解除できます。</p>
+    </div>
+    <p class="disclaimer">※この診断は、経営スタイルの傾向を楽しく知るための読み物です。実際に使える制度は業種・従業員数・地域・時期によって変わります。締切・金額・要件は必ず各制度の原文でご確認ください。</p>
+    <button type="button" class="btn-sub" id="retry-btn">もう一度診断する</button>
+  </div>
+
+</section>
+</main>
+<footer>
+  <div class="wrap">補助金・助成金の情報で、沖縄の企業にあかりを。<br>&copy; 2026 株式会社GLOW / <a href="../">沖縄企業のミカタ</a></div>
+</footer>
+<script src="data.js"></script>
+<script src="logic.js"></script>
+<script>
+(function () {
+  "use strict";
+  var config = window.TypeShindanData;
+  var engine = window.TypeShindan;
+
+  var check = engine.validateConfig(config);
+  if (!check.valid) {
+    // データ不整合時は診断を出さない(壊れた結果を見せない)
+    document.getElementById("view-intro").innerHTML =
+      "<p>ただいま診断を調整中です。お手数ですが時間をおいてお試しください。</p>";
+    return;
+  }
+
+  var answers = [];
+  var idx = 0;
+  var views = {
+    intro: document.getElementById("view-intro"),
+    quiz: document.getElementById("view-quiz"),
+    result: document.getElementById("view-result"),
+  };
+  function show(name) {
+    Object.keys(views).forEach(function (k) { views[k].hidden = k !== name; });
+    window.scrollTo(0, 0);
+  }
+  function track(name, params) {
+    if (typeof gtag === "function") {
+      gtag("event", name, Object.assign({ transport_type: "beacon" }, params || {}));
+    }
+  }
+
+  document.getElementById("q-total").textContent = config.QUESTIONS.length;
+
+  function renderQuestion() {
+    var q = config.QUESTIONS[idx];
+    document.getElementById("q-no").textContent = idx + 1;
+    document.getElementById("bar").style.width = (idx / config.QUESTIONS.length) * 100 + "%";
+    document.getElementById("q-text").textContent = "Q" + (idx + 1) + ". " + q.text;
+    [0, 1].forEach(function (i) {
+      var btn = document.getElementById("opt-" + i);
+      btn.textContent = q.options[i].label;
+      btn.dataset.letter = q.options[i].letter;
+    });
+    document.getElementById("back-btn").hidden = idx === 0;
+  }
+
+  function answer(letter) {
+    answers[idx] = letter;
+    idx++;
+    if (idx < config.QUESTIONS.length) {
+      renderQuestion();
+    } else {
+      finish();
+    }
+  }
+
+  function finish() {
+    var r = engine.resolve(config, answers);
+    if (r.error || !r.type) {
+      idx = 0; answers = []; renderQuestion(); show("quiz");
+      return;
+    }
+    document.getElementById("r-code").textContent = r.code;
+    document.getElementById("r-name").textContent = r.type.name;
+    document.getElementById("r-tagline").textContent = r.type.tagline;
+    document.getElementById("r-desc").textContent = r.type.desc;
+    document.getElementById("r-strength").textContent = r.type.strength;
+    document.getElementById("r-caution").textContent = r.type.caution;
+    var tempoLetter = r.code.charAt(3);
+    document.getElementById("r-advice").textContent = config.ADVICE[tempoLetter] || "";
+    var box = document.getElementById("r-themes");
+    box.innerHTML = "";
+    r.type.themes.forEach(function (key) {
+      var t = config.THEMES[key];
+      if (!t) return;
+      var a = document.createElement("a");
+      a.href = t.path;
+      a.textContent = t.label + " の制度をみる";
+      box.appendChild(a);
+    });
+    // 送るのはタイプコードのみ(個人識別子なし)
+    track("type_shindan_result", { type_code: r.code });
+    show("result");
+  }
+
+  document.getElementById("start-btn").addEventListener("click", function () {
+    answers = []; idx = 0;
+    renderQuestion();
+    track("type_shindan_start");
+    show("quiz");
+  });
+  [0, 1].forEach(function (i) {
+    document.getElementById("opt-" + i).addEventListener("click", function () {
+      answer(this.dataset.letter);
+    });
+  });
+  document.getElementById("back-btn").addEventListener("click", function () {
+    if (idx > 0) { idx--; renderQuestion(); }
+  });
+  document.getElementById("retry-btn").addEventListener("click", function () {
+    answers = []; idx = 0;
+    renderQuestion();
+    show("quiz");
+  });
+})();
+</script>
+</body>
+</html>
