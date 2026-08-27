@@ -125,6 +125,12 @@ test("導線: go ページはLINE宛の line_redirect + channel=type-shindan で
   assert.match(goHtml, /lin\.ee\/sh4bTUe/);
 });
 
-test("公開前ガード: 決裁が下りるまで noindex を維持する", () => {
-  assert.match(pageHtml, /<meta name="robots" content="noindex">/);
+// 2026-08-27 小柳さん決裁で公開(議事_20260827_タイプ診断の仕組み化.md)
+test("公開: noindex が外れている(sitemap 自動掲載の前提)", () => {
+  assert.ok(!/noindex/.test(pageHtml));
+});
+
+test("公開: トップページの「目的別にさがす」から導線がある", () => {
+  const topHtml = readFileSync(new URL("../site/index.html", import.meta.url), "utf-8");
+  assert.match(topHtml, /href="type-shindan\/"/);
 });
