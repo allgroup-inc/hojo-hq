@@ -1266,5 +1266,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-27",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "【令和７年度補正 グローバルサウス未来志向型共創等事業費補助金（ウクライナ復興支援に向けた欧州企業連携・中東欧諸国等連携強化）（FS実証・実証事業実施事業者の募集（補助））】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczgMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度】フェーズフリーの省CO2独立型施設支援事業（２次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbq0MAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(個人向けSDGs預金)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdABMA1",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【近畿支部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYucMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【関東監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY88MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
