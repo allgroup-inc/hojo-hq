@@ -2523,6 +2523,7 @@ EXTRA_SEEDS += [
  'how_to_apply': '浦添市 資産税課への申告(工事完了後の申告期限あり・要確認)',
  'source_url': 'https://www.city.urasoe.lg.jp/doc/612f0d55793a620ed41dae64',
  'deadline_type': '期限あり',
+ 'deadline': '2031-03-31',
  'assume_reachable': True,
  'amount_note': '補助金ではなく固定資産税の減額措置です。令和13年3月31日までの耐震改修が対象と案内されています(減額割合・期間は要確認)'},
  {'id': 'fk-okinawashi-kaigo-hokenryo-genmen',
