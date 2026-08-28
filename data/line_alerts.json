@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-08-28 11:13",
+ "generated_at": "2026-08-28 17:39",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 5,
- "count": 26,
+ "count": 27,
  "items": [
   {
    "id": "a0WJ200000CDdu5MAD",
@@ -195,6 +195,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdmpMAD",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDeUbMAL",
+   "name": "重要経済安保情報保護活用民間企業等情報保全施設導入支援補助金（令和８年度第２回公募）",
+   "deadline": "2026-09-18",
+   "days_left": 21,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeUbMAL",
    "tag": "nationwide"
   },
   {
