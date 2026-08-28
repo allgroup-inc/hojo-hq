@@ -1328,5 +1328,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-28",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和６年度補正予算　商用車等の電動化促進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDL8JMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(グリーンボンド/グリーンローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd5XMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度　電力利活用事業（単年度事業分）　第３次公募　【　廃棄物処理施設を核とした地域循環共生圏構築促進事業　】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdmVMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "⑤金属破砕・選別設備導入事業（バリューチェーン）【令和７年度（補正予算）第４次公募及び第８年度第３次公募】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYk0MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度地域脱炭素実現に向けた具体的施策実装支援事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd3YMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
