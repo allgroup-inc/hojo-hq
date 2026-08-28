@@ -1,0 +1,43 @@
+# もらいわすれ堂の独自ドメイン配信(moradou.jp)— 2026-08-28 小柳さん決裁
+# site/fukugiiro/ を配信専用リポジトリ allgroup-inc/moradou へ自動ミラーする。
+# 前提Secrets: MORADOU_DEPLOY_TOKEN(fine-grained PAT・moradouリポジトリのContents Read/Write)
+# 未設定の間は何もしない(安全にスキップ)。議事: docs/議事_20260828_独自ドメインmoradou.md
+name: moradou-deploy
+on:
+  push:
+    branches: [main]
+    paths: ["site/fukugiiro/**"]
+  workflow_dispatch:
+concurrency:
+  group: moradou-deploy
+  cancel-in-progress: false
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Mirror site/fukugiiro to allgroup-inc/moradou
+        env:
+          TOKEN: ${{ secrets.MORADOU_DEPLOY_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "[info] MORADOU_DEPLOY_TOKEN 未設定: ミラーをスキップ(独自ドメイン準備前の正常動作)"
+            exit 0
+          fi
+          git clone --depth 1 "https://x-access-token:${TOKEN}@github.com/allgroup-inc/moradou.git" /tmp/moradou || {
+            echo "::error::allgroup-inc/moradou のcloneに失敗(リポジトリ未作成 or トークン権限不足)"; exit 1; }
+          rsync -a --delete --exclude .git --exclude CNAME --exclude .nojekyll --exclude README.md site/fukugiiro/ /tmp/moradou/
+          echo "moradou.jp" > /tmp/moradou/CNAME
+          touch /tmp/moradou/.nojekyll
+          cd /tmp/moradou
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add -A
+          git diff --cached --quiet && { echo "[info] 差分なし"; exit 0; }
+          git commit -m "auto: mirror from hojo-hq site/fukugiiro $(date '+%Y-%m-%d %H:%M')"
+          pushed=0
+          for i in 1 2 3; do
+            git push && pushed=1 && break
+            echo "push retry $i"; sleep 5; git pull --rebase || git rebase --abort
+          done
+          [ "$pushed" = "1" ] || { echo "::error::moradouへのpushに3回失敗"; exit 1; }
