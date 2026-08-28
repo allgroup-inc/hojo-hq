@@ -44,3 +44,5 @@ private/
 
 # ローカル動作確認用のデータコピー(本番は update.yml が cp -r data site/data で毎回生成)
 site/data/
+video-project/export/
+video-project/hf/node_modules/

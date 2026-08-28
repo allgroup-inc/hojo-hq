@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  #root { font-family:"Noto Sans JP","Meiryo",sans-serif; }
+  .scene { position:absolute; inset:0;
+    background:linear-gradient(180deg,#0E2440 0%,#0A1B33 55%,#071426 100%); }
+  header { position:absolute; top:64px; left:80px; right:80px;
+    display:flex; align-items:center; justify-content:space-between; }
+  .brand { color:#fff; font-weight:900; font-size:36px; letter-spacing:.04em;
+    border-bottom:5px solid #F88800; padding-bottom:10px; }
+  .ep { color:#F88800; font-weight:700; font-size:30px;
+    border:3px solid #F88800; border-radius:999px; padding:8px 26px; }
+  .cap { position:absolute; top:172px; left:60px; right:60px; text-align:center;
+    color:#fff; font-weight:900; font-size:68px; line-height:1.32;
+    text-wrap:balance; }
+  .sub { position:absolute; bottom:150px; left:60px; right:60px; text-align:center;
+    color:#F88800; font-weight:700; font-size:40px; }
+  .phone { position:absolute; top:388px; left:50%; transform:translateX(-50%);
+    width:576px; height:1180px; border-radius:48px; overflow:hidden;
+    border:3px solid rgba(255,255,255,.22);
+    box-shadow:0 40px 90px rgba(0,0,0,.55), 0 0 0 12px rgba(255,255,255,.06); }
+  .phone video { width:100%; height:100%; object-fit:cover; object-position:top; }
+  .bigcap-wrap { position:absolute; top:0; bottom:0; left:80px; right:80px;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    gap:56px; text-align:center; }
+  .bigcap { color:#fff; font-weight:900; font-size:96px; line-height:1.4;
+    text-wrap:balance; }
+  .bigsub { color:#F88800; font-weight:700; font-size:46px; }
+  .dots { position:absolute; bottom:84px; left:0; right:0; text-align:center; }
+  .dot { display:inline-block; width:16px; height:16px; border-radius:50%;
+    background:rgba(255,255,255,.22); margin:0 9px; }
+  .dot.on { background:#F88800; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="root" data-width="1080" data-height="1920" data-duration="81.86">
+
+  <div class="clip scene" data-start="0" data-duration="8.66">
+    <header><span class="brand">沖縄企業のミカタ</span><span class="ep">① さがす・診断する</span></header>
+    <p class="cap">使える補助金、30秒でわかる</p><p class="sub">沖縄企業のミカタの使い方 ①</p>
+    <div class="phone"><video src="../clips/hook_result.webm" muted
+             data-start="0" data-duration="8.66"
+             data-media-start="3.64" data-volume="0"></video></div>
+    <div class="dots"><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <audio src="../audio/v1/s1.mp3" data-start="0.3" data-duration="7.46"></audio>
+  </div>
+
+  <div class="clip scene" data-start="8.66" data-duration="7.42">
+    <header><span class="brand">沖縄企業のミカタ</span><span class="ep">① さがす・診断する</span></header>
+    <p class="cap">プロフィールの<br>リンクからひらく</p><p class="sub">検索は「沖縄企業のミカタ」</p>
+    <div class="phone"><video src="../clips/top.webm" muted
+             data-start="8.66" data-duration="7.42"
+             data-media-start="0.52" data-volume="0"></video></div>
+    <div class="dots"><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <audio src="../audio/v1/s2.mp3" data-start="8.96" data-duration="6.22"></audio>
+  </div>
+
+  <div class="clip scene" data-start="16.08" data-duration="8.18">
+    <header><span class="brand">沖縄企業のミカタ</span><span class="ep">① さがす・診断する</span></header>
+    <p class="cap">沖縄の補助金を、毎日更新</p><p class="sub">国・県・市町村をチェック</p>
+    <div class="phone"><video src="../clips/stats.webm" muted
+             data-start="16.08" data-duration="8.18"
+             data-media-start="0.64" data-volume="0"></video></div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <audio src="../audio/v1/s3.mp3" data-start="16.38" data-duration="6.98"></audio>
+  </div>
+
+  <div class="clip scene" data-start="24.26" data-duration="10.3">
+    <header><span class="brand">沖縄企業のミカタ</span><span class="ep">① さがす・診断する</span></header>
+    <p class="cap">下にすすむと「無料診断」</p><p class="sub">上のボタンからも行けます</p>
+    <div class="phone"><video src="../clips/to_shindan.webm" muted
+             data-start="24.26" data-duration="10.3"
+             data-media-start="0.8" data-volume="0"></video></div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <audio src="../audio/v1/s4.mp3" data-start="24.56" data-duration="9.1"></audio>
+  </div>
+
+  <div class="clip scene" data-start="34.56" data-duration="11.59">
+    <header><span class="brand">沖縄企業のミカタ</span><span class="ep">① さがす・診断する</span></header>
+    <p class="cap">条件を選ぶだけ</p><p class="sub">1つだけでも大丈夫</p>
+    <div class="phone"><video src="../clips/select.webm" muted
+             data-start="34.56" data-duration="11.59"
+             data-media-start="0.48" data-volume="0"></video></div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <audio src="../audio/v1/s5.mp3" data-start="34.86" data-duration="10.39"></audio>
+  </div>
+
+  <div class="clip scene" data-start="46.15" data-duration="8.45">
+    <header><span class="brand">沖縄企業のミカタ</span><span class="ep">① さがす・診断する</span></header>
+    <p class="cap">GビズIDは<br>「聞いたことがない」でOK</p><p class="sub">チェックを入れるだけ</p>
+    <div class="phone"><video src="../clips/gbiz.webm" muted
+             data-start="46.15" data-duration="8.45"
+             data-media-start="0.56" data-volume="0"></video></div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <audio src="../audio/v1/s6.mp3" data-start="46.45" data-duration="7.25"></audio>
+  </div>
+
+  <div class="clip scene" data-start="54.6" data-duration="9.96">
+    <header><span class="brand">沖縄企業のミカタ</span><span class="ep">① さがす・診断する</span></header>
+    <p class="cap">会社名の入力なしで診断</p><p class="sub">登録もいりません</p>
+    <div class="phone"><video src="../clips/diagnose.webm" muted
+             data-start="54.6" data-duration="9.96"
+             data-media-start="0.52" data-volume="0"></video></div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span></div>
+    <audio src="../audio/v1/s7.mp3" data-start="54.9" data-duration="8.76"></audio>
+  </div>
+
+  <div class="clip scene" data-start="64.56" data-duration="8.11">
+    <header><span class="brand">沖縄企業のミカタ</span><span class="ep">① さがす・診断する</span></header>
+    <p class="cap">結果と金額の目安が、<br>その場に</p><p class="sub">使える可能性のある制度を表示</p>
+    <div class="phone"><video src="../clips/result.webm" muted
+             data-start="64.56" data-duration="8.11"
+             data-media-start="0.56" data-volume="0"></video></div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span></div>
+    <audio src="../audio/v1/s8.mp3" data-start="64.86" data-duration="6.91"></audio>
+  </div>
+
+  <div class="clip scene" data-start="72.67" data-duration="9.19">
+    <header><span class="brand">沖縄企業のミカタ</span><span class="ep">① さがす・診断する</span></header>
+    
+    <div class="bigcap-wrap"><p class="bigcap">つづきは②へ</p>
+           <p class="bigsub">LINEで見逃さない編</p></div>
+    <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot on"></span></div>
+    <audio src="../audio/v1/s9.mp3" data-start="72.97" data-duration="7.99"></audio>
+  </div>
+</div>
+</body>
+</html>
