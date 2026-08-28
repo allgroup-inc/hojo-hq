@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-08-28 06:39",
+ "generated_at": "2026-08-28 11:13",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 5,
- "count": 24,
+ "count": 26,
  "items": [
   {
    "id": "a0WJ200000CDdu5MAD",
@@ -98,6 +98,16 @@
    "tag": "okinawa"
   },
   {
+   "id": "a0WJ200000CDe3bMAD",
+   "name": "「特定半導体生産施設整備に係る建設工事の現状及び国内投資促進に向けた課題に関する調査・分析事業」の公募",
+   "deadline": "2026-09-11",
+   "days_left": 14,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe3bMAD",
+   "tag": "nationwide"
+  },
+  {
    "id": "a0WJ200000CDO8eMAH",
    "name": "交通システムの省CO2 化に向けた設備整備事業（鉄道事業等におけるネットワーク型低炭素化促進事業）（二次公募）",
    "deadline": "2026-09-14",
@@ -145,6 +155,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDb6JMAT",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDe8MMAT",
+   "name": "令和７年度補正　米粉商品開発等支援対策事業　2次募集",
+   "deadline": "2026-09-18",
+   "days_left": 21,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 30950204,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe8MMAT",
    "tag": "nationwide"
   },
   {
