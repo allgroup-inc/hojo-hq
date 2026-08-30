@@ -1,0 +1,56 @@
+name: ig-feed
+
+# ミカタ公式Instagramへ「フィード投稿(単枚画像)」を行うユーティリティ(手動実行専用)。
+# 使用は小柳さんの承認がある素材・文面のみ。月水金の自動投稿(social-post)とは別系統。
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "投稿画像のリポジトリ内パス(JPEG推奨・4:5)"
+        required: true
+      caption:
+        description: "キャプション全文"
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ig-feed
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: フィード投稿
+        env:
+          TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          IG_USER: ${{ secrets.IG_USER_ID }}
+          IMG_PATH: ${{ inputs.image }}
+          CAPTION: ${{ inputs.caption }}
+        run: |
+          set -e
+          set -x
+          if [ -z "$TOKEN" ] || [ -z "$IG_USER" ]; then
+            echo "::error::FB_PAGE_ACCESS_TOKEN / IG_USER_ID が未設定です"; exit 1
+          fi
+          URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/${IMG_PATH}"
+          code=$(curl -sS --retry 2 -o /dev/null -w "%{http_code}" "$URL")
+          if [ "$code" != "200" ]; then
+            echo "::error::画像が取得できません(HTTP $code): $URL"; exit 1
+          fi
+          create=$(curl -sS --retry 2 -X POST "https://graph.facebook.com/v21.0/${IG_USER}/media" \
+            --data-urlencode "image_url=${URL}" \
+            --data-urlencode "caption=${CAPTION}" \
+            -d "access_token=${TOKEN}")
+          cid=$(echo "$create" | python3 -c "import sys,json;print(json.load(sys.stdin).get('id',''))")
+          if [ -z "$cid" ]; then echo "::error::コンテナ作成に失敗: $create"; exit 1; fi
+          sleep 5
+          pub=$(curl -sS --retry 2 -X POST "https://graph.facebook.com/v21.0/${IG_USER}/media_publish" \
+            -d "creation_id=${cid}" -d "access_token=${TOKEN}")
+          mid=$(echo "$pub" | python3 -c "import sys,json;print(json.load(sys.stdin).get('id',''))")
+          if [ -z "$mid" ]; then echo "::error::公開に失敗: $pub"; exit 1; fi
+          echo "フィード投稿完了 media_id=${mid}"

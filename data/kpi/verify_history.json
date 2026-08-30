@@ -1452,5 +1452,70 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-08-30",
+  "sample": 5,
+  "ng": 1,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和８年度運輸部門におけるエネルギーの使用合理化・非化石エネルギー転換推進事業費補助金（内航船革新的運航効率化・非化石エネルギー転換推進事業）（三次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe7xMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和5年沖縄建設産業グローバル化支援業務委託に係る企画提案書等の募集",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010165.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": false,
+    "issues": [
+     "Claude: 出典ページに制度の言及が見つからない(移設・削除の可能性)"
+    ],
+    "human_verdict": null
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(ブルーボンド/ブルーローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9wMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "京都型グローバル・ニッチ・トップ企業育成補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFgMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度ゼロエミッション船等の導入支援事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbyjMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
