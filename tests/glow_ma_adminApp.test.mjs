@@ -108,6 +108,15 @@ test("buildAdminAppHtml: コーポレートカラーの変数とロゴのアニ�
   assert.ok(html.indexOf("prefers-reduced-motion") !== -1, "reduced-motion対応がない");
 });
 
+test("buildAdminAppHtml: ヘッダーに実際のロゴ画像要素が出力される(CSS定義だけでなくマークアップ自体を確認)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.match(
+    html,
+    /<img class="topbar-logo"[^>]*src="data:image\/(png|svg\+xml);base64,[A-Za-z0-9+/=]+"/,
+    "topbar-logoクラスの<img>要素がヘッダーに出力されていない(CSSのlogoGlow定義だけでは画面に何も表示されない)"
+  );
+});
+
 test("buildAdminAppHtml: KPIカード・緊急度ドット・ランクバッジ用のCSSクラスを含む", () => {
   const html = adminApp.buildAdminAppHtml();
   [".kpi{", ".rank-A{", ".rank-B{", ".rank-C{", ".rank-D{", ".dot.overdue{", ".dot.soon{", ".dot.ok{"]
