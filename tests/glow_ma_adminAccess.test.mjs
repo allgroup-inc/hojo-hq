@@ -388,3 +388,21 @@ test("buildNextActionQueue: 次回アクション予定日がDateオブジェク
   assert.equal(typeof result[0]["次回アクション予定日"], "string");
   assert.equal(result[0]["次回アクション予定日"], "2026-08-01");
 });
+
+test("buildNextActionQueue: 登録日・最終接触日がDateオブジェクトでも文字列に正規化する(google.script.runの応答全体が壊れるのを防ぐ。2026-08-31 getAdminBootstrap導入時に発覚した不具合の再発防止)", () => {
+  const today = "2026-08-13";
+  const companies = [
+    {
+      "企業ID": "C_untouched_date",
+      "登録日": new Date(2026, 7, 10, 15, 0, 0),
+      "最終接触日": new Date(2026, 7, 5),
+      "次回アクション予定日": "",
+      "連絡不要": false,
+      "本日反応あり": false
+    }
+  ];
+  const result = adminAccess.buildNextActionQueue(companies, today, 8);
+  assert.equal(result.length, 1);
+  assert.equal(result[0]["登録日"], "2026-08-10");
+  assert.equal(result[0]["最終接触日"], "2026-08-05");
+});

@@ -83,9 +83,12 @@
     var candidates = (companies || [])
       .map(function (company) {
         var urgency = computeUrgency(company, todayString);
-        var withUrgency = {};
-        Object.keys(company).forEach(function (key) { withUrgency[key] = company[key]; });
-        withUrgency["次回アクション予定日"] = normalizeDateForDisplay(company["次回アクション予定日"]);
+        // company(readCompanyRecords_の生レコード)には登録日・最終接触日等がJSのDate
+        // オブジェクトのまま入っている。normalizeCompanyDetailDatesで文字列化しておかないと
+        // google.script.runの応答全体が壊れ、ブラウザ側にnull/undefinedが渡ってしまう
+        // (getCompanyDetailで踏んだのと同じ既知の癖。2026-08-31 getAdminBootstrap
+        // 導入時に発覚)。
+        var withUrgency = normalizeCompanyDetailDates(company);
         withUrgency.urgency = urgency;
         return withUrgency;
       })
