@@ -118,6 +118,19 @@ test("buildAdminAppHtml: 企業詳細の電話番号・携帯番号がtel:リン
   assert.ok(html.indexOf("isPhoneField") !== -1, "電話番号フィールドの判定ロジックが含まれていない");
 });
 
+test("buildAdminAppHtml: ホーム画面追加(PWA風)に必要なメタタグ・アイコンを含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  [
+    'rel="icon"',
+    'rel="apple-touch-icon"',
+    'name="apple-mobile-web-app-capable" content="yes"',
+    'name="mobile-web-app-capable" content="yes"',
+    'name="theme-color" content="#00335c"'
+  ].forEach((needle) => {
+    assert.ok(html.indexOf(needle) !== -1, needle + " が含まれていない");
+  });
+});
+
 test("buildAdminAppHtml: 使い方ガイド(howto)のマークアップが実際に出力される(CSS定義だけでなくアコーディオン本体を確認)", () => {
   const html = adminApp.buildAdminAppHtml();
   assert.ok(html.indexOf('class="howto"') !== -1, "class=\"howto\" の使い方ガイドがヘッダー直後に出力されていない");
