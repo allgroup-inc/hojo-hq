@@ -318,6 +318,23 @@
     color:rgba(247,245,241,.85);text-decoration:underline;padding:8px;}
   .unlock strong{color:var(--kin);}
   .unlock .line-btn{margin-top:1.1rem;font-size:1rem;padding:.95em 2.4em;}
+  /* 診断v2: 申請前の最終チェック(STEP2・任意) */
+  .step2{margin-top:var(--sp-3);border:2px solid #dfe7ee;border-radius:14px;background:#fff;}
+  .step2>summary{cursor:pointer;padding:1em 1.2em;font-weight:700;color:#00335c;list-style:none;}
+  .step2>summary::before{content:"\25b8 ";color:#F88800;}
+  .step2[open]>summary::before{content:"\25be ";}
+  .step2 .s2-body{padding:0 1.2em 1.2em;}
+  .s2-label{margin:1.1em 0 .45em;font-weight:700;font-size:.95rem;color:#00335c;}
+  .s2-note{margin:1.1em 0 0;padding:.8em 1em;border-radius:10px;background:#f2f6fa;
+    font-size:.9rem;color:#2b4257;}
+  .s2-card{margin:1em 0 0;padding:1em 1.1em;border-radius:12px;background:#fff7ec;
+    border:1.5px solid #f2c98a;font-size:.92rem;line-height:1.8;}
+  .s2-card a{color:#c96a00;font-weight:700;}
+  .s2-basics{margin:1.3em 0 0;padding:1em 1.1em;border-radius:12px;background:#f7f5f1;font-size:.9rem;}
+  .s2-basics p{margin:.2em 0;font-weight:700;color:#00335c;}
+  .s2-basics li{margin:.35em 0 .35em 1.2em;line-height:1.7;}
+  .apply-badge.s2b{background:#fdeeee;color:#8a3c3c;border-color:#e8b7b7;}
+  .apply-badge.s2ok{background:#eaf6ee;color:#1f6b3a;border-color:#b5dcc2;}
   .experts{margin-top:var(--sp-6);padding-top:var(--sp-4);border-top:2px solid rgba(0,51,92,.15);}
   .experts-head{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-weight:800;font-size:1.2rem;}
   .experts-sub{margin-top:.4rem;font-size:.88rem;color:rgba(0,51,92,.78);}
@@ -736,6 +753,56 @@
       <a href="https://line.me/R/oaMessage/%40345pqedv/?%E3%80%90%E5%BC%95%E3%81%8D%E7%B6%99%E3%81%8E%E3%81%AE%E3%81%94%E7%9B%B8%E8%AB%87%E3%80%91" target="_blank" rel="noopener" class="shokei-link">引き継ぎの無料相談はこちら</a>
     </div>
     <div id="result-list"></div>
+    <details id="step2" class="step2">
+      <summary>申請前の最終チェック(30秒・任意) — 答えると上の一覧が貴社向けに並び替わります</summary>
+      <div class="s2-body">
+        <p class="s2-label">GビズIDプライムは持っていますか?<span class="opt-tag">(国の電子申請で使うID)</span></p>
+        <div class="chip-group s2-group" data-q="gbiz">
+          <button type="button" class="chip" data-v="yes">持っている</button>
+          <button type="button" class="chip" data-v="applying">申請中</button>
+          <button type="button" class="chip" data-v="none">持っていない</button>
+        </div>
+        <p class="s2-label">申請の準備に使える時間は?</p>
+        <div class="chip-group s2-group" data-q="time">
+          <button type="button" class="chip" data-v="now">すぐ動ける</button>
+          <button type="button" class="chip" data-v="month">1か月くらい</button>
+          <button type="button" class="chip" data-v="slow">急がない</button>
+        </div>
+        <p class="s2-label">経費をいったん立て替えられますか?<span class="opt-tag">(補助金は後払いが基本)</span></p>
+        <div class="chip-group s2-group" data-q="tatekae">
+          <button type="button" class="chip" data-v="ok">できる</button>
+          <button type="button" class="chip" data-v="hard">むずかしい</button>
+          <button type="button" class="chip" data-v="unknown">わからない</button>
+        </div>
+        <p class="s2-label">税金・社会保険料の滞納はありませんか?</p>
+        <div class="chip-group s2-group" data-q="tax">
+          <button type="button" class="chip" data-v="ok">ない</button>
+          <button type="button" class="chip" data-v="unknown">ある・わからない</button>
+        </div>
+        <p class="s2-label">事業計画書はどう作りますか?</p>
+        <div class="chip-group s2-group" data-q="plan">
+          <button type="button" class="chip" data-v="self">自分で書ける</button>
+          <button type="button" class="chip" data-v="help">手伝ってほしい</button>
+        </div>
+        <p id="s2-note" class="s2-note" hidden></p>
+        <div id="s2-tax-card" class="s2-card" hidden>
+          税金・社会保険料の滞納がないことは、ほとんどの制度で共通の要件です。まずは納付状況の確認・解消からが近道です。
+          進め方に迷ったら、<a href="https://line.me/R/oaMessage/%40345pqedv/?%E7%9B%B8%E8%AB%87" target="_blank" rel="noopener">LINEで「相談」と一言</a>どうぞ(無料)。
+        </div>
+        <div id="s2-help-card" class="s2-card" hidden>
+          事業計画書は、専門家と一緒に作ることもできます。ミカタの相談窓口から、状況に合う専門家へおつなぎします。
+          <a href="https://line.me/R/oaMessage/%40345pqedv/?%E7%9B%B8%E8%AB%87" target="_blank" rel="noopener">LINEで「相談」と送る</a>(無料・1営業日以内にお返事)。
+        </div>
+        <div class="s2-basics">
+          <p>申請前に知っておく3つの基本</p>
+          <ul>
+            <li>補助金は<strong>後払い</strong>が基本です(経費はいったん立て替えます)</li>
+            <li><strong>交付決定前に使ったお金は対象外</strong>です(買ってから申請、は通りません)</li>
+            <li>国の電子申請には<strong>GビズIDプライム</strong>が必要です(取得に1〜2週間)</li>
+          </ul>
+        </div>
+      </div>
+    </details>
     <p class="result-note">締切アラート(約1か月前から)を受け取るには、LINE登録(無料)をどうぞ。</p>
     <button type="button" class="register-btn" id="reg-open">貴社専用の制度通知を受け取る(会社情報を登録)</button>
     <div id="reg-form" class="reg-form" hidden>
@@ -1038,6 +1105,16 @@
   // 申請方法の判定。jGrants掲載制度は電子申請システム上での手続きとなるため
   // GビズIDプライムが必要。県・市町村・公社の制度は独自申請の場合がある。
   const needsGbiz=it=>/jgrants-portal\.go\.jp/.test(it.source_url||'');
+  // 診断v2 STEP2: 申請前の最終チェック(回答は端末内のみ・断定せず並べ替えと注記まで)
+  function s2Get(){try{return JSON.parse(lsGet('mikata_step2')||'{}');}catch(e){return {};}}
+  function s2Set(o){lsSet('mikata_step2',JSON.stringify(o));}
+  function daysLeftOf(it){
+    if(!it||!it.deadline)return null;
+    var m=String(it.deadline).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(!m)return null;
+    var d=new Date(+m[1],+m[2]-1,+m[3]);
+    return Math.round((d-new Date())/(24*3600*1000));
+  }
 
   // テーマ→制度キーワード(すべてマッチング精度向上に実際に使う)
   const THEME_KEYS={
@@ -1083,13 +1160,24 @@
     // 申請方法の判定: jGrants(国の電子申請)はGビズIDプライムでのログインが必要。
     // それ以外(県・市町村・公社)は独自申請のため不要な場合がある(最終的な要否は公募要領で要確認)。
     const noGbiz=document.getElementById('f-nogbiz').checked;
+    const S2=s2Get();
+    const noGAll=noGbiz||S2.gbiz==='none'||S2.gbiz==='applying';
 
     const score=it=>{
       const text=(it.name||'')+(it.target_biz||'');
       let s=0;
       if(shokeiSignal&&it.tag==='shokei')s-=100;
       // GビズID未取得の方には、独自申請の制度を上位へ(隠さず順序のみ変更)
-      if(noGbiz&&!needsGbiz(it))s-=50;
+      if(noGAll&&!needsGbiz(it))s-=50;
+      // STEP2の回答による並べ替え(隠さず順序と注記のみ。締切3層: 30日未満は急がせず下位へ)
+      var dl=daysLeftOf(it);
+      if(dl!==null&&dl<30)s+=40;
+      if(S2.time&&(dl===null||dl>=45))s-=6;
+      if(S2.time==='slow'&&(dl===null||dl>=90))s-=4;
+      if(S2.tatekae==='hard'){
+        var amt=Number(it.max_amount)||0;
+        if(amt>0&&amt<=1000000)s-=12;else if(amt>0&&amt<=5000000)s-=6;
+      }
       if(themeKeys.some(k=>text.includes(k)))s-=10;
       if(keys.some(k=>text.includes(k)))s-=5;
       return s;
@@ -1165,6 +1253,13 @@
         ${needsGbiz(it)
           ?'<span class="apply-badge egov">電子申請(GビズID必要)</span>'
           :'<span class="apply-badge direct">独自申請(GビズID不要の場合あり)</span>'}
+        ${(function(){
+          var b='';var dl2=daysLeftOf(it);
+          if(noGAll&&needsGbiz(it))b+='<span class="apply-badge s2b">GビズID取得に1〜2週間</span>';
+          if(dl2!==null&&dl2<30)b+='<span class="apply-badge s2b">今回は次回公募に備える向き</span>';
+          else if(S2.time&&dl2!==null&&dl2>=45&&dl2<=120)b+='<span class="apply-badge s2ok">準備が間に合いやすい</span>';
+          return b;
+        })()}
         ${locked||!safeUrl(it.source_url)?'':`<a href="${esc(safeUrl(it.source_url))}" target="_blank" rel="noopener">公式ページで確認 →</a>`}
       </div>`;
     const member=lsGet('mikata_member')==='1';
@@ -1193,6 +1288,24 @@
     }
     const list=document.getElementById('result-list');
     list.innerHTML=html;
+    // STEP2の注記・案内カードの表示状態を更新
+    (function(){
+      var answered=['gbiz','time','tatekae','tax','plan'].filter(function(q){return S2[q];}).length;
+      var note=document.getElementById('s2-note');
+      if(note){
+        note.hidden=answered===0;
+        if(answered>0)note.textContent='最終チェックの回答をもとに、申請しやすい可能性が高い順に並べ替えました。個別の要件は、必ず各制度の原文でご確認ください。';
+      }
+      var tc=document.getElementById('s2-tax-card');
+      if(tc)tc.hidden=S2.tax!=='unknown';
+      var hc=document.getElementById('s2-help-card');
+      if(hc)hc.hidden=S2.plan!=='help';
+      if(answered>=3&&lsGet('mikata_s2_done')!=='1'){
+        lsSet('mikata_s2_done','1');
+        gtag('event','step2_done',{answered:answered});
+        try{window.plausible('hojo_step2_done');}catch(e){}
+      }
+    })();
     if(!REDUCED)[...list.children].forEach((el,i)=>el.style.animationDelay=(i*70)+'ms');
     const ub=document.getElementById('unlock-btn');
     if(ub)ub.addEventListener('click',function(){
@@ -1273,6 +1386,28 @@
     AUTORUN=true;
     try{document.getElementById('match-btn').click();}finally{AUTORUN=false;}
   }
+  // STEP2チップ: 各グループ単一選択→保存→静かに再描画(スクロール・計測なし)
+  (function(){
+    var st=s2Get();
+    document.querySelectorAll('.s2-group').forEach(function(g){
+      var q=g.dataset.q;
+      g.querySelectorAll('.chip').forEach(function(c){
+        if(st[q]===c.dataset.v)c.classList.add('on');
+        c.addEventListener('click',function(){
+          var cur=s2Get();
+          if(cur[q]===c.dataset.v){delete cur[q];c.classList.remove('on');}
+          else{
+            cur[q]=c.dataset.v;
+            g.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on');});
+            c.classList.add('on');
+          }
+          s2Set(cur);
+          var mr=document.getElementById('match-result');
+          if(mr&&!mr.hidden)autoRunMatch();
+        });
+      });
+    });
+  })();
   function restoreState(){
     var st=null;
     try{st=JSON.parse(lsGet('mikata_form')||'null');}catch(e){}
