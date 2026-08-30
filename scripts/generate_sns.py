@@ -49,7 +49,8 @@ SOON_MAX_DAYS = 7       # これ未満は「予告」カードに回す
 # ローテーションする(固定1ブロックの使い回しはNG)。ニッチ・ミドルタグを優先。
 HASHTAG_SETS = {
     "seido": "#沖縄補助金 #沖縄助成金 #沖縄経営者 #中小企業支援 #沖縄企業のミカタ",
-    "shokei": "#事業承継 #沖縄M&A #後継者問題 #沖縄経営者 #沖縄企業のミカタ",
+    # カモフラージュ設計(2026-08-11)により承継系ハッシュタグは使わない(2026-08-29 小柳さん指摘で是正)
+    "shokei": "#沖縄企業のミカタ #沖縄補助金 #助成金 #沖縄の中小企業 #経営",
     "yokoku": "#沖縄補助金 #GビズID #中小企業支援 #沖縄経営者 #沖縄企業のミカタ",
     "deadline_alert": "#沖縄補助金 #締切管理 #中小企業支援 #沖縄経営者 #沖縄企業のミカタ",
 }
@@ -280,23 +281,24 @@ def main():
     if shokei:
         dl = days_left(shokei, today)
         num = f"締切まで残り{dl}日" if dl is not None else "募集中"
+        # カモフラージュ設計(2026-08-11): 承継・M&Aの直接訴求はしない。
+        # この枠も他の制度紹介と同じ扱い(制度名は事実としてそのまま。2026-08-29 小柳さん指摘で是正)
         cap = (
-            f"🤝【事業承継・M&A】{shokei['name']}\n"
+            f"【募集中】{shokei['name']}\n"
             f"🗓 {deadline_line(shokei, today)}\n"
             f"💰 {amount_text(shokei.get('max_amount'))}\n"
-            "後継者・M&Aのお悩みは、GLOWの専門チームにもおつなぎできます。\n"
+            "沖縄の事業者も、要件に合えば申請できます。\n"
             f"制度の詳細・申請は原文で👇\n{shokei['source_url']}\n"
             f"{DISCLAIMER}"
         )
-        # こちらも制度名を主役に(テーマ名は右上バッジへ移す)
         made.append(write_post(
-            5, "shokei", "事業承継・M&A",
+            5, "shokei", "制度紹介(30日以上先・4件目)",
             img_title=shorten_name(shokei["name"], limit=60),
             img_sub=amount_text(shokei.get("max_amount")),
             img_number=num,
             caption=cap,
             source=shokei["source_url"],
-            badge="事業承継・M&A",
+            badge="いま募集中",
         ))
 
     # 6) なぜ無料か

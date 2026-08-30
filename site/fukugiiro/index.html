@@ -67,9 +67,20 @@ section{padding:52px 0}
 .btn:active{transform:translateY(0);background:var(--coral-deep)}
 .note{font-size:.85rem;color:var(--muted);line-height:1.75}
 .note--long{text-align:left!important}
-.iglink{display:inline-block;font-size:.82rem;color:#F3D7C7;padding:6px 2px;text-decoration:underline}
-.ignav{display:inline-flex;align-items:center;justify-content:center;padding:8px;min-width:36px;min-height:36px;color:var(--coral-deep);border-radius:8px}
+.iglink{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;color:#F3D7C7;padding:6px 2px;text-decoration:underline}
+.ignav{display:inline-flex;align-items:center;justify-content:center;padding:8px;min-width:36px;min-height:36px;border-radius:8px}
 .ignav:hover{background:var(--sand-2)}
+/* Instagramセクション(2026-08-26 小柳さん指示: 投稿プレビューで誘導。LINEが主役CVのため配置はLINEセクションの手前) */
+.igsec{background:#FFF7F0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.igsec .igrid{display:flex;gap:10px;justify-content:center;margin:18px 0 20px}
+.igsec .igrid a{display:block;flex:0 1 150px;border-radius:14px;overflow:hidden;border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.igsec .igrid img{display:block;width:100%;height:auto;transition:transform .25s}
+.igsec .igrid a:hover img{transform:scale(1.04)}
+.igbtn{display:inline-flex;align-items:center;gap:8px;font-weight:800;color:#fff;text-decoration:none;
+  background:linear-gradient(45deg,#FEDA75,#FA7E1E,#D62976,#962FBF,#4F5BD5);
+  border-radius:999px;padding:13px 26px;box-shadow:0 3px 10px rgba(214,41,118,.25)}
+.igbtn:active{transform:translateY(1px)}
+.igsec .ighandle{font-size:.85rem;color:var(--muted);margin-top:10px}
 .microtrust{font-size:.82rem;color:var(--muted);text-align:center;margin-top:10px}
 .microtrust.on-green{color:#eafff2}
 strong{font-weight:700}
@@ -385,7 +396,7 @@ footer .fwrap p{margin-bottom:6px}
     <a href="area/">市町村</a>
     <a href="kit/">準備シート</a>
     <a href="../go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
-    <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
+    <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><defs><linearGradient id="igg-h" x1="0" y1="24" x2="24" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FA7E1E"/><stop offset=".5" stop-color="#D62976"/><stop offset="1" stop-color="#962FBF"/></linearGradient></defs><g stroke="url(#igg-h)"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="url(#igg-h)" stroke="none"/></g></svg></a>
   </nav>
 </header>
 <main>
@@ -527,6 +538,21 @@ footer .fwrap p{margin-bottom:6px}
   </div>
 </section>
 
+<section class="igsec">
+  <div class="wrap" style="text-align:center">
+    <span class="eyebrow">Instagram</span>
+    <h2>インスタでも、「もらい忘れ」を防ぐヒントを</h2>
+    <p>締切が近い制度や、もらえるお金の小さなヒントを、<span style="white-space:nowrap">画像1枚でわかる形</span>で発信しています。</p>
+    <div class="igrid">
+      <a href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagramの投稿を見る" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'card_thumb1'})"><img src="assets/ig/ig1.webp" alt="今週のInstagram投稿プレビュー1" width="360" height="360" loading="lazy" decoding="async"></a>
+      <a href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagramの投稿を見る" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'card_thumb2'})"><img src="assets/ig/ig2.webp" alt="今週のInstagram投稿プレビュー2" width="360" height="360" loading="lazy" decoding="async"></a>
+      <a href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagramの投稿を見る" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'card_thumb3'})"><img src="assets/ig/ig3.webp" alt="今週のInstagram投稿プレビュー3" width="360" height="360" loading="lazy" decoding="async"></a>
+    </div>
+    <a class="igbtn" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'card_btn'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="#fff" stroke="none"/></svg>Instagramをフォローする</a>
+    <p class="ighandle">@moradou.okinawa ・ フォローは無料です</p>
+  </div>
+</section>
+
 <section class="line-sec">
   <div class="wrap">
     <h2>LINEで「もらい忘れ」を防ぐ</h2>
@@ -551,7 +577,7 @@ footer .fwrap p{margin-bottom:6px}
     <p style="margin-top:14px"><a href="area/">市町村別の給付金・手当まとめ</a> ・ <a href="life/">ライフイベント別まとめ</a> ・ <a href="kit/">申請準備シート一覧</a></p>
     <p style="margin-top:6px"><a href="privacy/">個人情報保護方針</a> ・ <a href="teisei/">情報の訂正・ご指摘</a></p>
   </div>
-  <p style="margin-top:6px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
+  <p style="margin-top:6px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'footer'})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg>Instagram @moradou.okinawa で最新情報を見る ›</a></p>
 </footer>
 
 <script type="application/ld+json">

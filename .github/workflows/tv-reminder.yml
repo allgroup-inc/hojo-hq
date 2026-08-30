@@ -1,0 +1,62 @@
+name: tv-reminder
+
+# 嶺井さんTV出演「リゾートキングダム」(2026-10-10放送)の当日リマインダー。
+# 放送日の朝9時(JST)に、投稿用カード画像+放送後の投稿文面を小柳さんのLINEへ届ける。
+# ワンショット運用: 2026-10-10にだけ実動し、それ以外の年はガードで何もしない。
+# 放送が終わって投稿が済んだら、このファイルは削除してよい(決裁キューに消し込みメモあり)。
+
+on:
+  schedule:
+    # 10月10日 00:00 UTC = 09:00 JST
+    - cron: "0 0 10 10 *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tv-reminder
+  cancel-in-progress: false
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: LINEへ当日リマインダーを送る
+        env:
+          TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          TO: ${{ secrets.LINE_ADMIN_USER_ID }}
+        run: |
+          set -e
+          # 2026年のみ実動(手動実行は年ガードなし)
+          if [ "${GITHUB_EVENT_NAME}" = "schedule" ] && [ "$(date -u +%Y)" != "2026" ]; then
+            echo "2026年以外のためスキップ(削除忘れ防止ガード)"; exit 0
+          fi
+          IMG="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/posts/tv/tv_shutsuen.png"
+          MSG="📺【ミカタ】本日「リゾートキングダム」放送日です
+
+          ◆いま(放送前): 上のカード画像で予告投稿ができます(任意)
+          ◆放送後: 下の文面をコピーしてIGフィード投稿をお願いします
+
+          ━━━ 放送後の投稿文(コピー用) ━━━
+          ミカタの監修者が、テレビに出ました。
+
+          沖縄の観光と経済を語る番組「リゾートキングダム」に、当サイト監修の嶺井忍(株式会社GLOW代表)が出演しています。
+
+          日本政策金融公庫で沖縄の中小企業を見続けてきた嶺井が、ふだんの相談でも話している「沖縄の会社のお金の話」。番組でも同じ目線で話しています。
+
+          補助金・助成金のことは、プロフィールのリンクからどうぞ。30秒の無料診断で、御社が使える可能性のある制度がわかります。
+
+          #沖縄企業のミカタ #リゾートキングダム #沖縄経営者 #補助金 #嶺井忍
+          ━━━━━━━━━━━━━━━
+
+          画像はこのトークの1枚目(保存して投稿に添付)。
+          あわせて番組公式・嶺井さんのストーリーズのリポストもおすすめです。"
+          jq -n --arg to "$TO" --arg img "$IMG" --arg text "$MSG" \
+            '{to:$to, messages:[{type:"image",originalContentUrl:$img,previewImageUrl:$img},{type:"text",text:$text}]}' > payload.json
+          curl -sf -X POST https://api.line.me/v2/bot/message/push \
+            -H "Authorization: Bearer $TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d @payload.json
+          echo "リマインダー送信完了"

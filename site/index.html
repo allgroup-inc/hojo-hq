@@ -733,11 +733,6 @@
     </div>
     <div id="result-list"></div>
     <p class="result-note">締切アラート(約1か月前から)を受け取るには、LINE登録(無料)をどうぞ。</p>
-    <div id="insurance-banner" class="insurance-banner" hidden>
-      <strong>経営課題が「人件費管理」「リスク対策」なら</strong>、
-      あわせて保険の引き受け目安も確認できます。
-      <a href="./insurance-underwriting-tool.html" target="_blank" rel="noopener" class="insurance-link">業種・規模から、加入できる保険をチェック</a>
-    </div>
     <button type="button" class="register-btn" id="reg-open">貴社専用の制度通知を受け取る(会社情報を登録)</button>
     <div id="reg-form" class="reg-form" hidden>
       <p class="reg-head">約30秒で完了。下のボタンを押すと<strong>LINEアプリが開き、入力内容が書き込まれたメッセージが用意されます</strong>。あとはLINE側の送信ボタンを押すだけです。</p>
@@ -882,7 +877,7 @@
       <p>沖縄振興開発金融公庫に34年間在籍し、創業支援、事業再生、事業承継、大型プロジェクトファイナンスなど幅広い企業支援業務に従事。地域経済を支える数多くの企業・プロジェクトを支援してきました。</p>
       <p>離島振興、大型ホテルプロジェクト、大型エネルギープロジェクトなど、沖縄の発展を支える大型案件をはじめ、創業支援から事業再生、事業承継まで、企業のライフステージに応じた幅広い支援を担当。経営者が迷い、決断を迫られる局面では、資金調達だけでなく、その先の成長を見据えた伴走支援を信条としてきました。</p>
       <p>代表的な支援事例として、現在では世界13カ国・約600店舗以上を展開するアイウェアブランド「OWNDAYS株式会社」の海外展開資金の融資を担当。当時、多くの金融機関が同社への融資に慎重な判断をする中、事業の将来性を評価し海外展開を支援しました。同社会長・田中修治氏は講演や著書の中で、「沖縄公庫の嶺井さんが可能性を信じてくれた」と当時の支援について紹介しています。</p>
-      <p>現在は株式会社GLOWにて、34年間で培った企業支援の経験と行政・金融機関・士業との幅広いネットワークを活かし、M&amp;A・事業承継をはじめとする経営課題に応じた最適な専門家・支援機関との橋渡しを担っています。<strong>「経営者が最初に相談するパートナー」</strong>として、一社一社に寄り添い、企業の持続的な成長と円滑な事業承継を支えています。</p>
+      <p>現在は株式会社GLOWにて、34年間で培った企業支援の経験と行政・金融機関・士業との幅広いネットワークを活かし、M&amp;A・事業承継をはじめとする経営課題に応じた最適な専門家・支援機関との橋渡しを担っています。<strong>「経営者が最初に相談するパートナー」</strong>として、一社一社に寄り添い、企業の持続的な成長と円滑な事業承継を支えています。テレビ番組「リゾートキングダム」出演(2026年10月10日放送予定)。</p>
 
       <p class="glow-eyebrow2">TRACK RECORD</p>
       <h3 class="glow-sub">これまでの主な支援実績</h3>
@@ -1098,7 +1093,6 @@
     hits=hits.slice(0,10);
 
     document.getElementById('shokei-banner').hidden=!shokeiSignal;
-    document.getElementById('insurance-banner').hidden=hits.length===0;
     animateCount(document.getElementById('result-count'),hits.length);
 
     // 総額ポテンシャル(参考値): 表示中の制度のうち上限額公表分の単純合計

@@ -1,4 +1,12 @@
 {
   "_readme": "結果マガ(@kekka_mag)のX投稿ログ。体験共有投稿(x-taikenワークフロー)が追記する。generate_x_taiken.pyの同日重複ガード(1日1本ルールの機械化)がこのログとお題キューのx_posted_atを参照する",
-  "posts": []
+  "posts": [
+    {
+      "date": "2026-08-28",
+      "type": "taiken",
+      "material_id": "m1",
+      "text": "8/22、初めてノーカットで一巡した。11時にAIが記事生成→LINE通知→私は貼り付けて公開ボタンを押すだけ(約10分)→X告知→記録まで自動。人間の仕事は検品と公開だけになった。",
+      "url": "https://x.com/kekka_mag/status/2093099373257199848"
+    }
+  ]
 }
