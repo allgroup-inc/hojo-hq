@@ -1,0 +1,54 @@
+name: ig-story
+
+# ミカタ公式Instagramへ「ストーリーズ」を投稿するユーティリティ(手動実行専用)。
+# 自前素材(リポジトリ内の画像)のみを対象とし、投稿は小柳さんの指示があった時だけ。
+# 2026-08-30 初回用途: TV出演予告カード(posts/tv/tv_shutsuen_story.png)。
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "投稿する画像のリポジトリ内パス(1080x1920推奨)"
+        required: true
+        default: "posts/tv/tv_shutsuen_story.png"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ig-story
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: ストーリーズ投稿
+        env:
+          TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          IG_USER: ${{ secrets.IG_USER_ID }}
+          IMG_PATH: ${{ inputs.image }}
+        run: |
+          set -e
+          if [ -z "$TOKEN" ] || [ -z "$IG_USER" ]; then
+            echo "::error::FB_PAGE_ACCESS_TOKEN / IG_USER_ID が未設定です"; exit 1
+          fi
+          URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/${IMG_PATH}"
+          code=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          if [ "$code" != "200" ]; then
+            echo "::error::画像が取得できません(HTTP $code): $URL"; exit 1
+          fi
+          create=$(curl -sf -X POST "https://graph.facebook.com/v21.0/${IG_USER}/media" \
+            -d "media_type=STORIES" \
+            --data-urlencode "image_url=${URL}" \
+            -d "access_token=${TOKEN}")
+          echo "create: $(echo "$create" | sed 's/access_token=[^&]*/TOKEN/')"
+          cid=$(echo "$create" | python3 -c "import sys,json;print(json.load(sys.stdin).get('id',''))")
+          if [ -z "$cid" ]; then echo "::error::コンテナ作成に失敗: $create"; exit 1; fi
+          sleep 5
+          pub=$(curl -sf -X POST "https://graph.facebook.com/v21.0/${IG_USER}/media_publish" \
+            -d "creation_id=${cid}" -d "access_token=${TOKEN}")
+          mid=$(echo "$pub" | python3 -c "import sys,json;print(json.load(sys.stdin).get('id',''))")
+          if [ -z "$mid" ]; then echo "::error::公開に失敗: $pub"; exit 1; fi
+          echo "ストーリーズ投稿完了 media_id=${mid}"
