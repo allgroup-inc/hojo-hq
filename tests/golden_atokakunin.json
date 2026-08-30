@@ -1,469 +1,1480 @@
 {
+  "_superseded": [
+    "⚠️ この写しは更新されません。ここを編集しても本物には反映されません。",
+    "   正(コード)  : allgroup-inc/kakei-atokakunin",
+    "   正(システム): allgroup-inc/kakei-crm の apps/confirmation",
+    "   2026-08-31 移設完了。作業するときは kakei-atokakunin を clone してください。"
+  ],
   "_comment": "後確認 判定ロジックのゴールデンセット。scripts/atokakunin_rules.py --self-test が読む。個人情報は含まない(tel_keyは仮名化済みの不透明キー)。設計根拠: docs/後確認SMS_質問リスト_2026-08-14.md §B",
   "version": 1,
-
   "reply_judgment": [
-    {"name": "完全一致の「はい」は承認", "text": "はい", "expect": "承認"},
-    {"name": "前後の半角空白は落として承認", "text": "  はい ", "expect": "承認"},
-    {"name": "前後の全角空白も落として承認", "text": "　はい　", "expect": "承認"},
-    {"name": "改行付きでも承認", "text": "はい\n", "expect": "承認"},
-    {"name": "句点付きは要確認(完全一致ではない)", "text": "はい。", "expect": "要確認"},
-    {"name": "丁寧な言い回しは要確認", "text": "はい、お願いします", "expect": "要確認"},
-    {"name": "カタカナは要確認(既定では承認語に含めない)", "text": "ハイ", "expect": "要確認"},
-    {"name": "質問が来たら要確認", "text": "内容について質問があります", "expect": "要確認"},
-    {"name": "否定は当然に要確認", "text": "いいえ", "expect": "要確認"},
-    {"name": "空文字は要確認", "text": "", "expect": "要確認"},
-    {"name": "空白だけは要確認", "text": "   ", "expect": "要確認"},
-    {"name": "未受信(None)は要確認", "text": null, "expect": "要確認"},
-    {"name": "「はい」を含むだけの長文は承認しない", "text": "はいはい了解です", "expect": "要確認"}
+    {
+      "name": "完全一致の「はい」は承認",
+      "text": "はい",
+      "expect": "承認"
+    },
+    {
+      "name": "前後の半角空白は落として承認",
+      "text": "  はい ",
+      "expect": "承認"
+    },
+    {
+      "name": "前後の全角空白も落として承認",
+      "text": "　はい　",
+      "expect": "承認"
+    },
+    {
+      "name": "改行付きでも承認",
+      "text": "はい\n",
+      "expect": "承認"
+    },
+    {
+      "name": "句点付きは要確認(完全一致ではない)",
+      "text": "はい。",
+      "expect": "要確認"
+    },
+    {
+      "name": "丁寧な言い回しは要確認",
+      "text": "はい、お願いします",
+      "expect": "要確認"
+    },
+    {
+      "name": "カタカナは要確認(既定では承認語に含めない)",
+      "text": "ハイ",
+      "expect": "要確認"
+    },
+    {
+      "name": "質問が来たら要確認",
+      "text": "内容について質問があります",
+      "expect": "要確認"
+    },
+    {
+      "name": "否定は当然に要確認",
+      "text": "いいえ",
+      "expect": "要確認"
+    },
+    {
+      "name": "空文字は要確認",
+      "text": "",
+      "expect": "要確認"
+    },
+    {
+      "name": "空白だけは要確認",
+      "text": "   ",
+      "expect": "要確認"
+    },
+    {
+      "name": "未受信(None)は要確認",
+      "text": null,
+      "expect": "要確認"
+    },
+    {
+      "name": "「はい」を含むだけの長文は承認しない",
+      "text": "はいはい了解です",
+      "expect": "要確認"
+    }
   ],
-
   "auto_approve": [
-    {"name": "未完了が1件だけなら自動承認してよい", "tel_key": "T-aaa", "open_tel_keys": ["T-aaa"], "expect": true},
-    {"name": "同じ番号で未完了2件なら自動承認しない", "tel_key": "T-aaa", "open_tel_keys": ["T-aaa", "T-aaa"], "expect": false},
-    {"name": "同じ番号で未完了3件なら自動承認しない", "tel_key": "T-aaa", "open_tel_keys": ["T-aaa", "T-aaa", "T-aaa"], "expect": false},
-    {"name": "別番号が何件あっても影響しない", "tel_key": "T-aaa", "open_tel_keys": ["T-aaa", "T-bbb", "T-ccc"], "expect": true},
-    {"name": "未完了が0件でも自動承認は妨げない", "tel_key": "T-zzz", "open_tel_keys": [], "expect": true}
+    {
+      "name": "未完了が1件だけなら自動承認してよい",
+      "tel_key": "T-aaa",
+      "open_tel_keys": [
+        "T-aaa"
+      ],
+      "expect": true
+    },
+    {
+      "name": "同じ番号で未完了2件なら自動承認しない",
+      "tel_key": "T-aaa",
+      "open_tel_keys": [
+        "T-aaa",
+        "T-aaa"
+      ],
+      "expect": false
+    },
+    {
+      "name": "同じ番号で未完了3件なら自動承認しない",
+      "tel_key": "T-aaa",
+      "open_tel_keys": [
+        "T-aaa",
+        "T-aaa",
+        "T-aaa"
+      ],
+      "expect": false
+    },
+    {
+      "name": "別番号が何件あっても影響しない",
+      "tel_key": "T-aaa",
+      "open_tel_keys": [
+        "T-aaa",
+        "T-bbb",
+        "T-ccc"
+      ],
+      "expect": true
+    },
+    {
+      "name": "未完了が0件でも自動承認は妨げない",
+      "tel_key": "T-zzz",
+      "open_tel_keys": [],
+      "expect": true
+    }
   ],
-
   "after_reply": [
-    {"name": "送信済に「はい」が来たら承認",
-     "record": {"state": "送信済", "tel_key": "T-aaa"}, "reply": "はい",
-     "open_tel_keys": ["T-aaa"], "expect": "承認_SMS"},
-    {"name": "同番号で未完了2件なら「はい」でも要確認に落とす",
-     "record": {"state": "送信済", "tel_key": "T-aaa"}, "reply": "はい",
-     "open_tel_keys": ["T-aaa", "T-aaa"], "expect": "要確認"},
-    {"name": "曖昧な返信は要確認",
-     "record": {"state": "送信済", "tel_key": "T-aaa"}, "reply": "はい、お願いします",
-     "open_tel_keys": ["T-aaa"], "expect": "要確認"},
-    {"name": "未送信の申込への返信は機械処理しない",
-     "record": {"state": "未送信", "tel_key": "T-aaa"}, "reply": "はい",
-     "open_tel_keys": ["T-aaa"], "expect": "要確認"},
-    {"name": "すでに承認済への再返信は機械処理しない",
-     "record": {"state": "承認_SMS", "tel_key": "T-aaa"}, "reply": "はい",
-     "open_tel_keys": ["T-aaa"], "expect": "要確認"},
-    {"name": "送信失敗の申込への返信も機械処理しない",
-     "record": {"state": "送信失敗", "tel_key": "T-aaa"}, "reply": "はい",
-     "open_tel_keys": ["T-aaa"], "expect": "要確認"}
+    {
+      "name": "送信済に「はい」が来たら承認",
+      "record": {
+        "state": "送信済",
+        "tel_key": "T-aaa"
+      },
+      "reply": "はい",
+      "open_tel_keys": [
+        "T-aaa"
+      ],
+      "expect": "承認_SMS"
+    },
+    {
+      "name": "同番号で未完了2件なら「はい」でも要確認に落とす",
+      "record": {
+        "state": "送信済",
+        "tel_key": "T-aaa"
+      },
+      "reply": "はい",
+      "open_tel_keys": [
+        "T-aaa",
+        "T-aaa"
+      ],
+      "expect": "要確認"
+    },
+    {
+      "name": "曖昧な返信は要確認",
+      "record": {
+        "state": "送信済",
+        "tel_key": "T-aaa"
+      },
+      "reply": "はい、お願いします",
+      "open_tel_keys": [
+        "T-aaa"
+      ],
+      "expect": "要確認"
+    },
+    {
+      "name": "未送信の申込への返信は機械処理しない",
+      "record": {
+        "state": "未送信",
+        "tel_key": "T-aaa"
+      },
+      "reply": "はい",
+      "open_tel_keys": [
+        "T-aaa"
+      ],
+      "expect": "要確認"
+    },
+    {
+      "name": "すでに承認済への再返信は機械処理しない",
+      "record": {
+        "state": "承認_SMS",
+        "tel_key": "T-aaa"
+      },
+      "reply": "はい",
+      "open_tel_keys": [
+        "T-aaa"
+      ],
+      "expect": "要確認"
+    },
+    {
+      "name": "送信失敗の申込への返信も機械処理しない",
+      "record": {
+        "state": "送信失敗",
+        "tel_key": "T-aaa"
+      },
+      "reply": "はい",
+      "open_tel_keys": [
+        "T-aaa"
+      ],
+      "expect": "要確認"
+    }
   ],
-
   "call_list": [
-    {"name": "送信から1日では電話リストに載せない",
-     "record": {"state": "送信済", "sent_at": "2026-08-14 10:00"}, "now": "2026-08-15 10:00", "expect": false},
-    {"name": "送信から2日ちょうどで載せる",
-     "record": {"state": "送信済", "sent_at": "2026-08-14 10:00"}, "now": "2026-08-16 10:00", "expect": true},
-    {"name": "送信から3日なら当然載せる",
-     "record": {"state": "送信済", "sent_at": "2026-08-14 10:00"}, "now": "2026-08-17 10:00", "expect": true},
-    {"name": "2日に1分足りなければ載せない",
-     "record": {"state": "送信済", "sent_at": "2026-08-14 10:00"}, "now": "2026-08-16 09:59", "expect": false},
-    {"name": "承認済は載せない",
-     "record": {"state": "承認_SMS", "sent_at": "2026-08-10 10:00"}, "now": "2026-08-17 10:00", "expect": false},
-    {"name": "電話で承認済も載せない",
-     "record": {"state": "承認_電話", "sent_at": "2026-08-10 10:00"}, "now": "2026-08-17 10:00", "expect": false},
-    {"name": "送信失敗は経過日数によらず即載せる",
-     "record": {"state": "送信失敗", "sent_at": "2026-08-17 09:00"}, "now": "2026-08-17 10:00", "expect": true},
-    {"name": "要確認も即載せる",
-     "record": {"state": "要確認", "sent_at": "2026-08-17 09:00"}, "now": "2026-08-17 10:00", "expect": true},
-    {"name": "未送信は載せない(まだ待つ段階ですらない)",
-     "record": {"state": "未送信"}, "now": "2026-08-17 10:00", "expect": false},
-    {"name": "期限切れは電話リストではなく別扱い",
-     "record": {"state": "期限切れ", "sent_at": "2026-08-01 10:00"}, "now": "2026-08-17 10:00", "expect": false}
+    {
+      "name": "送信から1日では電話リストに載せない",
+      "record": {
+        "state": "送信済",
+        "sent_at": "2026-08-14 10:00"
+      },
+      "now": "2026-08-15 10:00",
+      "expect": false
+    },
+    {
+      "name": "送信から2日ちょうどで載せる",
+      "record": {
+        "state": "送信済",
+        "sent_at": "2026-08-14 10:00"
+      },
+      "now": "2026-08-16 10:00",
+      "expect": true
+    },
+    {
+      "name": "送信から3日なら当然載せる",
+      "record": {
+        "state": "送信済",
+        "sent_at": "2026-08-14 10:00"
+      },
+      "now": "2026-08-17 10:00",
+      "expect": true
+    },
+    {
+      "name": "2日に1分足りなければ載せない",
+      "record": {
+        "state": "送信済",
+        "sent_at": "2026-08-14 10:00"
+      },
+      "now": "2026-08-16 09:59",
+      "expect": false
+    },
+    {
+      "name": "承認済は載せない",
+      "record": {
+        "state": "承認_SMS",
+        "sent_at": "2026-08-10 10:00"
+      },
+      "now": "2026-08-17 10:00",
+      "expect": false
+    },
+    {
+      "name": "電話で承認済も載せない",
+      "record": {
+        "state": "承認_電話",
+        "sent_at": "2026-08-10 10:00"
+      },
+      "now": "2026-08-17 10:00",
+      "expect": false
+    },
+    {
+      "name": "送信失敗は経過日数によらず即載せる",
+      "record": {
+        "state": "送信失敗",
+        "sent_at": "2026-08-17 09:00"
+      },
+      "now": "2026-08-17 10:00",
+      "expect": true
+    },
+    {
+      "name": "要確認も即載せる",
+      "record": {
+        "state": "要確認",
+        "sent_at": "2026-08-17 09:00"
+      },
+      "now": "2026-08-17 10:00",
+      "expect": true
+    },
+    {
+      "name": "未送信は載せない(まだ待つ段階ですらない)",
+      "record": {
+        "state": "未送信"
+      },
+      "now": "2026-08-17 10:00",
+      "expect": false
+    },
+    {
+      "name": "期限切れは電話リストではなく別扱い",
+      "record": {
+        "state": "期限切れ",
+        "sent_at": "2026-08-01 10:00"
+      },
+      "now": "2026-08-17 10:00",
+      "expect": false
+    }
   ],
-
   "expire": [
-    {"name": "6日では期限切れにしない",
-     "record": {"state": "送信済", "sent_at": "2026-08-11 10:00"}, "now": "2026-08-17 10:00", "expect": false},
-    {"name": "7日で期限切れ",
-     "record": {"state": "送信済", "sent_at": "2026-08-10 10:00"}, "now": "2026-08-17 10:00", "expect": true},
-    {"name": "承認済は期限切れにしない",
-     "record": {"state": "承認_SMS", "sent_at": "2026-08-01 10:00"}, "now": "2026-08-17 10:00", "expect": false},
-    {"name": "未送信(sent_atなし)は期限切れ判定の対象外",
-     "record": {"state": "未送信"}, "now": "2026-08-17 10:00", "expect": false}
+    {
+      "name": "6日では期限切れにしない",
+      "record": {
+        "state": "送信済",
+        "sent_at": "2026-08-11 10:00"
+      },
+      "now": "2026-08-17 10:00",
+      "expect": false
+    },
+    {
+      "name": "7日で期限切れ",
+      "record": {
+        "state": "送信済",
+        "sent_at": "2026-08-10 10:00"
+      },
+      "now": "2026-08-17 10:00",
+      "expect": true
+    },
+    {
+      "name": "承認済は期限切れにしない",
+      "record": {
+        "state": "承認_SMS",
+        "sent_at": "2026-08-01 10:00"
+      },
+      "now": "2026-08-17 10:00",
+      "expect": false
+    },
+    {
+      "name": "未送信(sent_atなし)は期限切れ判定の対象外",
+      "record": {
+        "state": "未送信"
+      },
+      "now": "2026-08-17 10:00",
+      "expect": false
+    }
   ],
-
   "send_gate": [
-    {"name": "時間帯内・未送信・上限未満なら送れる",
-     "order_id": "A-10431", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 0, "expect": true},
-    {"name": "送信済の申込には二度送らない(べき等性)",
-     "order_id": "A-10431", "now": "2026-08-17 10:00", "already_sent_ids": ["A-10431"], "sent_today": 1, "expect": false},
-    {"name": "開始時刻ちょうどは送れる",
-     "order_id": "A-10432", "now": "2026-08-17 09:00", "already_sent_ids": [], "sent_today": 0, "expect": true},
-    {"name": "早朝は送らない",
-     "order_id": "A-10432", "now": "2026-08-17 08:59", "already_sent_ids": [], "sent_today": 0, "expect": false},
-    {"name": "終了時刻ちょうどは送らない(19時は含めない)",
-     "order_id": "A-10433", "now": "2026-08-17 19:00", "already_sent_ids": [], "sent_today": 0, "expect": false},
-    {"name": "18時台は送れる",
-     "order_id": "A-10433", "now": "2026-08-17 18:59", "already_sent_ids": [], "sent_today": 0, "expect": true},
-    {"name": "深夜は送らない",
-     "order_id": "A-10434", "now": "2026-08-17 23:30", "already_sent_ids": [], "sent_today": 0, "expect": false},
-    {"name": "1日の上限に達したら止める",
-     "order_id": "A-10435", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 100, "expect": false},
-    {"name": "上限の1件手前なら送れる",
-     "order_id": "A-10436", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 99, "expect": true},
-
-    {"name": "架電禁止の方には自動送信もしない(条件が揃っていても送らない)",
-     "order_id": "A-10437", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 0,
-     "record": {"order_id": "A-10437", "state": "未送信", "do_not_call": true}, "expect": false},
-
-    {"name": "対象外(list_status)も同じく送らない",
-     "order_id": "A-10438", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 0,
-     "record": {"order_id": "A-10438", "state": "未送信", "list_status": "対象外"}, "expect": false},
-
-    {"name": "架電禁止でなければ従来どおり送れる",
-     "order_id": "A-10439", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 0,
-     "record": {"order_id": "A-10439", "state": "未送信"}, "expect": true},
-
-    {"name": "後確認が不要になった申込にはSMSも送らない",
-     "order_id": "A-10440", "now": "2026-08-17 10:00", "already_sent_ids": [], "sent_today": 0,
-     "record": {"order_id": "A-10440", "state": "未送信", "atokakunin_required": false}, "expect": false}
+    {
+      "name": "時間帯内・未送信・上限未満なら送れる",
+      "order_id": "A-10431",
+      "now": "2026-08-17 10:00",
+      "already_sent_ids": [],
+      "sent_today": 0,
+      "expect": true
+    },
+    {
+      "name": "送信済の申込には二度送らない(べき等性)",
+      "order_id": "A-10431",
+      "now": "2026-08-17 10:00",
+      "already_sent_ids": [
+        "A-10431"
+      ],
+      "sent_today": 1,
+      "expect": false
+    },
+    {
+      "name": "開始時刻ちょうどは送れる",
+      "order_id": "A-10432",
+      "now": "2026-08-17 09:00",
+      "already_sent_ids": [],
+      "sent_today": 0,
+      "expect": true
+    },
+    {
+      "name": "早朝は送らない",
+      "order_id": "A-10432",
+      "now": "2026-08-17 08:59",
+      "already_sent_ids": [],
+      "sent_today": 0,
+      "expect": false
+    },
+    {
+      "name": "終了時刻ちょうどは送らない(19時は含めない)",
+      "order_id": "A-10433",
+      "now": "2026-08-17 19:00",
+      "already_sent_ids": [],
+      "sent_today": 0,
+      "expect": false
+    },
+    {
+      "name": "18時台は送れる",
+      "order_id": "A-10433",
+      "now": "2026-08-17 18:59",
+      "already_sent_ids": [],
+      "sent_today": 0,
+      "expect": true
+    },
+    {
+      "name": "深夜は送らない",
+      "order_id": "A-10434",
+      "now": "2026-08-17 23:30",
+      "already_sent_ids": [],
+      "sent_today": 0,
+      "expect": false
+    },
+    {
+      "name": "1日の上限に達したら止める",
+      "order_id": "A-10435",
+      "now": "2026-08-17 10:00",
+      "already_sent_ids": [],
+      "sent_today": 100,
+      "expect": false
+    },
+    {
+      "name": "上限の1件手前なら送れる",
+      "order_id": "A-10436",
+      "now": "2026-08-17 10:00",
+      "already_sent_ids": [],
+      "sent_today": 99,
+      "expect": true
+    },
+    {
+      "name": "架電禁止の方には自動送信もしない(条件が揃っていても送らない)",
+      "order_id": "A-10437",
+      "now": "2026-08-17 10:00",
+      "already_sent_ids": [],
+      "sent_today": 0,
+      "record": {
+        "order_id": "A-10437",
+        "state": "未送信",
+        "do_not_call": true
+      },
+      "expect": false
+    },
+    {
+      "name": "対象外(list_status)も同じく送らない",
+      "order_id": "A-10438",
+      "now": "2026-08-17 10:00",
+      "already_sent_ids": [],
+      "sent_today": 0,
+      "record": {
+        "order_id": "A-10438",
+        "state": "未送信",
+        "list_status": "対象外"
+      },
+      "expect": false
+    },
+    {
+      "name": "架電禁止でなければ従来どおり送れる",
+      "order_id": "A-10439",
+      "now": "2026-08-17 10:00",
+      "already_sent_ids": [],
+      "sent_today": 0,
+      "record": {
+        "order_id": "A-10439",
+        "state": "未送信"
+      },
+      "expect": true
+    },
+    {
+      "name": "後確認が不要になった申込にはSMSも送らない",
+      "order_id": "A-10440",
+      "now": "2026-08-17 10:00",
+      "already_sent_ids": [],
+      "sent_today": 0,
+      "record": {
+        "order_id": "A-10440",
+        "state": "未送信",
+        "atokakunin_required": false
+      },
+      "expect": false
+    }
   ],
-
   "error_class": [
-    {"name": "タイムアウトは再試行してよい", "kind": "timeout", "expect": "retry"},
-    {"name": "レート制限は再試行してよい", "kind": "rate_limit", "expect": "retry"},
-    {"name": "5xxは再試行してよい", "kind": "server_5xx", "expect": "retry"},
-    {"name": "ネットワーク障害は再試行してよい", "kind": "network", "expect": "retry"},
-    {"name": "曖昧な返信は人へ回す", "kind": "ambiguous_reply", "expect": "human"},
-    {"name": "申込が特定できない場合は人へ回す", "kind": "order_not_identified", "expect": "human"},
-    {"name": "認証エラーは即停止", "kind": "auth_invalid", "expect": "stop"},
-    {"name": "番号不正は即停止(再試行しても直らない)", "kind": "invalid_number", "expect": "stop"},
-    {"name": "残高切れは即停止", "kind": "balance_empty", "expect": "stop"},
-    {"name": "権限不足は即停止", "kind": "permission_denied", "expect": "stop"},
-    {"name": "知らないエラーを勝手に再試行しない(人へ)", "kind": "何かよくわからないエラー", "expect": "human"}
+    {
+      "name": "タイムアウトは再試行してよい",
+      "kind": "timeout",
+      "expect": "retry"
+    },
+    {
+      "name": "レート制限は再試行してよい",
+      "kind": "rate_limit",
+      "expect": "retry"
+    },
+    {
+      "name": "5xxは再試行してよい",
+      "kind": "server_5xx",
+      "expect": "retry"
+    },
+    {
+      "name": "ネットワーク障害は再試行してよい",
+      "kind": "network",
+      "expect": "retry"
+    },
+    {
+      "name": "曖昧な返信は人へ回す",
+      "kind": "ambiguous_reply",
+      "expect": "human"
+    },
+    {
+      "name": "申込が特定できない場合は人へ回す",
+      "kind": "order_not_identified",
+      "expect": "human"
+    },
+    {
+      "name": "認証エラーは即停止",
+      "kind": "auth_invalid",
+      "expect": "stop"
+    },
+    {
+      "name": "番号不正は即停止(再試行しても直らない)",
+      "kind": "invalid_number",
+      "expect": "stop"
+    },
+    {
+      "name": "残高切れは即停止",
+      "kind": "balance_empty",
+      "expect": "stop"
+    },
+    {
+      "name": "権限不足は即停止",
+      "kind": "permission_denied",
+      "expect": "stop"
+    },
+    {
+      "name": "知らないエラーを勝手に再試行しない(人へ)",
+      "kind": "何かよくわからないエラー",
+      "expect": "human"
+    }
   ],
-
   "call_list_order": [
-    {"name": "送信失敗→要確認→返信なし の順にかける",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-003", "tel_key": "T-c", "state": "送信済", "sent_at": "2026-08-14 10:00"},
-       {"order_id": "A-002", "tel_key": "T-b", "state": "要確認", "sent_at": "2026-08-16 10:00"},
-       {"order_id": "A-001", "tel_key": "T-a", "state": "送信失敗", "sent_at": "2026-08-17 08:00"}
-     ],
-     "expect": ["A-001", "A-002", "A-003"]},
-
-    {"name": "同じ状態なら経過の長い順",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-010", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-15 09:00"},
-       {"order_id": "A-011", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-11 09:00"},
-       {"order_id": "A-012", "tel_key": "T-c", "state": "送信済", "sent_at": "2026-08-13 09:00"}
-     ],
-     "expect": ["A-011", "A-012", "A-010"]},
-
-    {"name": "経過も同じなら申込ID順で固定する(毎朝の並びを変えない)",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-022", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-15 09:00"},
-       {"order_id": "A-020", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-15 09:00"},
-       {"order_id": "A-021", "tel_key": "T-c", "state": "送信済", "sent_at": "2026-08-15 09:00"}
-     ],
-     "expect": ["A-020", "A-021", "A-022"]},
-
-    {"name": "承認済・未送信・期限切れは載せない",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-030", "tel_key": "T-a", "state": "承認_SMS", "sent_at": "2026-08-10 09:00"},
-       {"order_id": "A-031", "tel_key": "T-b", "state": "承認_電話", "sent_at": "2026-08-10 09:00"},
-       {"order_id": "A-032", "tel_key": "T-c", "state": "未送信"},
-       {"order_id": "A-033", "tel_key": "T-d", "state": "期限切れ", "sent_at": "2026-08-01 09:00"},
-       {"order_id": "A-034", "tel_key": "T-e", "state": "送信済", "sent_at": "2026-08-14 09:00"}
-     ],
-     "expect": ["A-034"]},
-
-    {"name": "2日に満たない返信待ちは載せない",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-040", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-16 09:00"},
-       {"order_id": "A-041", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-15 09:00"}
-     ],
-     "expect": ["A-041"]},
-
-    {"name": "期限間近は送信失敗より先にかける(取り返しがつかない順)",
-     "_note": "送信失敗は急ぐが期限まで7日ある。期限が明日の件は今日かけないと手遅れになる",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-090", "tel_key": "T-a", "state": "送信失敗", "sent_at": "2026-08-17 08:00"},
-       {"order_id": "A-091", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-11 09:00"}
-     ],
-     "expect": ["A-091", "A-090"]},
-
-    {"name": "期限間近どうしなら通常の優先度で並ぶ",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-100", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-11 09:00"},
-       {"order_id": "A-101", "tel_key": "T-b", "state": "送信失敗", "sent_at": "2026-08-10 09:00"}
-     ],
-     "expect": ["A-101", "A-100"]},
-
-    {"name": "架電禁止は何より先に効く(期限間近でも電話リストに載せない)",
-     "_note": "共通仕様: 架電禁止は持ち場と無関係に最優先。どこにいても発信しない",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-110", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-10 09:00", "do_not_call": true},
-       {"order_id": "A-111", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-14 09:00"}
-     ],
-     "expect": ["A-111"]},
-
-    {"name": "架電禁止は送信失敗でも電話リストに載せない",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-120", "tel_key": "T-a", "state": "送信失敗", "sent_at": "2026-08-17 08:00", "do_not_call": true}
-     ],
-     "expect": []},
-
-    {"name": "対象外(list_status)も架電禁止と同じに扱う",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-130", "tel_key": "T-a", "state": "要確認", "sent_at": "2026-08-15 09:00", "list_status": "対象外"}
-     ],
-     "expect": []},
-
-    {"name": "後確認が不要になった申込は追いかけない(取下げ等)",
-     "_note": "起点は申込完了。申込から成立までの間に申込自体が無くなることがある",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-140", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-14 09:00", "atokakunin_required": false},
-       {"order_id": "A-141", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-14 09:00"}
-     ],
-     "expect": ["A-141"]},
-
-    {"name": "不要フラグは期限間近より先に効く",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-150", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-10 09:00", "atokakunin_required": false}
-     ],
-     "expect": []},
-
-    {"name": "フラグが無ければ従来どおり必要とみなす(既定は必要)",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-160", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-14 09:00"}
-     ],
-     "expect": ["A-160"]},
-
-    {"name": "かけ直し希望の日時より前は電話リストに出さない",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-170", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-14 09:00", "next_call_at": "2026-08-19 14:00"},
-       {"order_id": "A-171", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-14 09:00"}
-     ],
-     "expect": ["A-171"]},
-
-    {"name": "かけ直し希望の日時を過ぎたら出す",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-180", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-14 09:00", "next_call_at": "2026-08-16 14:00"}
-     ],
-     "expect": ["A-180"]},
-
-    {"name": "期限が目前なら、かけ直し希望の日時より前でも出す",
-     "_note": "待っていると手遅れになる。取り返しがつかない順を優先する",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-190", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-11 09:00", "next_call_at": "2026-08-25 14:00"}
-     ],
-     "expect": ["A-190"]},
-
-    {"name": "対象が無ければ空",
-     "now": "2026-08-17 09:00", "records": [], "expect": []}
+    {
+      "name": "送信失敗→要確認→返信なし の順にかける",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-003",
+          "tel_key": "T-c",
+          "state": "送信済",
+          "sent_at": "2026-08-14 10:00"
+        },
+        {
+          "order_id": "A-002",
+          "tel_key": "T-b",
+          "state": "要確認",
+          "sent_at": "2026-08-16 10:00"
+        },
+        {
+          "order_id": "A-001",
+          "tel_key": "T-a",
+          "state": "送信失敗",
+          "sent_at": "2026-08-17 08:00"
+        }
+      ],
+      "expect": [
+        "A-001",
+        "A-002",
+        "A-003"
+      ]
+    },
+    {
+      "name": "同じ状態なら経過の長い順",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-010",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-15 09:00"
+        },
+        {
+          "order_id": "A-011",
+          "tel_key": "T-b",
+          "state": "送信済",
+          "sent_at": "2026-08-11 09:00"
+        },
+        {
+          "order_id": "A-012",
+          "tel_key": "T-c",
+          "state": "送信済",
+          "sent_at": "2026-08-13 09:00"
+        }
+      ],
+      "expect": [
+        "A-011",
+        "A-012",
+        "A-010"
+      ]
+    },
+    {
+      "name": "経過も同じなら申込ID順で固定する(毎朝の並びを変えない)",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-022",
+          "tel_key": "T-b",
+          "state": "送信済",
+          "sent_at": "2026-08-15 09:00"
+        },
+        {
+          "order_id": "A-020",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-15 09:00"
+        },
+        {
+          "order_id": "A-021",
+          "tel_key": "T-c",
+          "state": "送信済",
+          "sent_at": "2026-08-15 09:00"
+        }
+      ],
+      "expect": [
+        "A-020",
+        "A-021",
+        "A-022"
+      ]
+    },
+    {
+      "name": "承認済・未送信・期限切れは載せない",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-030",
+          "tel_key": "T-a",
+          "state": "承認_SMS",
+          "sent_at": "2026-08-10 09:00"
+        },
+        {
+          "order_id": "A-031",
+          "tel_key": "T-b",
+          "state": "承認_電話",
+          "sent_at": "2026-08-10 09:00"
+        },
+        {
+          "order_id": "A-032",
+          "tel_key": "T-c",
+          "state": "未送信"
+        },
+        {
+          "order_id": "A-033",
+          "tel_key": "T-d",
+          "state": "期限切れ",
+          "sent_at": "2026-08-01 09:00"
+        },
+        {
+          "order_id": "A-034",
+          "tel_key": "T-e",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00"
+        }
+      ],
+      "expect": [
+        "A-034"
+      ]
+    },
+    {
+      "name": "2日に満たない返信待ちは載せない",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-040",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-16 09:00"
+        },
+        {
+          "order_id": "A-041",
+          "tel_key": "T-b",
+          "state": "送信済",
+          "sent_at": "2026-08-15 09:00"
+        }
+      ],
+      "expect": [
+        "A-041"
+      ]
+    },
+    {
+      "name": "期限間近は送信失敗より先にかける(取り返しがつかない順)",
+      "_note": "送信失敗は急ぐが期限まで7日ある。期限が明日の件は今日かけないと手遅れになる",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-090",
+          "tel_key": "T-a",
+          "state": "送信失敗",
+          "sent_at": "2026-08-17 08:00"
+        },
+        {
+          "order_id": "A-091",
+          "tel_key": "T-b",
+          "state": "送信済",
+          "sent_at": "2026-08-11 09:00"
+        }
+      ],
+      "expect": [
+        "A-091",
+        "A-090"
+      ]
+    },
+    {
+      "name": "期限間近どうしなら通常の優先度で並ぶ",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-100",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-11 09:00"
+        },
+        {
+          "order_id": "A-101",
+          "tel_key": "T-b",
+          "state": "送信失敗",
+          "sent_at": "2026-08-10 09:00"
+        }
+      ],
+      "expect": [
+        "A-101",
+        "A-100"
+      ]
+    },
+    {
+      "name": "架電禁止は何より先に効く(期限間近でも電話リストに載せない)",
+      "_note": "共通仕様: 架電禁止は持ち場と無関係に最優先。どこにいても発信しない",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-110",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-10 09:00",
+          "do_not_call": true
+        },
+        {
+          "order_id": "A-111",
+          "tel_key": "T-b",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00"
+        }
+      ],
+      "expect": [
+        "A-111"
+      ]
+    },
+    {
+      "name": "架電禁止は送信失敗でも電話リストに載せない",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-120",
+          "tel_key": "T-a",
+          "state": "送信失敗",
+          "sent_at": "2026-08-17 08:00",
+          "do_not_call": true
+        }
+      ],
+      "expect": []
+    },
+    {
+      "name": "対象外(list_status)も架電禁止と同じに扱う",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-130",
+          "tel_key": "T-a",
+          "state": "要確認",
+          "sent_at": "2026-08-15 09:00",
+          "list_status": "対象外"
+        }
+      ],
+      "expect": []
+    },
+    {
+      "name": "後確認が不要になった申込は追いかけない(取下げ等)",
+      "_note": "起点は申込完了。申込から成立までの間に申込自体が無くなることがある",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-140",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00",
+          "atokakunin_required": false
+        },
+        {
+          "order_id": "A-141",
+          "tel_key": "T-b",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00"
+        }
+      ],
+      "expect": [
+        "A-141"
+      ]
+    },
+    {
+      "name": "不要フラグは期限間近より先に効く",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-150",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-10 09:00",
+          "atokakunin_required": false
+        }
+      ],
+      "expect": []
+    },
+    {
+      "name": "フラグが無ければ従来どおり必要とみなす(既定は必要)",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-160",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00"
+        }
+      ],
+      "expect": [
+        "A-160"
+      ]
+    },
+    {
+      "name": "かけ直し希望の日時より前は電話リストに出さない",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-170",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00",
+          "next_call_at": "2026-08-19 14:00"
+        },
+        {
+          "order_id": "A-171",
+          "tel_key": "T-b",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00"
+        }
+      ],
+      "expect": [
+        "A-171"
+      ]
+    },
+    {
+      "name": "かけ直し希望の日時を過ぎたら出す",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-180",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00",
+          "next_call_at": "2026-08-16 14:00"
+        }
+      ],
+      "expect": [
+        "A-180"
+      ]
+    },
+    {
+      "name": "期限が目前なら、かけ直し希望の日時より前でも出す",
+      "_note": "待っていると手遅れになる。取り返しがつかない順を優先する",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-190",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-11 09:00",
+          "next_call_at": "2026-08-25 14:00"
+        }
+      ],
+      "expect": [
+        "A-190"
+      ]
+    },
+    {
+      "name": "対象が無ければ空",
+      "now": "2026-08-17 09:00",
+      "records": [],
+      "expect": []
+    }
   ],
-
   "call_outcome": [
-    {"name": "了承をもらえたら承認(電話)。次回の予定は消す",
-     "now": "2026-08-17 10:00", "outcome": "了承",
-     "record": {"state": "送信済", "absent_count": 0},
-     "expect": {"state": "承認_電話", "next_call_at": null, "absent_count": 0, "needs_human": false}},
-
-    {"name": "不在1回目は翌日にかけ直す",
-     "now": "2026-08-17 10:00", "outcome": "不在",
-     "record": {"state": "送信済", "absent_count": 0},
-     "expect": {"state": "送信済", "next_call_at": "2026-08-18 10:00", "absent_count": 1, "needs_human": false}},
-
-    {"name": "不在2回目もまだ自動で追う",
-     "now": "2026-08-17 10:00", "outcome": "不在",
-     "record": {"state": "送信済", "absent_count": 1},
-     "expect": {"state": "送信済", "next_call_at": "2026-08-18 10:00", "absent_count": 2, "needs_human": false}},
-
-    {"name": "不在3回目で自動追跡をやめ、人に回す",
-     "_note": "3回は仮の値。何回まで追うかは担当者に質問中",
-     "now": "2026-08-17 10:00", "outcome": "不在",
-     "record": {"state": "送信済", "absent_count": 2},
-     "expect": {"state": "要確認", "next_call_at": null, "absent_count": 3, "needs_human": true}},
-
-    {"name": "かけ直し希望は、その日時まで出さない",
-     "now": "2026-08-17 10:00", "outcome": "かけ直し希望", "callback_at": "2026-08-19 14:00",
-     "record": {"state": "送信済", "absent_count": 0},
-     "expect": {"state": "送信済", "next_call_at": "2026-08-19 14:00", "absent_count": 0, "needs_human": false}},
-
-    {"name": "かけ直し希望なのに日時が無ければ人に回す(埋もれさせない)",
-     "now": "2026-08-17 10:00", "outcome": "かけ直し希望",
-     "record": {"state": "送信済", "absent_count": 0},
-     "expect": {"state": "送信済", "next_call_at": null, "absent_count": 0, "needs_human": true}},
-
-    {"name": "拒否は機械で決めず人に回す",
-     "_note": "後確認が取れなかった申込をどうするかは業務判断",
-     "now": "2026-08-17 10:00", "outcome": "拒否",
-     "record": {"state": "送信済", "absent_count": 0},
-     "expect": {"state": "要確認", "next_call_at": null, "absent_count": 0, "needs_human": true}},
-
-    {"name": "想定外の結果を勝手に解釈しない",
-     "now": "2026-08-17 10:00", "outcome": "なんとなく良い感じだった",
-     "record": {"state": "送信済", "absent_count": 0},
-     "expect": {"state": "送信済", "next_call_at": null, "absent_count": 0, "needs_human": true}}
+    {
+      "name": "了承をもらえたら承認(電話)。次回の予定は消す",
+      "now": "2026-08-17 10:00",
+      "outcome": "了承",
+      "record": {
+        "state": "送信済",
+        "absent_count": 0
+      },
+      "expect": {
+        "state": "承認_電話",
+        "next_call_at": null,
+        "absent_count": 0,
+        "needs_human": false
+      }
+    },
+    {
+      "name": "不在1回目は翌日にかけ直す",
+      "now": "2026-08-17 10:00",
+      "outcome": "不在",
+      "record": {
+        "state": "送信済",
+        "absent_count": 0
+      },
+      "expect": {
+        "state": "送信済",
+        "next_call_at": "2026-08-18 10:00",
+        "absent_count": 1,
+        "needs_human": false
+      }
+    },
+    {
+      "name": "不在2回目もまだ自動で追う",
+      "now": "2026-08-17 10:00",
+      "outcome": "不在",
+      "record": {
+        "state": "送信済",
+        "absent_count": 1
+      },
+      "expect": {
+        "state": "送信済",
+        "next_call_at": "2026-08-18 10:00",
+        "absent_count": 2,
+        "needs_human": false
+      }
+    },
+    {
+      "name": "不在3回目で自動追跡をやめ、人に回す",
+      "_note": "3回は仮の値。何回まで追うかは担当者に質問中",
+      "now": "2026-08-17 10:00",
+      "outcome": "不在",
+      "record": {
+        "state": "送信済",
+        "absent_count": 2
+      },
+      "expect": {
+        "state": "要確認",
+        "next_call_at": null,
+        "absent_count": 3,
+        "needs_human": true
+      }
+    },
+    {
+      "name": "かけ直し希望は、その日時まで出さない",
+      "now": "2026-08-17 10:00",
+      "outcome": "かけ直し希望",
+      "callback_at": "2026-08-19 14:00",
+      "record": {
+        "state": "送信済",
+        "absent_count": 0
+      },
+      "expect": {
+        "state": "送信済",
+        "next_call_at": "2026-08-19 14:00",
+        "absent_count": 0,
+        "needs_human": false
+      }
+    },
+    {
+      "name": "かけ直し希望なのに日時が無ければ人に回す(埋もれさせない)",
+      "now": "2026-08-17 10:00",
+      "outcome": "かけ直し希望",
+      "record": {
+        "state": "送信済",
+        "absent_count": 0
+      },
+      "expect": {
+        "state": "送信済",
+        "next_call_at": null,
+        "absent_count": 0,
+        "needs_human": true
+      }
+    },
+    {
+      "name": "拒否は機械で決めず人に回す",
+      "_note": "後確認が取れなかった申込をどうするかは業務判断",
+      "now": "2026-08-17 10:00",
+      "outcome": "拒否",
+      "record": {
+        "state": "送信済",
+        "absent_count": 0
+      },
+      "expect": {
+        "state": "要確認",
+        "next_call_at": null,
+        "absent_count": 0,
+        "needs_human": true
+      }
+    },
+    {
+      "name": "想定外の結果を勝手に解釈しない",
+      "now": "2026-08-17 10:00",
+      "outcome": "なんとなく良い感じだった",
+      "record": {
+        "state": "送信済",
+        "absent_count": 0
+      },
+      "expect": {
+        "state": "送信済",
+        "next_call_at": null,
+        "absent_count": 0,
+        "needs_human": true
+      }
+    }
   ],
-
   "excluded_list": [
-    {"name": "架電禁止で後確認が未了のものは、黙って消さず一覧に出す",
-     "records": [
-       {"order_id": "A-200", "state": "送信済", "do_not_call": true},
-       {"order_id": "A-201", "state": "送信済"}
-     ],
-     "expect": ["A-200"]},
-
-    {"name": "対象外(list_status)も同じ扱い",
-     "records": [
-       {"order_id": "A-210", "state": "未送信", "list_status": "対象外"}
-     ],
-     "expect": ["A-210"]},
-
-    {"name": "架電禁止でも承認済なら一覧に出さない(もう用事がない)",
-     "records": [
-       {"order_id": "A-220", "state": "承認_電話", "do_not_call": true},
-       {"order_id": "A-221", "state": "承認_SMS", "do_not_call": true}
-     ],
-     "expect": []},
-
-    {"name": "架電禁止でも後確認が不要になったなら一覧に出さない",
-     "_note": "追いかける理由が消えているので、人が判断する対象でもなくなる",
-     "records": [
-       {"order_id": "A-240", "state": "送信済", "do_not_call": true, "atokakunin_required": false}
-     ],
-     "expect": []},
-
-    {"name": "架電禁止が無ければ空",
-     "records": [{"order_id": "A-230", "state": "送信済"}],
-     "expect": []}
+    {
+      "name": "架電禁止で後確認が未了のものは、黙って消さず一覧に出す",
+      "records": [
+        {
+          "order_id": "A-200",
+          "state": "送信済",
+          "do_not_call": true
+        },
+        {
+          "order_id": "A-201",
+          "state": "送信済"
+        }
+      ],
+      "expect": [
+        "A-200"
+      ]
+    },
+    {
+      "name": "対象外(list_status)も同じ扱い",
+      "records": [
+        {
+          "order_id": "A-210",
+          "state": "未送信",
+          "list_status": "対象外"
+        }
+      ],
+      "expect": [
+        "A-210"
+      ]
+    },
+    {
+      "name": "架電禁止でも承認済なら一覧に出さない(もう用事がない)",
+      "records": [
+        {
+          "order_id": "A-220",
+          "state": "承認_電話",
+          "do_not_call": true
+        },
+        {
+          "order_id": "A-221",
+          "state": "承認_SMS",
+          "do_not_call": true
+        }
+      ],
+      "expect": []
+    },
+    {
+      "name": "架電禁止でも後確認が不要になったなら一覧に出さない",
+      "_note": "追いかける理由が消えているので、人が判断する対象でもなくなる",
+      "records": [
+        {
+          "order_id": "A-240",
+          "state": "送信済",
+          "do_not_call": true,
+          "atokakunin_required": false
+        }
+      ],
+      "expect": []
+    },
+    {
+      "name": "架電禁止が無ければ空",
+      "records": [
+        {
+          "order_id": "A-230",
+          "state": "送信済"
+        }
+      ],
+      "expect": []
+    }
   ],
-
   "call_list_flags": [
-    {"name": "同じ番号で未完了2件なら両方に「申込の特定が必要」を立てる",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-050", "tel_key": "T-same", "state": "送信済", "sent_at": "2026-08-14 09:00"},
-       {"order_id": "A-051", "tel_key": "T-same", "state": "送信済", "sent_at": "2026-08-14 09:00"}
-     ],
-     "expect": [["A-050", true, false], ["A-051", true, false]]},
-
-    {"name": "番号が違えば特定フラグは立たない",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-060", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-14 09:00"},
-       {"order_id": "A-061", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-14 09:00"}
-     ],
-     "expect": [["A-060", false, false], ["A-061", false, false]]},
-
-    {"name": "承認済の同番号は未完了に数えない(特定フラグを立てない)",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-070", "tel_key": "T-same", "state": "送信済", "sent_at": "2026-08-14 09:00"},
-       {"order_id": "A-071", "tel_key": "T-same", "state": "承認_SMS", "sent_at": "2026-08-10 09:00"}
-     ],
-     "expect": [["A-070", false, false]]},
-
-    {"name": "期限(7日)の1日前から期限間近を立てる",
-     "now": "2026-08-17 09:00",
-     "records": [
-       {"order_id": "A-080", "tel_key": "T-a", "state": "送信済", "sent_at": "2026-08-11 09:00"},
-       {"order_id": "A-081", "tel_key": "T-b", "state": "送信済", "sent_at": "2026-08-12 09:00"}
-     ],
-     "expect": [["A-080", false, true], ["A-081", false, false]]}
+    {
+      "name": "同じ番号で未完了2件なら両方に「申込の特定が必要」を立てる",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-050",
+          "tel_key": "T-same",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00"
+        },
+        {
+          "order_id": "A-051",
+          "tel_key": "T-same",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00"
+        }
+      ],
+      "expect": [
+        [
+          "A-050",
+          true,
+          false
+        ],
+        [
+          "A-051",
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "番号が違えば特定フラグは立たない",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-060",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00"
+        },
+        {
+          "order_id": "A-061",
+          "tel_key": "T-b",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00"
+        }
+      ],
+      "expect": [
+        [
+          "A-060",
+          false,
+          false
+        ],
+        [
+          "A-061",
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "承認済の同番号は未完了に数えない(特定フラグを立てない)",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-070",
+          "tel_key": "T-same",
+          "state": "送信済",
+          "sent_at": "2026-08-14 09:00"
+        },
+        {
+          "order_id": "A-071",
+          "tel_key": "T-same",
+          "state": "承認_SMS",
+          "sent_at": "2026-08-10 09:00"
+        }
+      ],
+      "expect": [
+        [
+          "A-070",
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "期限(7日)の1日前から期限間近を立てる",
+      "now": "2026-08-17 09:00",
+      "records": [
+        {
+          "order_id": "A-080",
+          "tel_key": "T-a",
+          "state": "送信済",
+          "sent_at": "2026-08-11 09:00"
+        },
+        {
+          "order_id": "A-081",
+          "tel_key": "T-b",
+          "state": "送信済",
+          "sent_at": "2026-08-12 09:00"
+        }
+      ],
+      "expect": [
+        [
+          "A-080",
+          false,
+          true
+        ],
+        [
+          "A-081",
+          false,
+          false
+        ]
+      ]
+    }
   ],
-
   "review_candidates": [
-    {"name": "3件以上そろった短い語だけを候補にする",
-     "replies": ["ハイ", "ハイ", "ハイ", "承知", "承知"],
-     "expect": {"candidates": [["ハイ", 3]], "needs_human_read": 2}},
-
-    {"name": "件数が多い順に並ぶ",
-     "replies": ["OK", "OK", "OK", "ハイ", "ハイ", "ハイ", "ハイ"],
-     "expect": {"candidates": [["ハイ", 4], ["OK", 3]], "needs_human_read": 0}},
-
-    {"name": "同数なら語順で安定させる(出現順が逆でも並びは同じ)",
-     "_note": "出現順(いろ→あい)と期待する並び(あい→いろ)を逆にしてある。ここを揃えると並べ替えの有無を検出できない",
-     "replies": ["いろ", "いろ", "いろ", "あい", "あい", "あい"],
-     "expect": {"candidates": [["あい", 3], ["いろ", 3]], "needs_human_read": 0}},
-
-    {"name": "すでに承認語のものは候補に出さない",
-     "replies": ["はい", "はい", "はい", "はい"],
-     "expect": {"candidates": [], "needs_human_read": 0}},
-
-    {"name": "長文は候補にせず人が読む対象にする",
-     "replies": ["はい、内容を確認しました。よろしくお願いします", "ハイ", "ハイ", "ハイ"],
-     "expect": {"candidates": [["ハイ", 3]], "needs_human_read": 1}},
-
-    {"name": "長文は何件そろっても候補にしない",
-     "_note": "頻度しきい値ではなく長さで弾いていることを確かめる(3件そろえてある)",
-     "replies": ["はい、内容を確認しました。よろしくお願いします",
-                 "はい、内容を確認しました。よろしくお願いします",
-                 "はい、内容を確認しました。よろしくお願いします"],
-     "expect": {"candidates": [], "needs_human_read": 3}},
-
-    {"name": "上限ちょうどの長さは候補にする(境界)",
-     "replies": ["わかりました", "わかりました", "わかりました"],
-     "expect": {"candidates": [["わかりました", 3]], "needs_human_read": 0}},
-
-    {"name": "上限を1文字超えたら候補にしない(境界)",
-     "replies": ["わかりましたよ", "わかりましたよ", "わかりましたよ"],
-     "expect": {"candidates": [], "needs_human_read": 3}},
-
-    {"name": "半角数字を含む返信は候補にしない(電話番号等の混入を防ぐ)",
-     "_note": "携帯番号の形をした文字列は、たとえ架空でもここに書かない。長さフィルタで先に弾かれて数字フィルタの検証にならないうえ、CIのPII混入チェックに引っかかるため。短い数字列で数字フィルタだけを確かめる",
-     "replies": ["0912", "0912", "0912", "ハイ", "ハイ", "ハイ"],
-     "expect": {"candidates": [["ハイ", 3]], "needs_human_read": 3}},
-
-    {"name": "全角数字も候補にしない",
-     "replies": ["１２３４", "１２３４", "１２３４"],
-     "expect": {"candidates": [], "needs_human_read": 3}},
-
-    {"name": "疑問符つきは候補にせず人が読む",
-     "replies": ["これは何?", "これは何?", "これは何?"],
-     "expect": {"candidates": [], "needs_human_read": 3}},
-
-    {"name": "全角の疑問符も同じ扱い",
-     "replies": ["何ですか？", "何ですか？", "何ですか？"],
-     "expect": {"candidates": [], "needs_human_read": 3}},
-
-    {"name": "空文字は数えない",
-     "replies": ["", "   ", "　"],
-     "expect": {"candidates": [], "needs_human_read": 0}},
-
-    {"name": "未受信(None)は人が読む対象",
-     "replies": [null, null],
-     "expect": {"candidates": [], "needs_human_read": 2}},
-
-    {"name": "前後の空白は落としてから数える",
-     "replies": [" ハイ", "ハイ ", "　ハイ　"],
-     "expect": {"candidates": [["ハイ", 3]], "needs_human_read": 0}},
-
-    {"name": "2件しか無い語は候補にせず、件数は人が読む側に積む",
-     "replies": ["ハイ", "ハイ"],
-     "expect": {"candidates": [], "needs_human_read": 2}},
-
-    {"name": "min_countを上げると候補が絞られる",
-     "replies": ["ハイ", "ハイ", "ハイ", "ハイ"], "min_count": 5,
-     "expect": {"candidates": [], "needs_human_read": 4}},
-
-    {"name": "返信が1件も無ければ何も出ない",
-     "replies": [],
-     "expect": {"candidates": [], "needs_human_read": 0}}
+    {
+      "name": "3件以上そろった短い語だけを候補にする",
+      "replies": [
+        "ハイ",
+        "ハイ",
+        "ハイ",
+        "承知",
+        "承知"
+      ],
+      "expect": {
+        "candidates": [
+          [
+            "ハイ",
+            3
+          ]
+        ],
+        "needs_human_read": 2
+      }
+    },
+    {
+      "name": "件数が多い順に並ぶ",
+      "replies": [
+        "OK",
+        "OK",
+        "OK",
+        "ハイ",
+        "ハイ",
+        "ハイ",
+        "ハイ"
+      ],
+      "expect": {
+        "candidates": [
+          [
+            "ハイ",
+            4
+          ],
+          [
+            "OK",
+            3
+          ]
+        ],
+        "needs_human_read": 0
+      }
+    },
+    {
+      "name": "同数なら語順で安定させる(出現順が逆でも並びは同じ)",
+      "_note": "出現順(いろ→あい)と期待する並び(あい→いろ)を逆にしてある。ここを揃えると並べ替えの有無を検出できない",
+      "replies": [
+        "いろ",
+        "いろ",
+        "いろ",
+        "あい",
+        "あい",
+        "あい"
+      ],
+      "expect": {
+        "candidates": [
+          [
+            "あい",
+            3
+          ],
+          [
+            "いろ",
+            3
+          ]
+        ],
+        "needs_human_read": 0
+      }
+    },
+    {
+      "name": "すでに承認語のものは候補に出さない",
+      "replies": [
+        "はい",
+        "はい",
+        "はい",
+        "はい"
+      ],
+      "expect": {
+        "candidates": [],
+        "needs_human_read": 0
+      }
+    },
+    {
+      "name": "長文は候補にせず人が読む対象にする",
+      "replies": [
+        "はい、内容を確認しました。よろしくお願いします",
+        "ハイ",
+        "ハイ",
+        "ハイ"
+      ],
+      "expect": {
+        "candidates": [
+          [
+            "ハイ",
+            3
+          ]
+        ],
+        "needs_human_read": 1
+      }
+    },
+    {
+      "name": "長文は何件そろっても候補にしない",
+      "_note": "頻度しきい値ではなく長さで弾いていることを確かめる(3件そろえてある)",
+      "replies": [
+        "はい、内容を確認しました。よろしくお願いします",
+        "はい、内容を確認しました。よろしくお願いします",
+        "はい、内容を確認しました。よろしくお願いします"
+      ],
+      "expect": {
+        "candidates": [],
+        "needs_human_read": 3
+      }
+    },
+    {
+      "name": "上限ちょうどの長さは候補にする(境界)",
+      "replies": [
+        "わかりました",
+        "わかりました",
+        "わかりました"
+      ],
+      "expect": {
+        "candidates": [
+          [
+            "わかりました",
+            3
+          ]
+        ],
+        "needs_human_read": 0
+      }
+    },
+    {
+      "name": "上限を1文字超えたら候補にしない(境界)",
+      "replies": [
+        "わかりましたよ",
+        "わかりましたよ",
+        "わかりましたよ"
+      ],
+      "expect": {
+        "candidates": [],
+        "needs_human_read": 3
+      }
+    },
+    {
+      "name": "半角数字を含む返信は候補にしない(電話番号等の混入を防ぐ)",
+      "_note": "携帯番号の形をした文字列は、たとえ架空でもここに書かない。長さフィルタで先に弾かれて数字フィルタの検証にならないうえ、CIのPII混入チェックに引っかかるため。短い数字列で数字フィルタだけを確かめる",
+      "replies": [
+        "0912",
+        "0912",
+        "0912",
+        "ハイ",
+        "ハイ",
+        "ハイ"
+      ],
+      "expect": {
+        "candidates": [
+          [
+            "ハイ",
+            3
+          ]
+        ],
+        "needs_human_read": 3
+      }
+    },
+    {
+      "name": "全角数字も候補にしない",
+      "replies": [
+        "１２３４",
+        "１２３４",
+        "１２３４"
+      ],
+      "expect": {
+        "candidates": [],
+        "needs_human_read": 3
+      }
+    },
+    {
+      "name": "疑問符つきは候補にせず人が読む",
+      "replies": [
+        "これは何?",
+        "これは何?",
+        "これは何?"
+      ],
+      "expect": {
+        "candidates": [],
+        "needs_human_read": 3
+      }
+    },
+    {
+      "name": "全角の疑問符も同じ扱い",
+      "replies": [
+        "何ですか？",
+        "何ですか？",
+        "何ですか？"
+      ],
+      "expect": {
+        "candidates": [],
+        "needs_human_read": 3
+      }
+    },
+    {
+      "name": "空文字は数えない",
+      "replies": [
+        "",
+        "   ",
+        "　"
+      ],
+      "expect": {
+        "candidates": [],
+        "needs_human_read": 0
+      }
+    },
+    {
+      "name": "未受信(None)は人が読む対象",
+      "replies": [
+        null,
+        null
+      ],
+      "expect": {
+        "candidates": [],
+        "needs_human_read": 2
+      }
+    },
+    {
+      "name": "前後の空白は落としてから数える",
+      "replies": [
+        " ハイ",
+        "ハイ ",
+        "　ハイ　"
+      ],
+      "expect": {
+        "candidates": [
+          [
+            "ハイ",
+            3
+          ]
+        ],
+        "needs_human_read": 0
+      }
+    },
+    {
+      "name": "2件しか無い語は候補にせず、件数は人が読む側に積む",
+      "replies": [
+        "ハイ",
+        "ハイ"
+      ],
+      "expect": {
+        "candidates": [],
+        "needs_human_read": 2
+      }
+    },
+    {
+      "name": "min_countを上げると候補が絞られる",
+      "replies": [
+        "ハイ",
+        "ハイ",
+        "ハイ",
+        "ハイ"
+      ],
+      "min_count": 5,
+      "expect": {
+        "candidates": [],
+        "needs_human_read": 4
+      }
+    },
+    {
+      "name": "返信が1件も無ければ何も出ない",
+      "replies": [],
+      "expect": {
+        "candidates": [],
+        "needs_human_read": 0
+      }
+    }
   ],
-
   "retry_delay": [
-    {"name": "1回目は30秒待つ", "attempt": 1, "expect": 30},
-    {"name": "2回目は2分待つ", "attempt": 2, "expect": 120},
-    {"name": "3回目は10分待つ", "attempt": 3, "expect": 600},
-    {"name": "4回目は無い(上限超過。呼び出し側は落とすこと)", "attempt": 4, "expect": null},
-    {"name": "0回目は不正な入力", "attempt": 0, "expect": null}
+    {
+      "name": "1回目は30秒待つ",
+      "attempt": 1,
+      "expect": 30
+    },
+    {
+      "name": "2回目は2分待つ",
+      "attempt": 2,
+      "expect": 120
+    },
+    {
+      "name": "3回目は10分待つ",
+      "attempt": 3,
+      "expect": 600
+    },
+    {
+      "name": "4回目は無い(上限超過。呼び出し側は落とすこと)",
+      "attempt": 4,
+      "expect": null
+    },
+    {
+      "name": "0回目は不正な入力",
+      "attempt": 0,
+      "expect": null
+    }
   ]
 }

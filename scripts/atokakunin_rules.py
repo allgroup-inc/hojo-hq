@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# ⚠️ この写しは更新されません。ここを編集しても本物には反映されません。
+#    正(コード)  : allgroup-inc/kakei-atokakunin
+#    正(システム): allgroup-inc/kakei-crm の apps/confirmation
+#    2026-08-31 移設完了。作業するときは kakei-atokakunin を clone してください。
+
 """
 後確認(申込完了後の了承取得)の判定ロジック — 純粋関数のみ
 
