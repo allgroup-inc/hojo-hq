@@ -100,17 +100,37 @@ test("applyCompanyFilters: ランク・ステージ・担当者の完全一致�
 });
 
 test("buildCompanyListResult: 絞り込み指定時は上位100件制限をかけず、最小フィールドのみ返す(機微情報を含まない)", () => {
-  const result = adminAccess.buildCompanyListResult(SAMPLE_COMPANIES, { rank: "A" });
+  const result = adminAccess.buildCompanyListResult(SAMPLE_COMPANIES, { rank: "A" }, "2026-08-15");
   assert.deepEqual(result, [
-    { 企業ID: "C000001", 会社名: "テスト商事株式会社", ランク: "A", 現在ステージ: "提案中", 次回アクション予定日: "2026-08-20", 担当者: "たかし", 業種: "", 所在地: "", 流入ルート: [], 提案商品: [] },
-    { 企業ID: "C000003", 会社名: "デモ工業株式会社", ランク: "A", 現在ステージ: "成約", 次回アクション予定日: "", 担当者: "たかし", 業種: "", 所在地: "", 流入ルート: [], 提案商品: [] }
+    { 企業ID: "C000001", 会社名: "テスト商事株式会社", ランク: "A", 現在ステージ: "提案中", 次回アクション予定日: "2026-08-20", 担当者: "たかし", 業種: "", 所在地: "", 流入ルート: [], 提案商品: [], urgency: "ok" },
+    { 企業ID: "C000003", 会社名: "デモ工業株式会社", ランク: "A", 現在ステージ: "成約", 次回アクション予定日: "", 担当者: "たかし", 業種: "", 所在地: "", 流入ルート: [], 提案商品: [], urgency: "untouched" }
   ]);
 });
 
 test("buildCompanyListResult: 未絞り込み時は次回アクション予定日の降順で上位DEFAULT_LIST_LIMIT件のみ返す", () => {
-  const result = adminAccess.buildCompanyListResult(SAMPLE_COMPANIES, {});
+  const result = adminAccess.buildCompanyListResult(SAMPLE_COMPANIES, {}, "2026-08-15");
   assert.deepEqual(result.map(c => c["企業ID"]), ["C000001", "C000002", "C000003"]);
   assert.ok(result.length <= adminAccess.DEFAULT_LIST_LIMIT);
+});
+
+test("buildCompanyListResult: 各行にurgency(緊急度)が付与される(一覧テーブルの緊急度ドット表示用)", () => {
+  const companies = [
+    { 企業ID: "C_overdue", 会社名: "A社", ランク: "A", 次回アクション予定日: "2026-08-10" },
+    { 企業ID: "C_soon", 会社名: "B社", ランク: "A", 次回アクション予定日: "2026-08-17" },
+    { 企業ID: "C_ok", 会社名: "C社", ランク: "A", 次回アクション予定日: "2026-09-01" },
+    { 企業ID: "C_untouched", 会社名: "D社", ランク: "A", 次回アクション予定日: "" },
+    { 企業ID: "C_none", 会社名: "E社", ランク: "A", 次回アクション予定日: "2026-08-10", 連絡不要: true }
+  ];
+  const result = adminAccess.buildCompanyListResult(companies, {}, "2026-08-15");
+  const byId = {};
+  result.forEach((r) => { byId[r["企業ID"]] = r.urgency; });
+  assert.deepEqual(byId, {
+    C_overdue: "overdue",
+    C_soon: "soon",
+    C_ok: "ok",
+    C_untouched: "untouched",
+    C_none: "none"
+  });
 });
 
 test("sortInteractionsByDateDesc: 対応履歴を日付の新しい順に並び替える", () => {

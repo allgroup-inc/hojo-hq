@@ -254,6 +254,7 @@
     ".urgency{display:flex; align-items:center; gap:7px; font-size:.82rem; font-weight:700; color:var(--navy-ink);}",
     ".dot{width:9px; height:9px; border-radius:50%; flex:0 0 auto;}",
     ".dot.overdue{background:var(--bad); box-shadow:0 0 0 3px var(--bad-bg);}",
+    ".dot.untouched{background:var(--bad); box-shadow:0 0 0 3px var(--bad-bg);}",
     ".dot.soon{background:var(--warn); box-shadow:0 0 0 3px var(--warn-bg);}",
     ".dot.ok{background:var(--good); box-shadow:0 0 0 3px var(--good-bg);}",
     ".dot.none{background:var(--muted-2);}",
@@ -465,6 +466,32 @@
     "<select id=\"filterRoute\"><option value=\"\">流入ルート(すべて)</option></select>",
     "<select id=\"filterProduct\"><option value=\"\">提案商品(すべて)</option></select>",
     "</div>"
+  ].join("");
+
+  var HOWTO_GUIDE = [
+    "<div class=\"howto\"><details class=\"howto-card\">",
+    "<summary><span class=\"ico\">?</span>使い方ガイド",
+    "<span class=\"hint\">はじめての方はこちらをクリック</span><span class=\"chev\">▾</span></summary>",
+    "<div class=\"howto-body\">",
+    "<div><h4>① 使い方</h4><ol>",
+    "<li>会社名・代表者名で検索するか、ランク・現在ステージ・担当者・流入ルート・提案商品で絞り込む</li>",
+    "<li>一覧の行をクリックすると、対応履歴や関係メモを含む詳細が右からスライドして開く</li>",
+    "<li>詳細画面の🤝ボタンから、担当スタッフへSlackで即座に共有できる</li>",
+    "<li>上部のKPIカードをクリックすると、該当する企業の一覧がそのまま見られる</li>",
+    "</ol></div>",
+    "<div><h4>② データが蓄積される仕組み</h4><ul>",
+    "<li>入口(手紙DM・ミカタ経由・紹介パートナー経由)が違っても、「電話する」「訪問する」から先はすべて同じ仕組みに合流する</li>",
+    "<li>電話は通話システムと連携し、通話履歴が自動で対応履歴ログに記録される(手入力不要)</li>",
+    "<li>訪問した内容は、専用LINEに音声を送るだけで自動的に文字起こしされ、対応履歴として記録される</li>",
+    "<li>蓄積された対応履歴から、スコア・ランク・次回アクションが自動で再計算される。記録すること自体が優先順位を作る仕組み</li>",
+    "</ul></div>",
+    "<div><h4>③ 凡例</h4><div class=\"howto-legend\">",
+    "<div class=\"lg-row\"><span class=\"swatch rank rank-A\">A</span>総合スコアが最も高いランク(以下B・C・Dの順)</div>",
+    "<div class=\"lg-row\"><span class=\"swatch dot overdue\"></span>対応期限超過・未着手(最優先)</div>",
+    "<div class=\"lg-row\"><span class=\"swatch dot soon\"></span>対応期限が近い(3日以内)</div>",
+    "<div class=\"lg-row\"><span class=\"swatch dot ok\"></span>順調(期限まで余裕あり)</div>",
+    "</div></div>",
+    "</div></details></div>"
   ].join("");
 
   var KPI_ROW = [
@@ -747,7 +774,7 @@
     "'<td>' + escapeHtml(row['現在ステージ']) + '</td>' +",
     "'<td><div class=\"badge-row\">' + productBadges + '</div></td>' +",
     "'<td><span class=\"rank rank-' + escapeHtml(row['ランク']) + '\">' + escapeHtml(row['ランク']) + '</span></td>' +",
-    "'<td>' + escapeHtml(row['次回アクション予定日']) + '</td>';",
+    "'<td><span class=\"urgency\"><span class=\"dot ' + escapeHtml(row.urgency||'none') + '\"></span>' + escapeHtml(row['次回アクション予定日'] || '未設定') + '</span></td>';",
     "tr.addEventListener('click', function(){ openDrawer(row['企業ID']); });",
     "tbody.appendChild(tr);});",
     "}",
@@ -1087,6 +1114,7 @@
       "<style>" + STYLE + "</style></head><body>" +
       "<div class=\"app\">" +
       HEADER_AND_FILTERS +
+      HOWTO_GUIDE +
       "<div class=\"body-grid\">" + KPI_ROW + TABLE + SIDE_PANEL + PARTNER_VIEW + "</div>" +
       "</div>" +
       DRAWER + PARTNER_DRAWER + KPI_MODAL + SHARE_MODAL + LETTER_PREVIEW_MODAL +

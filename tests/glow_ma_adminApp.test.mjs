@@ -108,6 +108,22 @@ test("buildAdminAppHtml: コーポレートカラーの変数とロゴのアニ�
   assert.ok(html.indexOf("prefers-reduced-motion") !== -1, "reduced-motion対応がない");
 });
 
+test("buildAdminAppHtml: 使い方ガイド(howto)のマークアップが実際に出力される(CSS定義だけでなくアコーディオン本体を確認)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.indexOf('class="howto"') !== -1, "class=\"howto\" の使い方ガイドがヘッダー直後に出力されていない");
+  assert.ok(html.indexOf("使い方ガイド") !== -1, "使い方ガイドの見出しテキストが含まれていない");
+  assert.ok(html.indexOf("データが蓄積される仕組み") !== -1, "データ蓄積の仕組みの説明が含まれていない");
+});
+
+test("buildAdminAppHtml: 一覧テーブルの次回アクション列にurgencyドットのマークアップが出力される(CSS定義だけでなく実際の描画コードを確認)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.match(
+    html,
+    /class="dot ' \+ escapeHtml\(row\.urgency/,
+    "drawTableの行テンプレートにurgencyドット(class=\"dot ...\")が組み込まれていない"
+  );
+});
+
 test("buildAdminAppHtml: ヘッダーに実際のロゴ画像要素が出力される(CSS定義だけでなくマークアップ自体を確認)", () => {
   const html = adminApp.buildAdminAppHtml();
   assert.match(

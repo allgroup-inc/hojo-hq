@@ -150,7 +150,7 @@
   ];
   var DEFAULT_LIST_LIMIT = 100;
 
-  function pickCompanyListFields_(company) {
+  function pickCompanyListFields_(company, todayString) {
     var picked = {};
     COMPANY_LIST_FIELDS.forEach(function (field) {
       picked[field] = company[field] !== undefined ? company[field] : "";
@@ -158,6 +158,7 @@
     picked["次回アクション予定日"] = normalizeDateForDisplay(company["次回アクション予定日"]);
     picked["流入ルート"] = company["流入ルート"] || [];
     picked["提案商品"] = company["提案商品"] || [];
+    picked["urgency"] = computeUrgency(company, todayString);
     return picked;
   }
 
@@ -193,12 +194,14 @@
     });
   }
 
-  function buildCompanyListResult(companies, filters) {
+  function buildCompanyListResult(companies, filters, todayString) {
     var filtered = applyCompanyFilters(companies, filters);
     var limited = hasAnyFilter(filters)
       ? filtered
       : sortByNextActionDateDesc_(filtered).slice(0, DEFAULT_LIST_LIMIT);
-    return limited.map(pickCompanyListFields_);
+    return limited.map(function (company) {
+      return pickCompanyListFields_(company, todayString);
+    });
   }
 
   function sortInteractionsByDateDesc(records) {

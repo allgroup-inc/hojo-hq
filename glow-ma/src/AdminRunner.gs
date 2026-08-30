@@ -73,10 +73,8 @@ function renderAdminPage_() {
  */
 function getCompanyList(filters) {
   requireAdminAccess_();
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
-  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
-  return GlowAdminAccess.buildCompanyListResult(companies, filters || {});
+  var loaded = loadCompaniesWithReactionFlag_();
+  return GlowAdminAccess.buildCompanyListResult(loaded.companies, filters || {}, loaded.todayString);
 }
 
 /**
