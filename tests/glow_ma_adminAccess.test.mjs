@@ -133,6 +133,27 @@ test("buildCompanyListResult: 各行にurgency(緊急度)が付与される(一�
   });
 });
 
+test("normalizeCompanyDetailDates: 日付列(Dateオブジェクト)をyyyy-MM-dd文字列に正規化する(google.script.runがDateを含む応答を壊すのを防ぐ)", () => {
+  const company = {
+    "企業ID": "C000001",
+    "会社名": "太田建設株式会社",
+    "登録日": new Date(2026, 7, 10, 15, 0, 0),
+    "最終接触日": new Date(2026, 7, 18),
+    "次回アクション予定日": "",
+    "電話番号": "098-933-6464"
+  };
+  const result = adminAccess.normalizeCompanyDetailDates(company);
+  assert.equal(result["登録日"], "2026-08-10");
+  assert.equal(result["最終接触日"], "2026-08-18");
+  assert.equal(result["次回アクション予定日"], "");
+  assert.equal(result["会社名"], "太田建設株式会社");
+  assert.equal(result["電話番号"], "098-933-6464");
+});
+
+test("normalizeCompanyDetailDates: nullを渡してもそのまま返す(getCompanyDetailの未検出ケース)", () => {
+  assert.equal(adminAccess.normalizeCompanyDetailDates(null), null);
+});
+
 test("sortInteractionsByDateDesc: 対応履歴を日付の新しい順に並び替える", () => {
   const records = [
     { 履歴ID: "H-1", 日付: "2026-08-01" },

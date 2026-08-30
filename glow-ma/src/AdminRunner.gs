@@ -93,7 +93,7 @@ function getCompanyDetail(companyId) {
   var interactionsByCompany = logSheet ? readInteractionsByCompanyId_(logSheet) : {};
   var history = GlowAdminAccess.sortInteractionsByDateDesc(interactionsByCompany[companyId] || []);
 
-  return { company: company, history: history };
+  return { company: GlowAdminAccess.normalizeCompanyDetailDates(company), history: history };
 }
 
 /**

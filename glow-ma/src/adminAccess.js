@@ -255,6 +255,26 @@
     });
   }
 
+  // 企業詳細(getCompanyDetail)が返す企業オブジェクトの日付列。
+  // SheetsのgetValues()はこれらをJSのDateオブジェクトのまま返すため、
+  // google.script.runでブラウザへ渡す前に文字列へ正規化する必要がある
+  // (Dateオブジェクトが混ざったオブジェクトを返すと、応答がブラウザ側でnull扱いに
+  // なることがある。一覧側は既にpickCompanyListFields_で対応済みだったが、
+  // 詳細側は未対応で「該当する企業が見つかりません」という誤表示を招いていた)。
+  var COMPANY_DETAIL_DATE_FIELDS = ["最終接触日", "次回アクション予定日", "登録日"];
+
+  function normalizeCompanyDetailDates(company) {
+    if (!company) return company;
+    var normalized = {};
+    Object.keys(company).forEach(function (key) { normalized[key] = company[key]; });
+    COMPANY_DETAIL_DATE_FIELDS.forEach(function (field) {
+      if (normalized[field] !== undefined) {
+        normalized[field] = normalizeDateForDisplay(normalized[field]);
+      }
+    });
+    return normalized;
+  }
+
   var api = {
     isAllowedEmail: isAllowedEmail,
     buildAccessDeniedHtml: buildAccessDeniedHtml,
@@ -266,6 +286,7 @@
     buildCompanyListResult: buildCompanyListResult,
     sortInteractionsByDateDesc: sortInteractionsByDateDesc,
     normalizeDateForDisplay: normalizeDateForDisplay,
+    normalizeCompanyDetailDates: normalizeCompanyDetailDates,
     buildPartnerListRows: buildPartnerListRows,
     normalizeReferralRecords: normalizeReferralRecords,
     computeUrgency: computeUrgency,
