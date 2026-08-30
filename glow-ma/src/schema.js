@@ -65,8 +65,9 @@
   // Slack User ID の調べ方: Slackで対象社員のプロフィールを開き「その他」→
   // 「メンバーIDをコピー」(U から始まる文字列)。メールアドレスではない。
   // LINE User ID の調べ方: LINE公式アカウントの管理画面から事前に一覧取得する方法が
-  // ないため、対象社員が最初に音声を送った際にGAS側の実行ログへ出力されたIDを
-  // 人間が転記する(glow-ma/src/LineVoiceLogRunner.gs参照)。
+  // ないため、対象社員が最初に音声を送ると返る「担当者が特定できませんでした」の
+  // 返信に併記されるIDを、本人から管理者へ転送してもらって転記する。同じIDは
+  // GAS側の実行ログにも出力される(glow-ma/src/LineVoiceLogRunner.gs参照)。
   var STAFF_HEADERS = ["氏名", "Slack User ID", "有効", "メールアドレス", "LINE User ID"];
 
   var PARTNER_INTERACTION_LOG_SHEET_NAME = "パートナー対応履歴ログ";

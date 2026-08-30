@@ -76,6 +76,28 @@
     return candidateRespondent === RESPONDENT_UNCERTAIN_VALUE;
   }
 
+  var RESPONDENT_REVIEW_MARK = "【対応相手 要確認】";
+
+  /**
+   * 対応相手が判別できなかった場合に、内容メモの先頭へ目印を付ける。
+   *
+   * 対応履歴ログの「対応相手」列は RESPONDENT_TYPES の3値しか取れず(プルダウンと
+   * スコアリングがこの3値を前提にしている)、buildInteractionLogRow が
+   * normalizeRespondentType で既定値「経理・総務等の窓口担当」に丸める。
+   * そのため「判別できなかった」という事実が台帳のどこにも残らず、
+   * オーナー社長本人と話せていても decisionMakerBonus(+15点)が付かないまま
+   * 埋もれる。内容メモに目印を残せば、台帳を「要確認」で検索するだけで
+   * 訂正対象を拾える。
+   *
+   * 列を増やさないため既存データ・ダッシュボード集計には影響しない。
+   */
+  function markMemoIfRespondentUncertain(contentMemo, rawRespondent) {
+    var memo = String(contentMemo == null ? "" : contentMemo);
+    if (!isRespondentUncertain(rawRespondent)) return memo;
+    if (memo.indexOf(RESPONDENT_REVIEW_MARK) === 0) return memo;
+    return memo ? RESPONDENT_REVIEW_MARK + " " + memo : RESPONDENT_REVIEW_MARK;
+  }
+
   var FORMULA_PREFIX_PATTERN = /^[=+\-@]/;
 
   /**
@@ -248,8 +270,21 @@
     return "うまく処理できませんでした。もう一度録音してください。";
   }
 
-  function buildStaffNotFoundMessage() {
-    return "担当者が特定できませんでした。管理者に「スタッフ」タブへの登録を依頼してください。";
+  /**
+   * 未登録の担当者へ返す案内。LINE User IDを本文に含めて、本人が管理者へ
+   * そのまま転送するだけで登録が済むようにする。
+   *
+   * 背景: LINE User IDは公式アカウントの管理画面から一覧取得できないため、
+   * 従来は一時デバッグ用のスクリプトプロパティ(LAST_LINE_USER_ID)から人間が
+   * 転記していた。その暫定コードは2026-08-22に削除され(コミット433fee372)、
+   * 以後は新しい担当者を登録する手段が存在しない状態だった。実行ログを掘る運用に
+   * 戻すのではなく、本人に見せて転送してもらう方が早く、確実に届く。
+   * 自分自身のIDを本人に返すだけなので、他人の情報は漏れない。
+   */
+  function buildStaffNotFoundMessage(lineUserId) {
+    var base = "担当者が特定できませんでした。管理者に「スタッフ」タブへの登録を依頼してください。";
+    if (!lineUserId) return base;
+    return base + "\n\n----------\nこのメッセージをそのまま管理者に転送してください。\nLINE User ID: " + lineUserId;
   }
 
   function buildAlreadyProcessingMessage() {
@@ -269,6 +304,8 @@
     normalizeInteractionType: normalizeInteractionType,
     normalizeRespondentType: normalizeRespondentType,
     isRespondentUncertain: isRespondentUncertain,
+    markMemoIfRespondentUncertain: markMemoIfRespondentUncertain,
+    RESPONDENT_REVIEW_MARK: RESPONDENT_REVIEW_MARK,
     sanitizeSheetText: sanitizeSheetText,
     buildInteractionLogRow: buildInteractionLogRow,
     buildNewCompanyRow: buildNewCompanyRow,

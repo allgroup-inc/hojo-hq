@@ -130,7 +130,10 @@ function handleAudioMessage_(event) {
 
   var staffName = resolveStaffNameByLineUserId_(ss, lineUserId);
   if (!staffName) {
-    lineReply_(replyToken, [GlowLineVoiceLogContent.buildStaffNotFoundMessage()]);
+    // 新しい担当者を「スタッフ」タブへ登録するには、その人のLINE User IDが要る。
+    // 実行ログと本人への返信の両方に出して、どちらからでも拾えるようにする。
+    Logger.log("未登録のLINEユーザーから音声を受信しました。「スタッフ」タブへの登録が必要です。LINE User ID: " + lineUserId);
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildStaffNotFoundMessage(lineUserId)]);
     return;
   }
 
@@ -482,8 +485,15 @@ function processOneVoiceLog_(ss, record) {
 
   var companyNameCandidate = GlowLineVoiceLogContent.sanitizeSheetText(extracted.companyName);
   var interactionType = GlowLineVoiceLogContent.normalizeInteractionType(extracted.interactionType);
-  var respondentType = GlowLineVoiceLogContent.normalizeRespondentType(extracted.respondentType);
-  var contentMemo = GlowLineVoiceLogContent.sanitizeSheetText(extracted.contentMemo);
+  // 「不明」のまま持ち回す。ここで normalizeRespondentType に通してしまうと既定値
+  // 「経理・総務等の窓口担当」に化け、buildFinalConfirmPrompt の未判別チェックが
+  // 常に偽になって警告が一度も出なかった(2026-08-28 検証で判明)。
+  // 対応履歴ログへ書く際は buildInteractionLogRow が改めて正規化するため、
+  // 台帳には従来どおり3値のいずれかしか入らない。
+  var respondentType = GlowLineVoiceLogContent.sanitizeSheetText(extracted.respondentType);
+  var contentMemo = GlowLineVoiceLogContent.markMemoIfRespondentUncertain(
+    GlowLineVoiceLogContent.sanitizeSheetText(extracted.contentMemo), respondentType
+  );
   var nextAction = GlowLineVoiceLogContent.sanitizeSheetText(extracted.nextAction);
 
   var transcribed = transitionVoiceLogStatus_(ss, record.sheetRow, [VOICE_LOG_STATUS_PROCESSING], {
