@@ -154,6 +154,26 @@ test("normalizeCompanyDetailDates: nullを渡してもそのまま返す(getComp
   assert.equal(adminAccess.normalizeCompanyDetailDates(null), null);
 });
 
+test("buildFilterOptions: 現在ステージ・担当者・流入ルート・提案商品の選択肢を重複なく作る(getAdminBootstrapとgetFilterOptionsで共有)", () => {
+  const companies = [
+    { "現在ステージ": "未接触", "担当者": "たかし", "流入ルート": ["②手紙DM"], "提案商品": ["法人保険"] },
+    { "現在ステージ": "未接触", "担当者": "嶺井さん", "流入ルート": ["①紹介"], "提案商品": [] },
+    { "現在ステージ": "", "担当者": "", "流入ルート": [], "提案商品": ["法人保険", "M&A"] }
+  ];
+  const result = adminAccess.buildFilterOptions(companies);
+  assert.deepEqual(result, {
+    stages: ["未接触"],
+    owners: ["たかし", "嶺井さん"],
+    routes: ["②手紙DM", "①紹介"].sort(),
+    products: ["M&A", "法人保険"]
+  });
+});
+
+test("buildFilterOptions: 企業が空でも例外を投げず空の配列を返す", () => {
+  assert.deepEqual(adminAccess.buildFilterOptions([]), { stages: [], owners: [], routes: [], products: [] });
+  assert.deepEqual(adminAccess.buildFilterOptions(undefined), { stages: [], owners: [], routes: [], products: [] });
+});
+
 test("sortInteractionsByDateDesc: 対応履歴を日付の新しい順に並び替える", () => {
   const records = [
     { 履歴ID: "H-1", 日付: "2026-08-01" },

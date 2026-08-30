@@ -105,24 +105,7 @@ function getFilterOptions() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
   var companies = companySheet ? readCompanyRecords_(companySheet) : [];
-
-  var stageSet = {};
-  var ownerSet = {};
-  var routeSet = {};
-  var productSet = {};
-  companies.forEach(function (company) {
-    if (company["現在ステージ"]) stageSet[company["現在ステージ"]] = true;
-    if (company["担当者"]) ownerSet[company["担当者"]] = true;
-    (company["流入ルート"] || []).forEach(function (route) { routeSet[route] = true; });
-    (company["提案商品"] || []).forEach(function (product) { productSet[product] = true; });
-  });
-
-  return {
-    stages: Object.keys(stageSet).sort(),
-    owners: Object.keys(ownerSet).sort(),
-    routes: Object.keys(routeSet).sort(),
-    products: Object.keys(productSet).sort()
-  };
+  return GlowAdminAccess.buildFilterOptions(companies);
 }
 
 /**
@@ -178,6 +161,28 @@ function getNextActionQueue() {
   requireAdminAccess_();
   var loaded = loadCompaniesWithReactionFlag_();
   return GlowAdminAccess.buildNextActionQueue(loaded.companies, loaded.todayString, 8);
+}
+
+/**
+ * 管理画面を開いた直後の初回表示に必要なデータ(企業一覧・KPI・ワークロード・
+ * ネクストアクション・フィルタ選択肢)を1回のスプレッドシート読み込みでまとめて返す。
+ *
+ * 個別関数(getCompanyList/getKpiSummary/getOwnerWorkload/getNextActionQueue/
+ * getFilterOptions)はそれぞれ独立に企業マスタ全件(3,000件超)を読み直しており、
+ * 初回表示だけで5回分の重複読み込みが発生し体感速度を悪化させていた
+ * (2026-08-31 小柳さんの「動作が遅い」報告を受けて調査・特定)。
+ * 個別関数は絞り込み後の再取得(getCompanyList)等で引き続き使うため残す。
+ */
+function getAdminBootstrap() {
+  requireAdminAccess_();
+  var loaded = loadCompaniesWithReactionFlag_();
+  return {
+    companyList: GlowAdminAccess.buildCompanyListResult(loaded.companies, {}, loaded.todayString),
+    kpi: GlowAdminAccess.buildKpiSummary(loaded.companies, loaded.todayString),
+    workload: GlowAdminAccess.buildOwnerWorkload(loaded.companies, loaded.todayString),
+    queue: GlowAdminAccess.buildNextActionQueue(loaded.companies, loaded.todayString, 8),
+    filterOptions: GlowAdminAccess.buildFilterOptions(loaded.companies)
+  };
 }
 
 /**

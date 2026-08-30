@@ -204,6 +204,31 @@
     });
   }
 
+  /**
+   * 一覧画面の「現在ステージ」「担当者」「流入ルート」「提案商品」フィルタの選択肢を、
+   * 企業マスタに実在する値から重複なく作る(ランクはA/B/C/Dで固定のため画面側で
+   * ハードコードする)。AdminRunner.gsのgetFilterOptions/getAdminBootstrapの両方から
+   * 同じロジックを共有する。
+   */
+  function buildFilterOptions(companies) {
+    var stageSet = {};
+    var ownerSet = {};
+    var routeSet = {};
+    var productSet = {};
+    (companies || []).forEach(function (company) {
+      if (company["現在ステージ"]) stageSet[company["現在ステージ"]] = true;
+      if (company["担当者"]) ownerSet[company["担当者"]] = true;
+      (company["流入ルート"] || []).forEach(function (route) { routeSet[route] = true; });
+      (company["提案商品"] || []).forEach(function (product) { productSet[product] = true; });
+    });
+    return {
+      stages: Object.keys(stageSet).sort(),
+      owners: Object.keys(ownerSet).sort(),
+      routes: Object.keys(routeSet).sort(),
+      products: Object.keys(productSet).sort()
+    };
+  }
+
   function sortInteractionsByDateDesc(records) {
     return (records || [])
       .map(function (record) {
@@ -284,6 +309,7 @@
     hasAnyFilter: hasAnyFilter,
     applyCompanyFilters: applyCompanyFilters,
     buildCompanyListResult: buildCompanyListResult,
+    buildFilterOptions: buildFilterOptions,
     sortInteractionsByDateDesc: sortInteractionsByDateDesc,
     normalizeDateForDisplay: normalizeDateForDisplay,
     normalizeCompanyDetailDates: normalizeCompanyDetailDates,
