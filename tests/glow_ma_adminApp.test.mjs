@@ -131,6 +131,22 @@ test("buildAdminAppHtml: ホーム画面追加(PWA風)に必要なメタタグ�
   });
 });
 
+test("buildAdminAppHtml: 企業一覧にチェックボックス選択とQR用CSV出力の仕組みが組み込まれている", () => {
+  const html = adminApp.buildAdminAppHtml();
+  [
+    'id="selectAllCheckbox"',
+    'id="qrExportBar"',
+    'id="qrExportBtn"',
+    'id="qrExportClearBtn"',
+    'id="qrExportModal"',
+    'id="qrExportRunBtn"',
+    'class="row-check"',
+    "getQrExportForSelectedCompanies"
+  ].forEach((needle) => {
+    assert.ok(html.indexOf(needle) !== -1, needle + " が含まれていない");
+  });
+});
+
 test("buildAdminAppHtml: 使い方ガイド(howto)のマークアップが実際に出力される(CSS定義だけでなくアコーディオン本体を確認)", () => {
   const html = adminApp.buildAdminAppHtml();
   assert.ok(html.indexOf('class="howto"') !== -1, "class=\"howto\" の使い方ガイドがヘッダー直後に出力されていない");

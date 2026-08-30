@@ -57,6 +57,33 @@ test("buildShippingCsvRows: 企業マスタに一致する企業が見つから�
   assert.deepEqual(rows, [["発送日", "企業ID", "会社名", "所在地", "窓口担当者名"]]);
 });
 
+test("buildRowsForCompanyIds: 指定した企業IDの順番でCSV行を作る(レター下書きの発送日記録を経由しない)", () => {
+  const companies = [
+    { "企業ID": "C000001", "会社名": "テスト商事株式会社", "所在地": "沖縄県那覇市", "窓口担当者名": "山田" },
+    { "企業ID": "C000002", "会社名": "サンプル建設株式会社", "所在地": "沖縄県石垣市", "窓口担当者名": "" }
+  ];
+  const rows = shippingContent.buildRowsForCompanyIds(companies, ["C000002", "C000001"], "2026-08-31");
+  assert.deepEqual(rows, [
+    ["発送日", "企業ID", "会社名", "所在地", "窓口担当者名"],
+    ["2026-08-31", "C000002", "サンプル建設株式会社", "沖縄県石垣市", ""],
+    ["2026-08-31", "C000001", "テスト商事株式会社", "沖縄県那覇市", "山田"]
+  ]);
+});
+
+test("buildRowsForCompanyIds: 企業マスタに存在しないIDはスキップする(障害隔離)", () => {
+  const companies = [{ "企業ID": "C000001", "会社名": "テスト商事株式会社" }];
+  const rows = shippingContent.buildRowsForCompanyIds(companies, ["C999999", "C000001"], "2026-08-31");
+  assert.deepEqual(rows, [
+    ["発送日", "企業ID", "会社名", "所在地", "窓口担当者名"],
+    ["2026-08-31", "C000001", "テスト商事株式会社", "", ""]
+  ]);
+});
+
+test("buildRowsForCompanyIds: 空配列ならヘッダー行のみ返す", () => {
+  const rows = shippingContent.buildRowsForCompanyIds([], [], "2026-08-31");
+  assert.deepEqual(rows, [["発送日", "企業ID", "会社名", "所在地", "窓口担当者名"]]);
+});
+
 test("buildShippingCsvRows: 発送日がDateオブジェクト(getValues由来)でも突合できる", () => {
   const letterDrafts = [
     { 下書きID: "D-1", 企業ID: "C000001", 発送日: new Date(2026, 7, 10) }

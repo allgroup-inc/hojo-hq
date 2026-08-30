@@ -63,6 +63,33 @@
     return [CSV_HEADER_ROW].concat(rows);
   }
 
+  /**
+   * 管理画面の企業一覧でチェックした企業ID一覧から、make_qr_cards.py入力用のCSV行を作る。
+   * 「発送日でCSV出力」(buildShippingCsvRows)と違い、レター下書きの発送日記録を経由せず、
+   * 選んだ企業をそのままCSV化する(まとめて印刷したい企業を都度選ぶ運用のため)。
+   * targetDateは印刷物の管理用に付与するラベルであり、実際の発送記録(レター下書きの
+   * 発送日列)には影響しない。
+   */
+  function buildRowsForCompanyIds(companies, companyIds, targetDate) {
+    var companyById = {};
+    (companies || []).forEach(function (company) {
+      companyById[company["企業ID"]] = company;
+    });
+    var rows = (companyIds || [])
+      .map(function (id) { return companyById[id]; })
+      .filter(Boolean)
+      .map(function (company) {
+        return [
+          targetDate,
+          company["企業ID"],
+          company["会社名"] || "",
+          company["所在地"] || "",
+          company["窓口担当者名"] || ""
+        ];
+      });
+    return [CSV_HEADER_ROW].concat(rows);
+  }
+
   function escapeCsvField_(value) {
     var stringValue = value === null || value === undefined ? "" : String(value);
     if (/[",\r\n]/.test(stringValue)) {
@@ -81,6 +108,7 @@
     DEFAULT_CONFIG: DEFAULT_CONFIG,
     computeFollowUpDate: computeFollowUpDate,
     buildShippingCsvRows: buildShippingCsvRows,
+    buildRowsForCompanyIds: buildRowsForCompanyIds,
     toCsvString: toCsvString
   };
 

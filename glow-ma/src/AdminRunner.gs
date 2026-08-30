@@ -186,6 +186,30 @@ function getAdminBootstrap() {
 }
 
 /**
+ * 企業一覧でチェックした企業を、make_qr_cards.py(❸事業構成&ゆんたく)の入力形式
+ * (発送日・企業ID・会社名・所在地・窓口担当者名のCSV。ShippingRunner.gsの
+ * 「発送日でCSV出力」と同じ列)でまとめて出力する。QRコード画像自体の生成・印刷は
+ * 引き続きmake_qr_cards.pyが担当し、この管理画面では対象企業の選定とCSV化のみ行う
+ * (2026-08-31 小柳さんの依頼: 管理画面で任意の企業を選んで一括印刷準備をしたい)。
+ *
+ * BOM付きUTF-8でbase64化して返す(ShippingRunner.gsのbuildCsvDownloadHtml_と同じ
+ * 理由: BOMがないと日本語Excelが文字化けする)。プレビュー用に企業名一覧も返す。
+ */
+function getQrExportForSelectedCompanies(companyIds, targetDate) {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+  var rows = GlowShippingContent.buildRowsForCompanyIds(companies, companyIds || [], targetDate);
+  var csvString = GlowShippingContent.toCsvString(rows);
+  var base64Csv = Utilities.base64Encode("﻿" + csvString, Utilities.Charset.UTF_8);
+  var preview = rows.slice(1).map(function (row) {
+    return { "企業ID": row[1], "会社名": row[2], "所在地": row[3], "窓口担当者名": row[4] };
+  });
+  return { base64Csv: base64Csv, count: preview.length, preview: preview };
+}
+
+/**
  * ドロワーの🤝連携ボタン用。ShareRunner.gsのreadActiveStaff_と同じロジックだが、
  * 呼び出し元(スプレッドシートメニュー vs Web App)が異なるため、末尾に`_`を付けない
  * 公開関数として別途用意する(google.script.runから呼ぶため)。
