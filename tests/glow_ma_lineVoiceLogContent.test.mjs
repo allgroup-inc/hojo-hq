@@ -218,3 +218,62 @@ test("buildFinalConfirmPrompt: 種別・対応相手は記録時と同じ正規�
 test("buildAlreadyHandledMessage: 処理済み案内の固定文言を返す", () => {
   assert.equal(lineVoiceLogContent.buildAlreadyHandledMessage(), "この記録はすでに処理済みか、無効になっています。");
 });
+
+// ---- 2026-08-28 追加: 未登録担当者の登録導線と、対応相手が不明なときの追跡可能性 ----
+
+test("buildStaffNotFoundMessage: LINE User IDを渡すと本文に含める(管理者への転送用)", () => {
+  const id = "U0123456789abcdef0123456789abcdef";
+  const msg = lineVoiceLogContent.buildStaffNotFoundMessage(id);
+  assert.ok(msg.includes("担当者が特定できませんでした"));
+  assert.ok(msg.includes(id), "IDが本文に含まれること");
+});
+
+test("buildStaffNotFoundMessage: 引数なしでも従来どおりの案内を返す", () => {
+  const msg = lineVoiceLogContent.buildStaffNotFoundMessage();
+  assert.equal(msg, "担当者が特定できませんでした。管理者に「スタッフ」タブへの登録を依頼してください。");
+});
+
+test("markMemoIfRespondentUncertain: 不明のときだけ目印を付ける", () => {
+  const mark = lineVoiceLogContent.RESPONDENT_REVIEW_MARK;
+  assert.equal(
+    lineVoiceLogContent.markMemoIfRespondentUncertain("後継者は未定", "不明"),
+    mark + " 後継者は未定"
+  );
+  assert.equal(
+    lineVoiceLogContent.markMemoIfRespondentUncertain("後継者は未定", "オーナー社長本人"),
+    "後継者は未定"
+  );
+});
+
+test("markMemoIfRespondentUncertain: 二重に付けない・空メモでも壊れない", () => {
+  const mark = lineVoiceLogContent.RESPONDENT_REVIEW_MARK;
+  const once = lineVoiceLogContent.markMemoIfRespondentUncertain("メモ", "不明");
+  assert.equal(lineVoiceLogContent.markMemoIfRespondentUncertain(once, "不明"), once);
+  assert.equal(lineVoiceLogContent.markMemoIfRespondentUncertain("", "不明"), mark);
+  assert.equal(lineVoiceLogContent.markMemoIfRespondentUncertain(null, "不明"), mark);
+});
+
+test("buildFinalConfirmPrompt: 生の「不明」を渡すと警告が出る(正規化済みだと出なかった不具合の再発防止)", () => {
+  const withRaw = lineVoiceLogContent.buildFinalConfirmPrompt(
+    "P-1", "テスト建設", "面談実施", "不明", "メモ", "次回"
+  );
+  assert.ok(withRaw.text.includes("⚠️"), "未判別の警告が出ること");
+
+  // 正規化してから渡すと警告が消える = これが2026-08-28まで起きていた状態
+  const normalized = lineVoiceLogContent.normalizeRespondentType("不明");
+  const withNormalized = lineVoiceLogContent.buildFinalConfirmPrompt(
+    "P-1", "テスト建設", "面談実施", normalized, "メモ", "次回"
+  );
+  assert.ok(!withNormalized.text.includes("⚠️"));
+});
+
+test("buildInteractionLogRow: 「不明」は台帳へ書く時点で必ず3値に正規化される", () => {
+  const row = lineVoiceLogContent.buildInteractionLogRow(
+    "H-1", "C000001", "2026-09-01", "嶺井", "面談実施", "不明", "メモ", "次回"
+  );
+  const idx = schema.INTERACTION_LOG_HEADERS.indexOf("対応相手");
+  assert.ok(
+    schema.RESPONDENT_TYPES.includes(row[idx]),
+    "対応履歴ログの入力規則(3値)に必ず収まること"
+  );
+});
