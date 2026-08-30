@@ -108,6 +108,16 @@ test("buildAdminAppHtml: コーポレートカラーの変数とロゴのアニ�
   assert.ok(html.indexOf("prefers-reduced-motion") !== -1, "reduced-motion対応がない");
 });
 
+test("buildAdminAppHtml: 企業詳細の電話番号・携帯番号がtel:リンクとして出力される(BlueBeanクリック発信対応)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.match(
+    html,
+    /href="tel:' \+ escapeHtml\(String\(f\[1\]\)\.replace\(\/\[\^0-9\+\]\/g,''\)\)/,
+    "電話番号/携帯番号をtel:リンクにするコードが含まれていない"
+  );
+  assert.ok(html.indexOf("isPhoneField") !== -1, "電話番号フィールドの判定ロジックが含まれていない");
+});
+
 test("buildAdminAppHtml: 使い方ガイド(howto)のマークアップが実際に出力される(CSS定義だけでなくアコーディオン本体を確認)", () => {
   const html = adminApp.buildAdminAppHtml();
   assert.ok(html.indexOf('class="howto"') !== -1, "class=\"howto\" の使い方ガイドがヘッダー直後に出力されていない");
