@@ -2,6 +2,15 @@
   "_readme": "実例研究シリーズのお題キュー。generate_tanpatsu_draft.py が毎月8日・22日に先頭のpendingを1本記事化する。factsは docs/note多ジャンル_世界事例リサーチ集.md から出典URLごと転記すること(出典なしのfactは生成拒否される)。稼ぎ方勧誘・収益保証系のお題は登録禁止(運営計画v3 §3)",
   "queue": [
     {
+      "id": "08",
+      "slug": "neage_kenkyu",
+      "genre": "価格",
+      "title_hint": "値上げで売れたアイスと、18円で客が離れた焼き鳥 — 価格転嫁の成功と失敗を分けた実例研究",
+      "paid_price": 1280,
+      "status": "stock",
+      "note": "手動執筆の在庫記事(2026-08-04執筆・8/31公開運転)。生成不要のためstatusはpendingにしない。X告知文は記事ヘッダーの告知パック(A/B/C)から抽出される"
+    },
+    {
       "id": "12",
       "slug": "chihou_hasshin",
       "genre": "地方×デジタル",
