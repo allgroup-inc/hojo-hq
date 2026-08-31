@@ -486,3 +486,59 @@ test("buildPartnerRegistration: 種別・担当者名・関係性ランク・紹
   assert.equal(result.record["最終接触日"], "2026-08-25");
   assert.equal(result.record["次回アクション予定日"], "2026-09-10");
 });
+
+// ---- buildFollowUpReminders(要対応ポップアップ) ----
+
+test("buildFollowUpReminders: 次回アクション予定日が本日・期限超過の企業だけを抽出し、古い順に並べて遅延日数を付ける", () => {
+  const today = "2026-08-31";
+  const companies = [
+    { "企業ID": "C1", "会社名": "本日予定の会社", "担当者": "山田", "次回アクション予定日": "2026-08-31", "連絡不要": false },
+    { "企業ID": "C2", "会社名": "3日遅れの会社", "担当者": "田中", "次回アクション予定日": "2026-08-28", "連絡不要": false },
+    { "企業ID": "C3", "会社名": "未来予定の会社", "次回アクション予定日": "2026-09-05", "連絡不要": false },
+    { "企業ID": "C4", "会社名": "予定なしの会社", "次回アクション予定日": "", "連絡不要": false }
+  ];
+  const result = adminAccess.buildFollowUpReminders(companies, today, 10);
+  assert.equal(result.total, 2);
+  assert.equal(result.items.length, 2);
+  assert.equal(result.items[0]["企業ID"], "C2");
+  assert.equal(result.items[0]["遅延日数"], 3);
+  assert.equal(result.items[1]["企業ID"], "C1");
+  assert.equal(result.items[1]["遅延日数"], 0);
+});
+
+test("buildFollowUpReminders: 連絡不要の企業は除外する", () => {
+  const companies = [
+    { "企業ID": "C1", "会社名": "連絡不要の会社", "次回アクション予定日": "2026-08-01", "連絡不要": true }
+  ];
+  const result = adminAccess.buildFollowUpReminders(companies, "2026-08-31", 10);
+  assert.equal(result.total, 0);
+});
+
+test("buildFollowUpReminders: limitを超える分はitemsから外れるがtotalには含まれる", () => {
+  const companies = [1, 2, 3, 4, 5].map((n) => ({
+    "企業ID": "C" + n, "会社名": "会社" + n, "次回アクション予定日": "2026-08-2" + n, "連絡不要": false
+  }));
+  const result = adminAccess.buildFollowUpReminders(companies, "2026-08-31", 3);
+  assert.equal(result.total, 5);
+  assert.equal(result.items.length, 3);
+});
+
+test("buildFollowUpReminders: 次回アクション予定日がDateオブジェクトでも文字列に正規化して返す(google.script.run対策)", () => {
+  const companies = [
+    { "企業ID": "C1", "会社名": "Date型の会社", "次回アクション予定日": new Date(2026, 7, 28), "連絡不要": false }
+  ];
+  const result = adminAccess.buildFollowUpReminders(companies, "2026-08-31", 10);
+  assert.equal(result.total, 1);
+  assert.equal(result.items[0]["次回アクション予定日"], "2026-08-28");
+  assert.equal(typeof result.items[0]["次回アクション予定日"], "string");
+});
+
+test("buildFollowUpReminders: 次回アクション内容も一緒に返す(何をする予定だったか思い出せるように)", () => {
+  const companies = [
+    { "企業ID": "C1", "会社名": "会社A", "担当者": "山田", "次回アクション予定日": "2026-08-30",
+      "次回アクション内容": "資料持参で再訪問", "連絡不要": false }
+  ];
+  const result = adminAccess.buildFollowUpReminders(companies, "2026-08-31", 10);
+  assert.equal(result.items[0]["次回アクション内容"], "資料持参で再訪問");
+  assert.equal(result.items[0]["担当者"], "山田");
+});

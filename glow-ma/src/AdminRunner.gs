@@ -181,7 +181,8 @@ function getAdminBootstrap() {
     kpi: GlowAdminAccess.buildKpiSummary(loaded.companies, loaded.todayString),
     workload: GlowAdminAccess.buildOwnerWorkload(loaded.companies, loaded.todayString),
     queue: GlowAdminAccess.buildNextActionQueue(loaded.companies, loaded.todayString, 8),
-    filterOptions: GlowAdminAccess.buildFilterOptions(loaded.companies)
+    filterOptions: GlowAdminAccess.buildFilterOptions(loaded.companies),
+    reminders: GlowAdminAccess.buildFollowUpReminders(loaded.companies, loaded.todayString, 10)
   };
 }
 

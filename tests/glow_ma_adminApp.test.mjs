@@ -366,3 +366,32 @@ test("buildAdminAppHtml: 使い方ガイドにパートナー登録の説明が�
   const html = adminApp.buildAdminAppHtml();
   assert.ok(html.includes("紹介パートナー開拓状況」タブ"));
 });
+
+test("buildAdminAppHtml: 要対応ポップアップ(リマインダーモーダル)の主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("id=\"reminderModal\""));
+  assert.ok(html.includes("id=\"reminderList\""));
+  assert.ok(html.includes("id=\"reminderCloseBtn\""));
+  assert.ok(html.includes("本日の要対応"));
+  assert.ok(html.includes("function renderReminders("));
+  // bootstrapの応答からremindersを受け取って表示する
+  assert.ok(html.includes("renderReminders(data.reminders"));
+});
+
+test("buildAdminAppHtml: リマインダーの行クリックで企業詳細が開く", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(/reminderList[\s\S]{0,900}openDrawer\(/.test(html));
+});
+
+test("buildAdminAppHtml: ヘッダーにアプリのバージョンが表示される", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("id=\"appVersion\""));
+  assert.ok(/v\d+\.\d+\.\d+/.test(html));
+});
+
+test("buildAdminAppHtml: 使い方ガイドに「更新履歴」セクションがあり、直近の変更が載っている", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("④ 更新履歴"));
+  assert.ok(html.includes("新規パートナー登録"));
+  assert.ok(html.includes("本日の要対応ポップアップ"));
+});

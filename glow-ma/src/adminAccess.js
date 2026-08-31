@@ -118,6 +118,47 @@
   }
 
   /**
+   * 「本日の要対応」ポップアップ用: 次回アクション予定日が本日以前(=期限到来・超過)の
+   * 企業を、予定日の古い順に返す。管理画面を開いた瞬間に表示し、話した後に決めた
+   * 「次に架電する時期」が埋もれるのを防ぐ。
+   *
+   * buildNextActionQueue(サイドパネル)との違い: あちらは未着手(予定日なし)も含む
+   * 掘り起こしの優先順位リスト。こちらは「予定日を自分で決めた企業」だけに絞る。
+   * 未着手3,000社超を毎回ポップアップに出すと、本当に今日やるべき数件が埋もれるため。
+   *
+   * 返り値: { total: 全該当件数, items: 上位limit件(既定10件) }
+   */
+  function buildFollowUpReminders(companies, todayString, limit) {
+    var max = typeof limit === "number" ? limit : 10;
+    var due = (companies || [])
+      .filter(function (company) {
+        if (company["連絡不要"] === true) return false;
+        var next = company["次回アクション予定日"];
+        if (!next) return false;
+        var diff = getGlowAlerting_().daysBetween(todayString, next);
+        return diff !== null && diff <= 0;
+      })
+      .map(function (company) {
+        var next = normalizeDateForDisplay(company["次回アクション予定日"]);
+        var diff = getGlowAlerting_().daysBetween(todayString, next);
+        return {
+          "企業ID": company["企業ID"],
+          "会社名": company["会社名"],
+          "担当者": company["担当者"] || "",
+          "ランク": company["ランク"] || "",
+          "次回アクション予定日": next,
+          "次回アクション内容": company["次回アクション内容"] || "",
+          "遅延日数": Math.abs(diff)
+        };
+      })
+      .sort(function (a, b) {
+        if (a["次回アクション予定日"] === b["次回アクション予定日"]) return 0;
+        return a["次回アクション予定日"] < b["次回アクション予定日"] ? -1 : 1;
+      });
+    return { total: due.length, items: due.slice(0, max) };
+  }
+
+  /**
    * Sheetsの getValues() は日付セルを文字列ではなくJSの Date オブジェクトで返す。
    * これをそのまま String(...) すると "Thu Aug 20 2026 00:00:00 GMT+0900 ..." のような
    * 表示になり、曜日名基準でソートされてしまう(alerting.js の toDate と同じ問題への対処)。
@@ -397,7 +438,8 @@
     computeUrgency: computeUrgency,
     buildKpiSummary: buildKpiSummary,
     buildOwnerWorkload: buildOwnerWorkload,
-    buildNextActionQueue: buildNextActionQueue
+    buildNextActionQueue: buildNextActionQueue,
+    buildFollowUpReminders: buildFollowUpReminders
   };
 
   if (typeof module !== "undefined" && module.exports) {
