@@ -449,3 +449,47 @@ test("buildAdminAppHtml: バージョンがv1.3.0に上がり、更新履歴に�
   assert.ok(html.includes("v1.3.0"));
   assert.ok(html.includes("行動量"));
 });
+
+// ---- v1.3.1 使いやすさ改善 ----
+
+test("buildAdminAppHtml: 日付欄はすべてカレンダー選択式(type=date)で手打ち不要", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["naDate", "partnerRegLastContact", "partnerRegNextAction", "qrExportDateInput"].forEach((id) => {
+    const pattern = new RegExp('<input type="date"[^>]*id="' + id + '"');
+    assert.match(html, pattern, id + " がtype=dateになっていない");
+  });
+});
+
+test("buildAdminAppHtml: Escキーで開いているモーダル・詳細画面を閉じられる", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("ev.key !== 'Escape'") || html.includes("ev.key === 'Escape'"));
+  // 会社ドロワーは未保存メモの確認(closeDrawer)を通す
+  assert.ok(/Escape[\s\S]{0,900}closeDrawer\(\)/.test(html));
+});
+
+test("buildAdminAppHtml: 起動直後に読み込み中の表示を出す(数秒の空白画面を防ぐ)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("読み込み中…"));
+  assert.ok(/読み込み中[\s\S]{0,2200}loadBootstrap\(\);/.test(html));
+});
+
+test("buildAdminAppHtml: KPIの数値は桁区切りで表示する(3212→3,212)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("toLocaleString"));
+});
+
+test("buildAdminAppHtml: パートナー0件のときは次の行動(新規パートナー登録)を案内する", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("まだ登録されたパートナーがありません"));
+});
+
+test("buildAdminAppHtml: 次回アクションの入力欄でEnterを押すと保存される", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(/naDate[\s\S]{0,400}Enter[\s\S]{0,200}saveNextAction/.test(html) ||
+    /\['naDate','naNote'\][\s\S]{0,300}Enter/.test(html));
+});
+
+test("buildAdminAppHtml: バージョンがv1.3.1に上がっている", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("v1.3.1"));
+});

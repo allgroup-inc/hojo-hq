@@ -24,8 +24,9 @@
   // 機能を追加・変更したら、(1)APP_VERSIONを上げ、(2)CHANGELOGの先頭に1行足すこと。
   // CHANGELOGは使い方ガイドの「④ 更新履歴」にそのまま表示される取説の一部。
   // 利用者(小柳さん・スタッフ)が読む前提で、技術用語ではなく「何ができるようになったか」を書く。
-  var APP_VERSION = "v1.3.0";
+  var APP_VERSION = "v1.3.1";
   var CHANGELOG = [
+    { date: "2026-08-31", version: "v1.3.1", text: "使いやすさ改善: 日付欄をすべてカレンダー選択式に/起動直後に「読み込み中…」を表示/Escキーでどの画面も閉じられるように/KPIの数字を桁区切り表示/次回アクションはEnterキーでも保存/パートナー0件時に登録方法を案内" },
     { date: "2026-08-31", version: "v1.3.0", text: "スケジュールタブに行動量ダッシュボードを追加(手紙・架電・アポ獲得・面談/訪問・提案・成約を週ごとに自動集計。担当者絞り込み連動)。対応履歴の種別に「アポ獲得」を追加" },
     { date: "2026-08-31", version: "v1.2.0", text: "「訪問・架電スケジュール」タブを追加(今日から2週間の予定を日別に表示。期限超過は最上部・担当者で絞り込み可)/企業詳細から次回アクションの予定日・内容を直接編集できるように(明日/3日後/1週間後/1ヶ月後のワンタッチ設定付き)" },
     { date: "2026-08-31", version: "v1.1.0", text: "本日の要対応ポップアップを追加(次回アクション予定日が来た企業を、画面を開いた瞬間にお知らせ。クリックでそのまま詳細を開けます)/「＋新規パートナー登録」フォームを追加(パートナーIDは自動採番・二重登録は自動でブロック)" },
@@ -552,7 +553,8 @@
     ".act-range{font-weight:400; color:var(--muted); font-size:.72rem; margin-left:.4rem;}",
     ".act-num{font-variant-numeric:tabular-nums; font-weight:600;}",
     ".act-num.zero{color:var(--muted-2); font-weight:400;}",
-    ".act-note{font-size:.72rem; color:var(--muted); margin-top:6px;}"
+    ".act-note{font-size:.72rem; color:var(--muted); margin-top:6px;}",
+    ".loading-note{grid-column:1 / -1; color:var(--muted); font-size:.85rem; padding:.5rem .2rem;}"
   ].join("");
 
   var HEADER_AND_FILTERS = [
@@ -743,7 +745,7 @@
     "</div></div>",
     "<div class=\"km-body\" id=\"qrExportModalBody\">",
     "<div class=\"field\"><div class=\"label\">発送日(印刷物の管理用ラベル)</div>",
-    "<input type=\"text\" id=\"qrExportDateInput\" class=\"qr-date-input\">",
+    "<input type=\"date\" id=\"qrExportDateInput\" class=\"qr-date-input\">",
     "<button class=\"btn-small btn-primary\" id=\"qrExportRunBtn\" type=\"button\">CSVを作成</button>",
     "</div>",
     "<div id=\"qrExportPreviewList\"></div>",
@@ -861,6 +863,8 @@
     "}).getKpiSummary();",
     "}",
 
+    "function formatNum(value){ return typeof value === 'number' ? value.toLocaleString('ja-JP') : value; }",
+
     "var LAST_KPI_SUMMARY = null;",
     "function renderKpiRow(summary){",
     "LAST_KPI_SUMMARY = summary;",
@@ -877,7 +881,7 @@
     "row.innerHTML = kpis.map(function(k){",
     "return '<div class=\"kpi ' + (k.cls||'') + '\" data-kpi=\"' + k.key + '\" role=\"button\" tabindex=\"0\">' +",
     "'<div class=\"label\">' + escapeHtml(k.label) + '</div>' +",
-    "'<div class=\"value\">' + escapeHtml(k.value) + '</div>' +",
+    "'<div class=\"value\">' + escapeHtml(formatNum(k.value)) + '</div>' +",
     "'<div class=\"sub\">' + escapeHtml(k.sub) + '</div></div>';",
     "}).join('');",
     "row.querySelectorAll('.kpi').forEach(function(el){",
@@ -1119,7 +1123,7 @@
     "function renderNextActionField(dateValue, noteValue){",
     "return '<div class=\"field\" id=\"naField\"><div class=\"label\">次回アクション(予定日・内容)</div>' +",
     "'<div class=\"na-grid\">' +",
-    "'<input type=\"text\" id=\"naDate\" class=\"reg-input\" placeholder=\"yyyy-MM-dd\" value=\"' + escapeHtml(dateValue||'') + '\">' +",
+    "'<input type=\"date\" id=\"naDate\" class=\"reg-input\" value=\"' + escapeHtml(dateValue||'') + '\">' +",
     "'<input type=\"text\" id=\"naNote\" class=\"reg-input\" placeholder=\"例: 資料持参で再訪問\" value=\"' + escapeHtml(noteValue||'') + '\">' +",
     "'</div><div class=\"na-quick\">' +",
     "'<button class=\"btn-small na-q\" data-days=\"1\" type=\"button\">明日</button>' +",
@@ -1139,6 +1143,10 @@
     "document.getElementById('naDate').value = d.getFullYear() + '-' + mm + '-' + dd;",
     "});});",
     "document.getElementById('naSaveBtn').addEventListener('click', function(){ saveNextAction(companyId); });",
+    "['naDate','naNote'].forEach(function(id){",
+    "document.getElementById(id).addEventListener('keydown', function(ev){",
+    "if (ev.key === 'Enter') { ev.preventDefault(); saveNextAction(companyId); }",
+    "});});",
     "}",
 
     "function saveNextAction(companyId){",
@@ -1395,7 +1403,7 @@
     "var tbody = document.getElementById('partnerTableBody'); tbody.innerHTML = '';",
     "var empty = document.getElementById('partnerEmptyState');",
     "if (!rows || rows.length === 0){ empty.style.display = 'block';",
-    "empty.textContent = '該当するパートナーが見つかりません'; return; }",
+    "empty.textContent = 'まだ登録されたパートナーがありません。開拓できたら右上の「＋新規パートナー登録」から追加できます'; return; }",
     "empty.style.display = 'none';",
     "rows.forEach(function(row){",
     "var tr = document.createElement('tr');",
@@ -1582,6 +1590,23 @@
     "});",
     "});",
 
+    "document.addEventListener('keydown', function(ev){",
+    "if (ev.key !== 'Escape') return;",
+    "if (document.getElementById('partnerRegModal').classList.contains('open')) { closePartnerRegModal(); return; }",
+    "if (document.getElementById('qrExportModal').classList.contains('open')) { closeQrExportModal(); return; }",
+    "if (document.getElementById('reminderModal').classList.contains('open')) { document.getElementById('reminderModal').classList.remove('open'); return; }",
+    "if (document.getElementById('shareModal').classList.contains('open')) { closeShareModal(); return; }",
+    "if (document.getElementById('letterPreviewModal').classList.contains('open')) { closeLetterPreview(); return; }",
+    "if (document.getElementById('kpiModal').classList.contains('open')) { closeKpiModal(); return; }",
+    "if (document.getElementById('partnerDrawer').classList.contains('open')) { closePartnerDrawer(); return; }",
+    "if (document.getElementById('drawer').classList.contains('open')) { closeDrawer(); }",
+    "});",
+
+    "document.getElementById('kpiRow').innerHTML = '<div class=\"loading-note\">読み込み中…(企業データを取得しています)</div>';",
+    "var emptyInit = document.getElementById('emptyState');",
+    "emptyInit.style.display = 'block'; emptyInit.textContent = '読み込み中…';",
+    "document.getElementById('queue').innerHTML = '<p class=\"empty-note\">読み込み中…</p>';",
+    "document.getElementById('workloadList').innerHTML = '<p class=\"empty-note\">読み込み中…</p>';",
     "loadBootstrap();",
     "loadPartnerList();"
   ].join("");
@@ -1625,10 +1650,10 @@
       "<select id=\"partnerRegRank\" class=\"reg-input\">" + rankOptions + "</select></div>",
       "<div class=\"field\"><div class=\"label\">紹介料率・条件</div>",
       "<input type=\"text\" id=\"partnerRegRate\" class=\"reg-input\" placeholder=\"例: 成約報酬の10%\"></div>",
-      "<div class=\"field\"><div class=\"label\">最終接触日</div>",
-      "<input type=\"text\" id=\"partnerRegLastContact\" class=\"reg-input\" placeholder=\"yyyy-MM-dd(空欄なら今日)\"></div>",
+      "<div class=\"field\"><div class=\"label\">最終接触日(空欄なら今日)</div>",
+      "<input type=\"date\" id=\"partnerRegLastContact\" class=\"reg-input\"></div>",
       "<div class=\"field\"><div class=\"label\">次回アクション予定日</div>",
-      "<input type=\"text\" id=\"partnerRegNextAction\" class=\"reg-input\" placeholder=\"yyyy-MM-dd\"></div>",
+      "<input type=\"date\" id=\"partnerRegNextAction\" class=\"reg-input\"></div>",
       "<div class=\"field reg-span2\"><div class=\"label\">提供済み情報・開拓メモ</div>",
       "<textarea id=\"partnerRegMemo\" class=\"reg-input\" rows=\"3\" placeholder=\"例: 8月に提携のご挨拶。M&A・事業承継の相談があれば当社へ紹介いただける合意\"></textarea></div>",
       "</div>",
