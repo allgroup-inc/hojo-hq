@@ -24,8 +24,9 @@
   // 機能を追加・変更したら、(1)APP_VERSIONを上げ、(2)CHANGELOGの先頭に1行足すこと。
   // CHANGELOGは使い方ガイドの「④ 更新履歴」にそのまま表示される取説の一部。
   // 利用者(小柳さん・スタッフ)が読む前提で、技術用語ではなく「何ができるようになったか」を書く。
-  var APP_VERSION = "v1.4.0";
+  var APP_VERSION = "v1.5.0";
   var CHANGELOG = [
+    { date: "2026-08-31", version: "v1.5.0", text: "「集客ファネル」タブを追加(LP閲覧→LINE登録→台帳への新規登録→面談→成約を週次で1つの表に。KGI進捗バー・流入ルート別の内訳付き。LP閲覧とLINE友だち数は毎日自動収集されるKPIデータから読み込み)" },
     { date: "2026-08-31", version: "v1.4.0", text: "LINE音声ログと台帳の連携を強化: 音声を「確定」した瞬間に、要約が関係メモ(見込みコメント)へ日付付きで自動追記され、最終接触日・次回アクション予定日・後継者状況・興味のある商品(M&A/不動産/法人保険)も自動反映。反映内容はLINEにその場で返信される" },
     { date: "2026-08-31", version: "v1.3.1", text: "使いやすさ改善: 日付欄をすべてカレンダー選択式に/起動直後に「読み込み中…」を表示/Escキーでどの画面も閉じられるように/KPIの数字を桁区切り表示/次回アクションはEnterキーでも保存/パートナー0件時に登録方法を案内" },
     { date: "2026-08-31", version: "v1.3.0", text: "スケジュールタブに行動量ダッシュボードを追加(手紙・架電・アポ獲得・面談/訪問・提案・成約を週ごとに自動集計。担当者絞り込み連動)。対応履歴の種別に「アポ獲得」を追加" },
@@ -555,7 +556,11 @@
     ".act-num{font-variant-numeric:tabular-nums; font-weight:600;}",
     ".act-num.zero{color:var(--muted-2); font-weight:400;}",
     ".act-note{font-size:.72rem; color:var(--muted); margin-top:6px;}",
-    ".loading-note{grid-column:1 / -1; color:var(--muted); font-size:.85rem; padding:.5rem .2rem;}"
+    ".loading-note{grid-column:1 / -1; color:var(--muted); font-size:.85rem; padding:.5rem .2rem;}",
+    "/* ---- 集客ファネル ---- */",
+    ".kgi-bar{height:10px; border-radius:5px; background:var(--line); overflow:hidden; margin-top:8px;}",
+    ".kgi-bar-fill{height:100%; border-radius:5px; min-width:2px;",
+    "background:linear-gradient(90deg, var(--brand-navy-2), var(--kin));}"
   ].join("");
 
   var HEADER_AND_FILTERS = [
@@ -565,7 +570,8 @@
     "</span></header>",
     "<div id=\"viewSwitcher\"><button id=\"viewCompanyBtn\" class=\"active\">企業一覧</button>",
     "<button id=\"viewScheduleBtn\">訪問・架電スケジュール</button>",
-    "<button id=\"viewPartnerBtn\">紹介パートナー開拓状況</button></div>",
+    "<button id=\"viewPartnerBtn\">紹介パートナー開拓状況</button>",
+    "<button id=\"viewFunnelBtn\">集客ファネル</button></div>",
     "<div class=\"filters\" id=\"companyFiltersBar\">",
     "<input type=\"search\" id=\"searchInput\" placeholder=\"会社名・代表者名で検索\">",
     "<select id=\"filterRank\"><option value=\"\">ランク(すべて)</option>",
@@ -600,6 +606,8 @@
     "<li>同じタブの上部に「行動量(直近4週の実績)」が出る。手紙・架電・アポ獲得・面談/訪問・提案・成約の週次実績が"+
     "対応履歴から自動集計されるので、予定と実績の差・アポ率の変化を数字で追える。"+
     "<b>アポが取れたら対応履歴に種別「アポ獲得」で記録する</b>とアポ数に反映される</li>",
+    "<li>「集客ファネル」タブで、LP閲覧→LINE登録→台帳への新規登録→面談→成約の週次推移とKGI進捗(LINE登録1,000社)を"+
+    "1つの表で確認できる。どの段階で細くなっているかを見て、次の一手(投稿を増やす/架電を増やす等)を決める</li>",
     "<li>企業詳細の「次回アクション」欄で予定日と内容をその場で編集できる(明日/3日後/1週間後/1ヶ月後のワンタッチ設定付き)。"+
     "<b>電話や訪問を終えたら、次の予定日を必ず入れてから閉じる</b>のが見込を埋もれさせないコツ</li>",
     "</ol></div>",
@@ -673,6 +681,19 @@
     "</div></div>",
     "<div id=\"activityPanel\"></div>",
     "<div id=\"scheduleList\"></div>",
+    "</div>"
+  ].join("");
+
+  var FUNNEL_VIEW = [
+    "<div id=\"funnelView\" class=\"viewPane\">",
+    "<div class=\"sched-toolbar\">",
+    "<div class=\"partner-toolbar-note\">LP閲覧→LINE登録→台帳登録→面談→成約を週次で1つの表に。数字の元はLP解析(Plausible)・LINE公式・この台帳です</div>",
+    "<div class=\"sched-controls\">",
+    "<button class=\"btn-small\" id=\"funnelRefreshBtn\" type=\"button\">再読み込み</button>",
+    "</div></div>",
+    "<div id=\"funnelKgi\"></div>",
+    "<div id=\"funnelTableArea\"></div>",
+    "<p class=\"empty-note\">「—」はその週のデータが取得できなかった印(実績ゼロとは区別しています)。LP閲覧・LINE友だち数は毎日自動収集される公開KPIデータから読み込みます</p>",
     "</div>"
   ].join("");
 
@@ -1320,16 +1341,58 @@
     "var isCompany = target === 'company';",
     "var isPartner = target === 'partner';",
     "var isSchedule = target === 'schedule';",
+    "var isFunnel = target === 'funnel';",
     "document.getElementById('viewCompanyBtn').classList.toggle('active', isCompany);",
     "document.getElementById('viewPartnerBtn').classList.toggle('active', isPartner);",
     "document.getElementById('viewScheduleBtn').classList.toggle('active', isSchedule);",
+    "document.getElementById('viewFunnelBtn').classList.toggle('active', isFunnel);",
     "document.getElementById('companyView').classList.toggle('active', isCompany);",
     "document.getElementById('partnerView').classList.toggle('active', isPartner);",
     "document.getElementById('scheduleView').classList.toggle('active', isSchedule);",
+    "document.getElementById('funnelView').classList.toggle('active', isFunnel);",
     "document.getElementById('companyFiltersBar').style.display = isCompany ? 'flex' : 'none';",
     "document.getElementById('kpiRow').style.display = isCompany ? 'grid' : 'none';",
     "document.getElementById('sidePanel').style.display = isCompany ? 'flex' : 'none';",
     "if (isSchedule && !scheduleLoaded) { loadSchedule(); }",
+    "if (isFunnel && !funnelLoaded) { loadFunnel(); }",
+    "}",
+
+    "var funnelLoaded = false;",
+    "function loadFunnel(){",
+    "document.getElementById('funnelTableArea').innerHTML = '<div class=\"empty\">読み込み中…</div>';",
+    "document.getElementById('funnelKgi').innerHTML = '';",
+    "google.script.run.withSuccessHandler(function(data){",
+    "funnelLoaded = true; renderFunnel(data);",
+    "}).withFailureHandler(function(){",
+    "document.getElementById('funnelTableArea').innerHTML = '<div class=\"empty\">読み込みに失敗しました。再読み込みしてください。</div>';",
+    "}).getFunnelSummary();",
+    "}",
+
+    "function renderFunnel(data){",
+    "if (!data) return;",
+    "function cell(value){ return value === null ? '—' : formatNum(value); }",
+    "var kgi = data.kgi || {};",
+    "var rate = kgi.ratePercent === null || kgi.ratePercent === undefined ? null : kgi.ratePercent;",
+    "document.getElementById('funnelKgi').innerHTML =",
+    "'<div class=\"act-panel\"><div class=\"act-title\">KGI: LINE登録 ' +",
+    "(kgi.current === null ? '—' : formatNum(kgi.current)) + ' / ' + formatNum(kgi.target || 0) + '社' +",
+    "(rate === null ? '' : '(' + rate + '%)') + '</div>' +",
+    "'<div class=\"kgi-bar\"><div class=\"kgi-bar-fill\" style=\"width:' + Math.min(100, rate || 0) + '%\"></div></div></div>';",
+    "var head = '<tr><th>週</th><th>LP閲覧</th><th>LINE友だち(累計)</th><th>純増</th>' +",
+    "'<th>新規登録</th><th>紹介</th><th>手紙DM</th><th>ミカタ</th><th>面談・訪問</th><th>提案</th><th>成約</th></tr>';",
+    "var rows = (data.weeks || []).map(function(week){",
+    "var byRoute = week.newByRoute || {};",
+    "return '<tr><td class=\"act-week\">' + escapeHtml(week.label) +",
+    "'<span class=\"act-range\">' + escapeHtml(week.start.slice(5).replace('-','/')) + '〜' + escapeHtml(week.end.slice(5).replace('-','/')) + '</span></td>' +",
+    "[cell(week.lpVisitors), cell(week.lineFollowersEnd), cell(week.lineNet), cell(week.newCompanies),",
+    "cell(byRoute['①紹介'] || 0), cell(byRoute['②手紙DM'] || 0), cell(byRoute['③ミカタ経由'] || 0),",
+    "cell(week.meetings), cell(week.proposals), cell(week.closings)].map(function(v){",
+    "return '<td class=\"act-num' + (v === '—' || v === 0 || v === '0' ? ' zero' : '') + '\">' + v + '</td>';",
+    "}).join('') + '</tr>';",
+    "}).join('');",
+    "document.getElementById('funnelTableArea').innerHTML =",
+    "'<div class=\"act-panel\"><div class=\"act-title\">週次ファネル(閲覧 → LINE登録 → 台帳登録 → 面談 → 成約)</div>' +",
+    "'<div class=\"act-scroll\"><table class=\"act-table\"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div></div>';",
     "}",
 
     "var scheduleLoaded = false;",
@@ -1549,6 +1612,8 @@
     "document.getElementById('viewCompanyBtn').addEventListener('click', function(){ switchView('company'); });",
     "document.getElementById('viewPartnerBtn').addEventListener('click', function(){ switchView('partner'); });",
     "document.getElementById('viewScheduleBtn').addEventListener('click', function(){ switchView('schedule'); });",
+    "document.getElementById('viewFunnelBtn').addEventListener('click', function(){ switchView('funnel'); });",
+    "document.getElementById('funnelRefreshBtn').addEventListener('click', loadFunnel);",
     "document.getElementById('scheduleOwnerFilter').addEventListener('change', renderSchedule);",
     "document.getElementById('scheduleRefreshBtn').addEventListener('click', loadSchedule);",
     "document.getElementById('scheduleList').addEventListener('click', function(ev){",
@@ -1682,7 +1747,7 @@
       "<div class=\"app\">" +
       HEADER_AND_FILTERS +
       HOWTO_GUIDE +
-      "<div class=\"body-grid\">" + KPI_ROW + TABLE + SIDE_PANEL + PARTNER_VIEW + SCHEDULE_VIEW + "</div>" +
+      "<div class=\"body-grid\">" + KPI_ROW + TABLE + SIDE_PANEL + PARTNER_VIEW + SCHEDULE_VIEW + FUNNEL_VIEW + "</div>" +
       "</div>" +
       DRAWER + PARTNER_DRAWER + KPI_MODAL + SHARE_MODAL + LETTER_PREVIEW_MODAL + QR_EXPORT_MODAL +
       buildPartnerRegModal_() + REMINDER_MODAL +

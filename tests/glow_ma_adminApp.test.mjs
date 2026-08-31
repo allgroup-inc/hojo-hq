@@ -499,3 +499,29 @@ test("buildAdminAppHtml: バージョンがv1.4.0に上がり、更新履歴にL
   assert.ok(html.includes("v1.4.0"));
   assert.ok(html.includes("見込みコメント"));
 });
+
+test("buildAdminAppHtml: 集客ファネルタブ(第4タブ)の主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("id=\"viewFunnelBtn\""));
+  assert.ok(html.includes("id=\"funnelView\""));
+  assert.ok(html.includes("id=\"funnelKgi\""));
+  assert.ok(html.includes("id=\"funnelTableArea\""));
+  assert.ok(html.includes("id=\"funnelRefreshBtn\""));
+  assert.ok(html.includes(".getFunnelSummary("));
+  assert.ok(html.includes("function renderFunnel("));
+  assert.ok(html.includes("target === 'funnel'"));
+});
+
+test("buildAdminAppHtml: ファネル表に閲覧→登録→面談→成約の列と、データ欠損時の「—」表示がある", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("LP閲覧"));
+  assert.ok(html.includes("LINE友だち"));
+  assert.ok(html.includes("新規登録"));
+  assert.ok(/=== null \? '—'/.test(html) || html.includes("null ? '—'"));
+});
+
+test("buildAdminAppHtml: バージョンがv1.5.0に上がり、更新履歴に集客ファネルの説明がある", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("v1.5.0"));
+  assert.ok(html.includes("集客ファネル"));
+});

@@ -381,6 +381,58 @@ function getVisitSchedule(daysAhead) {
 }
 
 /**
+ * 集客ファネル(週次)を返す。LP閲覧・LINE友だち数はhojo-hq(公開リポジトリ)で
+ * 毎日自動収集されているKPIデータをraw.githubusercontent.comから読む。
+ * 取得に失敗してもglow-ma内部の数字(新規登録・面談・成約)だけで表は成立させ、
+ * 欠けた列はnull(画面では「—」)として返す。
+ * この関数の名前の末尾に `_` を付けてはいけない(getPartnerListと同じ理由)。
+ */
+function getFunnelSummary() {
+  requireAdminAccess_();
+  var loaded = loadCompaniesWithReactionFlag_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  var flatInteractions = [];
+  if (logSheet) {
+    var byCompany = readInteractionsByCompanyId_(logSheet);
+    Object.keys(byCompany).forEach(function (companyId) {
+      Array.prototype.push.apply(flatInteractions, byCompany[companyId]);
+    });
+  }
+  var activity = GlowAdminAccess.buildActivitySummary(flatInteractions, loaded.todayString, 4);
+  var siteTraffic = fetchPublicKpiJson_("site_traffic.json");
+  var lineFollowers = fetchPublicKpiJson_("line_followers.json");
+  return GlowFunnelContent.buildWeeklyFunnel({
+    siteTraffic: (siteTraffic && siteTraffic.history) || [],
+    lineFollowers: (lineFollowers && lineFollowers.history) || [],
+    kgiTarget: (lineFollowers && lineFollowers.kgi_target) || 1000,
+    companies: loaded.companies,
+    activity: activity
+  }, loaded.todayString, 4);
+}
+
+/**
+ * hojo-hq(公開リポジトリ)のdata/kpi/配下のJSONを読む。公開データのみが対象
+ * (認証トークン不要)。失敗時はnullを返し、呼び出し側が「—」表示に倒す。
+ */
+function fetchPublicKpiJson_(fileName) {
+  try {
+    var response = UrlFetchApp.fetch(
+      "https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/data/kpi/" + fileName,
+      { muteHttpExceptions: true }
+    );
+    if (response.getResponseCode() !== 200) {
+      Logger.log("KPIデータの取得に失敗しました(" + fileName + "): HTTP " + response.getResponseCode());
+      return null;
+    }
+    return JSON.parse(response.getContentText());
+  } catch (error) {
+    Logger.log("KPIデータの取得に失敗しました(" + fileName + "): " + error);
+    return null;
+  }
+}
+
+/**
  * 企業詳細ドロワーからの次回アクション(予定日・内容)の直接更新。
  * 検証はGlowAdminAccess.buildNextActionUpdate(純ロジック)が担う。
  * ロック理由はupdateCompanyMemoと同じ(行特定と書き込みの間の全体書き戻し・行ズレ防止)。
