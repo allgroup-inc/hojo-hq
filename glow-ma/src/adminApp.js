@@ -547,7 +547,7 @@
   ].join("");
 
   var SIDE_PANEL = [
-    "<div class=\"side\">",
+    "<div class=\"side\" id=\"sidePanel\">",
     "<div class=\"panel\"><div class=\"panel-head\"><h2>本日のネクストアクション</h2></div>",
     "<div class=\"panel-body-pad\" id=\"queue\"></div></div>",
     "<div class=\"panel\"><div class=\"panel-head\"><h2>担当者別ワークロード</h2></div>",
@@ -1098,6 +1098,8 @@
     "document.getElementById('companyView').classList.toggle('active', isCompany);",
     "document.getElementById('partnerView').classList.toggle('active', !isCompany);",
     "document.getElementById('companyFiltersBar').style.display = isCompany ? 'flex' : 'none';",
+    "document.getElementById('kpiRow').style.display = isCompany ? 'grid' : 'none';",
+    "document.getElementById('sidePanel').style.display = isCompany ? 'flex' : 'none';",
     "}",
 
     "function loadPartnerList(){",
