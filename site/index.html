@@ -517,6 +517,20 @@
     overflow-y:auto;border-radius:0;animation:glowUp .35s ease;}
   @media (prefers-reduced-motion:reduce){.glow-card{animation:none;}}
   @keyframes glowUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+  /* PC向け: LINEリンクの代わりに表示するQRコード案内(2026-08-31 福田さん依頼❷) */
+  .lineqr-modal{position:fixed;inset:0;z-index:1001;background:rgba(0,20,38,.85);
+    display:flex;align-items:center;justify-content:center;padding:20px;}
+  .lineqr-modal[hidden]{display:none;}
+  .lineqr-card{position:relative;background:#fff;color:#1c2b3a;max-width:380px;width:100%;
+    border-radius:14px;padding:30px 22px 24px;text-align:center;max-height:90vh;overflow-y:auto;}
+  .lineqr-card h2{font-size:1.02rem;margin:0 14px 4px;color:#00335C;line-height:1.6;}
+  .lineqr-card img{width:210px;height:210px;margin:12px auto 4px;display:block;}
+  .lineqr-card p{font-size:.9rem;line-height:1.7;margin:6px 0 0;}
+  .lineqr-close{position:absolute;top:8px;right:10px;border:none;background:none;
+    font-size:1.25rem;cursor:pointer;color:#4a5a66;padding:6px;}
+  .lineqr-msg{margin-top:12px;text-align:left;background:#f4f7fa;border-radius:8px;
+    padding:10px 12px;font-size:.8rem;line-height:1.7;white-space:pre-wrap;}
+  .lineqr-msg[hidden]{display:none;}
   .glow-close{position:sticky;top:14px;z-index:5;display:block;margin:14px 16px 0 auto;
     width:42px;height:42px;border-radius:50%;border:none;background:rgba(0,51,92,.9);
     color:#fff;font-size:1.3rem;cursor:pointer;line-height:1;box-shadow:0 4px 12px rgba(0,0,0,.3);}
@@ -921,6 +935,15 @@
 <button id="back-result" class="back-result" hidden>💰 診断結果へ戻る</button>
 
 <!-- GLOWとは(運営会社モーダル) -->
+<div id="lineqr-modal" class="lineqr-modal" hidden role="dialog" aria-modal="true" aria-labelledby="lineqr-title">
+  <div class="lineqr-card">
+    <button type="button" id="lineqr-close" class="lineqr-close" aria-label="閉じる">✕</button>
+    <h2 id="lineqr-title">スマートフォンでQRコードを読み取ってください</h2>
+    <img src="assets/qr-line-oa.png" alt="沖縄企業のミカタ LINE公式アカウントのQRコード" width="210" height="210" loading="lazy">
+    <p>LINE公式アカウントからご相談いただけます。</p>
+    <div class="lineqr-msg" id="lineqr-msg" hidden></div>
+  </div>
+</div>
 <div id="glow-modal" class="glow-modal" hidden role="dialog" aria-modal="true" aria-labelledby="glow-title">
   <div class="glow-card">
     <button type="button" id="glow-close" class="glow-close" aria-label="閉じる">✕</button>
@@ -1345,6 +1368,9 @@
         g.hidden=true;
         gtag('event','line_cta_click',{channel:'regform'});
         const text='【会社情報登録】'+String.fromCharCode(10)+'会社名：'+c+String.fromCharCode(10)+'代表者名：'+n+String.fromCharCode(10)+'所在地：'+city;
+        // PCではLINEアプリが開けず公式サイトに飛んでしまうため、QRコード案内に切り替える
+        // (2026-08-31 福田さん依頼❷)。スマホは従来どおりLINEを開く
+        if(window.__mikataOpenQr){window.__mikataOpenQr(text);return;}
         window.open('https://line.me/R/oaMessage/%40345pqedv/?'+encodeURIComponent(text),'_blank','noopener');
       });
     }
@@ -1612,6 +1638,47 @@
     closer.addEventListener('click',closeModal);
     modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
     document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidden)closeModal();});
+  })();
+
+  // ===== PCではLINEリンクの代わりにQRコードを表示(2026-08-31 福田さん依頼❷) =====
+  // PCでoaMessageリンクを開くとPC版LINEのトークではなくLINE公式サイトが開いてしまう。
+  // PC(非モバイルUA)のときだけリンクを止め、スマホで読み取るQRコードを表示する。
+  // リッチメニューはPC版LINE非対応のため、最終的にスマホのLINEへ誘導する方針(福田さん)。
+  (function(){
+    var modal=document.getElementById('lineqr-modal');
+    if(!modal)return;
+    var isMobile=/iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent);
+    if(isMobile)return;
+    var msgBox=document.getElementById('lineqr-msg');
+    function openQr(message){
+      if(message){
+        msgBox.textContent='読み取り後、LINEのトーク画面で下の内容をそのまま送ってください:\n\n'+message;
+        msgBox.hidden=false;
+      }else{
+        msgBox.hidden=true;
+      }
+      modal.hidden=false;
+      document.body.classList.add('modal-open');
+      // 計測はline_redirectともline_cta_clickとも別イベントにする(go-link-discipline:
+      // LINE遷移が起きていないものをLINE系イベントに混ぜて登録数を水増ししない)
+      gtag('event','line_qr_modal');
+    }
+    window.__mikataOpenQr=openQr;
+    function closeQr(){modal.hidden=true;document.body.classList.remove('modal-open');}
+    document.getElementById('lineqr-close').addEventListener('click',closeQr);
+    modal.addEventListener('click',function(e){if(e.target===modal)closeQr();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidden)closeQr();});
+    // capture段階でリンクを止める(既存の計測リスナーはbubble段階でそのまま発火する)
+    document.addEventListener('click',function(e){
+      var a=e.target.closest&&e.target.closest('a');
+      if(!a)return;
+      var href=a.getAttribute('href')||'';
+      if(href.indexOf('line.me/R/oaMessage')<0)return;
+      e.preventDefault();
+      var text='';
+      try{text=decodeURIComponent(href.split('/?')[1]||'');}catch(err){}
+      openQr(text);
+    },true);
   })();
 </script>
 </body>
