@@ -24,8 +24,9 @@
   // 機能を追加・変更したら、(1)APP_VERSIONを上げ、(2)CHANGELOGの先頭に1行足すこと。
   // CHANGELOGは使い方ガイドの「④ 更新履歴」にそのまま表示される取説の一部。
   // 利用者(小柳さん・スタッフ)が読む前提で、技術用語ではなく「何ができるようになったか」を書く。
-  var APP_VERSION = "v1.2.0";
+  var APP_VERSION = "v1.3.0";
   var CHANGELOG = [
+    { date: "2026-08-31", version: "v1.3.0", text: "スケジュールタブに行動量ダッシュボードを追加(手紙・架電・アポ獲得・面談/訪問・提案・成約を週ごとに自動集計。担当者絞り込み連動)。対応履歴の種別に「アポ獲得」を追加" },
     { date: "2026-08-31", version: "v1.2.0", text: "「訪問・架電スケジュール」タブを追加(今日から2週間の予定を日別に表示。期限超過は最上部・担当者で絞り込み可)/企業詳細から次回アクションの予定日・内容を直接編集できるように(明日/3日後/1週間後/1ヶ月後のワンタッチ設定付き)" },
     { date: "2026-08-31", version: "v1.1.0", text: "本日の要対応ポップアップを追加(次回アクション予定日が来た企業を、画面を開いた瞬間にお知らせ。クリックでそのまま詳細を開けます)/「＋新規パートナー登録」フォームを追加(パートナーIDは自動採番・二重登録は自動でブロック)" },
     { date: "2026-08-31", version: "v1.0.2", text: "パートナー画面に企業向けのパネルが残って見える表示不具合を修正/初回読み込みを高速化" },
@@ -537,7 +538,21 @@
     ".na-quick{display:flex; gap:6px; margin-top:.4rem; align-items:center; flex-wrap:wrap;}",
     "#naStatus{font-size:.78rem; color:var(--muted);}",
     "#naStatus.error{color:var(--bad);}",
-    "#naStatus.okmsg{color:var(--good);}"
+    "#naStatus.okmsg{color:var(--good);}",
+    "/* ---- 行動量ダッシュボード ---- */",
+    ".act-panel{border:1px solid var(--line); border-radius:var(--radius-lg); background:var(--card);",
+    "padding:12px 14px; margin-bottom:16px; box-shadow:var(--shadow-sm);}",
+    ".act-title{font-size:.85rem; font-weight:700; margin-bottom:8px;}",
+    ".act-scroll{overflow-x:auto;}",
+    ".act-table{width:100%; border-collapse:collapse; font-size:.82rem;}",
+    ".act-table th{text-align:right; padding:.3rem .5rem; border-bottom:2px solid var(--line); font-size:.75rem; color:var(--muted); white-space:nowrap;}",
+    ".act-table th:first-child{text-align:left;}",
+    ".act-table td{text-align:right; padding:.35rem .5rem; border-bottom:1px solid var(--line); white-space:nowrap;}",
+    ".act-week{text-align:left !important; font-weight:600;}",
+    ".act-range{font-weight:400; color:var(--muted); font-size:.72rem; margin-left:.4rem;}",
+    ".act-num{font-variant-numeric:tabular-nums; font-weight:600;}",
+    ".act-num.zero{color:var(--muted-2); font-weight:400;}",
+    ".act-note{font-size:.72rem; color:var(--muted); margin-top:6px;}"
   ].join("");
 
   var HEADER_AND_FILTERS = [
@@ -579,6 +594,9 @@
     "ここに出るので、見込が埋もれない。行をクリックすればそのまま詳細が開く</li>",
     "<li>「訪問・架電スケジュール」タブで今日から2週間の行動予定を日別に確認できる。"+
     "1日に詰め込みすぎていないか・空いている日はどこかが一目で分かるので、行動量の平準化に使う。担当者での絞り込みも可能</li>",
+    "<li>同じタブの上部に「行動量(直近4週の実績)」が出る。手紙・架電・アポ獲得・面談/訪問・提案・成約の週次実績が"+
+    "対応履歴から自動集計されるので、予定と実績の差・アポ率の変化を数字で追える。"+
+    "<b>アポが取れたら対応履歴に種別「アポ獲得」で記録する</b>とアポ数に反映される</li>",
     "<li>企業詳細の「次回アクション」欄で予定日と内容をその場で編集できる(明日/3日後/1週間後/1ヶ月後のワンタッチ設定付き)。"+
     "<b>電話や訪問を終えたら、次の予定日を必ず入れてから閉じる</b>のが見込を埋もれさせないコツ</li>",
     "</ol></div>",
@@ -648,6 +666,7 @@
     "<select id=\"scheduleOwnerFilter\"><option value=\"\">担当者(すべて)</option></select>",
     "<button class=\"btn-small\" id=\"scheduleRefreshBtn\" type=\"button\">再読み込み</button>",
     "</div></div>",
+    "<div id=\"activityPanel\"></div>",
     "<div id=\"scheduleList\"></div>",
     "</div>"
   ].join("");
@@ -1339,6 +1358,29 @@
     "(items.length ? items.map(itemRow).join('') : '<div class=\"sched-none\">予定なし</div>') + '</div>';",
     "});",
     "document.getElementById('scheduleList').innerHTML = html;",
+    "renderActivity();",
+    "}",
+
+    "function renderActivity(){",
+    "var panel = document.getElementById('activityPanel');",
+    "var activity = scheduleData && scheduleData.activity;",
+    "if (!activity || !activity.weeks){ panel.innerHTML = ''; return; }",
+    "var owner = document.getElementById('scheduleOwnerFilter').value;",
+    "var head = '<tr><th>週</th>' + activity.metrics.map(function(m){",
+    "return '<th>' + escapeHtml(m) + '</th>'; }).join('') + '</tr>';",
+    "var rows = activity.weeks.map(function(week){",
+    "var counts = owner ? (week.byOwner[owner] || null) : week.total;",
+    "return '<tr><td class=\"act-week\">' + escapeHtml(week.label) +",
+    "'<span class=\"act-range\">' + escapeHtml(week.start.slice(5).replace('-','/')) + '〜' + escapeHtml(week.end.slice(5).replace('-','/')) + '</span></td>' +",
+    "activity.metrics.map(function(m){",
+    "var v = counts ? counts[m] : 0;",
+    "return '<td class=\"act-num' + (v > 0 ? '' : ' zero') + '\">' + v + '</td>';",
+    "}).join('') + '</tr>';",
+    "}).join('');",
+    "panel.innerHTML = '<div class=\"act-panel\"><div class=\"act-title\">行動量(直近4週の実績)' +",
+    "(owner ? ' — ' + escapeHtml(owner) : '') + '</div>' +",
+    "'<div class=\"act-scroll\"><table class=\"act-table\"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>' +",
+    "'<div class=\"act-note\">対応履歴ログ(LINE音声・通話連携・手入力)から自動集計。アポが取れたら種別「アポ獲得」で記録するとアポ数に反映されます</div></div>';",
     "}",
 
     "function loadPartnerList(){",

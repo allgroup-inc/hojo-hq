@@ -621,3 +621,77 @@ test("buildNextActionUpdate: 日付を空にして予定を消すことも許可
   assert.equal(result.ok, true);
   assert.equal(result.date, "");
 });
+
+// ---- buildActivitySummary(行動量の実績ダッシュボード) ----
+
+test("buildActivitySummary: 週(月曜はじまり)ごとに種別を指標に分類して集計する", () => {
+  // 2026-08-31は月曜日 → 今週=08-31〜09-06、先週=08-24〜08-30
+  const interactions = [
+    { "日付": "2026-08-31", "担当者": "山田", "種別": "電話" },
+    { "日付": "2026-09-02", "担当者": "山田", "種別": "アポ獲得" },
+    { "日付": "2026-09-03", "担当者": "田中", "種別": "面談実施" },
+    { "日付": "2026-08-25", "担当者": "山田", "種別": "手紙送付" },
+    { "日付": "2026-08-26", "担当者": "山田", "種別": "提案(M&A)" },
+    { "日付": "2026-08-27", "担当者": "田中", "種別": "成約" }
+  ];
+  const result = adminAccess.buildActivitySummary(interactions, "2026-08-31", 4);
+  assert.deepEqual(result.metrics, ["手紙", "架電", "アポ獲得", "面談・訪問", "提案", "成約"]);
+  assert.equal(result.weeks.length, 4);
+  assert.equal(result.weeks[0].label, "今週");
+  assert.equal(result.weeks[0].start, "2026-08-31");
+  assert.equal(result.weeks[0].end, "2026-09-06");
+  assert.equal(result.weeks[0].total["架電"], 1);
+  assert.equal(result.weeks[0].total["アポ獲得"], 1);
+  assert.equal(result.weeks[0].total["面談・訪問"], 1);
+  assert.equal(result.weeks[1].label, "先週");
+  assert.equal(result.weeks[1].total["手紙"], 1);
+  assert.equal(result.weeks[1].total["提案"], 1);
+  assert.equal(result.weeks[1].total["成約"], 1);
+});
+
+test("buildActivitySummary: 担当者別の内訳を持ち、担当者未記入は「未記入」に集計する", () => {
+  const interactions = [
+    { "日付": "2026-08-31", "担当者": "山田", "種別": "電話" },
+    { "日付": "2026-08-31", "担当者": "山田", "種別": "電話" },
+    { "日付": "2026-08-31", "担当者": "", "種別": "電話" }
+  ];
+  const result = adminAccess.buildActivitySummary(interactions, "2026-08-31", 1);
+  assert.equal(result.weeks[0].byOwner["山田"]["架電"], 2);
+  assert.equal(result.weeks[0].byOwner["未記入"]["架電"], 1);
+  assert.equal(result.weeks[0].total["架電"], 3);
+});
+
+test("buildActivitySummary: 指標に該当しない種別(返信・関係メモ更新など)や範囲外の日付は数えない", () => {
+  const interactions = [
+    { "日付": "2026-08-31", "担当者": "山田", "種別": "返信" },
+    { "日付": "2026-08-31", "担当者": "山田", "種別": "関係メモ更新" },
+    { "日付": "2026-01-01", "担当者": "山田", "種別": "電話" }
+  ];
+  const result = adminAccess.buildActivitySummary(interactions, "2026-08-31", 4);
+  result.weeks.forEach((week) => {
+    result.metrics.forEach((metric) => {
+      assert.equal(week.total[metric], 0, week.label + "の" + metric + "が0でない");
+    });
+  });
+});
+
+test("buildActivitySummary: 日付がDateオブジェクトでも集計できる(getValues由来)", () => {
+  const interactions = [
+    { "日付": new Date(2026, 7, 31, 10, 30), "担当者": "山田", "種別": "ゆんたく相談実施" }
+  ];
+  const result = adminAccess.buildActivitySummary(interactions, "2026-08-31", 1);
+  assert.equal(result.weeks[0].total["面談・訪問"], 1);
+});
+
+test("buildActivitySummary: 週の途中(木曜)でも月曜はじまりで正しく区切る", () => {
+  // 2026-09-03は木曜日 → 今週=08-31〜09-06
+  const interactions = [
+    { "日付": "2026-08-31", "担当者": "山田", "種別": "電話" },
+    { "日付": "2026-08-30", "担当者": "山田", "種別": "電話" }
+  ];
+  const result = adminAccess.buildActivitySummary(interactions, "2026-09-03", 2);
+  assert.equal(result.weeks[0].start, "2026-08-31");
+  assert.equal(result.weeks[0].total["架電"], 1);
+  assert.equal(result.weeks[1].start, "2026-08-24");
+  assert.equal(result.weeks[1].total["架電"], 1);
+});

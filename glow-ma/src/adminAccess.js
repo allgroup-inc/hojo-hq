@@ -222,6 +222,71 @@
     };
   }
 
+  // 行動量ダッシュボードの指標と、対応履歴ログの「種別」との対応。
+  // ここに載っていない種別(返信・レターURLアクセス・関係メモ更新等)は行動量には数えない
+  // (企業側の反応や記録操作であり、営業側の行動量ではないため)。
+  var ACTIVITY_METRICS_ = [
+    { key: "手紙", types: ["手紙送付"] },
+    { key: "架電", types: ["電話"] },
+    { key: "アポ獲得", types: ["アポ獲得"] },
+    { key: "面談・訪問", types: ["面談実施", "ゆんたく相談実施"] },
+    { key: "提案", types: ["提案(M&A)", "提案(不動産)", "提案(法人保険)"] },
+    { key: "成約", types: ["成約"] }
+  ];
+
+  /**
+   * 行動量の実績ダッシュボード: 対応履歴ログを月曜はじまりの週ごとに
+   * 「手紙・架電・アポ獲得・面談/訪問・提案・成約」へ分類して集計する。
+   * 予定(訪問・架電スケジュール)と実績の差を見るための土台で、
+   * 「行動量→アポ率→面談→成約」のファネルを数字で追う法人営業の定石に沿う。
+   * 返り値: { metrics: 指標名の配列, weeks: [{label, start, end, total, byOwner}] }(今週が先頭)
+   */
+  function buildActivitySummary(interactions, todayString, weeksBack) {
+    var count = typeof weeksBack === "number" ? weeksBack : 4;
+    var typeToMetric = {};
+    ACTIVITY_METRICS_.forEach(function (metric) {
+      metric.types.forEach(function (type) { typeToMetric[type] = metric.key; });
+    });
+    function emptyCounts() {
+      var counts = {};
+      ACTIVITY_METRICS_.forEach(function (metric) { counts[metric.key] = 0; });
+      return counts;
+    }
+    var parts = todayString.split("-").map(Number);
+    var today = new Date(parts[0], parts[1] - 1, parts[2]);
+    var mondayOffset = (today.getDay() + 6) % 7;
+    var labels = ["今週", "先週", "2週前", "3週前", "4週前", "5週前"];
+    var weeks = [];
+    for (var w = 0; w < count; w++) {
+      var start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - mondayOffset - w * 7);
+      var end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+      weeks.push({
+        label: labels[w] || w + "週前",
+        start: formatDate_(start),
+        end: formatDate_(end),
+        total: emptyCounts(),
+        byOwner: {}
+      });
+    }
+    (interactions || []).forEach(function (record) {
+      var metric = typeToMetric[record["種別"]];
+      if (!metric) return;
+      var date = normalizeDateForDisplay(record["日付"]);
+      if (!date) return;
+      weeks.forEach(function (week) {
+        if (date < week.start || date > week.end) return;
+        week.total[metric] += 1;
+        var owner = String(record["担当者"] || "").trim() || "未記入";
+        if (!week.byOwner[owner]) week.byOwner[owner] = emptyCounts();
+        week.byOwner[owner][metric] += 1;
+      });
+    });
+    return {
+      metrics: ACTIVITY_METRICS_.map(function (metric) { return metric.key; }),
+      weeks: weeks
+    };
+  }
+
   /**
    * 企業詳細ドロワーからの次回アクション直接編集の入力検証。
    * 日付は空でもよい(予定を消す操作)。入力があればyyyy-MM-dd形式のみ許可。
@@ -518,7 +583,8 @@
     buildNextActionQueue: buildNextActionQueue,
     buildFollowUpReminders: buildFollowUpReminders,
     buildVisitSchedule: buildVisitSchedule,
-    buildNextActionUpdate: buildNextActionUpdate
+    buildNextActionUpdate: buildNextActionUpdate,
+    buildActivitySummary: buildActivitySummary
   };
 
   if (typeof module !== "undefined" && module.exports) {

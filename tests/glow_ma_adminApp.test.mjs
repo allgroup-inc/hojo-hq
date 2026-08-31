@@ -434,3 +434,18 @@ test("buildAdminAppHtml: バージョンがv1.2.0に上がり、更新履歴に�
   assert.ok(html.includes("v1.2.0"));
   assert.ok(html.includes("訪問・架電スケジュール"));
 });
+
+test("buildAdminAppHtml: スケジュールタブに行動量ダッシュボード(実績パネル)を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("id=\"activityPanel\""));
+  assert.ok(html.includes("function renderActivity("));
+  assert.ok(html.includes("行動量(直近4週の実績)"));
+  // スケジュールと同じ応答(activity)から描画し、担当者絞り込みにも連動する
+  assert.ok(html.includes("scheduleData.activity"));
+});
+
+test("buildAdminAppHtml: バージョンがv1.3.0に上がり、更新履歴に行動量ダッシュボードの説明がある", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("v1.3.0"));
+  assert.ok(html.includes("行動量"));
+});

@@ -364,7 +364,20 @@ function getPartnerDetail(partnerId) {
 function getVisitSchedule(daysAhead) {
   requireAdminAccess_();
   var loaded = loadCompaniesWithReactionFlag_();
-  return GlowAdminAccess.buildVisitSchedule(loaded.companies, loaded.todayString, daysAhead);
+  var schedule = GlowAdminAccess.buildVisitSchedule(loaded.companies, loaded.todayString, daysAhead);
+
+  // 行動量ダッシュボード(週次実績)も同じ応答に載せ、往復回数を増やさない
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  var flatInteractions = [];
+  if (logSheet) {
+    var byCompany = readInteractionsByCompanyId_(logSheet);
+    Object.keys(byCompany).forEach(function (companyId) {
+      Array.prototype.push.apply(flatInteractions, byCompany[companyId]);
+    });
+  }
+  schedule.activity = GlowAdminAccess.buildActivitySummary(flatInteractions, loaded.todayString, 4);
+  return schedule;
 }
 
 /**
