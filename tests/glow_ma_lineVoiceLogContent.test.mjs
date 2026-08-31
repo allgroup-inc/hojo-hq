@@ -277,3 +277,131 @@ test("buildInteractionLogRow: 「不明」は台帳へ書く時点で必ず3値�
     "対応履歴ログの入力規則(3値)に必ず収まること"
   );
 });
+
+// ---- v1.4: 見込みシグナルの抽出と企業台帳への反映 ----
+
+test("normalizeProspectSignals: 後継者状況・興味商品・次回予定日を検証済みの値に正規化する", () => {
+  const signals = lineVoiceLogContent.normalizeProspectSignals({
+    successorStatus: "なし",
+    interestedProducts: ["M&A", "不動産", "存在しない商品"],
+    nextActionDate: "2026-09-10"
+  });
+  assert.equal(signals.successorStatus, "なし");
+  assert.deepEqual(signals.interestedProducts, ["M&A", "不動産"]);
+  assert.equal(signals.nextActionDate, "2026-09-10");
+});
+
+test("normalizeProspectSignals: 不正な値は空にする(決めつけ禁止・正確性最優先)", () => {
+  const signals = lineVoiceLogContent.normalizeProspectSignals({
+    successorStatus: "たぶんいない",
+    interestedProducts: "M&A",
+    nextActionDate: "来週"
+  });
+  assert.equal(signals.successorStatus, "");
+  assert.deepEqual(signals.interestedProducts, []);
+  assert.equal(signals.nextActionDate, "");
+});
+
+test("normalizeProspectSignals: 未定義でも安全に空を返す", () => {
+  const signals = lineVoiceLogContent.normalizeProspectSignals({});
+  assert.equal(signals.successorStatus, "");
+  assert.deepEqual(signals.interestedProducts, []);
+  assert.equal(signals.nextActionDate, "");
+});
+
+test("buildProspectUpdates: 最終接触日は常に更新し、要約を関係メモの先頭に日付付きで追記する", () => {
+  const record = {
+    "種別候補": "面談実施",
+    "内容メモ": "社長と面談。業績は堅調だが後継者がいない。",
+    "次回アクション": "M&Aの初期資料を持参",
+    "後継者状況候補": "なし",
+    "興味商品候補": "M&A",
+    "次回予定日候補": "2026-09-10"
+  };
+  const company = {
+    "企業ID": "C1", "関係メモ": "既存のメモ", "提案商品": [],
+    "後継者状況": "不明"
+  };
+  const result = lineVoiceLogContent.buildProspectUpdates(record, company, "2026-08-31");
+  assert.equal(result.updates["最終接触日"], "2026-08-31");
+  assert.equal(result.updates["次回アクション予定日"], "2026-09-10");
+  assert.equal(result.updates["次回アクション内容"], "M&Aの初期資料を持参");
+  assert.equal(result.updates["後継者状況"], "なし");
+  assert.equal(result.updates["提案商品"], "M&A");
+  assert.ok(result.updates["関係メモ"].startsWith("【2026-08-31 面談実施(LINE音声)】社長と面談。"));
+  assert.ok(result.updates["関係メモ"].includes("▶次: M&Aの初期資料を持参"));
+  assert.ok(result.updates["関係メモ"].endsWith("既存のメモ"));
+});
+
+test("buildProspectUpdates: 変わらない項目は更新に含めない(後継者状況が同じ・興味商品が既登録)", () => {
+  const record = {
+    "種別候補": "電話", "内容メモ": "近況確認",
+    "次回アクション": "", "後継者状況候補": "なし",
+    "興味商品候補": "M&A", "次回予定日候補": ""
+  };
+  const company = {
+    "企業ID": "C1", "関係メモ": "", "提案商品": ["M&A"], "後継者状況": "なし"
+  };
+  const result = lineVoiceLogContent.buildProspectUpdates(record, company, "2026-08-31");
+  assert.equal(result.updates["後継者状況"], undefined);
+  assert.equal(result.updates["提案商品"], undefined);
+  assert.equal(result.updates["次回アクション予定日"], undefined);
+  assert.equal(result.updates["次回アクション内容"], undefined);
+  assert.equal(result.updates["最終接触日"], "2026-08-31");
+});
+
+test("buildProspectUpdates: 後継者状況候補「不明」は既存の値を上書きしない", () => {
+  const record = {
+    "種別候補": "電話", "内容メモ": "", "次回アクション": "",
+    "後継者状況候補": "不明", "興味商品候補": "", "次回予定日候補": ""
+  };
+  const company = { "企業ID": "C1", "関係メモ": "", "提案商品": [], "後継者状況": "あり" };
+  const result = lineVoiceLogContent.buildProspectUpdates(record, company, "2026-08-31");
+  assert.equal(result.updates["後継者状況"], undefined);
+  assert.equal(result.updates["関係メモ"], undefined);
+});
+
+test("buildProspectUpdates: 提案商品は既存とマージして「、」区切りで返す(既存が文字列でも配列でも)", () => {
+  const record = {
+    "種別候補": "電話", "内容メモ": "", "次回アクション": "",
+    "後継者状況候補": "", "興味商品候補": "不動産、法人保険", "次回予定日候補": ""
+  };
+  const asArray = lineVoiceLogContent.buildProspectUpdates(record, { "提案商品": ["M&A"], "関係メモ": "" }, "2026-08-31");
+  assert.equal(asArray.updates["提案商品"], "M&A、不動産、法人保険");
+  const asString = lineVoiceLogContent.buildProspectUpdates(record, { "提案商品": "M&A", "関係メモ": "" }, "2026-08-31");
+  assert.equal(asString.updates["提案商品"], "M&A、不動産、法人保険");
+});
+
+test("buildProspectUpdates: 関係メモが長くなりすぎたら古い側を切り詰める(上限6000文字)", () => {
+  const record = {
+    "種別候補": "電話", "内容メモ": "新しい要約", "次回アクション": "",
+    "後継者状況候補": "", "興味商品候補": "", "次回予定日候補": ""
+  };
+  const company = { "関係メモ": "あ".repeat(7000), "提案商品": [] };
+  const result = lineVoiceLogContent.buildProspectUpdates(record, company, "2026-08-31");
+  assert.ok(result.updates["関係メモ"].length <= 6000);
+  assert.ok(result.updates["関係メモ"].startsWith("【2026-08-31 電話(LINE音声)】新しい要約"));
+  assert.ok(result.updates["関係メモ"].includes("(古いメモは省略)"));
+});
+
+test("buildProspectUpdateSummaryMessage: 台帳に反映した項目を人が読める1通にまとめる", () => {
+  const message = lineVoiceLogContent.buildProspectUpdateSummaryMessage({
+    "最終接触日": "2026-08-31",
+    "次回アクション予定日": "2026-09-10",
+    "関係メモ": "【…】…",
+    "後継者状況": "なし",
+    "提案商品": "M&A、不動産"
+  });
+  assert.equal(typeof message, "string");
+  assert.ok(message.includes("台帳にも反映しました"));
+  assert.ok(message.includes("次回予定: 2026-09-10"));
+  assert.ok(message.includes("後継者状況: なし"));
+  assert.ok(message.includes("関係メモに要約を追記"));
+  assert.ok(message.includes("興味あり商品: M&A、不動産"));
+});
+
+test("buildProspectUpdateSummaryMessage: 最終接触日だけの場合も成立する", () => {
+  const message = lineVoiceLogContent.buildProspectUpdateSummaryMessage({ "最終接触日": "2026-08-31" });
+  assert.ok(message.includes("台帳にも反映しました"));
+  assert.ok(message.includes("最終接触日"));
+});

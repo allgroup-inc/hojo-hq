@@ -159,9 +159,13 @@ test("事前選定リスト・事前選定_未一致タブの名称・見出し�
 test("音声ログ処理状況のシート名・ヘッダー・ステータス一覧が定義されている", () => {
   assert.equal(schema.LINE_VOICE_LOG_SHEET_NAME, "音声ログ処理状況");
   assert.ok(Array.isArray(schema.LINE_VOICE_LOG_HEADERS));
-  assert.equal(schema.LINE_VOICE_LOG_HEADERS.length, 12);
+  assert.equal(schema.LINE_VOICE_LOG_HEADERS.length, 15);
   assert.ok(schema.LINE_VOICE_LOG_HEADERS.includes("処理ID"));
   assert.ok(schema.LINE_VOICE_LOG_HEADERS.includes("LINEユーザーID"));
+  // v1.4: 見込みシグナル(既存12列の後ろに追加。既存行のズレを起こさないため末尾固定)
+  assert.equal(schema.LINE_VOICE_LOG_HEADERS[12], "後継者状況候補");
+  assert.equal(schema.LINE_VOICE_LOG_HEADERS[13], "興味商品候補");
+  assert.equal(schema.LINE_VOICE_LOG_HEADERS[14], "次回予定日候補");
   assert.ok(Array.isArray(schema.LINE_VOICE_LOG_STATUSES));
   assert.ok(schema.LINE_VOICE_LOG_STATUSES.includes("受信済み"));
   assert.ok(schema.LINE_VOICE_LOG_STATUSES.includes("確定"));

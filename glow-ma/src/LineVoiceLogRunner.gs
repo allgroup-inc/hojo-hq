@@ -144,7 +144,7 @@ function handleAudioMessage_(event) {
   try {
     appendVoiceLogRow_(ss, [
       processId, lineUserId, event.message.id, "受信済み",
-      receivedAt, "", "", "", "", "", "", ""
+      receivedAt, "", "", "", "", "", "", "", "", "", ""
     ]);
   } catch (error) {
     Logger.log("音声ログ処理状況タブへの受付行の追加に失敗しました: " + error);
@@ -495,6 +495,7 @@ function processOneVoiceLog_(ss, record) {
     GlowLineVoiceLogContent.sanitizeSheetText(extracted.contentMemo), respondentType
   );
   var nextAction = GlowLineVoiceLogContent.sanitizeSheetText(extracted.nextAction);
+  var prospectSignals = GlowLineVoiceLogContent.normalizeProspectSignals(extracted);
 
   var transcribed = transitionVoiceLogStatus_(ss, record.sheetRow, [VOICE_LOG_STATUS_PROCESSING], {
     "ステータス": "文字起こし済み",
@@ -502,7 +503,10 @@ function processOneVoiceLog_(ss, record) {
     "種別候補": interactionType,
     "対応相手候補": respondentType,
     "内容メモ": contentMemo,
-    "次回アクション": nextAction
+    "次回アクション": nextAction,
+    "後継者状況候補": prospectSignals.successorStatus,
+    "興味商品候補": prospectSignals.interestedProducts.join("、"),
+    "次回予定日候補": prospectSignals.nextActionDate
   });
   if (!transcribed) {
     Logger.log("文字起こし結果の書き込み前に他の処理が状態を変更したため中断しました(処理ID " + record["処理ID"] + ")。");
@@ -576,7 +580,7 @@ function callGeminiForVoiceLogOnce_(audioBlob) {
   var payload = {
     contents: [{
       parts: [
-        { text: buildGeminiPrompt_() },
+        { text: buildGeminiPrompt_(Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd")) },
         { inline_data: { mime_type: audioBlob.getContentType() || "audio/m4a", data: Utilities.base64Encode(audioBlob.getBytes()) } }
       ]
     }]
@@ -606,7 +610,7 @@ function callGeminiForVoiceLogOnce_(audioBlob) {
   return parseGeminiExtractionResult_(text);
 }
 
-function buildGeminiPrompt_() {
+function buildGeminiPrompt_(todayString) {
   return "この音声は、営業担当者が企業訪問後に残した口頭のメモです。以下のJSON形式のみを出力してください" +
     "(説明文やコードブロックの記号は付けないこと):\n" +
     "{\"companyName\": \"話された会社名\", " +
@@ -615,7 +619,13 @@ function buildGeminiPrompt_() {
       "のいずれか。音声だけでは相手がオーナー社長本人か窓口担当か判別できない場合は、" +
       "推測で決めつけず「不明」と正直に出力すること\", " +
     "\"contentMemo\": \"話の内容の要約(2〜3文程度)\", " +
-    "\"nextAction\": \"次にやるべきこと(無ければ空文字)\"}";
+    "\"nextAction\": \"次にやるべきこと(無ければ空文字)\", " +
+    "\"successorStatus\": \"後継者・跡継ぎの話が出た場合のみ " + GlowSchema.SUCCESSOR_STATUS_TYPES.join("/") +
+      " のいずれか。話に出ていなければ空文字。推測で決めつけないこと\", " +
+    "\"interestedProducts\": \"企業側がM&A・不動産・法人保険に関心や課題を示した場合のみ、" +
+      "[\\\"M&A\\\",\\\"不動産\\\",\\\"法人保険\\\"]から該当するものだけの配列。無ければ[]\", " +
+    "\"nextActionDate\": \"次に対応する時期が話されていれば yyyy-MM-dd 形式。今日は" + todayString +
+      "。「来週」「月末」などの相対表現はこの日付を基準に具体的な日付へ直す。話に出ていなければ空文字\"}";
 }
 
 function parseGeminiExtractionResult_(text) {
@@ -626,7 +636,10 @@ function parseGeminiExtractionResult_(text) {
     interactionType: parsed.interactionType || "",
     respondentType: parsed.respondentType || "",
     contentMemo: parsed.contentMemo || "",
-    nextAction: parsed.nextAction || ""
+    nextAction: parsed.nextAction || "",
+    successorStatus: parsed.successorStatus || "",
+    interestedProducts: parsed.interestedProducts || [],
+    nextActionDate: parsed.nextActionDate || ""
   };
 }
 
@@ -880,5 +893,45 @@ function handleFinalConfirmPostback_(ss, replyToken, record, answer) {
   var companies = companySheet ? readCompanyRecords_(companySheet) : [];
   var company = companies.filter(function (c) { return c["企業ID"] === record["企業ID"]; })[0];
   var companyName = company ? company["会社名"] : (record["会社名候補"] || "");
-  lineReply_(replyToken, [GlowLineVoiceLogContent.buildCompletionMessage(companyName)]);
+
+  // 見込み情報を企業マスタへ反映する(v1.4)。対応履歴の記録は既に完了しているため、
+  // ここで失敗しても確定は成立させ、ログへ残して返信は完了通知のみにする
+  // (要約→関係メモ蓄積・最終接触日・次回予定・後継者状況・興味商品)。
+  var replySpecs = [GlowLineVoiceLogContent.buildCompletionMessage(companyName)];
+  if (company && companySheet) {
+    try {
+      var prospectResult = GlowLineVoiceLogContent.buildProspectUpdates(record, company, todayString);
+      applyCompanyUpdatesFromVoiceLog_(companySheet, record["企業ID"], prospectResult.updates);
+      replySpecs.push(GlowLineVoiceLogContent.buildProspectUpdateSummaryMessage(prospectResult.updates));
+    } catch (error) {
+      Logger.log("企業マスタへの見込み反映に失敗しました(処理ID " + record["処理ID"] + "): " + error);
+    }
+  }
+  lineReply_(replyToken, replySpecs);
+}
+
+/**
+ * 音声ログ確定時の企業マスタ更新。updateCompanyMemo(AdminRunner.gs)と同じ
+ * getDocumentLockで排他し、行特定と書き込みの間に全体書き戻しが挟まる
+ * ロストアップデート・行ズレを防ぐ。列名が見つからない更新は黙って読み飛ばす。
+ */
+function applyCompanyUpdatesFromVoiceLog_(companySheet, companyId, updates) {
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(10000)) {
+    throw new Error("企業マスタのロック取得に失敗しました。");
+  }
+  try {
+    var rowIndex = findCompanyRowIndex_(companySheet, companyId);
+    if (rowIndex === -1) {
+      throw new Error("該当する企業が見つかりません: " + companyId);
+    }
+    var headers = GlowSchema.COMPANY_MASTER_HEADERS;
+    Object.keys(updates).forEach(function (column) {
+      var columnIndex = headers.indexOf(column);
+      if (columnIndex === -1) return;
+      companySheet.getRange(rowIndex, columnIndex + 1).setValue(updates[column]);
+    });
+  } finally {
+    lock.releaseLock();
+  }
 }

@@ -493,3 +493,9 @@ test("buildAdminAppHtml: バージョンがv1.3.1に上がっている", () => {
   const html = adminApp.buildAdminAppHtml();
   assert.ok(html.includes("v1.3.1"));
 });
+
+test("buildAdminAppHtml: バージョンがv1.4.0に上がり、更新履歴にLINE連携強化の説明がある", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("v1.4.0"));
+  assert.ok(html.includes("見込みコメント"));
+});

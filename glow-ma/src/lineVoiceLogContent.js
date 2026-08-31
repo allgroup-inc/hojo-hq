@@ -299,6 +299,115 @@
     return "この記録はすでに処理済みか、無効になっています。";
   }
 
+  // 音声から拾う「興味あり商品」の許可リスト。企業マスタ「提案商品」の値と揃える
+  var INTERESTED_PRODUCT_TYPES_ = ["M&A", "不動産", "法人保険"];
+  var MEMO_MAX_LENGTH_ = 6000;
+  var MEMO_TRUNCATE_SUFFIX_ = "\n…(古いメモは省略)";
+
+  /**
+   * Gemini抽出結果のうち見込みシグナル(後継者状況・興味商品・次回予定日)を
+   * 検証済みの値に正規化する。不正・不明な値は空にする(決めつけ禁止。
+   * CLAUDE.md絶対ルール1「不明時は断定しない」をここでも適用する)。
+   */
+  function normalizeProspectSignals(parsed) {
+    var source = parsed || {};
+    var schema = getGlowSchema_();
+    var successor = String(source.successorStatus || "").trim();
+    if (schema.SUCCESSOR_STATUS_TYPES.indexOf(successor) === -1) successor = "";
+    var products = Array.isArray(source.interestedProducts) ? source.interestedProducts : [];
+    var seen = {};
+    products = products
+      .map(function (product) { return String(product || "").trim(); })
+      .filter(function (product) {
+        if (INTERESTED_PRODUCT_TYPES_.indexOf(product) === -1) return false;
+        if (seen[product]) return false;
+        seen[product] = true;
+        return true;
+      });
+    var nextDate = String(source.nextActionDate || "").trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(nextDate)) nextDate = "";
+    return { successorStatus: successor, interestedProducts: products, nextActionDate: nextDate };
+  }
+
+  /**
+   * 音声ログの確定時に企業マスタへ反映する更新セット {列名: 新値} を組み立てる。
+   * recordは音声ログ行(種別候補・内容メモ・次回アクション・後継者状況候補・
+   * 興味商品候補・次回予定日候補)、companyは企業マスタの現レコード。
+   *
+   * - 最終接触日は常に当日へ更新(ログ確定=接触があった事実)
+   * - 関係メモは「【日付 種別(LINE音声)】要約 ▶次: …」を先頭に追記して蓄積する
+   *   (見込みコメント。上限6000文字で古い側から省略)
+   * - 後継者状況は「あり/なし」のときだけ、現在値と異なる場合に更新
+   *   (「不明」で既知の値を上書きしない)
+   * - 提案商品は既存とマージし、新しい関心があったときだけ更新
+   * - 変わらない項目はupdatesに含めない(シート書き込みを最小にする)
+   */
+  function buildProspectUpdates(record, company, todayString) {
+    var source = record || {};
+    var target = company || {};
+    var updates = {};
+    updates["最終接触日"] = todayString;
+
+    var nextDate = String(source["次回予定日候補"] || "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(nextDate)) {
+      updates["次回アクション予定日"] = nextDate;
+    }
+    var nextAction = String(source["次回アクション"] || "").trim();
+    if (nextAction) {
+      updates["次回アクション内容"] = nextAction;
+    }
+
+    var successor = String(source["後継者状況候補"] || "").trim();
+    if ((successor === "あり" || successor === "なし") && successor !== String(target["後継者状況"] || "").trim()) {
+      updates["後継者状況"] = successor;
+    }
+
+    var existingProducts = target["提案商品"];
+    if (!Array.isArray(existingProducts)) {
+      existingProducts = existingProducts ? String(existingProducts).split("、") : [];
+    }
+    var merged = existingProducts.slice();
+    String(source["興味商品候補"] || "").split("、").forEach(function (product) {
+      var trimmed = product.trim();
+      if (!trimmed) return;
+      if (INTERESTED_PRODUCT_TYPES_.indexOf(trimmed) === -1) return;
+      if (merged.indexOf(trimmed) !== -1) return;
+      merged.push(trimmed);
+    });
+    if (merged.length > existingProducts.length) {
+      updates["提案商品"] = merged.join("、");
+    }
+
+    var contentMemo = String(source["内容メモ"] || "").trim();
+    if (contentMemo) {
+      var digest = "【" + todayString + " " + (String(source["種別候補"] || "").trim() || "対応") + "(LINE音声)】" +
+        contentMemo + (nextAction ? " ▶次: " + nextAction : "");
+      var existingMemo = String(target["関係メモ"] || "");
+      var combined = existingMemo ? digest + "\n" + existingMemo : digest;
+      if (combined.length > MEMO_MAX_LENGTH_) {
+        combined = combined.slice(0, MEMO_MAX_LENGTH_ - MEMO_TRUNCATE_SUFFIX_.length) + MEMO_TRUNCATE_SUFFIX_;
+      }
+      updates["関係メモ"] = combined;
+    }
+    return { updates: updates };
+  }
+
+  /**
+   * 確定後にLINEへ返す「台帳へ何を反映したか」の1通。担当者がその場で
+   * 反映結果を確認でき、誤反映(日付の聞き間違い等)にすぐ気づける。
+   */
+  function buildProspectUpdateSummaryMessage(updates) {
+    var source = updates || {};
+    var parts = [];
+    if (source["最終接触日"]) parts.push("最終接触日: " + source["最終接触日"]);
+    if (source["次回アクション予定日"]) parts.push("次回予定: " + source["次回アクション予定日"]);
+    if (source["次回アクション内容"]) parts.push("次回内容: " + source["次回アクション内容"]);
+    if (source["関係メモ"]) parts.push("関係メモに要約を追記");
+    if (source["後継者状況"]) parts.push("後継者状況: " + source["後継者状況"]);
+    if (source["提案商品"]) parts.push("興味あり商品: " + source["提案商品"]);
+    return "台帳にも反映しました:\n・" + parts.join("\n・");
+  }
+
   var api = {
     matchCompanyCandidates: matchCompanyCandidates,
     normalizeInteractionType: normalizeInteractionType,
@@ -326,7 +435,10 @@
     buildProcessingErrorMessage: buildProcessingErrorMessage,
     buildStaffNotFoundMessage: buildStaffNotFoundMessage,
     buildAlreadyProcessingMessage: buildAlreadyProcessingMessage,
-    buildAlreadyHandledMessage: buildAlreadyHandledMessage
+    buildAlreadyHandledMessage: buildAlreadyHandledMessage,
+    normalizeProspectSignals: normalizeProspectSignals,
+    buildProspectUpdates: buildProspectUpdates,
+    buildProspectUpdateSummaryMessage: buildProspectUpdateSummaryMessage
   };
 
   if (typeof module !== "undefined" && module.exports) {
