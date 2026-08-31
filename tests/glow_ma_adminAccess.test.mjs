@@ -542,3 +542,82 @@ test("buildFollowUpReminders: 次回アクション内容も一緒に返す(何�
   assert.equal(result.items[0]["次回アクション内容"], "資料持参で再訪問");
   assert.equal(result.items[0]["担当者"], "山田");
 });
+
+// ---- buildVisitSchedule(訪問・架電スケジュール表) ----
+
+test("buildVisitSchedule: 今日からN日分の日付ブロックを返し、各日に予定企業を割り当てる", () => {
+  const today = "2026-08-31";
+  const companies = [
+    { "企業ID": "C1", "会社名": "本日の会社", "担当者": "山田", "ランク": "A", "次回アクション予定日": "2026-08-31", "次回アクション内容": "架電", "連絡不要": false },
+    { "企業ID": "C2", "会社名": "明日の会社", "担当者": "田中", "ランク": "B", "次回アクション予定日": "2026-09-01", "連絡不要": false },
+    { "企業ID": "C3", "会社名": "範囲外の会社", "次回アクション予定日": "2026-12-01", "連絡不要": false }
+  ];
+  const result = adminAccess.buildVisitSchedule(companies, today, 7);
+  assert.equal(result.today, "2026-08-31");
+  assert.equal(result.days.length, 7);
+  assert.equal(result.days[0].date, "2026-08-31");
+  assert.equal(result.days[0]["曜日"], "月");
+  assert.equal(result.days[0].items.length, 1);
+  assert.equal(result.days[0].items[0]["会社名"], "本日の会社");
+  assert.equal(result.days[1].items[0]["会社名"], "明日の会社");
+  assert.equal(result.days[6].date, "2026-09-06");
+  // 範囲外(12月)はどの日にも現れない
+  const allNames = result.days.flatMap((d) => d.items.map((i) => i["会社名"]));
+  assert.ok(!allNames.includes("範囲外の会社"));
+});
+
+test("buildVisitSchedule: 期限超過はoverdueに古い順でまとめ、連絡不要・予定日なしは除外する", () => {
+  const today = "2026-08-31";
+  const companies = [
+    { "企業ID": "C1", "会社名": "3日遅れ", "次回アクション予定日": "2026-08-28", "連絡不要": false },
+    { "企業ID": "C2", "会社名": "10日遅れ", "次回アクション予定日": "2026-08-21", "連絡不要": false },
+    { "企業ID": "C3", "会社名": "連絡不要の会社", "次回アクション予定日": "2026-08-01", "連絡不要": true },
+    { "企業ID": "C4", "会社名": "予定なし", "次回アクション予定日": "", "連絡不要": false }
+  ];
+  const result = adminAccess.buildVisitSchedule(companies, today, 7);
+  assert.equal(result.overdue.total, 2);
+  assert.equal(result.overdue.items[0]["会社名"], "10日遅れ");
+  assert.equal(result.overdue.items[1]["会社名"], "3日遅れ");
+});
+
+test("buildVisitSchedule: 同じ日の中はランク順(A→D)、月をまたいでも日付が正しい", () => {
+  const today = "2026-08-30";
+  const companies = [
+    { "企業ID": "C1", "会社名": "Cランクの会社", "ランク": "C", "次回アクション予定日": "2026-09-02", "連絡不要": false },
+    { "企業ID": "C2", "会社名": "Aランクの会社", "ランク": "A", "次回アクション予定日": "2026-09-02", "連絡不要": false }
+  ];
+  const result = adminAccess.buildVisitSchedule(companies, today, 7);
+  const day = result.days.find((d) => d.date === "2026-09-02");
+  assert.equal(day.items[0]["会社名"], "Aランクの会社");
+  assert.equal(day.items[1]["会社名"], "Cランクの会社");
+});
+
+test("buildVisitSchedule: 予定日がDateオブジェクトでも文字列に正規化される", () => {
+  const companies = [
+    { "企業ID": "C1", "会社名": "Date型", "次回アクション予定日": new Date(2026, 8, 1), "連絡不要": false }
+  ];
+  const result = adminAccess.buildVisitSchedule(companies, "2026-08-31", 7);
+  const day = result.days.find((d) => d.date === "2026-09-01");
+  assert.equal(day.items.length, 1);
+});
+
+// ---- buildNextActionUpdate(次回アクションの直接編集) ----
+
+test("buildNextActionUpdate: 正しい日付と内容ならok、前後の空白は除去", () => {
+  const result = adminAccess.buildNextActionUpdate(" 2026-09-05 ", " 資料持参で再訪問 ");
+  assert.equal(result.ok, true);
+  assert.equal(result.date, "2026-09-05");
+  assert.equal(result.note, "資料持参で再訪問");
+});
+
+test("buildNextActionUpdate: 日付が不正な形式ならok:false", () => {
+  const result = adminAccess.buildNextActionUpdate("9月5日", "架電");
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.includes("yyyy-MM-dd")));
+});
+
+test("buildNextActionUpdate: 日付を空にして予定を消すことも許可する", () => {
+  const result = adminAccess.buildNextActionUpdate("", "");
+  assert.equal(result.ok, true);
+  assert.equal(result.date, "");
+});

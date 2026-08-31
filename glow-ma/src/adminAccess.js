@@ -158,6 +158,83 @@
     return { total: due.length, items: due.slice(0, max) };
   }
 
+  var WEEKDAY_LABELS_ = ["日", "月", "火", "水", "木", "金", "土"];
+
+  /**
+   * 訪問・架電スケジュール表(第3タブ)用: 今日からdaysAhead日分の日付ブロックと、
+   * 各日の予定企業(次回アクション予定日ベース)を返す。期限超過はoverdueに古い順で
+   * まとめる(予定日の再設定を促すため)。
+   * 「1日に予定を詰め込みすぎていないか」「空いている日はどこか」を見て行動量を
+   * 平準化する、法人営業の週次行動計画の定石をそのまま画面にしたもの。
+   */
+  function buildVisitSchedule(companies, todayString, daysAhead) {
+    var ahead = typeof daysAhead === "number" ? daysAhead : 14;
+    var scheduled = (companies || [])
+      .filter(function (company) {
+        if (company["連絡不要"] === true) return false;
+        return !!company["次回アクション予定日"];
+      })
+      .map(function (company) {
+        return {
+          "企業ID": company["企業ID"],
+          "会社名": company["会社名"],
+          "担当者": company["担当者"] || "",
+          "ランク": company["ランク"] || "",
+          "次回アクション予定日": normalizeDateForDisplay(company["次回アクション予定日"]),
+          "次回アクション内容": company["次回アクション内容"] || ""
+        };
+      });
+
+    function byRankThenName(a, b) {
+      var rankA = a["ランク"] || "Z";
+      var rankB = b["ランク"] || "Z";
+      if (rankA !== rankB) return rankA < rankB ? -1 : 1;
+      var nameA = a["会社名"] || "";
+      var nameB = b["会社名"] || "";
+      if (nameA === nameB) return 0;
+      return nameA < nameB ? -1 : 1;
+    }
+
+    var overdueItems = scheduled
+      .filter(function (item) { return item["次回アクション予定日"] < todayString; })
+      .sort(function (a, b) {
+        if (a["次回アクション予定日"] === b["次回アクション予定日"]) return byRankThenName(a, b);
+        return a["次回アクション予定日"] < b["次回アクション予定日"] ? -1 : 1;
+      });
+
+    var parts = todayString.split("-").map(Number);
+    var days = [];
+    for (var i = 0; i < ahead; i++) {
+      var date = new Date(parts[0], parts[1] - 1, parts[2] + i);
+      var dateString = formatDate_(date);
+      days.push({
+        date: dateString,
+        "曜日": WEEKDAY_LABELS_[date.getDay()],
+        items: scheduled
+          .filter(function (item) { return item["次回アクション予定日"] === dateString; })
+          .sort(byRankThenName)
+      });
+    }
+    return {
+      today: todayString,
+      overdue: { total: overdueItems.length, items: overdueItems },
+      days: days
+    };
+  }
+
+  /**
+   * 企業詳細ドロワーからの次回アクション直接編集の入力検証。
+   * 日付は空でもよい(予定を消す操作)。入力があればyyyy-MM-dd形式のみ許可。
+   */
+  function buildNextActionUpdate(dateString, note) {
+    var date = String(dateString || "").trim();
+    var text = String(note || "").trim();
+    if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return { ok: false, errors: ["予定日は yyyy-MM-dd 形式で入力してください(例: 2026-09-05)"] };
+    }
+    return { ok: true, date: date, note: text };
+  }
+
   /**
    * Sheetsの getValues() は日付セルを文字列ではなくJSの Date オブジェクトで返す。
    * これをそのまま String(...) すると "Thu Aug 20 2026 00:00:00 GMT+0900 ..." のような
@@ -439,7 +516,9 @@
     buildKpiSummary: buildKpiSummary,
     buildOwnerWorkload: buildOwnerWorkload,
     buildNextActionQueue: buildNextActionQueue,
-    buildFollowUpReminders: buildFollowUpReminders
+    buildFollowUpReminders: buildFollowUpReminders,
+    buildVisitSchedule: buildVisitSchedule,
+    buildNextActionUpdate: buildNextActionUpdate
   };
 
   if (typeof module !== "undefined" && module.exports) {

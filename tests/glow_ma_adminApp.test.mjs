@@ -395,3 +395,42 @@ test("buildAdminAppHtml: 使い方ガイドに「更新履歴」セクション�
   assert.ok(html.includes("新規パートナー登録"));
   assert.ok(html.includes("本日の要対応ポップアップ"));
 });
+
+test("buildAdminAppHtml: 訪問・架電スケジュールビュー(第3タブ)の主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("id=\"viewScheduleBtn\""));
+  assert.ok(html.includes("id=\"scheduleView\""));
+  assert.ok(html.includes("id=\"scheduleOwnerFilter\""));
+  assert.ok(html.includes("id=\"scheduleList\""));
+  assert.ok(html.includes("id=\"scheduleRefreshBtn\""));
+  assert.ok(html.includes(".getVisitSchedule("));
+  assert.ok(html.includes("function renderSchedule("));
+});
+
+test("buildAdminAppHtml: switchViewが3ビュー(企業・パートナー・スケジュール)を切り替える", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(/scheduleView'\)\.classList\.toggle\('active', isSchedule\)/.test(html));
+  assert.ok(html.includes("target === 'schedule'"));
+});
+
+test("buildAdminAppHtml: 企業詳細に次回アクションの編集欄(日付・内容・クイックボタン・保存)を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("id=\"naDate\""));
+  assert.ok(html.includes("id=\"naNote\""));
+  assert.ok(html.includes("id=\"naSaveBtn\""));
+  assert.ok(html.includes("id=\"naStatus\""));
+  assert.ok(html.includes("data-days=\"1\""));
+  assert.ok(html.includes("data-days=\"7\""));
+  assert.ok(html.includes(".updateNextAction("));
+});
+
+test("buildAdminAppHtml: 要対応ポップアップは1回の閲覧で1度だけ表示される(保存後の再取得で再ポップアップしない)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("remindersShown"));
+});
+
+test("buildAdminAppHtml: バージョンがv1.2.0に上がり、更新履歴にスケジュール表の説明がある", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("v1.2.0"));
+  assert.ok(html.includes("訪問・架電スケジュール"));
+});

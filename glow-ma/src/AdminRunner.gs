@@ -358,6 +358,52 @@ function getPartnerDetail(partnerId) {
 }
 
 /**
+ * 訪問・架電スケジュール表(今日からdaysAhead日分+期限超過)を返す。
+ * この関数の名前の末尾に `_` を付けてはいけない(getPartnerListと同じ理由)。
+ */
+function getVisitSchedule(daysAhead) {
+  requireAdminAccess_();
+  var loaded = loadCompaniesWithReactionFlag_();
+  return GlowAdminAccess.buildVisitSchedule(loaded.companies, loaded.todayString, daysAhead);
+}
+
+/**
+ * 企業詳細ドロワーからの次回アクション(予定日・内容)の直接更新。
+ * 検証はGlowAdminAccess.buildNextActionUpdate(純ロジック)が担う。
+ * ロック理由はupdateCompanyMemoと同じ(行特定と書き込みの間の全体書き戻し・行ズレ防止)。
+ * この関数の名前の末尾に `_` を付けてはいけない(getPartnerListと同じ理由)。
+ */
+function updateNextAction(companyId, dateString, note) {
+  requireAdminAccess_();
+  var validated = GlowAdminAccess.buildNextActionUpdate(dateString, note);
+  if (!validated.ok) {
+    return { ok: false, errors: validated.errors };
+  }
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  if (!companySheet) {
+    throw new Error("企業マスタタブが見つかりません。");
+  }
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(10000)) {
+    throw new Error("他の処理がデータを操作中のため、保存を中断しました。しばらく待ってから再実行してください。");
+  }
+  try {
+    var rowIndex = findCompanyRowIndex_(companySheet, companyId);
+    if (rowIndex === -1) {
+      throw new Error("該当する企業が見つかりません: " + companyId);
+    }
+    var dateColumnIndex = GlowSchema.COMPANY_MASTER_HEADERS.indexOf("次回アクション予定日") + 1;
+    var noteColumnIndex = GlowSchema.COMPANY_MASTER_HEADERS.indexOf("次回アクション内容") + 1;
+    companySheet.getRange(rowIndex, dateColumnIndex).setValue(validated.date);
+    companySheet.getRange(rowIndex, noteColumnIndex).setValue(validated.note);
+    return { ok: true, date: validated.date, note: validated.note };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
  * 新規パートナーを紹介パートナーマスタへ1行追記する(管理画面の登録フォームから)。
  * 入力検証・ID自動採番・行組み立てはGlowAdminAccess.buildPartnerRegistration(純ロジック)が担う。
  *
