@@ -11,6 +11,15 @@
 (function (global) {
   "use strict";
 
+  // 種別・関係性ランクの選択肢はスキーマを唯一の情報源にする(GAS側は読み込み順が
+  // 保証されないため、モジュール読み込み時ではなくbuildAdminAppHtml呼び出し時に参照する)
+  function getGlowSchema_() {
+    if (typeof module !== "undefined" && module.exports) {
+      return require("./schema.js");
+    }
+    return global.GlowSchema;
+  }
+
   var STYLE = [
     ":root{",
     "/* GLOWコーポレートカラー(テーマに関わらず固定。グラデーション装飾専用) */",
@@ -461,7 +470,21 @@
     "background:var(--card); color:var(--navy-ink);}",
     "#memoEditControls{margin-top:.4rem; display:flex; align-items:center; gap:.5rem;}",
     "#memoStatus{font-size:.78rem; color:var(--muted);}",
-    "#memoStatus.error{color:var(--bad);}"
+    "#memoStatus.error{color:var(--bad);}",
+    "/* ---- 新規パートナー登録 ---- */",
+    ".partner-toolbar{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px;}",
+    ".partner-toolbar-note{font-size:.8rem; color:var(--muted);}",
+    ".reg-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 14px;}",
+    "@media (max-width:700px){ .reg-grid{grid-template-columns:1fr;} }",
+    ".reg-span2{grid-column:1 / -1;}",
+    ".reg-input{width:100%; padding:.45rem .55rem; font:inherit; font-size:.85rem;",
+    "border:1px solid var(--line-strong); border-radius:.35rem; box-sizing:border-box;",
+    "background:var(--card); color:var(--navy-ink); margin-top:.25rem;}",
+    ".req{font-size:.68rem; color:#fff; background:var(--bad); border-radius:.25rem; padding:.08rem .4rem; margin-left:.4rem;}",
+    ".reg-actions{display:flex; align-items:center; justify-content:flex-end; gap:.8rem; margin-top:14px;}",
+    "#partnerRegStatus{font-size:.8rem; color:var(--muted); white-space:pre-line; text-align:right;}",
+    "#partnerRegStatus.error{color:var(--bad);}",
+    "#partnerRegStatus.okmsg{color:var(--good);}"
   ].join("");
 
   var HEADER_AND_FILTERS = [
@@ -496,6 +519,8 @@
     "<li>上部のKPIカードをクリックすると、該当する企業の一覧がそのまま見られる</li>",
     "<li>一覧の左端チェックボックスで企業を選ぶと「QR用CSVを出力」バーが出る。まとめて選んでCSVを作成し、"+
     "make_qr_cards.py(印刷担当のツール)に渡せば発送準備ができる</li>",
+    "<li>「紹介パートナー開拓状況」タブは、紹介契約まで開拓できたパートナー(銀行・税理士など)を蓄積する台帳。"+
+    "「＋新規パートナー登録」から追加する(開拓がまだのパートナーは登録しない)</li>",
     "</ol></div>",
     "<div><h4>② データが蓄積される仕組み</h4><ul>",
     "<li>入口(手紙DM・ミカタ経由・紹介パートナー経由)が違っても、「電話する」「訪問する」から先はすべて同じ仕組みに合流する</li>",
@@ -540,6 +565,10 @@
 
   var PARTNER_VIEW = [
     "<div id=\"partnerView\" class=\"viewPane\">",
+    "<div class=\"partner-toolbar\">",
+    "<div class=\"partner-toolbar-note\">開拓できた紹介パートナー(銀行・税理士など)を登録して蓄積します</div>",
+    "<button class=\"btn-small btn-primary\" id=\"partnerAddBtn\" type=\"button\">＋ 新規パートナー登録</button>",
+    "</div>",
     "<table><thead><tr><th>名称</th><th>種別</th><th>関係性ランク</th><th>対応回数</th></tr></thead>",
     "<tbody id=\"partnerTableBody\"></tbody></table>",
     "<div class=\"empty\" id=\"partnerEmptyState\" style=\"display:none\">該当するパートナーが見つかりません</div>",
@@ -1126,6 +1155,51 @@
     "tbody.appendChild(tr);});",
     "}",
 
+    "function openPartnerRegModal(){",
+    "['partnerRegName','partnerRegOwner','partnerRegRate','partnerRegMemo','partnerRegLastContact','partnerRegNextAction']",
+    ".forEach(function(id){ document.getElementById(id).value = ''; });",
+    "document.getElementById('partnerRegType').value = '';",
+    "document.getElementById('partnerRegRank').value = 'C';",
+    "var status = document.getElementById('partnerRegStatus');",
+    "status.textContent = ''; status.className = '';",
+    "document.getElementById('partnerRegSubmitBtn').disabled = false;",
+    "document.getElementById('partnerRegModal').classList.add('open');",
+    "document.getElementById('partnerRegName').focus();",
+    "}",
+
+    "function closePartnerRegModal(){",
+    "document.getElementById('partnerRegModal').classList.remove('open');",
+    "}",
+
+    "function submitPartnerRegistration(){",
+    "var status = document.getElementById('partnerRegStatus');",
+    "var input = {",
+    "'名称': document.getElementById('partnerRegName').value,",
+    "'種別': document.getElementById('partnerRegType').value,",
+    "'担当者名': document.getElementById('partnerRegOwner').value,",
+    "'関係性ランク': document.getElementById('partnerRegRank').value,",
+    "'紹介料率': document.getElementById('partnerRegRate').value,",
+    "'提供済み情報ログ': document.getElementById('partnerRegMemo').value,",
+    "'最終接触日': document.getElementById('partnerRegLastContact').value,",
+    "'次回アクション予定日': document.getElementById('partnerRegNextAction').value",
+    "};",
+    "if (!input['名称'].trim()){ status.className = 'error'; status.textContent = '名称を入力してください'; return; }",
+    "var btn = document.getElementById('partnerRegSubmitBtn');",
+    "btn.disabled = true; status.className = ''; status.textContent = '登録中…';",
+    "google.script.run.withSuccessHandler(function(result){",
+    "if (!result || result.ok !== true){",
+    "btn.disabled = false; status.className = 'error';",
+    "status.textContent = (result && result.errors) ? result.errors.join('\\n') : '登録に失敗しました。再度お試しください。';",
+    "return; }",
+    "status.className = 'okmsg'; status.textContent = result.partnerId + ' として登録しました';",
+    "loadPartnerList();",
+    "setTimeout(closePartnerRegModal, 900);",
+    "}).withFailureHandler(function(error){",
+    "btn.disabled = false; status.className = 'error';",
+    "status.textContent = '登録に失敗しました: ' + (error && error.message ? error.message : error);",
+    "}).registerPartner(input);",
+    "}",
+
     "function openPartnerDrawer(partnerId){",
     "document.getElementById('partnerDrawer').classList.add('open');",
     "document.getElementById('partnerOverlay').classList.add('open');",
@@ -1229,6 +1303,9 @@
     "document.getElementById('qrExportBtn').addEventListener('click', openQrExportModal);",
     "document.getElementById('qrExportModalClose').addEventListener('click', closeQrExportModal);",
     "document.getElementById('qrExportRunBtn').addEventListener('click', runQrExport);",
+    "document.getElementById('partnerAddBtn').addEventListener('click', openPartnerRegModal);",
+    "document.getElementById('partnerRegModalClose').addEventListener('click', closePartnerRegModal);",
+    "document.getElementById('partnerRegSubmitBtn').addEventListener('click', submitPartnerRegistration);",
     "document.querySelectorAll('thead th[data-sort]').forEach(function(th){",
     "th.addEventListener('click', function(){",
     "var key = th.getAttribute('data-sort');",
@@ -1241,6 +1318,60 @@
     "loadBootstrap();",
     "loadPartnerList();"
   ].join("");
+
+  /**
+   * 新規パートナー登録モーダル。種別・関係性ランクの選択肢をGlowSchemaから
+   * 生成するため、静的な文字列定数ではなく関数として組み立てる。
+   */
+  function buildPartnerRegModal_() {
+    var schema = getGlowSchema_();
+    var typeOptions = "<option value=\"\">選択してください</option>" +
+      schema.PARTNER_TYPES.map(function (type) {
+        return "<option value=\"" + type + "\">" + type + "</option>";
+      }).join("");
+    var rankLabels = {
+      "A": "A(最重要・強い関係)",
+      "B": "B(定期的に接触あり)",
+      "C": "C(関係構築中)",
+      "D": "D(接点づくり中)"
+    };
+    var rankOptions = schema.PARTNER_RANKS.map(function (rank) {
+      var selected = rank === "C" ? " selected" : "";
+      return "<option value=\"" + rank + "\"" + selected + ">" + (rankLabels[rank] || rank) + "</option>";
+    }).join("");
+    return [
+      "<div class=\"kpi-modal\" id=\"partnerRegModal\">",
+      "<div class=\"km-head\"><div class=\"km-head-row\">",
+      "<div><h3>新規パートナー登録</h3>",
+      "<div class=\"km-sub\">契約・合意まで開拓できたパートナーを台帳へ追加します(パートナーIDは自動採番)</div></div>",
+      "<button class=\"close-btn\" id=\"partnerRegModalClose\">&times;</button>",
+      "</div></div>",
+      "<div class=\"km-body\">",
+      "<div class=\"reg-grid\">",
+      "<div class=\"field\"><div class=\"label\">名称<span class=\"req\">必須</span></div>",
+      "<input type=\"text\" id=\"partnerRegName\" class=\"reg-input\" placeholder=\"例: 沖縄第一銀行 〇〇支店\"></div>",
+      "<div class=\"field\"><div class=\"label\">種別</div>",
+      "<select id=\"partnerRegType\" class=\"reg-input\">" + typeOptions + "</select></div>",
+      "<div class=\"field\"><div class=\"label\">先方の担当者名</div>",
+      "<input type=\"text\" id=\"partnerRegOwner\" class=\"reg-input\" placeholder=\"例: 比嘉様\"></div>",
+      "<div class=\"field\"><div class=\"label\">関係性ランク</div>",
+      "<select id=\"partnerRegRank\" class=\"reg-input\">" + rankOptions + "</select></div>",
+      "<div class=\"field\"><div class=\"label\">紹介料率・条件</div>",
+      "<input type=\"text\" id=\"partnerRegRate\" class=\"reg-input\" placeholder=\"例: 成約報酬の10%\"></div>",
+      "<div class=\"field\"><div class=\"label\">最終接触日</div>",
+      "<input type=\"text\" id=\"partnerRegLastContact\" class=\"reg-input\" placeholder=\"yyyy-MM-dd(空欄なら今日)\"></div>",
+      "<div class=\"field\"><div class=\"label\">次回アクション予定日</div>",
+      "<input type=\"text\" id=\"partnerRegNextAction\" class=\"reg-input\" placeholder=\"yyyy-MM-dd\"></div>",
+      "<div class=\"field reg-span2\"><div class=\"label\">提供済み情報・開拓メモ</div>",
+      "<textarea id=\"partnerRegMemo\" class=\"reg-input\" rows=\"3\" placeholder=\"例: 8月に提携のご挨拶。M&A・事業承継の相談があれば当社へ紹介いただける合意\"></textarea></div>",
+      "</div>",
+      "<div class=\"reg-actions\">",
+      "<div id=\"partnerRegStatus\"></div>",
+      "<button class=\"btn-small btn-primary\" id=\"partnerRegSubmitBtn\" type=\"button\">登録する</button>",
+      "</div>",
+      "</div></div>"
+    ].join("");
+  }
 
   function buildAdminAppHtml() {
     return "<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\">" +
@@ -1259,6 +1390,7 @@
       "<div class=\"body-grid\">" + KPI_ROW + TABLE + SIDE_PANEL + PARTNER_VIEW + "</div>" +
       "</div>" +
       DRAWER + PARTNER_DRAWER + KPI_MODAL + SHARE_MODAL + LETTER_PREVIEW_MODAL + QR_EXPORT_MODAL +
+      buildPartnerRegModal_() +
       "<script>" + SCRIPT + "<\/script>" +
       "</body></html>";
   }

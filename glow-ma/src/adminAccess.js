@@ -21,6 +21,13 @@
     return global.GlowAlerting;
   }
 
+  function getGlowSchema_() {
+    if (typeof module !== "undefined" && module.exports) {
+      return require("./schema.js");
+    }
+    return global.GlowSchema;
+  }
+
   function computeUrgency(company, todayString) {
     if (company["連絡不要"] === true) return "none";
     var nextDate = company["次回アクション予定日"];
@@ -303,6 +310,74 @@
     return normalized;
   }
 
+  /**
+   * 新規パートナー登録の入力検証+紹介パートナーマスタへ追記する1行を組み立てる。
+   * AdminRunner.gs の registerPartner がシート読み取り後にこれを呼ぶ。
+   *
+   * - パートナーIDは既存の "P-NNN" 形式の最大値+1で自動採番(3桁ゼロ埋め、
+   *   1000件以降は自然に4桁へ伸びる)。P-形式でない既存IDは採番の対象外。
+   * - 名称は必須+既存名称との重複禁止(前後空白は無視して比較)。手動でシートに
+   *   追加された行との二重登録を防ぐため、IDではなく名称で重複を見る。
+   * - 最終接触日が未入力なら登録日(todayString)で初期化する(開拓できた時に
+   *   登録する運用のため、登録日=直近の接触日とみなせる)。
+   */
+  function buildPartnerRegistration(input, existingPartners, todayString) {
+    var source = input || {};
+    var partners = existingPartners || [];
+    var errors = [];
+
+    var name = String(source["名称"] || "").trim();
+    if (!name) {
+      errors.push("名称は必須です");
+    } else {
+      var duplicated = partners.some(function (p) {
+        return String(p["名称"] || "").trim() === name;
+      });
+      if (duplicated) {
+        errors.push("「" + name + "」は既に登録されています(同じ名称のパートナーの二重登録を防ぐため、別名称にするか既存の行を更新してください)");
+      }
+    }
+
+    ["最終接触日", "次回アクション予定日"].forEach(function (field) {
+      var value = String(source[field] || "").trim();
+      if (value && !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        errors.push(field + "は yyyy-MM-dd 形式で入力してください(例: " + todayString + ")");
+      }
+    });
+
+    if (errors.length > 0) return { ok: false, errors: errors };
+
+    var maxNumber = 0;
+    partners.forEach(function (p) {
+      var matched = /^P-(\d+)$/.exec(String(p["パートナーID"] || "").trim());
+      if (!matched) return;
+      var n = parseInt(matched[1], 10);
+      if (n > maxNumber) maxNumber = n;
+    });
+    var numberText = String(maxNumber + 1);
+    while (numberText.length < 3) numberText = "0" + numberText;
+    var partnerId = "P-" + numberText;
+
+    var record = {
+      "パートナーID": partnerId,
+      "名称": name,
+      "種別": String(source["種別"] || "").trim(),
+      "担当者名": String(source["担当者名"] || "").trim(),
+      "関係性ランク": String(source["関係性ランク"] || "").trim(),
+      "累計紹介数": 0,
+      "成約数": 0,
+      "提供済み情報ログ": String(source["提供済み情報ログ"] || "").trim(),
+      "紹介料率": String(source["紹介料率"] || "").trim(),
+      "逆紹介履歴": "",
+      "最終接触日": String(source["最終接触日"] || "").trim() || todayString,
+      "次回アクション予定日": String(source["次回アクション予定日"] || "").trim()
+    };
+    var row = getGlowSchema_().PARTNER_MASTER_HEADERS.map(function (header) {
+      return record[header];
+    });
+    return { ok: true, partnerId: partnerId, record: record, row: row };
+  }
+
   var api = {
     isAllowedEmail: isAllowedEmail,
     buildAccessDeniedHtml: buildAccessDeniedHtml,
@@ -317,6 +392,7 @@
     normalizeDateForDisplay: normalizeDateForDisplay,
     normalizeCompanyDetailDates: normalizeCompanyDetailDates,
     buildPartnerListRows: buildPartnerListRows,
+    buildPartnerRegistration: buildPartnerRegistration,
     normalizeReferralRecords: normalizeReferralRecords,
     computeUrgency: computeUrgency,
     buildKpiSummary: buildKpiSummary,

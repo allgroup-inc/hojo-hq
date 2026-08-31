@@ -181,3 +181,13 @@ test("CTI通話履歴タブの名称・見出しが定義されている", () =>
 test("スタッフのヘッダーにLINE User ID列が追加されている", () => {
   assert.deepEqual(schema.STAFF_HEADERS, ["氏名", "Slack User ID", "有効", "メールアドレス", "LINE User ID"]);
 });
+
+test("紹介パートナーの種別・関係性ランクの選択肢が定義されている(新規パートナー登録フォーム用)", () => {
+  assert.ok(Array.isArray(schema.PARTNER_TYPES));
+  assert.ok(schema.PARTNER_TYPES.includes("銀行"));
+  assert.ok(schema.PARTNER_TYPES.includes("信用金庫"));
+  assert.ok(schema.PARTNER_TYPES.includes("税理士"));
+  assert.ok(schema.PARTNER_TYPES.includes("商工会・商工会議所"));
+  assert.ok(schema.PARTNER_TYPES.includes("その他"));
+  assert.deepEqual(schema.PARTNER_RANKS, ["A", "B", "C", "D"]);
+});

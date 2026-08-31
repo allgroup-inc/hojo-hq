@@ -327,3 +327,42 @@ test("buildAdminAppHtml: getSortedRowsが7列すべてに対応する比較ロ�
     });
   assert.ok(html.indexOf("rankOrder") !== -1, "ランクの並び順定義(A<B<C<D)がない");
 });
+
+test("buildAdminAppHtml: パートナービューに「新規パートナー登録」ボタンと登録モーダルの主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("id=\"partnerAddBtn\""));
+  assert.ok(html.includes("新規パートナー登録"));
+  assert.ok(html.includes("id=\"partnerRegModal\""));
+  assert.ok(html.includes("id=\"partnerRegName\""));
+  assert.ok(html.includes("id=\"partnerRegType\""));
+  assert.ok(html.includes("id=\"partnerRegOwner\""));
+  assert.ok(html.includes("id=\"partnerRegRank\""));
+  assert.ok(html.includes("id=\"partnerRegRate\""));
+  assert.ok(html.includes("id=\"partnerRegMemo\""));
+  assert.ok(html.includes("id=\"partnerRegLastContact\""));
+  assert.ok(html.includes("id=\"partnerRegNextAction\""));
+  assert.ok(html.includes("id=\"partnerRegSubmitBtn\""));
+  assert.ok(html.includes("id=\"partnerRegStatus\""));
+});
+
+test("buildAdminAppHtml: 種別・関係性ランクの選択肢はスキーマ(PARTNER_TYPES/PARTNER_RANKS)から生成される", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("<option value=\"銀行\">銀行</option>"));
+  assert.ok(html.includes("<option value=\"信用金庫\">信用金庫</option>"));
+  assert.ok(html.includes("<option value=\"その他\">その他</option>"));
+  assert.ok(html.includes("<option value=\"A\">A(最重要・強い関係)</option>"));
+  assert.ok(html.includes("<option value=\"D\">D(接点づくり中)</option>"));
+});
+
+test("buildAdminAppHtml: google.script.runでregisterPartnerを呼び、成功時に一覧を再読み込みする", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(/google\.script\.run[\s\S]{0,900}\.registerPartner\(input\)/.test(html));
+  assert.ok(html.includes("function submitPartnerRegistration()"));
+  assert.ok(html.includes("function openPartnerRegModal()"));
+  assert.ok(html.includes("function closePartnerRegModal()"));
+});
+
+test("buildAdminAppHtml: 使い方ガイドにパートナー登録の説明がある", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("紹介パートナー開拓状況」タブ"));
+});

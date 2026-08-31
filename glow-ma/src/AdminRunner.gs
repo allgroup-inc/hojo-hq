@@ -357,6 +357,41 @@ function getPartnerDetail(partnerId) {
 }
 
 /**
+ * 新規パートナーを紹介パートナーマスタへ1行追記する(管理画面の登録フォームから)。
+ * 入力検証・ID自動採番・行組み立てはGlowAdminAccess.buildPartnerRegistration(純ロジック)が担う。
+ *
+ * ロックは、既存ID読み取り→採番→appendRowの間に別の登録が挟まってIDが重複するのを
+ * 防ぐため(updateCompanyMemoと同じgetDocumentLockで、シート全体の書き込みと排他する)。
+ *
+ * この関数の名前の末尾に `_` を付けてはいけない(getPartnerListと同じ理由。
+ * google.script.runから呼べなくなる)。
+ */
+function registerPartner(input) {
+  requireAdminAccess_();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(GlowSchema.PARTNER_MASTER_SHEET_NAME);
+  if (!sheet) {
+    throw new Error("紹介パートナーマスタタブが見つかりません。");
+  }
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(10000)) {
+    throw new Error("他の処理がデータを操作中のため、登録を中断しました。しばらく待ってから再実行してください。");
+  }
+  try {
+    var partners = readPartnerRecords_(sheet);
+    var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+    var result = GlowAdminAccess.buildPartnerRegistration(input, partners, todayString);
+    if (!result.ok) {
+      return { ok: false, errors: result.errors };
+    }
+    sheet.appendRow(result.row);
+    return { ok: true, partnerId: result.partnerId };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
  * 企業マスタの中から「企業ID」が一致する行の行番号(1始まり、ヘッダー行込み)を返す。
  * 見つからなければ-1を返す。updateCompanyMemoが書き込み先の行を特定するために使う。
  */

@@ -40,6 +40,13 @@
     "パートナーID", "名称", "種別", "担当者名", "関係性ランク", "累計紹介数", "成約数",
     "提供済み情報ログ", "紹介料率", "逆紹介履歴", "最終接触日", "次回アクション予定日"
   ];
+  // 新規パートナー登録フォーム(管理画面)の選択肢。開拓先の実態に合わせて追加してよいが、
+  // 既存行の種別と表記を揃えること(絞り込み・集計で別物扱いになるため)
+  var PARTNER_TYPES = [
+    "銀行", "信用金庫", "税理士", "公認会計士", "行政書士", "社会保険労務士",
+    "弁護士", "商工会・商工会議所", "保険代理店", "不動産会社", "その他"
+  ];
+  var PARTNER_RANKS = ["A", "B", "C", "D"];
 
   var SETTINGS_SHEET_NAME = "設定";
   var SETTINGS_HEADERS = ["キー", "値", "説明"];
@@ -119,6 +126,8 @@
     SUCCESSOR_STATUS_TYPES: SUCCESSOR_STATUS_TYPES,
     PARTNER_MASTER_SHEET_NAME: PARTNER_MASTER_SHEET_NAME,
     PARTNER_MASTER_HEADERS: PARTNER_MASTER_HEADERS,
+    PARTNER_TYPES: PARTNER_TYPES,
+    PARTNER_RANKS: PARTNER_RANKS,
     SETTINGS_SHEET_NAME: SETTINGS_SHEET_NAME,
     SETTINGS_HEADERS: SETTINGS_HEADERS,
     LETTER_DRAFT_SHEET_NAME: LETTER_DRAFT_SHEET_NAME,

@@ -406,3 +406,83 @@ test("buildNextActionQueue: 登録日・最終接触日がDateオブジェクト
   assert.equal(result[0]["登録日"], "2026-08-10");
   assert.equal(result[0]["最終接触日"], "2026-08-05");
 });
+
+// ---- buildPartnerRegistration(新規パートナー登録) ----
+
+test("buildPartnerRegistration: 名称だけでも登録でき、IDはP-001から自動採番・紹介数/成約数は0・最終接触日は当日で初期化される", () => {
+  const result = adminAccess.buildPartnerRegistration(
+    { "名称": " 沖縄第一銀行 " },
+    [],
+    "2026-08-31"
+  );
+  assert.equal(result.ok, true);
+  assert.equal(result.partnerId, "P-001");
+  assert.equal(result.record["名称"], "沖縄第一銀行");
+  assert.equal(result.record["累計紹介数"], 0);
+  assert.equal(result.record["成約数"], 0);
+  assert.equal(result.record["最終接触日"], "2026-08-31");
+  // 行配列はPARTNER_MASTER_HEADERSの並び順に一致する
+  assert.equal(result.row.length, 12);
+  assert.equal(result.row[0], "P-001");
+  assert.equal(result.row[1], "沖縄第一銀行");
+});
+
+test("buildPartnerRegistration: 既存IDの最大値+1で採番する(欠番・P-形式でないIDは無視)", () => {
+  const existing = [
+    { "パートナーID": "P-002", "名称": "A信金" },
+    { "パートナーID": "P-010", "名称": "B税理士事務所" },
+    { "パートナーID": "レガシー01", "名称": "C商工会" }
+  ];
+  const result = adminAccess.buildPartnerRegistration({ "名称": "D銀行" }, existing, "2026-08-31");
+  assert.equal(result.ok, true);
+  assert.equal(result.partnerId, "P-011");
+});
+
+test("buildPartnerRegistration: 名称が空ならok:falseとエラー文言を返す", () => {
+  const result = adminAccess.buildPartnerRegistration({ "名称": "  " }, [], "2026-08-31");
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.includes("名称")));
+});
+
+test("buildPartnerRegistration: 同じ名称が既に登録済みならok:falseを返す(前後の空白は無視して比較)", () => {
+  const existing = [{ "パートナーID": "P-001", "名称": "沖縄第一銀行" }];
+  const result = adminAccess.buildPartnerRegistration({ "名称": " 沖縄第一銀行" }, existing, "2026-08-31");
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.includes("既に登録")));
+});
+
+test("buildPartnerRegistration: 日付欄がyyyy-MM-dd形式でなければok:falseを返す", () => {
+  const result = adminAccess.buildPartnerRegistration(
+    { "名称": "E銀行", "次回アクション予定日": "9月1日" },
+    [],
+    "2026-08-31"
+  );
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.includes("yyyy-MM-dd")));
+});
+
+test("buildPartnerRegistration: 種別・担当者名・関係性ランク・紹介料率・メモ・次回アクション予定日も行に反映される", () => {
+  const result = adminAccess.buildPartnerRegistration(
+    {
+      "名称": "F信用金庫",
+      "種別": "信用金庫",
+      "担当者名": "比嘉様",
+      "関係性ランク": "B",
+      "紹介料率": "成約報酬の10%",
+      "提供済み情報ログ": "8月に提携の挨拶訪問",
+      "最終接触日": "2026-08-25",
+      "次回アクション予定日": "2026-09-10"
+    },
+    [],
+    "2026-08-31"
+  );
+  assert.equal(result.ok, true);
+  assert.equal(result.record["種別"], "信用金庫");
+  assert.equal(result.record["担当者名"], "比嘉様");
+  assert.equal(result.record["関係性ランク"], "B");
+  assert.equal(result.record["紹介料率"], "成約報酬の10%");
+  assert.equal(result.record["提供済み情報ログ"], "8月に提携の挨拶訪問");
+  assert.equal(result.record["逆紹介履歴"], "");
+  assert.equal(result.record["最終接触日"], "2026-08-25");
+  assert.equal(result.record["次回アクション予定日"], "2026-09-10");
+});
