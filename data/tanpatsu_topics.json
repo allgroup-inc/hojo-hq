@@ -10,7 +10,9 @@
       "status": "published",
       "note": "手動執筆の在庫記事(2026-08-04執筆・8/31公開運転)。生成不要のためstatusはpendingにしない。X告知文は記事ヘッダーの告知パック(A/B/C)から抽出される",
       "published_url": "https://note.com/kekka_mag/n/nd309ea5745b0",
-      "published_at": "2026-09-01"
+      "published_at": "2026-09-01",
+      "x_post_url": "https://x.com/kekka_mag/status/2094638729243549932",
+      "x_posted_at": "2026-09-01"
     },
     {
       "id": "12",
