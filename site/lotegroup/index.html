@@ -78,26 +78,26 @@ html.intro-lock{overflow:hidden;}
 .intro{
   position:fixed;inset:0;z-index:200;background:#FFFFFF;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;
-  animation:introOut .6s var(--ease) 3.6s forwards;
+  animation:introOut .8s var(--ease) 5.3s forwards;
 }
 .intro-mark{width:220px;height:220px;position:relative;}
 .intro .ring{
   position:absolute;inset:0;border-radius:50%;
   border:14px solid;border-top-color:transparent;
   opacity:0;
-  animation:ringIn 1.5s var(--ease-out) var(--d,0s) both,
-            ringOut .5s var(--ease) 1.65s forwards;
+  animation:ringIn 2.2s var(--ease-out) var(--d,0s) both,
+            ringOut .8s var(--ease) 2.5s forwards;
 }
 .intro .r1{border-color:transparent #C9A24B #C9A24B #C9A24B;--tx:-300px;--ty:-160px;--rot:-200deg;--rote:405deg;--sc:.55;--d:0s;}
-.intro .r2{border-color:transparent #1E3A6E #1E3A6E #1E3A6E;--tx:300px;--ty:-120px;--rot:160deg;--rote:495deg;--sc:1.35;--d:.07s;}
-.intro .r3{border-color:transparent #B08D4F #B08D4F #B08D4F;--tx:260px;--ty:180px;--rot:220deg;--rote:585deg;--sc:.8;--d:.14s;}
-.intro .r4{border-color:transparent #16305D #16305D #16305D;--tx:-280px;--ty:150px;--rot:-160deg;--rote:675deg;--sc:1.15;--d:.21s;}
+.intro .r2{border-color:transparent #1E3A6E #1E3A6E #1E3A6E;--tx:300px;--ty:-120px;--rot:160deg;--rote:495deg;--sc:1.35;--d:.1s;}
+.intro .r3{border-color:transparent #B08D4F #B08D4F #B08D4F;--tx:260px;--ty:180px;--rot:220deg;--rote:585deg;--sc:.8;--d:.2s;}
+.intro .r4{border-color:transparent #16305D #16305D #16305D;--tx:-280px;--ty:150px;--rot:-160deg;--rote:675deg;--sc:1.15;--d:.3s;}
 .intro .mark-final{
   position:absolute;inset:0;opacity:0;
   background:var(--logo-mark) center/contain no-repeat;
-  animation:markIn .7s var(--ease-out) 1.6s both;
+  animation:markIn 1.1s var(--ease-out) 2.4s both;
 }
-.intro-word{width:280px;aspect-ratio:631/227;background:var(--logo-word) center/contain no-repeat;opacity:0;animation:wordIn .8s var(--ease-out) 2.15s both;}
+.intro-word{width:280px;aspect-ratio:631/227;background:var(--logo-word) center/contain no-repeat;opacity:0;animation:wordIn 1s var(--ease-out) 3.4s both;}
 .intro-skip{position:absolute;bottom:32px;left:0;right:0;text-align:center;}
 @keyframes ringIn{
   0%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(var(--sc));}
@@ -677,7 +677,7 @@ try{
         intro.style.opacity='0';
         setTimeout(endIntro,250);
       });
-      setTimeout(endIntro,5200);
+      setTimeout(endIntro,7500);
     }
   }
 
