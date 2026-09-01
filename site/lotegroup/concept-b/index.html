@@ -75,7 +75,7 @@ nav.global a::after{
 }
 nav.global a:hover::after,nav.global a:focus-visible::after{transform:scaleX(1);}
 .nav-cta{
-  border:1px solid var(--navy);color:var(--navy);border-radius:2px;
+  border:1px solid var(--navy);color:var(--navy);border-radius:999px;
   padding:12px 26px;font-family:var(--jp);font-size:13px;font-weight:500;letter-spacing:.08em;
   transition:all .25s var(--ease);
 }
@@ -108,6 +108,16 @@ nav.global a:hover::after,nav.global a:focus-visible::after{transform:scaleX(1);
   animation:drip 2.2s var(--ease) infinite;
 }
 @keyframes drip{to{transform:translateY(154px);}}
+.hero-waves{
+  position:absolute;left:0;right:0;bottom:0;height:200px;
+  pointer-events:none;overflow:hidden;
+}
+.hero-waves svg{width:200%;height:100%;display:block;}
+.hero-waves path{fill:none;stroke-width:1.5;vector-effect:non-scaling-stroke;}
+.w1{stroke:rgba(30,58,110,.28);animation:waveDrift 26s linear infinite;}
+.w2{stroke:rgba(201,162,75,.55);animation:waveDrift 34s linear infinite;}
+.w3{stroke:rgba(30,58,110,.14);animation:waveDrift 44s linear infinite reverse;}
+@keyframes waveDrift{to{transform:translateX(-50%);}}
 
 /* ---- marquee ---- */
 .marquee{
@@ -126,6 +136,10 @@ nav.global a:hover::after,nav.global a:focus-visible::after{transform:scaleX(1);
 .marquee-track em{
   font-style:normal;color:var(--gold);padding:0 .5em;font-weight:400;
 }
+.marquee-track i{
+  font-style:normal;color:transparent;
+  -webkit-text-stroke:1.5px var(--navy);text-stroke:1.5px var(--navy);
+}
 @keyframes marquee{to{transform:translateX(-50%);}}
 
 /* ---- about ---- */
@@ -134,6 +148,11 @@ nav.global a:hover::after,nav.global a:focus-visible::after{transform:scaleX(1);
   max-width:48em;
 }
 .about .more{margin-top:48px;}
+.wavy{
+  font-style:normal;
+  text-decoration:underline wavy var(--gold);
+  text-decoration-thickness:2px;text-underline-offset:10px;
+}
 .text-link{
   display:inline-flex;align-items:center;gap:10px;
   font-family:var(--en);font-size:14px;font-weight:600;letter-spacing:.1em;
@@ -195,7 +214,7 @@ nav.global a:hover::after,nav.global a:focus-visible::after{transform:scaleX(1);
 }
 .news-list a:hover{background:var(--off);}
 .news-date{font-family:var(--en);font-size:13px;font-weight:400;color:var(--gray);font-variant-numeric:tabular-nums;letter-spacing:.04em;}
-.news-tag{font-size:11px;letter-spacing:.08em;color:var(--gray);border:1px solid var(--line);padding:5px 14px;text-align:center;}
+.news-tag{font-size:11px;letter-spacing:.08em;color:var(--gray);border:1px solid var(--line);border-radius:999px;padding:5px 14px;text-align:center;}
 .news-title{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .news-list .arrow{font-family:var(--en);color:var(--navy);transition:transform .25s var(--ease);}
 .news-list a:hover .arrow{transform:translateX(6px);}
@@ -219,7 +238,7 @@ nav.global a:hover::after,nav.global a:focus-visible::after{transform:scaleX(1);
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:12px;
   min-width:240px;min-height:56px;padding:0 36px;width:fit-content;
-  font-size:15px;font-weight:500;letter-spacing:.08em;border-radius:2px;
+  font-size:15px;font-weight:500;letter-spacing:.08em;border-radius:999px;
   transition:all .25s var(--ease);border:1px solid transparent;cursor:pointer;
 }
 .btn .arrow{font-family:var(--en);transition:transform .25s var(--ease);}
@@ -249,6 +268,12 @@ footer .logo-en{color:var(--white);}
   font-size:12px;color:rgba(255,255,255,.45);
 }
 
+/* ---- wave dividers ---- */
+.wave-cap{display:block;width:100%;height:80px;margin-bottom:-1px;}
+.wave-cap svg{width:100%;height:100%;display:block;}
+.cap-off-deep{background:var(--off);}
+.cap-navy-deep{background:var(--navy);}
+
 /* ---- reveal ---- */
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .7s var(--ease-out),transform .7s var(--ease-out);}
 .reveal.in{opacity:1;transform:none;}
@@ -259,6 +284,7 @@ footer .logo-en{color:var(--white);}
   .hero-display .row span{transform:none;animation:none;}
   .hero-tag,.hero-note{opacity:1;animation:none;}
   .marquee-track{animation:none;}
+  .hero-waves path{animation:none;}
   .scroll-line::after{animation:none;}
   *{transition-duration:.01ms !important;}
 }
@@ -343,13 +369,20 @@ footer .logo-en{color:var(--white);}
       <p class="hero-note">INSURANCE / REAL ESTATE / M&amp;A / FINANCIAL SOLUTIONS</p>
     </div>
   </div>
+  <div class="hero-waves" aria-hidden="true">
+    <svg viewBox="0 0 2880 200" preserveAspectRatio="none">
+      <path class="w1" d="M0 100 Q180 40 360 100 T720 100 T1080 100 T1440 100 T1800 100 T2160 100 T2520 100 T2880 100"/>
+      <path class="w2" d="M0 130 Q180 80 360 130 T720 130 T1080 130 T1440 130 T1800 130 T2160 130 T2520 130 T2880 130"/>
+      <path class="w3" d="M0 70 Q180 20 360 70 T720 70 T1080 70 T1440 70 T1800 70 T2160 70 T2520 70 T2880 70"/>
+    </svg>
+  </div>
   <div class="scroll-line" aria-hidden="true"></div>
 </section>
 
 <!-- 2. Marquee -->
 <div class="marquee" aria-hidden="true">
   <div class="marquee-track">
-    <span>INSURANCE<em>—</em>REAL ESTATE<em>—</em>M&amp;A<em>—</em>FINANCIAL SOLUTIONS<em>—</em></span><span>INSURANCE<em>—</em>REAL ESTATE<em>—</em>M&amp;A<em>—</em>FINANCIAL SOLUTIONS<em>—</em></span>
+    <span>INSURANCE<em>—</em><i>REAL ESTATE</i><em>—</em>M&amp;A<em>—</em><i>FINANCIAL SOLUTIONS</i><em>—</em></span><span>INSURANCE<em>—</em><i>REAL ESTATE</i><em>—</em>M&amp;A<em>—</em><i>FINANCIAL SOLUTIONS</i><em>—</em></span>
   </div>
 </div>
 
@@ -357,7 +390,7 @@ footer .logo-en{color:var(--white);}
 <section class="about" id="about">
   <div class="container">
     <span class="label-en reveal">About</span>
-    <p class="statement reveal">私たちは商品を売る会社ではありません。保険、不動産、M&amp;A、金融。扱うものは違っても、届けるのは「これで大丈夫だ」と思える確かさです。</p>
+    <p class="statement reveal">私たちは商品を売る会社ではありません。保険、不動産、M&amp;A、金融。扱うものは違っても、届けるのは「これで大丈夫だ」と思える<em class="wavy">確かさ</em>です。</p>
     <p class="more reveal"><a class="text-link" href="#">MORE ABOUT US <span class="arrow">→</span></a></p>
   </div>
 </section>
@@ -409,7 +442,8 @@ footer .logo-en{color:var(--white);}
 </section>
 
 <!-- 5. Numbers -->
-<section class="bg-deep">
+<div class="wave-cap cap-off-deep" aria-hidden="true"><svg viewBox="0 0 1440 80" preserveAspectRatio="none"><path d="M0 46 Q180 10 360 46 T720 46 T1080 46 T1440 46 V80 H0 Z" fill="#0B1F33"/></svg></div>
+<section class="bg-deep" style="padding-top:clamp(64px,9vh,120px);">
   <div class="container">
     <span class="label-en reveal">Numbers</span>
     <h2 class="reveal">数字で見る、LOTE Group。</h2>
@@ -466,7 +500,8 @@ footer .logo-en{color:var(--white);}
 </main>
 
 <!-- 9. Footer -->
-<footer>
+<div class="wave-cap cap-navy-deep" aria-hidden="true"><svg viewBox="0 0 1440 80" preserveAspectRatio="none"><path d="M0 46 Q180 10 360 46 T720 46 T1080 46 T1440 46 V80 H0 Z" fill="#0B1F33"/></svg></div>
+<footer style="padding-top:64px;">
   <div class="container">
     <div class="footer-grid">
       <div class="footer-col">
