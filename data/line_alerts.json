@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-09-01 12:12",
+ "generated_at": "2026-09-01 17:06",
  "alert_window": [
   7,
   29
  ],
- "soon_closed_count": 8,
- "count": 41,
+ "soon_closed_count": 7,
+ "count": 45,
  "items": [
   {
    "id": "a0WJ200000CDdKuMAL",
@@ -205,6 +205,46 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczgMAD",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDeNwMAL",
+   "name": "令和7年度_産油国石油精製技術等対策事業費補助金（石油天然ガス権益・安定供給の確保に向けた資源国との関係強化支援事業のうち産油・産ガス国産業協力等事業に係るもの）_第5回公募",
+   "deadline": "2026-09-25",
+   "days_left": 24,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 340000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeNwMAL",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDeNSMA1",
+   "name": "令和7年度_資源国脱炭素化・エネルギー転換技術等支援事業費補助金_第5回公募",
+   "deadline": "2026-09-25",
+   "days_left": 24,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 660000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeNSMA1",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDeO6MAL",
+   "name": "令和8年度_産油国石油精製技術等対策事業費補助金（石油天然ガス権益・安定供給の確保に向けた資源国との関係強化支援事業のうち産油・産ガス国産業協力等事業に係るもの）_第3回公募",
+   "deadline": "2026-09-25",
+   "days_left": 24,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 2900000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeO6MAL",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDeO1MAL",
+   "name": "令和8年度_資源国脱炭素化・エネルギー転換技術等支援事業費補助金_第3回公募",
+   "deadline": "2026-09-25",
+   "days_left": 24,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 1200000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeO1MAL",
    "tag": "nationwide"
   },
   {
