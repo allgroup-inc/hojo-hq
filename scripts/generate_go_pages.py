@@ -48,7 +48,7 @@ CHANNELS = {
     "fg-area":    {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 市町村ページ"},
     "fg-kit":     {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 制度キットページ"},
     "fg-shindan": {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 診断ページ"},
-    "fg-jukyu":   {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 受給報告(振り込まれました)"},
+    "fg-jukyu":   {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 受給報告(受け取れました)"},
 }
 
 TEMPLATE = """<!DOCTYPE html>
