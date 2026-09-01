@@ -7,8 +7,10 @@
       "genre": "価格",
       "title_hint": "値上げで売れたアイスと、18円で客が離れた焼き鳥 — 価格転嫁の成功と失敗を分けた実例研究",
       "paid_price": 1280,
-      "status": "stock",
-      "note": "手動執筆の在庫記事(2026-08-04執筆・8/31公開運転)。生成不要のためstatusはpendingにしない。X告知文は記事ヘッダーの告知パック(A/B/C)から抽出される"
+      "status": "published",
+      "note": "手動執筆の在庫記事(2026-08-04執筆・8/31公開運転)。生成不要のためstatusはpendingにしない。X告知文は記事ヘッダーの告知パック(A/B/C)から抽出される",
+      "published_url": "https://note.com/kekka_mag/n/nd309ea5745b0",
+      "published_at": "2026-09-01"
     },
     {
       "id": "12",
