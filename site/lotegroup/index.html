@@ -62,6 +62,50 @@ h3{font-size:24px;line-height:1.5;}
 section{padding:160px 0;}
 .section-head{margin-bottom:64px;}
 
+/* ---- logo ---- */
+.logo{display:inline-flex;align-items:center;gap:12px;}
+.logo-mark{width:34px;height:34px;flex:none;}
+.c-gold{fill:url(#lgGold);}
+.c-navy{fill:url(#lgNavy);}
+header:not(.solid) .logo-mark .c-navy{fill:#FFFFFF;}
+footer .logo-mark .c-navy{fill:#FFFFFF;}
+.logo-type{display:flex;flex-direction:column;font-family:Georgia,"Times New Roman",serif;font-size:18px;font-weight:600;letter-spacing:.2em;line-height:1.2;}
+.logo-type small{font-size:9px;font-weight:400;letter-spacing:.42em;color:var(--brass);}
+
+/* ---- opening(トップのみ・セッション1回・約3.5秒・クリックでスキップ)---- */
+html.intro-lock{overflow:hidden;}
+.no-intro .intro{display:none;}
+.intro{
+  position:fixed;inset:0;z-index:200;background:#FFFFFF;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;
+  animation:introOut .6s var(--ease) 3s forwards;
+}
+.intro svg{width:200px;height:200px;display:block;overflow:visible;}
+.intro .rotor,.intro .piece{transform-box:view-box;transform-origin:50% 50%;}
+.intro .rotor{animation:rotorIn 1.7s var(--ease-out) both;}
+.intro .piece{opacity:0;animation:assemble 1.3s var(--ease-out) both;}
+.intro .p1{--tx:-150px;--ty:-90px;--rot:-150deg;animation-delay:.1s;}
+.intro .p2{--tx:150px;--ty:-120px;--rot:130deg;animation-delay:.22s;}
+.intro .p3{--tx:-120px;--ty:150px;--rot:160deg;animation-delay:.34s;}
+.intro .p4{--tx:140px;--ty:110px;--rot:-120deg;animation-delay:.46s;}
+.intro-word{text-align:center;opacity:0;animation:wordIn .8s var(--ease-out) 1.55s both;}
+.intro-lote{font-family:Georgia,"Times New Roman",serif;font-size:52px;font-weight:600;letter-spacing:.3em;text-indent:.3em;color:#1E3A6E;line-height:1;}
+.intro-group{
+  display:flex;align-items:center;justify-content:center;gap:16px;margin-top:18px;
+  font-family:Georgia,"Times New Roman",serif;font-size:16px;letter-spacing:.34em;text-indent:.34em;color:#1E3A6E;
+}
+.intro-group .rule{width:56px;height:1px;background:#C9A24B;transform:scaleX(0);animation:ruleIn .6s var(--ease-out) 1.95s both;}
+.intro-skip{position:absolute;bottom:32px;left:0;right:0;text-align:center;}
+@keyframes assemble{
+  0%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(.7);}
+  40%{opacity:1;}
+  100%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1);}
+}
+@keyframes rotorIn{from{transform:rotate(-100deg);}to{transform:rotate(0deg);}}
+@keyframes wordIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes ruleIn{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+@keyframes introOut{to{opacity:0;visibility:hidden;}}
+
 /* ---- header ---- */
 header{
   position:fixed;top:0;left:0;right:0;z-index:100;height:80px;
@@ -259,6 +303,7 @@ footer .logo{color:var(--white);}
 
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto;}
+  .intro{display:none;}
   .reveal{opacity:1;transform:none;transition:none;}
   .scroll-hint::after{animation:none;}
   *{transition-duration:.01ms !important;}
@@ -305,14 +350,66 @@ footer .logo{color:var(--white);}
   .recruit .photo::before{padding-top:120%;}
   .footer-grid{grid-template-columns:1fr;gap:32px;margin-bottom:48px;}
   .contact .btn{width:auto;min-width:240px;}
+  .intro{gap:28px;}
+  .intro svg{width:140px;height:140px;}
+  .intro-lote{font-size:36px;}
 }
 </style>
 </head>
 <body>
 
+<script>
+/* オープニング表示判定: 同一セッション2回目・reduced-motionでは出さない */
+try{
+  if(sessionStorage.getItem('loteIntro')||matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.documentElement.classList.add('no-intro');
+  }else{
+    document.documentElement.classList.add('intro-lock');
+  }
+}catch(e){document.documentElement.classList.add('no-intro');}
+</script>
+
+<!-- ロゴ用グラデーション定義(共有スプライト) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="lgGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E9CC82"/><stop offset=".5" stop-color="#C9A24B"/><stop offset="1" stop-color="#8F6B26"/>
+    </linearGradient>
+    <linearGradient id="lgNavy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2C5590"/><stop offset=".55" stop-color="#1E3A6E"/><stop offset="1" stop-color="#0E2140"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- オープニング: 4ピースが集まりロゴになる(初回のみ・クリックでスキップ)
+     ※マークは正式ロゴSVG受領までの近似再現 -->
+<div class="intro" id="intro" role="presentation">
+  <svg viewBox="12 12 216 216" aria-hidden="true">
+    <g class="rotor">
+      <g class="piece p1"><path class="c-navy" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z"/></g>
+      <g class="piece p2"><path class="c-gold" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z" transform="rotate(90 120 120)"/></g>
+      <g class="piece p3"><path class="c-navy" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z" transform="rotate(180 120 120)"/></g>
+      <g class="piece p4"><path class="c-gold" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z" transform="rotate(270 120 120)"/></g>
+    </g>
+  </svg>
+  <div class="intro-word">
+    <div class="intro-lote">LOTE</div>
+    <div class="intro-group"><span class="rule"></span><span>Group</span><span class="rule"></span></div>
+  </div>
+  <p class="intro-skip caption">クリックでスキップ</p>
+</div>
+
 <header id="header">
   <div class="container">
-    <a class="logo" href="#">LOTEGROUP</a>
+    <a class="logo" href="#" aria-label="LOTE Group">
+      <svg class="logo-mark" viewBox="20 20 200 200" aria-hidden="true">
+        <path class="c-navy" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z"/>
+        <path class="c-gold" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z" transform="rotate(90 120 120)"/>
+        <path class="c-navy" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z" transform="rotate(180 120 120)"/>
+        <path class="c-gold" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z" transform="rotate(270 120 120)"/>
+      </svg>
+      <span class="logo-type">LOTE<small>Group</small></span>
+    </a>
     <nav class="global" aria-label="グローバルナビゲーション">
       <a href="#business">事業内容</a>
       <a href="#about">私たちについて</a>
@@ -510,7 +607,15 @@ footer .logo{color:var(--white);}
   <div class="container">
     <div class="footer-grid">
       <div class="footer-col">
-        <a class="logo" href="#">LOTEGROUP</a>
+        <a class="logo" href="#" aria-label="LOTE Group">
+          <svg class="logo-mark" viewBox="20 20 200 200" aria-hidden="true">
+            <path class="c-navy" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z"/>
+            <path class="c-gold" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z" transform="rotate(90 120 120)"/>
+            <path class="c-navy" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z" transform="rotate(180 120 120)"/>
+            <path class="c-gold" d="M120 25A95 95 0 0 0 120 215A109.5 109.5 0 0 1 120 25Z" transform="rotate(270 120 120)"/>
+          </svg>
+          <span class="logo-type">LOTE<small>Group</small></span>
+        </a>
         <p style="margin-top:24px;">人生と企業の未来に、<br>確かな選択肢を。</p>
       </div>
       <div class="footer-col">
@@ -572,6 +677,31 @@ footer .logo{color:var(--white);}
     el.dataset.idx=i;
     io.observe(el);
   });
+
+  var intro=document.getElementById('intro');
+  if(intro){
+    if(document.documentElement.classList.contains('no-intro')){
+      intro.style.display='none';
+    }else{
+      try{sessionStorage.setItem('loteIntro','1');}catch(e){}
+      var ended=false;
+      var endIntro=function(){
+        if(ended)return;
+        ended=true;
+        intro.style.display='none';
+        document.documentElement.classList.remove('intro-lock');
+      };
+      intro.addEventListener('animationend',function(e){
+        if(e.animationName==='introOut')endIntro();
+      });
+      intro.addEventListener('click',function(){
+        intro.style.transition='opacity .25s';
+        intro.style.opacity='0';
+        setTimeout(endIntro,250);
+      });
+      setTimeout(endIntro,4200);
+    }
+  }
 
   var btn=document.getElementById('menuBtn');
   var menu=document.getElementById('mobileMenu');
