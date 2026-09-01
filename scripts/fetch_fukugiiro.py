@@ -255,6 +255,8 @@ SEEDS = [
         "how_to_apply": "労働基準監督署",
         "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/kijungyosei/miharai/index.html",
         "match_tokens": ["未払賃金"],
+        # 官公庁サイトのbot遮断で到達性チェックが間欠的に落ち、掲載から静かに消えた実績あり(2026-09-01 おもてなし総点検で検出)。手動確認済み扱いにする
+        "assume_reachable": True,
     },
     {
         "id": "fk-kuni-seikatsu-hogo",
@@ -305,6 +307,8 @@ SEEDS = [
         "how_to_apply": "お子さんが通う学校・教育委員会",
         "source_url": "https://www.mext.go.jp/a_menu/shotou/tokubetu/material/1340250.htm",
         "match_tokens": ["就学奨励"],
+        # 官公庁サイトのbot遮断で到達性チェックが間欠的に落ち、掲載から静かに消えた実績あり(2026-09-01 おもてなし総点検で検出)。手動確認済み扱いにする
+        "assume_reachable": True,
     },
     {
         "id": "fk-kuni-safetynet-jutaku",
