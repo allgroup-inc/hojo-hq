@@ -78,27 +78,34 @@ html.intro-lock{overflow:hidden;}
 .intro{
   position:fixed;inset:0;z-index:200;background:#FFFFFF;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;
-  animation:introOut .6s var(--ease) 3s forwards;
+  animation:introOut .6s var(--ease) 3.6s forwards;
 }
 .intro-mark{width:220px;height:220px;position:relative;}
-.intro .rotor{position:absolute;inset:0;animation:rotorIn 1.7s var(--ease-out) both;}
-.intro .slice{
+.intro .ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:14px solid;border-top-color:transparent;
+  opacity:0;
+  animation:ringIn 1.5s var(--ease-out) var(--d,0s) both,
+            ringOut .5s var(--ease) 1.65s forwards;
+}
+.intro .r1{border-color:transparent #C9A24B #C9A24B #C9A24B;--tx:-300px;--ty:-160px;--rot:-200deg;--rote:405deg;--sc:.55;--d:0s;}
+.intro .r2{border-color:transparent #1E3A6E #1E3A6E #1E3A6E;--tx:300px;--ty:-120px;--rot:160deg;--rote:495deg;--sc:1.35;--d:.07s;}
+.intro .r3{border-color:transparent #B08D4F #B08D4F #B08D4F;--tx:260px;--ty:180px;--rot:220deg;--rote:585deg;--sc:.8;--d:.14s;}
+.intro .r4{border-color:transparent #16305D #16305D #16305D;--tx:-280px;--ty:150px;--rot:-160deg;--rote:675deg;--sc:1.15;--d:.21s;}
+.intro .mark-final{
   position:absolute;inset:0;opacity:0;
   background:var(--logo-mark) center/contain no-repeat;
-  animation:assemble 1.3s var(--ease-out) both;
+  animation:markIn .7s var(--ease-out) 1.6s both;
 }
-.intro .s1{clip-path:polygon(50% 50%,0% 0%,100% 0%);--tx:-130px;--ty:-130px;--rot:-120deg;animation-delay:.1s;}
-.intro .s2{clip-path:polygon(50% 50%,100% 0%,100% 100%);--tx:140px;--ty:-110px;--rot:100deg;animation-delay:.22s;}
-.intro .s3{clip-path:polygon(50% 50%,100% 100%,0% 100%);--tx:120px;--ty:140px;--rot:140deg;animation-delay:.34s;}
-.intro .s4{clip-path:polygon(50% 50%,0% 100%,0% 0%);--tx:-140px;--ty:110px;--rot:-100deg;animation-delay:.46s;}
-.intro-word{width:280px;aspect-ratio:631/227;background:var(--logo-word) center/contain no-repeat;opacity:0;animation:wordIn .8s var(--ease-out) 1.55s both;}
+.intro-word{width:280px;aspect-ratio:631/227;background:var(--logo-word) center/contain no-repeat;opacity:0;animation:wordIn .8s var(--ease-out) 2.15s both;}
 .intro-skip{position:absolute;bottom:32px;left:0;right:0;text-align:center;}
-@keyframes assemble{
-  0%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(.7);}
-  40%{opacity:1;}
-  100%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1);}
+@keyframes ringIn{
+  0%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(var(--sc));}
+  25%{opacity:1;}
+  100%{opacity:1;transform:translate(0,0) rotate(var(--rote)) scale(1);}
 }
-@keyframes rotorIn{from{transform:rotate(-100deg);}to{transform:rotate(0deg);}}
+@keyframes ringOut{to{opacity:0;}}
+@keyframes markIn{from{opacity:0;transform:scale(1.06) rotate(8deg);}to{opacity:1;transform:none;}}
 @keyframes wordIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
 @keyframes introOut{to{opacity:0;visibility:hidden;}}
 
@@ -349,6 +356,7 @@ footer .logo{color:var(--white);}
   .contact .btn{width:auto;min-width:240px;}
   .intro{gap:28px;}
   .intro-mark{width:150px;height:150px;}
+  .intro .ring{border-width:10px;}
   .intro-word{width:200px;}
 }
 </style>
@@ -369,12 +377,11 @@ try{
 <!-- オープニング: 実ロゴが4片に分かれて渦を巻きながら集まる(初回のみ・クリックでスキップ) -->
 <div class="intro" id="intro" role="presentation">
   <div class="intro-mark">
-    <div class="rotor">
-      <div class="slice s1"></div>
-      <div class="slice s2"></div>
-      <div class="slice s3"></div>
-      <div class="slice s4"></div>
-    </div>
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+    <div class="ring r4"></div>
+    <div class="mark-final"></div>
   </div>
   <div class="intro-word" role="img" aria-label="LOTE Group"></div>
   <p class="intro-skip caption">クリックでスキップ</p>
@@ -670,7 +677,7 @@ try{
         intro.style.opacity='0';
         setTimeout(endIntro,250);
       });
-      setTimeout(endIntro,4200);
+      setTimeout(endIntro,5200);
     }
   }
 
