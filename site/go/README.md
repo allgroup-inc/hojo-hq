@@ -17,7 +17,7 @@
 | /go/fg-area/ | フクギイロ: 市町村ページ | https://lin.ee/7fH7vDQ |
 | /go/fg-kit/ | フクギイロ: 制度キットページ | https://lin.ee/7fH7vDQ |
 | /go/fg-shindan/ | フクギイロ: 診断ページ | https://lin.ee/7fH7vDQ |
-| /go/fg-jukyu/ | フクギイロ: 受給報告(振り込まれました) | https://lin.ee/7fH7vDQ |
+| /go/fg-jukyu/ | フクギイロ: 受給報告(受け取れました) | https://lin.ee/7fH7vDQ |
 
 ## 転送先を変えるとき
 1. `scripts/generate_go_pages.py` の CHANNELS の dest を書き換える
