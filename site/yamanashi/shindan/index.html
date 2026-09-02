@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3分でもらい忘れ診断 | もらいわすれ堂</title>
+<link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/yamanashi/shindan/">
+<meta name="description" content="山梨県にお住まいの世帯向け。家族の状況にあてはまる可能性のある給付金・手当を3分で診断します。名前や住所の入力は不要です。">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../assets/fg-base.css">
+<style>
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
+body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  font-size:18px;line-height:1.8;color:var(--fg-ink);background:var(--fg-bg)}
+.wrap{max-width:640px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:1.3rem;margin-bottom:4px}
+.progress{height:8px;background:var(--fg-line);border-radius:4px;margin:16px 0 24px}
+.progress > div{height:100%;background:var(--fg-accent);border-radius:4px;transition:width .3s}
+.q{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:22px}
+.q h2{font-size:1.1rem;margin-bottom:14px}
+.opts{display:grid;gap:10px}
+.opts button,.opts label{display:block;width:100%;text-align:left;padding:13px 16px;min-height:44px;
+  border:2px solid var(--fg-line);border-radius:10px;background:#fff;font-size:1rem;cursor:pointer}
+.opts .sel{border-color:var(--fg-primary);background:#F9EDE3;font-weight:700}
+select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);border-radius:10px;background:#fff}
+.nav{display:flex;gap:10px;margin-top:18px}
+.nav button{flex:1;padding:14px;min-height:44px;border-radius:999px;border:none;font-size:1rem;font-weight:700;cursor:pointer}
+.next{background:var(--fg-primary);color:#fff}
+.back{background:var(--fg-line);color:var(--fg-ink)}
+.note{font-size:.85rem;color:var(--fg-muted);margin-top:10px}
+.result-card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:18px 16px;margin-bottom:16px}
+.result-card + .result-card{margin-top:0}
+.summary-card{background:linear-gradient(180deg,#F9EDE3,#fff);border:2px solid var(--fg-accent);border-radius:12px;padding:18px 16px;margin:6px 0 18px;text-align:center}
+.summary-card .total{font-size:1.15rem;font-weight:800;color:var(--fg-primary)}
+.summary-card .total b{font-size:1.7rem;margin:0 2px}
+.summary-card .breakdown{font-size:.95rem;margin-top:4px}
+.summary-card .breakdown .hi{color:#0f5138;font-weight:700}
+.summary-card .breakdown .mi{color:#7a5b00;font-weight:700}
+.result-card h3{font-size:1.1rem;line-height:1.35;margin:2px 0 6px}
+.lk{display:inline-block;font-size:.82rem;border-radius:4px;padding:2px 12px;font-weight:700;margin-bottom:6px}
+.lk-high{background:#dff2e9;color:#0f5138}
+.lk-mid{background:#fff3cd;color:#7a5b00}
+.result-card a{color:var(--fg-primary);display:inline-block;min-height:44px;line-height:1.9;padding:6px 0}
+@media(max-width:480px){.result-card .linksep{display:none}.result-card a.cardlink{display:block}}
+.first-badge{display:inline-block;background:var(--fg-primary);color:#fff;font-size:.82rem;border-radius:4px;padding:2px 12px;font-weight:700;margin-bottom:6px;margin-right:6px}
+.actions{display:flex;gap:10px;margin:16px 0}
+@media(max-width:480px){.actions{flex-direction:column}}
+.actions button{flex:1;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer}
+.madoguchi{font-size:.85rem;background:#eaf5f0;border-radius:6px;padding:6px 10px;margin-top:6px;color:#0f5138}
+.kind-msg{background:#EAF5F0;border:1px solid #B7E0CF;border-radius:12px;padding:14px 16px;margin:6px 0 16px;color:#0f5138;line-height:1.7;font-size:.95rem}
+.combine-note{margin-top:8px;padding:10px 12px;border-radius:8px;font-size:.85rem;line-height:1.65}
+.combine-note .cl{display:inline-block;font-weight:800;border-radius:4px;padding:1px 8px;margin-right:6px;font-size:.8rem}
+.combine-exclusive{background:#FBEEE6;border:1px solid #E8C4AE}
+.combine-exclusive .cl{background:#B9502F;color:#fff}
+.combine-adjust{background:#FFF6DB;border:1px solid #EAD59A}
+.combine-adjust .cl{background:#7a5b00;color:#fff}
+.combine-stackable{background:#E7F4EC;border:1px solid #B7E0CF}
+.combine-stackable .cl{background:#0F5138;color:#fff}
+.next-step{background:#FDF5E6;border-left:5px solid var(--fg-primary);border-radius:8px;padding:12px 14px;margin:10px 0}
+.next-step .ns-label{display:inline-block;font-size:.75rem;font-weight:800;color:#fff;background:var(--fg-primary);border-radius:4px;padding:2px 8px;margin-right:6px}
+.next-step .ns-body{font-weight:700}
+.card-sub{font-size:.82rem;color:var(--fg-muted);margin-top:2px}
+.markbtn{display:block;width:100%;margin-top:8px;padding:9px 12px;min-height:44px;border-radius:8px;border:1.5px dashed var(--fg-muted);background:#fff;color:var(--fg-muted);font-size:.85rem;cursor:pointer}
+.markbtn.marked{border:1.5px solid #1A6B52;background:#DFF2E9;color:#0F5138;font-weight:700}
+.card-done h3{text-decoration:line-through;color:var(--fg-muted)}
+.resume-box{background:#F9EDE3;border:2px solid var(--fg-primary);border-radius:12px;padding:16px;margin-bottom:16px}
+@media(min-width:900px){.wrap{max-width:720px}}
+@media print{.progress,.actions,.btn,.nav,.siteheader{display:none!important}body{background:#fff}}
+</style>
+</head>
+<body>
+<header class="siteheader">
+  <a class="hlogo" href="../index.html"><img src="../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.72rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
+  <nav>
+    <a href="../shindan/">3分診断</a>
+    <a href="../life/">ライフイベント別</a>
+    <a href="../area/">市町村</a>
+  </nav>
+</header>
+<div class="wrap">
+  <h1>3分でもらい忘れ診断</h1>
+  <p class="note">名前・住所・電話番号は不要。答えたくない質問はとばせて、途中でやめても大丈夫。<br>回答はこの端末の中だけに残り、送信されません。</p>
+  <div class="progress" aria-hidden="true"><div id="bar" style="width:0%"></div></div>
+  <div id="app" aria-live="polite"><noscript>この診断はJavaScriptを使って動きます。設定を有効にしてご覧ください。</noscript></div>
+</div>
+<script src="../analytics-config.js"></script>
+<script src="../assets/fg-analytics.js"></script>
+<script src="logic.js"></script>
+<script>
+(function(){
+  var MUNIS = ["甲府市", "富士吉田市", "都留市", "山梨市", "大月市", "韮崎市", "南アルプス市", "北杜市", "甲斐市", "笛吹市", "上野原市", "甲州市", "中央市", "市川三郷町", "早川町", "身延町", "南部町", "富士川町", "昭和町", "西桂町", "富士河口湖町", "道志村", "忍野村", "山中湖村", "鳴沢村", "小菅村", "丹波山村", "県外"];
+  var AGES = ["未就学","小学生","中学生","高校生","大学・専門"];
+  var EVENTS = ["妊娠・出産","入園・入学","引越・住宅購入","就職・転職","失業","病気・けが","介護","災害","特になし"];
+  var EVENT_MAP = {"引越・住宅購入":"住宅取得・引越","病気・けが":"病気・けが","妊娠・出産":"妊娠・出産","入園・入学":"入園・入学","就職・転職":"就職・転職","失業":"失業","介護":"介護","災害":"災害"};
+
+  var state = { step: 0, municipality: null, children: 0, childAges: [], lifeEvents: [], housing: null };
+  var childrenTouched = false; // Q2未回答時に「0人」が選択済みに見える問題の表示用フラグ(初期値0は維持)
+  var app = document.getElementById("app");
+  var bar = document.getElementById("bar");
+  var TOTAL = 5;
+  // 市町村→ページslug(診断結果から市町村ページへ1タップで案内するため)
+  var MUNI_SLUG = {};
+
+  function h(tag, attrs, children){
+    var el = document.createElement(tag);
+    for (var k in (attrs||{})) {
+      if (k === "text") el.textContent = attrs[k];
+      else if (k.slice(0,2) === "on") el.addEventListener(k.slice(2), attrs[k]);
+      else el.setAttribute(k, attrs[k]);
+    }
+    (children||[]).forEach(function(c){ el.appendChild(c); });
+    return el;
+  }
+  var tracked = {};
+  function trackStep(name){
+    if (tracked[name]) return;
+    tracked[name] = true;
+    if (window.fgTrack) window.fgTrack(name);
+  }
+  function loadSaved(){
+    try { return JSON.parse(localStorage.getItem("fg_shindan_answers") || "null"); } catch(e){ return null; }
+  }
+  // 途中保存(設問ごと)。バスの中・家事の合間の中断で回答を失わないための保険。
+  // 家族共用端末で他人の古い回答が誤結果を出さないよう、24時間で自動失効(三名体制の採用条件)。
+  var PROGRESS_TTL = 24 * 60 * 60 * 1000;
+  function saveProgress(){
+    if (state.step <= 0 || state.step >= 5) return;
+    try { localStorage.setItem("fg_shindan_progress", JSON.stringify({
+      step: state.step, municipality: state.municipality, children: state.children,
+      childAges: state.childAges, lifeEvents: state.lifeEvents, housing: state.housing, ts: Date.now()
+    })); } catch(e){}
+  }
+  function loadProgress(){
+    try {
+      var p = JSON.parse(localStorage.getItem("fg_shindan_progress") || "null");
+      if (!p || !p.ts || (Date.now() - p.ts) > PROGRESS_TTL) return null;
+      if (!p.step || p.step < 1 || p.step > 4) return null;
+      return p;
+    } catch(e){ return null; }
+  }
+  function clearProgress(){ try { localStorage.removeItem("fg_shindan_progress"); } catch(e){} }
+  function applySaved(sv){
+    childrenTouched = true;
+    state.municipality = sv.municipality || null;
+    state.children = sv.children || 0;
+    state.childAges = sv.childAges || [];
+    state.lifeEvents = sv.lifeEvents || [];
+    state.step = 5;
+    if (window.fgTrack) window.fgTrack("shindan_resume");
+    render();
+  }
+  function getMarks(){
+    try { return JSON.parse(localStorage.getItem("fg_seido_marks") || "{}"); } catch(e){ return {}; }
+  }
+  function setMark(id, on){
+    var m = getMarks();
+    if (on) m[id] = 1; else delete m[id];
+    try { localStorage.setItem("fg_seido_marks", JSON.stringify(m)); } catch(e){}
+  }
+  function render(){
+    bar.style.width = Math.round(state.step / TOTAL * 100) + "%";
+    saveProgress();
+    app.innerHTML = "";
+    if (state.step === 0) { trackStep("shindan_start"); return qMunicipality(); }
+    if (state.step >= 1 && state.step <= 4) trackStep("shindan_step_q" + (state.step + 1));
+    if (state.step === 1) return qChildren();
+    if (state.step === 2) return qChildAges();
+    if (state.step === 3) return qEvents();
+    if (state.step === 4) return qHousing();
+    return showResult();
+  }
+  function nav(nextLabel, onNext){
+    return h("div", {class:"nav"}, [
+      state.step > 0 ? h("button", {class:"back", text:"もどる", onclick:function(){ state.step--; if(state.step===2 && state.children===0) state.step--; render(); }}) : h("span"),
+      h("button", {class:"next", text: nextLabel || "つぎへ", onclick: onNext})
+    ]);
+  }
+  function qMunicipality(){
+    // 途中まで答えた回答が残っていれば「つづきから」を出す(24時間以内のみ)
+    var pv = loadProgress();
+    if (pv) {
+      app.appendChild(h("div", {class:"resume-box"}, [
+        h("p", {text:"途中まで答えた回答が、この端末に残っています。", style:"margin-bottom:8px;font-weight:700"}),
+        h("button", {class:"next", text:"つづきから(質問" + (pv.step + 1) + "から)", style:"width:100%;padding:12px;border-radius:999px;border:none;font-weight:700;cursor:pointer", onclick:function(){
+          childrenTouched = true;
+          state.step = pv.step; state.municipality = pv.municipality || null; state.children = pv.children || 0;
+          state.childAges = pv.childAges || []; state.lifeEvents = pv.lifeEvents || []; state.housing = pv.housing || null;
+          if (window.fgTrack) window.fgTrack("shindan_resume", {kind:"progress"});
+          render();
+        }}),
+        h("button", {text:"最初からやり直す", style:"width:100%;margin-top:8px;padding:10px;border-radius:999px;border:1px solid var(--fg-line);background:#fff;cursor:pointer", onclick:function(){
+          clearProgress();
+          state.step = 0; state.municipality = null; state.children = 0; state.childAges = []; state.lifeEvents = []; state.housing = null;
+          render();
+        }}),
+        h("p", {class:"note", text:"回答はこの端末の中だけに保存され、24時間で自動的に消えます。"})
+      ]));
+    }
+    var sv = loadSaved();
+    if (sv && !pv) {
+      app.appendChild(h("div", {class:"resume-box"}, [
+        h("p", {text:"前回の診断結果が、この端末に残っています。", style:"margin-bottom:8px;font-weight:700"}),
+        h("button", {class:"next", text:"前回の結果をもう一度見る", style:"width:100%;padding:12px;border-radius:999px;border:none;font-weight:700;cursor:pointer", onclick:function(){ applySaved(sv); }}),
+        h("p", {class:"note", text:"状況が変わった方は、そのまま下から診断し直せます。"})
+      ]));
+    }
+    var sel = h("select", {id:"muni", "aria-label":"お住まいの市町村"});
+    sel.appendChild(h("option", {value:"", text:"選んでください"}));
+    MUNIS.forEach(function(m){ sel.appendChild(h("option", {value:m, text:m})); });
+    sel.appendChild(h("option", {value:"県外", text:"沖縄県外にお住まい"}));
+    if (state.municipality) sel.value = state.municipality;
+    // 選んだ瞬間に次へ(タップ1回を削減)。空のまま進めない(勝手に県外にしない)
+    function goMuni(){ if (!sel.value) return; state.municipality = sel.value; state.step = 1; render(); }
+    sel.addEventListener("change", goMuni);
+    app.appendChild(h("div", {class:"q"}, [
+      h("h2", {text:"Q1. お住まいの市町村は?"}),
+      h("p", {class:"note", text:"制度をしぼり込むためだけに使います。名前や住所(番地)は不要です。回答はこの端末の中だけで処理され、送信されません。", style:"margin:-4px 0 10px"}),
+      sel,
+      h("p", {class:"note", text:"最初の質問です。ぜんぶで" + TOTAL + "問・3分ほどで終わります。", style:"margin-top:10px"}),
+      nav("つぎへ", goMuni)
+    ]));
+  }
+  function qChildren(){
+    var box = h("div", {class:"opts"});
+    [0,1,2,3].forEach(function(n){
+      var label = n === 3 ? "3人以上" : n + "人";
+      var b = h("button", {text:"お子さん " + label, class: (childrenTouched && state.children===n) ? "sel":""});
+      b.addEventListener("click", function(){ childrenTouched = true; state.children = n; state.step = n > 0 ? 2 : 3; render(); });
+      box.appendChild(b);
+    });
+    app.appendChild(h("div", {class:"q"}, [h("h2",{text:"Q2. お子さんは何人いますか?"}), box, nav("とばす", function(){ state.step = state.children>0?2:3; render(); })]));
+  }
+  function qChildAges(){
+    var box = h("div", {class:"opts"});
+    AGES.forEach(function(a){
+      var b = h("button", {text:a, class: state.childAges.indexOf(a)>=0 ? "sel":""});
+      b.addEventListener("click", function(){
+        var i = state.childAges.indexOf(a);
+        if (i>=0) state.childAges.splice(i,1); else state.childAges.push(a);
+        render();
+      });
+      box.appendChild(b);
+    });
+    app.appendChild(h("div", {class:"q"}, [h("h2",{text:"Q3. お子さんの年齢は?(あてはまるもの全部)"}), box,
+      nav("つぎへ", function(){ state.step = 3; render(); })]));
+  }
+  function qEvents(){
+    var box = h("div", {class:"opts"});
+    EVENTS.forEach(function(ev){
+      var b = h("button", {text:ev, class: state.lifeEvents.indexOf(ev)>=0 ? "sel":""});
+      b.addEventListener("click", function(){
+        if (ev === "特になし") { state.lifeEvents = ["特になし"]; }
+        else {
+          var i = state.lifeEvents.indexOf(ev);
+          var none = state.lifeEvents.indexOf("特になし"); if (none>=0) state.lifeEvents.splice(none,1);
+          if (i>=0) state.lifeEvents.splice(i,1); else state.lifeEvents.push(ev);
+        }
+        render();
+      });
+      box.appendChild(b);
+    });
+    app.appendChild(h("div", {class:"q"}, [h("h2",{text:"Q4. 最近あった・これからある出来事は?(あてはまるもの全部)"}), box,
+      nav("つぎへ", function(){ state.step = 4; render(); })]));
+  }
+  function qHousing(){
+    var box = h("div", {class:"opts"});
+    ["持ち家","賃貸","実家","公営住宅"].forEach(function(hs){
+      var b = h("button", {text:hs, class: state.housing===hs ? "sel":""});
+      b.addEventListener("click", function(){ state.housing = hs; render(); });
+      box.appendChild(b);
+    });
+    app.appendChild(h("div", {class:"q"}, [h("h2",{text:"Q5. お住まいは?(任意)"}), box,
+      nav("診断結果を見る", function(){ state.step = 5; render(); })]));
+  }
+  function showResult(){
+    bar.style.width = "100%";
+    clearProgress();
+    try {
+      localStorage.setItem("fg_shindan_done", new Date().toISOString());
+      localStorage.setItem("fg_shindan_answers", JSON.stringify({
+        municipality: state.municipality, children: state.children,
+        childAges: state.childAges, lifeEvents: state.lifeEvents
+      }));
+    } catch(e){}
+    fetch("../../data/yamanashi/seido.json").then(function(r){return r.json()}).then(function(db){
+      var answers = {
+        municipality: state.municipality, children: state.children,
+        childAges: state.childAges,
+        lifeEvents: state.lifeEvents.map(function(e){ return EVENT_MAP[e]; }).filter(Boolean)
+      };
+      var rs = window.FGShindan.matchSeido(db.items, answers);
+      if (window.fgTrack) window.fgTrack(rs.length ? "shindan_complete" : "shindan_zero", {results: rs.length});
+      app.innerHTML = "";
+      var rh = h("h2"); rh.innerHTML = "あなたの世帯が使える<wbr>可能性のある<wbr>制度: " + rs.length + "件"; app.appendChild(rh);
+      if (rs.length === 0) {
+        app.appendChild(h("p", {text:"今回の回答では、該当の可能性が高い制度は見つかりませんでした。制度は毎日更新されるので、状況が変わったらまた診断してみてください。"}));
+      }
+      // 共有・印刷は結果一覧の下へ降格(主CTA=LINEの1つに絞る。2026-08-10 三名体制裁定・第2着手)
+      var actions = null;
+      // 結果の持ち出しテキスト(LINEのトークに貼れば端末が変わっても消えない=嘘のない「保存」)
+      function resultText(){
+        var lines = ["【わたしの診断結果】対象の可能性 " + rs.length + "件(もらいわすれ堂)"];
+        rs.slice(0, 8).forEach(function(r){ lines.push("・" + r.item.name + "(可能性" + r.likelihood + ")"); });
+        if (rs.length > 8) lines.push("…ほか" + (rs.length - 8) + "件");
+        lines.push("くわしく見る: https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/");
+        return lines.join("\n");
+      }
+      if (rs.length > 0) {
+        actions = h("div", {class:"actions"});
+        var shareBtn = h("button", {text:"家族に教える(共有)"});
+        shareBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("share_click");
+          var url = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/";
+          var text = "「もらいわすれ堂」で沖縄の給付金・手当のもらい忘れを3分で診断できるよ(無料・匿名)";
+          if (navigator.share) { navigator.share({title:"もらいわすれ堂|3分でもらい忘れ診断", text:text, url:url}).catch(function(){}); }
+          else if (navigator.clipboard) { navigator.clipboard.writeText(text + " " + url); shareBtn.textContent = "リンクをコピーしました!"; }
+        });
+        var printBtn = h("button", {text:"印刷して窓口に持っていく"});
+        printBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("print_click");
+          window.print();
+        });
+        actions.appendChild(shareBtn); actions.appendChild(printBtn);
+        app.appendChild(h("p", {class:"note", text:"ぜんぶ一度にやらなくて大丈夫です。まずは1件だけ、いちばん上から始めてみてください。"}));
+        var sum = window.FGShindan.summarize(rs);
+        var summary = h("div", {class:"summary-card"});
+        var total = h("p", {class:"total"});
+        total.innerHTML = "合計 <b>" + sum.total + "</b> 件が対象の可能性";
+        summary.appendChild(total);
+        var bd = h("p", {class:"breakdown"});
+        bd.innerHTML = sum.mid > 0 ? "可能性 <span class='hi'>高 " + sum.high + "件</span> ・ <span class='mi'>中 " + sum.mid + "件</span>" : "可能性が高いもの <span class='hi'>" + sum.high + "件</span>";
+        summary.appendChild(bd);
+        summary.appendChild(h("p", {class:"note", text:"「対象の可能性」のご案内です。受給の可否は各窓口の判断となります。"}));
+        app.appendChild(summary);
+        // 結果が出た直後(最も関与が高い瞬間)にLINEを差し出す。制度一覧は登録なしでも全部見られる。
+        // 主訴求=「見逃し防止」・副訴求=「結果の保存」(2026-08-11 小柳さん決裁で主役交代)。
+        // 掲載件数は生データから出す(固定の数字を書くと古くなるため。正確性最優先)。
+        var seidoCount = db.count || (db.items || []).length;
+        var topLine = h("div", {style:"margin:8px 0 4px;padding:16px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
+        topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この結果" + sum.total + "件、今日のままとは限りません"}));
+        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:6px", text:"制度は増えたり、変わったりします(いまの掲載は" + seidoCount + "件・毎日更新)。LINEに登録しておくと、新しい制度が増えたときや締切が近づいたときにお知らせが届きます。"}));
+        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"いまの結果もコピーして残せます。制度の一覧は登録なしでも、ぜんぶ見られます。"}));
+        var topLineBtn = h("a", {href:window.FG_LINE_URL, target:"_blank", rel:"noopener",
+          style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"LINEで「見逃し」をなくす(無料)"});
+        var topCopied = h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名 ・ いつでも解除"});
+        topLineBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_top"});
+          try { if (navigator.clipboard) { navigator.clipboard.writeText(resultText()); topCopied.textContent = "結果をコピーしました。メモアプリなどに貼り付けると保存できます。"; } } catch(e){}
+        });
+        topLine.appendChild(topLineBtn);
+        topLine.appendChild(topCopied);
+        if (window.FG_LINE_URL) app.appendChild(topLine);
+        var kindMsg = h("p", {class:"kind-msg"});
+        kindMsg.innerHTML = "もらい忘れは、知らなかっただけ。<br>あなたは悪くありません。<br>ぜんぶ一度にやらなくて大丈夫。ひとつずつ、いっしょに進めましょう。";
+        app.appendChild(kindMsg);
+      }
+      // 医療・健康の制度は診断では判定しない設計(症状を尋ねない方針)のため、
+      // 市町村ページへの非断定の案内をここに出す(2026-08-11 三名体制裁定・文言は断定禁止)。
+      var areaSlug = MUNI_SLUG[state.municipality];
+      var areaHref = "../life/iryo/";
+      var areaLabel = "医療・健康の制度一覧を見る";
+      var medBanner = h("div", {style:"margin:14px 0;padding:14px 16px;background:#FFF8E6;border:1px solid #EAD59A;border-radius:12px"});
+      medBanner.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px", text:"こども医療費助成などの「医療・健康」の制度は、この診断では判定していません"}));
+      medBanner.appendChild(h("p", {class:"note", style:"margin-bottom:8px", text:"症状などをおたずねしない方針のためです。ライフイベント別の一覧で、医療費に関する制度をまとめて確認できます。"}));
+      var areaLink = h("a", {href: areaHref, style:"font-weight:700", text: areaLabel + " ›"});
+      areaLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("result_area_link"); });
+      medBanner.appendChild(areaLink);
+      app.appendChild(medBanner);
+      var marks = getMarks();
+      rs.forEach(function(r, idx){
+        var it = r.item;
+        var isMarked = !!marks[it.id];
+        var card = h("div", {class:"result-card" + (isMarked ? " card-done" : "")}, []);
+        if (idx === 0 && !isMarked) card.appendChild(h("span", {class:"first-badge", text:"まずはこの1件から"}));
+        card.appendChild(h("span", {class:"lk " + (r.likelihood==="高"?"lk-high":"lk-mid"), text:"対象の可能性: " + r.likelihood}));
+        card.appendChild(h("h3", {text: it.name}));
+        var ns = h("div", {class:"next-step"});
+        ns.appendChild(h("span", {class:"ns-label", text:"次にやること"}));
+        ns.appendChild(h("span", {class:"ns-body", text: (it.how_to_apply||"").replace(/市区町村/g,"市町村").replace(/。$/,"")}));
+        card.appendChild(ns);
+        card.appendChild(h("p", {class:"card-sub", text:"対象: " + it.target_household}));
+        card.appendChild(h("p", {class:"card-sub", text:"金額: " + it.amount_note}));
+        // 併給・重複の注意(あれば)。断定せず「要確認・窓口で確認」を促す。
+        if (it.combine && it.combine.note) {
+          var ctype = it.combine.type || "exclusive";
+          var clabel = {exclusive:"どちらか一方", adjust:"併用に条件あり", stackable:"一緒に受けられる"}[ctype] || "併用に注意";
+          var cbox = h("div", {class:"combine-note combine-" + ctype});
+          cbox.appendChild(h("span", {class:"cl", text: clabel}));
+          cbox.appendChild(document.createTextNode(it.combine.note));
+          card.appendChild(cbox);
+        }
+        var mg = h("div", {class:"madoguchi"});
+        mg.appendChild(document.createTextNode("窓口でこう言えばOK:"));
+        mg.appendChild(h("span", {style:"user-select:all;-webkit-user-select:all;display:block;margin:2px 0", text:"「" + it.name + "について教えてください。対象か不安なのですが大丈夫ですか?」"}));
+        mg.appendChild(h("span", {class:"note", style:"display:block;margin-top:2px;color:#0f5138", text:"対象かどうかは窓口が判断します。自信がなくて大丈夫です。"}));
+        card.appendChild(mg);
+        card.appendChild(h("a", {href: it.source_url, rel:"noopener", class:"cardlink", text:"公式ページで確認する"}));
+        card.appendChild(h("p", {class:"note", style:"margin-top:6px", text:"準備の目安がそろったら、お住まいの窓口へ。最終的な受給の可否は窓口で確認されます。"}));
+        if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
+        var mk = h("button", {class:"markbtn" + (isMarked ? " marked" : ""),
+          text: isMarked ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、タップして記録"});
+        // 受給報告の導線: 「受け取った」瞬間に、その制度の報告をLINEへ促す(⑤の回収)
+        var rep = h("div", {style:"display:" + (isMarked ? "block" : "none") + ";margin-top:8px;padding-top:8px;border-top:1px dashed var(--fg-line)"});
+        var repLink = h("a", {href:"../houkoku/",
+          style:"font-weight:700", text:"💬 受け取れたことを報告する(匿名・任意)"});
+        repLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("jukyu_report_click", {seido: it.id}); });
+        rep.appendChild(repLink);
+        rep.appendChild(h("p", {class:"note", style:"margin-top:2px", text:"あなたの報告が、次の県民のもらい忘れを防ぎます。制度名とおおよその金額だけでOK。お名前や口座番号はうかがいません。"}));
+        mk.addEventListener("click", function(){
+          var now = !card.classList.contains("card-done");
+          setMark(it.id, now);
+          card.classList.toggle("card-done", now);
+          mk.classList.toggle("marked", now);
+          mk.textContent = now ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、タップして記録";
+          rep.style.display = now ? "block" : "none";
+          if (now && window.fgTrack) window.fgTrack("seido_done_mark");
+        });
+        card.appendChild(mk);
+        card.appendChild(rep);
+        app.appendChild(card);
+      });
+      // 共有・印刷はここ(結果一覧の下)に配置 — 上部の主CTAはLINE1つに絞る
+      if (actions) app.appendChild(actions);
+      var lineUrl = window.FG_LINE_URL;
+      var lineBox = h("div", {style:"margin:22px 0;padding:18px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
+      lineBox.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px;font-size:1.05rem", text:"この結果、もらい忘れないために"}));
+      lineBox.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"LINEに登録すると、次の3つができます(制度の一覧は登録なしでもぜんぶ見られます)。"}));
+      var rewards = h("ul", {style:"list-style:none;text-align:left;max-width:420px;margin:0 auto 12px;padding:0"});
+      ["新しい制度が増えたら、すぐお知らせ(見逃しゼロ)","締切がある制度は、締切の約1か月前からお知らせ","診断結果の保存(結果をトークに貼っておけば、機種変更しても消えません)"].forEach(function(t){
+        rewards.appendChild(h("li", {style:"padding:6px 0;border-bottom:1px solid #cfe9d8", text:t}));
+      });
+      lineBox.appendChild(rewards);
+      var lineBtn = h("a", {href: lineUrl, target:"_blank", rel:"noopener",
+        style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEでお知らせを受け取る(無料)"});
+      lineBtn.addEventListener("click", function(){
+        if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_bottom"});
+        try { if (rs.length && navigator.clipboard) navigator.clipboard.writeText(resultText()); } catch(e){}
+      });
+      lineBox.appendChild(lineBtn);
+      lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。"}));
+      if (window.FG_LINE_URL) { app.appendChild(lineBox); }
+      else {
+        var prep = h("div", {style:"margin:22px 0;padding:14px 16px;background:#F4F1E8;border:1px solid var(--fg-line);border-radius:12px;text-align:center"});
+        prep.appendChild(h("p", {class:"note", text:"LINEでの締切お知らせは、山梨版では準備中です。上のコピー機能で結果をメモアプリなどに保存しておけます。"}));
+        app.appendChild(prep);
+      }
+      var disc = h("div", {class:"disclaimer"});
+      disc.innerHTML = "この診断は公式情報に基づく「可能性のご案内」です。<br>受給できるかどうかの最終判断は各窓口で行われます。<br>医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため、診断には表示していません。<a href=\"../life/\">ライフイベント別の一覧</a>でご確認ください。";
+      app.appendChild(disc);
+      app.appendChild(h("p", {style:"margin-top:16px"}, [h("a", {href:"../index.html", text:"← トップへもどる"})]));
+    }).catch(function(){
+      // 電波の弱い場所(バス・離島)での読込失敗。回答は失わせず、その場で再試行できるようにする
+      app.innerHTML = "";
+      app.appendChild(h("p", {text:"データの読み込みに失敗しました(電波の弱い場所などで起こることがあります)。", style:"margin-bottom:6px"}));
+      app.appendChild(h("p", {class:"note", text:"ご安心ください。あなたの回答は消えていません。", style:"margin-bottom:12px"}));
+      app.appendChild(h("button", {class:"next", text:"もう一度読み込む", style:"width:100%;max-width:420px;display:block;margin:0 auto;padding:13px;border-radius:999px;border:none;font-weight:700;cursor:pointer", onclick:function(){ showResult(); }}));
+    });
+  }
+  if (/[?&]resume=1/.test(location.search)) {
+    var _sv = loadSaved();
+    if (_sv) {
+      state.municipality = _sv.municipality || null;
+      state.children = _sv.children || 0;
+      state.childAges = _sv.childAges || [];
+      state.lifeEvents = _sv.lifeEvents || [];
+      state.step = 5;
+      if (window.fgTrack) window.fgTrack("shindan_resume");
+    }
+  }
+  render();
+})();
+</script>
+</body>
+</html>

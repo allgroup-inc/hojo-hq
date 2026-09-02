@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>もらえた報告 | もらいわすれ堂</title>
+<link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/yamanashi/houkoku/">
+<meta name="description" content="給付金・手当を受け取れたら、ぜひ教えてください。あなたの「もらえた」が、次の誰かの「調べてみよう」につながります。お名前・住所・金額は不要です。">
+<link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../assets/fg-base.css">
+<style>
+h1,h2{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
+h1{font-size:1.35rem;margin-bottom:6px;text-align:center}
+.lead{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:18px 20px;margin:16px 0;box-shadow:var(--fg-shadow);text-align:center}
+.lead .big{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.12rem;color:var(--fg-primary-deep)}
+.box{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:18px 20px;margin:14px 0;box-shadow:var(--fg-shadow)}
+label{display:block;font-weight:700;margin:14px 0 6px}
+label .opt{font-weight:400;font-size:.8rem;color:var(--fg-muted)}
+input[type=text],select,textarea{width:100%;padding:13px 14px;border:1.5px solid var(--fg-line);border-radius:12px;font-size:1rem;font-family:inherit;background:#fff;color:var(--fg-ink)}
+textarea{min-height:90px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--fg-sea)}
+.pii{background:#FDF2EC;border:1px solid #F0D5C5;border-radius:12px;padding:12px 14px;font-size:.85rem;color:#8a5a3d;margin-top:14px}
+.sendbtn{display:block;width:100%;margin:18px auto 0;padding:17px 24px;min-height:44px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border:none;border-radius:999px;font-size:1.1rem;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:var(--fg-shadow)}
+.sendbtn:active{background:var(--fg-primary-deep)}
+#fallback{display:none;margin-top:14px;background:#EFF5F0;border:1px solid #D5E5DA;border-radius:12px;padding:14px 16px;font-size:.9rem}
+#fallback textarea{margin-top:8px;background:#fff}
+#fallback a{display:inline-block;margin-top:10px;padding:11px 20px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:.95rem}
+@media(min-width:900px){.wrap{max-width:760px}}
+</style>
+</head>
+<body>
+<script src="../analytics-config.js"></script>
+<script src="../assets/fg-analytics.js"></script>
+<header class="siteheader">
+  <a class="hlogo" href="../index.html"><img src="../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.72rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
+  <nav>
+    <a href="../shindan/">3分診断</a>
+    <a href="../life/">ライフイベント別</a>
+    <a href="../area/">市町村</a>
+  </nav>
+</header>
+<div class="wrap">
+<p class="note"><a href="../index.html">もらいわすれ堂</a> › もらえた報告</p>
+<h1>受け取れたこと、教えてください</h1>
+<div class="lead">
+  <p class="big">おめでとうございます。</p>
+  <p>あなたの「もらえた」の一言が、<br>「うちも調べてみよう」という<strong>次の誰かの一歩</strong>になります。</p>
+</div>
+
+<div class="box">
+  <label for="seido">受け取れた制度の名前 <span class="opt">(うろ覚えでOK)</span></label>
+  <input type="text" id="seido" placeholder="例: 児童手当">
+  <label for="area">お住まいの市町村 <span class="opt">(任意)</span></label>
+  <select id="area"><option value="">選択しない</option><option>甲府市</option><option>富士吉田市</option><option>都留市</option><option>山梨市</option><option>大月市</option><option>韮崎市</option><option>南アルプス市</option><option>北杜市</option><option>甲斐市</option><option>笛吹市</option><option>上野原市</option><option>甲州市</option><option>中央市</option><option>市川三郷町</option><option>早川町</option><option>身延町</option><option>南部町</option><option>富士川町</option><option>昭和町</option><option>西桂町</option><option>富士河口湖町</option><option>道志村</option><option>忍野村</option><option>山中湖村</option><option>鳴沢村</option><option>小菅村</option><option>丹波山村</option></select>
+  <label for="koe">ひとこと <span class="opt">(任意・そのままの言葉で)</span></label>
+  <textarea id="koe" placeholder="例: 診断で知って申請したら、ほんとに受け取れました!"></textarea>
+  <div class="pii">🔒 <strong>お名前・ご住所・金額は書かないでください。</strong>いただいた報告は、個人がわからない形(件数など)でのみ使わせていただきます。</div>
+  <button class="sendbtn" id="send">LINEで報告を送る</button>
+  <div id="fallback">
+    <strong>報告文を下に用意しました。</strong><br>文をコピーして、下のボタンでLINEを開き、もらいわすれ堂のトークに貼り付けて送ってください(まだ友だちでない方は、追加すると送れます)。
+    <textarea id="preview" readonly></textarea>
+    <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener">LINEを開く</a>
+  </div>
+</div>
+
+<div class="disclaimer">いただいた報告は、検証部が公式制度と照合できたもののみを件数として計上します。受給の可否・金額の最終判断は各窓口が行うものであり、当サイトが保証するものではありません。<br>運営: 株式会社フクギイロ</div>
+<p style="margin-top:16px"><a href="../index.html">もらいわすれ堂 トップへ</a></p>
+<p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
+</div>
+<script>
+document.getElementById('send').addEventListener('click', function(){
+  var seido=(document.getElementById('seido').value||'').trim();
+  var area=document.getElementById('area').value;
+  var koe=(document.getElementById('koe').value||'').trim();
+  var lines=['【もらえた報告】'];
+  lines.push('制度: '+(seido||'(名前はうろ覚えです)'));
+  if(area) lines.push('市町村: '+area);
+  if(koe) lines.push('ひとこと: '+koe);
+  var text=lines.join('\n');
+  if(window.fgTrack) fgTrack('jukyu_report_click');
+  var oa=window.FG_LINE_OA_ID;
+  if(oa){
+    location.href='https://line.me/R/oaMessage/%40'+encodeURIComponent(oa.replace(/^@/,''))+'/?'+encodeURIComponent(text);
+    return;
+  }
+  var fb=document.getElementById('fallback');
+  document.getElementById('preview').value=text;
+  fb.style.display='block';
+  if(navigator.clipboard) navigator.clipboard.writeText(text).catch(function(){});
+  fb.scrollIntoView({behavior:'smooth',block:'center'});
+});
+</script>
+</body>
+</html>
