@@ -695,3 +695,29 @@ test("buildActivitySummary: 週の途中(木曜)でも月曜はじまりで正�
   assert.equal(result.weeks[1].start, "2026-08-24");
   assert.equal(result.weeks[1].total["架電"], 1);
 });
+
+// ---- validateQuickLog(詳細ドロワーからのクイック記録・v1.6.0) ----
+
+test("validateQuickLog: 企業IDと正しい種別ならok。メモは前後の空白を除去", () => {
+  const result = adminAccess.validateQuickLog({ "企業ID": "C1", "種別": "電話", "内容メモ": " 不在。夕方かけ直す " });
+  assert.equal(result.ok, true);
+  assert.equal(result.memo, "不在。夕方かけ直す");
+});
+
+test("validateQuickLog: メモが空でも種別だけで記録できる(電話不在などの最速記録)", () => {
+  const result = adminAccess.validateQuickLog({ "企業ID": "C1", "種別": "電話", "内容メモ": "" });
+  assert.equal(result.ok, true);
+  assert.equal(result.memo, "");
+});
+
+test("validateQuickLog: 企業IDなし・不正な種別はok:false", () => {
+  assert.equal(adminAccess.validateQuickLog({ "企業ID": "", "種別": "電話" }).ok, false);
+  const bad = adminAccess.validateQuickLog({ "企業ID": "C1", "種別": "存在しない種別" });
+  assert.equal(bad.ok, false);
+  assert.ok(bad.errors.some((e) => e.includes("種別")));
+});
+
+test("validateQuickLog: 長すぎるメモ(2000文字超)は拒否する", () => {
+  const result = adminAccess.validateQuickLog({ "企業ID": "C1", "種別": "電話", "内容メモ": "あ".repeat(2001) });
+  assert.equal(result.ok, false);
+});

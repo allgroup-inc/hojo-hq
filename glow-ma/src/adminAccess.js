@@ -287,6 +287,31 @@
     };
   }
 
+  var QUICK_LOG_MEMO_MAX_ = 2000;
+
+  /**
+   * 詳細ドロワーからのクイック記録(対応履歴の直接追加・v1.6.0)の入力検証。
+   * 「電話したが不在」のような最速記録を許すため、メモは空でもよい。
+   * 種別はスキーマのINTERACTION_TYPESに一致するもののみ(表記ゆれで集計から
+   * 漏れるのを防ぐ。行動量ダッシュボード・スコアリングと同じ語彙を共有する)。
+   */
+  function validateQuickLog(input) {
+    var source = input || {};
+    var errors = [];
+    var companyId = String(source["企業ID"] || "").trim();
+    if (!companyId) errors.push("企業IDがありません");
+    var type = String(source["種別"] || "").trim();
+    if (getGlowSchema_().INTERACTION_TYPES.indexOf(type) === -1) {
+      errors.push("種別が正しくありません: " + type);
+    }
+    var memo = String(source["内容メモ"] || "").trim();
+    if (memo.length > QUICK_LOG_MEMO_MAX_) {
+      errors.push("メモが長すぎます(" + QUICK_LOG_MEMO_MAX_ + "文字以内)");
+    }
+    if (errors.length > 0) return { ok: false, errors: errors };
+    return { ok: true, companyId: companyId, type: type, memo: memo };
+  }
+
   /**
    * 企業詳細ドロワーからの次回アクション直接編集の入力検証。
    * 日付は空でもよい(予定を消す操作)。入力があればyyyy-MM-dd形式のみ許可。
@@ -584,7 +609,8 @@
     buildFollowUpReminders: buildFollowUpReminders,
     buildVisitSchedule: buildVisitSchedule,
     buildNextActionUpdate: buildNextActionUpdate,
-    buildActivitySummary: buildActivitySummary
+    buildActivitySummary: buildActivitySummary,
+    validateQuickLog: validateQuickLog
   };
 
   if (typeof module !== "undefined" && module.exports) {

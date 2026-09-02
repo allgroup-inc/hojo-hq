@@ -381,6 +381,65 @@ function getVisitSchedule(daysAhead) {
 }
 
 /**
+ * 詳細ドロワーからのクイック記録(v1.6.0): 対応履歴ログへ1行追記し、
+ * 最終接触日を当日に更新する(記録=接触の事実。LINE音声ログ確定時と同じ扱い)。
+ * 検証はGlowAdminAccess.validateQuickLog(純ロジック)が担う。担当者は
+ * ログイン中のスタッフをスタッフタブから逆引きし、手入力ゼロにする。
+ * ロック理由はupdateCompanyMemoと同じ(全体書き戻しとの競合・行ズレ防止)。
+ * この関数の名前の末尾に `_` を付けてはいけない(getPartnerListと同じ理由)。
+ */
+function appendInteractionLog(companyId, interactionType, memo) {
+  requireAdminAccess_();
+  var validated = GlowAdminAccess.validateQuickLog({
+    "企業ID": companyId, "種別": interactionType, "内容メモ": memo
+  });
+  if (!validated.ok) {
+    return { ok: false, errors: validated.errors };
+  }
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  if (!logSheet) {
+    throw new Error("対応履歴ログタブが見つかりません。");
+  }
+  var staffName = GlowAdminAccess.resolveStaffName(
+    Session.getActiveUser().getEmail(), readStaffAllowlistEmails_()
+  );
+  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  var record = {
+    "履歴ID": "H-" + Utilities.getUuid(),
+    "企業ID": validated.companyId,
+    "日付": todayString,
+    "担当者": staffName,
+    "種別": validated.type,
+    "対応相手": "",
+    "内容メモ": validated.memo,
+    "次回アクション": ""
+  };
+  var headers = GlowSchema.INTERACTION_LOG_HEADERS;
+  var row = headers.map(function (header) {
+    return record[header] !== undefined ? record[header] : "";
+  });
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(10000)) {
+    throw new Error("他の処理がデータを操作中のため、記録を中断しました。しばらく待ってから再実行してください。");
+  }
+  try {
+    logSheet.getRange(logSheet.getLastRow() + 1, 1, 1, headers.length).setValues([row]);
+    var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+    if (companySheet) {
+      var rowIndex = findCompanyRowIndex_(companySheet, validated.companyId);
+      if (rowIndex !== -1) {
+        var lastContactColumn = GlowSchema.COMPANY_MASTER_HEADERS.indexOf("最終接触日") + 1;
+        companySheet.getRange(rowIndex, lastContactColumn).setValue(todayString);
+      }
+    }
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true, record: record };
+}
+
+/**
  * 集客ファネル(週次)を返す。LP閲覧・LINE友だち数はhojo-hq(公開リポジトリ)で
  * 毎日自動収集されているKPIデータをraw.githubusercontent.comから読む。
  * 取得に失敗してもglow-ma内部の数字(新規登録・面談・成約)だけで表は成立させ、

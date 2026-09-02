@@ -32,9 +32,9 @@ test("buildAdminAppHtml: google.script.runでupdateCompanyMemoを呼ぶ(Phase 18
   assert.ok(html.indexOf(".updateCompanyMemo(") !== -1);
 });
 
-test("buildAdminAppHtml: 想定外の書き込み系google.script.run呼び出しを含まない", () => {
+test("buildAdminAppHtml: 想定外の書き込み系google.script.run呼び出しを含まない(appendInteractionLogはv1.6.0で正式実装のため禁止リストから解除)", () => {
   const html = adminApp.buildAdminAppHtml();
-  ["appendInteractionLog", "addPartner", "logPartnerInteraction", "recordReferral"].forEach((forbidden) => {
+  ["addPartner", "logPartnerInteraction", "recordReferral"].forEach((forbidden) => {
     assert.equal(html.indexOf(forbidden), -1, forbidden + " への呼び出しが含まれてはいけない(未実装の機能)");
   });
 });
@@ -532,4 +532,60 @@ test("buildAdminAppHtml: 使い方ガイド冒頭に「このシステムの特�
   assert.ok(html.includes("保険営業20年"));
   assert.ok(html.includes("自社オリジナルの教材"));
   assert.ok(html.includes("v1.5.1"));
+});
+
+// ---- v1.6.0 会話蓄積画面の改善 ----
+
+test("buildAdminAppHtml: 対応履歴タブにクイック記録(種別ボタン+一言メモ+記録)の要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("id=\"qlMemo\""));
+  assert.ok(html.includes("id=\"qlSaveBtn\""));
+  assert.ok(html.includes("id=\"qlStatus\""));
+  assert.ok(html.includes("class=\\\"ql-type\\\"") || html.includes("ql-type"));
+  assert.ok(html.includes(".appendInteractionLog("));
+  // よく使う種別ボタン
+  ["電話", "入電", "アポ獲得", "面談実施", "手紙送付"].forEach((t) => {
+    assert.ok(html.includes(t), t + " のボタンがない");
+  });
+});
+
+test("buildAdminAppHtml: 対応履歴がタイムライン表示(日付+種別バッジ色分け)になっている", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("function renderHistoryTimeline("));
+  assert.ok(html.includes("tl-row"));
+  assert.ok(html.includes("tl-badge"));
+  assert.ok(html.includes("function classifyType("));
+  // 色分けCSS
+  [".tl-badge.tl-phone", ".tl-badge.tl-meeting", ".tl-badge.tl-letter", ".tl-badge.tl-deal"].forEach((sel) => {
+    assert.ok(html.includes(sel), sel + " のCSSがない");
+  });
+});
+
+test("buildAdminAppHtml: 対応履歴のキーワード絞り込み入力がある", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("id=\"historyFilter\""));
+});
+
+test("buildAdminAppHtml: ヘッダーに「最終接触から◯日」を表示する要素がある", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("id=\"drawerLastContact\""));
+  assert.ok(html.includes("最終接触"));
+});
+
+test("buildAdminAppHtml: 関係メモは【日付 種別】ごとのブロック表示に整形される", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("function formatMemoDisplay("));
+  assert.ok(html.includes("memo-entry"));
+});
+
+test("buildAdminAppHtml: クイック記録の保存後に次回アクション設定へ誘導する", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("id=\"qlGoNextBtn\""));
+  assert.ok(/qlGoNextBtn[\s\S]{0,600}naDate/.test(html));
+});
+
+test("buildAdminAppHtml: バージョンがv1.6.0に上がり、更新履歴にクイック記録の説明がある", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("v1.6.0"));
+  assert.ok(html.includes("クイック記録"));
 });
