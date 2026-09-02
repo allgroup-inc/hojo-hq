@@ -525,3 +525,11 @@ test("buildAdminAppHtml: バージョンがv1.5.0に上がり、更新履歴に�
   assert.ok(html.includes("v1.5.0"));
   assert.ok(html.includes("集客ファネル"));
 });
+
+test("buildAdminAppHtml: 使い方ガイド冒頭に「このシステムの特長」がある(保険営業20年のノウハウ・自社教材化)", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("このシステムの特長"));
+  assert.ok(html.includes("保険営業20年"));
+  assert.ok(html.includes("自社オリジナルの教材"));
+  assert.ok(html.includes("v1.5.1"));
+});

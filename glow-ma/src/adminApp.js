@@ -24,8 +24,9 @@
   // 機能を追加・変更したら、(1)APP_VERSIONを上げ、(2)CHANGELOGの先頭に1行足すこと。
   // CHANGELOGは使い方ガイドの「④ 更新履歴」にそのまま表示される取説の一部。
   // 利用者(小柳さん・スタッフ)が読む前提で、技術用語ではなく「何ができるようになったか」を書く。
-  var APP_VERSION = "v1.5.0";
+  var APP_VERSION = "v1.5.1";
   var CHANGELOG = [
+    { date: "2026-09-01", version: "v1.5.1", text: "使い方ガイドの冒頭に「このシステムの特長」を追加(保険営業20年のノウハウと営業プログラムを仕組み化したシステムであること、記録が貯まるほど自社オリジナルの教材に育つこと)" },
     { date: "2026-08-31", version: "v1.5.0", text: "「集客ファネル」タブを追加(LP閲覧→LINE登録→台帳への新規登録→面談→成約を週次で1つの表に。KGI進捗バー・流入ルート別の内訳付き。LP閲覧とLINE友だち数は毎日自動収集されるKPIデータから読み込み)" },
     { date: "2026-08-31", version: "v1.4.0", text: "LINE音声ログと台帳の連携を強化: 音声を「確定」した瞬間に、要約が関係メモ(見込みコメント)へ日付付きで自動追記され、最終接触日・次回アクション予定日・後継者状況・興味のある商品(M&A/不動産/法人保険)も自動反映。反映内容はLINEにその場で返信される" },
     { date: "2026-08-31", version: "v1.3.1", text: "使いやすさ改善: 日付欄をすべてカレンダー選択式に/起動直後に「読み込み中…」を表示/Escキーでどの画面も閉じられるように/KPIの数字を桁区切り表示/次回アクションはEnterキーでも保存/パートナー0件時に登録方法を案内" },
@@ -518,6 +519,8 @@
     ".howto-changelog{margin:0; padding-left:1.1rem;}",
     ".howto-changelog li{margin-bottom:.35rem;}",
     ".howto-changelog .cl-date{color:var(--muted); font-size:.75rem; margin-right:.35rem;}",
+    ".howto-lead{font-size:.83rem; line-height:1.9; margin:0 0 .6rem; color:var(--navy-ink);}",
+    ".howto-lead b{color:var(--navy);}",
     "/* ---- 訪問・架電スケジュール ---- */",
     ".sched-toolbar{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap;}",
     ".sched-controls{display:flex; gap:8px; align-items:center;}",
@@ -589,6 +592,14 @@
     "<summary><span class=\"ico\">?</span>使い方ガイド",
     "<span class=\"hint\">はじめての方はこちらをクリック</span><span class=\"chev\">▾</span></summary>",
     "<div class=\"howto-body\">",
+    "<div><h4>このシステムの特長(はじめに)</h4>",
+    "<p class=\"howto-lead\">このシステムは、システムエンジニアが作る一般的な顧客管理・ログ解析システムとは成り立ちが違います。"+
+    "<b>保険営業20年の現場ノウハウと、実際に成果を出してきた営業プログラム</b>"+
+    "──「次回アクションを決めてから終える」「行動量→アポ→面談→成約をファネルで追う」「接触サイクルで見込を掘り起こす」──を、"+
+    "そのまま画面と仕組みに落とし込んだものです。</p>",
+    "<p class=\"howto-lead\">日々の記録が貯まるほど、「うちの営業のやり方」がデータと手順として形になり、"+
+    "新しいメンバーの教育にそのまま使える<b>自社オリジナルの教材(営業プレイブック)</b>に育っていきます。"+
+    "営業ノウハウそのものをシステム化した、業界でも限りなく珍しい現場発の仕組みです。</p></div>",
     "<div><h4>① 使い方</h4><ol>",
     "<li>会社名・代表者名で検索するか、ランク・現在ステージ・担当者・流入ルート・提案商品で絞り込む</li>",
     "<li>一覧の行をクリックすると、対応履歴や関係メモを含む詳細が右からスライドして開く</li>",
