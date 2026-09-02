@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-09-02 05:27",
+ "generated_at": "2026-09-02 11:31",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 7,
- "count": 44,
+ "count": 45,
  "items": [
   {
    "id": "a0WJ200000CDe7xMAD",
@@ -135,6 +135,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeUbMAL",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDeXgMAL",
+   "name": "【二次公募】令和８年度　天然ガス利用設備による強靱性向上対策事業費補助金",
+   "deadline": "2026-09-24",
+   "days_left": 22,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeXgMAL",
    "tag": "nationwide"
   },
   {

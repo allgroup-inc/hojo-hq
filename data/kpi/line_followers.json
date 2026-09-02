@@ -1,7 +1,7 @@
 {
   "note": "KGI実測: ミカタLINE公式の友だち数(LINE Insight API・前日確定値)。kgi_target=1,000社(2027-07頃)。定常ペース目標は週20社。",
   "kgi_target": 1000,
-  "last_checked": "2026-09-02 05:28",
+  "last_checked": "2026-09-02 11:31",
   "last_status": "ready",
   "history": [
     {
