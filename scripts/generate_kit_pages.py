@@ -24,6 +24,7 @@ import urllib.parse
 
 sys.path.insert(0, os.path.dirname(__file__))
 from fg_seo import HIDDEN_MUNIS, MUNI_SLUG, breadcrumb_jsonld, canonical_tag, faq_jsonld, ogp_tags
+import fg_madoguchi  # 窓口情報(役場住所・電話・開庁時間)2026-09-02
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA = os.path.join(BASE, "data", "fukugiiro", "seido.json")
@@ -291,6 +292,36 @@ def kit_page(it, updated):
         warn = ('<div class="box" style="border-color:#E0B54A;background:#FFF8E6"><span class="note">'
                 'この制度は内容の最終確認中です。金額・締切・対象はお出かけ前に必ず公式ページと窓口でご確認ください。</span></div>')
 
+    # 聞きに行く場所と時間(市町村・県の制度のみ。2026-09-02 小柳さん発案)
+    # 役場(本庁)単位の情報。担当課が別庁舎の場合があるため非断定の注意文を必ず添える。
+    madoguchi_html = ""
+    mg = fg_madoguchi.get(it.get("area"))
+    if mg:
+        q = urllib.parse.quote(f"{mg['hall']} {mg['address']}")
+        map_url = f"https://www.google.com/maps/search/?api=1&query={q}"
+        tel_digits = mg["tel"].replace("-", "")
+        hours = mg["hours"]
+        if hours == "要確認":
+            hours_html = "要確認(お出かけ前に代表電話でおたずねください)"
+        else:
+            hours_html = esc(hours)
+            if mg.get("hours_note"):
+                hours_html += f'<span class="note">({esc(mg["hours_note"])})</span>'
+        madoguchi_html = (
+            '<div class="box place" style="background:#F4F7F1;border-color:#CFE0C6">'
+            f'<p><strong>📍 聞きに行く場所と時間</strong></p>'
+            f'<p style="margin-top:6px">{esc(mg["hall"])}<br><span class="note">{esc(mg["address"])}</span></p>'
+            f'<p style="margin-top:8px" class="screen-only"><a href="{map_url}" target="_blank" rel="noopener" '
+            'style="display:inline-block;padding:9px 16px;border:2px solid var(--fg-deep);border-radius:999px;'
+            'color:var(--fg-deep);font-weight:700;text-decoration:none" '
+            'onclick="if(window.fgTrack)fgTrack(\'kit_map\')">地図アプリでひらく</a></p>'
+            f'<p style="margin-top:8px">☎ <a href="tel:{tel_digits}" onclick="if(window.fgTrack)fgTrack(\'kit_tel\')">{esc(mg["tel"])}</a>(代表)'
+            '<br><span class="note">「この制度について聞きたいです」と伝えれば、担当の課につないでもらえます</span></p>'
+            f'<p style="margin-top:8px">🕐 開庁時間の目安: {hours_html}'
+            '<br><span class="note">祝日・年末年始はお休みです。担当課が別の建物の場合もあるため、'
+            '遠くから行くときは先にお電話で確認すると安心です。</span></p>'
+            '</div>')
+
     # 併給・重複の注意(あれば)
     combine_html = ""
     cmb = it.get("combine") or {}
@@ -332,10 +363,11 @@ def kit_page(it, updated):
   <p><strong>金額の目安</strong><br>{esc(it['amount_note'])}</p>
   <p><strong>行き先(窓口)</strong><br>{esc(it['how_to_apply'])}</p>
 </div>
+{madoguchi_html}
 {combine_html}
 
 <div class="btns">
-  <button class="primary" onclick="if(window.fgTrack)fgTrack('kit_print');window.print()">印刷して持っていく</button>
+  <button class="primary" onclick="if(window.fgTrack)fgTrack('kit_print');window.print()">印刷する</button>
   <a href="{src}" rel="noopener" onclick="if(window.fgTrack)fgTrack('kit_official')">公式ページで最新を確認</a>
 </div>
 
@@ -351,7 +383,7 @@ def kit_page(it, updated):
   <summary>プリンターがないとき — コンビニで印刷するかんたん手順</summary>
   <div class="inner">
     <ol>
-      <li>上の「印刷して持っていく」を押して、プリンターのかわりに<strong>「PDFとして保存」</strong>を選びます(iPhoneは共有ボタン→「プリント」からでも保存できます)</li>
+      <li>上の「印刷する」を押して、プリンターのかわりに<strong>「PDFとして保存」</strong>を選びます(iPhoneは共有ボタン→「プリント」からでも保存できます)</li>
       <li><strong>セブンイレブン</strong>なら「かんたんnetprint」アプリ(会員登録なしで使えます)、<strong>ファミリーマート・ローソン</strong>なら「ネットワークプリント」アプリに、そのPDFを登録します</li>
       <li>表示された<strong>受付番号</strong>を、お店のコピー機(マルチコピー機)に入力して印刷します。A4白黒で1枚20円前後が目安です(機種や時期で変わることがあります)</li>
     </ol>

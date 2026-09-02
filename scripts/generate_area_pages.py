@@ -154,20 +154,19 @@ def muni_page(muni, items, updated):
     ex_txt = "・".join(esc(x) for x in examples)
     total = len(shown)
     if local:
-        intro = (f'{esc(muni)}の制度{len(local)}件と、全国共通の国の制度{len(national)}件の'
-                 f'計{total}件から、ご家庭向けのものをまとめています。')
+        intro = (f'{esc(muni)}の制度{len(local)}件と、全国共通の制度{len(national)}件を'
+                 f'まとめています。')
     else:
         intro = (f'全国共通の国の制度{len(national)}件から、'
                  f'{esc(muni)}にお住まいのご家庭が使える可能性のあるものをまとめています。')
     body = [
         f"<h1>{esc(muni)}にお住まいの方が使える可能性のある給付金・手当</h1>",
-        f'<p class="note">{intro}あなたの世帯にあてはまるものは3分診断でしぼり込めます。</p>',
+        f'<p class="note">{intro}ぜんぶ読まなくて大丈夫 — あなたの世帯にあてはまるものは3分診断でしぼり込めます。</p>',
     ]
     if verified_n:
         body.append(
-            f'<div class="trust">✓ このうち <strong>{verified_n}件</strong> は、'
-            f'{esc(muni)}や国・県の公式ページと照合して掲載しています(確認済み)。'
-            '金額の目安など一部「要確認」の項目は、公式ページのリンクからご確認いただけます。</div>'
+            f'<div class="trust">✓ <strong>{verified_n}件</strong>は公式ページと照合済み。'
+            '「要確認」の項目は各シートの公式リンクからご確認いただけます。</div>'
         )
     body.append('<a class="btn" href="../../shindan/">3分でもらい忘れ診断をはじめる</a>')
     # 市町村の制度のみカード表示(県の制度は混ぜない・2026-08-19)

@@ -85,7 +85,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 </header>
 <div class="wrap">
   <h1>3分でもらい忘れ診断</h1>
-  <p class="note">名前・住所・電話番号の入力は不要です。<br>答えたくない質問はとばせます。<br>途中でやめても大丈夫。何度でもやり直せます。<br>回答や記録はこの端末の中だけに保存され、送信されません。</p>
+  <p class="note">名前・住所・電話番号は不要。答えたくない質問はとばせて、途中でやめても大丈夫。<br>回答はこの端末の中だけに残り、送信されません。</p>
   <div class="progress" aria-hidden="true"><div id="bar" style="width:0%"></div></div>
   <div id="app" aria-live="polite"><noscript>この診断はJavaScriptを使って動きます。設定を有効にしてご覧ください。</noscript></div>
 <p style="margin-top:20px;text-align:center"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
@@ -335,7 +335,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         total.innerHTML = "合計 <b>" + sum.total + "</b> 件が対象の可能性";
         summary.appendChild(total);
         var bd = h("p", {class:"breakdown"});
-        bd.innerHTML = "可能性 <span class='hi'>高 " + sum.high + "件</span> ・ <span class='mi'>中 " + sum.mid + "件</span>";
+        bd.innerHTML = sum.mid > 0 ? "可能性 <span class='hi'>高 " + sum.high + "件</span> ・ <span class='mi'>中 " + sum.mid + "件</span>" : "可能性が高いもの <span class='hi'>" + sum.high + "件</span>";
         summary.appendChild(bd);
         summary.appendChild(h("p", {class:"note", text:"「対象の可能性」のご案内です。受給の可否は各窓口の判断となります。"}));
         app.appendChild(summary);
