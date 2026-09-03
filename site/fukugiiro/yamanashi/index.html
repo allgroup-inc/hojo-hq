@@ -171,17 +171,11 @@ footer .fwrap p{margin-bottom:6px}
 .ysil svg.fillbox{height:100%}
 .ysil path,.ysil circle,.ysil ellipse,.ysil rect{fill:#0B1514}
 .ys2 .fujicap{fill:#E7E9E4;opacity:.92}
-.ys3 .ysil path,.ys3 .ysil circle,.ys3 .ysil ellipse,.ys3 .ysil rect{fill:#101E1D}
-/* S3は写真を使わない完成形(影絵+あかり)。灯りのゆらぎで「集まりの温かさ」を出す */
-.ys3 .akaribi{position:absolute;left:50%;bottom:15vh;width:min(80vw,460px);height:200px;transform:translateX(-50%);z-index:2;
-  background:radial-gradient(ellipse at 50% 68%, rgba(242,183,5,.30), rgba(242,183,5,.10) 55%, transparent 78%);
-  animation:akariyure 4.5s ease-in-out infinite alternate}
-@keyframes akariyure{from{opacity:.7}to{opacity:1}}
-@media(prefers-reduced-motion:reduce){.ys3 .akaribi{animation:none}}
 .ys4 .ysil path,.ys4 .ysil circle,.ys4 .ysil ellipse{fill:#3D2B20}
 /* S3b: ぶどう棚(夜明け)。写真 budo.jpg を置くと実写に切替 */
 .ys3b .ysil path,.ys3b .ysil circle,.ys3b .ysil rect,.ys3b .ysil ellipse{fill:#2A2015}
 .ys3b .photoback img{filter:brightness(.85) saturate(.95)}
+.ys3b .photoback:not(.nophoto)~.ysil{display:none} /* 写真に本物のぶどう棚があるため */
 .ys3b .photoback::after{background:linear-gradient(180deg,rgba(58,74,60,.55) 0%,rgba(96,88,62,.18) 40%,rgba(201,142,108,.28) 66%,rgba(231,185,143,.70) 100%)}
 /* 写真が入ったら影絵を引っ込める(実写主役化・沖縄版と同じ思想) */
 .film .photoback:not(.nophoto)~.ysil{opacity:.35}
@@ -197,7 +191,7 @@ footer .fwrap p{margin-bottom:6px}
 </head>
 <body>
 
-<!-- ===== 山梨版フィルム: 夜の盆地→富士→無尽→ぶどう棚→桃源郷→ビジョン。写真は assets/film/ に置くと実写に切替 ===== -->
+<!-- ===== 山梨版フィルム: 夜の盆地→富士→ぶどう棚→桃源郷→ビジョン。写真は assets/film/ に置くと実写に切替 ===== -->
 <div style="position:relative">
 <div class="tinyhead" id="thead" style="position:absolute">
   <a class="hl" href="#top"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="2" width="60" height="60" rx="18" fill="#F5E0CE"/><g fill="#F5CE6E"><circle cx="52" cy="16.5" r="1.9"/><circle cx="50.2" cy="20.7" r="1.9"/><circle cx="46" cy="22.5" r="1.9"/><circle cx="41.8" cy="20.7" r="1.9"/><circle cx="40" cy="16.5" r="1.9"/><circle cx="41.8" cy="12.3" r="1.9"/><circle cx="46" cy="10.5" r="1.9"/><circle cx="50.2" cy="12.3" r="1.9"/></g><circle cx="46" cy="16.5" r="4" fill="#F2C14E"/><path d="M11 53 A21 21 0 0 1 53 53" stroke="#D2694A" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M18 53 A14 14 0 0 1 46 53" stroke="#F2C14E" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M25 53 A7 7 0 0 1 39 53" stroke="#6FAEA4" stroke-width="6" fill="none" stroke-linecap="round"/></svg>もらいわすれ堂 山梨版</a>
@@ -243,26 +237,6 @@ footer .fwrap p{margin-bottom:6px}
     <div class="copy">
       <p class="stmt stmt-s dark-t">富士山を仰いで<br>暮らすのが、山梨です。</p>
       <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#C9D2C6;font-weight:500">日本一の山と、いっしょに目覚める毎日。</p>
-    </div>
-  </section>
-
-  <!-- S3: 無尽(夜明け前・支え合い)。写真は使わない完成形: 影絵+灯りのゆらぎ -->
-  <section class="scene ys3" id="s3">
-    <div class="kb">
-      <div class="cloud c1" style="top:14%"></div>
-      <div class="akaribi"></div>
-      <!-- 食卓を囲む人々の影(無尽) -->
-      <div class="ysil" style="left:50%;bottom:16vh;width:min(76vw,440px);transform:translateX(-50%)"><svg viewBox="0 0 440 170">
-        <ellipse cx="220" cy="128" rx="150" ry="20"/>
-        <g><circle cx="98" cy="62" r="15"/><path d="M76 128 C76 96 84 78 98 74 C112 78 120 96 120 128 Z"/></g>
-        <g><circle cx="220" cy="46" r="16"/><path d="M196 122 C196 88 205 68 220 64 C235 68 244 88 244 122 Z"/></g>
-        <g><circle cx="342" cy="62" r="15"/><path d="M320 128 C320 96 328 78 342 74 C356 78 364 96 364 128 Z"/></g>
-        <rect x="150" y="108" width="26" height="8" rx="4"/><rect x="264" y="108" width="26" height="8" rx="4"/><rect x="206" y="104" width="28" height="9" rx="4"/>
-      </svg></div>
-    </div>
-    <div class="copy" style="transform:translateY(-8vh)">
-      <p class="stmt stmt-s dark-t">困ったときは、<br>支え合うのが山梨です。</p>
-      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#D8DCC9;font-weight:500">無尽(むじん)—— 集まって、ささえ合う。<br>山梨に息づく習わし。</p>
     </div>
   </section>
 
