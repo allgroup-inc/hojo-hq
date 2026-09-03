@@ -62,7 +62,7 @@ if (th) {
   var light = new IntersectionObserver(function(es){
     es.forEach(function(e){ if (e.isIntersecting) th.classList.toggle('on-light', ['s6','s7','s8'].indexOf(e.target.id)>=0); });
   }, {threshold: .55});
-  ['s1','s2','s3','s4','s6','s7','s8'].forEach(function(id){ var el=document.getElementById(id); if(el) light.observe(el); });
+  ['s1','s2','s3','s3b','s4','s6','s7','s8'].forEach(function(id){ var el=document.getElementById(id); if(el) light.observe(el); });
 }
 
 // 実用レイヤーもフィルムと同じ呼吸で(内容不変・クラス付与のみ)

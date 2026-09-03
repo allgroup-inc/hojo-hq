@@ -179,6 +179,10 @@ footer .fwrap p{margin-bottom:6px}
 @keyframes akariyure{from{opacity:.7}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.ys3 .akaribi{animation:none}}
 .ys4 .ysil path,.ys4 .ysil circle,.ys4 .ysil ellipse{fill:#3D2B20}
+/* S3b: ぶどう棚(夜明け)。写真 budo.jpg を置くと実写に切替 */
+.ys3b .ysil path,.ys3b .ysil circle,.ys3b .ysil rect,.ys3b .ysil ellipse{fill:#2A2015}
+.ys3b .photoback img{filter:brightness(.85) saturate(.95)}
+.ys3b .photoback::after{background:linear-gradient(180deg,rgba(58,74,60,.55) 0%,rgba(96,88,62,.18) 40%,rgba(201,142,108,.28) 66%,rgba(231,185,143,.70) 100%)}
 /* 写真が入ったら影絵を引っ込める(実写主役化・沖縄版と同じ思想) */
 .film .photoback:not(.nophoto)~.ysil{opacity:.35}
 .ys1 .photoback:not(.nophoto)~.island, .ys1 .photoback:not(.nophoto)~#vlights{display:none}
@@ -193,7 +197,7 @@ footer .fwrap p{margin-bottom:6px}
 </head>
 <body>
 
-<!-- ===== 山梨版フィルム: 夜の盆地→富士→無尽→桃源郷→ビジョン。写真は assets/film/ に置くと実写に切替 ===== -->
+<!-- ===== 山梨版フィルム: 夜の盆地→富士→無尽→ぶどう棚→桃源郷→ビジョン。写真は assets/film/ に置くと実写に切替 ===== -->
 <div style="position:relative">
 <div class="tinyhead" id="thead" style="position:absolute">
   <a class="hl" href="#top"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="2" width="60" height="60" rx="18" fill="#F5E0CE"/><g fill="#F5CE6E"><circle cx="52" cy="16.5" r="1.9"/><circle cx="50.2" cy="20.7" r="1.9"/><circle cx="46" cy="22.5" r="1.9"/><circle cx="41.8" cy="20.7" r="1.9"/><circle cx="40" cy="16.5" r="1.9"/><circle cx="41.8" cy="12.3" r="1.9"/><circle cx="46" cy="10.5" r="1.9"/><circle cx="50.2" cy="12.3" r="1.9"/></g><circle cx="46" cy="16.5" r="4" fill="#F2C14E"/><path d="M11 53 A21 21 0 0 1 53 53" stroke="#D2694A" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M18 53 A14 14 0 0 1 46 53" stroke="#F2C14E" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M25 53 A7 7 0 0 1 39 53" stroke="#6FAEA4" stroke-width="6" fill="none" stroke-linecap="round"/></svg>もらいわすれ堂 山梨版</a>
@@ -259,6 +263,38 @@ footer .fwrap p{margin-bottom:6px}
     <div class="copy" style="transform:translateY(-8vh)">
       <p class="stmt stmt-s dark-t">困ったときは、<br>支え合うのが山梨です。</p>
       <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#D8DCC9;font-weight:500">無尽(むじん)—— 集まって、ささえ合う。<br>山梨に息づく習わし。</p>
+    </div>
+  </section>
+
+  <!-- S3b: ぶどう棚(夜明け・実り)。写真は assets/film/budo.jpg -->
+  <section class="scene ys3b" id="s3b">
+    <div class="kb">
+      <div class="photoback"><img src="assets/film/budo.jpg" alt="" loading="lazy"></div>
+      <div class="cloud c2" style="top:20%"></div>
+      <!-- ぶどう棚の影(頭上から下がる房) -->
+      <div class="ysil" style="left:50%;top:7vh;width:min(88vw,520px);transform:translateX(-50%)"><svg viewBox="0 0 520 170">
+        <rect x="0" y="10" width="520" height="7" rx="3"/>
+        <g><rect x="97" y="16" width="5" height="18" rx="2"/>
+          <ellipse cx="82" cy="30" rx="16" ry="8" transform="rotate(-18 82 30)"/><ellipse cx="120" cy="28" rx="14" ry="7" transform="rotate(14 120 28)"/>
+          <circle cx="82" cy="48" r="9"/><circle cx="100" cy="48" r="9"/><circle cx="118" cy="48" r="9"/>
+          <circle cx="91" cy="64" r="9"/><circle cx="109" cy="64" r="9"/>
+          <circle cx="100" cy="79" r="9"/></g>
+        <g><rect x="257" y="16" width="5" height="20" rx="2"/>
+          <ellipse cx="238" cy="32" rx="17" ry="8" transform="rotate(-16 238 32)"/><ellipse cx="284" cy="30" rx="15" ry="7" transform="rotate(12 284 30)"/>
+          <circle cx="233" cy="52" r="9"/><circle cx="251" cy="52" r="9"/><circle cx="269" cy="52" r="9"/><circle cx="287" cy="52" r="9"/>
+          <circle cx="242" cy="68" r="9"/><circle cx="260" cy="68" r="9"/><circle cx="278" cy="68" r="9"/>
+          <circle cx="251" cy="83" r="9"/><circle cx="269" cy="83" r="9"/>
+          <circle cx="260" cy="97" r="9"/></g>
+        <g><rect x="417" y="16" width="5" height="18" rx="2"/>
+          <ellipse cx="402" cy="30" rx="16" ry="8" transform="rotate(-18 402 30)"/><ellipse cx="438" cy="28" rx="14" ry="7" transform="rotate(14 438 28)"/>
+          <circle cx="402" cy="48" r="9"/><circle cx="420" cy="48" r="9"/><circle cx="438" cy="48" r="9"/>
+          <circle cx="411" cy="64" r="9"/><circle cx="429" cy="64" r="9"/>
+          <circle cx="420" cy="79" r="9"/></g>
+      </svg></div>
+    </div>
+    <div class="copy">
+      <p class="stmt stmt-s dark-t">実りを、<br>育てるのが山梨です。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#F5E3CB;font-weight:500">ぶどう棚の下、手をかけた分だけ甘くなる。</p>
     </div>
   </section>
 
