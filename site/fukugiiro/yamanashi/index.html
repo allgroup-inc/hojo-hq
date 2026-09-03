@@ -168,6 +168,7 @@ footer .fwrap p{margin-bottom:6px}
 /* 写真未配置のとき(.nophoto)は影絵と光が主役。写真を置くと自動で実写が主役になる */
 .ysil{position:absolute;z-index:3;opacity:.95}
 .ysil svg{display:block;width:100%;height:auto}
+.ysil svg.fillbox{height:100%}
 .ysil path,.ysil circle,.ysil ellipse,.ysil rect{fill:#0B1514}
 .ys2 .fujicap{fill:#E7E9E4;opacity:.92}
 .ys3 .ysil path,.ys3 .ysil circle,.ys3 .ysil ellipse,.ys3 .ysil rect{fill:#101E1D}
@@ -217,7 +218,7 @@ footer .fwrap p{margin-bottom:6px}
       <div class="hoshi" style="top:28%;left:14%;width:2px;height:2px;animation-delay:1.9s"></div>
       <div class="cloud c2" style="top:26%"></div>
       <!-- 富士の影 -->
-      <div class="ysil" style="left:0;right:0;bottom:0;height:34vh"><svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" style="width:100%;height:100%">
+      <div class="ysil" style="left:0;right:0;bottom:0;height:34vh"><svg class="fillbox" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice">
         <path d="M0 300 L0 268 C120 258 260 244 380 196 C470 160 540 108 600 104 C660 108 730 160 820 196 C940 244 1080 258 1200 268 L1200 300 Z"/>
         <path class="fujicap" d="M512 152 C544 122 576 110 600 109 C624 110 656 122 688 152 C668 142 654 156 636 144 C620 158 604 140 588 154 C570 140 548 150 534 158 C526 152 518 154 512 152 Z"/>
       </svg></div>
