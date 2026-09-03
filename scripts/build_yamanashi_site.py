@@ -139,7 +139,7 @@ h2 .cnt{{font-size:.8rem;color:var(--fg-muted);font-weight:400;margin-left:.6em}
     <a href="../shindan/">3分診断</a>
     <a href="../area/">市町村</a>
     <a href="../kit/">準備シート</a>
-    <a href="../houkoku/">もらえた報告</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/go/ymn-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')">LINE登録</a>
   </nav>
 </header>
 <div class="wrap">

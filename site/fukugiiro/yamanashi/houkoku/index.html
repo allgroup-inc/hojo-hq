@@ -41,7 +41,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--fg-sea)}
     <a href="../shindan/">3分診断</a>
     <a href="../area/">市町村</a>
     <a href="../kit/">準備シート</a>
-    <a href="./">もらえた報告</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/go/ymn-jukyu/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')">LINE登録</a>
   </nav>
 </header>
 <div class="wrap">
@@ -60,10 +60,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--fg-sea)}
   <label for="koe">ひとこと <span class="opt">(任意・そのままの言葉で)</span></label>
   <textarea id="koe" placeholder="例: 診断で知って申請したら、ほんとに受け取れました!"></textarea>
   <div class="pii">🔒 <strong>お名前・ご住所・金額は書かないでください。</strong>いただいた報告は、個人がわからない形(件数など)でのみ使わせていただきます。</div>
-  <button class="sendbtn" id="send">メールで報告を送る</button>
-  <p class="note" style="text-align:center;margin-top:8px">ワンタップで送れるLINEでの報告は準備中です。いまはメールで受け付けています。</p>
+  <button class="sendbtn" id="send">LINEで報告を送る</button>
+  <p class="note" style="text-align:center;margin-top:8px">ボタンを押すとLINEが開き、報告文が入った状態で「もらいわすれ堂 山梨」のトークに送れます(まだ友だちでない方は、追加すると送れます)。<br>LINEを使っていない方は<a href="#" id="mailsend">メールで送る</a>こともできます。</p>
   <div id="fallback">
-    <strong>報告文を下に用意しました(コピー済みです)。</strong><br>メールが立ち上がらない場合は、この文を <span style="user-select:all;-webkit-user-select:all">info@fukugiiro.com</span> へ貼り付けて送ってください。
+    <strong>報告文を下に用意しました(コピー済みです)。</strong><br>LINE・メールが立ち上がらない場合は、この文を <span style="user-select:all;-webkit-user-select:all">info@fukugiiro.com</span> へ貼り付けて送ってください。
     <textarea id="preview" readonly></textarea>
   </div>
 </div>
@@ -72,16 +72,35 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--fg-sea)}
 <p style="margin-top:16px"><a href="../">もらいわすれ堂 山梨版 トップへ</a></p>
 </div>
 <script>
-document.getElementById('send').addEventListener('click', function(){
+/* 山梨版LINE: @630pbjqq(2026-09-03開設)。IDを変えるときはここだけ書き換える */
+var YMN_LINE_OA_ID='630pbjqq';
+function ymnReportText(){
   var seido=(document.getElementById('seido').value||'').trim();
   var area=document.getElementById('area').value;
   var koe=(document.getElementById('koe').value||'').trim();
-  var lines=['【もらえた報告・山梨】'];
+  var lines=['【もらえた報告】'];
   lines.push('制度: '+(seido||'(名前はうろ覚えです)'));
   if(area) lines.push('市町村: '+area);
   if(koe) lines.push('ひとこと: '+koe);
-  var text=lines.join('\n');
+  return lines.join('\n');
+}
+document.getElementById('send').addEventListener('click', function(){
+  var text=ymnReportText();
   if(window.fgTrack) fgTrack('ymn_jukyu_report_click');
+  if(YMN_LINE_OA_ID){
+    location.href='https://line.me/R/oaMessage/%40'+encodeURIComponent(YMN_LINE_OA_ID.replace(/^@/,''))+'/?'+encodeURIComponent(text);
+    return;
+  }
+  var fb=document.getElementById('fallback');
+  document.getElementById('preview').value=text;
+  fb.style.display='block';
+  if(navigator.clipboard) navigator.clipboard.writeText(text).catch(function(){});
+  fb.scrollIntoView({behavior:'smooth',block:'center'});
+});
+document.getElementById('mailsend').addEventListener('click', function(ev){
+  ev.preventDefault();
+  var text=ymnReportText();
+  if(window.fgTrack) fgTrack('ymn_jukyu_report_mail');
   var fb=document.getElementById('fallback');
   document.getElementById('preview').value=text;
   fb.style.display='block';

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>LINEへ移動中…</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TQMX3MPFSR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  gtag("js", new Date());
+  gtag("config", "G-TQMX3MPFSR", { transport_type: "beacon" });
+  var fgDone = false;
+  function fgGo() { if (fgDone) return; fgDone = true; window.location.replace("https://line.me/R/ti/p/%40630pbjqq"); }
+  // 送るのはイベント名と channel のみ(個人識別子なし)
+  gtag("event", "line_redirect", { channel: "ymn-kit", transport_type: "beacon",
+    event_callback: fgGo, event_timeout: 400 });
+  setTimeout(fgGo, 400);
+</script>
+<style>
+  body{font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;
+    background:#00335c;color:#F7F5F1;display:flex;flex-direction:column;gap:16px;
+    align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:24px;}
+  a{color:#F88800;font-weight:700;}
+</style>
+</head>
+<body>
+<p>LINEへ移動しています…</p>
+<p>自動で切り替わらない場合は <a href="https://line.me/R/ti/p/%40630pbjqq">こちらをタップ</a></p>
+</body>
+</html>

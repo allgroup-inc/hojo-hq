@@ -132,10 +132,12 @@ def muni_page(muni, items, updated):
     national = [it for it in items if it["area"] == "全国"]
     shown = local + national
     verified_n = sum(1 for it in shown if it.get("verified") is True)
-    # LINEは準備中(開設後に沖縄版と同じ単一CVへ)。締切は「約1か月前」表現で統一(3層ルール準拠)。
+    # 単一CV(LINE登録・@630pbjqq)。締切は「約1か月前」表現で統一(3層ルール準拠)。
     line_cta = (
-        '<div class="trust" style="max-width:460px;margin:18px auto;text-align:center">'
-        '締切を約1か月前からお知らせするLINEは準備中です。開設したらこのサイトでお知らせします。</div>'
+        '<a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/ymn-area/" '
+        'target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ymn_line_add_click\')">'
+        f'💬 {esc(muni)}で使える制度の締切をLINEで受け取る'
+        '<span>締切の約1か月前にお知らせ・新しい制度が増えたときも(無料)</span></a>'
     )
     # 導入文を市町村ごとに固有化(掲載件数・代表制度名入り。41ページの文面重複を下げる)
     examples = [it["name"] for it in local][:3]
@@ -200,10 +202,11 @@ def muni_page(muni, items, updated):
     if pref:
         body.append(f'<p class="note" style="margin-top:14px">山梨県の制度({len(pref)}件)は'
                     '<a href="../../kit/">申請準備シート一覧</a>でご覧いただけます。</p>')
-    # ページ末: 市町村独自制度の追加予定を正直に伝える
+    # ページ末: 市町村独自制度の追加予定を正直に伝えつつ、締切の見逃し防止(LINE)へ
     body.append(
         f'<p class="note" style="margin-top:22px;text-align:center">'
-        f'{esc(muni)}独自の制度は、掲載のご了解を確認できたところから順に追加します。</p>'
+        f'{esc(muni)}独自の制度は、掲載のご了解を確認できたところから順に追加します。<br>'
+        '新しい制度が増えたときや、締切が近づいたときに、LINEでそっとお知らせします。</p>'
     )
     body.append(line_cta)
     title = f"{muni}の給付金・手当まとめ({total}件)|申請方法と窓口|もらいわすれ堂"

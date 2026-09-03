@@ -79,7 +79,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     <a href="./">3分診断</a>
     <a href="../area/">市町村</a>
     <a href="../kit/">準備シート</a>
-    <a href="../houkoku/">もらえた報告</a>
+    <a href="https://allgroup-inc.github.io/hojo-hq/go/ymn-shindan/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')">LINE登録</a>
   </nav>
 </header>
 <div class="wrap">
@@ -337,19 +337,22 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         summary.appendChild(bd);
         summary.appendChild(h("p", {class:"note", text:"「対象の可能性」のご案内です。受給の可否は各窓口の判断となります。"}));
         app.appendChild(summary);
-        // 結果の保存: 山梨版のLINEは準備中のため、コピーで持ち出せるようにする(嘘のない「保存」)
+        // 結果が出た直後(最も関与が高い瞬間)にLINEを差し出す(沖縄版と同じ設計)。
+        // 制度一覧は登録なしでも全部見られる。掲載件数は生データから出す(正確性最優先)。
+        var seidoCount = db.count || (db.items || []).length;
         var topLine = h("div", {style:"margin:8px 0 4px;padding:16px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
-        topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この結果" + sum.total + "件、消えないうちに保存を"}));
-        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"下のボタンで結果をコピーして、メモアプリやご家族とのトークに貼っておくと、端末が変わっても消えません。"}));
-        var topCopyBtn = h("button", {style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;border:none;border-radius:999px;font-weight:700;font-size:1rem;cursor:pointer", text:"診断結果をコピーして保存する"});
-        var topCopied = h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名"});
-        topCopyBtn.addEventListener("click", function(){
-          if (window.fgTrack) window.fgTrack("ymn_result_copy", {pos:"result_top"});
-          try { if (navigator.clipboard) { navigator.clipboard.writeText(resultText()); topCopied.textContent = "結果をコピーしました。メモアプリなどに貼り付けると保存できます。"; } } catch(e){}
+        topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この結果" + sum.total + "件、今日のままとは限りません"}));
+        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:6px", text:"制度は増えたり、変わったりします(いまの掲載は" + seidoCount + "件)。LINEに登録しておくと、新しい制度が増えたときや締切が近づいたとき(約1か月前から)にお知らせが届きます。"}));
+        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"いまの結果もコピーして残せます。制度の一覧は登録なしでも、ぜんぶ見られます。"}));
+        var topLineBtn = h("a", {href:"https://allgroup-inc.github.io/hojo-hq/go/ymn-shindan/", target:"_blank", rel:"noopener",
+          style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"LINEで「見逃し」をなくす(無料)"});
+        var topCopied = h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名 ・ いつでも解除"});
+        topLineBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("ymn_line_add_click", {pos:"result_top"});
+          try { if (navigator.clipboard) { navigator.clipboard.writeText(resultText()); topCopied.textContent = "結果をコピーしました。LINEで「もらいわすれ堂」のトークに貼り付けると保存できます。"; } } catch(e){}
         });
-        topLine.appendChild(topCopyBtn);
+        topLine.appendChild(topLineBtn);
         topLine.appendChild(topCopied);
-        topLine.appendChild(h("p", {class:"note", style:"margin-top:6px", text:"締切を約1か月前からお知らせするLINEは準備中です。開設したらこのサイトでお知らせします。"}));
         app.appendChild(topLine);
         var kindMsg = h("p", {class:"kind-msg"});
         kindMsg.innerHTML = "もらい忘れは、知らなかっただけ。<br>あなたは悪くありません。<br>ぜんぶ一度にやらなくて大丈夫。ひとつずつ、いっしょに進めましょう。";
@@ -427,8 +430,25 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         card.appendChild(rep);
         app.appendChild(card);
       });
-      // 共有・印刷はここ(結果一覧の下)に配置
+      // 共有・印刷はここ(結果一覧の下)に配置 — 上部の主CTAはLINE1つに絞る(沖縄版と同じ)
       if (actions) app.appendChild(actions);
+      var lineBox = h("div", {style:"margin:22px 0;padding:18px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
+      lineBox.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px;font-size:1.05rem", text:"この結果、もらい忘れないために"}));
+      lineBox.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"LINEに登録すると、次の3つができます(制度の一覧は登録なしでもぜんぶ見られます)。"}));
+      var rewards = h("ul", {style:"list-style:none;text-align:left;max-width:420px;margin:0 auto 12px;padding:0"});
+      ["新しい制度が増えたら、すぐお知らせ(見逃しゼロ)","締切がある制度は、締切の約1か月前からお知らせ","診断結果の保存(結果をトークに貼っておけば、機種変更しても消えません)"].forEach(function(t){
+        rewards.appendChild(h("li", {style:"padding:6px 0;border-bottom:1px solid #cfe9d8", text:t}));
+      });
+      lineBox.appendChild(rewards);
+      var lineBtn = h("a", {href:"https://allgroup-inc.github.io/hojo-hq/go/ymn-shindan/", target:"_blank", rel:"noopener",
+        style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEでお知らせを受け取る(無料)"});
+      lineBtn.addEventListener("click", function(){
+        if (window.fgTrack) window.fgTrack("ymn_line_add_click", {pos:"result_bottom"});
+        try { if (rs.length && navigator.clipboard) navigator.clipboard.writeText(resultText()); } catch(e){}
+      });
+      lineBox.appendChild(lineBtn);
+      lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。"}));
+      app.appendChild(lineBox);
       var disc = h("div", {class:"disclaimer"});
       disc.innerHTML = "この診断は公式情報に基づく「可能性のご案内」です。<br>受給できるかどうかの最終判断は各窓口で行われます。<br>医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため、診断には表示していません。<a href=\"" + areaHref + "\">お住まいの市町村のページ</a>と<a href=\"../seido/\">国の制度一覧</a>でご確認ください。<br>いま診断の対象は国の制度のみです。山梨県・市町村独自の制度は準備中のため、お住まいの市役所・町村役場のサイトもあわせてご確認ください。";
       app.appendChild(disc);

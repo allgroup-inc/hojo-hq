@@ -364,7 +364,8 @@ def kit_page(it, updated):
   <p><strong>印刷できなくても、大丈夫です。</strong><br>
   このページをスマホで開いたまま、あなたのメモ代わりに窓口で使えます。チェックとメモはこの端末に残ります。</p>
   <p style="margin-top:10px"><button class="copybtn" id="copy-sheet" onclick="fkCopySheet(this)">このシートをコピーして手元に残す</button></p>
-  <p class="note" style="color:#0F5138;margin-top:8px">コピーしたら、メモアプリやご家族とのトークに貼りつけておくと、電波の弱い窓口でもすぐ開けます。</p>
+  <p class="note" style="color:#0F5138;margin-top:8px">コピーしたら、LINEのメモやトークに貼りつけておくと、電波の弱い窓口でもすぐ開けます。
+  <a href="https://allgroup-inc.github.io/hojo-hq/go/ymn-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')" style="color:#0F5138;font-weight:700">もらいわすれ堂のLINE</a>に貼っていただければ、そのまま締切のお知らせも受け取れます(無料)。</p>
 </div>
 
 <details class="conbini no-print screen-only" ontoggle="if(this.open&&window.fgTrack)fgTrack('ymn_kit_conbini')">
@@ -449,7 +450,8 @@ def kit_page(it, updated):
   <a class="linebtn" style="background:var(--fg-primary)" href="../../houkoku/" onclick="if(window.fgTrack)fgTrack('ymn_jukyu_report_link_kit')">受け取れたことを報告する(匿名・無料)</a>
 </div>
 <div class="after" style="background:#EAF7EE;border-color:#B7E4C7;text-align:center;color:#0F5138">
-  締切を約1か月前からLINEでお知らせする仕組みは準備中です。開設したらこのサイトでお知らせします。
+  締切や新しい制度は、LINEでそっとお知らせします(締切の約1か月前から・無料・名前の入力は不要)
+  <a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/ymn-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')">LINEで受け取る</a>
 </div>
 </section>
 

@@ -134,6 +134,12 @@ details[open] summary{margin-bottom:.5em;color:var(--coral-deep)}
 .prep-sec{background:#FFF8E6;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .prep-sec .prepbox{max-width:600px;margin:0 auto;background:#fff;border:1px solid #EAD59A;border-radius:16px;padding:20px 22px;text-align:left}
 .prep-sec .prepbox li{margin:6px 0 6px 1.2em}
+.line-sec{background:#22382A}
+.line-sec h2{color:#fff}
+.line-sec p{color:#EAF0EC}
+.line-sec .btn{background:#fff;color:#22382A;box-shadow:var(--shadow-sm)}
+.line-sec .btn:active{background:#eef3ef}
+.microtrust.on-green{color:#eafff2}
 footer{background:#3B322B;color:#e6ddd2;padding:44px 0;font-size:.9rem;text-align:center}
 footer .mincho{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;color:#fff;font-size:1.1rem}
 footer .fvision{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;color:#F2C14E;font-size:.95rem;letter-spacing:.08em;margin-bottom:10px}
@@ -165,7 +171,7 @@ footer .fwrap p{margin-bottom:6px}
     <a href="shindan/">3分診断</a>
     <a href="area/">市町村</a>
     <a href="kit/">準備シート</a>
-    <a href="houkoku/">もらえた報告</a>
+    <a href="../../go/ymn-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')">LINE登録</a>
   </nav>
 </header>
 <main>
@@ -240,14 +246,14 @@ footer .fwrap p{margin-bottom:6px}
     <ol class="steps">
       <li><strong>3分診断</strong><br>ご家族の状況にあてはまる可能性のある制度がわかります。名前や住所の入力は不要です。</li>
       <li><strong>申請のかんたん化</strong><br>制度ごとの「<span style="white-space:nowrap">申請準備シート</span>」を印刷して、そのまま<span style="white-space:nowrap">窓口へ。</span><br>(持ち物チェックリスト・窓口でのひとこと・メモ欄つき)<br>書くのはご本人ですが、準備はぜんぶここで終わります。</li>
-      <li><strong>受け取るまでフォロー</strong><br>締切の約1か月前からお知らせする仕組みを準備中です。<br>「振り込まれた」までを一緒に見届けます。</li>
+      <li><strong>入金確認までフォロー</strong><br>締切の約1か月前からLINEでお知らせ。<br>「振り込まれた」までを一緒に見届けます。</li>
     </ol>
     <p class="note note--long" style="margin-top:14px">※ 申請手続きの代行は行いません。専門家のサポートが必要な場合は、提携する専門家(社会保険労務士・行政書士など)におつなぎします。</p>
     <div class="navcards" style="margin-top:22px">
       <a class="navcard" href="area/">市町村でさがす ›<span>お住まいの街のまとめ(27市町村)</span></a>
       <a class="navcard" href="seido/">分野からさがす ›<span>出産・子育て・医療費・失業など</span></a>
       <a class="navcard" href="kit/">申請準備シート ›<span>持ち物リスト・印刷して窓口へ</span></a>
-      <a class="navcard" href="houkoku/">「もらえた」を報告する ›<span>あなたの一言が次の誰かを助けます</span></a>
+      <a class="navcard" href="../../go/ymn-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')">LINEで受け取る ›<span>締切の約1か月前からお知らせ(無料)</span></a>
     </div>
   </div>
 </section>
@@ -279,12 +285,8 @@ footer .fwrap p{margin-bottom:6px}
     <span class="eyebrow">準 備 中</span>
     <h2>山梨県・市町村の制度は、<br>じゅんばんに追加していきます</h2>
     <div class="prepbox">
-      <p style="text-align:left;margin-bottom:8px">いま掲載しているのは<strong>国の制度</strong>です(<a href="area/">27市町村のページ</a>と<a href="kit/">申請準備シート</a>から使えます)。山梨県と県内27市町村<strong>独自の制度</strong>は、各自治体に掲載のご了解を確認できたところから順に追加します。</p>
-      <ul>
-        <li>山梨県・市町村独自の制度の掲載 — 準備中(確認がとれた自治体から追加)</li>
-        <li>締切を約1か月前からお知らせするLINE — 準備中</li>
-      </ul>
-      <p class="note" style="text-align:left;margin-top:8px">それまでは、お住まいの市役所・町村役場の公式サイトもあわせてご確認ください。</p>
+      <p style="text-align:left;margin-bottom:8px">いま掲載しているのは<strong>国の制度</strong>です(<a href="area/">27市町村のページ</a>と<a href="kit/">申請準備シート</a>から使えます)。山梨県と県内27市町村<strong>独自の制度</strong>は、各自治体に掲載のご了解を確認できたところから順に追加します(準備中)。</p>
+      <p class="note" style="text-align:left;margin-top:8px">それまでは、お住まいの市役所・町村役場の公式サイトもあわせてご確認ください。追加されたときはLINEでお知らせします。</p>
     </div>
   </div>
 </section>
@@ -316,6 +318,15 @@ footer .fwrap p{margin-bottom:6px}
       <p>いいえ。お名前・住所・電話番号の入力は不要です。<br>市町村名やご家族の人数など、診断に必要な最小限のことだけをおたずねします。回答はお使いの端末の中だけで処理され、送信されません。</p></details>
     <details><summary>山梨県や市町村の制度は載っていますか?</summary>
       <p>いまは国の制度のみを掲載しています。県・市町村の制度は、各自治体に掲載のご了解を確認できたところから順に追加します(準備中)。</p></details>
+  </div>
+</section>
+
+<section class="line-sec">
+  <div class="wrap">
+    <h2>LINEで「もらい忘れ」を防ぐ</h2>
+    <p>締切のある制度は、<strong style="white-space:nowrap">約1か月前</strong>からLINEでお知らせします。<br>新しい制度が増えたときも、<span style="white-space:nowrap">お知らせします。</span></p>
+    <a class="btn" href="../../go/ymn-top/" target="_blank" rel="noopener" style="margin-top:10px" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')">LINEで締切通知を受け取る(無料)</a>
+    <p class="microtrust on-green">無料 ・ 診断は匿名 ・ 通知はいつでも停止できます</p>
   </div>
 </section>
 </main>
