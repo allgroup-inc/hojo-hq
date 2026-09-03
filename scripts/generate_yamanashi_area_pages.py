@@ -48,6 +48,10 @@ ul.areas a{display:inline-block;padding:8px 4px}
 @media(min-width:900px){ul.seidolist{columns:2;column-gap:28px}}
 .cardgrid{display:grid;gap:14px}
 @media(min-width:900px){.wrap{max-width:900px}.cardgrid{grid-template-columns:1fr 1fr}ul.areas{columns:3}}
+/* 山梨版: ヘッダーを読みやすく・押しやすく(点検2026-09-03 🟡6) */
+.siteheader nav a{font-size:.95rem;padding:10px 12px}
+.siteheader .hlogo{font-size:1.1rem}
+
 """
 
 
@@ -137,7 +141,7 @@ def muni_page(muni, items, updated):
         '<a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/ymn-area/" '
         'target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ymn_line_add_click\')">'
         f'💬 {esc(muni)}で使える制度の締切をLINEで受け取る'
-        '<span>締切の約1か月前にお知らせ・新しい制度が増えたときも(無料)</span></a>'
+        '<span>締切の約1か月前にお知らせ(配信は順次開始)・新しい制度が増えたときも(無料)</span></a>'
     )
     # 導入文を市町村ごとに固有化(掲載件数・代表制度名入り。41ページの文面重複を下げる)
     examples = [it["name"] for it in local][:3]

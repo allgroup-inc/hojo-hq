@@ -53,7 +53,7 @@ ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through
 .madoguchi{font-size:.95rem;background:#EAF5F0;border-radius:8px;padding:12px 14px;color:#0F5138}
 .ask{list-style:none;margin-top:6px}
 .ask li{background:#fff;border-radius:8px;padding:8px 12px;margin:6px 0;color:#0F5138}
-.memo{width:100%;border:none;border-bottom:2px solid var(--fg-line);background:transparent;font:inherit;font-size:.95rem;min-height:44px;resize:vertical;padding:6px 2px}
+.memo{width:100%;border:none;border-bottom:2px solid var(--fg-line);background:transparent;font:inherit;font-size:1rem;min-height:44px;resize:vertical;padding:6px 2px}
 .memo:focus{outline:none;border-bottom-color:var(--fg-primary)}
 .prog{font-weight:700;color:var(--fg-deep)}
 .after{background:#F7F3EA;border:1px solid var(--fg-line);border-radius:12px;padding:16px 18px;margin:12px 0}
@@ -71,6 +71,10 @@ details.conbini .inner{padding:0 16px 14px;border-top:1px dashed var(--fg-line)}
 details.conbini ol{margin:10px 0 6px;padding-left:1.4em}
 details.conbini li{margin:8px 0}
 @media(min-width:900px){.wrap{max-width:820px}}
+/* 山梨版: ヘッダーを読みやすく・押しやすく(点検2026-09-03 🟡6) */
+.siteheader nav a{font-size:.95rem;padding:10px 12px}
+.siteheader .hlogo{font-size:1.1rem}
+
 /* 印刷=電話台本+持ち物+窓口ひとこと+メモの1枚に圧縮。工程表・申請後・LINEは画面のみ。 */
 @media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}
   a[href^="http"]::after{content:" (" attr(href) ")";font-size:.8em;word-break:break-all}
@@ -81,7 +85,7 @@ details.conbini li{margin:8px 0}
 <script src="../../analytics-config.js"></script>
 <script src="../../assets/fg-analytics.js"></script>
 <header class="siteheader">
-  <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/yamanashi/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.78rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
+  <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/yamanashi/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.9rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
   <nav>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/yamanashi/shindan/">3分診断</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/yamanashi/area/">市町村</a>
@@ -147,7 +151,7 @@ details.conbini li{margin:8px 0}
 <li style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:1px dashed var(--fg-line)"><a href="fk-kuni-hosougu/" style="display:inline-block;padding:9px 0;line-height:1.55">補装具費支給制度</a> <span class="status" style="font-size:.72rem;padding:1px 7px">要確認</span></li>
 <li style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:1px dashed var(--fg-line)"><a href="fk-kuni-nichijo-yougu/" style="display:inline-block;padding:9px 0;line-height:1.55">日常生活用具給付等事業</a> <span class="status" style="font-size:.72rem;padding:1px 7px">要確認</span></li>
 <li style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:1px dashed var(--fg-line)"><a href="fk-kuni-nenkin-shien-kyufukin/" style="display:inline-block;padding:9px 0;line-height:1.55">年金生活者支援給付金(老齢・障害・遺族)</a> <span class="status" style="font-size:.72rem;padding:1px 7px">要確認</span></li></ul></div>
-<div class="disclaimer">最終更新: 2026-09-03 11:02 / もらいわすれ堂(運営: 株式会社フクギイロ)<br>山梨県・市町村の制度の準備シートは、掲載のご了解を確認できたところから順に追加します(準備中)。</div>
+<div class="disclaimer">最終更新: 2026-09-03 12:51 / もらいわすれ堂(運営: 株式会社フクギイロ)<br>山梨県・市町村の制度の準備シートは、掲載のご了解を確認できたところから順に追加します(準備中)。</div>
 <p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 山梨版 トップ</a></p>
 
 </div>

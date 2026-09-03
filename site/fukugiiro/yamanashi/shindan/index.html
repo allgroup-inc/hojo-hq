@@ -69,12 +69,15 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .card-done h3{text-decoration:line-through;color:var(--fg-muted)}
 .resume-box{background:#F9EDE3;border:2px solid var(--fg-primary);border-radius:12px;padding:16px;margin-bottom:16px}
 @media(min-width:900px){.wrap{max-width:720px}}
+/* 山梨版: ヘッダーを読みやすく・押しやすく(点検2026-09-03 🟡6) */
+.siteheader nav a{font-size:.95rem;padding:10px 12px}
+
 @media print{.progress,.actions,.btn,.nav,.siteheader{display:none!important}body{background:#fff}}
 </style>
 </head>
 <body>
 <header class="siteheader">
-  <a class="hlogo" href="../"><img src="../../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.8rem;color:var(--fg-muted)">山梨版</span></a>
+  <a class="hlogo" href="../"><img src="../../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.9rem;color:var(--fg-muted)">山梨版</span></a>
   <nav>
     <a href="./">3分診断</a>
     <a href="../area/">市町村</a>
@@ -342,7 +345,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var seidoCount = db.count || (db.items || []).length;
         var topLine = h("div", {style:"margin:8px 0 4px;padding:16px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
         topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この結果" + sum.total + "件、今日のままとは限りません"}));
-        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:6px", text:"制度は増えたり、変わったりします(いまの掲載は" + seidoCount + "件)。LINEに登録しておくと、新しい制度が増えたときや締切が近づいたとき(約1か月前から)にお知らせが届きます。"}));
+        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:6px", text:"制度は増えたり、変わったりします(いまの掲載は" + seidoCount + "件)。LINEに登録しておくと、新しい制度が増えたときや締切が近づいたとき(約1か月前から)にお知らせが届きます(配信は順次はじめていきます)。"}));
         topLine.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"いまの結果もコピーして残せます。制度の一覧は登録なしでも、ぜんぶ見られます。"}));
         var topLineBtn = h("a", {href:"https://allgroup-inc.github.io/hojo-hq/go/ymn-shindan/", target:"_blank", rel:"noopener",
           style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"LINEで「見逃し」をなくす(無料)"});
@@ -447,7 +450,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         try { if (rs.length && navigator.clipboard) navigator.clipboard.writeText(resultText()); } catch(e){}
       });
       lineBox.appendChild(lineBtn);
-      lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。"}));
+      lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。お知らせの配信は順次はじめていきます。"}));
       app.appendChild(lineBox);
       var disc = h("div", {class:"disclaimer"});
       disc.innerHTML = "この診断は公式情報に基づく「可能性のご案内」です。<br>受給できるかどうかの最終判断は各窓口で行われます。<br>医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため、診断には表示していません。<a href=\"" + areaHref + "\">お住まいの市町村のページ</a>と<a href=\"../seido/\">国の制度一覧</a>でご確認ください。<br>いま診断の対象は国の制度のみです。山梨県・市町村独自の制度は準備中のため、お住まいの市役所・町村役場のサイトもあわせてご確認ください。";

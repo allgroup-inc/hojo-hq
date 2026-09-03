@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>個人情報保護方針 | もらいわすれ堂</title>
 <link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/privacy/">
-<meta name="description" content="もらいわすれ堂(運営: 株式会社フクギイロ)の個人情報保護方針。3分診断はお使いの端末の中だけで動き、回答は当社へ送信しません。取得するのはLINE登録者の識別子と、Cookieを使わない匿名のアクセス統計だけです。">
+<meta name="description" content="もらいわすれ堂(運営: 株式会社フクギイロ)の個人情報保護方針。3分診断はお使いの端末の中だけで動き、回答は当社へ送信しません。取得するのはLINE登録者の識別子と、個人を特定しない匿名のアクセス統計だけです。">
 <link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,7 +56,7 @@ th{background:#f4f1e8}
 <div class="lead">
 <p><strong>いちばん大事なことを先に。</strong></p>
 <p>もらいわすれ堂の<strong>3分診断は、お使いの端末(スマホ・パソコン)の中だけで動きます。</strong><br>入力した市町村やご家族の状況は、当社のサーバーへ送られません。<br>だから当社は、あなたが診断で答えた内容を受け取っていませんし、保存もしていません。</p>
-<p>当社が個人に関わる情報として扱うのは、次の2つだけです。<br><strong>①LINEに登録してくださった方の識別子など、締切のお知らせを送るために必要な最小限</strong><br><strong>②Cookieを使わない匿名のアクセス統計</strong><br>氏名・住所の番地・電話番号・口座番号は、はじめから受け取りません。</p>
+<p>当社が個人に関わる情報として扱うのは、次の2つだけです。<br><strong>①LINEに登録してくださった方の識別子など、締切のお知らせを送るために必要な最小限</strong><br><strong>②個人を特定しない、匿名のアクセス統計</strong>(Google アナリティクスを利用します。くわしくは6章)<br>氏名・住所の番地・電話番号・口座番号は、はじめから受け取りません。</p>
 </div>
 
 <h2>1. 基本の考え方</h2>
@@ -71,7 +71,7 @@ th{background:#f4f1e8}
 <tr><th>経路</th><th>情報</th><th>取得</th><th>使いみち</th></tr>
 <tr><td>3分診断</td><td>お住まいの市町村・世帯構成・お子さんの年齢帯・ライフイベント・住まいの状況</td><td><span class="pill no">取得しません</span></td><td>端末内で「使える可能性のある制度」を判定するためだけに使用。回答はお使いのブラウザ内(ローカル保存)にのみ残り、当社へ送信されません。ブラウザのデータ消去でいつでも削除できます。</td></tr>
 <tr><td>LINE登録</td><td>LINEの識別子・表示名など(LINEプラットフォーム上の情報)</td><td><span class="pill">取得します</span></td><td>締切リマインド・申請手順・受給フォローのお知らせ配信(登録者のみ)</td></tr>
-<tr><td>アクセス解析</td><td>ページの閲覧状況の匿名統計(Cookie不使用・個人を特定しません)</td><td><span class="pill">取得します</span><br>(個人特定なし)</td><td>サイトの改善と、「届いていない支援」の匿名分析</td></tr>
+<tr><td>アクセス解析</td><td>ページの閲覧状況の匿名統計(Cookieを使用します・個人は特定しません。6章参照)</td><td><span class="pill">取得します</span><br>(個人特定なし)</td><td>サイトの改善と、「届いていない支援」の匿名分析</td></tr>
 </table></div>
 
 <h2>3. 受け取らない情報</h2>
@@ -130,5 +130,19 @@ th{background:#f4f1e8}
 <p style="margin-top:16px"><a href="../">もらいわすれ堂 トップへ</a></p>
 <p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
 </div>
+<script>
+/* 山梨版から来た方への戻り案内(2026-09-03 点検🟡4)。referrerが山梨版のときだけ表示 */
+(function(){
+  try {
+    if (document.referrer.indexOf("/fukugiiro/yamanashi/") >= 0) {
+      var b = document.createElement("p");
+      b.style.cssText = "background:#FFF8E6;border:1px solid #EAD59A;border-radius:10px;padding:10px 14px;margin:0 0 14px;font-size:.95rem";
+      b.innerHTML = 'このページは沖縄版と山梨版で共通です。<a href="../yamanashi/" style="font-weight:700">← もらいわすれ堂 山梨版へ戻る</a>';
+      var w = document.querySelector(".wrap");
+      if (w) w.insertBefore(b, w.firstChild);
+    }
+  } catch(e){}
+})();
+</script>
 </body>
 </html>

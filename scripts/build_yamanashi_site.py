@@ -128,13 +128,16 @@ h2 .cnt{{font-size:.8rem;color:var(--fg-muted);font-weight:400;margin-left:.6em}
 .card a{{display:inline-block;margin-top:6px;padding:6px 0;min-height:32px;font-weight:700;text-decoration:none;color:#1F5C45}}
 .card a::after{{content:" ›"}}
 @media(min-width:900px){{.wrap{{max-width:900px}}.cards{{grid-template-columns:1fr 1fr}}}}
+/* 山梨版: ヘッダーを読みやすく・押しやすく(点検2026-09-03 🟡6) */
+.siteheader nav a{{font-size:.95rem;padding:10px 12px}}
+.siteheader .hlogo{{font-size:1.1rem}}
 </style>
 </head>
 <body>
 <script src="../../analytics-config.js"></script>
 <script src="../../assets/fg-analytics.js"></script>
 <header class="siteheader">
-  <a class="hlogo" href="../"><img src="../../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.8rem;color:var(--fg-muted)">山梨版</span></a>
+  <a class="hlogo" href="../"><img src="../../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.9rem;color:var(--fg-muted)">山梨版</span></a>
   <nav>
     <a href="../shindan/">3分診断</a>
     <a href="../area/">市町村</a>

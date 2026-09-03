@@ -38,7 +38,7 @@ GO_BASE = "https://allgroup-inc.github.io/hojo-hq/go"
 
 # 全ページ共通ヘッダー(Instagramは準備中のため置かない)
 HEADER = f'''<header class="siteheader">
-  <a class="hlogo" href="{SITE_BASE}/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.78rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
+  <a class="hlogo" href="{SITE_BASE}/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.9rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
   <nav>
     <a href="{SITE_BASE}/shindan/">3分診断</a>
     <a href="{SITE_BASE}/area/">市町村</a>

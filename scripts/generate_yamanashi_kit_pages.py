@@ -85,7 +85,7 @@ ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through
 .madoguchi{font-size:.95rem;background:#EAF5F0;border-radius:8px;padding:12px 14px;color:#0F5138}
 .ask{list-style:none;margin-top:6px}
 .ask li{background:#fff;border-radius:8px;padding:8px 12px;margin:6px 0;color:#0F5138}
-.memo{width:100%;border:none;border-bottom:2px solid var(--fg-line);background:transparent;font:inherit;font-size:.95rem;min-height:44px;resize:vertical;padding:6px 2px}
+.memo{width:100%;border:none;border-bottom:2px solid var(--fg-line);background:transparent;font:inherit;font-size:1rem;min-height:44px;resize:vertical;padding:6px 2px}
 .memo:focus{outline:none;border-bottom-color:var(--fg-primary)}
 .prog{font-weight:700;color:var(--fg-deep)}
 .after{background:#F7F3EA;border:1px solid var(--fg-line);border-radius:12px;padding:16px 18px;margin:12px 0}
@@ -103,6 +103,10 @@ details.conbini .inner{padding:0 16px 14px;border-top:1px dashed var(--fg-line)}
 details.conbini ol{margin:10px 0 6px;padding-left:1.4em}
 details.conbini li{margin:8px 0}
 @media(min-width:900px){.wrap{max-width:820px}}
+/* 山梨版: ヘッダーを読みやすく・押しやすく(点検2026-09-03 🟡6) */
+.siteheader nav a{font-size:.95rem;padding:10px 12px}
+.siteheader .hlogo{font-size:1.1rem}
+
 /* 印刷=電話台本+持ち物+窓口ひとこと+メモの1枚に圧縮。工程表・申請後・LINEは画面のみ。 */
 @media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}
   a[href^="http"]::after{content:" (" attr(href) ")";font-size:.8em;word-break:break-all}
@@ -365,7 +369,7 @@ def kit_page(it, updated):
   このページをスマホで開いたまま、あなたのメモ代わりに窓口で使えます。チェックとメモはこの端末に残ります。</p>
   <p style="margin-top:10px"><button class="copybtn" id="copy-sheet" onclick="fkCopySheet(this)">このシートをコピーして手元に残す</button></p>
   <p class="note" style="color:#0F5138;margin-top:8px">コピーしたら、LINEのメモやトークに貼りつけておくと、電波の弱い窓口でもすぐ開けます。
-  <a href="https://allgroup-inc.github.io/hojo-hq/go/ymn-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')" style="color:#0F5138;font-weight:700">もらいわすれ堂のLINE</a>に貼っていただければ、そのまま締切のお知らせも受け取れます(無料)。</p>
+  <a href="https://allgroup-inc.github.io/hojo-hq/go/ymn-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')" style="color:#0F5138;font-weight:700">もらいわすれ堂のLINE</a>に貼っていただければ、そのまま締切のお知らせも受け取れます(無料・配信は順次はじめていきます)。</p>
 </div>
 
 <details class="conbini no-print screen-only" ontoggle="if(this.open&&window.fgTrack)fgTrack('ymn_kit_conbini')">
@@ -407,7 +411,7 @@ def kit_page(it, updated):
   <div class="say">③ <b>申請書</b>はそちらにありますか？ <b>いつまで</b>に出せばいいですか？</div>
   <p class="note" style="margin-top:10px">電話番号は公式ページに載っています → <a href="{src}" rel="noopener">公式ページで電話番号を確認</a></p>
   <p class="note" style="margin-top:6px">聞いた電話番号・受付時間のメモ:</p>
-  <textarea class="memo" data-m="0" rows="1" placeholder="例) 〇〇課 098-000-0000 / 平日8:30-17:15"></textarea>
+  <textarea class="memo" data-m="0" rows="1" placeholder="例) 〇〇課 055-000-0000 / 平日8:30-17:15"></textarea>
 </div>
 
 <h2>② 持ち物チェックリスト</h2>
@@ -450,7 +454,7 @@ def kit_page(it, updated):
   <a class="linebtn" style="background:var(--fg-primary)" href="../../houkoku/" onclick="if(window.fgTrack)fgTrack('ymn_jukyu_report_link_kit')">受け取れたことを報告する(匿名・無料)</a>
 </div>
 <div class="after" style="background:#EAF7EE;border-color:#B7E4C7;text-align:center;color:#0F5138">
-  締切や新しい制度は、LINEでそっとお知らせします(締切の約1か月前から・無料・名前の入力は不要)
+  締切や新しい制度は、LINEでそっとお知らせします(締切の約1か月前から・無料・名前の入力は不要)。配信は順次はじめていきます
   <a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/ymn-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')">LINEで受け取る</a>
 </div>
 </section>
