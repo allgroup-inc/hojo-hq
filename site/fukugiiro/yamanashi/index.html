@@ -182,6 +182,13 @@ footer .fwrap p{margin-bottom:6px}
 /* 写真が入ったら影絵を引っ込める(実写主役化・沖縄版と同じ思想) */
 .film .photoback:not(.nophoto)~.ysil{opacity:.35}
 .ys1 .photoback:not(.nophoto)~.island, .ys1 .photoback:not(.nophoto)~#vlights{display:none}
+.ys1 .photoback:not(.nophoto)~.moon{display:none} /* 写真に本物の月があるため */
+.ys2 .photoback:not(.nophoto)~.ysil{display:none} /* 写真に本物の富士があるため(影絵の雪頂が二重に見える) */
+/* 写真の色なじませ: 場面の時間帯(夜→未明→朝)に写真を溶かす */
+.ys1 .photoback::after{background:linear-gradient(180deg,rgba(16,27,26,.55) 0%,rgba(16,27,26,.16) 42%,rgba(16,27,26,.26) 70%,rgba(19,30,29,.78) 100%)}
+.ys2 .photoback img{filter:saturate(.9) brightness(.8)}
+.ys2 .photoback::after{background:linear-gradient(180deg,rgba(24,40,40,.72) 0%,rgba(24,40,40,.22) 38%,rgba(24,40,40,.30) 62%,rgba(31,56,56,.78) 100%)}
+.ys4 .photoback::after{background:linear-gradient(180deg,rgba(110,65,40,.28) 0%,rgba(170,105,70,.12) 46%,rgba(243,220,192,.76) 100%)}
 </style>
 </head>
 <body>
