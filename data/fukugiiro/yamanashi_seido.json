@@ -1,0 +1,1358 @@
+{
+ "updated_at": "2026-09-03 10:08",
+ "source": "data/fukugiiro/seido.json の area=全国(国の制度)のみを抽出",
+ "note": "山梨版 第1段階: 国の制度のみ。山梨県・市町村の制度は利用規約確認後に追加する",
+ "count": 53,
+ "items": [
+  {
+   "id": "fk-kuni-jidoteate",
+   "name": "児童手当",
+   "category": "子育て",
+   "life_events": [
+    "子育て"
+   ],
+   "issuer": "こども家庭庁",
+   "area": "全国",
+   "target_household": "中学生以下(2024年10月以降は高校生年代まで拡充)のお子さんを育てている世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.cfa.go.jp/policies/kokoseido/jidouteate",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: こども家庭庁ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-jidofuyoteate",
+   "name": "児童扶養手当",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "低所得・生活苦"
+   ],
+   "issuer": "こども家庭庁",
+   "area": "全国",
+   "target_household": "ひとり親家庭などでお子さんを育てている世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.cfa.go.jp/policies/hitori-oya/fuyou-teate",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: こども家庭庁ウェブサイト",
+   "fetched_at": "2026-09-02 22:07",
+   "combine": {
+    "type": "adjust",
+    "note": "公的年金(遺族年金・障害年金など)を受け取れる場合は、手当額が調整される(全部または一部が支給されない)場合があります。窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-shussan-ichijikin",
+   "name": "出産育児一時金",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "厚生労働省(各健康保険)",
+   "area": "全国",
+   "target_household": "健康保険に加入している方(被扶養者を含む)が出産したときに対象となる可能性があります",
+   "how_to_apply": "加入している健康保険(協会けんぽ・国保など)への申請。多くは医療機関での直接支払制度が利用できます",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/shussan/index.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-ikuji-kyufu",
+   "name": "育児休業給付(雇用保険)",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産",
+    "子育て",
+    "就職・転職"
+   ],
+   "issuer": "厚生労働省・ハローワーク",
+   "area": "全国",
+   "target_household": "雇用保険に加入していて育児休業を取得する方が対象となる可能性があります",
+   "how_to_apply": "原則、勤務先を通じてハローワークへ申請",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000158500.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省・ハローワークウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-jukyo-kakuho",
+   "name": "住居確保給付金",
+   "category": "住まい",
+   "life_events": [
+    "失業",
+    "低所得・生活苦",
+    "住宅取得・引越"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "離職・収入減少などで家賃の支払いにお困りの世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの自治体の自立相談支援機関",
+   "source_url": "https://corona-support.mhlw.go.jp/jukyokakuhokyufukin/index.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "要確認",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07",
+   "combine": {
+    "type": "adjust",
+    "note": "生活保護(住宅扶助)を受けている場合は対象外となる場合があります。窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-kogaku-ryoyo",
+   "name": "高額療養費制度",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが"
+   ],
+   "issuer": "厚生労働省(各健康保険)",
+   "area": "全国",
+   "target_household": "1ヶ月の医療費の自己負担が上限額を超えた方が対象となる可能性があります",
+   "how_to_apply": "加入している健康保険への申請(事前の限度額適用認定証の利用も可能です)",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/juuyou/kougakuiryou/index.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-shugaku-shien",
+   "name": "高等教育の修学支援新制度(授業料等減免・給付型奨学金)",
+   "category": "教育",
+   "life_events": [
+    "入園・入学"
+   ],
+   "issuer": "文部科学省",
+   "area": "全国",
+   "target_household": "大学・短大・高専・専門学校に進学する(在学中の)お子さんがいる世帯が対象となる可能性があります(2025年度から多子世帯の拡充があります)",
+   "how_to_apply": "在学校・進学先を通じた申込み(日本学生支援機構)",
+   "source_url": "https://www.mext.go.jp/kyufu/",
+   "amount_note": "給付型奨学金(返還不要)と授業料・入学金の減免をセットで受けられる場合があります。世帯年収の目安は約600万円まで、令和7年度からは扶養する子3人以上の多子世帯は所得制限なく減免の対象になる場合があります(要確認)",
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(文部科学省 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "deadline_type": "常時",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: 文部科学省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07",
+   "combine": {
+    "type": "adjust",
+    "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-hitorioya-shien",
+   "name": "ひとり親家庭への支援制度(全体案内)",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "低所得・生活苦"
+   ],
+   "issuer": "こども家庭庁",
+   "area": "全国",
+   "target_household": "ひとり親家庭の世帯向けの各種支援(手当・貸付・就業支援など)の入口です",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.cfa.go.jp/policies/hitori-oya",
+   "match_tokens": [
+    "ひとり親家庭"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○・match_tokens修正後)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: こども家庭庁ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-ninpu-shien",
+   "name": "妊婦のための支援給付・伴走型相談支援",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "こども家庭庁",
+   "area": "全国",
+   "target_household": "妊娠された方・出産された世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口(母子保健担当)",
+   "source_url": "https://www.cfa.go.jp/policies/shussan-kosodate",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: こども家庭庁ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-shugakushienkin-koko",
+   "name": "高等学校等就学支援金",
+   "category": "教育",
+   "life_events": [
+    "入園・入学"
+   ],
+   "issuer": "文部科学省",
+   "area": "全国",
+   "target_household": "高校等に通うお子さんがいる世帯が対象となる可能性があります(令和8年度から所得制限が撤廃され、世帯収入にかかわらず授業料が実質無償となる案内が出ています。学校種別・支給額の詳細は公式ページでご確認ください)",
+   "how_to_apply": "在学する学校を通じた申請(オンライン申請 e-Shien)",
+   "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1342674.htm",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: 文部科学省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-shogaku-kyufukin-koko",
+   "name": "高校生等奨学給付金",
+   "category": "教育",
+   "life_events": [
+    "入園・入学",
+    "低所得・生活苦"
+   ],
+   "issuer": "文部科学省(窓口は都道府県)",
+   "area": "全国",
+   "target_household": "住民税非課税世帯等で高校生等のお子さんがいる世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの都道府県への申請(学校経由の場合あり)",
+   "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1344089.htm",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: 文部科学省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-kyushokusha-shien",
+   "name": "求職者支援制度(職業訓練受講給付金)",
+   "category": "仕事・失業",
+   "life_events": [
+    "失業",
+    "就職・転職",
+    "低所得・生活苦"
+   ],
+   "issuer": "厚生労働省・ハローワーク",
+   "area": "全国",
+   "target_household": "雇用保険を受給できない求職中の方(フリーランス・自営業を廃業した方等を含む)が対象となる可能性があります",
+   "how_to_apply": "ハローワーク",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyushokusha_shien/index.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省・ハローワークウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-seikatsu-konkyu",
+   "name": "生活困窮者自立支援制度(相談窓口)",
+   "category": "生活支援",
+   "life_events": [
+    "低所得・生活苦",
+    "失業"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "生活にお困りごとを抱えている世帯の総合相談窓口です(家賃・就労・家計・子どもの学習支援など)",
+   "how_to_apply": "お住まいの自治体の自立相談支援機関",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000055454.html",
+   "match_tokens": [
+    "生活困窮者自立支援"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-kyoiku-kunren",
+   "name": "教育訓練給付金",
+   "category": "仕事・失業",
+   "life_events": [
+    "就職・転職"
+   ],
+   "issuer": "厚生労働省・ハローワーク",
+   "area": "全国",
+   "target_household": "働きながら(または離職後に)資格取得やスキルアップを目指す方が対象となる可能性があります",
+   "how_to_apply": "ハローワーク",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/jinzaikaihatsu/kyouiku.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-22",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省・ハローワークウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-hoiku-mushoka",
+   "name": "幼児教育・保育の無償化",
+   "category": "子育て",
+   "life_events": [
+    "入園・入学",
+    "子育て"
+   ],
+   "issuer": "こども家庭庁",
+   "area": "全国",
+   "target_household": "3〜5歳のお子さん(住民税非課税世帯は0〜2歳も)が幼稚園・保育所・認定こども園などを利用する世帯が対象となる可能性があります",
+   "how_to_apply": "利用する施設・お住まいの市区町村の窓口",
+   "source_url": "https://www.cfa.go.jp/policies/kokoseido/mushouka",
+   "match_tokens": [
+    "無償化"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: こども家庭庁ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-tokubetsu-jifute",
+   "name": "特別児童扶養手当",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "障がい"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "障がいのあるお子さん(20歳未満)を育てている世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.mhlw.go.jp/bunya/shougaihoken/jidou/huyou.html",
+   "match_tokens": [
+    "特別児童扶養手当"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07",
+   "combine": {
+    "type": "adjust",
+    "note": "公的年金(遺族年金・障害年金など)を受け取れる場合は、手当額が調整される(全部または一部が支給されない)場合があります。窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-shogaiji-fukushi",
+   "name": "障害児福祉手当",
+   "category": "子育て",
+   "life_events": [
+    "子育て",
+    "障がい"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "重度の障がいのあるお子さん(20歳未満)を育てている世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.mhlw.go.jp/bunya/shougaihoken/jidou/hukushi.html",
+   "match_tokens": [
+    "障害児福祉手当"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-tokubetsu-shogaisha",
+   "name": "特別障害者手当",
+   "category": "生活支援",
+   "life_events": [
+    "障がい"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "重度の障がいがあり日常生活で常時特別の介護が必要な方(20歳以上)が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.mhlw.go.jp/bunya/shougaihoken/jidou/tokubetsu.html",
+   "match_tokens": [
+    "特別障害者手当"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-jiritsushien-iryo",
+   "name": "自立支援医療(医療費の自己負担軽減)",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが",
+    "障がい"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "心身の治療を続けている方(精神通院・更生医療・育成医療)が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/shougaishahukushi/jiritsu/index.html",
+   "match_tokens": [
+    "自立支援医療"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07",
+   "combine": {
+    "type": "adjust",
+    "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-koyohoken-kihonteate",
+   "name": "雇用保険の基本手当(失業給付)",
+   "category": "仕事・失業",
+   "life_events": [
+    "失業"
+   ],
+   "issuer": "厚生労働省・ハローワーク",
+   "area": "全国",
+   "target_household": "離職して求職活動をしている、雇用保険に加入していた方が対象となる可能性があります",
+   "how_to_apply": "ハローワーク",
+   "source_url": "https://www.hellowork.mhlw.go.jp/insurance/insurance_basicbenefit.html",
+   "match_tokens": [
+    "基本手当"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省・ハローワークウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-kaigokyugyo-kyufu",
+   "name": "介護休業給付金(雇用保険)",
+   "category": "介護",
+   "life_events": [
+    "介護",
+    "就職・転職"
+   ],
+   "issuer": "厚生労働省・ハローワーク",
+   "area": "全国",
+   "target_household": "家族の介護のために休業する、雇用保険に加入している方が対象となる可能性があります",
+   "how_to_apply": "原則、勤務先を通じてハローワークへ申請",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000135090.html",
+   "match_tokens": [
+    "介護休業給付"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省・ハローワークウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-rousai",
+   "name": "労災保険の給付(仕事中・通勤中のけが・病気)",
+   "category": "仕事・失業",
+   "life_events": [
+    "病気・けが"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "仕事中や通勤中のけが・病気で治療や休業が必要になった方が対象となる可能性があります(パート・アルバイトも対象です)",
+   "how_to_apply": "労働基準監督署(多くは勤務先経由)",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/rousai/index.html",
+   "match_tokens": [
+    "労災"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-miharai-chingin",
+   "name": "未払賃金立替払制度",
+   "category": "仕事・失業",
+   "life_events": [
+    "失業"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "勤務先の倒産などで賃金が支払われないまま退職した方が対象となる可能性があります",
+   "how_to_apply": "労働基準監督署",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/kijungyosei/miharai/index.html",
+   "match_tokens": [
+    "未払賃金"
+   ],
+   "assume_reachable": true,
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-seikatsu-hogo",
+   "name": "生活保護制度(相談窓口)",
+   "category": "生活支援",
+   "life_events": [
+    "低所得・生活苦"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "収入や資産だけでは生活が難しい世帯のための、最後のセーフティネットの相談窓口です。ためらわずに相談できます",
+   "how_to_apply": "お住まいの地域の福祉事務所",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/seikatuhogo/index.html",
+   "match_tokens": [
+    "生活保護"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-nenkin-kyufukin",
+   "name": "年金生活者支援給付金",
+   "category": "生活支援",
+   "life_events": [
+    "低所得・生活苦"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "年金を受給していて所得が一定以下の方が対象となる可能性があります(年金に上乗せして支給されます)",
+   "how_to_apply": "日本年金機構(年金事務所)への請求",
+   "source_url": "https://www.mhlw.go.jp/nenkinkyuufukin/",
+   "match_tokens": [
+    "年金生活者支援給付金"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-saigai-choui",
+   "name": "災害弔慰金・災害援護資金など(被災時の支援)",
+   "category": "防災・その他",
+   "life_events": [
+    "災害"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "台風などの自然災害で被害を受けた世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/saigaikyujo/index.html",
+   "match_tokens": [
+    "災害弔慰金"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-shugaku-enjo",
+   "name": "就学援助(小・中学生の学用品費・給食費など)",
+   "category": "教育",
+   "life_events": [
+    "入園・入学",
+    "低所得・生活苦"
+   ],
+   "issuer": "文部科学省(窓口は市区町村)",
+   "area": "全国",
+   "target_household": "経済的な理由で小・中学校の就学にお困りの世帯が対象となる可能性があります",
+   "how_to_apply": "お子さんが通う学校・お住まいの市区町村の教育委員会",
+   "source_url": "https://www.mext.go.jp/a_menu/shotou/career/05010502/017.htm",
+   "match_tokens": [
+    "就学援助"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 文部科学省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07",
+   "combine": {
+    "type": "adjust",
+    "note": "就学援助(給食費の援助)を受けている場合や他の給食費助成との重複時の取り扱いは、窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-tokushi-shorei",
+   "name": "特別支援教育就学奨励費",
+   "category": "教育",
+   "life_events": [
+    "入園・入学",
+    "障がい"
+   ],
+   "issuer": "文部科学省(窓口は学校・教育委員会)",
+   "area": "全国",
+   "target_household": "特別支援学校・特別支援学級などに通うお子さんがいる世帯が対象となる可能性があります",
+   "how_to_apply": "お子さんが通う学校・教育委員会",
+   "source_url": "https://www.mext.go.jp/a_menu/shotou/tokubetu/material/1340250.htm",
+   "match_tokens": [
+    "就学奨励"
+   ],
+   "assume_reachable": true,
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 文部科学省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-safetynet-jutaku",
+   "name": "住宅セーフティネット制度(住宅確保要配慮者の入居支援)",
+   "category": "住まい",
+   "life_events": [
+    "住宅取得・引越",
+    "低所得・生活苦"
+   ],
+   "issuer": "国土交通省",
+   "area": "全国",
+   "target_household": "低所得・ひとり親・高齢などの理由で民間賃貸住宅への入居にお困りの世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの自治体の居住支援窓口・居住支援法人",
+   "source_url": "https://www.mlit.go.jp/jutakukentiku/house/jutakukentiku_house_tk3_000055.html",
+   "match_tokens": [
+    "セーフティネット"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 国土交通省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-kosodate-green",
+   "name": "子育てグリーン住宅支援事業(新築・リフォーム補助)",
+   "category": "住まい",
+   "life_events": [
+    "住宅取得・引越",
+    "子育て"
+   ],
+   "issuer": "国土交通省",
+   "area": "全国",
+   "target_household": "省エネ住宅の新築や省エネリフォームを行う世帯(子育て・若者夫婦世帯は補助が手厚い)が対象となる可能性があります",
+   "how_to_apply": "登録事業者(工務店・リフォーム会社)を通じた申請",
+   "source_url": "https://kosodate-green.mlit.go.jp/",
+   "match_tokens": [
+    "子育てグリーン"
+   ],
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-07-23",
+   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
+   "status": "検証済み",
+   "notes": "出典: 国土交通省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-shussan-ouen",
+   "name": "出産・子育て応援給付金(妊婦のための支援給付・伴走型相談支援)",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産",
+    "子育て"
+   ],
+   "issuer": "こども家庭庁(実施は市区町村)",
+   "area": "全国",
+   "target_household": "妊娠・出産をされた方や0〜2歳のお子さんを育てる世帯が対象となる可能性があります。",
+   "how_to_apply": "お住まいの市区町村の窓口(母子保健・子育て支援担当)。",
+   "source_url": "https://www.cfa.go.jp/policies/shussan-kosodate",
+   "deadline_type": "要確認",
+   "amount_note": "妊娠届出時と出生届出後にあわせて計10万円相当(妊娠時5万円+出産時5万円)の給付が受けられる場合があります。伴走型の相談支援もあわせて実施されます(自治体で異なります。要確認)",
+   "assume_reachable": true,
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(こども家庭庁 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: こども家庭庁ウェブサイト",
+   "fetched_at": "2026-09-02 22:07",
+   "combine": {
+    "type": "adjust",
+    "note": "国の出産・子育て応援給付金(妊婦のための支援給付)に基づく支給のため、転入前の市町村などで既に受け取った分と重ねては受けられない場合があります。窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-hisaisha-saiken",
+   "name": "被災者生活再建支援金",
+   "category": "防災・その他",
+   "life_events": [
+    "災害",
+    "住宅取得・引越"
+   ],
+   "issuer": "内閣府(申請窓口は市区町村)",
+   "area": "全国",
+   "target_household": "自然災害で住宅が全壊するなど、生活基盤に著しい被害を受けた世帯が対象となる可能性があります。",
+   "how_to_apply": "お住まいの市区町村の窓口。制度が適用された災害が対象です。",
+   "source_url": "https://www.bousai.go.jp/taisaku/seikatsusaiken/shiensya.html",
+   "deadline_type": "要確認",
+   "amount_note": "基礎支援金(住宅の被害程度に応じ最大100万円)と加算支援金(再建方法に応じ建設・購入で最大200万円/補修100万円/賃借50万円)の合計で、最大300万円が支給される場合があります(世帯人数などで変わります。要確認)",
+   "assume_reachable": true,
+   "combine": {
+    "type": "stackable",
+    "note": "災害弔慰金・災害援護資金など他の被災者支援と併せて受けられる場合があります(要確認)。窓口でご確認ください。"
+   },
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(内閣府 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: 内閣府ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-hello-training",
+   "name": "ハロートレーニング(公共職業訓練・求職者支援訓練)",
+   "category": "仕事・失業",
+   "life_events": [
+    "失業",
+    "就職・転職"
+   ],
+   "issuer": "厚生労働省(窓口はハローワーク)",
+   "area": "全国",
+   "target_household": "再就職やスキル習得のために職業訓練を受けたい求職中の方が対象となる可能性があります。",
+   "how_to_apply": "お住まいの地域を管轄するハローワークで事前相談・申込み。",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/jinzaikaihatsu/hellotraining_top.html",
+   "deadline_type": "要確認",
+   "amount_note": "受講料は原則無料です(テキスト代等は自己負担)。求職者支援訓練では一定要件を満たすと月10万円の給付金を受けられる場合があります(要確認)",
+   "assume_reachable": true,
+   "combine": {
+    "type": "stackable",
+    "note": "求職者支援訓練では一定要件で給付金を受けられる場合があります(要確認)。ハローワークでご確認ください。"
+   },
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(厚生労働省 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-josei-sodan",
+   "name": "女性相談支援センター(困難な問題を抱える女性への支援)",
+   "category": "生活支援",
+   "life_events": [
+    "低所得・生活苦"
+   ],
+   "issuer": "厚生労働省(設置は都道府県)",
+   "area": "全国",
+   "target_household": "生活や家庭、暴力などさまざまな困難を抱え、相談先を探している女性が対象となる可能性があります。",
+   "how_to_apply": "各都道府県の女性相談支援センター(旧・婦人相談所)。まずは相談から。",
+   "source_url": "https://www.mhlw.go.jp/stf/newpage_40452.html",
+   "deadline_type": "常時",
+   "amount_note": "相談は無料です。悩みの相談のほか、緊急時の安全確保・一時保護などの支援もあります(全国共通ダイヤル #8778「はなそう なやみ」。要確認)",
+   "assume_reachable": true,
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(厚生労働省 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-kokuho-genmen",
+   "name": "国民健康保険料(税)の軽減・減免",
+   "category": "生活支援",
+   "life_events": [
+    "低所得・生活苦",
+    "失業"
+   ],
+   "issuer": "厚生労働省(実施は市区町村・国保組合)",
+   "area": "全国",
+   "target_household": "所得が一定基準を下回る世帯や、災害・失業などで保険料の納付が難しい世帯が対象となる可能性があります。",
+   "how_to_apply": "お住まいの市区町村の国民健康保険窓口。",
+   "source_url": "https://www.mhlw.go.jp/stf/newpage_21517.html",
+   "deadline_type": "要確認",
+   "amount_note": "所得が基準以下の世帯は保険料の均等割・平等割が7割・5割・2割軽減される場合があります。災害・失業などでは減免・納付猶予を受けられる場合もあります(市区町村でご確認ください。要確認)",
+   "assume_reachable": true,
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(厚生労働省 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07",
+   "combine": {
+    "type": "adjust",
+    "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-chiiki-houkatsu",
+   "name": "地域包括支援センター(高齢者の総合相談・生活支援の窓口)",
+   "category": "介護",
+   "life_events": [
+    "介護"
+   ],
+   "issuer": "厚生労働省(設置は市区町村)",
+   "area": "全国",
+   "target_household": "高齢のご本人やご家族で、介護・福祉・生活のことで相談先を探している世帯が対象となる可能性があります。",
+   "how_to_apply": "お住まいの地域を担当する地域包括支援センター(市区町村で案内)。まずは相談から。",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/kaigo_koureisha/chiiki-houkatsu/index.html",
+   "deadline_type": "常時",
+   "amount_note": "相談は無料です。介護・福祉・生活の総合相談に応じ、必要な支援やサービスにつなぐ市区町村の窓口です(要確認)",
+   "assume_reachable": true,
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(厚生労働省 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-kashitsuke",
+   "name": "生活福祉資金貸付制度",
+   "category": "生活支援",
+   "life_events": [
+    "低所得・生活苦",
+    "失業"
+   ],
+   "issuer": "厚生労働省(実施は社会福祉協議会)",
+   "area": "全国",
+   "target_household": "低所得の世帯や、失業などで生活の立て直しが必要な世帯が対象となる可能性があります。",
+   "how_to_apply": "お住まいの市区町村の社会福祉協議会。",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/seikatsu-fukushi-shikin1/kashitsukejoken.html",
+   "deadline_type": "常時",
+   "amount_note": "低所得・高齢・障がいのある世帯に、資金の貸付と相談支援を行う制度です(貸付の種類・条件は資金ごとに異なります。要確認)",
+   "assume_reachable": true,
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(厚生労働省 公式ページ照合WebSearch・URL更新)+小柳さん同席確認 2026-08-06",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-kokunen-menjo",
+   "name": "国民年金保険料の免除・納付猶予制度",
+   "category": "生活支援",
+   "life_events": [
+    "失業",
+    "低所得・生活苦"
+   ],
+   "issuer": "日本年金機構(厚生労働省)",
+   "area": "全国",
+   "target_household": "収入が少ない、または失業などで国民年金保険料の納付がむずかしい方(世帯)が対象となる可能性があります。",
+   "how_to_apply": "お住まいの市区町村の国民年金窓口、または年金事務所(電子申請も可)。",
+   "source_url": "https://www.nenkin.go.jp/service/kokunen/menjo/20150428.html",
+   "deadline_type": "常時",
+   "amount_note": "前年所得が一定以下などの場合、保険料の全額または一部が免除・猶予される場合があります。免除期間も年金額に一部反映され、10年以内なら追納も可能です(要確認)",
+   "assume_reachable": true,
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(日本年金機構 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: 日本年金機構ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-boshi-jiritsu-kyufu",
+   "name": "母子家庭等自立支援給付金(自立支援教育訓練給付金・高等職業訓練促進給付金)",
+   "category": "仕事・失業",
+   "life_events": [
+    "就職・転職",
+    "子育て",
+    "低所得・生活苦"
+   ],
+   "issuer": "こども家庭庁(実施は都道府県・市区町村)",
+   "area": "全国",
+   "target_household": "ひとり親家庭(母子・父子家庭)で、資格取得や就職を目指す方が対象となる可能性があります。",
+   "how_to_apply": "お住まいの都道府県・市区町村のひとり親支援担当窓口。",
+   "source_url": "https://www.cfa.go.jp/policies/hitori-oya/jiritsu-shien-kyuufukin",
+   "deadline_type": "要確認",
+   "amount_note": "自立支援教育訓練給付金は受講費用の6割(上限あり)、高等職業訓練促進給付金は資格取得の修業期間中の生活費が支給される場合があります(自治体で異なります。要確認)",
+   "assume_reachable": true,
+   "verified": true,
+   "verified_at": "2026-08-06",
+   "verified_by": "kensho(こども家庭庁 公式ページ照合WebSearch)+小柳さん同席確認 2026-08-06",
+   "deadline": null,
+   "status": "検証済み",
+   "notes": "出典: こども家庭庁ウェブサイト",
+   "fetched_at": "2026-09-02 22:07",
+   "combine": {
+    "type": "adjust",
+    "note": "求職者支援制度(職業訓練受講給付金)や雇用保険の教育訓練給付との併給には条件がある場合があります。窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-shobyo-teate",
+   "name": "傷病手当金",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが"
+   ],
+   "issuer": "全国健康保険協会(協会けんぽ)・健康保険組合",
+   "area": "全国",
+   "target_household": "業務外の病気やけがの療養のため仕事を休み、その間の給与が受けられない(または少ない)健康保険の被保険者の方が対象となる可能性があります",
+   "how_to_apply": "加入している健康保険(協会けんぽの都道府県支部・健康保険組合)へ支給申請書を提出",
+   "source_url": "https://www.kyoukaikenpo.or.jp/benefit/injury_and_sickness_allowance/index.html",
+   "deadline_type": "常時",
+   "amount_note": "1日あたり「直近12か月の標準報酬月額の平均÷30×2/3」が通算1年6か月を限度に支給される場合があります(要確認)。加入している健康保険により内容が異なります",
+   "combine": {
+    "type": "adjust",
+    "note": "出産手当金・障害年金・労災の休業(補償)給付を受けられる期間は、支給されないか調整される場合があります(要確認)"
+   },
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 全国健康保険協会ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-shussan-teate",
+   "name": "出産手当金",
+   "category": "子育て",
+   "life_events": [
+    "妊娠・出産"
+   ],
+   "issuer": "全国健康保険協会(協会けんぽ)・健康保険組合",
+   "area": "全国",
+   "target_household": "出産のため仕事を休み、その間の給与が受けられない健康保険の被保険者の方が対象となる可能性があります(出産日以前42日〜出産日後56日の範囲)",
+   "how_to_apply": "加入している健康保険(協会けんぽの都道府県支部・健康保険組合)へ出産手当金支給申請書を提出",
+   "source_url": "https://www.kyoukaikenpo.or.jp/benefit/childbirth/001/index.html",
+   "deadline_type": "常時",
+   "amount_note": "1日あたり「直近12か月の標準報酬月額の平均÷30×2/3」が支給される場合があります(要確認)。加入している健康保険により内容が異なります",
+   "combine": {
+    "type": "adjust",
+    "note": "同じ期間に傷病手当金を受けられる場合は出産手当金が優先され調整される場合があります。出産育児一時金(分娩費用の給付)とは別制度です(要確認)"
+   },
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 全国健康保険協会ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-maisoryo",
+   "name": "埋葬料・埋葬費(健康保険)/葬祭費(国保・後期高齢者)",
+   "category": "生活支援",
+   "life_events": [
+    "病気・けが"
+   ],
+   "issuer": "全国健康保険協会(協会けんぽ)・健康保険組合(国保・後期高齢者医療は市区町村)",
+   "area": "全国",
+   "target_household": "健康保険の被保険者・被扶養者が亡くなったとき、生計を維持されていて埋葬を行う方が対象となる可能性があります",
+   "how_to_apply": "加入している健康保険(協会けんぽの都道府県支部等)へ申請(国保・後期高齢者医療の葬祭費は市区町村窓口)",
+   "source_url": "https://www.kyoukaikenpo.or.jp/benefit/burial_charges/index.html",
+   "deadline_type": "常時",
+   "amount_note": "協会けんぽでは埋葬料5万円(埋葬費は実費で上限5万円)の場合があります(要確認)。加入している健康保険により内容が異なります",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 全国健康保険協会ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-kogaku-kaigo-service",
+   "name": "高額介護サービス費",
+   "category": "介護",
+   "life_events": [
+    "介護",
+    "低所得・生活苦"
+   ],
+   "issuer": "市区町村(介護保険の保険者)",
+   "area": "全国",
+   "target_household": "介護保険サービスの月々の利用者負担額の合計が、所得に応じた上限額を超えた世帯の方が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の介護保険窓口へ申請(該当者には案内が届く場合があります)",
+   "source_url": "https://www.kaigokensaku.mhlw.go.jp/commentary/fee.html",
+   "deadline_type": "常時",
+   "amount_note": "所得区分ごとの負担限度額を超えた分が支給される場合があります(要確認)",
+   "combine": {
+    "type": "stackable",
+    "note": "医療と介護の両方の負担が重い場合は「高額医療・高額介護合算療養費制度」の対象にもなる場合があります(要確認)"
+   },
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 市区町村ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-kogaku-iryo-kaigo-gassan",
+   "name": "高額医療・高額介護合算療養費制度",
+   "category": "介護",
+   "life_events": [
+    "介護",
+    "病気・けが"
+   ],
+   "issuer": "各医療保険者(協会けんぽ・健康保険組合・国保等)・介護保険者(市区町村)",
+   "area": "全国",
+   "target_household": "毎年8月1日〜翌年7月31日の1年間で、同一世帯の医療保険と介護保険の自己負担の合算額が基準額を超えた世帯の方が対象となる可能性があります",
+   "how_to_apply": "加入している医療保険(協会けんぽ支部・健保組合・市区町村国保等)へ申請",
+   "source_url": "https://www.kyoukaikenpo.or.jp/benefit/high_cost_medical_expenses/003/index.html",
+   "deadline_type": "常時",
+   "amount_note": "基準額を超えた分が支給される場合があります(要確認)。加入している健康保険により内容が異なります",
+   "combine": {
+    "type": "adjust",
+    "note": "医療・介護いずれか一方の自己負担が0円の場合は対象外とされています。高額療養費制度(月単位)とは別の年単位の制度です(要確認)"
+   },
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 各医療保険者ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-kaigo-jutaku-kaishu",
+   "name": "居宅介護(介護予防)住宅改修費",
+   "category": "介護",
+   "life_events": [
+    "介護"
+   ],
+   "issuer": "市区町村(介護保険の保険者)",
+   "area": "全国",
+   "target_household": "要介護・要支援認定を受け、自宅に手すりの取付けや段差解消などの住宅改修を行う世帯が対象となる可能性があります",
+   "how_to_apply": "改修前にケアマネジャー等に相談のうえ、お住まいの市区町村の介護保険窓口へ事前申請(工事前の申請が必要とされています)",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000212398.html",
+   "deadline_type": "常時",
+   "amount_note": "支給限度基準額20万円の範囲で、費用の7〜9割が払い戻される場合があります(要確認)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 市区町村ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-shoni-mansei",
+   "name": "小児慢性特定疾病医療費助成",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが",
+    "子育て"
+   ],
+   "issuer": "都道府県・指定都市・中核市等",
+   "area": "全国",
+   "target_household": "国が定める小児慢性特定疾病にかかっている18歳未満のお子さんを養育している世帯が対象となる可能性があります(継続治療の場合は20歳未満まで対象となる場合があります)",
+   "how_to_apply": "お住まいの都道府県等の窓口(保健所など)へ申請",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000078973.html",
+   "deadline_type": "常時",
+   "amount_note": "医療費の自己負担分の一部が助成され、所得等に応じた自己負担上限月額が設定される場合があります(要確認)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 都道府県・指定都市・中核市等ウェブサイト",
+   "fetched_at": "2026-09-02 22:07",
+   "combine": {
+    "type": "adjust",
+    "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
+   }
+  },
+  {
+   "id": "fk-kuni-nyuin-shokuji-gengaku",
+   "name": "入院時食事療養費の標準負担額減額(住民税非課税世帯など)",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが",
+    "低所得・生活苦"
+   ],
+   "issuer": "全国健康保険協会(協会けんぽ)・健康保険組合 等の各医療保険者",
+   "area": "全国",
+   "target_household": "住民税非課税世帯などの方が入院した場合に、食事代の標準負担額が減額の対象となる可能性があります",
+   "how_to_apply": "加入している健康保険(協会けんぽの都道府県支部等)へ「限度額適用・標準負担額減額認定申請書」を提出(マイナ保険証の利用で認定証の提示に代えられる場合があります)",
+   "source_url": "https://www.kyoukaikenpo.or.jp/benefit/mynumber_insurance_card/002/index.html",
+   "deadline_type": "常時",
+   "amount_note": "住民税非課税世帯等は1食あたりの標準負担額が減額される場合があります(要確認)。加入している健康保険により内容が異なります",
+   "combine": {
+    "type": "adjust",
+    "note": "食事の標準負担額は高額療養費の対象に含まれないとされています(要確認)"
+   },
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 全国健康保険協会ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-iryohi-kojo",
+   "name": "医療費控除(セルフメディケーション税制含む)",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが"
+   ],
+   "issuer": "国(国税庁・所得税の所得控除)",
+   "area": "全国",
+   "target_household": "1年間に本人や生計を一にするご家族の医療費を一定額を超えて支払った方が対象となる可能性があります",
+   "how_to_apply": "確定申告(還付申告)で医療費控除の明細書を添付して税務署へ申請(e-Tax可)",
+   "source_url": "https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1120.htm",
+   "deadline_type": "常時",
+   "amount_note": "支払医療費を基に計算した金額(最高200万円)の所得控除を受けられる場合があります(要確認)。セルフメディケーション税制は対象医薬品購入費12,000円超の部分(上限88,000円)が対象となる場合があります(2026年12月31日までの特例・延長の有無は要確認)",
+   "combine": {
+    "type": "exclusive",
+    "note": "通常の医療費控除とセルフメディケーション税制は、どちらか一方の選択適用とされています"
+   },
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 国ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-koki-korei-hokenryo-keigen",
+   "name": "後期高齢者医療制度の保険料軽減",
+   "category": "医療・健康",
+   "life_events": [
+    "低所得・生活苦"
+   ],
+   "issuer": "都道府県の後期高齢者医療広域連合・市区町村",
+   "area": "全国",
+   "target_household": "後期高齢者医療制度(原則75歳以上)の被保険者で、世帯の所得が一定以下の方が対象となる可能性があります",
+   "how_to_apply": "原則として所得情報に基づき自動判定される場合があります。詳細はお住まいの市区町村の後期高齢者医療担当窓口へ",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/newpage_00009.html",
+   "deadline_type": "常時",
+   "amount_note": "所得に応じて均等割額の7割・5割・2割が軽減される場合があります(要確認)",
+   "combine": {
+    "type": "adjust",
+    "note": "「国民健康保険料(税)の軽減・減免」とは別制度(後期高齢者医療制度側の軽減)です"
+   },
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 都道府県の後期高齢者医療広域連合・市区町村ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-nhk-menjo",
+   "name": "NHK放送受信料の免除",
+   "category": "生活支援",
+   "life_events": [
+    "低所得・生活苦",
+    "障がい"
+   ],
+   "issuer": "NHK(日本放送協会)",
+   "area": "全国",
+   "target_household": "生活保護など公的扶助を受給している世帯や、障害者手帳をお持ちの方がいる市町村民税非課税世帯などが対象となる可能性があります",
+   "how_to_apply": "免除申請書に市区町村で免除事由の証明を受け、NHK(受信料の窓口)へ提出",
+   "source_url": "https://www.nhk-cs.jp/jushinryo/exemption_list.html",
+   "deadline_type": "常時",
+   "assume_reachable": true,
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: NHKウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-hosougu",
+   "name": "補装具費支給制度",
+   "category": "生活支援",
+   "life_events": [
+    "障がい"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "身体障害者手帳をお持ちの方や、難病等により義肢・車いす・補聴器などの補装具を必要とする方がいる世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の障がい福祉窓口",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/shougaishahukushi/yogu/index.html",
+   "deadline_type": "常時",
+   "assume_reachable": true,
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-nichijo-yougu",
+   "name": "日常生活用具給付等事業",
+   "category": "生活支援",
+   "life_events": [
+    "障がい",
+    "病気・けが"
+   ],
+   "issuer": "厚生労働省(実施主体は市町村)",
+   "area": "全国",
+   "target_household": "日常生活用具を必要とする障がいのある方・障がいのあるお子さん・難病の方などのいる世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の障がい福祉窓口(品目・基準額は市町村ごとに異なります)",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/shougaishahukushi/yogu/seikatsu.html",
+   "deadline_type": "常時",
+   "assume_reachable": true,
+   "combine": {
+    "type": "adjust",
+    "note": "補装具費支給制度と対象品目のすみ分けがあります。どちらに当たるかは窓口でご確認ください(要確認)"
+   },
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  },
+  {
+   "id": "fk-kuni-nenkin-shien-kyufukin",
+   "name": "年金生活者支援給付金(老齢・障害・遺族)",
+   "category": "生活支援",
+   "life_events": [
+    "低所得・生活苦",
+    "介護",
+    "障がい"
+   ],
+   "issuer": "日本年金機構",
+   "area": "全国",
+   "target_household": "公的年金等の収入とその他の所得が一定基準以下の、老齢基礎年金・障害基礎年金・遺族基礎年金を受給している方の世帯が対象となる可能性があります",
+   "how_to_apply": "日本年金機構から届く請求書(ハガキ等)の返送、または年金事務所・市町村窓口での請求手続き(電子申請も案内されています)",
+   "source_url": "https://www.nenkin.go.jp/service/jukyu/seido/sonota-kyufu/shienkyufukin/",
+   "deadline_type": "常時",
+   "assume_reachable": true,
+   "amount_note": "年金に上乗せして支給される給付金です(老齢・障害・遺族の3種類。給付額は年度ごとに改定されるため、令和8年度の月額は日本年金機構の案内でご確認ください。要確認)。請求手続きをしないと受け取れず、支給は原則として請求した月の翌月分からとされているため、請求書が届いたら早めの手続きが案内されています",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 日本年金機構ウェブサイト",
+   "fetched_at": "2026-09-02 22:07"
+  }
+ ]
+}
