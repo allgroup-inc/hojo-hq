@@ -172,6 +172,12 @@ footer .fwrap p{margin-bottom:6px}
 .ysil path,.ysil circle,.ysil ellipse,.ysil rect{fill:#0B1514}
 .ys2 .fujicap{fill:#E7E9E4;opacity:.92}
 .ys3 .ysil path,.ys3 .ysil circle,.ys3 .ysil ellipse,.ys3 .ysil rect{fill:#101E1D}
+/* S3は写真を使わない完成形(影絵+あかり)。灯りのゆらぎで「集まりの温かさ」を出す */
+.ys3 .akaribi{position:absolute;left:50%;bottom:15vh;width:min(80vw,460px);height:200px;transform:translateX(-50%);z-index:2;
+  background:radial-gradient(ellipse at 50% 68%, rgba(242,183,5,.30), rgba(242,183,5,.10) 55%, transparent 78%);
+  animation:akariyure 4.5s ease-in-out infinite alternate}
+@keyframes akariyure{from{opacity:.7}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.ys3 .akaribi{animation:none}}
 .ys4 .ysil path,.ys4 .ysil circle,.ys4 .ysil ellipse{fill:#3D2B20}
 /* 写真が入ったら影絵を引っ込める(実写主役化・沖縄版と同じ思想) */
 .film .photoback:not(.nophoto)~.ysil{opacity:.35}
@@ -229,11 +235,11 @@ footer .fwrap p{margin-bottom:6px}
     </div>
   </section>
 
-  <!-- S3: 無尽(夜明け前・支え合い) -->
+  <!-- S3: 無尽(夜明け前・支え合い)。写真は使わない完成形: 影絵+灯りのゆらぎ -->
   <section class="scene ys3" id="s3">
     <div class="kb">
-      <div class="photoback"><img src="assets/film/mujin.jpg" alt=""></div>
       <div class="cloud c1" style="top:14%"></div>
+      <div class="akaribi"></div>
       <!-- 食卓を囲む人々の影(無尽) -->
       <div class="ysil" style="left:50%;bottom:16vh;width:min(76vw,440px);transform:translateX(-50%)"><svg viewBox="0 0 440 170">
         <ellipse cx="220" cy="128" rx="150" ry="20"/>
