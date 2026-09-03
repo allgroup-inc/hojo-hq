@@ -1703,5 +1703,68 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-03",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和８年度酒類業振興支援事業費補助金（第４期）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdQxMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度ゼロエミッション船等の導入支援事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbyjMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "事業承継推進事業",
+    "url": "https://okinawa-ric.jp/service/post-3.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": [],
+    "amount_in_source": "100万円/件"
+   },
+   {
+    "name": "令和8年度_資源国脱炭素化・エネルギー転換技術等支援事業費補助金_第3回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeO1MAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和8年度　資源循環分野の脱炭素化促進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXyuMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
