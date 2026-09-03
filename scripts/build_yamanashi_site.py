@@ -90,7 +90,8 @@ def render_page(db):
                 f'<p class="sub">対象: {esc(it.get("target_household"))}</p>'
                 f'<p class="sub">金額: {esc(it.get("amount_note"))}</p>'
                 f'{howline}'
-                f'<a href="{esc(it.get("source_url"))}" rel="noopener">公式ページで確認する</a>'
+                f'<a href="{esc(it.get("source_url"))}" rel="noopener">公式ページで確認する</a> '
+                f'<a href="../kit/{esc(it.get("id"))}/">申請準備シート</a>'
                 f'</div>'
             )
         secs.append(
@@ -136,7 +137,8 @@ h2 .cnt{{font-size:.8rem;color:var(--fg-muted);font-weight:400;margin-left:.6em}
   <a class="hlogo" href="../"><img src="../../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.8rem;color:var(--fg-muted)">山梨版</span></a>
   <nav>
     <a href="../shindan/">3分診断</a>
-    <a href="./">制度一覧</a>
+    <a href="../area/">市町村</a>
+    <a href="../kit/">準備シート</a>
     <a href="../houkoku/">もらえた報告</a>
   </nav>
 </header>
@@ -146,11 +148,11 @@ h2 .cnt{{font-size:.8rem;color:var(--fg-muted);font-weight:400;margin-left:.6em}
 <div class="lead">
 <p>山梨県にお住まいの方が使える可能性のある、<strong>国の制度{count}本</strong>を分野別にまとめました。<br>掲載内容は各制度の公式ページと照合しています。金額・締切など確認が取れていないものは「要確認」と表示し、断定しません。最終的な受給の可否は各窓口の判断となります。</p>
 </div>
-<div class="prep">🏗 <strong>山梨県・市町村の制度は準備中です。</strong>各自治体に掲載のご了解を確認できたところから順に追加します。それまでは、市役所・町村役場の公式サイトもあわせてご確認ください。</div>
+<div class="prep">🏗 <strong>山梨県・市町村独自の制度は準備中です。</strong>各自治体に掲載のご了解を確認できたところから順に追加します。<a href="../area/">市町村別ページ</a>では、お住まいの街で使える国の制度をまとめて確認できます。</div>
 <div class="toc">{toc}</div>
 {"".join(secs)}
 <div class="disclaimer">このページは公式情報に基づく「ご案内」です。受給できるかどうかの最終判断は各窓口で行われます。申請手続きの代行は行っていません。<br>出典: こども家庭庁・厚生労働省・文部科学省・内閣府 各ウェブサイト(公共データ利用規約 PDL1.0 に基づく利用)ほか / 最終更新: {updated}<br>古い・違う情報を見つけたら <a href="../../teisei/">訂正窓口</a> から教えてください。<br>運営: 株式会社フクギイロ</div>
-<p style="margin-top:16px"><a href="../">もらいわすれ堂 山梨版 トップへ</a></p>
+<p style="margin-top:16px" class="footlinks"><a href="../area/">市町村別まとめ</a> ・ <a href="../kit/">申請準備シート一覧</a> ・ <a href="../">もらいわすれ堂 山梨版 トップへ</a></p>
 </div>
 </body>
 </html>

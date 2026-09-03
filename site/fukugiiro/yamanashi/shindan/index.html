@@ -45,6 +45,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 .lk-high{background:#dff2e9;color:#0f5138}
 .lk-mid{background:#fff3cd;color:#7a5b00}
 .result-card a{color:var(--fg-primary);display:inline-block;min-height:44px;line-height:1.9;padding:6px 0}
+@media(max-width:480px){.result-card .linksep{display:none}.result-card a.cardlink{display:block}}
 .first-badge{display:inline-block;background:var(--fg-primary);color:#fff;font-size:.82rem;border-radius:4px;padding:2px 12px;font-weight:700;margin-bottom:6px;margin-right:6px}
 .actions{display:flex;gap:10px;margin:16px 0}
 @media(max-width:480px){.actions{flex-direction:column}}
@@ -76,7 +77,8 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   <a class="hlogo" href="../"><img src="../../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.8rem;color:var(--fg-muted)">山梨版</span></a>
   <nav>
     <a href="./">3分診断</a>
-    <a href="../seido/">制度一覧</a>
+    <a href="../area/">市町村</a>
+    <a href="../kit/">準備シート</a>
     <a href="../houkoku/">もらえた報告</a>
   </nav>
 </header>
@@ -95,6 +97,8 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   var AGES = ["未就学","小学生","中学生","高校生","大学・専門"];
   var EVENTS = ["妊娠・出産","入園・入学","引越・住宅購入","就職・転職","失業","病気・けが","介護","災害","特になし"];
   var EVENT_MAP = {"引越・住宅購入":"住宅取得・引越","病気・けが":"病気・けが","妊娠・出産":"妊娠・出産","入園・入学":"入園・入学","就職・転職":"就職・転職","失業":"失業","介護":"介護","災害":"災害"};
+  // 市町村→ページslug(診断結果から市町村ページへ1タップで案内するため)
+  var MUNI_SLUG = {"甲府市":"kofu","富士吉田市":"fujiyoshida","都留市":"tsuru","山梨市":"yamanashi-shi","大月市":"otsuki","韮崎市":"nirasaki","南アルプス市":"minami-alps","北杜市":"hokuto","甲斐市":"kai","笛吹市":"fuefuki","上野原市":"uenohara","甲州市":"koshu","中央市":"chuo","市川三郷町":"ichikawamisato","早川町":"hayakawa","身延町":"minobu","南部町":"nanbu","富士川町":"fujikawa","昭和町":"showa","道志村":"doshi","西桂町":"nishikatsura","忍野村":"oshino","山中湖村":"yamanakako","鳴沢村":"narusawa","富士河口湖町":"fujikawaguchiko","小菅村":"kosuge","丹波山村":"tabayama"};
 
   var state = { step: 0, municipality: null, children: 0, childAges: [], lifeEvents: [], housing: null };
   var childrenTouched = false; // Q2未回答時に「0人」が選択済みに見える問題の表示用フラグ(初期値0は維持)
@@ -352,11 +356,17 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         app.appendChild(kindMsg);
       }
       // 医療・健康の制度は診断では判定しない設計(症状を尋ねない方針)のため、
-      // 制度一覧ページへの非断定の案内をここに出す(沖縄版 2026-08-11 三名体制裁定を継承・文言は断定禁止)。
+      // 一覧ページへの非断定の案内をここに出す(沖縄版 2026-08-11 三名体制裁定を継承・文言は断定禁止)。
+      var areaSlug = MUNI_SLUG[state.municipality];
+      var areaHref = areaSlug ? ("../area/" + areaSlug + "/") : "../area/";
+      var areaLabel = areaSlug ? (state.municipality + "の給付金・手当を見る") : "お住まいの市町村のページを見る";
       var medBanner = h("div", {style:"margin:14px 0;padding:14px 16px;background:#FFF8E6;border:1px solid #EAD59A;border-radius:12px"});
       medBanner.appendChild(h("p", {style:"font-weight:700;margin-bottom:4px", text:"医療費助成などの「医療・健康」の制度は、この診断では判定していません"}));
-      medBanner.appendChild(h("p", {class:"note", style:"margin-bottom:8px", text:"症状などをおたずねしない方針のためです。国の制度一覧で「医療・健康」の制度を確認できます。市町村独自の医療費助成は準備中のため、お住まいの市役所・町村役場のサイトもあわせてご確認ください。"}));
-      var seidoLink = h("a", {href:"../seido/#iryo", style:"font-weight:700", text:"国の制度一覧(医療・健康)を見る ›"});
+      medBanner.appendChild(h("p", {class:"note", style:"margin-bottom:8px", text:"症状などをおたずねしない方針のためです。国の「医療・健康」の制度は制度一覧で確認できます。市町村独自の医療費助成は準備中のため、お住まいの市役所・町村役場のサイトもあわせてご確認ください。"}));
+      var areaLink = h("a", {href: areaHref, style:"font-weight:700;margin-right:14px", text: areaLabel + " ›"});
+      areaLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("ymn_result_area_link"); });
+      medBanner.appendChild(areaLink);
+      var seidoLink = h("a", {href:"../seido/#iryo", style:"font-weight:700", text:"国の制度一覧(医療・健康) ›"});
       seidoLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("ymn_result_seido_link"); });
       medBanner.appendChild(seidoLink);
       app.appendChild(medBanner);
@@ -389,7 +399,11 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         mg.appendChild(h("span", {class:"note", style:"display:block;margin-top:2px;color:#0f5138", text:"対象かどうかは窓口が判断します。自信がなくて大丈夫です。"}));
         card.appendChild(mg);
         card.appendChild(h("a", {href: it.source_url, rel:"noopener", class:"cardlink", text:"公式ページで確認する"}));
-        card.appendChild(h("p", {class:"note", style:"margin-top:6px", text:"公式ページで内容を確認できたら、お住まいの窓口へ。最終的な受給の可否は窓口で確認されます。(印刷して持っていける「申請準備シート」は準備中です)"}));
+        card.appendChild(h("span", {class:"linksep", text:" ・ "}));
+        var kitLink = h("a", {href:"../kit/" + it.id + "/", class:"cardlink", text:"申請準備シート(持ち物リストつき)"});
+        kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("ymn_kit_click"); });
+        card.appendChild(kitLink);
+        card.appendChild(h("p", {class:"note", style:"margin-top:6px", text:"準備の目安がそろったら、お住まいの窓口へ。最終的な受給の可否は窓口で確認されます。"}));
         if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
         var mk = h("button", {class:"markbtn" + (isMarked ? " marked" : ""),
           text: isMarked ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、タップして記録"});
@@ -416,7 +430,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       // 共有・印刷はここ(結果一覧の下)に配置
       if (actions) app.appendChild(actions);
       var disc = h("div", {class:"disclaimer"});
-      disc.innerHTML = "この診断は公式情報に基づく「可能性のご案内」です。<br>受給できるかどうかの最終判断は各窓口で行われます。<br>医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため、診断には表示していません。<a href=\"../seido/\">国の制度一覧</a>でご確認ください。<br>いま診断の対象は国の制度のみです。山梨県・市町村の制度は準備中のため、お住まいの市役所・町村役場のサイトもあわせてご確認ください。";
+      disc.innerHTML = "この診断は公式情報に基づく「可能性のご案内」です。<br>受給できるかどうかの最終判断は各窓口で行われます。<br>医療・介護・障がいに関する制度は、症状などをおたずねしない方針のため、診断には表示していません。<a href=\"" + areaHref + "\">お住まいの市町村のページ</a>と<a href=\"../seido/\">国の制度一覧</a>でご確認ください。<br>いま診断の対象は国の制度のみです。山梨県・市町村独自の制度は準備中のため、お住まいの市役所・町村役場のサイトもあわせてご確認ください。";
       app.appendChild(disc);
       app.appendChild(h("p", {style:"margin-top:16px"}, [h("a", {href:"../", text:"← トップへもどる"})]));
     }).catch(function(){
