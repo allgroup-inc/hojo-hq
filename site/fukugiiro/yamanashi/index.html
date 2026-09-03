@@ -162,10 +162,163 @@ footer .fwrap p{margin-bottom:6px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<link rel="stylesheet" href="../assets/film.css">
+<style>
+/* ===== 山梨版フィルム(沖縄版film.cssの汎用部を流用し、シーンだけ山梨のもの) ===== */
+/* 写真未配置のとき(.nophoto)は影絵と光が主役。写真を置くと自動で実写が主役になる */
+.ysil{position:absolute;z-index:3;opacity:.95}
+.ysil svg{display:block;width:100%;height:auto}
+.ysil path,.ysil circle,.ysil ellipse,.ysil rect{fill:#0B1514}
+.ys2 .fujicap{fill:#E7E9E4;opacity:.92}
+.ys3 .ysil path,.ys3 .ysil circle,.ys3 .ysil ellipse,.ys3 .ysil rect{fill:#101E1D}
+.ys4 .ysil path,.ys4 .ysil circle,.ys4 .ysil ellipse{fill:#3D2B20}
+/* 写真が入ったら影絵を引っ込める(実写主役化・沖縄版と同じ思想) */
+.film .photoback:not(.nophoto)~.ysil{opacity:.35}
+.ys1 .photoback:not(.nophoto)~.island, .ys1 .photoback:not(.nophoto)~#vlights{display:none}
+</style>
 </head>
 <body>
 
-<header class="siteheader" id="top">
+<!-- ===== 山梨版フィルム: 夜の盆地→富士→無尽→桃源郷→ビジョン。写真は assets/film/ に置くと実写に切替 ===== -->
+<div style="position:relative">
+<div class="tinyhead" id="thead" style="position:absolute">
+  <a class="hl" href="#top"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="2" width="60" height="60" rx="18" fill="#F5E0CE"/><g fill="#F5CE6E"><circle cx="52" cy="16.5" r="1.9"/><circle cx="50.2" cy="20.7" r="1.9"/><circle cx="46" cy="22.5" r="1.9"/><circle cx="41.8" cy="20.7" r="1.9"/><circle cx="40" cy="16.5" r="1.9"/><circle cx="41.8" cy="12.3" r="1.9"/><circle cx="46" cy="10.5" r="1.9"/><circle cx="50.2" cy="12.3" r="1.9"/></g><circle cx="46" cy="16.5" r="4" fill="#F2C14E"/><path d="M11 53 A21 21 0 0 1 53 53" stroke="#D2694A" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M18 53 A14 14 0 0 1 46 53" stroke="#F2C14E" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M25 53 A7 7 0 0 1 39 53" stroke="#6FAEA4" stroke-width="6" fill="none" stroke-linecap="round"/></svg>もらいわすれ堂 山梨版</a>
+  <a class="skip" href="#honmon">スキップして診断へ →</a>
+</div>
+<div class="film">
+
+  <!-- S1: 約80万人(夜・甲府盆地の灯り) -->
+  <section class="scene ys1" id="s1">
+    <div class="kb">
+      <div class="photoback"><img src="assets/film/yakei.jpg" alt=""></div>
+      <div class="milky"></div>
+      <div id="stars"></div>
+      <div class="cloud c1" style="top:20%"></div>
+      <div class="moon"></div>
+      <div class="shooting"></div>
+      <div class="island"><svg viewBox="0 0 1200 240" preserveAspectRatio="none"><path d="M0 240 L0 128 C90 96 180 118 270 92 C360 66 430 90 520 108 C610 126 700 96 790 84 C880 72 980 110 1080 122 C1130 128 1170 126 1200 130 L1200 240 Z" fill="#0B1514"/></svg></div>
+      <div id="vlights"></div>
+    </div>
+    <div class="pretitle"><p>これは、あなたにも関係のある物語。</p></div>
+    <div class="copy">
+      <p class="stmt stmt-l dark-t" style="transition-delay:2.5s">約80万人が、<br>暮らしているのが山梨です。</p>
+      <p class="rise sub" style="transition-delay:3.1s;margin-top:1.2em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.22em;color:#E9D8BC;font-weight:500">— 盆地の灯りのひとつひとつに、暮らしがある —</p>
+    </div>
+    <div class="scrollcue">ゆっくり、下へ</div>
+  </section>
+
+  <!-- S2: 富士山(未明・仰いで暮らす) -->
+  <section class="scene ys2" id="s2">
+    <div class="kb">
+      <div class="photoback"><img src="assets/film/fuji.jpg" alt=""></div>
+      <div class="hoshi" style="top:12%;left:30%;width:3px;height:3px;animation-delay:.5s"></div>
+      <div class="hoshi" style="top:20%;left:78%;width:2px;height:2px;animation-delay:1.3s"></div>
+      <div class="hoshi" style="top:6%;left:56%;width:3px;height:3px"></div>
+      <div class="hoshi" style="top:28%;left:14%;width:2px;height:2px;animation-delay:1.9s"></div>
+      <div class="cloud c2" style="top:26%"></div>
+      <!-- 富士の影 -->
+      <div class="ysil" style="left:0;right:0;bottom:0;height:34vh"><svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" style="width:100%;height:100%">
+        <path d="M0 300 L0 268 C120 258 260 244 380 196 C470 160 540 108 600 104 C660 108 730 160 820 196 C940 244 1080 258 1200 268 L1200 300 Z"/>
+        <path class="fujicap" d="M512 152 C544 122 576 110 600 109 C624 110 656 122 688 152 C668 142 654 156 636 144 C620 158 604 140 588 154 C570 140 548 150 534 158 C526 152 518 154 512 152 Z"/>
+      </svg></div>
+    </div>
+    <div class="copy">
+      <p class="stmt stmt-s dark-t">富士山を仰いで<br>暮らすのが、山梨です。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#C9D2C6;font-weight:500">日本一の山と、いっしょに目覚める毎日。</p>
+    </div>
+  </section>
+
+  <!-- S3: 無尽(夜明け前・支え合い) -->
+  <section class="scene ys3" id="s3">
+    <div class="kb">
+      <div class="photoback"><img src="assets/film/mujin.jpg" alt=""></div>
+      <div class="cloud c1" style="top:14%"></div>
+      <!-- 食卓を囲む人々の影(無尽) -->
+      <div class="ysil" style="left:50%;bottom:16vh;width:min(76vw,440px);transform:translateX(-50%)"><svg viewBox="0 0 440 170">
+        <ellipse cx="220" cy="128" rx="150" ry="20"/>
+        <g><circle cx="98" cy="62" r="15"/><path d="M76 128 C76 96 84 78 98 74 C112 78 120 96 120 128 Z"/></g>
+        <g><circle cx="220" cy="46" r="16"/><path d="M196 122 C196 88 205 68 220 64 C235 68 244 88 244 122 Z"/></g>
+        <g><circle cx="342" cy="62" r="15"/><path d="M320 128 C320 96 328 78 342 74 C356 78 364 96 364 128 Z"/></g>
+        <rect x="150" y="108" width="26" height="8" rx="4"/><rect x="264" y="108" width="26" height="8" rx="4"/><rect x="206" y="104" width="28" height="9" rx="4"/>
+      </svg></div>
+    </div>
+    <div class="copy" style="transform:translateY(-8vh)">
+      <p class="stmt stmt-s dark-t">困ったときは、<br>支え合うのが山梨です。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#D8DCC9;font-weight:500">無尽(むじん)—— 集まって、ささえ合う。<br>山梨に息づく習わし。</p>
+    </div>
+  </section>
+
+  <!-- S4: 美しい(桃源郷の朝) -->
+  <section class="scene ys4" id="s4">
+    <div class="kb">
+      <div class="photoback"><img src="assets/film/momo.jpg" alt="" loading="lazy"></div>
+      <div class="cloud c1" style="top:12%;background:rgba(255,224,194,.16)"></div>
+      <div class="glow"></div>
+      <div class="risingsun"></div>
+      <div class="bird" style="top:24%"><svg viewBox="0 0 60 24"><path class="flap" d="M4 16 C12 6 20 6 30 14 C40 6 48 6 56 16"/></svg></div>
+      <div class="bird b2" style="top:32%"><svg viewBox="0 0 60 24"><path class="flap" d="M4 16 C12 6 20 6 30 14 C40 6 48 6 56 16"/></svg></div>
+      <!-- 桃の枝の影 -->
+      <div class="ysil" style="left:-2vw;bottom:13vh;width:min(34vw,180px)"><svg viewBox="0 0 180 200">
+        <path d="M28 200 C34 150 44 112 62 84 L70 90 C54 118 46 152 42 200 Z"/>
+        <path d="M64 90 C50 74 34 68 18 72 C34 60 54 68 68 84 Z"/>
+        <path d="M66 88 C70 64 84 48 104 44 C88 56 78 72 74 88 Z"/>
+        <circle cx="96" cy="52" r="7"/><circle cx="112" cy="44" r="6"/><circle cx="24" cy="70" r="6"/><circle cx="40" cy="62" r="5"/><circle cx="82" cy="70" r="5"/>
+      </svg></div>
+    </div>
+    <div class="copy" style="transform:translateY(-6vh)">
+      <p class="stmt stmt-l warm-t">なにより、<br>美しいのが山梨です。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#FFF1DE;font-weight:500">桃の春、ぶどうの秋。盆地はきょうも色づく。</p>
+    </div>
+  </section>
+
+  <!-- S6: そんな山梨に(問題→希望) -->
+  <section class="scene s6" id="s6">
+    <div class="mote" style="width:7px;height:7px;top:26%;left:20%"></div>
+    <div class="mote" style="width:5px;height:5px;top:56%;left:76%;animation-delay:1.4s"></div>
+    <div class="copy">
+      <p class="rise q1">そんな山梨に、いま。<br>まだ眠っている“ささえ”があります。</p>
+      <p class="rise d2 q2">国や県、市町村が用意した給付金や手当が——<br>「知らなかった」というだけで、<br>届かないまま終わることがある。</p>
+      <p class="rise d3 q2" style="color:var(--coral-deep);font-weight:700">一人が受け取るたび、<br>山梨のみらいは、すこし明るくなる。</p>
+    </div>
+  </section>
+
+  <!-- S7: ビジョン -->
+  <section class="scene s7" id="s7">
+    <div class="sunburst"></div>
+    <div class="mote" style="width:6px;height:6px;top:22%;left:24%;animation-delay:.4s"></div>
+    <div class="mote" style="width:5px;height:5px;top:34%;left:72%;animation-delay:1.6s"></div>
+    <svg class="logo" viewBox="0 0 64 46" aria-label="もらいわすれ堂のロゴ">
+      <g fill="#F5CE6E" class="petal"><circle cx="52" cy="12.5" r="1.9"/><circle cx="50.2" cy="16.7" r="1.9"/><circle cx="46" cy="18.5" r="1.9"/><circle cx="41.8" cy="16.7" r="1.9"/><circle cx="40" cy="12.5" r="1.9"/><circle cx="41.8" cy="8.3" r="1.9"/><circle cx="46" cy="6.5" r="1.9"/><circle cx="50.2" cy="8.3" r="1.9"/></g>
+      <circle cx="46" cy="12.5" r="4" fill="#F2C14E" class="petal"/>
+      <path class="arc a1" d="M11 43 A21 21 0 0 1 53 43" stroke="#D2694A"/>
+      <path class="arc a2" d="M18 43 A14 14 0 0 1 46 43" stroke="#F2C14E"/>
+      <path class="arc a3" d="M25 43 A7 7 0 0 1 39 43" stroke="#6FAEA4"/>
+    </svg>
+    <div class="copy">
+      <p class="vision mincho" id="visiontext">とどけ、山梨のご家庭へ。</p>
+      <p class="wm mincho rise d2" style="margin-top:.9em">もらいわすれ堂 山梨版</p>
+    </div>
+  </section>
+
+  <!-- S8: 誘い(写真の壁は山梨の笑顔写真が集まったら追加) -->
+  <section class="scene s8" id="s8">
+    <div class="haze"></div>
+    <div class="copy">
+      <p class="main mincho rise">そのみらいは、<br><span class="em">あなたの家</span>から はじまる。</p>
+      <p class="sub2 mincho rise d2">こどもも、おとなも、おじいちゃんも、おばあちゃんも。</p>
+      <p class="mincho rise d3" style="margin-top:1.4em;font-size:clamp(.95rem,3.1vw,1.15rem);color:var(--ink);letter-spacing:.1em">あなたの家にも、まだ気づいていない<br>“ささえ”があるかもしれません。</p>
+      <a class="cta rise d3" href="shindan/">私の“もらい忘れ”を3分で調べる</a>
+      <p class="micro rise d3" style="margin-top:10px">無料 ・ 匿名 ・ 登録不要ではじめられます</p>
+      <p class="rise d3" style="margin-top:14px;font-size:.85rem"><a href="area/" style="color:var(--coral-deep);text-decoration:none;letter-spacing:.06em">まずは、お住まいの市町村のささえを見てみる ›</a></p>
+    </div>
+  </section>
+
+</div>
+</div>
+<script src="assets/ymn-film.js" defer></script>
+<!-- ===== フィルムここまで。以下、実用レイヤー ===== -->
+
+<header class="siteheader" id="honmon">
   <a class="hlogo" href="./"><img src="../assets/icon.svg" alt="" width="32" height="32">もらいわすれ堂 <span class="ed">山梨版</span></a>
   <nav>
     <a href="shindan/">3分診断</a>

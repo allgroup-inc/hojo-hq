@@ -1,0 +1,43 @@
+name: yamanashi-audit
+
+# もらいわすれ堂 山梨版: 県+27市町村サイトの自動監査(本人確認+robots+規約抜粋)。
+# 開発サンドボックスは外部接続不可のため、GitHub Actions で実行する(沖縄版 fukugiiro-audit と同型)。
+# 初回はこのワークフローが main に入った push で自動実行され、結果が docs/ にコミットされる。
+on:
+  push:
+    branches: [main]  # 作業ブランチへのbot混入防止(fukugiiro-audit と同じ方針)
+    paths:
+      - "scripts/audit_yamanashi.py"
+      - ".github/workflows/yamanashi-audit.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: yamanashi-audit
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 自治体サイト自動監査(本人確認+robots+規約抜粋)
+        run: python scripts/audit_yamanashi.py
+
+      - name: Commit audit report
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add docs/山梨版_自治体サイト監査結果.md data/fukugiiro/yamanashi_site_audit.json
+          git diff --cached --quiet || git commit -m "auto: yamanashi municipality site audit $(date '+%Y-%m-%d %H:%M')"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done
