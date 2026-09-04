@@ -241,6 +241,15 @@ def main():
     else:
         print("[skip] Facebook: 未接続(FB_PAGE_ID / FB_PAGE_ACCESS_TOKEN 未設定)")
 
+    # IGのキャプション内URLはタップできない(リンク化されるのはプロフィール欄と
+    # ストーリーズのスタンプのみ)。サイトURLの行を「プロフィールのリンクから」に
+    # 置き換える(2026-09-01 小柳さん指摘)。制度の原文URLは情報として残す。
+    import re as _re
+    ig_caption = _re.sub(
+        r"^https://allgroup-inc\.github\.io/hojo-hq/\S*$",
+        "プロフィールのリンクからどうぞ",
+        caption, flags=_re.M)
+
     if state.get("instagram"):
         print("[skip] Instagram: 本日分は投稿済み(state記録済み・二重投稿防止)")
     elif ig_user and token:
@@ -253,10 +262,10 @@ def main():
                 children.append(c["id"])
             c = api(f"/{ig_user}/media",
                     {"media_type": "CAROUSEL", "children": ",".join(children),
-                     "caption": caption, "access_token": token})
+                     "caption": ig_caption, "access_token": token})
         else:
             c = api(f"/{ig_user}/media",
-                    {"image_url": image_url, "caption": caption, "access_token": token})
+                    {"image_url": image_url, "caption": ig_caption, "access_token": token})
         creation_id = c["id"]
         last_err = None
         for _ in range(3):  # コンテナ処理待ちを考慮して公開を最大3回試行
