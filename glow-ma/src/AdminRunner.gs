@@ -58,7 +58,7 @@ function renderAdminPage_() {
     return HtmlService.createHtmlOutput(GlowAdminAccess.buildAccessDeniedHtml());
   }
   return HtmlService.createHtmlOutput(GlowAdminApp.buildAdminAppHtml())
-    .setTitle("GLOW企業リレーション台帳");
+    .setTitle("GLOWリレーション管理システム");
 }
 
 /**
