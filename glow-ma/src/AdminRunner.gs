@@ -440,6 +440,84 @@ function appendInteractionLog(companyId, interactionType, memo) {
 }
 
 /**
+ * 連続架電モード(v1.7.0): 現在の絞り込み条件で架電リストを返す。
+ * 並び順・除外規則はGlowCallMode.buildCallQueue(純ロジック)が担う。
+ * この関数の名前の末尾に `_` を付けてはいけない(getPartnerListと同じ理由)。
+ */
+function getCallQueue(filters) {
+  requireAdminAccess_();
+  var loaded = loadCompaniesWithReactionFlag_();
+  var filtered = GlowAdminAccess.applyCompanyFilters(loaded.companies, filters || {});
+  return GlowCallMode.buildCallQueue(filtered, loaded.todayString);
+}
+
+/**
+ * 連続架電モードの結果記録(v1.7.0): 結果ボタン1つで、対応履歴への記録+
+ * 次回アクションの自動設定+最終接触日の更新を1ロックの中で行う。
+ * 結果→記録内容の変換はGlowCallMode.resolveCallOutcome(純ロジック)、
+ * 入力検証は既存のvalidateQuickLog/buildNextActionUpdateを再利用する。
+ * この関数の名前の末尾に `_` を付けてはいけない(getPartnerListと同じ理由)。
+ */
+function recordCallOutcome(companyId, outcome, extra) {
+  requireAdminAccess_();
+  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  var resolved = GlowCallMode.resolveCallOutcome(outcome, todayString, extra || {});
+  if (!resolved.ok) {
+    return { ok: false, errors: resolved.errors };
+  }
+  var quick = GlowAdminAccess.validateQuickLog({
+    "企業ID": companyId, "種別": resolved.type, "内容メモ": resolved.memo
+  });
+  if (!quick.ok) {
+    return { ok: false, errors: quick.errors };
+  }
+  var nextAction = GlowAdminAccess.buildNextActionUpdate(resolved.nextDate, resolved.nextNote);
+  if (!nextAction.ok) {
+    return { ok: false, errors: nextAction.errors };
+  }
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  if (!logSheet || !companySheet) {
+    throw new Error("対応履歴ログまたは企業マスタのタブが見つかりません。");
+  }
+  var staffName = GlowAdminAccess.resolveStaffName(
+    Session.getActiveUser().getEmail(), readStaffAllowlistEmails_()
+  );
+  var record = {
+    "履歴ID": "H-" + Utilities.getUuid(),
+    "企業ID": quick.companyId,
+    "日付": todayString,
+    "担当者": staffName,
+    "種別": quick.type,
+    "対応相手": "",
+    "内容メモ": quick.memo,
+    "次回アクション": nextAction.note
+  };
+  var headers = GlowSchema.INTERACTION_LOG_HEADERS;
+  var row = headers.map(function (header) {
+    return record[header] !== undefined ? record[header] : "";
+  });
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(10000)) {
+    throw new Error("他の処理がデータを操作中のため、記録を中断しました。しばらく待ってから再実行してください。");
+  }
+  try {
+    logSheet.getRange(logSheet.getLastRow() + 1, 1, 1, headers.length).setValues([row]);
+    var rowIndex = findCompanyRowIndex_(companySheet, quick.companyId);
+    if (rowIndex !== -1) {
+      var masterHeaders = GlowSchema.COMPANY_MASTER_HEADERS;
+      companySheet.getRange(rowIndex, masterHeaders.indexOf("最終接触日") + 1).setValue(todayString);
+      companySheet.getRange(rowIndex, masterHeaders.indexOf("次回アクション予定日") + 1).setValue(nextAction.date);
+      companySheet.getRange(rowIndex, masterHeaders.indexOf("次回アクション内容") + 1).setValue(nextAction.note);
+    }
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true, record: record, nextDate: nextAction.date, nextNote: nextAction.note };
+}
+
+/**
  * 集客ファネル(週次)を返す。LP閲覧・LINE友だち数はhojo-hq(公開リポジトリ)で
  * 毎日自動収集されているKPIデータをraw.githubusercontent.comから読む。
  * 取得に失敗してもglow-ma内部の数字(新規登録・面談・成約)だけで表は成立させ、
