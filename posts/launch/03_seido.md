@@ -1,26 +1,26 @@
 # 投稿3｜締切が近い制度(2/3・30日以上先)
 
 ## 画像に載せる文言
-- タイトル: 「風車生産技術研究開発」の公募
+- タイトル: 「地熱ポテンシャル高度利活用技術開発」の追加公募
 - サブ: 上限額は要確認（原文でご確認ください）
 - 数字: 締切まで残り31日
 - バッジ: いま募集中
 
 ## キャプション
 締切まで残り31日。書類の準備、ここから始めれば間に合います。
-【募集中】「風車生産技術研究開発」の公募
+【募集中】「地熱ポテンシャル高度利活用技術開発」の追加公募
 🗓 締切：2026-10-05（残り31日）
 💰 上限額は要確認（原文でご確認ください）
 🏝 実施主体：要確認
 沖縄の事業者も、要件に合えば申請できます。準備の時間も取りやすい制度です。
 公募要領の原文はこちら👇
-https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe8tMAD
+https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdoxMAD
 ※要件・締切・金額は必ず原文の公募要領でご確認ください。
 
 #沖縄補助金 #沖縄助成金 #沖縄経営者 #中小企業支援 #沖縄企業のミカタ
 
 ## 出典
-https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe8tMAD
+https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdoxMAD
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
