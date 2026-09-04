@@ -7,16 +7,20 @@
 <title>LINEへ移動中…</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TQMX3MPFSR"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag() { dataLayer.push(arguments); }
-  gtag("js", new Date());
-  gtag("config", "G-TQMX3MPFSR", { transport_type: "beacon" });
   var fgDone = false;
   function fgGo() { if (fgDone) return; fgDone = true; window.location.replace("https://lin.ee/7fH7vDQ"); }
-  // 送るのはイベント名と channel のみ(個人識別子なし)
-  gtag("event", "line_redirect", { channel: "fg-life", transport_type: "beacon",
-    event_callback: fgGo, event_timeout: 400 });
-  setTimeout(fgGo, 400);
+  if (navigator.webdriver) {
+    setTimeout(fgGo, 50);
+  } else {
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag("js", new Date());
+    gtag("config", "G-TQMX3MPFSR", { transport_type: "beacon" });
+    // 送るのはイベント名と channel のみ(個人識別子なし)
+    gtag("event", "line_redirect", { channel: "fg-life", transport_type: "beacon",
+      event_callback: fgGo, event_timeout: 400 });
+    setTimeout(fgGo, 400);
+  }
 </script>
 <style>
   body{font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;
