@@ -46,3 +46,6 @@ private/
 site/data/
 video-project/export/
 video-project/hf/node_modules/
+
+# 山梨版デモのローカル生成物
+demo_out/
