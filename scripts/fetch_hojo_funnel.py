@@ -12,8 +12,20 @@ data/hojo/funnel.json を生成する。
   channel を絞らずに event:name だけで集計すると、もらいわすれ堂などの
   他チャネルの line_redirect まで混ざるため、必ず channel フィルタをかける。
 
+GA4版(2026-09-04 追加。議事_20260824_計測GA4切替.md の残タスク):
+- Plausible は 2026-08-24 に契約終了(402)で停止。GA4_SA_JSON と
+  GA4_MIKATA_PROPERTY_ID(ミカタLPプロパティ G-TW6M6WFB9T の数字ID)が
+  Secrets にあれば GA4 Data API から取得する(GA4優先)。
+- イベント対応: diagnosis_start→診断開始 / diagnosis_run→診断実行 /
+  line_cta_click(channel=shindan)→LINE誘導タップ。
+  channel はカスタムディメンション登録が要るため、引けない間は
+  line_cta_click 全体で代用し line_tap_note に明記する(黙って欠損させない)。
+- 計測方式が変わるため source フィールドで区別する(ga4-data-api)。
+
 使い方:
-  PLAUSIBLE_API_KEY=xxx python scripts/fetch_hojo_funnel.py   # 取得して funnel.json 生成
+  GA4_SA_JSON='{...}' GA4_MIKATA_PROPERTY_ID=123456789 \
+    python scripts/fetch_hojo_funnel.py                       # GA4から取得
+  PLAUSIBLE_API_KEY=xxx python scripts/fetch_hojo_funnel.py   # (旧)Plausibleから取得
   python scripts/fetch_hojo_funnel.py --self-test             # build_funnel を golden で検証
 """
 import json
@@ -112,6 +124,40 @@ def fetch_counts(api_key, site_id, period, api_base):
     return counts
 
 
+GA4_EVENT_MAP = {  # GA4イベント名 → funnel.json のキー
+    "diagnosis_start": "hojo_shindan_start",
+    "diagnosis_run": "hojo_shindan_complete",
+}
+
+
+def fetch_counts_ga4(days):
+    """GA4 Data API(ミカタLPプロパティ)から同じ3段のカウントを取得する。
+    返り値: (counts, line_tap_note)。line_tap_note は channel 内訳が
+    引けなかったときの注記(通常は None)。"""
+    import ga4_client  # noqa: PLC0415
+
+    prop = os.environ["GA4_MIKATA_PROPERTY_ID"]
+    token = ga4_client.get_token()
+    start, end = f"{days}daysAgo", "today"
+
+    ev = ga4_client.event_counts(token, prop, start, end,
+                                 list(GA4_EVENT_MAP) + ["line_cta_click"])
+    counts = {}
+    for ga4_name, key in GA4_EVENT_MAP.items():
+        counts[key] = ev.get(ga4_name, {}).get("events", 0)
+
+    note = None
+    br = ga4_client.channel_breakdown(token, prop, start, end, "line_cta_click")
+    if br is None:
+        # カスタムディメンション channel 未登録など。全チャネル合算で代用し明記
+        counts["line_tap"] = ev.get("line_cta_click", {}).get("events", 0)
+        note = ("channel内訳が引けないため line_cta_click 全体の値"
+                "(GA4のカスタムディメンション channel 登録で診断経由のみに絞れる)")
+    else:
+        counts["line_tap"] = sum(e for ch, e, _ in br if ch == LINE_TAP_CHANNEL)
+    return counts, note
+
+
 def _r(x):
     return None if x is None else round(x, 4)
 
@@ -144,27 +190,44 @@ def self_test():
 def main():
     if "--self-test" in sys.argv:
         return self_test()
-    api_key = os.environ.get("PLAUSIBLE_API_KEY")
-    if not api_key:
-        print("[info] PLAUSIBLE_API_KEY 未設定: ファネル取得をスキップ(週次レポは未接続表示にフォールバック)")
-        return 0
-    site_id = os.environ.get("PLAUSIBLE_SITE_ID", "allgroup-inc.github.io")
-    period = os.environ.get("PLAUSIBLE_PERIOD", "7d")
-    api_base = os.environ.get("PLAUSIBLE_API_BASE", "https://plausible.io")
-    try:
-        counts = fetch_counts(api_key, site_id, period, api_base)
-    except urllib.error.HTTPError as e:
-        body = ""
+
+    counts = None
+    source = None
+    line_tap_note = None
+
+    # GA4優先(2026-08-24 Plausible契約終了のため。議事_20260824_計測GA4切替.md)
+    if os.environ.get("GA4_SA_JSON") and os.environ.get("GA4_MIKATA_PROPERTY_ID"):
         try:
-            body = e.read().decode("utf-8", "replace")[:500]
-        except Exception:
-            pass
-        print(f"[warn] Plausible Stats API {e.code} {e.reason}: {body}")
-        print("[info] ファネル取得をスキップ(週次レポは未接続表示にフォールバック)")
-        return 0
+            counts, line_tap_note = fetch_counts_ga4(7)
+            source = "ga4-data-api"
+        except Exception as e:  # noqa: BLE001
+            print(f"[warn] GA4 Data API 取得失敗: {type(e).__name__}(Plausibleへフォールバック)")
+
+    period = os.environ.get("PLAUSIBLE_PERIOD", "7d")
+    if counts is None:
+        api_key = os.environ.get("PLAUSIBLE_API_KEY")
+        if not api_key:
+            print("[info] GA4/Plausible とも未設定: ファネル取得をスキップ(週次レポは未接続表示にフォールバック)")
+            return 0
+        site_id = os.environ.get("PLAUSIBLE_SITE_ID", "allgroup-inc.github.io")
+        api_base = os.environ.get("PLAUSIBLE_API_BASE", "https://plausible.io")
+        try:
+            counts = fetch_counts(api_key, site_id, period, api_base)
+            source = "plausible-stats-api"
+        except urllib.error.HTTPError as e:
+            body = ""
+            try:
+                body = e.read().decode("utf-8", "replace")[:500]
+            except Exception:
+                pass
+            print(f"[warn] Plausible Stats API {e.code} {e.reason}: {body}")
+            print("[info] ファネル取得をスキップ(週次レポは未接続表示にフォールバック)")
+            return 0
     fn = build_funnel(counts)
     out = {"schema_version": 1, "updated_at": date.today().isoformat(),
-           "period": period, "source": "plausible-stats-api"}
+           "period": period, "source": source}
+    if line_tap_note:
+        out["line_tap_note"] = line_tap_note
     out.update(fn)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:

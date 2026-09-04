@@ -27,10 +27,15 @@ jobs:
       - name: レポート生成
         env:
           PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
+          GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
+          GA4_MIKATA_PROPERTY_ID: ${{ secrets.GA4_MIKATA_PROPERTY_ID }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
-        run: python scripts/funnel_deep_dive.py
+        run: |
+          if [ -n "$GA4_SA_JSON" ]; then pip install -q google-auth requests; fi
+          python scripts/funnel_deep_dive.py
 
       - name: コミット
         run: |

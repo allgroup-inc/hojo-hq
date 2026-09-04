@@ -9,11 +9,11 @@ on:
   workflow_dispatch:
     inputs:
       files:
-        description: "送る画像ファイル名(posts/images/内・カンマ区切り・最大4)"
-        required: true
-        default: "02_seido.png,03_seido.png,04_seido.png,05_shokei.png"
+        description: "送る画像ファイル名(posts/images/内・カンマ区切り・最大4。空ならテキストのみ)"
+        required: false
+        default: ""
       note:
-        description: "画像に添える一言(省略可)"
+        description: "添える文章(画像なしのテキスト連絡にも使える)"
         required: false
         default: ""
 
@@ -39,6 +39,10 @@ jobs:
           set -e
           if [ -z "$TOKEN" ] || [ -z "$TO" ]; then
             echo "::error::LINE_CHANNEL_ACCESS_TOKEN / LINE_ADMIN_USER_ID が未設定です"
+            exit 1
+          fi
+          if [ -z "$FILES" ] && [ -z "$NOTE" ]; then
+            echo "::error::files と note の両方が空です(送るものがありません)"
             exit 1
           fi
           RAW="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/posts/images"

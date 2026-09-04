@@ -134,6 +134,99 @@ def site_block(h, label, period):
     return "\n".join(L)
 
 
+GA4_FUNNEL = [  # (GA4イベント名, 表示ラベル)
+    ("diagnosis_start", "診断をさわり始めた"),
+    ("diagnosis_run", "診断を実行(結果を見た)"),
+    ("step2_done", "STEP2最終チェック回答"),
+    ("line_cta_click", "LINE登録ボタンをタップ"),
+]
+
+
+def site_block_ga4(token, label, start, end):
+    """GA4版(2026-08-24 Plausible契約終了→切替)。ミカタLPプロパティの
+    ファネルイベント+ /go/ 側(もらいわすれ堂プロパティ)のline_redirect内訳。"""
+    import ga4_client  # noqa: PLC0415
+    prop = os.environ["GA4_MIKATA_PROPERTY_ID"]
+    L = [f"### {label}"]
+    try:
+        agg = ga4_client.aggregate(token, prop, start, end)
+        L.append(f"- 訪問者 **{agg['visitors']}人** / 閲覧 {agg['pageviews']}PV"
+                 f" / 平均滞在 {agg['visit_duration']}秒 / 直帰率 {agg['bounce_rate']}%"
+                 "(操作なし直帰はGA4に載らないため、実際の訪問はこれより多い可能性)")
+    except Exception as e:  # noqa: BLE001
+        L.append(f"- サイト集計: 取得不可({type(e).__name__})")
+        return "\n".join(L)
+    v_total = agg["visitors"] or 0
+
+    try:
+        ev = ga4_client.event_counts(token, prop, start, end,
+                                     [n for n, _ in GA4_FUNNEL])
+    except Exception as e:  # noqa: BLE001
+        L.append(f"- ファネルイベント: 取得不可({type(e).__name__})")
+        ev = {}
+    L.append("")
+    L.append("| 段階 | 人数(ユニーク) | 到達率(訪問者比) | 回数 |")
+    L.append("|---|---|---|---|")
+    L.append(f"| サイト訪問 | {v_total}人 | 100% | - |")
+    for name, label2 in GA4_FUNNEL:
+        d = ev.get(name)
+        if d is None:
+            L.append(f"| {label2} | 0人 | {fmt_pct(0, v_total)} | 0回 |")
+        else:
+            L.append(f"| {label2} | {d['users']}人 | {fmt_pct(d['users'], v_total)} | {d['events']}回 |")
+
+    # LINEタップの経路内訳(LP側 line_cta_click / go側 line_redirect)
+    br = ga4_client.channel_breakdown(token, prop, start, end, "line_cta_click")
+    if br is None:
+        L.append("- LPのLINEタップ経路内訳: 取得不可(GA4カスタムディメンション channel 未登録)")
+    elif br:
+        L.append("- LPのLINEタップ経路内訳: "
+                 + " / ".join(f"{ch}: {e}回({u}人)" for ch, e, u in br))
+    go_prop = os.environ.get("GA4_PROPERTY_ID", "")
+    if go_prop:
+        br2 = ga4_client.channel_breakdown(token, go_prop, start, end, "line_redirect")
+        if br2 is None:
+            L.append("- /go/中間ページ到達の内訳: 取得不可(channel未登録)")
+        elif br2:
+            L.append("- /go/中間ページ到達の内訳: "
+                     + " / ".join(f"{ch}: {e}回({u}人)" for ch, e, u in br2))
+        else:
+            L.append("- /go/中間ページ到達: 0回")
+
+    # 流入元
+    try:
+        data = ga4_client.run_report(token, prop, {
+            "dateRanges": [{"startDate": start, "endDate": end}],
+            "dimensions": [{"name": "sessionSource"}],
+            "metrics": [{"name": "activeUsers"}], "limit": "8",
+            "orderBys": [{"metric": {"metricName": "activeUsers"}, "desc": True}]})
+        rows = data.get("rows") or []
+        if rows:
+            parts = [f"{r['dimensionValues'][0]['value']}: {r['metricValues'][0]['value']}人"
+                     for r in rows]
+            L.append("- 流入元: " + " / ".join(parts))
+    except Exception:  # noqa: BLE001
+        L.append("- 流入元: 取得不可")
+
+    # よく見られたページ
+    try:
+        data = ga4_client.run_report(token, prop, {
+            "dateRanges": [{"startDate": start, "endDate": end}],
+            "dimensions": [{"name": "pagePath"}],
+            "metrics": [{"name": "activeUsers"}, {"name": "screenPageViews"}],
+            "limit": "10",
+            "orderBys": [{"metric": {"metricName": "activeUsers"}, "desc": True}]})
+        rows = data.get("rows") or []
+        if rows:
+            L.append("- よく見られたページ(訪問者数):")
+            for r in rows:
+                L.append(f"  - {r['dimensionValues'][0]['value']}:"
+                         f" {r['metricValues'][0]['value']}人 / {r['metricValues'][1]['value']}PV")
+    except Exception:  # noqa: BLE001
+        L.append("- ページ内訳: 取得不可")
+    return "\n".join(L)
+
+
 def line_block():
     token = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN", "")
     if not token:
@@ -197,8 +290,22 @@ def main():
            "",
            "「何人が・どこまで来て・どこで離脱しているか」の全量。取得できない項目は正直に「取得不可」と表記。",
            ""]
-    if not h:
-        out.append("サイト計測: 未接続(PLAUSIBLE_API_KEY未設定)")
+    if os.environ.get("GA4_SA_JSON") and os.environ.get("GA4_MIKATA_PROPERTY_ID"):
+        out.append("## サイト(GA4計測 ※2026-08-24にPlausibleから方式変更・数字は直接比較不可)")
+        try:
+            import ga4_client  # noqa: PLC0415
+            token = ga4_client.get_token()
+            out.append(site_block_ga4(token, f"GA4計測開始(2026-08-24)〜{TODAY}",
+                                      "2026-08-24", "today"))
+            out.append("")
+            out.append(site_block_ga4(token, "直近7日", "7daysAgo", "today"))
+        except Exception as e:  # noqa: BLE001
+            out.append(f"サイト集計: 取得不可(GA4認証 {type(e).__name__})")
+        out.append("")
+        out.append(f"※Plausible時代(公開{LAUNCH}〜8/24)の最終値は"
+                   " reports/hojo-mikata/funnel_deep_dive_2026-09-04.md と data/hojo/funnel.json(8/16取得)を参照")
+    elif not h:
+        out.append("サイト計測: 未接続(GA4_SA_JSON+GA4_MIKATA_PROPERTY_ID 未設定。手順: docs/GA4計測復旧手順_20260904.md)")
     else:
         out.append("## サイト(Plausible)")
         out.append(site_block(h, f"全期間(公開{LAUNCH}〜{TODAY})",

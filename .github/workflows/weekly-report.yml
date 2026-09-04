@@ -37,11 +37,18 @@ jobs:
         continue-on-error: true
         env:
           PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
-        run: python scripts/fetch_hojo_funnel.py
+          GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
+          GA4_MIKATA_PROPERTY_ID: ${{ secrets.GA4_MIKATA_PROPERTY_ID }}
+        run: |
+          if [ -n "$GA4_SA_JSON" ]; then pip install -q google-auth requests; fi
+          python scripts/fetch_hojo_funnel.py
 
       - name: 週次レポートを生成してLINEへ送信
         env:
           PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
+          GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
+          GA4_MIKATA_PROPERTY_ID: ${{ secrets.GA4_MIKATA_PROPERTY_ID }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           LINE_ADMIN_USER_ID: ${{ secrets.LINE_ADMIN_USER_ID }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
@@ -51,6 +58,7 @@ jobs:
         # 実弾のLINE配信は schedule(月曜8時) と workflow_dispatch(手動) のみ。
         # (2026-08-03: push毎に実配信され小柳さんへ重複LINEが10通飛んだ事故の再発防止)
         run: |
+          if [ -n "$GA4_SA_JSON" ]; then pip install -q google-auth requests; fi
           if [ "${{ github.event_name }}" = "push" ]; then
             python scripts/weekly_report.py --dry-run
           else
