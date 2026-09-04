@@ -75,18 +75,23 @@ TEMPLATE = """<!DOCTYPE html>
 
 # GA4計測つき: beacon送信+event_callbackで「送信でき次第すぐ転送」。
 # gtag.jsが{ms}ms内に読み込めなくても必ず転送する(計測より転送優先)。
+# 自動巡回(navigator.webdriver=true)は計測せず即転送(2026-09-04: 実訪問との混同防止)。
 ANALYTICS_GA4 = """<script async src="https://www.googletagmanager.com/gtag/js?id={mid}"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag() {{ dataLayer.push(arguments); }}
-  gtag("js", new Date());
-  gtag("config", "{mid}", {{ transport_type: "beacon" }});
   var fgDone = false;
   function fgGo() {{ if (fgDone) return; fgDone = true; window.location.replace("{dest}"); }}
-  // 送るのはイベント名と channel のみ(個人識別子なし)
-  gtag("event", "{event}", {{ channel: "{channel}", transport_type: "beacon",
-    event_callback: fgGo, event_timeout: {ms} }});
-  setTimeout(fgGo, {ms});
+  if (navigator.webdriver) {{
+    setTimeout(fgGo, 50);
+  }} else {{
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {{ dataLayer.push(arguments); }}
+    gtag("js", new Date());
+    gtag("config", "{mid}", {{ transport_type: "beacon" }});
+    // 送るのはイベント名と channel のみ(個人識別子なし)
+    gtag("event", "{event}", {{ channel: "{channel}", transport_type: "beacon",
+      event_callback: fgGo, event_timeout: {ms} }});
+    setTimeout(fgGo, {ms});
+  }}
 </script>"""
 
 # 計測なし(GA4_MEASUREMENT_ID未設定の間): 外部送信ゼロで即転送
