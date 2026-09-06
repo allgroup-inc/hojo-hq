@@ -56,7 +56,7 @@
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
       "review_status": "verified",
-      "notes": "原文表記:「小学生、中学生、高校生を対象にオンライン授業とテキストが全て無料」「登録なし、課金なし、アプリ不要」。小学生は算数(小3〜小6)・社会中心。不登校・病気で学校に行けない人向けの学習支援ガイドあり。A類型例外の3点確認: 運営者名公開○(葉一・19ch運営事務局)/実績○(copyright 2015〜)/無料商法でない○(全て無料明記)"
+      "notes": "原文表記:「小学生、中学生、高校生を対象にオンライン授業とテキストが全て無料」「登録なし、課金なし、アプリ不要」。小学生は算数(小3〜小6)・社会中心。不登校・病気で学校に行けない人向けの学習支援ガイドあり。A類型例外の3点確認: 運営者名公開○(葉一・19ch運営事務局)/実績○(copyright 2015〜)/無料商法でない○(全て無料明記) / 掲載審査2026-09-06: 保留。A類型例外3点は確認できたが、掲載基準1-3の所在地(市区町村)の公開がサイト取得テキストから確認できず。運営者情報ページの確認が取れ次第昇格"
     },
     {
       "service_id": "svc-0002",
@@ -109,7 +109,7 @@
       "data_source": "https://www.try-it.jp/",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "原文表記:「永久無料映像授業サービス」「これまで100万人を超える方に無料でご利用いただいています」。4,000本の映像授業(1授業約15分)。無料アプリあり"
     },
     {
@@ -157,7 +157,7 @@
       "data_source": "https://info.eboard.jp/index.html",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "原文表記:「ご家庭や公立学校等では、無料で利用することができます」。全映像授業に「やさしい字幕」(ろう・難聴の子、外国につながる子、学びの困りごとを抱えた子を主な対象)。不登校の子への思いを明記。対象学年の範囲(小・中・高のどこまでか)はトップページに明記なし=要確認"
     },
     {
@@ -198,7 +198,7 @@
       "data_source": "https://www.nhk.or.jp/school/",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "2026-09時点でNHK ONEの利用確認(用途・地域の選択)が入口にある。対象学年の明記はトップになし=要確認(学校放送番組が中心)。コンテンツの転載不可"
     },
     {
@@ -240,7 +240,7 @@
       "data_source": "https://www.nhk.or.jp/kokokoza/",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "原文表記:「高校生の『学び』をサポートする『NHK高校講座』。放送日程や各回の内容、学習に役立つ資料・映像、音声などをストリーミング配信」。通信制・定時制の学習との相性がよい(この点は一般知識のため表示には使わない)"
     },
     {
@@ -285,7 +285,7 @@
       "data_source": "https://www.mext.go.jp/a_menu/shotou/mushouka/1344089.htm",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "参照ページは「平成26年度〜令和7年度までの制度」の表記。令和8年度の概要・予算は別ページ参照とあり、最新の要件・金額・沖縄県の申請窓口は要確認。授業料以外の教育費(教科書費・教材費・学用品費・修学旅行費等)が対象"
     },
     {
@@ -328,7 +328,7 @@
       "data_source": "https://www.jasso.go.jp/shogakukin/kyufu/index.html",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "原文表記:「返還を要しない給付型奨学金と授業料・入学金の免除または減額により、大学・短期大学、高等専門学校、専門学校を無償化する制度」「2025年度より多子世帯を対象に、所得制限なく授業料等減免」。2026年度申込のリーフレットあり。申込資格・学力基準・家計基準・支給額の詳細は公式ページで確認"
     },
     {
@@ -373,7 +373,7 @@
       "data_source": "https://www.pref.okinawa.lg.jp/kyoiku/jido/1007994/1007960/1007964/index.html",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "令和8年度事業。事業目標: 高校進学率100%・大学等進学率60%以上。募集中かどうかは県の募集ページで要確認"
     },
     {
@@ -423,7 +423,7 @@
       "data_source": "https://www.pref.okinawa.lg.jp/kyoiku/jido/1007994/1007960/1007964/index.html",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "令和8年度事業。募集中かどうかは県の募集ページで要確認"
     },
     {
@@ -473,7 +473,7 @@
       "data_source": "https://www.pref.okinawa.lg.jp/kyoiku/jido/1007994/1007960/1007964/index.html",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "令和8年度事業。募集中かどうかは県の募集ページで要確認(継続募集の案内あり)"
     },
     {
@@ -522,7 +522,7 @@
       "data_source": "https://www.pref.okinawa.lg.jp/kyoiku/jido/1007994/1007960/1007964/index.html",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "令和8年度事業。募集中かどうかは県の募集ページで要確認"
     },
     {
@@ -574,8 +574,8 @@
       "data_source": "https://www.city.okinawa.okinawa.jp/k021/contents/p00006.html",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
-      "notes": "令和8年度の指定学習塾一覧(意伸学院・ポテンシャル・沖ゼミJr.ほか)掲載中。個別指導館を含む塾があるため1対1可(塾により異なる)。塾への送迎支援はなし。受付状況は保護管理課へ要確認"
+      "review_status": "published",
+      "notes": "令和8年度の指定学習塾一覧(意伸学院・ポテンシャル・沖ゼミJr.ほか)掲載中。個別指導館を含む塾があるため1対1可(塾により異なる)。塾への送迎支援はなし。受付状況は保護管理課へ要確認 / 掲載審査2026-09-06: 公開可(C類型相当: 指定塾内の個別指導。安全確認=市の対象要件確認・保護者の窓口申込・塾事業所内での指導・窓口は保護管理課。年1回再確認の対象)"
     },
     {
       "service_id": "svc-0013",
@@ -617,7 +617,7 @@
       "data_source": "https://www.city.naha.okinawa.jp/child/kosodateouen/1002864/1002873.html",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "内容: 学習習慣の定着等(主に宿題と復習)+基本的な生活習慣の習得支援。関連: 児童扶養手当受給世帯の小4〜中3には学習塾代等を助成する「那覇市まなびクーポン」事業あり(別途起票候補)"
     },
     {
@@ -667,7 +667,7 @@
       "data_source": "https://futoko.katariba.online/",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "子ども本人向けのオンライン支援「room-K」は、現在は連携自治体の教育委員会・学校から紹介を受けた小中学生のみ対象(新規連携自治体の募集は停止中)。それ以外はまず保護者相談から。相談内容の秘密は守られる(緊急時等の法令上の例外あり)"
     },
     {
@@ -773,7 +773,7 @@
       "data_source": "https://www.library.pref.okinawa.jp/",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "トップページで確認: 電子書籍サービス/遠隔地貸出・返却サービス(一部館で休止のお知らせあり=利用前に要確認)/AI蔵書探索/「図書館がない地域の方」向けページ/こどものへや/オンライン利用者登録。離島への郵送貸出の送料負担・図書館未設置離島向け電子書籍の対象町村は個別ページで要確認"
     },
     {
@@ -825,7 +825,7 @@
       "data_source": "https://nll.red/",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "内容: 小学算数(学年別・単元別)/小学英語・理科・社会・漢字・百ます/中学数英理社・漢字/高1数学。A類型例外の3点確認: 運営者名公開○(制作者の氏名・経歴を公開)/実績○(2005年制作開始・2026年6月時点で1日平均PV66,000回)/無料商法でない○(無償明記・学校等へ寄贈も)。国語は漢字・百ます中心"
     },
     {
@@ -870,7 +870,7 @@
       "data_source": "https://myprojects.jp/",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
-      "review_status": "verified",
+      "review_status": "published",
       "notes": "「マイプロジェクトアワード」= 全国の高校生がプロジェクトと学びを発表する場。参加形態ごとの費用・日程の詳細は高校生向けページで確認"
     },
     {
@@ -1012,7 +1012,7 @@
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
       "review_status": "verified",
-      "notes": "活動確認: かがくワークショップ(2026年8月)・おきなわこども選挙ワークショップ(7月)・Minecraftカップ沖縄ブロック地区大会・探究学習イベント等。中高生がサポーターとして教える側に回る文化あり(「教える側に回る学び」の好例)。A類型でなくB類型(集団・対面)のため団体実在の追加確認(運営者情報)を掲載審査時に行う"
+      "notes": "活動確認: かがくワークショップ(2026年8月)・おきなわこども選挙ワークショップ(7月)・Minecraftカップ沖縄ブロック地区大会・探究学習イベント等。中高生がサポーターとして教える側に回る文化あり(「教える側に回る学び」の好例)。A類型でなくB類型(集団・対面)のため団体実在の追加確認(運営者情報)を掲載審査時に行う / 掲載審査2026-09-06: 保留。任意団体(法人番号なし)の対面形態のためA類型例外は適用外。国・自治体・主要財団の後援/助成の裏取り(後援側公式サイト)が確認でき次第昇格"
     },
     {
       "service_id": "svc-0022",
@@ -1073,7 +1073,7 @@
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
       "review_status": "verified",
-      "notes": "今期(2026年度参加分)の募集は2026年1月16日で終了。次回募集の時期は要確認(サイト表示では「次回募集予定」の扱いで案内し、募集開始を検知したら更新する)。参加家庭の85%がひとり親世帯。ヤングケアラー向けの対話プログラムあり。C類型(1対1面談)のため掲載審査時に安全4点確認を行う(メンターは選考・研修ありと記載)"
+      "notes": "今期(2026年度参加分)の募集は2026年1月16日で終了。次回募集の時期は要確認(サイト表示では「次回募集予定」の扱いで案内し、募集開始を検知したら更新する)。参加家庭の85%がひとり親世帯。ヤングケアラー向けの対話プログラムあり。C類型(1対1面談)のため掲載審査時に安全4点確認を行う(メンターは選考・研修ありと記載) / 掲載審査2026-09-06: 保留。募集終了中、かつC類型(1対1オンライン伴走)の安全4点が未確認。募集再開の際に安全4点を確認して審査する"
     },
     {
       "service_id": "svc-0023",
