@@ -161,6 +161,34 @@
       "url": "https://www.j-flec.go.jp/",
       "robots_approved": false,
       "memo": "広がる学び: お金の教育の公式機関(知るぽるとの後継と原文に明記)。子ども向け無料教材の有無を要照合"
+    },
+    {
+      "id": "asdessin-miraidoor",
+      "org": "NPO法人アスデッサン",
+      "url": "https://www.asdessin.org/miraidoor",
+      "robots_approved": true,
+      "memo": "ミライドア(中1〜高3向け・Zoom開催)の詳細ページ。参加費の明記を照合してsvc-0020を昇格判断|同一ドメイン(asdessin.org)のrobots許可・承認済みのため単発取得可(守り部審査記録2026-09-06追記)"
+    },
+    {
+      "id": "oist-festival",
+      "org": "沖縄科学技術大学院大学(OIST)",
+      "url": "https://www.oist.jp/science-festival",
+      "robots_approved": true,
+      "memo": "OISTサイエンスフェスタのページ(eventsページはJS描画で取得不可だったため代替)|同一ドメイン(oist.jp)のrobots許可・承認済みのため単発取得可(守り部審査記録2026-09-06追記)"
+    },
+    {
+      "id": "coderdojo-naha",
+      "org": "CoderDojo那覇",
+      "url": "https://coderdojonaha.hatenablog.jp/",
+      "robots_approved": false,
+      "memo": "那覇の道場公式ブログ。検索では参加費無料・小〜高校生(小学生は保護者付添)・月1回IT創造館の情報→原文照合してsvc-0019の昇格判断。新ドメインのためaudit待ち"
+    },
+    {
+      "id": "coderdojo-urasoe",
+      "org": "CoderDojo浦添",
+      "url": "https://coderdojo-urasoe.com/",
+      "robots_approved": false,
+      "memo": "浦添の道場公式サイト。参加費・対象を照合。新ドメインのためaudit待ち"
     }
   ]
 }
