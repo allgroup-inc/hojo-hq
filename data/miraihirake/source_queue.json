@@ -1,19 +1,131 @@
 {
   "note": "みらいひらけ堂の原文取得キュー。robots_approved は守り部が robots_report.json を確認して true にする(絶対ルール2)。fetch は robots_approved=true の行だけが対象。URLは2026-09-06にWeb検索で確認した公式ページ(内容の照合はまだ)。",
   "queue": [
-    {"id": "katariba-kikkake",   "org": "認定NPO法人カタリバ", "url": "https://katariba.online/kikkake",            "robots_approved": false, "memo": "キッカケプログラム(就学援助世帯の小3〜高3・PC/Wi-Fi無償貸与・無料)※検索結果ベース要照合"},
-    {"id": "katariba-futoko",    "org": "認定NPO法人カタリバ", "url": "https://futoko.katariba.online/",             "robots_approved": false, "memo": "オンライン不登校支援プログラム(room-K系)。対象・自治体連携の条件を要照合"},
-    {"id": "kidsdoor-study",     "org": "認定NPO法人キッズドア", "url": "https://kidsdoor.net/activity/study/index.html", "robots_approved": false, "memo": "学習支援・居場所支援の一覧。オンラインの全国枠があるか要照合"},
-    {"id": "eboard",             "org": "NPO法人eboard",       "url": "https://info.eboard.jp/index.html",           "robots_approved": false, "memo": "映像授業+デジタルドリル。家庭利用無料※要照合"},
-    {"id": "19ch",               "org": "葉一(個人)",          "url": "https://19ch.tv/",                            "robots_approved": false, "memo": "とある男が授業をしてみた。小3算数〜高校の無料授業動画+無料プリント※要照合"},
-    {"id": "nhk-school",         "org": "NHK",                 "url": "https://www.nhk.or.jp/school/",               "robots_approved": false, "memo": "NHK for School(小中心の無料映像教材)"},
-    {"id": "nhk-kokokoza",       "org": "NHK",                 "url": "https://www.nhk.or.jp/kokokoza/",             "robots_approved": false, "memo": "NHK高校講座(URL要確認)"},
-    {"id": "try-it",             "org": "トライグループ",       "url": "https://www.try-it.jp/",                      "robots_approved": false, "memo": "映像授業Try IT。無料範囲と登録要否を要照合"},
-    {"id": "mext-kyufu",         "org": "文部科学省",           "url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1344089.htm", "robots_approved": false, "memo": "高校生等奨学給付金(返済不要・住民税非課税世帯等。申請は都道府県)※要照合"},
-    {"id": "jasso-kyufu",        "org": "日本学生支援機構",     "url": "https://www.jasso.go.jp/shogakukin/kyufu/index.html", "robots_approved": false, "memo": "給付型奨学金(大学等進学)"},
-    {"id": "okinawa-pref-juku",  "org": "沖縄県",               "url": "https://www.pref.okinawa.lg.jp/kyoiku/jido/1007994/1007960/1007964/index.html", "robots_approved": false, "memo": "県の無料塾設置(小中学生無料塾/中学生・高校生進学チャレンジ/大学等進学促進)※要照合"},
-    {"id": "okinawa-city-gakushu","org": "沖縄市",              "url": "https://www.city.okinawa.okinawa.jp/k021/contents/p00006.html", "robots_approved": false, "memo": "沖縄市生活困窮者学習支援事業"},
-    {"id": "naha-hitorioya",     "org": "那覇市",               "url": "https://www.city.naha.okinawa.jp/child/kosodateouen/1002864/1002873.html", "robots_approved": false, "memo": "ひとり親家庭の子どもの学習支援事業(小学生・無料・要登録)※要照合"},
-    {"id": "okinawa-mirai",      "org": "沖縄こどもの未来県民会議", "url": "https://www.okinawa-child-future.jp/work/",  "robots_approved": false, "memo": "県内支援団体の一覧(芋づる収集の起点)"}
+    {
+      "id": "katariba-kikkake",
+      "org": "認定NPO法人カタリバ",
+      "url": "https://katariba.online/kikkake",
+      "robots_approved": false,
+      "memo": "キッカケプログラム(就学援助世帯の小3〜高3・PC/Wi-Fi無償貸与・無料)※検索結果ベース要照合"
+    },
+    {
+      "id": "katariba-futoko",
+      "org": "認定NPO法人カタリバ",
+      "url": "https://futoko.katariba.online/",
+      "robots_approved": true,
+      "memo": "オンライン不登校支援プログラム(room-K系)。対象・自治体連携の条件を要照合|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "kidsdoor-study",
+      "org": "認定NPO法人キッズドア",
+      "url": "https://kidsdoor.net/activity/study/index.html",
+      "robots_approved": true,
+      "memo": "学習支援・居場所支援の一覧。オンラインの全国枠があるか要照合|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "eboard",
+      "org": "NPO法人eboard",
+      "url": "https://info.eboard.jp/index.html",
+      "robots_approved": true,
+      "memo": "映像授業+デジタルドリル。家庭利用無料※要照合|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "19ch",
+      "org": "葉一(個人)",
+      "url": "https://19ch.tv/",
+      "robots_approved": true,
+      "memo": "とある男が授業をしてみた。小3算数〜高校の無料授業動画+無料プリント※要照合|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "nhk-school",
+      "org": "NHK",
+      "url": "https://www.nhk.or.jp/school/",
+      "robots_approved": true,
+      "memo": "NHK for School(小中心の無料映像教材)|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "nhk-kokokoza",
+      "org": "NHK",
+      "url": "https://www.nhk.or.jp/kokokoza/",
+      "robots_approved": true,
+      "memo": "NHK高校講座(URL要確認)|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "try-it",
+      "org": "トライグループ",
+      "url": "https://www.try-it.jp/",
+      "robots_approved": true,
+      "memo": "映像授業Try IT。無料範囲と登録要否を要照合|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "mext-kyufu",
+      "org": "文部科学省",
+      "url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1344089.htm",
+      "robots_approved": true,
+      "memo": "高校生等奨学給付金(返済不要・住民税非課税世帯等。申請は都道府県)※要照合|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "jasso-kyufu",
+      "org": "日本学生支援機構",
+      "url": "https://www.jasso.go.jp/shogakukin/kyufu/index.html",
+      "robots_approved": true,
+      "memo": "給付型奨学金(大学等進学)|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "okinawa-pref-juku",
+      "org": "沖縄県",
+      "url": "https://www.pref.okinawa.lg.jp/kyoiku/jido/1007994/1007960/1007964/index.html",
+      "robots_approved": true,
+      "memo": "県の無料塾設置(小中学生無料塾/中学生・高校生進学チャレンジ/大学等進学促進)※要照合|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "okinawa-city-gakushu",
+      "org": "沖縄市",
+      "url": "https://www.city.okinawa.okinawa.jp/k021/contents/p00006.html",
+      "robots_approved": true,
+      "memo": "沖縄市生活困窮者学習支援事業|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "naha-hitorioya",
+      "org": "那覇市",
+      "url": "https://www.city.naha.okinawa.jp/child/kosodateouen/1002864/1002873.html",
+      "robots_approved": true,
+      "memo": "ひとり親家庭の子どもの学習支援事業(小学生・無料・要登録)※要照合|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "okinawa-mirai",
+      "org": "沖縄こどもの未来県民会議",
+      "url": "https://www.okinawa-child-future.jp/work/",
+      "robots_approved": true,
+      "memo": "県内支援団体の一覧(芋づる収集の起点)|robots承認2026-09-06(単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "coderdojo-jp",
+      "org": "CoderDojo Japan",
+      "url": "https://coderdojo.jp/",
+      "robots_approved": false,
+      "memo": "無料プログラミング道場の全国ポータル(213拠点超・オンライン対応道場あり・県内道場も要確認)※検索結果ベース要照合"
+    },
+    {
+      "id": "katariba-online",
+      "org": "認定NPO法人カタリバ",
+      "url": "https://online.katariba.or.jp/",
+      "robots_approved": false,
+      "memo": "カタリバオンライン/forTeens(オンラインの居場所・一緒に勉強)。公式URLは要再確認(検索ではnote記事のみ確認)"
+    },
+    {
+      "id": "asdessin",
+      "org": "NPO法人アスデッサン",
+      "url": "https://www.asdessin.org/",
+      "robots_approved": false,
+      "memo": "中高生向け無料キャリア教育(全国からオンライン参加・社会人との対話)※要照合"
+    },
+    {
+      "id": "netre",
+      "org": "新・ネットレの学習教室",
+      "url": "https://nll.red/",
+      "robots_approved": false,
+      "memo": "小中学生向け無償デジタル教材(自動出題・採点)。運営者・実績はA類型例外の3点確認が必要"
+    }
   ]
 }
