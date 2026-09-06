@@ -84,7 +84,12 @@ def main():
                 warnings.append(f"{sid}: 最終確認から{d}日。再確認が必要")
 
     pub = [s for s in services if s.get("review_status") == "published"]
-    fresh = [s for s in pub if (days_since(s.get("last_verified")) or 10**6) <= WARN_DAYS]
+    # 注意: days_since は「今日確認」で 0 を返す。`or` で欠損値を代用すると 0 が偽扱いされ
+    # 最新レコードを古い扱いにしてしまうため、None 判定は明示的に行う
+    fresh = [
+        s for s in pub
+        if (lambda d: d is not None and d <= WARN_DAYS)(days_since(s.get("last_verified")))
+    ]
     kpi = (len(fresh) / len(pub)) if pub else None
     if kpi is None:
         kpi_level = "対象なし(published 0件)"

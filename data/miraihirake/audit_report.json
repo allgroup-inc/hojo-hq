@@ -1,0 +1,12 @@
+{
+  "audited_at": "2026-09-06T14:30:35",
+  "total": 145,
+  "published": 16,
+  "freshness_kpi_60d": 1.0,
+  "freshness_level": "正常",
+  "problems": [],
+  "warnings": [],
+  "auto_demoted": [],
+  "url_alerts": [],
+  "note": "掲載基準v2 §7 の機械監査。auto_demoted は --fix 時のみ実際に保存される。"
+}
