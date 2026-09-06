@@ -3,11 +3,10 @@
   "results": [
     {
       "id": "katariba-kikkake",
-      "url": "https://katariba.online/kikkake",
+      "url": "https://www.katariba.or.jp/activity/project/kikkake/",
       "org": "認定NPO法人カタリバ",
       "checked_at": "2026-09-06",
-      "robots_allows": "error",
-      "error": "URLError: <urlopen error [Errno -5] No address associated with hostname>"
+      "robots_allows": true
     },
     {
       "id": "katariba-futoko",
@@ -154,6 +153,41 @@
       "id": "shiruporuto",
       "url": "https://www.shiruporuto.jp/",
       "org": "金融広報中央委員会",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "j-flec",
+      "url": "https://www.j-flec.go.jp/",
+      "org": "金融経済教育推進機構(J-FLEC)",
+      "checked_at": "2026-09-06",
+      "robots_allows": false
+    },
+    {
+      "id": "asdessin-miraidoor",
+      "url": "https://www.asdessin.org/miraidoor",
+      "org": "NPO法人アスデッサン",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "oist-festival",
+      "url": "https://www.oist.jp/science-festival",
+      "org": "沖縄科学技術大学院大学(OIST)",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "coderdojo-naha",
+      "url": "https://coderdojonaha.hatenablog.jp/",
+      "org": "CoderDojo那覇",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "coderdojo-urasoe",
+      "url": "https://coderdojo-urasoe.com/",
+      "org": "CoderDojo浦添",
       "checked_at": "2026-09-06",
       "robots_allows": true
     }
