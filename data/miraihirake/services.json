@@ -904,7 +904,7 @@
       ],
       "group_lesson": true,
       "live_lesson": true,
-      "price_type": "完全無料",
+      "price_type": "要確認",
       "price": "要確認(国際的な非営利活動。参加費の明記は各道場ページで確認する)",
       "completely_free": false,
       "teacher_type": [
@@ -951,7 +951,7 @@
       ],
       "zoom_support": true,
       "career_support": true,
-      "price_type": "完全無料",
+      "price_type": "要確認",
       "price": "要確認(寄付収入で運営するNPO。参加費の明記は生徒向けプログラムページで確認する)",
       "completely_free": false,
       "application_method": "公式サイトの「生徒向けプログラム」「開催中のオンラインプログラム一覧」から",
@@ -1074,6 +1074,5445 @@
       "updated_at": "2026-09-06",
       "review_status": "verified",
       "notes": "今期(2026年度参加分)の募集は2026年1月16日で終了。次回募集の時期は要確認(サイト表示では「次回募集予定」の扱いで案内し、募集開始を検知したら更新する)。参加家庭の85%がひとり親世帯。ヤングケアラー向けの対話プログラムあり。C類型(1対1面談)のため掲載審査時に安全4点確認を行う(メンターは選考・研修ありと記載)"
+    },
+    {
+      "service_id": "svc-0023",
+      "service_name": "名護市学習支援教室ぴゅあ",
+      "summary": "名護市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "名護市学習支援教室ぴゅあ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "名護市 名護市字為又1220-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週3回(火･木･金) / 18:00～20:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 0980-53-1212",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0024",
+      "service_name": "名護市学習支援教室くにむとぅや～",
+      "summary": "名護市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "名護市学習支援教室くにむとぅや～",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "名護市 名護市大中1-4-17 比嘉ビル101",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週4日 （月・水・金・日） / 15：00～20：00（月・水・金） 10：00～18：00（日）",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 0980-50-9952",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0025",
+      "service_name": "名護こども食堂",
+      "summary": "名護市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "名護こども食堂",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "名護市 名護市城1-4-11(名護市市営市場内)",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週2回（金･土） / 16:00～19:00(金) 9:30～12:00(土)",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 0980-54-3939",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0026",
+      "service_name": "aube屋部の浦食堂",
+      "summary": "名護市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "aube屋部の浦食堂",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "名護市 名護市字屋部546",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週２回（火・木） / 6：30～8：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 0980-50-9952",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0027",
+      "service_name": "ゆめみのる塾（無料塾）",
+      "summary": "国頭村にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ゆめみのる塾（無料塾）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "国頭村 〒905-1411 国頭村字辺土名112番地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "完全無料",
+      "price": "0円(名称に「無料塾」と明記)",
+      "completely_free": true,
+      "frequency": "週２日(月、金) / 19:00～21:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 0980-41-2255",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0028",
+      "service_name": "スマイル☆キッズルーム",
+      "summary": "国頭村にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "スマイル☆キッズルーム",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "国頭村 〒905-1411 国頭村字辺土名178番地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日（月～金） / 14：30～18：00（夏） 14：30～17：30（冬）",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 0980-41-2765",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0029",
+      "service_name": "ぶながやっ子ハウス",
+      "summary": "大宜味村にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ぶながやっ子ハウス",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "大宜味村 大宜味村字塩屋1306番地6",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月～土（祝日、年末年始は除く） / 平日13：00～20：00 休校日8：00～20：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 0980-43-6606",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0030",
+      "service_name": "フリースペースあがりキッズ（B班）",
+      "summary": "東村にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "フリースペースあがりキッズ（B班）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "東村 東村字平良465番地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回 （月～金） / 13：00～19：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 070-3612-6009",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0031",
+      "service_name": "フリースペースあがりキッズ（A班）",
+      "summary": "東村にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "フリースペースあがりキッズ（A班）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "東村 東村字平良804番地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日（月～金） / 13：00～19：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0032",
+      "service_name": "わくわくクラブ",
+      "summary": "伊平屋村にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "わくわくクラブ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "伊平屋村 〒905-0703 伊平屋村字我喜屋2132番地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5日 / 14:00～18:30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-6868-2806",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0033",
+      "service_name": "普天間やまがっこう",
+      "summary": "宜野湾市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "普天間やまがっこう",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "宜野湾市 宜野湾市新城1-32-5 3F",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5日(月～金) / 平日15:00～19:00 長期休暇9:00～19:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-959-2265",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0034",
+      "service_name": "子ども食堂M",
+      "summary": "宜野湾市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "子ども食堂M",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "宜野湾市 宜野湾市嘉数3-2-22(嘉数区公民館)",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "毎月第2土曜日 / 13:00～15:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 080-3221-8148",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0035",
+      "service_name": "普天間1区自治会 子どもの居場所",
+      "summary": "宜野湾市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "普天間1区自治会 子どもの居場所",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "宜野湾市 宜野湾市普天間1-19-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "毎週火曜日 / 15:00～18:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-892-2045",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0036",
+      "service_name": "ハレルヤアカデミー",
+      "summary": "宜野湾市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ハレルヤアカデミー",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "宜野湾市 宜野湾市愛知3-5-23 ヒガ不動産2F",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "毎週2回 火・木 / 15：00～19：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-892-3902",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0037",
+      "service_name": "普天間３区自治会 こどもの居場所",
+      "summary": "宜野湾市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "普天間３区自治会 こどもの居場所",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "宜野湾市 〒901-2202 宜野湾市普天間2-10-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週２回（火・木） / 15時～18時",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0038",
+      "service_name": "我如古区自治会 青少年育成塾『ゆ～でぃき家～』",
+      "summary": "宜野湾市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "我如古区自治会 青少年育成塾『ゆ～でぃき家～』",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "宜野湾市 〒901-2214 宜野湾市我如古1-36-12",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週２回（水・土） / 水：15：30～17：30／土：14：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-898-6304",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0039",
+      "service_name": "地域ボランティア組織こどな部（美里仲原集会所）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "地域ボランティア組織こどな部（美里仲原集会所）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 沖縄市美里仲原7-25",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週3日（火・木・金） / 14：00～20：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-9781-8028",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0040",
+      "service_name": "出前児童館（宮里自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（宮里自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 沖縄市宮里1-3-9",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週1日（水曜日） / 16:00～18:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0041",
+      "service_name": "出前児童館（久保田自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（久保田自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 沖縄市久保田2-27-19",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週1日（木曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-933-4201",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0042",
+      "service_name": "NPO法人 エンカレッジ おこすこや教室",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "NPO法人 エンカレッジ おこすこや教室",
+      "organization_type": "NPO",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 沖縄市照屋4-12-2",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回 （月～金） / 14：00～21：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-923-3695",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0043",
+      "service_name": "子どもカフェ",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "子どもカフェ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 沖縄市照屋1-28-17",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週2回 （火・木） / 16：00～18：30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-938-4010",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0044",
+      "service_name": "若年妊産婦の居場所ゆくるん",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "若年妊産婦の居場所ゆくるん",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 沖縄市胡屋6-7-5 U-house",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月曜日～金曜日（祝日除く） / 10：00～19：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-989-7266",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0045",
+      "service_name": "NPO法人エンカレッジ美里学習支援教室",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "NPO法人エンカレッジ美里学習支援教室",
+      "organization_type": "NPO",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2151 沖縄県沖縄市松本4-16-42",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日（月～金） / 14：00～21：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-923-3795",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0046",
+      "service_name": "一般社団法人 学習支援ひろば くじら寺子屋",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "一般社団法人 学習支援ひろば くじら寺子屋",
+      "organization_type": "一般社団法人",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2162 沖縄市海邦2-9-10",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回 （月～金） / 13：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-989-7930",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0047",
+      "service_name": "ここキッズ",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ここキッズ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2171 沖縄県沖縄市高原5-18-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週2回（月・金） / 15：00～19：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-7458-0694",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0048",
+      "service_name": "こどもの居場所 美らこどもステーション",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "こどもの居場所 美らこどもステーション",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 沖縄市知花1-25-3 1F",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回 （火・水・木・金・土） / 14：00～18：30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-3582-3323",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0049",
+      "service_name": "夢空間たんぽぽ",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "夢空間たんぽぽ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2172 沖縄市泡瀬2-50-25",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回 （月～金） / 13：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-4352-8839",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0050",
+      "service_name": "住吉国際ジュニア倶楽部",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "住吉国際ジュニア倶楽部",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-0003 沖縄市住吉1-11-23",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回（月・火・木・金・土） / 16：00～20:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-9482-0696",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0051",
+      "service_name": "みんなのももやま子ども食堂",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "みんなのももやま子ども食堂",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-0031 沖縄市上地3-20-12",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回 （月～金） / 13：30～19：30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導等、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0052",
+      "service_name": "出前児童館（松本自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（松本自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2151 沖縄市松本1-6-12",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（金曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0053",
+      "service_name": "出前児童館（比屋根自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（比屋根自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2173 沖縄市比屋根6-7-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（金曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0054",
+      "service_name": "出前児童館（古謝自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（古謝自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2161 沖縄市古謝2-23-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（火曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0055",
+      "service_name": "出前児童館（美里自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（美里自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2153 沖縄市美里2-19-13",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（月曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0056",
+      "service_name": "出前児童館（知花自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（知花自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2143 沖縄市知花1-11-7",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（月曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0057",
+      "service_name": "出前児童館（池原自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（池原自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2141 沖縄市池原1-25-15",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（金曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0058",
+      "service_name": "出前児童館（泡瀬自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（泡瀬自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2172 沖縄市泡瀬2-3-26",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（木曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0059",
+      "service_name": "出前児童館（明道自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（明道自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2152 沖縄市明道1-20-10",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（木曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0060",
+      "service_name": "出前児童館（登川自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（登川自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2142 沖縄市登川3-36-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（水曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0061",
+      "service_name": "出前児童館（海邦町自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（海邦町自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-2162 沖縄市海邦町2-12-38",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（水曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0062",
+      "service_name": "出前児童館（越来自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（越来自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-0001 沖縄市越来2-18-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（火曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0063",
+      "service_name": "出前児童館（胡屋自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（胡屋自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-0021 沖縄市胡屋3-17-4",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（火曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0064",
+      "service_name": "出前児童館（センター自治会）",
+      "summary": "沖縄市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "出前児童館（センター自治会）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄市 〒904-0004 沖縄市中央2-6-53",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回（月曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-929-0503",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0065",
+      "service_name": "松原ふれあいこども食堂",
+      "summary": "うるま市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "松原ふれあいこども食堂",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "うるま市 うるま市字具志川3512番地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週1日(金) / 15:00～17:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-973-6036",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0066",
+      "service_name": "ゆい結カフェ（こども食堂） 結☆きずな（中高生の居場所）",
+      "summary": "うるま市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ゆい結カフェ（こども食堂） 結☆きずな（中高生の居場所）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "うるま市 うるま市勝連平敷屋3607",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "こども食堂・毎週土曜日（長期休暇・月～金） 中高生の居場所・週2日（月・木） ※児童館の休館日及び行事等の日は除く / こども食堂・12：00～14：00 中高生の居場所17：30～20：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-978-2066",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0067",
+      "service_name": "むる☆はっぴー（こども食堂） ももたまな（中高生の居場所）",
+      "summary": "うるま市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "むる☆はっぴー（こども食堂） ももたまな（中高生の居場所）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "うるま市 うるま市字豊原345-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "こども食堂・毎週土曜日（長期休暇・月～金）中高生の居場所・週2日 （火・金） ※児童館の休館日及び行事等の日は除く / こども食堂・10：00～15：00 中高生の居場所18：00～20：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0068",
+      "service_name": "石川第二団地",
+      "summary": "うるま市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "石川第二団地",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "うるま市 〒904-1115 うるま市石川伊波1482",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週３日～４日（月・水・金・土） / 14:00～18:00(土9:00～13:00)",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-965-6481",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0069",
+      "service_name": "グレイスキッチン KID&#8217;S CLUB",
+      "summary": "うるま市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "グレイスキッチン KID&#8217;S CLUB",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "うるま市 〒904-2215 うるま市安慶名2丁目20-30",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週２回（火、木） / 16：00～19：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 080-3961-7101",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0070",
+      "service_name": "まんぷくや（こども食堂）びーぐ（中高生の居場所）",
+      "summary": "うるま市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "まんぷくや（こども食堂）びーぐ（中高生の居場所）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "うるま市 〒904-2304 沖縄県うるま市与那城屋慶名981",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "こども食堂・毎週土曜日（長期休暇・月～土） 中高生の居場所・週2日（月・水）※児童館の休館日及び行事等の日は除く / こども食堂・10：00～15：00 中高生の居場所・18：00～21：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-978-6082",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0071",
+      "service_name": "ちゃんぷるーきっずかふぇ（こども食堂） 結BOX（中高生の居場所）",
+      "summary": "うるま市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ちゃんぷるーきっずかふぇ（こども食堂） 結BOX（中高生の居場所）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "うるま市 〒904-1106 沖縄県うるま市石川2-12-22",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "こども食堂・毎週土曜日（不定期開催有り、長期休暇・週3日） 中高生の居場所・週2日（火・木）※児童館の休館日及び行事等の日は除く / こども食堂・9：00～14：00（昼食） 中高生の居場所・18：00～20：30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-964-6051",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0072",
+      "service_name": "HARU塾 金武",
+      "summary": "金武町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "HARU塾 金武",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "金武町 〒904-1201 沖縄県国頭郡金武町字金武4348-2",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日（月～金） / 16：30～20：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-983-2130",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0073",
+      "service_name": "こども食堂 あしびなー会",
+      "summary": "嘉手納町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "こども食堂 あしびなー会",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "嘉手納町 〒904-0203 嘉手納町字嘉手納169-3",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月４回 第１～４の土曜日 / 16：00～20：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-989-4564",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0074",
+      "service_name": "ＨＯＭＥ会",
+      "summary": "北谷町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ＨＯＭＥ会",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "北谷町 〒904-0105 沖縄県中頭郡北谷町字吉原114",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週2回 （火・金） / 14：00～21：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-9591-0331",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0075",
+      "service_name": "ちーたん塾",
+      "summary": "北谷町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ちーたん塾",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "北谷町 〒904-0103 沖縄県中頭郡北谷町字桑江467-1 ちゃたん二ライセンター地下1階工作室",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回 （月～金） / 14：00～19：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 070-4427-1898",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0076",
+      "service_name": "エンカレッジ 中城教室",
+      "summary": "中城村にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "エンカレッジ 中城教室",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "中城村 中城村字安里191",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月～金 / 小学生:週2回 16:30～18:30 中学生:週3回 16:00～21:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-987-6016",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0077",
+      "service_name": "久場っ子クラブ",
+      "summary": "中城村にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "久場っ子クラブ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "中城村 〒901-2401 中城村字久場241番地 久場地区健康スポーツセンター",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回 （月～金） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0078",
+      "service_name": "子どもの居場所 わらびぃくらぶ",
+      "summary": "中城村にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "子どもの居場所 わらびぃくらぶ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "中城村 沖縄県中頭郡中城村字当間847-1（子育て支援センターごさまる内）",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週6回 （月～土-祝日、年末年始を除く） / 月～金 放課後～20：00 土9：00～20：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-988-0156",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0079",
+      "service_name": "小学生ユイマール塾なかいま",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "小学生ユイマール塾なかいま",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 那覇市仲井真260-3 仲井真北公園内自治会事務所",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週1回(土) / 9:00～11:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-4516-8087",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0080",
+      "service_name": "にぬふぁぶし",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "にぬふぁぶし",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 那覇市泊3-12-14",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週2回(水・土) / 17:00～20:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-861-8783",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0081",
+      "service_name": "水曜みんなDAY",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "水曜みんなDAY",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 那覇市松尾2-12-3",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週1回(水) / 16:00～19:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-943-2100",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0082",
+      "service_name": "タコライスラバーズ事務所",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "タコライスラバーズ事務所",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 那覇市泉崎2-3-3 オフィス泉崎2-A",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週1回(土) / 8:00～16:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-996-5351",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0083",
+      "service_name": "こども広場トントン",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "こども広場トントン",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 那覇市長田2-28-40 かなさ保育園内",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月1回(第3土曜日) / 12:00～14:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-9568-2407",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0084",
+      "service_name": "サンキュウ",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "サンキュウ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 那覇市長田2-24-76",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週3回(火・木・金) / 14:00～18:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 070-5492-6232",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0085",
+      "service_name": "未来こうさく室TIGUTI",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "未来こうさく室TIGUTI",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 那覇市泉崎1-19-20 2F",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5日( 平日のみ、土日は不定期) / 13:30～21:30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-943-7917",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0086",
+      "service_name": "山城塾（無料塾）〈小学生の部〉",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "山城塾（無料塾）〈小学生の部〉",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 那覇市古波蔵2丁目18-2",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "完全無料",
+      "price": "0円(名称に「無料」と明記)",
+      "completely_free": true,
+      "frequency": "毎週水曜日 / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 070-5818-5850",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0087",
+      "service_name": "ぽっとらっくパーティー",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ぽっとらっくパーティー",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 那覇市字上間549番1 那覇市人材育成支援センターまーいまーいNaha 1階 会議室",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月2回 （第2・4土曜日） / 10：00～13：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-8764-6738",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0088",
+      "service_name": "町の自習室",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "町の自習室",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒902-0062 那覇市松川3-18-30 首里城下町クリニック内",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週２回 月・水 クリニック講演会の日・祝祭日は休み / 18：00～21：30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 080-4312-9200",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0089",
+      "service_name": "グロリアキッズクラブ",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "グロリアキッズクラブ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒901-0153 那覇市宇栄原504番地 東アパート102",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１回 土曜日 / 16：00～19：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-8293-0041",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0090",
+      "service_name": "マヒナジーモ学舎",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "マヒナジーモ学舎",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒902-0077 那覇市長田2-9-33 伊佐アパート201",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週２回 水・土 / 水曜日17：00～19：00 土曜日11：00～13：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-854-3985",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0091",
+      "service_name": "山城塾（無料塾）〈中学生の部〉",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "山城塾（無料塾）〈中学生の部〉",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒900-0024 那覇市古波蔵３丁目20‐1 千代正マンション1F",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "完全無料",
+      "price": "0円(名称に「無料」と明記)",
+      "completely_free": true,
+      "frequency": "週２回 火・木 / 18：00～20：30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 070-5818-5850",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0092",
+      "service_name": "放課後こくば教室",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "放課後こくば教室",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒902-0075 那覇市国場405 沖縄大学アネックス共創館",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "毎週２回 水・金 / 15：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-832-5599",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0093",
+      "service_name": "ほのぼのカフェ",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ほのぼのカフェ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒900-0002 那覇市曙1-18-12（曙一丁目自治会事務所）",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月２日（第２・第４土） / 10：00～14：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-3793-6436",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0094",
+      "service_name": "小禄にじのひろば勉強室",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "小禄にじのひろば勉強室",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒901-0153 那覇市宇栄原2-2-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１日（土）※夏休みは週３日 / 10：00～12：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-9787-9100",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0095",
+      "service_name": "安謝新都心こども広場",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "安謝新都心こども広場",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒900-0003 那覇市安謝1-8-24",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月4回～8回 / 16:00～18:00、9:00～13:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-943-3558",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0096",
+      "service_name": "すこやか宇栄原っ子",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "すこやか宇栄原っ子",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒901-0153 那覇市宇栄原4-17-9",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月2回(第1、第3金曜日) / 15：00～17：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-6634-9727",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0097",
+      "service_name": "子どもの広場in那覇",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "子どもの広場in那覇",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒902-0073 那覇市字上間245-1 南風ビル102",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週６日 / 10：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0098",
+      "service_name": "すい・こども食堂",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "すい・こども食堂",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒903-0806 那覇市首里汀良町3-111-1 汀良市住1-107",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１日（土） / 食事支援 12：00～13：30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 080-1658-0100",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0099",
+      "service_name": "小学生ユイマール塾よぎ",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "小学生ユイマール塾よぎ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒902-0076 那覇市与儀1-15-10（八三会館）",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週２日 月・金 / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-4516-8087",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0100",
+      "service_name": "ユイマール塾",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ユイマール塾",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒902-0062 那覇市松川3-18-30",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週２日（月、水） / 18：00～20：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-8290-7054",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0101",
+      "service_name": "のびのび広場",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "のびのび広場",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒900-0014 那覇市松尾2-20-13",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5日程度 / 14:00～18:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 070-6597-0193",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0102",
+      "service_name": "那覇市母子生活支援センターさくら（夜の子どもの居場所）",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "那覇市母子生活支援センターさくら（夜の子どもの居場所）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 〒903-0805 那覇市首里鳥堀町4-99",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月～金 土日祝 / 月～金 18：00～21：00 土～日 9：00～17：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-886-7018",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0103",
+      "service_name": "kukulu",
+      "summary": "那覇市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "kukulu",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市 那覇市牧志3-6-41 島商会ビル2階",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5日 （月～金） / 10：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-943-8502",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0104",
+      "service_name": "うらそえぐすく児童センター",
+      "summary": "浦添市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "うらそえぐすく児童センター",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "浦添市 浦添市仲間2-47-5",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週3日(火・木・土) / 火木 18:30～20:00 土 12:00～14:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-874-0417",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0105",
+      "service_name": "イマココ☆",
+      "summary": "浦添市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "イマココ☆",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "浦添市 浦添市内間3-15-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "夏・冬・春休み(長期休暇) 週2日 / 10:00～13:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-877-3251",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0106",
+      "service_name": "てだこチャレンジ教室（前田小）",
+      "summary": "浦添市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "てだこチャレンジ教室（前田小）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "浦添市 浦添市前田小学校内",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週2日 （月・水） / 15：00～17：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0107",
+      "service_name": "てだこチャレンジ教室（沢岻小）",
+      "summary": "浦添市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "てだこチャレンジ教室（沢岻小）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "浦添市 浦添市沢岻小学校内",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週2日 （水・金） / 15：00～17：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0108",
+      "service_name": "森の子児童センター",
+      "summary": "浦添市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "森の子児童センター",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "浦添市 〒901-2122 浦添市勢理客1-4-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週２日（火・木） / 18：00～20：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-874-7610",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0109",
+      "service_name": "はっぴーてぃーだクラブ",
+      "summary": "浦添市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "はっぴーてぃーだクラブ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "浦添市 〒901-2127 浦添市屋富祖3-1-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週1日(木) / 16:00～18:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-877-2981",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0110",
+      "service_name": "MTキッズクラブ",
+      "summary": "浦添市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "MTキッズクラブ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "浦添市 〒901-2134 浦添市港川458-1 県営港川団地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "毎週木曜日 / 16:00～18:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 876-3274",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0111",
+      "service_name": "こども食堂レッツクッキング",
+      "summary": "浦添市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "こども食堂レッツクッキング",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "浦添市 浦添市宮城2-4-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週6日(月～土) / 15:30～18:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0112",
+      "service_name": "てぃーだこども食堂",
+      "summary": "浦添市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "てぃーだこども食堂",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "浦添市 〒901-2103 浦添市仲間2-47-5",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "火・木 / 16:00～20:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-9780-6122",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0113",
+      "service_name": "みんなおいでよ陽迎橋",
+      "summary": "浦添市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "みんなおいでよ陽迎橋",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "浦添市 〒901-2101 浦添市西原5-12-6-103",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5日(月～金) / 15:00～19:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0114",
+      "service_name": "自立支援室 希望",
+      "summary": "糸満市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "自立支援室 希望",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "糸満市 〒901-0361 糸満市字糸満1410番地の10",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5日（月～金） / 10:00～18:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0115",
+      "service_name": "拠点型子どもの居場所いっぽ",
+      "summary": "糸満市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "拠点型子どもの居場所いっぽ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "糸満市 〒901-0305 糸満市西崎６丁目４番８号",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月～金 / 9：30～16：30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-987-4112",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0116",
+      "service_name": "ふらっと こうえん前",
+      "summary": "糸満市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ふらっと こうえん前",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "糸満市 糸満市西崎町3丁目120番地 ゴールドキャッスル1-B",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日（月～金）イベント等により土曜日も開所 / 月～木10：30～18：00 金11：30～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0117",
+      "service_name": "ゆいと",
+      "summary": "糸満市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ゆいと",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "糸満市",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日 月～金 / 15：00～21：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-840-8191",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0118",
+      "service_name": "がじゅまる学習支援（糸満市立糸満がじゅまる児童センター）",
+      "summary": "糸満市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "がじゅまる学習支援（糸満市立糸満がじゅまる児童センター）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "糸満市 〒901-0361 糸満市字糸満1410番地の10",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週２回（火・木） / 17：30～19：30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-995-1937",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0119",
+      "service_name": "NPO法人エンカレッジ豊見城教室（第２教室）",
+      "summary": "豊見城市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "NPO法人エンカレッジ豊見城教室（第２教室）",
+      "organization_type": "NPO",
+      "prefecture": "沖縄県",
+      "available_area": "豊見城市",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日（月～金） / 14：00～22：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-987-4663",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0120",
+      "service_name": "子どもの広場（わくじぃ）",
+      "summary": "豊見城市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "子どもの広場（わくじぃ）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "豊見城市 豊見城市字保栄茂1153-109 市立わくわく児童館内",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日（月～金） / 14：00～21：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-856-7124",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0121",
+      "service_name": "子ども未来塾（かなえ）",
+      "summary": "豊見城市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "子ども未来塾（かなえ）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "豊見城市 豊見城市字高嶺395-44 桜山荘「共に生きる町」たかみね内",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週１日（土） / 14：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-996-2510",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0122",
+      "service_name": "子どもの広場（まかぶ）",
+      "summary": "豊見城市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "子どもの広場（まかぶ）",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "豊見城市 豊見城市字根差部375番地2 真嘉部コミュニティセンター内",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日（月～金） / 14：00～21：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-840-6828",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0123",
+      "service_name": "NPO法人エンカレッジ豊見城教室（第１教室）",
+      "summary": "豊見城市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "NPO法人エンカレッジ豊見城教室（第１教室）",
+      "organization_type": "NPO",
+      "prefecture": "沖縄県",
+      "available_area": "豊見城市",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日（月～金） / 14：00～22：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-996-1519",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0124",
+      "service_name": "こどもの居場所みんなのいえ",
+      "summary": "南城市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "こどもの居場所みんなのいえ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "南城市 南城市知念字海野129",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "毎週4回 （月・水・金・土・） / 月・水・金（16：00～20：00） 土（10：00～14：00）",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-800-2857",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0125",
+      "service_name": "BIG MAMA HOUSE",
+      "summary": "南城市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "BIG MAMA HOUSE",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "南城市 〒901-1206 南城市大里字仲間194番地 1階",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "毎週３回（火・木・土）祝日除く / 16：00～20：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-955-7032",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0126",
+      "service_name": "ほっとハウスがじゅまる",
+      "summary": "南城市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ほっとハウスがじゅまる",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "南城市 〒901-0612 南城市玉城字當山54番地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月・水・金（祝日除く） / 16：00～19：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 917-5692",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0127",
+      "service_name": "ほっとハウスひまわり",
+      "summary": "南城市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "ほっとハウスひまわり",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "南城市 〒901-1415 南城市佐敷字新開1番地73",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月・水・木・金（祝日除く） / 16：30～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 917-5692",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0128",
+      "service_name": "嘉手苅こどもの居場所",
+      "summary": "西原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "嘉手苅こどもの居場所",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "西原町 西原町嘉手苅68番地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週1回（日曜日） / 10:00～12:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-8293-0246",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0129",
+      "service_name": "棚原自治会 たなばるわらびなぁ",
+      "summary": "西原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "棚原自治会 たなばるわらびなぁ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "西原町 西原町字棚原67",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回（月～金）※祝日除く / 15：30～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-946-4766",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0130",
+      "service_name": "上原自治会こどもの居場所",
+      "summary": "西原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "上原自治会こどもの居場所",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "西原町 西原町上原1丁目23番地の8",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週1回 （木曜日） / 15：30～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-944-4027",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0131",
+      "service_name": "小波津団地自治会こどもの居場所",
+      "summary": "西原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "小波津団地自治会こどもの居場所",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "西原町 西原町字小波津233-126",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週1回 （木曜日） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-946-4822",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0132",
+      "service_name": "平園自治会こどもの居場所",
+      "summary": "西原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "平園自治会こどもの居場所",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "西原町 西原町与那城300番地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回 （月～金） / 15：00～17：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-944-3030",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0133",
+      "service_name": "西原がじゅまーる教室",
+      "summary": "西原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "西原がじゅまーる教室",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "西原町 〒903-0117 西原町翁長543-1 FC翁長コーポ1F",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週3回 （火・水・木） / 11：00～18：30",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-975-7119",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0134",
+      "service_name": "あつまーる",
+      "summary": "与那原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "あつまーる",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "与那原町",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月～金 / 8:30～20:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 070-1941-9922",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0135",
+      "service_name": "まるはな食堂",
+      "summary": "与那原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "まるはな食堂",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "与那原町 〒901-1303 与那原町字与那原3171番地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週5回 （月・火・水・木・金） / 16：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-882-8030",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0136",
+      "service_name": "まぁる家(やー)あがり",
+      "summary": "与那原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "まぁる家(やー)あがり",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "与那原町 与那原町字与那原3835-1 江口荘301",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週3回 （火・木・金） / 8:30～21:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-946-4928",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0137",
+      "service_name": "まぁる家(やー)よなばる",
+      "summary": "与那原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "まぁる家(やー)よなばる",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "与那原町 与那原町字与那原912番地 与原区公民館内",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月・水・金 / 17：00～21：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 098-946-4928",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0138",
+      "service_name": "つなひき無料学習塾",
+      "summary": "与那原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "つなひき無料学習塾",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "与那原町 〒901-1303 与那原町字与那原567 ちかしアパート102号",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "完全無料",
+      "price": "0円(名称に「無料」と明記)",
+      "completely_free": true,
+      "frequency": "火・水・木・金・土 / 6:00～8:00（火・水・木・金） 13:00～18:00（土）",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 090-9870-6632",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0139",
+      "service_name": "子ども元気ROOM カナカナ",
+      "summary": "南風原町にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "子ども元気ROOM カナカナ",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "南風原町 南風原町字照屋88番地1階",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "月曜～日曜 / 月～金10：00～22：00 祝・土・日9：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0140",
+      "service_name": "宮古島市下地児童館 わくわく食堂",
+      "summary": "宮古島市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "宮古島市下地児童館 わくわく食堂",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "宮古島市 〒906-0304 沖縄県宮古島市下地字上地628-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週3（火・木・土）火・木おやつ、土曜日食事 / 火・木 15:30～17:30 土 12:00～13:00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 0980-76-3391",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0141",
+      "service_name": "漲水学園 にじいろ塾",
+      "summary": "宮古島市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "漲水学園 にじいろ塾",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "宮古島市 沖縄県宮古島市平良字西仲宗根745-5",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週２回（月・木） / 18：00～20：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 0980-72-4960",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0142",
+      "service_name": "いそべ子どもホッ！とステーション",
+      "summary": "石垣市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "いそべ子どもホッ！とステーション",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "石垣市 沖縄県石垣市字大浜1349番地1 磯辺団地自治集会場",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週３日（月・水・金） / 14:00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 080-1764-6267",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0143",
+      "service_name": "まきら子どもホッ！とステーション",
+      "summary": "石垣市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "まきら子どもホッ！とステーション",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "石垣市 沖縄県石垣市字新川2345番地 真喜良第三団地自治集会場",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日（月・火・水・木・金） / 14：00～18：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 080-1764-6267",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0144",
+      "service_name": "子どもホッ！とステーション未来塾",
+      "summary": "石垣市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "子どもホッ！とステーション未来塾",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "石垣市 沖縄県石垣市字大川147番地",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週３日（火・水・金） / 18：00～21：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "TEL 0980-83-3991",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、学習支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0145",
+      "service_name": "子どもホッ！とステーション",
+      "summary": "石垣市にある、学習支援のあるこどもの居場所(沖縄こどもの未来県民会議の掲載団体)",
+      "organization_name": "子どもホッ！とステーション",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "石垣市 沖縄県石垣市字石垣481",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面の居場所",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "地域の子ども(詳細は団体へ確認)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "要確認",
+      "price": "要確認(県民会議ページに参加費の記載なし。団体へ確認する)",
+      "completely_free": false,
+      "frequency": "週５日（月～金） / 月～金 14：00～21：00",
+      "application_method": "団体へ問い合わせ(県民会議ページ参照)",
+      "official_url": "https://www.okinawa-child-future.jp/work/",
+      "application_url": "https://www.okinawa-child-future.jp/work/",
+      "contact": "県民会議ページ参照",
+      "recruitment_status": "不明",
+      "data_source": "https://www.okinawa-child-future.jp/work/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
     }
   ]
 }
