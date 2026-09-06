@@ -190,6 +190,20 @@
       "org": "CoderDojo浦添",
       "checked_at": "2026-09-06",
       "robots_allows": true
+    },
+    {
+      "id": "nhk-one-school",
+      "url": "https://edu.web.nhk/school/",
+      "org": "NHK",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "nhk-one-kokokoza",
+      "url": "https://edu.web.nhk/kokokoza/",
+      "org": "NHK",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
     }
   ]
 }
