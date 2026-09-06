@@ -1,0 +1,5 @@
+{
+  "updated_at": "2026-09-06",
+  "note": "みらいひらけ堂の掲載サービス台帳。スキーマ: docs/みらいひらけ堂_データスキーマ.md。review_status が published のレコードのみサイトに表示される。全レコードに data_source と last_verified が必須。",
+  "services": []
+}
