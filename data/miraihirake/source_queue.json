@@ -126,6 +126,34 @@
       "url": "https://nll.red/",
       "robots_approved": false,
       "memo": "小中学生向け無償デジタル教材(自動出題・採点)。運営者・実績はA類型例外の3点確認が必要"
+    },
+    {
+      "id": "oist-outreach",
+      "org": "沖縄科学技術大学院大学(OIST)",
+      "url": "https://www.oist.jp/ja/events",
+      "robots_approved": false,
+      "memo": "広がる学び: サイエンスフェスタ・子ども向け科学プログラム(無料)※要照合"
+    },
+    {
+      "id": "okinawa-library",
+      "org": "沖縄県立図書館",
+      "url": "https://www.library.pref.okinawa.jp/",
+      "robots_approved": false,
+      "memo": "広がる学び: 離島・国頭への郵送貸出(送料図書館負担)/未設置離島向け電子書籍※要照合"
+    },
+    {
+      "id": "myprojects",
+      "org": "認定NPO法人カタリバ",
+      "url": "https://myprojects.jp/",
+      "robots_approved": false,
+      "memo": "広がる学び: 全国高校生マイプロジェクト(探究・無料・オンライン参加可)※要照合"
+    },
+    {
+      "id": "shiruporuto",
+      "org": "金融広報中央委員会",
+      "url": "https://www.shiruporuto.jp/",
+      "robots_approved": false,
+      "memo": "広がる学び: 知るぽると(お金の無料学習教材)。URL・運営体制の現況要確認"
     }
   ]
 }
