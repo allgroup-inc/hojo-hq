@@ -1,19 +1,161 @@
 {
-  "note": "robots.txt監査結果。取得元: GitHub Actions run 34003628813 (2026-09-06 01:20 UTC, https://github.com/allgroup-inc/hojo-hq/actions/runs/34003628813) の実行ログ。初回実行時はワークフローのコミット工程のバグでファイルが保存されなかったため、ログから復元した(結果自体はCIでの実測)。robots_allows=error は robots.txt が読めなかったもので人が個別確認する。",
+  "note": "robots.txt監査結果。守り部はこれと各サイトの利用規約を確認のうえ、source_queue.json の robots_approved を true にする。robots_allows=error はrobots.txt が読めなかった(存在しない場合も含む)ので人が個別確認する。",
   "results": [
-    {"id": "katariba-kikkake",    "url": "https://katariba.online/kikkake", "org": "認定NPO法人カタリバ", "checked_at": "2026-09-06", "robots_allows": "error"},
-    {"id": "katariba-futoko",     "url": "https://futoko.katariba.online/", "org": "認定NPO法人カタリバ", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "kidsdoor-study",      "url": "https://kidsdoor.net/activity/study/index.html", "org": "認定NPO法人キッズドア", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "eboard",              "url": "https://info.eboard.jp/index.html", "org": "NPO法人eboard", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "19ch",                "url": "https://19ch.tv/", "org": "葉一(個人)", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "nhk-school",          "url": "https://www.nhk.or.jp/school/", "org": "NHK", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "nhk-kokokoza",        "url": "https://www.nhk.or.jp/kokokoza/", "org": "NHK", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "try-it",              "url": "https://www.try-it.jp/", "org": "トライグループ", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "mext-kyufu",          "url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1344089.htm", "org": "文部科学省", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "jasso-kyufu",         "url": "https://www.jasso.go.jp/shogakukin/kyufu/index.html", "org": "日本学生支援機構", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "okinawa-pref-juku",   "url": "https://www.pref.okinawa.lg.jp/kyoiku/jido/1007994/1007960/1007964/index.html", "org": "沖縄県", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "okinawa-city-gakushu","url": "https://www.city.okinawa.okinawa.jp/k021/contents/p00006.html", "org": "沖縄市", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "naha-hitorioya",      "url": "https://www.city.naha.okinawa.jp/child/kosodateouen/1002864/1002873.html", "org": "那覇市", "checked_at": "2026-09-06", "robots_allows": true},
-    {"id": "okinawa-mirai",       "url": "https://www.okinawa-child-future.jp/work/", "org": "沖縄こどもの未来県民会議", "checked_at": "2026-09-06", "robots_allows": true}
+    {
+      "id": "katariba-kikkake",
+      "url": "https://katariba.online/kikkake",
+      "org": "認定NPO法人カタリバ",
+      "checked_at": "2026-09-06",
+      "robots_allows": "error",
+      "error": "URLError: <urlopen error [Errno -5] No address associated with hostname>"
+    },
+    {
+      "id": "katariba-futoko",
+      "url": "https://futoko.katariba.online/",
+      "org": "認定NPO法人カタリバ",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "kidsdoor-study",
+      "url": "https://kidsdoor.net/activity/study/index.html",
+      "org": "認定NPO法人キッズドア",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "eboard",
+      "url": "https://info.eboard.jp/index.html",
+      "org": "NPO法人eboard",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "19ch",
+      "url": "https://19ch.tv/",
+      "org": "葉一(個人)",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "nhk-school",
+      "url": "https://www.nhk.or.jp/school/",
+      "org": "NHK",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "nhk-kokokoza",
+      "url": "https://www.nhk.or.jp/kokokoza/",
+      "org": "NHK",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "try-it",
+      "url": "https://www.try-it.jp/",
+      "org": "トライグループ",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "mext-kyufu",
+      "url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1344089.htm",
+      "org": "文部科学省",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "jasso-kyufu",
+      "url": "https://www.jasso.go.jp/shogakukin/kyufu/index.html",
+      "org": "日本学生支援機構",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "okinawa-pref-juku",
+      "url": "https://www.pref.okinawa.lg.jp/kyoiku/jido/1007994/1007960/1007964/index.html",
+      "org": "沖縄県",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "okinawa-city-gakushu",
+      "url": "https://www.city.okinawa.okinawa.jp/k021/contents/p00006.html",
+      "org": "沖縄市",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "naha-hitorioya",
+      "url": "https://www.city.naha.okinawa.jp/child/kosodateouen/1002864/1002873.html",
+      "org": "那覇市",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "okinawa-mirai",
+      "url": "https://www.okinawa-child-future.jp/work/",
+      "org": "沖縄こどもの未来県民会議",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "coderdojo-jp",
+      "url": "https://coderdojo.jp/",
+      "org": "CoderDojo Japan",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "katariba-online",
+      "url": "https://online.katariba.or.jp/",
+      "org": "認定NPO法人カタリバ",
+      "checked_at": "2026-09-06",
+      "robots_allows": "error",
+      "error": "URLError: <urlopen error [Errno -2] Name or service not known>"
+    },
+    {
+      "id": "asdessin",
+      "url": "https://www.asdessin.org/",
+      "org": "NPO法人アスデッサン",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "netre",
+      "url": "https://nll.red/",
+      "org": "新・ネットレの学習教室",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "oist-outreach",
+      "url": "https://www.oist.jp/ja/events",
+      "org": "沖縄科学技術大学院大学(OIST)",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "okinawa-library",
+      "url": "https://www.library.pref.okinawa.jp/",
+      "org": "沖縄県立図書館",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "myprojects",
+      "url": "https://myprojects.jp/",
+      "org": "認定NPO法人カタリバ",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    },
+    {
+      "id": "shiruporuto",
+      "url": "https://www.shiruporuto.jp/",
+      "org": "金融広報中央委員会",
+      "checked_at": "2026-09-06",
+      "robots_allows": true
+    }
   ]
 }
