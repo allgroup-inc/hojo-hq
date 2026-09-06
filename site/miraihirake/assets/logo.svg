@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="430" height="100" viewBox="0 0 430 100" role="img" aria-label="みらいひらけ堂">
+  <!-- 堂シリーズ共通の文法(もらいわすれ堂ロゴ準拠): 朱タイル+2段丸ゴ+黄バッジ。
+       バッジはもら堂の「1件の通知」に対し、みら堂は「ひらいていく方向(↗)」 -->
+  <rect x="4" y="4" width="92" height="92" rx="23" fill="#B9502F"/>
+  <text x="50" y="46" font-family="'Hiragino Maru Gothic ProN','HGMaruGothicMPRO','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">みら</text>
+  <text x="50" y="80" font-family="'Hiragino Maru Gothic ProN','HGMaruGothicMPRO','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">堂</text>
+  <circle cx="81" cy="19" r="14" fill="#F2B705" stroke="#FFFBF4" stroke-width="3"/>
+  <path d="M75 25 L87 13 M87 13 h-8 M87 13 v8" stroke="#1F2A2E" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <text x="114" y="64" font-family="'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif" font-size="40" fill="#1F2A2E" font-weight="800" letter-spacing="1">みらいひらけ堂</text>
+</svg>

@@ -29,8 +29,7 @@ h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;line-height:
 a{color:var(--coral-deep)}
 [hidden]{display:none!important}
 header.site{padding:18px 0 8px;text-align:center}
-.logo{font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.35rem;letter-spacing:.06em}
-.logo .open{color:var(--coral-deep)}
+img.logo{height:52px;width:auto;max-width:100%}
 main{padding-bottom:56px}
 .hero{text-align:center;padding:26px 0 8px}
 .hero h1{font-size:1.5rem;margin-bottom:.6em}
@@ -95,6 +94,15 @@ main{padding-bottom:56px}
 .applybtn{display:block;text-align:center;background:var(--coral);color:#fff;border-radius:12px;
   padding:14px;font-size:1.08rem;font-weight:700;text-decoration:none;margin:16px 0 8px}
 .srcline{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:10px}
+/* ---- 価値観セクション(LP) ---- */
+.values{margin-top:40px}
+.valblock{background:var(--card);border:1.5px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+  padding:20px 22px;margin-bottom:16px;text-align:left}
+.valblock h2{font-size:1.18rem;margin-bottom:.5em;color:var(--coral-deep)}
+.valblock p{font-size:.98rem}
+.valblock p + p{margin-top:.6em}
+.doors{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.door{font-size:.9rem;background:var(--sand-2);border:1px solid var(--line);border-radius:999px;padding:4px 14px}
 footer.site{border-top:1px solid var(--line);padding:20px 0 40px;color:var(--muted);font-size:.88rem;text-align:center}
 footer.site a{color:var(--muted)}
 @media (min-width:560px){ .choice{flex:1 1 30%} }
@@ -102,7 +110,7 @@ footer.site a{color:var(--muted)}
 </head>
 <body>
 <header class="site"><div class="wrap">
-  <div class="logo">みらい<span class="open">ひらけ</span>堂</div>
+  <a href="./" aria-label="みらいひらけ堂 トップ"><img class="logo" src="assets/logo.svg" alt="みらいひらけ堂"></a>
 </div></header>
 
 <main class="wrap">
@@ -124,6 +132,28 @@ footer.site a{color:var(--muted)}
     </ul>
   </div>
   <div class="notice" id="prep-notice" hidden>🚧 いまサービスの情報を集めて確認しています。もうすこしだけ待っていてね。</div>
+
+  <div class="values">
+    <div class="valblock">
+      <h2>みらいは、いろんな扉からひらく</h2>
+      <p>学びは、学校の勉強だけではありません。本を読むこと、何かを作ること、いろんな大人と話すこと、好きなことに夢中になること。どれも、あなたのみらいをひらく扉になる可能性があります。</p>
+      <div class="doors">
+        <span class="door">📖 本を読む</span><span class="door">🛠 ものづくり</span>
+        <span class="door">💬 大人と話す</span><span class="door">🔍 好きなことを探す</span>
+        <span class="door">🎓 受験にちょうせん</span><span class="door">💻 プログラミング</span>
+      </div>
+    </div>
+    <div class="valblock">
+      <h2>ささえてくれる人が、こんなにいる</h2>
+      <p>沖縄にも全国にも、子どもの学びを無料でささえてくれる人たちがいます。NPO・先生・大学生・ボランティア・県や市・図書館。そんな「まなびば」や制度が、じつはたくさんあります。</p>
+      <p>「知らなかったから使えなかった」をなくすために、みらいひらけ堂はその入口をひとつにまとめています。</p>
+    </div>
+    <div class="valblock">
+      <h2>お金をかける道も、かけない道も</h2>
+      <p>塾や教材にお金をかけて可能性をひらくのも、大切な選択です。そして、お金をかけられなくても、ひらける扉はたくさんあります。</p>
+      <p>このサイトには、無料(一部無料・条件付き無料をふくむ)で使える情報だけを、公式の情報とてらしあわせてのせています。まずはここから、一歩ためしてみてください。</p>
+    </div>
+  </div>
 </section>
 
 <!-- 質問 -->
