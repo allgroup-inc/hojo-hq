@@ -109,7 +109,129 @@ footer.site a{color:var(--muted)}
 </style>
 </head>
 <body>
-<header class="site"><div class="wrap">
+
+<!-- ===== 世界観フィルム(v0): 夜→朝、「扉がひらく」の物語。実写差し替え前の絵コンテ実装(堂シリーズ共通の文法) ===== -->
+<link rel="stylesheet" href="assets/film.css">
+<noscript><style>
+.mfilm .rise,.mfilm .stmt,.mfilm .sunburst,.mfilm .dlogo .tile,.mfilm .dlogo .moji,.mfilm .dlogo .bdg,.mfilm .vision span{opacity:1!important;transform:none!important}
+.mfilm .stmt{letter-spacing:.14em!important}
+.mfilm .dlogo .arw{stroke-dashoffset:0!important}
+</style></noscript>
+<div style="position:relative">
+<div class="mhead" id="mhead">
+  <a class="hl" href="#honmon"><img src="assets/icon.svg" alt="">みらいひらけ堂</a>
+  <a class="skip" href="#honmon">スキップして探す →</a>
+</div>
+<div class="mfilm">
+
+  <!-- S1: 夜・星空(どの子にもみらいがある) -->
+  <section class="scene" id="ms1">
+    <div class="kb">
+      <!-- 実写に差し替えるとき: <div class="photoback"><img src="assets/film/hoshizora.jpg" alt=""></div>(写真の選び方: docs/みらいひらけ堂_LP制作プロンプト.md「写真プラン」) -->
+      <div id="mstars"></div>
+      <div class="moon"></div>
+      <div class="shooting"></div>
+      <div class="island"><svg viewBox="0 0 1200 240" preserveAspectRatio="none"><path d="M0 240 L0 150 C120 118 260 132 380 110 C500 88 640 96 760 118 C880 140 1040 128 1200 150 L1200 240 Z" fill="#0B1514"/></svg></div>
+      <div id="mvlights"></div>
+      <!-- 星を見上げる子ども(影絵) -->
+      <div class="sil" style="left:50%;bottom:16vh;width:min(34vw,150px);transform:translateX(-50%)"><svg viewBox="0 0 200 170">
+        <circle cx="104" cy="42" r="17"/>
+        <path d="M72 170 C74 128 82 96 98 86 C112 80 126 90 130 106 C136 128 136 150 134 170 Z"/>
+        <path d="M78 128 C64 122 54 110 50 96 L58 92 C62 104 72 114 84 118 Z"/>
+      </svg></div>
+    </div>
+    <div class="pret"><p>これは、あなたのための物語。</p></div>
+    <div class="copy">
+      <p class="stmt stmt-l dark-t">どの子にも、<br>ひらくのを待っている<br>みらいがある。</p>
+    </div>
+    <div class="cue">ゆっくり、下へ</div>
+  </section>
+
+  <!-- S2: 未明・好きなこと(学びは教室の中だけじゃない) -->
+  <section class="scene" id="ms2">
+    <div class="kb">
+      <!-- 実写枠: 手元の写真(本をめくる手・工作する手など。顔は写さない) -->
+      <div class="mote" style="width:6px;height:6px;top:24%;left:18%"></div>
+      <div class="mote" style="width:5px;height:5px;top:38%;left:78%;animation-delay:1.2s"></div>
+      <!-- ひらいた本(影絵) -->
+      <div class="sil" style="left:4vw;bottom:6vh;width:min(38vw,220px)"><svg viewBox="0 0 200 100">
+        <path d="M10 60 C40 42 70 42 100 56 C130 42 160 42 190 60 L190 88 C160 72 130 72 100 84 C70 72 40 72 10 88 Z"/>
+        <rect x="97" y="54" width="6" height="32" rx="3"/>
+      </svg></div>
+      <!-- 望遠鏡(影絵) -->
+      <div class="sil" style="right:5vw;bottom:5vh;width:min(30vw,170px)"><svg viewBox="0 0 170 140">
+        <rect x="52" y="18" width="96" height="20" rx="10" transform="rotate(-22 52 18)"/>
+        <path d="M78 56 L58 136 L48 136 L70 52 Z"/>
+        <path d="M86 56 L106 136 L116 136 L96 52 Z"/>
+        <rect x="80" y="52" width="10" height="30" rx="4"/>
+      </svg></div>
+    </div>
+    <div class="copy">
+      <p class="stmt stmt-s dark-t">学びは、<br>教室の中だけじゃない。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#D8DCC9;font-weight:500">本を読むこと。何かを作ること。星を見ること。<br>好きなことは、ぜんぶ みらいの扉。</p>
+    </div>
+  </section>
+
+  <!-- S3: 夜明け前・ささえてくれる人(まなびばの扉) -->
+  <section class="scene" id="ms3">
+    <div class="kb">
+      <!-- 実写枠: まなびばの風景(教室のうしろ姿・図書館の本棚など。顔は写さない) -->
+      <!-- ひらいた扉から差す光 -->
+      <div style="position:absolute;right:16%;bottom:0;width:15vmin;height:36vmin;z-index:2;background:linear-gradient(180deg,rgba(247,201,110,.8),rgba(247,201,110,.25));border-radius:4px 4px 0 0;box-shadow:0 0 60px 16px rgba(247,201,110,.35)"></div>
+      <!-- 手をつなぎ扉へ向かう大人と子ども(影絵) -->
+      <div class="sil" style="right:26%;bottom:2vh;width:min(40vw,230px)"><svg viewBox="0 0 230 190">
+        <circle cx="70" cy="40" r="17"/>
+        <path d="M46 190 C46 136 54 100 70 92 C84 86 96 96 100 112 C106 136 106 166 104 190 Z"/>
+        <circle cx="152" cy="86" r="12"/>
+        <path d="M136 190 C136 152 142 126 152 120 C162 116 170 124 172 136 C176 154 176 176 174 190 Z"/>
+        <path d="M100 118 C114 122 128 124 140 124 L140 132 C126 132 112 130 98 126 Z"/>
+      </svg></div>
+    </div>
+    <div class="copy" style="transform:translateY(-8vh)">
+      <p class="stmt stmt-s dark-t">ささえてくれる人が、<br>こんなにいる。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#D8DCC9;font-weight:500">先生、大学生、NPO、図書館——<br>“まなびば”の扉は、もう ひらいている。</p>
+    </div>
+  </section>
+
+  <!-- S4: 朝焼け(問題→希望) -->
+  <section class="scene" id="ms4">
+    <div class="kb">
+      <div class="glow"></div>
+      <div class="risingsun"></div>
+      <div class="bird" style="top:24%"><svg viewBox="0 0 60 24"><path d="M4 16 C12 6 20 6 30 14 C40 6 48 6 56 16"/></svg></div>
+      <div class="bird b2" style="top:32%"><svg viewBox="0 0 60 24"><path d="M4 16 C12 6 20 6 30 14 C40 6 48 6 56 16"/></svg></div>
+    </div>
+    <div class="copy">
+      <p class="rise" style="color:#5A4030">でも——「知らなかった」というだけで、<br>ひらかれないままの扉がある。</p>
+      <p class="rise d2" style="margin-top:1.2em;color:#5A4030">お金をかけられても、かけられなくても、<br>ひらける扉はある。</p>
+      <p class="rise d3" style="margin-top:1.2em;color:var(--coral-deep);font-weight:700">ひとりの子が扉をひらくたび、<br>沖縄のみらいは、すこし明るくなる。</p>
+    </div>
+  </section>
+
+  <!-- S5: 朝・ロゴの現れ -->
+  <section class="scene" id="ms5">
+    <div class="sunburst"></div>
+    <svg class="dlogo" viewBox="0 0 100 100" aria-label="みらいひらけ堂のロゴ">
+      <rect class="tile" x="4" y="4" width="92" height="92" rx="23" fill="#B9502F"/>
+      <text class="moji" x="50" y="46" font-family="'Hiragino Maru Gothic ProN','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">みら</text>
+      <text class="moji" x="50" y="80" font-family="'Hiragino Maru Gothic ProN','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">堂</text>
+      <circle class="bdg" cx="81" cy="19" r="14" fill="#F2B705" stroke="#FFFBF4" stroke-width="3"/>
+      <path class="arw" d="M75 25 L87 13 M87 13 h-8 M87 13 v8" stroke="#1F2A2E" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </svg>
+    <div class="copy">
+      <p class="vision" id="mvision">ひらけ、みらい。</p>
+      <p class="wm rise d2" style="margin-top:.9em">みらいひらけ堂</p>
+      <a class="fcta rise d3" href="#honmon">あなたの扉を さがしにいく</a>
+      <p class="micro rise d3">無料 ・ 登録不要 ・ 名前も住所もいりません</p>
+    </div>
+  </section>
+
+</div>
+</div>
+<script src="assets/film.js" defer></script>
+<!-- ===== フィルムここまで。以下、実用レイヤー ===== -->
+
+<header class="site" id="honmon"><div class="wrap">
   <a href="./" aria-label="みらいひらけ堂 トップ"><img class="logo" src="assets/logo.svg" alt="みらいひらけ堂"></a>
 </div></header>
 
