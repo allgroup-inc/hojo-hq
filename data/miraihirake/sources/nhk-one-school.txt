@@ -1,5 +1,5 @@
-# source_id: nhk-school
-# url: https://www.nhk.or.jp/school/
+# source_id: nhk-one-school
+# url: https://edu.web.nhk/school/
 # org: NHK
 # fetched_at: 2026-09-06
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
