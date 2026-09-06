@@ -194,15 +194,15 @@
       "id": "nhk-one-school",
       "org": "NHK",
       "url": "https://edu.web.nhk/school/",
-      "robots_approved": false,
-      "memo": "NHK ONE for School(旧NHK for School。2025-10-01移行・新ドメイン)。svc-0004の再照合用。新ドメインのためaudit待ち"
+      "robots_approved": true,
+      "memo": "NHK ONE for School(旧NHK for School。2025-10-01移行・新ドメイン)。svc-0004の再照合用。新ドメインのためaudit待ち|robots承認2026-09-07(単発取得のみ。守り部審査記録参照)"
     },
     {
       "id": "nhk-one-kokokoza",
       "org": "NHK",
       "url": "https://edu.web.nhk/kokokoza/",
-      "robots_approved": false,
-      "memo": "NHK高校講座(NHK ONE移行後の新URL)。svc-0005の再照合用。新ドメインのためaudit待ち"
+      "robots_approved": true,
+      "memo": "NHK高校講座(NHK ONE移行後の新URL)。svc-0005の再照合用。新ドメインのためaudit待ち|robots承認2026-09-07(単発取得のみ。守り部審査記録参照)"
     }
   ]
 }
