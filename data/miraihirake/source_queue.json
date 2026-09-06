@@ -4,9 +4,9 @@
     {
       "id": "katariba-kikkake",
       "org": "認定NPO法人カタリバ",
-      "url": "https://katariba.online/kikkake",
+      "url": "https://www.katariba.or.jp/activity/project/kikkake/",
       "robots_approved": false,
-      "memo": "キッカケプログラム(就学援助世帯の小3〜高3・PC/Wi-Fi無償貸与・無料)※検索結果ベース要照合"
+      "memo": "キッカケプログラム(就学援助世帯の小3〜高3・PC/Wi-Fi無償貸与・無料)※katariba.onlineはrobots読取不可が2回続いたため公式サイト側ページへ変更。次回auditで確認後にfetch"
     },
     {
       "id": "katariba-futoko",
@@ -103,57 +103,57 @@
       "id": "coderdojo-jp",
       "org": "CoderDojo Japan",
       "url": "https://coderdojo.jp/",
-      "robots_approved": false,
-      "memo": "無料プログラミング道場の全国ポータル(213拠点超・オンライン対応道場あり・県内道場も要確認)※検索結果ベース要照合"
+      "robots_approved": true,
+      "memo": "無料プログラミング道場の全国ポータル(213拠点超・オンライン対応道場あり・県内道場も要確認)※検索結果ベース要照合|robots承認2026-09-06第2陣(単発取得のみ。守り部審査記録参照)"
     },
     {
       "id": "katariba-online",
       "org": "認定NPO法人カタリバ",
       "url": "https://online.katariba.or.jp/",
       "robots_approved": false,
-      "memo": "カタリバオンライン/forTeens(オンラインの居場所・一緒に勉強)。公式URLは要再確認(検索ではnote記事のみ確認)"
+      "memo": "【掲載見送り(要確認)】検索でforTeensは2025年12月提供終了・forKidsは新規申込受付停止の情報。URL(online.katariba.or.jp)もrobots読取エラー。再開の情報が出たら再検討"
     },
     {
       "id": "asdessin",
       "org": "NPO法人アスデッサン",
       "url": "https://www.asdessin.org/",
-      "robots_approved": false,
-      "memo": "中高生向け無料キャリア教育(全国からオンライン参加・社会人との対話)※要照合"
+      "robots_approved": true,
+      "memo": "中高生向け無料キャリア教育(全国からオンライン参加・社会人との対話)※要照合|robots承認2026-09-06第2陣(単発取得のみ。守り部審査記録参照)"
     },
     {
       "id": "netre",
       "org": "新・ネットレの学習教室",
       "url": "https://nll.red/",
-      "robots_approved": false,
-      "memo": "小中学生向け無償デジタル教材(自動出題・採点)。運営者・実績はA類型例外の3点確認が必要"
+      "robots_approved": true,
+      "memo": "小中学生向け無償デジタル教材(自動出題・採点)。運営者・実績はA類型例外の3点確認が必要|robots承認2026-09-06第2陣(単発取得のみ。守り部審査記録参照)"
     },
     {
       "id": "oist-outreach",
       "org": "沖縄科学技術大学院大学(OIST)",
       "url": "https://www.oist.jp/ja/events",
-      "robots_approved": false,
-      "memo": "広がる学び: サイエンスフェスタ・子ども向け科学プログラム(無料)※要照合"
+      "robots_approved": true,
+      "memo": "広がる学び: サイエンスフェスタ・子ども向け科学プログラム(無料)※要照合|robots承認2026-09-06第2陣(単発取得のみ。守り部審査記録参照)"
     },
     {
       "id": "okinawa-library",
       "org": "沖縄県立図書館",
       "url": "https://www.library.pref.okinawa.jp/",
-      "robots_approved": false,
-      "memo": "広がる学び: 離島・国頭への郵送貸出(送料図書館負担)/未設置離島向け電子書籍※要照合"
+      "robots_approved": true,
+      "memo": "広がる学び: 離島・国頭への郵送貸出(送料図書館負担)/未設置離島向け電子書籍※要照合|robots承認2026-09-06第2陣(単発取得のみ。守り部審査記録参照)"
     },
     {
       "id": "myprojects",
       "org": "認定NPO法人カタリバ",
       "url": "https://myprojects.jp/",
-      "robots_approved": false,
-      "memo": "広がる学び: 全国高校生マイプロジェクト(探究・無料・オンライン参加可)※要照合"
+      "robots_approved": true,
+      "memo": "広がる学び: 全国高校生マイプロジェクト(探究・無料・オンライン参加可)※要照合|robots承認2026-09-06第2陣(単発取得のみ。守り部審査記録参照)"
     },
     {
       "id": "shiruporuto",
       "org": "金融広報中央委員会",
       "url": "https://www.shiruporuto.jp/",
-      "robots_approved": false,
-      "memo": "広がる学び: 知るぽると(お金の無料学習教材)。URL・運営体制の現況要確認"
+      "robots_approved": true,
+      "memo": "広がる学び: 知るぽると(お金の無料学習教材)。URL・運営体制の現況要確認|robots承認2026-09-06第2陣(単発取得のみ。守り部審査記録参照)"
     }
   ]
 }
