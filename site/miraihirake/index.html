@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>みらいひらけ堂|むりょうで べんきょうできる ばしょが みつかる</title>
+<meta name="description" content="沖縄の小学生・中学生・高校生向け。全国と県内の無料の学習支援・オンライン授業・自習室・奨学金を、4つの質問でかんたんに探せます。登録不要・名前も住所もいりません。">
+<!-- 公開判定(掲載基準決裁+守り部審査+データ整備)クリアまで検索エンジン非公開。
+     解除するときは下の robots メタを削除し、update.yml の除外ステップも外すこと -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FBF5EC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<style>
+:root{
+  /* フクギイロ「島の陽だまり」パレット準拠(もらいわすれ堂と姉妹) */
+  --sand:#FBF5EC; --sand-2:#F6EADB; --card:#FFFDF9;
+  --ink:#3B322B; --muted:#6E6156;
+  --coral:#D2694A; --coral-deep:#B9502F;
+  --sun:#F2C14E; --sea:#6FAEA4; --leaf:#7E9B79;
+  --line:#EEE1D0; --shadow:0 1px 2px rgba(0,0,0,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  font-size:17px;line-height:1.9;color:var(--ink);background:var(--sand);-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:0 18px}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;line-height:1.5;font-weight:600;word-break:keep-all;overflow-wrap:anywhere;text-wrap:balance}
+a{color:var(--coral-deep)}
+[hidden]{display:none!important}
+header.site{padding:18px 0 8px;text-align:center}
+.logo{font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.35rem;letter-spacing:.06em}
+.logo .open{color:var(--coral-deep)}
+main{padding-bottom:56px}
+.hero{text-align:center;padding:26px 0 8px}
+.hero h1{font-size:1.5rem;margin-bottom:.6em}
+.hero p.lead{color:var(--muted);margin-bottom:22px}
+.bigbtn{display:block;width:100%;border:none;cursor:pointer;background:var(--coral);color:#fff;
+  font-size:1.15rem;font-weight:700;font-family:inherit;padding:20px 16px;border-radius:16px;box-shadow:var(--shadow)}
+.bigbtn:hover,.bigbtn:focus-visible{background:var(--coral-deep)}
+.bigbtn small{display:block;font-weight:400;font-size:.85rem;opacity:.92;margin-top:2px}
+.subrow{display:flex;gap:10px;margin-top:12px}
+.subbtn{flex:1;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 8px;
+  font-family:inherit;font-size:.95rem;font-weight:500;color:var(--ink);cursor:pointer}
+.subbtn:hover,.subbtn:focus-visible{border-color:var(--coral)}
+.promises{margin:26px auto 0;max-width:420px;text-align:left;background:var(--card);
+  border:1.5px solid var(--line);border-radius:14px;padding:14px 18px}
+.promises li{list-style:none;padding-left:1.6em;position:relative;margin:4px 0}
+.promises li::before{content:"✓";position:absolute;left:.2em;color:var(--leaf);font-weight:700}
+.notice{margin:22px 0;background:var(--sand-2);border:1.5px dashed var(--sun);border-radius:12px;
+  padding:12px 16px;font-size:.95rem}
+/* ---- 質問画面 ---- */
+.stepbar{display:flex;gap:6px;margin:18px 0 10px}
+.stepbar span{flex:1;height:8px;border-radius:4px;background:var(--line)}
+.stepbar span.on{background:var(--coral)}
+.qtitle{font-size:1.25rem;margin:10px 0 4px}
+.qnote{color:var(--muted);font-size:.92rem;margin-bottom:14px}
+.choices{display:flex;flex-wrap:wrap;gap:10px}
+.choice{border:2px solid var(--line);background:var(--card);border-radius:14px;padding:12px 16px;
+  font-family:inherit;font-size:1.02rem;color:var(--ink);cursor:pointer;flex:1 1 45%;min-height:56px;text-align:center}
+.choice[aria-pressed="true"]{border-color:var(--coral-deep);background:#FDF0EA;font-weight:700}
+.choice[aria-pressed="true"]::before{content:"✓ ";color:var(--coral-deep)}
+.navrow{display:flex;gap:10px;margin-top:22px}
+.backbtn{background:none;border:1.5px solid var(--line);border-radius:12px;padding:12px 18px;
+  font-family:inherit;font-size:1rem;color:var(--muted);cursor:pointer}
+.nextbtn{flex:1;background:var(--coral);color:#fff;border:none;border-radius:12px;padding:14px;
+  font-family:inherit;font-size:1.08rem;font-weight:700;cursor:pointer}
+.nextbtn:disabled{background:#D9CBBB;cursor:not-allowed}
+.skiplink{display:block;text-align:center;margin-top:12px;font-size:.95rem;color:var(--muted)}
+/* ---- 結果 ---- */
+.rescount{margin:16px 0 8px;font-weight:700}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+  padding:16px 18px;margin-bottom:16px}
+.score{display:inline-block;background:var(--sun);color:var(--ink);font-weight:700;border-radius:8px;
+  padding:1px 10px;font-size:.95rem;margin-bottom:6px}
+.card h3{font-size:1.15rem;margin-bottom:2px}
+.card .org{color:var(--muted);font-size:.88rem;margin-bottom:6px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.badge{font-size:.82rem;border-radius:8px;padding:2px 9px;border:1px solid var(--line);background:var(--sand-2)}
+.badge.ok{background:#EAF3EA;border-color:var(--leaf)}
+.badge.warn{background:#FBF0DC;border-color:var(--sun)}
+.badge.na{background:#F3E7E2;border-color:#D8B4A5}
+.why{background:var(--sand-2);border-radius:10px;padding:10px 14px;font-size:.92rem;margin:8px 0}
+.why b{display:block;margin-bottom:2px}
+.why li{list-style:none;padding-left:1.4em;position:relative}
+.why li::before{content:"・";position:absolute;left:.2em}
+.detailbtn{display:block;width:100%;text-align:center;background:none;border:2px solid var(--coral);
+  color:var(--coral-deep);border-radius:12px;padding:10px;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;margin-top:6px}
+.detailbtn:hover,.detailbtn:focus-visible{background:#FDF0EA}
+.stale{color:#8A5A00;background:#FBF0DC;border-radius:8px;padding:4px 10px;font-size:.85rem;display:inline-block;margin-top:6px}
+/* ---- 詳細 ---- */
+.dl{margin:10px 0}
+.dl dt{font-weight:700;font-size:.9rem;color:var(--muted);margin-top:12px}
+.dl dd{margin-left:0}
+.applybtn{display:block;text-align:center;background:var(--coral);color:#fff;border-radius:12px;
+  padding:14px;font-size:1.08rem;font-weight:700;text-decoration:none;margin:16px 0 8px}
+.srcline{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:10px}
+footer.site{border-top:1px solid var(--line);padding:20px 0 40px;color:var(--muted);font-size:.88rem;text-align:center}
+footer.site a{color:var(--muted)}
+@media (min-width:560px){ .choice{flex:1 1 30%} }
+</style>
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <div class="logo">みらい<span class="open">ひらけ</span>堂</div>
+</div></header>
+
+<main class="wrap">
+
+<!-- ホーム -->
+<section id="view-home" aria-label="ホーム">
+  <div class="hero">
+    <h1>むりょうで べんきょうできる<br>ばしょが みつかる</h1>
+    <p class="lead">沖縄にいながら、全国の無料の勉強サービスを使えます。</p>
+    <button class="bigbtn" id="btn-start">あなたに合う無料の勉強サービスを探す<small>4つの質問・1分でおわります</small></button>
+    <div class="subrow">
+      <button class="subbtn" id="btn-all">ぜんぶの一覧を見る</button>
+      <button class="subbtn" id="btn-about">このサイトについて</button>
+    </div>
+    <ul class="promises">
+      <li>登録なしで使えます</li>
+      <li>名前も住所もいりません</li>
+      <li>ぜんぶ無料の情報だけをのせています</li>
+    </ul>
+  </div>
+  <div class="notice" id="prep-notice" hidden>🚧 いまサービスの情報を集めて確認しています。もうすこしだけ待っていてね。</div>
+</section>
+
+<!-- 質問 -->
+<section id="view-quiz" hidden aria-label="質問">
+  <div class="stepbar" id="stepbar"><span></span><span></span><span></span><span></span></div>
+  <h2 class="qtitle" id="q-title"></h2>
+  <p class="qnote" id="q-note"></p>
+  <div class="choices" id="q-choices" role="group"></div>
+  <div class="navrow">
+    <button class="backbtn" id="btn-back">← もどる</button>
+    <button class="nextbtn" id="btn-next">つぎへ</button>
+  </div>
+  <a href="#" class="skiplink" id="btn-skip" hidden>この質問はスキップする(答えなくてもOK)</a>
+</section>
+
+<!-- 結果 -->
+<section id="view-results" hidden aria-label="検索結果">
+  <button class="backbtn" id="btn-requiz">← 質問をやりなおす</button>
+  <p class="rescount" id="res-count"></p>
+  <div id="res-list"></div>
+  <div class="notice" id="res-empty" hidden>ぴったりのサービスがまだ見つかりませんでした。情報はこれからどんどん増えます。条件を減らして、もういちど試してみてください。</div>
+</section>
+
+<!-- 詳細 -->
+<section id="view-detail" hidden aria-label="サービスの詳しい情報">
+  <button class="backbtn" id="btn-backres">← 結果にもどる</button>
+  <div id="detail-body"></div>
+</section>
+
+<!-- このサイトについて -->
+<section id="view-about" hidden aria-label="このサイトについて">
+  <button class="backbtn" id="btn-backhome">← もどる</button>
+  <h2 class="qtitle">このサイトについて</h2>
+  <p>みらいひらけ堂は、沖縄の小学生・中学生・高校生が、<b>無料で勉強できる場所・サービス</b>を探せるサイトです。塾に行っていなくても、全国にはオンラインで使える無料の勉強サービスがたくさんあります。「知らなかったから使えなかった」をなくすために作りました。</p>
+  <p>だれでも無料で使えます。名前・住所・電話番号はいりません。あなたが何を選んだかを、わたしたちが集めることもありません。</p>
+  <p>のせているサービスは、運営チームが公式の情報とてらしあわせて確認しています。それでも募集が終わっていることがあるので、申しこむ前に必ず公式ページを見てください。「要確認」と書いてあるところは、まだ確認できていないという意味です。</p>
+  <p>掲載のルール(掲載基準)とおすすめ順の計算方法は、準備ができしだい、このページで全文公開します。お金をもらって順番を変えることはありません。</p>
+  <p>運営: 株式会社フクギイロ(姉妹サービス: <a href="../fukugiiro/">もらいわすれ堂</a>)</p>
+</section>
+
+</main>
+
+<footer class="site"><div class="wrap">
+  <p>みらいひらけ堂|運営: 株式会社フクギイロ</p>
+  <p><a href="../fukugiiro/">もらいわすれ堂(給付金のもらい忘れ診断)</a></p>
+</div></footer>
+
+<script>
+"use strict";
+/* みらいひらけ堂 検索アプリ。
+   回答はブラウザ内だけで処理し、サーバーに送らない(プライバシー設計)。
+   スコアの加点表は設計書§11と一致させ、/about で公開する前提。 */
+const QUESTIONS = [
+  { key:"grade", multi:false, title:"なんねんせい ですか?", note:"",
+    choices:[["小学生","小学生"],["中学生","中学生"],["高校生","高校生"],["高卒後","高校を出たあと"],["その他","その他・わからない"]] },
+  { key:"goal", multi:true, title:"どんな勉強がしたい?", note:"いくつ選んでもOK",
+    choices:[["ついていく","学校のじゅぎょうについていきたい"],["高校受験","高校受験"],["大学受験","大学受験"],
+      ["英語","英語"],["数学","数学"],["国語","国語"],["理科","理科"],["社会","社会"],
+      ["プログラミング","プログラミング"],["資格","資格"],["不登校","不登校中の勉強"],
+      ["進路相談","進路の相談"],["質問だけ","わからない問題だけ質問したい"],
+      ["場所","勉強する場所がほしい"],["マンツーマン","マンツーマンで教えてほしい"]] },
+  { key:"method", multi:true, title:"どんな方法がいい?", note:"いくつ選んでもOK",
+    choices:[["オンライン","オンライン"],["対面","直接会う"],["どちらでも","どちらでも"],
+      ["LINE","LINE"],["Zoom","Zoom"],["動画","動画"],["マンツーマン","マンツーマン"],
+      ["集団","みんなで授業"],["自習室","自習室"]] },
+  { key:"family", multi:true, title:"おうちのこと", note:"あてはまるものがあれば。なくてもOK。答えはこのスマホの中だけで使われ、どこにも送られません。",
+    choices:[["なし","とくになし・わからない"],["ひとり親","ひとり親家庭"],["低所得","収入が少なめの家庭"],
+      ["生活保護","生活保護"],["非課税","住民税非課税世帯(家の収入が一定以下の家庭)"],
+      ["不登校","不登校"],["施設","施設でくらしている"]] }
+];
+const state = { step:0, answers:{grade:[],goal:[],method:[],family:[]}, services:[], results:[] };
+const $ = id => document.getElementById(id);
+const VIEWS = ["view-home","view-quiz","view-results","view-detail","view-about"];
+function show(view){ VIEWS.forEach(v => { $(v).hidden = (v !== view); }); window.scrollTo(0,0); }
+
+/* ---- データ読み込み(published のみ) ---- */
+fetch("../data/miraihirake/services.json")
+  .then(r => r.json())
+  .then(d => {
+    state.services = (d.services || []).filter(s =>
+      s.review_status === "published" && s.data_source && s.last_verified);
+    if (state.services.length === 0) $("prep-notice").hidden = false;
+  })
+  .catch(() => { $("prep-notice").hidden = false; });
+
+/* ---- 質問フロー ---- */
+function renderStep(){
+  const q = QUESTIONS[state.step];
+  [...$("stepbar").children].forEach((el,i)=> el.className = i <= state.step ? "on" : "");
+  $("q-title").textContent = `ステップ${state.step+1}/4 ${q.title}`;
+  $("q-note").textContent = q.note;
+  $("btn-skip").hidden = q.key !== "family";
+  const box = $("q-choices"); box.innerHTML = "";
+  q.choices.forEach(([val,label])=>{
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "choice"; b.textContent = label;
+    b.setAttribute("aria-pressed", state.answers[q.key].includes(val));
+    b.onclick = ()=>{
+      if (q.multi){
+        const arr = state.answers[q.key];
+        const i = arr.indexOf(val);
+        if (i >= 0) arr.splice(i,1); else arr.push(val);
+        b.setAttribute("aria-pressed", i < 0);
+      } else {
+        state.answers[q.key] = [val];
+        next();
+      }
+    };
+    box.appendChild(b);
+  });
+  $("btn-next").hidden = !q.multi;
+}
+function next(){
+  if (state.step < QUESTIONS.length - 1){ state.step++; renderStep(); }
+  else { runSearch(); }
+}
+$("btn-start").onclick = ()=>{ state.step = 0; state.answers = {grade:[],goal:[],method:[],family:[]}; show("view-quiz"); renderStep(); };
+$("btn-next").onclick = next;
+$("btn-skip").onclick = e=>{ e.preventDefault(); state.answers.family = []; runSearch(); };
+$("btn-back").onclick = ()=>{
+  if (state.step === 0){ show("view-home"); } else { state.step--; renderStep(); }
+};
+$("btn-requiz").onclick = ()=>{ state.step = 0; show("view-quiz"); renderStep(); };
+$("btn-about").onclick = ()=> show("view-about");
+$("btn-backhome").onclick = ()=> show("view-home");
+$("btn-all").onclick = ()=>{ state.answers = {grade:[],goal:[],method:[],family:[]}; runSearch(); };
+$("btn-backres").onclick = ()=> show("view-results");
+
+/* ---- スコアリング(設計書§11の加点表。理由を必ず表示する) ---- */
+function daysSince(iso){ return Math.floor((Date.now() - new Date(iso+"T00:00:00")) / 864e5); }
+function scoreService(s, a){
+  let pts = 0; const max = 100; const reasons = [];
+  if (s.okinawa_available === "×") return null;
+  if (s.okinawa_available === "○"){ pts += 30; reasons.push("沖縄県から利用できます"); }
+  else if (s.okinawa_available === "△"){ pts += 10; reasons.push("条件によっては沖縄から利用できます"); }
+  else { reasons.push("沖縄から使えるかは要確認です"); }
+  if (a.grade.length && a.grade[0] !== "その他"){
+    if ((s.target_grade||[]).includes(a.grade[0])){ pts += 20; reasons.push(`${a.grade[0]}が対象です`); }
+    else if ((s.target_grade||[]).length){ pts -= 100; } /* 学年対象外は実質除外 */
+  } else { pts += 10; }
+  const GOAL_MATCH = {
+    "高校受験": s=>s.highschool_exam, "大学受験": s=>s.university_exam,
+    "英語": s=>(s.subject||[]).some(x=>["英語","全般"].includes(x)),
+    "数学": s=>(s.subject||[]).some(x=>["数学","全般"].includes(x)),
+    "国語": s=>(s.subject||[]).some(x=>["国語","全般"].includes(x)),
+    "理科": s=>(s.subject||[]).some(x=>["理科","全般"].includes(x)),
+    "社会": s=>(s.subject||[]).some(x=>["社会","全般"].includes(x)),
+    "プログラミング": s=>(s.subject||[]).includes("プログラミング"),
+    "資格": s=>(s.subject||[]).includes("資格"),
+    "ついていく": s=>(s.support_type||[]).some(x=>["授業","個別指導","家庭教師","質問対応"].includes(x)),
+    "不登校": s=>s.non_attendance_support === true,
+    "進路相談": s=>s.career_support || (s.support_type||[]).includes("進路相談"),
+    "質問だけ": s=>(s.support_type||[]).includes("質問対応"),
+    "場所": s=>(s.support_type||[]).includes("自習室"),
+    "マンツーマン": s=>s.one_on_one
+  };
+  const GOAL_LABEL = {"ついていく":"学校の授業のサポートがあります","高校受験":"高校受験に対応しています","大学受験":"大学受験に対応しています","不登校":"不登校の人も使えます","進路相談":"進路の相談ができます","質問だけ":"わからない問題の質問ができます","場所":"勉強する場所があります","マンツーマン":"マンツーマンで教えてもらえます"};
+  a.goal.forEach(g=>{ const f = GOAL_MATCH[g]; if (f && f(s)){ pts += 15; reasons.push(GOAL_LABEL[g] || `${g}に対応しています`); } });
+  const METHOD_MATCH = {
+    "オンライン": s=>s.online_available, "対面": s=>s.offline_available, "どちらでも": ()=>true,
+    "LINE": s=>s.line_support, "Zoom": s=>s.zoom_support, "動画": s=>s.video_lesson,
+    "マンツーマン": s=>s.one_on_one, "集団": s=>s.group_lesson, "自習室": s=>(s.support_type||[]).includes("自習室")
+  };
+  a.method.forEach(m=>{ const f = METHOD_MATCH[m]; if (f && f(s)){ pts += 10; if (m !== "どちらでも") reasons.push(`${m === "対面" ? "直接会って" : m + "で"}利用できます`); } });
+  const FAMILY_MATCH = {"ひとり親":["single_parent_support","ひとり親家庭が対象にふくまれます"],
+    "低所得":["poverty_support","収入が少なめの家庭も対象です"],
+    "生活保護":["welfare_support","生活保護の世帯も対象です"],
+    "非課税":["hikazei_support","住民税非課税世帯(家の収入が一定以下の家庭)も対象です"],
+    "不登校":["non_attendance_support","不登校の人も使えます"],
+    "施設":["facility_support","施設でくらしている人も使えます"]};
+  a.family.forEach(f=>{ const m = FAMILY_MATCH[f]; if (m && s[m[0]] === true){ pts += 15; if(!reasons.includes(m[1])) reasons.push(m[1]); } });
+  if (s.completely_free){ pts += 5; reasons.push("完全無料です"); }
+  if (s.recruitment_status === "募集中" || s.recruitment_status === "常時募集"){ pts += 5; reasons.push("いま申しこめます"); }
+  if (s.recruitment_status === "募集終了"){ pts -= 50; reasons.push("いまは募集していません"); }
+  if (s.last_verified && daysSince(s.last_verified) > 60){ pts -= 10; }
+  if (pts < 0) return null;
+  return { s, score: Math.max(1, Math.min(99, Math.round(pts / max * 100))), reasons };
+}
+function runSearch(){
+  state.results = state.services.map(s => scoreService(s, state.answers)).filter(Boolean)
+    .sort((x,y)=> y.score - x.score);
+  $("res-count").textContent = state.results.length
+    ? `あなたが使える可能性が高いサービス ${state.results.length}件` : "";
+  $("res-empty").hidden = state.results.length > 0 || state.services.length === 0;
+  const list = $("res-list"); list.innerHTML = "";
+  if (state.services.length === 0){
+    $("res-count").textContent = "";
+    const n = document.createElement("div"); n.className = "notice";
+    n.textContent = "🚧 いまサービスの情報を集めて確認しています。公開までもうすこし待ってね。";
+    list.appendChild(n);
+  }
+  state.results.forEach((r,i)=> list.appendChild(resultCard(r,i)));
+  show("view-results");
+}
+function badge(text, cls){ const b = document.createElement("span"); b.className = "badge " + (cls||""); b.textContent = text; return b; }
+function okinawaBadge(s){
+  return { "○": badge("✅ 沖縄から利用OK","ok"), "△": badge("△ 沖縄は条件次第","warn"),
+           "?": badge("? 沖縄から使えるか要確認","warn") }[s.okinawa_available] || badge("要確認","warn");
+}
+function resultCard(r, idx){
+  const s = r.s;
+  const c = document.createElement("article"); c.className = "card";
+  const sc = document.createElement("div"); sc.className = "score"; sc.textContent = `おすすめ度 ${r.score}%`; c.appendChild(sc);
+  const h = document.createElement("h3"); h.textContent = s.service_name; c.appendChild(h);
+  const org = document.createElement("p"); org.className = "org"; org.textContent = `${s.organization_name}(${s.organization_type})`; c.appendChild(org);
+  const sum = document.createElement("p"); sum.textContent = s.summary; c.appendChild(sum);
+  const bd = document.createElement("div"); bd.className = "badges";
+  bd.appendChild(okinawaBadge(s));
+  bd.appendChild(badge(s.completely_free ? "完全無料" : s.price_type, s.completely_free ? "ok" : "warn"));
+  (s.target_grade||[]).forEach(g=> bd.appendChild(badge(g)));
+  if (s.online_available) bd.appendChild(badge("💻 オンライン"));
+  if (s.recruitment_status) bd.appendChild(badge("📅 " + s.recruitment_status, s.recruitment_status === "募集終了" ? "na" : ""));
+  c.appendChild(bd);
+  if (r.reasons.length){
+    const w = document.createElement("div"); w.className = "why";
+    const b = document.createElement("b"); b.textContent = "なぜおすすめ?"; w.appendChild(b);
+    const ul = document.createElement("ul");
+    r.reasons.slice(0,5).forEach(t=>{ const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+    w.appendChild(ul); c.appendChild(w);
+  }
+  if (s.last_verified && daysSince(s.last_verified) > 60){
+    const st = document.createElement("span"); st.className = "stale";
+    st.textContent = "⚠ 情報が古い可能性があります。公式サイトで確認してください"; c.appendChild(st);
+  }
+  const btn = document.createElement("button"); btn.className = "detailbtn"; btn.textContent = "くわしく見る";
+  btn.onclick = ()=> renderDetail(idx); c.appendChild(btn);
+  return c;
+}
+/* ---- 詳細 ---- */
+function dd(dl, term, val){
+  if (val === undefined || val === null || val === "" ) return;
+  const dt = document.createElement("dt"); dt.textContent = term;
+  const el = document.createElement("dd"); el.textContent = Array.isArray(val) ? val.join(" / ") : String(val);
+  dl.appendChild(dt); dl.appendChild(el);
+}
+function yn(v){ return v === true ? "○" : v === false ? "—" : "要確認"; }
+function renderDetail(idx){
+  const r = state.results[idx]; const s = r.s;
+  const box = $("detail-body"); box.innerHTML = "";
+  const h = document.createElement("h2"); h.className = "qtitle"; h.textContent = s.service_name; box.appendChild(h);
+  const org = document.createElement("p"); org.className = "org"; org.textContent = `${s.organization_name}(${s.organization_type})`; box.appendChild(org);
+  const bd = document.createElement("div"); bd.className = "badges";
+  bd.appendChild(okinawaBadge(s)); bd.appendChild(badge(s.completely_free ? "完全無料" : s.price_type, s.completely_free ? "ok" : "warn"));
+  box.appendChild(bd);
+  const sum = document.createElement("p"); sum.textContent = s.summary; box.appendChild(sum);
+  const dl = document.createElement("dl"); dl.className = "dl";
+  dd(dl, "沖縄からの利用", (s.okinawa_note || "") || undefined);
+  dd(dl, "対象", (s.target_grade||[]).join("・") + (s.target_conditions && s.target_conditions.length ? " / " + s.target_conditions.join("・") : ""));
+  dd(dl, "所得などの条件", s.income_requirement);
+  dd(dl, "教えてもらえる内容", s.subject);
+  dd(dl, "支援の形", s.support_type);
+  dd(dl, "ひとり親家庭", yn(s.single_parent_support));
+  dd(dl, "不登校", yn(s.non_attendance_support));
+  dd(dl, "生活保護の世帯", yn(s.welfare_support));
+  dd(dl, "住民税非課税世帯(家の収入が一定以下の家庭)", yn(s.hikazei_support));
+  dd(dl, "料金", s.price);
+  dd(dl, "回数・期間", [s.frequency, s.duration].filter(Boolean).join(" / ") || "要確認");
+  dd(dl, "教えてくれる人", s.teacher_type);
+  dd(dl, "申しこみ方法", s.application_method);
+  dd(dl, "募集の状態", s.recruitment_status);
+  dd(dl, "定員・募集期間", [s.capacity, s.application_period].filter(Boolean).join(" / ") || undefined);
+  box.appendChild(dl);
+  if (s.application_url || s.official_url){
+    const a = document.createElement("a"); a.className = "applybtn";
+    a.href = s.application_url || s.official_url; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = "公式サイトを見る・申しこむ →"; box.appendChild(a);
+  }
+  const src = document.createElement("p"); src.className = "srcline";
+  src.textContent = `情報のもと: 公式サイト(最終確認日 ${s.last_verified})。申しこむ前に必ず公式サイトで最新の内容を確認してください。`;
+  box.appendChild(src);
+  show("view-detail");
+}
+</script>
+</body>
+</html>

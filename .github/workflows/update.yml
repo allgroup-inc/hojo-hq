@@ -140,6 +140,9 @@ jobs:
           rm -rf /tmp/pages-deploy
           cp -r site /tmp/pages-deploy
           rm -rf /tmp/pages-deploy/nobishiro
+          # みらいひらけ堂は公開判定(掲載基準決裁+守り部審査+データ整備)クリアまで除外。
+          # 詳細: docs/みらいひらけ堂_掲載基準_draft.md / docs/議事_20260905_無料学習支援検索サービス新設の上申.md 追記2
+          rm -rf /tmp/pages-deploy/miraihirake
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v5

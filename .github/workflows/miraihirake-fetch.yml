@@ -1,0 +1,47 @@
+name: miraihirake-fetch
+
+# みらいひらけ堂(子ども向け無料学習支援)の原文取得。
+# Claude Codeのリモート環境は外部サイトへ出られないため、原文の取得だけCIで行う。
+# 手動実行のみ(定期巡回は守り部のrobots/規約承認と小柳さん決裁が揃ってから)。
+# mode=audit : robots.txt の監査レポートを作る(本文は取らない。守り部の審査材料)
+# mode=fetch : source_queue.json で robots_approved=true のURLだけ本文テキストを保存
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "audit(robots監査) / fetch(承認済みURLの本文取得)"
+        type: choice
+        options: [audit, fetch]
+        default: audit
+
+concurrency:
+  group: miraihirake-fetch
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 原文取得ツール実行
+        run: python scripts/miraihirake/fetch_sources.py --${{ inputs.mode }}
+
+      - name: Commit results(実行したブランチへ)
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add data/miraihirake/robots_report.json data/miraihirake/sources || true
+          git diff --cached --quiet || git commit -m "auto: miraihirake sources ${{ inputs.mode }} $(date '+%Y-%m-%d %H:%M')"
+          for i in 1 2 3 4; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "${GITHUB_REF_NAME}" && break
+            sleep $((i*2))
+          done
