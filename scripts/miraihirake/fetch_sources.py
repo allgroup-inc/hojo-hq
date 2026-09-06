@@ -31,7 +31,9 @@ ROOT = Path(__file__).resolve().parents[2]
 QUEUE = ROOT / "data/miraihirake/source_queue.json"
 REPORT = ROOT / "data/miraihirake/robots_report.json"
 OUTDIR = ROOT / "data/miraihirake/sources"
-UA = "miraihirake-bot/0.1 (+https://github.com/allgroup-inc/hojo-hq; 教育支援情報の確認目的)"
+# HTTPヘッダーは latin-1 しか許されないため UA は必ずASCIIのみ(日本語を入れると
+# 全リクエストが UnicodeEncodeError で失敗する。2026-09-06 初回fetchで発生)
+UA = "miraihirake-bot/0.1 (+https://github.com/allgroup-inc/hojo-hq; education-info-check)"
 DELAY_SEC = 3
 TIMEOUT = 20
 MAX_BYTES = 1_500_000
@@ -87,10 +89,12 @@ def audit(queue):
 
 def fetch(queue):
     OUTDIR.mkdir(parents=True, exist_ok=True)
+    attempted = ok = 0
     for item in queue:
         if item.get("robots_approved") is not True:
             print(f"[skip] {item['id']}: robots_approved ではない")
             continue
+        attempted += 1
         try:
             if not robots_for(item["url"]).can_fetch(UA, item["url"]):
                 print(f"[skip] {item['id']}: robots.txt が不許可(承認済みでも取得しない)")
@@ -103,8 +107,14 @@ def fetch(queue):
                   f"# org: {item['org']}\n# fetched_at: {date.today().isoformat()}\n"
                   f"# 注意: 機械抽出テキスト。照合の最終根拠は url の原文。\n\n")
         (OUTDIR / f"{item['id']}.txt").write_text(header + text + "\n", encoding="utf-8")
+        ok += 1
         print(f"[ok] {item['id']} -> sources/{item['id']}.txt ({len(text)}字)")
         time.sleep(DELAY_SEC)
+    print(f"fetch完了: 対象{attempted}件 / 成功{ok}件")
+    if attempted and ok == 0:
+        print("全件失敗のためジョブを赤にする(成功ゼロは異常)")
+        return 1
+    return 0
 
 
 def main():
@@ -116,9 +126,8 @@ def main():
     queue = load_queue()
     if args.audit:
         audit(queue)
-    else:
-        fetch(queue)
-    return 0
+        return 0
+    return fetch(queue)
 
 
 if __name__ == "__main__":
