@@ -918,7 +918,7 @@
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
       "review_status": "draft",
-      "notes": "【掲載保留(基準1・6: 料金の原文確認待ち)】ポータルでは「国際的な非営利活動」と明記だが参加費無料の文言は未確認。県内道場(那覇等)の個別ページで無料を確認できたらverifiedへ。学べる内容: Scratch/micro:bit/Python/Minecraft/電子工作など(道場ごとに異なる)"
+      "notes": "【掲載保留(基準1・6: ポータル全体の料金明記待ち)】ポータルは「国際的な非営利活動」表記。浦添道場は「無料」明記を個別確認済み(svc-0021として起票)。那覇道場は2026年4〜8月に毎月開催の実績を原文確認したが無料の明記はブログに無し→各回の募集ページで確認する。他道場も個別確認でverified化していく方針"
     },
     {
       "service_id": "svc-0020",
@@ -964,6 +964,116 @@
       "review_status": "draft",
       "notes": "【掲載保留(基準1・6: 料金の原文確認待ち)】ミライドアページで「申込受付中」と次回開催(2026-09-17)を確認。3ヶ月伴走型探究支援「ミラクト」もあり。参加費の明記はミライドアページにもないため、個別イベント詳細ページでの確認が取れたらverifiedへ",
       "frequency": "不定期開催(次回: 2026年9月17日(木)19:00〜20:00の案内あり)"
+    },
+    {
+      "service_id": "svc-0021",
+      "service_name": "CoderDojo浦添(デジタル創作の無料コミュニティ)",
+      "summary": "浦添市てだこホールで隔週開催。Scratch・Minecraft・科学ワークショップなどを無料で楽しめる子どものプログラミング道場",
+      "organization_name": "CoderDojo浦添",
+      "organization_type": "個人団体",
+      "prefecture": "沖縄県",
+      "available_area": "浦添市(てだこホールで隔週開催)",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "県内の対面道場",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "子ども(親子参加の様子あり。詳細は各回の募集ページで確認)"
+      ],
+      "income_requirement": "なし",
+      "subject": [
+        "プログラミング",
+        "探究"
+      ],
+      "support_type": [
+        "ものづくり",
+        "体験・イベント"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "完全無料",
+      "price": "0円(「デジタル創作を楽しむ無料の非営利コミュニティです」と明記)",
+      "completely_free": true,
+      "teacher_type": [
+        "ボランティア"
+      ],
+      "frequency": "隔週開催(ポータル記載)",
+      "application_method": "公式サイトの各回の参加者募集ページから",
+      "official_url": "https://coderdojo-urasoe.com/",
+      "application_url": "https://coderdojo-urasoe.com/",
+      "recruitment_status": "常時募集",
+      "data_source": "https://coderdojo-urasoe.com/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "verified",
+      "notes": "活動確認: かがくワークショップ(2026年8月)・おきなわこども選挙ワークショップ(7月)・Minecraftカップ沖縄ブロック地区大会・探究学習イベント等。中高生がサポーターとして教える側に回る文化あり(「教える側に回る学び」の好例)。A類型でなくB類型(集団・対面)のため団体実在の追加確認(運営者情報)を掲載審査時に行う"
+    },
+    {
+      "service_id": "svc-0022",
+      "service_name": "カタリバ キッカケプログラム(PC・Wi-Fi無償貸与+オンライン伴走)",
+      "summary": "経済的に大変な家庭の小4〜高校生に、パソコンとWi-Fiを無料で貸し出し、担当メンターが週1回のオンライン面談で勉強と気持ちに伴走してくれるプログラム",
+      "organization_name": "認定NPO法人カタリバ",
+      "organization_type": "NPO",
+      "prefecture": "全国",
+      "available_area": "全国(オンライン)",
+      "nationwide_available": true,
+      "okinawa_available": "○",
+      "okinawa_note": "全国対象(オンライン)。ただし今期の募集は終了(下記)",
+      "online_available": true,
+      "offline_available": false,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "住民税非課税世帯・生活保護・就学援助費・児童扶養手当のいずれかを受給していて、小4〜高校生の子がいる家庭",
+        "小4〜高校生のヤングケアラーがいる家庭"
+      ],
+      "income_requirement": "あり: 非課税世帯・生活保護・就学援助・児童扶養手当のいずれか受給",
+      "single_parent_support": true,
+      "poverty_support": true,
+      "welfare_support": true,
+      "hikazei_support": true,
+      "subject": [
+        "全般",
+        "キャリア"
+      ],
+      "support_type": [
+        "個別指導",
+        "進路相談",
+        "キャリア教育",
+        "端末・通信支援",
+        "居場所・対話"
+      ],
+      "one_on_one": true,
+      "zoom_support": true,
+      "career_support": true,
+      "device_support": true,
+      "wifi_support": true,
+      "price_type": "完全無料",
+      "price": "0円(奨学プログラム。パソコンとWi-Fiを無償で貸出しと明記。参加費徴収の記載なし)",
+      "completely_free": true,
+      "frequency": "週1回のオンライン面談(担当メンター)+保護者は月1回面談",
+      "teacher_type": [
+        "大学生",
+        "社会人"
+      ],
+      "application_method": "募集期間中に公式サイトから申込(直近の募集期間: 2025年12月1日〜2026年1月16日)",
+      "official_url": "https://www.katariba.or.jp/activity/project/kikkake/",
+      "application_url": "https://www.katariba.or.jp/activity/project/kikkake/",
+      "recruitment_status": "募集終了",
+      "data_source": "https://www.katariba.or.jp/activity/project/kikkake/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "verified",
+      "notes": "今期(2026年度参加分)の募集は2026年1月16日で終了。次回募集の時期は要確認(サイト表示では「次回募集予定」の扱いで案内し、募集開始を検知したら更新する)。参加家庭の85%がひとり親世帯。ヤングケアラー向けの対話プログラムあり。C類型(1対1面談)のため掲載審査時に安全4点確認を行う(メンターは選考・研修ありと記載)"
     }
   ]
 }
