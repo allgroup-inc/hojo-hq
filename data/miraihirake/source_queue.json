@@ -5,8 +5,8 @@
       "id": "katariba-kikkake",
       "org": "認定NPO法人カタリバ",
       "url": "https://www.katariba.or.jp/activity/project/kikkake/",
-      "robots_approved": false,
-      "memo": "キッカケプログラム(就学援助世帯の小3〜高3・PC/Wi-Fi無償貸与・無料)※katariba.onlineはrobots読取不可が2回続いたため公式サイト側ページへ変更。次回auditで確認後にfetch"
+      "robots_approved": true,
+      "memo": "キッカケプログラム(就学援助世帯の小3〜高3・PC/Wi-Fi無償貸与・無料)※katariba.onlineはrobots読取不可が2回続いたため公式サイト側ページへ変更。次回auditで確認後にfetch|robots承認2026-09-06第3陣(単発取得のみ。守り部審査記録参照)"
     },
     {
       "id": "katariba-futoko",
@@ -132,7 +132,7 @@
       "org": "沖縄科学技術大学院大学(OIST)",
       "url": "https://www.oist.jp/ja/events",
       "robots_approved": true,
-      "memo": "広がる学び: OISTサイエンスフェスタ等。ページがJS描画のため機械取得不可(2026-09-06)。人手での確認か、science-festivalページ等の代替URLを次回試す"
+      "memo": "【機械取得不可】bot対策(Client Challenge)によりCI取得不可を2ページで確認(2026-09-06)。掲載検討時は人手でサイト確認する(サイエンスフェスタ等)"
     },
     {
       "id": "okinawa-library",
@@ -160,7 +160,7 @@
       "org": "金融経済教育推進機構(J-FLEC)",
       "url": "https://www.j-flec.go.jp/",
       "robots_approved": false,
-      "memo": "広がる学び: お金の教育の公式機関(知るぽるとの後継と原文に明記)。子ども向け無料教材の有無を要照合"
+      "memo": "【機械取得不可】robots.txtが不許可(2026-09-06 audit)。ルールに従い取得しない。掲載検討時は人手でサイト確認する"
     },
     {
       "id": "asdessin-miraidoor",
@@ -174,21 +174,21 @@
       "org": "沖縄科学技術大学院大学(OIST)",
       "url": "https://www.oist.jp/science-festival",
       "robots_approved": true,
-      "memo": "OISTサイエンスフェスタのページ(eventsページはJS描画で取得不可だったため代替)|同一ドメイン(oist.jp)のrobots許可・承認済みのため単発取得可(守り部審査記録2026-09-06追記)"
+      "memo": "【機械取得不可】bot対策(Client Challenge)によりCI取得不可を2ページで確認(2026-09-06)。掲載検討時は人手でサイト確認する(サイエンスフェスタ等)"
     },
     {
       "id": "coderdojo-naha",
       "org": "CoderDojo那覇",
       "url": "https://coderdojonaha.hatenablog.jp/",
-      "robots_approved": false,
-      "memo": "那覇の道場公式ブログ。検索では参加費無料・小〜高校生(小学生は保護者付添)・月1回IT創造館の情報→原文照合してsvc-0019の昇格判断。新ドメインのためaudit待ち"
+      "robots_approved": true,
+      "memo": "那覇の道場公式ブログ。検索では参加費無料・小〜高校生(小学生は保護者付添)・月1回IT創造館の情報→原文照合してsvc-0019の昇格判断。新ドメインのためaudit待ち|robots承認2026-09-06第3陣(単発取得のみ。守り部審査記録参照)"
     },
     {
       "id": "coderdojo-urasoe",
       "org": "CoderDojo浦添",
       "url": "https://coderdojo-urasoe.com/",
-      "robots_approved": false,
-      "memo": "浦添の道場公式サイト。参加費・対象を照合。新ドメインのためaudit待ち"
+      "robots_approved": true,
+      "memo": "浦添の道場公式サイト。参加費・対象を照合。新ドメインのためaudit待ち|robots承認2026-09-06第3陣(単発取得のみ。守り部審査記録参照)"
     }
   ]
 }

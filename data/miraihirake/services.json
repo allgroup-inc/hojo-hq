@@ -956,13 +956,14 @@
       "completely_free": false,
       "application_method": "公式サイトの「生徒向けプログラム」「開催中のオンラインプログラム一覧」から",
       "official_url": "https://www.asdessin.org/",
-      "application_url": "https://www.asdessin.org/",
-      "recruitment_status": "不明",
-      "data_source": "https://www.asdessin.org/",
+      "application_url": "https://www.asdessin.org/miraidoor",
+      "recruitment_status": "募集中",
+      "data_source": "https://www.asdessin.org/miraidoor",
       "last_verified": "2026-09-06",
       "updated_at": "2026-09-06",
       "review_status": "draft",
-      "notes": "【掲載保留(基準1・6: 料金の原文確認待ち)】2026年5〜7月にオンラインイベント開催の報告あり(活動継続を確認)。「100名を超える社会人と中高生の出会いの場」。生徒向けプログラムページで参加費無料を確認できたらverifiedへ"
+      "notes": "【掲載保留(基準1・6: 料金の原文確認待ち)】ミライドアページで「申込受付中」と次回開催(2026-09-17)を確認。3ヶ月伴走型探究支援「ミラクト」もあり。参加費の明記はミライドアページにもないため、個別イベント詳細ページでの確認が取れたらverifiedへ",
+      "frequency": "不定期開催(次回: 2026年9月17日(木)19:00〜20:00の案内あり)"
     }
   ]
 }
