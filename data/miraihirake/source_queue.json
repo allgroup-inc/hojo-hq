@@ -14,6 +14,10 @@
     {"id": "okinawa-pref-juku",  "org": "沖縄県",               "url": "https://www.pref.okinawa.lg.jp/kyoiku/jido/1007994/1007960/1007964/index.html", "robots_approved": false, "memo": "県の無料塾設置(小中学生無料塾/中学生・高校生進学チャレンジ/大学等進学促進)※要照合"},
     {"id": "okinawa-city-gakushu","org": "沖縄市",              "url": "https://www.city.okinawa.okinawa.jp/k021/contents/p00006.html", "robots_approved": false, "memo": "沖縄市生活困窮者学習支援事業"},
     {"id": "naha-hitorioya",     "org": "那覇市",               "url": "https://www.city.naha.okinawa.jp/child/kosodateouen/1002864/1002873.html", "robots_approved": false, "memo": "ひとり親家庭の子どもの学習支援事業(小学生・無料・要登録)※要照合"},
-    {"id": "okinawa-mirai",      "org": "沖縄こどもの未来県民会議", "url": "https://www.okinawa-child-future.jp/work/",  "robots_approved": false, "memo": "県内支援団体の一覧(芋づる収集の起点)"}
+    {"id": "okinawa-mirai",      "org": "沖縄こどもの未来県民会議", "url": "https://www.okinawa-child-future.jp/work/",  "robots_approved": false, "memo": "県内支援団体の一覧(芋づる収集の起点)"},
+    {"id": "coderdojo-jp",       "org": "CoderDojo Japan",       "url": "https://coderdojo.jp/",                       "robots_approved": false, "memo": "無料プログラミング道場の全国ポータル(213拠点超・オンライン対応道場あり・県内道場も要確認)※検索結果ベース要照合"},
+    {"id": "katariba-online",    "org": "認定NPO法人カタリバ",    "url": "https://online.katariba.or.jp/",              "robots_approved": false, "memo": "カタリバオンライン/forTeens(オンラインの居場所・一緒に勉強)。公式URLは要再確認(検索ではnote記事のみ確認)"},
+    {"id": "asdessin",           "org": "NPO法人アスデッサン",    "url": "https://www.asdessin.org/",                   "robots_approved": false, "memo": "中高生向け無料キャリア教育(全国からオンライン参加・社会人との対話)※要照合"},
+    {"id": "netre",              "org": "新・ネットレの学習教室",  "url": "https://nll.red/",                            "robots_approved": false, "memo": "小中学生向け無償デジタル教材(自動出題・採点)。運営者・実績はA類型例外の3点確認が必要"}
   ]
 }
