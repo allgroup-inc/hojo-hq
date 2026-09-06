@@ -15,16 +15,31 @@
       "okinawa_note": "全国対象・居住地制限なし",
       "online_available": true,
       "offline_available": false,
-      "target_grade": ["小学生", "中学生", "高校生"],
-      "target_conditions": ["だれでも利用できます"],
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "だれでも利用できます"
+      ],
       "income_requirement": "なし",
       "single_parent_support": true,
       "poverty_support": true,
       "welfare_support": true,
       "hikazei_support": true,
       "non_attendance_support": true,
-      "subject": ["数学", "理科", "英語", "国語", "社会"],
-      "support_type": ["授業", "教材提供"],
+      "subject": [
+        "数学",
+        "理科",
+        "英語",
+        "国語",
+        "社会"
+      ],
+      "support_type": [
+        "授業",
+        "教材提供"
+      ],
       "video_lesson": true,
       "highschool_exam": true,
       "exam_support": true,
@@ -56,15 +71,28 @@
       "okinawa_note": "全国対象・居住地制限なし",
       "online_available": true,
       "offline_available": false,
-      "target_grade": ["中学生", "高校生"],
-      "target_conditions": ["だれでも利用できます"],
+      "target_grade": [
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "だれでも利用できます"
+      ],
       "income_requirement": "なし",
       "single_parent_support": true,
       "poverty_support": true,
       "welfare_support": true,
       "hikazei_support": true,
-      "subject": ["英語", "数学", "理科", "社会", "国語"],
-      "support_type": ["授業"],
+      "subject": [
+        "英語",
+        "数学",
+        "理科",
+        "社会",
+        "国語"
+      ],
+      "support_type": [
+        "授業"
+      ],
       "video_lesson": true,
       "exam_support": true,
       "highschool_exam": true,
@@ -98,7 +126,9 @@
       "online_available": true,
       "offline_available": false,
       "target_grade": [],
-      "target_conditions": ["だれでも利用できます"],
+      "target_conditions": [
+        "だれでも利用できます"
+      ],
       "income_requirement": "なし",
       "single_parent_support": true,
       "poverty_support": true,
@@ -107,8 +137,13 @@
       "non_attendance_support": true,
       "disability_support": true,
       "foreign_roots_support": true,
-      "subject": ["全般"],
-      "support_type": ["授業", "教材提供"],
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "授業",
+        "教材提供"
+      ],
       "video_lesson": true,
       "price_type": "完全無料",
       "price": "0円(家庭・公立学校での利用は無料と明記)",
@@ -139,10 +174,17 @@
       "online_available": true,
       "offline_available": false,
       "target_grade": [],
-      "target_conditions": ["だれでも利用できます"],
+      "target_conditions": [
+        "だれでも利用できます"
+      ],
       "income_requirement": "なし",
-      "subject": ["全般"],
-      "support_type": ["授業", "教材提供"],
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "授業",
+        "教材提供"
+      ],
       "video_lesson": true,
       "price_type": "条件付き無料",
       "price": "NHK受信契約がある世帯は追加負担なし。契約していない世帯が利用する場合は放送法に基づき契約が必要(原文表記)",
@@ -172,11 +214,19 @@
       "okinawa_note": "全国対象・居住地制限なし",
       "online_available": true,
       "offline_available": false,
-      "target_grade": ["高校生"],
-      "target_conditions": ["だれでも利用できます"],
+      "target_grade": [
+        "高校生"
+      ],
+      "target_conditions": [
+        "だれでも利用できます"
+      ],
       "income_requirement": "なし",
-      "subject": ["全般"],
-      "support_type": ["授業"],
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "授業"
+      ],
       "video_lesson": true,
       "price_type": "条件付き無料",
       "price": "NHK受信契約がある世帯は追加負担なし。契約していない世帯が利用する場合は放送法に基づき契約が必要(原文表記)",
@@ -206,13 +256,21 @@
       "okinawa_note": "申請は沖縄県へ。学校経由で申請する場合もあります(所得条件あり)",
       "online_available": false,
       "offline_available": true,
-      "target_grade": ["高校生"],
-      "target_conditions": ["生活保護を受けている世帯", "住民税非課税世帯(家の収入が一定以下の家庭)", "家計が急変して非課税相当になった世帯"],
+      "target_grade": [
+        "高校生"
+      ],
+      "target_conditions": [
+        "生活保護を受けている世帯",
+        "住民税非課税世帯(家の収入が一定以下の家庭)",
+        "家計が急変して非課税相当になった世帯"
+      ],
       "income_requirement": "あり: 生活保護受給世帯・住民税非課税世帯等",
       "welfare_support": true,
       "hikazei_support": true,
       "subject": [],
-      "support_type": ["奨学金"],
+      "support_type": [
+        "奨学金"
+      ],
       "exam_support": false,
       "price_type": "完全無料",
       "price": "給付額の例(令和7年度までの制度・国の補助基準): 非課税世帯・全日制で国公立年額143,700円/私立年額152,000円 ほか。令和8年度の内容は要確認",
@@ -243,12 +301,20 @@
       "okinawa_note": "全国対象(所得条件あり。多子世帯の授業料等減免は2025年度から所得制限なし)",
       "online_available": true,
       "offline_available": true,
-      "target_grade": ["高校生", "高卒後"],
-      "target_conditions": ["家計基準(住民税非課税世帯等)に該当する世帯", "多子世帯(授業料等減免は所得制限なし)"],
+      "target_grade": [
+        "高校生",
+        "高卒後"
+      ],
+      "target_conditions": [
+        "家計基準(住民税非課税世帯等)に該当する世帯",
+        "多子世帯(授業料等減免は所得制限なし)"
+      ],
       "income_requirement": "あり: 家計基準あり(多子世帯の授業料等減免は所得制限なし)",
       "hikazei_support": true,
       "subject": [],
-      "support_type": ["奨学金"],
+      "support_type": [
+        "奨学金"
+      ],
       "university_exam": false,
       "career_support": true,
       "price_type": "完全無料",
@@ -278,12 +344,22 @@
       "okinawa_note": "沖縄県内限定(設置市町村・所得等の条件あり)",
       "online_available": false,
       "offline_available": true,
-      "target_grade": ["小学生", "中学生"],
-      "target_conditions": ["準要保護世帯(就学援助を受けている家庭)の児童生徒とその親等"],
+      "target_grade": [
+        "小学生",
+        "中学生"
+      ],
+      "target_conditions": [
+        "準要保護世帯(就学援助を受けている家庭)の児童生徒とその親等"
+      ],
       "income_requirement": "あり: 準要保護世帯",
       "poverty_support": true,
-      "subject": ["全般"],
-      "support_type": ["授業", "個別指導"],
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "授業",
+        "個別指導"
+      ],
       "group_lesson": true,
       "live_lesson": true,
       "price_type": "完全無料",
@@ -313,14 +389,25 @@
       "okinawa_note": "沖縄県内限定(世帯・成績等の条件あり)",
       "online_available": false,
       "offline_available": true,
-      "target_grade": ["中学生"],
-      "target_conditions": ["児童扶養手当受給世帯", "住民税非課税世帯(家の収入が一定以下の家庭)", "里親・児童養護施設入所の生徒等", "上記に該当し成績や就学が良好であること"],
+      "target_grade": [
+        "中学生"
+      ],
+      "target_conditions": [
+        "児童扶養手当受給世帯",
+        "住民税非課税世帯(家の収入が一定以下の家庭)",
+        "里親・児童養護施設入所の生徒等",
+        "上記に該当し成績や就学が良好であること"
+      ],
       "income_requirement": "あり: 児童扶養手当受給世帯・住民税非課税世帯等",
       "single_parent_support": true,
       "hikazei_support": true,
       "facility_support": true,
-      "subject": ["全般"],
-      "support_type": ["授業"],
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "授業"
+      ],
       "group_lesson": true,
       "live_lesson": true,
       "exam_support": true,
@@ -352,14 +439,25 @@
       "okinawa_note": "沖縄県内限定(世帯・成績等の条件あり)",
       "online_available": false,
       "offline_available": true,
-      "target_grade": ["高校生"],
-      "target_conditions": ["児童扶養手当受給世帯", "住民税非課税世帯(家の収入が一定以下の家庭)", "里親・児童養護施設入所の生徒等", "上記に該当し成績や就学が良好であること"],
+      "target_grade": [
+        "高校生"
+      ],
+      "target_conditions": [
+        "児童扶養手当受給世帯",
+        "住民税非課税世帯(家の収入が一定以下の家庭)",
+        "里親・児童養護施設入所の生徒等",
+        "上記に該当し成績や就学が良好であること"
+      ],
       "income_requirement": "あり: 児童扶養手当受給世帯・住民税非課税世帯等",
       "single_parent_support": true,
       "hikazei_support": true,
       "facility_support": true,
-      "subject": ["全般"],
-      "support_type": ["授業"],
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "授業"
+      ],
       "group_lesson": true,
       "live_lesson": true,
       "exam_support": true,
@@ -391,14 +489,24 @@
       "okinawa_note": "沖縄県内限定(世帯の条件あり)",
       "online_available": false,
       "offline_available": true,
-      "target_grade": ["高校生"],
-      "target_conditions": ["児童扶養手当受給世帯", "住民税非課税世帯(家の収入が一定以下の家庭)", "里親・児童養護施設入所の生徒等"],
+      "target_grade": [
+        "高校生"
+      ],
+      "target_conditions": [
+        "児童扶養手当受給世帯",
+        "住民税非課税世帯(家の収入が一定以下の家庭)",
+        "里親・児童養護施設入所の生徒等"
+      ],
       "income_requirement": "あり: 児童扶養手当受給世帯・住民税非課税世帯等",
       "single_parent_support": true,
       "hikazei_support": true,
       "facility_support": true,
-      "subject": ["全般"],
-      "support_type": ["授業"],
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "授業"
+      ],
       "group_lesson": true,
       "live_lesson": true,
       "exam_support": true,
@@ -430,13 +538,23 @@
       "okinawa_note": "沖縄市民限定(世帯の条件あり)",
       "online_available": false,
       "offline_available": true,
-      "target_grade": ["中学生"],
-      "target_conditions": ["沖縄市内の生活保護世帯の中学1〜3年生", "沖縄市内の準要保護世帯(就学援助受給世帯)の中学3年生"],
+      "target_grade": [
+        "中学生"
+      ],
+      "target_conditions": [
+        "沖縄市内の生活保護世帯の中学1〜3年生",
+        "沖縄市内の準要保護世帯(就学援助受給世帯)の中学3年生"
+      ],
       "income_requirement": "あり: 生活保護世帯・準要保護世帯",
       "poverty_support": true,
       "welfare_support": true,
-      "subject": ["全般"],
-      "support_type": ["授業", "個別指導"],
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "授業",
+        "個別指導"
+      ],
       "one_on_one": true,
       "group_lesson": true,
       "live_lesson": true,
@@ -445,7 +563,9 @@
       "price_type": "完全無料",
       "price": "0円(市の指定学習塾に無料で通塾)",
       "completely_free": true,
-      "teacher_type": ["塾講師"],
+      "teacher_type": [
+        "塾講師"
+      ],
       "application_method": "市役所1階の保護管理課窓口に利用申込書を提出(準要保護世帯は就学援助認定通知書も)。審査・利用決定に1〜2週間程度→塾と面談→通塾開始",
       "official_url": "https://www.city.okinawa.okinawa.jp/k021/contents/p00006.html",
       "application_url": "https://www.city.okinawa.okinawa.jp/k021/contents/p00006.html",
@@ -470,12 +590,21 @@
       "okinawa_note": "那覇市民限定(ひとり親家庭・養育者家庭)",
       "online_available": false,
       "offline_available": true,
-      "target_grade": ["小学生"],
-      "target_conditions": ["那覇市内に住むひとり親家庭または養育者家庭の小学生"],
+      "target_grade": [
+        "小学生"
+      ],
+      "target_conditions": [
+        "那覇市内に住むひとり親家庭または養育者家庭の小学生"
+      ],
       "income_requirement": "なし(家庭状況の条件あり)",
       "single_parent_support": true,
-      "subject": ["全般"],
-      "support_type": ["個別指導", "質問対応"],
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "質問対応"
+      ],
       "live_lesson": true,
       "price_type": "完全無料",
       "price": "0円(事前登録が必要)",
@@ -504,12 +633,23 @@
       "okinawa_note": "全国対象(原文:「日本全国どこに住んでいる方でも大丈夫です」)",
       "online_available": true,
       "offline_available": false,
-      "target_grade": ["小学生", "中学生", "高校生"],
-      "target_conditions": ["小学生〜高校生の子どもを子育て中の保護者", "不登校または不登校傾向で悩んでいる"],
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "小学生〜高校生の子どもを子育て中の保護者",
+        "不登校または不登校傾向で悩んでいる"
+      ],
       "income_requirement": "なし",
       "non_attendance_support": true,
       "subject": [],
-      "support_type": ["進路相談", "質問対応", "居場所・対話"],
+      "support_type": [
+        "進路相談",
+        "質問対応",
+        "居場所・対話"
+      ],
       "one_on_one": true,
       "line_support": true,
       "zoom_support": true,
@@ -543,19 +683,36 @@
       "okinawa_note": "掲載ページで確認できた学習会はすべて県外の対面拠点。オンラインで全国から参加できる枠や奨学金事業の有無は別ページで要確認",
       "online_available": false,
       "offline_available": true,
-      "target_grade": ["小学生", "中学生", "高校生"],
-      "target_conditions": ["経済的な事情で塾に行けない・進学に悩む子どもたち(学習会により対象が異なる)"],
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "経済的な事情で塾に行けない・進学に悩む子どもたち(学習会により対象が異なる)"
+      ],
       "income_requirement": "要確認",
       "poverty_support": true,
       "single_parent_support": true,
-      "subject": ["全般", "英語"],
-      "support_type": ["授業", "個別指導", "居場所・対話"],
+      "subject": [
+        "全般",
+        "英語"
+      ],
+      "support_type": [
+        "授業",
+        "個別指導",
+        "居場所・対話"
+      ],
       "group_lesson": true,
       "live_lesson": true,
       "exam_support": true,
       "highschool_exam": true,
       "university_exam": true,
-      "teacher_type": ["大学生", "社会人", "ボランティア"],
+      "teacher_type": [
+        "大学生",
+        "社会人",
+        "ボランティア"
+      ],
       "price_type": "完全無料",
       "price": "0円(「無料でありながら質の高い教育支援」と明記)",
       "completely_free": true,
@@ -569,6 +726,243 @@
       "updated_at": "2026-09-06",
       "review_status": "draft",
       "notes": "沖縄からは現状×のため非表示枠。オンライン学習会・奨学金事業(サイトにメニューあり)が沖縄から使えるかを次回照合する。2025年度実績: 学習支援2,293人・学習会6,956回"
+    },
+    {
+      "service_id": "svc-0016",
+      "service_name": "沖縄県立図書館(電子書籍・遠隔地貸出などの広域サービス)",
+      "summary": "県立図書館の本を、離島や遠くの町からも借りられる仕組み。電子書籍やAI蔵書探索、こども向けページもあります",
+      "organization_name": "沖縄県立図書館",
+      "organization_type": "自治体",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄県全域(遠隔地貸出・返却サービスは県内各地の協力図書館経由。電子書籍はオンライン)",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県民向け(県立図書館のサービス)",
+      "online_available": true,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生",
+        "高卒後"
+      ],
+      "target_conditions": [
+        "だれでも利用できます"
+      ],
+      "income_requirement": "なし",
+      "single_parent_support": true,
+      "poverty_support": true,
+      "welfare_support": true,
+      "hikazei_support": true,
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "図書館・本",
+        "教材提供"
+      ],
+      "price_type": "完全無料",
+      "price": "0円(公立図書館の貸出・電子書籍)",
+      "completely_free": true,
+      "smartphone_only_ok": true,
+      "application_method": "オンライン利用者登録あり。遠隔地貸出・電子書籍の詳しい使い方は公式サイトで確認",
+      "official_url": "https://www.library.pref.okinawa.jp/",
+      "application_url": "https://www.library.pref.okinawa.jp/",
+      "contact": "沖縄県立図書館 電話098-894-5858(那覇市泉崎1-20-1)",
+      "recruitment_status": "常時募集",
+      "data_source": "https://www.library.pref.okinawa.jp/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "verified",
+      "notes": "トップページで確認: 電子書籍サービス/遠隔地貸出・返却サービス(一部館で休止のお知らせあり=利用前に要確認)/AI蔵書探索/「図書館がない地域の方」向けページ/こどものへや/オンライン利用者登録。離島への郵送貸出の送料負担・図書館未設置離島向け電子書籍の対象町村は個別ページで要確認"
+    },
+    {
+      "service_id": "svc-0017",
+      "service_name": "新・ネットレの学習教室",
+      "summary": "小中学生向けの無料デジタル教材。問題が自動で出て、自動で採点、全国ランキングや成績記録も",
+      "organization_name": "ネットレの学習教室(個人制作: 制作者名・経歴公開)",
+      "organization_type": "個人団体",
+      "prefecture": "全国",
+      "available_area": "全国(インターネット)",
+      "nationwide_available": true,
+      "okinawa_available": "○",
+      "okinawa_note": "全国対象・居住地制限なし",
+      "online_available": true,
+      "offline_available": false,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "だれでも利用できます"
+      ],
+      "income_requirement": "なし",
+      "single_parent_support": true,
+      "poverty_support": true,
+      "welfare_support": true,
+      "hikazei_support": true,
+      "subject": [
+        "数学",
+        "英語",
+        "理科",
+        "社会",
+        "国語"
+      ],
+      "support_type": [
+        "教材提供"
+      ],
+      "ai_support": true,
+      "price_type": "完全無料",
+      "price": "0円(「無償でデジタル学習教材を提供」と明記)",
+      "completely_free": true,
+      "smartphone_only_ok": true,
+      "frequency": "いつでも",
+      "application_method": "申込不要。サイトを開けばすぐ使えます(推奨ブラウザはGoogle Chrome)",
+      "official_url": "https://nll.red/",
+      "application_url": "https://nll.red/",
+      "recruitment_status": "常時募集",
+      "data_source": "https://nll.red/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "verified",
+      "notes": "内容: 小学算数(学年別・単元別)/小学英語・理科・社会・漢字・百ます/中学数英理社・漢字/高1数学。A類型例外の3点確認: 運営者名公開○(制作者の氏名・経歴を公開)/実績○(2005年制作開始・2026年6月時点で1日平均PV66,000回)/無料商法でない○(無償明記・学校等へ寄贈も)。国語は漢字・百ます中心"
+    },
+    {
+      "service_id": "svc-0018",
+      "service_name": "全国高校生マイプロジェクト",
+      "summary": "高校生が自分の「やってみたい」を起点に社会に挑戦する探究プログラム。全国の仲間と学び、アワード(発表の場)もあります",
+      "organization_name": "認定NPO法人カタリバ(全国高校生マイプロジェクト事業)",
+      "organization_type": "NPO",
+      "prefecture": "全国",
+      "available_area": "全国(オンライン参加可)",
+      "nationwide_available": true,
+      "okinawa_available": "○",
+      "okinawa_note": "全国対象",
+      "online_available": true,
+      "offline_available": true,
+      "target_grade": [
+        "高校生"
+      ],
+      "target_conditions": [
+        "高校生(2025年度は約10万8千人が実践)"
+      ],
+      "income_requirement": "なし",
+      "single_parent_support": true,
+      "poverty_support": true,
+      "welfare_support": true,
+      "hikazei_support": true,
+      "subject": [
+        "探究"
+      ],
+      "support_type": [
+        "探究",
+        "体験・イベント"
+      ],
+      "career_support": true,
+      "price_type": "完全無料",
+      "price": "0円(登録受付中(無料)の表記を確認)",
+      "completely_free": true,
+      "application_method": "公式サイトの高校生向けページから登録",
+      "official_url": "https://myprojects.jp/",
+      "application_url": "https://myprojects.jp/students/",
+      "recruitment_status": "募集中",
+      "data_source": "https://myprojects.jp/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "verified",
+      "notes": "「マイプロジェクトアワード」= 全国の高校生がプロジェクトと学びを発表する場。参加形態ごとの費用・日程の詳細は高校生向けページで確認"
+    },
+    {
+      "service_id": "svc-0019",
+      "service_name": "CoderDojo(子どものためのプログラミング道場)",
+      "summary": "7〜17歳向けのプログラミングクラブ。沖縄県内にも那覇・宜野湾・石垣・浦添・名護・南城・恩納(OIST)・嘉手納・南風原の道場があります",
+      "organization_name": "CoderDojo Japan(各道場は地域の運営者)",
+      "organization_type": "一般社団法人",
+      "prefecture": "全国",
+      "available_area": "全国210以上の道場(沖縄県内9道場を確認)",
+      "nationwide_available": true,
+      "okinawa_available": "○",
+      "okinawa_note": "県内に対面道場あり(恩納道場はOISTで毎月開催)。参加方法は各道場のサイトで確認",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "子ども(道場ごとに対象年齢が異なる)"
+      ],
+      "income_requirement": "なし",
+      "subject": [
+        "プログラミング"
+      ],
+      "support_type": [
+        "ものづくり",
+        "体験・イベント"
+      ],
+      "group_lesson": true,
+      "live_lesson": true,
+      "price_type": "完全無料",
+      "price": "要確認(国際的な非営利活動。参加費の明記は各道場ページで確認する)",
+      "completely_free": false,
+      "teacher_type": [
+        "ボランティア"
+      ],
+      "application_method": "「全国の道場」から近くの道場を探す。参加方法は各道場のWebサイトに記載",
+      "official_url": "https://coderdojo.jp/",
+      "application_url": "https://coderdojo.jp/",
+      "recruitment_status": "常時募集",
+      "data_source": "https://coderdojo.jp/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "【掲載保留(基準1・6: 料金の原文確認待ち)】ポータルでは「国際的な非営利活動」と明記だが参加費無料の文言は未確認。県内道場(那覇等)の個別ページで無料を確認できたらverifiedへ。学べる内容: Scratch/micro:bit/Python/Minecraft/電子工作など(道場ごとに異なる)"
+    },
+    {
+      "service_id": "svc-0020",
+      "service_name": "アスデッサン ミライドア(中高生向けオンラインキャリアイベント)",
+      "summary": "いろいろな仕事の大人と話せる中高生向けオンラインイベント。「未来を描く力」を育てるNPOの活動",
+      "organization_name": "NPO法人アスデッサン",
+      "organization_type": "NPO",
+      "prefecture": "全国",
+      "available_area": "全国(オンライン)",
+      "nationwide_available": true,
+      "okinawa_available": "○",
+      "okinawa_note": "オンライン開催のイベントは全国から参加可(と考えられるが個別イベントページで要確認)",
+      "online_available": true,
+      "offline_available": false,
+      "target_grade": [
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "中高生"
+      ],
+      "income_requirement": "なし",
+      "subject": [
+        "キャリア"
+      ],
+      "support_type": [
+        "キャリア教育",
+        "居場所・対話",
+        "体験・イベント"
+      ],
+      "zoom_support": true,
+      "career_support": true,
+      "price_type": "完全無料",
+      "price": "要確認(寄付収入で運営するNPO。参加費の明記は生徒向けプログラムページで確認する)",
+      "completely_free": false,
+      "application_method": "公式サイトの「生徒向けプログラム」「開催中のオンラインプログラム一覧」から",
+      "official_url": "https://www.asdessin.org/",
+      "application_url": "https://www.asdessin.org/",
+      "recruitment_status": "不明",
+      "data_source": "https://www.asdessin.org/",
+      "last_verified": "2026-09-06",
+      "updated_at": "2026-09-06",
+      "review_status": "draft",
+      "notes": "【掲載保留(基準1・6: 料金の原文確認待ち)】2026年5〜7月にオンラインイベント開催の報告あり(活動継続を確認)。「100名を超える社会人と中高生の出会いの場」。生徒向けプログラムページで参加費無料を確認できたらverifiedへ"
     }
   ]
 }

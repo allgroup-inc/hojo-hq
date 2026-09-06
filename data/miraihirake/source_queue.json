@@ -132,7 +132,7 @@
       "org": "沖縄科学技術大学院大学(OIST)",
       "url": "https://www.oist.jp/ja/events",
       "robots_approved": true,
-      "memo": "広がる学び: サイエンスフェスタ・子ども向け科学プログラム(無料)※要照合|robots承認2026-09-06第2陣(単発取得のみ。守り部審査記録参照)"
+      "memo": "広がる学び: OISTサイエンスフェスタ等。ページがJS描画のため機械取得不可(2026-09-06)。人手での確認か、science-festivalページ等の代替URLを次回試す"
     },
     {
       "id": "okinawa-library",
@@ -152,8 +152,15 @@
       "id": "shiruporuto",
       "org": "金融広報中央委員会",
       "url": "https://www.shiruporuto.jp/",
-      "robots_approved": true,
-      "memo": "広がる学び: 知るぽると(お金の無料学習教材)。URL・運営体制の現況要確認|robots承認2026-09-06第2陣(単発取得のみ。守り部審査記録参照)"
+      "robots_approved": false,
+      "memo": "【差し替え】知るぽるとはアーカイブサイト(原文明記)。最新は金融経済教育推進機構(J-FLEC)へ移行 → j-flec を新候補として追加済み"
+    },
+    {
+      "id": "j-flec",
+      "org": "金融経済教育推進機構(J-FLEC)",
+      "url": "https://www.j-flec.go.jp/",
+      "robots_approved": false,
+      "memo": "広がる学び: お金の教育の公式機関(知るぽるとの後継と原文に明記)。子ども向け無料教材の有無を要照合"
     }
   ]
 }
