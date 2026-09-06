@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-06",
+  "updated_at": "2026-09-07",
   "note": "みらいひらけ堂の掲載サービス台帳。スキーマ: docs/みらいひらけ堂_データスキーマ.md。review_status が published のレコードのみサイトに表示される。全レコードに data_source と last_verified が必須。verified=検証部が data/miraihirake/sources/ の原文テキストと照合済み(published昇格は掲載基準決裁+守り部審査後)。",
   "services": [
     {
@@ -197,9 +197,9 @@
       "recruitment_status": "常時募集",
       "data_source": "https://www.nhk.or.jp/school/",
       "last_verified": "2026-09-06",
-      "updated_at": "2026-09-06",
-      "review_status": "published",
-      "notes": "2026-09時点でNHK ONEの利用確認(用途・地域の選択)が入口にある。対象学年の明記はトップになし=要確認(学校放送番組が中心)。コンテンツの転載不可"
+      "updated_at": "2026-09-07",
+      "review_status": "verified",
+      "notes": "2026-09時点でNHK ONEの利用確認(用途・地域の選択)が入口にある。対象学年の明記はトップになし=要確認(学校放送番組が中心)。コンテンツの転載不可 / 監査2026-09-06: official_urlの転送先が edu.web.nhk(NHK ONE for School へ移行・2025-10-01)に変化。掲載基準§4③(転送先変化)により審査中・非表示へ。新URLで対象・料金条件を再照合後に復帰判断"
     },
     {
       "service_id": "svc-0005",
@@ -239,9 +239,9 @@
       "recruitment_status": "常時募集",
       "data_source": "https://www.nhk.or.jp/kokokoza/",
       "last_verified": "2026-09-06",
-      "updated_at": "2026-09-06",
-      "review_status": "published",
-      "notes": "原文表記:「高校生の『学び』をサポートする『NHK高校講座』。放送日程や各回の内容、学習に役立つ資料・映像、音声などをストリーミング配信」。通信制・定時制の学習との相性がよい(この点は一般知識のため表示には使わない)"
+      "updated_at": "2026-09-07",
+      "review_status": "verified",
+      "notes": "原文表記:「高校生の『学び』をサポートする『NHK高校講座』。放送日程や各回の内容、学習に役立つ資料・映像、音声などをストリーミング配信」。通信制・定時制の学習との相性がよい(この点は一般知識のため表示には使わない) / 監査2026-09-06: official_urlの転送先が edu.web.nhk(NHK ONE for School へ移行・2025-10-01)に変化。掲載基準§4③(転送先変化)により審査中・非表示へ。新URLで対象・料金条件を再照合後に復帰判断"
     },
     {
       "service_id": "svc-0006",
