@@ -1,0 +1,11 @@
+# source_id: oist-festival
+# url: https://www.oist.jp/science-festival
+# org: 沖縄科学技術大学院大学(OIST)
+# fetched_at: 2026-09-06
+# 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
+
+Client Challenge 
+
+ A required part of this site couldn’t load. This may be due to a browser
+ extension, network issues, or browser settings. Please check your
+ connection, disable any ad blockers, or try using a different browser.
