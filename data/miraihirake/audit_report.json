@@ -1,5 +1,5 @@
 {
-  "audited_at": "2026-09-06T22:02:51",
+  "audited_at": "2026-09-06T22:18:48",
   "total": 145,
   "published": 16,
   "freshness_kpi_60d": 1.0,
@@ -7,23 +7,6 @@
   "problems": [],
   "warnings": [],
   "auto_demoted": [],
-  "url_alerts": [
-    {
-      "service_id": "svc-0004",
-      "field": "official_url",
-      "url": "https://www.nhk.or.jp/school/",
-      "status": 200,
-      "moved_host": true,
-      "action": "審査中(非表示)候補。人が確認する"
-    },
-    {
-      "service_id": "svc-0005",
-      "field": "official_url",
-      "url": "https://www.nhk.or.jp/kokokoza/",
-      "status": 200,
-      "moved_host": true,
-      "action": "審査中(非表示)候補。人が確認する"
-    }
-  ],
+  "url_alerts": [],
   "note": "掲載基準v2 §7 の機械監査。auto_demoted は --fix 時のみ実際に保存される。"
 }
