@@ -808,9 +808,9 @@ CTI(BlueBean/ソフツー)の通話履歴を、`顧客発着信履歴出力API`(
 
 **セットアップ:**
 1. スクリプト プロパティに以下4つを設定する(すべて秘匿情報。コードに直書きしない):
-   `BLUEBEAN_DOMAIN`(例: `bbw2960-g-low2.softsu.com`。`https://`は含めない)、
-   `BLUEBEAN_USERNAME`、`BLUEBEAN_PASSWORD`、`BLUEBEAN_CAMPAIGN_ID`(例: `8002`。
-   手紙の返信用封筒に記載したGLOW管理番号の架電キャンペーンを指すBlueBeanの作業グループID)
+   `BLUEBEAN_DOMAIN`(管理画面URLのドメイン部分。`https://`は含めない。実値は公開リポジトリに
+   書かない)、`BLUEBEAN_USERNAME`、`BLUEBEAN_PASSWORD`(受け渡しはメール・チャット禁止)、
+   `BLUEBEAN_CAMPAIGN_ID`(架電に使うBlueBeanの作業グループID=ACD番号。実値は書かない)
 2. `ensureLedgerTabs`を実行し、「CTI通話履歴」タブを作成する
 3. `installCtiSyncTrigger`を1度だけ実行し、1時間間隔の同期トリガーを登録する
 4. **(必須設定)** Apps Scriptエディタの「トリガー」画面で、`syncCtiCallHistory`トリガーの
