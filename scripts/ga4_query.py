@@ -67,6 +67,18 @@ def top_pages(token: str, prop: str, start: str, end: str, limit: int = 8):
     return [(r["dimensionValues"][0]["value"], int(r["metricValues"][0]["value"])) for r in rows]
 
 
+def events(token: str, prop: str, start: str, end: str, limit: int = 25):
+    body = {
+        "dateRanges": [{"startDate": start, "endDate": end}],
+        "dimensions": [{"name": "eventName"}],
+        "metrics": [{"name": "eventCount"}],
+        "orderBys": [{"metric": {"metricName": "eventCount"}, "desc": True}],
+        "limit": limit,
+    }
+    rows = call(token, prop, "runReport", body).get("rows") or []
+    return [(r["dimensionValues"][0]["value"], int(r["metricValues"][0]["value"])) for r in rows]
+
+
 def main():
     prop = os.environ.get("GA4_PROPERTY_ID")
     sa_json = os.environ.get("GA4_SA_JSON")
@@ -97,6 +109,13 @@ def main():
     print("top_pages_today:")
     for path, users in top_pages(token, prop, today, today):
         print(f"  {users:4d}  {path}")
+    # ファネルイベント(LINE誘導・診断・IG導線・窓口ボタン等)。❹LINE登録の代理指標=line_redirect
+    print("events_7d:")
+    try:
+        for name, cnt in events(token, prop, week_ago, today):
+            print(f"  {cnt:5d}  {name}")
+    except Exception as e:  # noqa: BLE001
+        print(f"  [warn] イベント取得に失敗: {type(e).__name__}")
     return 0
 
 
