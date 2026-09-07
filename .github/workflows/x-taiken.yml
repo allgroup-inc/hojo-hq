@@ -11,7 +11,8 @@ name: x-taiken
 on:
   schedule:
     - cron: "5 12 * * 1,4"   # 月・木 21:05 JST(本枠)
-    - cron: "5 13 * * 1,4"   # 月・木 22:05 JST(リトライ枠)
+    - cron: "5 13 * * 1,4"   # 月・木 22:05 JST(リトライ枠1)
+    - cron: "5 14 * * 1,4"   # 月・木 23:05 JST(リトライ枠2。cron大幅遅延対策=ニドナシ#19)
   workflow_dispatch:
 
 permissions:
