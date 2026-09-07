@@ -1952,5 +1952,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-07",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【近畿支部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY89MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度】二酸化炭素排出抑制対策事業費等補助金（再エネ等由来水素を活用した自立・分散型エネルギーシステム構築等事業）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaotMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和７年度（補正予算）地域共生を目指したデータセンター脱炭素化設備導入支援事業（三次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeS9MAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(個人向けSDGs預金)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdABMA1",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "③太陽光パネルリサイクル設備導入事業（バリューチェーン）【令和７年度（補正予算）第４次公募及び令和８年度第３次公募】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYkCMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
