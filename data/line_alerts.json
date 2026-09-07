@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-09-07 04:55",
+ "generated_at": "2026-09-07 11:29",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 10,
- "count": 46,
+ "count": 47,
  "items": [
   {
    "id": "a0WJ200000CDO8eMAH",
@@ -225,6 +225,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 20000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcODMA1",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDe3zMAD",
+   "name": "【令和８年度・第４回】INPIT外国出願補助金",
+   "deadline": "2026-09-28",
+   "days_left": 21,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 3000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe3zMAD",
    "tag": "nationwide"
   },
   {
