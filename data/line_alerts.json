@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-09-08 06:03",
+ "generated_at": "2026-09-08 11:42",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 9,
- "count": 45,
+ "count": 46,
  "items": [
   {
    "id": "a0WJ200000CDdqyMAD",
@@ -195,6 +195,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 20000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcODMA1",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDeNDMA1",
+   "name": "「デジタル社会の将来像の実現に向けた技術課題及び社会実装方策に関する調査」の公募",
+   "deadline": "2026-09-28",
+   "days_left": 20,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeNDMA1",
    "tag": "nationwide"
   },
   {
