@@ -2076,5 +2076,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-09",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和８年度　水力発電導入促進支援事業費補助金（既存設備有効活用強化支援事業）公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYcpMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和7年度_産油国石油精製技術等対策事業費補助金（石油天然ガス権益・安定供給の確保に向けた資源国との関係強化支援事業のうち産油・産ガス国産業協力等事業に係るもの）_第5回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeNwMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和8年度_資源国脱炭素化・エネルギー転換技術等支援事業費補助金_第3回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeO1MAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "よろず支援拠点事業 生産性向上支援センター",
+    "url": "https://okinawa-ric.jp/service/post-58-1.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度 脱炭素成長型経済構造移行推進対策費補助金（自律型資源循環システム強靱化促進事業）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYlTMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
