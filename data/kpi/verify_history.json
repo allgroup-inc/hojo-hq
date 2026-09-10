@@ -2138,5 +2138,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-10",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "重要経済安保情報保護活用民間企業等情報保全施設導入支援補助金（令和８年度第２回公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeUbMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度東京港物流効率化等事業補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY72MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "廃止石油坑井封鎖事業費補助金（令和8年度：関東東北産業保安監督部）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSKMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和8年度沖縄県奨学金代理返還支援事業",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010156.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和7年度_資源国脱炭素化・エネルギー転換技術等支援事業費補助金_第5回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeNSMA1",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
