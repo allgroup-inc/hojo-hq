@@ -2200,5 +2200,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-11",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和８年度「水力発電導入促進支援事業費補助金（事業性評価支援事業）」（新規事業　３次締切分）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcODMA1",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度】働き方改革推進支援助成金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYEGMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度二酸化炭素排出抑制対策事業費等補助金（運輸部門等の脱炭素化に向けた先進的システム社会実装促進事業のうち、農業機械の電動化促進事業）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDa1gMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "航空機整備施設省エネ設備導入事業補助金の公募",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1039661.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度】二酸化炭素排出抑制対策事業費等補助金（地域再エネ水素ステーション保守点検等支援事業）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZzQMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
