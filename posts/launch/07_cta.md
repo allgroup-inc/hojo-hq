@@ -1,4 +1,4 @@
-# 投稿9｜まとめ・LINE登録
+# 投稿7｜30秒診断・LINE登録
 
 ## 画像に載せる文言
 - タイトル: うちに使える制度、\nあるのかな。
@@ -19,5 +19,5 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-08-17
+- checked: 2026-09-11
 - by: scripts/generate_sns.py(SNS部・ヒロメさん)

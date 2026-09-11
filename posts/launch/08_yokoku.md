@@ -1,4 +1,4 @@
-# 投稿10｜次回公募に備える予告
+# 投稿8｜次回公募に備える予告
 
 ## 画像に載せる文言
 - タイトル: 次の公募に、備える。
@@ -24,5 +24,5 @@ https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe3bMAD
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-08-17
+- checked: 2026-09-11
 - by: scripts/generate_sns.py(SNS部・ヒロメさん)

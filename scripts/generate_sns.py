@@ -37,7 +37,9 @@ OUT_DIR = os.path.join(BASE_DIR, "..", "posts", "launch")
 # 更新せずに放置すると shipping_gate.MAX_AGE_DAYS を超えた時点で自動投稿が止まる(フェイルクローズ)。
 # 2026-08-17: 全10投稿を accuracy-check(出典・件数はdata由来)/ deadline-alert(「約1か月前から」で統一)/
 #             humanizer(定型句・過剰な絵文字なし)で確認。
-GATE_CHECKED = "2026-08-17"
+# 2026-09-11: 構成変更(自己紹介系カード廃止・制度5枠=沖縄2/金額2/締切1+shokei/30秒診断/予告)。
+#             フック別の書き出しを含む全8投稿を同3観点で確認。
+GATE_CHECKED = "2026-09-11"
 # UTM付き(ヒロメさんのUTM運用: instagram/social/launch)。プロフィールリンクにも同URLを使用
 SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch"
 
@@ -221,9 +223,53 @@ def main():
     def dleft(it):
         return (parse_date(it["deadline"]) - today).days
 
-    # 通常投稿: 締切30日以上先を近い順に
+    # 通常投稿の母集団: 締切30日以上先
     promote = [it for it in dated if dleft(it) >= PROMOTE_MIN_DAYS]
-    seido3 = [it for it in promote if it.get("tag") != "shokei"][:3]
+
+    # 興味フック優先の選定(2026-09-11 小柳さん指示「見た人が『使えるかも』『これ何?』と
+    # 思うものを。サービス自体の説明には誰も興味がない」):
+    # 締切近い順だけだとニッチな全国制度が上位を占めるため、
+    # ①沖縄限定(自分ごと度が最も高い) ②金額が大きい(数字のフック) ③締切が近い
+    # の順で枠を取る。同じ制度・同名の重複は除く。
+    non_shokei = [it for it in promote if it.get("tag") != "shokei"]
+    picked = []
+    _seen = set()
+
+    def _norm_name(s):
+        """名寄せ用: 年度・補正・括弧書きを落とす(「令和6年度補正 ◯◯事業」と
+        「令和7年度補正 ◯◯事業(建設機械)」が同じフィードに並ぶのを防ぐ)。"""
+        import re as _re
+        s = _re.sub(r"令和[0-9０-９]+年度|平成[0-9０-９]+年度|補正予算|補正|"
+                    r"（[^）]*）|\([^)]*\)|【[^】]*】|［[^］]*］|[\s　]", "", s or "")
+        return s
+
+    def _take(pool, n, hook):
+        got = 0
+        for it in pool:
+            key = _norm_name(it["name"])
+            if key in _seen:
+                continue
+            _seen.add(key)
+            picked.append((it, hook))
+            got += 1
+            if got >= n:
+                return
+
+    # 金額枠は「1社あたりの上限」として現実的な帯(100万〜10億円)に絞る。
+    # 数十億〜数百億は制度全体の予算枠であることが多く、フックに使うと誇大に見える
+    AMT_MIN, AMT_MAX = 1_000_000, 1_000_000_000
+    # 沖縄枠: tag=okinawa は全国制度も混ざるため使わない(2026-09-11 検証で確認)。
+    # 「対象は沖縄県内」とキャプションで言い切る以上、target_area が正確に沖縄県のみの制度に限る
+    def _okinawa_only(it):
+        return " ".join((it.get("target_area") or "").split()) == "沖縄県"
+
+    _take(sorted([it for it in non_shokei if _okinawa_only(it)],
+                 key=lambda x: x["deadline"]), 2, "okinawa")
+    _take(sorted([it for it in non_shokei
+                  if AMT_MIN <= (it.get("max_amount") or 0) <= AMT_MAX],
+                 key=lambda x: -x["max_amount"]), 2, "amount")
+    _take(sorted(non_shokei, key=lambda x: x["deadline"]), 1, "deadline")
+
     shokei_pool = [it for it in promote if it.get("tag") == "shokei"]
     if not shokei_pool:  # 30日以上のshokeiが無ければ近い順で代替
         shokei_pool = [it for it in dated if it.get("tag") == "shokei"]
@@ -240,65 +286,83 @@ def main():
 
     made = []
 
-    # 1) ローンチ告知
-    made.append(write_post(
-        1, "launch", "ローンチ告知",
-        img_title="沖縄企業のミカタ、公開。",
-        img_sub="補助金・助成金を、毎日ぜんぶ。",
-        img_number=f"掲載 {count}件",
-        caption=(
-            f"沖縄で今使える補助金・助成金、{count}件。ぜんぶ無料で見られる場所を作りました🌺\n"
-            "国・県・関係機関の情報を毎日集めて更新する「沖縄企業のミカタ」です。\n\n"
-            "「知らなかった」で機会を逃さないために。\n"
-            "📌 気になる制度は、締切の約1か月前からLINEでお知らせします。\n"
-            f"まずは無料のLINE登録から👇\n{SITE_URL}"
-        ),
-        source=SITE_URL,
-    ))
+    # サービス自己紹介系のカード(ローンチ告知/なぜ無料/使い方/締切アラート)は
+    # 2026-09-11 小柳さん指示で廃止: 「聞いたことのないサービスの説明には誰も興味がない。
+    # 制度データそのもので『使えるかも』『これ何?』と思わせる」。以降は制度が主役。
 
-    # 2〜4) 締切30日以上先の制度(近い順)
-    # 書き出しは3パターンを順繰り(humanizer: 同一文の反復を避ける。番号順で決定的=再生成しても同じ)
-    seido_openers = [
-        "📣 締切まで残り{dl}日。いまなら準備が間に合います。",
-        "締切まで残り{dl}日。書類の準備、ここから始めれば間に合います。",
-        "残り{dl}日。この制度、見逃していませんか?",
-    ]
+    # 1〜5) 制度投稿。書き出しは選定フックに合わせる(番号順で決定的=再生成しても同じ)
+    hook_openers = {
+        "okinawa": [
+            "沖縄の事業者向けの募集が出ています。全国枠ではなく、沖縄向けです。",
+            "対象は沖縄県内の事業者。うちも当てはまるかも、と思ったら締切だけ先に控えてください。",
+        ],
+        "amount": [
+            "{amt}の制度が、いま募集中です。",
+            "上限は{amt}。この規模の募集は、そう多くありません。",
+        ],
+        "deadline": [
+            "📣 締切まで残り{dl}日。いまなら準備が間に合います。",
+        ],
+    }
     seido_closers = [
         "詳細・申請は原文で👇",
         "公募要領の原文はこちら👇",
         "申請できるかは原文で確認を👇",
+        "対象になるかは、原文の要件欄でわかります👇",
+        "まずは原文をざっと見てみてください👇",
     ]
     # 見た目テンプレの週次ローテーション(2026-09-11 小柳さん指示「毎回同じに見える」対応):
     # IG広告画像_マスタープロンプト.mdの型のうち、事実データだけで自動生成できる4型を
     # 制度投稿で順繰りにする。週番号でずらすため、同じ制度でも週が変われば見た目が変わる。
     # 決定論的(同じ日は同じ出力)なので、承認ゲートのプレビューと実投稿はずれない。
     week = today.isocalendar()[1]
-    seido_templates = ["number", "news", "facts", "brand"]
+    # フックごとの型(週番号で入れ替え): 沖縄枠は対象地域が見える型、金額枠は数字が主役の型
+    hook_templates = {
+        "okinawa": ["facts", "news"],
+        "amount": ["number", "brand"],
+        "deadline": ["news", "brand"],
+    }
 
     def facts_rows(it2, dl2):
-        rows = [f"締切　{it2['deadline']}(残り{dl2}日)" if dl2 is not None else f"締切　{it2['deadline']}",
-                amount_text(it2.get("max_amount"))]
+        # 金額未設定の「要確認」行は画像では弱いので載せず、対象地域・実施主体で埋める
+        rows = [f"締切　{it2['deadline']}(残り{dl2}日)" if dl2 is not None else f"締切　{it2['deadline']}"]
+        if it2.get("max_amount"):
+            rows.append(amount_text(it2.get("max_amount")))
         area = " ".join((it2.get("target_area") or "").split())
         if area and len(area) <= 20:
             rows.append(f"対象地域　{area}")
-        else:
+        if len(rows) < 3:
             rows.append(f"実施主体　{it2.get('issuer') or '要確認'}")
-        return rows
+        return rows[:3]
 
-    for i, it in enumerate(seido3, start=2):
+    def sub_line(it2):
+        """number型以外のサブ行: 金額があれば金額、なければ実施主体(「要確認」を画像に出さない)"""
+        if it2.get("max_amount"):
+            return amount_text(it2["max_amount"])
+        return f"実施主体：{it2.get('issuer') or '原文参照'}"
+
+    hook_count = {}
+    for i, (it, hook) in enumerate(picked, start=1):
         dl = days_left(it, today)
         num = f"締切まで残り{dl}日" if dl is not None else "募集中"
+        k = hook_count.get(hook, 0)
+        hook_count[hook] = k + 1
+        opener = hook_openers[hook][k % len(hook_openers[hook])].format(
+            dl=dl, amt=amount_short(it.get("max_amount")) or "")
+        # 沖縄枠は書き出しで対象を言い切っているため、汎用の一文は重ねない
+        body_line = ("" if hook == "okinawa"
+                     else "沖縄の事業者も、要件に合えば申請できます。準備の時間も取りやすい制度です。\n")
         cap = (
-            seido_openers[(i - 2) % len(seido_openers)].format(dl=dl) + "\n"
+            opener + "\n"
             f"【募集中】{it['name']}\n"
             f"🗓 {deadline_line(it, today)}\n"
             f"💰 {amount_text(it.get('max_amount'))}\n"
             f"🏝 実施主体：{it.get('issuer') or '要確認'}\n"
-            "沖縄の事業者も、要件に合えば申請できます。準備の時間も取りやすい制度です。\n"
-            f"{seido_closers[(i - 2) % len(seido_closers)]}\n{it['source_url']}\n"
+            f"{body_line}"
+            f"{seido_closers[(i - 1) % len(seido_closers)]}\n{it['source_url']}\n"
             f"{DISCLAIMER}"
         )
-        template = seido_templates[(week + i) % len(seido_templates)]
+        template = hook_templates[hook][(week + i) % len(hook_templates[hook])]
         # 数字ドン型は金額が主役。上限額が未設定の制度では成立しないため事実カード型に切替
         if template == "number" and not amount_short(it.get("max_amount")):
             template = "facts"
@@ -306,13 +370,13 @@ def main():
         # タイトル=制度名の全文(描画側が3行以内に自動折返し・縮小)。
         # number型のみ数字=短い金額、それ以外は数字=残り日数
         made.append(write_post(
-            i, "seido", f"締切が近い制度({i-1}/3・30日以上先)",
+            i, "seido", f"制度紹介({i}/5・{hook}枠・締切30日以上先)",
             img_title=shorten_name(it["name"], limit=60),
-            img_sub=(num if template == "number" else amount_text(it.get("max_amount"))),
+            img_sub=(num if template == "number" else sub_line(it)),
             img_number=(amount_short(it.get("max_amount")) if template == "number" else num),
             caption=cap,
             source=it["source_url"],
-            badge="いま募集中",
+            badge=("沖縄の事業者向け" if hook == "okinawa" else "いま募集中"),
             template=template,
             rows=facts_rows(it, dl) if template == "facts" else None,
         ))
@@ -333,7 +397,7 @@ def main():
         )
         tpl5 = ["brand", "news"][week % 2]
         made.append(write_post(
-            5, "shokei", "制度紹介(30日以上先・4件目)",
+            6, "shokei", "制度紹介(30日以上先・6件目)",
             img_title=shorten_name(shokei["name"], limit=60),
             img_sub=amount_text(shokei.get("max_amount")),
             img_number=num,
@@ -343,64 +407,10 @@ def main():
             template=tpl5,
         ))
 
-    # 6) なぜ無料か
+    # 7) 30秒診断(唯一残すサービス系カード: 「うちに使える制度あるのかな」という
+    #    読者自身の問いから入るため、自己紹介ではなく興味フックとして機能する)
     made.append(write_post(
-        6, "why_free", "なぜ無料か",
-        img_title="なぜ、無料なの?",
-        img_sub="先に、全部話します。答えはキャプションで。",
-        img_number="利用料 ¥0",
-        template="qa",
-        caption=(
-            "💡「なぜ無料？」とよく聞かれます。\n"
-            "運営費は、対応いただける専門家様の掲載料や、ご希望の方への経営相談でまかないます。"
-            "登録企業様から利用料をいただくことはありません。\n"
-            "だから毎日、情報を全部ひらけます。"
-        ),
-        source=SITE_URL,
-    ))
-
-    # 7) 使い方(3ステップ)
-    made.append(write_post(
-        7, "how", "使い方",
-        img_title="使い方は、3ステップ。",
-        img_sub="探すのは、私たちの仕事。",
-        img_number="3ステップ",
-        template="facts",
-        rows=["市町村と業種を選ぶ",
-              "30秒診断で候補が出る",
-              "締切の約1か月前にLINEが届く"],
-        caption=(
-            "補助金探しに、夜の時間を使わなくてよくなります。\n"
-            "使い方はかんたん。市町村と業種を選ぶだけの30秒診断で、"
-            "御社が使えそうな制度が出てきます。\n"
-            "あとはLINEに登録しておけば、気になる制度の締切を"
-            "約1か月前からお知らせします📲\n"
-            "探すのは、私たちの仕事です。"
-        ),
-        source=SITE_URL,
-    ))
-
-    # 8) 締切アラート(締切3層ルール: LINE個別アラートは残り7〜29日の窓で出す。
-    #    「7日前」は書類・gBizIDの準備が間に合わないため使わない)
-    made.append(write_post(
-        8, "deadline_alert", "締切アラート特典",
-        img_title=r"知らなかった、は、\nもったいない。",  # \nは描画側で改行に変換
-        img_sub="締切の約1か月前に、LINEでお知らせ。",
-        img_number="締切1か月前",
-        template="poem",
-        caption=(
-            "補助金の「知った時にはもう遅い」は、だいたい締切の1か月前に決まります。\n"
-            "しかも申請には事業計画書や、国の電子申請で使うGビズIDの準備が要ることも。"
-            "締切の直前に知っても、間に合わないことがあります。\n"
-            "だからLINE登録で、気になる制度の締切の約1か月前からお知らせします。（無料）\n"
-            "「知っていれば間に合った」を、なくすために。"
-        ),
-        source=SITE_URL,
-    ))
-
-    # 9) まとめ / LINE登録CTA
-    made.append(write_post(
-        9, "cta", "まとめ・LINE登録",
+        7, "cta", "30秒診断・LINE登録",
         img_title=r"うちに使える制度、\nあるのかな。",  # \nは描画側で改行に変換
         img_sub="診断も登録も、無料です。",
         img_number="30秒",
@@ -413,7 +423,7 @@ def main():
         source=SITE_URL,
     ))
 
-    # 10) 次回公募に備える予告(締切7日未満は今回は狙わず、次に備える)
+    # 8) 次回公募に備える予告(締切7日未満は今回は狙わず、次に備える)
     if yokoku_item:
         dl = days_left(yokoku_item, today)
         ex = (
@@ -421,7 +431,7 @@ def main():
             f"参考: {yokoku_item['source_url']}\n"
         )
         made.append(write_post(
-            10, "yokoku", "次回公募に備える予告",
+            8, "yokoku", "次回公募に備える予告",
             img_title="次の公募に、備える。",
             img_sub="まずはGビズIDプライムの準備から。",
             img_number="今から準備",

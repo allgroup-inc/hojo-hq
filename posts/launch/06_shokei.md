@@ -1,4 +1,4 @@
-# 投稿5｜制度紹介(30日以上先・4件目)
+# 投稿6｜制度紹介(30日以上先・6件目)
 
 ## 画像に載せる文言
 - タイトル: ［第十三回］事業再構築補助金_GX進出類型（交付申請等）
@@ -23,5 +23,5 @@ https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDPyeMAH
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-08-17
+- checked: 2026-09-11
 - by: scripts/generate_sns.py(SNS部・ヒロメさん)
