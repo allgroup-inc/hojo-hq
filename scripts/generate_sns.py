@@ -135,6 +135,18 @@ def shorten_name(s, limit=IMG_SUB_LIMIT):
     return out + "…"
 
 
+def amount_short(v):
+    """画像の「数字ドン」用の短い金額表示。未設定(0/None)はNone(=型を変える)。"""
+    if not v:
+        return None
+    if v >= 100_000_000:
+        oku = f"{v / 100_000_000:.1f}".rstrip("0").rstrip(".")
+        return f"最大 {oku}億円"
+    if v >= 10000:
+        return f"最大 {v // 10000:,}万円"
+    return f"最大 {v:,}円"
+
+
 def amount_text(v):
     """金額を原文通りに表示。未設定(0/None)は要確認。億・万で読みやすく。"""
     if not v:
@@ -165,17 +177,22 @@ def days_left(it, today):
     return (d - today).days if d else None
 
 
-def write_post(n, slug, role, img_title, img_sub, img_number, caption, source, badge=""):
+def write_post(n, slug, role, img_title, img_sub, img_number, caption, source, badge="",
+               template="brand", rows=None):
     fname = f"{n:02d}_{slug}.md"
     path = os.path.join(OUT_DIR, fname)
     badge_line = f"\n- バッジ: {badge}" if badge else ""
+    # 画像テンプレ(IG広告画像_マスタープロンプト.mdの型を自動生成に実装。2026-09-11
+    # 小柳さん指示「毎回同じに見える」対応): generate_images.py が描き分ける
+    tpl_line = f"\n- テンプレ: {template}"
+    rows_lines = "".join(f"\n- 行{i}: {r}" for i, r in enumerate(rows or [], start=1))
     hashtags = HASHTAG_SETS.get(slug, DEFAULT_HASHTAGS)
     body = f"""# 投稿{n}｜{role}
 
 ## 画像に載せる文言
 - タイトル: {img_title}
 - サブ: {img_sub}
-- 数字: {img_number}{badge_line}
+- 数字: {img_number}{badge_line}{tpl_line}{rows_lines}
 
 ## キャプション
 {caption}
@@ -251,6 +268,23 @@ def main():
         "公募要領の原文はこちら👇",
         "申請できるかは原文で確認を👇",
     ]
+    # 見た目テンプレの週次ローテーション(2026-09-11 小柳さん指示「毎回同じに見える」対応):
+    # IG広告画像_マスタープロンプト.mdの型のうち、事実データだけで自動生成できる4型を
+    # 制度投稿で順繰りにする。週番号でずらすため、同じ制度でも週が変われば見た目が変わる。
+    # 決定論的(同じ日は同じ出力)なので、承認ゲートのプレビューと実投稿はずれない。
+    week = today.isocalendar()[1]
+    seido_templates = ["number", "news", "facts", "brand"]
+
+    def facts_rows(it2, dl2):
+        rows = [f"締切　{it2['deadline']}(残り{dl2}日)" if dl2 is not None else f"締切　{it2['deadline']}",
+                amount_text(it2.get("max_amount"))]
+        area = " ".join((it2.get("target_area") or "").split())
+        if area and len(area) <= 20:
+            rows.append(f"対象地域　{area}")
+        else:
+            rows.append(f"実施主体　{it2.get('issuer') or '要確認'}")
+        return rows
+
     for i, it in enumerate(seido3, start=2):
         dl = days_left(it, today)
         num = f"締切まで残り{dl}日" if dl is not None else "募集中"
@@ -264,17 +298,23 @@ def main():
             f"{seido_closers[(i - 2) % len(seido_closers)]}\n{it['source_url']}\n"
             f"{DISCLAIMER}"
         )
+        template = seido_templates[(week + i) % len(seido_templates)]
+        # 数字ドン型は金額が主役。上限額が未設定の制度では成立しないため事実カード型に切替
+        if template == "number" and not amount_short(it.get("max_amount")):
+            template = "facts"
         # 画像は制度名が主役(2026-08-24 小柳さん指摘「何の補助金かが分かりにくい」対応):
-        # タイトル=制度名の全文(描画側が3行以内に自動折返し・縮小)、
-        # サブ=金額(何がもらえるかの実利)、「いま募集中」は右上バッジへ
+        # タイトル=制度名の全文(描画側が3行以内に自動折返し・縮小)。
+        # number型のみ数字=短い金額、それ以外は数字=残り日数
         made.append(write_post(
             i, "seido", f"締切が近い制度({i-1}/3・30日以上先)",
             img_title=shorten_name(it["name"], limit=60),
-            img_sub=amount_text(it.get("max_amount")),
-            img_number=num,
+            img_sub=(num if template == "number" else amount_text(it.get("max_amount"))),
+            img_number=(amount_short(it.get("max_amount")) if template == "number" else num),
             caption=cap,
             source=it["source_url"],
             badge="いま募集中",
+            template=template,
+            rows=facts_rows(it, dl) if template == "facts" else None,
         ))
 
     # 5) 事業承継(shokei)
@@ -291,6 +331,7 @@ def main():
             f"制度の詳細・申請は原文で👇\n{shokei['source_url']}\n"
             f"{DISCLAIMER}"
         )
+        tpl5 = ["brand", "news"][week % 2]
         made.append(write_post(
             5, "shokei", "制度紹介(30日以上先・4件目)",
             img_title=shorten_name(shokei["name"], limit=60),
@@ -299,14 +340,16 @@ def main():
             caption=cap,
             source=shokei["source_url"],
             badge="いま募集中",
+            template=tpl5,
         ))
 
     # 6) なぜ無料か
     made.append(write_post(
         6, "why_free", "なぜ無料か",
-        img_title="なぜ、無料なのか。",
-        img_sub="先に、全部話します。",
+        img_title="なぜ、無料なの?",
+        img_sub="先に、全部話します。答えはキャプションで。",
         img_number="利用料 ¥0",
+        template="qa",
         caption=(
             "💡「なぜ無料？」とよく聞かれます。\n"
             "運営費は、対応いただける専門家様の掲載料や、ご希望の方への経営相談でまかないます。"
@@ -322,6 +365,10 @@ def main():
         img_title="使い方は、3ステップ。",
         img_sub="探すのは、私たちの仕事。",
         img_number="3ステップ",
+        template="facts",
+        rows=["市町村と業種を選ぶ",
+              "30秒診断で候補が出る",
+              "締切の約1か月前にLINEが届く"],
         caption=(
             "補助金探しに、夜の時間を使わなくてよくなります。\n"
             "使い方はかんたん。市町村と業種を選ぶだけの30秒診断で、"
@@ -337,9 +384,10 @@ def main():
     #    「7日前」は書類・gBizIDの準備が間に合わないため使わない)
     made.append(write_post(
         8, "deadline_alert", "締切アラート特典",
-        img_title="LINEでお知らせ。",
-        img_sub="間に合う時期に、お伝えします。",
+        img_title=r"知らなかった、は、\nもったいない。",  # \nは描画側で改行に変換
+        img_sub="締切の約1か月前に、LINEでお知らせ。",
         img_number="締切1か月前",
+        template="poem",
         caption=(
             "補助金の「知った時にはもう遅い」は、だいたい締切の1か月前に決まります。\n"
             "しかも申請には事業計画書や、国の電子申請で使うGビズIDの準備が要ることも。"
@@ -353,9 +401,10 @@ def main():
     # 9) まとめ / LINE登録CTA
     made.append(write_post(
         9, "cta", "まとめ・LINE登録",
-        img_title="まずは、LINE登録から。",
-        img_sub="沖縄企業のミカタ",
-        img_number=f"掲載 {count}件",
+        img_title=r"うちに使える制度、\nあるのかな。",  # \nは描画側で改行に変換
+        img_sub="診断も登録も、無料です。",
+        img_number="30秒",
+        template="number",
         caption=(
             "「うちに使える制度、あるのかな」。30秒でわかります。\n"
             "沖縄の事業者のための、補助金・助成金ナビ。会社名の入力は不要です🌺\n"
@@ -377,6 +426,7 @@ def main():
             img_sub="まずはGビズIDプライムの準備から。",
             img_number="今から準備",
             badge="次回公募に備える",
+            template="news",
             caption=(
                 "⏳ 締切が目前の制度は、いま慌てて申請すると要件を満たせないことも。\n"
                 "次の公募に備えて、国の電子申請(jGrants)で使う【GビズIDプライム】を"
