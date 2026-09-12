@@ -1,0 +1,38 @@
+name: keihi-ci
+
+# 経費精算の読取判定ロジック(scripts/keihi_receipt.py)の自己点検。
+# 設計: docs/経費精算_試作設計.md / 手順書: docs/経費精算_構築手順書.md
+# 実データ(領収書・申請者・金額)はMicrosoft 365側にのみ置き、ここでは扱わない。
+
+on:
+  push:
+    paths:
+      - "scripts/keihi_receipt.py"
+      - "scripts/keihi_accuracy.py"
+      - ".github/workflows/keihi-ci.yml"
+  pull_request:
+    paths:
+      - "scripts/keihi_receipt.py"
+      - "scripts/keihi_accuracy.py"
+      - ".github/workflows/keihi-ci.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: keihi-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  self-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 読取判定ロジックの自己点検
+        run: python3 scripts/keihi_receipt.py --self-test
+
+      - name: 精度集計ロジックの自己点検(API不要)
+        run: python3 scripts/keihi_accuracy.py --self-test
