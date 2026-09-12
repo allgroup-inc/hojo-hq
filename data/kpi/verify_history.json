@@ -2262,5 +2262,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-12",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和８年度子育て【宅配ボックス】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSPMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "京都市企業立地促進制度補助金［本社・工場等新増設等支援制度］",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFhMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和６年度補正予算　商用車等の電動化促進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDL8JMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "［第十一回］事業再構築補助金（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UbU66EAF",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和７年度補正 グローバルサウス未来志向型共創等事業費補助金（ウクライナ復興支援に向けた欧州企業連携・中東欧諸国等連携強化）（FS実証・実証事業実施事業者の募集（補助））】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczgMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
