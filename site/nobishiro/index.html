@@ -38,6 +38,11 @@ section{padding:44px 0}
 .pillars{display:grid;gap:14px}
 .pillar{background:var(--nb-card);border:1px solid var(--nb-line);border-radius:12px;padding:20px}
 .pillar h3{color:var(--nb-primary);margin-bottom:.3em}
+.trustquote{background:var(--nb-card);border:1px solid var(--nb-line);border-radius:12px;padding:18px 20px;
+  display:flex;gap:16px;align-items:center}
+.trustquote .avatar{flex:none;display:block}
+.trustquote p{font-size:.95rem;color:var(--nb-muted)}
+.trustquote a{font-weight:700}
 table.pricecmp{width:100%;border-collapse:collapse;background:var(--nb-card);border:1px solid var(--nb-line);
   border-radius:12px;overflow:hidden}
 table.pricecmp th,table.pricecmp td{padding:12px 14px;border-bottom:1px solid var(--nb-line);text-align:left}
@@ -74,6 +79,19 @@ footer a{color:#bcd0c4}
     </div>
   </section>
 
+  <section style="padding:0 0 8px">
+    <div class="wrap">
+      <div class="trustquote">
+        <svg class="avatar" width="56" height="56" viewBox="0 0 120 120" role="img" aria-label="カチカクくんのシンボルアイコン">
+          <circle cx="60" cy="60" r="58" fill="#2F6B4F"/>
+          <path d="M34 78 L34 62 M52 78 L52 50 M70 78 L70 40 M88 78 L88 30" stroke="#D98E2B" stroke-width="8" stroke-linecap="round"/>
+          <path d="M30 78 H90" stroke="#FAF7F0" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <p>「経理も採用も、自分の会社で全部自分でやってきました。だから、どこが本当に苦しいか分かります。」— カチカクくん<br><span class="note">カチカクくんは、私たちの実務経験を人格化したキャラクターです。</span> <a href="about/">詳しいプロフィールを見る</a></p>
+      </div>
+    </div>
+  </section>
+
   <section>
     <div class="wrap">
       <h2>3つの約束</h2>
@@ -88,7 +106,7 @@ footer a{color:#bcd0c4}
         </div>
         <div class="pillar">
           <h3>本物</h3>
-          <p>10年以上、経営の現場で実践してきた「カチカクくん」がAIチームと一緒に設計・伴走します。丸投げのAIツールではありません。</p>
+          <p>新卒から会社員、役員、そして自分の会社の経営まで。経理・採用・営業・資金繰り、現場から経営まで自分の手でやってきた「カチカクくん」が、AIチームと一緒に設計・伴走します。丸投げのAIツールではありません。<a href="about/">プロフィールを見る</a></p>
         </div>
       </div>
     </div>
@@ -115,12 +133,13 @@ footer a{color:#bcd0c4}
         <a class="btn" href="shindan/">AI活用診断を受ける(¥14,800)</a>
         <a class="btn ghost" href="contact/">無料相談を予約する</a>
       </div>
+      <p class="note" style="margin-top:12px">どんなレポートが届くか、<a href="shindan/sample/">サンプルレポート</a>を見てからお申し込みいただけます。</p>
     </div>
   </section>
 </main>
 <footer>
   <div class="wrap">
-    <p>&copy; 2026 ノビシロ — ブランド名は検討中です。</p>
+    <p>&copy; 2026 ノビシロ</p>
     <p class="note"><a href="about/">代表者紹介</a> ・ <a href="pricing/">料金</a> ・ <a href="blog/">お役立ち情報</a> ・ <a href="tokushoho/">特定商取引法に基づく表記</a> ・ <a href="privacy/">プライバシーポリシー</a></p>
   </div>
 </footer>
