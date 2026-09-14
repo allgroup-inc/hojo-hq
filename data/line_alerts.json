@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-09-14 05:12",
+ "generated_at": "2026-09-14 12:00",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 10,
- "count": 43,
+ "count": 46,
  "items": [
   {
    "id": "a0WJ200000CDeXgMAL",
@@ -208,6 +208,16 @@
    "tag": "nationwide"
   },
   {
+   "id": "a0WJ200000CDeTjMAL",
+   "name": "「情報基盤システムの基本構想に関する分析調査」の公募",
+   "deadline": "2026-09-30",
+   "days_left": 16,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeTjMAL",
+   "tag": "nationwide"
+  },
+  {
    "id": "a0WJ200000CDdtgMAD",
    "name": "【令和７年度補正予算・令和８年度】二酸化炭素排出抑制対策事業費等補助金（クーリングシェルターの普及に向けた高効率空調導入支援事業（令和７年度補正予算三次公募・令和８年度二次公募））",
    "deadline": "2026-09-30",
@@ -348,6 +358,16 @@
    "tag": "nationwide"
   },
   {
+   "id": "a0WJ200000CDeT0MAL",
+   "name": "「2026年度NEDO情報セキュリティ監査業務」の公募",
+   "deadline": "2026-10-02",
+   "days_left": 18,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeT0MAL",
+   "tag": "nationwide"
+  },
+  {
    "id": "a0WJ200000CDeSJMA1",
    "name": "令和8年度当初予算　二次公募　民間企業等による再エネの導入及び地域共生加速化事業のうち、ストレージパリティの達成に向けた太陽光発電設備等の価格低減促進事業",
    "deadline": "2026-10-02",
@@ -435,6 +455,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 150000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000007Cos5EAC",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WfQ000003EVJxUAO",
+   "name": "令和８年度（秋公募）コールドチェーンを支える冷凍冷蔵機器の脱フロン・脱炭素化推進事業",
+   "deadline": "2026-10-13",
+   "days_left": 29,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 500000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003EVJxUAO",
    "tag": "nationwide"
   }
  ]
