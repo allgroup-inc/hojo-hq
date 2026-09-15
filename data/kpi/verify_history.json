@@ -2448,5 +2448,68 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-15",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "地域社会ＤＸ推進パッケージ事業（補助事業）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdjzMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度ゼロエミッション船等の導入支援事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbyjMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度】INPIT外国出願補助金（中間手続補助）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXmVMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "事業承継推進事業",
+    "url": "https://okinawa-ric.jp/service/post-3.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": [],
+    "amount_in_source": "100万円"
+   },
+   {
+    "name": "令和７年度補正予算　商用車等の電動化促進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDWZ9MAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
