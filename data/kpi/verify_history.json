@@ -2511,5 +2511,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-16",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "民放ラジオ難聴解消支援事業（令和８年度公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXENMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和7年度_資源国脱炭素化・エネルギー転換技術等支援事業費補助金_第5回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeNSMA1",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和8年度 生放送字幕番組普及促進助成金（第３期）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000004PhCHEA0",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "沖縄物流デジタル技術活用推進事業",
+    "url": "https://okinawa-ric.jp/service/logidigi.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和8年度】DX型CO2削減対策実行支援事業（二次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003BrAXUA0",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
