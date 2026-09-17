@@ -2573,5 +2573,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-17",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "課題解決集中支援事業",
+    "url": "https://okinawa-ric.jp/service/post-56.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「地熱ポテンシャル高度利活用技術開発」の追加公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdoxMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "④リチウム蓄電池リサイクル設備導入事業（バリューチェーン）【令和７年度（補正予算）第４次公募及び令和８年度第３次公募】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYkHMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "地域社会ＤＸ推進パッケージ事業（補助事業）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdjzMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和７年度補正予算・令和８年度】二酸化炭素排出抑制対策事業費等補助金（テナントビルの省CO2改修支援事業（令和７年度補正三次公募・令和８年度二次公募））",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtvMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
