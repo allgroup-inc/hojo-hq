@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-09-17 12:02",
+ "generated_at": "2026-09-17 19:52",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 6,
- "count": 51,
+ "count": 52,
  "items": [
   {
    "id": "a0WJ200000CDeXgMAL",
@@ -515,6 +515,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDKZFMA5",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDeZuMAL",
+   "name": "令和８年度データセンターのゼロエミッション化・レジリエンス強化促進事業（二次公募）",
+   "deadline": "2026-10-16",
+   "days_left": 29,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeZuMAL",
    "tag": "nationwide"
   }
  ]
