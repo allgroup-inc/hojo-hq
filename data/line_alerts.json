@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-09-18 05:55",
+ "generated_at": "2026-09-18 11:50",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 7,
- "count": 51,
+ "count": 53,
  "items": [
   {
    "id": "a0WJ200000CDYiwMAH",
@@ -205,6 +205,16 @@
    "tier": "まもなく締切(7〜14日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeTjMAL",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDeY5MAL",
+   "name": "「脱炭素化・エネルギー転換に資する我が国技術の国際実証事業／普及促進事業／グローバルな液化水素サプライチェーン構築に向けた我が国技術の適用可能性等調査」の公募",
+   "deadline": "2026-09-30",
+   "days_left": 12,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeY5MAL",
    "tag": "nationwide"
   },
   {
@@ -435,6 +445,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeS9MAL",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WfQ000003CVHdUAO",
+   "name": "令和８年度　ＺＥＢ実証事業（三次公募）",
+   "deadline": "2026-10-09",
+   "days_left": 21,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 700000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003CVHdUAO",
    "tag": "nationwide"
   },
   {
