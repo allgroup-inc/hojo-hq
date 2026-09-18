@@ -91,13 +91,15 @@ def build_facts():
                 break
     topics = load_json(TOPICS_PATH, {"queue": []})
     published = [t for t in topics.get("queue", []) if t.get("status") == "published"]
+    # 公開済み合計はURLの和集合で数える(kpi.articlesはメンテされず件数がズレる=ニドナシ#21)
+    urls = {t.get("published_url") for t in published if t.get("published_url")}
+    urls |= {a.get("url") for a in kpi.get("articles", {}).values() if isinstance(a, dict) and a.get("url")}
     days = (today_jst() - datetime.strptime(FIRST_PUBLISH, "%Y-%m-%d").date()).days
     facts = {
         "今日": today_jst().isoformat(),
         "初公開からの日数": days,
         "初公開からの週数": days // 7,
-        "公開済み記事数(自動生成キュー分)": len(published),
-        "公開済み記事数(手動執筆含む合計)": len(kpi.get("articles", {})),
+        "公開済み記事数(合計)": len(urls),
         "直近週次の計測日": latest.get("date"),
         "note累計ビュー": note.get("total_views"),
         "noteスキ": note.get("likes"),
