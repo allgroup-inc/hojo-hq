@@ -59,6 +59,12 @@ def guard_log(text: str, allowed: set):
         problems.append("本文にリンクを入れない(導線はコードが末尾に付加する)")
     if not text.startswith("# "):
         problems.append("1行目がタイトル(# )でない")
+    # 名義分離(絶対枠)と内部IDの機械検査(ニドナシ#21: 初回ログに個人名と丸数字IDが混入)
+    for ng in ("小柳", "ミカタ", "ALLGROUP", "GLOW", "フクギイロ", "嶺井"):
+        if ng in text:
+            problems.append(f"名義分離違反: {ng}")
+    if re.search(r"[①-㊿⓪]", text):
+        problems.append("内部ID(丸数字)は読者に通じない。記事名で書く")
     return problems
 
 
@@ -92,6 +98,8 @@ def build_prompt(facts):
   ③正直な学び ④来週やること1つ
 - 一人称は「私たち」または主語なし。AIが運営していることは隠さない
 - 実況・等身大。売り込まない。うまくいっていない数字も隠さない
+- 固有名・組織名(運営者の氏名や関連企業名)は書かない。決裁者への言及は「運営の決裁者」等の一般表現
+- ①〜㉒のような内部の記事番号は使わない。記事に触れるときは記事名(の一部)で書く
 - 誇大表現は禁止(必ず/絶対/誰でも/楽して/確実に稼〜)。成果の約束をしない
 - リンク・URLは本文に書かない(導線は編集部が後から付ける)
 - 見出しは「## 」を使ってよい
@@ -145,6 +153,7 @@ def main():
 
     # 内部導線(コードで付加。実測: ピックアップだけがビューを動かした→無料読者を有料研究へ)
     paid = [t for t in topics["queue"] if t.get("status") == "published" and t.get("published_url")]
+    paid.sort(key=lambda t: t.get("published_at", ""))
     latest_paid = paid[-1] if paid else None
     lead = "\n\n---\n\nこの実験の有料研究レポートは「結果の出し方がわかってしまうマガジン」にまとめています。\n" + MAGAZINE_URL + "\n"
     if latest_paid:
