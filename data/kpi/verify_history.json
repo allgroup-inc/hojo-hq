@@ -2697,5 +2697,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-19",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "⑤金属破砕・選別設備導入事業（バリューチェーン）【令和７年度（補正予算）第４次公募及び第８年度第３次公募】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYk0MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "［第六回以降］事業再構築補助金（共同申請者）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000007Cos5EAC",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【倉敷市】実証実験サポート事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY6KMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "事業再構築補助金（共同申請_リース会社）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UaiqSEAR",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【九州監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYurMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
