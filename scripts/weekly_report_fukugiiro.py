@@ -129,7 +129,7 @@ def render_funnel_section(funnel):
                     f"中間ページ到達(line_redirect): {ch_txt}"
                     "(クリック数と到達数の差=クリック後の脱落)\n")
     return (
-        f"## 2. ファネル(自動取得 — Plausible Stats API / 直近{funnel.get('period','7d')})\n\n"
+        f"## 2. ファネル(自動取得 — {_src_label(funnel.get('source'))} / 直近{funnel.get('period','7d')})\n\n"
         f"更新: {funnel.get('updated_at','-')}。集計値のみ(個人識別子なし)。\n{warn_line}\n"
         "| 段 | 件数 | 前段比 | 離脱率 |\n|---|---|---|---|\n"
         f"{rows}\n\n"
@@ -138,8 +138,21 @@ def render_funnel_section(funnel):
         f"**完了率**: {_pct(kr.get('finish_rate'))} / **0件率**: {_pct(kr.get('zero_rate'))}\n"
         f"{ld_lines}\n"
         f"補助: 準備シート {eng.get('kit_click',0)} / 受給ずみ {eng.get('seido_done_mark',0)} / "
-        f"受給報告 {eng.get('jukyu_report_click',0)} / 0件 {eng.get('shindan_zero',0)}"
+        f"報告ページへ {_report_links(eng)}(内訳 top{eng.get('jukyu_report_link_top',0)}"
+        f"/診断{eng.get('jukyu_report_link_shindan',0)}/シート{eng.get('jukyu_report_link_kit',0)}) / "
+        f"報告の送信 {eng.get('jukyu_report_click',0)} / 0件 {eng.get('shindan_zero',0)}"
     )
+
+
+def _src_label(source):
+    return {"ga4-data-api": "GA4 Data API",
+            "plausible-stats-api": "Plausible Stats API"}.get(source, source or "未接続")
+
+
+def _report_links(eng):
+    """報告ページへの導線クリック合計。送信意思(jukyu_report_click)とは別物。"""
+    return sum(eng.get(k, 0) for k in
+               ("jukyu_report_link_top", "jukyu_report_link_shindan", "jukyu_report_link_kit"))
 
 
 KPI_DIR = os.path.join(BASE, "data", "kpi")

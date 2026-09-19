@@ -5,8 +5,18 @@
 Stats API からイベント件数を取得し data/fukugiiro/funnel.json を生成する。
 - PLAUSIBLE_API_KEY 未設定なら何も書かず exit 0(週次レポは手動フォールバック)
 - 集計値のみ。個人識別子は扱わない。APIキーはログに出さない。
+
+GA4版(2026-09-19 追加。議事_20260824_計測GA4切替.md の残タスク):
+- Plausible は 2026-08-24 に契約終了(402)で停止し、data/fukugiiro/funnel.json は
+  2026-08-20 を最後に欠測していた。GA4_SA_JSON と GA4_PROPERTY_ID
+  (もらいわすれ堂プロパティ G-TQMX3MPFSR の数字ID)があれば GA4 から取得する(GA4優先)。
+- もらいわすれ堂は fgTrack のイベント名をそのまま GA4 へ送るため、ミカタ版と違い
+  イベント名の対応表は要らない(FUNNEL / ENGAGEMENT_KEYS のキーがそのまま GA4 の eventName)。
+
 使い方:
-  PLAUSIBLE_API_KEY=xxx python scripts/fetch_plausible_funnel.py   # 取得して funnel.json 生成
+  PLAUSIBLE_API_KEY=xxx python scripts/fetch_plausible_funnel.py   # Plausibleから取得
+  GA4_SA_JSON='{...}' GA4_PROPERTY_ID=123456789 \
+    python scripts/fetch_plausible_funnel.py                       # GA4から取得
   python scripts/fetch_plausible_funnel.py --self-test             # build_funnel を golden で検証
 """
 import json
@@ -31,7 +41,11 @@ FUNNEL = [
     ("shindan_complete", "診断完了(1件以上)"),
     ("line_add_click", "LINE誘導クリック"),
 ]
-ENGAGEMENT_KEYS = ["kit_click", "seido_done_mark", "jukyu_report_click", "shindan_zero"]
+# 補助指標。jukyu_report_link_* は報告ページへの「到達前クリック」、
+# jukyu_report_click は報告ページで実際に送信を押した数(=送信意思)。
+# 両者を同じ名前で数えると送信意思が水増しされるため必ず分ける。
+ENGAGEMENT_KEYS = ["kit_click", "seido_done_mark", "jukyu_report_click", "shindan_zero",
+                   "jukyu_report_link_top", "jukyu_report_link_shindan", "jukyu_report_link_kit"]
 
 
 def build_funnel(counts):
@@ -145,46 +159,72 @@ def self_test():
     return 0
 
 
+def fetch_counts_ga4(days):
+    """GA4 Data API(もらいわすれ堂プロパティ)からイベント件数を取得する。"""
+    import ga4_client  # noqa: PLC0415
+
+    prop = os.environ["GA4_PROPERTY_ID"]
+    token = ga4_client.get_token()
+    names = [k for k, _ in FUNNEL] + ENGAGEMENT_KEYS
+    ev = ga4_client.event_counts(token, prop, f"{days}daysAgo", "today", names)
+    return {n: ev.get(n, {}).get("events", 0) for n in names}
+
+
 def main():
     if "--self-test" in sys.argv:
         return self_test()
-    api_key = os.environ.get("PLAUSIBLE_API_KEY")
-    if not api_key:
-        print("[info] PLAUSIBLE_API_KEY 未設定: ファネル取得をスキップ(週次レポは確認先表示にフォールバック)")
-        return 0
-    site_id = os.environ.get("PLAUSIBLE_SITE_ID", "allgroup-inc.github.io")
+
     period = os.environ.get("PLAUSIBLE_PERIOD", "7d")
-    api_base = os.environ.get("PLAUSIBLE_API_BASE", "https://plausible.io")
-    try:
-        counts = fetch_counts(api_key, site_id, period, api_base)
-    except urllib.error.HTTPError as e:
-        body = ""
+    counts, source, line_detail = None, None, {}
+
+    # GA4優先(2026-08-24 Plausible契約終了のため。議事_20260824_計測GA4切替.md)
+    if os.environ.get("GA4_SA_JSON") and os.environ.get("GA4_PROPERTY_ID"):
         try:
-            body = e.read().decode("utf-8", "replace")[:500]
-        except Exception:
-            pass
-        # Plausible が返す理由文言をそのまま表示(鍵無効 or サブスク要 等の切り分け用)。
-        # キー値はログに出さない。取得失敗時は funnel を書かず週次レポは手動フォールバック。
-        print(f"[warn] Plausible Stats API {e.code} {e.reason}: {body}")
-        print("[info] ファネル取得をスキップ(週次レポは確認先表示にフォールバック)")
-        return 0
+            days = int(period[:-1]) if period.endswith("d") and period[:-1].isdigit() else 7
+            counts = fetch_counts_ga4(days)
+            source = "ga4-data-api"
+        except Exception as e:  # noqa: BLE001
+            print(f"[warn] GA4 Data API 取得失敗: {type(e).__name__}(Plausibleへフォールバック)")
+
+    if counts is None:
+        api_key = os.environ.get("PLAUSIBLE_API_KEY")
+        if not api_key:
+            print("[info] GA4/Plausible とも未設定: ファネル取得をスキップ"
+                  "(週次レポは確認先表示にフォールバック)")
+            return 0
+        site_id = os.environ.get("PLAUSIBLE_SITE_ID", "allgroup-inc.github.io")
+        api_base = os.environ.get("PLAUSIBLE_API_BASE", "https://plausible.io")
+        try:
+            counts = fetch_counts(api_key, site_id, period, api_base)
+        except urllib.error.HTTPError as e:
+            body = ""
+            try:
+                body = e.read().decode("utf-8", "replace")[:500]
+            except Exception:
+                pass
+            # Plausible が返す理由文言をそのまま表示(鍵無効 or サブスク要 等の切り分け用)。
+            # キー値はログに出さない。取得失敗時は funnel を書かず週次レポは手動フォールバック。
+            print(f"[warn] Plausible Stats API {e.code} {e.reason}: {body}")
+            print("[info] ファネル取得をスキップ(週次レポは確認先表示にフォールバック)")
+            return 0
+        source = "plausible-stats-api"
+        # LINE誘導の入口別内訳とリダイレクト突合(2026-08-10 裁定・第2着手の計測)。
+        # クリック(line_add_click pos別)と中間ページ到達(line_redirect channel別)を並記し、
+        # クリック後の脱落を週次で監視できるようにする。取得失敗は本体に影響させない。
+        try:
+            line_detail["click_by_pos"] = fetch_prop_breakdown(
+                api_key, site_id, period, api_base, "line_add_click", "pos")
+        except Exception as e:  # noqa: BLE001
+            print(f"[warn] pos内訳の取得失敗(継続): {type(e).__name__}")
+        try:
+            line_detail["redirect_by_channel"] = fetch_prop_breakdown(
+                api_key, site_id, period, api_base, "line_redirect", "channel")
+        except Exception as e:  # noqa: BLE001
+            print(f"[warn] channel内訳の取得失敗(継続): {type(e).__name__}")
+
     fn = build_funnel(counts)
-    # LINE誘導の入口別内訳とリダイレクト突合(2026-08-10 裁定・第2着手の計測)。
-    # クリック(line_add_click pos別)と中間ページ到達(line_redirect channel別)を並記し、
-    # クリック後の脱落を週次で監視できるようにする。取得失敗は本体に影響させない。
-    line_detail = {}
-    try:
-        line_detail["click_by_pos"] = fetch_prop_breakdown(
-            api_key, site_id, period, api_base, "line_add_click", "pos")
-    except Exception as e:
-        print(f"[warn] pos内訳の取得失敗(継続): {type(e).__name__}")
-    try:
-        line_detail["redirect_by_channel"] = fetch_prop_breakdown(
-            api_key, site_id, period, api_base, "line_redirect", "channel")
-    except Exception as e:
-        print(f"[warn] channel内訳の取得失敗(継続): {type(e).__name__}")
     out = {"schema_version": 1, "updated_at": date.today().isoformat(),
-           "period": period, "source": "plausible-stats-api"}
+           "period": period, "source": source}
     if line_detail:
         out["line_detail"] = line_detail
     out.update(fn)
@@ -193,7 +233,7 @@ def main():
         json.dump(out, f, ensure_ascii=False, indent=2)
         f.write("\n")
     ws = fn["worst_drop"]["stage"] if fn["worst_drop"] else "-"
-    print(f"funnel.json 生成: 段数{len(fn['stages'])} / 最大離脱段={ws}")
+    print(f"funnel.json 生成({source}): 段数{len(fn['stages'])} / 最大離脱段={ws}")
     return 0
 
 
