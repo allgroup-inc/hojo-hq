@@ -15,6 +15,12 @@ test("classifyIndustryTier: 高流動性業種のキーワードを含むとhigh
   assert.equal(scoring.classifyIndustryTier("一般貨物自動車運送業", scoring.DEFAULT_CONFIG), "high");
 });
 
+test("classifyIndustryTier: ホテル・宿泊・観光もhigh(議事_20260918 沖縄でM&Aにつながりやすい業態)", () => {
+  assert.equal(scoring.classifyIndustryTier("宿泊業(ホテル)", scoring.DEFAULT_CONFIG), "high");
+  assert.equal(scoring.classifyIndustryTier("宿泊業(リゾートホテル)", scoring.DEFAULT_CONFIG), "high");
+  assert.equal(scoring.classifyIndustryTier("観光業", scoring.DEFAULT_CONFIG), "high");
+});
+
 test("classifyIndustryTier: 未一致の業種はmid(中立)扱い", () => {
   assert.equal(scoring.classifyIndustryTier("情報通信業", scoring.DEFAULT_CONFIG), "mid");
   assert.equal(scoring.classifyIndustryTier("", scoring.DEFAULT_CONFIG), "mid");

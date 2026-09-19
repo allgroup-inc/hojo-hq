@@ -20,7 +20,14 @@ var IMPORT_COLUMN_MAP = {
   "代表者名": "代表者名",
   "代表者年齢": "代表者年齢",
   "所在地": "所在地",
-  "電話番号": "電話番号"
+  "電話番号": "電話番号",
+  // 2026-09-18 架電リスト(ホテル等)投入用に追加: リスト側で初期ランク・流入ルート・
+  // 備考(業態メモ)を持たせて取り込めるようにする(議事_20260918参照)。
+  // 下のIMPORT_OPTIONAL_FIELDSに載せているため「あれば取り込む」任意列で、
+  // 列が無い既存の手紙DMリスト形式でもエラーにならない。
+  "ランク": "ランク",
+  "流入ルート": "流入ルート",
+  "備考": "業態メモ"
   // 将来、取り込み元リストにDNC(連絡不要)情報の列が追加された場合は、
   // "連絡不要": "<実データの見出し>" をここに追加すればよい(csvImport.jsが自動で真偽値へ変換する)。
   // 現時点の実リストにはこの列がないため、デフォルトではマッピングしない。
@@ -28,6 +35,8 @@ var IMPORT_COLUMN_MAP = {
   // "事前選定ランク": "<実データの見出し>", "事前選定スコア": "<実データの見出し>" を
   // ここに追加すればよい(csvImport.jsの汎用マッピング処理がそのまま対応する)。
 };
+// 「インポート待ち」タブに見出しが無くてもエラーにしない任意項目(無ければ既定値のまま)。
+var IMPORT_OPTIONAL_FIELDS = ["ランク", "流入ルート", "備考"];
 var STAGING_SHEET_NAME = "インポート待ち";
 
 function importCompaniesFromStaging() {
@@ -52,6 +61,7 @@ function importCompaniesFromStaging() {
     var headerRow = values[0].map(String);
 
     var missingHeaders = Object.keys(IMPORT_COLUMN_MAP)
+      .filter(function (targetField) { return IMPORT_OPTIONAL_FIELDS.indexOf(targetField) === -1; })
       .map(function (targetField) { return IMPORT_COLUMN_MAP[targetField]; })
       .filter(function (sourceHeader) { return headerRow.indexOf(sourceHeader) === -1; });
     if (missingHeaders.length > 0) {

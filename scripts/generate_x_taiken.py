@@ -91,13 +91,15 @@ def build_facts():
                 break
     topics = load_json(TOPICS_PATH, {"queue": []})
     published = [t for t in topics.get("queue", []) if t.get("status") == "published"]
+    # 公開済み合計はURLの和集合で数える(kpi.articlesはメンテされず件数がズレる=ニドナシ#21)
+    urls = {t.get("published_url") for t in published if t.get("published_url")}
+    urls |= {a.get("url") for a in kpi.get("articles", {}).values() if isinstance(a, dict) and a.get("url")}
     days = (today_jst() - datetime.strptime(FIRST_PUBLISH, "%Y-%m-%d").date()).days
     facts = {
         "今日": today_jst().isoformat(),
         "初公開からの日数": days,
         "初公開からの週数": days // 7,
-        "公開済み記事数(自動生成キュー分)": len(published),
-        "公開済み記事数(手動執筆含む合計)": len(kpi.get("articles", {})),
+        "公開済み記事数(合計)": len(urls),
         "直近週次の計測日": latest.get("date"),
         "note累計ビュー": note.get("total_views"),
         "noteスキ": note.get("likes"),
@@ -193,9 +195,9 @@ def generate():
     # 「前夜の投稿」が翌日の1日1本枠を先食いする(実例: 8/31 21:05枠が9/1 4:28に投稿され、
     # 同日の記事告知と合わせて2本になった)。想定枠(21〜23時JST)の外なら投稿せず見送る
     hour = datetime.now(JST).hour
-    if not (21 <= hour <= 23) and not os.environ.get("KEKKA_TAIKEN_FORCE"):
+    if not (20 <= hour <= 23) and not os.environ.get("KEKKA_TAIKEN_FORCE"):
         print("skipped=out_of_window")
-        print(f"::warning::実行がJST{hour}時のため投稿を見送り(想定枠21〜23時。cron遅延で日付またぎの枠先食いを防止)", file=sys.stderr)
+        print(f"::warning::実行がJST{hour}時のため投稿を見送り(想定枠20〜23時。cron遅延で日付またぎの枠先食いを防止)", file=sys.stderr)
         return 0
     if already_posted_today():
         print("skipped=already_posted_today")

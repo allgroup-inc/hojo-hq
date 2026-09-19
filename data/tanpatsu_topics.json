@@ -619,6 +619,20 @@
       "x_hook_a": "宝くじの還元率45.7%。リボの年率15%。休眠預金は毎年1,200億円。頑張って増やす前に、構造的に漏れている穴だけ塞ぐリストを作りました",
       "x_hook_b": "節約が続かないのは性格のせいではない、というScience論文があります。だから「頑張らない塞ぎ方」だけ集めました",
       "x_hook_c": "あなたの家計、「増やす努力」と「漏れを塞ぐ」どちらが先だと思いますか?"
+    },
+    {
+      "id": "L01",
+      "slug": "unei_log",
+      "genre": "実録ログ(無料)",
+      "title_hint": "実録・第7週 — 累計64ビュー、判定基準未達で仮説を1つ棄却した週",
+      "paid_price": 0,
+      "status": "published",
+      "drafted_at": "2026-09-18",
+      "note": "週次無料ログ(議事_20260916 案1)。公開後は publish-record --id L01",
+      "published_url": "https://note.com/kekka_mag/n/n9ef2f500cacd",
+      "published_at": "2026-09-18",
+      "x_post_url": "https://x.com/kekka_mag/status/2100854932647641413",
+      "x_posted_at": "2026-09-18"
     }
   ]
 }
