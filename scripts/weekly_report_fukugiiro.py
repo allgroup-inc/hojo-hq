@@ -139,7 +139,8 @@ def render_funnel_section(funnel):
         f"{ld_lines}\n"
         f"補助: 準備シート {eng.get('kit_click',0)} / 受給ずみ {eng.get('seido_done_mark',0)} / "
         f"報告ページへ {_report_links(eng)}(内訳 top{eng.get('jukyu_report_link_top',0)}"
-        f"/診断{eng.get('jukyu_report_link_shindan',0)}/シート{eng.get('jukyu_report_link_kit',0)}) / "
+        f"/診断{eng.get('jukyu_report_link_shindan',0)}/シート{eng.get('jukyu_report_link_kit',0)}"
+        f"/市町村{eng.get('jukyu_report_link_area',0)}/ライフ{eng.get('jukyu_report_link_life',0)}) / "
         f"報告の送信 {eng.get('jukyu_report_click',0)} / 0件 {eng.get('shindan_zero',0)}"
     )
 
@@ -152,7 +153,8 @@ def _src_label(source):
 def _report_links(eng):
     """報告ページへの導線クリック合計。送信意思(jukyu_report_click)とは別物。"""
     return sum(eng.get(k, 0) for k in
-               ("jukyu_report_link_top", "jukyu_report_link_shindan", "jukyu_report_link_kit"))
+               ("jukyu_report_link_top", "jukyu_report_link_shindan", "jukyu_report_link_kit",
+                "jukyu_report_link_area", "jukyu_report_link_life"))
 
 
 KPI_DIR = os.path.join(BASE, "data", "kpi")

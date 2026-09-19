@@ -45,7 +45,8 @@ FUNNEL = [
 # jukyu_report_click は報告ページで実際に送信を押した数(=送信意思)。
 # 両者を同じ名前で数えると送信意思が水増しされるため必ず分ける。
 ENGAGEMENT_KEYS = ["kit_click", "seido_done_mark", "jukyu_report_click", "shindan_zero",
-                   "jukyu_report_link_top", "jukyu_report_link_shindan", "jukyu_report_link_kit"]
+                   "jukyu_report_link_top", "jukyu_report_link_shindan", "jukyu_report_link_kit",
+                   "jukyu_report_link_area", "jukyu_report_link_life"]
 
 
 def build_funnel(counts):
