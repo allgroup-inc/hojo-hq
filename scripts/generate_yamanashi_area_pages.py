@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 もらいわすれ堂 山梨版 — 27市町村別ページ自動生成(沖縄版 generate_area_pages.py の複製・山梨向け調整)
-data/fukugiiro/yamanashi_seido.json(国の制度のみ)から
-site/fukugiiro/yamanashi/area/<slug>/index.html を生成する。データ更新時に再実行。
+data/yamanashi/seido.json(国の制度のみ)から
+site/yamanashi/area/<slug>/index.html を生成する。データ更新は scripts/yamanashi/build_yamanashi.py が本スクリプトも続けて実行する。
 市町村独自の制度は掲載了解の確認後、area==市町村名のデータが入れば自動で混ざる(沖縄版と同じ仕組み)。
-山梨版の違い: LINEは準備中のため導線を置かない。
+山梨版のLINEは @630pbjqq(/go/ymn-* 経由)。
 
 方針:
 - 全ページ断定表現なし・一次ソースリンク必須・診断への単一CTA(LP設計と同思想)
@@ -23,8 +23,8 @@ from fg_yamanashi import HEADER, HIDDEN_MUNIS, MUNI_SLUG, VISIBLE_MUNIS, breadcr
 
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
-DATA = os.path.join(BASE, "data", "fukugiiro", "yamanashi_seido.json")
-OUT_DIR = os.path.join(BASE, "site", "fukugiiro", "yamanashi", "area")
+DATA = os.path.join(BASE, "data", "yamanashi", "seido.json")
+OUT_DIR = os.path.join(BASE, "site", "yamanashi", "area")
 
 STYLE = """
 h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:auto-phrase;overflow-wrap:anywhere}
@@ -90,7 +90,7 @@ def area_jsonld(muni, groups):
 
 
 def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
-    rel = "../" * (depth + 1)  # yamanashi/ の1階層ぶん深い
+    rel = "../" * depth  # site/yamanashi/ 直下が基準
     # フッター: depthに応じて正しい相対パスを組む(一覧ページが別ブランドのミカタへ飛ぶバグの修正・2026-08-12)
     if depth == 1:
         footer_links = '<p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 山梨版 トップへ</a></p>'
@@ -120,7 +120,7 @@ def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
 {HEADER}
 <div class="wrap">
 {body}
-<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: {esc(updated)} / もらいわすれ堂 山梨版(運営: 株式会社フクギイロ)</div>
+<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://allgroup-inc.github.io/hojo-hq/yamanashi/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: {esc(updated)} / もらいわすれ堂 山梨版(運営: 株式会社フクギイロ)</div>
 {footer_links}
 </div>
 </body>
@@ -236,7 +236,7 @@ def index_page(updated):
     body = (
         "<h1>市町村別 給付金・手当まとめ</h1>"
         '<p class="note">お住まいの市町村を選んでください。'
-        '分野から探したい方は<a href="../seido/">国の制度一覧</a>もどうぞ。</p>'
+        '場面から探したい方は<a href="../life/">ライフイベント別の一覧</a>もどうぞ。</p>'
         '<p class="note">いま掲載しているのは全国共通の国の制度です。各市町村独自の制度は、'
         '掲載のご了解を確認できたところから順に追加します(準備中)。</p>'
         f'<ul class="areas">{lis}</ul>'

@@ -28,7 +28,7 @@ from audit_terms_fukugiiro import (COMMON_PATHS, excerpt, fetch,  # 規約収集
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
 OUT_MD = os.path.join(BASE, "docs", "山梨版_自治体サイト監査結果.md")
-OUT_JSON = os.path.join(BASE, "data", "fukugiiro", "yamanashi_site_audit.json")
+OUT_JSON = os.path.join(BASE, "data", "yamanashi", "site_audit.json")
 
 # (自治体名, ドメイン)。2026-09-03 ウェブ検索で特定。地方公共団体コード順。
 TARGETS = [

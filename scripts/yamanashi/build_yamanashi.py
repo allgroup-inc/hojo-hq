@@ -11,7 +11,7 @@
 - 断定表現なし・全件出典リンク・診断は端末内完結・LINEは準備中(入口を勝手に作らない)
 - 締切表現は「約1か月前から」ルールのまま流用
 """
-import json, os, re, shutil
+import json, os, re, shutil, subprocess, sys
 
 BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 SRC = os.path.join(BASE, "site", "fukugiiro")
@@ -72,10 +72,12 @@ def build_assets():
         shutil.copy(os.path.join(SRC,"assets",fn), os.path.join(OUT,"assets",fn))
     with open(os.path.join(OUT,"analytics-config.js"),"w",encoding="utf-8") as f:
         f.write('''/* 山梨版 計測設定。GA4は沖縄版と同一プロパティ(page_pathで判別)。
-   LINE・Instagramは準備中のため空(入口を勝手に作らない=約束5)。開設決裁後にここへ設定 */
+   LINEは山梨版公式アカウント @630pbjqq(2026-09-03 小柳さんが開設)。
+   ボタンは /go/ymn-* 経由(lin.ee直貼り禁止・channelで沖縄版と分けて集計)。
+   Instagramは準備中のため設定しない(入口を勝手に作らない=約束5) */
 window.FG_ANALYTICS = {provider: "ga4", measurementId: "G-TQMX3MPFSR", domain: "allgroup-inc.github.io"};
-window.FG_LINE_URL = "";
-window.FG_LINE_OA_ID = "";
+window.FG_LINE_URL = "https://allgroup-inc.github.io/hojo-hq/go/ymn-shindan/";
+window.FG_LINE_OA_ID = "630pbjqq";
 ''')
 
 def swap_header(s, depth=1):
@@ -91,7 +93,11 @@ def build_shindan():
     # 市町村リスト
     munis_js = json.dumps(MUNIS + ["県外"], ensure_ascii=False)
     s = re.sub(r'var MUNIS = \[.*?\];', f'var MUNIS = {munis_js};', s, count=1, flags=re.S)
-    s = re.sub(r'var MUNI_SLUG = \{.*?\};', 'var MUNI_SLUG = {};', s, count=1, flags=re.S)
+    # 市町村→slug(市町村ページが第2段階で公開されたため復活。fg_yamanashi.py と同一の表)
+    sys.path.insert(0, os.path.join(BASE, "scripts"))
+    from fg_yamanashi import MUNI_SLUG as Y_MUNI_SLUG
+    slug_js = json.dumps(Y_MUNI_SLUG, ensure_ascii=False)
+    s = re.sub(r'var MUNI_SLUG = \{.*?\};', f'var MUNI_SLUG = {slug_js};', s, count=1, flags=re.S)
     s = must_replace(s, 'fetch("../../data/fukugiiro/seido.json")', 'fetch("../../data/yamanashi/seido.json")', "fetch")
     # Instagram行の削除(山梨は未開設)
     s = re.sub(r'<p style="margin-top:20px;text-align:center"><a class="iglink"[^\n]*</p>\n', '', s, count=1)
@@ -109,8 +115,7 @@ def build_shindan():
         prep.appendChild(h("p", {class:"note", text:"LINEでの締切お知らせは、山梨版では準備中です。上のコピー機能で結果をメモアプリなどに保存しておけます。"}));
         app.appendChild(prep);
       }''', "lineBox gate")
-    s = must_replace(s, 'topCopied.textContent = "結果をコピーしました。LINEで「もらいわすれ堂」のトークに貼り付けると保存できます。";',
-                     'topCopied.textContent = "結果をコピーしました。メモアプリなどに貼り付けると保存できます。";', "copy text")
+    # コピー案内文はLINE開設済みのため沖縄版の原文(LINEトークに貼ると保存できる)をそのまま使う
     # 医療バナー: 市町村ページ(準備中)ではなくライフイベント別「医療」へ
     s = must_replace(s, 'var areaHref = areaSlug ? ("../area/" + areaSlug + "/") : "../area/";',
                      'var areaHref = "../life/iryo/";', "areaHref")
@@ -120,13 +125,7 @@ def build_shindan():
                      'text:"症状などをおたずねしない方針のためです。ライフイベント別の一覧で、医療費に関する制度をまとめて確認できます。"', "medBanner text")
     s = must_replace(s, '<a href=\\"" + areaHref + "\\">お住まいの市町村のページ</a>',
                      '<a href=\\"../life/\\">ライフイベント別の一覧</a>', "disclaimer link")
-    # 準備シートは第2段階のためリンクを外す
-    s = must_replace(s, '''        card.appendChild(h("a", {href: it.source_url, rel:"noopener", class:"cardlink", text:"公式ページで確認する"}));
-        card.appendChild(h("span", {class:"linksep", text:" ・ "}));
-        var kitLink = h("a", {href:"../kit/" + it.id + "/", class:"cardlink", text:"申請準備シート(持ち物リストつき)"});
-        kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("kit_click"); });
-        card.appendChild(kitLink);''',
-                     '        card.appendChild(h("a", {href: it.source_url, rel:"noopener", class:"cardlink", text:"公式ページで確認する"}));', "kit link removal")
+    # 準備シート53ページを生成済みのため、結果カードの準備シートリンクは沖縄版のまま生かす(第2段階・2026-09-20)
     s = must_replace(s, 'text:"💬 受け取れた金額をLINEで報告する(匿名・任意)"',
                      'text:"💬 受け取れたことを報告する(匿名・任意)"', "houkoku link text")
     os.makedirs(os.path.join(OUT,"shindan"), exist_ok=True)
@@ -199,7 +198,8 @@ def item_card(it):
             f'<p class="sub">金額の目安: {esc(it.get("amount_note",""))}</p>'
             f'<p class="sub">窓口: {esc(it.get("how_to_apply",""))}</p>'
             f'{cmb}'
-            f'<a class="src" href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する ›</a> '
+            f'<a class="src" href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する ›</a> ・ '
+            f'<a href="../../kit/{esc(it["id"])}/">申請準備シート(持ち物・窓口での言い方)</a> '
             f'<span class="note">(出典: {esc(it.get("issuer","").split("(")[0])}ウェブサイト)</span></div>')
 
 def build_life(items):
@@ -221,17 +221,11 @@ def build_life(items):
                             body="<h1>ライフイベント別の一覧</h1>\n" + "\n".join(links))
     open(os.path.join(OUT,"life","index.html"),"w",encoding="utf-8").write(idx)
 
-def build_area():
-    os.makedirs(os.path.join(OUT,"area"), exist_ok=True)
-    lis = "".join(f"<li>{m}</li>" for m in MUNIS)
-    body = f'''<h1>市町村別の給付金・手当</h1>
-<p class="note">山梨県の27市町村ごとのページは<strong>現在準備中です</strong>。各市町村の公式サイトの利用条件を1つずつ確認しながら、確認が取れたところから順に公開します(勝手に載せない方針のためです)。</p>
-<p class="note">それまでのあいだ、全国共通の国の制度は<a href="../life/">ライフイベント別の一覧</a>と<a href="../shindan/">3分診断</a>でご確認いただけます。</p>
-<ul class="munis">{lis}</ul>
-<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'''
-    html = PAGE_SHELL.format(title="市町村別(準備中)", desc="山梨県27市町村の給付金・手当ページは準備中です。国の制度は3分診断・ライフイベント別一覧でご確認いただけます。",
-                             canonical=f"{Y_BASE_URL}area/", updot="", header=header(1), body=body)
-    open(os.path.join(OUT,"area","index.html"),"w",encoding="utf-8").write(html)
+def build_kit_and_area():
+    """第2段階(2026-09-20 一本化): 申請準備シート53+市町村27ページは専用ジェネレーターが生成する。
+    市町村ページ(area/)の一覧もそちらが書くため、本スクリプトでは作らない。"""
+    for script in ("generate_yamanashi_kit_pages.py", "generate_yamanashi_area_pages.py"):
+        subprocess.run([sys.executable, os.path.join(BASE, "scripts", script)], check=True)
 
 def main():
     os.makedirs(OUT, exist_ok=True)
@@ -240,8 +234,8 @@ def main():
     build_shindan()
     build_static()
     build_life(items)
-    build_area()
-    print(f"[ok] 山梨版ビルド完了: 国の制度{len(items)}件 / life9+一覧 / area準備中 / shindan / houkoku / privacy / teisei")
+    build_kit_and_area()
+    print(f"[ok] 山梨版ビルド完了: 国の制度{len(items)}件 / life9+一覧 / shindan / houkoku / privacy / teisei / kit53+一覧 / area27+一覧")
 
 if __name__ == "__main__":
     main()

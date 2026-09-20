@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 もらいわすれ堂 山梨版 申請準備シート自動生成(沖縄版 generate_kit_pages.py の複製・山梨向け調整)
-data/fukugiiro/yamanashi_seido.json(国の制度のみ)から伴走シートを
-site/fukugiiro/yamanashi/kit/<id>/index.html に生成する。データ更新時に scripts/build_yamanashi_site.py と合わせて再実行。
-山梨版の違い: LINE・Instagramは準備中のため導線を置かない / 窓口住所ブロックなし(全国の制度のみ)
+data/yamanashi/seido.json(国の制度のみ)から伴走シートを
+site/yamanashi/kit/<id>/index.html に生成する。データ更新は scripts/yamanashi/build_yamanashi.py が本スクリプトも続けて実行する。
+山梨版の違い: LINEは @630pbjqq(/go/ymn-* 経由)/ Instagramは準備中のため導線を置かない / 窓口住所ブロックなし(全国の制度のみ)
 
 設計(2026-08-06 三名体制の裁定):
 - 画面=5ステップ工程表で伴走(今どこ/次の一歩が見える)。印刷=電話台本+持ち物+窓口ひとことの1枚に圧縮。
@@ -27,8 +27,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from fg_yamanashi import HEADER, HIDDEN_MUNIS, MUNI_SLUG, breadcrumb_jsonld, canonical_tag, faq_jsonld, ogp_tags
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
-DATA = os.path.join(BASE, "data", "fukugiiro", "yamanashi_seido.json")
-OUT_DIR = os.path.join(BASE, "site", "fukugiiro", "yamanashi", "kit")
+DATA = os.path.join(BASE, "data", "yamanashi", "seido.json")
+OUT_DIR = os.path.join(BASE, "site", "yamanashi", "kit")
 
 # ほぼ必ず要るもの(どの制度でも共通で聞かれることが多い)
 CORE_ITEMS = [
@@ -138,7 +138,7 @@ def kit_jsonld(it):
 
 
 def page(title, desc, body, depth=2, head_extra="", canon_path=None):
-    rel = "../" * (depth + 1)  # yamanashi/ の1階層ぶん深い
+    rel = "../" * depth  # site/yamanashi/ 直下が基準
     seo = ""
     if canon_path is not None:
         seo = canonical_tag(canon_path) + "\n" + ogp_tags(title, desc, canon_path) + "\n"
@@ -464,7 +464,7 @@ def kit_page(it, updated):
   <a href="{report_link}" onclick="if(window.fgTrack)fgTrack('ymn_teisei_mail')" style="display:inline-block;margin-top:8px;color:var(--fg-primary);font-weight:700">この制度の情報の間違いを知らせる</a>
 </div>
 <div class="disclaimer">このシートは公式情報に基づく「準備のご案内」です。持ち物は一般的な例で、市町村により異なります。受給できるかどうかの最終判断は各窓口で行われます。<br>申請書の作成代行・代筆は行っていません(ご本人が記入します)。<br>専門家のサポートが必要な場合は、提携の専門家(社会保険労務士・行政書士など)をご紹介します。<br>最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)/ 出典: <a href="{src}" rel="noopener">公式ページ</a></div>
-<p style="margin-top:16px" class="no-print footlinks">{area_link}<a href="../index.html">申請準備シート一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../../teisei/">情報の訂正</a> ・ <a href="../../index.html">もらいわすれ堂 山梨版 トップ</a></p>
+<p style="margin-top:16px" class="no-print footlinks">{area_link}<a href="../index.html">申請準備シート一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../teisei/">情報の訂正</a> ・ <a href="../../index.html">もらいわすれ堂 山梨版 トップ</a></p>
 """
     # コピー用の定型文(制度名・持ち物例・セリフ・URLのみ。個人のメモ・チェック状態は含めない)
     sheet_lines = [
@@ -478,7 +478,7 @@ def kit_page(it, updated):
         "▼窓口でのひとこと:",
         f"「{it['name']}について教えてください。対象になるか確認したいです」",
         "▼行く前に電話で聞く3つ: ①受付時間と場所 ②私の場合の持ち物 ③申請書と締切",
-        f"くわしくは: https://allgroup-inc.github.io/hojo-hq/fukugiiro/yamanashi/kit/{it['id']}/",
+        f"くわしくは: https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/{it['id']}/",
         "※金額・締切は公式ページと窓口でご確認ください",
     ]
     sheet_text = json.dumps("\n".join(sheet_lines), ensure_ascii=False)

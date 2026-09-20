@@ -10,7 +10,8 @@ canonical / OGP / BreadcrumbList / FAQPage を山梨版ジェネレーターへ�
 import json
 
 # ★山梨版のURL基底(独自ドメイン移行時はここだけ変更)
-SITE_BASE = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/yamanashi"
+# 2026-09-20 一本化: 公開URLは /yamanashi/(議事_20260902_山梨版第1段階)。/fukugiiro/yamanashi/ は廃止
+SITE_BASE = "https://allgroup-inc.github.io/hojo-hq/yamanashi"
 
 # OGP画像はブランド共通(沖縄版と同じ)
 OGP_IMAGE = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/ogp.jpg"
@@ -38,7 +39,7 @@ GO_BASE = "https://allgroup-inc.github.io/hojo-hq/go"
 
 # 全ページ共通ヘッダー(Instagramは準備中のため置かない)
 HEADER = f'''<header class="siteheader">
-  <a class="hlogo" href="{SITE_BASE}/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.9rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
+  <a class="hlogo" href="{SITE_BASE}/"><img src="{SITE_BASE}/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.9rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
   <nav>
     <a href="{SITE_BASE}/shindan/">3分診断</a>
     <a href="{SITE_BASE}/area/">市町村</a>
