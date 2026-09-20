@@ -8,8 +8,8 @@ site/fukugiiro/kit/<id>/index.html に生成する。fetch後に毎回再生成�
 設計(2026-08-06 三名体制の裁定):
 - 画面=5ステップ工程表で伴走(今どこ/次の一歩が見える)。印刷=電話台本+持ち物+窓口ひとことの1枚に圧縮。
 - 「どこに・何を持って・何と言えば」を、まず電話1本で確定できる台本を最上位に置く(ムダ足をなくす最大レバー)。
-- 電話番号・締切・振込時期は断定せず「窓口で"聞くこと"」として設計(正確性最優先)。
-- 申請後の「振り込まれたか確認」まで導線を伸ばす(受給報告=次の県民の役に立つ)。
+- 電話番号・締切・受け取り時期は断定せず「窓口で"聞くこと"」として設計(正確性最優先)。
+- 申請後の「受け取れたか確認」まで導線を伸ばす(受給報告=次の県民の役に立つ)。
 
 守り部の線引き(docs/フクギイロ_申請準備キット_線引き.md):
 - 申請書の代筆・代行はしない。書くのは本人。私たちは「迷わない準備」までを提供する
@@ -404,7 +404,7 @@ def kit_page(it, updated):
     <li><label><input type="checkbox"><span class="n"></span><span>窓口に電話して「私の場合の持ち物」を聞く(下に台本があります)</span></label></li>
     <li><label><input type="checkbox"><span class="n"></span><span>持ち物をそろえる(全部なくても大丈夫)</span></label></li>
     <li><label><input type="checkbox"><span class="n"></span><span>窓口で申請する(会話はこのとおりでOK)</span></label></li>
-    <li><label><input type="checkbox"><span class="n"></span><span>結果と振込を確認する(受け取れたらLINEで報告)</span></label></li>
+    <li><label><input type="checkbox"><span class="n"></span><span>結果を確認する(受け取れたらLINEで報告)</span></label></li>
   </ol>
 </div>
 </section>
@@ -442,7 +442,7 @@ def kit_page(it, updated):
   <ul class="ask">
     <li>締切はいつまでですか？</li>
     <li>申請書はこの場で書けますか？ 書き方も教えてください</li>
-    <li>振り込まれるのは、いつ頃ですか？</li>
+    <li>受け取れるのは、いつ頃ですか？</li>
   </ul>
 </div>
 
@@ -450,14 +450,14 @@ def kit_page(it, updated):
 <div class="box">
   <p class="note">締切(いつまで):</p><textarea class="memo" data-m="1" rows="1"></textarea>
   <p class="note" style="margin-top:10px">足りなかった書類・次にやること:</p><textarea class="memo" data-m="2" rows="1"></textarea>
-  <p class="note" style="margin-top:10px">振込は、いつ頃・どう届く:</p><textarea class="memo" data-m="3" rows="1"></textarea>
+  <p class="note" style="margin-top:10px">受け取りは、いつ頃・どう届く:</p><textarea class="memo" data-m="3" rows="1"></textarea>
 </div>
 
 <section class="screen-only">
-<h2>申請したあと(振込まで見届ける)</h2>
+<h2>申請したあと(受け取れるまで見届ける)</h2>
 <div class="after">
-  <p>申請してからが本番です。振り込まれるまで、いっしょに見届けましょう。</p>
-  <p class="note" style="margin-top:6px">・結果の通知や振込の時期は、④のメモで管理できます。<br>・「振り込まれた」まで確認できたら、下から教えてください。次の県民の「もらい忘れ」を防ぐ力になります。</p>
+  <p>申請してからが本番です。受け取れるまで、いっしょに見届けましょう。</p>
+  <p class="note" style="margin-top:6px">・結果の通知や受け取りの時期は、④のメモで管理できます。<br>・「受け取れた」と確認できたら、下から教えてください。次の県民の「もらい忘れ」を防ぐ力になります。</p>
   <a class="linebtn" style="background:var(--fg-primary)" href="../../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit')">受け取れたことを報告する(匿名・無料)</a>
 </div>
 <div class="after" style="background:#EAF7EE;border-color:#B7E4C7;text-align:center;color:#0F5138">
@@ -550,7 +550,7 @@ def index_page(items, updated):
     body = f"""
 <style>.kul{{list-style:none}}.kul li{{display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:1px dashed var(--fg-line)}}.kul a{{display:inline-block;padding:9px 0;line-height:1.55}}.kul .status{{font-size:.72rem;padding:1px 7px}}.kul .ok{{font-size:inherit}}</style>
 <h1>申請準備シート一覧</h1>
-<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで。<strong>スマホで開いたまま窓口で使えます</strong>(印刷して持っていくのもOK。プリンターがない方向けにコンビニ印刷の手順も各シートにあります)。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
+<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・受け取り確認まで。<strong>スマホで開いたまま窓口で使えます</strong>(印刷して持っていくのもOK。プリンターがない方向けにコンビニ印刷の手順も各シートにあります)。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>
 {sections_html}
 <p class="note" style="margin-top:18px;text-align:center">もう受け取れた制度はありますか? <a href="../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit',{{pos:'index'}})">受け取れたことを教えてください(匿名・任意)</a><br>制度名とおおよその金額だけで大丈夫です。お名前や口座番号はうかがいません。</p>
