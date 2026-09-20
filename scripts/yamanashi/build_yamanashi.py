@@ -42,7 +42,7 @@ def header(depth=1):
     p = "../" * depth
     # ヘッダーの読みやすさ・押しやすさは点検2026-09-03 🟡6 と同じ基準(.95rem・タップ44px相当)。
     # fg-base.css は沖縄版と共用のためここで山梨版だけ上書きする
-    return f'''<style>.siteheader nav a{{font-size:.95rem;padding:10px 12px}}.siteheader .hlogo{{font-size:1.1rem}}</style>
+    return f'''<style>p,li{{word-break:auto-phrase;text-wrap:pretty}}h1,h2,h3{{text-wrap:balance}}.siteheader nav a{{font-size:.95rem;padding:10px 12px}}.siteheader .hlogo{{font-size:1.1rem}}</style>
 <header class="siteheader">
   <a class="hlogo" href="{p}index.html"><img src="{p}assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.78rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
   <nav>
