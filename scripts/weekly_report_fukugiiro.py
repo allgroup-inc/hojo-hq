@@ -153,9 +153,10 @@ def _kensho_unconfirmed():
     try:
         with open(p, encoding="utf-8") as f:
             d = json.load(f)
-        return d.get("verified_but_unconfirmed"), d.get("updated_at")
+        return (d.get("verified_but_unconfirmed"), d.get("updated_at"),
+                d.get("verified_but_unreachable") or 0)
     except Exception:  # noqa: BLE001
-        return None, None
+        return None, None, 0
 
 
 def _src_label(source):
@@ -295,14 +296,18 @@ def main():
     items = db["items"]
     keisai = db.get("count", len(items))
     verified = sum(1 for it in items if it.get("status") == "検証済み")
-    _unconf, _unconf_at = _kensho_unconfirmed()
+    _unconf, _unconf_at, _unreach = _kensho_unconfirmed()
+    # 取得できなかった件数は「掲載が誤り」ではないので、要対応とは別に併記する
+    _ur = f" / 取得できず {_unreach} 件" if _unreach else ""
     if _unconf is None:
         _unconf_val, _unconf_judge = "未測定", "突合レポート未生成(kensho_fukugiiro.py)"
     elif _unconf == 0:
-        _unconf_val, _unconf_judge = "0 件", "✅ 検証済みは全件が原文確認済み"
+        _unconf_val = f"0 件{_ur}"
+        _unconf_judge = ("✅ 検証済みは全件が原文確認済み" if not _unreach
+                         else "✅ 内容の不一致なし(取得できなかった分は判定不能・掲載の誤りではない)")
     else:
-        _unconf_val = f"{_unconf} 件が未確認"
-        _unconf_judge = f"⚠ 検証済み表示のまま原文未確認({_unconf_at} 時点)。docs/フクギイロ_突合レポート.md の要対応欄"
+        _unconf_val = f"{_unconf} 件が内容未確認{_ur}"
+        _unconf_judge = f"⚠ 検証済み表示のまま内容を確認できず({_unconf_at} 時点)。docs/フクギイロ_突合レポート.md の要対応欄"
     youkakunin = sum(1 for it in items if it.get("status") == "要確認")
     verified_rate = (verified / keisai * 100) if keisai else 0
 

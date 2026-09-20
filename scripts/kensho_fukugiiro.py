@@ -57,13 +57,14 @@ def main():
         "",
         f"最終実行: {now} JST / スクリプト: scripts/kensho_fukugiiro.py",
         "",
-        "> ○=制度名がページ上で確認できた / △=一部トークンのみ一致 / ×=確認できず(URL先の内容が変わった可能性 — 最優先で人間確認)",
+        "> ○=制度名がページ上で確認できた / △=一部トークンのみ一致 / ×=ページは取得できたが制度名を確認できず(内容が変わった可能性 — 最優先で人間確認) / **-=ページを取得できず判定不能**(UAブロック・一時障害等。掲載の誤りを意味しない)",
         "> **verified=true への昇格は、本レポートをケンショウ+金曜承認バッチで確認してから行う(L2)。機械照合だけで昇格しない。**",
         "",
         "| 制度 | ページタイトル | 照合 | 現status |",
         "|---|---|---|---|",
     ]
     ng = 0
+    unreachable = 0
     rows = []
     for it in db.get("items", []):
         url = it["source_url"]
@@ -81,19 +82,23 @@ def main():
             else:
                 mark, ng = "×", ng + 1
         except Exception as e:
-            title, mark = f"(取得失敗: {type(e).__name__})", "×"
-            ng += 1
+            # 取得できないことは「掲載内容が誤り」の証拠にならない(UAブロック・一時障害・
+            # レート制限で起きる)。× と混ぜると健全な掲載まで誤って要対応に見えるため分ける。
+            # 2026-09-20: 13件が×として要対応に出たが、11件は検索で現行URLと一致し健在だった。
+            title, mark = f"(取得できず: {type(e).__name__})", "-"
+            unreachable += 1
         rows.append({"name": it["name"], "url": url, "title": title[:60],
                      "mark": mark, "status": it["status"], "area": it.get("area", "")})
         lines.append(f"| {it['name']} | {title[:60]} | {mark} | {it['status']} |")
         print(f"{mark} {it['name']}")
         time.sleep(1.5)
 
-    lines += ["", f"×の件数: {ng}(×が出た制度は掲載を「要確認」のまま維持し、人間確認を最優先する)"]
+    lines += ["", f"×の件数: {ng}(内容を確認できず) / 取得できず判定不能: {unreachable}件"]
 
     # 「検証済み」表示なのに原文で確認できない = 絶対ルール1(断定しない)に触れる状態。
     # 従来は260行の表に埋もれて気づけなかったため、最上部に独立した要対応欄として出す。
     risky = [r for r in rows if r["status"] == "検証済み" and r["mark"] in ("×", "△")]
+    unresolved = [r for r in rows if r["status"] == "検証済み" and r["mark"] == "-"]
     head = [
         f"## ⚠ 要対応: 「検証済み」表示なのに原文で確認できない {len(risky)}件",
         "",
@@ -108,6 +113,20 @@ def main():
                  for r in risky]
     else:
         head.append("(該当なし)")
+    head += [
+        "",
+        f"### 判定できなかった {len(unresolved)}件(検証済み表示・ページを取得できず)",
+        "",
+        "**掲載が誤っているという意味ではない。** 取得失敗はUAブロック・一時障害・レート制限でも起きる。"
+        "同じURLが次回実行で取得できることも多いため、status は変えず、"
+        "連続して取得できない場合にURLの生死を人間が確認する。",
+        "",
+    ]
+    if unresolved:
+        head += ["| 制度 | 地域 | 事象 | 原文URL |", "|---|---|---|---|"]
+        head += [f"| {r['name']} | {r['area']} | {r['title']} | {r['url']} |" for r in unresolved]
+    else:
+        head.append("(該当なし)")
     head.append("")
     lines[7:7] = head  # 凡例の直後、全件表の前に差し込む
 
@@ -115,13 +134,16 @@ def main():
         f.write("\n".join(lines) + "\n")
 
     summary = {"updated_at": now, "total": len(rows), "ng": ng,
+               "unreachable": unreachable,
                "verified_but_unconfirmed": len(risky),
+               "verified_but_unreachable": len(unresolved),
                "items": [{k: r[k] for k in ("name", "area", "mark", "url")} for r in risky]}
     with open(SUMMARY, "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
         f.write("\n")
 
-    print(f"レポート出力: {OUT} / × {ng}件 / 検証済みなのに未確認 {len(risky)}件")
+    print(f"レポート出力: {OUT} / × {ng}件 / 取得できず {unreachable}件 / "
+          f"検証済みなのに内容未確認 {len(risky)}件")
     if risky:
         print("[warn] 検証済み表示のまま原文を確認できない制度があります(要対応欄を参照)")
 
