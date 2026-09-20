@@ -146,6 +146,18 @@ def render_funnel_section(funnel):
     )
 
 
+def _kensho_unconfirmed():
+    """「検証済み」表示のまま原文を確認できていない件数(絶対ルール1に触れる状態)。
+    kensho_fukugiiro.py が出力する。未生成なら None を返し、判定を断定しない。"""
+    p = os.path.join(BASE, "data", "fukugiiro", "kensho_summary.json")
+    try:
+        with open(p, encoding="utf-8") as f:
+            d = json.load(f)
+        return d.get("verified_but_unconfirmed"), d.get("updated_at")
+    except Exception:  # noqa: BLE001
+        return None, None
+
+
 def _src_label(source):
     return {"ga4-data-api": "GA4 Data API",
             "plausible-stats-api": "Plausible Stats API"}.get(source, source or "未接続")
@@ -283,6 +295,14 @@ def main():
     items = db["items"]
     keisai = db.get("count", len(items))
     verified = sum(1 for it in items if it.get("status") == "検証済み")
+    _unconf, _unconf_at = _kensho_unconfirmed()
+    if _unconf is None:
+        _unconf_val, _unconf_judge = "未測定", "突合レポート未生成(kensho_fukugiiro.py)"
+    elif _unconf == 0:
+        _unconf_val, _unconf_judge = "0 件", "✅ 検証済みは全件が原文確認済み"
+    else:
+        _unconf_val = f"{_unconf} 件が未確認"
+        _unconf_judge = f"⚠ 検証済み表示のまま原文未確認({_unconf_at} 時点)。docs/フクギイロ_突合レポート.md の要対応欄"
     youkakunin = sum(1 for it in items if it.get("status") == "要確認")
     verified_rate = (verified / keisai * 100) if keisai else 0
 
@@ -342,6 +362,7 @@ def main():
 |---|---|---|---|
 | 掲載制度数 | {keisai} 件 | 常時{KPI_KEISAI}件以上 | {'✅' if keisai >= KPI_KEISAI else f'🟡 あと{KPI_KEISAI - keisai}件'} |
 | 検証済み | {verified} 件({verified_rate:.0f}%) | 誤情報ゼロ | {'✅ 全件検証済み' if youkakunin == 0 else f'要確認 {youkakunin}件'} |
+| 原文の裏取り | {_unconf_val} | 検証済み表示は全件が原文確認済み | {_unconf_judge} |
 | データ鮮度 | {db.get('updated_at','?')} | 24時間以内 | {fresh_label} |
 | 市町村ページ | {n_area} ページ | 41市町村 | {'✅' if n_area >= 41 else '🟡'} |
 | 申請準備シート | {n_kit} ページ | 全制度 | {'✅' if n_kit >= keisai else '🟡'} |

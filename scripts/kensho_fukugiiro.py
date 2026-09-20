@@ -21,6 +21,7 @@ UA = "hojo-hq-bot/1.0 (+https://allgroup-inc.github.io/hojo-hq; contact: bot@en-
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA = os.path.join(BASE, "data", "fukugiiro", "seido.json")
 OUT = os.path.join(BASE, "docs", "フクギイロ_突合レポート.md")
+SUMMARY = os.path.join(BASE, "data", "fukugiiro", "kensho_summary.json")
 
 
 def fetch_text(url):
@@ -63,6 +64,7 @@ def main():
         "|---|---|---|---|",
     ]
     ng = 0
+    rows = []
     for it in db.get("items", []):
         url = it["source_url"]
         try:
@@ -81,14 +83,47 @@ def main():
         except Exception as e:
             title, mark = f"(取得失敗: {type(e).__name__})", "×"
             ng += 1
+        rows.append({"name": it["name"], "url": url, "title": title[:60],
+                     "mark": mark, "status": it["status"], "area": it.get("area", "")})
         lines.append(f"| {it['name']} | {title[:60]} | {mark} | {it['status']} |")
         print(f"{mark} {it['name']}")
         time.sleep(1.5)
 
     lines += ["", f"×の件数: {ng}(×が出た制度は掲載を「要確認」のまま維持し、人間確認を最優先する)"]
+
+    # 「検証済み」表示なのに原文で確認できない = 絶対ルール1(断定しない)に触れる状態。
+    # 従来は260行の表に埋もれて気づけなかったため、最上部に独立した要対応欄として出す。
+    risky = [r for r in rows if r["status"] == "検証済み" and r["mark"] in ("×", "△")]
+    head = [
+        f"## ⚠ 要対応: 「検証済み」表示なのに原文で確認できない {len(risky)}件",
+        "",
+        "掲載は検証済みと表示しているが、機械照合では原文を確認できていない。"
+        "**絶対ルール1(不明なら要確認・断定しない)に触れる状態**のため、"
+        "原文URLの差し替えか、status を要確認へ戻すかを人間が判断する。",
+        "",
+    ]
+    if risky:
+        head += ["| 制度 | 地域 | 照合 | ページタイトル | 原文URL |", "|---|---|---|---|---|"]
+        head += [f"| {r['name']} | {r['area']} | {r['mark']} | {r['title']} | {r['url']} |"
+                 for r in risky]
+    else:
+        head.append("(該当なし)")
+    head.append("")
+    lines[7:7] = head  # 凡例の直後、全件表の前に差し込む
+
     with open(OUT, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
-    print(f"レポート出力: {OUT} / × {ng}件")
+
+    summary = {"updated_at": now, "total": len(rows), "ng": ng,
+               "verified_but_unconfirmed": len(risky),
+               "items": [{k: r[k] for k in ("name", "area", "mark", "url")} for r in risky]}
+    with open(SUMMARY, "w", encoding="utf-8") as f:
+        json.dump(summary, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
+    print(f"レポート出力: {OUT} / × {ng}件 / 検証済みなのに未確認 {len(risky)}件")
+    if risky:
+        print("[warn] 検証済み表示のまま原文を確認できない制度があります(要対応欄を参照)")
 
 
 if __name__ == "__main__":
