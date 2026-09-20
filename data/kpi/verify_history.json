@@ -2759,5 +2759,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-20",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和8年度SDS電子化補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDderMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "電気料金高騰に対する支援",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010146.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "事業再構築補助金（共同申請_リース会社）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UaiqSEAR",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "［第十回］事業再構築補助金（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000GMgXBEA1",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "いわき市診療所開設・承継支援補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXK4MAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
