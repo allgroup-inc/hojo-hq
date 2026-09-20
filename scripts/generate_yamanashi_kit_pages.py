@@ -54,6 +54,9 @@ EVENT_ITEMS = {
 }
 
 STYLE = """
+p,li,.phone .say{word-break:auto-phrase;text-wrap:pretty}
+li .status{display:inline}
+h1,h2,h3{text-wrap:balance}
 h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}
 h1{font-size:1.35rem;margin-bottom:4px;line-height:1.5}
@@ -511,14 +514,14 @@ def index_page(items, updated):
     def line(it):
         # 一覧では「照合済み」は✓だけに圧縮(176件の縦の壁と視覚ノイズを減らす・議事_20260817組版)
         if it.get("verified") is True:
-            b = ' <span class="status ok" title="公式と照合済み" style="padding:1px 7px">✓</span>'
+            b = '&nbsp;<span class="status ok" title="公式と照合済み" style="padding:1px 7px">✓</span>'
         elif it.get("status") == "要確認":
-            b = ' <span class="status" style="font-size:.72rem;padding:1px 7px">要確認</span>'
+            b = '&nbsp;<span class="status" style="font-size:.72rem;padding:1px 7px">要確認</span>'
         else:
             b = ""
-        return (f'<li style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;'
+        return (f'<li style="'
                 f'border-bottom:1px dashed var(--fg-line)">'
-                f'<a href="{esc(it["id"])}/" style="display:inline-block;padding:9px 0;line-height:1.55">{esc(it["name"])}</a>{b}</li>')
+                f'<a href="{esc(it["id"])}/" style="display:inline-block;padding:9px 0;line-height:1.55">{esc(it["name"])}{b}</a></li>')
     # 全国/沖縄県/市町村の3区分で表示(160件のフラット一覧は探しにくいため・2026-08-12 小柳さん委任裁定)
     national = [it for it in items if it.get("area") == "全国"]
     pref = [it for it in items if it.get("area") == "山梨県"]

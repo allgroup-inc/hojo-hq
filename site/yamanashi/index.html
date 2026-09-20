@@ -30,7 +30,7 @@ body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,s
   font-size:17px;line-height:1.9;color:var(--ink);background:var(--shikkui);-webkit-font-smoothing:antialiased}
 .wrap{max-width:720px;margin:0 auto;padding:0 20px}
 a{color:var(--shu)}
-h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;line-height:1.5;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;line-height:1.5;font-weight:600;word-break:auto-phrase;overflow-wrap:anywhere}
 h2{font-size:1.45rem;margin-bottom:.7em;text-align:center;color:var(--ink)}
 section{padding:48px 0}
 section p{text-align:center}
@@ -46,6 +46,8 @@ section p{text-align:center}
 .siteheader .hlogo{display:flex;align-items:center;gap:9px;font-family:"Shippori Mincho",serif;font-weight:600;color:var(--shu);text-decoration:none;font-size:1.05rem}
 .siteheader .hlogo img{width:32px;height:32px}
 .siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+p,li{word-break:auto-phrase;text-wrap:pretty}
+h1,h2,h3{text-wrap:balance}
 .siteheader nav a{font-size:.95rem;color:var(--ink);text-decoration:none;padding:10px 12px;border-radius:8px}
 /* 受け取るまでの道のり(おもてなし点検 2026-09-20) */
 .michinori{list-style:none;display:grid;gap:10px}
