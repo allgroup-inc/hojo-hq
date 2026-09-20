@@ -14,6 +14,9 @@
 import json, os, re, shutil, subprocess, sys
 
 BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from seeds_yamanashi import YMN_PREF_SEEDS  # noqa: E402
+
 SRC = os.path.join(BASE, "site", "fukugiiro")
 OUT = os.path.join(BASE, "site", "yamanashi")
 DATA_OUT = os.path.join(BASE, "data", "yamanashi", "seido.json")
@@ -53,18 +56,53 @@ def must_replace(s, old, new, label):
     assert old in s, f"置換対象が見つからない: {label}"
     return s.replace(old, new)
 
+def _pref_items(now):
+    """山梨県の制度シードを、全国制度と同じ形に整えて返す(第2段階)。
+
+    守り部審査(docs/守り部審査記録_山梨版_2026-09-20.md)でA区分=個別ページへの
+    リンク可と判定された山梨県分のみ。金額・締切は原文の逐語照合が済むまで
+    status="要確認" / verified=False のままにする(絶対ルール1)。
+    """
+    out = []
+    for seed in YMN_PREF_SEEDS:
+        it = dict(seed)
+        it.setdefault("amount_note", "要確認(公式ページでご確認ください)")
+        it.setdefault("deadline_type", "要確認")
+        it.setdefault("deadline", None)
+        it.update({
+            "verified": False,
+            "verified_at": None,
+            "verified_by": None,
+            "status": "要確認",
+            "notes": "出典: " + seed["issuer"].split("(")[0] + "ウェブサイト",
+            "fetched_at": now,
+        })
+        out.append(it)
+    return out
+
+
 def build_data():
-    items = json.load(open(os.path.join(BASE,"data","fukugiiro","seido.json"),encoding="utf-8"))["items"]
+    src = json.load(open(os.path.join(BASE,"data","fukugiiro","seido.json"),encoding="utf-8"))
+    items = src["items"]
     nat = [dict(i) for i in items if i.get("area") == "全国"]
     for i in nat:
         assert "沖縄" not in json.dumps(i, ensure_ascii=False), i["id"]
-    data = {"region":"yamanashi","updated_at": json.load(open(os.path.join(BASE,"data","fukugiiro","seido.json"),encoding="utf-8"))["updated_at"],
-            "count": len(nat), "items": nat,
-            "note": "第1段階=国の制度のみ(沖縄版で公式照合済みの全国制度を流用)。県・市町村は規約確認後に追加"}
+    pref = _pref_items(src["updated_at"])
+    for i in pref:
+        # 沖縄版からの取り違えを機械で止める(全国制度と同じ守り)
+        assert "沖縄" not in json.dumps(i, ensure_ascii=False), i["id"]
+        assert i["area"] == "山梨県", i["id"]
+    merged = nat + pref
+    ids = [i["id"] for i in merged]
+    assert len(ids) == len(set(ids)), "IDが重複している"
+    data = {"region":"yamanashi","updated_at": src["updated_at"],
+            "count": len(merged), "items": merged,
+            "note": "国の制度(沖縄版で公式照合済みの全国制度を流用)+山梨県の制度。"
+                    "市町村独自の制度は守り部の論点(営利サイト可否・トップページ限定)の決裁後に追加"}
     os.makedirs(os.path.dirname(DATA_OUT), exist_ok=True)
     with open(DATA_OUT,"w",encoding="utf-8") as f:
         json.dump(data,f,ensure_ascii=False,indent=1); f.write("\n")
-    return nat
+    return merged
 
 YMN_EVENT_PREFIX_JS = '\n\n/* 山梨版のみ: イベント名に ymn_ を付けて沖縄版と数字を分ける(2026-09-20 追加)。\n   既に ymn_ が付いているもの(市町村・準備シート・ライフイベントの各ジェネレーター出力)は二重に付けない。 */\n(function () {\n  "use strict";\n  var orig = window.fgTrack;\n  if (typeof orig !== "function") return;\n  window.fgTrack = function (name, props) {\n    var n = typeof name === "string" && name.indexOf("ymn_") !== 0 ? "ymn_" + name : name;\n    return orig(n, props);\n  };\n})();\n'
 
@@ -264,7 +302,9 @@ def main():
     build_static()
     build_life(items)
     build_kit_and_area()
-    print(f"[ok] 山梨版ビルド完了: 国の制度{len(items)}件 / life9+一覧 / shindan / houkoku / privacy / teisei / kit53+一覧 / area27+一覧")
+    nat = sum(1 for i in items if i["area"] == "全国")
+    pref = sum(1 for i in items if i["area"] == "山梨県")
+    print(f"[ok] 山梨版ビルド完了: 制度{len(items)}件(国{nat}+県{pref}) / life9+一覧 / shindan / houkoku / privacy / teisei / kit53+一覧 / area27+一覧")
 
 if __name__ == "__main__":
     main()
