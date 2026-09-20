@@ -18,6 +18,11 @@
 | /go/fg-kit/ | フクギイロ: 制度キットページ | https://lin.ee/7fH7vDQ |
 | /go/fg-shindan/ | フクギイロ: 診断ページ | https://lin.ee/7fH7vDQ |
 | /go/fg-jukyu/ | フクギイロ: 受給報告(受け取れました) | https://lin.ee/7fH7vDQ |
+| /go/ymn-top/ | フクギイロ山梨: トップページ | https://line.me/R/ti/p/%40630pbjqq |
+| /go/ymn-shindan/ | フクギイロ山梨: 診断ページ | https://line.me/R/ti/p/%40630pbjqq |
+| /go/ymn-area/ | フクギイロ山梨: 市町村ページ | https://line.me/R/ti/p/%40630pbjqq |
+| /go/ymn-kit/ | フクギイロ山梨: 準備シートページ | https://line.me/R/ti/p/%40630pbjqq |
+| /go/ymn-jukyu/ | フクギイロ山梨: 受給報告(受け取れました) | https://line.me/R/ti/p/%40630pbjqq |
 
 ## 転送先を変えるとき
 1. `scripts/generate_go_pages.py` の CHANNELS の dest を書き換える

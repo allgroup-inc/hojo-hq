@@ -85,7 +85,7 @@ ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through
 .madoguchi{font-size:.95rem;background:#EAF5F0;border-radius:8px;padding:12px 14px;color:#0F5138}
 .ask{list-style:none;margin-top:6px}
 .ask li{background:#fff;border-radius:8px;padding:8px 12px;margin:6px 0;color:#0F5138}
-.memo{width:100%;border:none;border-bottom:2px solid var(--fg-line);background:transparent;font:inherit;font-size:.95rem;min-height:44px;resize:vertical;padding:6px 2px}
+.memo{width:100%;border:none;border-bottom:2px solid var(--fg-line);background:transparent;font:inherit;font-size:1rem;min-height:44px;resize:vertical;padding:6px 2px}  /* 16px未満はiPhoneで画面が勝手に拡大するため(点検2026-09-03) */
 .memo:focus{outline:none;border-bottom-color:var(--fg-primary)}
 .prog{font-weight:700;color:var(--fg-deep)}
 .after{background:#F7F3EA;border:1px solid var(--fg-line);border-radius:12px;padding:16px 18px;margin:12px 0}
