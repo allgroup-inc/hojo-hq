@@ -118,6 +118,9 @@ SEEDS = [
         "target_household": "高校等に通うお子さんがいる世帯が対象となる可能性があります(令和8年度から所得制限が撤廃され、世帯収入にかかわらず授業料が実質無償となる案内が出ています。学校種別・支給額の詳細は公式ページでご確認ください)",
         "how_to_apply": "在学する学校を通じた申請(オンライン申請 e-Shien)",
         "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1342674.htm",
+        # mext.go.jp がbotを弾くため reachable() が通らず、制度ごとサイトから欠落していた
+        # (2026-09-20 検知)。公式URLの現存は WebSearch で確認済み(タイトル「高等学校等就学支援金制度：文部科学省」)
+        "assume_reachable": True,
     },
     {
         "id": "fk-kuni-shogaku-kyufukin-koko",
@@ -127,6 +130,8 @@ SEEDS = [
         "target_household": "住民税非課税世帯等で高校生等のお子さんがいる世帯が対象となる可能性があります",
         "how_to_apply": "お住まいの都道府県への申請(学校経由の場合あり)",
         "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1344089.htm",
+        # 同上。公式URLの現存は WebSearch で確認済み(タイトル「高校生等奨学給付金」)
+        "assume_reachable": True,
     },
     {
         "id": "fk-kuni-kyushokusha-shien",
