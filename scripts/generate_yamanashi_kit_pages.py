@@ -544,6 +544,7 @@ def index_page(items, updated):
 <p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・受け取りの確認まで。<strong>スマホで開いたまま窓口で使えます</strong>(印刷して持っていくのもOK。プリンターがない方向けにコンビニ印刷の手順も各シートにあります)。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>
 {sections_html}
+<p class="note" style="margin-top:18px;text-align:center">もう受け取れた制度はありますか? <a href="../houkoku/" onclick="if(window.fgTrack)fgTrack('ymn_jukyu_report_link_kit',{{pos:'index'}})">受け取れたことを教えてください(匿名・任意)</a><br>制度名とおおよその金額だけで大丈夫です。お名前や口座番号はうかがいません。</p>
 <div class="disclaimer">最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)<br>山梨県・市町村の制度の準備シートは、掲載のご了解を確認できたところから順に追加します(準備中)。</div>
 <p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 山梨版 トップ</a></p>
 """

@@ -17,7 +17,7 @@
     gtag("js", new Date());
     gtag("config", "G-TQMX3MPFSR", { transport_type: "beacon" });
     // 送るのはイベント名と channel のみ(個人識別子なし)
-    gtag("event", "line_redirect", { channel: "ymn-kit", transport_type: "beacon",
+    gtag("event", "line_redirect", { channel: "ymn-life", transport_type: "beacon",
       event_callback: fgGo, event_timeout: 400 });
     setTimeout(fgGo, 400);
   }

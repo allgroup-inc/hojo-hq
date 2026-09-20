@@ -66,10 +66,21 @@ def build_data():
         json.dump(data,f,ensure_ascii=False,indent=1); f.write("\n")
     return nat
 
+YMN_EVENT_PREFIX_JS = '\n\n/* 山梨版のみ: イベント名に ymn_ を付けて沖縄版と数字を分ける(2026-09-20 追加)。\n   既に ymn_ が付いているもの(市町村・準備シート・ライフイベントの各ジェネレーター出力)は二重に付けない。 */\n(function () {\n  "use strict";\n  var orig = window.fgTrack;\n  if (typeof orig !== "function") return;\n  window.fgTrack = function (name, props) {\n    var n = typeof name === "string" && name.indexOf("ymn_") !== 0 ? "ymn_" + name : name;\n    return orig(n, props);\n  };\n})();\n'
+
+
 def build_assets():
     os.makedirs(os.path.join(OUT,"assets"), exist_ok=True)
     for fn in ("fg-base.css","fg-analytics.js","icon.svg"):
         shutil.copy(os.path.join(SRC,"assets",fn), os.path.join(OUT,"assets",fn))
+    # 山梨版は沖縄版と同一のGA4プロパティを使うため、イベント名が同じだと
+    # 沖縄のKGI(診断ファネル・LINE誘導・受給報告)に山梨の数字が混ざる。
+    # 沖縄から変換してくるページ(トップ・診断・報告・訂正・privacy)は沖縄の
+    # イベント名をそのまま持ってくるため、ここで一律 ymn_ を付けて分離する。
+    # shindan_step_q* のように実行時に組み立てる名前も確実に捕まえるので、
+    # 個別の書き換えではなく fgTrack を包む方式にしている。
+    with open(os.path.join(OUT,"assets","fg-analytics.js"),"a",encoding="utf-8") as f:
+        f.write(YMN_EVENT_PREFIX_JS)
     with open(os.path.join(OUT,"analytics-config.js"),"w",encoding="utf-8") as f:
         f.write('''/* 山梨版 計測設定。GA4は沖縄版と同一プロパティ(page_pathで判別)。
    LINEは山梨版公式アカウント @630pbjqq(2026-09-03 小柳さんが開設)。
@@ -211,6 +222,24 @@ def build_life(items):
                 f'<p class="note">国の制度{len(sel)}件を掲載しています。山梨県・市町村の制度は現在準備中です(確認が取れたものから追加します)。</p>',
                 '<a class="btn" href="../../shindan/">3分でもらい忘れ診断をはじめる</a>']
         body += [item_card(i) for i in sel]
+        # 単一CV(LINE登録・@630pbjqq)。締切は「約1か月前」表現で統一(3層ルール準拠)。
+        # ライフイベント別ページは「もらい忘れ」が最も起きる場面なのに導線が無かった(2026-09-20 追加)
+        body.append(
+            f'<p class="note" style="margin-top:22px;text-align:center">'
+            f'{esc(heading)}に関する制度が増えたときや、締切が近づいたときに、LINEでそっとお知らせします。</p>'
+            '<a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/ymn-life/" '
+            'target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ymn_line_add_click\')">'
+            '💬 締切をLINEで受け取る'
+            '<span>締切の約1か月前にお知らせ(配信は順次開始)・新しい制度が増えたときも(無料)</span></a>'
+        )
+        # 受け取ったあとの報告導線。単一CVと競合させないため控えめな一文にする(絶対ルール4)
+        body.append(
+            '<p class="note" style="margin-top:18px;text-align:center">'
+            'もう受け取れた制度はありますか? '
+            '<a href="../../houkoku/" onclick="if(window.fgTrack)fgTrack(\'ymn_jukyu_report_link_life\')">'
+            '受け取れたことを教えてください(匿名・任意)</a><br>'
+            '制度名とおおよその金額だけで大丈夫です。お名前や口座番号はうかがいません。</p>'
+        )
         os.makedirs(os.path.join(OUT,"life",slug), exist_ok=True)
         html = PAGE_SHELL.format(title=heading, desc=f"山梨県にお住まいの方向け。{heading}に使える可能性のある給付金・手当のご案内(要確認含む)。",
                                  canonical=f"{Y_BASE_URL}life/{slug}/", updot="../", header=header(2), body="\n".join(body))

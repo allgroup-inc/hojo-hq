@@ -63,3 +63,16 @@
     window.fgTrack = noop;
   }
 })();
+
+
+/* 山梨版のみ: イベント名に ymn_ を付けて沖縄版と数字を分ける(2026-09-20 追加)。
+   既に ymn_ が付いているもの(市町村・準備シート・ライフイベントの各ジェネレーター出力)は二重に付けない。 */
+(function () {
+  "use strict";
+  var orig = window.fgTrack;
+  if (typeof orig !== "function") return;
+  window.fgTrack = function (name, props) {
+    var n = typeof name === "string" && name.indexOf("ymn_") !== 0 ? "ymn_" + name : name;
+    return orig(n, props);
+  };
+})();

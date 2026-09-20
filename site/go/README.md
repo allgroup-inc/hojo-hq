@@ -22,6 +22,7 @@
 | /go/ymn-shindan/ | フクギイロ山梨: 診断ページ | https://line.me/R/ti/p/%40630pbjqq |
 | /go/ymn-area/ | フクギイロ山梨: 市町村ページ | https://line.me/R/ti/p/%40630pbjqq |
 | /go/ymn-kit/ | フクギイロ山梨: 準備シートページ | https://line.me/R/ti/p/%40630pbjqq |
+| /go/ymn-life/ | フクギイロ山梨: ライフイベント別ページ | https://line.me/R/ti/p/%40630pbjqq |
 | /go/ymn-jukyu/ | フクギイロ山梨: 受給報告(受け取れました) | https://line.me/R/ti/p/%40630pbjqq |
 
 ## 転送先を変えるとき
