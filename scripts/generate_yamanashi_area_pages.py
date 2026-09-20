@@ -36,7 +36,7 @@ h1{font-size:1.4rem;margin-bottom:8px;line-height:1.5}
 .card h2{font-size:1.05rem;margin-bottom:4px}
 .card .trust{background:#EFF5F0;border:1px solid #D5E5DA;border-radius:12px;padding:12px 14px;font-size:.9rem;color:#1F4534;margin:12px 0}
 .linebtn{display:block;max-width:460px;margin:18px auto;padding:16px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
-.linebtn span{display:block;font-size:.8rem;font-weight:600;opacity:.95;margin-top:2px}
+.linebtn span{display:block;font-size:.85rem;font-weight:600;opacity:.95;margin-top:2px}
 .disclaimer{background:#F6EADB;border-radius:12px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
 ul.areas{list-style:none;columns:2;gap:12px}
 ul.areas li{margin-bottom:8px}

@@ -40,12 +40,15 @@ def esc(s):
 
 def header(depth=1):
     p = "../" * depth
-    return f'''<header class="siteheader">
-  <a class="hlogo" href="{p}index.html"><img src="{p}assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.72rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
+    # ヘッダーの読みやすさ・押しやすさは点検2026-09-03 🟡6 と同じ基準(.95rem・タップ44px相当)。
+    # fg-base.css は沖縄版と共用のためここで山梨版だけ上書きする
+    return f'''<style>.siteheader nav a{{font-size:.95rem;padding:10px 12px}}.siteheader .hlogo{{font-size:1.1rem}}</style>
+<header class="siteheader">
+  <a class="hlogo" href="{p}index.html"><img src="{p}assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.78rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
   <nav>
     <a href="{p}shindan/">3分診断</a>
-    <a href="{p}life/">ライフイベント別</a>
     <a href="{p}area/">市町村</a>
+    <a href="{p}kit/">準備シート</a>
   </nav>
 </header>'''
 
