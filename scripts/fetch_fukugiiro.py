@@ -111,15 +111,6 @@ SEEDS = [
         "match_tokens": ["ひとり親家庭"],
     },
     {
-        "id": "fk-kuni-ninpu-shien",
-        "name": "妊婦のための支援給付・伴走型相談支援",
-        "category": "子育て", "life_events": ["妊娠・出産"],
-        "issuer": "こども家庭庁", "area": "全国",
-        "target_household": "妊娠された方・出産された世帯が対象となる可能性があります",
-        "how_to_apply": "お住まいの市区町村の窓口(母子保健担当)",
-        "source_url": "https://www.cfa.go.jp/policies/shussan-kosodate",
-    },
-    {
         "id": "fk-kuni-shugakushienkin-koko",
         "name": "高等学校等就学支援金",
         "category": "教育", "life_events": ["入園・入学"],

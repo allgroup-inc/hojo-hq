@@ -8,7 +8,7 @@ site/fukugiiro/kit/<id>/index.html に生成する。fetch後に毎回再生成�
 設計(2026-08-06 三名体制の裁定):
 - 画面=5ステップ工程表で伴走(今どこ/次の一歩が見える)。印刷=電話台本+持ち物+窓口ひとことの1枚に圧縮。
 - 「どこに・何を持って・何と言えば」を、まず電話1本で確定できる台本を最上位に置く(ムダ足をなくす最大レバー)。
-- 電話番号・締切・受け取り時期は断定せず「窓口で"聞くこと"」として設計(正確性最優先)。
+- 電話番号・締切・受け取りの時期は断定せず「窓口で"聞くこと"」として設計(正確性最優先)。
 - 申請後の「受け取れたか確認」まで導線を伸ばす(受給報告=次の県民の役に立つ)。
 
 守り部の線引き(docs/フクギイロ_申請準備キット_線引き.md):
@@ -85,7 +85,7 @@ ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through
 .madoguchi{font-size:.95rem;background:#EAF5F0;border-radius:8px;padding:12px 14px;color:#0F5138}
 .ask{list-style:none;margin-top:6px}
 .ask li{background:#fff;border-radius:8px;padding:8px 12px;margin:6px 0;color:#0F5138}
-.memo{width:100%;border:none;border-bottom:2px solid var(--fg-line);background:transparent;font:inherit;font-size:.95rem;min-height:44px;resize:vertical;padding:6px 2px}
+.memo{width:100%;border:none;border-bottom:2px solid var(--fg-line);background:transparent;font:inherit;font-size:1rem;min-height:44px;resize:vertical;padding:6px 2px}  /* 16px未満はiPhoneで画面が勝手に拡大するため(点検2026-09-03) */
 .memo:focus{outline:none;border-bottom-color:var(--fg-primary)}
 .prog{font-weight:700;color:var(--fg-deep)}
 .after{background:#F7F3EA;border:1px solid var(--fg-line);border-radius:12px;padding:16px 18px;margin:12px 0}
@@ -404,7 +404,7 @@ def kit_page(it, updated):
     <li><label><input type="checkbox"><span class="n"></span><span>窓口に電話して「私の場合の持ち物」を聞く(下に台本があります)</span></label></li>
     <li><label><input type="checkbox"><span class="n"></span><span>持ち物をそろえる(全部なくても大丈夫)</span></label></li>
     <li><label><input type="checkbox"><span class="n"></span><span>窓口で申請する(会話はこのとおりでOK)</span></label></li>
-    <li><label><input type="checkbox"><span class="n"></span><span>結果を確認する(受け取れたらLINEで報告)</span></label></li>
+    <li><label><input type="checkbox"><span class="n"></span><span>結果と受け取りを確認する(受け取れたらLINEで報告)</span></label></li>
   </ol>
 </div>
 </section>
@@ -454,10 +454,10 @@ def kit_page(it, updated):
 </div>
 
 <section class="screen-only">
-<h2>申請したあと(受け取れるまで見届ける)</h2>
+<h2>申請したあと(受け取りまで見届ける)</h2>
 <div class="after">
   <p>申請してからが本番です。受け取れるまで、いっしょに見届けましょう。</p>
-  <p class="note" style="margin-top:6px">・結果の通知や受け取りの時期は、④のメモで管理できます。<br>・「受け取れた」と確認できたら、下から教えてください。次の県民の「もらい忘れ」を防ぐ力になります。</p>
+  <p class="note" style="margin-top:6px">・結果の通知や受け取りの時期は、④のメモで管理できます。<br>・「受け取れた」まで確認できたら、下から教えてください。次の県民の「もらい忘れ」を防ぐ力になります。</p>
   <a class="linebtn" style="background:var(--fg-primary)" href="../../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit')">受け取れたことを報告する(匿名・無料)</a>
 </div>
 <div class="after" style="background:#EAF7EE;border-color:#B7E4C7;text-align:center;color:#0F5138">
@@ -550,7 +550,7 @@ def index_page(items, updated):
     body = f"""
 <style>.kul{{list-style:none}}.kul li{{display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:1px dashed var(--fg-line)}}.kul a{{display:inline-block;padding:9px 0;line-height:1.55}}.kul .status{{font-size:.72rem;padding:1px 7px}}.kul .ok{{font-size:inherit}}</style>
 <h1>申請準備シート一覧</h1>
-<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・受け取り確認まで。<strong>スマホで開いたまま窓口で使えます</strong>(印刷して持っていくのもOK。プリンターがない方向けにコンビニ印刷の手順も各シートにあります)。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
+<p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・受け取りの確認まで。<strong>スマホで開いたまま窓口で使えます</strong>(印刷して持っていくのもOK。プリンターがない方向けにコンビニ印刷の手順も各シートにあります)。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>
 {sections_html}
 <p class="note" style="margin-top:18px;text-align:center">もう受け取れた制度はありますか? <a href="../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit',{{pos:'index'}})">受け取れたことを教えてください(匿名・任意)</a><br>制度名とおおよその金額だけで大丈夫です。お名前や口座番号はうかがいません。</p>

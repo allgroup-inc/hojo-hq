@@ -49,6 +49,15 @@ CHANNELS = {
     "fg-kit":     {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 制度キットページ"},
     "fg-shindan": {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 診断ページ"},
     "fg-jukyu":   {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 受給報告(受け取れました)"},
+    # ── もらいわすれ堂 山梨版(@630pbjqq・2026-09-03開設) ──
+    # dest は当面ベーシックIDから作る正式な友だち追加リンク。lin.ee の短縮URLが
+    # 発行されたらここを差し替えて再実行(docs/もらいわすれ堂_山梨版_LINE開設キット参照)。
+    # 転送先はLINEなので event は既定(line_redirect)のまま。channel=ymn-* で沖縄版と分けて集計。
+    "ymn-top":     {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: トップページ"},
+    "ymn-shindan": {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 診断ページ"},
+    "ymn-area":    {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 市町村ページ"},
+    "ymn-kit":     {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 準備シートページ"},
+    "ymn-jukyu":   {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 受給報告(受け取れました)"},
 }
 
 TEMPLATE = """<!DOCTYPE html>

@@ -266,7 +266,7 @@ def pick_bottleneck(db, jukyu, keisai, funnel=None):
     if reports == 0:
         return (
             "LINEは開設済みだが受給報告がまだ0件。ファネル最終段(申請着手→受給)の実測が始まっていない。",
-            "既存のLINE友だちに『振り込まれたら教えてください』の初回配信を送る(文面は開設パッケージ§5)。",
+            "既存のLINE友だちに『受け取れたら教えてください』の初回配信を送る(文面は開設パッケージ§5)。",
         )
     if keisai < KPI_KEISAI:
         return (
