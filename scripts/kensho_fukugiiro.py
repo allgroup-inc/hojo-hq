@@ -12,9 +12,13 @@ seido.json の各制度について公式ページを取得し、掲載内容(�
 import json
 import os
 import re
+import sys
 import time
 import urllib.request
 from datetime import datetime, timezone, timedelta
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from fetch_fukugiiro import robots_ok  # noqa: E402  収集側と同じ礼儀ルールを使う
 
 JST = timezone(timedelta(hours=9))
 UA = "hojo-hq-bot/1.0 (+https://allgroup-inc.github.io/hojo-hq; contact: bot@en-life.co.jp)"
@@ -22,6 +26,12 @@ BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA = os.path.join(BASE, "data", "fukugiiro", "seido.json")
 OUT = os.path.join(BASE, "docs", "フクギイロ_突合レポート.md")
 SUMMARY = os.path.join(BASE, "data", "fukugiiro", "kensho_summary.json")
+
+
+def describe_error(e):
+    """403(遮断)と404(消滅)は意味が全く違うので、必ずコードまで残す。"""
+    code = getattr(e, "code", None)
+    return f"{type(e).__name__} {code}" if code else type(e).__name__
 
 
 def fetch_text(url):
@@ -65,9 +75,19 @@ def main():
     ]
     ng = 0
     unreachable = 0
+    skipped_known = 0
+    skipped_robots = 0
     rows = []
     for it in db.get("items", []):
         url = it["source_url"]
+        if not robots_ok(url):
+            title, mark = "(未取得: robots.txt が許可していないため)", "◇"
+            skipped_robots += 1
+            rows.append({"name": it["name"], "url": url, "title": title,
+                         "mark": mark, "status": it["status"], "area": it.get("area", "")})
+            lines.append(f"| {it['name']} | {title} | {mark} | {it['status']} |")
+            print(f"{mark} {it['name']}")
+            continue
         try:
             html = fetch_text(url)
             title = page_title(html)
@@ -85,15 +105,26 @@ def main():
             # 取得できないことは「掲載内容が誤り」の証拠にならない(UAブロック・一時障害・
             # レート制限で起きる)。× と混ぜると健全な掲載まで誤って要対応に見えるため分ける。
             # 2026-09-20: 13件が×として要対応に出たが、11件は検索で現行URLと一致し健在だった。
-            title, mark = f"(取得できず: {type(e).__name__})", "-"
-            unreachable += 1
+            if it.get("assume_reachable"):
+                # bot遮断(403)が既知で、収集側が assume_reachable を立てている先。
+                # 根拠は verified_by に記録された手動確認(WebSearch照合)。要対応には数えない。
+                # 取得自体は毎回試す: 213件中の大多数は実際には応答するため、
+                # 事前に一律スキップすると健全な照合まで失う。
+                basis = f"{it.get('verified_at', '')} {it.get('verified_by', '手動確認')}".strip()
+                title = f"(未取得: {describe_error(e)} / bot遮断が既知・手動確認済み {basis[:40]})"
+                mark = "◇"
+                skipped_known += 1
+            else:
+                title, mark = f"(取得できず: {describe_error(e)})", "-"
+                unreachable += 1
         rows.append({"name": it["name"], "url": url, "title": title[:60],
                      "mark": mark, "status": it["status"], "area": it.get("area", "")})
         lines.append(f"| {it['name']} | {title[:60]} | {mark} | {it['status']} |")
         print(f"{mark} {it['name']}")
         time.sleep(1.5)
 
-    lines += ["", f"×の件数: {ng}(内容を確認できず) / 取得できず判定不能: {unreachable}件"]
+    lines += ["", f"×の件数: {ng}(内容を確認できず) / 取得できず判定不能: {unreachable}件 / "
+              f"既知のbot遮断(手動確認済み): {skipped_known}件 / robots不許可で未取得: {skipped_robots}件"]
 
     # 「検証済み」表示なのに原文で確認できない = 絶対ルール1(断定しない)に触れる状態。
     # 従来は260行の表に埋もれて気づけなかったため、最上部に独立した要対応欄として出す。
@@ -135,6 +166,7 @@ def main():
 
     summary = {"updated_at": now, "total": len(rows), "ng": ng,
                "unreachable": unreachable,
+               "skipped_known_block": skipped_known, "skipped_robots": skipped_robots,
                "verified_but_unconfirmed": len(risky),
                "verified_but_unreachable": len(unresolved),
                "items": [{k: r[k] for k in ("name", "area", "mark", "url")} for r in risky]}
@@ -143,6 +175,7 @@ def main():
         f.write("\n")
 
     print(f"レポート出力: {OUT} / × {ng}件 / 取得できず {unreachable}件 / "
+          f"既知の遮断 {skipped_known}件 / robots不許可 {skipped_robots}件 / "
           f"検証済みなのに内容未確認 {len(risky)}件")
     if risky:
         print("[warn] 検証済み表示のまま原文を確認できない制度があります(要対応欄を参照)")
