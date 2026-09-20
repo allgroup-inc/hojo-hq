@@ -467,8 +467,27 @@ function processQueuedVoiceLogs() {
       processOneVoiceLog_(ss, record);
     } catch (error) {
       Logger.log("音声ログの処理に失敗しました(処理ID " + record["処理ID"] + "): " + error);
+      var isTransient = GlowLineVoiceLogContent.isTransientProcessingError(error);
+      // 一時的な障害(混雑・5xx)は「エラー」で確定させず「受信済み」へ戻し、次回のトリガーに
+      // 再試行させる。processOneVoiceLog_ は毎回LINEから音声を取り直すので、戻すだけで再開できる。
+      if (isTransient && GlowLineVoiceLogContent.hasTransientRetryLeft(record["エラー内容"])) {
+        var requeued = transitionVoiceLogStatus_(ss, record.sheetRow, [VOICE_LOG_STATUS_PROCESSING], {
+          "ステータス": "受信済み",
+          "エラー内容": GlowLineVoiceLogContent.buildTransientRetryNote(record["エラー内容"], String(error))
+        });
+        if (requeued) {
+          Logger.log("一時的な障害のため再試行待ちに戻しました(処理ID " + record["処理ID"] + ")。");
+          return;
+        }
+        // 戻せなかった(別の実行が状態を進めた)場合は、下のエラー確定へ落とす
+        Logger.log("再試行待ちへ戻せなかったためエラーとして確定します(処理ID " + record["処理ID"] + ")。");
+      }
       markVoiceLogAsError_(ss, record.sheetRow, VOICE_LOG_IN_PROGRESS_STATUSES, String(error));
-      linePush_(record["LINEユーザーID"], [GlowLineVoiceLogContent.buildProcessingErrorMessage()]);
+      linePush_(record["LINEユーザーID"], [
+        isTransient
+          ? GlowLineVoiceLogContent.buildTransientRetryExhaustedMessage()
+          : GlowLineVoiceLogContent.buildProcessingErrorMessage()
+      ]);
     }
   });
 }
@@ -499,6 +518,8 @@ function processOneVoiceLog_(ss, record) {
 
   var transcribed = transitionVoiceLogStatus_(ss, record.sheetRow, [VOICE_LOG_STATUS_PROCESSING], {
     "ステータス": "文字起こし済み",
+    // 再試行の末に成功した行に「再試行中(n/10)」の記録が残らないよう、ここで消す
+    "エラー内容": "",
     "会社名候補": companyNameCandidate,
     "種別候補": interactionType,
     "対応相手候補": respondentType,
@@ -550,7 +571,10 @@ function fetchLineAudioContent_(messageId) {
     muteHttpExceptions: true
   });
   if (response.getResponseCode() !== 200) {
-    throw new Error("LINEから音声データの取得に失敗しました(HTTP " + response.getResponseCode() + ")");
+    // statusCode を載せて、混雑・5xx を processQueuedVoiceLogs 側で再試行対象と判定できるようにする
+    var error = new Error("LINEから音声データの取得に失敗しました(HTTP " + response.getResponseCode() + ")");
+    error.statusCode = response.getResponseCode();
+    throw error;
   }
   return response.getBlob();
 }

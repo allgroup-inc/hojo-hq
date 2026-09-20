@@ -405,3 +405,55 @@ test("buildProspectUpdateSummaryMessage: 最終接触日だけの場合も成立
   assert.ok(message.includes("台帳にも反映しました"));
   assert.ok(message.includes("最終接触日"));
 });
+
+// --- 一時的な障害の再試行(2026-09-03 GeminiのHTTP 503で訪問メモが失われた件) ---
+
+test("isTransientProcessingError: 429と5xxだけを再試行対象と判定する", () => {
+  const withStatus = (statusCode) => Object.assign(new Error("x"), { statusCode });
+  assert.equal(lineVoiceLogContent.isTransientProcessingError(withStatus(503)), true);
+  assert.equal(lineVoiceLogContent.isTransientProcessingError(withStatus(500)), true);
+  assert.equal(lineVoiceLogContent.isTransientProcessingError(withStatus(429)), true);
+  // 認証切れ・モデル廃止・入力不正は再試行しても直らない(2026-08-18に401と404で実際に失敗している)
+  assert.equal(lineVoiceLogContent.isTransientProcessingError(withStatus(401)), false);
+  assert.equal(lineVoiceLogContent.isTransientProcessingError(withStatus(404)), false);
+  assert.equal(lineVoiceLogContent.isTransientProcessingError(new Error("statusCodeなし")), false);
+  assert.equal(lineVoiceLogContent.isTransientProcessingError(null), false);
+});
+
+test("parseTransientRetryCount: 未記録なら0、記録済みならその回数を読む", () => {
+  assert.equal(lineVoiceLogContent.parseTransientRetryCount(""), 0);
+  assert.equal(lineVoiceLogContent.parseTransientRetryCount(null), 0);
+  assert.equal(lineVoiceLogContent.parseTransientRetryCount("Error: 何かの失敗"), 0);
+  assert.equal(lineVoiceLogContent.parseTransientRetryCount("再試行中(3/10) Error: 503"), 3);
+});
+
+test("buildTransientRetryNote: 回数が1ずつ増え、元のメッセージも残る", () => {
+  const first = lineVoiceLogContent.buildTransientRetryNote("", "Error: 503");
+  assert.ok(first.startsWith("再試行中(1/10)"));
+  assert.ok(first.includes("Error: 503"));
+  const second = lineVoiceLogContent.buildTransientRetryNote(first, "Error: 503");
+  assert.equal(lineVoiceLogContent.parseTransientRetryCount(second), 2);
+});
+
+test("hasTransientRetryLeft: 上限に達したら再試行しない", () => {
+  assert.equal(lineVoiceLogContent.hasTransientRetryLeft(""), true);
+  const atLimit = "再試行中(" + lineVoiceLogContent.MAX_TRANSIENT_RETRIES + "/10) Error: 503";
+  assert.equal(lineVoiceLogContent.hasTransientRetryLeft(atLimit), false);
+});
+
+test("再試行の記録は何度重ねても上限を超えたら止まる(無限ループしない)", () => {
+  let note = "";
+  for (let i = 0; i < 50; i++) {
+    if (!lineVoiceLogContent.hasTransientRetryLeft(note)) break;
+    note = lineVoiceLogContent.buildTransientRetryNote(note, "Error: 503");
+  }
+  assert.equal(
+    lineVoiceLogContent.parseTransientRetryCount(note),
+    lineVoiceLogContent.MAX_TRANSIENT_RETRIES
+  );
+});
+
+test("buildTransientRetryExhaustedMessage: 録り直しを促す文面になっている", () => {
+  const message = lineVoiceLogContent.buildTransientRetryExhaustedMessage();
+  assert.ok(message.includes("もう一度録音"));
+});

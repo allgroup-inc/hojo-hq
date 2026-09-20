@@ -1,0 +1,44 @@
+name: miraihirake-audit
+
+# みらいひらけ堂の定期監査(掲載基準v2 §7の機械監査)。
+# 週1回、台帳の必須項目・鮮度・URL死活を検査し、
+# 最終確認120日超の published を自動で非表示(verified降格)にする。
+# 鮮度KPIが撤退基準(80%/60%)を割るか、データ不備があるとジョブが赤くなる。
+# 月曜 06:00 JST = 日曜 21:00 UTC
+
+on:
+  schedule:
+    - cron: "0 21 * * 0"
+  workflow_dispatch: {}
+
+concurrency:
+  group: miraihirake-audit
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 台帳監査(鮮度・必須項目・URL死活・自動降格)
+        run: python scripts/miraihirake/audit_services.py --fix --check-urls
+
+      - name: Commit report
+        if: always()
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add -A data/miraihirake
+          git diff --cached --quiet || git commit -m "auto: miraihirake audit $(date '+%Y-%m-%d')"
+          for i in 1 2 3 4; do
+            git pull --rebase origin main && git push origin main && break
+            sleep $((i*2))
+          done

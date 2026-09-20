@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>みらいひらけ堂|むりょうで べんきょうできる ばしょが みつかる</title>
+<meta name="description" content="沖縄の小学生・中学生・高校生向け。全国と県内の無料の学習支援・オンライン授業・自習室・奨学金を、4つの質問でかんたんに探せます。登録不要・名前も住所もいりません。">
+<!-- 公開判定(掲載基準決裁+守り部審査+データ整備)クリアまで検索エンジン非公開。
+     解除するときは下の robots メタを削除し、update.yml の除外ステップも外すこと -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FBF5EC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<style>
+:root{
+  /* フクギイロ「島の陽だまり」パレット準拠(もらいわすれ堂と姉妹) */
+  --sand:#FBF5EC; --sand-2:#F6EADB; --card:#FFFDF9;
+  --ink:#3B322B; --muted:#6E6156;
+  --coral:#D2694A; --coral-deep:#B9502F;
+  --sun:#F2C14E; --sea:#6FAEA4; --leaf:#7E9B79;
+  --line:#EEE1D0; --shadow:0 1px 2px rgba(0,0,0,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  font-size:17px;line-height:1.9;color:var(--ink);background:var(--sand);-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:0 18px}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;line-height:1.5;font-weight:600;word-break:keep-all;overflow-wrap:anywhere;text-wrap:balance}
+a{color:var(--coral-deep)}
+[hidden]{display:none!important}
+header.site{padding:18px 0 8px;text-align:center}
+img.logo{height:52px;width:auto;max-width:100%}
+main{padding-bottom:56px}
+.hero{text-align:center;padding:26px 0 8px}
+.hero h1{font-size:1.5rem;margin-bottom:.6em}
+.hero p.lead{color:var(--muted);margin-bottom:22px}
+.bigbtn{display:block;width:100%;border:none;cursor:pointer;background:var(--coral);color:#fff;
+  font-size:1.15rem;font-weight:700;font-family:inherit;padding:20px 16px;border-radius:16px;box-shadow:var(--shadow)}
+.bigbtn:hover,.bigbtn:focus-visible{background:var(--coral-deep)}
+.bigbtn small{display:block;font-weight:400;font-size:.85rem;opacity:.92;margin-top:2px}
+.subrow{display:flex;gap:10px;margin-top:12px}
+.subbtn{flex:1;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 8px;
+  font-family:inherit;font-size:.95rem;font-weight:500;color:var(--ink);cursor:pointer}
+.subbtn:hover,.subbtn:focus-visible{border-color:var(--coral)}
+.promises{margin:26px auto 0;max-width:420px;text-align:left;background:var(--card);
+  border:1.5px solid var(--line);border-radius:14px;padding:14px 18px}
+.promises li{list-style:none;padding-left:1.6em;position:relative;margin:4px 0}
+.promises li::before{content:"✓";position:absolute;left:.2em;color:var(--leaf);font-weight:700}
+.notice{margin:22px 0;background:var(--sand-2);border:1.5px dashed var(--sun);border-radius:12px;
+  padding:12px 16px;font-size:.95rem}
+/* ---- 質問画面 ---- */
+.stepbar{display:flex;gap:6px;margin:18px 0 10px}
+.stepbar span{flex:1;height:8px;border-radius:4px;background:var(--line)}
+.stepbar span.on{background:var(--coral)}
+.qtitle{font-size:1.25rem;margin:10px 0 4px}
+.qnote{color:var(--muted);font-size:.92rem;margin-bottom:14px}
+.choices{display:flex;flex-wrap:wrap;gap:10px}
+.choice{border:2px solid var(--line);background:var(--card);border-radius:14px;padding:12px 16px;
+  font-family:inherit;font-size:1.02rem;color:var(--ink);cursor:pointer;flex:1 1 45%;min-height:56px;text-align:center}
+.choice[aria-pressed="true"]{border-color:var(--coral-deep);background:#FDF0EA;font-weight:700}
+.choice[aria-pressed="true"]::before{content:"✓ ";color:var(--coral-deep)}
+.navrow{display:flex;gap:10px;margin-top:22px}
+.backbtn{background:none;border:1.5px solid var(--line);border-radius:12px;padding:12px 18px;
+  font-family:inherit;font-size:1rem;color:var(--muted);cursor:pointer}
+.nextbtn{flex:1;background:var(--coral);color:#fff;border:none;border-radius:12px;padding:14px;
+  font-family:inherit;font-size:1.08rem;font-weight:700;cursor:pointer}
+.nextbtn:disabled{background:#D9CBBB;cursor:not-allowed}
+.skiplink{display:block;text-align:center;margin-top:12px;font-size:.95rem;color:var(--muted)}
+/* ---- 結果 ---- */
+.rescount{margin:16px 0 8px;font-weight:700}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+  padding:16px 18px;margin-bottom:16px}
+.score{display:inline-block;background:var(--sun);color:var(--ink);font-weight:700;border-radius:8px;
+  padding:1px 10px;font-size:.95rem;margin-bottom:6px}
+.card h3{font-size:1.15rem;margin-bottom:2px}
+.card .org{color:var(--muted);font-size:.88rem;margin-bottom:6px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.badge{font-size:.82rem;border-radius:8px;padding:2px 9px;border:1px solid var(--line);background:var(--sand-2)}
+.badge.ok{background:#EAF3EA;border-color:var(--leaf)}
+.badge.warn{background:#FBF0DC;border-color:var(--sun)}
+.badge.na{background:#F3E7E2;border-color:#D8B4A5}
+.why{background:var(--sand-2);border-radius:10px;padding:10px 14px;font-size:.92rem;margin:8px 0}
+.why b{display:block;margin-bottom:2px}
+.why li{list-style:none;padding-left:1.4em;position:relative}
+.why li::before{content:"・";position:absolute;left:.2em}
+.detailbtn{display:block;width:100%;text-align:center;background:none;border:2px solid var(--coral);
+  color:var(--coral-deep);border-radius:12px;padding:10px;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;margin-top:6px}
+.detailbtn:hover,.detailbtn:focus-visible{background:#FDF0EA}
+.stale{color:#8A5A00;background:#FBF0DC;border-radius:8px;padding:4px 10px;font-size:.85rem;display:inline-block;margin-top:6px}
+/* ---- 詳細 ---- */
+.dl{margin:10px 0}
+.dl dt{font-weight:700;font-size:.9rem;color:var(--muted);margin-top:12px}
+.dl dd{margin-left:0}
+.applybtn{display:block;text-align:center;background:var(--coral);color:#fff;border-radius:12px;
+  padding:14px;font-size:1.08rem;font-weight:700;text-decoration:none;margin:16px 0 8px}
+.srcline{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:10px}
+/* ---- 価値観セクション(LP) ---- */
+.values{margin-top:40px}
+.valblock{background:var(--card);border:1.5px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+  padding:20px 22px;margin-bottom:16px;text-align:left}
+.valblock h2{font-size:1.18rem;margin-bottom:.5em;color:var(--coral-deep)}
+.valblock p{font-size:.98rem}
+.valblock p + p{margin-top:.6em}
+.doors{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.door{font-size:.9rem;background:var(--sand-2);border:1px solid var(--line);border-radius:999px;padding:4px 14px}
+footer.site{border-top:1px solid var(--line);padding:20px 0 40px;color:var(--muted);font-size:.88rem;text-align:center}
+footer.site a{color:var(--muted)}
+@media (min-width:560px){ .choice{flex:1 1 30%} }
+</style>
+</head>
+<body>
+
+<!-- ===== 世界観フィルム(v0): 夜→朝、「扉がひらく」の物語。実写差し替え前の絵コンテ実装(堂シリーズ共通の文法) ===== -->
+<link rel="stylesheet" href="assets/film.css">
+<noscript><style>
+.mfilm .rise,.mfilm .stmt,.mfilm .sunburst,.mfilm .dlogo .tile,.mfilm .dlogo .moji,.mfilm .dlogo .bdg,.mfilm .vision span{opacity:1!important;transform:none!important}
+.mfilm .stmt{letter-spacing:.14em!important}
+.mfilm .dlogo .arw{stroke-dashoffset:0!important}
+</style></noscript>
+<div style="position:relative">
+<div class="mhead" id="mhead">
+  <a class="hl" href="#honmon"><img src="assets/icon.svg" alt="">みらいひらけ堂</a>
+  <a class="skip" href="#honmon">スキップして探す →</a>
+</div>
+<div class="mfilm">
+
+  <!-- S1: 夜・星空(どの子にもみらいがある) -->
+  <section class="scene" id="ms1">
+    <div class="kb">
+      <!-- 実写に差し替えるとき: <div class="photoback"><img src="assets/film/hoshizora.jpg" alt=""></div>(写真の選び方: docs/みらいひらけ堂_LP制作プロンプト.md「写真プラン」) -->
+      <div id="mstars"></div>
+      <div class="moon"></div>
+      <div class="shooting"></div>
+      <div class="island"><svg viewBox="0 0 1200 240" preserveAspectRatio="none"><path d="M0 240 L0 150 C120 118 260 132 380 110 C500 88 640 96 760 118 C880 140 1040 128 1200 150 L1200 240 Z" fill="#0B1514"/></svg></div>
+      <div id="mvlights"></div>
+      <!-- 星を見上げる子ども(影絵) -->
+      <div class="sil" style="left:50%;bottom:16vh;width:min(34vw,150px);transform:translateX(-50%)"><svg viewBox="0 0 200 170">
+        <circle cx="104" cy="42" r="17"/>
+        <path d="M72 170 C74 128 82 96 98 86 C112 80 126 90 130 106 C136 128 136 150 134 170 Z"/>
+        <path d="M78 128 C64 122 54 110 50 96 L58 92 C62 104 72 114 84 118 Z"/>
+      </svg></div>
+    </div>
+    <div class="pret"><p>これは、あなたのための物語。</p></div>
+    <div class="copy">
+      <p class="stmt stmt-l dark-t">どの子にも、<br>ひらくのを待っている<br>みらいがある。</p>
+    </div>
+    <div class="cue">ゆっくり、下へ</div>
+  </section>
+
+  <!-- S2: 未明・好きなこと(学びは教室の中だけじゃない) -->
+  <section class="scene" id="ms2">
+    <div class="kb">
+      <!-- 実写枠: 手元の写真(本をめくる手・工作する手など。顔は写さない) -->
+      <div class="mote" style="width:6px;height:6px;top:24%;left:18%"></div>
+      <div class="mote" style="width:5px;height:5px;top:38%;left:78%;animation-delay:1.2s"></div>
+      <!-- ひらいた本(影絵) -->
+      <div class="sil" style="left:4vw;bottom:6vh;width:min(38vw,220px)"><svg viewBox="0 0 200 100">
+        <path d="M10 60 C40 42 70 42 100 56 C130 42 160 42 190 60 L190 88 C160 72 130 72 100 84 C70 72 40 72 10 88 Z"/>
+        <rect x="97" y="54" width="6" height="32" rx="3"/>
+      </svg></div>
+      <!-- 望遠鏡(影絵) -->
+      <div class="sil" style="right:5vw;bottom:5vh;width:min(30vw,170px)"><svg viewBox="0 0 170 140">
+        <rect x="52" y="18" width="96" height="20" rx="10" transform="rotate(-22 52 18)"/>
+        <path d="M78 56 L58 136 L48 136 L70 52 Z"/>
+        <path d="M86 56 L106 136 L116 136 L96 52 Z"/>
+        <rect x="80" y="52" width="10" height="30" rx="4"/>
+      </svg></div>
+    </div>
+    <div class="copy">
+      <p class="stmt stmt-s dark-t">学びは、<br>教室の中だけじゃない。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#D8DCC9;font-weight:500">本を読むこと。何かを作ること。星を見ること。<br>好きなことは、ぜんぶ みらいの扉。</p>
+    </div>
+  </section>
+
+  <!-- S3: 夜明け前・ささえてくれる人(まなびばの扉) -->
+  <section class="scene" id="ms3">
+    <div class="kb">
+      <!-- 実写枠: まなびばの風景(教室のうしろ姿・図書館の本棚など。顔は写さない) -->
+      <!-- ひらいた扉から差す光 -->
+      <div style="position:absolute;right:16%;bottom:0;width:15vmin;height:36vmin;z-index:2;background:linear-gradient(180deg,rgba(247,201,110,.8),rgba(247,201,110,.25));border-radius:4px 4px 0 0;box-shadow:0 0 60px 16px rgba(247,201,110,.35)"></div>
+      <!-- 手をつなぎ扉へ向かう大人と子ども(影絵) -->
+      <div class="sil" style="right:26%;bottom:2vh;width:min(40vw,230px)"><svg viewBox="0 0 230 190">
+        <circle cx="70" cy="40" r="17"/>
+        <path d="M46 190 C46 136 54 100 70 92 C84 86 96 96 100 112 C106 136 106 166 104 190 Z"/>
+        <circle cx="152" cy="86" r="12"/>
+        <path d="M136 190 C136 152 142 126 152 120 C162 116 170 124 172 136 C176 154 176 176 174 190 Z"/>
+        <path d="M100 118 C114 122 128 124 140 124 L140 132 C126 132 112 130 98 126 Z"/>
+      </svg></div>
+    </div>
+    <div class="copy" style="transform:translateY(-8vh)">
+      <p class="stmt stmt-s dark-t">ささえてくれる人が、<br>こんなにいる。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#D8DCC9;font-weight:500">先生、大学生、NPO、図書館——<br>“まなびば”の扉は、もう ひらいている。</p>
+    </div>
+  </section>
+
+  <!-- S4: 朝焼け(問題→希望) -->
+  <section class="scene" id="ms4">
+    <div class="kb">
+      <div class="glow"></div>
+      <div class="risingsun"></div>
+      <div class="bird" style="top:24%"><svg viewBox="0 0 60 24"><path d="M4 16 C12 6 20 6 30 14 C40 6 48 6 56 16"/></svg></div>
+      <div class="bird b2" style="top:32%"><svg viewBox="0 0 60 24"><path d="M4 16 C12 6 20 6 30 14 C40 6 48 6 56 16"/></svg></div>
+    </div>
+    <div class="copy">
+      <p class="rise" style="color:#5A4030">でも——「知らなかった」というだけで、<br>ひらかれないままの扉がある。</p>
+      <p class="rise d2" style="margin-top:1.2em;color:#5A4030">お金をかけられても、かけられなくても、<br>ひらける扉はある。</p>
+      <p class="rise d3" style="margin-top:1.2em;color:var(--coral-deep);font-weight:700">ひとりの子が扉をひらくたび、<br>沖縄のみらいは、すこし明るくなる。</p>
+    </div>
+  </section>
+
+  <!-- S5: 朝・ロゴの現れ -->
+  <section class="scene" id="ms5">
+    <div class="sunburst"></div>
+    <svg class="dlogo" viewBox="0 0 100 100" aria-label="みらいひらけ堂のロゴ">
+      <rect class="tile" x="4" y="4" width="92" height="92" rx="23" fill="#B9502F"/>
+      <text class="moji" x="50" y="46" font-family="'Hiragino Maru Gothic ProN','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">みら</text>
+      <text class="moji" x="50" y="80" font-family="'Hiragino Maru Gothic ProN','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">堂</text>
+      <circle class="bdg" cx="81" cy="19" r="14" fill="#F2B705" stroke="#FFFBF4" stroke-width="3"/>
+      <path class="arw" d="M75 25 L87 13 M87 13 h-8 M87 13 v8" stroke="#1F2A2E" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </svg>
+    <div class="copy">
+      <p class="vision" id="mvision">ひらけ、みらい。</p>
+      <p class="wm rise d2" style="margin-top:.9em">みらいひらけ堂</p>
+      <a class="fcta rise d3" href="#honmon">あなたの扉を さがしにいく</a>
+      <p class="micro rise d3">無料 ・ 登録不要 ・ 名前も住所もいりません</p>
+    </div>
+  </section>
+
+</div>
+</div>
+<script src="assets/film.js" defer></script>
+<!-- ===== フィルムここまで。以下、実用レイヤー ===== -->
+
+<header class="site" id="honmon"><div class="wrap">
+  <a href="./" aria-label="みらいひらけ堂 トップ"><img class="logo" src="assets/logo.svg" alt="みらいひらけ堂"></a>
+</div></header>
+
+<main class="wrap">
+
+<!-- ホーム -->
+<section id="view-home" aria-label="ホーム">
+  <div class="hero">
+    <h1>むりょうで べんきょうできる<br>ばしょが みつかる</h1>
+    <p class="lead">沖縄にいながら、全国の無料の勉強サービスを使えます。</p>
+    <button class="bigbtn" id="btn-start">あなたに合う無料の勉強サービスを探す<small>4つの質問・1分でおわります</small></button>
+    <div class="subrow">
+      <button class="subbtn" id="btn-all">ぜんぶの一覧を見る</button>
+      <button class="subbtn" id="btn-about">このサイトについて</button>
+    </div>
+    <ul class="promises">
+      <li>登録なしで使えます</li>
+      <li>名前も住所もいりません</li>
+      <li>ぜんぶ無料の情報だけをのせています</li>
+    </ul>
+  </div>
+  <div class="notice" id="prep-notice" hidden>🚧 いまサービスの情報を集めて確認しています。もうすこしだけ待っていてね。</div>
+
+  <div class="values">
+    <div class="valblock">
+      <h2>みらいは、いろんな扉からひらく</h2>
+      <p>学びは、学校の勉強だけではありません。本を読むこと、何かを作ること、いろんな大人と話すこと、好きなことに夢中になること。どれも、あなたのみらいをひらく扉になる可能性があります。</p>
+      <div class="doors">
+        <span class="door">📖 本を読む</span><span class="door">🛠 ものづくり</span>
+        <span class="door">💬 大人と話す</span><span class="door">🔍 好きなことを探す</span>
+        <span class="door">🎓 受験にちょうせん</span><span class="door">💻 プログラミング</span>
+      </div>
+    </div>
+    <div class="valblock">
+      <h2>ささえてくれる人が、こんなにいる</h2>
+      <p>沖縄にも全国にも、子どもの学びを無料でささえてくれる人たちがいます。NPO・先生・大学生・ボランティア・県や市・図書館。そんな「まなびば」や制度が、じつはたくさんあります。</p>
+      <p>「知らなかったから使えなかった」をなくすために、みらいひらけ堂はその入口をひとつにまとめています。</p>
+    </div>
+    <div class="valblock">
+      <h2>お金をかける道も、かけない道も</h2>
+      <p>塾や教材にお金をかけて可能性をひらくのも、大切な選択です。そして、お金をかけられなくても、ひらける扉はたくさんあります。</p>
+      <p>このサイトには、無料(一部無料・条件付き無料をふくむ)で使える情報だけを、公式の情報とてらしあわせてのせています。まずはここから、一歩ためしてみてください。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 質問 -->
+<section id="view-quiz" hidden aria-label="質問">
+  <div class="stepbar" id="stepbar"><span></span><span></span><span></span><span></span></div>
+  <h2 class="qtitle" id="q-title"></h2>
+  <p class="qnote" id="q-note"></p>
+  <div class="choices" id="q-choices" role="group"></div>
+  <div class="navrow">
+    <button class="backbtn" id="btn-back">← もどる</button>
+    <button class="nextbtn" id="btn-next">つぎへ</button>
+  </div>
+  <a href="#" class="skiplink" id="btn-skip" hidden>この質問はスキップする(答えなくてもOK)</a>
+</section>
+
+<!-- 結果 -->
+<section id="view-results" hidden aria-label="検索結果">
+  <button class="backbtn" id="btn-requiz">← 質問をやりなおす</button>
+  <p class="rescount" id="res-count"></p>
+  <div id="res-list"></div>
+  <div class="notice" id="res-empty" hidden>ぴったりのサービスがまだ見つかりませんでした。情報はこれからどんどん増えます。条件を減らして、もういちど試してみてください。</div>
+</section>
+
+<!-- 詳細 -->
+<section id="view-detail" hidden aria-label="サービスの詳しい情報">
+  <button class="backbtn" id="btn-backres">← 結果にもどる</button>
+  <div id="detail-body"></div>
+</section>
+
+<!-- このサイトについて -->
+<section id="view-about" hidden aria-label="このサイトについて">
+  <button class="backbtn" id="btn-backhome">← もどる</button>
+  <h2 class="qtitle">このサイトについて</h2>
+  <p>みらいひらけ堂は、沖縄の小学生・中学生・高校生が、<b>無料で勉強できる場所・サービス</b>を探せるサイトです。塾に行っていなくても、全国にはオンラインで使える無料の勉強サービスがたくさんあります。「知らなかったから使えなかった」をなくすために作りました。</p>
+  <p>だれでも無料で使えます。名前・住所・電話番号はいりません。あなたが何を選んだかを、わたしたちが集めることもありません。</p>
+  <p>のせているサービスは、運営チームが公式の情報とてらしあわせて確認しています。それでも募集が終わっていることがあるので、申しこむ前に必ず公式ページを見てください。「要確認」と書いてあるところは、まだ確認できていないという意味です。</p>
+  <p>掲載のルール(掲載基準)とおすすめ順の計算方法は、準備ができしだい、このページで全文公開します。お金をもらって順番を変えることはありません。</p>
+  <p>運営: 株式会社フクギイロ(姉妹サービス: <a href="../fukugiiro/">もらいわすれ堂</a>)</p>
+</section>
+
+</main>
+
+<footer class="site"><div class="wrap">
+  <p>みらいひらけ堂|運営: 株式会社フクギイロ</p>
+  <p><a href="../fukugiiro/">もらいわすれ堂(給付金のもらい忘れ診断)</a></p>
+</div></footer>
+
+<script>
+"use strict";
+/* みらいひらけ堂 検索アプリ。
+   回答はブラウザ内だけで処理し、サーバーに送らない(プライバシー設計)。
+   スコアの加点表は設計書§11と一致させ、/about で公開する前提。 */
+const QUESTIONS = [
+  { key:"grade", multi:false, title:"なんねんせい ですか?", note:"",
+    choices:[["小学生","小学生"],["中学生","中学生"],["高校生","高校生"],["高卒後","高校を出たあと"],["その他","その他・わからない"]] },
+  { key:"goal", multi:true, title:"どんな勉強がしたい?", note:"いくつ選んでもOK",
+    choices:[["ついていく","学校のじゅぎょうについていきたい"],["高校受験","高校受験"],["大学受験","大学受験"],
+      ["英語","英語"],["数学","数学"],["国語","国語"],["理科","理科"],["社会","社会"],
+      ["プログラミング","プログラミング"],["資格","資格"],["不登校","不登校中の勉強"],
+      ["進路相談","進路の相談"],["質問だけ","わからない問題だけ質問したい"],
+      ["場所","勉強する場所がほしい"],["マンツーマン","マンツーマンで教えてほしい"],
+      ["好きなこと","好きなこと・やりたいことを見つけたい"],
+      ["大人と話す","いろんな大人と話してみたい"],
+      ["ものづくり","何かを作ってみたい"]] },
+  { key:"method", multi:true, title:"どんな方法がいい?", note:"いくつ選んでもOK",
+    choices:[["オンライン","オンライン"],["対面","直接会う"],["どちらでも","どちらでも"],
+      ["LINE","LINE"],["Zoom","Zoom"],["動画","動画"],["マンツーマン","マンツーマン"],
+      ["集団","みんなで授業"],["自習室","自習室"]] },
+  { key:"family", multi:true, title:"おうちのこと", note:"あてはまるものがあれば。なくてもOK。答えはこのスマホの中だけで使われ、どこにも送られません。",
+    choices:[["なし","とくになし・わからない"],["ひとり親","ひとり親家庭"],["低所得","収入が少なめの家庭"],
+      ["生活保護","生活保護"],["非課税","住民税非課税世帯(家の収入が一定以下の家庭)"],
+      ["不登校","不登校"],["施設","施設でくらしている"]] }
+];
+const state = { step:0, answers:{grade:[],goal:[],method:[],family:[]}, services:[], results:[] };
+const $ = id => document.getElementById(id);
+const VIEWS = ["view-home","view-quiz","view-results","view-detail","view-about"];
+function show(view){ VIEWS.forEach(v => { $(v).hidden = (v !== view); }); window.scrollTo(0,0); }
+
+/* ---- データ読み込み(published のみ) ---- */
+fetch("../data/miraihirake/services.json")
+  .then(r => r.json())
+  .then(d => {
+    state.services = (d.services || []).filter(s =>
+      s.review_status === "published" && s.data_source && s.last_verified);
+    if (state.services.length === 0) $("prep-notice").hidden = false;
+  })
+  .catch(() => { $("prep-notice").hidden = false; });
+
+/* ---- 質問フロー ---- */
+function renderStep(){
+  const q = QUESTIONS[state.step];
+  [...$("stepbar").children].forEach((el,i)=> el.className = i <= state.step ? "on" : "");
+  $("q-title").textContent = `ステップ${state.step+1}/4 ${q.title}`;
+  $("q-note").textContent = q.note;
+  $("btn-skip").hidden = q.key !== "family";
+  const box = $("q-choices"); box.innerHTML = "";
+  q.choices.forEach(([val,label])=>{
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "choice"; b.textContent = label;
+    b.setAttribute("aria-pressed", state.answers[q.key].includes(val));
+    b.onclick = ()=>{
+      if (q.multi){
+        const arr = state.answers[q.key];
+        const i = arr.indexOf(val);
+        if (i >= 0) arr.splice(i,1); else arr.push(val);
+        b.setAttribute("aria-pressed", i < 0);
+      } else {
+        state.answers[q.key] = [val];
+        next();
+      }
+    };
+    box.appendChild(b);
+  });
+  $("btn-next").hidden = !q.multi;
+}
+function next(){
+  if (state.step < QUESTIONS.length - 1){ state.step++; renderStep(); }
+  else { runSearch(); }
+}
+$("btn-start").onclick = ()=>{ state.step = 0; state.answers = {grade:[],goal:[],method:[],family:[]}; show("view-quiz"); renderStep(); };
+$("btn-next").onclick = next;
+$("btn-skip").onclick = e=>{ e.preventDefault(); state.answers.family = []; runSearch(); };
+$("btn-back").onclick = ()=>{
+  if (state.step === 0){ show("view-home"); } else { state.step--; renderStep(); }
+};
+$("btn-requiz").onclick = ()=>{ state.step = 0; show("view-quiz"); renderStep(); };
+$("btn-about").onclick = ()=> show("view-about");
+$("btn-backhome").onclick = ()=> show("view-home");
+$("btn-all").onclick = ()=>{ state.answers = {grade:[],goal:[],method:[],family:[]}; runSearch(); };
+$("btn-backres").onclick = ()=> show("view-results");
+
+/* ---- スコアリング(設計書§11の加点表。理由を必ず表示する) ---- */
+function daysSince(iso){ return Math.floor((Date.now() - new Date(iso+"T00:00:00")) / 864e5); }
+function scoreService(s, a){
+  let pts = 0; const max = 100; const reasons = [];
+  if (s.okinawa_available === "×") return null;
+  if (s.okinawa_available === "○"){ pts += 30; reasons.push("沖縄県から利用できます"); }
+  else if (s.okinawa_available === "△"){ pts += 10; reasons.push("条件によっては沖縄から利用できます"); }
+  else { reasons.push("沖縄から使えるかは要確認です"); }
+  if (a.grade.length && a.grade[0] !== "その他"){
+    if ((s.target_grade||[]).includes(a.grade[0])){ pts += 20; reasons.push(`${a.grade[0]}が対象です`); }
+    else if ((s.target_grade||[]).length){ pts -= 100; } /* 学年対象外は実質除外 */
+  } else { pts += 10; }
+  const GOAL_MATCH = {
+    "高校受験": s=>s.highschool_exam, "大学受験": s=>s.university_exam,
+    "英語": s=>(s.subject||[]).some(x=>["英語","全般"].includes(x)),
+    "数学": s=>(s.subject||[]).some(x=>["数学","全般"].includes(x)),
+    "国語": s=>(s.subject||[]).some(x=>["国語","全般"].includes(x)),
+    "理科": s=>(s.subject||[]).some(x=>["理科","全般"].includes(x)),
+    "社会": s=>(s.subject||[]).some(x=>["社会","全般"].includes(x)),
+    "プログラミング": s=>(s.subject||[]).includes("プログラミング"),
+    "資格": s=>(s.subject||[]).includes("資格"),
+    "ついていく": s=>(s.support_type||[]).some(x=>["授業","個別指導","家庭教師","質問対応"].includes(x)),
+    "不登校": s=>s.non_attendance_support === true,
+    "進路相談": s=>s.career_support || (s.support_type||[]).includes("進路相談"),
+    "質問だけ": s=>(s.support_type||[]).includes("質問対応"),
+    "場所": s=>(s.support_type||[]).includes("自習室"),
+    "マンツーマン": s=>s.one_on_one,
+    "好きなこと": s=>(s.subject||[]).some(x=>["探究","キャリア"].includes(x)) || (s.support_type||[]).some(x=>["体験・イベント","居場所・対話","図書館・本"].includes(x)),
+    "大人と話す": s=>s.career_support || (s.support_type||[]).some(x=>["キャリア教育","居場所・対話"].includes(x)),
+    "ものづくり": s=>(s.subject||[]).includes("プログラミング") || (s.support_type||[]).includes("ものづくり")
+  };
+  const GOAL_LABEL = {"ついていく":"学校の授業のサポートがあります","高校受験":"高校受験に対応しています","大学受験":"大学受験に対応しています","不登校":"不登校の人も使えます","進路相談":"進路の相談ができます","質問だけ":"わからない問題の質問ができます","場所":"勉強する場所があります","マンツーマン":"マンツーマンで教えてもらえます","好きなこと":"好きなこと・やりたいこと探しにつながります","大人と話す":"いろんな大人と話せます","ものづくり":"ものづくり・プログラミングができます"};
+  a.goal.forEach(g=>{ const f = GOAL_MATCH[g]; if (f && f(s)){ pts += 15; reasons.push(GOAL_LABEL[g] || `${g}に対応しています`); } });
+  const METHOD_MATCH = {
+    "オンライン": s=>s.online_available, "対面": s=>s.offline_available, "どちらでも": ()=>true,
+    "LINE": s=>s.line_support, "Zoom": s=>s.zoom_support, "動画": s=>s.video_lesson,
+    "マンツーマン": s=>s.one_on_one, "集団": s=>s.group_lesson, "自習室": s=>(s.support_type||[]).includes("自習室")
+  };
+  a.method.forEach(m=>{ const f = METHOD_MATCH[m]; if (f && f(s)){ pts += 10; if (m !== "どちらでも") reasons.push(`${m === "対面" ? "直接会って" : m + "で"}利用できます`); } });
+  const FAMILY_MATCH = {"ひとり親":["single_parent_support","ひとり親家庭が対象にふくまれます"],
+    "低所得":["poverty_support","収入が少なめの家庭も対象です"],
+    "生活保護":["welfare_support","生活保護の世帯も対象です"],
+    "非課税":["hikazei_support","住民税非課税世帯(家の収入が一定以下の家庭)も対象です"],
+    "不登校":["non_attendance_support","不登校の人も使えます"],
+    "施設":["facility_support","施設でくらしている人も使えます"]};
+  a.family.forEach(f=>{ const m = FAMILY_MATCH[f]; if (m && s[m[0]] === true){ pts += 15; if(!reasons.includes(m[1])) reasons.push(m[1]); } });
+  if (s.completely_free){ pts += 5; reasons.push("完全無料です"); }
+  if (s.recruitment_status === "募集中" || s.recruitment_status === "常時募集"){ pts += 5; reasons.push("いま申しこめます"); }
+  if (s.recruitment_status === "募集終了"){ pts -= 50; reasons.push("いまは募集していません"); }
+  if (s.last_verified && daysSince(s.last_verified) > 60){ pts -= 10; }
+  if (pts < 0) return null;
+  return { s, score: Math.max(1, Math.min(99, Math.round(pts / max * 100))), reasons };
+}
+function runSearch(){
+  state.results = state.services.map(s => scoreService(s, state.answers)).filter(Boolean)
+    .sort((x,y)=> y.score - x.score);
+  $("res-count").textContent = state.results.length
+    ? `あなたが使える可能性が高いサービス ${state.results.length}件` : "";
+  $("res-empty").hidden = state.results.length > 0 || state.services.length === 0;
+  const list = $("res-list"); list.innerHTML = "";
+  if (state.services.length === 0){
+    $("res-count").textContent = "";
+    const n = document.createElement("div"); n.className = "notice";
+    n.textContent = "🚧 いまサービスの情報を集めて確認しています。公開までもうすこし待ってね。";
+    list.appendChild(n);
+  }
+  state.results.forEach((r,i)=> list.appendChild(resultCard(r,i)));
+  show("view-results");
+}
+function badge(text, cls){ const b = document.createElement("span"); b.className = "badge " + (cls||""); b.textContent = text; return b; }
+function okinawaBadge(s){
+  return { "○": badge("✅ 沖縄から利用OK","ok"), "△": badge("△ 沖縄は条件次第","warn"),
+           "?": badge("? 沖縄から使えるか要確認","warn") }[s.okinawa_available] || badge("要確認","warn");
+}
+function resultCard(r, idx){
+  const s = r.s;
+  const c = document.createElement("article"); c.className = "card";
+  const sc = document.createElement("div"); sc.className = "score"; sc.textContent = `おすすめ度 ${r.score}%`; c.appendChild(sc);
+  const h = document.createElement("h3"); h.textContent = s.service_name; c.appendChild(h);
+  const org = document.createElement("p"); org.className = "org"; org.textContent = `${s.organization_name}(${s.organization_type})`; c.appendChild(org);
+  const sum = document.createElement("p"); sum.textContent = s.summary; c.appendChild(sum);
+  const bd = document.createElement("div"); bd.className = "badges";
+  bd.appendChild(okinawaBadge(s));
+  bd.appendChild(badge(s.completely_free ? "完全無料" : s.price_type, s.completely_free ? "ok" : "warn"));
+  (s.target_grade||[]).forEach(g=> bd.appendChild(badge(g)));
+  if (s.online_available) bd.appendChild(badge("💻 オンライン"));
+  if (s.recruitment_status) bd.appendChild(badge("📅 " + s.recruitment_status, s.recruitment_status === "募集終了" ? "na" : ""));
+  c.appendChild(bd);
+  if (r.reasons.length){
+    const w = document.createElement("div"); w.className = "why";
+    const b = document.createElement("b"); b.textContent = "なぜおすすめ?"; w.appendChild(b);
+    const ul = document.createElement("ul");
+    r.reasons.slice(0,5).forEach(t=>{ const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+    w.appendChild(ul); c.appendChild(w);
+  }
+  if (s.last_verified && daysSince(s.last_verified) > 60){
+    const st = document.createElement("span"); st.className = "stale";
+    st.textContent = "⚠ 情報が古い可能性があります。公式サイトで確認してください"; c.appendChild(st);
+  }
+  const btn = document.createElement("button"); btn.className = "detailbtn"; btn.textContent = "くわしく見る";
+  btn.onclick = ()=> renderDetail(idx); c.appendChild(btn);
+  return c;
+}
+/* ---- 詳細 ---- */
+function dd(dl, term, val){
+  if (val === undefined || val === null || val === "" ) return;
+  const dt = document.createElement("dt"); dt.textContent = term;
+  const el = document.createElement("dd"); el.textContent = Array.isArray(val) ? val.join(" / ") : String(val);
+  dl.appendChild(dt); dl.appendChild(el);
+}
+function yn(v){ return v === true ? "○" : v === false ? "—" : "要確認"; }
+function renderDetail(idx){
+  const r = state.results[idx]; const s = r.s;
+  const box = $("detail-body"); box.innerHTML = "";
+  const h = document.createElement("h2"); h.className = "qtitle"; h.textContent = s.service_name; box.appendChild(h);
+  const org = document.createElement("p"); org.className = "org"; org.textContent = `${s.organization_name}(${s.organization_type})`; box.appendChild(org);
+  const bd = document.createElement("div"); bd.className = "badges";
+  bd.appendChild(okinawaBadge(s)); bd.appendChild(badge(s.completely_free ? "完全無料" : s.price_type, s.completely_free ? "ok" : "warn"));
+  box.appendChild(bd);
+  const sum = document.createElement("p"); sum.textContent = s.summary; box.appendChild(sum);
+  const dl = document.createElement("dl"); dl.className = "dl";
+  dd(dl, "沖縄からの利用", (s.okinawa_note || "") || undefined);
+  dd(dl, "対象", (s.target_grade||[]).join("・") + (s.target_conditions && s.target_conditions.length ? " / " + s.target_conditions.join("・") : ""));
+  dd(dl, "所得などの条件", s.income_requirement);
+  dd(dl, "教えてもらえる内容", s.subject);
+  dd(dl, "支援の形", s.support_type);
+  dd(dl, "ひとり親家庭", yn(s.single_parent_support));
+  dd(dl, "不登校", yn(s.non_attendance_support));
+  dd(dl, "生活保護の世帯", yn(s.welfare_support));
+  dd(dl, "住民税非課税世帯(家の収入が一定以下の家庭)", yn(s.hikazei_support));
+  dd(dl, "料金", s.price);
+  dd(dl, "回数・期間", [s.frequency, s.duration].filter(Boolean).join(" / ") || "要確認");
+  dd(dl, "教えてくれる人", s.teacher_type);
+  dd(dl, "申しこみ方法", s.application_method);
+  dd(dl, "募集の状態", s.recruitment_status);
+  dd(dl, "定員・募集期間", [s.capacity, s.application_period].filter(Boolean).join(" / ") || undefined);
+  box.appendChild(dl);
+  if (s.application_url || s.official_url){
+    const a = document.createElement("a"); a.className = "applybtn";
+    a.href = s.application_url || s.official_url; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = "公式サイトを見る・申しこむ →"; box.appendChild(a);
+  }
+  const src = document.createElement("p"); src.className = "srcline";
+  src.textContent = `情報のもと: 公式サイト(最終確認日 ${s.last_verified})。申しこむ前に必ず公式サイトで最新の内容を確認してください。`;
+  box.appendChild(src);
+  show("view-detail");
+}
+</script>
+</body>
+</html>

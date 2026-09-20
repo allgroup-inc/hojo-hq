@@ -38,10 +38,45 @@ def get(url, headers=None):
         return json.loads(r.read().decode("utf-8"))
 
 
+def section_site_ga4():
+    """GA4版サイト集計(2026-08-24 Plausible契約終了→GA4切替。方式変更のため
+    Plausible時代の数字と直接比較しない旨を明記する)。
+    訪問者/PVはミカタLPプロパティ、LINEタップの経路内訳は /go/ を計測する
+    もらいわすれ堂プロパティ(line_redirect)から取る。"""
+    import ga4_client  # noqa: PLC0415
+    try:
+        token = ga4_client.get_token()
+    except Exception as e:  # noqa: BLE001
+        return f"🌐 サイト: 取得不可(GA4認証 {type(e).__name__})"
+    lines = ["🌐 サイト(7日間・GA4計測 ※8/24方式変更、操作なし直帰は載らない)"]
+    try:
+        agg = ga4_client.aggregate(token, os.environ["GA4_MIKATA_PROPERTY_ID"],
+                                   "7daysAgo", "today")
+        lines.append(f"・訪問者: {agg['visitors']}人 / 閲覧: {agg['pageviews']}PV")
+    except Exception as e:  # noqa: BLE001
+        lines.append(f"・訪問者/PV: 取得不可({type(e).__name__})")
+    go_prop = os.environ.get("GA4_PROPERTY_ID", "")
+    if go_prop:
+        br = ga4_client.channel_breakdown(token, go_prop, "7daysAgo", "today",
+                                          "line_redirect")
+        if br is None:
+            lines.append("・LINE登録タップ: 取得不可(channel未登録)")
+        elif br:
+            lines.append("・LINE登録ボタンのタップ: "
+                         + " / ".join(f"{ch} {e}回" for ch, e, _ in br))
+        else:
+            lines.append("・LINE登録ボタンのタップ: 0回")
+    else:
+        lines.append("・LINE登録タップ内訳: 未接続(GA4_PROPERTY_ID未設定)")
+    return "\n".join(lines)
+
+
 def section_site():
+    if os.environ.get("GA4_SA_JSON") and os.environ.get("GA4_MIKATA_PROPERTY_ID"):
+        return section_site_ga4()
     key = os.environ.get("PLAUSIBLE_API_KEY", "")
     if not key:
-        return "🌐 サイト: 未接続(PLAUSIBLE_API_KEY未設定)"
+        return "🌐 サイト: 未接続(GA4_SA_JSON+GA4_MIKATA_PROPERTY_ID 未設定。手順: docs/GA4計測復旧手順_20260904.md)"
     h = {"Authorization": "Bearer " + key}
     try:
         agg = get(f"https://plausible.io/api/v1/stats/aggregate?site_id={SITE_ID}"

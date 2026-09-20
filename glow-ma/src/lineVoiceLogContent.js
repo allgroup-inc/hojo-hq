@@ -271,6 +271,48 @@
   }
 
   /**
+   * 一時的な障害(Gemini・LINEの混雑やサーバ側の一時停止)で失敗したとき、その場で
+   * 「エラー」に倒さず「受信済み」へ戻し、1分間隔トリガーに再試行させるための判定・記録。
+   *
+   * 背景: 従来は1回の失敗が即「エラー」になり、担当者が訪問直後に吹き込んだメモが
+   * そのまま失われていた(2026-09-03 15:12・15:17にGemini APIの503「高負荷」で連続2件が消失)。
+   * 混雑は数分続くことがあり、callGeminiForVoiceLog_ のリトライ(3回・約12秒)では吸収しきれない。
+   *
+   * 再試行回数は「エラー内容」列に書き戻して持ち回る(列を増やすと既存行の位置がズレるため。
+   * 成功・確定・破棄のいずれでも同じ列が上書きされるので、後片付けは不要)。
+   * 上限を超えたら諦めて担当者へ通知する。黙って2時間再試行し続けるより、早めに知らせて
+   * 記憶が新しいうちに録り直してもらう方が、メモの中身が残る。
+   */
+  var MAX_TRANSIENT_RETRIES = 10;
+  var TRANSIENT_RETRY_NOTE_PATTERN = /^再試行中\((\d+)\/\d+\)/;
+
+  function isTransientProcessingError(error) {
+    var statusCode = error && error.statusCode;
+    if (typeof statusCode !== "number") return false;
+    return statusCode === 429 || (statusCode >= 500 && statusCode < 600);
+  }
+
+  function parseTransientRetryCount(errorNote) {
+    var matched = TRANSIENT_RETRY_NOTE_PATTERN.exec(String(errorNote == null ? "" : errorNote));
+    return matched ? Number(matched[1]) : 0;
+  }
+
+  function hasTransientRetryLeft(errorNote) {
+    return parseTransientRetryCount(errorNote) < MAX_TRANSIENT_RETRIES;
+  }
+
+  function buildTransientRetryNote(previousNote, message) {
+    var next = parseTransientRetryCount(previousNote) + 1;
+    return "再試行中(" + next + "/" + MAX_TRANSIENT_RETRIES + ") " +
+      String(message == null ? "" : message);
+  }
+
+  function buildTransientRetryExhaustedMessage() {
+    return "外部サービスが混み合っているため、時間内に処理できませんでした。" +
+      "お手数ですが、もう一度録音してください。";
+  }
+
+  /**
    * 未登録の担当者へ返す案内。LINE User IDを本文に含めて、本人が管理者へ
    * そのまま転送するだけで登録が済むようにする。
    *
@@ -433,6 +475,12 @@
     buildCompletionMessage: buildCompletionMessage,
     buildDiscardMessage: buildDiscardMessage,
     buildProcessingErrorMessage: buildProcessingErrorMessage,
+    MAX_TRANSIENT_RETRIES: MAX_TRANSIENT_RETRIES,
+    isTransientProcessingError: isTransientProcessingError,
+    parseTransientRetryCount: parseTransientRetryCount,
+    hasTransientRetryLeft: hasTransientRetryLeft,
+    buildTransientRetryNote: buildTransientRetryNote,
+    buildTransientRetryExhaustedMessage: buildTransientRetryExhaustedMessage,
     buildStaffNotFoundMessage: buildStaffNotFoundMessage,
     buildAlreadyProcessingMessage: buildAlreadyProcessingMessage,
     buildAlreadyHandledMessage: buildAlreadyHandledMessage,

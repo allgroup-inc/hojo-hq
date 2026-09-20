@@ -1,8 +1,8 @@
 {
   "note": "サイトのアクセス総量(Plausible集計・Cookieなし)。KGI❶=もらいわすれ堂 月1万人。domain=ドメイン全体(企業のミカタ+もらいわすれ堂)、moradou=もらいわすれ堂ページのみ。",
   "kgi_target_monthly_users": 10000,
-  "last_checked": "2026-08-31 10:56",
-  "last_status": "partial",
+  "last_checked": "2026-09-14 10:59",
+  "last_status": "ok(ga4)",
   "history": [
     {
       "date": "2026-08-04",
@@ -177,6 +177,74 @@
       "period": "7d",
       "domain": null,
       "moradou": null
+    },
+    {
+      "date": "2026-09-04",
+      "period": "7d",
+      "source": "ga4",
+      "domain": {
+        "visitors": 237,
+        "pageviews": 246,
+        "bounce_rate": 97,
+        "visit_duration": 10
+      },
+      "moradou": {
+        "visitors": 235,
+        "pageviews": 243,
+        "bounce_rate": 97,
+        "visit_duration": 10
+      }
+    },
+    {
+      "date": "2026-09-07",
+      "period": "7d",
+      "source": "ga4",
+      "domain": {
+        "visitors": 235,
+        "pageviews": 244,
+        "bounce_rate": 96,
+        "visit_duration": 8
+      },
+      "moradou": {
+        "visitors": 233,
+        "pageviews": 241,
+        "bounce_rate": 96,
+        "visit_duration": 8
+      }
+    },
+    {
+      "date": "2026-09-08",
+      "period": "7d",
+      "source": "ga4",
+      "domain": {
+        "visitors": 234,
+        "pageviews": 242,
+        "bounce_rate": 97,
+        "visit_duration": 8
+      },
+      "moradou": {
+        "visitors": 233,
+        "pageviews": 241,
+        "bounce_rate": 97,
+        "visit_duration": 8
+      }
+    },
+    {
+      "date": "2026-09-14",
+      "period": "7d",
+      "source": "ga4",
+      "domain": {
+        "visitors": 9,
+        "pageviews": 11,
+        "bounce_rate": 80,
+        "visit_duration": 11
+      },
+      "moradou": {
+        "visitors": 3,
+        "pageviews": 5,
+        "bounce_rate": 50,
+        "visit_duration": 26
+      }
     }
   ],
   "all_time": {
@@ -185,5 +253,12 @@
     "domain_visitors": 90,
     "moradou_visitors": 53,
     "moradou_pageviews": 272
+  },
+  "all_time_ga4": {
+    "since_measured": "GA4計測開始日以降のみ",
+    "as_of": "2026-09-14",
+    "domain_visitors": 258,
+    "moradou_visitors": 249,
+    "moradou_pageviews": 261
   }
 }

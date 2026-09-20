@@ -4,9 +4,9 @@
  * 「連絡不要」フラグをTRUEにする。さらに同じ電話番号を持つ他の企業
  * (関連会社・家族経営等)にも連絡不要を伝播させる(GlowDedupe.propagateDoNotContact)。
  *
- * Apps Scriptエディタの関数選択で syncDoNotContactFlags を選び、実行ボタンで
- * 手動実行する。(将来的には日次バッチに組み込むことを想定しているが、
- * トリガー登録自体は本Planの範囲外。)
+ * 通常は MaintenanceRunner.gs の runDailyMaintenance から日次で自動実行される
+ * (2026-09-03 まで手動実行のみだったため、断った会社への再架電が起こりうる状態だった)。
+ * 単発で反映したいときだけ、Apps Scriptエディタで syncDoNotContactFlags を直接実行する。
  */
 function syncDoNotContactFlags() {
   var lock = LockService.getDocumentLock();

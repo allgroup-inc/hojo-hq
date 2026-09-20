@@ -516,17 +516,17 @@ def kit_page(it, updated):
 
 
 def index_page(items, updated):
+    # 260件超の一覧で行ごとのインラインstyleを繰り返すとサイズ予算(96KB)を超えるため、
+    # 共通スタイルは下のbody内<style>に1回だけ書く(2026-09-11 fetch #254のサイズ超過対応)
     def line(it):
         # 一覧では「照合済み」は✓だけに圧縮(176件の縦の壁と視覚ノイズを減らす・議事_20260817組版)
         if it.get("verified") is True:
-            b = ' <span class="status ok" title="公式と照合済み" style="padding:1px 7px">✓</span>'
+            b = ' <span class="status ok" title="公式と照合済み">✓</span>'
         elif it.get("status") == "要確認":
-            b = ' <span class="status" style="font-size:.72rem;padding:1px 7px">要確認</span>'
+            b = ' <span class="status">要確認</span>'
         else:
             b = ""
-        return (f'<li style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;'
-                f'border-bottom:1px dashed var(--fg-line)">'
-                f'<a href="{esc(it["id"])}/" style="display:inline-block;padding:9px 0;line-height:1.55">{esc(it["name"])}</a>{b}</li>')
+        return f'<li><a href="{esc(it["id"])}/">{esc(it["name"])}</a>{b}</li>'
     # 全国/沖縄県/市町村の3区分で表示(160件のフラット一覧は探しにくいため・2026-08-12 小柳さん委任裁定)
     national = [it for it in items if it.get("area") == "全国"]
     pref = [it for it in items if it.get("area") == "沖縄県"]
@@ -544,10 +544,11 @@ def index_page(items, updated):
         sections.append(
             f"<h2 style='font-size:1.1rem;margin-top:20px'>{label}({len(group)}件)</h2>"
             f"<p class='note'>{note}</p>"
-            f"<div class='box'><ul style='list-style:none'>{lis}</ul></div>"
+            f"<div class='box'><ul class='kul'>{lis}</ul></div>"
         )
     sections_html = "\n".join(sections)
     body = f"""
+<style>.kul{{list-style:none}}.kul li{{display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:1px dashed var(--fg-line)}}.kul a{{display:inline-block;padding:9px 0;line-height:1.55}}.kul .status{{font-size:.72rem;padding:1px 7px}}.kul .ok{{font-size:inherit}}</style>
 <h1>申請準備シート一覧</h1>
 <p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・振込確認まで。<strong>スマホで開いたまま窓口で使えます</strong>(印刷して持っていくのもOK。プリンターがない方向けにコンビニ印刷の手順も各シートにあります)。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>

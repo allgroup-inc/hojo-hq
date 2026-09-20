@@ -1,0 +1,22 @@
+# GA4オンデマンド照会(「今日何人?」に即答する読み取り専用ジョブ)
+# 手動実行のみ。ファイルは書かず、集計値をジョブログに出すだけ。
+name: ga4-query
+on:
+  workflow_dispatch:
+
+jobs:
+  query:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: GA4照会
+        env:
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
+        run: |
+          pip install -q google-auth requests
+          python scripts/ga4_query.py

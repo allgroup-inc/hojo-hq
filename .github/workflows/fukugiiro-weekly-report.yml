@@ -48,7 +48,7 @@ jobs:
           GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
           GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
         run: |
-          if [ -n "$GA4_PROPERTY_ID" ] && [ -n "$GA4_SA_JSON" ]; then pip install -q google-auth; fi
+          if [ -n "$GA4_PROPERTY_ID" ] && [ -n "$GA4_SA_JSON" ]; then pip install -q google-auth requests; fi
           python scripts/fetch_ga4_traffic.py
 
       - name: 週次レポート生成(統括ユイさん)

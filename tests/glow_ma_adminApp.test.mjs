@@ -589,3 +589,33 @@ test("buildAdminAppHtml: バージョンがv1.6.0に上がり、更新履歴に�
   assert.ok(html.includes("v1.6.0"));
   assert.ok(html.includes("クイック記録"));
 });
+
+// ---- v1.7.0 連続架電モード ----
+
+test("buildAdminAppHtml: 架電開始ボタンとコールモード画面の主要要素を含む", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["callStartBtn", "callOverlay", "callCounter", "callCompanyName", "callPhoneBtn",
+   "callHistory", "callEndBtn", "callSkipBtn", "callStatus", "callExtraArea"]
+    .forEach((id) => {
+      assert.ok(html.includes('id=\\"' + id + '\\"') || html.includes('id="' + id + '"'), id + " が含まれていない");
+    });
+  assert.ok(html.includes(".getCallQueue("));
+  assert.ok(html.includes(".recordCallOutcome("));
+});
+
+test("buildAdminAppHtml: 結果ボタン5種(不在/話せた/アポ獲得/断られた/番号違い)がある", () => {
+  const html = adminApp.buildAdminAppHtml();
+  ["不在だった", "話せた", "アポ獲得", "断られた", "番号違い"].forEach((label) => {
+    assert.ok(html.includes(label), label + " のボタンがない");
+  });
+  // 断り理由のワンタップ選択
+  ["時期が合わない", "必要ない", "他社利用中"].forEach((label) => {
+    assert.ok(html.includes(label), "断り理由 " + label + " がない");
+  });
+});
+
+test("buildAdminAppHtml: バージョンがv1.7.0に上がり、更新履歴に連続架電モードの説明がある", () => {
+  const html = adminApp.buildAdminAppHtml();
+  assert.ok(html.includes("v1.7.0"));
+  assert.ok(html.includes("連続架電モード"));
+});

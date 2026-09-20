@@ -185,7 +185,8 @@ def life_page(slug, events, heading, kw, items, updated):
                 '<div class="card">'
                 f"<h2>{esc(it['name'])}{badge}</h2>"
                 f'<p class="note">{esc(it["target_household"])}</p>'
-                f'<p class="note">窓口: {esc(it["how_to_apply"])}</p>'
+                # 窓口行は載せない(準備シート側に地図・電話つきの窓口情報あり。
+                # 2026-09-08 掲載97件でサイズ予算超過したため一覧は対象+リンクに絞る)
                 f'<p style="display:flex;gap:16px;flex-wrap:wrap;margin:0">'
                 f'<a href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する</a>'
                 f'<a href="../../kit/{esc(it["id"])}/">申請準備シート</a></p>'

@@ -1,0 +1,80 @@
+name: kekka-log-draft
+
+# 結果マガ 無料実録ログ記事の週次自動生成(2026-09-16 小柳さん決裁・案1)。
+# 議事: docs/議事_20260916_判定日_流入仮説棄却とチャネル再設計.md
+# 唯一実証された流入装置=note公式ピックアップの抽選回数を増やす。公開は人間の10分
+# (noteに投稿APIなし=自動投稿は絶対禁止)。公開後は publish-record --id L{NN} で記録・X告知。
+# cronはUTC混雑帯・ジャスト分を避ける(ニドナシ#20)。同日重複ガードあり(drafted_at)。
+
+on:
+  schedule:
+    - cron: "17 2 * * 5"   # 金曜 11:17 JST(本枠)
+    - cron: "41 3 * * 5"   # 金曜 12:41 JST(リトライ枠)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kekka-log-draft
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 実録ログ記事の生成(数字ガード=台帳実数のみ)
+        id: gen
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          pip install -q anthropic pillow
+          python scripts/generate_kekka_log.py >> "$GITHUB_OUTPUT"
+
+      - name: コミット
+        if: steps.gen.outputs.stem != ''
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add posts/note/tanpatsu posts/note/paste data/tanpatsu_topics.json assets/kekka
+          git diff --cached --quiet || git commit -m "auto: 無料実録ログ下書き ${{ steps.gen.outputs.stem }}"
+          for i in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            echo "push retry $i"; sleep 5
+          done
+
+      - name: LINE通知(下書き完成)
+        if: steps.gen.outputs.stem != ''
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            📗【結果マガ】今週の無料実録ログができました(公開は約5分・無料記事)
+
+            ${{ steps.gen.outputs.title }}
+
+            ━━━ 公開手順 ━━━
+            ①貼るだけ版を開き「Raw」→全文コピー(1行目がタイトル)
+            https://github.com/${{ github.repository }}/blob/main/posts/note/paste/${{ steps.gen.outputs.log_id }}_hariduke_you.md
+            ②noteの新規記事に貼り付け(翻訳ポップアップは「翻訳しない」)
+            ③無料のまま公開設定 → マガジンに追加 → 投稿
+            (有料ライン・価格設定は不要。見出し画像は任意: 下のURLの画像を保存して設定)
+            https://github.com/${{ github.repository }}/blob/main/${{ steps.gen.outputs.eyecatch }}
+            ④公開URLをチャットに貼る(記録とX告知は自動で回ります)
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【結果マガ】無料実録ログの生成に失敗しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
