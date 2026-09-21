@@ -113,9 +113,9 @@ footer.site a{color:var(--muted)}
 <!-- ===== 世界観フィルム(v0): 夜→朝、「扉がひらく」の物語。実写差し替え前の絵コンテ実装(堂シリーズ共通の文法) ===== -->
 <link rel="stylesheet" href="assets/film.css">
 <noscript><style>
-.mfilm .rise,.mfilm .stmt,.mfilm .sunburst,.mfilm .dlogo .tile,.mfilm .dlogo .moji,.mfilm .dlogo .bdg,.mfilm .vision span{opacity:1!important;transform:none!important}
+.mfilm .rise,.mfilm .stmt,.mfilm .sunburst,.mfilm .dlogo .petal,.mfilm .vision span{opacity:1!important;transform:none!important}
 .mfilm .stmt{letter-spacing:.14em!important}
-.mfilm .dlogo .arw{stroke-dashoffset:0!important}
+.mfilm .dlogo .arc{stroke-dashoffset:0!important}
 </style></noscript>
 <div style="position:relative">
 <div class="mhead" id="mhead">
@@ -134,7 +134,7 @@ footer.site a{color:var(--muted)}
       <div class="island"><svg viewBox="0 0 1200 240" preserveAspectRatio="none"><path d="M0 240 L0 150 C120 118 260 132 380 110 C500 88 640 96 760 118 C880 140 1040 128 1200 150 L1200 240 Z" fill="#0B1514"/></svg></div>
       <div id="mvlights"></div>
       <!-- 星を見上げる子ども(影絵) -->
-      <div class="sil" style="left:50%;bottom:16vh;width:min(34vw,150px);transform:translateX(-50%)"><svg viewBox="0 0 200 170">
+      <div class="sil" style="left:50%;bottom:9vh;width:min(34vw,150px);transform:translateX(-50%)"><svg viewBox="0 0 200 170">
         <circle cx="104" cy="42" r="17"/>
         <path d="M72 170 C74 128 82 96 98 86 C112 80 126 90 130 106 C136 128 136 150 134 170 Z"/>
         <path d="M78 128 C64 122 54 110 50 96 L58 92 C62 104 72 114 84 118 Z"/>
@@ -212,12 +212,17 @@ footer.site a{color:var(--muted)}
   <!-- S5: 朝・ロゴの現れ -->
   <section class="scene" id="ms5">
     <div class="sunburst"></div>
-    <svg class="dlogo" viewBox="0 0 100 100" aria-label="みらいひらけ堂のロゴ">
-      <rect class="tile" x="4" y="4" width="92" height="92" rx="23" fill="#B9502F"/>
-      <text class="moji" x="50" y="46" font-family="'Hiragino Maru Gothic ProN','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">みら</text>
-      <text class="moji" x="50" y="80" font-family="'Hiragino Maru Gothic ProN','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">堂</text>
-      <circle class="bdg" cx="81" cy="19" r="14" fill="#F2B705" stroke="#FFFBF4" stroke-width="3"/>
-      <path class="arw" d="M75 25 L87 13 M87 13 h-8 M87 13 v8" stroke="#1F2A2E" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <div class="mote" style="width:6px;height:6px;top:22%;left:24%;animation-delay:.4s"></div>
+    <div class="mote" style="width:5px;height:5px;top:34%;left:72%;animation-delay:1.6s"></div>
+    <!-- ロゴ「虹と朝日」(堂シリーズ共通)。虹が3色順に描かれ、最後に朝日がのぼる -->
+    <svg class="dlogo" viewBox="0 0 64 46" aria-label="みらいひらけ堂のロゴ">
+      <g class="petal">
+        <g fill="#F5CE6E"><circle cx="38" cy="12.5" r="1.9"/><circle cx="36.2" cy="16.7" r="1.9"/><circle cx="32" cy="18.5" r="1.9"/><circle cx="27.8" cy="16.7" r="1.9"/><circle cx="26" cy="12.5" r="1.9"/><circle cx="27.8" cy="8.3" r="1.9"/><circle cx="32" cy="6.5" r="1.9"/><circle cx="36.2" cy="8.3" r="1.9"/></g>
+        <circle cx="32" cy="12.5" r="4" fill="#F2C14E"/>
+      </g>
+      <path class="arc a1" d="M11 43 A21 21 0 0 1 53 43" stroke="#D2694A"/>
+      <path class="arc a2" d="M18 43 A14 14 0 0 1 46 43" stroke="#F2C14E"/>
+      <path class="arc a3" d="M25 43 A7 7 0 0 1 39 43" stroke="#6FAEA4"/>
     </svg>
     <div class="copy">
       <p class="vision" id="mvision">ひらけ、みらい。</p>

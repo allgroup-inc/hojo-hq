@@ -1,10 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="430" height="100" viewBox="0 0 430 100" role="img" aria-label="みらいひらけ堂">
-  <!-- 堂シリーズ共通の文法(もらいわすれ堂ロゴ準拠): 朱タイル+2段丸ゴ+黄バッジ。
-       バッジはもら堂の「1件の通知」に対し、みら堂は「ひらいていく方向(↗)」 -->
-  <rect x="4" y="4" width="92" height="92" rx="23" fill="#B9502F"/>
-  <text x="50" y="46" font-family="'Hiragino Maru Gothic ProN','HGMaruGothicMPRO','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">みら</text>
-  <text x="50" y="80" font-family="'Hiragino Maru Gothic ProN','HGMaruGothicMPRO','Noto Sans JP',sans-serif" font-size="28" fill="#FFFBF4" text-anchor="middle" font-weight="800">堂</text>
-  <circle cx="81" cy="19" r="14" fill="#F2B705" stroke="#FFFBF4" stroke-width="3"/>
-  <path d="M75 25 L87 13 M87 13 h-8 M87 13 v8" stroke="#1F2A2E" stroke-width="3" stroke-linecap="round" fill="none"/>
-  <text x="114" y="64" font-family="'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif" font-size="40" fill="#1F2A2E" font-weight="800" letter-spacing="1">みらいひらけ堂</text>
+  <!-- 横組みロックアップ(堂シリーズ共通: アイコン「虹と朝日」+ しっぽり明朝600 #B9502F。もらいわすれ堂ロゴガイドv1準拠) -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FAECDC"/>
+      <stop offset="1" stop-color="#F5E0CE"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(4 4) scale(1.4375)">
+    <rect x="2" y="2" width="60" height="60" rx="18" fill="url(#tile)"/>
+    <g fill="#F5CE6E">
+      <circle cx="38" cy="19.5" r="1.9"/><circle cx="36.2" cy="23.7" r="1.9"/><circle cx="32" cy="25.5" r="1.9"/><circle cx="27.8" cy="23.7" r="1.9"/>
+      <circle cx="26" cy="19.5" r="1.9"/><circle cx="27.8" cy="15.3" r="1.9"/><circle cx="32" cy="13.5" r="1.9"/><circle cx="36.2" cy="15.3" r="1.9"/>
+    </g>
+    <circle cx="32" cy="19.5" r="4" fill="#F2C14E"/>
+    <path d="M11 53 A21 21 0 0 1 53 53" stroke="#D2694A" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M18 53 A14 14 0 0 1 46 53" stroke="#F2C14E" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M25 53 A7 7 0 0 1 39 53" stroke="#6FAEA4" stroke-width="6" fill="none" stroke-linecap="round"/>
+  </g>
+  <text x="112" y="64" font-family="'Shippori Mincho','Hiragino Mincho ProN','Yu Mincho',serif" font-size="40" fill="#B9502F" font-weight="600" letter-spacing="2">みらいひらけ堂</text>
 </svg>
