@@ -48,7 +48,7 @@ LINE_HOSTS = ("lin.ee", "line.me")
 # 締切3層ルール(CLAUDE.md)。SNS告知に使えるのは30日以上先か、締切なしの制度だけ
 SNS_MIN_DAYS = 30
 
-# 「締切7日前」系は憲法が명示的に誤りとしている表現
+# 「締切7日前」系は憲法が明示的に誤りとしている表現
 BANNED_DEADLINE_PHRASES = ["締切7日前", "締切の7日前", "7日前アラート", "締切1週間前"]
 
 # 生成ステップと、その出力が fukugiiro-fetch.yml の git add に載っているべきパス。
@@ -197,9 +197,28 @@ def check_workflow_add_list(rep, wf=None):
 
 
 # ---------------------------------------------------------------- 検査4
-_DOC_PATH = re.compile(r"(?<![\w/./-])docs/[^\s`)（）、。,|\"'<>]*\.md")
+_DOC_PATH = re.compile(r"(?<![\w/./-])docs/[^\s`)（）、。,|\"'<>・]*\.md")
 # 「非公開repo」「kakei-crm」等が同じ行にあれば、本リポジトリ外を指しているとみなす
-_EXTERNAL_HINTS = ("非公開repo", "非公開リポ", "kakei-crm", "glow-docs-private", "移設済み", "移設先")
+# ファイル名の雛形。実在しなくて当然なので検査対象外
+_TEMPLATE_TOKENS = ("*", "<", ">", "YYYYMMDD", "YYYY-MM-DD", "YYYY", "MM-DD", "nnn", "◯", "〇")
+
+
+def _is_template(ref):
+    return any(t in ref for t in _TEMPLATE_TOKENS)
+
+
+# 同じ行に「どこへ行ったか/なぜ無いか」の注記があれば、リンク切れではなく記録とみなす。
+# 過去の決裁記録のパスを黙って書き換えると、いつ何を決めたかが追えなくなるため、
+# パスは残したまま注記を添える運用にしている(docs/移設済み_アポ管理と営業指名_2026-08-22.md)。
+_EXTERNAL_HINTS = (
+    # 他リポジトリにある
+    "非公開repo", "非公開リポ", "kakei-crm", "glow-docs-private",
+    "移設済み", "移設先", "本リポジトリの対象外",
+    # 別の文書に統合された
+    "へ統合", "に統合", "統合済み",
+    # そもそも作られていない(宿題として別途管理する)
+    "未作成",
+)
 
 
 def check_doc_refs(rep, files=None):
@@ -220,8 +239,8 @@ def check_doc_refs(rep, files=None):
                 continue
             for m in _DOC_PATH.finditer(ln):
                 ref = m.group(0)
-                if "*" in ref or "<" in ref or ">" in ref:
-                    continue   # テンプレート表記
+                if _is_template(ref):
+                    continue   # テンプレート表記(雛形)であって実パスではない
                 if not os.path.exists(os.path.join(BASE, ref)):
                     rep.add("ng", "doc-ref",
                             f"{os.path.relpath(path, BASE)} が存在しない {ref} を案内しています")
