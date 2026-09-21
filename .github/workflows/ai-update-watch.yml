@@ -1,0 +1,92 @@
+name: ai-update-watch
+
+# 月次: Claude Code / Anthropic / MCP の直近アップデートを Claude(Web検索付き)で調べ、
+# 運用に効くものだけを docs/AI更新ウォッチ_YYYY-MM.md にまとめて PR を出す(2026-09-21 導入)。
+# 直接 main には書かず PR にするのは、AIの調査結果を人が出典で裏取りしてから取り込むため。
+# Secrets: ANTHROPIC_API_KEY(既存)。
+# 注意: github.token で PR を作るには、リポジトリ設定 Actions → General →
+# 「Allow GitHub Actions to create and approve pull requests」が有効である必要がある。
+# 無効の場合はブランチだけ push して警告を出す(手動で PR を作れる)。
+
+on:
+  schedule:
+    # JST 毎月1日 10:00(= UTC 1日 01:00)
+    - cron: "0 1 1 * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: ai-update-watch
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install -q anthropic
+
+      - name: Self-test
+        run: python scripts/ai_update_watch.py --self-test
+
+      - name: Research updates
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/ai_update_watch.py
+
+      - name: Open PR with the monthly watch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          month=$(TZ=Asia/Tokyo date '+%Y-%m')
+          file="docs/AI更新ウォッチ/${month}.md"
+          if git diff --quiet -- "$file" && git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
+            echo "変更なし(同月分は既に取り込み済み)"; exit 0
+          fi
+          [ -f "$file" ] || { echo "生成ファイルが無い(スキップ扱い)"; exit 0; }
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          branch="auto/ai-update-watch-${month}"
+          git checkout -B "$branch"
+          git add "$file"
+          git commit -m "auto: AI更新ウォッチ ${month}"
+          git push -f origin "$branch"
+          if gh pr create --base main --head "$branch" \
+               --title "AI更新ウォッチ ${month}(自動調査・要裏取り)" \
+               --body "月次の自動調査です。**出典URLで裏取りしてから**採用してください。「すぐ試せる」は該当チャットで試し、効けばCLAUDE.md/スキルへ1行。「要決裁」は決裁キューへ。" \
+               2>pr_err.txt; then
+            echo "PR を作成しました"
+          else
+            cat pr_err.txt
+            echo "::warning::PR 作成に失敗(ブランチ $branch は push 済み。手動で PR を作成するか、Actions の PR 作成許可を確認)"
+          fi
+
+      - name: Open or update issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh label create ai-update-watch --color 0E8A16 \
+            --description "月次AI更新ウォッチの自動調査が失敗" 2>/dev/null || true
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body="月次AI更新ウォッチの自動調査が失敗しました。\n\n- 実行: $run_url\n- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')\n\nよくある原因: Claude API の一時障害(自動リトライ済み)/ Web検索ツールの仕様変更。"
+          existing=$(gh issue list --state open --label ai-update-watch --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            printf "%b" "$body" | gh issue comment "$existing" --body-file -
+          else
+            printf "%b" "$body" | gh issue create --label ai-update-watch \
+              --title "⚠️ 月次AI更新ウォッチの自動調査に失敗" --body-file -
+          fi
