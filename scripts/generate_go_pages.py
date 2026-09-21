@@ -49,6 +49,18 @@ CHANNELS = {
     "fg-kit":     {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 制度キットページ"},
     "fg-shindan": {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 診断ページ"},
     "fg-jukyu":   {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 受給報告(受け取れました)"},
+    # Instagram(@moradou.okinawa)プロフィールのリンク。転送先はLINEではなく
+    # 診断ページなので event を必ず変える(既定の line_redirect のままだと
+    # プロフィールのタップがLINE登録として数えられ、❹の現在地を見誤る)。
+    # 着地側でも経路が分かるよう utm を付ける(GA4のイベントと二重に取れる)。
+    "fg-ig":      {"dest": "https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/"
+                           "?utm_source=instagram&utm_medium=social&utm_campaign=profile",
+                   "label": "もらいわすれ堂: Instagramプロフィール → 3分診断",
+                   "event": "shindan_redirect", "dest_name": "3分診断"},
+    # プロフィールのリンク枠は2つある。2つめをLINEにする場合だけこちらを使う
+    # (使わないなら CHANNELS から消して再実行すればページごと消える)。
+    "fg-ig-line": {"dest": "https://lin.ee/7fH7vDQ",
+                   "label": "もらいわすれ堂: Instagramプロフィール → LINE"},
     # ── もらいわすれ堂 山梨版(@630pbjqq・2026-09-03開設) ──
     # dest は当面ベーシックIDから作る正式な友だち追加リンク。lin.ee の短縮URLが
     # 発行されたらここを差し替えて再実行(docs/もらいわすれ堂_山梨版_LINE開設キット参照)。

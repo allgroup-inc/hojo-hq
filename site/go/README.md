@@ -18,6 +18,8 @@
 | /go/fg-kit/ | フクギイロ: 制度キットページ | https://lin.ee/7fH7vDQ |
 | /go/fg-shindan/ | フクギイロ: 診断ページ | https://lin.ee/7fH7vDQ |
 | /go/fg-jukyu/ | フクギイロ: 受給報告(受け取れました) | https://lin.ee/7fH7vDQ |
+| /go/fg-ig/ | もらいわすれ堂: Instagramプロフィール → 3分診断 | https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/?utm_source=instagram&utm_medium=social&utm_campaign=profile |
+| /go/fg-ig-line/ | もらいわすれ堂: Instagramプロフィール → LINE | https://lin.ee/7fH7vDQ |
 | /go/ymn-top/ | フクギイロ山梨: トップページ | https://line.me/R/ti/p/%40630pbjqq |
 | /go/ymn-shindan/ | フクギイロ山梨: 診断ページ | https://line.me/R/ti/p/%40630pbjqq |
 | /go/ymn-area/ | フクギイロ山梨: 市町村ページ | https://line.me/R/ti/p/%40630pbjqq |
