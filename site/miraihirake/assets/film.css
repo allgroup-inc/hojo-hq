@@ -17,7 +17,9 @@
     #F3DCC0 80%,
     #FBF5EC 90%,
     #FBF5EC 100%)}
-.mfilm .scene{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0}
+/* 横のはみ出し(鳥・流れ星)はフィルム全体で切り、縦は各シーンで切らない(写真を隣のシーンへ重ねるため) */
+.mfilm{overflow:hidden}
+.mfilm .scene{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:visible;padding:0}
 .mfilm .copy{position:relative;z-index:6;text-align:center;padding:0 24px;max-width:760px}
 .mfilm .copy p{margin:0;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;line-height:2.1;
   word-break:keep-all;overflow-wrap:anywhere;letter-spacing:.1em}
@@ -32,10 +34,11 @@
 .mfilm .warm-t{color:#FFF7EA;text-shadow:0 2px 20px rgba(90,50,25,.45)}
 .mfilm .kb{position:absolute;inset:0;transform:scale(1.07);transition:transform 22s ease-out;transform-origin:50% 72%}
 .mfilm .in .kb{transform:scale(1)}
-/* 実写: 写真そのものは全開、上に各シーンの色をかぶせ、上下をディゾルブで一枚グラデーションへ溶かす */
-.mfilm .photoback{position:absolute;inset:0;z-index:0;
-  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 38%,#000 62%,transparent 100%);
-  mask-image:linear-gradient(180deg,transparent 0%,#000 38%,#000 62%,transparent 100%)}
+/* 実写: 写真は自分のシーンの上下30vhずつ隣へはみ出し、前の写真が消えながら次の写真が現れる(オーバーラップ)。
+   後のシーンほど上に重なるので、次の写真の透明な上端から前の写真の下端が透けて、境目が生まれない */
+.mfilm .photoback{position:absolute;left:0;right:0;top:-30vh;bottom:-30vh;z-index:0;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 42%,#000 58%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0%,#000 42%,#000 58%,transparent 100%)}
 .mfilm .photoback img{width:100%;height:100%;object-fit:cover;display:block}
 .mfilm .photoback::before{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at 50% 42%,rgba(8,18,18,.34),transparent 62%)}
 .mfilm .photoback::after{content:"";position:absolute;inset:0;z-index:1}

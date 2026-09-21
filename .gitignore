@@ -2,6 +2,9 @@
 healthcheck_report.txt
 verify_report.txt
 
+# 試写・検査の生成物(scripts/miraihirake/preview.sh)
+dist/
+
 # E2E(Playwright)の実行時生成物
 node_modules/
 package.json

@@ -1,0 +1,59 @@
+name: miraihirake-film-check
+
+# みらいひらけ堂のフィルム(トップの世界観演出)を、変更のたびに実ブラウザで自動試写・検査する。
+# 人が目で見ていた「境目の硬い線」「アニメーションが動かない」「ロゴが出ない」を機械で判定し、
+# そのまま開ける試写ファイル(preview.html)と撮影画像を成果物として残す。
+# 公開判定まで GitHub Pages では配信しないため(update.yml)、試写はこの成果物で行う。
+
+on:
+  push:
+    paths:
+      - "site/miraihirake/**"
+      - "scripts/miraihirake/build_preview.py"
+      - "scripts/miraihirake/check_film.js"
+      - ".github/workflows/miraihirake-film-check.yml"
+  pull_request:
+    paths:
+      - "site/miraihirake/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: miraihirake-film-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  film:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Playwright
+        run: |
+          npm init -y > /dev/null
+          npm i -D playwright
+          npx playwright install --with-deps chromium
+
+      - name: 試写ファイルを組む
+        run: python scripts/miraihirake/build_preview.py
+
+      - name: 自動試写・検査(境目・アニメーション・ロゴ)
+        run: node scripts/miraihirake/check_film.js
+
+      - name: 成果物(試写HTML・撮影画像・判定)を残す
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: miraihirake-preview-${{ github.sha }}
+          path: dist/miraihirake
+          retention-days: 30
