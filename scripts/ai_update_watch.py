@@ -60,15 +60,27 @@ def research(prompt):
     client = anthropic.Anthropic(max_retries=3)
     resp = client.messages.create(
         model=MODEL,
-        max_tokens=2500,
+        # Web検索は複数回の検索クエリ・結果要約が本文の前に挟まるため、2500だと
+        # 本文(text block)が出る前にmax_tokensで打ち切られることがある(2026-09-21
+        # 初回本番実行で実際に発生・Issue #348)。テキストなしで終わらせないための余裕。
+        max_tokens=8000,
         tools=[WEB_SEARCH_TOOL],
         messages=[{"role": "user", "content": prompt}],
     )
     text = "\n".join(
         b.text for b in resp.content if getattr(b, "type", "") == "text" and b.text.strip()
     ).strip()
+    if resp.stop_reason == "max_tokens":
+        block_types = [getattr(b, "type", "?") for b in resp.content]
+        raise RuntimeError(
+            f"max_tokensで本文が途中で切れた可能性(stop_reason=max_tokens, blocks={block_types})"
+        )
     if not text:
-        raise RuntimeError("Claude から本文が返りませんでした")
+        block_types = [getattr(b, "type", "?") for b in resp.content]
+        raise RuntimeError(
+            f"Claude から本文が返りませんでした(stop_reason={resp.stop_reason}, "
+            f"blocks={block_types})"
+        )
     return text
 
 
