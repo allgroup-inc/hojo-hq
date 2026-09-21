@@ -91,10 +91,10 @@
 
 /* S5: ロゴの現れ(ロゴ→言葉の縦積み) */
 #ms5{flex-direction:column}
-.mfilm .sunburst{position:absolute;inset:0;background:
-  radial-gradient(circle at 50% 42%,rgba(242,193,78,.28),rgba(242,193,78,0) 46%),
-  conic-gradient(from 0deg at 50% 42%,rgba(242,193,78,.10) 0 6deg,transparent 6deg 18deg,rgba(242,193,78,.10) 18deg 24deg,transparent 24deg 36deg,rgba(242,193,78,.10) 36deg 42deg,transparent 42deg 54deg,rgba(242,193,78,.10) 54deg 60deg,transparent 60deg 72deg,rgba(242,193,78,.10) 72deg 78deg,transparent 78deg 90deg,rgba(242,193,78,.10) 90deg 96deg,transparent 96deg 108deg,rgba(242,193,78,.10) 108deg 114deg,transparent 114deg 126deg,rgba(242,193,78,.10) 126deg 132deg,transparent 132deg 144deg,rgba(242,193,78,.10) 144deg 150deg,transparent 150deg 162deg,rgba(242,193,78,.10) 162deg 168deg,transparent 168deg 180deg,rgba(242,193,78,.10) 180deg 186deg,transparent 186deg 198deg,rgba(242,193,78,.10) 198deg 204deg,transparent 204deg 216deg,rgba(242,193,78,.10) 216deg 222deg,transparent 222deg 234deg,rgba(242,193,78,.10) 234deg 240deg,transparent 240deg 252deg,rgba(242,193,78,.10) 252deg 258deg,transparent 258deg 270deg,rgba(242,193,78,.10) 270deg 276deg,transparent 276deg 288deg,rgba(242,193,78,.10) 288deg 294deg,transparent 294deg 306deg,rgba(242,193,78,.10) 306deg 312deg,transparent 312deg 324deg,rgba(242,193,78,.10) 324deg 330deg,transparent 330deg 342deg,rgba(242,193,78,.10) 342deg 348deg,transparent 348deg 360deg);
-  opacity:0;transition:opacity 2.4s ease}
+/* S5の光: 放射状の筋はなし。もら堂と同じ、やわらかい丸い光だけ */
+.mfilm .sunburst{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);width:90vmin;height:90vmin;border-radius:50%;z-index:1;
+  background:radial-gradient(circle,rgba(246,203,116,.45) 0%,rgba(246,203,116,.2) 34%,rgba(246,203,116,0) 66%);
+  opacity:0;transition:opacity 2.6s ease 1.6s}
 .mfilm .in .sunburst{opacity:1}
 /* ロゴ「虹と朝日」(堂シリーズ共通・もらいわすれ堂ロゴガイドv1準拠): 虹が自分で描かれ、朝日がのぼる */
 .mfilm .dlogo{width:clamp(220px,58vmin,440px);height:auto;display:block;margin:0 auto 10px;position:relative;z-index:6;overflow:visible}
