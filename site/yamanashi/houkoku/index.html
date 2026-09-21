@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>もらえた報告 | もらいわすれ堂</title>
+<title>受け取れた報告 | もらいわすれ堂</title>
 <link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/yamanashi/houkoku/">
-<meta name="description" content="給付金・手当を受け取れたら、ぜひ教えてください。あなたの「もらえた」が、次の誰かの「調べてみよう」につながります。お名前・住所・金額は不要です。">
+<meta name="description" content="給付金・手当を受け取れたら、ぜひ教えてください。あなたの「受け取れた」が、次の誰かの「調べてみよう」につながります。お名前・住所・金額は不要です。">
 <link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,7 +19,7 @@ h1{font-size:1.35rem;margin-bottom:6px;text-align:center}
 .lead .big{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.12rem;color:var(--fg-primary-deep)}
 .box{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:18px 20px;margin:14px 0;box-shadow:var(--fg-shadow)}
 label{display:block;font-weight:700;margin:14px 0 6px}
-label .opt{font-weight:400;font-size:.8rem;color:var(--fg-muted)}
+label .opt{font-weight:400;font-size:.85rem;color:var(--fg-muted)}
 input[type=text],select,textarea{width:100%;padding:13px 14px;border:1.5px solid var(--fg-line);border-radius:12px;font-size:1rem;font-family:inherit;background:#fff;color:var(--fg-ink)}
 textarea{min-height:90px;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--fg-sea)}
@@ -35,20 +35,21 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--fg-sea)}
 <body>
 <script src="../analytics-config.js"></script>
 <script src="../assets/fg-analytics.js"></script>
+<style>p,li{word-break:auto-phrase;text-wrap:pretty}h1,h2,h3{text-wrap:balance}.siteheader nav a{font-size:.95rem;padding:10px 12px}.siteheader .hlogo{font-size:1.1rem}</style>
 <header class="siteheader">
-  <a class="hlogo" href="../index.html"><img src="../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.72rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
+  <a class="hlogo" href="../index.html"><img src="../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.78rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
   <nav>
     <a href="../shindan/">3分診断</a>
-    <a href="../life/">ライフイベント別</a>
     <a href="../area/">市町村</a>
+    <a href="../kit/">準備シート</a>
   </nav>
 </header>
 <div class="wrap">
-<p class="note"><a href="../index.html">もらいわすれ堂</a> › もらえた報告</p>
+<p class="note"><a href="../index.html">もらいわすれ堂</a> › 受け取れた報告</p>
 <h1>受け取れたこと、教えてください</h1>
 <div class="lead">
   <p class="big">おめでとうございます。</p>
-  <p>あなたの「もらえた」の一言が、<br>「うちも調べてみよう」という<strong>次の誰かの一歩</strong>になります。</p>
+  <p>あなたの「受け取れた」の一言が、<br>「うちも調べてみよう」という<strong>次の誰かの一歩</strong>になります。</p>
 </div>
 
 <div class="box">
@@ -76,7 +77,7 @@ document.getElementById('send').addEventListener('click', function(){
   var seido=(document.getElementById('seido').value||'').trim();
   var area=document.getElementById('area').value;
   var koe=(document.getElementById('koe').value||'').trim();
-  var lines=['【もらえた報告】'];
+  var lines=['【受け取れた報告】'];
   lines.push('制度: '+(seido||'(名前はうろ覚えです)'));
   if(area) lines.push('市町村: '+area);
   if(koe) lines.push('ひとこと: '+koe);

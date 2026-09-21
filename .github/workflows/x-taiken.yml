@@ -10,8 +10,11 @@ name: x-taiken
 
 on:
   schedule:
-    - cron: "5 12 * * 1,4"   # 月・木 21:05 JST(本枠)
-    - cron: "5 13 * * 1,4"   # 月・木 22:05 JST(リトライ枠)
+    # ニドナシ#22: JST夜=UTC11〜14時はどう配置しても発火しない(3構成連続で失敗)。
+    # 一方この repo で tanpatsu(0:35 UTC)・kekka-log(2:17 UTC)は毎回発火している。
+    # 投稿枠をJST朝(7〜9時=UTC22〜0時の実績帯)へ移設する。朝の通勤帯はX閲覧も多い
+    - cron: "23 22 * * 0,3"  # 月・木 7:23 JST(本枠。UTC日曜/水曜=JST月/木の朝)
+    - cron: "41 23 * * 0,3"  # 月・木 8:41 JST(リトライ枠)
   workflow_dispatch:
 
 permissions:

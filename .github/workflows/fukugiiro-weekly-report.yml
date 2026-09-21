@@ -29,11 +29,16 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Plausibleファネル取得(キーが有れば)
+      # GA4優先(2026-08-24 Plausible契約終了。Secretsが無ければ従来どおりPlausible→未設定ならスキップ)
+      - name: ファネル取得 GA4優先(キーが有れば)
         continue-on-error: true
         env:
           PLAUSIBLE_API_KEY: ${{ secrets.PLAUSIBLE_API_KEY }}
-        run: python scripts/fetch_plausible_funnel.py
+          GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+        run: |
+          if [ -n "$GA4_SA_JSON" ]; then pip install -q google-auth requests; fi
+          python scripts/fetch_plausible_funnel.py
 
       - name: サイトのアクセス総量取得(訪問者数・PV / キーが有れば)
         continue-on-error: true

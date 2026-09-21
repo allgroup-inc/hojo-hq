@@ -1,56 +1,50 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-08-20",
+  "updated_at": "2026-09-21",
   "period": "7d",
-  "source": "plausible-stats-api",
-  "line_detail": {
-    "click_by_pos": {},
-    "redirect_by_channel": {
-      "ig": 6
-    }
-  },
+  "source": "ga4-data-api",
   "stages": [
     {
       "key": "shindan_start",
       "label": "診断開始",
-      "count": 15,
+      "count": 4,
       "cvr_from_prev": null,
       "drop_rate": null
     },
     {
       "key": "shindan_step_q2",
       "label": "Q2到達",
-      "count": 8,
-      "cvr_from_prev": 0.5333333333333333,
-      "drop_rate": 0.4666666666666667
+      "count": 3,
+      "cvr_from_prev": 0.75,
+      "drop_rate": 0.25
     },
     {
       "key": "shindan_step_q3",
       "label": "Q3到達",
-      "count": 3,
-      "cvr_from_prev": 0.375,
-      "drop_rate": 0.625
+      "count": 1,
+      "cvr_from_prev": 0.3333333333333333,
+      "drop_rate": 0.6666666666666667
     },
     {
       "key": "shindan_step_q4",
       "label": "Q4到達",
-      "count": 8,
-      "cvr_from_prev": 2.6666666666666665,
-      "drop_rate": -1.6666666666666665
+      "count": 3,
+      "cvr_from_prev": 3.0,
+      "drop_rate": -2.0
     },
     {
       "key": "shindan_step_q5",
       "label": "Q5到達",
-      "count": 7,
-      "cvr_from_prev": 0.875,
-      "drop_rate": 0.125
+      "count": 3,
+      "cvr_from_prev": 1.0,
+      "drop_rate": 0.0
     },
     {
       "key": "shindan_complete",
       "label": "診断完了(1件以上)",
-      "count": 6,
-      "cvr_from_prev": 0.8571428571428571,
-      "drop_rate": 0.1428571428571429
+      "count": 2,
+      "cvr_from_prev": 0.6666666666666666,
+      "drop_rate": 0.33333333333333337
     },
     {
       "key": "line_add_click",
@@ -64,12 +58,19 @@
     "kit_click": 0,
     "seido_done_mark": 0,
     "jukyu_report_click": 0,
-    "shindan_zero": 1
+    "shindan_zero": 2,
+    "jukyu_report_link_top": 0,
+    "jukyu_report_link_shindan": 0,
+    "jukyu_report_link_kit": 0,
+    "jukyu_report_link_area": 0,
+    "jukyu_report_link_life": 0,
+    "shindan_cta_click": 0,
+    "shindan_redirect": 0
   },
   "key_rates": {
-    "finish_rate": 0.4666666666666667,
+    "finish_rate": 1.0,
     "line_cvr": 0.0,
-    "zero_rate": 0.14285714285714285
+    "zero_rate": 0.5
   },
   "worst_drop": {
     "stage": "line_add_click",

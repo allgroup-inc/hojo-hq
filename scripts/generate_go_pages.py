@@ -49,6 +49,28 @@ CHANNELS = {
     "fg-kit":     {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 制度キットページ"},
     "fg-shindan": {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 診断ページ"},
     "fg-jukyu":   {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: 受給報告(受け取れました)"},
+    # Instagram(@moradou.okinawa)プロフィールのリンク。転送先はLINEではなく
+    # 診断ページなので event を必ず変える(既定の line_redirect のままだと
+    # プロフィールのタップがLINE登録として数えられ、❹の現在地を見誤る)。
+    # 着地側でも経路が分かるよう utm を付ける(GA4のイベントと二重に取れる)。
+    "fg-ig":      {"dest": "https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/"
+                           "?utm_source=instagram&utm_medium=social&utm_campaign=profile",
+                   "label": "もらいわすれ堂: Instagramプロフィール → 3分診断",
+                   "event": "shindan_redirect", "dest_name": "3分診断"},
+    # プロフィールのリンク枠は2つある。2つめをLINEにする場合だけこちらを使う
+    # (使わないなら CHANNELS から消して再実行すればページごと消える)。
+    "fg-ig-line": {"dest": "https://lin.ee/7fH7vDQ",
+                   "label": "もらいわすれ堂: Instagramプロフィール → LINE"},
+    # ── もらいわすれ堂 山梨版(@630pbjqq・2026-09-03開設) ──
+    # dest は当面ベーシックIDから作る正式な友だち追加リンク。lin.ee の短縮URLが
+    # 発行されたらここを差し替えて再実行(docs/もらいわすれ堂_山梨版_LINE開設キット参照)。
+    # 転送先はLINEなので event は既定(line_redirect)のまま。channel=ymn-* で沖縄版と分けて集計。
+    "ymn-top":     {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: トップページ"},
+    "ymn-shindan": {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 診断ページ"},
+    "ymn-area":    {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 市町村ページ"},
+    "ymn-kit":     {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 準備シートページ"},
+    "ymn-life":    {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: ライフイベント別ページ"},
+    "ymn-jukyu":   {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 受給報告(受け取れました)"},
 }
 
 TEMPLATE = """<!DOCTYPE html>
@@ -61,9 +83,9 @@ TEMPLATE = """<!DOCTYPE html>
 {analytics}
 <style>
   body{{font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;
-    background:#00335c;color:#F7F5F1;display:flex;flex-direction:column;gap:16px;
+    background:{bg};color:{fg};display:flex;flex-direction:column;gap:16px;
     align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:24px;}}
-  a{{color:#F88800;font-weight:700;}}
+  a{{color:{link};font-weight:700;}}
 </style>
 </head>
 <body>
@@ -116,6 +138,16 @@ README = """# /go/ 中間リンク(lin.ee直貼り禁止)
 CHANNELS に1行足して再実行するだけ(計測→転送の構造は共通テンプレート)。
 GA4 では計測イベントの `channel` パラメータで経路別に集計できる。
 
+## プロフィールの1枠目を /go/ に通すかどうか(事業で型が違う)
+
+| 事業 | プロフィール1枠目 | 理由 |
+|---|---|---|
+| 沖縄企業のミカタ | サイトへ **utm付きの直リンク** | `docs/決裁キュー.md` の既定 |
+| もらいわすれ堂 | **`/go/fg-ig/` 経由** | ❸の計測がゼロで、utm だけだと着地前の離脱を取りこぼすため |
+
+型が分かれているのは事故ではなく決定。**ミカタに合わせて直リンクへ戻さないこと。**
+経緯と採用条件: `docs/議事_20260921_IGプロフィール導線をgo経由にする.md`
+
 **転送先がLINEでないチャネルは `event` と `dest_name` を必ず指定する。**
 既定のまま(`line_redirect`)にすると、その導線のクリックがLINE登録として集計され、
 KGI(LINE登録1,000社)の現在地を見誤る。例:
@@ -138,9 +170,15 @@ def main():
                 channel=ch, event=cfg.get("event", DEFAULT_EVENT))
         else:
             analytics = ANALYTICS_NONE.format(dest=cfg["dest"])
+        # 転送ページの色は事業ブランドに合わせる(点検2026-09-03 ⚪9)。
+        # fg-*/ymn-* = もらいわすれ堂(漆喰・朱)。それ以外 = 沖縄企業のミカタ(紺・橙)
+        if ch.startswith(("fg-", "ymn-")):
+            colors = {"bg": "#FFFBF4", "fg": "#3B322B", "link": "#B9502F"}
+        else:
+            colors = {"bg": "#00335c", "fg": "#F7F5F1", "link": "#F88800"}
         html = TEMPLATE.format(
             channel=ch, dest=cfg["dest"], analytics=analytics,
-            dest_name=cfg.get("dest_name", DEFAULT_DEST_NAME),
+            dest_name=cfg.get("dest_name", DEFAULT_DEST_NAME), **colors,
         )
         with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
             f.write(html)

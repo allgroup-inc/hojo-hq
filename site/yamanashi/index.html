@@ -21,6 +21,8 @@
   /* ブランドガイドv1(朱・黄・漆喰)。背景のグラデーションは使わない(依頼指定) */
   --shu:#B9502F; --ki:#F2B705; --shikkui:#FFFBF4;
   --card:#FFFFFF; --ink:#3B322B; --muted:#8B7C6E; --line:#EEE1D0;
+  /* 冒頭フィルム用(沖縄版film.cssが参照する色。朱系に合わせる) */
+  --coral:#D2694A; --coral-deep:#B9502F; --sun:#F2C14E; --sea:#6FAEA4; --leaf:#7E9B79;
   --shadow:0 1px 2px rgba(0,0,0,.04);
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -28,7 +30,7 @@ body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,s
   font-size:17px;line-height:1.9;color:var(--ink);background:var(--shikkui);-webkit-font-smoothing:antialiased}
 .wrap{max-width:720px;margin:0 auto;padding:0 20px}
 a{color:var(--shu)}
-h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;line-height:1.5;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;line-height:1.5;font-weight:600;word-break:auto-phrase;overflow-wrap:anywhere}
 h2{font-size:1.45rem;margin-bottom:.7em;text-align:center;color:var(--ink)}
 section{padding:48px 0}
 section p{text-align:center}
@@ -44,7 +46,15 @@ section p{text-align:center}
 .siteheader .hlogo{display:flex;align-items:center;gap:9px;font-family:"Shippori Mincho",serif;font-weight:600;color:var(--shu);text-decoration:none;font-size:1.05rem}
 .siteheader .hlogo img{width:32px;height:32px}
 .siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-.siteheader nav a{font-size:.82rem;color:var(--ink);text-decoration:none;padding:7px 10px;border-radius:8px}
+p,li{word-break:auto-phrase;text-wrap:pretty}
+h1,h2,h3{text-wrap:balance}
+.siteheader nav a{font-size:.95rem;color:var(--ink);text-decoration:none;padding:10px 12px;border-radius:8px}
+/* 受け取るまでの道のり(おもてなし点検 2026-09-20) */
+.michinori{list-style:none;display:grid;gap:10px}
+.michinori li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;text-align:left;box-shadow:var(--shadow)}
+.michinori b{display:block;font-family:"Shippori Mincho",serif;color:var(--shu);font-size:1.02rem;margin-bottom:2px}
+.michinori span{font-size:.9rem;color:#5c5148;line-height:1.75}
+@media(min-width:640px){.michinori{grid-template-columns:1fr 1fr 1fr}}
 .hero{text-align:center;padding:46px 0 50px;background:var(--shikkui)}
 .hero .brand img{width:76px;height:76px}
 .hero .wm{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.9rem;color:var(--shu);letter-spacing:.04em;display:block;margin-top:6px}
@@ -77,14 +87,190 @@ footer{background:#3B322B;color:#F3EBDD;padding:36px 0 46px;font-size:.9rem}
 footer .wrap p{margin:6px 0;text-align:center}
 footer a{color:var(--ki)}
 </style>
+<link rel="stylesheet" href="assets/film.css">
+<style>
+/* ===== 山梨版フィルム(沖縄版film.cssの汎用部を流用し、シーンだけ山梨のもの) ===== */
+/* 写真未配置のとき(.nophoto)は影絵と光が主役。写真を置くと自動で実写が主役になる */
+.ysil{position:absolute;z-index:3;opacity:.95}
+.ysil svg{display:block;width:100%;height:auto}
+.ysil svg.fillbox{height:100%}
+.ysil path,.ysil circle,.ysil ellipse,.ysil rect{fill:#0B1514}
+.ys2 .fujicap{fill:#E7E9E4;opacity:.92}
+.ys4 .ysil path,.ys4 .ysil circle,.ys4 .ysil ellipse{fill:#3D2B20}
+/* S3b: ぶどう棚(夜明け)。写真 budo.jpg を置くと実写に切替 */
+.ys3b .ysil path,.ys3b .ysil circle,.ys3b .ysil rect,.ys3b .ysil ellipse{fill:#2A2015}
+.ys3b .photoback img{filter:brightness(.85) saturate(.95)}
+.ys3b .photoback:not(.nophoto)~.ysil{display:none} /* 写真に本物のぶどう棚があるため */
+.ys3b .photoback::after{background:linear-gradient(180deg,rgba(58,74,60,.55) 0%,rgba(96,88,62,.18) 40%,rgba(201,142,108,.28) 66%,rgba(231,185,143,.70) 100%)}
+/* 写真が入ったら影絵を引っ込める(実写主役化・沖縄版と同じ思想) */
+.film .photoback:not(.nophoto)~.ysil{opacity:.35}
+.ys1 .photoback:not(.nophoto)~.island, .ys1 .photoback:not(.nophoto)~#vlights{display:none}
+.ys1 .photoback:not(.nophoto)~.moon{display:none} /* 写真に本物の月があるため */
+.ys2 .photoback:not(.nophoto)~.ysil{display:none} /* 写真に本物の富士があるため(影絵の雪頂が二重に見える) */
+/* 写真の色なじませ: 場面の時間帯(夜→未明→朝)に写真を溶かす */
+.ys1 .photoback::after{background:linear-gradient(180deg,rgba(16,27,26,.55) 0%,rgba(16,27,26,.16) 42%,rgba(16,27,26,.26) 70%,rgba(19,30,29,.78) 100%)}
+.ys2 .photoback img{filter:saturate(.9) brightness(.8)}
+.ys2 .photoback::after{background:linear-gradient(180deg,rgba(24,40,40,.72) 0%,rgba(24,40,40,.22) 38%,rgba(24,40,40,.30) 62%,rgba(31,56,56,.78) 100%)}
+.ys4 .photoback::after{background:linear-gradient(180deg,rgba(110,65,40,.28) 0%,rgba(170,105,70,.12) 46%,rgba(243,220,192,.76) 100%)}
+</style>
 </head>
 <body>
-<header class="siteheader">
+<!-- ===== 山梨版フィルム: 夜の盆地→富士→ぶどう棚→桃源郷→ビジョン。写真は assets/film/ に置くと実写に切替 ===== -->
+<div style="position:relative">
+<div class="tinyhead" id="thead" style="position:absolute">
+  <a class="hl" href="./"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="2" width="60" height="60" rx="18" fill="#F5E0CE"/><g fill="#F5CE6E"><circle cx="52" cy="16.5" r="1.9"/><circle cx="50.2" cy="20.7" r="1.9"/><circle cx="46" cy="22.5" r="1.9"/><circle cx="41.8" cy="20.7" r="1.9"/><circle cx="40" cy="16.5" r="1.9"/><circle cx="41.8" cy="12.3" r="1.9"/><circle cx="46" cy="10.5" r="1.9"/><circle cx="50.2" cy="12.3" r="1.9"/></g><circle cx="46" cy="16.5" r="4" fill="#F2C14E"/><path d="M11 53 A21 21 0 0 1 53 53" stroke="#D2694A" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M18 53 A14 14 0 0 1 46 53" stroke="#F2C14E" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M25 53 A7 7 0 0 1 39 53" stroke="#6FAEA4" stroke-width="6" fill="none" stroke-linecap="round"/></svg>もらいわすれ堂 山梨版</a>
+  <a class="skip" href="#honmon">スキップして診断へ →</a>
+</div>
+<div class="film">
+
+  <!-- S1: 約80万人(夜・甲府盆地の灯り) -->
+  <section class="scene ys1" id="s1">
+    <div class="kb">
+      <div class="photoback"><img src="assets/film/yakei.jpg" alt=""></div>
+      <div class="milky"></div>
+      <div id="stars"></div>
+      <div class="cloud c1" style="top:20%"></div>
+      <div class="moon"></div>
+      <div class="shooting"></div>
+      <div class="island"><svg viewBox="0 0 1200 240" preserveAspectRatio="none"><path d="M0 240 L0 128 C90 96 180 118 270 92 C360 66 430 90 520 108 C610 126 700 96 790 84 C880 72 980 110 1080 122 C1130 128 1170 126 1200 130 L1200 240 Z" fill="#0B1514"/></svg></div>
+      <div id="vlights"></div>
+    </div>
+    <div class="pretitle"><p>これは、あなたにも関係のある物語。</p></div>
+    <div class="copy">
+      <p class="stmt stmt-l dark-t" style="transition-delay:2.5s">約80万人が、<br>暮らしているのが山梨です。</p>
+      <p class="rise sub" style="transition-delay:3.1s;margin-top:1.2em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.22em;color:#E9D8BC;font-weight:500">— 盆地の灯りのひとつひとつに、暮らしがある —</p>
+    </div>
+    <div class="scrollcue">ゆっくり、下へ</div>
+  </section>
+
+  <!-- S2: 富士山(未明・仰いで暮らす) -->
+  <section class="scene ys2" id="s2">
+    <div class="kb">
+      <div class="photoback"><img src="assets/film/fuji.jpg" alt=""></div>
+      <div class="hoshi" style="top:12%;left:30%;width:3px;height:3px;animation-delay:.5s"></div>
+      <div class="hoshi" style="top:20%;left:78%;width:2px;height:2px;animation-delay:1.3s"></div>
+      <div class="hoshi" style="top:6%;left:56%;width:3px;height:3px"></div>
+      <div class="hoshi" style="top:28%;left:14%;width:2px;height:2px;animation-delay:1.9s"></div>
+      <div class="cloud c2" style="top:26%"></div>
+      <!-- 富士の影 -->
+      <div class="ysil" style="left:0;right:0;bottom:0;height:34vh"><svg class="fillbox" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice">
+        <path d="M0 300 L0 268 C120 258 260 244 380 196 C470 160 540 108 600 104 C660 108 730 160 820 196 C940 244 1080 258 1200 268 L1200 300 Z"/>
+        <path class="fujicap" d="M512 152 C544 122 576 110 600 109 C624 110 656 122 688 152 C668 142 654 156 636 144 C620 158 604 140 588 154 C570 140 548 150 534 158 C526 152 518 154 512 152 Z"/>
+      </svg></div>
+    </div>
+    <div class="copy">
+      <p class="stmt stmt-s dark-t">富士山を仰いで<br>暮らすのが、山梨です。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#C9D2C6;font-weight:500">日本一の山と、いっしょに目覚める毎日。</p>
+    </div>
+  </section>
+
+  <!-- S3b: ぶどう棚(夜明け・実り)。写真は assets/film/budo.jpg -->
+  <section class="scene ys3b" id="s3b">
+    <div class="kb">
+      <div class="photoback"><img src="assets/film/budo.jpg" alt="" loading="lazy"></div>
+      <div class="cloud c2" style="top:20%"></div>
+      <!-- ぶどう棚の影(頭上から下がる房) -->
+      <div class="ysil" style="left:50%;top:7vh;width:min(88vw,520px);transform:translateX(-50%)"><svg viewBox="0 0 520 170">
+        <rect x="0" y="10" width="520" height="7" rx="3"/>
+        <g><rect x="97" y="16" width="5" height="18" rx="2"/>
+          <ellipse cx="82" cy="30" rx="16" ry="8" transform="rotate(-18 82 30)"/><ellipse cx="120" cy="28" rx="14" ry="7" transform="rotate(14 120 28)"/>
+          <circle cx="82" cy="48" r="9"/><circle cx="100" cy="48" r="9"/><circle cx="118" cy="48" r="9"/>
+          <circle cx="91" cy="64" r="9"/><circle cx="109" cy="64" r="9"/>
+          <circle cx="100" cy="79" r="9"/></g>
+        <g><rect x="257" y="16" width="5" height="20" rx="2"/>
+          <ellipse cx="238" cy="32" rx="17" ry="8" transform="rotate(-16 238 32)"/><ellipse cx="284" cy="30" rx="15" ry="7" transform="rotate(12 284 30)"/>
+          <circle cx="233" cy="52" r="9"/><circle cx="251" cy="52" r="9"/><circle cx="269" cy="52" r="9"/><circle cx="287" cy="52" r="9"/>
+          <circle cx="242" cy="68" r="9"/><circle cx="260" cy="68" r="9"/><circle cx="278" cy="68" r="9"/>
+          <circle cx="251" cy="83" r="9"/><circle cx="269" cy="83" r="9"/>
+          <circle cx="260" cy="97" r="9"/></g>
+        <g><rect x="417" y="16" width="5" height="18" rx="2"/>
+          <ellipse cx="402" cy="30" rx="16" ry="8" transform="rotate(-18 402 30)"/><ellipse cx="438" cy="28" rx="14" ry="7" transform="rotate(14 438 28)"/>
+          <circle cx="402" cy="48" r="9"/><circle cx="420" cy="48" r="9"/><circle cx="438" cy="48" r="9"/>
+          <circle cx="411" cy="64" r="9"/><circle cx="429" cy="64" r="9"/>
+          <circle cx="420" cy="79" r="9"/></g>
+      </svg></div>
+    </div>
+    <div class="copy">
+      <p class="stmt stmt-s dark-t">実りを、<br>育てるのが山梨です。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#F5E3CB;font-weight:500">ぶどう棚の下、手をかけた分だけ甘くなる。</p>
+    </div>
+  </section>
+
+  <!-- S4: 美しい(桃源郷の朝) -->
+  <section class="scene ys4" id="s4">
+    <div class="kb">
+      <div class="photoback"><img src="assets/film/momo.jpg" alt="" loading="lazy"></div>
+      <div class="cloud c1" style="top:12%;background:rgba(255,224,194,.16)"></div>
+      <div class="glow"></div>
+      <div class="risingsun"></div>
+      <div class="bird" style="top:24%"><svg viewBox="0 0 60 24"><path class="flap" d="M4 16 C12 6 20 6 30 14 C40 6 48 6 56 16"/></svg></div>
+      <div class="bird b2" style="top:32%"><svg viewBox="0 0 60 24"><path class="flap" d="M4 16 C12 6 20 6 30 14 C40 6 48 6 56 16"/></svg></div>
+      <!-- 桃の枝の影 -->
+      <div class="ysil" style="left:-2vw;bottom:13vh;width:min(34vw,180px)"><svg viewBox="0 0 180 200">
+        <path d="M28 200 C34 150 44 112 62 84 L70 90 C54 118 46 152 42 200 Z"/>
+        <path d="M64 90 C50 74 34 68 18 72 C34 60 54 68 68 84 Z"/>
+        <path d="M66 88 C70 64 84 48 104 44 C88 56 78 72 74 88 Z"/>
+        <circle cx="96" cy="52" r="7"/><circle cx="112" cy="44" r="6"/><circle cx="24" cy="70" r="6"/><circle cx="40" cy="62" r="5"/><circle cx="82" cy="70" r="5"/>
+      </svg></div>
+    </div>
+    <div class="copy" style="transform:translateY(-6vh)">
+      <p class="stmt stmt-l warm-t">なにより、<br>美しいのが山梨です。</p>
+      <p class="rise d2" style="margin-top:1.3em;font-size:clamp(.85rem,2.6vw,1rem);letter-spacing:.18em;color:#FFF1DE;font-weight:500">桃の春、ぶどうの秋。盆地はきょうも色づく。</p>
+    </div>
+  </section>
+
+  <!-- S6: そんな山梨に(問題→希望) -->
+  <section class="scene s6" id="s6">
+    <div class="mote" style="width:7px;height:7px;top:26%;left:20%"></div>
+    <div class="mote" style="width:5px;height:5px;top:56%;left:76%;animation-delay:1.4s"></div>
+    <div class="copy">
+      <p class="rise q1">そんな山梨に、いま。<br>まだ眠っている“ささえ”があります。</p>
+      <p class="rise d2 q2">国や県、市町村が用意した給付金や手当が——<br>「知らなかった」というだけで、<br>届かないまま終わることがある。</p>
+      <p class="rise d3 q2" style="color:var(--coral-deep);font-weight:700">一人が受け取るたび、<br>山梨のみらいは、すこし明るくなる。</p>
+    </div>
+  </section>
+
+  <!-- S7: ビジョン -->
+  <section class="scene s7" id="s7">
+    <div class="sunburst"></div>
+    <div class="mote" style="width:6px;height:6px;top:22%;left:24%;animation-delay:.4s"></div>
+    <div class="mote" style="width:5px;height:5px;top:34%;left:72%;animation-delay:1.6s"></div>
+    <svg class="logo" viewBox="0 0 64 46" aria-label="もらいわすれ堂のロゴ">
+      <g fill="#F5CE6E" class="petal"><circle cx="52" cy="12.5" r="1.9"/><circle cx="50.2" cy="16.7" r="1.9"/><circle cx="46" cy="18.5" r="1.9"/><circle cx="41.8" cy="16.7" r="1.9"/><circle cx="40" cy="12.5" r="1.9"/><circle cx="41.8" cy="8.3" r="1.9"/><circle cx="46" cy="6.5" r="1.9"/><circle cx="50.2" cy="8.3" r="1.9"/></g>
+      <circle cx="46" cy="12.5" r="4" fill="#F2C14E" class="petal"/>
+      <path class="arc a1" d="M11 43 A21 21 0 0 1 53 43" stroke="#D2694A"/>
+      <path class="arc a2" d="M18 43 A14 14 0 0 1 46 43" stroke="#F2C14E"/>
+      <path class="arc a3" d="M25 43 A7 7 0 0 1 39 43" stroke="#6FAEA4"/>
+    </svg>
+    <div class="copy">
+      <p class="vision mincho" id="visiontext">とどけ、山梨のご家庭へ。</p>
+      <p class="wm mincho rise d2" style="margin-top:.9em">もらいわすれ堂 山梨版</p>
+    </div>
+  </section>
+
+  <!-- S8: 誘い(写真の壁は山梨の笑顔写真が集まったら追加) -->
+  <section class="scene s8" id="s8">
+    <div class="haze"></div>
+    <div class="copy">
+      <p class="main mincho rise">そのみらいは、<br><span class="em">あなたの家</span>から はじまる。</p>
+      <p class="sub2 mincho rise d2">こどもも、おとなも、おじいちゃんも、おばあちゃんも。</p>
+      <p class="mincho rise d3" style="margin-top:1.4em;font-size:clamp(.95rem,3.1vw,1.15rem);color:var(--ink);letter-spacing:.1em">あなたの家にも、まだ気づいていない<br>“ささえ”があるかもしれません。</p>
+      <a class="cta rise d3" href="shindan/">私の“もらい忘れ”を3分で調べる</a>
+      <p class="micro rise d3" style="margin-top:10px">無料 ・ 匿名 ・ 登録不要ではじめられます</p>
+      <p class="rise d3" style="margin-top:14px;font-size:.85rem"><a href="area/" style="color:var(--coral-deep);text-decoration:none;letter-spacing:.06em">まずは、お住まいの市町村のささえを見てみる ›</a></p>
+    </div>
+  </section>
+
+</div>
+</div>
+<script src="assets/ymn-film.js" defer></script>
+<header class="siteheader" id="honmon">
   <a class="hlogo" href="index.html"><img src="assets/icon.svg" alt="" width="32" height="32">もらいわすれ堂 <span style="font-size:.72rem;color:var(--muted);font-weight:400">山梨版</span></a>
   <nav>
     <a href="shindan/">3分診断</a>
     <a href="life/">ライフイベント別</a>
     <a href="area/">市町村</a>
+    <a href="kit/">準備シート</a>
   </nav>
 </header>
 <main>
@@ -99,6 +285,18 @@ footer a{color:var(--ki)}
     <p class="note" style="margin-top:10px">匿名 ・ 登録不要 ・ 名前や住所は聞きません</p>
   </div>
 </div>
+
+<section style="padding:30px 0 6px">
+  <div class="wrap">
+    <span class="eyebrow">受け取るまでの道のり</span>
+    <h2 style="font-size:1.2rem">やることは、3つだけ</h2>
+    <ol class="michinori">
+      <li><b>1. みつける</b><span>3分診断で、あなたの世帯にあてはまる可能性のある制度がわかります(匿名・無料)</span></li>
+      <li><b>2. そろえる</b><span>制度ごとの申請準備シートで、持ち物や窓口での言い方まで準備できます</span></li>
+      <li><b>3. 受け取る</b><span>窓口で申請したら、受け取りの確認まで見届けましょう。受け取れたら、匿名のご報告が次の誰かの力になります</span></li>
+    </ol>
+  </div>
+</section>
 
 <section>
   <div class="wrap">
@@ -155,7 +353,7 @@ footer a{color:var(--ki)}
       <div class="scard"><h3>国民健康保険料の軽減・減免</h3><p>所得に応じて<span class="amt">7割/5割/2割</span>の軽減。失業・災害時の減免もあります(要確認)</p></div>
       <div class="scard"><h3>被災者生活再建支援金</h3><p>災害で住まいに大きな被害を受けたとき<span class="amt">最大300万円</span>(要確認)</p></div>
     </div>
-    <p class="note">現在は全国共通の国の制度53件を掲載しています。山梨県・27市町村の制度は、各公式サイトの利用条件を確認しながら順次追加します(<a href="area/">準備状況はこちら</a>)。</p>
+    <p class="note">現在は全国共通の国の制度を掲載し、それぞれに<a href="kit/">申請準備シート(持ち物・窓口での言い方)</a>を用意しています。山梨県・27市町村の制度は、各公式サイトの利用条件を確認しながら順次追加します(<a href="area/">市町村ページはこちら</a>)。</p>
     <a class="btn" href="life/" style="margin-top:12px;background:#fff;color:var(--shu);border:2px solid var(--shu)">ライフイベント別の一覧を見る</a>
   </div>
 </section>
@@ -190,9 +388,10 @@ footer a{color:var(--ki)}
 
 <section style="background:#FFF7EC">
   <div class="wrap">
-    <h2>お知らせの仕組みは準備中です</h2>
-    <p>締切が近い制度をLINEでお知らせする仕組み(締切の約1か月前からお知らせ)は、山梨版では現在準備中です。</p>
-    <div class="prep"><p class="note" style="text-align:center">それまでのあいだは、3分診断の結果をコピーしてメモに残しておくのがおすすめです。<br>制度の一覧は、登録なしでいつでもぜんぶ見られます。</p></div>
+    <h2>締切を、LINEでそっとお知らせ</h2>
+    <p>締切が近い制度を、LINEでお知らせします(締切の約1か月前から・無料)。<br>お名前の入力は不要です。配信は順次はじめていきます。</p>
+    <a class="btn" href="https://allgroup-inc.github.io/hojo-hq/go/ymn-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ymn_line_add_click')">LINEで締切のお知らせを受け取る(無料)</a>
+    <div class="prep" style="margin-top:14px"><p class="note" style="text-align:center">登録しなくても大丈夫です。制度の一覧は、いつでもぜんぶ見られます。</p></div>
     <a class="btn" href="shindan/" style="margin-top:16px" onclick="if(window.fgTrack)fgTrack('lp_cta_bottom')">3分でもらい忘れ診断をはじめる</a>
   </div>
 </section>

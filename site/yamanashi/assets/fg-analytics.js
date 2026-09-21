@@ -11,6 +11,14 @@
   var queue = [];
 
   function noop() {}
+
+  /* 自動巡回(おもてなし総点検・Lighthouse等の自動ブラウザ)は計測しない。
+   * 2026-09-04: GA4に9/1の総点検分とみられる山が混ざり実訪問と区別できなくなったため。
+   * navigator.webdriver は自動操縦ブラウザで true になる標準フラグ(実利用者では false) */
+  if (typeof navigator !== "undefined" && navigator.webdriver) {
+    window.fgTrack = noop;
+    return;
+  }
   window.fgTrack = function (name, props) { queue.push([name, props]); };
 
   function flush() {
@@ -54,4 +62,17 @@
   } else {
     window.fgTrack = noop;
   }
+})();
+
+
+/* 山梨版のみ: イベント名に ymn_ を付けて沖縄版と数字を分ける(2026-09-20 追加)。
+   既に ymn_ が付いているもの(市町村・準備シート・ライフイベントの各ジェネレーター出力)は二重に付けない。 */
+(function () {
+  "use strict";
+  var orig = window.fgTrack;
+  if (typeof orig !== "function") return;
+  window.fgTrack = function (name, props) {
+    var n = typeof name === "string" && name.indexOf("ymn_") !== 0 ? "ymn_" + name : name;
+    return orig(n, props);
+  };
 })();

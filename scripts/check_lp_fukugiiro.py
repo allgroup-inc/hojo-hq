@@ -14,6 +14,8 @@ import sys
 BASE = os.path.join(os.path.dirname(__file__), "..")
 LP = os.path.join(BASE, "site", "fukugiiro", "index.html")
 SITE_GLOB = os.path.join(BASE, "site", "fukugiiro", "**", "*.html")
+# 山梨版(もらいわすれ堂 山梨版・2026-09-20 一本化)も同じ予算・禁止語で検査する
+YMN_GLOB = os.path.join(BASE, "site", "yamanashi", "**", "*.html")
 SIZE_BUDGET = 50 * 1024
 # 集約ページ(市町村・準備シート)は掲載制度が増えるほど大きくなる。
 # メインLP(index.html)は50KB厳守のまま、集約ページは96KBまで許容する。
@@ -26,7 +28,7 @@ def main():
     if not os.path.exists(LP):
         print("[ERROR] site/fukugiiro/index.html がない")
         sys.exit(1)
-    pages = sorted(glob.glob(SITE_GLOB, recursive=True)) + [LP]
+    pages = sorted(glob.glob(SITE_GLOB, recursive=True)) + sorted(glob.glob(YMN_GLOB, recursive=True)) + [LP]
     pages = sorted(set(pages))
     for path in pages:
         rel = os.path.relpath(path, BASE)

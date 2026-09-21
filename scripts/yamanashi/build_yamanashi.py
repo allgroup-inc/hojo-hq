@@ -11,9 +11,12 @@
 - 断定表現なし・全件出典リンク・診断は端末内完結・LINEは準備中(入口を勝手に作らない)
 - 締切表現は「約1か月前から」ルールのまま流用
 """
-import json, os, re, shutil
+import json, os, re, shutil, subprocess, sys
 
 BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from seeds_yamanashi import YMN_PREF_SEEDS  # noqa: E402
+
 SRC = os.path.join(BASE, "site", "fukugiiro")
 OUT = os.path.join(BASE, "site", "yamanashi")
 DATA_OUT = os.path.join(BASE, "data", "yamanashi", "seido.json")
@@ -40,12 +43,15 @@ def esc(s):
 
 def header(depth=1):
     p = "../" * depth
-    return f'''<header class="siteheader">
-  <a class="hlogo" href="{p}index.html"><img src="{p}assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.72rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
+    # ヘッダーの読みやすさ・押しやすさは点検2026-09-03 🟡6 と同じ基準(.95rem・タップ44px相当)。
+    # fg-base.css は沖縄版と共用のためここで山梨版だけ上書きする
+    return f'''<style>p,li{{word-break:auto-phrase;text-wrap:pretty}}h1,h2,h3{{text-wrap:balance}}.siteheader nav a{{font-size:.95rem;padding:10px 12px}}.siteheader .hlogo{{font-size:1.1rem}}</style>
+<header class="siteheader">
+  <a class="hlogo" href="{p}index.html"><img src="{p}assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.78rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
   <nav>
     <a href="{p}shindan/">3分診断</a>
-    <a href="{p}life/">ライフイベント別</a>
     <a href="{p}area/">市町村</a>
+    <a href="{p}kit/">準備シート</a>
   </nav>
 </header>'''
 
@@ -53,29 +59,77 @@ def must_replace(s, old, new, label):
     assert old in s, f"置換対象が見つからない: {label}"
     return s.replace(old, new)
 
+def _pref_items(now):
+    """山梨県の制度シードを、全国制度と同じ形に整えて返す(第2段階)。
+
+    守り部審査(docs/守り部審査記録_山梨版_2026-09-20.md)でA区分=個別ページへの
+    リンク可と判定された山梨県分のみ。金額・締切は原文の逐語照合が済むまで
+    status="要確認" / verified=False のままにする(絶対ルール1)。
+    """
+    out = []
+    for seed in YMN_PREF_SEEDS:
+        it = dict(seed)
+        it.setdefault("amount_note", "要確認(公式ページでご確認ください)")
+        it.setdefault("deadline_type", "要確認")
+        it.setdefault("deadline", None)
+        it.update({
+            "verified": False,
+            "verified_at": None,
+            "verified_by": None,
+            "status": "要確認",
+            "notes": "出典: " + seed["issuer"].split("(")[0] + "ウェブサイト",
+            "fetched_at": now,
+        })
+        out.append(it)
+    return out
+
+
 def build_data():
-    items = json.load(open(os.path.join(BASE,"data","fukugiiro","seido.json"),encoding="utf-8"))["items"]
+    src = json.load(open(os.path.join(BASE,"data","fukugiiro","seido.json"),encoding="utf-8"))
+    items = src["items"]
     nat = [dict(i) for i in items if i.get("area") == "全国"]
     for i in nat:
         assert "沖縄" not in json.dumps(i, ensure_ascii=False), i["id"]
-    data = {"region":"yamanashi","updated_at": json.load(open(os.path.join(BASE,"data","fukugiiro","seido.json"),encoding="utf-8"))["updated_at"],
-            "count": len(nat), "items": nat,
-            "note": "第1段階=国の制度のみ(沖縄版で公式照合済みの全国制度を流用)。県・市町村は規約確認後に追加"}
+    pref = _pref_items(src["updated_at"])
+    for i in pref:
+        # 沖縄版からの取り違えを機械で止める(全国制度と同じ守り)
+        assert "沖縄" not in json.dumps(i, ensure_ascii=False), i["id"]
+        assert i["area"] == "山梨県", i["id"]
+    merged = nat + pref
+    ids = [i["id"] for i in merged]
+    assert len(ids) == len(set(ids)), "IDが重複している"
+    data = {"region":"yamanashi","updated_at": src["updated_at"],
+            "count": len(merged), "items": merged,
+            "note": "国の制度(沖縄版で公式照合済みの全国制度を流用)+山梨県の制度。"
+                    "市町村独自の制度は守り部の論点(営利サイト可否・トップページ限定)の決裁後に追加"}
     os.makedirs(os.path.dirname(DATA_OUT), exist_ok=True)
     with open(DATA_OUT,"w",encoding="utf-8") as f:
         json.dump(data,f,ensure_ascii=False,indent=1); f.write("\n")
-    return nat
+    return merged
+
+YMN_EVENT_PREFIX_JS = '\n\n/* 山梨版のみ: イベント名に ymn_ を付けて沖縄版と数字を分ける(2026-09-20 追加)。\n   既に ymn_ が付いているもの(市町村・準備シート・ライフイベントの各ジェネレーター出力)は二重に付けない。 */\n(function () {\n  "use strict";\n  var orig = window.fgTrack;\n  if (typeof orig !== "function") return;\n  window.fgTrack = function (name, props) {\n    var n = typeof name === "string" && name.indexOf("ymn_") !== 0 ? "ymn_" + name : name;\n    return orig(n, props);\n  };\n})();\n'
+
 
 def build_assets():
     os.makedirs(os.path.join(OUT,"assets"), exist_ok=True)
     for fn in ("fg-base.css","fg-analytics.js","icon.svg"):
         shutil.copy(os.path.join(SRC,"assets",fn), os.path.join(OUT,"assets",fn))
+    # 山梨版は沖縄版と同一のGA4プロパティを使うため、イベント名が同じだと
+    # 沖縄のKGI(診断ファネル・LINE誘導・受給報告)に山梨の数字が混ざる。
+    # 沖縄から変換してくるページ(トップ・診断・報告・訂正・privacy)は沖縄の
+    # イベント名をそのまま持ってくるため、ここで一律 ymn_ を付けて分離する。
+    # shindan_step_q* のように実行時に組み立てる名前も確実に捕まえるので、
+    # 個別の書き換えではなく fgTrack を包む方式にしている。
+    with open(os.path.join(OUT,"assets","fg-analytics.js"),"a",encoding="utf-8") as f:
+        f.write(YMN_EVENT_PREFIX_JS)
     with open(os.path.join(OUT,"analytics-config.js"),"w",encoding="utf-8") as f:
         f.write('''/* 山梨版 計測設定。GA4は沖縄版と同一プロパティ(page_pathで判別)。
-   LINE・Instagramは準備中のため空(入口を勝手に作らない=約束5)。開設決裁後にここへ設定 */
+   LINEは山梨版公式アカウント @630pbjqq(2026-09-03 小柳さんが開設)。
+   ボタンは /go/ymn-* 経由(lin.ee直貼り禁止・channelで沖縄版と分けて集計)。
+   Instagramは準備中のため設定しない(入口を勝手に作らない=約束5) */
 window.FG_ANALYTICS = {provider: "ga4", measurementId: "G-TQMX3MPFSR", domain: "allgroup-inc.github.io"};
-window.FG_LINE_URL = "";
-window.FG_LINE_OA_ID = "";
+window.FG_LINE_URL = "https://allgroup-inc.github.io/hojo-hq/go/ymn-shindan/";
+window.FG_LINE_OA_ID = "630pbjqq";
 ''')
 
 def swap_header(s, depth=1):
@@ -91,7 +145,11 @@ def build_shindan():
     # 市町村リスト
     munis_js = json.dumps(MUNIS + ["県外"], ensure_ascii=False)
     s = re.sub(r'var MUNIS = \[.*?\];', f'var MUNIS = {munis_js};', s, count=1, flags=re.S)
-    s = re.sub(r'var MUNI_SLUG = \{.*?\};', 'var MUNI_SLUG = {};', s, count=1, flags=re.S)
+    # 市町村→slug(市町村ページが第2段階で公開されたため復活。fg_yamanashi.py と同一の表)
+    sys.path.insert(0, os.path.join(BASE, "scripts"))
+    from fg_yamanashi import MUNI_SLUG as Y_MUNI_SLUG
+    slug_js = json.dumps(Y_MUNI_SLUG, ensure_ascii=False)
+    s = re.sub(r'var MUNI_SLUG = \{.*?\};', f'var MUNI_SLUG = {slug_js};', s, count=1, flags=re.S)
     s = must_replace(s, 'fetch("../../data/fukugiiro/seido.json")', 'fetch("../../data/yamanashi/seido.json")', "fetch")
     # Instagram行の削除(山梨は未開設)
     s = re.sub(r'<p style="margin-top:20px;text-align:center"><a class="iglink"[^\n]*</p>\n', '', s, count=1)
@@ -109,8 +167,7 @@ def build_shindan():
         prep.appendChild(h("p", {class:"note", text:"LINEでの締切お知らせは、山梨版では準備中です。上のコピー機能で結果をメモアプリなどに保存しておけます。"}));
         app.appendChild(prep);
       }''', "lineBox gate")
-    s = must_replace(s, 'topCopied.textContent = "結果をコピーしました。LINEで「もらいわすれ堂」のトークに貼り付けると保存できます。";',
-                     'topCopied.textContent = "結果をコピーしました。メモアプリなどに貼り付けると保存できます。";', "copy text")
+    # コピー案内文はLINE開設済みのため沖縄版の原文(LINEトークに貼ると保存できる)をそのまま使う
     # 医療バナー: 市町村ページ(準備中)ではなくライフイベント別「医療」へ
     s = must_replace(s, 'var areaHref = areaSlug ? ("../area/" + areaSlug + "/") : "../area/";',
                      'var areaHref = "../life/iryo/";', "areaHref")
@@ -120,13 +177,7 @@ def build_shindan():
                      'text:"症状などをおたずねしない方針のためです。ライフイベント別の一覧で、医療費に関する制度をまとめて確認できます。"', "medBanner text")
     s = must_replace(s, '<a href=\\"" + areaHref + "\\">お住まいの市町村のページ</a>',
                      '<a href=\\"../life/\\">ライフイベント別の一覧</a>', "disclaimer link")
-    # 準備シートは第2段階のためリンクを外す
-    s = must_replace(s, '''        card.appendChild(h("a", {href: it.source_url, rel:"noopener", class:"cardlink", text:"公式ページで確認する"}));
-        card.appendChild(h("span", {class:"linksep", text:" ・ "}));
-        var kitLink = h("a", {href:"../kit/" + it.id + "/", class:"cardlink", text:"申請準備シート(持ち物リストつき)"});
-        kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("kit_click"); });
-        card.appendChild(kitLink);''',
-                     '        card.appendChild(h("a", {href: it.source_url, rel:"noopener", class:"cardlink", text:"公式ページで確認する"}));', "kit link removal")
+    # 準備シート53ページを生成済みのため、結果カードの準備シートリンクは沖縄版のまま生かす(第2段階・2026-09-20)
     s = must_replace(s, 'text:"💬 受け取れた金額をLINEで報告する(匿名・任意)"',
                      'text:"💬 受け取れたことを報告する(匿名・任意)"', "houkoku link text")
     os.makedirs(os.path.join(OUT,"shindan"), exist_ok=True)
@@ -199,7 +250,8 @@ def item_card(it):
             f'<p class="sub">金額の目安: {esc(it.get("amount_note",""))}</p>'
             f'<p class="sub">窓口: {esc(it.get("how_to_apply",""))}</p>'
             f'{cmb}'
-            f'<a class="src" href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する ›</a> '
+            f'<a class="src" href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する ›</a> ・ '
+            f'<a href="../../kit/{esc(it["id"])}/">申請準備シート(持ち物・窓口での言い方)</a> '
             f'<span class="note">(出典: {esc(it.get("issuer","").split("(")[0])}ウェブサイト)</span></div>')
 
 def build_life(items):
@@ -211,6 +263,24 @@ def build_life(items):
                 f'<p class="note">国の制度{len(sel)}件を掲載しています。山梨県・市町村の制度は現在準備中です(確認が取れたものから追加します)。</p>',
                 '<a class="btn" href="../../shindan/">3分でもらい忘れ診断をはじめる</a>']
         body += [item_card(i) for i in sel]
+        # 単一CV(LINE登録・@630pbjqq)。締切は「約1か月前」表現で統一(3層ルール準拠)。
+        # ライフイベント別ページは「もらい忘れ」が最も起きる場面なのに導線が無かった(2026-09-20 追加)
+        body.append(
+            f'<p class="note" style="margin-top:22px;text-align:center">'
+            f'{esc(heading)}に関する制度が増えたときや、締切が近づいたときに、LINEでそっとお知らせします。</p>'
+            '<a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/ymn-life/" '
+            'target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ymn_line_add_click\')">'
+            '💬 締切をLINEで受け取る'
+            '<span>締切の約1か月前にお知らせ(配信は順次開始)・新しい制度が増えたときも(無料)</span></a>'
+        )
+        # 受け取ったあとの報告導線。単一CVと競合させないため控えめな一文にする(絶対ルール4)
+        body.append(
+            '<p class="note" style="margin-top:18px;text-align:center">'
+            'もう受け取れた制度はありますか? '
+            '<a href="../../houkoku/" onclick="if(window.fgTrack)fgTrack(\'ymn_jukyu_report_link_life\')">'
+            '受け取れたことを教えてください(匿名・任意)</a><br>'
+            '制度名とおおよその金額だけで大丈夫です。お名前や口座番号はうかがいません。</p>'
+        )
         os.makedirs(os.path.join(OUT,"life",slug), exist_ok=True)
         html = PAGE_SHELL.format(title=heading, desc=f"山梨県にお住まいの方向け。{heading}に使える可能性のある給付金・手当のご案内(要確認含む)。",
                                  canonical=f"{Y_BASE_URL}life/{slug}/", updot="../", header=header(2), body="\n".join(body))
@@ -221,17 +291,11 @@ def build_life(items):
                             body="<h1>ライフイベント別の一覧</h1>\n" + "\n".join(links))
     open(os.path.join(OUT,"life","index.html"),"w",encoding="utf-8").write(idx)
 
-def build_area():
-    os.makedirs(os.path.join(OUT,"area"), exist_ok=True)
-    lis = "".join(f"<li>{m}</li>" for m in MUNIS)
-    body = f'''<h1>市町村別の給付金・手当</h1>
-<p class="note">山梨県の27市町村ごとのページは<strong>現在準備中です</strong>。各市町村の公式サイトの利用条件を1つずつ確認しながら、確認が取れたところから順に公開します(勝手に載せない方針のためです)。</p>
-<p class="note">それまでのあいだ、全国共通の国の制度は<a href="../life/">ライフイベント別の一覧</a>と<a href="../shindan/">3分診断</a>でご確認いただけます。</p>
-<ul class="munis">{lis}</ul>
-<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'''
-    html = PAGE_SHELL.format(title="市町村別(準備中)", desc="山梨県27市町村の給付金・手当ページは準備中です。国の制度は3分診断・ライフイベント別一覧でご確認いただけます。",
-                             canonical=f"{Y_BASE_URL}area/", updot="", header=header(1), body=body)
-    open(os.path.join(OUT,"area","index.html"),"w",encoding="utf-8").write(html)
+def build_kit_and_area():
+    """第2段階(2026-09-20 一本化): 申請準備シート53+市町村27ページは専用ジェネレーターが生成する。
+    市町村ページ(area/)の一覧もそちらが書くため、本スクリプトでは作らない。"""
+    for script in ("generate_yamanashi_kit_pages.py", "generate_yamanashi_area_pages.py"):
+        subprocess.run([sys.executable, os.path.join(BASE, "scripts", script)], check=True)
 
 def main():
     os.makedirs(OUT, exist_ok=True)
@@ -240,8 +304,10 @@ def main():
     build_shindan()
     build_static()
     build_life(items)
-    build_area()
-    print(f"[ok] 山梨版ビルド完了: 国の制度{len(items)}件 / life9+一覧 / area準備中 / shindan / houkoku / privacy / teisei")
+    build_kit_and_area()
+    nat = sum(1 for i in items if i["area"] == "全国")
+    pref = sum(1 for i in items if i["area"] == "山梨県")
+    print(f"[ok] 山梨版ビルド完了: 制度{len(items)}件(国{nat}+県{pref}) / life9+一覧 / shindan / houkoku / privacy / teisei / kit53+一覧 / area27+一覧")
 
 if __name__ == "__main__":
     main()

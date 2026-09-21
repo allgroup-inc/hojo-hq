@@ -73,12 +73,13 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 </style>
 </head>
 <body>
+<style>p,li{word-break:auto-phrase;text-wrap:pretty}h1,h2,h3{text-wrap:balance}.siteheader nav a{font-size:.95rem;padding:10px 12px}.siteheader .hlogo{font-size:1.1rem}</style>
 <header class="siteheader">
-  <a class="hlogo" href="../index.html"><img src="../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.72rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
+  <a class="hlogo" href="../index.html"><img src="../assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂 <span style="font-size:.78rem;color:var(--fg-muted);font-weight:400">山梨版</span></a>
   <nav>
     <a href="../shindan/">3分診断</a>
-    <a href="../life/">ライフイベント別</a>
     <a href="../area/">市町村</a>
+    <a href="../kit/">準備シート</a>
   </nav>
 </header>
 <div class="wrap">
@@ -103,7 +104,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   var bar = document.getElementById("bar");
   var TOTAL = 5;
   // 市町村→ページslug(診断結果から市町村ページへ1タップで案内するため)
-  var MUNI_SLUG = {};
+  var MUNI_SLUG = {"甲府市": "kofu", "富士吉田市": "fujiyoshida", "都留市": "tsuru", "山梨市": "yamanashi-shi", "大月市": "otsuki", "韮崎市": "nirasaki", "南アルプス市": "minami-alps", "北杜市": "hokuto", "甲斐市": "kai", "笛吹市": "fuefuki", "上野原市": "uenohara", "甲州市": "koshu", "中央市": "chuo", "市川三郷町": "ichikawamisato", "早川町": "hayakawa", "身延町": "minobu", "南部町": "nanbu", "富士川町": "fujikawa", "昭和町": "showa", "道志村": "doshi", "西桂町": "nishikatsura", "忍野村": "oshino", "山中湖村": "yamanakako", "鳴沢村": "narusawa", "富士河口湖町": "fujikawaguchiko", "小菅村": "kosuge", "丹波山村": "tabayama"};
 
   function h(tag, attrs, children){
     var el = document.createElement(tag);
@@ -349,7 +350,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var topCopied = h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名 ・ いつでも解除"});
         topLineBtn.addEventListener("click", function(){
           if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_top"});
-          try { if (navigator.clipboard) { navigator.clipboard.writeText(resultText()); topCopied.textContent = "結果をコピーしました。メモアプリなどに貼り付けると保存できます。"; } } catch(e){}
+          try { if (navigator.clipboard) { navigator.clipboard.writeText(resultText()); topCopied.textContent = "結果をコピーしました。LINEで「もらいわすれ堂」のトークに貼り付けると保存できます。"; } } catch(e){}
         });
         topLine.appendChild(topLineBtn);
         topLine.appendChild(topCopied);
@@ -399,6 +400,10 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         mg.appendChild(h("span", {class:"note", style:"display:block;margin-top:2px;color:#0f5138", text:"対象かどうかは窓口が判断します。自信がなくて大丈夫です。"}));
         card.appendChild(mg);
         card.appendChild(h("a", {href: it.source_url, rel:"noopener", class:"cardlink", text:"公式ページで確認する"}));
+        card.appendChild(h("span", {class:"linksep", text:" ・ "}));
+        var kitLink = h("a", {href:"../kit/" + it.id + "/", class:"cardlink", text:"申請準備シート(持ち物リストつき)"});
+        kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("kit_click"); });
+        card.appendChild(kitLink);
         card.appendChild(h("p", {class:"note", style:"margin-top:6px", text:"準備の目安がそろったら、お住まいの窓口へ。最終的な受給の可否は窓口で確認されます。"}));
         if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
         var mk = h("button", {class:"markbtn" + (isMarked ? " marked" : ""),
@@ -407,7 +412,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var rep = h("div", {style:"display:" + (isMarked ? "block" : "none") + ";margin-top:8px;padding-top:8px;border-top:1px dashed var(--fg-line)"});
         var repLink = h("a", {href:"../houkoku/",
           style:"font-weight:700", text:"💬 受け取れたことを報告する(匿名・任意)"});
-        repLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("jukyu_report_click", {seido: it.id}); });
+        repLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("jukyu_report_link_shindan", {seido: it.id}); });
         rep.appendChild(repLink);
         rep.appendChild(h("p", {class:"note", style:"margin-top:2px", text:"あなたの報告が、次の県民のもらい忘れを防ぎます。制度名とおおよその金額だけでOK。お名前や口座番号はうかがいません。"}));
         mk.addEventListener("click", function(){

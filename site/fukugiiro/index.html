@@ -377,7 +377,7 @@ footer .fwrap p{margin-bottom:6px}
       <p class="main mincho rise">そのみらいは、<br><span class="em">みんなの笑顔</span>で できている。</p>
       <p class="sub2 mincho rise d2">こどもも、おとなも、おじいも、おばあも。</p>
       <p class="mincho rise d3" style="margin-top:1.4em;font-size:clamp(.95rem,3.1vw,1.15rem);color:var(--ink);letter-spacing:.1em">あなたの家にも、まだ気づいていない<br>“ささえ”があるかもしれません。</p>
-      <a class="cta rise d3" href="shindan/">私の“もらい忘れ”を3分で調べる</a>
+      <a class="cta rise d3" href="shindan/" onclick="if(window.fgTrack)fgTrack('shindan_cta_click',{pos:'hero'})">私の“もらい忘れ”を3分で調べる</a>
       <p class="micro rise d3" style="margin-top:10px">無料 ・ 匿名 ・ 登録不要ではじめられます</p>
       <p class="rise d3" style="margin-top:14px;font-size:.85rem"><a href="area/" style="color:var(--coral-deep);text-decoration:none;letter-spacing:.06em">まずは、お住まいの市町村のささえを見てみる ›</a></p>
     </div>
@@ -392,10 +392,10 @@ footer .fwrap p{margin-bottom:6px}
 <header class="siteheader" id="honmon">
   <a class="hlogo" href="./"><img src="assets/icon.svg" alt="" width="32" height="32">もらいわすれ堂</a>
   <nav>
-    <a href="shindan/">3分診断</a>
+    <a href="shindan/" onclick="if(window.fgTrack)fgTrack('shindan_cta_click',{pos:'nav'})">3分診断</a>
     <a href="area/">市町村</a>
     <a href="kit/">準備シート</a>
-    <a href="../go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a href="../go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click',{pos:'nav'})">LINE登録</a>
     <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><defs><linearGradient id="igg-h" x1="0" y1="24" x2="24" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FA7E1E"/><stop offset=".5" stop-color="#D62976"/><stop offset="1" stop-color="#962FBF"/></linearGradient></defs><g stroke="url(#igg-h)"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="url(#igg-h)" stroke="none"/></g></svg></a>
   </nav>
 </header>
@@ -411,7 +411,7 @@ footer .fwrap p{margin-bottom:6px}
     <span class="badge">沖縄県にお住まいの方向け ・ ずっと無料</span>
     <h1>あなたの世帯、<br>いくら<strong>もらい忘れて</strong>る?</h1>
     <p class="sub">国・県・市町村の、給付金や手当。<br>「知らなかった」だけで、<br>受け取れるはずのお金が眠っているかもしれません。</p>
-    <a class="btn" href="shindan/">私の“もらい忘れ”を3分で調べる</a>
+    <a class="btn" href="shindan/" onclick="if(window.fgTrack)fgTrack('shindan_cta_click',{pos:'intro'})">私の“もらい忘れ”を3分で調べる</a>
     <p class="microtrust">無料 ・ 診断は匿名 ・ 登録不要ではじめられます</p>
     <p id="resume-link" style="display:none"><a href="shindan/?resume=1">前回の診断結果をもう一度見る →</a></p>
   </div>
@@ -427,7 +427,7 @@ footer .fwrap p{margin-bottom:6px}
         <div>出産育児一時金<span>健康保険に入っていれば対象かも(要確認)</span></div>
         <div>ひとり親家庭の支援<span>手当・就学・医療など、入口いろいろ<span style="white-space:nowrap">(要確認)</span></span></div>
       </div>
-      <a class="btn" href="shindan/" style="margin-top:18px">対象かどうか、3分で調べる</a>
+      <a class="btn" href="shindan/" style="margin-top:18px" onclick="if(window.fgTrack)fgTrack('shindan_cta_click',{pos:'seido_example'})">対象かどうか、3分で調べる</a>
       <p class="microtrust">無料 ・ 匿名 ・ 登録不要</p>
     </div>
   </div>
@@ -464,7 +464,7 @@ footer .fwrap p{margin-bottom:6px}
       </div>
       <div class="stat" id="jukyu-stat" style="display:none">
         <span class="num" id="jukyu-count">—</span>
-        <div class="lbl">「もらえた」のご報告(検証済み)</div>
+        <div class="lbl">「受け取れた」のご報告(検証済み)</div>
         <div class="note" style="margin-top:6px;font-size:.8rem;text-align:center">利用者からの受給報告のうち、公式の制度と照らし合わせて確認できた世帯数</div>
       </div>
     </div>
@@ -477,14 +477,14 @@ footer .fwrap p{margin-bottom:6px}
     <ol class="steps">
       <li><strong>3分診断</strong><br>ご家族の状況にあてはまる可能性のある制度と、おおよその金額の目安がわかります。</li>
       <li><strong>申請のかんたん化</strong><br>制度ごとの「<span style="white-space:nowrap">申請準備シート</span>」を印刷して、そのまま<span style="white-space:nowrap">窓口へ。</span><br>(持ち物チェックリスト・窓口でのひとこと・メモ欄つき)<br>書くのはご本人ですが、準備はぜんぶここで終わります。</li>
-      <li><strong>入金確認までフォロー</strong><br>締切の約1か月前からお知らせ。<br>「振り込まれた」までを一緒に見届けます。</li>
+      <li><strong>受け取りの確認までフォロー</strong><br>締切の約1か月前からお知らせ。<br>「受け取れた」までを一緒に見届けます。</li>
     </ol>
     <p class="note note--long" style="margin-top:14px">※ 申請手続きの代行は行いません。専門家のサポートが必要な場合は、提携する専門家(社会保険労務士・行政書士など)におつなぎします。</p>
     <div class="navcards" style="margin-top:22px">
       <a class="navcard" href="area/">市町村でさがす ›<span>お住まいの街のまとめ</span></a>
       <a class="navcard" href="life/">状況からさがす ›<span>出産・子育て・医療費・失業など</span></a>
       <a class="navcard" href="kit/">申請準備シート ›<span>持ち物リスト・印刷して窓口へ</span></a>
-      <a class="navcard" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで受け取る ›<span>締切の約1か月前からお知らせ(無料)</span></a>
+      <a class="navcard" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click',{pos:'navcard'})">LINEで受け取る ›<span>締切の約1か月前からお知らせ(無料)</span></a>
     </div>
   </div>
 </section>
@@ -557,14 +557,14 @@ footer .fwrap p{margin-bottom:6px}
   <div class="wrap">
     <h2>LINEで「もらい忘れ」を防ぐ</h2>
     <p>あなたの地域・条件に合う制度の締切を、<strong style="white-space:nowrap">約1か月前</strong>からLINEでお知らせします。<br>新しい制度が増えたときも、<span style="white-space:nowrap">お知らせします。</span></p>
-    <a class="btn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" style="margin-top:10px" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで締切通知を受け取る(無料)</a>
+    <a class="btn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-top/" target="_blank" rel="noopener" style="margin-top:10px" onclick="if(window.fgTrack)fgTrack('line_add_click',{pos:'bottom'})">LINEで締切通知を受け取る(無料)</a>
     <p class="microtrust on-green">無料 ・ 診断は匿名 ・ 通知はいつでも停止できます</p>
   </div>
 </section>
 </main>
 
 <div class="sticky-cta">
-  <a href="shindan/">私の“もらい忘れ”を3分で調べる(無料)</a>
+  <a href="shindan/" onclick="if(window.fgTrack)fgTrack('shindan_cta_click',{pos:'sticky'})">私の“もらい忘れ”を3分で調べる(無料)</a>
   <span class="mt">匿名 ・ 登録不要ではじめられます</span>
 </div>
 
