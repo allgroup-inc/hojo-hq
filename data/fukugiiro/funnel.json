@@ -64,7 +64,8 @@
     "jukyu_report_link_kit": 0,
     "jukyu_report_link_area": 0,
     "jukyu_report_link_life": 0,
-    "shindan_cta_click": 0
+    "shindan_cta_click": 0,
+    "shindan_redirect": 0
   },
   "key_rates": {
     "finish_rate": 1.0,
