@@ -1,0 +1,74 @@
+name: kekka-weekly-health
+
+# 結果マガ 週次ヘルスチェック+素材自動補充(2026-09-21 小柳さん指示「極限まで自動化」)。
+# これまでツヅルがチャットで手作業でやっていた月曜点検を機械化:
+#   X投稿欠落・素材残量(2以下ならAI自動補充)・公開待ち滞留・KPI鮮度・note公開情報(スキ数)
+# 結果は毎週月曜の朝にLINEで届く(毎週必ず1通=LINE経路の生存確認も兼ねる=ニドナシ#2対策)。
+# cronは発火実績のあるUTC深夜帯(ニドナシ#22)。
+
+on:
+  schedule:
+    - cron: "17 23 * * 0"   # 月曜 8:17 JST(UTC日曜23:17)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kekka-weekly-health
+  cancel-in-progress: false
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 点検+素材自動補充
+        id: health
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          pip install -q anthropic
+          python scripts/weekly_health.py >> "$GITHUB_OUTPUT"
+
+      - name: 補充素材のコミット
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add data/kekka_x_material.json
+          git diff --cached --quiet || git commit -m "auto: X体験共有の素材を自動補充(週次ヘルス)"
+          for i in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
+            echo "push retry $i"; sleep 5
+          done
+
+      - name: 通知本文の読み込み
+        id: rep
+        run: |
+          {
+            echo 'text<<KEKKA_EOF'
+            cat data/kekka_health_report.txt
+            echo 'KEKKA_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: LINE通知(週次ヘルス)
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: ${{ steps.rep.outputs.text }}
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【結果マガ】週次ヘルスチェックが失敗しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
