@@ -1,0 +1,98 @@
+name: weekly-gakubi
+
+# 週次「学び」ダイジェスト(2026-09-21 導入)。直近7日の docs/reports の変更を Claude で
+# 要約し docs/学び/学び_YYYY-Www.md を main に追加する。Obsidian へは整理担当セッションの
+# 毎朝6時同期(docs/Obsidian連携ガイド.md)が docs/** を写すため、ここでは vault に触らない。
+# Secrets: ANTHROPIC_API_KEY(既存)のみ。
+
+on:
+  schedule:
+    # JST 月曜 21:00(= UTC 月曜 12:00)。月曜8:00の週次レポ生成の後・翌朝6時の同期の前。
+    - cron: "0 12 * * 1"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/weekly_gakubi.py"
+      - ".github/workflows/weekly-gakubi.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: weekly-gakubi
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  gakubi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # 直近7日のログ集計に履歴が必要
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install -q anthropic
+
+      - name: Self-test
+        run: python scripts/weekly_gakubi.py --self-test
+
+      - name: Generate weekly digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        # pushイベント(コード編集時)は dry-run(ファイルを作らない)。実生成は schedule と手動のみ。
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python scripts/weekly_gakubi.py --dry-run
+          else
+            python scripts/weekly_gakubi.py
+          fi
+
+      - name: Commit digest
+        if: github.event_name != 'push'
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add docs/学び
+          git diff --cached --quiet && { echo "変更なし"; exit 0; }
+          git commit -m "auto: 週次学びダイジェスト $(TZ=Asia/Tokyo date '+%Y-%m-%d')"
+          for i in 1 2 3; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            git rebase --abort 2>/dev/null || true
+            echo "push retry $i"; sleep 5
+          done
+          echo "::error::push に3回失敗"; exit 1
+
+      - name: Open or update issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh label create weekly-gakubi --color 5319E7 \
+            --description "週次学びダイジェストの自動生成が失敗" 2>/dev/null || true
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body="週次学びダイジェストの自動生成が失敗しました。\n\n- 実行: $run_url\n- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')\n\nよくある原因: Claude API の一時障害(自動リトライ済み)/ push 競合。"
+          existing=$(gh issue list --state open --label weekly-gakubi --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            printf "%b" "$body" | gh issue comment "$existing" --body-file -
+          else
+            printf "%b" "$body" | gh issue create --label weekly-gakubi \
+              --title "⚠️ 週次学びダイジェストの生成に失敗" --body-file -
+          fi
+
+      - name: Auto-close issue on recovery
+        if: success() && github.event_name != 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --state open --label weekly-gakubi --json number --jq '.[].number' 2>/dev/null || true); do
+            gh issue comment "$n" --body "✅ 週次ダイジェストの生成が回復しました。自動クローズします。"
+            gh issue close "$n"
+          done
