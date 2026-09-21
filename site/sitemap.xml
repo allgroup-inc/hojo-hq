@@ -961,12 +961,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-kuni-ninpu-shien/</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-kuni-nyuin-shokuji-gengaku/</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -1015,6 +1009,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-kuni-shogaku-kyufukin-koko/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-kuni-shoni-mansei/</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -1028,6 +1028,12 @@
   </url>
   <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-kuni-shugaku-shien/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/fk-kuni-shugakushienkin-koko/</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -2329,12 +2335,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/fk-kuni-ninpu-shien/</loc>
-    <lastmod>2026-09-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/fk-kuni-nyuin-shokuji-gengaku/</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -2383,6 +2383,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/fk-kuni-shogaku-kyufukin-koko/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/fk-kuni-shoni-mansei/</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -2396,6 +2402,12 @@
   </url>
   <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/fk-kuni-shugaku-shien/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/fk-kuni-shugakushienkin-koko/</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -2432,6 +2444,36 @@
   </url>
   <url>
     <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/fk-kuni-tokushi-shorei/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/ym-ken-hitorioya-iryo/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/ym-ken-iju-shienkin/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/ym-ken-judo-shinshin-iryo/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/ym-ken-nanbyo-iryo/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://allgroup-inc.github.io/hojo-hq/yamanashi/kit/ym-ken-nyuyoji-iryo/</loc>
     <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

@@ -1,6 +1,6 @@
 {
  "updated_at": "2026-09-21 07:50",
- "count": 260,
+ "count": 261,
  "items": [
   {
    "id": "fk-kuni-jidoteate",
@@ -195,28 +195,6 @@
    "verified": true,
    "verified_at": "2026-07-22",
    "verified_by": "kensho(突合レポート○・match_tokens修正後)+小柳さん進行承認 2026-07-22",
-   "status": "検証済み",
-   "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-09-21 07:50"
-  },
-  {
-   "id": "fk-kuni-ninpu-shien",
-   "name": "妊婦のための支援給付・伴走型相談支援",
-   "category": "子育て",
-   "life_events": [
-    "妊娠・出産"
-   ],
-   "issuer": "こども家庭庁",
-   "area": "全国",
-   "target_household": "妊娠された方・出産された世帯が対象となる可能性があります",
-   "how_to_apply": "お住まいの市区町村の窓口(母子保健担当)",
-   "source_url": "https://www.cfa.go.jp/policies/shussan-kosodate",
-   "amount_note": "要確認(公式ページでご確認ください)",
-   "deadline_type": "常時",
-   "deadline": null,
-   "verified": true,
-   "verified_at": "2026-07-22",
-   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
    "fetched_at": "2026-09-21 07:50"
@@ -6948,6 +6926,51 @@
    "status": "要確認",
    "notes": "出典: 糸満市ウェブサイト",
    "fetched_at": "2026-09-21 07:50"
+  },
+  {
+   "id": "fk-kuni-shugakushienkin-koko",
+   "name": "高等学校等就学支援金",
+   "category": "教育",
+   "life_events": [
+    "入園・入学"
+   ],
+   "issuer": "文部科学省",
+   "area": "全国",
+   "target_household": "高校等に通うお子さんがいる世帯が対象となる可能性があります(令和8年度から所得制限が撤廃され、世帯収入にかかわらず授業料が実質無償となる案内が出ています。学校種別・支給額の詳細は公式ページでご確認ください)",
+   "how_to_apply": "在学する学校を通じた申請(オンライン申請 e-Shien)",
+   "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1342674.htm",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 文部科学省ウェブサイト",
+   "fetched_at": "2026-09-20 23:07"
+  },
+  {
+   "id": "fk-kuni-shogaku-kyufukin-koko",
+   "name": "高校生等奨学給付金",
+   "category": "教育",
+   "life_events": [
+    "入園・入学",
+    "低所得・生活苦"
+   ],
+   "issuer": "文部科学省(窓口は都道府県)",
+   "area": "全国",
+   "target_household": "住民税非課税世帯等で高校生等のお子さんがいる世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの都道府県への申請(学校経由の場合あり)",
+   "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1344089.htm",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 文部科学省ウェブサイト",
+   "fetched_at": "2026-09-20 23:07"
   }
  ]
 }

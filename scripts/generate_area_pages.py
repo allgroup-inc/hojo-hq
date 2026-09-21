@@ -219,6 +219,16 @@ def muni_page(muni, items, updated):
         f'{esc(muni)}で新しい制度が増えたときや、締切が近づいたときに、LINEでそっとお知らせします。</p>'
     )
     body.append(line_cta)
+    # 受け取ったあとの報告導線。単一CV(LINE登録)と競合させないため、
+    # ボタンではなく控えめな一文にする(絶対ルール4)。
+    body.append(
+        '<p class="note" style="margin-top:18px;text-align:center">'
+        f'{esc(muni)}で、もう受け取れた制度はありますか? '
+        '<a href="../../houkoku/" onclick="if(window.fgTrack)'
+        "fgTrack('jukyu_report_link_area')\">"
+        '受け取れたことを教えてください(匿名・任意)</a><br>'
+        '制度名とおおよその金額だけで大丈夫です。お名前や口座番号はうかがいません。</p>'
+    )
     title = f"{muni}の給付金・手当まとめ({total}件)|申請方法と窓口|もらいわすれ堂"
     desc = (f"{muni}にお住まいの世帯が使える可能性のある給付金・手当{total}件のまとめ。"
             + (f"{ex_txt}など、" if ex_txt else "")

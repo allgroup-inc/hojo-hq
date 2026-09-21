@@ -57,6 +57,7 @@ CHANNELS = {
     "ymn-shindan": {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 診断ページ"},
     "ymn-area":    {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 市町村ページ"},
     "ymn-kit":     {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 準備シートページ"},
+    "ymn-life":    {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: ライフイベント別ページ"},
     "ymn-jukyu":   {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 受給報告(受け取れました)"},
 }
 

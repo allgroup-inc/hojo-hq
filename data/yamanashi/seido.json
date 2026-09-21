@@ -1,7 +1,7 @@
 {
  "region": "yamanashi",
- "updated_at": "2026-09-20 23:42",
- "count": 51,
+ "updated_at": "2026-09-21 07:50",
+ "count": 57,
  "items": [
   {
    "id": "fk-kuni-jidoteate",
@@ -23,7 +23,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-jidofuyoteate",
@@ -46,7 +46,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-09-20 23:42",
+   "fetched_at": "2026-09-21 07:50",
    "combine": {
     "type": "adjust",
     "note": "公的年金(遺族年金・障害年金など)を受け取れる場合は、手当額が調整される(全部または一部が支給されない)場合があります。窓口でご確認ください(要確認)"
@@ -72,7 +72,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-ikuji-kyufu",
@@ -96,7 +96,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-jukyo-kakuho",
@@ -120,7 +120,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42",
+   "fetched_at": "2026-09-21 07:50",
    "combine": {
     "type": "adjust",
     "note": "生活保護(住宅扶助)を受けている場合は対象外となる場合があります。窓口でご確認ください(要確認)"
@@ -146,7 +146,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-shugaku-shien",
@@ -168,7 +168,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42",
+   "fetched_at": "2026-09-21 07:50",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -198,29 +198,7 @@
    "verified_by": "kensho(突合レポート○・match_tokens修正後)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
-  },
-  {
-   "id": "fk-kuni-ninpu-shien",
-   "name": "妊婦のための支援給付・伴走型相談支援",
-   "category": "子育て",
-   "life_events": [
-    "妊娠・出産"
-   ],
-   "issuer": "こども家庭庁",
-   "area": "全国",
-   "target_household": "妊娠された方・出産された世帯が対象となる可能性があります",
-   "how_to_apply": "お住まいの市区町村の窓口(母子保健担当)",
-   "source_url": "https://www.cfa.go.jp/policies/shussan-kosodate",
-   "amount_note": "要確認(公式ページでご確認ください)",
-   "deadline_type": "常時",
-   "deadline": null,
-   "verified": true,
-   "verified_at": "2026-07-22",
-   "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
-   "status": "検証済み",
-   "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-kyushokusha-shien",
@@ -244,7 +222,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-seikatsu-konkyu",
@@ -270,7 +248,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-kyoiku-kunren",
@@ -292,7 +270,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-hoiku-mushoka",
@@ -318,7 +296,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-tokubetsu-jifute",
@@ -344,7 +322,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42",
+   "fetched_at": "2026-09-21 07:50",
    "combine": {
     "type": "adjust",
     "note": "公的年金(遺族年金・障害年金など)を受け取れる場合は、手当額が調整される(全部または一部が支給されない)場合があります。窓口でご確認ください(要確認)"
@@ -374,7 +352,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-tokubetsu-shogaisha",
@@ -399,7 +377,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-jiritsushien-iryo",
@@ -425,7 +403,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42",
+   "fetched_at": "2026-09-21 07:50",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -454,7 +432,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-kaigokyugyo-kyufu",
@@ -480,7 +458,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-rousai",
@@ -505,7 +483,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-miharai-chingin",
@@ -531,7 +509,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-seikatsu-hogo",
@@ -556,7 +534,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-nenkin-kyufukin",
@@ -581,7 +559,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-saigai-choui",
@@ -606,7 +584,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-shugaku-enjo",
@@ -632,7 +610,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42",
+   "fetched_at": "2026-09-21 07:50",
    "combine": {
     "type": "adjust",
     "note": "就学援助(給食費の援助)を受けている場合や他の給食費助成との重複時の取り扱いは、窓口でご確認ください(要確認)"
@@ -663,7 +641,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-safetynet-jutaku",
@@ -689,7 +667,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 国土交通省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-kosodate-green",
@@ -715,7 +693,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 国土交通省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-shussan-ouen",
@@ -739,7 +717,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-09-20 23:42",
+   "fetched_at": "2026-09-21 07:50",
    "combine": {
     "type": "adjust",
     "note": "国の出産・子育て応援給付金(妊婦のための支援給付)に基づく支給のため、転入前の市町村などで既に受け取った分と重ねては受けられない場合があります。窓口でご確認ください(要確認)"
@@ -771,7 +749,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 内閣府ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-hello-training",
@@ -799,7 +777,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-josei-sodan",
@@ -822,7 +800,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-kokuho-genmen",
@@ -846,7 +824,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42",
+   "fetched_at": "2026-09-21 07:50",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -873,7 +851,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-kashitsuke",
@@ -897,7 +875,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-kokunen-menjo",
@@ -921,7 +899,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 日本年金機構ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-boshi-jiritsu-kyufu",
@@ -946,7 +924,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-09-20 23:42",
+   "fetched_at": "2026-09-21 07:50",
    "combine": {
     "type": "adjust",
     "note": "求職者支援制度(職業訓練受講給付金)や雇用保険の教育訓練給付との併給には条件がある場合があります。窓口でご確認ください(要確認)"
@@ -976,7 +954,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-shussan-teate",
@@ -1002,7 +980,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-maisoryo",
@@ -1024,7 +1002,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-kogaku-kaigo-service",
@@ -1051,7 +1029,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 市区町村ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-kogaku-iryo-kaigo-gassan",
@@ -1078,7 +1056,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 各医療保険者ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-kaigo-jutaku-kaishu",
@@ -1100,7 +1078,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 市区町村ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-shoni-mansei",
@@ -1123,7 +1101,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 都道府県・指定都市・中核市等ウェブサイト",
-   "fetched_at": "2026-09-20 23:42",
+   "fetched_at": "2026-09-21 07:50",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -1154,7 +1132,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-iryohi-kojo",
@@ -1180,7 +1158,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 国ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-koki-korei-hokenryo-keigen",
@@ -1206,7 +1184,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 都道府県の後期高齢者医療広域連合・市区町村ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-nhk-menjo",
@@ -1230,7 +1208,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: NHKウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-hosougu",
@@ -1253,7 +1231,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-nichijo-yougu",
@@ -1281,7 +1259,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
   },
   {
    "id": "fk-kuni-nenkin-shien-kyufukin",
@@ -1306,8 +1284,177 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 日本年金機構ウェブサイト",
-   "fetched_at": "2026-09-20 23:42"
+   "fetched_at": "2026-09-21 07:50"
+  },
+  {
+   "id": "fk-kuni-shugakushienkin-koko",
+   "name": "高等学校等就学支援金",
+   "category": "教育",
+   "life_events": [
+    "入園・入学"
+   ],
+   "issuer": "文部科学省",
+   "area": "全国",
+   "target_household": "高校等に通うお子さんがいる世帯が対象となる可能性があります(令和8年度から所得制限が撤廃され、世帯収入にかかわらず授業料が実質無償となる案内が出ています。学校種別・支給額の詳細は公式ページでご確認ください)",
+   "how_to_apply": "在学する学校を通じた申請(オンライン申請 e-Shien)",
+   "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1342674.htm",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 文部科学省ウェブサイト",
+   "fetched_at": "2026-09-20 23:07"
+  },
+  {
+   "id": "fk-kuni-shogaku-kyufukin-koko",
+   "name": "高校生等奨学給付金",
+   "category": "教育",
+   "life_events": [
+    "入園・入学",
+    "低所得・生活苦"
+   ],
+   "issuer": "文部科学省(窓口は都道府県)",
+   "area": "全国",
+   "target_household": "住民税非課税世帯等で高校生等のお子さんがいる世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの都道府県への申請(学校経由の場合あり)",
+   "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1344089.htm",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 文部科学省ウェブサイト",
+   "fetched_at": "2026-09-20 23:07"
+  },
+  {
+   "id": "ym-ken-nyuyoji-iryo",
+   "name": "乳幼児医療費の助成",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て",
+    "病気・けが"
+   ],
+   "issuer": "山梨県(実施は市町村)",
+   "area": "山梨県",
+   "target_household": "山梨県内にお住まいで、乳幼児を育てている世帯が対象となる可能性があります(対象年齢や助成内容は市町村ごとに決められています)",
+   "how_to_apply": "お住まいの市町村の担当窓口",
+   "source_url": "https://www.pref.yamanashi.jp/kosodate/71890998147.html",
+   "amount_note": "要確認(対象年齢・自己負担の有無は市町村で異なります。公式ページと窓口でご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 山梨県ウェブサイト",
+   "fetched_at": "2026-09-21 07:50"
+  },
+  {
+   "id": "ym-ken-hitorioya-iryo",
+   "name": "ひとり親家庭等医療費助成",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て",
+    "離婚・死別",
+    "病気・けが"
+   ],
+   "issuer": "山梨県(実施は市町村)",
+   "area": "山梨県",
+   "target_household": "山梨県内にお住まいのひとり親家庭の親と子(18歳年度末まで)、父母のない児童が対象となる可能性があります",
+   "how_to_apply": "お住まいの市町村の担当窓口",
+   "source_url": "https://www.pref.yamanashi.jp/kodomo-fukushi/40_026.html",
+   "match_tokens": [
+    "ひとり親家庭"
+   ],
+   "amount_note": "要確認(生活保護受給世帯や所得が一定以上の世帯は対象外とされています。公式ページと窓口でご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 山梨県ウェブサイト",
+   "fetched_at": "2026-09-21 07:50"
+  },
+  {
+   "id": "ym-ken-judo-shinshin-iryo",
+   "name": "重度心身障害者医療費助成制度",
+   "category": "医療・健康",
+   "life_events": [
+    "障害",
+    "病気・けが"
+   ],
+   "issuer": "山梨県(実施は市町村)",
+   "area": "山梨県",
+   "target_household": "山梨県内にお住まいで、重度の心身障害のある方が対象となる可能性があります",
+   "how_to_apply": "お住まいの市町村の担当窓口",
+   "source_url": "https://www.pref.yamanashi.jp/shogai-fks/judo/jidoukanpu-ikou.html",
+   "amount_note": "要確認(対象となる障害の程度・助成の方法は公式ページと窓口でご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 山梨県ウェブサイト",
+   "fetched_at": "2026-09-21 07:50"
+  },
+  {
+   "id": "ym-ken-nanbyo-iryo",
+   "name": "難病医療費助成制度",
+   "category": "医療・健康",
+   "life_events": [
+    "病気・けが"
+   ],
+   "issuer": "山梨県",
+   "area": "山梨県",
+   "target_household": "国が定める指定難病と診断され、一定の重症度等の要件に当てはまる方が対象となる可能性があります",
+   "how_to_apply": "お住まいの地域を管轄する保健所",
+   "source_url": "https://www.pref.yamanashi.jp/kenko-zsn/boshinanbyou/aratana-nanbyou.html",
+   "match_tokens": [
+    "難病"
+   ],
+   "amount_note": "要確認(自己負担の上限額は所得等に応じて決まります。公式ページと窓口でご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 山梨県ウェブサイト",
+   "fetched_at": "2026-09-21 07:50"
+  },
+  {
+   "id": "ym-ken-iju-shienkin",
+   "name": "山梨県移住支援金",
+   "category": "住まい",
+   "life_events": [
+    "住宅取得・引越",
+    "就職・転職"
+   ],
+   "issuer": "山梨県(市町村と共同)",
+   "area": "山梨県",
+   "target_household": "東京圏から山梨県内へ移住し、就業・起業などの要件を満たす世帯が対象となる可能性があります",
+   "how_to_apply": "移住先の市町村の担当窓口",
+   "source_url": "https://www.pref.yamanashi.jp/jinko-taisaku/koukai/ijushienkin.html",
+   "match_tokens": [
+    "移住支援金"
+   ],
+   "amount_note": "要確認(予算の範囲内で支給されるため、年度途中に受付が終わることがあります。公式ページと窓口でご確認ください)",
+   "deadline_type": "要確認",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 山梨県ウェブサイト",
+   "fetched_at": "2026-09-21 07:50"
   }
  ],
- "note": "第1段階=国の制度のみ(沖縄版で公式照合済みの全国制度を流用)。県・市町村は規約確認後に追加"
+ "note": "国の制度(沖縄版で公式照合済みの全国制度を流用)+山梨県の制度。市町村独自の制度は守り部の論点(営利サイト可否・トップページ限定)の決裁後に追加"
 }

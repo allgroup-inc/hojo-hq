@@ -129,7 +129,7 @@ def render_funnel_section(funnel):
                     f"中間ページ到達(line_redirect): {ch_txt}"
                     "(クリック数と到達数の差=クリック後の脱落)\n")
     return (
-        f"## 2. ファネル(自動取得 — Plausible Stats API / 直近{funnel.get('period','7d')})\n\n"
+        f"## 2. ファネル(自動取得 — {_src_label(funnel.get('source'))} / 直近{funnel.get('period','7d')})\n\n"
         f"更新: {funnel.get('updated_at','-')}。集計値のみ(個人識別子なし)。\n{warn_line}\n"
         "| 段 | 件数 | 前段比 | 離脱率 |\n|---|---|---|---|\n"
         f"{rows}\n\n"
@@ -137,9 +137,38 @@ def render_funnel_section(funnel):
         f"**診断完了→LINE誘導**: {_pct(kr.get('line_cvr'))}(KPI 30%) / "
         f"**完了率**: {_pct(kr.get('finish_rate'))} / **0件率**: {_pct(kr.get('zero_rate'))}\n"
         f"{ld_lines}\n"
-        f"補助: 準備シート {eng.get('kit_click',0)} / 受給ずみ {eng.get('seido_done_mark',0)} / "
-        f"受給報告 {eng.get('jukyu_report_click',0)} / 0件 {eng.get('shindan_zero',0)}"
+        f"補助: トップの診断CTA {eng.get('shindan_cta_click',0)} / "
+        f"準備シート {eng.get('kit_click',0)} / 受給ずみ {eng.get('seido_done_mark',0)} / "
+        f"報告ページへ {_report_links(eng)}(内訳 top{eng.get('jukyu_report_link_top',0)}"
+        f"/診断{eng.get('jukyu_report_link_shindan',0)}/シート{eng.get('jukyu_report_link_kit',0)}"
+        f"/市町村{eng.get('jukyu_report_link_area',0)}/ライフ{eng.get('jukyu_report_link_life',0)}) / "
+        f"報告の送信 {eng.get('jukyu_report_click',0)} / 0件 {eng.get('shindan_zero',0)}"
     )
+
+
+def _kensho_unconfirmed():
+    """「検証済み」表示のまま原文を確認できていない件数(絶対ルール1に触れる状態)。
+    kensho_fukugiiro.py が出力する。未生成なら None を返し、判定を断定しない。"""
+    p = os.path.join(BASE, "data", "fukugiiro", "kensho_summary.json")
+    try:
+        with open(p, encoding="utf-8") as f:
+            d = json.load(f)
+        return (d.get("verified_but_unconfirmed"), d.get("updated_at"),
+                d.get("verified_but_unreachable") or 0)
+    except Exception:  # noqa: BLE001
+        return None, None, 0
+
+
+def _src_label(source):
+    return {"ga4-data-api": "GA4 Data API",
+            "plausible-stats-api": "Plausible Stats API"}.get(source, source or "未接続")
+
+
+def _report_links(eng):
+    """報告ページへの導線クリック合計。送信意思(jukyu_report_click)とは別物。"""
+    return sum(eng.get(k, 0) for k in
+               ("jukyu_report_link_top", "jukyu_report_link_shindan", "jukyu_report_link_kit",
+                "jukyu_report_link_area", "jukyu_report_link_life"))
 
 
 KPI_DIR = os.path.join(BASE, "data", "kpi")
@@ -267,6 +296,18 @@ def main():
     items = db["items"]
     keisai = db.get("count", len(items))
     verified = sum(1 for it in items if it.get("status") == "検証済み")
+    _unconf, _unconf_at, _unreach = _kensho_unconfirmed()
+    # 取得できなかった件数は「掲載が誤り」ではないので、要対応とは別に併記する
+    _ur = f" / 取得できず {_unreach} 件" if _unreach else ""
+    if _unconf is None:
+        _unconf_val, _unconf_judge = "未測定", "突合レポート未生成(kensho_fukugiiro.py)"
+    elif _unconf == 0:
+        _unconf_val = f"0 件{_ur}"
+        _unconf_judge = ("✅ 検証済みは全件が原文確認済み" if not _unreach
+                         else "✅ 内容の不一致なし(取得できなかった分は判定不能・掲載の誤りではない)")
+    else:
+        _unconf_val = f"{_unconf} 件が内容未確認{_ur}"
+        _unconf_judge = f"⚠ 検証済み表示のまま内容を確認できず({_unconf_at} 時点)。docs/フクギイロ_突合レポート.md の要対応欄"
     youkakunin = sum(1 for it in items if it.get("status") == "要確認")
     verified_rate = (verified / keisai * 100) if keisai else 0
 
@@ -326,6 +367,7 @@ def main():
 |---|---|---|---|
 | 掲載制度数 | {keisai} 件 | 常時{KPI_KEISAI}件以上 | {'✅' if keisai >= KPI_KEISAI else f'🟡 あと{KPI_KEISAI - keisai}件'} |
 | 検証済み | {verified} 件({verified_rate:.0f}%) | 誤情報ゼロ | {'✅ 全件検証済み' if youkakunin == 0 else f'要確認 {youkakunin}件'} |
+| 原文の裏取り | {_unconf_val} | 検証済み表示は全件が原文確認済み | {_unconf_judge} |
 | データ鮮度 | {db.get('updated_at','?')} | 24時間以内 | {fresh_label} |
 | 市町村ページ | {n_area} ページ | 41市町村 | {'✅' if n_area >= 41 else '🟡'} |
 | 申請準備シート | {n_kit} ページ | 全制度 | {'✅' if n_kit >= keisai else '🟡'} |

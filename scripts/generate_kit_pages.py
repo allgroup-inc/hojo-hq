@@ -553,6 +553,7 @@ def index_page(items, updated):
 <p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・受け取りの確認まで。<strong>スマホで開いたまま窓口で使えます</strong>(印刷して持っていくのもOK。プリンターがない方向けにコンビニ印刷の手順も各シートにあります)。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>
 {sections_html}
+<p class="note" style="margin-top:18px;text-align:center">もう受け取れた制度はありますか? <a href="../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit',{{pos:'index'}})">受け取れたことを教えてください(匿名・任意)</a><br>制度名とおおよその金額だけで大丈夫です。お名前や口座番号はうかがいません。</p>
 <div class="disclaimer">最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
 <p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップ</a></p>
 <p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
