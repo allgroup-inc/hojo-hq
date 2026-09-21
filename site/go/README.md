@@ -18,6 +18,8 @@
 | /go/fg-kit/ | フクギイロ: 制度キットページ | https://lin.ee/7fH7vDQ |
 | /go/fg-shindan/ | フクギイロ: 診断ページ | https://lin.ee/7fH7vDQ |
 | /go/fg-jukyu/ | フクギイロ: 受給報告(受け取れました) | https://lin.ee/7fH7vDQ |
+| /go/fg-ig/ | もらいわすれ堂: Instagramプロフィール → 3分診断 | https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/?utm_source=instagram&utm_medium=social&utm_campaign=profile |
+| /go/fg-ig-line/ | もらいわすれ堂: Instagramプロフィール → LINE | https://lin.ee/7fH7vDQ |
 | /go/ymn-top/ | フクギイロ山梨: トップページ | https://line.me/R/ti/p/%40630pbjqq |
 | /go/ymn-shindan/ | フクギイロ山梨: 診断ページ | https://line.me/R/ti/p/%40630pbjqq |
 | /go/ymn-area/ | フクギイロ山梨: 市町村ページ | https://line.me/R/ti/p/%40630pbjqq |
@@ -33,6 +35,16 @@
 ## チャネルを追加するとき
 CHANNELS に1行足して再実行するだけ(計測→転送の構造は共通テンプレート)。
 GA4 では計測イベントの `channel` パラメータで経路別に集計できる。
+
+## プロフィールの1枠目を /go/ に通すかどうか(事業で型が違う)
+
+| 事業 | プロフィール1枠目 | 理由 |
+|---|---|---|
+| 沖縄企業のミカタ | サイトへ **utm付きの直リンク** | `docs/決裁キュー.md` の既定 |
+| もらいわすれ堂 | **`/go/fg-ig/` 経由** | ❸の計測がゼロで、utm だけだと着地前の離脱を取りこぼすため |
+
+型が分かれているのは事故ではなく決定。**ミカタに合わせて直リンクへ戻さないこと。**
+経緯と採用条件: `docs/議事_20260921_IGプロフィール導線をgo経由にする.md`
 
 **転送先がLINEでないチャネルは `event` と `dest_name` を必ず指定する。**
 既定のまま(`line_redirect`)にすると、その導線のクリックがLINE登録として集計され、

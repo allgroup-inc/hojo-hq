@@ -49,7 +49,10 @@ ENGAGEMENT_KEYS = ["kit_click", "seido_done_mark", "jukyu_report_click", "shinda
                    "jukyu_report_link_area", "jukyu_report_link_life",
                    # トップの診断CTAクリック。診断へは市町村・シート・直接流入からも来るため、
                    # ファネルの段にはせず補助指標として扱う(段にすると離脱率が誤る)
-                   "shindan_cta_click"]
+                   "shindan_cta_click",
+                   # Instagramプロフィール(/go/fg-ig/)から診断ページへの転送。
+                   # LINEではないので line_redirect とは別名で数える
+                   "shindan_redirect"]
 
 
 def build_funnel(counts):
