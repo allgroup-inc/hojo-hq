@@ -2821,5 +2821,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-21",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "【令和７年度補正予算・令和８年度】二酸化炭素排出抑制対策事業費等補助金（ライフサイクルカーボン削減型の先導的な新築ZEB支援事業（令和７年度補正予算三次公募・令和８年度二次公募））",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtbMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(トランジションボンド/トランジションローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9xMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「グリーンイノベーション基金事業／次世代型地熱技術の開発」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXkJMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(個人向けSDGs預金)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdABMA1",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度子育て【宅配ボックス】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSPMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
