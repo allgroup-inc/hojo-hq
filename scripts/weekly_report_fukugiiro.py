@@ -14,6 +14,7 @@
 import json
 import os
 import re
+import sys
 from datetime import datetime, timezone, timedelta
 
 JST = timezone(timedelta(hours=9))
@@ -145,6 +146,35 @@ def render_funnel_section(funnel):
         f"/市町村{eng.get('jukyu_report_link_area',0)}/ライフ{eng.get('jukyu_report_link_life',0)}) / "
         f"報告の送信 {eng.get('jukyu_report_click',0)} / 0件 {eng.get('shindan_zero',0)}"
     )
+
+
+def _selfcheck():
+    """自己点検(scripts/selfcheck_moradou.py)の結果を取り込む。
+
+    検査が落ちても週次レポ本体は出す。「取れなかった」と「異常あり」を混同しない。
+    """
+    import subprocess
+    try:
+        r = subprocess.run(
+            [sys.executable, os.path.join(BASE, "scripts", "selfcheck_moradou.py"), "--json"],
+            capture_output=True, text=True, timeout=120)
+        return json.loads(r.stdout)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _selfcheck_lines(sc):
+    if sc is None:
+        return ("未取得", "自己点検を実行できませんでした(selfcheck_moradou.py)", "")
+    fresh, known = len(sc.get("fresh_ng", [])), sc.get("known_ng_count", 0)
+    val = f"新規NG {fresh} 件 / 既知の負債 {known} 件"
+    judge = "✅ 新規の違反なし" if fresh == 0 else f"🔴 {fresh} 件を直してください"
+    todos = sc.get("todo", [])
+    if todos:
+        body = "\n".join(f"- {t['msg']}" for t in todos)
+    else:
+        body = "- 人の作業待ちはありません"
+    return val, judge, body
 
 
 def _kensho_unconfirmed():
@@ -298,6 +328,8 @@ def main():
     keisai = db.get("count", len(items))
     verified = sum(1 for it in items if it.get("status") == "検証済み")
     _unconf, _unconf_at, _unreach = _kensho_unconfirmed()
+    _sc = _selfcheck()
+    _sc_val, _sc_judge, _sc_todos = _selfcheck_lines(_sc)
     # 取得できなかった件数は「掲載が誤り」ではないので、要対応とは別に併記する
     _ur = f" / 取得できず {_unreach} 件" if _unreach else ""
     if _unconf is None:
@@ -370,10 +402,15 @@ def main():
 | 検証済み | {verified} 件({verified_rate:.0f}%) | 誤情報ゼロ | {'✅ 全件検証済み' if youkakunin == 0 else f'要確認 {youkakunin}件'} |
 | 原文の裏取り | {_unconf_val} | 検証済み表示は全件が原文確認済み | {_unconf_judge} |
 | データ鮮度 | {db.get('updated_at','?')} | 24時間以内 | {fresh_label} |
+| 自己点検 | {_sc_val} | 新規の違反ゼロ | {_sc_judge} |
 | 市町村ページ | {n_area} ページ | 41市町村 | {'✅' if n_area >= 41 else '🟡'} |
 | 申請準備シート | {n_kit} ページ | 全制度 | {'✅' if n_kit >= keisai else '🟡'} |
 
 カテゴリ別: {cat_line}
+
+### 人の手が要る残件(自己点検より)
+
+{_sc_todos}
 
 ## 4. 品質・統制(ニドナシ機構 / eval)
 
