@@ -1,0 +1,60 @@
+name: note-rss-watch
+
+# 結果マガ 公開の自動検知(2026-09-21 小柳さん指示「極限まで自動化」)。
+# noteのRSSを1日2回巡回し、下書き済み記事の公開を見つけたら publish-record を自動起動する。
+# これにより人間の作業は「noteで公開する」だけになる(URL貼り付け・起動操作が不要)。
+# 二重起動しても publish-record 側のべき等性ガード(already / x_post_url)で安全。
+# cronは発火実績のあるUTC早朝帯(ニドナシ#22)。
+
+on:
+  schedule:
+    - cron: "23 1 * * *"   # 毎日 10:23 JST
+    - cron: "23 4 * * *"   # 毎日 13:23 JST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: note-rss-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: RSS巡回と公開検知
+        id: watch
+        run: |
+          python scripts/watch_note_rss.py | tee /tmp/watch.out
+
+      - name: publish-record を自動起動
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          grep '^dispatch_[0-9]*=' /tmp/watch.out | while IFS='=' read -r k v; do
+            id="${v%%|*}"; url="${v##*|}"
+            echo "dispatching publish-record: $id $url"
+            curl -sS -o /dev/null -w "%{http_code}\n" -X POST \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/publish-record.yml/dispatches" \
+              -d "{\"ref\":\"main\",\"inputs\":{\"article_id\":\"$id\",\"note_url\":\"$url\"}}"
+          done
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.KEKKA_LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【結果マガ】公開の自動検知(RSS巡回)が失敗しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
