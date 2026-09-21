@@ -31,7 +31,7 @@
 .mfilm .kb{position:absolute;inset:0;transform:scale(1.07);transition:transform 22s ease-out;transform-origin:50% 72%}
 .mfilm .in .kb{transform:scale(1)}
 .mfilm .photoback{position:absolute;inset:0;z-index:0}
-.mfilm .photoback img{width:100%;height:100%;object-fit:cover;opacity:.5}
+.mfilm .photoback img{width:100%;height:100%;object-fit:cover;opacity:.25}
 
 /* 固定ヘッダー(スキップ導線) */
 .mhead{position:fixed;top:0;left:0;right:0;z-index:90;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;pointer-events:none}
