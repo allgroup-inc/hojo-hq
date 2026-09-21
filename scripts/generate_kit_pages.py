@@ -521,12 +521,12 @@ def index_page(items, updated):
     def line(it):
         # 一覧では「照合済み」は✓だけに圧縮(176件の縦の壁と視覚ノイズを減らす・議事_20260817組版)
         if it.get("verified") is True:
-            b = ' <span class="status ok" title="公式と照合済み">✓</span>'
+            b = '&nbsp;<span class="status ok" title="公式と照合済み">✓</span>'
         elif it.get("status") == "要確認":
-            b = ' <span class="status">要確認</span>'
+            b = '&nbsp;<span class="status">要確認</span>'
         else:
             b = ""
-        return f'<li><a href="{esc(it["id"])}/">{esc(it["name"])}</a>{b}</li>'
+        return f'<li><a href="{esc(it["id"])}/">{esc(it["name"])}{b}</a></li>'
     # 全国/沖縄県/市町村の3区分で表示(160件のフラット一覧は探しにくいため・2026-08-12 小柳さん委任裁定)
     national = [it for it in items if it.get("area") == "全国"]
     pref = [it for it in items if it.get("area") == "沖縄県"]
@@ -548,7 +548,7 @@ def index_page(items, updated):
         )
     sections_html = "\n".join(sections)
     body = f"""
-<style>.kul{{list-style:none}}.kul li{{display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:1px dashed var(--fg-line)}}.kul a{{display:inline-block;padding:9px 0;line-height:1.55}}.kul .status{{font-size:.72rem;padding:1px 7px}}.kul .ok{{font-size:inherit}}</style>
+<style>.kul{{list-style:none}}.kul .status{{display:inline}}.kul li{{border-bottom:1px dashed var(--fg-line)}}.kul a{{display:inline-block;padding:9px 0;line-height:1.55}}.kul .status{{font-size:.72rem;padding:1px 7px}}.kul .ok{{font-size:inherit}}</style>
 <h1>申請準備シート一覧</h1>
 <p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・受け取りの確認まで。<strong>スマホで開いたまま窓口で使えます</strong>(印刷して持っていくのもOK。プリンターがない方向けにコンビニ印刷の手順も各シートにあります)。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>

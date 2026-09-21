@@ -71,9 +71,9 @@ TEMPLATE = """<!DOCTYPE html>
 {analytics}
 <style>
   body{{font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic',Meiryo,sans-serif;
-    background:#00335c;color:#F7F5F1;display:flex;flex-direction:column;gap:16px;
+    background:{bg};color:{fg};display:flex;flex-direction:column;gap:16px;
     align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:24px;}}
-  a{{color:#F88800;font-weight:700;}}
+  a{{color:{link};font-weight:700;}}
 </style>
 </head>
 <body>
@@ -148,9 +148,15 @@ def main():
                 channel=ch, event=cfg.get("event", DEFAULT_EVENT))
         else:
             analytics = ANALYTICS_NONE.format(dest=cfg["dest"])
+        # 転送ページの色は事業ブランドに合わせる(点検2026-09-03 ⚪9)。
+        # fg-*/ymn-* = もらいわすれ堂(漆喰・朱)。それ以外 = 沖縄企業のミカタ(紺・橙)
+        if ch.startswith(("fg-", "ymn-")):
+            colors = {"bg": "#FFFBF4", "fg": "#3B322B", "link": "#B9502F"}
+        else:
+            colors = {"bg": "#00335c", "fg": "#F7F5F1", "link": "#F88800"}
         html = TEMPLATE.format(
             channel=ch, dest=cfg["dest"], analytics=analytics,
-            dest_name=cfg.get("dest_name", DEFAULT_DEST_NAME),
+            dest_name=cfg.get("dest_name", DEFAULT_DEST_NAME), **colors,
         )
         with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
             f.write(html)

@@ -30,7 +30,7 @@ body{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,s
   font-size:17px;line-height:1.9;color:var(--ink);background:var(--shikkui);-webkit-font-smoothing:antialiased}
 .wrap{max-width:720px;margin:0 auto;padding:0 20px}
 a{color:var(--shu)}
-h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;line-height:1.5;font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
+h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;line-height:1.5;font-weight:600;word-break:auto-phrase;overflow-wrap:anywhere}
 h2{font-size:1.45rem;margin-bottom:.7em;text-align:center;color:var(--ink)}
 section{padding:48px 0}
 section p{text-align:center}
@@ -46,7 +46,15 @@ section p{text-align:center}
 .siteheader .hlogo{display:flex;align-items:center;gap:9px;font-family:"Shippori Mincho",serif;font-weight:600;color:var(--shu);text-decoration:none;font-size:1.05rem}
 .siteheader .hlogo img{width:32px;height:32px}
 .siteheader nav{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-.siteheader nav a{font-size:.82rem;color:var(--ink);text-decoration:none;padding:7px 10px;border-radius:8px}
+p,li{word-break:auto-phrase;text-wrap:pretty}
+h1,h2,h3{text-wrap:balance}
+.siteheader nav a{font-size:.95rem;color:var(--ink);text-decoration:none;padding:10px 12px;border-radius:8px}
+/* 受け取るまでの道のり(おもてなし点検 2026-09-20) */
+.michinori{list-style:none;display:grid;gap:10px}
+.michinori li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;text-align:left;box-shadow:var(--shadow)}
+.michinori b{display:block;font-family:"Shippori Mincho",serif;color:var(--shu);font-size:1.02rem;margin-bottom:2px}
+.michinori span{font-size:.9rem;color:#5c5148;line-height:1.75}
+@media(min-width:640px){.michinori{grid-template-columns:1fr 1fr 1fr}}
 .hero{text-align:center;padding:46px 0 50px;background:var(--shikkui)}
 .hero .brand img{width:76px;height:76px}
 .hero .wm{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.9rem;color:var(--shu);letter-spacing:.04em;display:block;margin-top:6px}
@@ -277,6 +285,18 @@ footer a{color:var(--ki)}
     <p class="note" style="margin-top:10px">匿名 ・ 登録不要 ・ 名前や住所は聞きません</p>
   </div>
 </div>
+
+<section style="padding:30px 0 6px">
+  <div class="wrap">
+    <span class="eyebrow">受け取るまでの道のり</span>
+    <h2 style="font-size:1.2rem">やることは、3つだけ</h2>
+    <ol class="michinori">
+      <li><b>1. みつける</b><span>3分診断で、あなたの世帯にあてはまる可能性のある制度がわかります(匿名・無料)</span></li>
+      <li><b>2. そろえる</b><span>制度ごとの申請準備シートで、持ち物や窓口での言い方まで準備できます</span></li>
+      <li><b>3. 受け取る</b><span>窓口で申請したら、受け取りの確認まで見届けましょう。受け取れたら、匿名のご報告が次の誰かの力になります</span></li>
+    </ol>
+  </div>
+</section>
 
 <section>
   <div class="wrap">
