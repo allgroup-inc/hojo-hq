@@ -4,17 +4,16 @@
 
 .mfilm{position:relative;
   background:linear-gradient(180deg,
-    #101B1A 0%,
-    #131E1D 10%,
-    #1B2C2B 22%,
-    #27403E 34%,
-    #3C5A55 44%,
-    #7A7E66 54%,
-    #C98E6C 62%,
-    #E7B98F 70%,
-    #F3DCC0 80%,
-    #FBF5EC 90%,
-    #FBF5EC 100%)}
+    #0D1615 0%,
+    #0D1615 18%,
+    #1A3A36 20%,
+    #1A3A36 38%,
+    #4A6B63 40%,
+    #4A6B63 58%,
+    #D4956E 60%,
+    #D4956E 78%,
+    #FAE8D1 80%,
+    #FAE8D1 100%)}
 .mfilm .scene{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0}
 .mfilm .copy{position:relative;z-index:6;text-align:center;padding:0 24px;max-width:760px}
 .mfilm .copy p{margin:0;font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;line-height:2.1;
