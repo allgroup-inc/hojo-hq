@@ -116,7 +116,51 @@ def name_tokens(name):
     return [t for t in re.split(r"[・\s/]+", base) if len(t) >= 2]
 
 
+def self_test():
+    """ネットワーク無しで検証できる部分を固定する。
+
+    このスクリプトは CI で一度も実行されておらず、バグが本番(夜間の収集)でしか
+    出てこなかった。文字コードの取り違えとエラーの読み分けは純粋な処理なので、
+    ここでテストしておけば同じ事故を PR の時点で止められる。
+    """
+    ok = True
+
+    def expect(cond, label):
+        nonlocal ok
+        print(("  ok   " if cond else "  NG   ") + label)
+        ok = ok and cond
+
+    title = "渡名喜村 こども医療費助成 | 渡名喜村役場"
+    # 文字化け: cp932 は EUC-JP を例外なしに読んでしまうため、順に試すだけでは足りない
+    for enc in ("euc_jp", "shift_jis", "utf-8"):
+        with_meta = f'<html><head><meta charset="{enc}"><title>{title}</title></head></html>'
+        expect(page_title(decode_html(with_meta.encode(enc))) == title,
+               f"{enc}(charset宣言あり)を正しく読む")
+        bare = f"<html><head><title>{title}</title></head></html>"
+        expect(page_title(decode_html(bare.encode(enc))) == title,
+               f"{enc}(宣言なし)を正しく読む")
+    # ヘッダの charset が meta より優先されること
+    raw = f'<html><head><meta charset="utf-8"><title>{title}</title></head></html>'.encode("euc_jp")
+    expect(page_title(decode_html(raw, "euc_jp")) == title, "HTTPヘッダのcharsetを優先する")
+
+    # エラーは種類名だけでなくHTTPステータスまで残す(403=遮断と404=消滅は意味が正反対)
+    class _E(Exception):
+        code = 403
+    expect("403" in describe_error(_E()), "HTTPステータスをエラー表記に残す")
+    expect(describe_error(ValueError()) == "ValueError", "ステータスが無い例外は種類名のみ")
+
+    # 照合トークン: match_tokens があればそちらを使う
+    expect("高額介護合算" in "高額介護合算｜限度額適用認定証｜協会けんぽ",
+           "実測タイトルに match_tokens が含まれる(高額介護合算)")
+    expect(len(name_tokens("居宅介護(介護予防)住宅改修費")) > 0, "name_tokens が空にならない")
+
+    print("self-test:", "OK" if ok else "NG")
+    return 0 if ok else 1
+
+
 def main():
+    if "--self-test" in sys.argv:
+        return self_test()
     now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
     with open(DATA, encoding="utf-8") as f:
         db = json.load(f)
@@ -241,4 +285,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)
