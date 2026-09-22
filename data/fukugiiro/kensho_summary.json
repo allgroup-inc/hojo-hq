@@ -1,0 +1,42 @@
+{
+  "updated_at": "2026-09-22 11:11",
+  "total": 261,
+  "ng": 10,
+  "unreachable": 0,
+  "skipped_known_block": 29,
+  "skipped_robots": 0,
+  "verified_but_unconfirmed": 5,
+  "verified_but_unreachable": 0,
+  "items": [
+    {
+      "name": "浦添市 学校給食費の無償化(令和8年度)",
+      "area": "浦添市",
+      "mark": "△",
+      "url": "https://www.city.urasoe.lg.jp/doc/2026032600054"
+    },
+    {
+      "name": "宜野湾市 学校給食費の助成(小学生半額・食材費補助)",
+      "area": "宜野湾市",
+      "mark": "△",
+      "url": "https://www.city.ginowan.lg.jp/soshiki/kikaku/4/2/1/5_6/14177.html"
+    },
+    {
+      "name": "八重瀬町 学校給食費の無償化(令和8年度)",
+      "area": "八重瀬町",
+      "mark": "△",
+      "url": "https://www.town.yaese.lg.jp/docs/2023121400014/"
+    },
+    {
+      "name": "読谷村 学校給食費の補助(無償化)",
+      "area": "読谷村",
+      "mark": "△",
+      "url": "https://www.vill.yomitan.okinawa.jp/kosodate_kyoiku/school/kyushoku/index.html"
+    },
+    {
+      "name": "嘉手納町 学校給食費の無償化",
+      "area": "嘉手納町",
+      "mark": "△",
+      "url": "https://www.town.kadena.okinawa.jp/life/kadena-kosodate-2025.pdf"
+    }
+  ]
+}

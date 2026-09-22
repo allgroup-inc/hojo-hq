@@ -1,7 +1,7 @@
 {
   "note": "サイトのアクセス総量(Plausible集計・Cookieなし)。KGI❶=もらいわすれ堂 月1万人。domain=ドメイン全体(企業のミカタ+もらいわすれ堂)、moradou=もらいわすれ堂ページのみ。",
   "kgi_target_monthly_users": 10000,
-  "last_checked": "2026-09-21 10:59",
+  "last_checked": "2026-09-22 11:23",
   "last_status": "ok(ga4)",
   "history": [
     {
@@ -279,6 +279,23 @@
         "bounce_rate": 98,
         "visit_duration": 7
       }
+    },
+    {
+      "date": "2026-09-22",
+      "period": "7d",
+      "source": "ga4",
+      "domain": {
+        "visitors": 56,
+        "pageviews": 63,
+        "bounce_rate": 93,
+        "visit_duration": 22
+      },
+      "moradou": {
+        "visitors": 46,
+        "pageviews": 51,
+        "bounce_rate": 96,
+        "visit_duration": 5
+      }
     }
   ],
   "all_time": {
@@ -290,9 +307,47 @@
   },
   "all_time_ga4": {
     "since_measured": "GA4計測開始日以降のみ",
-    "as_of": "2026-09-21",
-    "domain_visitors": 304,
-    "moradou_visitors": 291,
-    "moradou_pageviews": 308
+    "as_of": "2026-09-22",
+    "domain_visitors": 314,
+    "moradou_visitors": 295,
+    "moradou_pageviews": 312
+  },
+  "monthly": {
+    "2026-09": {
+      "period": "2026-09-01..2026-09-22",
+      "confirmed": false,
+      "as_of": "2026-09-22",
+      "domain": {
+        "visitors": 297,
+        "pageviews": 315,
+        "bounce_rate": 95,
+        "visit_duration": 11
+      },
+      "moradou": {
+        "visitors": 280,
+        "pageviews": 296,
+        "bounce_rate": 96,
+        "visit_duration": 8
+      },
+      "quality_note": "直帰率が高く滞在が極端に短いため、実訪問として読まないこと(直帰96% / 滞在8秒)。自動巡回の可能性"
+    },
+    "2026-08": {
+      "period": "2026-08-01..2026-08-31",
+      "confirmed": true,
+      "as_of": "2026-09-22",
+      "domain": {
+        "visitors": 18,
+        "pageviews": 19,
+        "bounce_rate": 78,
+        "visit_duration": 41
+      },
+      "moradou": {
+        "visitors": 15,
+        "pageviews": 16,
+        "bounce_rate": 73,
+        "visit_duration": 49
+      },
+      "quality_note": null
+    }
   }
 }
