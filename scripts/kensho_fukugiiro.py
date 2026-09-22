@@ -34,16 +34,75 @@ def describe_error(e):
     return f"{type(e).__name__} {code}" if code else type(e).__name__
 
 
+# バイト列から charset 宣言を拾う(宣言はASCII範囲なので復号前に読める)
+_META_CHARSET = re.compile(rb'charset["\s=:]+([A-Za-z0-9_\-]+)', re.I)
+
+
+def sniff_charset(raw, header_charset=None):
+    """宣言されている文字コードを返す。HTTPヘッダ → HTMLのmeta の順。"""
+    if header_charset:
+        return header_charset
+    m = _META_CHARSET.search(raw[:4096])
+    return m.group(1).decode("ascii", "ignore") if m else None
+
+
+def decode_html(raw, header_charset=None):
+    """文字化けさせずに復号する。
+
+    以前は utf-8 → shift_jis → cp932 の順に試していたが、**cp932 は EUC-JP の
+    バイト列を例外なしに読んでしまう**ため、EUC-JP の自治体サイト(渡名喜村など)が
+    文字化けし、突合で「内容不一致(×)」として誤報告されていた(2026-09-22 検知)。
+    化けた結果は例外にならないので、候補を順に試すだけでは足りない。
+
+    対策は2つ:
+      1. 宣言された charset を最優先する
+      2. 復号できた候補を**日本語らしさで採点**して選ぶ(置換文字と私用領域を減点)
+    """
+    cands = []
+    declared = sniff_charset(raw, header_charset)
+    if declared:
+        cands.append(declared)
+    cands += ["utf-8", "euc_jp", "shift_jis", "cp932"]
+
+    best, best_score = None, None
+    for enc in cands:
+        try:
+            text = raw.decode(enc)
+        except (UnicodeDecodeError, LookupError):
+            continue
+        score = _jp_score(text)
+        if best_score is None or score > best_score:
+            best, best_score = text, score
+        if enc == declared and score > 0:
+            break   # 宣言どおりに読めて日本語が出ているなら、それを信じる
+    if best is not None:
+        return best
+    return raw.decode("utf-8", errors="replace")
+
+
+def _jp_score(text):
+    """日本語として読めているかの粗い採点。化けた文字列を弾くために使う。"""
+    head = text[:4000]
+    if not head:
+        return 0
+    jp = sum(1 for ch in head
+             if 0x3040 <= ord(ch) <= 0x30FF or 0x4E00 <= ord(ch) <= 0x9FFF)
+    # 置換文字(U+FFFD)と私用領域は化けの痕跡。強めに減点する
+    bad = sum(1 for ch in head
+              if ch == "\ufffd" or 0xE000 <= ord(ch) <= 0xF8FF)
+    return jp - bad * 5
+
+
 def fetch_text(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=25) as res:
         raw = res.read(500000)
-    for enc in ("utf-8", "shift_jis", "cp932"):
+        cs = None
         try:
-            return raw.decode(enc)
-        except (UnicodeDecodeError, LookupError):
-            continue
-    return raw.decode("utf-8", errors="replace")
+            cs = res.headers.get_content_charset()
+        except Exception:  # noqa: BLE001
+            pass
+    return decode_html(raw, cs)
 
 
 def page_title(html):
@@ -57,7 +116,51 @@ def name_tokens(name):
     return [t for t in re.split(r"[・\s/]+", base) if len(t) >= 2]
 
 
+def self_test():
+    """ネットワーク無しで検証できる部分を固定する。
+
+    このスクリプトは CI で一度も実行されておらず、バグが本番(夜間の収集)でしか
+    出てこなかった。文字コードの取り違えとエラーの読み分けは純粋な処理なので、
+    ここでテストしておけば同じ事故を PR の時点で止められる。
+    """
+    ok = True
+
+    def expect(cond, label):
+        nonlocal ok
+        print(("  ok   " if cond else "  NG   ") + label)
+        ok = ok and cond
+
+    title = "渡名喜村 こども医療費助成 | 渡名喜村役場"
+    # 文字化け: cp932 は EUC-JP を例外なしに読んでしまうため、順に試すだけでは足りない
+    for enc in ("euc_jp", "shift_jis", "utf-8"):
+        with_meta = f'<html><head><meta charset="{enc}"><title>{title}</title></head></html>'
+        expect(page_title(decode_html(with_meta.encode(enc))) == title,
+               f"{enc}(charset宣言あり)を正しく読む")
+        bare = f"<html><head><title>{title}</title></head></html>"
+        expect(page_title(decode_html(bare.encode(enc))) == title,
+               f"{enc}(宣言なし)を正しく読む")
+    # ヘッダの charset が meta より優先されること
+    raw = f'<html><head><meta charset="utf-8"><title>{title}</title></head></html>'.encode("euc_jp")
+    expect(page_title(decode_html(raw, "euc_jp")) == title, "HTTPヘッダのcharsetを優先する")
+
+    # エラーは種類名だけでなくHTTPステータスまで残す(403=遮断と404=消滅は意味が正反対)
+    class _E(Exception):
+        code = 403
+    expect("403" in describe_error(_E()), "HTTPステータスをエラー表記に残す")
+    expect(describe_error(ValueError()) == "ValueError", "ステータスが無い例外は種類名のみ")
+
+    # 照合トークン: match_tokens があればそちらを使う
+    expect("高額介護合算" in "高額介護合算｜限度額適用認定証｜協会けんぽ",
+           "実測タイトルに match_tokens が含まれる(高額介護合算)")
+    expect(len(name_tokens("居宅介護(介護予防)住宅改修費")) > 0, "name_tokens が空にならない")
+
+    print("self-test:", "OK" if ok else "NG")
+    return 0 if ok else 1
+
+
 def main():
+    if "--self-test" in sys.argv:
+        return self_test()
     now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
     with open(DATA, encoding="utf-8") as f:
         db = json.load(f)
@@ -182,4 +285,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)
