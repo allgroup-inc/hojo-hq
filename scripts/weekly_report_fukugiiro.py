@@ -191,6 +191,19 @@ def north_star_section(jukyu):
         mo = h.get("moradou") or {}
         if mo.get("visitors") is not None:
             v1 = f"週{mo['visitors']}人({h.get('date','')}時点・7日間)"
+        # KGI❶は「月1万人」なので、月次があればそちらを主に出す(7日値は併記)。
+        # 7日ローリングしか無かったため目標と測り方がずれていた(2026-09-22 是正)
+        monthly = st.get("monthly") or {}
+        if monthly:
+            key = sorted(monthly)[-1]
+            m = monthly[key]
+            mm = m.get("moradou") or {}
+            if mm.get("visitors") is not None:
+                pct = mm["visitors"] / 10000 * 100
+                stamp = "確定" if m.get("confirmed") else f"{m.get('as_of','')}まで途中集計"
+                v1 = f"**{key} 月{mm['visitors']:,}人**(KGIの{pct:.1f}% / {stamp})/ 直近7日 {mo.get('visitors','?')}人"
+                if m.get("quality_note"):
+                    v1 += f"<br>⚠ {m['quality_note']}"
     except Exception:
         pass
     # ❸ IGフォロワー
