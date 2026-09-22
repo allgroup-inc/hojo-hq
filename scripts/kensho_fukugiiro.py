@@ -34,16 +34,75 @@ def describe_error(e):
     return f"{type(e).__name__} {code}" if code else type(e).__name__
 
 
+# バイト列から charset 宣言を拾う(宣言はASCII範囲なので復号前に読める)
+_META_CHARSET = re.compile(rb'charset["\s=:]+([A-Za-z0-9_\-]+)', re.I)
+
+
+def sniff_charset(raw, header_charset=None):
+    """宣言されている文字コードを返す。HTTPヘッダ → HTMLのmeta の順。"""
+    if header_charset:
+        return header_charset
+    m = _META_CHARSET.search(raw[:4096])
+    return m.group(1).decode("ascii", "ignore") if m else None
+
+
+def decode_html(raw, header_charset=None):
+    """文字化けさせずに復号する。
+
+    以前は utf-8 → shift_jis → cp932 の順に試していたが、**cp932 は EUC-JP の
+    バイト列を例外なしに読んでしまう**ため、EUC-JP の自治体サイト(渡名喜村など)が
+    文字化けし、突合で「内容不一致(×)」として誤報告されていた(2026-09-22 検知)。
+    化けた結果は例外にならないので、候補を順に試すだけでは足りない。
+
+    対策は2つ:
+      1. 宣言された charset を最優先する
+      2. 復号できた候補を**日本語らしさで採点**して選ぶ(置換文字と私用領域を減点)
+    """
+    cands = []
+    declared = sniff_charset(raw, header_charset)
+    if declared:
+        cands.append(declared)
+    cands += ["utf-8", "euc_jp", "shift_jis", "cp932"]
+
+    best, best_score = None, None
+    for enc in cands:
+        try:
+            text = raw.decode(enc)
+        except (UnicodeDecodeError, LookupError):
+            continue
+        score = _jp_score(text)
+        if best_score is None or score > best_score:
+            best, best_score = text, score
+        if enc == declared and score > 0:
+            break   # 宣言どおりに読めて日本語が出ているなら、それを信じる
+    if best is not None:
+        return best
+    return raw.decode("utf-8", errors="replace")
+
+
+def _jp_score(text):
+    """日本語として読めているかの粗い採点。化けた文字列を弾くために使う。"""
+    head = text[:4000]
+    if not head:
+        return 0
+    jp = sum(1 for ch in head
+             if 0x3040 <= ord(ch) <= 0x30FF or 0x4E00 <= ord(ch) <= 0x9FFF)
+    # 置換文字(U+FFFD)と私用領域は化けの痕跡。強めに減点する
+    bad = sum(1 for ch in head
+              if ch == "\ufffd" or 0xE000 <= ord(ch) <= 0xF8FF)
+    return jp - bad * 5
+
+
 def fetch_text(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=25) as res:
         raw = res.read(500000)
-    for enc in ("utf-8", "shift_jis", "cp932"):
+        cs = None
         try:
-            return raw.decode(enc)
-        except (UnicodeDecodeError, LookupError):
-            continue
-    return raw.decode("utf-8", errors="replace")
+            cs = res.headers.get_content_charset()
+        except Exception:  # noqa: BLE001
+            pass
+    return decode_html(raw, cs)
 
 
 def page_title(html):
