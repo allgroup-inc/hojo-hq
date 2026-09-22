@@ -13,6 +13,12 @@ on:
       - "site/fukugiiro/**"
       - "scripts/fetch_plausible_funnel.py"
       - "tests/golden_funnel.json"
+      # シードとビルドの変更もCIで見る。ここが対象外だったため、全国制度の出典を
+      # 沖縄県ページに変えたPRが緑で通り、その夜 fukugiiro-fetch が落ちた(2026-09-22)
+      - "scripts/fetch_fukugiiro.py"
+      - "scripts/fetch_fukugiiro_extra.py"
+      - "scripts/fg_seo.py"
+      - "scripts/yamanashi/**"
   pull_request:
     paths:
       - "data/fukugiiro/**"
@@ -25,6 +31,12 @@ on:
       - "site/fukugiiro/**"
       - "scripts/fetch_plausible_funnel.py"
       - "tests/golden_funnel.json"
+      # シードとビルドの変更もCIで見る。ここが対象外だったため、全国制度の出典を
+      # 沖縄県ページに変えたPRが緑で通り、その夜 fukugiiro-fetch が落ちた(2026-09-22)
+      - "scripts/fetch_fukugiiro.py"
+      - "scripts/fetch_fukugiiro_extra.py"
+      - "scripts/fg_seo.py"
+      - "scripts/yamanashi/**"
   workflow_dispatch: {}
 
 # 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
@@ -55,6 +67,11 @@ jobs:
 
       - name: LP検査(サイズ予算・禁止表現・基本要件)
         run: python scripts/check_lp_fukugiiro.py
+
+      # 山梨版は夜間cronの中でしかビルドされておらず、PR時点で検査されていなかった。
+      # ビルドを通しておかないと、壊れたときに気づくのが翌朝の収集失敗になる
+      - name: 山梨版ビルド(沖縄の内容が混ざらないかの安全弁を通す)
+        run: python scripts/yamanashi/build_yamanashi.py
 
       - uses: actions/setup-node@v6
         with:
