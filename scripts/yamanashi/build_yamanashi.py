@@ -84,16 +84,30 @@ def _pref_items(now):
     return out
 
 
+def _assert_no_okinawa(item):
+    """山梨版に沖縄の内容が混ざるのを止める。
+
+    漢字の「沖縄」だけでは足りない。出典URLが okinawa ドメインのままだと、
+    山梨の利用者が沖縄県のページへ送られる(2026-09-22 実際に fukugiiro-fetch が
+    落ちた原因。全国制度 fk-kuni-kokuho-genmen の出典を沖縄県ページへ差し替えたため)。
+    表記は漢字・ローマ字の両方で見る。
+    """
+    blob = json.dumps(item, ensure_ascii=False)
+    assert "沖縄" not in blob, f'{item["id"]}: 内容に「沖縄」が含まれる'
+    url = (item.get("source_url") or "").lower()
+    assert "okinawa" not in url, f'{item["id"]}: 出典URLが沖縄ドメイン({url})'
+
+
 def build_data():
     src = json.load(open(os.path.join(BASE,"data","fukugiiro","seido.json"),encoding="utf-8"))
     items = src["items"]
     nat = [dict(i) for i in items if i.get("area") == "全国"]
     for i in nat:
-        assert "沖縄" not in json.dumps(i, ensure_ascii=False), i["id"]
+        _assert_no_okinawa(i)
     pref = _pref_items(src["updated_at"])
     for i in pref:
         # 沖縄版からの取り違えを機械で止める(全国制度と同じ守り)
-        assert "沖縄" not in json.dumps(i, ensure_ascii=False), i["id"]
+        _assert_no_okinawa(i)
         assert i["area"] == "山梨県", i["id"]
     merged = nat + pref
     ids = [i["id"] for i in merged]
