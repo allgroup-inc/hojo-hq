@@ -14,7 +14,7 @@ import json
 SITE_BASE = "https://allgroup-inc.github.io/hojo-hq/yamanashi"
 
 # OGP画像はブランド共通(沖縄版と同じ)
-OGP_IMAGE = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/ogp.jpg"
+OGP_IMAGE = "https://allgroup-inc.github.io/hojo-hq/yamanashi/assets/ogp.jpg"  # 山梨版カード(桜と富士・2026-09-22作成)
 
 # 山梨県 27市町村マスタ(名前→slug)。全国地方公共団体コード順。
 # 「山梨市」は県名と同じため slug を yamanashi-shi にして紛れを防ぐ。
