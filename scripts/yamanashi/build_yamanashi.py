@@ -146,12 +146,18 @@ window.FG_LINE_URL = "https://allgroup-inc.github.io/hojo-hq/go/ymn-shindan/";
 window.FG_LINE_OA_ID = "630pbjqq";
 ''')
 
+def swap_ogp(s):
+    """OGP画像を山梨版カードへ(沖縄版ページから変換する際の共通処理)"""
+    return s.replace("https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/ogp.jpg",
+                     "https://allgroup-inc.github.io/hojo-hq/yamanashi/assets/ogp.jpg")
+
 def swap_header(s, depth=1):
     return re.sub(r'<header class="siteheader">.*?</header>', header(depth), s, count=1, flags=re.S)
 
 def build_shindan():
     s = open(os.path.join(SRC,"shindan","index.html"),encoding="utf-8").read()
     s = swap_header(s)
+    s = swap_ogp(s)
     s = must_replace(s, '<link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">',
                      f'<link rel="canonical" href="{Y_BASE_URL}shindan/">', "canonical")
     s = must_replace(s, '<meta name="description" content="沖縄県にお住まいの世帯向け。',
@@ -202,6 +208,7 @@ def build_static():
     # 受給報告
     s = open(os.path.join(SRC,"houkoku","index.html"),encoding="utf-8").read()
     s = swap_header(s)
+    s = swap_ogp(s)
     s = re.sub(r'<link rel="canonical" href="[^"]*">', f'<link rel="canonical" href="{Y_BASE_URL}houkoku/">', s, count=1)
     opts = '<select id="area"><option value="">選択しない</option>' + ''.join(f'<option>{m}</option>' for m in MUNIS) + '</select>'
     s = re.sub(r'<select id="area">.*?</select>', opts, s, count=1, flags=re.S)
@@ -211,6 +218,7 @@ def build_static():
     for page in ("privacy","teisei"):
         s = open(os.path.join(SRC,page,"index.html"),encoding="utf-8").read()
         s = swap_header(s)
+        s = swap_ogp(s)
         s = re.sub(r'<link rel="canonical" href="[^"]*">', f'<link rel="canonical" href="{Y_BASE_URL}{page}/">', s, count=1)
         os.makedirs(os.path.join(OUT,page), exist_ok=True)
         open(os.path.join(OUT,page,"index.html"),"w",encoding="utf-8").write(s)
