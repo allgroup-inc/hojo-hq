@@ -19,6 +19,11 @@ on:
       - "scripts/fetch_fukugiiro_extra.py"
       - "scripts/fg_seo.py"
       - "scripts/yamanashi/**"
+      - "scripts/selfcheck_moradou.py"
+      - "tests/selfcheck_baseline.json"
+      - "scripts/generate_go_pages.py"
+      - "docs/**"
+      - ".github/workflows/fukugiiro-fetch.yml"
   pull_request:
     paths:
       - "data/fukugiiro/**"
@@ -37,6 +42,11 @@ on:
       - "scripts/fetch_fukugiiro_extra.py"
       - "scripts/fg_seo.py"
       - "scripts/yamanashi/**"
+      - "scripts/selfcheck_moradou.py"
+      - "tests/selfcheck_baseline.json"
+      - "scripts/generate_go_pages.py"
+      - "docs/**"
+      - ".github/workflows/fukugiiro-fetch.yml"
   workflow_dispatch: {}
 
 # 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
@@ -72,6 +82,13 @@ jobs:
       # ビルドを通しておかないと、壊れたときに気づくのが翌朝の収集失敗になる
       - name: 山梨版ビルド(沖縄の内容が混ざらないかの安全弁を通す)
         run: python scripts/yamanashi/build_yamanashi.py
+
+      # このリポジトリが実際に繰り返した失敗だけを見張る(CLAUDE.md 再発防止メモ)。
+      # 既知の負債は tests/selfcheck_baseline.json で許容し、新しく増えた分だけ止める。
+      - name: 自己点検(再発防止メモの機械化)
+        run: |
+          python scripts/selfcheck_moradou.py --self-test
+          python scripts/selfcheck_moradou.py
 
       - uses: actions/setup-node@v6
         with:

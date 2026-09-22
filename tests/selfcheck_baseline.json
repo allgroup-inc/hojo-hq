@@ -1,0 +1,11 @@
+{
+ "note": "既知の負債。新しく増えた NG だけ CI を止める。直したら --update-baseline で減らす。現在の5件は W37 のIGネタによるもので、**2026-09-28 に W39(全案が検証済み×締切なし)へ差し替えると解消する**。遥さんへW37の番号で案内済みのため意図的に据え置いている(議事: 9/28のマージRoutine)。10月以降も残っていたら差し替えが失敗している。",
+ "updated_at": "2026-09-22",
+ "accepted": [
+  "neta-source::案N「N学期からでも間に合う「就学援助」、知っています」の出典が seido.json にありません(https://www.city.naha.okinawa.jp/child/school/N/N)。未検証の情報をネタにしないでください",
+  "neta-source::案N「私立高校生の「奨学給付金」、申請はN月N日まで」の出典が seido.json にありません(https://www.pref.okinawa.jp/kyoiku/edu/N/N/N)。未検証の情報をネタにしないでください(絶対ルール",
+  "neta-source::案N「那覇市の「おこめ券」、期限はN月N日です」の出典が seido.json にありません(https://www.city.naha.okinawa.jp/fukusi/shakaifukushi/N)。未検証の情報をネタにしないでくだ",
+  "neta-source::案Nの出典「年金生活者支援給付金(老齢・障害・遺族)」は verified=false です。検証済みの制度から引いてください",
+  "neta-source::案Nの出典「那覇市 軽度・中等度難聴児 補聴器購入費等助成」は verified=false です。検証済みの制度から引いてください"
+ ]
+}
