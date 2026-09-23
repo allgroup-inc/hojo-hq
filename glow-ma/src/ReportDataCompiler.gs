@@ -145,3 +145,150 @@ function getLineUserCountByDate(targetDate) {
   Logger.log("⚠ getLineUserCountByDate: LINE API not yet implemented");
   return 0;
 }
+
+/**
+ * テスト関数: 架電・訪問・成約集計の検証
+ */
+function testCallAggregation() {
+  const mockInteractions = [
+    {"対応日時": new Date(2026, 8, 22), "種別": "電話", "企業ランク": "A"},
+    {"対応日時": new Date(2026, 8, 22), "種別": "電話", "企業ランク": "B"},
+    {"対応日時": new Date(2026, 8, 21), "種別": "電話", "企業ランク": "A"},
+    {"対応日時": new Date(2026, 8, 22), "種別": "訪問", "企業ランク": "C"},
+  ];
+
+  const yesterday = new Date(2026, 8, 22);
+  const count = countCallsByDate(mockInteractions, yesterday);
+  if (count !== 2) {
+    throw new Error("countCallsByDate failed: expected 2, got " + count);
+  }
+
+  const byRank = countCallsByDateRange(mockInteractions, yesterday, yesterday);
+  if (byRank.byRank.A !== 1 || byRank.byRank.B !== 1) {
+    throw new Error("countCallsByDateRange byRank failed");
+  }
+  Logger.log("✓ Call aggregation tests passed");
+}
+
+/**
+ * 指定された日付の架電件数を数える
+ * @param {Array} interactionRecords - インタラクションレコード配列
+ * @param {Date} targetDate - 対象日
+ * @returns {number} 架電件数
+ */
+function countCallsByDate(interactionRecords, targetDate) {
+  const targetDateStr = datesToLocaleDateString(targetDate);
+  return interactionRecords.filter(r => {
+    if (r["種別"] !== "電話") return false;
+    const recordDate = new Date(r["対応日時"]);
+    return datesToLocaleDateString(recordDate) === targetDateStr;
+  }).length;
+}
+
+/**
+ * 指定された日付範囲の架電件数を企業ランク別に集計
+ * @param {Array} interactionRecords - インタラクションレコード配列
+ * @param {Date} startDate - 開始日
+ * @param {Date} endDate - 終了日
+ * @returns {Object} {total: number, byRank: {A: number, B: number, C: number, D: number}}
+ */
+function countCallsByDateRange(interactionRecords, startDate, endDate) {
+  const filtered = interactionRecords.filter(r => {
+    if (r["種別"] !== "電話") return false;
+    const recordDate = new Date(r["対応日時"]);
+    return recordDate >= startDate && recordDate <= endDate;
+  });
+
+  return {
+    total: filtered.length,
+    byRank: {
+      "A": filtered.filter(r => r["企業ランク"] === "A").length,
+      "B": filtered.filter(r => r["企業ランク"] === "B").length,
+      "C": filtered.filter(r => r["企業ランク"] === "C").length,
+      "D": filtered.filter(r => r["企業ランク"] === "D").length,
+    }
+  };
+}
+
+/**
+ * 指定された日付の訪問・面談件数を分離して返す
+ * @param {Array} interactionRecords - インタラクションレコード配列
+ * @param {Date} targetDate - 対象日
+ * @returns {Object} {visits: number, meetings: number, total: number}
+ */
+function countVisitsByDate(interactionRecords, targetDate) {
+  const targetDateStr = datesToLocaleDateString(targetDate);
+  const filtered = interactionRecords.filter(r => {
+    if (!["訪問", "面談"].includes(r["種別"])) return false;
+    const recordDate = new Date(r["対応日時"]);
+    return datesToLocaleDateString(recordDate) === targetDateStr;
+  });
+
+  return {
+    visits: filtered.filter(r => r["種別"] === "訪問").length,
+    meetings: filtered.filter(r => r["種別"] === "面談").length,
+    total: filtered.length,
+  };
+}
+
+/**
+ * 指定された日付範囲の訪問・面談件数を分離して返す
+ * @param {Array} interactionRecords - インタラクションレコード配列
+ * @param {Date} startDate - 開始日
+ * @param {Date} endDate - 終了日
+ * @returns {Object} {visits: number, meetings: number, total: number}
+ */
+function countVisitsByDateRange(interactionRecords, startDate, endDate) {
+  const filtered = interactionRecords.filter(r => {
+    if (!["訪問", "面談"].includes(r["種別"])) return false;
+    const recordDate = new Date(r["対応日時"]);
+    return recordDate >= startDate && recordDate <= endDate;
+  });
+
+  return {
+    visits: filtered.filter(r => r["種別"] === "訪問").length,
+    meetings: filtered.filter(r => r["種別"] === "面談").length,
+    total: filtered.length,
+  };
+}
+
+/**
+ * 指定された日付の成約件数を数える
+ * @param {Array} interactionRecords - インタラクションレコード配列
+ * @param {Date} targetDate - 対象日
+ * @returns {number} 成約件数
+ */
+function countContractsByDate(interactionRecords, targetDate) {
+  const targetDateStr = datesToLocaleDateString(targetDate);
+  return interactionRecords.filter(r => {
+    if (r["成約"] !== true) return false;
+    const recordDate = new Date(r["対応日時"]);
+    return datesToLocaleDateString(recordDate) === targetDateStr;
+  }).length;
+}
+
+/**
+ * 指定された日付範囲の成約件数を数える
+ * @param {Array} interactionRecords - インタラクションレコード配列
+ * @param {Date} startDate - 開始日
+ * @param {Date} endDate - 終了日
+ * @returns {number} 成約件数
+ */
+function countContractsByDateRange(interactionRecords, startDate, endDate) {
+  return interactionRecords.filter(r => {
+    if (r["成約"] !== true) return false;
+    const recordDate = new Date(r["対応日時"]);
+    return recordDate >= startDate && recordDate <= endDate;
+  }).length;
+}
+
+/**
+ * 成約率を計算して%表記で返す
+ * @param {number} contracts - 成約件数
+ * @param {number} total - 総件数
+ * @returns {string} "0.0%"形式の文字列
+ */
+function getConversionRate(contracts, total) {
+  if (total === 0) return "0.0%";
+  return (contracts / total * 100).toFixed(1) + "%";
+}
