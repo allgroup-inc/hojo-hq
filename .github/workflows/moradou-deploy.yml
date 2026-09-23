@@ -1,12 +1,27 @@
 # もらいわすれ堂の独自ドメイン配信(moradou.jp)— 2026-08-28 小柳さん決裁
-# site/fukugiiro/ を配信専用リポジトリ allgroup-inc/moradou へ自動ミラーする。
+# site/ のうちもらいわすれ堂の分だけを取り出し、URL基底を moradou.jp に書き換えて
+# 配信専用リポジトリ allgroup-inc/moradou へミラーする。
+#
 # 前提Secrets: MORADOU_DEPLOY_TOKEN(fine-grained PAT・moradouリポジトリのContents Read/Write)
-# 未設定の間は何もしない(安全にスキップ)。議事: docs/議事_20260828_独自ドメインmoradou.md
+# 未設定の間は「組み立てと検査だけ」を毎回やる(pushはしない)。
+#   ← 2026-09-23: 従来は丸ごとスキップしていたため、26日間・11回 success のまま
+#      中身が一度も検査されていなかった。動いていない仕組みが緑で通る状態をやめる。
+# 議事: docs/議事_20260828_独自ドメインmoradou.md
 name: moradou-deploy
 on:
   push:
     branches: [main]
-    paths: ["site/fukugiiro/**"]
+    paths:
+      - "site/fukugiiro/**"
+      - "site/yamanashi/**"
+      - "site/go/**"
+      - "site/sitemap.xml"
+      - "scripts/deploy_moradou.py"
+      - ".github/workflows/moradou-deploy.yml"
+  pull_request:
+    paths:
+      - "scripts/deploy_moradou.py"
+      - ".github/workflows/moradou-deploy.yml"
   workflow_dispatch:
 concurrency:
   group: moradou-deploy
@@ -16,25 +31,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Mirror site/fukugiiro to allgroup-inc/moradou
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      # 検査そのものが正しく落ちるかを毎回確かめる(壊して落ちることまで見る)
+      - name: 組み立てスクリプトの自己テスト
+        run: python scripts/deploy_moradou.py --self-test
+
+      # トークンの有無にかかわらず毎回ここまでやる。
+      # 旧URLの残存・ミカタ(別ブランド)の混入があればここで落ちる。
+      - name: 配信ツリーの組み立てと検査
+        run: python scripts/deploy_moradou.py --out /tmp/moradou-build
+
+      - name: allgroup-inc/moradou へミラー
+        if: github.event_name != 'pull_request'
         env:
           TOKEN: ${{ secrets.MORADOU_DEPLOY_TOKEN }}
         run: |
           if [ -z "$TOKEN" ]; then
-            echo "[info] MORADOU_DEPLOY_TOKEN 未設定: ミラーをスキップ(独自ドメイン準備前の正常動作)"
+            echo "::notice::MORADOU_DEPLOY_TOKEN 未設定のためミラーはしていません。"
+            echo "::notice::配信ツリーの組み立てと検査は上のステップで完了済み(ページ $(find /tmp/moradou-build -name 'index.html' | wc -l) 枚)。"
+            echo "::notice::残りは小柳さんの4手順(docs/決裁キュー.md「独自ドメイン moradou.jp」)です。"
             exit 0
           fi
           git clone --depth 1 "https://x-access-token:${TOKEN}@github.com/allgroup-inc/moradou.git" /tmp/moradou || {
             echo "::error::allgroup-inc/moradou のcloneに失敗(リポジトリ未作成 or トークン権限不足)"; exit 1; }
-          rsync -a --delete --exclude .git --exclude CNAME --exclude .nojekyll --exclude README.md site/fukugiiro/ /tmp/moradou/
-          echo "moradou.jp" > /tmp/moradou/CNAME
-          touch /tmp/moradou/.nojekyll
+          # .git を残したまま中身を入れ替える
+          python scripts/deploy_moradou.py --out /tmp/moradou
           cd /tmp/moradou
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
           git add -A
           git diff --cached --quiet && { echo "[info] 差分なし"; exit 0; }
-          git commit -m "auto: mirror from hojo-hq site/fukugiiro $(date '+%Y-%m-%d %H:%M')"
+          git commit -m "auto: mirror from hojo-hq $(date '+%Y-%m-%d %H:%M')"
           pushed=0
           for i in 1 2 3; do
             git push && pushed=1 && break

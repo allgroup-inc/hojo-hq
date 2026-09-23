@@ -23,6 +23,7 @@ on:
       - "scripts/selfcheck_moradou.py"
       - "tests/selfcheck_baseline.json"
       - "scripts/generate_go_pages.py"
+      - "scripts/deploy_moradou.py"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
   pull_request:
@@ -47,6 +48,7 @@ on:
       - "scripts/selfcheck_moradou.py"
       - "tests/selfcheck_baseline.json"
       - "scripts/generate_go_pages.py"
+      - "scripts/deploy_moradou.py"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
   workflow_dispatch: {}
@@ -96,6 +98,13 @@ jobs:
         run: |
           python scripts/selfcheck_moradou.py --self-test
           python scripts/selfcheck_moradou.py
+
+      # 独自ドメイン配信ツリーが今この瞬間も組み立てられることを確かめる。
+      # 旧URLの書き換え漏れ・ミカタ(別ブランド)の混入があればここで落ちる。
+      - name: 独自ドメイン配信ツリーの組み立て検査
+        run: |
+          python scripts/deploy_moradou.py --self-test
+          python scripts/deploy_moradou.py --out /tmp/moradou-ci
 
       - uses: actions/setup-node@v6
         with:
