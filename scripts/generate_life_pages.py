@@ -45,6 +45,11 @@ h1{font-size:1.4rem;margin-bottom:8px;line-height:1.5}
 .card{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:18px;margin:14px 0;box-shadow:var(--fg-shadow)}
 .card h2{font-size:1.05rem;margin-bottom:4px}
 .trust{background:#EFF5F0;border:1px solid #D5E5DA;border-radius:12px;padding:12px 14px;font-size:.9rem;color:#1F4534;margin:12px 0}
+.windows{display:grid;gap:10px;margin:12px 0}
+.wcard{background:var(--fg-card,#fff);border:1px solid var(--fg-line,#EEE1D0);border-radius:12px;padding:12px 14px}
+.wcard h3{font-size:.98rem;margin:0 0 6px;display:flex;align-items:baseline;gap:8px;word-break:auto-phrase}
+.wcard h3 span{font-size:.78rem;color:var(--fg-muted,#7A6B5D);font-weight:400}
+.wcard p{margin:0;font-size:.88rem;line-height:1.7;color:var(--fg-ink,#3B322B)}
 .linebtn{display:block;max-width:460px;margin:18px auto;padding:16px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
 .linebtn span{display:block;font-size:.8rem;font-weight:600;opacity:.95;margin-top:2px}
 .disclaimer{background:#F6EADB;border-radius:12px;padding:14px;font-size:.85rem;color:var(--fg-muted);margin-top:24px}
@@ -140,6 +145,75 @@ def match(it, events):
     return any(e in (it.get("life_events") or []) for e in events)
 
 
+# 申請窓口の分類。「同じ窓口で一度に聞けるもの」をまとめるために使う。
+# 官公庁のページは自分の窓口のことしか書けないので、横断してまとめられるのは
+# こちら側の強み(2026-09-23 議事: 勝てるクエリへの絞り直し)。
+# 断定はしない。あくまで登録済みの how_to_apply を束ねているだけ。
+WINDOWS = [
+    ("ハローワーク", ("ハローワーク", "公共職業安定所")),
+    ("加入している健康保険(協会けんぽ・国保など)", ("健康保険", "協会けんぽ", "国民健康保険", "保険者")),
+    ("年金事務所・年金機構", ("年金事務所", "年金機構", "国民年金")),
+    ("お住まいの市区町村の窓口", ("市区町村", "市役所", "町村役場", "役場", "自治体")),
+    ("くらしの相談窓口(自立相談支援機関・パーソナルサポートセンター)",
+     ("自立相談", "パーソナルサポート", "生活困窮", "さぽんちゅ", "生活支援", "福祉事務所")),
+    ("社会福祉協議会", ("社会福祉協議会", "社協")),
+    ("労働基準監督署", ("労働基準監督署", "労働局")),
+    ("学校・教育委員会", ("学校", "教育委員会")),
+]
+
+
+def window_of(it):
+    """制度の申請窓口を粗く分類する。どれにも当たらなければ None(個別に案内)。"""
+    text = f"{it.get('how_to_apply','')} {it.get('issuer','')}"
+    for label, keys in WINDOWS:
+        if any(k in text for k in keys):
+            return label
+    return None
+
+
+def window_section(hits):
+    """「どこに行けばいいか」を窓口別にまとめる。
+
+    39件の一覧を渡されても、失業した直後の人は動けない。同じ窓口で一度に聞けるものが
+    分かれば、行く回数が減る。離島や、仕事を探しながらの人ほど効く。
+    """
+    # 制度名を並べるのは全国・県のものだけにする。市町村独自の制度をそのまま並べると、
+    # 那覇の人に石垣市の制度が見えてしまい、かえって分かりにくい。
+    # 市町村分は「お住まいの市町村にもあります(N市町村)」と件数で示す。
+    groups, muni = {}, {}
+    for it in hits:
+        w = window_of(it)
+        if not w:
+            continue
+        if it["area"] in ("全国", "沖縄県"):
+            groups.setdefault(w, []).append(it)
+        else:
+            muni.setdefault(w, set()).add(it["area"])
+    labels = [w for w, _ in WINDOWS if len(groups.get(w, [])) >= 2 or len(muni.get(w, ())) >= 3]
+    if not labels:
+        return []
+    out = ['<h2 style="font-size:1.1rem;margin-top:24px">どこに行けばいいか(窓口別)</h2>',
+           '<p class="note">同じ窓口で一度に聞けるものをまとめました。'
+           '窓口に行くとき、この見出しごと見せていただいてかまいません。'
+           '対象になるかどうかは窓口でご確認ください。</p>',
+           '<div class="windows">']
+    for label in sorted(labels, key=lambda w: -(len(groups.get(w, [])) + len(muni.get(w, ())))):
+        its = groups.get(label, [])
+        towns = muni.get(label, set())
+        parts = []
+        if its:
+            names = "、".join(esc(i["name"]) for i in its[:8])
+            parts.append(names + (f"ほか{len(its) - 8}件" if len(its) > 8 else ""))
+        if towns:
+            parts.append(f"このほか、お住まいの市町村にも同じ窓口で扱う制度があります"
+                         f"({len(towns)}市町村で確認)")
+        cnt = len(its) + (1 if towns else 0)
+        out.append(f'<div class="wcard"><h3>{esc(label)}<span>{cnt}件</span></h3>'
+                   f"<p>{'。'.join(parts)}</p></div>")
+    out.append("</div>")
+    return out
+
+
 def life_page(slug, events, heading, kw, items, updated):
     hits = [it for it in items if match(it, events)]
     national = [it for it in hits if it["area"] == "全国"]
@@ -168,6 +242,8 @@ def life_page(slug, events, heading, kw, items, updated):
             '金額など一部「要確認」の項目は、公式ページのリンクからご確認いただけます。</div>'
         )
     body.append('<a class="btn" href="../../shindan/">3分でもらい忘れ診断をはじめる</a>')
+    # 一覧の前に「どこに行けばいいか」。件数の多い一覧をいきなり見せても人は動けない
+    body += window_section(hits)
     # 国・県=カード(このページの主コンテンツ)
     for label, group in ((f"国の制度({len(national)}件)", national), (f"沖縄県の制度({len(pref)}件)", pref)):
         if not group:
