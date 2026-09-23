@@ -16,7 +16,7 @@
 function compileDailyReport(yesterdayDate) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const masterSheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
-  const interactionSheet = ss.getSheetByName("活動記録");
+  const interactionSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
 
   if (!masterSheet || !interactionSheet) {
     throw new Error("Required sheets not found: Company Master or Activity Records");
