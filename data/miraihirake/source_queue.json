@@ -222,36 +222,36 @@
       "id": "19ch-info",
       "org": "19ch運営事務局(アトリエ・ビュー)",
       "url": "https://19ch.tv/js/info.html",
-      "robots_approved": false,
-      "memo": "svc-0001の保留解消用。ご利用ガイドページ。運営者所在地(市区町村)の記載有無を確認|2026-09-23 WebSearchで発見・robots未監査"
+      "robots_approved": true,
+      "memo": "svc-0001の保留解消用。ご利用ガイドページ。運営者所在地(市区町村)の記載有無を確認|2026-09-23 WebSearchで発見・robots未監査|robots承認2026-09-23(robots_report.json実測。単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
     },
     {
       "id": "learningforall-outline",
       "org": "認定NPO法人Learning for All",
       "url": "https://learningforall.or.jp/outline/",
-      "robots_approved": false,
-      "memo": "svc-0147の保留解消用(団体概要ページ)。1対1個別指導の安全4点(本人確認/保護者同意/見まもり/相談窓口)を確認|2026-09-23 robots未監査"
+      "robots_approved": true,
+      "memo": "svc-0147の保留解消用(団体概要ページ)。1対1個別指導の安全4点(本人確認/保護者同意/見まもり/相談窓口)を確認|2026-09-23 robots未監査|robots承認2026-09-23(robots_report.json実測。単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
     },
     {
       "id": "learningforall-faq",
       "org": "認定NPO法人Learning for All",
       "url": "https://learningforall.or.jp/faq/",
-      "robots_approved": false,
-      "memo": "svc-0147の保留解消用(よくある質問ページ)。安全体制・対象拠点(沖縄含むか)を確認|2026-09-23 robots未監査"
+      "robots_approved": true,
+      "memo": "svc-0147の保留解消用(よくある質問ページ)。安全体制・対象拠点(沖縄含むか)を確認|2026-09-23 robots未監査|robots承認2026-09-23(robots_report.json実測。単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
     },
     {
       "id": "kotsuiji",
       "org": "公益財団法人交通遺児育英会",
       "url": "https://www.kotsuiji.com/scholarship",
-      "robots_approved": false,
-      "memo": "交通事故で親を亡くした・重度後遺障害家庭向け奨学金(無利子貸与中心)。あしなが育英会(svc-0146)と同型で資金支援のみ・対面接触なし。全国オンライン系A表|2026-09-23 WebSearchで公式URL確認・robots未監査"
+      "robots_approved": true,
+      "memo": "交通事故で親を亡くした・重度後遺障害家庭向け奨学金(無利子貸与中心)。あしなが育英会(svc-0146)と同型で資金支援のみ・対面接触なし。全国オンライン系A表|2026-09-23 WebSearchで公式URL確認・robots未監査|robots承認2026-09-23(robots_report.json実測。単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
     },
     {
       "id": "urasoe-programming-contest",
       "org": "浦添市",
       "url": "https://www.city.urasoe.lg.jp/doc/60d9b30bfd0cbe0821f9cf3e/",
-      "robots_approved": false,
-      "memo": "svc-0021(CoderDojo浦添)の実在確認例外(後援・助成側の公式サイトでの裏取り)用。浦添市公式サイトのプログラミングコンテストページにCoderDojo浦添が協力団体として記載との検索結果|2026-09-23 WebSearchで発見・robots未監査"
+      "robots_approved": true,
+      "memo": "svc-0021(CoderDojo浦添)の実在確認例外(後援・助成側の公式サイトでの裏取り)用。浦添市公式サイトのプログラミングコンテストページにCoderDojo浦添が協力団体として記載との検索結果|2026-09-23 WebSearchで発見・robots未監査|robots承認2026-09-23(robots_report.json実測。単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
     }
   ]
 }
