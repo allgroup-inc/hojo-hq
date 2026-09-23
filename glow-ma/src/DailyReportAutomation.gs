@@ -115,7 +115,7 @@ function validateCodeQuality() {
 
   let allDefined = true;
   requiredFunctions.forEach(fn => {
-    if (typeof eval(fn) !== "function") {
+    if (typeof globalThis[fn] !== "function") {
       Logger.log("✗ Missing function: " + fn);
       allDefined = false;
     }
@@ -123,6 +123,8 @@ function validateCodeQuality() {
 
   if (allDefined) {
     Logger.log("✓ All required functions defined");
+  } else {
+    throw new Error("Code quality validation failed: missing required functions");
   }
 }
 
@@ -135,18 +137,39 @@ function validateCodeQuality() {
 function testDateBoundaries() {
   Logger.log("=== Date Boundary Tests ===");
 
-  // Test month-end transition
-  const monthEnd = new Date(2026, 8, 30); // Sept 30
-  const range = getMonthDateRange(monthEnd);
-  Logger.log("Sept 30 month range: " + range.startDate.toLocaleDateString() + " to " + range.endDate.toLocaleDateString());
+  let allTestsPassed = true;
 
+  // Test 1: Sept 30 should return Sept 1 - Sept 30 (month index 8)
+  const sept30 = new Date(2026, 8, 30); // Sept 30
+  const septRange = getMonthDateRange(sept30);
+  Logger.log("Sept 30 month range: " + septRange.startDate.toLocaleDateString() + " to " + septRange.endDate.toLocaleDateString());
+
+  if (septRange.startDate.getMonth() !== 8 || septRange.startDate.getDate() !== 1) {
+    Logger.log("✗ Sept 30 start date test failed: expected month 8, date 1");
+    allTestsPassed = false;
+  } else if (septRange.endDate.getMonth() !== 8 || septRange.endDate.getDate() !== 30) {
+    Logger.log("✗ Sept 30 end date test failed: expected month 8, date 30");
+    allTestsPassed = false;
+  } else {
+    Logger.log("✓ Sept 30 month range correct (Sept 1 - Sept 30)");
+  }
+
+  // Test 2: Oct 1 should return Oct 1 - Oct 1 (month index 9)
   const oct1 = new Date(2026, 9, 1); // Oct 1
   const octRange = getMonthDateRange(oct1);
   Logger.log("Oct 1 month range: " + octRange.startDate.toLocaleDateString() + " to " + octRange.endDate.toLocaleDateString());
 
-  if (oct1.getMonth() !== octRange.startDate.getMonth()) {
-    Logger.log("✓ Month transition handled correctly");
+  if (octRange.startDate.getMonth() !== 9 || octRange.startDate.getDate() !== 1) {
+    Logger.log("✗ Oct 1 start date test failed: expected month 9, date 1");
+    allTestsPassed = false;
+  } else if (octRange.endDate.getMonth() !== 9 || octRange.endDate.getDate() !== 1) {
+    Logger.log("✗ Oct 1 end date test failed: expected month 9, date 1");
+    allTestsPassed = false;
   } else {
-    Logger.log("✗ Month transition test failed");
+    Logger.log("✓ Oct 1 month range correct (Oct 1 - Oct 1)");
+  }
+
+  if (!allTestsPassed) {
+    throw new Error("Date boundary tests failed");
   }
 }
