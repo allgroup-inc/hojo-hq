@@ -292,3 +292,125 @@ function getConversionRate(contracts, total) {
   if (total === 0) return "0.0%";
   return (contracts / total * 100).toFixed(1) + "%";
 }
+
+/**
+ * テスト関数: ランク分布の検証
+ */
+function testRankDistribution() {
+  const mockRecords = [
+    {"ランク": "A"},
+    {"ランク": "A"},
+    {"ランク": "B"},
+    {"ランク": "C"},
+    {"ランク": "D"},
+  ];
+
+  const dist = getRankDistribution(mockRecords);
+  if (dist.A !== 2 || dist.B !== 1 || dist.C !== 1 || dist.D !== 1 || dist.total !== 5) {
+    throw new Error("getRankDistribution failed: " + JSON.stringify(dist));
+  }
+  Logger.log("✓ Rank distribution test passed");
+}
+
+/**
+ * 企業マスタからランク分布を集計
+ * @param {Array} masterRecords - 企業マスタのレコード配列
+ * @returns {Object} {A: number, B: number, C: number, D: number, total: number}
+ */
+function getRankDistribution(masterRecords) {
+  const dist = {A: 0, B: 0, C: 0, D: 0};
+  masterRecords.forEach(r => {
+    const rank = r["ランク"];
+    if (rank && dist[rank] !== undefined) {
+      dist[rank]++;
+    }
+  });
+  dist.total = masterRecords.length;
+  return dist;
+}
+
+/**
+ * 企業マスタからランク分布を集計し、前期との比較を返す
+ * @param {Array} masterRecords - 企業マスタのレコード配列
+ * @param {Array} previousMasterRecords - 前期の企業マスタのレコード配列
+ * @returns {Object} {current: {...}, previous: {...}, changes: {A: number, B: number, C: number, D: number}}
+ */
+function getRankDistributionWithPrevious(masterRecords, previousMasterRecords) {
+  const current = getRankDistribution(masterRecords);
+  const previous = getRankDistribution(previousMasterRecords);
+
+  return {
+    current,
+    previous,
+    changes: {
+      A: current.A - previous.A,
+      B: current.B - previous.B,
+      C: current.C - previous.C,
+      D: current.D - previous.D,
+    }
+  };
+}
+
+/**
+ * 企業マスタからスコアセグメント分布を集計
+ * @param {Array} masterRecords - 企業マスタのレコード配列
+ * @returns {Object} {"90以上": number, "70-89": number, "40-69": number, "15-39": number, "15未満": number}
+ */
+function getScoreSegments(masterRecords) {
+  return {
+    "90以上": masterRecords.filter(r => r["総合スコア"] >= 90).length,
+    "70-89": masterRecords.filter(r => r["総合スコア"] >= 70 && r["総合スコア"] < 90).length,
+    "40-69": masterRecords.filter(r => r["総合スコア"] >= 40 && r["総合スコア"] < 70).length,
+    "15-39": masterRecords.filter(r => r["総合スコア"] >= 15 && r["総合スコア"] < 40).length,
+    "15未満": masterRecords.filter(r => r["総合スコア"] < 15).length,
+  };
+}
+
+/**
+ * 企業マスタからスコアセグメント分布を集計し、前期との比較を返す
+ * @param {Array} masterRecords - 企業マスタのレコード配列
+ * @param {Array} previousMasterRecords - 前期の企業マスタのレコード配列
+ * @returns {Object} {current: {...}, previous: {...}, changes: {...}}
+ */
+function getScoreSegmentsWithPrevious(masterRecords, previousMasterRecords) {
+  const current = getScoreSegments(masterRecords);
+  const previous = getScoreSegments(previousMasterRecords);
+
+  const changes = {};
+  Object.keys(current).forEach(segment => {
+    changes[segment] = current[segment] - previous[segment];
+  });
+
+  return { current, previous, changes };
+}
+
+/**
+ * 流入ルート別の成約率を集計
+ * @param {Array} masterRecords - 企業マスタのレコード配列
+ * @returns {Object} {"①紹介": {contracts: number, total: number, rate: string}, ...}
+ */
+function getRouteConversionRates(masterRecords) {
+  const routes = ["①紹介", "②手紙DM", "③ミカタ経由", "④開拓架電"];
+  const result = {};
+
+  routes.forEach(route => {
+    const total = masterRecords.filter(r => {
+      const routesArray = r["流入ルート"];
+      return Array.isArray(routesArray) ? routesArray.includes(route) : false;
+    }).length;
+
+    const contracts = masterRecords.filter(r => {
+      const routesArray = r["流入ルート"];
+      const hasRoute = Array.isArray(routesArray) ? routesArray.includes(route) : false;
+      return hasRoute && r["成約"] === true;
+    }).length;
+
+    result[route] = {
+      total,
+      contracts,
+      rate: total === 0 ? "0.0%" : (contracts / total * 100).toFixed(1) + "%"
+    };
+  });
+
+  return result;
+}
