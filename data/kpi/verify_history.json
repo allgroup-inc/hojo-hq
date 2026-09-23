@@ -2946,5 +2946,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-23",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "「風車生産技術研究開発」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe8tMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "高度安全機械等導入支援補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYq2MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "在宅人工呼吸器使用難病患者非常用電源設備整備事業補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDHQZMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【東北支部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY7yMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度 脱炭素成長型経済構造移行推進対策費補助金 （業務用建築物の脱炭素改修加速化事業）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDa1bMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
