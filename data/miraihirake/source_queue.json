@@ -245,6 +245,13 @@
       "url": "https://www.kotsuiji.com/scholarship",
       "robots_approved": false,
       "memo": "交通事故で親を亡くした・重度後遺障害家庭向け奨学金(無利子貸与中心)。あしなが育英会(svc-0146)と同型で資金支援のみ・対面接触なし。全国オンライン系A表|2026-09-23 WebSearchで公式URL確認・robots未監査"
+    },
+    {
+      "id": "urasoe-programming-contest",
+      "org": "浦添市",
+      "url": "https://www.city.urasoe.lg.jp/doc/60d9b30bfd0cbe0821f9cf3e/",
+      "robots_approved": false,
+      "memo": "svc-0021(CoderDojo浦添)の実在確認例外(後援・助成側の公式サイトでの裏取り)用。浦添市公式サイトのプログラミングコンテストページにCoderDojo浦添が協力団体として記載との検索結果|2026-09-23 WebSearchで発見・robots未監査"
     }
   ]
 }
