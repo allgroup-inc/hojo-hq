@@ -1,0 +1,68 @@
+# moradou.jp の中身を組み立てて、このリポジトリ自身に書き出す。
+#
+# hojo-hq は**Publicリポジトリ**なので、認証なしで読める。
+# そのため、このworkflowは自分のGITHUB_TOKEN(自分のリポジトリへの書き込み権限)
+# だけで完結し、**個人アクセストークン(PAT)もSecretsも一切要らない**。
+#
+# 置き場所: allgroup-inc/moradou の .github/workflows/build.yml
+# 中身の生成元: allgroup-inc/hojo-hq の scripts/deploy_moradou.py
+# 経緯: hojo-hq の docs/議事_20260923_独自ドメイン配信範囲.md
+name: build
+on:
+  schedule:
+    # hojo-hq の収集cron(03/09/15/21時 JST)の30分後に組み立てる。
+    # JST = UTC+9 なので、UTCでは 18:30 / 00:30 / 06:30 / 12:30。
+    - cron: "30 18,0,6,12 * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [hojo-hq-updated]
+permissions:
+  contents: write
+concurrency:
+  group: build
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 配信先(このリポジトリ)を取得
+        uses: actions/checkout@v7
+
+      - name: 生成元(hojo-hq・Public)を取得
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse \
+            https://github.com/allgroup-inc/hojo-hq.git /tmp/hojo-hq
+          cd /tmp/hojo-hq
+          git sparse-checkout set site scripts
+          echo "hojo-hq $(git rev-parse --short HEAD) を取得しました"
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      # 検査そのものが壊れていないことを毎回確かめてから使う
+      - name: 組み立てスクリプトの自己テスト
+        run: python /tmp/hojo-hq/scripts/deploy_moradou.py --self-test
+
+      # 旧URLの書き換え漏れ・別ブランド(沖縄企業のミカタ)の混入があればここで落ちる。
+      # 落ちた場合は**何もコミットしない**ので、前回の正しい内容が公開されたまま残る。
+      - name: 配信ツリーを組み立て、このリポジトリへ書き出す
+        run: python /tmp/hojo-hq/scripts/deploy_moradou.py --out "$GITHUB_WORKSPACE"
+
+      - name: 変化があればコミット
+        run: |
+          git config user.name "moradou-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "[info] 前回から差分なし。コミットしません"
+            exit 0
+          fi
+          git commit -m "auto: hojo-hq から再生成 $(date -u '+%Y-%m-%d %H:%M UTC')"
+          pushed=0
+          for i in 1 2 3; do
+            git push && pushed=1 && break
+            echo "push retry $i"; sleep 5
+            git pull --rebase || git rebase --abort
+          done
+          [ "$pushed" = "1" ] || { echo "::error::pushに3回失敗しました"; exit 1; }

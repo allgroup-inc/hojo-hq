@@ -55,6 +55,9 @@ TEXT_EXT = {".html", ".htm", ".xml", ".txt", ".json", ".js", ".css", ".svg", ".w
 # もらいわすれ堂の /go/ チャネル接頭辞。ミカタ(site/shindan/ig/fb/card/insurance-*)は除く
 GO_PREFIXES = ("fg-", "ymn-")
 
+# 配信先リポジトリで消してはいけないもの(リポジトリ自身のものと、自分を動かす仕組み)
+PRESERVE = {".git", ".github"}
+
 # 配信ツリーに現れてはいけない表記(ブランド混同の検知)
 FORBIDDEN_IN_OUTPUT = ["沖縄企業のミカタ", OLD_ROOT, OLD_HOST]
 
@@ -195,7 +198,7 @@ def verify(out_dir):
     ここで落とすことで「書き換え漏れが成功として通る」事故を防ぐ。"""
     bad = []
     for root, dirs, files in os.walk(out_dir):
-        dirs[:] = [d for d in dirs if d != ".git"]
+        dirs[:] = [d for d in dirs if d not in PRESERVE]
         for name in files:
             p = os.path.join(root, name)
             if not is_text(p):
@@ -216,10 +219,13 @@ def build(out_dir, domain):
             print(f"::error::site/{need} が無い。先にサイトを生成してください", file=sys.stderr)
             return 1
 
-    # .git と CNAME 以外を一旦片付ける(配信先リポジトリの上で動かす前提)
+    # 配信先リポジトリの上で直接動かす前提。リポジトリ自身のもの(.git)と
+    # 自分を動かしている仕組み(.github/workflows)は消さない。
+    #   ← ここで .github を消すと、配信のたびに自分のビルド用workflowを削除して
+    #     二度と動かなくなる(1回目だけ成功して以後沈黙する形の事故)。
     os.makedirs(out_dir, exist_ok=True)
     for name in os.listdir(out_dir):
-        if name in (".git",):
+        if name in PRESERVE:
             continue
         p = os.path.join(out_dir, name)
         shutil.rmtree(p) if os.path.isdir(p) else os.remove(p)
@@ -340,6 +346,8 @@ def self_test():
           "Sitemap: https://moradou.jp/sitemap.xml" in ROBOTS.format(domain=d))
     check("robotsは /go/ を除外", "Disallow: /go/" in ROBOTS.format(domain=d))
     check("READMEに直接編集しない旨がある", "直接編集しないでください" in README.format(domain=d))
+    check("配信先の .git は消さない", ".git" in PRESERVE)
+    check("配信先の .github(自分を動かすworkflow)は消さない", ".github" in PRESERVE)
     check("READMEは .md なので書換対象(旧URLが混ざらない)",
           is_text("README.md") and OLD_ROOT not in README.format(domain=d))
 
