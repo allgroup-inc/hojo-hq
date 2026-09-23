@@ -87,6 +87,9 @@ def _pref_items(now):
 
 # A区分(個別ページへのリンク可)の市町村と本人確認済みドメイン(守り部審査記録_山梨版_2026-09-20)。
 # シードのURLがこの表に無いドメインなら機械で止める(検索由来URLの取り違え防止)
+# 2026-09-23 再監査(抜粋2窓化)で修正: 小菅村は「リンクフリー」の続きに
+# 「下層ページへの直リンクはご遠慮ください」とありB区分だったため除外。
+# 都留市・甲斐市は各ページへのリンク可が確認できたためA区分へ追加。
 A_MUNI_DOMAINS = {
     "北杜市": "www.city.hokuto.yamanashi.jp",
     "富士河口湖町": "www.town.fujikawaguchiko.lg.jp",
@@ -94,7 +97,8 @@ A_MUNI_DOMAINS = {
     "上野原市": "www.city.uenohara.yamanashi.jp",
     "昭和町": "www.town.showa.yamanashi.jp",
     "早川町": "www.town.hayakawa.yamanashi.jp",
-    "小菅村": "www.vill.kosuge.yamanashi.jp",
+    "都留市": "www.city.tsuru.yamanashi.jp",
+    "甲斐市": "www.city.kai.yamanashi.jp",
 }
 
 
@@ -161,7 +165,8 @@ def build_data():
     data = {"region":"yamanashi","updated_at": src["updated_at"],
             "count": len(merged), "items": merged,
             "note": "国の制度(沖縄版で公式照合済みの全国制度を流用)+山梨県の制度"
-                    "+A区分7市町村の制度(守り部審査でリンク可と判定済み・2026-09-23追加)。"
+                    "+A区分8市町村の制度(守り部審査でリンク可と判定済み・2026-09-23追加、"
+                    "同日の再監査で小菅村を撤去し都留市・甲斐市を追加)。"
                     "B区分(トップページ限定)と論点対象の市町(営利サイト条項)は決裁後に追加"}
     os.makedirs(os.path.dirname(DATA_OUT), exist_ok=True)
     with open(DATA_OUT,"w",encoding="utf-8") as f:
