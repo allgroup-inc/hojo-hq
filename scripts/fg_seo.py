@@ -9,8 +9,16 @@ canonical / OGP / BreadcrumbList / FAQPage を生成テンプレートへ一元�
 """
 import json
 
-# ★独自ドメイン移行時はここだけ変更(例: "https://fukugiiro.com")
+# ページが実際に置かれている場所。ここは変えない。
+# 独自ドメイン(moradou.jp)側の配信物は scripts/deploy_moradou.py が配信時に書き換える。
 SITE_BASE = "https://allgroup-inc.github.io/hojo-hq/fukugiiro"
+
+# 独自ドメインへ引っ越したあと、旧URL(github.io)側が「正規URLは新ドメイン」と
+# 検索エンジンに伝えるための設定。**moradou.jp が実際に開通して表示確認が済むまで None**。
+# 先に入れると、まだ開いていないドメインを正規URLとして教えてしまう
+# (議事_20260828 ウタガイ②)。切替は scripts/moradou_cutover.py が
+# 開通を実測してから行う。
+MOVED_TO = None
 
 OGP_IMAGE = f"{SITE_BASE}/assets/ogp.jpg"
 
@@ -43,14 +51,23 @@ def _esc(s):
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
 
+def canonical_base():
+    """正規URLの基底。引っ越し後は新ドメイン、それまでは今いる場所。"""
+    return MOVED_TO or SITE_BASE
+
+
+def canonical_url(path):
+    base = canonical_base()
+    return f"{base}/{path}" if path else f"{base}/"
+
+
 def canonical_tag(path):
     """path: SITE_BASE からの相対パス(例 "kit/fk-xxx/")。末尾スラッシュ形式で統一。"""
-    url = f"{SITE_BASE}/{path}" if path else f"{SITE_BASE}/"
-    return f'<link rel="canonical" href="{url}">'
+    return f'<link rel="canonical" href="{canonical_url(path)}">'
 
 
 def ogp_tags(title, desc, path, og_type="article"):
-    url = f"{SITE_BASE}/{path}" if path else f"{SITE_BASE}/"
+    url = canonical_url(path)
     return "\n".join([
         f'<meta property="og:title" content="{_esc(title)}">',
         f'<meta property="og:description" content="{_esc(desc)}">',

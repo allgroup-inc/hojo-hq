@@ -21,7 +21,12 @@ from seeds_yamanashi_muni import YMN_MUNI_SEEDS  # noqa: E402
 SRC = os.path.join(BASE, "site", "fukugiiro")
 OUT = os.path.join(BASE, "site", "yamanashi")
 DATA_OUT = os.path.join(BASE, "data", "yamanashi", "seido.json")
-Y_BASE_URL = "https://allgroup-inc.github.io/hojo-hq/yamanashi/"
+# 山梨版ページの**正規URL**の基底(canonicalにしか使わない)。
+# 独自ドメインへ引っ越したら fg_yamanashi.MOVED_TO が入るので、ここも自動で追従する
+# (scripts/moradou_cutover.py が開通を実測してから切り替える)。
+sys.path.insert(0, os.path.join(BASE, "scripts"))
+import fg_yamanashi as _fgy  # noqa: E402
+Y_BASE_URL = _fgy.canonical_base() + "/"
 
 MUNIS = ["甲府市","富士吉田市","都留市","山梨市","大月市","韮崎市","南アルプス市","北杜市","甲斐市","笛吹市","上野原市","甲州市","中央市",
          "市川三郷町","早川町","身延町","南部町","富士川町","昭和町","西桂町","富士河口湖町",
@@ -59,6 +64,12 @@ def header(depth=1):
 def must_replace(s, old, new, label):
     assert old in s, f"置換対象が見つからない: {label}"
     return s.replace(old, new)
+
+def must_sub(s, pattern, new, label, count=1):
+    """正規表現での置換。1件も当たらなければ落とす(置換したつもりで素通り、を防ぐ)。"""
+    out, n = re.subn(pattern, new, s, count=count)
+    assert n > 0, f"置換対象が見つからない: {label}"
+    return out
 
 def _pref_items(now):
     """山梨県の制度シードを、全国制度と同じ形に整えて返す(第2段階)。
@@ -210,8 +221,10 @@ def build_shindan():
     s = open(os.path.join(SRC,"shindan","index.html"),encoding="utf-8").read()
     s = swap_header(s)
     s = swap_ogp(s)
-    s = must_replace(s, '<link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">',
-                     f'<link rel="canonical" href="{Y_BASE_URL}shindan/">', "canonical")
+    # 沖縄側のcanonicalの値は独自ドメイン移行で変わるため、URLの厳密一致では探さない。
+    # ただし「1件も置き換わらなかった」は静かに通さない(must_sub が落とす)。
+    s = must_sub(s, r'<link rel="canonical" href="[^"]*">',
+                 f'<link rel="canonical" href="{Y_BASE_URL}shindan/">', "canonical")
     s = must_replace(s, '<meta name="description" content="沖縄県にお住まいの世帯向け。',
                      '<meta name="description" content="山梨県にお住まいの世帯向け。', "desc")
     # 市町村リスト

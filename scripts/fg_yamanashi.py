@@ -13,6 +13,10 @@ import json
 # 2026-09-20 一本化: 公開URLは /yamanashi/(議事_20260902_山梨版第1段階)。/fukugiiro/yamanashi/ は廃止
 SITE_BASE = "https://allgroup-inc.github.io/hojo-hq/yamanashi"
 
+# 独自ドメインへの引っ越し後、旧URL側が正規URLとして指す先(沖縄版 fg_seo.MOVED_TO の山梨版)。
+# moradou.jp 上では山梨版は /yamanashi/ 配下に置かれる。開通・表示確認が済むまで None。
+MOVED_TO = None
+
 # OGP画像はブランド共通(沖縄版と同じ)
 OGP_IMAGE = "https://allgroup-inc.github.io/hojo-hq/yamanashi/assets/ogp.jpg"  # 山梨版カード(桜と富士・2026-09-22作成)
 
@@ -53,14 +57,23 @@ def _esc(s):
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
 
+def canonical_base():
+    """正規URLの基底。引っ越し後は新ドメイン、それまでは今いる場所。"""
+    return MOVED_TO or SITE_BASE
+
+
+def canonical_url(path):
+    base = canonical_base()
+    return f"{base}/{path}" if path else f"{base}/"
+
+
 def canonical_tag(path):
     """path: SITE_BASE からの相対パス(例 "kit/fk-xxx/")。末尾スラッシュ形式で統一。"""
-    url = f"{SITE_BASE}/{path}" if path else f"{SITE_BASE}/"
-    return f'<link rel="canonical" href="{url}">'
+    return f'<link rel="canonical" href="{canonical_url(path)}">'
 
 
 def ogp_tags(title, desc, path, og_type="article"):
-    url = f"{SITE_BASE}/{path}" if path else f"{SITE_BASE}/"
+    url = canonical_url(path)
     return "\n".join([
         f'<meta property="og:title" content="{_esc(title)}">',
         f'<meta property="og:description" content="{_esc(desc)}">',
