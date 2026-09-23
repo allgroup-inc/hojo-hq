@@ -6513,6 +6513,92 @@
       "updated_at": "2026-09-06",
       "review_status": "draft",
       "notes": "沖縄こどもの未来県民会議の掲載団体(支援内容: 食事提供、生活指導、学習支援、キャリア支援等)。県民会議掲載=実在確認の簡略化対象(議事ベッカイ案B)。料金・募集状況・団体の公式ページは掲載審査前に団体側の一次情報で再確認する"
+    },
+    {
+      "service_id": "svc-0146",
+      "service_name": "あしなが育英会 奨学金(遺児・親に重度後遺障がいがある家庭向け)",
+      "summary": "病気・災害・自死等で親を亡くした子ども、親が重度後遺障がいで働けない家庭の子ども向けの奨学金(高校は給付、大学以上は無利子貸与)",
+      "organization_name": "一般財団法人あしなが育英会",
+      "organization_type": "財団",
+      "prefecture": "東京都",
+      "available_area": "全国(地域制限の記載なし)",
+      "nationwide_available": true,
+      "okinawa_available": "○",
+      "okinawa_note": "全国対象の奨学金制度。沖縄限定の記載・除外の記載はいずれもなし",
+      "online_available": true,
+      "offline_available": false,
+      "target_grade": [
+        "高校生",
+        "高卒後"
+      ],
+      "target_conditions": [
+        "病気・災害・自死等で親を亡くした子ども(遺児)",
+        "親が重度後遺障がいで働けない家庭の子ども"
+      ],
+      "income_requirement": "要確認(遺児・重度後遺障がい家庭が対象。所得基準の詳細は別ページ「奨学金を利用したい方へ」参照)",
+      "subject": [],
+      "support_type": [],
+      "exam_support": false,
+      "highschool_exam": false,
+      "university_exam": false,
+      "price_type": "条件付き無料",
+      "price": "高校生は月30,000円給付(返済不要)。大学・専門学校・大学院は月40,000〜80,000円貸与(20年以内・無利子)",
+      "completely_free": false,
+      "application_method": "公式サイト「奨学金を利用したい方へ」または奨学金検索システムCanpassから要確認",
+      "official_url": "https://www.ashinaga.org/scholarship/",
+      "application_url": "https://www.ashinaga.org/scholarship/",
+      "contact": "一般財団法人あしなが育英会 03-3221-0888(平日9-17時)",
+      "recruitment_status": "不明",
+      "data_source": "https://www.ashinaga.org/scholarship/",
+      "last_verified": "2026-09-23",
+      "updated_at": "2026-09-23",
+      "review_status": "published",
+      "notes": "2026-09-23 検証部照合・守り部審査で published。対面接触を伴わない資金支援(奨学金)のため掲載基準§1-7の安全階層(A〜D)の対象外。高校生分のみ完全無料(給付)、大学以上は無利子貸与のため「完全無料」ではなく「条件付き無料」と正確に記載。対象は遺児等に限定されるため target_conditions に明記"
+    },
+    {
+      "service_id": "svc-0147",
+      "service_name": "Learning for All 学習支援拠点(小学生〜高校生世代)",
+      "summary": "認定NPO法人Learning for Allが地域・学校と協力して運営する無償の学習支援拠点・居場所支援(小学生〜高校生世代対象)",
+      "organization_name": "認定NPO法人Learning for All",
+      "organization_type": "NPO",
+      "prefecture": "東京都",
+      "available_area": "要確認(拠点の具体的な所在地一覧は本ページからは確認できず。本部所在地は東京都新宿区)",
+      "nationwide_available": false,
+      "okinawa_available": "?",
+      "okinawa_note": "沖縄県内に拠点があるか、本ページからは確認できない。拠点一覧ページでの再確認が必要",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [
+        "小学生",
+        "中学生",
+        "高校生"
+      ],
+      "target_conditions": [
+        "経済的困難・家庭環境等により支援を必要とする子ども(詳細は別ページ)"
+      ],
+      "income_requirement": "要確認",
+      "subject": [
+        "全般"
+      ],
+      "support_type": [
+        "個別指導",
+        "居場所・対話"
+      ],
+      "one_on_one": true,
+      "group_lesson": true,
+      "price_type": "完全無料",
+      "price": "無償(「無償の学習支援拠点を運営」と明記)",
+      "completely_free": true,
+      "application_method": "要確認",
+      "official_url": "https://learningforall.or.jp/activity/",
+      "application_url": "https://learningforall.or.jp/activity/",
+      "contact": "認定NPO法人Learning for All 03-5357-7131(平日10-17時)",
+      "recruitment_status": "不明",
+      "data_source": "https://learningforall.or.jp/activity/",
+      "last_verified": "2026-09-23",
+      "updated_at": "2026-09-23",
+      "review_status": "verified",
+      "notes": "2026-09-23 検証部照合完了。守り部審査は保留。理由: ページ内に「対象に週2回の1対1の個別指導を実施」との記載があり、掲載基準§1-7のC類型(団体の管理下の1対1)に該当する可能性がある。C類型は安全4点(本人確認の仕組み/保護者同意/記録・見まもりルール/相談・通報窓口)を確認できた場合のみ掲載可だが、本ページからは確認できない。加えて沖縄県内の拠点有無も未確認(okinawa_available=?)。安全4点の確認ができる一次情報(拠点一覧・年次報告書等)が見つかり次第、守り部が再審査する(掲載基準v2.1 §0 フェイルクローズ原則)"
     }
   ]
 }
