@@ -218,6 +218,34 @@
       "org": "あしなが育英会",
       "checked_at": "2026-09-23",
       "robots_allows": true
+    },
+    {
+      "id": "19ch-info",
+      "url": "https://19ch.tv/js/info.html",
+      "org": "19ch運営事務局(アトリエ・ビュー)",
+      "checked_at": "2026-09-23",
+      "robots_allows": true
+    },
+    {
+      "id": "learningforall-outline",
+      "url": "https://learningforall.or.jp/outline/",
+      "org": "認定NPO法人Learning for All",
+      "checked_at": "2026-09-23",
+      "robots_allows": true
+    },
+    {
+      "id": "learningforall-faq",
+      "url": "https://learningforall.or.jp/faq/",
+      "org": "認定NPO法人Learning for All",
+      "checked_at": "2026-09-23",
+      "robots_allows": true
+    },
+    {
+      "id": "kotsuiji",
+      "url": "https://www.kotsuiji.com/scholarship",
+      "org": "公益財団法人交通遺児育英会",
+      "checked_at": "2026-09-23",
+      "robots_allows": true
     }
   ]
 }
