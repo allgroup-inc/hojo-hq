@@ -92,6 +92,12 @@ def main():
             continue
         # ② robots.txt
         status, text = fetch_robots(domain)
+        # 一時的な接続失敗は再試行(2026-09-20 道志村・小菅村がURLErrorで判定不能だった対策)
+        attempts = 1
+        while isinstance(status, str) and status.startswith("ERR:") and attempts < 3:
+            time.sleep(5)
+            status, text = fetch_robots(domain)
+            attempts += 1
         comment, ok = analyze(status, text, domain, "/")
         entry["robots"] = {"http_status": status, "machine_check": comment,
                            "excerpt": text[:800]}

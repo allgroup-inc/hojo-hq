@@ -63,12 +63,17 @@ EXTRA_PAGES = {
 
 # リンク未発見サイトで試すよくあるパス(404は無視)
 COMMON_PATHS = ["/site-policy", "/sitepolicy.html", "/policy.html", "/riyou.html",
-                "/disclaimer.html", "/link.html", "/about/", "/site/rule/"]
+                "/disclaimer.html", "/link.html", "/about/", "/site/rule/",
+                # 2026-09-23 山梨監査で9件が未発見だったため候補を拡充(追加のみ)
+                "/sitepolicy/", "/site_policy.html", "/rule.html", "/riyoukiyaku.html",
+                "/link/", "/copyright.html", "/webpolicy.html", "/site/policy/"]
 
 # リンクテキスト/URLに含まれていたら規約系とみなすキーワード
 LINK_KEYWORDS = ["利用規約", "サイトポリシー", "著作権", "リンクについて", "リンク・著作権",
                  "免責", "このサイトについて", "ご利用に", "ご利用ガイド", "サイトの使い方",
-                 "policy", "copyright", "terms", "about_site", "sitepolicy", "site-policy", "riyou"]
+                 "policy", "copyright", "terms", "about_site", "sitepolicy", "site-policy", "riyou",
+                 # 2026-09-23 追加(山梨監査の未発見対策)
+                 "ホームページについて", "本サイトについて", "当サイトについて", "リンクポリシー", "webpolicy"]
 # 抜粋時に重要箇所を優先するキーワード
 BODY_KEYWORDS = ["著作権", "転載", "引用", "複製", "リンク", "無断", "許可", "承諾", "出典", "免責"]
 
@@ -144,7 +149,10 @@ def find_terms_links(home_html, base_url):
 
 
 def excerpt(text, limit=1200):
-    """重要キーワード周辺を優先して抜粋"""
+    """重要キーワード周辺を優先して抜粋。
+
+    リンク条項が最初の窓から遠いページ(甲府市・甲斐市・丹波山村で発生)向けに、
+    「リンク」の周辺が窓に入らない場合は2つ目の窓として結合する(2026-09-23)。"""
     hits = []
     for kw in BODY_KEYWORDS:
         i = text.find(kw)
@@ -153,7 +161,12 @@ def excerpt(text, limit=1200):
     if not hits:
         return text[:limit]
     start = min(hits)
-    return text[start:start + limit]
+    out = text[start:start + limit]
+    li = text.find("リンク")
+    if li >= 0 and not (start <= li < start + limit):
+        w = max(0, li - 60)
+        out += "\n…(リンク条項の周辺を追加抜粋)…\n" + text[w:w + limit]
+    return out
 
 
 def main():

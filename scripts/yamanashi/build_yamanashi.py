@@ -16,6 +16,7 @@ import json, os, re, shutil, subprocess, sys
 BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from seeds_yamanashi import YMN_PREF_SEEDS  # noqa: E402
+from seeds_yamanashi_muni import YMN_MUNI_SEEDS  # noqa: E402
 
 SRC = os.path.join(BASE, "site", "fukugiiro")
 OUT = os.path.join(BASE, "site", "yamanashi")
@@ -84,6 +85,48 @@ def _pref_items(now):
     return out
 
 
+# A区分(個別ページへのリンク可)の市町村と本人確認済みドメイン(守り部審査記録_山梨版_2026-09-20)。
+# シードのURLがこの表に無いドメインなら機械で止める(検索由来URLの取り違え防止)
+A_MUNI_DOMAINS = {
+    "北杜市": "www.city.hokuto.yamanashi.jp",
+    "富士河口湖町": "www.town.fujikawaguchiko.lg.jp",
+    "南アルプス市": "www.city.minami-alps.yamanashi.jp",
+    "上野原市": "www.city.uenohara.yamanashi.jp",
+    "昭和町": "www.town.showa.yamanashi.jp",
+    "早川町": "www.town.hayakawa.yamanashi.jp",
+    "小菅村": "www.vill.kosuge.yamanashi.jp",
+}
+
+
+def _muni_items(now):
+    """A区分市町村の制度シードを全国制度と同じ形に整えて返す(第2段階・2026-09-23)。
+
+    金額・締切は原文の逐語照合が済むまで status="要確認" / verified=False のまま(絶対ルール1)。
+    B区分・論点1の市町(トップページ限定/営利サイト条項)は決裁待ちのため含まれない。
+    """
+    import urllib.parse
+    out = []
+    for seed in YMN_MUNI_SEEDS:
+        it = dict(seed)
+        area = it["area"]
+        assert area in A_MUNI_DOMAINS, f'{it["id"]}: A区分外の市町村({area})'
+        host = urllib.parse.urlparse(it["source_url"]).netloc
+        assert host == A_MUNI_DOMAINS[area], f'{it["id"]}: 出典ドメイン不一致({host})'
+        it.setdefault("amount_note", "要確認(公式ページと窓口でご確認ください)")
+        it.setdefault("deadline_type", "常時")
+        it.setdefault("deadline", None)
+        it.update({
+            "verified": False,
+            "verified_at": None,
+            "verified_by": None,
+            "status": "要確認",
+            "notes": "出典: " + area + "ウェブサイト",
+            "fetched_at": now,
+        })
+        out.append(it)
+    return out
+
+
 def _assert_no_okinawa(item):
     """山梨版に沖縄の内容が混ざるのを止める。
 
@@ -109,13 +152,17 @@ def build_data():
         # 沖縄版からの取り違えを機械で止める(全国制度と同じ守り)
         _assert_no_okinawa(i)
         assert i["area"] == "山梨県", i["id"]
-    merged = nat + pref
+    muni = _muni_items(src["updated_at"])
+    for i in muni:
+        _assert_no_okinawa(i)
+    merged = nat + pref + muni
     ids = [i["id"] for i in merged]
     assert len(ids) == len(set(ids)), "IDが重複している"
     data = {"region":"yamanashi","updated_at": src["updated_at"],
             "count": len(merged), "items": merged,
-            "note": "国の制度(沖縄版で公式照合済みの全国制度を流用)+山梨県の制度。"
-                    "市町村独自の制度は守り部の論点(営利サイト可否・トップページ限定)の決裁後に追加"}
+            "note": "国の制度(沖縄版で公式照合済みの全国制度を流用)+山梨県の制度"
+                    "+A区分7市町村の制度(守り部審査でリンク可と判定済み・2026-09-23追加)。"
+                    "B区分(トップページ限定)と論点対象の市町(営利サイト条項)は決裁後に追加"}
     os.makedirs(os.path.dirname(DATA_OUT), exist_ok=True)
     with open(DATA_OUT,"w",encoding="utf-8") as f:
         json.dump(data,f,ensure_ascii=False,indent=1); f.write("\n")
@@ -329,7 +376,8 @@ def main():
     build_kit_and_area()
     nat = sum(1 for i in items if i["area"] == "全国")
     pref = sum(1 for i in items if i["area"] == "山梨県")
-    print(f"[ok] 山梨版ビルド完了: 制度{len(items)}件(国{nat}+県{pref}) / life9+一覧 / shindan / houkoku / privacy / teisei / kit53+一覧 / area27+一覧")
+    muni = len(items) - nat - pref
+    print(f"[ok] 山梨版ビルド完了: 制度{len(items)}件(国{nat}+県{pref}+市町村{muni}) / life9+一覧 / shindan / houkoku / privacy / teisei / kit53+一覧 / area27+一覧")
 
 if __name__ == "__main__":
     main()
