@@ -273,6 +273,13 @@
       "url": "https://neopalette.org/list/",
       "robots_approved": true,
       "memo": "全国無料塾リスト。法人格ありの信頼できる運営元。沖縄県内団体または全国型オンライン無料塾の新規発掘源として有望(県民会議に続く第2の一覧サイト)|2026-09-23 WebSearchで発見・robots未監査|robots承認2026-09-23(robots_report.json実測。単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
+    },
+    {
+      "id": "asunochi",
+      "org": "あすのち",
+      "url": "https://satsuki-yuuguregakkyu.jimdofree.com/",
+      "robots_approved": false,
+      "memo": "神奈川県座間・横浜拠点+オンライン教室(ZOOM)。かながわ子ども・子育て支援大賞奨励賞受賞団体。「参加費用は一切かかりません」と明記(WebSearch要約)。オンライン教室部門は対象学年のみで地域限定の記載なし(全国無料塾リスト由来)。県民会議由来ではない新規発掘源(ネオパレット全国無料塾リスト)|2026-09-23 WebSearchで公式URL確認・robots未監査"
     }
   ]
 }
