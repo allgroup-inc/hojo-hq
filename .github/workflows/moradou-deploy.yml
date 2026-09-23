@@ -52,8 +52,47 @@ jobs:
             || { echo "::error::配信で自分のworkflowを消している"; exit 1; }
           echo "ページ $(find /tmp/moradou-build -name index.html | wc -l) 枚 / workflow 保持OK"
 
+      # 小柳さんがコピペする元ファイルが、壊れていない・要点が欠けていないことを見る。
+      # 本文の文字列一致ではなく**解析した構造**で見る。コメント行にも
+      # deploy_moradou.py と書いてあるため、文字列一致だと「途中で切れたファイル」が
+      # 通ってしまうことを実測で確認した(2026-09-23)。
+      # PyYAMLはランナーに入っていないので入れてから使う。
       - name: 配信先workflowの構文検査
-        run: python -c "import yaml,sys; yaml.safe_load(open('deploy/moradou/.github/workflows/build.yml')); print('OK')"
+        run: |
+          python -m pip install --quiet pyyaml
+          python - <<'PY'
+          import sys, yaml
+          p = "deploy/moradou/.github/workflows/build.yml"
+          doc = yaml.safe_load(open(p, encoding="utf-8"))
+          if not isinstance(doc, dict):
+              sys.exit(f"::error::{p} がYAMLの辞書として読めません")
+          # PyYAMLは裸の on: を真偽値 True として読むため、どちらの綴りも許す
+          for key in ("name", "jobs"):
+              if key not in doc:
+                  sys.exit(f"::error::{p} に {key}: がありません")
+          if "on" not in doc and True not in doc:
+              sys.exit(f"::error::{p} に on:(起動条件)がありません")
+          build = (doc.get("jobs") or {}).get("build")
+          if not isinstance(build, dict):
+              sys.exit(f"::error::{p} に jobs.build がありません(コピペが途中で切れていませんか)")
+          steps = build.get("steps")
+          if not isinstance(steps, list) or not steps:
+              sys.exit(f"::error::{p} の jobs.build.steps が空です(コピペが途中で切れていませんか)")
+          runs = "\n".join(s.get("run", "") for s in steps if isinstance(s, dict))
+          uses = [s.get("uses", "") for s in steps if isinstance(s, dict)]
+          required = {
+              "hojo-hqの取得": "github.com/allgroup-inc/hojo-hq",
+              "組み立ての実行": "deploy_moradou.py --out",
+              "自己テスト": "deploy_moradou.py --self-test",
+              "コミット": "git commit",
+          }
+          missing = [name for name, needle in required.items() if needle not in runs]
+          if not any("actions/checkout" in u for u in uses):
+              missing.append("配信先のcheckout")
+          if missing:
+              sys.exit(f"::error::{p} に次の工程がありません: {missing}")
+          print(f"OK: {p} は正しいYAMLで、{len(steps)}工程すべて揃っています")
+          PY
 
       - name: 現状の案内
         run: |
