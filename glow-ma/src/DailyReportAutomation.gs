@@ -53,7 +53,7 @@ function sendDailyReport() {
 
     // エラーメールを送信
     try {
-      GmailApp.sendEmail(
+      MailApp.sendEmail(
         "takeshi.koyanagi9@gmail.com",
         "【GLOW日次レポート】エラーが発生しました",
         "エラー詳細:\n" + e.toString() + "\n\nスタックトレース:\n" + e.stack
@@ -61,6 +61,7 @@ function sendDailyReport() {
     } catch (emailError) {
       Logger.log("Error sending error email: " + emailError.toString());
     }
+    throw e;
   }
 }
 

@@ -80,7 +80,7 @@ function sendDailyReportEmail(reportData, emailBody) {
   const recipientEmail = "takeshi.koyanagi9@gmail.com";
   const subject = `【GLOW日次レポート】${reportData.reportDate}`;
 
-  GmailApp.sendEmail(
+  MailApp.sendEmail(
     recipientEmail,
     subject,
     "", // plaintext body (minimal)
