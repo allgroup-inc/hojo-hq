@@ -1,7 +1,7 @@
 {
  "region": "yamanashi",
  "updated_at": "2026-09-23 08:23",
- "count": 73,
+ "count": 76,
  "items": [
   {
    "id": "fk-kuni-jidoteate",
@@ -1783,18 +1783,18 @@
    "fetched_at": "2026-09-23 08:23"
   },
   {
-   "id": "ym-kosuge-kodomo-iryo",
-   "name": "こども医療費助成金制度",
+   "id": "ym-tsuru-sukoyaka-iryo",
+   "name": "すこやか子育て医療費助成金支給制度",
    "category": "医療・健康",
    "life_events": [
     "子育て",
     "病気・けが"
    ],
-   "issuer": "小菅村",
-   "area": "小菅村",
-   "target_household": "小菅村にお住まいで、お子さんを育てている世帯が対象となる可能性があります(対象年齢は公式ページでご確認ください)",
-   "how_to_apply": "小菅村の担当窓口",
-   "source_url": "http://www.vill.kosuge.yamanashi.jp/living/jyumin/kodomoiryouhiijyosei.html",
+   "issuer": "都留市",
+   "area": "都留市",
+   "target_household": "都留市にお住まいで、お子さんを育てている世帯が対象となる可能性があります(対象年齢は公式ページでご確認ください)",
+   "how_to_apply": "都留市の担当窓口",
+   "source_url": "https://www.city.tsuru.yamanashi.jp/soshiki/kenkoukosodate/kosodateshien_t/1398.html",
    "amount_note": "要確認(公式ページと窓口でご確認ください)",
    "deadline_type": "常時",
    "deadline": null,
@@ -1802,44 +1802,22 @@
    "verified_at": null,
    "verified_by": null,
    "status": "要確認",
-   "notes": "出典: 小菅村ウェブサイト",
+   "notes": "出典: 都留市ウェブサイト",
    "fetched_at": "2026-09-23 08:23"
   },
   {
-   "id": "ym-kosuge-wakamono-teiju",
-   "name": "若者定住促進の奨励制度",
-   "category": "生活支援",
-   "life_events": [
-    "住宅取得・引越",
-    "妊娠・出産"
-   ],
-   "issuer": "小菅村",
-   "area": "小菅村",
-   "target_household": "小菅村にお住まい・移住する若い世帯が対象となる可能性があります(結婚・出産・定住の奨励金を含みます。内容は公式ページでご確認ください)",
-   "how_to_apply": "小菅村の担当窓口",
-   "source_url": "http://www.vill.kosuge.yamanashi.jp/administration/promotion/2010/11/post-1.php",
-   "amount_note": "要確認(公式ページと窓口でご確認ください)",
-   "deadline_type": "常時",
-   "deadline": null,
-   "verified": false,
-   "verified_at": null,
-   "verified_by": null,
-   "status": "要確認",
-   "notes": "出典: 小菅村ウェブサイト",
-   "fetched_at": "2026-09-23 08:23"
-  },
-  {
-   "id": "ym-kosuge-akiya-kaishu",
-   "name": "空き家改修等補助事業",
+   "id": "ym-tsuru-kosodate-jutaku",
+   "name": "都留市子育て世帯住宅取得支援事業",
    "category": "住まい",
    "life_events": [
-    "住宅取得・引越"
+    "住宅取得・引越",
+    "子育て"
    ],
-   "issuer": "小菅村",
-   "area": "小菅村",
-   "target_household": "小菅村の空き家を改修して住む方が対象となる可能性があります",
-   "how_to_apply": "小菅村の担当窓口",
-   "source_url": "http://www.vill.kosuge.yamanashi.jp/living/shinko/renovation.html",
+   "issuer": "都留市",
+   "area": "都留市",
+   "target_household": "都留市内で住宅の取得・改修をした子育て世帯が対象となる可能性があります(要件・受付状況は公式ページでご確認ください)",
+   "how_to_apply": "都留市の担当窓口",
+   "source_url": "https://www.city.tsuru.yamanashi.jp/soshiki/kikaku/seisaku_t/2_1/shien/14386.html",
    "deadline_type": "要確認",
    "amount_note": "要確認(公式ページと窓口でご確認ください)",
    "deadline": null,
@@ -1847,9 +1825,100 @@
    "verified_at": null,
    "verified_by": null,
    "status": "要確認",
-   "notes": "出典: 小菅村ウェブサイト",
+   "notes": "出典: 都留市ウェブサイト",
+   "fetched_at": "2026-09-23 08:23"
+  },
+  {
+   "id": "ym-tsuru-iju-teiju",
+   "name": "都留市移住定住促進奨励金",
+   "category": "住まい",
+   "life_events": [
+    "住宅取得・引越"
+   ],
+   "issuer": "都留市",
+   "area": "都留市",
+   "target_household": "都留市へ転入し、市内で住宅の購入・新築・改修などをした方が対象となる可能性があります(要件は公式ページでご確認ください)",
+   "how_to_apply": "都留市の担当窓口",
+   "source_url": "https://www.city.tsuru.yamanashi.jp/soshiki/kikaku/seisaku_t/2_1/shien/852.html",
+   "deadline_type": "要確認",
+   "amount_note": "要確認(公式ページと窓口でご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 都留市ウェブサイト",
+   "fetched_at": "2026-09-23 08:23"
+  },
+  {
+   "id": "ym-kai-kodomo-iryo",
+   "name": "甲斐市こども医療費助成金制度",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て",
+    "病気・けが"
+   ],
+   "issuer": "甲斐市",
+   "area": "甲斐市",
+   "target_household": "甲斐市にお住まいで、お子さんを育てている世帯が対象となる可能性があります(対象年齢・手続きは公式ページでご確認ください)",
+   "how_to_apply": "甲斐市の担当窓口",
+   "source_url": "https://www.city.kai.yamanashi.jp/site/kosodate/4433.html",
+   "amount_note": "要確認(公式ページと窓口でご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 甲斐市ウェブサイト",
+   "fetched_at": "2026-09-23 08:23"
+  },
+  {
+   "id": "ym-kai-jutaku-shutoku",
+   "name": "甲斐市住宅取得支援事業(補助制度)",
+   "category": "住まい",
+   "life_events": [
+    "住宅取得・引越",
+    "子育て"
+   ],
+   "issuer": "甲斐市",
+   "area": "甲斐市",
+   "target_household": "甲斐市内で住宅を取得する世帯(子育て世帯を含む)が対象となる可能性があります(要件・受付状況は公式ページでご確認ください)",
+   "how_to_apply": "甲斐市の担当窓口",
+   "source_url": "https://www.city.kai.yamanashi.jp/page/4693.html",
+   "deadline_type": "要確認",
+   "amount_note": "要確認(公式ページと窓口でご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 甲斐市ウェブサイト",
+   "fetched_at": "2026-09-23 08:23"
+  },
+  {
+   "id": "ym-kai-iju-shien",
+   "name": "甲斐市移住支援事業補助金",
+   "category": "住まい",
+   "life_events": [
+    "住宅取得・引越",
+    "就職・転職"
+   ],
+   "issuer": "甲斐市",
+   "area": "甲斐市",
+   "target_household": "甲斐市へ移住した方のうち、国・県の移住支援事業の要件に当てはまる方が対象となる可能性があります",
+   "how_to_apply": "甲斐市の担当窓口",
+   "source_url": "https://www.city.kai.yamanashi.jp/page/4141.html",
+   "deadline_type": "要確認",
+   "amount_note": "要確認(公式ページと窓口でご確認ください)",
+   "deadline": null,
+   "verified": false,
+   "verified_at": null,
+   "verified_by": null,
+   "status": "要確認",
+   "notes": "出典: 甲斐市ウェブサイト",
    "fetched_at": "2026-09-23 08:23"
   }
  ],
- "note": "国の制度(沖縄版で公式照合済みの全国制度を流用)+山梨県の制度+A区分7市町村の制度(守り部審査でリンク可と判定済み・2026-09-23追加)。B区分(トップページ限定)と論点対象の市町(営利サイト条項)は決裁後に追加"
+ "note": "国の制度(沖縄版で公式照合済みの全国制度を流用)+山梨県の制度+A区分8市町村の制度(守り部審査でリンク可と判定済み・2026-09-23追加、同日の再監査で小菅村を撤去し都留市・甲斐市を追加)。B区分(トップページ限定)と論点対象の市町(営利サイト条項)は決裁後に追加"
 }
