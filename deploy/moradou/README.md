@@ -86,16 +86,43 @@ www  →  allgroup-inc.github.io
 
 ---
 
-## 終わったら
+## 終わったら — **何もしなくて構いません**
 
-チャットで「できた」と一言ください。こちらで次を進めます。
+3つが終わると、あとは機械が勝手に進みます。
 
-- 表示確認（470ページ・沖縄版と山梨版・LINE導線）
-- 旧URL（github.io）側から新URLへの案内と canonical の付け替え
-- GA4のストリームURL、Search Console、LINE・Instagramのプロフィールリンクの差し替え
+1. `allgroup-inc/moradou` の `build.yml` が最新の内容を組み立てて公開します
+2. `hojo-hq` の `moradou-cutover` が**4時間おきに moradou.jp を実際に叩いて**、
+   開通したかどうかを見ています
+3. 開通が確認できた時点で、旧URL（github.io）側の正規URL（canonical）を
+   自動で moradou.jp へ向け直します。439ページ + 手書きページ全部です
 
-**canonical の切り替えはDNS開通と表示確認の後にやります。**
-先に切り替えると、まだ開いていないドメインを正規URLとして検索エンジンに教えてしまうためです。
+**開通の判定は3点そろって初めて成立します。**
+
+- `https://moradou.jp/` が開き、中身に「もらいわすれ堂」がある
+- **そのページの canonical が moradou.jp を指している**
+  ← ドメイン業者の仮ページを「開通」と誤認しないための決め手。仮ページはこちらのcanonicalを持てません
+- `/yamanashi/` と `/sitemap.xml` も開き、sitemapが新ドメインのURLを含む
+
+1つでも欠けたら切り替えません。まだ開いていないドメインを正規URLとして
+検索エンジンに教えてしまうのを防ぐためです（議事_20260828 ウタガイ②）。
+
+切り替えたあとは `moradou-cutover` は自動で何もしなくなります。
+**切り戻し**が要るときは `scripts/fg_seo.py` と `scripts/fg_yamanashi.py` の
+`MOVED_TO` を `None` に戻して再生成するだけです。
+
+### 早く反映したいとき
+
+DNSを設定した直後に確かめたい場合は、hojo-hq の Actions →
+**moradou-cutover** → Run workflow を押すと、その場で開通確認が走ります
+（まだなら何もせず終わるだけなので、何度押しても害はありません）。
+
+### 人の手が残るもの
+
+次の3つだけは外部サービスの管理画面なので、開通後にお知らせください。
+
+- GA4のストリームURL
+- Search Console のプロパティ追加
+- LINE・Instagram のプロフィールリンク
 
 ## 公開が始まったあとの動き
 

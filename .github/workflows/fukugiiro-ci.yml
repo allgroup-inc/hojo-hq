@@ -24,6 +24,7 @@ on:
       - "tests/selfcheck_baseline.json"
       - "scripts/generate_go_pages.py"
       - "scripts/deploy_moradou.py"
+      - "scripts/moradou_cutover.py"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
   pull_request:
@@ -49,6 +50,7 @@ on:
       - "tests/selfcheck_baseline.json"
       - "scripts/generate_go_pages.py"
       - "scripts/deploy_moradou.py"
+      - "scripts/moradou_cutover.py"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
   workflow_dispatch: {}
@@ -105,6 +107,11 @@ jobs:
         run: |
           python scripts/deploy_moradou.py --self-test
           python scripts/deploy_moradou.py --out /tmp/moradou-ci
+
+      # 開通判定と正規URL切替のロジック。開通前でも毎回テストしておき、
+      # 「その日に初めて動かして壊れていた」を避ける
+      - name: 独自ドメイン切替ロジックの自己テスト
+        run: python scripts/moradou_cutover.py --self-test
 
       - uses: actions/setup-node@v6
         with:

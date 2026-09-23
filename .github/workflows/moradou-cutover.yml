@@ -1,0 +1,110 @@
+# moradou.jp が開通したら、旧URL(github.io)側の正規URLを新ドメインへ向ける。
+#
+# 議事_20260828 のウタガイ②「canonicalの切替はDNS開通・表示確認の**後**でなければ、
+# 死んだドメインを正規URLとして検索エンジンに教えてしまう」を、人の判断ではなく
+# 機械の実測で担保する。開通していなければ何もしない。
+#
+# 開通後は自動で無効化される(MOVED_TO が入っていたら即終了)。
+# 切り戻しは scripts/fg_seo.py と scripts/fg_yamanashi.py の MOVED_TO を None に戻すだけ。
+name: moradou-cutover
+on:
+  schedule:
+    - cron: "17 */4 * * *"   # 4時間おき。開通前は何もせず終わる
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: moradou-cutover
+  cancel-in-progress: false
+jobs:
+  cutover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: 判定ロジックの自己テスト
+        run: python scripts/moradou_cutover.py --self-test
+
+      - name: 切替済みなら終了
+        id: done
+        run: |
+          if grep -q '^MOVED_TO = "' scripts/fg_seo.py; then
+            echo "::notice::既に moradou.jp へ切替済みです。何もしません"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: moradou.jp の開通を実測
+        id: check
+        if: steps.done.outputs.skip == 'false'
+        run: |
+          set +e
+          python scripts/moradou_cutover.py --check
+          rc=$?
+          set -e
+          if [ "$rc" = "2" ]; then
+            echo "::notice::moradou.jp はまだ開通していません。切替はしません"
+            echo "live=false" >> "$GITHUB_OUTPUT"
+          elif [ "$rc" = "0" ]; then
+            echo "live=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::開通確認が異常終了しました (exit $rc)"; exit "$rc"
+          fi
+
+      - name: 正規URLを新ドメインへ切り替えて再生成
+        if: steps.check.outputs.live == 'true'
+        run: |
+          python scripts/moradou_cutover.py --apply
+          python scripts/generate_area_pages.py
+          python scripts/generate_kit_pages.py
+          python scripts/generate_life_pages.py
+          python scripts/yamanashi/build_yamanashi.py
+          python scripts/generate_sitemap.py
+
+      # 「ほとんど切り替わったが入口だけ旧URL」を出さないための最終確認。
+      # 1つでも残っていれば、ここで落としてコミットしない。
+      - name: 取りこぼしが無いか確認
+        if: steps.check.outputs.live == 'true'
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, "scripts")
+          import moradou_cutover as mc
+          stale = mc.stale_canonicals()
+          if stale:
+              print(f"::error::旧URLを指したままの canonical が {len(stale)} ページ残っています")
+              for f in stale[:20]:
+                  print(f"  NG {f}")
+              sys.exit(1)
+          print("OK: 旧URLを指す canonical は残っていません")
+          PY
+          python scripts/check_lp_fukugiiro.py
+          python scripts/deploy_moradou.py --out /tmp/moradou-after
+
+      - name: コミット
+        if: steps.check.outputs.live == 'true'
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add scripts/fg_seo.py scripts/fg_yamanashi.py site/fukugiiro site/yamanashi site/sitemap.xml
+          if git diff --cached --quiet; then
+            echo "[info] 差分なし"; exit 0
+          fi
+          git commit -m "moradou.jp の開通を確認したため、旧URL側の正規URLを新ドメインへ切替
+
+          scripts/moradou_cutover.py が3点(トップ・山梨版・sitemap)を実測し、
+          canonical が moradou.jp を指していることまで確かめた上での自動切替。
+          旧URLのページはそのまま残り、正規URLだけが新ドメインを指す。
+
+          切り戻し: fg_seo.py と fg_yamanashi.py の MOVED_TO を None に戻して再生成。"
+          pushed=0
+          for i in 1 2 3; do
+            git push && pushed=1 && break
+            echo "push retry $i"; sleep 5; git pull --rebase || git rebase --abort
+          done
+          [ "$pushed" = "1" ] || { echo "::error::pushに3回失敗"; exit 1; }
+          echo "::notice::moradou.jp への切替が完了しました"
