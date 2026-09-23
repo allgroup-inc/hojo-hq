@@ -89,3 +89,64 @@ function testSendDailyReport() {
     Logger.log(e.stack);
   }
 }
+
+/**
+ * Task 7 Step 1: 本番デプロイ前チェックリスト — コード品質チェック
+ *
+ * Tasks 1-6 で定義されているはずの主要関数が全て存在するかを確認する。
+ * (docs/superpowers/plans/2026-09-22-daily-report-automation.md Task 7 Step 1 のコードをそのまま使用)
+ */
+function validateCodeQuality() {
+  Logger.log("=== Code Quality Validation ===");
+
+  // Check all required functions exist
+  const requiredFunctions = [
+    "getYesterday",
+    "countLettersByDate",
+    "countCallsByDateRange",
+    "getRankDistribution",
+    "compileDailyReport",
+    "formatReportEmail",
+    "writeReportToSheet",
+    "sendDailyReportEmail",
+    "createDailyReportTrigger",
+    "sendDailyReport"
+  ];
+
+  let allDefined = true;
+  requiredFunctions.forEach(fn => {
+    if (typeof eval(fn) !== "function") {
+      Logger.log("✗ Missing function: " + fn);
+      allDefined = false;
+    }
+  });
+
+  if (allDefined) {
+    Logger.log("✓ All required functions defined");
+  }
+}
+
+/**
+ * Task 7 Step 3: 本番デプロイ前チェックリスト — 月末・月初境界テスト
+ *
+ * getMonthDateRange() が月境界(9/30→10/1)を正しく扱えるかを確認する。
+ * (docs/superpowers/plans/2026-09-22-daily-report-automation.md Task 7 Step 3 のコードをそのまま使用)
+ */
+function testDateBoundaries() {
+  Logger.log("=== Date Boundary Tests ===");
+
+  // Test month-end transition
+  const monthEnd = new Date(2026, 8, 30); // Sept 30
+  const range = getMonthDateRange(monthEnd);
+  Logger.log("Sept 30 month range: " + range.startDate.toLocaleDateString() + " to " + range.endDate.toLocaleDateString());
+
+  const oct1 = new Date(2026, 9, 1); // Oct 1
+  const octRange = getMonthDateRange(oct1);
+  Logger.log("Oct 1 month range: " + octRange.startDate.toLocaleDateString() + " to " + octRange.endDate.toLocaleDateString());
+
+  if (oct1.getMonth() !== octRange.startDate.getMonth()) {
+    Logger.log("✓ Month transition handled correctly");
+  } else {
+    Logger.log("✗ Month transition test failed");
+  }
+}
