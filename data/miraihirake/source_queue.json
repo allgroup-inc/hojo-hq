@@ -203,6 +203,20 @@
       "url": "https://edu.web.nhk/kokokoza/",
       "robots_approved": true,
       "memo": "NHK高校講座(NHK ONE移行後の新URL)。svc-0005の再照合用。新ドメインのためaudit待ち|robots承認2026-09-07(単発取得のみ。守り部審査記録参照)"
+    },
+    {
+      "id": "learningforall",
+      "org": "認定NPO法人Learning for All",
+      "url": "https://learningforall.or.jp/activity/",
+      "robots_approved": false,
+      "memo": "学習支援拠点(小4〜高校生)。無料塾・目標60件(収集候補リストA表)。沖縄からの利用可否・拠点所在地を要照合|2026-09-23 WebSearchで公式URL確認・robots未監査"
+    },
+    {
+      "id": "ashinaga",
+      "org": "あしなが育英会",
+      "url": "https://www.ashinaga.org/scholarship/",
+      "robots_approved": false,
+      "memo": "遺児・親に障がいがある家庭向け給付/貸与奨学金。対象条件が限定的なため target_conditions に明記要。収集候補リストA表|2026-09-23 WebSearchで公式URL確認・robots未監査"
     }
   ]
 }
