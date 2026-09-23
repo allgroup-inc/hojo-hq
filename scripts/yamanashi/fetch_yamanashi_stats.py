@@ -36,9 +36,10 @@ OUT_MD = os.path.join(BASE, "docs", "山梨版_週次数字.md")
 SITE_PATH = "/hojo-hq/yamanashi/"
 GO_PATH = "/hojo-hq/go/ymn-"
 
-# 週次レポで名前を出す主要イベント(それ以外の ymn_ も all_events に全部残す)
+# 週次レポで名前を出す主要イベント(それ以外の ymn_ も all_events に全部残す)。
+# ページ表示はここに入れない: GA4の自動 page_view は fgTrack を通らないので
+# ymn_page_view は常に0になり、上段の実測PVと並ぶと紛らわしい(2026-09-23 初回実行で確認)
 MAIN_EVENTS = [
-    ("ymn_page_view", "ページ表示"),
     ("ymn_shindan_start", "診断を始めた"),
     ("ymn_shindan_complete", "診断の結果を見た"),
     ("ymn_line_add_click", "LINE登録ボタンを押した"),
