@@ -1,0 +1,50 @@
+{
+ "region": "yamanashi",
+ "fetched_at": "2026-09-23",
+ "source": "ga4-data-api",
+ "this_week": {
+  "start": "2026-09-16",
+  "end": "2026-09-22",
+  "events": {
+   "ymn_film_scene_s1": {
+    "events": 2,
+    "users": 1
+   },
+   "ymn_film_scene_s2": {
+    "events": 2,
+    "users": 1
+   },
+   "ymn_film_scene_s3b": {
+    "events": 2,
+    "users": 1
+   },
+   "ymn_film_scene_s4": {
+    "events": 2,
+    "users": 1
+   },
+   "ymn_film_scene_s6": {
+    "events": 2,
+    "users": 1
+   },
+   "ymn_film_scene_s7": {
+    "events": 2,
+    "users": 1
+   },
+   "ymn_film_scene_s8": {
+    "events": 2,
+    "users": 1
+   }
+  },
+  "pageviews": 3,
+  "visitors": 2,
+  "line_forward": {}
+ },
+ "prev_week": {
+  "start": "2026-09-09",
+  "end": "2026-09-15",
+  "events": {},
+  "pageviews": 0,
+  "visitors": 0,
+  "line_forward": {}
+ }
+}
