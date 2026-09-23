@@ -1,7 +1,7 @@
 # source_id: coderdojo-jp
 # url: https://coderdojo.jp/
 # org: CoderDojo Japan
-# fetched_at: 2026-09-06
+# fetched_at: 2026-09-23
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 CoderDojo Japan - 子どものためのプログラミング道場 
@@ -64,7 +64,7 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  子どものためのプログラミング道場
 
- CoderDojo は子どものためのプログラミング道場です。2011年にアイルランドから始まった 国際的な非営利活動 で、日本には 210 以上の道場があります。
+ CoderDojo は子どものためのプログラミング道場です。2011年にアイルランドから始まった 国際的な非営利活動 で、日本には 206 以上の道場があります。
 
  CoderDojo で学べる内容は道場ごとに様々で、例えば次のような内容です。
 
@@ -399,16 +399,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  守谷市で毎月開催
 
- 足利 (栃木) 
-
- Scratch
-
- Minecraft
-
- Webサイト
-
- 足利市で毎月開催
-
  西那須野 (栃木) 
 
  Scratch
@@ -507,18 +497,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  新座市で月2回開催
 
- 稲毛海岸 (千葉) 
-
- Scratch
-
- micro:bit
-
- M5Stack
-
- ラズベリーパイ
-
- 千葉市の稲毛海岸駅付近で毎月開催
-
  市川 (千葉) 
 
  Scratch
@@ -613,20 +591,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  鎌ケ谷市で毎月第4日曜に開催
 
- 末広町@アミュレット (東京) 
-
- Scratch
-
- micro:bit
-
- ラズベリーパイ
-
- Webサイト
-
- JavaScript
-
- 千代田区秋葉原・末広町駅周辺で毎月開催
-
  麹町@アドバンスト・ソフト (東京) 
 
  Scratch
@@ -641,6 +605,26 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  千代田区で毎月開催
 
+ 末広町@アミュレット (東京) 
+
+ Scratch
+
+ micro:bit
+
+ ラズベリーパイ
+
+ Webサイト
+
+ JavaScript
+
+ 千代田区秋葉原・末広町駅周辺で毎月開催
+
+ 日本橋 (東京) 
+
+ Scratch
+
+ 中央区で隔月開催
+
  晴海 (東京) 
 
  Scratch
@@ -648,12 +632,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
  Webサイト
 
  中央区晴海で毎月開催
-
- 日本橋 (東京) 
-
- Scratch
-
- 中央区で隔月開催
 
  たまち (東京) 
 
@@ -668,6 +646,18 @@ CoderDojo Japan - 子どものためのプログラミング道場
  アプリ開発
 
  港区JR田町駅周辺で毎月開催
+
+ 品川港南 (東京) 
+
+ Minecraft
+
+ Scratch
+
+ Webサイト
+
+ アプリ開発
+
+ 港区港南で毎月開催
 
  赤坂国際 (東京) 
 
@@ -685,18 +675,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
  title="Mindstorms">...
 
  港区赤坂で隔週開催
-
- 品川港南 (東京) 
-
- Minecraft
-
- Scratch
-
- Webサイト
-
- アプリ開発
-
- 港区港南で毎月開催
 
  新宿 (東京) 
 
@@ -745,14 +723,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
  映像制作
 
  品川区で不定期開催
-
- 蒲田 (東京) 
-
- Scratch
-
- Webサイト
-
- 大田区蒲田で不定期開催
 
  砧 (東京) 
 
@@ -1180,14 +1150,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  飯田市で第2土曜開催
 
- 塩尻 (長野) 
-
- Scratch
-
- Ruby
-
- 塩尻市で毎月開催
-
  佐久 (長野) 
 
  Scratch
@@ -1380,6 +1342,12 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  稲沢市で毎月開催
 
+ 大府 (愛知) 
+
+ Scratch
+
+ 大府市で毎月2回開催
+
  大府共和 (愛知) 
 
  Scratch
@@ -1391,12 +1359,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
  Hour of Code
 
  大府市で毎月1～2回開催
-
- 大府 (愛知) 
-
- Scratch
-
- 大府市で毎月2回開催
 
  尾張 (愛知) 
 
@@ -1519,6 +1481,16 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  平野区で毎月開催
 
+ 堺 (大阪) 
+
+ Scratch
+
+ PHP
+
+ Java
+
+ 堺市で毎月開催
+
  なかもず (大阪) 
 
  Node-RED MCU
@@ -1528,16 +1500,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
  電子工作
 
  3Dモデリング
-
- 堺市で毎月開催
-
- 堺 (大阪) 
-
- Scratch
-
- PHP
-
- Java
 
  堺市で毎月開催
 
@@ -1724,6 +1686,16 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  姫路市で毎月開催
 
+ 明石 (兵庫) 
+
+ Scratch
+
+ Webサイト
+
+ Arduino
+
+ 明石市で毎月開催
+
  藤江 (兵庫) 
 
  Scratch
@@ -1737,16 +1709,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
  Python
 
  明石市で不定期開催
-
- 明石 (兵庫) 
-
- Scratch
-
- Webサイト
-
- Arduino
-
- 明石市で毎月開催
 
  淡路島 (兵庫) 
 
@@ -1819,18 +1781,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  赤穂郡上郡町で毎月開催
 
- 奈良 (奈良) 
-
- Scratch
-
- micro:bit
-
- toio
-
- Minecraft
-
- 奈良市で毎月開催
-
  大和西大寺 (奈良) 
 
  Scratch
@@ -1842,6 +1792,18 @@ CoderDojo Japan - 子どものためのプログラミング道場
  AI
 
  奈良市で不定期開催
+
+ 奈良 (奈良) 
+
+ Scratch
+
+ micro:bit
+
+ toio
+
+ Minecraft
+
+ 奈良市で毎月開催
 
  生駒 (奈良) 
 
@@ -2124,18 +2086,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  黒潮町で毎月開催
 
- ももち (福岡) 
-
- Scratch
-
- micro:bit
-
- Minecraft
-
- Roblox
-
- 福岡市早良区百道で毎月開催
-
  福岡 (福岡) 
 
  Scratch
@@ -2161,6 +2111,18 @@ CoderDojo Japan - 子どものためのプログラミング道場
  Ozobot
 
  福岡市東区で毎月開催
+
+ ももち (福岡) 
+
+ Scratch
+
+ micro:bit
+
+ Minecraft
+
+ Roblox
+
+ 福岡市早良区百道で毎月開催
 
  早良 (福岡) 
 
@@ -2220,20 +2182,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  鞍手郡で隔月開催
 
- さが (佐賀) 
-
- Viscuit
-
- Springin&#39;
-
- Scratch
-
- micro:bit
-
- Minecraft
-
- 佐賀市で毎月開催
-
  SAGA@駅前中央 (佐賀) 
 
  Scratch
@@ -2250,6 +2198,20 @@ CoderDojo Japan - 子どものためのプログラミング道場
  title="Excel, GAS">...
 
  佐賀市で毎月土曜開催
+
+ さが (佐賀) 
+
+ Viscuit
+
+ Springin&#39;
+
+ Scratch
+
+ micro:bit
+
+ Minecraft
+
+ 佐賀市で毎月開催
 
  野母崎 (長崎) 
 
@@ -2433,6 +2395,8 @@ CoderDojo Japan - 子どものためのプログラミング道場
  📰 
  最近の CoderDojo
 
+ 📰 DojoLetter Vol.100 2026年07月号
+
  🎁 450 台の UIAPduino ボードを全国の CoderDojo 向けに寄贈
 
  📰 DojoLetter Vol.99 2026年06月号
@@ -2450,8 +2414,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
  📰 DojoLetter Vol.95 2026年02月号
 
  📢 神山まるごと高専と CoderDojo Japan、学びの選択肢を広げられる環境づくりなどで連携
-
- 📰 DojoLetter Vol.94 2026年01月号
 
  最新情報はメールで受け取れます。
 

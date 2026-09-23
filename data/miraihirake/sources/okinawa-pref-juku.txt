@@ -1,7 +1,7 @@
 # source_id: okinawa-pref-juku
 # url: https://www.pref.okinawa.lg.jp/kyoiku/jido/1007994/1007960/1007964/index.html
 # org: 沖縄県
-# fetched_at: 2026-09-06
+# fetched_at: 2026-09-23
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 令和8年度【子育て総合支援事業】無料塾の設置、学習支援、養育支援の取組｜沖縄県公式ホームページ 

@@ -1,7 +1,7 @@
 # source_id: asdessin-miraidoor
 # url: https://www.asdessin.org/miraidoor
 # org: NPO法人アスデッサン
-# fetched_at: 2026-09-06
+# fetched_at: 2026-09-23
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 プログラム 
@@ -87,6 +87,10 @@
  プログラム一覧 
 
  2026年9月17日(木) 19:00〜20:00
+
+ 詳細はこちら 
+
+ 2026年12月13日(日) 10:00〜11:30 
 
  詳細はこちら 
 
