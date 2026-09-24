@@ -10,13 +10,94 @@ site/staff/haruka/index.html を生成する。遥さんはこのページを開
 - /staff/ は robots.txt Disallow + sitemap 除外済みの内部領域(さらに noindex 付与)
 - 投稿するかどうかの最終判断は遥さん/小柳さん(絶対ルール5。ここは提案まで)
 - 各案の caution(断定禁止・要再照合)を必ずカード内に表示する
+
+2026-09-24 追加「確認ずみの事実」:
+  遥さんから「ネタ出しより**投稿前の情報確認**に時間がかかる。制度によって自治体ごとに
+  内容や条件が異なるので、出典を読んで誤解のない表現に整えてから画像を作っている」との
+  回答があった。それまでボードは出典URLを渡して「発信前にここで最終確認」と書くだけで、
+  こちらで照合済みの事実を渡していなかった。つまり**こちらが一度やった確認を、
+  遥さんにもう一度やらせていた**。
+  制度DB(seido.json)と出典URLで突き合わせ、照合済みの事実をカードに載せる。
+  ただし照合できていないものを「確認ずみ」と見せるのは絶対ルール1違反なので、
+  ①照合済み ②制度DBにあるが未照合 ③制度DBに無い の3つを必ず区別して出す。
 """
 import json
 import os
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA = os.path.join(BASE, "data", "fukugiiro", "ig_neta.json")
+SEIDO = os.path.join(BASE, "data", "fukugiiro", "seido.json")
 OUT = os.path.join(BASE, "site", "staff", "haruka", "index.html")
+
+# カードに出す事実。(制度DBのキー, 見出し)
+FACT_FIELDS = [
+    ("name", "制度名"),
+    ("issuer", "どこの制度か"),
+    ("target_household", "だれが対象か"),
+    ("amount_note", "いくら"),
+    ("how_to_apply", "どこへ申し込むか"),
+]
+
+
+def norm_url(u):
+    return (u or "").strip().rstrip("/")
+
+
+def load_seido():
+    """出典URL → 制度 の索引。制度DBが無くても止まらない(ボードは出せる)。"""
+    try:
+        with open(SEIDO, encoding="utf-8") as f:
+            items = json.load(f).get("items", [])
+    except (OSError, ValueError):
+        return {}
+    idx = {}
+    for i in items:
+        idx.setdefault(norm_url(i.get("source_url")), i)
+    return idx
+
+
+def deadline_text(s):
+    dl, dt = s.get("deadline"), s.get("deadline_type")
+    if dl:
+        return f"{dl}まで" + (f"({dt})" if dt else "")
+    return dt or ""
+
+
+def fact_block(it, seido_idx):
+    """照合の状態を3つに分けて出す。未照合を「確認ずみ」に見せない(絶対ルール1)。"""
+    s = seido_idx.get(norm_url(it.get("source_url")))
+    if not s:
+        return ('<div class="facts unknown"><b>⚠️ この案は制度DBに載っていません</b>'
+                '<p>こちらで照合できていない案です。出典を開いて、対象・金額・締切を'
+                'ご確認のうえ投稿してください。</p></div>')
+
+    rows = []
+    for key, label in FACT_FIELDS:
+        v = s.get(key)
+        if v:
+            rows.append(f"<dt>{esc(label)}</dt><dd>{esc(str(v))}</dd>")
+    dl = deadline_text(s)
+    if dl:
+        rows.append(f"<dt>いつまで</dt><dd>{esc(dl)}</dd>")
+    dl_html = "<dl>" + "".join(rows) + "</dl>" if rows else ""
+
+    if s.get("verified"):
+        when = s.get("verified_at") or "(日付不明)"
+        note = ("ここに書いてある範囲は、こちらで公式ページと突き合わせています。"
+                "改めて読み直さずに使っていただいて大丈夫です。")
+        # 照合済みでも、項目の中に「要確認」と書いてあるものは断定できない。
+        # 箱の見出しだけ見て「全部確認ずみ」と読まれると、そこが事故になる
+        if any("要確認" in str(s.get(k) or "") for k, _l in FACT_FIELDS):
+            note += ("<br>ただし<b>「要確認」と書いてある項目だけは断定しないでください</b>"
+                     "(制度はあるが、金額や条件までは詰め切れていない、という意味です)。")
+        head = f'<b>✅ 原文と照合ずみです({esc(when)}時点)</b><p>{note}</p>'
+        cls = "ok"
+    else:
+        head = ('<b>⚠️ 制度DBにはありますが、金額・締切は未照合です</b>'
+                '<p>下の内容は参考です。金額や期限は断定せず、'
+                '「詳しくは公式ページで」の形にしてください。</p>')
+        cls = "warn"
+    return f'<div class="facts {cls}">{head}{dl_html}</div>'
 
 
 def esc(s):
@@ -26,6 +107,7 @@ def esc(s):
 def main():
     with open(DATA, encoding="utf-8") as f:
         d = json.load(f)
+    seido_idx = load_seido()
     cards = []
     for it in d.get("items", []):
         cap_full = it["caption"] + "\n\n" + it["hashtags"]
@@ -35,10 +117,11 @@ def main():
   <h2>{esc(it['title'])}</h2>
   <img class="igimg" src="img/ig{it['no']}.png" alt="投稿画像 案{it['no']}">
   <p class="hint">🖼 画像はこのまま使えます: 長押し(PCは右クリック)→保存→Instagramへ</p>
+  {fact_block(it, seido_idx)}
   <div class="cap" id="cap{it['no']}">{esc(cap_full)}</div>
   <button class="copy" data-t="cap{it['no']}">キャプションをコピー</button>
   <p class="caution">⚠️ 投稿前の注意: {esc(it.get('caution',''))}<br>
-  出典(発信前にここで最終確認): <a href="{esc(it.get('source_url',''))}" rel="noopener" target="_blank">公式ページを開く</a></p>
+  出典: <a href="{esc(it.get('source_url',''))}" rel="noopener" target="_blank">公式ページを開く</a></p>
 </div>""")
     html = f"""<!DOCTYPE html>
 <html lang="ja">
@@ -58,6 +141,15 @@ h1{{font-size:1.2rem;color:var(--p);margin-bottom:4px}}
 .no{{display:inline-block;background:var(--a);border-radius:999px;padding:2px 12px;font-weight:800;font-size:.85rem;margin-bottom:6px}}
 h2{{font-size:1.02rem;margin-bottom:10px;line-height:1.5}}
 .cap{{white-space:pre-wrap;background:#FBF5EC;border:1px dashed var(--line);border-radius:10px;padding:12px;font-size:.92rem;margin-bottom:10px}}
+.facts{{border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:.88rem}}
+.facts.ok{{background:#F1F7F0;border:1px solid #CADFC6}}
+.facts.warn{{background:#FDF6E8;border:1px solid #EBD9AE}}
+.facts.unknown{{background:#FBEDEA;border:1px solid #E8C7BE}}
+.facts b{{display:block;margin-bottom:4px}}
+.facts p{{color:var(--muted);margin-bottom:6px}}
+.facts dl{{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0}}
+.facts dt{{color:var(--muted);white-space:nowrap}}
+.facts dd{{margin:0}}
 .copy{{display:block;width:100%;padding:12px;border-radius:999px;border:none;background:var(--p);color:#fff;font-weight:700;font-size:.95rem;cursor:pointer}}
 .copy.done{{background:#0F5138}}
 .hint{{font-size:.85rem;color:var(--muted);margin-top:10px}}
