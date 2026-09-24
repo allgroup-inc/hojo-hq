@@ -50,7 +50,7 @@ SEEDS = [
         "issuer": "こども家庭庁", "area": "全国",
         "target_household": "ひとり親家庭などでお子さんを育てている世帯が対象となる可能性があります",
         "how_to_apply": "お住まいの市区町村の窓口",
-        "source_url": "https://www.cfa.go.jp/policies/hitori-oya/fuyou-teate",
+        "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1008243/index.html",
     },
     {
         "id": "fk-kuni-shussan-ichijikin",
