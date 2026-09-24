@@ -29,6 +29,7 @@ on:
       - "scripts/generate_ig_neta.py"
       - "scripts/audit_ig_history.py"
       - "scripts/record_ig_post.py"
+      - "scripts/quote_source.py"
       - "data/fukugiiro/ig_neta.json"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
@@ -60,6 +61,7 @@ on:
       - "scripts/generate_ig_neta.py"
       - "scripts/audit_ig_history.py"
       - "scripts/record_ig_post.py"
+      - "scripts/quote_source.py"
       - "data/fukugiiro/ig_neta.json"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
@@ -132,6 +134,7 @@ jobs:
           python scripts/generate_ig_neta.py --self-test
           python scripts/audit_ig_history.py --self-test
           python scripts/record_ig_post.py --self-test
+          python scripts/quote_source.py --self-test
 
       - uses: actions/setup-node@v6
         with:
