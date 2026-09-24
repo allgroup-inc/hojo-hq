@@ -45,8 +45,16 @@ def check_pii(text):
     return [label for pat, label in PII if pat.search(text or "")]
 
 
-def add(ledger, date, no, title, posted, why=""):
-    """1件足す。同じ日・同じ案番号は上書きせず弾く(二重計上を防ぐ)。"""
+def add(ledger, date, no, title, posted, why="", seido_id="", source_url="",
+        verified_at="", status=""):
+    """1件足す。同じ日・同じ案番号は上書きせず弾く(二重計上を防ぐ)。
+
+    2026-09-24 遥さんの要望で照合記録を紐づける:
+      「『案として渡したもの』だけではなく、投稿実績台帳と照合記録が
+        紐づいた状態で管理してもらえると助かります」
+    seido_id / source_url / verified_at を一緒に残すので、あとから
+    「この投稿はいつ時点の原文に基づくか」を1行でたどれる。
+    """
     if check_pii(title) or check_pii(why):
         raise ValueError("個人情報らしき文字列が含まれています。台帳には書けません")
     try:
@@ -56,8 +64,13 @@ def add(ledger, date, no, title, posted, why=""):
     for p in ledger["posts"]:
         if p["date"] == date and p["no"] == no:
             raise ValueError(f"{date} の案{no}は既に記録されています")
+    if posted and not (seido_id or source_url):
+        raise ValueError("投稿済みの記録には seido_id か source_url のどちらかが必要です"
+                         "(照合記録と紐づかない投稿を台帳に残さない)")
     ledger["posts"].append({"date": date, "no": no, "title": title,
                             "posted": posted, "why": why,
+                            "seido_id": seido_id, "source_url": source_url,
+                            "verified_at": verified_at, "status": status,
                             "source": "遥さんからのメール返信"})
     ledger["posts"].sort(key=lambda p: (p["date"], p["no"]))
     ledger["updated_at"] = dt.date.today().isoformat()
@@ -67,8 +80,9 @@ def add(ledger, date, no, title, posted, why=""):
 def summary(ledger):
     posts = ledger.get("posts", [])
     done = [p for p in posts if p.get("posted")]
+    linked = [p for p in done if p.get("verified_at")]
     return (f"投稿実績: 記録 {len(posts)}件(投稿 {len(done)}件 / 見送り "
-            f"{len(posts) - len(done)}件)")
+            f"{len(posts) - len(done)}件)。うち照合日つき {len(linked)}件")
 
 
 def load():
@@ -96,22 +110,33 @@ def self_test():
     def fresh():
         return {"posts": [], "updated_at": "2026-09-24"}
 
-    d = add(fresh(), "2026-09-24", 3, "就学援助", True)
+    d = add(fresh(), "2026-09-24", 3, "就学援助", True, seido_id="x",
+            verified_at="2026-08-06")
     check("1件記録できる", len(d["posts"]) == 1 and d["posts"][0]["posted"])
+    check("照合記録が紐づく",
+          d["posts"][0]["seido_id"] == "x" and d["posts"][0]["verified_at"] == "2026-08-06")
+    try:
+        add(fresh(), "2026-09-24", 1, "裏づけなし", True)
+        check("照合記録の無い投稿は台帳に入れない", False)
+    except ValueError:
+        check("照合記録の無い投稿は台帳に入れない", True)
+    check("見送りなら裏づけ不要",
+          len(add(fresh(), "2026-09-24", 1, "出さなかった", False)["posts"]) == 1)
     check("出どころを残す", d["posts"][0]["source"] == "遥さんからのメール返信")
 
-    d = add(d, "2026-09-24", 4, "年金給付金", False, "旬を過ぎた")
+    d = add(d, "2026-09-24", 4, "年金給付金", False, "旬を過ぎた")  # 見送りは裏づけ不要
     check("見送りも記録できる", len(d["posts"]) == 2 and not d["posts"][1]["posted"])
-    check("集計が合う", summary(d) == "投稿実績: 記録 2件(投稿 1件 / 見送り 1件)")
+    check("集計が合う",
+          summary(d) == "投稿実績: 記録 2件(投稿 1件 / 見送り 1件)。うち照合日つき 1件")
 
     try:
-        add(d, "2026-09-24", 3, "就学援助", True)
+        add(d, "2026-09-24", 3, "就学援助", True, seido_id="x")
         check("同じ日の同じ案は弾く", False)
     except ValueError:
         check("同じ日の同じ案は弾く", True)
 
     try:
-        add(fresh(), "9/24", 1, "x", True)
+        add(fresh(), "9/24", 1, "x", True, seido_id="x")
         check("日付の形式を見る", False)
     except ValueError:
         check("日付の形式を見る", True)
@@ -120,14 +145,15 @@ def self_test():
     check("電話番号を見つける", check_pii("098-123-4567") == ["電話番号らしい数字"])
     check("ふつうの文は通す", check_pii("那覇市の就学援助について") == [])
     try:
-        add(fresh(), "2026-09-24", 1, "連絡先 a@b.co.jp", True)
+        add(fresh(), "2026-09-24", 1, "連絡先 a@b.co.jp", True, seido_id="x")
         check("個人情報は台帳に入れない", False)
     except ValueError:
         check("個人情報は台帳に入れない", True)
 
     check("日付順に並ぶ",
-          [p["no"] for p in add(add(fresh(), "2026-09-25", 1, "b", True),
-                                "2026-09-24", 9, "a", True)["posts"]] == [9, 1])
+          [p["no"] for p in add(add(fresh(), "2026-09-25", 1, "b", True, seido_id="x"),
+                                "2026-09-24", 9, "a", True, seido_id="y")["posts"]]
+          == [9, 1])
 
     # 実ファイルが読めて、形が期待どおりか
     real = load()
@@ -147,6 +173,10 @@ def main():
     ap.add_argument("--title", default="")
     ap.add_argument("--skipped", action="store_true", help="投稿しなかった場合")
     ap.add_argument("--why", default="")
+    ap.add_argument("--seido-id", default="")
+    ap.add_argument("--source-url", default="")
+    ap.add_argument("--verified-at", default="")
+    ap.add_argument("--status", default="")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--self-test", action="store_true")
     a = ap.parse_args()
@@ -161,7 +191,8 @@ def main():
         return 0
     if not (a.date and a.no):
         ap.error("--date と --no を指定してください(または --list / --self-test)")
-    save(add(d, a.date, a.no, a.title, not a.skipped, a.why))
+    save(add(d, a.date, a.no, a.title, not a.skipped, a.why,
+             a.seido_id, a.source_url, a.verified_at, a.status))
     print(f"記録しました: {a.date} 案{a.no}")
     print(summary(load()))
     return 0

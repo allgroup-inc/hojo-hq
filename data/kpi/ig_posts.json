@@ -2,5 +2,42 @@
  "note": "もらいわすれ堂 Instagram(@moradou.okinawa)の投稿実績。2026-09-24 小柳さん決裁(案A: メール返信を記録先にする)。遥さんからの投稿報告メールを読んで、こちらで追記する。フォロワー数の台帳は moradou_ig_followers.json で別。個人情報(氏名・連絡先)は書かない。",
  "source": "遥さんからの投稿案メールへの返信",
  "updated_at": "2026-09-24",
- "posts": []
+ "posts": [
+  {
+   "date": "2026-08-14",
+   "no": 1,
+   "title": "ひとり親の手当・現況届(投稿⑨)",
+   "posted": true,
+   "why": "",
+   "seido_id": "fk-kuni-jidofuyoteate",
+   "source_url": "https://www.city.naha.okinawa.jp/child/kosodateouen/1002864/1002850.html",
+   "verified_at": "2026-09-24",
+   "status": "要修正: 提出期間の表記と出典。11月分の記載は原文と一致",
+   "source": "遥さんからのメール返信"
+  },
+  {
+   "date": "2026-08-14",
+   "no": 4,
+   "title": "8月の電気代",
+   "posted": false,
+   "why": "遥さんが投稿していない",
+   "seido_id": "",
+   "source_url": "",
+   "verified_at": "",
+   "status": "",
+   "source": "遥さんからのメール返信"
+  },
+  {
+   "date": "2026-09-24",
+   "no": 2,
+   "title": "私立高校生の奨学給付金(期限延長を反映した新投稿・旧投稿にも追記済み)",
+   "posted": true,
+   "why": "",
+   "seido_id": "fk-kuni-shogaku-kyufukin-koko",
+   "source_url": "https://www.pref.okinawa.jp/kyoiku/edu/1008819/1008843/1008848.html",
+   "verified_at": "2026-09-24",
+   "status": "遥さんが沖縄県公式ページで10月30日への延長を確認。制度DB側は未登録",
+   "source": "遥さんからのメール返信"
+  }
+ ]
 }
