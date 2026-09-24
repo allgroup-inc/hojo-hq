@@ -31,11 +31,13 @@ def _seido_index():
             items = json.load(f).get("items", [])
     except Exception:
         return {}
-    return {(i.get("source_url") or "").rstrip("/"): i for i in items}
+    idx = {(i.get("source_url") or "").rstrip("/"): i for i in items}
+    idx.update({i["id"]: i for i in items if i.get("id")})
+    return idx
 
 
 def check_state(it, idx):
-    s = idx.get((it.get("source_url") or "").rstrip("/"))
+    s = idx.get(it.get("seido_id")) or idx.get((it.get("source_url") or "").rstrip("/"))
     if not s:
         return "unknown"
     return "ok" if s.get("verified") else "warn"

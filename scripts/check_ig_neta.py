@@ -64,10 +64,18 @@ def load(path):
 
 
 def seido_index(seido):
+    """出典URLと制度IDの両方から引けるようにする。
+    ネタに seido_id があればそちらが確実(URLは表記ゆれや移転で外れる)。"""
     idx = {}
     for i in seido.get("items", []):
         idx.setdefault(norm_url(i.get("source_url")), i)
+        if i.get("id"):
+            idx[i["id"]] = i
     return idx
+
+
+def lookup(idx, it):
+    return idx.get(it.get("seido_id")) or idx.get(norm_url(it.get("source_url")))
 
 
 def asserted(it):
@@ -97,7 +105,7 @@ def audit(neta, seido, today):
     for it in neta.get("items", []):
         no = it.get("no")
         dates, moneys = asserted(it)
-        s = idx.get(norm_url(it.get("source_url")))
+        s = lookup(idx, it)
 
         if not (dates or moneys):
             continue  # 断定していないので裏づけは要らない
