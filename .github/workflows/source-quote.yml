@@ -1,0 +1,37 @@
+# 一次ソース(公式ページ)の原文を取りに行くための実行場所。
+#
+# 開発環境からは egress 制限で官公庁・自治体のページを開けない。
+# 検索結果の要約で代用すると、それは原文ではない(絶対ルール1)。
+# GitHub Actions は外に出られるので、ここで原文を取得して該当箇所をそのまま出す。
+#
+# 2026-09-24 新設。遥さんから「投稿内容と沖縄の一次ソースを照合して、
+# 修正が必要な箇所を具体的に教えてください」と依頼を受けたことがきっかけ。
+name: source-quote
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "確認したい公式ページのURL(スペース区切り)"
+        required: true
+      words:
+        description: "探す語(スペース区切り)"
+        required: true
+jobs:
+  quote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: 取得ツールの自己テスト
+        run: python scripts/quote_source.py --self-test
+      - name: 原文を取得して該当箇所を出す
+        env:
+          URLS: ${{ inputs.urls }}
+          WORDS: ${{ inputs.words }}
+        run: |
+          args=""
+          for u in $URLS; do args="$args --url $u"; done
+          for w in $WORDS; do args="$args --word $w"; done
+          python scripts/quote_source.py $args
