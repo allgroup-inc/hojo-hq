@@ -55,6 +55,8 @@ def load_seido():
     idx = {}
     for i in items:
         idx.setdefault(norm_url(i.get("source_url")), i)
+        if i.get("id"):
+            idx[i["id"]] = i
     return idx
 
 
@@ -67,7 +69,7 @@ def deadline_text(s):
 
 def check_state(it, seido_idx):
     """照合の状態。ok=照合ずみ / warn=制度DBにあるが未照合 / unknown=制度DBに無い。"""
-    s = seido_idx.get(norm_url(it.get("source_url")))
+    s = seido_idx.get(it.get("seido_id")) or seido_idx.get(norm_url(it.get("source_url")))
     if not s:
         return "unknown"
     return "ok" if s.get("verified") else "warn"
@@ -75,7 +77,7 @@ def check_state(it, seido_idx):
 
 def fact_block(it, seido_idx):
     """照合の状態を3つに分けて出す。未照合を「確認ずみ」に見せない(絶対ルール1)。"""
-    s = seido_idx.get(norm_url(it.get("source_url")))
+    s = seido_idx.get(it.get("seido_id")) or seido_idx.get(norm_url(it.get("source_url")))
     if not s:
         return ('<div class="facts unknown"><b>⚠️ この案は制度DBに載っていません</b>'
                 '<p>こちらで照合できていない案です。出典を開いて、対象・金額・締切を'
