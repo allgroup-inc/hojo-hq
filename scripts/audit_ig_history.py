@@ -50,8 +50,21 @@ OKINAWA_HINTS = ("okinawa", "naha", "urasoe", "ginowan", "nanjo", "uruma", "itom
 MUNI_DOMAIN = re.compile(r"(?:city|town|vill)\.([a-z0-9-]+)\.(?:lg\.jp|jp)")
 
 
+def is_shallow():
+    """浅いクローンかどうか。CIの checkout は既定で depth=1 なので履歴が無い。"""
+    r = subprocess.run(["git", "rev-parse", "--is-shallow-repository"],
+                       cwd=BASE, capture_output=True, text=True)
+    return r.stdout.strip() == "true"
+
+
 def git_versions(path=NETA_PATH):
-    """そのファイルの全バージョンを古い順に返す。[(commit, 日付, データ)]"""
+    """そのファイルの全バージョンを古い順に返す。[(commit, 日付, データ)]
+
+    浅いクローンでは履歴が見えず、**最新1件だけを全履歴として報告してしまう**。
+    それでも成功として通ってしまうので、ここで止める。
+    (2026-09-24 実際に起きた。CIが「渡した案15件」を「5件」と報告し、
+     正しい記録を上書きした。checkout の fetch-depth: 0 が必要)
+    """
     out = subprocess.run(
         ["git", "log", "--follow", "--format=%H\t%ad", "--date=short", "--", path],
         cwd=BASE, capture_output=True, text=True, check=True).stdout
@@ -66,6 +79,15 @@ def git_versions(path=NETA_PATH):
             versions.append((sha[:9], day, json.loads(blob.stdout)))
         except ValueError:
             continue
+    # 浅いクローン + 見つかったのが1件だけ = 履歴が切れているのか、
+    # 本当に1件しか無いのかを**区別できない**。区別できないまま
+    # 「これが全部です」と報告するのがいちばん危ないので、ここで止める。
+    # (浅くても複数件見つかっていれば、履歴は追えているので進める)
+    if len(versions) <= 1 and is_shallow():
+        raise SystemExit(
+            "::error::浅いクローンで履歴が1件しか見えません。全履歴なのか"
+            "切れているのか区別できないため中止します。"
+            "actions/checkout に fetch-depth: 0 を指定してください")
     return versions
 
 
@@ -157,7 +179,7 @@ def online_status(rows, fetcher=fetch):
     return rows
 
 
-def to_markdown(rows, online):
+def to_markdown(rows, online, shallow=False):
     lines = ["# 点検: これまで渡したIG投稿案の照合状況(2026-09-24)", "",
              "遥さんの指摘「すでに公開されている投稿に古い情報や未照合の情報が残っていないか」"
              "を受けて、git履歴から**渡した案を全部**取り出して並べた。", "",
@@ -169,6 +191,13 @@ def to_markdown(rows, online):
         n[r["state"]] = n.get(r["state"], 0) + 1
     lines += [f"渡した案 {len(rows)}件 — "
               + " / ".join(f"{k} {v}件" for k, v in sorted(n.items())), ""]
+    days = sorted({d for r in rows for d in r["handed"]})
+    if len(days) < 2:
+        lines += ["> ⚠️ 渡した日が1日しかありません。履歴が取れていない可能性があります"
+                  "(浅いクローン)。件数を鵜呑みにしないでください。", ""]
+    if shallow:
+        lines += ["> ⚠️ 浅いクローンで作成しました。古い履歴が欠けている可能性があります"
+                  "(完全な履歴は fetch-depth: 0 で取れます)。", ""]
     lines += ["| 優先 | 案 | 断定している値 | 照合 | 出典 |", "|---|---|---|---|---|"]
     for r in sorted(rows, key=priority):
         claims = "・".join(r["dates"] + r["moneys"]) or "—"
@@ -232,6 +261,14 @@ def self_test():
 
     md = to_markdown([r(dates=["9月30日"], state="照合記録なし")], online=False)
     check("表に出る", "9月30日" in md and "最優先" in md)
+    check("渡した日が1日だけなら履歴不足を警告する", "履歴が取れていない可能性" in md)
+    two = to_markdown([r(handed=["2026-08-11"]), r(title="b", handed=["2026-09-08"])],
+                      online=False)
+    check("複数日あれば警告しない", "履歴が取れていない可能性" not in two)
+    check("浅いクローンなら報告に明記する",
+          "古い履歴が欠けている可能性" in to_markdown([r()], online=False, shallow=True))
+    check("浅くなければ書かない",
+          "古い履歴が欠けている可能性" not in to_markdown([r()], online=False, shallow=False))
     check("限界を明記する", "実際に投稿されたものではない" in md.replace("」", "").replace("「", "")
           or "実際に投稿されたもの" in md)
 
@@ -250,7 +287,7 @@ def main():
     rows = collect(git_versions(), seido_index())
     if a.online:
         online_status(rows)
-    md = to_markdown(rows, a.online)
+    md = to_markdown(rows, a.online, shallow=is_shallow())
     if a.md:
         path = a.md if os.path.isabs(a.md) else os.path.join(BASE, a.md)
         with open(path, "w", encoding="utf-8") as f:
