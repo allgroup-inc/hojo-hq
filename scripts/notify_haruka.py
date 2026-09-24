@@ -47,6 +47,9 @@ def build_text():
             d = json.load(f)
         idx = _seido_index()
         items = d.get("items", [])[:5]
+        # 照合ずみを先に。ボードの並びと揃える(2026-09-24)
+        order = {"ok": 0, "warn": 1, "unknown": 2}
+        items = sorted(items, key=lambda it: (order[check_state(it, idx)], it.get("no", 0)))
         titles = "\n".join(
             f"{MARK[check_state(it, idx)]} 案{it['no']}: {it['title']}" for it in items)
         n_ok = sum(1 for it in items if check_state(it, idx) == "ok")

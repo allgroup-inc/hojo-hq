@@ -126,6 +126,13 @@ def check_go_event_names(rep, src=None):
                     f"/go/{ch}/ の転送先はLINEですが event が {event} です。意図的なら無視してください")
 
 
+def _asserted(it):
+    """本文で断定されている日付・金額。判定は scripts/check_ig_neta.py と共有する
+    (同じデータを読む検査どうしで条件がずれると、片方だけ素通りする)。"""
+    from check_ig_neta import asserted
+    return asserted(it)
+
+
 # ---------------------------------------------------------------- 検査2
 def check_neta(rep, neta=None, seido=None, today=None):
     """IGネタが「検証済みの出典」かつ「締切3層ルール」に適合しているか。"""
@@ -137,14 +144,33 @@ def check_neta(rep, neta=None, seido=None, today=None):
     for it in neta.get("items", []):
         no, url = it.get("no"), it.get("source_url", "")
         s = by_url.get(url)
+        # 未照合の案でも、旬のものは❓を付けて渡してよい(2026-09-24 小柳さん承認)。
+        # 止めるのは「未照合なのに日付や金額を断定している」ときだけにする。
+        # ← それ以前は未照合そのものをNGにしていたが、5件まとめて baseline で
+        #   黙らされており、結果として未照合の締切を3週間使い回した。
+        #   条件を正確にして、黙らせずに済むようにする。
+        dates, moneys = _asserted(it)
+        claims = "・".join(dates + moneys)
         if s is None:
-            rep.add("ng", "neta-source",
-                    f"案{no}「{it.get('title','')[:24]}」の出典が seido.json にありません({url[:60]})。"
-                    "未検証の情報をネタにしないでください(絶対ルール1)")
+            if claims:
+                rep.add("ng", "neta-source",
+                        f"案{no}「{it.get('title','')[:24]}」が「{claims}」を断定していますが、"
+                        f"出典が seido.json にありません({url[:50]})。"
+                        "照合していない数字を本文に書かないでください(絶対ルール1)")
+            else:
+                rep.add("warn", "neta-source",
+                        f"案{no}「{it.get('title','')[:24]}」の出典が seido.json にありません。"
+                        "❓表示のまま渡してください(日付・金額は本文に書かないこと)")
             continue
         if not s.get("verified"):
-            rep.add("ng", "neta-source",
-                    f"案{no}の出典「{s['name']}」は verified=false です。検証済みの制度から引いてください")
+            if claims:
+                rep.add("ng", "neta-source",
+                        f"案{no}が「{claims}」を断定していますが、出典「{s['name']}」は"
+                        " verified=false です。照合してから書いてください")
+            else:
+                rep.add("warn", "neta-source",
+                        f"案{no}の出典「{s['name']}」は verified=false です。"
+                        "⚠️表示のまま渡してください(金額・期限は断定しないこと)")
         dl = s.get("deadline")
         if s.get("deadline_type") == "期限あり" and dl:
             try:
@@ -371,10 +397,24 @@ def self_test():
     check_neta(r, {"updated_at": "2026-09-21", "items": [
         {"no": 1, "source_url": "https://x.go.jp/b", "caution": "x"}]}, seido, today)
     expect(len(r.ng) == 0, "常時の検証済み制度は通す")
+    # 未照合の出典: 断定していなければ渡してよい(❓表示)。断定していたら止める
     r = Report()
     check_neta(r, {"updated_at": "2026-09-21", "items": [
         {"no": 1, "source_url": "https://x.go.jp/c", "caution": "x"}]}, seido, today)
-    expect(any(x["check"] == "neta-source" for x in r.ng), "未検証の制度を弾く")
+    expect(len(r.ng) == 0 and any(x["check"] == "neta-source" for x in r.warn),
+           "未照合でも断定していなければ WARN に留める")
+    r = Report()
+    check_neta(r, {"updated_at": "2026-09-21", "items": [
+        {"no": 1, "source_url": "https://x.go.jp/c", "caution": "x",
+         "title": "申請は9月30日までです", "caption": ""}]}, seido, today)
+    expect(any(x["check"] == "neta-source" for x in r.ng),
+           "未照合なのに日付を断定していたら弾く")
+    r = Report()
+    check_neta(r, {"updated_at": "2026-09-21", "items": [
+        {"no": 1, "source_url": "https://x.go.jp/zzz", "caution": "x",
+         "title": "4,400円分が届きます", "caption": ""}]}, seido, today)
+    expect(any(x["check"] == "neta-source" for x in r.ng),
+           "制度DBに無い出典で金額を断定していたら弾く")
     r = Report()
     check_neta(r, {"updated_at": "2026-09-21", "items": [
         {"no": 1, "source_url": "https://x.go.jp/b"}]}, seido, today)

@@ -25,6 +25,8 @@ on:
       - "scripts/generate_go_pages.py"
       - "scripts/deploy_moradou.py"
       - "scripts/moradou_cutover.py"
+      - "scripts/check_ig_neta.py"
+      - "data/fukugiiro/ig_neta.json"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
   pull_request:
@@ -51,6 +53,8 @@ on:
       - "scripts/generate_go_pages.py"
       - "scripts/deploy_moradou.py"
       - "scripts/moradou_cutover.py"
+      - "scripts/check_ig_neta.py"
+      - "data/fukugiiro/ig_neta.json"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
   workflow_dispatch: {}
@@ -112,6 +116,13 @@ jobs:
       # 「その日に初めて動かして壊れていた」を避ける
       - name: 独自ドメイン切替ロジックの自己テスト
         run: python scripts/moradou_cutover.py --self-test
+
+      # 投稿案が、照合の裏づけがない日付・金額を断定していないか
+      # (2026-09-24: 未照合の締切を3週間使い回していた)
+      - name: IG投稿案の裏づけ検査
+        run: |
+          python scripts/check_ig_neta.py --self-test
+          python scripts/check_ig_neta.py
 
       - uses: actions/setup-node@v6
         with:
