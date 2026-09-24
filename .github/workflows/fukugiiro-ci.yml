@@ -26,6 +26,8 @@ on:
       - "scripts/deploy_moradou.py"
       - "scripts/moradou_cutover.py"
       - "scripts/check_ig_neta.py"
+      - "scripts/audit_ig_history.py"
+      - "scripts/record_ig_post.py"
       - "data/fukugiiro/ig_neta.json"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
@@ -54,6 +56,8 @@ on:
       - "scripts/deploy_moradou.py"
       - "scripts/moradou_cutover.py"
       - "scripts/check_ig_neta.py"
+      - "scripts/audit_ig_history.py"
+      - "scripts/record_ig_post.py"
       - "data/fukugiiro/ig_neta.json"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
@@ -123,6 +127,8 @@ jobs:
         run: |
           python scripts/check_ig_neta.py --self-test
           python scripts/check_ig_neta.py
+          python scripts/audit_ig_history.py --self-test
+          python scripts/record_ig_post.py --self-test
 
       - uses: actions/setup-node@v6
         with:

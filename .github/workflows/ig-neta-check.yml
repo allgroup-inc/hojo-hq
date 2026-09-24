@@ -23,6 +23,8 @@ on:
     # 月曜の投稿案を送る前に、出典ページと突き合わせる(月曜 7:00 JST = 日曜 22:00 UTC)
     - cron: "0 22 * * 0"
   workflow_dispatch:
+permissions:
+  contents: write
 concurrency:
   group: ig-neta-check
   cancel-in-progress: false
@@ -44,6 +46,29 @@ jobs:
 
       # 出典ページを実際に取得して、断定した日付がいまもそこに書いてあるか。
       # 取得失敗は誤りとみなさない(通信失敗は掲載が誤っている証拠ではない)。
+      - name: 投稿実績台帳の自己テスト
+        run: python scripts/record_ig_post.py --self-test
+
+      - name: 過去に渡した案の照合状況(履歴監査)の自己テスト
+        run: python scripts/audit_ig_history.py --self-test
+
+      # 出典ページを実際に取得して確かめる。取得失敗は誤りとみなさない。
       - name: 出典ページとの突き合わせ
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: python scripts/check_ig_neta.py --online
+
+      # 過去に渡した案が、いまの公式情報と食い違っていないかを調べて記録に残す。
+      # 遥さんの指摘「すでに公開されている投稿に古い情報が残っていないか」への回答。
+      - name: 過去に渡した案を出典と突き合わせて記録
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: |
+          python scripts/audit_ig_history.py --online \
+            --md docs/点検_IG投稿済みの照合状況.md
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            git config user.name "hojo-hq-bot"
+            git config user.email "bot@users.noreply.github.com"
+            git add docs/点検_IG投稿済みの照合状況.md
+            git diff --cached --quiet && { echo "[info] 差分なし"; exit 0; }
+            git commit -m "auto: 過去に渡したIG投稿案の照合状況を更新 $(date -u '+%Y-%m-%d')"
+            git push || echo "::warning::pushできませんでした(記録はログに残っています)"
+          fi
