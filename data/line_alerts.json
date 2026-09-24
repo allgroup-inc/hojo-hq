@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-09-24 06:00",
+ "generated_at": "2026-09-24 11:48",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 36,
- "count": 23,
+ "count": 24,
  "items": [
   {
    "id": "a0WJ200000CDeT0MAL",
@@ -55,6 +55,16 @@
    "tier": "まもなく締切(7〜14日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdonMAD",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDeZLMA1",
+   "name": "「カーボンリサイクル・火力発電の脱炭素化技術等国際協力事業／カーボンマネジメントに係る国際連携事業／カーボンリサイクル関連技術及び脱炭素化技術等の海外展開可能性の調査」の公募について",
+   "deadline": "2026-10-07",
+   "days_left": 13,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeZLMA1",
    "tag": "nationwide"
   },
   {
