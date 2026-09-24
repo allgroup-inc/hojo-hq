@@ -46,7 +46,7 @@ HISTORY_PATH = os.path.join(
     os.path.dirname(__file__), "..", "data", "kpi", "verify_history.json"
 )
 JGRANTS_DETAIL = "https://api.jgrants-portal.go.jp/exp/v1/public/subsidies/id/{sid}"
-SAMPLE_SIZE = 5
+SAMPLE_SIZE = int(os.getenv("VERIFY_SAMPLE_SIZE", "5"))  # Default: 5, override with env var for re-verification
 CLAUDE_MODEL = "claude-haiku-4-5"
 # モデルは廃止・改名され得るため候補を順に試す。"-latest" エイリアスを最優先に
 # しておくと Google 側の世代交代に自動追従する(2026-08-06: gemini-2.5-flash 404 対応)。
