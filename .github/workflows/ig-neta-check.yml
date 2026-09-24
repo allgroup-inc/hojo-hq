@@ -1,0 +1,49 @@
+# IG投稿案が「断定してよいことだけを断定しているか」を検査する。
+#
+# 2026-09-24 遥さんの指摘で新設。9月8日に作った案「奨学給付金の申請は9月30日まで」を
+# 9月21日に渡したが、沖縄県の公式ページでは9月17日に期限が10月30日へ延長されていた。
+# 調べると、その日付は照合済みDB由来ですらなく、一度も照合を通っていなかった。
+# さらに ig_neta.json は生成元スクリプトが無い手置きファイルで、原文が変わっても
+# 永久に気づけない状態だった。
+name: ig-neta-check
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/fukugiiro/ig_neta.json"
+      - "data/fukugiiro/seido.json"
+      - "scripts/check_ig_neta.py"
+      - ".github/workflows/ig-neta-check.yml"
+  pull_request:
+    paths:
+      - "data/fukugiiro/ig_neta.json"
+      - "scripts/check_ig_neta.py"
+      - ".github/workflows/ig-neta-check.yml"
+  schedule:
+    # 月曜の投稿案を送る前に、出典ページと突き合わせる(月曜 7:00 JST = 日曜 22:00 UTC)
+    - cron: "0 22 * * 0"
+  workflow_dispatch:
+concurrency:
+  group: ig-neta-check
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: 検査そのものの自己テスト
+        run: python scripts/check_ig_neta.py --self-test
+
+      # 断定された日付・金額に照合の裏づけがあるか(通信なし)
+      - name: 裏づけの検査
+        run: python scripts/check_ig_neta.py
+
+      # 出典ページを実際に取得して、断定した日付がいまもそこに書いてあるか。
+      # 取得失敗は誤りとみなさない(通信失敗は掲載が誤っている証拠ではない)。
+      - name: 出典ページとの突き合わせ
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: python scripts/check_ig_neta.py --online

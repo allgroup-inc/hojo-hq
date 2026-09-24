@@ -63,6 +63,14 @@ def deadline_text(s):
     return dt or ""
 
 
+def check_state(it, seido_idx):
+    """照合の状態。ok=照合ずみ / warn=制度DBにあるが未照合 / unknown=制度DBに無い。"""
+    s = seido_idx.get(norm_url(it.get("source_url")))
+    if not s:
+        return "unknown"
+    return "ok" if s.get("verified") else "warn"
+
+
 def fact_block(it, seido_idx):
     """照合の状態を3つに分けて出す。未照合を「確認ずみ」に見せない(絶対ルール1)。"""
     s = seido_idx.get(norm_url(it.get("source_url")))
@@ -108,8 +116,14 @@ def main():
     with open(DATA, encoding="utf-8") as f:
         d = json.load(f)
     seido_idx = load_seido()
+    # 照合ずみを先に出す(2026-09-24 小柳さん承認の選定方針)。
+    # 旬のネタは未照合でも渡すが、❓として下に置き、番号は案の番号のまま変えない
+    # (メール・LINEと案番号がずれると事故になる)。
+    order = {"ok": 0, "warn": 1, "unknown": 2}
+    items = sorted(d.get("items", []),
+                   key=lambda it: (order[check_state(it, seido_idx)], it.get("no", 0)))
     cards = []
-    for it in d.get("items", []):
+    for it in items:
         cap_full = it["caption"] + "\n\n" + it["hashtags"]
         cards.append(f"""
 <div class="card">
