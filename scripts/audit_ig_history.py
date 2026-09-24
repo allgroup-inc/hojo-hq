@@ -40,7 +40,7 @@ NETA_PATH = "data/fukugiiro/ig_neta.json"
 SEIDO = os.path.join(BASE, "data", "fukugiiro", "seido.json")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from check_ig_neta import asserted, fetch, strip_tags, norm_url  # noqa: E402
+from check_ig_neta import asserted, fetch, strip_tags, norm_url, found_in  # noqa: E402
 
 # 沖縄県向けのサービスなのに、他都道府県の自治体ドメインが出典になっていないか。
 # (2026-09-24 実際に大阪市阿倍野区のページを出典にした案が見つかった)
@@ -172,8 +172,10 @@ def online_status(rows, fetcher=fetch):
         if body is None:
             r["online"] = f"取得できず({err}) ※誤りとは判定していない"
             continue
-        text = strip_tags(body)
-        missing = [c for c in claims if c not in text]
+        # 表記ゆれ(年の有無・カンマの有無)は check_ig_neta と同じ判定を使う。
+        # 判定がずれると、同じ制度が版によって違う結果になる
+        text = strip_tags(body).replace("　", "")
+        missing = [c for c in claims if not found_in(c, text)]
         r["online"] = ("出典に残っている" if not missing
                        else f"出典に見当たらない: {'・'.join(missing)} → 修正が必要")
     return rows
@@ -253,6 +255,12 @@ def self_test():
     rows = online_status([r(dates=["9月30日"])],
                          fetcher=lambda u: ("<p>10月30日まで</p>", None))
     check("出典から消えていれば修正が必要", "修正が必要" in rows[0]["online"])
+    rows = online_status([r(dates=["2026年9月30日"])],
+                         fetcher=lambda u: ("<p>9月30日まで</p>", None))
+    check("年の有無だけの違いは修正不要", "残っている" in rows[0]["online"])
+    rows = online_status([r(moneys=["4,400円"])],
+                         fetcher=lambda u: ("<p>4400円分</p>", None))
+    check("カンマの有無だけの違いは修正不要", "残っている" in rows[0]["online"])
     rows = online_status([r(dates=["9月30日"])], fetcher=lambda u: (None, "HTTP 403"))
     check("取得失敗は誤りと判定しない", "取得できず" in rows[0]["online"]
           and "修正が必要" not in rows[0]["online"])

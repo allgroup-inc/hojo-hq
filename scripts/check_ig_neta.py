@@ -152,6 +152,38 @@ def fetch(url):
     return raw.decode("utf-8", errors="replace"), None
 
 
+_YMD = re.compile(r"(?:(\d{4})年)?(\d{1,2})月(\d{1,2})日")
+
+
+def claim_variants(claim):
+    """出典ページで探すときの表記ゆれ。
+    「2026年9月30日」と「9月30日」、「4,400円」と「4400円」は同じものを指す。
+    ここを分けたまま照合すると、同じ制度が版によって違う結果になる
+    (2026-09-24 実際に、同じ那覇市おこめ券が片方だけ『修正が必要』と出た)。"""
+    m = _YMD.fullmatch(claim)
+    if m:
+        y, mo, da = m.groups()
+        out = [f"{int(mo)}月{int(da)}日"]
+        if y:
+            out.append(f"{y}年{int(mo)}月{int(da)}日")
+        else:
+            out.append(f"{int(mo)}月{int(da)}日")
+        # 0埋め表記も見る(例: 09月30日)
+        out.append(f"{int(mo):02d}月{int(da):02d}日")
+        return list(dict.fromkeys(out))
+    if claim.endswith("円"):
+        num = claim[:-1].strip()
+        return list(dict.fromkeys([claim, num.replace(",", "") + "円",
+                                   f"{int(num.replace(',', '')):,}円"
+                                   if num.replace(",", "").isdigit() else claim]))
+    return [claim]
+
+
+def found_in(claim, text):
+    """表記ゆれのどれか1つでもあれば「載っている」とみなす。"""
+    return any(v in text for v in claim_variants(claim))
+
+
 def strip_tags(html):
     html = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", html)
     return re.sub(r"<[^>]+>", " ", html)
@@ -171,8 +203,8 @@ def online_check(neta, fetcher=fetch):
             unknown.append(f"案{it.get('no')}: 出典を取得できませんでした({err})。"
                            f"誤りとは判定していません")
             continue
-        text = strip_tags(body)
-        missing = [d for d in dates if d.replace("　", "") not in text.replace("　", "")]
+        text = strip_tags(body).replace("　", "")
+        missing = [d for d in dates if not found_in(d, text)]
         if missing:
             ng.append(f"案{it.get('no')}: 本文の「{'・'.join(missing)}」が"
                       f"出典ページに見当たりません。変更されている可能性があります")
@@ -262,6 +294,18 @@ def self_test():
     ng, _u = online_check(neta_of("9月30日まで"),
                           fetcher=lambda u: ("<script>9月30日</script><p>本文</p>", None))
     check("scriptの中は本文として数えない", len(ng) == 1)
+
+    # 表記ゆれ
+    check("年つきの断定を年なしの記載で拾う", found_in("2026年9月30日", "申請は9月30日まで"))
+    check("年なしの断定を年つきの記載で拾う", found_in("9月30日", "2026年9月30日まで"))
+    check("0埋め表記でも拾う", found_in("9月30日", "受付は09月30日まで"))
+    check("金額のカンマ有無を吸収する", found_in("4,400円", "4400円分"))
+    check("金額のカンマ無し断定も拾う", found_in("4400円", "4,400円分"))
+    check("違う日付は拾わない", not found_in("9月30日", "10月30日まで"))
+    check("違う金額は拾わない", not found_in("4,400円", "3,000円分"))
+    ng, _u = online_check(neta_of("2026年9月30日まで"),
+                          fetcher=lambda u: ("<p>9月30日まで</p>", None))
+    check("表記ゆれなら修正不要と判定する", ng == [])
 
     check("NGがあれば終了コード1", report(["x"], []) == 1)
     check("NGが無ければ終了コード0", report([], ["y"]) == 0)
