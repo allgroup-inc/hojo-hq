@@ -32,7 +32,11 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      # 履歴監査が git log をさかのぼるので、浅いクローンにしない。
+      # 既定(depth=1)だと最新1件だけを全履歴として報告してしまう(2026-09-24 実際に発生)
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
