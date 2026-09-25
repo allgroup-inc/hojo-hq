@@ -3073,7 +3073,7 @@
  },
  {
   "date": "2026-09-25",
-  "sample": 20,
+  "sample": 5,
   "ng": 0,
   "gemini": {
    "enabled": true,
@@ -3082,8 +3082,8 @@
   },
   "items": [
    {
-    "name": "【令和７年度補正予算・令和８年度】二酸化炭素排出抑制対策事業費等補助金（クーリングシェルターの普及に向けた高効率空調導入支援事業（令和７年度補正予算三次公募・令和８年度二次公募））",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtgMAD",
+    "name": "令和８年度酒類業振興支援事業費補助金（第５期）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdRmMAL",
     "method": "jgrants",
     "judges": [
      "api"
@@ -3092,8 +3092,8 @@
     "issues": []
    },
    {
-    "name": "令和７年度補正　再生可能エネルギー導入拡大・系統用蓄電池等電力貯蔵システム導入支援事業費補助金　系統用蓄電システム等導入支援事業",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe4JMAT",
+    "name": "令和8年度SDS電子化補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDderMAD",
     "method": "jgrants",
     "judges": [
      "api"
@@ -3102,8 +3102,8 @@
     "issues": []
    },
    {
-    "name": "2026年度「木質バイオマス燃料等の安定的・効率的な供給・利用システム構築支援事業」の第２回公募",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtWMAT",
+    "name": "「GX分野の大企業等のスタートアップ連携・調達加速化事業／市場創出及び本格調達・購買の実現可能性の検証（GX_CPP）」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdmLMAT",
     "method": "jgrants",
     "judges": [
      "api"
@@ -3112,8 +3112,8 @@
     "issues": []
    },
    {
-    "name": "令和8年度当初予算　二次公募　民間企業等による再エネの導入及び地域共生加速化事業のうち、ストレージパリティの達成に向けた太陽光発電設備等の価格低減促進事業",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeSJMA1",
+    "name": "令和８年度　ＺＥＢ実証事業（三次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003CVHdUAO",
     "method": "jgrants",
     "judges": [
      "api"
@@ -3122,158 +3122,8 @@
     "issues": []
    },
    {
-    "name": "令和８年度_グリーンスローモビリティ等導入促進事業（二次公募）",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDKZFMA5",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【関東監督部】",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuSMAX",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "令和８年度（秋公募）コールドチェーンを支える冷凍冷蔵機器の脱フロン・脱炭素化推進事業",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003EVJxUAO",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "令和８年度SDGsファイナンス支援事業補助金(ソーシャルボンド/ソーシャルローン)",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdA6MAL",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "［第十回］事業再構築補助金（交付申請等）",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000GMgXBEA1",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "【令和８年度２次公募】国立公園等利用拠点滞在環境等上質化事業（国立公園等資源整備事業費補助金）",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczHMAT",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "【令和8年度】DX型CO2削減対策実行支援事業（二次公募）",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003BrAXUA0",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【四国支部】",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY96MAH",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "「『ディープテック・スタートアップ支援基金／国際共同研究開発』新規採択支援業務及び潜在的案件発掘促進を目的とした情報発信手法に関する調査」の公募",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeVeMAL",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "令和7年度_産油国石油精製技術等対策事業費補助金（石油天然ガス権益・安定供給の確保に向けた資源国との関係強化支援事業のうち産油・産ガス国産業協力等事業に係るもの）_第5回公募",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeNwMAL",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "【沖縄】令和８年度中小企業最低賃金引上げ支援対策費補助金（業務改善助成金）",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe6cMAD",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【中国監督部】",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY91MAH",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "INPIT事業再編計画支援事業補助金（令和８年度）",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYBxMAP",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "令和７年度補正 ディマンドリスポンスの拡大に向けたIoT化推進事業",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY5GMAX",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "令和８年度「水力発電導入促進支援事業費補助金（事業性評価支援事業）」（新規事業　３次締切分）",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDcODMA1",
-    "method": "jgrants",
-    "judges": [
-     "api"
-    ],
-    "ok": true,
-    "issues": []
-   },
-   {
-    "name": "令和８年度子育て【建設型】初年度",
-    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSAMA5",
+    "name": "産業車両等の脱炭素化促進事業のうち、空港における脱炭素化促進事業① 空港における再エネ活用型GPU等導入支援（二酸化炭素排出抑制対策事業費等補助金）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYzVMAX",
     "method": "jgrants",
     "judges": [
      "api"
