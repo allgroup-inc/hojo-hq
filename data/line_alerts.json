@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-09-25 06:05",
+ "generated_at": "2026-09-25 12:05",
  "alert_window": [
   7,
   29
  ],
- "soon_closed_count": 35,
- "count": 24,
+ "soon_closed_count": 25,
+ "count": 25,
  "items": [
   {
    "id": "a0WJ200000CDeT0MAL",
@@ -175,6 +175,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeTZMA1",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WfQ000003F3K1UAK",
+   "name": "「研究開発プロセスを起点とした動的なEBPMのための指標設計及びデータ活用戦略の策定に係る調査」の公募",
+   "deadline": "2026-10-16",
+   "days_left": 21,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003F3K1UAK",
    "tag": "nationwide"
   },
   {
