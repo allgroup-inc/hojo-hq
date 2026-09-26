@@ -3132,5 +3132,68 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-26",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和８年度酒類業振興支援事業費補助金（第５期）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdRmMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "流通環境整備支援事業(農林水産物県外出荷・流通合理化 実証事業)",
+    "url": "https://okinawa-ric.jp/service/post-55.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": [],
+    "amount_in_source": "２千万円"
+   },
+   {
+    "name": "「ディープテック・スタートアップ支援基金／大企業等のスタートアップ連携・調達加速化事業／市場創出及び本格調達・購買の実現可能性の検証（CPP）」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdmGMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和６年度補正予算　商用車等の電動化促進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDL8JMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度】二酸化炭素排出抑制対策事業費等補助金（再エネ等由来水素を活用した自立・分散型エネルギーシステム構築等事業）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaotMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
