@@ -151,10 +151,10 @@ function getLineUserCountByDate(targetDate) {
  */
 function testCallAggregation() {
   const mockInteractions = [
-    {"対応日時": new Date(2026, 8, 22), "種別": "電話", "企業ランク": "A"},
-    {"対応日時": new Date(2026, 8, 22), "種別": "電話", "企業ランク": "B"},
-    {"対応日時": new Date(2026, 8, 21), "種別": "電話", "企業ランク": "A"},
-    {"対応日時": new Date(2026, 8, 22), "種別": "訪問", "企業ランク": "C"},
+    {"日付": new Date(2026, 8, 22), "種別": "電話"},
+    {"日付": new Date(2026, 8, 22), "種別": "電話"},
+    {"日付": new Date(2026, 8, 21), "種別": "電話"},
+    {"日付": new Date(2026, 8, 22), "種別": "面談実施"},
   ];
 
   const yesterday = new Date(2026, 8, 22);
@@ -164,8 +164,8 @@ function testCallAggregation() {
   }
 
   const byRank = countCallsByDateRange(mockInteractions, yesterday, yesterday);
-  if (byRank.byRank.A !== 1 || byRank.byRank.B !== 1) {
-    throw new Error("countCallsByDateRange byRank failed");
+  if (byRank.total !== 2) {
+    throw new Error("countCallsByDateRange total failed");
   }
   Logger.log("✓ Call aggregation tests passed");
 }
@@ -180,7 +180,7 @@ function countCallsByDate(interactionRecords, targetDate) {
   const targetDateStr = datesToLocaleDateString(targetDate);
   return interactionRecords.filter(r => {
     if (r["種別"] !== "電話") return false;
-    const recordDate = new Date(r["対応日時"]);
+    const recordDate = new Date(r["日付"]);
     return datesToLocaleDateString(recordDate) === targetDateStr;
   }).length;
 }
@@ -195,17 +195,17 @@ function countCallsByDate(interactionRecords, targetDate) {
 function countCallsByDateRange(interactionRecords, startDate, endDate) {
   const filtered = interactionRecords.filter(r => {
     if (r["種別"] !== "電話") return false;
-    const recordDate = new Date(r["対応日時"]);
+    const recordDate = new Date(r["日付"]);
     return recordDate >= startDate && recordDate <= endDate;
   });
 
   return {
     total: filtered.length,
     byRank: {
-      "A": filtered.filter(r => r["企業ランク"] === "A").length,
-      "B": filtered.filter(r => r["企業ランク"] === "B").length,
-      "C": filtered.filter(r => r["企業ランク"] === "C").length,
-      "D": filtered.filter(r => r["企業ランク"] === "D").length,
+      "A": 0,
+      "B": 0,
+      "C": 0,
+      "D": 0,
     }
   };
 }
@@ -219,14 +219,14 @@ function countCallsByDateRange(interactionRecords, startDate, endDate) {
 function countVisitsByDate(interactionRecords, targetDate) {
   const targetDateStr = datesToLocaleDateString(targetDate);
   const filtered = interactionRecords.filter(r => {
-    if (!["訪問", "面談"].includes(r["種別"])) return false;
-    const recordDate = new Date(r["対応日時"]);
+    if (!["面談実施"].includes(r["種別"])) return false;
+    const recordDate = new Date(r["日付"]);
     return datesToLocaleDateString(recordDate) === targetDateStr;
   });
 
   return {
-    visits: filtered.filter(r => r["種別"] === "訪問").length,
-    meetings: filtered.filter(r => r["種別"] === "面談").length,
+    visits: 0,
+    meetings: filtered.length,
     total: filtered.length,
   };
 }
@@ -240,14 +240,14 @@ function countVisitsByDate(interactionRecords, targetDate) {
  */
 function countVisitsByDateRange(interactionRecords, startDate, endDate) {
   const filtered = interactionRecords.filter(r => {
-    if (!["訪問", "面談"].includes(r["種別"])) return false;
-    const recordDate = new Date(r["対応日時"]);
+    if (!["面談実施"].includes(r["種別"])) return false;
+    const recordDate = new Date(r["日付"]);
     return recordDate >= startDate && recordDate <= endDate;
   });
 
   return {
-    visits: filtered.filter(r => r["種別"] === "訪問").length,
-    meetings: filtered.filter(r => r["種別"] === "面談").length,
+    visits: 0,
+    meetings: filtered.length,
     total: filtered.length,
   };
 }
@@ -261,8 +261,8 @@ function countVisitsByDateRange(interactionRecords, startDate, endDate) {
 function countContractsByDate(interactionRecords, targetDate) {
   const targetDateStr = datesToLocaleDateString(targetDate);
   return interactionRecords.filter(r => {
-    if (r["成約"] !== true) return false;
-    const recordDate = new Date(r["対応日時"]);
+    if (r["種別"] !== "成約") return false;
+    const recordDate = new Date(r["日付"]);
     return datesToLocaleDateString(recordDate) === targetDateStr;
   }).length;
 }
@@ -276,8 +276,8 @@ function countContractsByDate(interactionRecords, targetDate) {
  */
 function countContractsByDateRange(interactionRecords, startDate, endDate) {
   return interactionRecords.filter(r => {
-    if (r["成約"] !== true) return false;
-    const recordDate = new Date(r["対応日時"]);
+    if (r["種別"] !== "成約") return false;
+    const recordDate = new Date(r["日付"]);
     return recordDate >= startDate && recordDate <= endDate;
   }).length;
 }
