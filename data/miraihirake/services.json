@@ -6725,6 +6725,49 @@
       "updated_at": "2026-09-27",
       "review_status": "published",
       "notes": "2026-09-27 検証部照合・守り部審査で published。県立図書館(svc-0016)と同じ県直営施設。「入場無料」と原文に明記。個人利用がデフォルトで、団体の場合のみ事前連絡が必要な運用のため、個人が直接利用できる常設展示の一部と判断"
+    },
+    {
+      "service_id": "svc-0151",
+      "service_name": "高校向け 金融経済教育指導教材(金融庁)",
+      "summary": "金融庁が高校の先生の意見を踏まえて作成した、新学習指導要領対応の金融経済教育指導教材(全7章・PowerPoint/PDF)。授業用だが一般の学習にも活用可能として無償公開",
+      "organization_name": "金融庁",
+      "organization_type": "国の機関",
+      "prefecture": "東京都",
+      "available_area": "全国(オンライン配布・地域制限の記載なし)",
+      "nationwide_available": true,
+      "okinawa_available": "○",
+      "okinawa_note": "全国向けのPowerPoint/PDF配布教材。地域限定の記載なし",
+      "online_available": true,
+      "offline_available": false,
+      "target_grade": [
+        "高校生"
+      ],
+      "target_conditions": [
+        "主に高校の授業向け(先生用教材)。原文に「実際の授業や先生方の準備のほか、一般の方の学習にもご活用ください」とあり一般の学習者も利用可能"
+      ],
+      "income_requirement": "なし",
+      "subject": [
+        "家庭",
+        "公民",
+        "全般"
+      ],
+      "support_type": [
+        "教材提供"
+      ],
+      "video_lesson": false,
+      "price_type": "完全無料",
+      "price": "0円(国の機関が公開するPowerPoint/PDF教材。料金・購入手続きの記載なし)",
+      "completely_free": true,
+      "application_method": "申込不要。公式サイトからPowerPoint・PDFを直接ダウンロード(全体版・各章版とも無料配布)",
+      "official_url": "https://www.fsa.go.jp/news/r3/sonota/20220317/20220317.html",
+      "application_url": "https://www.fsa.go.jp/news/r3/sonota/20220317/20220317.html",
+      "contact": "金融庁総合政策局総合政策課",
+      "recruitment_status": "常時募集",
+      "data_source": "https://www.fsa.go.jp/news/r3/sonota/20220317/20220317.html",
+      "last_verified": "2026-09-27",
+      "updated_at": "2026-09-27",
+      "review_status": "published",
+      "notes": "2026-09-27 検証部照合・守り部審査でpublished。国の機関が公開するPowerPoint/PDF教材のみでA類型(接触なし)のため安全階層の対象外。原文に明示的な「無料」表記はないが、料金・購入手続きの記載が一切ない政府公開資料であることを根拠とする(既存published のmext-kyufu・caa-shakai-tobira等と同種の扱い)。原文に「（注）教材の中で触れている家計管理、ライフプラン、資産形成、借金に関するシミュレーターサイトは公開終了いたしました」と明記(令和7年12月26日更新)されているため、シミュレーター副教材への言及・リンクは掲載しない。教材本体(PowerPoint/PDF)は引き続き公開中と原文で確認"
     }
   ]
 }
