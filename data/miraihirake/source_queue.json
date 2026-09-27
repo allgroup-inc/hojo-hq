@@ -280,6 +280,20 @@
       "url": "https://satsuki-yuuguregakkyu.jimdofree.com/",
       "robots_approved": false,
       "memo": "神奈川県座間・横浜拠点+オンライン教室(ZOOM)。かながわ子ども・子育て支援大賞奨励賞受賞団体。「参加費用は一切かかりません」と明記(WebSearch要約)。オンライン教室部門は対象学年のみで地域限定の記載なし(全国無料塾リスト由来)。県民会議由来ではない新規発掘源(ネオパレット全国無料塾リスト)|2026-09-23 WebSearchで公式URL確認・robots未監査"
+    },
+    {
+      "id": "caa-shakai-tobira",
+      "org": "消費者庁",
+      "url": "https://www.caa.go.jp/policies/policy/consumer_education/public_awareness/teaching_material/material_010/",
+      "robots_approved": false,
+      "memo": "高校生(若年者)向け消費者教育教材「社会への扉―12のクイズで学ぶ自立した消費者―」。PDFダウンロード可能・全国対応。国の機関のためA類型で実在確認容易。収集候補リストE表|2026-09-23 WebSearchで発見・robots未監査"
+    },
+    {
+      "id": "okimu-fureai",
+      "org": "沖縄県立博物館・美術館(おきみゅー)",
+      "url": "https://okimu.jp/museum/permanent/experience/",
+      "robots_approved": false,
+      "memo": "ふれあい体験室(無料ゾーン)。毎週土曜開催の体験プログラム。県立図書館(svc-0016)と同じ県直営施設で実在確認容易。収集候補リストE表|2026-09-23 WebSearchで発見・robots未監査"
     }
   ]
 }
