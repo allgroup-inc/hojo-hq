@@ -1,7 +1,7 @@
 # source_id: kotsuiji
 # url: https://www.kotsuiji.com/scholarship
 # org: 公益財団法人交通遺児育英会
-# fetched_at: 2026-09-23
+# fetched_at: 2026-09-27
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 奨学金で進学支援 | 公益財団法人 交通遺児育英会 

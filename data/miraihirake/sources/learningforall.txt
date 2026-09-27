@@ -1,7 +1,7 @@
 # source_id: learningforall
 # url: https://learningforall.or.jp/activity/
 # org: 認定NPO法人Learning for All
-# fetched_at: 2026-09-23
+# fetched_at: 2026-09-27
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 LFAの活動 - Learning for All &#8211; 子どもの貧困に、本質的解決を。 

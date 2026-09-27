@@ -1,7 +1,7 @@
 # source_id: coderdojo-jp
 # url: https://coderdojo.jp/
 # org: CoderDojo Japan
-# fetched_at: 2026-09-23
+# fetched_at: 2026-09-27
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 CoderDojo Japan - 子どものためのプログラミング道場 
@@ -591,20 +591,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  鎌ケ谷市で毎月第4日曜に開催
 
- 麹町@アドバンスト・ソフト (東京) 
-
- Scratch
-
- Webサイト
-
- PHP
-
- Java
-
- Python
-
- 千代田区で毎月開催
-
  末広町@アミュレット (東京) 
 
  Scratch
@@ -619,6 +605,20 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  千代田区秋葉原・末広町駅周辺で毎月開催
 
+ 麹町@アドバンスト・ソフト (東京) 
+
+ Scratch
+
+ Webサイト
+
+ PHP
+
+ Java
+
+ Python
+
+ 千代田区で毎月開催
+
  日本橋 (東京) 
 
  Scratch
@@ -632,32 +632,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
  Webサイト
 
  中央区晴海で毎月開催
-
- たまち (東京) 
-
- Scratch
-
- Hour of Code
-
- 電子工作
-
- Webサイト
-
- アプリ開発
-
- 港区JR田町駅周辺で毎月開催
-
- 品川港南 (東京) 
-
- Minecraft
-
- Scratch
-
- Webサイト
-
- アプリ開発
-
- 港区港南で毎月開催
 
  赤坂国際 (東京) 
 
@@ -676,6 +650,40 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  港区赤坂で隔週開催
 
+ 品川港南 (東京) 
+
+ Minecraft
+
+ Scratch
+
+ Webサイト
+
+ アプリ開発
+
+ 港区港南で毎月開催
+
+ たまち (東京) 
+
+ Scratch
+
+ Hour of Code
+
+ 電子工作
+
+ Webサイト
+
+ アプリ開発
+
+ 港区JR田町駅周辺で毎月開催
+
+ 神楽坂 (東京) 
+
+ Scratch
+
+ Minecraft
+
+ 新宿区で毎月開催
+
  新宿 (東京) 
 
  Scratch
@@ -687,14 +695,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
  Arduino
 
  電子工作
-
- 新宿区で毎月開催
-
- 神楽坂 (東京) 
-
- Scratch
-
- Minecraft
 
  新宿区で毎月開催
 
@@ -1258,12 +1258,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  磐田市で毎月開催
 
- 名古屋 (愛知) 
-
- Scratch
-
- 名古屋市中区で月2回開催
-
  天白 (愛知) 
 
  Scratch
@@ -1273,6 +1267,12 @@ CoderDojo Japan - 子どものためのプログラミング道場
  電子工作
 
  名古屋市天白区で月2回開催
+
+ 名古屋 (愛知) 
+
+ Scratch
+
+ 名古屋市中区で月2回開催
 
  瑞穂 (愛知) 
 
@@ -1517,16 +1517,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  岸和田市で毎月開催
 
- 豊中南 (大阪) 
-
- Scratch
-
- micro:bit
-
- 電子工作
-
- 豊中市大黒町で毎月開催
-
  とよなか (大阪) 
 
  Scratch
@@ -1536,6 +1526,16 @@ CoderDojo Japan - 子どものためのプログラミング道場
  micro:bit
 
  豊中市で毎月開催
+
+ 豊中南 (大阪) 
+
+ Scratch
+
+ micro:bit
+
+ 電子工作
+
+ 豊中市大黒町で毎月開催
 
  池田石橋 (大阪) 
 
@@ -1686,16 +1686,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  姫路市で毎月開催
 
- 明石 (兵庫) 
-
- Scratch
-
- Webサイト
-
- Arduino
-
- 明石市で毎月開催
-
  藤江 (兵庫) 
 
  Scratch
@@ -1709,6 +1699,16 @@ CoderDojo Japan - 子どものためのプログラミング道場
  Python
 
  明石市で不定期開催
+
+ 明石 (兵庫) 
+
+ Scratch
+
+ Webサイト
+
+ Arduino
+
+ 明石市で毎月開催
 
  淡路島 (兵庫) 
 
@@ -1781,18 +1781,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  赤穂郡上郡町で毎月開催
 
- 大和西大寺 (奈良) 
-
- Scratch
-
- Luanti
-
- KNIME
-
- AI
-
- 奈良市で不定期開催
-
  奈良 (奈良) 
 
  Scratch
@@ -1804,6 +1792,18 @@ CoderDojo Japan - 子どものためのプログラミング道場
  Minecraft
 
  奈良市で毎月開催
+
+ 大和西大寺 (奈良) 
+
+ Scratch
+
+ Luanti
+
+ KNIME
+
+ AI
+
+ 奈良市で不定期開催
 
  生駒 (奈良) 
 
@@ -2086,18 +2086,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  黒潮町で毎月開催
 
- 福岡 (福岡) 
-
- Scratch
-
- micro:bit
-
- Webサイト
-
- JavaScript
-
- 福岡市中央区天神で毎月開催
-
  香椎 (福岡) 
 
  Viscuit
@@ -2111,6 +2099,18 @@ CoderDojo Japan - 子どものためのプログラミング道場
  Ozobot
 
  福岡市東区で毎月開催
+
+ 福岡 (福岡) 
+
+ Scratch
+
+ micro:bit
+
+ Webサイト
+
+ JavaScript
+
+ 福岡市中央区天神で毎月開催
 
  ももち (福岡) 
 
