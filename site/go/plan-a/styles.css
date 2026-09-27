@@ -329,22 +329,37 @@ a:hover {
     padding: 0 var(--size-gutter-pc);
 }
 
-/* 主役のメッセージ: 毛筆書道風・力強い抽象表現 */
+/* 主役のメッセージ: 毛筆書道風・文字散在配置 */
 .hero-tagline {
+    display: inline-block;
+    margin: 0 0 var(--spacing-lg) -0.12em;
+    position: relative;
+}
+
+.hero-tagline .char {
     font-family: var(--font-heading);
     font-weight: 900;
     font-size: clamp(4.5rem, 2rem + 10vw, 10.5rem);
     line-height: 0.85;
-    letter-spacing: 0.08em;
-    margin: 0 0 var(--spacing-lg) -0.12em;
-    transform: skewX(-14deg) scaleY(1.2) rotate(-2deg);
-    transform-origin: left center;
     color: #000000;
     -webkit-text-stroke: 1.5px #000000;
     text-stroke: 1.5px #000000;
-    filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.2)) drop-shadow(-2px -4px 0 rgba(0, 0, 0, 0.1)) contrast(1.2) saturate(0.8);
-    -webkit-filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.2)) drop-shadow(-2px -4px 0 rgba(0, 0, 0, 0.1)) contrast(1.2) saturate(0.8);
+    filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.2)) drop-shadow(-2px -4px 0 rgba(0, 0, 0, 0.1));
+    -webkit-filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.2)) drop-shadow(-2px -4px 0 rgba(0, 0, 0, 0.1));
+    display: inline-block;
+    position: relative;
 }
+
+.hero-tagline .char-1 { transform: skewX(-16deg) scaleY(1.22) rotate(-4deg); }
+.hero-tagline .char-2 { transform: skewX(-12deg) scaleY(1.18) rotate(2deg); }
+.hero-tagline .char-3 { transform: skewX(-14deg) scaleY(1.2) rotate(-1deg); }
+.hero-tagline .char-4 { transform: skewX(-10deg) scaleY(1.25) rotate(3deg); }
+.hero-tagline .char-5 { transform: skewX(-15deg) scaleY(1.19) rotate(-2deg); }
+.hero-tagline .char-6 { transform: skewX(-13deg) scaleY(1.21) rotate(1deg); }
+.hero-tagline .char-7 { transform: skewX(-14deg) scaleY(1.2) rotate(-3deg); }
+.hero-tagline .char-8 { transform: skewX(-12deg) scaleY(1.23) rotate(2deg); }
+.hero-tagline .char-9 { transform: skewX(-15deg) scaleY(1.18) rotate(-4deg); }
+.hero-tagline .char-10 { transform: skewX(-11deg) scaleY(1.22) rotate(1deg); }
 
 .hero h1 {
     color: var(--color-on-accent);
@@ -413,11 +428,11 @@ a:hover {
     .hero-content {
         padding: 0 var(--size-gutter-mobile);
     }
-    .hero-tagline {
+    .hero-tagline .char {
         font-size: clamp(3rem, 14vw, 4.5rem); /* 390px幅で約3.46rem → 4rem */
-        letter-spacing: 0.08em;
+    }
+    .hero-tagline {
         margin-bottom: var(--spacing-md);
-        transform: skewX(-14deg) scaleY(1.18) rotate(-2deg);
     }
     .hero h1 {
         font-size: 1.25rem;
