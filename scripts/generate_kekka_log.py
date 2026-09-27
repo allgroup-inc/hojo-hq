@@ -47,6 +47,8 @@ POSITIVE_SAMPLE = os.path.join(ARTICLE_DIR, "L01_unei_log_20260918.md")  # 公�
 # ニドナシ#23: `[①-㊿]` と範囲指定すると U+2460〜U+32BF の全域=ひらがな・カタカナを含んで
 # しまい、日本語の本文すべてを不合格にした(9/25 無料ログ2枠とも生成失敗)。範囲は必ずブロック単位で書く
 CIRCLED_RE = re.compile(r"[①-⑳⓪-⓿㉑-㉟㊱-㊿]")
+# 素の内部ID: 「13」「L01」のようにカギ括弧で括った2桁ID、または L+2桁(無料ログのID)
+BARE_ID_RE = re.compile(r"「L?\d{2}」|(?<![A-Za-z0-9])L\d{2}(?![0-9])")
 
 
 def circled_to_int(ch: str):
@@ -126,6 +128,9 @@ def guard_log(text: str, allowed: set):
             problems.append(f"名義分離違反: {ng}")
     if CIRCLED_RE.search(text):
         problems.append("内部ID(丸数字)は読者に通じない。記事名で書く")
+    # 素の内部ID(「13」「L01」等。ニドナシ#24: 記事別ビューのfactsがID鍵のままでL02に混入)
+    if BARE_ID_RE.search(text):
+        problems.append("内部ID(「13」「L01」等)は読者に通じない。記事名で書く")
     return problems
 
 
@@ -151,6 +156,8 @@ def self_test() -> int:
             fails.append(f"丸数字を見逃し: {ch}")
     negatives = {
         "丸数字": body + "\n⑫の記事が伸びた",
+        "素のID(括弧)": body + "\n「13」が25ビュー",
+        "素のID(L)": body + "\nL01の末尾の導線",
         "名義分離": body + "\n小柳さんが決めた",
         "リンク": body + "\nhttps://example.com",
         "禁止語": body + "\n必ず伸びる",
@@ -169,7 +176,7 @@ def self_test() -> int:
         for f in fails:
             print(f"self-test NG: {f}", file=sys.stderr)
         return 1
-    print("self-test OK: 正例1件通過・負例4件検知・丸数字9文字検知・かな非反応")
+    print(f"self-test OK: 正例1件通過・負例{len(negatives)}件検知・丸数字9文字検知・かな非反応")
     return 0
 
 
@@ -180,11 +187,22 @@ def build_week_facts(topics=None):
     weeks = kpi.get("weeks", [])
     latest = weeks[-1] if weeks else {}
     prev = weeks[-2] if len(weeks) >= 2 else {}
-    facts["今週の記事別ビュー"] = latest.get("note", {}).get("views_by_article", {})
+    titles = article_titles(kpi, topics if topics is not None else load_topics())
+    # 記事別の数字はID鍵のまま渡さない(ニドナシ#24: 「13」が25ビュー、と読者に通じない書き方で出力された)
+    def by_title(d):
+        return {titles.get(str(k), f"記事名未登録({k})"): v for k, v in (d or {}).items()}
+    facts["今週の記事別ビュー"] = by_title(latest.get("note", {}).get("views_by_article"))
+    facts["今週の記事別スキ"] = by_title(latest.get("note", {}).get("likes_by_article"))
     facts["前週の累計ビュー"] = prev.get("note", {}).get("total_views")
     facts["今週の週次メモ(実測の文脈)"] = latest.get("memo", "")
     facts["週番号"] = facts["初公開からの日数"] // 7 + 1
-    titles = article_titles(kpi, topics if topics is not None else load_topics())
+    # X体験共有の現在値(メモの要約で方向を誤読させない。#24: 朝へ移設したのに「朝→深夜」と逆に書かれた)
+    xlog = gx.load_json(gx.LOG_PATH, {"posts": []})
+    posts = xlog.get("posts") if isinstance(xlog, dict) else xlog
+    dates = sorted(p.get("date") or p.get("posted_at", "")[:10] for p in (posts or []) if isinstance(p, dict))
+    facts["X体験共有の投稿枠(現在)"] = "毎週月曜・木曜の朝7〜9時(日本時間)。2026-09-21にJST夜の枠から朝へ移設"
+    facts["X体験共有の直近投稿日"] = dates[-1] if dates else None
+    facts["X体験共有の投稿回数(累計)"] = len(dates)
     return expand_all(facts, titles)
 
 
