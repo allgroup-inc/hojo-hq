@@ -295,6 +295,13 @@
       "org": "沖縄県立博物館・美術館(おきみゅー)",
       "checked_at": "2026-09-27",
       "robots_allows": true
+    },
+    {
+      "id": "fsa-kyouiku",
+      "url": "https://www.fsa.go.jp/teach/kyouiku.html",
+      "org": "金融庁",
+      "checked_at": "2026-09-27",
+      "robots_allows": true
     }
   ]
 }
