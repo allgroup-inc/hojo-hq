@@ -6641,6 +6641,90 @@
       "updated_at": "2026-09-23",
       "review_status": "published",
       "notes": "2026-09-23 検証部照合・守り部審査で published。あしなが育英会(svc-0146)と同型の資金支援のみ(対面接触なし)のため安全階層の対象外。原文に「個人に対して、メールやラインおよびフェイスブック等での勧誘は一切行っておりません」と明記あり(掲載基準§1-5)。貸与中心で「完全無料」ではないためprice_typeは条件付き無料、対象が交通事故遺児等に限定される事実をtarget_conditionsに明記"
+    },
+    {
+      "service_id": "svc-0149",
+      "service_name": "社会への扉―12のクイズで学ぶ自立した消費者―(消費者庁)",
+      "summary": "消費者庁が公開する高校生(若年者)向け消費者教育教材。生徒用教材・教師用解説書・特別支援学校用教材をPDFで無償公開",
+      "organization_name": "消費者庁",
+      "organization_type": "国の機関",
+      "prefecture": "東京都",
+      "available_area": "全国(オンライン配布・地域制限の記載なし)",
+      "nationwide_available": true,
+      "okinawa_available": "○",
+      "okinawa_note": "全国向けのPDF配布教材。地域限定の記載なし",
+      "online_available": true,
+      "offline_available": false,
+      "target_grade": [
+        "高校生"
+      ],
+      "target_conditions": [
+        "主に高校生向け。適切な指導があれば若年者を中心に幅広い世代で活用可能(原文)"
+      ],
+      "income_requirement": "なし",
+      "subject": [
+        "社会",
+        "全般"
+      ],
+      "support_type": [
+        "教材提供"
+      ],
+      "video_lesson": true,
+      "price_type": "完全無料",
+      "price": "0円(国の機関が公開するPDF教材。料金・購入手続きの記載なし)",
+      "completely_free": true,
+      "application_method": "申込不要。公式サイトからPDF・動画講座を直接閲覧",
+      "official_url": "https://www.caa.go.jp/policies/policy/consumer_education/public_awareness/teaching_material/material_010/",
+      "application_url": "https://www.caa.go.jp/policies/policy/consumer_education/public_awareness/teaching_material/material_010/",
+      "contact": "消費者庁",
+      "recruitment_status": "常時募集",
+      "data_source": "https://www.caa.go.jp/policies/policy/consumer_education/public_awareness/teaching_material/material_010/",
+      "last_verified": "2026-09-27",
+      "updated_at": "2026-09-27",
+      "review_status": "published",
+      "notes": "2026-09-27 検証部照合・守り部審査で published。国の機関が公開するPDF教材・動画講座のみでA類型(接触なし)のため安全階層の対象外。原文に明示的な「無料」表記はないが、料金・購入手続きの記載が一切ない政府公開資料であることを根拠とする(既存published のmext-kyufu等と同種の扱い)"
+    },
+    {
+      "service_id": "svc-0150",
+      "service_name": "おきみゅー ふれあい体験室(無料ゾーン)",
+      "summary": "沖縄県立博物館・美術館の常設展示内にある無料体験室。体験キットで沖縄の自然・文化を五感で学べる",
+      "organization_name": "沖縄県立博物館・美術館(おきみゅー)",
+      "organization_type": "公的機関",
+      "prefecture": "沖縄県",
+      "available_area": "那覇市おもろまち3-1-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面施設",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "子ども向け(常設展示と連動した体験キット)。学年区分の記載なし"
+      ],
+      "income_requirement": "なし",
+      "subject": [
+        "理科",
+        "全般",
+        "探究"
+      ],
+      "support_type": [
+        "体験・イベント"
+      ],
+      "group_lesson": true,
+      "price_type": "完全無料",
+      "price": "0円(入場無料と原文に明記)",
+      "completely_free": true,
+      "frequency": "9:00〜17:30(毎週月曜休室、常設展示の一部として常時利用可)",
+      "application_method": "予約不要。団体利用(40名定員)の場合のみ情報センターへ事前連絡",
+      "official_url": "https://okimu.jp/museum/permanent/experience/",
+      "application_url": "https://okimu.jp/museum/permanent/experience/",
+      "contact": "沖縄県立博物館・美術館 情報センター 098-941-1187",
+      "recruitment_status": "常時募集",
+      "data_source": "https://okimu.jp/museum/permanent/experience/",
+      "last_verified": "2026-09-27",
+      "updated_at": "2026-09-27",
+      "review_status": "published",
+      "notes": "2026-09-27 検証部照合・守り部審査で published。県立図書館(svc-0016)と同じ県直営施設。「入場無料」と原文に明記。個人利用がデフォルトで、団体の場合のみ事前連絡が必要な運用のため、個人が直接利用できる常設展示の一部と判断"
     }
   ]
 }
