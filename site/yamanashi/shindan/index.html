@@ -212,7 +212,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
     var sel = h("select", {id:"muni", "aria-label":"お住まいの市町村"});
     sel.appendChild(h("option", {value:"", text:"選んでください"}));
     MUNIS.forEach(function(m){ sel.appendChild(h("option", {value:m, text:m})); });
-    sel.appendChild(h("option", {value:"県外", text:"沖縄県外にお住まい"}));
+    sel.appendChild(h("option", {value:"県外", text:"山梨県外にお住まい"}));
     if (state.municipality) sel.value = state.municipality;
     // 選んだ瞬間に次へ(タップ1回を削減)。空のまま進めない(勝手に県外にしない)
     function goMuni(){ if (!sel.value) return; state.municipality = sel.value; state.step = 1; render(); }
@@ -307,7 +307,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var lines = ["【わたしの診断結果】対象の可能性 " + rs.length + "件(もらいわすれ堂)"];
         rs.slice(0, 8).forEach(function(r){ lines.push("・" + r.item.name + "(可能性" + r.likelihood + ")"); });
         if (rs.length > 8) lines.push("…ほか" + (rs.length - 8) + "件");
-        lines.push("くわしく見る: https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/");
+        lines.push("くわしく見る: https://allgroup-inc.github.io/hojo-hq/yamanashi/shindan/");
         return lines.join("\n");
       }
       if (rs.length > 0) {
@@ -315,8 +315,8 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var shareBtn = h("button", {text:"家族に教える(共有)"});
         shareBtn.addEventListener("click", function(){
           if (window.fgTrack) window.fgTrack("share_click");
-          var url = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/";
-          var text = "「もらいわすれ堂」で沖縄の給付金・手当のもらい忘れを3分で診断できるよ(無料・匿名)";
+          var url = "https://allgroup-inc.github.io/hojo-hq/yamanashi/shindan/";
+          var text = "「もらいわすれ堂」で山梨の給付金・手当のもらい忘れを3分で診断できるよ(無料・匿名)";
           if (navigator.share) { navigator.share({title:"もらいわすれ堂|3分でもらい忘れ診断", text:text, url:url}).catch(function(){}); }
           else if (navigator.clipboard) { navigator.clipboard.writeText(text + " " + url); shareBtn.textContent = "リンクをコピーしました!"; }
         });

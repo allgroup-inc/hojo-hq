@@ -265,9 +265,22 @@ def build_shindan():
     # 準備シート53ページを生成済みのため、結果カードの準備シートリンクは沖縄版のまま生かす(第2段階・2026-09-20)
     s = must_replace(s, 'text:"💬 受け取れた金額をLINEで報告する(匿名・任意)"',
                      'text:"💬 受け取れたことを報告する(匿名・任意)"', "houkoku link text")
+    # 共有・持ち出しテキストの沖縄残存を差し替える(2026-09-27 点検で発見。
+    # 山梨の利用者が家族に送ったリンクが沖縄版診断へ飛んでいた)
+    assert s.count('https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/') == 2, "共有URLの箇所数が想定と違う"
+    s = s.replace('https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/',
+                  f'{Y_BASE_URL}shindan/')
+    s = must_replace(s, '「もらいわすれ堂」で沖縄の給付金・手当のもらい忘れを3分で診断できるよ',
+                     '「もらいわすれ堂」で山梨の給付金・手当のもらい忘れを3分で診断できるよ', "share text")
+    s = must_replace(s, 'text:"沖縄県外にお住まい"', 'text:"山梨県外にお住まい"', "県外option")
     os.makedirs(os.path.join(OUT,"shindan"), exist_ok=True)
     open(os.path.join(OUT,"shindan","index.html"),"w",encoding="utf-8").write(s)
-    shutil.copy(os.path.join(SRC,"shindan","logic.js"), os.path.join(OUT,"shindan","logic.js"))
+    # 判定ロジックも沖縄版からの変換。area === "沖縄県" のままだと山梨県の制度(5件)が
+    # 診断で1件もヒットしない(2026-09-27 点検で発見)
+    lg = open(os.path.join(SRC,"shindan","logic.js"),encoding="utf-8").read()
+    lg = must_replace(lg, 'area === "沖縄県"', 'area === "山梨県"', "logic.js 県判定")
+    lg = lg.replace("地域: 全国 / 沖縄県 / 回答した市町村のみ", "地域: 全国 / 山梨県 / 回答した市町村のみ")
+    open(os.path.join(OUT,"shindan","logic.js"),"w",encoding="utf-8").write(lg)
 
 def build_static():
     # 受給報告

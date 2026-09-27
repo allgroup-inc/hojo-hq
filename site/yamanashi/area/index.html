@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>山梨県 市町村別の給付金・手当まとめ(27市町村)|もらいわすれ堂</title>
-<meta name="description" content="甲府市・甲斐市・南アルプス市・富士吉田市など山梨県の市町村ごとに、児童手当・出産育児一時金・ひとり親支援などの給付金・手当をまとめて確認できます。公式ページと照合して掲載(市町村独自の制度は準備中)。無料・匿名の3分診断つき。">
+<meta name="description" content="甲府市・甲斐市・南アルプス市・富士吉田市など山梨県の市町村ごとに、児童手当・出産育児一時金・ひとり親支援などの給付金・手当をまとめて確認できます。公式ページと照合して掲載。市町村独自の制度も確認できたところから順次掲載中。無料・匿名の3分診断つき。">
 <link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/yamanashi/area/">
 <meta property="og:title" content="山梨県 市町村別の給付金・手当まとめ(27市町村)|もらいわすれ堂">
-<meta property="og:description" content="甲府市・甲斐市・南アルプス市・富士吉田市など山梨県の市町村ごとに、児童手当・出産育児一時金・ひとり親支援などの給付金・手当をまとめて確認できます。公式ページと照合して掲載(市町村独自の制度は準備中)。無料・匿名の3分診断つき。">
+<meta property="og:description" content="甲府市・甲斐市・南アルプス市・富士吉田市など山梨県の市町村ごとに、児童手当・出産育児一時金・ひとり親支援などの給付金・手当をまとめて確認できます。公式ページと照合して掲載。市町村独自の制度も確認できたところから順次掲載中。無料・匿名の3分診断つき。">
 <meta property="og:url" content="https://allgroup-inc.github.io/hojo-hq/yamanashi/area/">
 <meta property="og:type" content="article">
 <meta property="og:image" content="https://allgroup-inc.github.io/hojo-hq/yamanashi/assets/ogp.jpg">
@@ -41,6 +41,8 @@ ul.seidolist{list-style:none;columns:1}
 ul.seidolist li{margin:0;border-bottom:1px dashed var(--fg-line);break-inside:avoid}
 ul.seidolist a{display:block;padding:8px 0}
 ul.areas a{display:inline-block;padding:8px 4px}
+ul.areas .lbadge{font-size:.72rem;font-weight:700;background:#F2B705;color:#3B322B;border-radius:8px;padding:1px 7px;margin-left:5px;white-space:nowrap}
+.lastmuni{background:#EFF5F0;border:1px solid #D5E5DA;border-radius:12px;padding:10px 14px;margin:12px 0;font-size:.95rem;display:none}
 .card a{display:inline-block;padding:4px 0;white-space:nowrap}
 @media(min-width:900px){ul.seidolist{columns:2;column-gap:28px}}
 .cardgrid{display:grid;gap:14px}
@@ -64,31 +66,32 @@ ul.areas a{display:inline-block;padding:8px 4px}
   </nav>
 </header>
 <div class="wrap">
-<h1>市町村別 給付金・手当まとめ</h1><p class="note">お住まいの市町村を選んでください。場面から探したい方は<a href="../life/">ライフイベント別の一覧</a>もどうぞ。</p><p class="note">いま掲載しているのは全国共通の国の制度です。各市町村独自の制度は、掲載のご了解を確認できたところから順に追加します(準備中)。</p><ul class="areas"><li><a href="kofu/">甲府市</a></li>
+<h1>市町村別 給付金・手当まとめ</h1><p class="note">お住まいの市町村を選んでください。場面から探したい方は<a href="../life/">ライフイベント別の一覧</a>もどうぞ。</p><p class="note">どの市町村でも、全国共通の国の制度がご覧いただけます。「独自◯件」の表示がある市町村(8市町)は、その市町村だけの制度も掲載中です。ほかの市町村の独自制度も、掲載のご了解を確認できたところから順に追加します。</p><p class="lastmuni" id="lastmuni"></p>
+<script>(function(){try{var M={"甲府市": "kofu", "富士吉田市": "fujiyoshida", "都留市": "tsuru", "山梨市": "yamanashi-shi", "大月市": "otsuki", "韮崎市": "nirasaki", "南アルプス市": "minami-alps", "北杜市": "hokuto", "甲斐市": "kai", "笛吹市": "fuefuki", "上野原市": "uenohara", "甲州市": "koshu", "中央市": "chuo", "市川三郷町": "ichikawamisato", "早川町": "hayakawa", "身延町": "minobu", "南部町": "nanbu", "富士川町": "fujikawa", "昭和町": "showa", "道志村": "doshi", "西桂町": "nishikatsura", "忍野村": "oshino", "山中湖村": "yamanakako", "鳴沢村": "narusawa", "富士河口湖町": "fujikawaguchiko", "小菅村": "kosuge", "丹波山村": "tabayama"};var a=JSON.parse(localStorage.getItem("fg_shindan_answers")||"null");if(!a||!a.municipality||!M[a.municipality])return;var el=document.getElementById("lastmuni");el.innerHTML="前回の診断でお選びの<a href=\""+M[a.municipality]+"/\"><b>"+a.municipality+"</b>のページ</a>からどうぞ。";el.style.display="block";}catch(e){}})();</script><ul class="areas"><li><a href="kofu/">甲府市</a></li>
 <li><a href="fujiyoshida/">富士吉田市</a></li>
-<li><a href="tsuru/">都留市</a></li>
+<li><a href="tsuru/">都留市<span class="lbadge">独自3件</span></a></li>
 <li><a href="yamanashi-shi/">山梨市</a></li>
 <li><a href="otsuki/">大月市</a></li>
 <li><a href="nirasaki/">韮崎市</a></li>
-<li><a href="minami-alps/">南アルプス市</a></li>
-<li><a href="hokuto/">北杜市</a></li>
-<li><a href="kai/">甲斐市</a></li>
+<li><a href="minami-alps/">南アルプス市<span class="lbadge">独自2件</span></a></li>
+<li><a href="hokuto/">北杜市<span class="lbadge">独自2件</span></a></li>
+<li><a href="kai/">甲斐市<span class="lbadge">独自3件</span></a></li>
 <li><a href="fuefuki/">笛吹市</a></li>
-<li><a href="uenohara/">上野原市</a></li>
+<li><a href="uenohara/">上野原市<span class="lbadge">独自3件</span></a></li>
 <li><a href="koshu/">甲州市</a></li>
 <li><a href="chuo/">中央市</a></li>
 <li><a href="ichikawamisato/">市川三郷町</a></li>
-<li><a href="hayakawa/">早川町</a></li>
+<li><a href="hayakawa/">早川町<span class="lbadge">独自3件</span></a></li>
 <li><a href="minobu/">身延町</a></li>
 <li><a href="nanbu/">南部町</a></li>
 <li><a href="fujikawa/">富士川町</a></li>
-<li><a href="showa/">昭和町</a></li>
+<li><a href="showa/">昭和町<span class="lbadge">独自2件</span></a></li>
 <li><a href="doshi/">道志村</a></li>
 <li><a href="nishikatsura/">西桂町</a></li>
 <li><a href="oshino/">忍野村</a></li>
 <li><a href="yamanakako/">山中湖村</a></li>
 <li><a href="narusawa/">鳴沢村</a></li>
-<li><a href="fujikawaguchiko/">富士河口湖町</a></li>
+<li><a href="fujikawaguchiko/">富士河口湖町<span class="lbadge">独自1件</span></a></li>
 <li><a href="kosuge/">小菅村</a></li>
 <li><a href="tabayama/">丹波山村</a></li></ul><a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>
 <div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://allgroup-inc.github.io/hojo-hq/yamanashi/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: 2026-09-24 08:22 / もらいわすれ堂 山梨版(運営: 株式会社フクギイロ)</div>
