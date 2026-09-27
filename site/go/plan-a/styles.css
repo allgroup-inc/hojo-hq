@@ -329,22 +329,23 @@ a:hover {
     padding: 0 var(--size-gutter-pc);
 }
 
-/* 主役のメッセージ: 画面からあふれる大書 */
+/* 主役のメッセージ: 画面からあふれる大書（アーティスティック強調） */
 .hero-tagline {
     font-family: var(--font-heading);
     font-weight: 900;
-    font-size: clamp(3.25rem, 1.2rem + 8.5vw, 8.5rem);
-    line-height: 1.02;
-    letter-spacing: -0.02em;
-    margin: 0 0 var(--spacing-lg) -0.04em;
-    transform: skewX(-7deg);
-    transform-origin: left bottom;
+    font-size: clamp(4.5rem, 2rem + 10vw, 10.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    margin: 0 0 var(--spacing-lg) -0.08em;
+    transform: skewX(-12deg) scaleY(1.15);
+    transform-origin: left center;
     color: var(--color-on-accent);
-    background: linear-gradient(100deg, #FFFFFF 0%, #FFFBF4 45%, #FFD95A 100%);
+    background: linear-gradient(115deg, #FFE8CC 0%, #FFFBF4 30%, #FFD95A 70%, #F2B705 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.35));
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 8px rgba(248, 136, 0, 0.3));
+    -webkit-filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 8px rgba(248, 136, 0, 0.3));
 }
 
 .hero h1 {
@@ -415,9 +416,10 @@ a:hover {
         padding: 0 var(--size-gutter-mobile);
     }
     .hero-tagline {
-        font-size: clamp(2.5rem, 12.5vw, 3.75rem); /* 390px幅で約3.05rem */
+        font-size: clamp(3rem, 14vw, 4.5rem); /* 390px幅で約3.46rem → 4rem */
         letter-spacing: -0.04em;
         margin-bottom: var(--spacing-md);
+        transform: skewX(-12deg) scaleY(1.12);
     }
     .hero h1 {
         font-size: 1.25rem;
