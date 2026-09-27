@@ -330,10 +330,7 @@ a:hover {
 }
 
 /* 主役のメッセージ: 画面からあふれる大書 */
-.hero-content::before {
-    content: "沖縄の力強さ、\A世界へ";
-    white-space: pre; /* 「沖縄の力強さ、」を1行で保つ(1行7字で幅を設計) */
-    display: block;
+.hero-tagline {
     font-family: var(--font-heading);
     font-weight: 900;
     font-size: clamp(3.25rem, 1.2rem + 8.5vw, 8.5rem);
@@ -417,7 +414,7 @@ a:hover {
     .hero-content {
         padding: 0 var(--size-gutter-mobile);
     }
-    .hero-content::before {
+    .hero-tagline {
         font-size: clamp(2.5rem, 12.5vw, 3.75rem); /* 390px幅で約3.05rem */
         letter-spacing: -0.04em;
         margin-bottom: var(--spacing-md);
