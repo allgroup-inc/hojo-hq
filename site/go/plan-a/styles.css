@@ -329,23 +329,21 @@ a:hover {
     padding: 0 var(--size-gutter-pc);
 }
 
-/* 主役のメッセージ: 画面からあふれる大書（アーティスティック強調） */
+/* 主役のメッセージ: 毛筆書道風・力強い抽象表現 */
 .hero-tagline {
     font-family: var(--font-heading);
     font-weight: 900;
     font-size: clamp(4.5rem, 2rem + 10vw, 10.5rem);
-    line-height: 0.95;
-    letter-spacing: -0.04em;
-    margin: 0 0 var(--spacing-lg) -0.08em;
-    transform: skewX(-12deg) scaleY(1.15);
+    line-height: 0.85;
+    letter-spacing: 0.08em;
+    margin: 0 0 var(--spacing-lg) -0.12em;
+    transform: skewX(-14deg) scaleY(1.2) rotate(-2deg);
     transform-origin: left center;
-    color: var(--color-on-accent);
-    background: linear-gradient(115deg, #FFE8CC 0%, #FFFBF4 30%, #FFD95A 70%, #F2B705 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 8px rgba(248, 136, 0, 0.3));
-    -webkit-filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 8px rgba(248, 136, 0, 0.3));
+    color: #000000;
+    -webkit-text-stroke: 1.5px #000000;
+    text-stroke: 1.5px #000000;
+    filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.2)) drop-shadow(-2px -4px 0 rgba(0, 0, 0, 0.1)) contrast(1.2) saturate(0.8);
+    -webkit-filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, 0.2)) drop-shadow(-2px -4px 0 rgba(0, 0, 0, 0.1)) contrast(1.2) saturate(0.8);
 }
 
 .hero h1 {
@@ -417,9 +415,9 @@ a:hover {
     }
     .hero-tagline {
         font-size: clamp(3rem, 14vw, 4.5rem); /* 390px幅で約3.46rem → 4rem */
-        letter-spacing: -0.04em;
+        letter-spacing: 0.08em;
         margin-bottom: var(--spacing-md);
-        transform: skewX(-12deg) scaleY(1.12);
+        transform: skewX(-14deg) scaleY(1.18) rotate(-2deg);
     }
     .hero h1 {
         font-size: 1.25rem;
