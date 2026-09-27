@@ -645,9 +645,11 @@
       "genre": "実録ログ(無料)",
       "title_hint": "実録・第8週 — 累計94ビュー、スキ18の現在地と、バグで2日遅れた週次ログ",
       "paid_price": 0,
-      "status": "log_drafted",
+      "status": "published",
       "drafted_at": "2026-09-27",
-      "note": "週次無料ログ(議事_20260916 案1)。公開後は publish-record --id L02"
+      "note": "週次無料ログ(議事_20260916 案1)。公開後は publish-record --id L02",
+      "published_url": "https://note.com/kekka_mag/n/NXXXXXXX",
+      "published_at": "2026-09-27"
     }
   ]
 }
