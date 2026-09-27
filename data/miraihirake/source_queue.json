@@ -299,8 +299,8 @@
       "id": "fsa-kyouiku",
       "org": "金融庁",
       "url": "https://www.fsa.go.jp/teach/kyouiku.html",
-      "robots_approved": false,
-      "memo": "金融経済教育について。高校向け金融経済教育指導教材の紹介ページ。シミュレーター副教材は2025年12月末に非公開予定との情報があり要確認(既に終了の可能性)。収集候補リストE表|2026-09-27 WebSearchで発見・robots未監査"
+      "robots_approved": true,
+      "memo": "金融経済教育について。高校向け金融経済教育指導教材の紹介ページ。シミュレーター副教材は2025年12月末に非公開予定との情報があり要確認(既に終了の可能性)。収集候補リストE表|2026-09-27 WebSearchで発見・robots未監査|robots承認2026-09-27(robots_report.json実測。単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
     }
   ]
 }
