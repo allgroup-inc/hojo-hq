@@ -19,6 +19,7 @@ on:
       - "scripts/fetch_fukugiiro_extra.py"
       - "scripts/fg_seo.py"
       - "scripts/kensho_fukugiiro.py"
+      - "scripts/kensho_yamanashi.py"
       - "scripts/yamanashi/**"
       - "scripts/selfcheck_moradou.py"
       - "tests/selfcheck_baseline.json"
@@ -51,6 +52,7 @@ on:
       - "scripts/fetch_fukugiiro_extra.py"
       - "scripts/fg_seo.py"
       - "scripts/kensho_fukugiiro.py"
+      - "scripts/kensho_yamanashi.py"
       - "scripts/yamanashi/**"
       - "scripts/selfcheck_moradou.py"
       - "tests/selfcheck_baseline.json"
@@ -104,7 +106,9 @@ jobs:
       # 突合スクリプトはCIで一度も実行されておらず、バグが夜間の収集でしか出てこなかった。
       # 文字コードの取り違えとエラーの読み分けはネットワーク無しで検証できる
       - name: 突合スクリプトの自己テスト(文字コード・エラー種別)
-        run: python scripts/kensho_fukugiiro.py --self-test
+        run: |
+          python scripts/kensho_fukugiiro.py --self-test
+          python scripts/kensho_yamanashi.py --self-test
 
       # このリポジトリが実際に繰り返した失敗だけを見張る(CLAUDE.md 再発防止メモ)。
       # 既知の負債は tests/selfcheck_baseline.json で許容し、新しく増えた分だけ止める。

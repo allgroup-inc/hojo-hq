@@ -75,6 +75,14 @@ h1,h2,h3{text-wrap:balance}
 .scard h3{font-size:1rem;margin-bottom:4px}
 .scard p{font-size:.88rem;color:var(--muted);text-align:left;margin:0}
 .scard .amt{color:var(--shu);font-weight:700}
+.scard .status{display:inline-block;font-size:.78rem;font-weight:700;border-radius:8px;padding:2px 8px;margin-top:8px;background:#F6EADB;color:#8B6A3C}
+.scard .status.ok{background:#EFF5F0;color:#1F4534}
+.scard a{font-size:.85rem}
+.stats{display:grid;gap:14px;max-width:520px;margin:0 auto}
+@media(min-width:700px){.stats{grid-template-columns:1fr 1fr;max-width:720px}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);text-align:center}
+.stat .num{font-family:"Shippori Mincho",serif;font-size:2rem;font-weight:700;color:var(--shu)}
+.stat .lbl{font-size:.9rem;color:var(--muted);margin-top:4px}
 .promise{list-style:none;max-width:560px;margin:0 auto;text-align:left}
 .promise li{padding:10px 0 10px 30px;position:relative;border-bottom:1px dashed var(--line)}
 .promise li::before{content:"✓";position:absolute;left:4px;color:var(--shu);font-weight:800}
@@ -285,6 +293,7 @@ footer a{color:var(--ki)}
     <p class="sub">国や市町村の給付金・手当には、<span style="white-space:nowrap">「申請しないと受け取れない」</span>ものがたくさんあります。<br>あなたが受け取るまで、いっしょに。</p>
     <a class="btn" href="shindan/" onclick="if(window.fgTrack)fgTrack('lp_cta_hero')">私の“もらい忘れ”を<span style="white-space:nowrap">3分で調べる(無料)</span></a>
     <p class="note" style="margin-top:10px">匿名 ・ 登録不要 ・ 名前や住所は聞きません</p>
+    <p id="resume-link" style="display:none;margin-top:10px"><a href="shindan/?resume=1">前回の診断結果をもう一度見る →</a></p>
   </div>
 </div>
 
@@ -347,15 +356,34 @@ footer a{color:var(--ki)}
 
 <section>
   <div class="wrap">
+    <span class="eyebrow">実 績</span>
+    <h2>確認済みの制度だけを、<br>掲載しています</h2>
+    <div class="stats">
+      <div class="stat">
+        <span class="num" id="seido-count">—</span>
+        <div class="lbl">公式ページと照合済みの制度</div>
+        <div class="note" id="seido-trust" style="margin-top:6px;font-size:.8rem;text-align:center"></div>
+      </div>
+      <div class="stat" id="jukyu-stat" style="display:none">
+        <span class="num" id="jukyu-count">—</span>
+        <div class="lbl">「受け取れた」のご報告(検証済み)</div>
+        <div class="note" style="margin-top:6px;font-size:.8rem;text-align:center">利用者からの受け取り報告のうち、公式の制度と照らし合わせて確認できた世帯数</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
     <span class="eyebrow">掲載している制度</span>
     <h2>たとえば、こんな制度を<br>掲載しています</h2>
-    <div class="cards">
+    <div class="cards" id="seido-cards">
       <div class="scard"><h3>出産・子育て応援給付金</h3><p><span class="amt">計10万円相当</span>(妊娠時5万+出産時5万)。面談とセットの申請制です(要確認)</p></div>
       <div class="scard"><h3>高等教育の修学支援新制度</h3><p>大学等の<span class="amt">授業料減免+給付型奨学金</span>。多子世帯は所得制限なく対象になる場合があります(要確認)</p></div>
       <div class="scard"><h3>国民健康保険料の軽減・減免</h3><p>所得に応じて<span class="amt">7割/5割/2割</span>の軽減。失業・災害時の減免もあります(要確認)</p></div>
       <div class="scard"><h3>被災者生活再建支援金</h3><p>災害で住まいに大きな被害を受けたとき<span class="amt">最大300万円</span>(要確認)</p></div>
     </div>
-    <p class="note">現在は全国共通の国の制度を掲載し、それぞれに<a href="kit/">申請準備シート(持ち物・窓口での言い方)</a>を用意しています。山梨県・27市町村の制度は、各公式サイトの利用条件を確認しながら順次追加します(<a href="area/">市町村ページはこちら</a>)。</p>
+    <p class="note" id="seido-note">全国共通の国の制度に加えて、山梨県と市町村の独自制度も掲載しています。すべての制度に<a href="kit/">申請準備シート(持ち物・窓口での言い方)</a>つき。ほかの市町村の制度も、各公式サイトの利用条件を確認できたところから順次追加します(<a href="area/">市町村ページはこちら</a>)。</p>
     <a class="btn" href="life/" style="margin-top:12px;background:#fff;color:var(--shu);border:2px solid var(--shu)">ライフイベント別の一覧を見る</a>
   </div>
 </section>
@@ -419,5 +447,61 @@ footer a{color:var(--ki)}
 </script>
 <script src="analytics-config.js"></script>
 <script src="assets/fg-analytics.js"></script>
+<script>
+(function(){
+  /* 沖縄版トップと同じ仕組み(2026-09-27 移植)。データは山梨版のみを見る */
+  var YMN = ["甲府市","富士吉田市","都留市","山梨市","大月市","韮崎市","南アルプス市","北杜市","甲斐市","笛吹市","上野原市","甲州市","中央市","市川三郷町","早川町","身延町","南部町","富士川町","昭和町","道志村","西桂町","忍野村","山中湖村","鳴沢村","富士河口湖町","小菅村","丹波山村","県外"];
+  try {
+    /* 保存キーは沖縄版と共通のため、山梨の選択肢で答えた記録のときだけ再開リンクを出す */
+    var a = JSON.parse(localStorage.getItem("fg_shindan_answers") || "null");
+    if (a && a.municipality && YMN.indexOf(a.municipality) >= 0) {
+      document.getElementById("resume-link").style.display = "block";
+    }
+  } catch(e){}
+  fetch("../data/yamanashi/seido.json").then(function(r){return r.json()}).then(function(db){
+    var items = db.items || [];
+    var total = db.count || items.length;
+    var ver = items.filter(function(it){return it.verified === true}).length;
+    document.getElementById("seido-count").textContent = ver;
+    var trust = document.getElementById("seido-trust");
+    if (trust && total > 0) {
+      trust.textContent = "掲載" + total + "件のうち" + Math.round(ver / total * 100) + "%を公式ページと照合済み。残りも順次照合しています";
+    }
+    if (total > 0) {
+      var box = document.getElementById("seido-cards");
+      box.innerHTML = "";
+      /* 照合済みを優先して見せる(確認済みの安心感を前面に) */
+      var sorted = items.slice().sort(function(x,y){return (y.verified?1:0) - (x.verified?1:0)});
+      sorted.slice(0,4).forEach(function(it){
+        var d = document.createElement("div");
+        d.className = "scard";
+        var h = document.createElement("h3"); h.textContent = it.name;
+        var p = document.createElement("p");
+        p.textContent = (it.issuer||"") + " / " + (it.amount_note||"");
+        d.appendChild(h); d.appendChild(p);
+        if (it.verified === true) {
+          var ok = document.createElement("span"); ok.className = "status ok"; ok.textContent = "✓ 公式と照合済み";
+          d.appendChild(ok); d.appendChild(document.createTextNode(" "));
+        } else if (it.status === "要確認") {
+          var st = document.createElement("span"); st.className = "status"; st.textContent = "要確認";
+          d.appendChild(st); d.appendChild(document.createTextNode(" "));
+        }
+        var link = document.createElement("a");
+        link.href = it.source_url; link.rel = "noopener"; link.textContent = "公式ページで確認";
+        d.appendChild(link);
+        box.appendChild(d);
+      });
+    }
+  }).catch(function(){ /* データ取得失敗時は静的表示のまま(診断・本文は影響なし) */ });
+  /* 受け取り報告カウンター: 沖縄版と同じく、検証済み10世帯以上たまってから表示 */
+  fetch("../data/yamanashi/jukyu_reports.json").then(function(r){return r.json()}).then(function(d){
+    var n = d && d.summary && d.summary.household_count;
+    if (typeof n === "number" && n >= 10) {
+      document.getElementById("jukyu-count").textContent = n.toLocaleString("ja-JP") + "世帯";
+      document.getElementById("jukyu-stat").style.display = "";
+    }
+  }).catch(function(){ /* 台帳ができるまでは非表示のまま */ });
+})();
+</script>
 </body>
 </html>
