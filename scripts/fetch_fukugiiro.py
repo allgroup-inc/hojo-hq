@@ -372,7 +372,7 @@ SEEDS = [
         "target_household": "沖縄県内の私立高等学校等に在学し、住民税非課税世帯等に該当するお子さんがいる世帯が対象となる可能性があります",
         "how_to_apply": "在学する学校を通じた申請",
         "amount_note": "返還不要。給付額は学校種別・在学状況により異なります(要確認)",
-        "deadline": "2026-10-30", "deadline_type": "申請期限",
+        "deadline": "2026-10-30", "deadline_type": "期限あり",
         "source_url": "https://www.pref.okinawa.jp/kyoiku/edu/1008819/1008843/1008848.html",
         "verified": True, "verified_at": "2026-09-24",
         "verified_by": "Haruka(沖縄県公式ページ確認)",
