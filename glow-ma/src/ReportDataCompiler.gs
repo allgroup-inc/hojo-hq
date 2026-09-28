@@ -186,27 +186,59 @@ function countCallsByDate(interactionRecords, targetDate) {
 }
 
 /**
+ * 企業マスタから企業ID→ランク マッピングを作成
+ * @param {Array} masterRecords - 企業マスタレコード配列
+ * @returns {Object} {企業ID: "ランク", ...}
+ */
+function buildCompanyRankMap(masterRecords) {
+  const rankMap = {};
+  const headers = GlowSchema.COMPANY_MASTER_HEADERS;
+  const companyIdIdx = headers.indexOf("企業ID");
+  const rankIdx = headers.indexOf("ランク");
+
+  if (companyIdIdx === -1 || rankIdx === -1) return rankMap;
+
+  masterRecords.forEach(r => {
+    if (r[companyIdIdx] && r[rankIdx]) {
+      rankMap[r[companyIdIdx]] = r[rankIdx];
+    }
+  });
+  return rankMap;
+}
+
+/**
  * 指定された日付範囲の架電件数を企業ランク別に集計
  * @param {Array} interactionRecords - インタラクションレコード配列
  * @param {Date} startDate - 開始日
  * @param {Date} endDate - 終了日
+ * @param {Object} companyRankMap - 企業ID→ランク マッピング（buildCompanyRankMap()の返り値）
  * @returns {Object} {total: number, byRank: {A: number, B: number, C: number, D: number}}
  */
-function countCallsByDateRange(interactionRecords, startDate, endDate) {
+function countCallsByDateRange(interactionRecords, startDate, endDate, companyRankMap) {
+  companyRankMap = companyRankMap || {};
+  const headers = GlowSchema.INTERACTION_LOG_HEADERS;
+  const companyIdIdx = headers.indexOf("企業ID");
+  const dateIdx = headers.indexOf("日付");
+  const typeIdx = headers.indexOf("種別");
+
   const filtered = interactionRecords.filter(r => {
-    if (r["種別"] !== "電話") return false;
-    const recordDate = new Date(r["日付"]);
+    if (r[typeIdx] !== "電話") return false;
+    const recordDate = new Date(r[dateIdx]);
     return recordDate >= startDate && recordDate <= endDate;
+  });
+
+  const byRank = { "A": 0, "B": 0, "C": 0, "D": 0 };
+  filtered.forEach(r => {
+    const companyId = r[companyIdIdx];
+    const rank = companyRankMap[companyId] || "D";
+    if (byRank[rank] !== undefined) {
+      byRank[rank]++;
+    }
   });
 
   return {
     total: filtered.length,
-    byRank: {
-      "A": 0,
-      "B": 0,
-      "C": 0,
-      "D": 0,
-    }
+    byRank: byRank
   };
 }
 

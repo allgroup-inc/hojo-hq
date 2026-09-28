@@ -56,12 +56,15 @@ function compileDailyReport(yesterdayDate) {
   const qrMonthlyPrev = getLineNewUsersMonthly(prevMonthRange);
   const totalLineUsers = getLineUserCountByDate(yesterdayDate);
 
+  // Build company rank map for call/visit/contract aggregation by rank
+  const companyRankMap = buildCompanyRankMap(masterRecords);
+
   // Compile call data
-  const callsYesterday = countCallsByDateRange(interactions, yesterdayDate, yesterdayDate);
-  const callsWeekly = countCallsByDateRange(interactions, weekRange.startDate, weekRange.endDate);
-  const callsWeeklyPrev = countCallsByDateRange(interactions, prevWeekRange.startDate, prevWeekRange.endDate);
-  const callsMonthly = countCallsByDateRange(interactions, monthRange.startDate, monthRange.endDate);
-  const callsMonthlyPrev = countCallsByDateRange(interactions, prevMonthRange.startDate, prevMonthRange.endDate);
+  const callsYesterday = countCallsByDateRange(interactions, yesterdayDate, yesterdayDate, companyRankMap);
+  const callsWeekly = countCallsByDateRange(interactions, weekRange.startDate, weekRange.endDate, companyRankMap);
+  const callsWeeklyPrev = countCallsByDateRange(interactions, prevWeekRange.startDate, prevWeekRange.endDate, companyRankMap);
+  const callsMonthly = countCallsByDateRange(interactions, monthRange.startDate, monthRange.endDate, companyRankMap);
+  const callsMonthlyPrev = countCallsByDateRange(interactions, prevMonthRange.startDate, prevMonthRange.endDate, companyRankMap);
 
   // Compile visit/contract data
   const visitsYesterday = countVisitsByDate(interactions, yesterdayDate);
