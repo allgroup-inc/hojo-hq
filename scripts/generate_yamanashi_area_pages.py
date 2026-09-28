@@ -27,7 +27,6 @@ DATA = os.path.join(BASE, "data", "yamanashi", "seido.json")
 OUT_DIR = os.path.join(BASE, "site", "yamanashi", "area")
 
 STYLE = """
-p,li{word-break:auto-phrase;text-wrap:pretty}
 h1,h2,h3{text-wrap:balance}
 h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:600;word-break:auto-phrase;overflow-wrap:anywhere}
 .wrap{max-width:680px;margin:0 auto;padding:28px 20px 64px}

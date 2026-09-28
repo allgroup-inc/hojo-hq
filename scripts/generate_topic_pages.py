@@ -81,7 +81,8 @@ CSS = """
 :root{--navy:#00335C;--kin:#F88800;--ink:#1c2b36;--paper:#f7f9fb;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN',Meiryo,sans-serif;
- color:var(--ink);background:var(--paper);line-height:1.9;word-break:auto-phrase;overflow-wrap:break-word;}
+ color:var(--ink);background:var(--paper);line-height:1.9;overflow-wrap:break-word;}
+h1,h2,h3{word-break:auto-phrase;}
 header{background:linear-gradient(160deg,#021c30,#00335c);color:#f7f5f1;padding:40px 20px 34px;}
 .wrap{max-width:860px;margin:0 auto;padding:0 4px;}
 .crumb{font-size:.78rem;opacity:.85;margin-bottom:14px;}
