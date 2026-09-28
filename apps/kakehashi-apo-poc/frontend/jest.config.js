@@ -13,9 +13,6 @@ module.exports = {
       },
     },
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(react-dnd|@react-dnd|dnd-core|@mui|@emotion|luxon|@babel))',
-  ],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
@@ -24,5 +21,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^react-dnd$': '<rootDir>/tests/mocks/react-dnd.js',
+    '^react-dnd-html5-backend$': '<rootDir>/tests/mocks/react-dnd-html5-backend.js',
   },
 };

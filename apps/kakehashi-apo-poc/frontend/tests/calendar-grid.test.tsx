@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CalendarGrid, Appointment } from '../src/components/CalendarGrid';
 import { DateTime } from 'luxon';
@@ -165,7 +165,7 @@ describe('CalendarGrid Component', () => {
 
   it('should handle month navigation', async () => {
     const user = userEvent.setup();
-    const { rerender } = render(
+    render(
       <CalendarGrid
         appointments={mockAppointments}
         freeSlots={mockFreeSlots}
