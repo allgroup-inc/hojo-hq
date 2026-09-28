@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import freeSlotRoutes from './routes/free-slots.routes';
+import protectedRoutes from './routes/protected.routes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,6 +12,7 @@ app.use(cors());
 
 // Routes
 app.use('/api', freeSlotRoutes);
+app.use('/api/protected', protectedRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -28,6 +30,7 @@ if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`✅ PoC Backend running on http://localhost:${PORT}`);
     console.log(`📍 API Endpoint: http://localhost:${PORT}/api/free-slots/:repId/:date`);
+    console.log(`🔒 Protected Endpoint: http://localhost:${PORT}/api/protected/profile (requires Bearer token)`);
   });
 }
 
