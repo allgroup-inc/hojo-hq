@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Post 1 - Page 2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Meiryo', 'Noto Sans JP', sans-serif;
+            width: 1080px;
+            height: 1350px;
+        }
+
+        .page {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: #FFFFFF;
+            padding: 40px;
+            gap: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-title {
+            color: #00335C;
+            font-size: 48px;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        .content {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            flex: 1;
+        }
+
+        .before-box, .after-box {
+            flex: 1;
+            background-color: #F5F5F5;
+            border: 2px solid #F88800;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .label {
+            color: #F88800;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .amount {
+            color: #00335C;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .center-section {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 0 20px;
+        }
+
+        .industry {
+            color: #00335C;
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .use-case {
+            color: #00335C;
+            font-size: 28px;
+            font-weight: normal;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .divider {
+            height: 3px;
+            background-color: #F88800;
+            margin: 20px 0;
+        }
+
+        .savings {
+            color: #F88800;
+            font-size: 22px;
+            font-weight: normal;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <div class="header-title">活用例① 農業</div>
+        </div>
+
+        <div class="content">
+            <div class="before-box">
+                <div class="label">Before</div>
+                <div class="amount">400万円</div>
+            </div>
+
+            <div class="center-section">
+                <div class="industry">農業</div>
+                <div class="use-case">中山間地域の農家</div>
+                <div class="use-case">経営コスト削減・<br>所得向上の取り組み</div>
+            </div>
+
+            <div class="after-box">
+                <div class="label">After</div>
+                <div class="amount">100万円</div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="savings">実質負担は約25%</div>
+    </div>
+</body>
+</html>

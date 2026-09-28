@@ -1,0 +1,97 @@
+{
+  "post_id": "test_post_1",
+  "template": "template1",
+  "template_type": "numbers_scarcity",
+  "seido_id": "a0WJ200000CDYDCMA5",
+  "seido_name": "【農林水産省】中山間地域所得確保推進事業",
+  "english_name": "MAFF: Mid-Mountain Area Income Assurance Promotion Project",
+  "industry": "農業",
+  "support_level": {
+    "max_amount": 5000000,
+    "subsidy_rate": "最大3/4",
+    "description": "Up to ¥5M (approx 75% subsidy rate)"
+  },
+  "example_data": {
+    "before_amount": 4000000,
+    "after_amount": 1000000,
+    "example_industry": "農業",
+    "use_case": "中山間地域の農家 / 経営コスト削減・所得向上の取り組み"
+  },
+  "created_at": "2026-09-28",
+  "status": "draft",
+  "approval_history": [
+    {
+      "stage": "week_1_approval_gate",
+      "reviewer": "humanizer",
+      "status": "pending",
+      "date": null,
+      "notes": "Awaiting humanizer Japanese language check and content verification"
+    }
+  ],
+  "content": {
+    "title": "農業の経営課題 補助金で500万円まで支援",
+    "hook": "農業経営の課題、400万円の投資が補助金で実質100万円に。",
+    "pages": [
+      {
+        "page": 1,
+        "type": "hero",
+        "elements": {
+          "background_color": "#00335C",
+          "large_number": "500万円",
+          "subsidy_name": "中山間地域所得確保推進事業",
+          "industry_label": "農業向け"
+        }
+      },
+      {
+        "page": 2,
+        "type": "before_after_1",
+        "elements": {
+          "before_amount": "400万円",
+          "after_amount": "100万円",
+          "industry": "農業",
+          "use_case": "中山間地域の農業経営者 / 経営コスト削減・所得向上"
+        }
+      },
+      {
+        "page": 3,
+        "type": "before_after_2",
+        "elements": {
+          "before_amount": "300万円",
+          "after_amount": "80万円",
+          "industry": "農業",
+          "use_case": "小規模農家 / デジタル化による農作業効率化"
+        }
+      },
+      {
+        "page": 4,
+        "type": "reference_table",
+        "elements": {
+          "subsidy_rate": "最大3/4",
+          "target_conditions": "中山間地域の農家・農業法人",
+          "deadline": "2026-12-01"
+        }
+      }
+    ]
+  },
+  "image": {
+    "filename": "test_post_1.png",
+    "dimensions": "1080×1350px per page",
+    "format": "PNG carousel (4 pages)",
+    "colors": {
+      "primary": "#00335C",
+      "accent": "#F88800",
+      "background": "#FFFFFF"
+    }
+  },
+  "caption": {
+    "filename": "test_post_1_caption.md",
+    "hooks": 1,
+    "hashtags": 5
+  },
+  "quality_checks": {
+    "japanese_naturalness": "pending",
+    "accuracy_check": "pending",
+    "brand_compliance": "pending",
+    "link_validation": "pending"
+  }
+}
