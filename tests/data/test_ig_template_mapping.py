@@ -169,3 +169,65 @@ def test_template1_eligibility_self_check():
     assert not _is_template1_eligible({"max_amount": 1_000_000, "deadline": "2026-10-27"})
     assert not _is_template1_eligible({"max_amount": None, "deadline": "2027-01-01"})
     assert not _is_template1_eligible({"max_amount": True, "deadline": "2027-01-01"})
+
+
+# --- template2: 沖縄県限定 OR 無料支援 -----------------------------------
+# ブリーフの擬似コードは target_region / max_amount_yen と 'okinawa' の英字照合を
+# 使っていたが、実データは target_area(日本語の都道府県名)と max_amount。
+# 英字照合のままだと全件 is_okinawa_only=False、フィールド欠落で is_free=True に
+# なり、どんな割当でも素通りする空検査になるため、実フィールドで判定する。
+
+
+def _is_okinawa_only(item):
+    """target_area が沖縄県のみ(全国・複数県列挙は含めない)。"""
+    return (item.get("target_area") or "").strip() == "沖縄県"
+
+
+def _is_free_support(item):
+    # max_amount=None は「金額不明」であって無料ではない。0 のみを無料扱いとする
+    return item.get("max_amount") == 0
+
+
+def _is_template2_eligible(item):
+    return _is_okinawa_only(item) or _is_free_support(item)
+
+
+def test_template2_mapping_rule():
+    items = _load_items()
+    template2_items = [s for s in items if s.get("ig_template") == "template2"]
+
+    assert 5 <= len(template2_items) <= 10, (
+        f"template2 は5〜10件の想定だが {len(template2_items)} 件"
+    )
+
+    priorities = []
+    for item in template2_items:
+        assert _is_template2_eligible(item), (
+            f"{item['id']} は沖縄県限定でも無料支援でもないため template2 不可"
+        )
+        p = item.get("ig_priority")
+        assert isinstance(p, int) and not isinstance(p, bool) and 1 <= p <= 10, (
+            f"{item['id']} の ig_priority が 1〜10 の整数でない: {p!r}"
+        )
+        priorities.append(p)
+        assert item.get("ig_example_industry"), (
+            f"{item['id']} の ig_example_industry が未設定"
+        )
+        assert item.get("ig_exclude") is not True, (
+            f"{item['id']} は ig_exclude=True なのに template2 に割当"
+        )
+
+    assert len(set(priorities)) == len(priorities), (
+        f"template2 の ig_priority が重複: {sorted(priorities)}"
+    )
+
+
+def test_template2_eligibility_self_check():
+    """ガードの正例・負例(再発防止メモ: 検査を足したら正例で試す)。"""
+    assert _is_template2_eligible({"target_area": "沖縄県", "max_amount": None})
+    assert _is_template2_eligible({"target_area": "全国", "max_amount": 0})
+    assert not _is_template2_eligible({"target_area": "全国", "max_amount": None})
+    assert not _is_template2_eligible(
+        {"target_area": "北海道 / 沖縄県 / 東京都", "max_amount": 15_000_000}
+    )
+    assert not _is_template2_eligible({})
