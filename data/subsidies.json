@@ -1244,8 +1244,8 @@
    "ig_template": "template3",
    "ig_priority": 4,
    "ig_example_industry": "製造業",
-   "ig_before_amount": null,
-   "ig_after_amount": null,
+   "ig_before_amount": 50000000,
+   "ig_after_amount": 15000000,
    "ig_exclude": false
   },
   {
@@ -1484,8 +1484,8 @@
    "ig_template": "template1",
    "ig_priority": 15,
    "ig_example_industry": "農業",
-   "ig_before_amount": null,
-   "ig_after_amount": null,
+   "ig_before_amount": 4000000,
+   "ig_after_amount": 1000000,
    "ig_exclude": false
   },
   {
@@ -3057,8 +3057,8 @@
    "ig_template": "template2",
    "ig_priority": 2,
    "ig_example_industry": "小売業",
-   "ig_before_amount": null,
-   "ig_after_amount": null,
+   "ig_before_amount": 1500000,
+   "ig_after_amount": 0,
    "ig_exclude": false
   },
   {
