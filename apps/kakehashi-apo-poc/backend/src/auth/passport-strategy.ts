@@ -1,34 +1,44 @@
 import passport from 'passport';
-import { OIDCStrategy } from 'passport-azure-ad';
+import { OIDCStrategy, IProfile } from 'passport-azure-ad';
 import { entraConfig } from '../config/entra-config';
 
-interface UserProfile {
+export interface UserProfile {
   id: string;
   displayName: string;
   email: string;
   oid: string;
 }
 
-const strategy = new OIDCStrategy({
-  clientID: entraConfig.clientID,
-  clientSecret: entraConfig.clientSecret,
-  callbackURL: entraConfig.callbackURL,
-  authorizationURL: `${entraConfig.authority}/oauth2/v2.0/authorize`,
-  tokenURL: `${entraConfig.authority}/oauth2/v2.0/token`,
-  userProfileURL: 'https://graph.microsoft.com/v1.0/me',
-  scope: ['profile', 'email', 'openid'],
-}, (accessToken: string, refreshToken: string, profile: any, done: any) => {
-  // ユーザーオブジェクト作成（DB保存は後の段階）
-  const user: UserProfile = {
-    id: profile.id,
-    displayName: profile.displayName,
-    email: profile._json.userPrincipalName,
-    oid: profile._json.oid, // Azure Object ID
-  };
-  done(null, user);
-});
+export function initializePassportStrategy(): void {
+  // Only initialize if clientID and clientSecret are provided
+  if (!entraConfig.clientID || !entraConfig.clientSecret) {
+    console.warn('Warning: Entra ID credentials not configured. Skipping Passport strategy initialization.');
+    return;
+  }
 
-passport.use(strategy);
+  const strategy = new OIDCStrategy({
+    identityMetadata: entraConfig.identityMetadata,
+    clientID: entraConfig.clientID,
+    clientSecret: entraConfig.clientSecret,
+    redirectUrl: entraConfig.redirectUrl,
+    responseType: 'code',
+    responseMode: 'query',
+    passReqToCallback: false,
+    scope: ['profile', 'email', 'openid'],
+  }, (iss: string, sub: string, profile: IProfile, accessToken: string, refreshToken: string, done: any) => {
+    // ユーザーオブジェクト作成（DB保存は後の段階）
+    const user: UserProfile = {
+      id: profile.oid || sub,
+      displayName: profile.displayName || '',
+      email: profile.upn || '',
+      oid: profile.oid || '',
+    };
+    done(null, user);
+  });
+
+  passport.use(strategy);
+}
+
 passport.serializeUser((user: any, done: any) => done(null, user));
 passport.deserializeUser((user: any, done: any) => done(null, user));
 

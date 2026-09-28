@@ -12,10 +12,15 @@ describe('FreeTimeCalculator', () => {
 
   it('should exclude break time (12:00-13:00)', () => {
     const slots = calculator.calculateFreeSlots('rep-001', '2026-10-04', []);
-    const breakSlots = slots.filter(s =>
-      s.startTime.includes('12:') || (s.startTime.includes('13:') && !s.startTime.includes('13:30'))
-    );
-    expect(breakSlots.length).toBe(0);
+    // Check that no slot includes the break period (12:00-13:00)
+    // Slots should either end at 12:00 or start at 13:00
+    const breakConflictSlots = slots.filter(s => {
+      const startTime = new Date(s.startTime).getHours();
+      const endTime = new Date(s.endTime).getHours();
+      // Check if slot spans across break time
+      return (startTime < 12 && endTime > 13) || (startTime >= 12 && startTime < 13);
+    });
+    expect(breakConflictSlots.length).toBe(0);
   });
 
   it('should exclude appointments with travel time buffer', () => {

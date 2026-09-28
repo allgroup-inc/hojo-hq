@@ -61,7 +61,7 @@ export class FreeTimeCalculator {
 
     // Find free slots
     const freeSlots: FreeSlot[] = [];
-    let currentTime = workStart;
+    let currentTime: DateTime = workStart;
 
     for (const interval of merged) {
       if (interval.start > currentTime) {
@@ -69,11 +69,15 @@ export class FreeTimeCalculator {
         const slotDuration = slotEnd.diff(currentTime, 'minutes').minutes;
 
         if (slotDuration >= this.MIN_SLOT_DURATION) {
-          freeSlots.push({
-            startTime: currentTime.toISO(),
-            endTime: slotEnd.toISO(),
-            durationMinutes: Math.floor(slotDuration),
-          });
+          const startISO = currentTime.toISO();
+          const endISO = slotEnd.toISO();
+          if (startISO && endISO) {
+            freeSlots.push({
+              startTime: startISO,
+              endTime: endISO,
+              durationMinutes: Math.floor(slotDuration),
+            });
+          }
         }
       }
       currentTime = interval.end;
@@ -83,11 +87,15 @@ export class FreeTimeCalculator {
     if (currentTime < workEnd) {
       const slotDuration = workEnd.diff(currentTime, 'minutes').minutes;
       if (slotDuration >= this.MIN_SLOT_DURATION) {
-        freeSlots.push({
-          startTime: currentTime.toISO(),
-          endTime: workEnd.toISO(),
-          durationMinutes: Math.floor(slotDuration),
-        });
+        const startISO = currentTime.toISO();
+        const endISO = workEnd.toISO();
+        if (startISO && endISO) {
+          freeSlots.push({
+            startTime: startISO,
+            endTime: endISO,
+            durationMinutes: Math.floor(slotDuration),
+          });
+        }
       }
     }
 
