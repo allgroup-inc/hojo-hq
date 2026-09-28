@@ -1,0 +1,139 @@
+{
+  "metadata": {
+    "created_at": "2026-09-28",
+    "milestone": "Phase 2 (09-29 ~ 10-10)",
+    "repo": "allgroup-inc/hojo-hq",
+    "total_issues": 16,
+    "import_method": "gh CLI または GitHub Web UI を使用して手動作成"
+  },
+  "issues": [
+    {
+      "number": 1,
+      "title": "[Block 1] 2-1-1: API仕様書最終化",
+      "body": "API仕様書 (docs/kakehashi-poc/API-SPECIFICATION.md) の15個のエンドポイント・スキーマが実装可能か確認し、最終化。\n\n**チェックリスト**:\n- [ ] 全15エンドポイント実装可能性の確認\n- [ ] エラーハンドリング実装方針決定\n- [ ] レート制限実装方法決定\n- [ ] JWT署名・検証方法確定\n- [ ] Postman Collection テンプレート作成\n\n**期限**: 2026-09-29",
+      "labels": ["phase-2", "block-1", "api", "critical"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": []
+    },
+    {
+      "number": 2,
+      "title": "[Block 1] 2-1-2: GASデータ抽出",
+      "body": "既存GASシートから営業マンデータ (12行) と過去アポ記録 (1,847件) をJSON形式で抽出。\n\n**チェックリスト**:\n- [ ] Google Sheets API で users シート抽出\n- [ ] appointments シート (3年分) をJSON出力\n- [ ] 敏感情報フィルタリング確認\n- [ ] S3に一時保存\n\n**期限**: 2026-09-29",
+      "labels": ["phase-2", "block-1", "data", "migration"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": []
+    },
+    {
+      "number": 3,
+      "title": "[Block 1] 2-1-3: マイグレーションスクリプト作成",
+      "body": "GAS JSONデータをPostgreSQL RDSへ移行するスクリプト実装。営業マンIDマッピング・データクリーニング・バリデーション機能を含む。\n\n**チェックリスト**:\n- [ ] scripts/migration/transform_gas_to_csv.py 実装\n- [ ] 営業マンID マッピングテーブル作成\n- [ ] CSVクリーニングロジック実装\n- [ ] scripts/migration/validate_migration_data.py 実装\n- [ ] テスト環境で試験実行\n\n**期限**: 2026-09-30\n**ブロッカー**: #1 (API仕様確定)",
+      "labels": ["phase-2", "block-1", "data", "migration"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [1]
+    },
+    {
+      "number": 4,
+      "title": "[Block 1] 2-1-4: テスト環境でマイグレーション検証",
+      "body": "テスト用RDSでマイグレーション実行し、データ品質・正確性・行数を検証。\n\n**チェックリスト**:\n- [ ] テスト用RDS接続確認\n- [ ] マイグレーション実行\n- [ ] 行数確認: users=12、appointments=1,847 (±5%)\n- [ ] ステータス分布が合理的か確認\n- [ ] API経由で過去データが取得できるか確認\n\n**期限**: 2026-09-30\n**ブロッカー**: #3 (マイグレーションスクリプト)",
+      "labels": ["phase-2", "block-1", "data", "qa"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [3]
+    },
+    {
+      "number": 5,
+      "title": "[Block 2] 2-2-1: kakei-apo への本システム組み込み",
+      "body": "PoC実装をkakei-apo リポジトリへ移設・統合。既存認証・環境に合わせる。\n\n**チェックリスト**:\n- [ ] kakei-apo リポジトリセットアップ\n- [ ] PoC実装を移設\n- [ ] 既存認証方式に調整\n- [ ] 環境変数統合\n- [ ] Dockerイメージ再ビルド・起動テスト\n\n**期限**: 2026-10-01\n**ブロッカー**: #4 (マイグレーション検証)",
+      "labels": ["phase-2", "block-2", "integration"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [4]
+    },
+    {
+      "number": 6,
+      "title": "[Block 2] 2-2-2: ❶入口システム連携テスト",
+      "body": "営業受付システム (❶入口) と本APO管理システムの連携テスト。新規アポ登録・振り分け・通知の統合動作確認。\n\n**テストシナリオ**:\n- [ ] POST /api/v1/appointments で新規登録\n- [ ] レスポンス201 Created + APO-ID返却確認\n- [ ] ラウンドロビン振り分け動作確認\n- [ ] Slack通知送信確認\n- [ ] エラーケースのハンドリング確認\n\n**期限**: 2026-10-02\n**ブロッカー**: #5 (kakei-apo組み込み)",
+      "labels": ["phase-2", "block-2", "integration", "qa"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [5]
+    },
+    {
+      "number": 7,
+      "title": "[Block 2] 2-2-3: ❂訪問管理・❸保全CRM連携テスト",
+      "body": "営業訪問管理システム (❂) と保全CRM (❸) の双方向連携テスト。訪問完了・結果入力の統合動作確認。\n\n**チェックリスト**:\n- [ ] POST /api/visits/completed で訪問完了通知受信\n- [ ] KPI自動集計トリガー確認\n- [ ] 保全CRM への結果同期確認\n- [ ] 失敗時のロールバック手順確認\n\n**期限**: 2026-10-02\n**ブロッカー**: #5 (kakei-apo組み込み)",
+      "labels": ["phase-2", "block-2", "integration", "qa"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [5]
+    },
+    {
+      "number": 8,
+      "title": "[Block 2] 2-2-4: UI統合テスト",
+      "body": "フロントエンド (React + Material-UI) の確認。カレンダー表示・ドラッグ操作・アポ詳細確認・Slack連携の実装確認。\n\n**チェックリスト**:\n- [ ] 月表示・週表示・日表示レンダリング確認\n- [ ] ドラッグ&ドロップ操作確認\n- [ ] アポ詳細モーダル表示確認\n- [ ] 営業マン検索・フィルタリング動作確認\n- [ ] レスポンシブデザイン (モバイル/タブレット) 確認\n\n**期限**: 2026-10-03\n**ブロッカー**: #5 (kakei-apo組み込み)",
+      "labels": ["phase-2", "block-2", "ui", "qa"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [5]
+    },
+    {
+      "number": 9,
+      "title": "[Block 2] 2-2-5: Gateway G1検証 (Block 1の成果物品質)",
+      "body": "Block 1の4つのタスクが完了し、以下の基準を満たしているか判定:\n\n**判定基準** (Pass必須):\n- [ ] API-SPECIFICATION.md が全15エンドポイントを網羅\n- [ ] マイグレーション検証でデータ行数 users=12/appointments≈1,847\n- [ ] テスト環境でAPI経由データ取得が成功\n- [ ] ブロッカーIssue (#1,#2,#3,#4) すべてCloseされている\n\n**判定責任**: PM/アーキテクト\n**期限**: 2026-09-30 23:59",
+      "labels": ["phase-2", "gateway", "qa", "critical"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [1, 2, 3, 4]
+    },
+    {
+      "number": 10,
+      "title": "[Block 3] 2-3-1: 本番環境インフラ準備",
+      "body": "AWS/Terraform による本番RDS・EC2・セキュリティグループの構築。シークレット管理 (GitHub Secrets) の設定。\n\n**チェックリスト**:\n- [ ] Terraform apply で本番RDS (PostgreSQL 15) 構築\n- [ ] EC2 t3.large インスタンス起動\n- [ ] セキュリティグループ設定 (3306ポート許可等)\n- [ ] CloudWatch ログ設定\n- [ ] GitHub Secrets に DEPLOY_KEY・RDS_PASSWORD登録\n\n**期限**: 2026-10-04\n**ブロッカー**: #9 (Gateway G1)",
+      "labels": ["phase-2", "block-3", "infra", "critical"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [9]
+    },
+    {
+      "number": 11,
+      "title": "[Block 3] 2-3-2: Entra IDテストユーザー・本番ユーザー作成",
+      "body": "Azure Entra ID に営業マン12人 + Admin + テストユーザーを登録。OAuthトークン発行テスト実施。\n\n**チェックリスト**:\n- [ ] Entra ID に12営業マン登録 (email: user-001@〜user-012@domain)\n- [ ] Admin アカウント作成\n- [ ] テストユーザー (3名) 作成\n- [ ] JWT トークン発行テスト\n- [ ] トークン署名・検証テスト (RS256)\n\n**期限**: 2026-10-05\n**ブロッカー**: #10 (本番インフラ)",
+      "labels": ["phase-2", "block-3", "infra"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [10]
+    },
+    {
+      "number": 12,
+      "title": "[Block 3] 2-3-3: トレーニング・運用マニュアル準備",
+      "body": "営業マン12人向けトレーニング資料 (動画/PDF)・運用マニュアル・FAQ作成。\n\n**チェックリスト**:\n- [ ] トレーニング動画 (基本操作 / カレンダー / ドラッグ操作)\n- [ ] PDF クイックスタートガイド作成\n- [ ] FAQ (よくある質問と回答)\n- [ ] Slack ウェルカムメッセージ・ピン付け情報作成\n- [ ] 日本語UI文面の最終校正\n\n**期限**: 2026-10-06\n**ブロッカー**: #9 (Gateway G1)",
+      "labels": ["phase-2", "block-3", "ops"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [9]
+    },
+    {
+      "number": 13,
+      "title": "[Block 4] 2-4-1: 本番RDSデータマイグレーション",
+      "body": "テスト環境で検証済みのマイグレーション実行スクリプトを本番RDSで実行。ロールバック手順の確認。\n\n**チェックリスト**:\n- [ ] バックアップ作成確認\n- [ ] マイグレーション実行 (users 12行 + appointments 1,847行)\n- [ ] データ行数・整合性確認\n- [ ] API経由データ取得テスト\n- [ ] ロールバック手順テスト\n\n**期限**: 2026-10-08 AM\n**ブロッカー**: #10,#11 (インフラ・ユーザー準備)",
+      "labels": ["phase-2", "block-4", "data", "migration", "critical"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [10, 11]
+    },
+    {
+      "number": 14,
+      "title": "[Block 4] 2-4-2: 全統合テスト・本番UAT",
+      "body": "本番環境でEnd-to-End統合テスト実施。営業マン・APO担当・システム管理者による本番環境確認。\n\n**チェックリスト**:\n- [ ] 本番RDSでAPI全15エンドポイント動作確認\n- [ ] 本番Entra IDトークン発行・検証確認\n- [ ] UI操作 (カレンダー・ドラッグ・登録) 確認\n- [ ] ❶❂❸連携の本番データで統合テスト\n- [ ] パフォーマンステスト (同時接続10人)\n- [ ] UAT参加者のサインオフ取得\n\n**期限**: 2026-10-09\n**ブロッカー**: #13 (本番RDSマイグレ)",
+      "labels": ["phase-2", "block-4", "qa", "critical"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [13]
+    },
+    {
+      "number": 15,
+      "title": "[Block 4] 2-4-3: Gateway G5最終判定 (本番リリース可否)",
+      "body": "本番環境のテスト・UATが完了し、本番リリースが安全か最終判定。不合格時は改善リストアップ。\n\n**判定基準** (Pass必須):\n- [ ] 統合テスト合格 (全15エンドポイント ✓)\n- [ ] UAT参加者 (営業マン/APO/管理者) サインオフ取得\n- [ ] パフォーマンス基準達成 (同時接続10人で平均応答時間 <2s)\n- [ ] セキュリティチェック完了 (OWASP Top 10)\n- [ ] ロールバック手順テスト成功\n\n**判定責任**: CTO/プロダクトリーダー\n**期限**: 2026-10-09 16:00\n**ブロッカー**: #14 (統合テスト・UAT)",
+      "labels": ["phase-2", "gateway", "qa", "critical"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [14]
+    },
+    {
+      "number": 16,
+      "title": "[Block 4] 2-4-4: 本番デプロイ・運用開始",
+      "body": "GitHub Actions による本番デプロイ実行。営業マン12人・APO担当者の利用開始。障害対応体制の起動。\n\n**チェックリスト**:\n- [ ] CI/CDパイプライン実行 (test → docker build → terraform apply → verify)\n- [ ] Blue-Green デプロイメント実施 (ダウンタイム0)\n- [ ] 営業マンへの利用開始通知\n- [ ] Slack #apo-support チャネル開設・運用チーム追加\n- [ ] 障害対応ホットライン (連絡先) 案内\n- [ ] 初日サポート体制起動 (09:00-18:00)\n\n**期限**: 2026-10-10 09:00\n**ブロッカー**: #15 (G5最終判定Pass)",
+      "labels": ["phase-2", "block-4", "infra", "deployment", "critical"],
+      "milestone": "Phase 2 (09-29 ~ 10-10)",
+      "blockers": [15]
+    }
+  ]
+}
