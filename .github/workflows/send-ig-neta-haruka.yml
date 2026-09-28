@@ -1,0 +1,39 @@
+name: send-ig-neta-haruka
+
+# 毎週月曜 11:00 JST に、ig_neta.json の最新5案を遥さんへメール送信する。
+# 検証ゲート: verified=True かつ常時制度のみを送信対象にする。
+
+on:
+  schedule:
+    # 毎週月曜 11:00 JST (= 日曜 02:00 UTC)
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: send-ig-neta-haruka
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Send IG neta to Haruka (with validation)
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+        run: |
+          python scripts/send_ig_neta_to_haruka.py
