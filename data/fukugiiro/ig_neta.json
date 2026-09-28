@@ -1,57 +1,57 @@
 {
- "updated_at": "2026-09-25",
+ "updated_at": "2026-09-28",
  "week": "2026-W40",
  "note": "照合済み(verified=True)かつ締切の無い制度だけから scripts/generate_ig_neta.py が生成。日付・金額は本文に書かない。",
  "items": [
   {
    "no": 1,
-   "seido_id": "fk-kuni-shugaku-shien",
-   "title": "「高等教育の修学支援新制度」、進学前に知っておこう",
-   "caption": "大学・短大・高専・専門学校への進学を考えている方へ。「高等教育の修学支援新制度」は、給付型奨学金(返還不要)と授業料・入学金の減免をセットで受けられる制度です。対象になる可能性があります。令和7年度からは、3人以上のお子さんがいるご家庭の所得制限が緩和される場合があります。進学先の学校で相談できます。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #教育 #給付金 #修学支援",
-   "caution": "金額・期限・対象条件は本文に書かない。「対象になる可能性があります」の言い方を崩さない。制度ID fk-kuni-shugaku-shien",
-   "source_url": "https://www.mext.go.jp/kyufu/",
-   "image_hint": "教育・進学のやさしいイラスト+「修学支援」"
+   "seido_id": "fk-kuni-jidoteate",
+   "title": "「児童手当」、申し込みを忘れていませんか",
+   "caption": "子育て中のご家庭に、知らないままの方が多い制度です。「児童手当」。中学生以下(2024年10月以降は高校生年代まで拡充)のお子さんを育てている世帯が対象になることがあります。申し込みの窓口はお住まいの市区町村の窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #子育て #児童手当",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-22 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-jidoteate",
+   "source_url": "https://www.cfa.go.jp/policies/kokoseido/jidouteate",
+   "image_hint": "子育てのやさしいイラスト+「児童手当」"
   },
   {
    "no": 2,
-   "seido_id": "fk-kuni-shotoku-shien",
-   "title": "「高等学校等就学支援金」、高校の費用が減ります",
-   "caption": "高校生のいるご家庭に知ってほしい制度です。「高等学校等就学支援金」。授業料負担を軽くするための支援です。一定の収入未満の世帯が対象になることがあります。在学している高校で申請できます。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず学校か公式ページでご確認ください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #教育 #高校 #就学支援",
-   "caution": "金額・期限・対象条件は本文に書かない。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-shotoku-shien",
-   "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/index.htm",
-   "image_hint": "教育・高校のやさしいイラスト+「就学支援金」"
+   "seido_id": "fk-kuni-kashitsuke",
+   "title": "「生活福祉資金貸付制度」、使える人が使えていません",
+   "caption": "家計が苦しいとき、相談できる窓口と制度があります。「生活福祉資金貸付制度」。低所得の世帯や、失業などで生活の立て直しが必要な世帯が対象になることがあります。申し込みの窓口はお住まいの市区町村の社会福祉協議会。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #くらしの支援 #仕事さがし #生活福祉資金貸付制度",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-08-06 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-kashitsuke",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/seikatsu-fukushi-shikin1/kashitsukejoken.html",
+   "image_hint": "低所得・生活苦のやさしいイラスト+「生活福祉資金貸付制度」"
   },
   {
    "no": 3,
-   "seido_id": "fk-kuni-shogaiji-kyufu",
-   "title": "「特別児童扶養手当」、お子さんの障害をサポート",
-   "caption": "障害のあるお子さんを育てているご家庭に、支援があります。「特別児童扶養手当」。一定の障害状態にあるお子さんを育てている方が対象になることがあります。申し込みの窓口はお住まいの市区町村の窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #子育て #障害児 #特別児童扶養手当",
-   "caution": "金額・期限・対象条件は本文に書かない。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-shogaiji-kyufu",
-   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kodomo_kosodate/kodomo_kosodate_top/tokubetukodumo.html",
-   "image_hint": "子育て・障害児サポートのやさしいイラスト+「特別児童扶養手当」"
+   "seido_id": "fk-kuni-kosodate-green",
+   "title": "「子育てグリーン住宅支援事業」、見落とされがちです",
+   "caption": "住まいのことで困ったときに使える制度です。「子育てグリーン住宅支援事業(新築・リフォーム補助)」。省エネ住宅の新築や省エネリフォームを行う世帯(子育て・若者夫婦世帯は補助が手厚い)が対象になることがあります。申し込みの窓口は登録事業者(工務店・リフォーム会社)を通じた申請。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #住まい #子育て #子育てグリーン住宅支援事業",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-kosodate-green",
+   "source_url": "https://kosodate-green.mlit.go.jp/",
+   "image_hint": "住宅取得・引越のやさしいイラスト+「子育てグリーン住宅支援事」"
   },
   {
    "no": 4,
-   "seido_id": "fk-kuni-syogaisya-teate",
-   "title": "「障害児福祉手当」、毎月のサポート",
-   "caption": "在宅で障害児のケアをしているご家庭へ。「障害児福祉手当」は、一定の障害状態にあるお子さんを育てている世帯が対象になることがあります。申し込みの窓口はお住まいの市区町村の窓口。手当の金額は月単位で支給されます。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #障害児 #福祉 #生活支援",
-   "caution": "金額・期限・対象条件は本文に書かない。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-syogaisya-teate",
-   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kodomo_kosodate/kodomo_kosodate_top/syogaiji_fukusiteate.html",
-   "image_hint": "福祉・障害児支援のやさしいイラスト+「障害児福祉手当」"
+   "seido_id": "fk-kuni-koyohoken-kihonteate",
+   "title": "「雇用保険の基本手当」、遠慮しなくて大丈夫です",
+   "caption": "仕事を離れたあとに使える制度です。「雇用保険の基本手当(失業給付)」。離職して求職活動をしている、雇用保険に加入していた方が対象になることがあります。申し込みの窓口はハローワーク。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #仕事さがし #雇用保険の基本手当",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-koyohoken-kihonteate",
+   "source_url": "https://www.hellowork.mhlw.go.jp/insurance/insurance_basicbenefit.html",
+   "image_hint": "失業のやさしいイラスト+「雇用保険の基本手当」"
   },
   {
    "no": 5,
-   "seido_id": "fk-okinawa-kokoro-iryo",
-   "title": "「沖縄県 こども医療費助成制度」、医療費が減ります",
-   "caption": "沖縄県内のお子さんがいるご家庭に朗報です。「沖縄県 こども医療費助成制度」。お子さんの医療費の一部または全部を補助する制度です。対象年齢や補助内容はお住まいの市町村で異なるので、詳しくはお住まいの市町村の福祉窓口でご確認ください。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず市町村窓口か公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #医療費 #子育て #こども医療費助成",
-   "caution": "金額・期限・対象条件は本文に書かない。「対象になる可能性があります」の言い方を崩さない。制度ID fk-okinawa-kokoro-iryo。市町村の個別制度との併給・重複を確認させる言い方が重要。",
-   "source_url": "https://www.pref.okinawa.lg.jp/iryokenko/iryo/1006488/1006512.html",
-   "image_hint": "医療・こどもサポートのやさしいイラスト+「こども医療費助成」"
+   "seido_id": "fk-kuni-kyoiku-kunren",
+   "title": "「教育訓練給付金」、見落とされがちです",
+   "caption": "働きはじめる前後で使える制度です。「教育訓練給付金」。働きながら(または離職後に)資格取得やスキルアップを目指す方が対象になることがあります。申し込みの窓口はハローワーク。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #しごと #教育訓練給付金",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-22 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-kyoiku-kunren",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/jinzaikaihatsu/kyouiku.html",
+   "image_hint": "就職・転職のやさしいイラスト+「教育訓練給付金」"
   }
  ],
  "used_ids": [
@@ -60,14 +60,19 @@
   "fk-kuni-hoiku-mushoka",
   "fk-kuni-ikuji-kyufu",
   "fk-kuni-jidofuyoteate",
+  "fk-kuni-jidoteate",
   "fk-kuni-jiritsushien-iryo",
   "fk-kuni-josei-sodan",
   "fk-kuni-kaigokyugyo-kyufu",
+  "fk-kuni-kashitsuke",
   "fk-kuni-kogaku-ryoyo",
   "fk-kuni-kokunen-menjo",
-  "fk-kuni-shugaku-shien",
-  "fk-kuni-shotoku-shien",
+  "fk-kuni-kosodate-green",
+  "fk-kuni-koyohoken-kihonteate",
+  "fk-kuni-kyoiku-kunren",
   "fk-kuni-shogaiji-kyufu",
+  "fk-kuni-shotoku-shien",
+  "fk-kuni-shugaku-shien",
   "fk-kuni-syogaisya-teate",
   "fk-okinawa-kokoro-iryo"
  ]
