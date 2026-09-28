@@ -1,4 +1,4 @@
-import express, { Router, RequestHandler } from 'express';
+import express, { Router, RequestHandler, Response } from 'express';
 import { authenticate, authorize, authorizeOwnerOrAdmin } from '../middleware/auth.middleware';
 import { UserRole, AuthRequest } from '../types/user.types';
 
@@ -9,13 +9,17 @@ const router = Router();
  * 認証済みユーザーのプロフィール取得
  * アクセス: すべての認証済みユーザー
  */
-router.get('/profile', authenticate as RequestHandler, ((req: AuthRequest, res) => {
-  res.json({
-    status: 'success',
-    message: 'Profile retrieved successfully',
-    user: req.user,
-  });
-}) as RequestHandler);
+router.get(
+  '/profile',
+  authenticate as RequestHandler,
+  ((req: AuthRequest, res: Response) => {
+    res.json({
+      status: 'success',
+      message: 'Profile retrieved successfully',
+      user: req.user,
+    });
+  }) as RequestHandler
+);
 
 /**
  * GET /protected/admin/stats
@@ -24,9 +28,9 @@ router.get('/profile', authenticate as RequestHandler, ((req: AuthRequest, res) 
  */
 router.get(
   '/admin/stats',
-  authenticate,
-  authorize(UserRole.ADMIN),
-  (req, res) => {
+  authenticate as RequestHandler,
+  authorize(UserRole.ADMIN) as RequestHandler,
+  ((req: AuthRequest, res: Response) => {
     res.json({
       status: 'success',
       message: 'Admin statistics retrieved successfully',
@@ -38,7 +42,7 @@ router.get(
         appointmentCompletionRate: 0.92,
       },
     });
-  }
+  }) as RequestHandler
 );
 
 /**
@@ -48,9 +52,9 @@ router.get(
  */
 router.get(
   '/admin/sales-reps',
-  authenticate,
-  authorize(UserRole.ADMIN),
-  (req, res) => {
+  authenticate as RequestHandler,
+  authorize(UserRole.ADMIN) as RequestHandler,
+  ((req: AuthRequest, res: Response) => {
     res.json({
       status: 'success',
       message: 'Sales representatives list retrieved successfully',
@@ -71,7 +75,7 @@ router.get(
         },
       ],
     });
-  }
+  }) as RequestHandler
 );
 
 /**
@@ -81,9 +85,9 @@ router.get(
  */
 router.get(
   '/apo-staff/dashboard',
-  authenticate,
-  authorize(UserRole.APO_STAFF, UserRole.ADMIN),
-  (req, res) => {
+  authenticate as RequestHandler,
+  authorize(UserRole.APO_STAFF, UserRole.ADMIN) as RequestHandler,
+  ((req: AuthRequest, res: Response) => {
     res.json({
       status: 'success',
       message: 'APO staff dashboard retrieved successfully',
@@ -94,7 +98,7 @@ router.get(
         lastUpdated: new Date().toISOString(),
       },
     });
-  }
+  }) as RequestHandler
 );
 
 /**
@@ -104,9 +108,9 @@ router.get(
  */
 router.get(
   '/sales/:repId/schedule',
-  authenticate,
-  authorizeOwnerOrAdmin,
-  (req, res) => {
+  authenticate as RequestHandler,
+  authorizeOwnerOrAdmin as RequestHandler,
+  ((req: AuthRequest, res: Response) => {
     const { repId } = req.params;
 
     res.json({
@@ -134,7 +138,7 @@ router.get(
         ],
       },
     });
-  }
+  }) as RequestHandler
 );
 
 /**
@@ -144,9 +148,9 @@ router.get(
  */
 router.get(
   '/sales/:repId/appointments',
-  authenticate,
-  authorizeOwnerOrAdmin,
-  (req, res) => {
+  authenticate as RequestHandler,
+  authorizeOwnerOrAdmin as RequestHandler,
+  ((req: AuthRequest, res: Response) => {
     const { repId } = req.params;
 
     res.json({
@@ -174,7 +178,7 @@ router.get(
         },
       ],
     });
-  }
+  }) as RequestHandler
 );
 
 /**
@@ -184,9 +188,9 @@ router.get(
  */
 router.post(
   '/sales/:repId/appointments',
-  authenticate,
-  authorizeOwnerOrAdmin,
-  (req, res) => {
+  authenticate as RequestHandler,
+  authorizeOwnerOrAdmin as RequestHandler,
+  ((req: AuthRequest, res: Response) => {
     const { repId } = req.params;
 
     res.status(201).json({
@@ -195,7 +199,7 @@ router.post(
       repId,
       appointmentId: 'apt-new-001',
     });
-  }
+  }) as RequestHandler
 );
 
 export default router;
