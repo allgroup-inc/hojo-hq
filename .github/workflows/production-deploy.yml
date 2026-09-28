@@ -1,0 +1,371 @@
+name: Production Deploy - KAKEHASHI Phase 1
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      dry_run:
+        description: 'Dry run (no actual deployment)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  AWS_REGION: ap-northeast-1
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_NAME: allgroup-inc/kakehashi-apo-poc
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # ========================================
+  # ステップ 1: テスト実行
+  # ========================================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Run Backend Tests
+        working-directory: apps/kakehashi-apo-poc/backend
+        run: |
+          npm ci
+          npm run test -- --coverage --passWithNoTests
+          npm run build
+
+      - name: Run Frontend Tests
+        working-directory: apps/kakehashi-apo-poc/frontend
+        run: |
+          npm ci
+          npm run test -- --coverage --passWithNoTests
+
+      - name: Upload Coverage Reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+          flags: kakehashi-poc
+
+  # ========================================
+  # ステップ 2: Docker イメージビルド・スキャン
+  # ========================================
+  build-docker:
+    name: Build and Scan Docker Images
+    runs-on: ubuntu-latest
+    needs: test
+    outputs:
+      backend-image: ${{ steps.meta-backend.outputs.tags }}
+      frontend-image: ${{ steps.meta-frontend.outputs.tags }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Metadata (Backend)
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}/backend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ inputs.environment }}
+
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/kakehashi-apo-poc/backend
+          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract Metadata (Frontend)
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}/frontend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ inputs.environment }}
+
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/kakehashi-apo-poc/frontend
+          push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy Image Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}/backend:${{ inputs.environment }}
+          format: sarif
+          output: trivy-results-backend.sarif
+
+      - name: Upload Scan Results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: trivy-results-backend.sarif
+
+  # ========================================
+  # ステップ 3: Terraform検証
+  # ========================================
+  terraform-validate:
+    name: Terraform Validate & Plan
+    runs-on: ubuntu-latest
+    env:
+      TF_VAR_aws_region: ${{ env.AWS_REGION }}
+      TF_VAR_environment_name: ${{ inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Format Check
+        working-directory: terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init -backend-config="key=${{ inputs.environment }}-kakehashi.tfstate"
+
+      - name: Terraform Validate
+        working-directory: terraform
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: terraform
+        run: |
+          terraform plan \
+            -var-file="terraform.${{ inputs.environment }}.tfvars" \
+            -out=tfplan
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan-${{ inputs.environment }}
+          path: terraform/tfplan
+
+  # ========================================
+  # ステップ 4: Terraform Apply
+  # ========================================
+  terraform-apply:
+    name: Terraform Apply (Infrastructure Deployment)
+    runs-on: ubuntu-latest
+    needs: terraform-validate
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      !inputs.dry_run &&
+      (inputs.environment == 'production' || inputs.environment == 'staging')
+    environment:
+      name: ${{ inputs.environment }}
+      url: https://kakehashi-${{ inputs.environment }}.example.com
+    env:
+      TF_VAR_aws_region: ${{ env.AWS_REGION }}
+      TF_VAR_environment_name: ${{ inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v3
+        with:
+          name: tfplan-${{ inputs.environment }}
+          path: terraform
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init -backend-config="key=${{ inputs.environment }}-kakehashi.tfstate"
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: terraform apply -auto-approve tfplan
+
+      - name: Export Outputs
+        working-directory: terraform
+        run: |
+          terraform output -json > outputs.json
+          cat outputs.json
+
+      - name: Upload Deployment Outputs
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-outputs-${{ inputs.environment }}
+          path: terraform/outputs.json
+
+  # ========================================
+  # ステップ 5: 本番環境検証
+  # ========================================
+  verify-deployment:
+    name: Verify Production Deployment
+    runs-on: ubuntu-latest
+    needs: terraform-apply
+    if: |
+      success() &&
+      !inputs.dry_run &&
+      inputs.environment == 'production'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Deployment Outputs
+        uses: actions/download-artifact@v3
+        with:
+          name: terraform-outputs-${{ inputs.environment }}
+
+      - name: Extract Infrastructure URLs
+        id: outputs
+        run: |
+          APP_IP=$(jq -r '.app_public_ip.value' outputs.json)
+          echo "app_url=http://$APP_IP" >> $GITHUB_OUTPUT
+          echo "App URL: http://$APP_IP"
+
+      - name: Health Check
+        run: |
+          for i in {1..30}; do
+            echo "Health check attempt $i/30..."
+            if curl -s -f http://${{ steps.outputs.outputs.app_url }}/health > /dev/null; then
+              echo "✓ Health check passed"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "✗ Health check failed"
+          exit 1
+
+      - name: Run Verification Tests
+        run: |
+          chmod +x scripts/verify-production.sh
+          ./scripts/verify-production.sh \
+            --app-url "${{ steps.outputs.outputs.app_url }}" \
+            --jwt-token "" \
+            --db-endpoint "" \
+            --db-username "" \
+            --db-password ""
+
+      - name: Upload Verification Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: verification-report-${{ inputs.environment }}
+          path: verification-report-*.json
+
+  # ========================================
+  # 完了通知
+  # ========================================
+  notify:
+    name: Send Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [test, build-docker, terraform-validate, verify-deployment]
+    if: always()
+    steps:
+      - name: Prepare Summary
+        run: |
+          echo "## KAKEHASHI Phase 1 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Dry Run**: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp**: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**:" >> $GITHUB_STEP_SUMMARY
+          echo "- Tests: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Docker Build: ${{ needs.build-docker.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Terraform: ${{ needs.terraform-validate.result }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Slack Notification
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "KAKEHASHI Phase 1 Deployment - ${{ inputs.environment }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*KAKEHASHI Phase 1 - ${{ inputs.environment }}* Deployment\n*Status*: ${{ job.status }}\n*Tests*: ${{ needs.test.result }}\n*Docker*: ${{ needs.build-docker.result }}\n*Terraform*: ${{ needs.terraform-validate.result }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+---
+
+# 使用方法:
+# 1. GitHub Actions ページで "Production Deploy" ワークフロー選択
+# 2. "Run workflow" をクリック
+# 3. Environment を選択 (staging or production)
+# 4. "Run workflow" を実行
+#
+# すべての以下のステップが自動実行されます:
+# ✓ テスト実行
+# ✓ Docker イメージビルド
+# ✓ Terraform 検証
+# ✓ インフラ自動構築（AWS）
+# ✓ 本番環境検証
+# ✓ 結果通知
