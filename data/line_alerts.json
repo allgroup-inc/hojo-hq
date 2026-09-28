@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-09-28 12:12",
+ "generated_at": "2026-09-28 21:43",
  "alert_window": [
   7,
   29
  ],
- "soon_closed_count": 25,
- "count": 24,
+ "soon_closed_count": 23,
+ "count": 25,
  "items": [
   {
    "id": "a0WJ200000CDdoxMAD",
@@ -25,6 +25,16 @@
    "tier": "まもなく締切(7〜14日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe8tMAD",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WfQ000003cYWnUAM",
+   "name": "情報通信利用促進支援事業費補助金「先進的設備等を活用した放送コンテンツ製作促進事業」三次公募",
+   "deadline": "2026-10-05",
+   "days_left": 7,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 150000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003cYWnUAM",
    "tag": "nationwide"
   },
   {
