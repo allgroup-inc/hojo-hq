@@ -1,0 +1,7 @@
+aws_region          = "ap-northeast-1"
+instance_type       = "t3.large"
+db_instance_class   = "db.t3.micro"
+db_name             = "kakehashi_apo_poc"
+db_username         = "kakehashi"
+db_password         = "CHANGE_ME_IN_PRODUCTION"
+docker_registry     = ""

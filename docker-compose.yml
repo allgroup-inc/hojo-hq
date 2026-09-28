@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: kakehashi-apo-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-kakehashi}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure-password}
+      POSTGRES_DB: ${DB_NAME:-kakehashi_apo_poc}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-kakehashi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./apps/kakehashi-apo-poc/backend
+      dockerfile: Dockerfile
+    container_name: kakehashi-apo-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${DB_USER:-kakehashi}:${DB_PASSWORD:-secure-password}@db:5432/${DB_NAME:-kakehashi_apo_poc}
+      ENTRA_CLIENT_ID: ${ENTRA_CLIENT_ID}
+      ENTRA_CLIENT_SECRET: ${ENTRA_CLIENT_SECRET}
+      ENTRA_CALLBACK_URL: http://localhost:3000/auth/callback
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./apps/kakehashi-apo-poc/frontend
+      dockerfile: Dockerfile
+    container_name: kakehashi-apo-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  postgres_data:
