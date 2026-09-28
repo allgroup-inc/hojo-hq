@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顧客カルテ — 家計の見直しやさん</title>
+    <style>
+        :root {
+            --primary: #F6C83E;
+            --ink: #241F14;
+            --cream: #FFFBF4;
+            --light-gray: #F5F5F5;
+            --border: #DDD;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Meiryo', 'Noto Sans JP', sans-serif;
+            color: var(--ink);
+            background-color: var(--cream);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 2px solid var(--primary);
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+        }
+
+        .header-info {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .header-info span {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-info strong {
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .tabs-nav {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            background: white;
+            margin-bottom: 0;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1rem;
+            background: white;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            text-align: center;
+        }
+
+        .tab-button:hover {
+            background: var(--light-gray);
+        }
+
+        .tab-button.active {
+            color: var(--ink);
+            border-bottom-color: var(--primary);
+            background: var(--cream);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            background: white;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--ink);
+            border-left: 4px solid var(--primary);
+            padding-left: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            padding: 1rem;
+            background: var(--light-gray);
+            border-radius: 4px;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+        }
+
+        .info-item value {
+            display: block;
+            font-size: 1rem;
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        thead {
+            background: var(--light-gray);
+        }
+
+        th {
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--ink);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr:hover {
+            background: var(--light-gray);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .error {
+            padding: 1rem;
+            background: #FEE;
+            border: 1px solid #F88;
+            border-radius: 4px;
+            color: #C00;
+            margin-bottom: 1rem;
+        }
+
+        .chat-panel {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--light-gray);
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .chat-panel h3 {
+            margin-bottom: 1rem;
+            color: var(--ink);
+        }
+
+        .placeholder {
+            padding: 2rem;
+            text-align: center;
+            background: var(--light-gray);
+            border-radius: 4px;
+            color: #999;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.7rem;
+            background: var(--primary);
+            color: var(--ink);
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .tabs-nav {
+                flex-wrap: wrap;
+            }
+
+            .tab-button {
+                flex: 0 0 50%;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>顧客カルテ</h1>
+        <div class="header-info" id="header-info">
+            <span><label>顧客ID</label><strong id="customer-id">読み込み中...</strong></span>
+            <span><label>契約者</label><strong id="customer-name">読み込み中...</strong></span>
+            <span><label>住所</label><strong id="customer-address">読み込み中...</strong></span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="error-message"></div>
+
+        <div class="tabs-nav">
+            <button class="tab-button active" data-tab="contracts">契約情報</button>
+            <button class="tab-button" data-tab="intention">意向把握・告知</button>
+            <button class="tab-button" data-tab="delivery">受け渡し・管理</button>
+            <button class="tab-button" data-tab="contacts">対応記録</button>
+        </div>
+
+        <!-- Tab 1: 契約情報 -->
+        <div id="contracts" class="tab-content active">
+            <div class="section">
+                <h2 class="section-title">契約情報</h2>
+                <div id="contracts-content" class="loading">読み込み中...</div>
+            </div>
+
+            <div class="chat-panel">
+                <h3>チャット（準備中）</h3>
+                <p class="placeholder">保全QCMとのリアルタイムメッセージング機能は準備中です。</p>
+            </div>
+        </div>
+
+        <!-- Tab 2: 意向把握・告知 -->
+        <div id="intention" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">意向把握・告知内容</h2>
+                <p class="placeholder">⚠️ 告知内容タブは準備中です。要配慮情報の設計が固まるまでお待ちください。</p>
+            </div>
+        </div>
+
+        <!-- Tab 3: 受け渡し・管理 -->
+        <div id="delivery" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">受け渡し・管理の現況</h2>
+                <div id="delivery-content" class="loading">読み込み中...</div>
+            </div>
+        </div>
+
+        <!-- Tab 4: 対応記録 -->
+        <div id="contacts" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">対応記録（時系列）</h2>
+                <div id="contacts-content" class="loading">読み込み中...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 設定 =====
+        const API_BASE = '/api';  // 実環境では API_BASE = 'https://kakei-crm.example.com/api'
+        const ENLIFE_COLORS = {
+            primary: '#F6C83E',
+            ink: '#241F14',
+            cream: '#FFFBF4'
+        };
+
+        // ===== メイン処理 =====
+        async function initializeCustomerDetail() {
+            const customerId = getCustomerIdFromUrl();
+
+            if (!customerId) {
+                showError('顧客IDが指定されていません。');
+                return;
+            }
+
+            try {
+                const dossier = await fetchCustomerDossier(customerId);
+                renderCustomerDetail(dossier);
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`エラーが発生しました: ${error.message}`);
+            }
+        }
+
+        // ===== URL パラメータ処理 =====
+        function getCustomerIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id') || null;
+        }
+
+        // ===== API 呼び出し =====
+        async function fetchCustomerDossier(customerId) {
+            const url = `${API_BASE}/customers/dossier?id=${encodeURIComponent(customerId)}`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status} ${response.statusText}`);
+            }
+
+            return await response.json();
+        }
+
+        // ===== レンダリング =====
+        function renderCustomerDetail(dossier) {
+            // ヘッダー情報
+            document.getElementById('customer-id').textContent = dossier.customer_id || '—';
+            document.getElementById('customer-name').textContent =
+                `${dossier.last_name || ''} ${dossier.first_name || ''}`.trim() || '—';
+            document.getElementById('customer-address').textContent = dossier.address || '—';
+
+            // Tab 1: 契約情報
+            renderContractsTab(dossier);
+
+            // Tab 3: 受け渡し・管理
+            renderDeliveryTab(dossier);
+
+            // Tab 4: 対応記録
+            renderContactsTab(dossier);
+        }
+
+        function renderContractsTab(dossier) {
+            const container = document.querySelector('#contracts-content');
+
+            if (!dossier.contracts || dossier.contracts.length === 0) {
+                container.innerHTML = '<p class="placeholder">契約情報がありません。</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>証券番号</th><th>保険会社</th><th>商品</th><th>成立日</th></tr></thead><tbody>';
+
+            dossier.contracts.forEach(contract => {
+                const insuranceCompany = contract.insurer || contract.carrier || '—';
+                const product = contract.product || '—';
+                const settledDate = contract.settled_date || contract.settled_on || '—';
+
+                html += `<tr>
+                    <td>${contract.raw || contract.policy_number || '—'}</td>
+                    <td>${insuranceCompany}</td>
+                    <td>${product}</td>
+                    <td>${settledDate}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderDeliveryTab(dossier) {
+            const container = document.querySelector('#delivery-content');
+
+            if (!dossier.hozen_board || dossier.hozen_board.length === 0) {
+                container.innerHTML = '<p class="placeholder">受け渡し・管理の記録がありません。</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>カテゴリ</th><th>保険会社</th><th>由来</th><th>連携状態</th><th>接触方法</th></tr></thead><tbody>';
+
+            dossier.hozen_board.forEach(row => {
+                const category = row.category || '—';
+                const carrier = row.carrier || '—';
+                const origin = row.origin || '—';
+                const crmSync = row.crm_sync || '—';
+                const contactMethod = row.contact_method || '—';
+
+                html += `<tr>
+                    <td><span class="badge">${category}</span></td>
+                    <td>${carrier}</td>
+                    <td>${origin}</td>
+                    <td>${crmSync}</td>
+                    <td>${contactMethod}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderContactsTab(dossier) {
+            const container = document.querySelector('#contacts-content');
+
+            if (!dossier.contacts || dossier.contacts.length === 0) {
+                container.innerHTML = '<p class="placeholder">対応記録がありません。</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>日時</th><th>手段</th><th>目的</th><th>結果</th><th>対応者</th></tr></thead><tbody>';
+
+            dossier.contacts.forEach(contact => {
+                const when = contact.when ? new Date(contact.when).toLocaleString('ja-JP') : '—';
+                const medium = contact.medium || '—';
+                const goal = contact.goal || '—';
+                const result = contact.result || '—';
+                const staff = contact.staff || '—';
+
+                html += `<tr>
+                    <td>${when}</td>
+                    <td>${medium}</td>
+                    <td>${goal}</td>
+                    <td>${result}</td>
+                    <td>${staff}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ===== タブ切り替え =====
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+
+                // ボタンのアクティブ状態を更新
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                // タブコンテンツを切り替え
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // ===== 初期化 =====
+        document.addEventListener('DOMContentLoaded', initializeCustomerDetail);
+    </script>
+</body>
+</html>
