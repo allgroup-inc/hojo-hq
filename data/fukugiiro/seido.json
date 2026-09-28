@@ -1,6 +1,6 @@
 {
- "updated_at": "2026-09-24 08:22",
- "count": 261,
+ "updated_at": "2026-09-25",
+ "count": 265,
  "items": [
   {
    "id": "fk-kuni-jidoteate",
@@ -7006,6 +7006,94 @@
    "status": "要確認",
    "notes": "出典: 糸満市ウェブサイト",
    "fetched_at": "2026-09-24 08:22"
+  },
+  {
+   "id": "fk-kuni-shotoku-shien",
+   "name": "高等学校等就学支援金",
+   "category": "教育",
+   "life_events": [
+    "入園・入学"
+   ],
+   "issuer": "文部科学省",
+   "area": "全国",
+   "target_household": "高校生のいるご家庭が対象となる可能性があります",
+   "how_to_apply": "在学している高校で申請",
+   "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/index.htm",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-09-25",
+   "verified_by": "Claude検証 2026-09-25",
+   "status": "検証済み",
+   "notes": "出典: 文部科学省ウェブサイト",
+   "fetched_at": "2026-09-25"
+  },
+  {
+   "id": "fk-kuni-shogaiji-kyufu",
+   "name": "特別児童扶養手当",
+   "category": "子育て",
+   "life_events": [
+    "子育て"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "一定の障害状態にあるお子さんを育てている方が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kodomo_kosodate/kodomo_kosodate_top/tokubetukodumo.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-09-25",
+   "verified_by": "Claude検証 2026-09-25",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-25"
+  },
+  {
+   "id": "fk-kuni-syogaisya-teate",
+   "name": "障害児福祉手当",
+   "category": "子育て",
+   "life_events": [
+    "子育て"
+   ],
+   "issuer": "厚生労働省",
+   "area": "全国",
+   "target_household": "在宅で一定の障害状態にあるお子さんのケアをしている世帯が対象となる可能性があります",
+   "how_to_apply": "お住まいの市区町村の窓口",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kodomo_kosodate/kodomo_kosodate_top/syogaiji_fukusiteate.html",
+   "amount_note": "要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-09-25",
+   "verified_by": "Claude検証 2026-09-25",
+   "status": "検証済み",
+   "notes": "出典: 厚生労働省ウェブサイト",
+   "fetched_at": "2026-09-25"
+  },
+  {
+   "id": "fk-okinawa-kokoro-iryo",
+   "name": "沖縄県 こども医療費助成制度",
+   "category": "医療・健康",
+   "life_events": [
+    "子育て"
+   ],
+   "issuer": "沖縄県(市町村)",
+   "area": "沖縄県",
+   "target_household": "沖縄県内のお子さんがいるご家庭が対象となる可能性があります",
+   "how_to_apply": "お住まいの市町村の福祉窓口",
+   "source_url": "https://www.pref.okinawa.lg.jp/iryokenko/iryo/1006488/1006512.html",
+   "amount_note": "対象年齢や補助内容は市町村で異なります。要確認(公式ページでご確認ください)",
+   "deadline_type": "常時",
+   "deadline": null,
+   "verified": true,
+   "verified_at": "2026-09-25",
+   "verified_by": "Claude検証 2026-09-25",
+   "status": "検証済み",
+   "notes": "出典: 沖縄県ウェブサイト",
+   "fetched_at": "2026-09-25"
   }
  ]
 }

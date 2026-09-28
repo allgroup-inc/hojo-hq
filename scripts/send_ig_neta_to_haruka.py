@@ -71,7 +71,9 @@ def validate_neta():
             issues.append(f"案{no}: 元の制度が照合済み(verified=True)になっていません")
 
         # 常時制度か確認(期限があると SNS 投稿ルールに引っかかる)
-        if s and s.get("deadline_type"):
+        # deadline_type が存在しない、または "常時" なら OK。その他は NG
+        deadline_type = s.get("deadline_type") if s else None
+        if deadline_type and deadline_type != "常時":
             issues.append(f"案{no}: 期限ありの制度です。常時制度のみ投稿可能です")
 
     if issues:
