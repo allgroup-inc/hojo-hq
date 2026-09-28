@@ -13,11 +13,8 @@ module.exports = {
       },
     },
   },
-  transform: {
-    '^.+\\.tsx?$': 'ts-jest',
-  },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-dnd|dnd-core|@react-dnd|@babel|luxon|@mui)/)',
+    'node_modules/(?!(react-dnd|@react-dnd|dnd-core|@mui|@emotion|luxon|@babel))',
   ],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   collectCoverageFrom: [

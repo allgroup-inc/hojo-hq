@@ -46,3 +46,6 @@ private/
 site/data/
 video-project/export/
 video-project/hf/node_modules/
+
+# JWT 秘密鍵（本番化時は削除・Azure Key Vault に移行）
+private-key.pem

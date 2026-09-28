@@ -23,9 +23,12 @@ app.use((err: any, req: any, res: any, next: any) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ PoC Backend running on http://localhost:${PORT}`);
-  console.log(`📍 API Endpoint: http://localhost:${PORT}/api/free-slots/:repId/:date`);
-});
+// Start server only when run directly (not when imported for testing)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`✅ PoC Backend running on http://localhost:${PORT}`);
+    console.log(`📍 API Endpoint: http://localhost:${PORT}/api/free-slots/:repId/:date`);
+  });
+}
 
 export default app;

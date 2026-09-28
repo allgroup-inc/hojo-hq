@@ -32,7 +32,7 @@ describe('GET /api/free-slots/:repId/:date', () => {
 
   it('should reject invalid date format', async () => {
     const res = await request(app)
-      .get('/api/free-slots/rep-001/2026/10/05')
+      .get('/api/free-slots/rep-001/invalid-date')
       .expect(400);
 
     expect(res.body).toHaveProperty('error');
