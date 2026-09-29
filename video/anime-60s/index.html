@@ -415,6 +415,37 @@ function drawCat(x,foot,s,t,pop,alpha){
   g.restore();g.restore();
 }
 
+// ---------- 青い小鳥(家の単位。x:足元の中心, base:とまる面のy, s:大きさ, f:向き 1=右向き) ----------
+function drawBird(x,base,s,f,t,ph,lit,alpha){
+  const body=mixHex('#26303C','#4FA3E0',lit*.9), wing=mixHex('#1E2833','#2F7FBF',lit*.9), belly=mixHex('#333B46','#EAF4FB',lit*.9);
+  const beak=mixHex('#3A3028','#F2A23A',lit*.9), dark='#1F2A2E';
+  const hop=-Math.max(0,Math.sin(t*3.4+ph))*(((t+ph)%3.2)<1.2?1:0)*.9;   // ときどき小さくはねる
+  const chirp=((t*1.3+ph)%2.6)<.45;                                     // ちゅん(くちばしが開く)
+  const flap=((t*.8+ph)%4.1)<.5?Math.abs(Math.sin(t*22))*.7:0;          // ときどき羽ばたく
+  g.save();g.translate(x,base+hop);g.scale(f,1);g.globalAlpha=alpha;
+  // 脚
+  g.strokeStyle=beak;g.lineWidth=s*.06;g.beginPath();g.moveTo(-s*.12,-s*.02);g.lineTo(-s*.12,-s*.3);g.moveTo(s*.12,-s*.02);g.lineTo(s*.12,-s*.3);g.stroke();
+  // しっぽ
+  g.fillStyle=wing;g.beginPath();g.moveTo(-s*.3,-s*.5);g.lineTo(-s*.75,-s*.35+Math.sin(t*6+ph)*s*.06);g.lineTo(-s*.7,-s*.62);g.closePath();g.fill();
+  // 体
+  g.fillStyle=body;g.beginPath();g.ellipse(0,-s*.55,s*.45,s*.36,0,0,6.283);g.fill();
+  g.fillStyle=belly;g.beginPath();g.ellipse(s*.08,-s*.45,s*.28,s*.2,0,0,6.283);g.fill();
+  // 羽
+  g.fillStyle=wing;g.save();g.translate(-s*.1,-s*.62);g.rotate(-flap);g.beginPath();g.ellipse(-s*.05,0,s*.28,s*.14,.3,0,6.283);g.fill();g.restore();
+  // 頭
+  const hx=s*.32, hy=-s*.95, tilt=Math.sin(t*2.1+ph)*.12;
+  g.save();g.translate(hx,hy);g.rotate(tilt);
+  g.fillStyle=body;g.beginPath();g.arc(0,0,s*.3,0,6.283);g.fill();
+  // くちばし(ちゅん、で開く)
+  g.fillStyle=beak;const op=chirp?s*.06:0;
+  g.beginPath();g.moveTo(s*.24,-s*.04-op);g.lineTo(s*.5,-s*.02);g.lineTo(s*.24,s*.02);g.closePath();g.fill();
+  g.beginPath();g.moveTo(s*.24,s*.0+op);g.lineTo(s*.48,s*.04);g.lineTo(s*.24,s*.08+op);g.closePath();g.fill();
+  // 目・ほっぺ
+  g.fillStyle=dark;g.beginPath();g.arc(s*.1,-s*.06,s*.05,0,6.283);g.fill();
+  g.fillStyle='rgba(235,120,110,.5)';g.globalAlpha=alpha*lit;g.beginPath();g.arc(s*.16,s*.06,s*.06,0,6.283);g.fill();
+  g.restore();g.restore();
+}
+
 // ---------- 子どもの動き:4.5秒ごとに両親に「高い高い」されて、あいだはぴょんぴょん ----------
 function kidPose(t){
   const T=(t-33.6);
@@ -565,6 +596,9 @@ function draw(t){
      // 棟の両端に小さなシーサー(左=吽・口を閉じる/右=阿・口を開ける)
      drawShisa(-15,-31.4,5.2, 1,false,t,0.0,litW,ha);
      drawShisa( 15,-31.4,5.2,-1,true, t,1.7,litW,ha);
+     // 棟のまんなかに小さな青い小鳥が2羽(向かい合って、ぴょこぴょこ・ちゅんちゅん)
+     drawBird(-3.2,-31.4,3.0, 1,t,0.0,litW,ha);
+     drawBird( 3.2,-31.4,3.0,-1,t,1.1,litW,ha);
      // 戸(家族が出てくると開く)
      g.fillStyle=mixHex('#0B1522','#2E1D18',litW*.7);g.beginPath();g.rect(-5,4,10,18);g.fill();
      if(out>0){g.fillStyle='#FFE9A8';g.globalAlpha=ha*out*.9;g.beginPath();g.rect(-5,4,10,18);g.fill();g.globalAlpha=ha}
