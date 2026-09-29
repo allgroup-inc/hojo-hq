@@ -261,104 +261,22 @@ a:hover {
     position: relative;
     width: 100vw;
     margin-left: calc(50% - 50vw);
-    min-height: 100vh;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
+    aspect-ratio: 1400 / 1233;
     background-image: url('assets/images/hero-shuri-calligraphy.jpg');
     background-size: cover;
     background-position: center top;
-    background-attachment: fixed;
     background-repeat: no-repeat;
-    overflow: hidden;
 }
 
 .hero::after {
     content: "";
     position: absolute;
-    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 1) 100%);
+    height: 20%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%);
     pointer-events: none;
-    z-index: 1;
-}
-
-.hero-inner {
-    position: relative;
-    z-index: 2;
-    max-width: var(--max-width-pc);
-    width: 100%;
-    padding: var(--spacing-xl) var(--size-gutter-pc);
-    margin: 0 auto;
-    background-color: #FFFFFF;
-}
-
-.hero-text {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.hero h1 {
-    color: var(--color-heading);
-    font-size: clamp(1.5rem, 1.2rem + 1.8vw, 2.5rem);
-    font-weight: 700;
-    line-height: 1.5;
-    max-width: 32em;
-    margin: 0;
-    word-break: auto-phrase;
-    text-wrap: balance;
-}
-
-.hero-description {
-    color: var(--color-text);
-    font-size: clamp(0.95rem, 0.9rem + 0.8vw, 1.1rem);
-    line-height: 1.6;
-    max-width: 48em;
-    margin: 0;
-}
-
-.hero .btn-primary {
-    background-color: var(--color-red);
-    color: var(--color-white);
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 14px 36px;
-    border-radius: 6px;
-    width: fit-content;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
-}
-
-.hero .btn-primary:hover {
-    background-color: #A0432A;
-    transform: translateY(-2px);
-}
-
-@media (max-width: 767px) {
-    .hero {
-        min-height: 80vh;
-        align-items: center;
-    }
-
-    .hero-inner {
-        padding: var(--spacing-lg) var(--size-gutter-mobile);
-    }
-
-    .hero h1 {
-        font-size: 1.25rem;
-    }
-
-    .hero-description {
-        font-size: 0.95rem;
-    }
-
-    .hero .btn-primary {
-        width: 100%;
-    }
 }
 
 /* ---------- Step 5: セクション2-3 Cards ---------- */
@@ -1042,7 +960,6 @@ a:hover {
     }
     .card:hover,
     .btn-primary:hover,
-    .hero .btn-primary:hover,
     .cta-button:hover {
         transform: none;
     }
