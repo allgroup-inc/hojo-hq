@@ -30,35 +30,35 @@ html,body{margin:0;padding:0;background:#000}
 @keyframes cvout{to{opacity:0}}
 
 /* ---- テキスト(DOM) ---- */
-.slot{position:absolute;left:80px;right:80px;text-align:center;z-index:5}
+.slot{position:absolute;left:40px;right:40px;text-align:center;z-index:5}
 .top{top:190px}
 .top2{top:240px}
 .in{opacity:0;animation:in 1.5s cubic-bezier(.2,.7,.2,1) forwards}
 .out{animation:out 1.1s ease forwards}
 @keyframes in{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
 @keyframes out{to{opacity:0}}
-.line{display:block;font-weight:700;font-size:58px;line-height:1.75;letter-spacing:.06em;
+.line{display:block;font-weight:700;font-size:84px;line-height:1.5;letter-spacing:.04em;
   text-shadow:0 2px 30px rgba(0,0,0,.55),0 0 60px rgba(242,193,78,.18)}
-.line.small{font-size:46px}
-.line.big{font-size:100px;line-height:1.3;color:var(--hi);letter-spacing:.04em;
+.line.small{font-size:69px}
+.line.big{font-size:150px;line-height:1.25;color:var(--hi);letter-spacing:.04em;
   text-shadow:0 0 50px rgba(242,193,78,.55),0 2px 30px rgba(0,0,0,.5)}
-.words{display:flex;flex-wrap:wrap;justify-content:center;gap:0 28px;padding:0 20px}
-.words .line{font-size:60px}
-.chip{display:inline-block;margin-top:18px;padding:12px 34px;border-radius:999px;
-  font-family:'Noto Sans JP',sans-serif;font-weight:500;font-size:34px;letter-spacing:.08em;
+.words{display:flex;flex-wrap:wrap;justify-content:center;gap:0 30px;padding:0}
+.words .line{font-size:90px}
+.chip{display:inline-block;margin-top:24px;padding:14px 44px;border-radius:999px;
+  font-family:'Noto Sans JP',sans-serif;font-weight:500;font-size:51px;letter-spacing:.06em;
   color:#FFFBF4;background:rgba(185,80,47,.85);text-shadow:none}
 
 /* ---- 締めのロックアップ ---- */
-.wm{position:absolute;left:0;right:0;top:1112px;text-align:center;font-weight:600;font-size:116px;
-  letter-spacing:.06em;color:var(--shu);opacity:0;animation:in 1.6s cubic-bezier(.2,.7,.2,1) 52.6s forwards;z-index:4}
-.tag{position:absolute;left:0;right:0;top:1292px;text-align:center;font-weight:600;font-size:44px;
-  letter-spacing:.14em;color:var(--umi);opacity:0;animation:in 1.6s cubic-bezier(.2,.7,.2,1) 54.2s forwards;z-index:4}
-.cta{position:absolute;left:0;right:0;top:1420px;text-align:center;font-family:'Noto Sans JP',sans-serif;
-  font-weight:500;font-size:32px;letter-spacing:.1em;color:var(--sumi);opacity:0;
+.wm{position:absolute;left:0;right:0;top:1100px;text-align:center;font-weight:600;font-size:136px;
+  letter-spacing:.04em;color:var(--shu);opacity:0;animation:in 1.6s cubic-bezier(.2,.7,.2,1) 52.6s forwards;z-index:4}
+.tag{position:absolute;left:0;right:0;top:1310px;text-align:center;font-weight:600;font-size:54px;
+  letter-spacing:.08em;color:var(--umi);opacity:0;animation:in 1.6s cubic-bezier(.2,.7,.2,1) 54.2s forwards;z-index:4}
+.cta{position:absolute;left:0;right:0;top:1450px;text-align:center;font-family:'Noto Sans JP',sans-serif;
+  font-weight:500;font-size:44px;letter-spacing:.08em;line-height:1.5;color:var(--sumi);opacity:0;
   animation:in 1.4s cubic-bezier(.2,.7,.2,1) 56.2s forwards;z-index:4}
-.cta b{display:inline-block;margin-bottom:14px;padding:10px 30px;border-radius:999px;background:var(--shu);color:#FFFBF4;font-weight:500}
+.cta b{display:inline-block;margin-bottom:16px;padding:12px 40px;border-radius:999px;background:var(--shu);color:#FFFBF4;font-weight:500}
 .corp{position:absolute;left:0;right:0;top:1790px;text-align:center;font-family:'Noto Sans JP',sans-serif;
-  font-weight:500;font-size:24px;letter-spacing:.2em;color:#9A8F86;opacity:0;
+  font-weight:500;font-size:32px;letter-spacing:.2em;color:#9A8F86;opacity:0;
   animation:in 1.4s ease 57s forwards;z-index:4}
 </style>
 </head>
@@ -113,7 +113,7 @@ html,body{margin:0;padding:0;background:#000}
   <!-- S3 まっくらな家 -->
   <div class="slot top">
     <div class="out" style="animation-delay:26.4s">
-      <span class="line in" style="animation-delay:18.6s">でも、制度は<br>自分からは来てくれません。</span>
+      <span class="line in" style="animation-delay:18.6s">でも、制度は<br>自分からは<br>来てくれません。</span>
       <span class="line in" style="animation-delay:22.6s">知らなければ、<br>あかりは届かない。</span>
     </div>
   </div>
@@ -122,7 +122,7 @@ html,body{margin:0;padding:0;background:#000}
   <div class="slot top">
     <div class="out" style="animation-delay:39.6s">
       <span class="line in" style="animation-delay:33.0s">もらいわすれ堂は、</span>
-      <span class="line small in" style="animation-delay:34.6s">あなたが受け取れるかもしれない<br>制度を、いっしょに、さがします。</span>
+      <span class="line small in" style="animation-delay:34.6s">あなたが受け取れる<br>かもしれない制度を、<br>いっしょに、さがします。</span>
       <span class="chip in" style="animation-delay:37.2s">3分診断 ・ 無料 ・ 匿名</span>
     </div>
   </div>
@@ -165,21 +165,34 @@ const ISLAND = [[330,40],[390,120],[420,230],[400,330],[430,420],[400,520],[385,
   [430,1400],[360,1450],[280,1460],[220,1420],[200,1340],[230,1250],[210,1160],[240,1060],[210,1000],
   [250,930],[270,860],[230,760],[215,660],[170,600],[120,560],[130,500],[200,470],[250,420],[260,330],
   [290,220],[300,120]];
+// 実際の沖縄本島と同じく南西→北東へ斜めに置く(北端が右上)。中心(300,750)まわりに時計回り32°
+const TILT=32*Math.PI/180, PIV={x:300,y:750};
+function rot(x,y){const dx=x-PIV.x,dy=y-PIV.y,c=Math.cos(TILT),sn=Math.sin(TILT);return [PIV.x+dx*c-dy*sn, PIV.y+dx*sn+dy*c]}
+for(let i=0;i<ISLAND.length;i++)ISLAND[i]=rot(ISLAND[i][0],ISLAND[i][1]);
+const BB={x0:Math.min(...ISLAND.map(p=>p[0])),x1:Math.max(...ISLAND.map(p=>p[0])),y0:Math.min(...ISLAND.map(p=>p[1])),y1:Math.max(...ISLAND.map(p=>p[1]))};
 function inPoly(x,y){let inside=false;for(let i=0,j=ISLAND.length-1;i<ISLAND.length;j=i++){
   const [xi,yi]=ISLAND[i],[xj,yj]=ISLAND[j];
   if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))inside=!inside}return inside}
 let ISLAND_LEN=0;for(let i=0;i<ISLAND.length;i++){const a=ISLAND[i],b=ISLAND[(i+1)%ISLAND.length];ISLAND_LEN+=Math.hypot(b[0]-a[0],b[1]-a[1])}
 
-const HOUSE = {x:300,y:1300};
+const HOUSE = (()=>{const [x,y]=rot(300,1300);return {x,y}})();
 const WINDOW = {x:HOUSE.x+10,y:HOUSE.y+1};
 
 // ---------- カメラ ----------
+// S1/S2: 島全体を、上の文字帯(〜560px)を避けて収める
+const Z1=Math.min(880/(BB.x1-BB.x0), 1240/(BB.y1-BB.y0));
+const CAM1={x:(BB.x0+BB.x1)/2, y:BB.y0+(400/Z1), z:Z1};
+// S3/S4: 家に寄る(家は画面中央よりやや下)
+const CAM3={x:HOUSE.x, y:HOUSE.y-22, z:6};
+// S5/S6: 引き。家が画面下(y≒1500)、虹が上
+const Z5=0.8;
+const CAM5={x:(BB.x0+BB.x1)/2, y:HOUSE.y-540/Z5, z:Z5};
 const CAM = [
-  [0,   {x:320,y:640, z:0.95}],
-  [17,  {x:320,y:640, z:0.95}],
-  [21.8,{x:300,y:1290,z:6}],
-  [40,  {x:300,y:1290,z:6}],
-  [43.2,{x:300,y:625, z:0.8}],
+  [0,   CAM1],
+  [17,  CAM1],
+  [21.8,CAM3],
+  [40,  CAM3],
+  [43.2,CAM5],
 ];
 const CAM_FINAL = CAM[CAM.length-1][1];
 function camAt(t){
@@ -207,7 +220,7 @@ const COLS = [
 function pickCol(u){let a=0;for(const c of COLS){a+=c.w;if(u<a)return c.c}return COLS[0].c}
 const lights=[];
 while(lights.length<470){
-  const x=100+rnd()*400,y=40+rnd()*1440;
+  const x=BB.x0+rnd()*(BB.x1-BB.x0),y=BB.y0+rnd()*(BB.y1-BB.y0);
   if(!inPoly(x,y))continue;
   const d=Math.hypot(x-HOUSE.x,y-HOUSE.y);
   if(d<28)continue;
@@ -261,7 +274,7 @@ function cubic(p0,p1,p2,p3,t){const u=1-t;return{
 
 // ---------- 案内のあかり(画面座標・27〜31.9秒) ----------
 function guidePos(t){
-  const winS = {x:W/2+(WINDOW.x-300)*6, y:H/2+(WINDOW.y-1290)*6};
+  const winS = toS(WINDOW,CAM3);
   if(t<29.6){const p=smooth((t-27)/2.6);return {x:W/2+150*Math.sin((t-27)*2.4)*(1-p*.3),y:lerp(-80,winS.y-330,easeOut(p))}}
   const p=clamp((t-29.6)/2.3);
   const ang=-Math.PI/2+p*Math.PI*2*1.15, r=lerp(330,0,easeIn(p)*.15+smooth(p)*.85);
@@ -290,7 +303,7 @@ function draw(t){
   {const ap=smooth((t-.4)/3.5)*(1-dawn*.9);
    if(ap>0){g.fillStyle='#FFFBF4';for(const s of stars){
      g.globalAlpha=ap*s.a*(.7+.3*Math.sin(t*s.w+s.ph));
-     g.beginPath();g.arc(s.x-(cam.x-320)*.02,s.y-(cam.y-640)*.02,s.r,0,6.283);g.fill()}}}
+     g.beginPath();g.arc(s.x-(cam.x-CAM1.x)*.02,s.y-(cam.y-CAM1.y)*.02,s.r,0,6.283);g.fill()}}}
 
   // 島の輪郭(点線で自ら描かれる)
   {const prog=smooth((t-.8)/5.5), vis=clamp((2.6-cam.z)/1.6)*(1-smooth((t-43.5)/3));
