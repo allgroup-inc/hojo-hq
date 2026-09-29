@@ -44,3 +44,6 @@ private/
 
 # ローカル動作確認用のデータコピー(本番は update.yml が cp -r data site/data で毎回生成)
 site/data/
+
+# 動画のレンダリング結果(video/*/ の MP4)はソースから再生成できるため追跡しない
+video/**/*.mp4
