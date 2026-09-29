@@ -259,24 +259,40 @@ a:hover {
 /* ---------- Step 4: セクション1 Hero「沖縄の力強さ、世界へ」 ---------- */
 .hero {
     position: relative;
-    width: 100%;
-    background-color: #FFFFFF;
-    padding: var(--spacing-xl) var(--size-gutter-pc);
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background-image: url('assets/images/hero-shuri-calligraphy.jpg');
+    background-size: cover;
+    background-position: center top;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 1) 100%);
+    pointer-events: none;
+    z-index: 1;
 }
 
 .hero-inner {
+    position: relative;
+    z-index: 2;
     max-width: var(--max-width-pc);
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-}
-
-.hero-tagline {
     width: 100%;
-    max-width: 100%;
-    height: auto;
-    display: block;
+    padding: var(--spacing-xl) var(--size-gutter-pc);
+    margin: 0 auto;
+    background-color: #FFFFFF;
 }
 
 .hero-text {
@@ -287,7 +303,7 @@ a:hover {
 
 .hero h1 {
     color: var(--color-heading);
-    font-size: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+    font-size: clamp(1.5rem, 1.2rem + 1.8vw, 2.5rem);
     font-weight: 700;
     line-height: 1.5;
     max-width: 32em;
@@ -324,15 +340,16 @@ a:hover {
 
 @media (max-width: 767px) {
     .hero {
-        padding: var(--spacing-lg) var(--size-gutter-mobile);
+        min-height: 80vh;
+        align-items: center;
     }
 
     .hero-inner {
-        gap: var(--spacing-md);
+        padding: var(--spacing-lg) var(--size-gutter-mobile);
     }
 
     .hero h1 {
-        font-size: 1.125rem;
+        font-size: 1.25rem;
     }
 
     .hero-description {
