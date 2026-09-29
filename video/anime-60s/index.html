@@ -169,7 +169,32 @@ const ISLAND = [[330,40],[390,120],[420,230],[400,330],[430,420],[400,520],[385,
 const TILT=45*Math.PI/180, PIV={x:300,y:750};
 function rot(x,y){const dx=x-PIV.x,dy=y-PIV.y,c=Math.cos(TILT),sn=Math.sin(TILT);return [PIV.x+dx*c-dy*sn, PIV.y+dx*sn+dy*c]}
 for(let i=0;i<ISLAND.length;i++)ISLAND[i]=rot(ISLAND[i][0],ISLAND[i][1]);
-const BB={x0:Math.min(...ISLAND.map(p=>p[0])),x1:Math.max(...ISLAND.map(p=>p[0])),y0:Math.min(...ISLAND.map(p=>p[1])),y1:Math.max(...ISLAND.map(p=>p[1]))};
+// 離島(様式化・距離は寄せて配置。cx,cy:中心 rx,ry:半径 a:向き(度) label:名前 lx,ly:ラベルの位置ずらし)
+const REMOTE_SRC=[
+  {cx:212,cy:52, rx:12,ry:40,a:-20,label:'伊平屋・伊是名',lx:-150,ly:-10},
+  {cx:238,cy:128,rx:14,ry:12,a:0},
+  {cx:62, cy:560,rx:26,ry:12,a:0,  label:'伊江島',lx:-70,ly:-24},
+  {cx:36, cy:1010,rx:10,ry:8,a:0, label:'粟国島',lx:-80,ly:-12},
+  {cx:58, cy:1092,rx:7, ry:6, a:0},
+  {cx:-64,cy:1176,rx:40,ry:28,a:20,label:'久米島',lx:-40,ly:52},
+  {cx:132,cy:1312,rx:9, ry:18,a:0, label:'慶良間諸島',lx:-90,ly:50},
+  {cx:96, cy:1292,rx:16,ry:8, a:0},
+  {cx:78, cy:1314,rx:7, ry:6, a:0},
+  {cx:-200,cy:1520,rx:50,ry:36,a:-30,label:'宮古島',lx:-20,ly:66},
+  {cx:-248,cy:1494,rx:15,ry:11,a:-30},
+  {cx:-300,cy:1548,rx:9, ry:8, a:0,  label:'多良間島',lx:-40,ly:-30},
+  {cx:-378,cy:1576,rx:34,ry:38,a:30, label:'石垣島',lx:-30,ly:70},
+  {cx:-458,cy:1586,rx:42,ry:34,a:0,  label:'西表島',lx:-40,ly:62},
+  {cx:-540,cy:1556,rx:20,ry:10,a:0,  label:'与那国島',lx:-50,ly:-40},
+  {cx:610,cy:1160,rx:10,ry:9, a:0,  label:'大東諸島',lx:22,ly:0},
+  {cx:616,cy:1196,rx:12,ry:11,a:0},
+];
+const REMOTE=REMOTE_SRC.map(o=>{const [x,y]=rot(o.cx,o.cy);return {...o,x,y,ang:o.a*Math.PI/180+TILT}});
+function inRemote(x,y){for(const o of REMOTE){const dx=x-o.x,dy=y-o.y,c=Math.cos(-o.ang),sn=Math.sin(-o.ang);
+  const u=dx*c-dy*sn,v=dx*sn+dy*c;if((u*u)/(o.rx*o.rx)+(v*v)/(o.ry*o.ry)<=1)return true}return false}
+const allX=[...ISLAND.map(p=>p[0]),...REMOTE.flatMap(o=>[o.x-o.rx-o.ry,o.x+o.rx+o.ry])];
+const allY=[...ISLAND.map(p=>p[1]),...REMOTE.flatMap(o=>[o.y-o.rx-o.ry,o.y+o.rx+o.ry])];
+const BB={x0:Math.min(...allX),x1:Math.max(...allX),y0:Math.min(...allY),y1:Math.max(...allY)};
 function inPoly(x,y){let inside=false;for(let i=0,j=ISLAND.length-1;i<ISLAND.length;j=i++){
   const [xi,yi]=ISLAND[i],[xj,yj]=ISLAND[j];
   if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))inside=!inside}return inside}
@@ -182,8 +207,8 @@ const KIDX = -5;                                    // 子どもの立ち位置(
 
 // ---------- カメラ ----------
 // S1/S2: 島全体を、上の文字帯(〜560px)を避けて収める
-const Z1=Math.min(880/(BB.x1-BB.x0), 1240/(BB.y1-BB.y0));
-const CAM1={x:(BB.x0+BB.x1)/2, y:BB.y0+(400/Z1), z:Z1};
+const Z1=Math.min(1000/(BB.x1-BB.x0), 1200/(BB.y1-BB.y0));
+const CAM1={x:(BB.x0+BB.x1)/2-(55/Z1), y:(BB.y0+BB.y1)/2-(230/Z1), z:Z1};   // 文字帯を避けて、島々を画面の下寄りの中央に
 // S3/S4: 家に寄る(家は画面中央よりやや下)
 const CAM3={x:HOUSE.x, y:HOUSE.y-64, z:6};
 // S5/S6: 引き。家が画面下(y≒1500)、虹が上
@@ -221,9 +246,9 @@ const COLS = [
   {c:'#F5CE6E',w:.56},{c:'#F2C14E',w:.24},{c:'#E58A6E',w:.12},{c:'#8FD0C4',w:.08}];
 function pickCol(u){let a=0;for(const c of COLS){a+=c.w;if(u<a)return c.c}return COLS[0].c}
 const lights=[];
-while(lights.length<470){
+while(lights.length<520){
   const x=BB.x0+rnd()*(BB.x1-BB.x0),y=BB.y0+rnd()*(BB.y1-BB.y0);
-  if(!inPoly(x,y))continue;
+  if(!inPoly(x,y)&&!inRemote(x,y))continue;
   const d=Math.hypot(x-HOUSE.x,y-HOUSE.y);
   if(d<28*HS)continue;
   lights.push({x,y,u:rnd(),v:rnd(),ph:rnd()*6.283,w:1.2+rnd()*2.2,col:pickCol(rnd()),near:d<100,type:'isl'});
@@ -421,7 +446,18 @@ function draw(t){
      // 島の内側をごく薄く(輪郭が閉じてから)
      if(prog>=1){g.beginPath();ISLAND.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();
        g.globalAlpha=.10*smooth((t-6.3)/1.5)*vis;g.fillStyle='#6FAEA4';g.fill()}
-     g.restore()}}
+     // 離島(本島が描き終わってから、北から順に浮かび上がる)
+     REMOTE.forEach((o,i)=>{const a=smooth((t-5.6-i*.12)/.9)*vis;if(a<=0)return;
+       g.beginPath();g.ellipse(o.x,o.y,o.rx,o.ry,o.ang,0,6.283);
+       g.globalAlpha=.10*a;g.fillStyle='#6FAEA4';g.fill();
+       g.strokeStyle='#6FAEA4';g.lineWidth=1.6/cam.z;g.setLineDash([3/cam.z,5/cam.z]);g.globalAlpha=.6*a;g.stroke();g.setLineDash([])});
+     g.restore();
+     // 島の名前(画面座標・大きさ固定)
+     {const la=smooth((t-6.6)/1.4)*vis;if(la>0){g.font="500 26px 'Noto Sans JP',sans-serif";g.textBaseline='middle';g.textAlign='left';
+       const put=(wx,wy,txt,lx,ly)=>{const sp=toS({x:wx,y:wy},cam);g.globalAlpha=la*.85;g.fillStyle='#A9DAD0';
+         g.shadowColor='rgba(0,0,0,.7)';g.shadowBlur=8;g.fillText(txt,sp.x+lx,sp.y+ly);g.shadowBlur=0};
+       REMOTE.forEach(o=>{if(o.label)put(o.x,o.y,o.label,o.lx,o.ly)});
+       const c=rot(300,700);put(c[0],c[1],'沖縄本島',30,-190)}}}}
 
   // 家(ズームしたときだけ現れる)+ 家族
   {const ha=clamp((cam.z-2)/2.5);
