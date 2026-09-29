@@ -3321,5 +3321,70 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-09-29",
+  "sample": 5,
+  "ng": 1,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "京都型グローバル・ニッチ・トップ企業育成補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFgMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和７年度補正　再生可能エネルギー導入拡大・系統用蓄電池等電力貯蔵システム導入支援事業費補助金　系統用蓄電システム等導入支援事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe4JMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和8年度 生放送字幕番組普及促進助成金（第３期）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000004PhCHEA0",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和７年度補正予算・令和８年度】二酸化炭素排出抑制対策事業費等補助金（民間建築物等における省CO2改修支援事業（令和７年度補正三次公募・令和８年度二次公募））",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtlMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和5年沖縄建設産業グローバル化支援業務委託に係る企画提案書等の募集",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010165.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": false,
+    "issues": [
+     "Claude: 出典ページに制度の言及が見つからない(移設・削除の可能性)"
+    ],
+    "human_verdict": null
+   }
+  ]
  }
 ]
