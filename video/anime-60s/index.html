@@ -287,6 +287,44 @@ function guidePos(t){
 function mixHex(a,b,p){const A=a.match(/\w\w/g).map(h=>parseInt(h,16)),B=b.match(/\w\w/g).map(h=>parseInt(h,16));
   return 'rgb('+A.map((v,i)=>Math.round(lerp(v,B[i],p))).join(',')+')'}
 
+// ---------- シーサー(家の単位。x:座る中心, base:棟の上面y, s:大きさ, f:向き(1=右向き)) ----------
+function drawShisa(x,base,s,f,open,t,ph,lit,alpha){
+  const body=mixHex('#2A2530','#D48A4A',lit*.9), mane=mixHex('#241F28','#8A4A2A',lit*.9), dark=mixHex('#241F28','#5A2E1E',lit*.9);
+  const bob=Math.sin(t*2.6+ph)*.12, tilt=Math.sin(t*1.9+ph)*.06;
+  g.save();g.translate(x,base+bob);g.scale(f,1);g.rotate(tilt);g.globalAlpha=alpha;
+  // しっぽ(くるん)
+  g.strokeStyle=mane;g.lineWidth=s*.14;g.lineCap='round';
+  g.beginPath();g.arc(-s*.62,-s*.55,s*.22,Math.PI*.5,Math.PI*1.9);g.stroke();
+  // 体
+  g.fillStyle=body;g.beginPath();g.ellipse(-s*.1,-s*.38,s*.5,s*.36,0,0,6.283);g.fill();
+  // 前足
+  g.beginPath();g.roundRect(s*.02,-s*.34,s*.16,s*.36,s*.08);g.fill();
+  g.beginPath();g.roundRect(s*.22,-s*.34,s*.16,s*.36,s*.08);g.fill();
+  // たてがみ(頭のまわりのふわふわ)
+  const hx=s*.3, hy=-s*.8, r=s*.36;
+  g.fillStyle=mane;
+  for(let k=0;k<7;k++){const a=Math.PI*.95+k*(Math.PI*1.25/6);g.beginPath();g.arc(hx+Math.cos(a)*r*1.05,hy+Math.sin(a)*r*1.05,s*.15,0,6.283);g.fill()}
+  // 頭
+  g.fillStyle=body;g.beginPath();g.arc(hx,hy,r,0,6.283);g.fill();
+  // 耳
+  g.fillStyle=mane;g.beginPath();g.arc(hx-r*.55,hy-r*.85,s*.1,0,6.283);g.fill();g.beginPath();g.arc(hx+r*.45,hy-r*.9,s*.1,0,6.283);g.fill();
+  // 目(白目+黒目。ときどきまばたき)
+  const blink=((t*1.1+ph)%3.7)<.18;
+  [-.32,.3].forEach(dx=>{const ex=hx+dx*r, ey=hy-r*.12;
+    if(blink){g.strokeStyle=dark;g.lineWidth=s*.06;g.beginPath();g.moveTo(ex-s*.08,ey);g.lineTo(ex+s*.08,ey);g.stroke()}
+    else{g.fillStyle=mixHex('#3A3440','#FFFBF4',lit*.9);g.beginPath();g.arc(ex,ey,s*.11,0,6.283);g.fill();
+      g.fillStyle=dark;g.beginPath();g.arc(ex+s*.03,ey,s*.06,0,6.283);g.fill()}});
+  // 鼻・口(阿は口を開けて舌、吽はにっこり)
+  g.fillStyle=dark;g.beginPath();g.ellipse(hx+r*.02,hy+r*.2,s*.09,s*.06,0,0,6.283);g.fill();
+  if(open){g.beginPath();g.ellipse(hx,hy+r*.5,s*.17,s*.12,0,0,6.283);g.fill();
+    g.fillStyle=mixHex('#3A2A2A','#E06A5A',lit*.9);g.beginPath();g.ellipse(hx,hy+r*.58,s*.08,s*.05,0,0,6.283);g.fill()}
+  else{g.strokeStyle=dark;g.lineWidth=s*.06;g.beginPath();g.arc(hx,hy+r*.38,s*.14,Math.PI*.15,Math.PI*.85);g.stroke()}
+  // ほっぺ
+  g.fillStyle='rgba(235,120,110,.45)';g.globalAlpha=alpha*lit;
+  g.beginPath();g.arc(hx-r*.6,hy+r*.28,s*.08,0,6.283);g.fill();g.beginPath();g.arc(hx+r*.6,hy+r*.28,s*.08,0,6.283);g.fill();
+  g.restore();
+}
+
 // ---------- 子どもの動き:4.5秒ごとに両親に「高い高い」されて、あいだはぴょんぴょん ----------
 function kidPose(t){
   const T=(t-33.6);
@@ -409,6 +447,9 @@ function draw(t){
      g.strokeStyle=mixHex('#2A2530','#F1E9DC',litW*.9);g.lineWidth=1.1;g.lineCap='round';
      g.beginPath();g.moveTo(-16,-30);g.lineTo(-38,-12);g.moveTo(16,-30);g.lineTo(38,-12);g.stroke();  // 隅棟の漆喰
      for(let x=-36;x<=36;x+=4){g.beginPath();g.arc(x,-11.6,1.35,0,6.283);g.fillStyle=mixHex('#2A2530','#F1E9DC',litW*.9);g.fill()} // 軒丸瓦
+     // 棟の両端に小さなシーサー(左=吽・口を閉じる/右=阿・口を開ける)
+     drawShisa(-15,-31.4,5.2, 1,false,t,0.0,litW,ha);
+     drawShisa( 15,-31.4,5.2,-1,true, t,1.7,litW,ha);
      // 戸(家族が出てくると開く)
      g.fillStyle=mixHex('#0B1522','#2E1D18',litW*.7);g.beginPath();g.rect(-5,4,10,18);g.fill();
      if(out>0){g.fillStyle='#FFE9A8';g.globalAlpha=ha*out*.9;g.beginPath();g.rect(-5,4,10,18);g.fill();g.globalAlpha=ha}
