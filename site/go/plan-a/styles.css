@@ -298,7 +298,7 @@ a:hover {
     top: 23.46%;
     width: 112%;
     transform-origin: 45% 55%;
-    animation: slam 0.8s cubic-bezier(0.5, 0, 0.75, 0) 2s both, settle 0.45s ease-out 2.8s forwards;
+    animation: slam 0.8s cubic-bezier(0.5, 0, 0.75, 0) 2s backwards, settle 0.45s ease-out 2.8s forwards;
 }
 
 @keyframes hero-zoom {
