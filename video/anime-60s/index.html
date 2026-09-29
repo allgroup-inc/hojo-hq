@@ -171,7 +171,7 @@ function rot(x,y){const dx=x-PIV.x,dy=y-PIV.y,c=Math.cos(TILT),sn=Math.sin(TILT)
 for(let i=0;i<ISLAND.length;i++)ISLAND[i]=rot(ISLAND[i][0],ISLAND[i][1]);
 // 離島(様式化・距離は寄せて配置。cx,cy:中心 rx,ry:半径 a:向き(度) label:名前 lx,ly:ラベルの位置ずらし)
 const REMOTE_SRC=[
-  {cx:212,cy:52, rx:12,ry:40,a:-20,label:'伊平屋・伊是名',lx:-150,ly:-10},
+  {cx:212,cy:52, rx:12,ry:40,a:-20,label:'伊平屋・伊是名',lx:-215,ly:-26},
   {cx:238,cy:128,rx:14,ry:12,a:0},
   {cx:62, cy:560,rx:26,ry:12,a:0,  label:'伊江島',lx:-70,ly:-24},
   {cx:36, cy:1010,rx:10,ry:8,a:0, label:'粟国島',lx:-80,ly:-12},
@@ -185,7 +185,7 @@ const REMOTE_SRC=[
   {cx:-300,cy:1548,rx:9, ry:8, a:0,  label:'多良間島',lx:-40,ly:-30},
   {cx:-378,cy:1576,rx:34,ry:38,a:30, label:'石垣島',lx:-30,ly:70},
   {cx:-458,cy:1586,rx:42,ry:34,a:0,  label:'西表島',lx:-40,ly:62},
-  {cx:-540,cy:1556,rx:20,ry:10,a:0,  label:'与那国島',lx:-50,ly:-40},
+  {cx:-540,cy:1556,rx:20,ry:10,a:0,  label:'与那国島',lx:-40,ly:-40},
   {cx:610,cy:1160,rx:10,ry:9, a:0,  label:'大東諸島',lx:22,ly:0},
   {cx:616,cy:1196,rx:12,ry:11,a:0},
 ];
@@ -207,8 +207,8 @@ const KIDX = -4;                                    // 子どもの立ち位置(
 
 // ---------- カメラ ----------
 // S1/S2: 島全体を、上の文字帯(〜560px)を避けて収める
-const Z1=Math.min(1000/(BB.x1-BB.x0), 1200/(BB.y1-BB.y0));
-const CAM1={x:(BB.x0+BB.x1)/2-(55/Z1), y:(BB.y0+BB.y1)/2-(230/Z1), z:Z1};   // 文字帯を避けて、島々を画面の下寄りの中央に
+const Z1=Math.min(930/(BB.x1-BB.x0), 1200/(BB.y1-BB.y0));
+const CAM1={x:(BB.x0+BB.x1)/2, y:(BB.y0+BB.y1)/2-(230/Z1), z:Z1};   // 文字帯を避けて、島々を画面の下寄りの中央に
 // S3/S4: 家に寄る(家は画面中央よりやや下)
 const CAM3={x:HOUSE.x, y:HOUSE.y-64, z:6};
 // S5/S6: 引き。家が画面下(y≒1500)、虹が上
