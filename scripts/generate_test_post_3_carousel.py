@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Generate test post 3 carousel images (Template 3 + 事業再構築補助金 transformation story)
+Generate test post 3 carousel images (Template 3 + Scope3 省CO2設備投資促進事業, a0WJ200000CDNDnMAP)
 6 pages × 1080×1350px, following Template 3 design specs
 
 Color palette:
@@ -92,15 +92,15 @@ def page_1_hook():
 
     # Subtitle with orange accent
     subtitle_font = get_font(44)
-    subtitle = "国が最大1.5億円サポートします。"
+    subtitle = "国が最大15億円サポートします。"
     bbox = draw.textbbox((0, 0), subtitle, font=subtitle_font)
     subtitle_w = bbox[2] - bbox[0]
     subtitle_x = (WIDTH - subtitle_w) // 2
     draw.text((subtitle_x, 620), subtitle, font=subtitle_font, fill=ORANGE)
 
     # Small text at bottom
-    bottom_font = get_font(28)
-    bottom_text = "事業再構築補助金GX・DX型"
+    bottom_font = get_font(26)
+    bottom_text = "Scope3排出量削減・企業間連携・省CO2設備投資促進事業"
     bbox = draw.textbbox((0, 0), bottom_text, font=bottom_font)
     bottom_w = bbox[2] - bbox[0]
     bottom_x = (WIDTH - bottom_w) // 2
@@ -118,7 +118,7 @@ def page_2_example(before_industry, after_industry, benefit):
     body_font = get_font(24)
 
     # Title at top
-    title = "事業転換の事例"
+    title = "事業転換のイメージ（試算例）"
     bbox = draw.textbbox((0, 0), title, font=title_font)
     title_w = bbox[2] - bbox[0]
     title_x = (WIDTH - title_w) // 2
@@ -157,7 +157,7 @@ def page_2_example(before_industry, after_industry, benefit):
     benefit_x1, benefit_y1 = 60, 480
     benefit_x2, benefit_y2 = 960, 700
     draw.rectangle([benefit_x1, benefit_y1, benefit_x2, benefit_y2], fill=NAVY)
-    draw.text((benefit_x1 + 30, benefit_y1 + 30), "効果", font=heading_font, fill=ORANGE)
+    draw.text((benefit_x1 + 30, benefit_y1 + 30), "効果（試算例）", font=heading_font, fill=ORANGE)
 
     lines = wrap_text(draw, benefit, body_font, 820)
     y = benefit_y1 + 100
@@ -167,7 +167,7 @@ def page_2_example(before_industry, after_industry, benefit):
 
     # Footer text
     footer_font = get_font(20)
-    footer = "上記はあくまで一般的な事例です。詳細はプロフィールのLINEからご相談ください。"
+    footer = "※この補助金の採択事例ではなく、一般的なイメージ（試算例）です。効果の数字は保証するものではありません。詳細はプロフィールのLINEからご相談ください。"
     lines = wrap_text(draw, footer, footer_font, 900)
     y = 900
     for line in lines:
@@ -196,7 +196,7 @@ def page_5_checklist():
     draw.text((title_x, 60), title, font=title_font, fill=ORANGE)
 
     subtitle_font = get_font(24)
-    subtitle = "（6か月の計画例）"
+    subtitle = "（6か月の計画例・試算例）"
     bbox = draw.textbbox((0, 0), subtitle, font=subtitle_font)
     subtitle_w = bbox[2] - bbox[0]
     subtitle_x = (WIDTH - subtitle_w) // 2
@@ -205,20 +205,21 @@ def page_5_checklist():
     # Checklist items
     body_font = get_font(28)
     items = [
-        "☐ 6ヶ月前：経営課題の整理と転換目標の設定",
-        "☐ 3ヶ月前：事業計画ドラフト作成・資金試算",
-        "☐ 1ヶ月前：申請書類の準備・経理資料確認",
-        "☐ 申請直前：書類チェック・最終提出準備"
+        "6ヶ月前：経営課題の整理と転換目標の設定",
+        "3ヶ月前：事業計画ドラフト作成・資金試算",
+        "1ヶ月前：申請書類の準備・経理資料確認",
+        "申請直前：書類チェック・最終提出準備"
     ]
 
     y = 300
     for item in items:
-        draw.text((80, y), item, font=body_font, fill=WHITE)
+        draw.rectangle([80, y + 4, 106, y + 30], outline=WHITE, width=3)
+        draw.text((130, y), item, font=body_font, fill=WHITE)
         y += 140
 
     # Footer
     footer_font = get_font(20)
-    footer = "※スケジュールは一般的な目安です。詳細な進め方はLINE相談でお伝えします。"
+    footer = "※スケジュール・期間は試算例で、一般的な目安です。詳細な進め方はLINE相談でお伝えします。"
     lines = wrap_text(draw, footer, footer_font, 900)
     y = 1050
     for line in lines:

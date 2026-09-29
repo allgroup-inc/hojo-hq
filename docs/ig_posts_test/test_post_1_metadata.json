@@ -8,8 +8,8 @@
   "industry": "農業",
   "support_level": {
     "max_amount": 5000000,
-    "subsidy_rate": "最大3/4",
-    "description": "Up to ¥5M (approx 75% subsidy rate)"
+    "subsidy_rate": "最大3/4（要確認）",
+    "description": "Up to ¥5M; subsidy rate 最大3/4 unverified (not in DB) - 要確認"
   },
   "example_data": {
     "before_amount": 4000000,
@@ -18,7 +18,7 @@
     "use_case": "中山間地域の農家 / 経営コスト削減・所得向上の取り組み"
   },
   "created_at": "2026-09-28",
-  "status": "draft",
+  "status": "revised",
   "approval_history": [
     {
       "stage": "week_1_approval_gate",
@@ -26,11 +26,18 @@
       "status": "pending",
       "date": null,
       "notes": "Awaiting humanizer Japanese language check and content verification"
+    },
+    {
+      "stage": "revision_after_gate",
+      "reviewer": "claude",
+      "status": "revised",
+      "date": "2026-09-29",
+      "notes": "補助率に要確認, 例示に試算例ラベル, p4の未検証行を削除"
     }
   ],
   "content": {
     "title": "農業の経営課題 補助金で500万円まで支援",
-    "hook": "農業経営の課題、400万円の投資が補助金で実質100万円に。",
+    "hook": "農業経営の課題、※試算例: 400万円投資の場合、補助で実質100万円に。",
     "pages": [
       {
         "page": 1,
@@ -49,7 +56,8 @@
           "before_amount": "400万円",
           "after_amount": "100万円",
           "industry": "農業",
-          "use_case": "中山間地域の農業経営者 / 経営コスト削減・所得向上"
+          "use_case": "中山間地域の農業経営者 / 経営コスト削減・所得向上",
+          "header_label": "活用例① 農業（試算例）"
         }
       },
       {
@@ -59,16 +67,18 @@
           "before_amount": "300万円",
           "after_amount": "80万円",
           "industry": "農業",
-          "use_case": "小規模農家 / デジタル化による農作業効率化"
+          "use_case": "小規模農家 / デジタル化による農作業効率化",
+          "header_label": "活用例② 農業（試算例）"
         }
       },
       {
         "page": 4,
         "type": "reference_table",
         "elements": {
-          "subsidy_rate": "最大3/4",
-          "target_conditions": "中山間地域の農家・農業法人",
-          "deadline": "2026-12-01"
+          "subsidy_rate": "最大3/4（要確認）",
+          "target_conditions": "中山間地域の農家・農業法人（要確認）",
+          "deadline": "2026-12-01",
+          "note": "rows with 最大2/3 and other deadlines removed: not in DB"
         }
       }
     ]
@@ -93,5 +103,6 @@
     "accuracy_check": "pending",
     "brand_compliance": "pending",
     "link_validation": "pending"
-  }
+  },
+  "revised_at": "2026-09-29"
 }
