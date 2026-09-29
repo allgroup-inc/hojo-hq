@@ -1,0 +1,5 @@
+/* 本動画で使う文字だけに絞ったサブセット(Google Fonts / SIL OFL)。
+   元フォント: Shippori Mincho 600/700, Noto Sans JP 500 */
+@font-face{font-family:'Shippori Mincho';font-style:normal;font-weight:600;font-display:block;src:url(./shippori-600.woff2) format('woff2')}
+@font-face{font-family:'Shippori Mincho';font-style:normal;font-weight:700;font-display:block;src:url(./shippori-700.woff2) format('woff2')}
+@font-face{font-family:'Noto Sans JP';font-style:normal;font-weight:500;font-display:block;src:url(./noto-500.woff2) format('woff2')}
