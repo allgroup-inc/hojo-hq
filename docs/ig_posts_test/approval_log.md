@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-28 → 2026-10-04
 **Test Posts:** 3 (Template1, Template2, Template3)
-**Overall result:** NOT READY. Post 1 is conditional, Posts 2 and 3 FAIL the accuracy check (絶対ルール1). Do not present for sign-off until fixed.
+**Overall result (Task 12 re-run, 2026-09-29, after revision commit ba09b9733):** READY FOR SIGN-OFF as reviewed drafts. All three pass the humanizer check. Post 1 and Post 3 pass accuracy; Post 2 is 要確認 by design (deadline and amount unpublished in the DB), so it cannot be posted until the official page is checked. History of the first run (2026-09-28) is kept below each post.
 
 ## How the checks were actually run (deviation from the brief)
 
@@ -17,110 +17,89 @@ The commands in the brief do not work as written. Both scripts take no file argu
   Substitute: manual cross-check of each caption and metadata against `data/subsidies.json` (jGrants-derived, fetched 2026-09-28 21:41).
 - The 出典ページ (jGrants) were NOT re-fetched online in this run. The comparison is against the DB values only.
 
+**Re-run (2026-09-29):** same method. `check_humanizer.check_one()` on each `## Instagram Caption` section returned `[]` for all three.
+`check_batch()` returned only the repeated template labels 「【1行フック】」「【ハッシュタグ】」 (false positive, as before).
+Accuracy was re-checked against `data/subsidies.json` for ids a0WJ200000CDYDCMA5, okinawa_ric-3, a0WJ200000CDNDnMAP. 出典ページ were still NOT re-fetched online.
+The revised images/HTML were also checked (Post 3 p1 PNG, Post 2 PNG, Post 1 p2/p4 HTML): they match the revised captions.
+
 ## Test Post 1: 【農林水産省】中山間地域所得確保推進事業 (Template1)
 
-**Subsidy ID:** a0WJ200000CDYDCMA5
-**Created:** 2026-09-28
-**Captions File:** `test_post_1_caption.md`
-**Image:** `test_post_1_p1.html` through `test_post_1_p4.html` (4-page carousel)
+**Subsidy ID:** a0WJ200000CDYDCMA5  **Captions File:** `test_post_1_caption.md`  **Image:** `test_post_1_p1.html` to `p4.html`
 
-### Humanizer Check
-- **Status:** PASS (with note)
-- **Severity:** Low
-- **Issues Found:** 絵文字6個 (✓ x6) hits the script's "excessive" threshold (6+). Suggest merging the two ✓ lists or using 「・」 for one.
-- **Run Date:** 2026-09-28
-- **Command:** `check_humanizer.check_one()` on the caption section (see above)
+### Re-run result (2026-09-29)
+- **Humanizer:** PASS. No findings; 絵文字 (✓) now 3, below the threshold of 6 (previous Low note resolved).
+- **Accuracy:** PASS (with 要確認 labels in place)
+  - 上限500万円 = DB max_amount 5,000,000. OK.
+  - Deadline 2026-12-01 = 63 days from 2026-09-29; satisfies the 30+ day SNS rule.
+  - 「補助率最大3/4（要確認）」: not in DB (subsidy_rate null), now marked 要確認 in caption and in p4 HTML. Acceptable under 絶対ルール1.
+  - Hook and p2 example (400万円→100万円, 実質負担約25%) are labeled 試算例 in caption, p2 and metadata.
+  - target_area 全国: caption does not claim Okinawa-only eligibility. OK.
+- **Non-blocking notes:** (a) the 400万→100万 example implies a 3/4 rate, which is itself unverified; it is labeled 試算例 but confirm the rate on the jGrants page before posting. (b) Hook wording 「農業経営の課題、※試算例: …」 reads a little clumsy; optional polish.
+- **Ready for sign-off:** YES
 
-### Accuracy Check
-- **Status:** CONDITIONAL (amount and deadline match; two items unverified)
-- **Verified vs DB:** max_amount 5,000,000 = 「500万円」 OK. deadline 2026-12-01 = 64 days remaining, satisfies the 30+ day SNS rule.
-- **Issues Found:**
-  1. 「補助率最大3/4」 is not in `subsidies.json`. Verify on the source page or change to 「要確認」.
-  2. Hook 「400万円の投資が補助金で実質100万円に」 is an illustrative example, not sourced. Add 「例」 or 「※試算例」 so it is not read as a guaranteed outcome.
-  3. DB target_area is 全国 (not Okinawa-specific); check the caption/hashtags do not imply Okinawa-only eligibility.
-- **Source URLs Checked (DB record only):** https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDCMA5
-- **Run Date:** 2026-09-28
+<details><summary>First run (2026-09-28)</summary>
 
-### Approval
-- **Humanizer Approval:** PASS
-- **Accuracy Approval:** PENDING (items 1-2)
-- **Ready for Posting:** NO (after fixes 1-2: YES)
+Humanizer PASS (Low: 絵文字6個). Accuracy CONDITIONAL: 補助率3/4 not in DB; hook example unlabeled; target_area 全国. Ready: NO.
+</details>
 
 ---
 
-## Test Post 2: 小規模事業者等デジタル化支援事業 (Template2)
+## Test Post 2: 事業承継推進事業（沖縄県産業振興公社） (Template2)
 
-**Subsidy ID:** okinawa_ric_dx_support (not a DB id)
-**Captions File:** `test_post_2_caption.md`  **Image:** `test_post_2.png`
+**Subsidy ID:** okinawa_ric-3  **Captions File:** `test_post_2_caption.md`  **Image:** `test_post_2.png`
 
-### Humanizer Check
-- **Status:** PASS
-- **Severity:** None
-- **Issues Found:** none (絵文字3個)
-- **Run Date:** 2026-09-28
+### Re-run result (2026-09-29)
+- **Humanizer:** PASS. No findings.
+- **Accuracy:** 要確認 (acceptable for sign-off, NOT postable)
+  - Program now exists in DB: name 事業承継推進事業, target_area 沖縄県, source_url https://okinawa-ric.jp/service/post-3.html. Caption program name and issuer match.
+  - DB max_amount null, deadline 「要確認」, status 要確認. Caption and image no longer state any amount, deadline, cost or phone number; all are shown as 要確認. Earlier unsourced claims (100万円, 相談無料, 電話番号) are removed.
+  - The 3-layer deadline rule cannot be evaluated (no deadline). Metadata says posting is blocked until the official page is checked.
+- **Blockers before posting (not before sign-off):** (1) confirm eligibility, cost and deadline on the official page and update the DB; (2) `/go/` link is not yet implemented (Task 13); the caption says the link is in the profile.
+- **Ready for sign-off:** YES as a 要確認 format sample. **Ready for posting:** NO.
 
-### Accuracy Check
-- **Status:** FAIL (unverifiable)
-- **Issues Found:**
-  1. No record with this ID or name exists in `data/subsidies.json`. No 原文URL, no deadline, no amount, so the 3-layer deadline rule cannot be applied at all.
-  2. Claims 「沖縄県が用意」「相談・診断が無料」「沖縄県産業振興公社の担当者から連絡」 have no source recorded.
-  3. Hook 「100万円は必要？」 has no basis.
-  4. Metadata `contact_phone` is the placeholder `0570-XXXXXX` and QR url is `https://lin.ee/...`; must not ship. Note: lin.ee direct links are also restricted by 出荷ゲート/`/go/` rules.
-  5. Caption ends 「詳細は公式ページで」 but gives no page.
-- **Remediation:** Find the official page, add the entry to the DB with source_url and deadline, then re-check. Otherwise publish as 「要確認」 or drop this post.
-- **Run Date:** 2026-09-28
+<details><summary>First run (2026-09-28)</summary>
 
-### Approval
-- **Humanizer Approval:** PASS
-- **Accuracy Approval:** FAIL
-- **Ready for Posting:** NO
+Humanizer PASS. Accuracy FAIL: no DB record, unsourced claims, placeholder phone/lin.ee. Ready: NO.
+</details>
 
 ---
 
-## Test Post 3: 事業再構築補助金GX・DX型 (Template3)
+## Test Post 3: Scope3排出量削減 省CO2設備投資促進事業 (Template3)
 
-**Subsidy ID:** a0WJ200000CDNDnMAP
-**Captions File:** `test_post_3_caption.md`  **Image:** `ig_test_3_p1.png` to `ig_test_3_p6.png`
+**Subsidy ID:** a0WJ200000CDNDnMAP  **Captions File:** `test_post_3_caption.md`  **Image:** `ig_test_3_p1.png` to `ig_test_3_p6.png`
 
-### Humanizer Check
-- **Status:** PASS
-- **Severity:** Low
-- **Issues Found:** none from the script. Manual note: 「この機会を逃さないでください」 is pressure copy inconsistent with the site tone; consider removing.
-- **Run Date:** 2026-09-28
+### Re-run result (2026-09-29)
+- **Humanizer:** PASS. No findings. The pressure line 「この機会を逃さないでください」 is gone.
+- **Accuracy:** PASS
+  - Program name in caption/hashtags is now the Scope3 program; matches DB 「令和８年度_Scope3排出量削減のための企業間連携による省CO2設備投資促進事業」 (shortened form).
+  - 最大15億円 = DB max_amount 1,500,000,000. Caption, title and metadata are now consistent (the 1.5億 / 150億 mismatches are fixed). Image ig_test_3_p1.png shows 15億円.
+  - Deadline 2026-11-13 = 45 days from 2026-09-29; satisfies the 30+ day rule.
+  - 「採択企業の声」 removed; caption says it is a general image, not a case study. 準備期間約6ヶ月 and the Before/After are labeled 試算例.
+- **Non-blocking notes:** (a) image p1 headline says 「事業転換を検討していますか?」 while the caption title says 「設備投資を検討していますか?」; the program supports equipment investment, so align the wording. (b) Metadata slide 6 still holds `https://lin.ee/...` as a placeholder QR URL; replace with the `/go/` link (Task 13) and do not ship lin.ee directly.
+- **Ready for sign-off:** YES
 
-### Accuracy Check
-- **Status:** FAIL (two blocking errors)
-- **Issues Found:**
-  1. **Program name mismatch.** DB record for this ID is 「令和８年度_Scope3排出量削減のための企業間連携による省CO2設備投資促進事業」 (issuer 脱炭素成長型経済構造移行推進対策費補助金). The caption, title and hashtags call it 「事業再構築補助金 GX・DX型」, which is a different program.
-  2. **Amount off by 10x.** DB max_amount = 1,500,000,000 = **15億円**. Caption/hook say 「最大1.5億円」. Metadata says 15,000,000,000 (150億) and caption Metadata says 150億. Three different values; only 15億 matches the DB.
-  3. 「採択企業の声」 is promised but no such content exists in the carousel. 「準備期間は約6ヶ月」 and the 40%/30%/50% benefits are unsourced examples; mark as 例.
-  4. target_area is 全国 (deadline 2026-11-13, 46 days, passes the 30+ day rule).
-- **Source URL (DB):** https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDNDnMAP
-- **Remediation:** Rename to the real program, correct amount to 最大15億円 (after confirming on the source page), fix metadata, drop or replace 「採択企業の声」, regenerate images if they show 1.5億 or the old name.
-- **Run Date:** 2026-09-28
+<details><summary>First run (2026-09-28)</summary>
 
-### Approval
-- **Humanizer Approval:** PASS
-- **Accuracy Approval:** FAIL
-- **Ready for Posting:** NO
+Humanizer PASS. Accuracy FAIL: wrong program name; amount off by 10x; 採択企業の声 unsupported. Ready: NO.
+</details>
 
 ---
 
 ## Summary
 
-| Post | Template | Humanizer | Accuracy | Ready |
-|---|---|---|---|---|
-| Post 1 | Template1 | PASS (Low) | CONDITIONAL | NO (after 2 fixes: YES) |
-| Post 2 | Template2 | PASS | FAIL | NO |
-| Post 3 | Template3 | PASS | FAIL | NO |
+| Post | Template | Humanizer | Accuracy | Sign-off | Postable now |
+|---|---|---|---|---|---|
+| Post 1 | Template1 | PASS | PASS (補助率 marked 要確認) | YES | YES, after confirming 補助率 on jGrants |
+| Post 2 | Template2 | PASS | 要確認 (deadline/amount unpublished) | YES (format sample) | NO |
+| Post 3 | Template3 | PASS | PASS | YES | YES, after replacing placeholder QR URL |
 
 Batch check note: 「【1行フック】」「【ハッシュタグ】」 repeated across 3 posts is a template label, not a prose repetition (false positive).
 
 ## Final Approval (小柳さん Sign-Off)
 
 - **Reviewer:** 小柳さん
-- **Decision:** PENDING (recommend REJECT for Posts 2 and 3 until fixed)
-- **Date:** YYYY-MM-DD
+- **Decision:** PENDING (recommend APPROVE Posts 1 and 3 with the notes above; APPROVE Post 2 only as a 要確認 sample)
+- **Date:** YYYY-MM-DD (planned: 2026-10-04)
 - **Notes:**
 
 ---
