@@ -177,7 +177,8 @@ let ISLAND_LEN=0;for(let i=0;i<ISLAND.length;i++){const a=ISLAND[i],b=ISLAND[(i+
 
 const HS = 1.7;                                     // 家の大きさ(世界単位の倍率)
 const HOUSE = (()=>{const [x,y]=rot(300,1300);return {x,y}})();
-const WINDOW = {x:HOUSE.x+10*HS,y:HOUSE.y+1*HS};
+const WINDOW = {x:HOUSE.x+14*HS,y:HOUSE.y+1*HS};
+const KIDX = -5;                                    // 子どもの立ち位置(家の単位)
 
 // ---------- カメラ ----------
 // S1/S2: 島全体を、上の文字帯(〜560px)を避けて収める
@@ -286,22 +287,48 @@ function guidePos(t){
 function mixHex(a,b,p){const A=a.match(/\w\w/g).map(h=>parseInt(h,16)),B=b.match(/\w\w/g).map(h=>parseInt(h,16));
   return 'rgb('+A.map((v,i)=>Math.round(lerp(v,B[i],p))).join(',')+')'}
 
+// ---------- 子どもの動き:4.5秒ごとに両親に「高い高い」されて、あいだはぴょんぴょん ----------
+function kidPose(t){
+  const T=(t-33.6);
+  const ph=((T%4.5)+4.5)%4.5;
+  const lift=ph<2.2?Math.sin(ph/2.2*Math.PI):0;              // 持ち上げ(0→1→0)
+  const hop=(1-lift)*Math.abs(Math.sin(t*4.2))*2.2;
+  const dy=-(lift*9+hop);
+  const tilt=Math.sin(t*3)*.08*lift;
+  const r=13*.27, hy=-(13-r);
+  // 両手(上にあげる)の位置。家の単位・足元(−3,23)基準
+  const sh={l:{x:-r*.8,y:hy+r*1.2},r:{x:r*.8,y:hy+r*1.2}};
+  const al=-Math.PI*.72+Math.sin(t*5)*.12, ar=-Math.PI*.28-Math.sin(t*5)*.12;
+  const lh={x:KIDX+sh.l.x+Math.cos(al)*r*1.5, y:23+dy+sh.l.y+Math.sin(al)*r*1.5};
+  const rh={x:KIDX+sh.r.x+Math.cos(ar)*r*1.5, y:23+dy+sh.r.y+Math.sin(ar)*r*1.5};
+  return {lift,dy,tilt,lh,rh,al,ar};
+}
 // ---------- 家族のキャラクター(家の単位。x:足元の中心, foot:足元y, h:身長) ----------
 function drawPerson(x,foot,h,o,t,ph,pop,alpha){
   const kid=o.type==='kid';
-  const bob=Math.sin(t*2.8+ph)*.7 + (kid?-Math.abs(Math.sin(t*4.2+ph))*2.6:0);
-  g.save();g.translate(x,foot);g.scale(pop,pop);g.translate(0,bob);g.globalAlpha=alpha;
+  const bob=kid?kidPose(t).dy:Math.sin(t*2.8+ph)*.7;
+  g.save();g.translate(x,foot);g.scale(pop,pop);g.translate(0,bob);if(kid)g.rotate(o.tilt||0);g.globalAlpha=alpha;
   const r=h*.27, hy=-(h-r);                      // 頭の半径・頭の中心y
   // 体
   g.fillStyle=o.cloth;g.beginPath();
   g.moveTo(-r*.95,0);g.lineTo(r*.95,0);g.lineTo(r*.8,hy+r*.7);g.quadraticCurveTo(0,hy+r*.3,-r*.8,hy+r*.7);g.closePath();g.fill();
-  // 腕(右手はふる)
+  // 腕
   g.strokeStyle=o.cloth;g.lineWidth=r*.42;g.lineCap='round';
-  g.beginPath();g.moveTo(-r*.8,hy+r*1.2);g.lineTo(-r*1.25,hy+r*2.4);g.stroke();
-  const wave=o.type==='mom'?0:1;
-  const a=wave?(-Math.PI*.75+Math.sin(t*7+ph)*.35):(Math.PI*.35);
-  g.beginPath();g.moveTo(r*.8,hy+r*1.2);g.lineTo(r*.8+Math.cos(a)*r*1.5,hy+r*1.2+Math.sin(a)*r*1.5);g.stroke();
-  g.fillStyle='#F8D9B8';g.beginPath();g.arc(r*.8+Math.cos(a)*r*1.5,hy+r*1.2+Math.sin(a)*r*1.5,r*.24,0,6.283);g.fill();
+  const hand=(hx,hy2)=>{g.fillStyle='#F8D9B8';g.beginPath();g.arc(hx,hy2,r*.24,0,6.283);g.fill()};
+  if(kid){const kp=kidPose(t);
+    [[-1,kp.al],[1,kp.ar]].forEach(([sx,a])=>{const sxp=sx*r*.8,syp=hy+r*1.2;
+      g.beginPath();g.moveTo(sxp,syp);g.lineTo(sxp+Math.cos(a)*r*1.5,syp+Math.sin(a)*r*1.5);g.stroke();
+      hand(sxp+Math.cos(a)*r*1.5,syp+Math.sin(a)*r*1.5)});
+  }else{
+    const inner=o.type==='dad'?1:-1;                       // 子どもがいる側
+    // 内側の手:子どもの手をつなぐ(相手の座標を自分の座標系へ)
+    if(o.handTo){const tx=(o.handTo.x-x)/pop, ty=(o.handTo.y-foot)/pop-bob;
+      g.beginPath();g.moveTo(inner*r*.8,hy+r*1.2);g.lineTo(tx,ty);g.stroke();hand(tx,ty)}
+    // 外側の手:お母さんは手をふる、お父さんは下ろす
+    const a=o.type==='mom'?(-Math.PI*.25-Math.sin(t*7+ph)*.35):(Math.PI*.65);
+    const ox=-inner*r*.8, oy=hy+r*1.2;
+    g.beginPath();g.moveTo(ox,oy);g.lineTo(ox+Math.cos(a)*r*1.5,oy+Math.sin(a)*r*1.5);g.stroke();hand(ox+Math.cos(a)*r*1.5,oy+Math.sin(a)*r*1.5);
+  }
   // 頭
   g.fillStyle='#F8D9B8';g.beginPath();g.arc(0,hy,r,0,6.283);g.fill();
   // 髪
@@ -369,19 +396,29 @@ function draw(t){
      // 本体
      g.fillStyle=mixHex('#111D2B','#4A3128',litW*.7);
      g.beginPath();g.rect(-24,-12,48,34);g.fill();
-     // 屋根(赤瓦)
+     // 屋根:沖縄の赤瓦(寄棟の低い勾配・漆喰の白い目地・軒丸瓦)
      g.fillStyle=mixHex('#1C1A26','#B9502F',litW*.85);
-     g.beginPath();g.moveTo(-30,-12);g.lineTo(0,-38);g.lineTo(30,-12);g.closePath();g.fill();
+     g.beginPath();g.moveTo(-38,-12);g.lineTo(-16,-30);g.lineTo(16,-30);g.lineTo(38,-12);g.closePath();g.fill();
+     g.save();g.beginPath();g.moveTo(-38,-12);g.lineTo(-16,-30);g.lineTo(16,-30);g.lineTo(38,-12);g.closePath();g.clip();
+     g.strokeStyle='#FFFBF4';g.lineWidth=.55;g.globalAlpha=ha*(.14+.36*litW);
+     for(let k=1;k<6;k++){const y=-30+k*3;g.beginPath();g.moveTo(-40,y);g.lineTo(40,y);g.stroke()}   // 瓦の段
+     for(let k=-6;k<=6;k++){g.beginPath();g.moveTo(k*2.6,-30);g.lineTo(k*6,-12);g.stroke()}         // 丸瓦の筋
+     g.restore();
+     g.globalAlpha=ha;g.fillStyle=mixHex('#2A2530','#F1E9DC',litW*.9);
+     g.beginPath();g.roundRect(-17,-31.4,34,2.6,1.3);g.fill();                                       // 漆喰の棟
+     g.strokeStyle=mixHex('#2A2530','#F1E9DC',litW*.9);g.lineWidth=1.1;g.lineCap='round';
+     g.beginPath();g.moveTo(-16,-30);g.lineTo(-38,-12);g.moveTo(16,-30);g.lineTo(38,-12);g.stroke();  // 隅棟の漆喰
+     for(let x=-36;x<=36;x+=4){g.beginPath();g.arc(x,-11.6,1.35,0,6.283);g.fillStyle=mixHex('#2A2530','#F1E9DC',litW*.9);g.fill()} // 軒丸瓦
      // 戸(家族が出てくると開く)
-     g.fillStyle=mixHex('#0B1522','#2E1D18',litW*.7);g.beginPath();g.rect(-16,4,10,18);g.fill();
-     if(out>0){g.fillStyle='#FFE9A8';g.globalAlpha=ha*out*.9;g.beginPath();g.rect(-16,4,10,18);g.fill();g.globalAlpha=ha}
+     g.fillStyle=mixHex('#0B1522','#2E1D18',litW*.7);g.beginPath();g.rect(-5,4,10,18);g.fill();
+     if(out>0){g.fillStyle='#FFE9A8';g.globalAlpha=ha*out*.9;g.beginPath();g.rect(-5,4,10,18);g.fill();g.globalAlpha=ha}
      // 窓
-     g.fillStyle=mixHex('#0D1826','#FFE9A8',litW);g.beginPath();g.rect(4,-5,12,12);g.fill();
-     g.strokeStyle=mixHex('#1E2B3A','#F2C14E',litW);g.lineWidth=1.2;g.strokeRect(4,-5,12,12);
+     g.fillStyle=mixHex('#0D1826','#FFE9A8',litW);g.beginPath();g.rect(8,-5,12,12);g.fill();
+     g.strokeStyle=mixHex('#1E2B3A','#F2C14E',litW);g.lineWidth=1.2;g.strokeRect(8,-5,12,12);
      // 窓の中の家族の影(灯ってから、外に出るまで)
      {const a=litW*(1-out)*ha;if(a>0){g.globalAlpha=a*.85;g.fillStyle='#3A2A22';
-       g.beginPath();g.arc(8+Math.sin(t*2.2)*.3,2.2,2.3,0,6.283);g.fill();
-       g.beginPath();g.arc(12.6,3.6+Math.sin(t*3.1)*.3,1.7,0,6.283);g.fill();g.globalAlpha=ha}}
+       g.beginPath();g.arc(12+Math.sin(t*2.2)*.3,2.2,2.3,0,6.283);g.fill();
+       g.beginPath();g.arc(16.6,3.6+Math.sin(t*3.1)*.3,1.7,0,6.283);g.fill();g.globalAlpha=ha}}
      // 家族(3人)。出てきたらずっと笑顔で、手をふったり、はねたりする
      g.restore();
      // 窓の光(画面座標のスプライト)
@@ -393,9 +430,10 @@ function draw(t){
      if(out>0){g.save();g.translate(W/2,H/2);g.scale(cam.z,cam.z);g.translate(-cam.x,-cam.y);
        g.translate(HOUSE.x,HOUSE.y);g.scale(HS,HS);
        const pop=out<1?easeOut(out)*(1+.28*Math.sin(out*Math.PI)):1;
-       drawPerson(-15,23, 21,{hair:'#3B2A22',cloth:'#6FAEA4',type:'dad'}, t,0.0,pop,ha);
-       drawPerson( -3,23, 19,{hair:'#4A2C24',cloth:'#D2694A',type:'mom'}, t,1.3,pop,ha);
-       drawPerson(  8,23, 13,{hair:'#3B2A22',cloth:'#F2C14E',type:'kid'}, t,2.1,pop,ha);
+       const kid=kidPose(t);                                   // 子どもの動き(両親の手もこれに合わせる)
+       drawPerson(KIDX-13,23, 21,{hair:'#3B2A22',cloth:'#6FAEA4',type:'dad',handTo:kid.lh}, t,0.0,pop,ha);
+       drawPerson(KIDX+13,23, 19,{hair:'#4A2C24',cloth:'#D2694A',type:'mom',handTo:kid.rh}, t,1.3,pop,ha);
+       drawPerson(KIDX,   23, 13,{hair:'#3B2A22',cloth:'#F2C14E',type:'kid',lift:kid.lift,tilt:kid.tilt}, t,2.1,pop,ha);
        g.restore()}}}
 
   // 波紋
