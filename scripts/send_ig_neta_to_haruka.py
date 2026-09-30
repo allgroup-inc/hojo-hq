@@ -212,7 +212,7 @@ def send_email(subject, body):
         "--to", HARUKA_EMAIL,
         "--subject", subject,
         "--body-file", body_file,
-        "--from-name", "もらいわすれ堂",
+        "--from-name", "もらいわすれ堂 運営",
     ]
 
     env = os.environ.copy()
