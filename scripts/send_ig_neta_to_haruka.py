@@ -139,7 +139,7 @@ def build_email_body(neta_data):
         "",
         "よろしくお願いします。",
         "",
-        "もらいわすれ堂",
+        "もらいわすれ堂 運営",
     ])
 
     return "\n".join(lines)
