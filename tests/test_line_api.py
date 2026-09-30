@@ -177,11 +177,44 @@ def test_api_path_success(monkeypatch, tmp_path, caplog):
 
 
 def test_api_token_read_from_env(monkeypatch, tmp_path):
-    monkeypatch.setenv("LINE_CHANNEL_ACCESS_TOKEN", TOKEN)
+    monkeypatch.setenv("KEKKA_LINE_CHANNEL_ACCESS_TOKEN", TOKEN)
     calls = install_urlopen(monkeypatch, ok_responses())
     m = fetch_line_metrics(CHANNEL, WEEK, delivered_by_segment=DELIVERED, data_dir=tmp_path)
     assert m.registered_count == 152
     assert calls[1]["headers"]["Authorization"] == f"Bearer {TOKEN}"
+
+
+def test_token_env_is_kekka_not_mikata(monkeypatch, tmp_path):
+    """ミカタの LINE_CHANNEL_ACCESS_TOKEN だけが設定されていても、それを使わず CSV へ回る。"""
+    assert line_api.TOKEN_ENV == "KEKKA_LINE_CHANNEL_ACCESS_TOKEN"
+    assert line_api.KEKKA_CHANNEL_ID == "2011004310"
+    monkeypatch.delenv("KEKKA_LINE_CHANNEL_ACCESS_TOKEN", raising=False)
+    monkeypatch.setenv("LINE_CHANNEL_ACCESS_TOKEN", "MIKATA-TOKEN")
+    write_csv(tmp_path)
+
+    def no_network(*a, **k):
+        raise AssertionError("ミカタのトークンで API を叩いた")
+
+    monkeypatch.setattr(line_api.urllib.request, "urlopen", no_network)
+    _, source = fetch_line_metrics_with_source(CHANNEL, WEEK, delivered_by_segment=DELIVERED, data_dir=tmp_path)
+    assert source == SOURCE_CSV
+
+
+def test_api_connection_error_falls_back_to_csv(monkeypatch, tmp_path):
+    write_csv(tmp_path)
+    install_urlopen(monkeypatch, {"verify": [urllib.error.URLError(ConnectionRefusedError("refused"))]})
+    _, source = fetch_line_metrics_with_source(CHANNEL, WEEK, delivered_by_segment=DELIVERED, token=TOKEN,
+                                               data_dir=tmp_path, sleep=lambda s: None)
+    assert source == SOURCE_CSV
+
+
+def test_api_code_bug_is_not_swallowed(monkeypatch, tmp_path):
+    """TypeError 等のコードの誤りは「接続できない」扱いで CSV に逃がさず、そのまま落とす。"""
+    write_csv(tmp_path)
+    install_urlopen(monkeypatch, {"verify": [TypeError("bug")]})
+    with pytest.raises(TypeError):
+        fetch_line_metrics(CHANNEL, WEEK, delivered_by_segment=DELIVERED, token=TOKEN,
+                           data_dir=tmp_path, sleep=lambda s: None)
 
 
 def test_api_retries_then_succeeds(monkeypatch, tmp_path):
@@ -241,7 +274,7 @@ def test_api_unknown_segment_in_delivered_raises(tmp_path):
 
 def test_csv_fallback_when_token_missing(monkeypatch, tmp_path, caplog):
     caplog.set_level(logging.INFO, logger="line_api")
-    monkeypatch.delenv("LINE_CHANNEL_ACCESS_TOKEN", raising=False)
+    monkeypatch.delenv("KEKKA_LINE_CHANNEL_ACCESS_TOKEN", raising=False)
     write_csv(tmp_path)
 
     def no_network(*a, **k):
@@ -258,7 +291,7 @@ def test_csv_fallback_when_token_missing(monkeypatch, tmp_path, caplog):
     assert m.click_rate_by_segment == {
         "high_engagement": pytest.approx(0.25), "active_reader": pytest.approx(0.1), "discovery_seeker": 0.0}
     assert "line_only" not in m.open_rate_by_segment  # 空欄は 0 にしない
-    assert "フォールバック" in caplog.text and "LINE_CHANNEL_ACCESS_TOKEN が未設定" in caplog.text
+    assert "フォールバック" in caplog.text and "KEKKA_LINE_CHANNEL_ACCESS_TOKEN が未設定" in caplog.text
 
 
 def test_csv_fallback_when_delivered_counts_not_given(monkeypatch, tmp_path):
@@ -292,7 +325,7 @@ def test_csv_fallback_when_followers_not_ready(monkeypatch, tmp_path):
 
 
 def test_both_unavailable_raises_with_both_reasons(monkeypatch, tmp_path):
-    monkeypatch.delenv("LINE_CHANNEL_ACCESS_TOKEN", raising=False)
+    monkeypatch.delenv("KEKKA_LINE_CHANNEL_ACCESS_TOKEN", raising=False)
     with pytest.raises(LINEAPIError) as ei:
         fetch_line_metrics(CHANNEL, WEEK, data_dir=tmp_path)
     msg = str(ei.value)
@@ -327,7 +360,7 @@ def test_csv_invalid_content_raises(tmp_path, body, match):
 
 
 def test_invalid_csv_is_not_masked_by_fallback(monkeypatch, tmp_path):
-    monkeypatch.delenv("LINE_CHANNEL_ACCESS_TOKEN", raising=False)
+    monkeypatch.delenv("KEKKA_LINE_CHANNEL_ACCESS_TOKEN", raising=False)
     write_csv(tmp_path, text="week,registered_count,segment,delivered,unique_opens,unique_clicks\n"
                              "2026-W40,150,line_only,10,12,1\n")
     with pytest.raises(LINEAPIError, match="超えています"):

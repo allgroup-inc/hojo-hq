@@ -3,19 +3,24 @@
 """
 hojo-hq — 結果マガ LINE クライアント(売上自動化 Task 3)
 
-週単位で LINE 公式アカウントの登録者数と、購買確度セグメント別の開封率・クリック率を取り、
-LINEMetrics にまとめる。出力は Task 4(collect_weekly_metrics.py)が
+週単位で結果マガの LINE 公式アカウント(@473btavk・プロバイダー kekka_mag・チャネルID 2011004310)の
+登録者数と、購買確度セグメント別の開封率・クリック率を取り、LINEMetrics にまとめる。
+ミカタ(沖縄企業のミカタ)やもらいわすれ堂の LINE 公式アカウントは対象外(数字を混ぜない)。出力は Task 4(collect_weekly_metrics.py)が
 data/kekka_weekly_metrics.json の line セクションへ追記する。
 
 取得経路(この順に試す):
 1. LINE Messaging API(リアルタイム)
    - 登録者数: GET /v2/bot/insight/followers?date=<週の日曜>
-     → followers(友だち追加の累計。ブロックしても減らない。data/kpi/line_followers.json の KGI 実測と同じ定義)
+     → followers(結果マガ LINE の友だち追加の累計。ブロックしても減らない。
+       LINE 公式アカウント管理画面の「友だち追加数」と同じ定義。有効友だち数 = followers - blocks ではない)
    - セグメント別の開封・クリック: GET /v2/bot/insight/message/event/aggregation
      ?customAggregationUnit=<ユニット名>&from=<月曜>&to=<日曜>
      → overview.uniqueImpression(開封した人数)/ overview.uniqueClick(クリックした人数)
      ユニット名は aggregation_unit(segment) = "kekka_<segment>"。送信側(Task 9)は
      push/multicast の customAggregationUnits にこの名前を付けて送ること
+     from/to は「イベント(開封・クリック)が起きた日」で絞る(送信日ではない)。前週に送った
+     メッセージを今週開いた分は今週に数えられ、今週送った分の開封が翌週にずれ込むこともある。
+     分母の delivered_by_segment は送信日ベースなので、週またぎの配信では率がわずかにずれ得る
    - 分母(配信人数)は LINE が返さないため、呼び出し側が delivered_by_segment で渡す
      (送信ログ由来のセグメント別ユニーク配信人数)。渡されなければ API 経路は「利用不可」
 2. フォールバック: data/line_segment_stats_<week>.csv(Power Automate の配信ログ等から事前集計したもの)
@@ -43,9 +48,11 @@ CSV の形式(UTF-8。Excel の BOM 付きも可。1行 = 1セグメント):
 - どちらの経路で取ったかはログと fetch_line_metrics_with_source() の戻り値で分かる
 - 集計値のみ。個人識別子(userId 等)は扱わない。チャネルアクセストークンはログにもエラー文にも出さない
 
-認証: 環境変数 LINE_CHANNEL_ACCESS_TOKEN(未設定なら API を叩かず CSV へ)。
-  取得前に POST /v2/oauth/verify でトークンの発行元チャネルが channel_id と一致するか確かめる
-  (リポジトリにはミカタ・もらいわすれ堂など複数の LINE 公式アカウントがあり、取り違えると別アカウントの数字になる)。
+認証: 環境変数 KEKKA_LINE_CHANNEL_ACCESS_TOKEN(結果マガ専用。.github/workflows/line-test.yml と同じ Secret。
+  未設定なら API を叩かず CSV へ)。ミカタ用の LINE_CHANNEL_ACCESS_TOKEN は読まない。
+  呼び出し側は channel_id=2011004310 を渡す。取得前に POST /v2/oauth/verify でトークンの発行元チャネルが
+  channel_id と一致するか確かめる(リポジトリにはミカタ・もらいわすれ堂など複数の LINE 公式アカウントがあり、
+  取り違えると別アカウントの数字になる)。
 
 リトライ: HTTP 500/502/503/504・タイムアウトのみ最大3回(待機 5s → 10s → 15s。Task 1/2 と同じ値)。
   それでも失敗、または 429 は LINEAPIUnavailable(CSV へ)。
@@ -54,6 +61,7 @@ CSV の形式(UTF-8。Excel の BOM 付きも可。1行 = 1セグメント):
 """
 import csv
 import datetime as dt
+import http.client
 import json
 import logging
 import os
@@ -68,7 +76,8 @@ from pathlib import Path
 logger = logging.getLogger("line_api")
 
 API_BASE = "https://api.line.me"
-TOKEN_ENV = "LINE_CHANNEL_ACCESS_TOKEN"
+TOKEN_ENV = "KEKKA_LINE_CHANNEL_ACCESS_TOKEN"  # 結果マガ専用(ミカタの LINE_CHANNEL_ACCESS_TOKEN ではない)
+KEKKA_CHANNEL_ID = "2011004310"  # 結果マガ LINE(@473btavk)。Task 4 はこれを channel_id に渡す
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 REQUEST_TIMEOUT_SEC = 30
 RETRY_DELAYS_SEC = (5, 10, 15)
@@ -213,9 +222,8 @@ def _request(url: str, label: str, *, token: str | None = None, form: dict | Non
             if e.code not in RETRYABLE_STATUS:
                 raise LINEAPIError(f"LINE がエラーを返しました(HTTP {e.code}, {label}): {detail}") from e
             last_reason = f"HTTP {e.code}"
-        except LINEAPIError:
-            raise
-        except Exception as e:  # noqa: BLE001 — タイムアウト判定のため一旦受ける
+        except (urllib.error.URLError, OSError, http.client.HTTPException) as e:
+            # 通信系の失敗だけ受ける(TypeError 等のコードの誤りは握りつぶさず、そのまま落とす)
             if _is_timeout(e):
                 logger.warning("LINE timeout %s attempt=%d", label, attempt)
                 last_reason = "timeout"
