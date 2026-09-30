@@ -1,0 +1,111 @@
+name: kekka-weekly-collect
+
+on:
+  schedule:
+    # 毎週月曜 09:00 JST(日曜 00:00 UTC)に実行
+    # UTC 0時 = JST 9時 (UTC+9)
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+    # 手動トリガー: workflow_dispatch で任意のタイミングで実行可能
+    inputs:
+      week:
+        description: "ISO週 'YYYY-Www'(例 '2026-W40')。指定なしは今週"
+        required: false
+        type: string
+
+jobs:
+  collect:
+    name: Collect weekly metrics
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        continue-on-error: true
+
+      # GA4 認証: Secrets から JSON を一時ファイルに書き出す
+      - name: Setup GA4 credentials
+        env:
+          GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
+        run: |
+          if [ -z "$GA4_SA_JSON" ]; then
+            echo "Warning: GA4_SA_JSON is not set"
+            exit 0
+          fi
+          echo "$GA4_SA_JSON" > /tmp/ga4_key.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/ga4_key.json" >> $GITHUB_ENV
+
+      - name: Collect weekly metrics
+        env:
+          NOTE_API_TOKEN: ${{ secrets.NOTE_API_TOKEN }}
+          KEKKA_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+        run: |
+          if [ -z "$NOTE_API_TOKEN" ]; then
+            echo "ERROR: NOTE_API_TOKEN not set"
+            exit 1
+          fi
+          if [ -z "$KEKKA_LINE_CHANNEL_ACCESS_TOKEN" ]; then
+            echo "ERROR: KEKKA_LINE_CHANNEL_ACCESS_TOKEN not set"
+            exit 1
+          fi
+          if [ -z "$GA4_PROPERTY_ID" ]; then
+            echo "ERROR: GA4_PROPERTY_ID not set"
+            exit 1
+          fi
+
+          WEEK_ARG=""
+          if [ -n "${{ github.event.inputs.week }}" ]; then
+            WEEK_ARG="-w ${{ github.event.inputs.week }}"
+          fi
+
+          python scripts/collect_weekly_metrics.py $WEEK_ARG -v
+
+      - name: Cleanup GA4 credentials
+        if: always()
+        run: |
+          rm -f /tmp/ga4_key.json
+
+      - name: Check if data changed
+        id: check_changes
+        run: |
+          if git diff --quiet data/kekka_weekly_metrics.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Data changed, will commit"
+          fi
+
+      - name: Commit and push
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config user.name "kekka-bot"
+          git config user.email "noreply@anthropic.com"
+          git add data/kekka_weekly_metrics.json
+          git commit -m "data: update kekka weekly metrics (auto)"
+          git push
+
+      - name: Notify LINE on error
+        if: failure()
+        env:
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+        run: |
+          # LINE Messaging API で管理者へ通知
+          # 当面は stderr に出力するのみ(本番での運用時に実装)
+          echo "ERROR: kekka-weekly-collect workflow failed"
+          echo "See: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
