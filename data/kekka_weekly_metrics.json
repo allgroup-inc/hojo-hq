@@ -1,0 +1,18 @@
+{
+  "_readme": "結果マガ(kekka_mag)の週次実績。scripts/collect_weekly_metrics.py(Task 4)が毎週1件を weeks に追記する(上書きしない)。数値はすべて各APIの実値のみ(推測・補完はしない。取得失敗の週は書かない)。note部分は scripts/note_api.py の NoteMetrics。",
+  "_schema": {
+    "week": "ISO週 'YYYY-Www'(例 2026-W40)。対象は月曜〜日曜",
+    "collected_at": "取得日時(ISO 8601・JST)",
+    "note": {
+      "week": "str — 上と同じISO週",
+      "views_by_article": "dict[str, int] — note記事ID → その週のビュー数",
+      "total_likes": "int — 対象記事のスキ合計",
+      "total_sales_jpy": "int — 対象記事の売上合計(円)",
+      "buyer_ids": "list[str] — 購入者ID(重複除去・初出順)",
+      "buyer_profiles": "list[dict] — 購入者属性。各要素に buyer_id を含む。注意: 本リポジトリはPUBLIC。個人を特定し得る属性をここへそのまま書かないこと(保存形式は Task 4 で守り部確認のうえ決める)"
+    },
+    "ga4": "Task 2 の GA4Metrics",
+    "line": "Task 3 の LINEMetrics"
+  },
+  "weeks": []
+}
