@@ -1,0 +1,182 @@
+name: Block 2 Integration Tests Orchestration (10/01-03)
+
+on:
+  schedule:
+    # 10/01 09:00 JST
+    - cron: '0 0 1 10 *'
+    # 10/02 09:00 JST
+    - cron: '0 0 2 10 *'
+    # 10/03 09:00 JST
+    - cron: '0 0 3 10 *'
+  workflow_dispatch:
+
+jobs:
+  block2-tests:
+    runs-on: ubuntu-latest
+    name: Block 2 Integration Tests
+
+    steps:
+      - name: Checkout hojo-hq
+        uses: actions/checkout@v4
+        with:
+          repository: allgroup-inc/hojo-hq
+          ref: main
+
+      - name: Checkout kakei-crm (for coordination)
+        uses: actions/checkout@v4
+        with:
+          repository: allgroup-inc/kakei-crm
+          path: kakei-crm-coordination
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install test dependencies
+        run: |
+          cd scripts/integration-tests
+          pip install -r requirements.txt
+          npm ci
+
+      - name: Run Block 2 integration tests
+        id: test-run
+        run: |
+          cd scripts/integration-tests
+          bash run-block2-tests.sh
+        env:
+          BASE_URL: ${{ secrets.KAKEHASHI_TEST_URL || 'http://localhost:3000' }}
+          CI: 'true'
+
+      - name: Parse test results
+        id: parse-results
+        run: |
+          python3 << 'EOF'
+          import json
+          import os
+          from pathlib import Path
+
+          test_dir = Path("scripts/integration-tests/results")
+          results = {
+              "timestamp": os.environ.get("GITHUB_RUN_ID", "unknown"),
+              "tests": {},
+              "summary": {}
+          }
+
+          # Parse each test result file
+          for result_file in test_dir.glob("*.json"):
+              with open(result_file) as f:
+                  results["tests"][result_file.stem] = json.load(f)
+
+          # Summary
+          all_passed = all(t.get("passed", False) for t in results["tests"].values())
+          results["summary"] = {
+              "all_passed": all_passed,
+              "total_tests": len(results["tests"]),
+              "passed_count": sum(1 for t in results["tests"].values() if t.get("passed")),
+              "failed_count": sum(1 for t in results["tests"].values() if not t.get("passed")),
+          }
+
+          with open("block2-test-results.json", "w") as f:
+              json.dump(results, f, indent=2)
+
+          print(f"TESTS_SUMMARY={json.dumps(results['summary'])}")
+          EOF
+
+      - name: Generate G1 judgment draft
+        if: always()
+        run: |
+          python3 << 'EOF'
+          import json
+          from datetime import datetime
+
+          # Read test results
+          with open("block2-test-results.json") as f:
+              results = json.load(f)
+
+          # Gateway G1 criteria
+          g1_criteria = {
+              "business_axis_integration": {"required": 10, "actual": results["tests"].get("business-axis", {}).get("passed_count", 0)},
+              "api_chain": {"required": 6, "actual": results["tests"].get("api-chain", {}).get("passed_count", 0)},
+              "ui_smoke": {"required": 12, "actual": results["tests"].get("ui", {}).get("passed_count", 0)},
+              "performance": {
+                  "p95_threshold_ms": 1000,
+                  "actual_p95_ms": results["tests"].get("performance", {}).get("p95_ms", 99999),
+                  "error_rate_threshold": 0.01,
+                  "actual_error_rate": results["tests"].get("performance", {}).get("error_rate", 1.0),
+              }
+          }
+
+          # Determine G1 status
+          all_tests_passed = results["summary"]["all_passed"]
+          perf_ok = (
+              g1_criteria["performance"]["actual_p95_ms"] <= g1_criteria["performance"]["p95_threshold_ms"] and
+              g1_criteria["performance"]["actual_error_rate"] <= g1_criteria["performance"]["error_rate_threshold"]
+          )
+          g1_status = "PASS" if (all_tests_passed and perf_ok) else "FAIL"
+
+          # Generate draft
+          judgment_draft = {
+              "timestamp": datetime.now().isoformat(),
+              "g1_status": g1_status,
+              "criteria": g1_criteria,
+              "results_summary": results["summary"],
+              "next_action": "Block 3 本番環境準備開始" if g1_status == "PASS" else "原因特定・再テスト",
+              "note": "⚠️ ドラフト — 小柳さんの最終確認が必須"
+          }
+
+          with open("g1-judgment-draft.json", "w") as f:
+              json.dump(judgment_draft, f, ensure_ascii=False, indent=2)
+
+          print(f"G1_STATUS={g1_status}")
+          EOF
+
+      - name: Upload test results to kakei-crm
+        if: always()
+        run: |
+          # Copy results to kakei-crm coordination repo
+          mkdir -p kakei-crm-coordination/block2-results
+          cp block2-test-results.json kakei-crm-coordination/block2-results/
+          cp g1-judgment-draft.json kakei-crm-coordination/block2-results/
+
+          # Commit (if results changed)
+          cd kakei-crm-coordination
+          git config user.email "ci@allgroup-inc"
+          git config user.name "KAKEHASHI CI"
+          git add block2-results/
+          git commit -m "test: Block 2 test results from run #${{ github.run_id }}" || true
+          git push origin main || true
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const results = fs.existsSync('block2-test-results.json')
+              ? JSON.parse(fs.readFileSync('block2-test-results.json', 'utf8'))
+              : {};
+
+            github.rest.issues.createComment({
+              issue_number: 1,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚨 Block 2 Tests Failed\n\n\`\`\`json\n${JSON.stringify(results, null, 2)}\n\`\`\`\n\n小柳さんへ通知完了`
+            });
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## Block 2 Integration Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat block2-test-results.json >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### G1 Judgment Draft" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat g1-judgment-draft.json >> $GITHUB_STEP_SUMMARY
