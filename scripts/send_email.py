@@ -6,9 +6,9 @@
 claude.ai のコネクタに依存せず、リポジトリ側から確実に自動送信する。
 
 必要な環境変数(GitHub Secrets):
-  SMTP_HOST   例: xxxx.sakura.ne.jp(さくらのメール SMTPサーバ名)
+  SMTP_HOST   例: xxxx.sakura.ne.jp(SMTPサーバ名)
   SMTP_PORT   587(STARTTLS・既定) または 465(SSL)
-  SMTP_USER   info@fukugiiro.com(送信に使うメールアドレス=SMTP認証ユーザー)
+  SMTP_USER   送信に使うメールアドレス(SMTP認証ユーザー)
   SMTP_PASS   そのメールボックスのパスワード
   SMTP_FROM   任意。差出人アドレス(未指定なら SMTP_USER)
 
