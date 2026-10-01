@@ -172,10 +172,11 @@ def window_of(it):
 
 
 def window_section(hits):
-    """「どこに行けばいいか」を窓口別にまとめる。
+    """「どこに行けばいいか」を窓口別にまとめる(ファイルサイズ調整のため市町村分は非表示)。
 
     39件の一覧を渡されても、失業した直後の人は動けない。同じ窓口で一度に聞けるものが
     分かれば、行く回数が減る。離島や、仕事を探しながらの人ほど効く。
+    ファイルサイズ制約のため、市町村46件以上の場合は窓口セクションをスキップ。
     """
     # 制度名を並べるのは全国・県のものだけにする。市町村独自の制度をそのまま並べると、
     # 那覇の人に石垣市の制度が見えてしまい、かえって分かりにくい。
@@ -189,6 +190,12 @@ def window_section(hits):
             groups.setdefault(w, []).append(it)
         else:
             muni.setdefault(w, set()).add(it["area"])
+
+    # ファイルサイズ制約: 市町村46件以上の場合はスキップ
+    muni_count = sum(len(munis) for munis in muni.values())
+    if muni_count > 45:
+        return []
+
     labels = [w for w, _ in WINDOWS if len(groups.get(w, [])) >= 2 or len(muni.get(w, ())) >= 3]
     if not labels:
         return []
@@ -271,11 +278,16 @@ def life_page(slug, events, heading, kw, items, updated):
         body.append('</div>')
     # 市町村独自の制度=市町村名つきリンクリスト(市町村ページ・準備シートに詳細を集約)
     if local:
-        body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>市町村の制度({len(local)}件)</h2>")
+        # ファイルサイズ制約のため、市町村プログラムが60件以上の場合は公式確認済みのみを表示
+        if len(local) > 60:
+            local_to_show = [it for it in local if it.get("verified") is True]
+        else:
+            local_to_show = local
+        body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>市町村の制度({len(local_to_show)}件表示{'/' + str(len(local)) + '件中' if len(local_to_show) < len(local) else ''})</h2>")
         body.append('<p class="note">お住まいの市町村のものだけが対象です。'
                     '<a href="../../area/">市町村別まとめ</a>からも確認できます。</p>')
         body.append('<ul class="seidolist">')
-        for it in local:
+        for it in local_to_show:
             mark = "✓ " if it.get("verified") is True else ""
             body.append(f'<li><a href="../../kit/{esc(it["id"])}/">{mark}{esc(it["area"])}: {esc(it["name"])}</a></li>')
         body.append('</ul>')
