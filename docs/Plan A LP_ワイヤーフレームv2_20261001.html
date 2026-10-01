@@ -1,0 +1,226 @@
+<title>Plan A 販路LP 構成案</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho:wght@600;800&display=swap">
+<style>
+/* Layout: 1-column mobile-first LP (max 720px) with a fixed bottom LINE bar. Wireframe = real structure + draft copy + annotation chips. */
+:root{
+  --bg:#FFFBF4; --surface:#FFFFFF; --fg:#1F2A36; --muted:#5B6672;
+  --navy:#00335C; --shu:#B9502F; --ki:#F2B705; --orange:#F88800;
+  --line:#06C755; --rule:#E7DFD2; --note-bg:#FFF4D6; --note-fg:#6B4E00;
+  --font-display:"Shippori Mincho","Noto Serif JP",serif;
+  --font-body:"Noto Sans JP","Meiryo",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#14191F; --surface:#1C232B; --fg:#F2EEE6; --muted:#A9B2BC; --navy:#9CC3EA; --shu:#E07A55; --ki:#F2B705; --orange:#FFA033; --rule:#2E3842; --note-bg:#3A2F10; --note-fg:#FFE3A0; color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#14191F; --surface:#1C232B; --fg:#F2EEE6; --muted:#A9B2BC; --navy:#9CC3EA; --shu:#E07A55; --ki:#F2B705; --orange:#FFA033; --rule:#2E3842; --note-bg:#3A2F10; --note-fg:#FFE3A0; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.75;margin:0;padding-block:0 110px;padding-inline:16px;font-size:16px}
+.wrap{max-width:720px;margin:0 auto}
+h1,h2,h3{text-wrap:balance;word-break:auto-phrase;line-height:1.35;margin:0}
+h1{font-family:var(--font-display);font-size:clamp(1.6rem,5.6vw,2.4rem);font-weight:800;color:var(--navy)}
+h2{font-family:var(--font-display);font-size:clamp(1.3rem,4.4vw,1.75rem);font-weight:800;color:var(--navy);margin-bottom:.9rem}
+h3{font-size:1.05rem;font-weight:700}
+p{margin:0}
+section{padding-block:2.4rem;border-bottom:1px solid var(--rule)}
+section:last-of-type{border-bottom:0}
+.eyebrow{display:inline-flex;gap:.5rem;align-items:center;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:.6rem}
+.eyebrow b{display:inline-block;background:var(--navy);color:#fff;border-radius:999px;padding:0 .55em;font-size:.72rem;letter-spacing:0}
+.note{display:block;background:var(--note-bg);color:var(--note-fg);border-left:4px solid var(--ki);padding:.55rem .8rem;font-size:.84rem;border-radius:0 8px 8px 0;margin-top:1rem;line-height:1.6}
+.note::before{content:"制作メモ: ";font-weight:700}
+.cta{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:var(--line);color:#fff;font-weight:700;border-radius:999px;padding:.9rem 1.5rem;text-decoration:none;font-size:1.05rem;min-height:52px}
+.cta small{font-weight:500;opacity:.9}
+.hero{padding-top:2rem}
+.hero .lead{font-size:1.05rem;margin-top:1rem;color:var(--fg)}
+.hero .mech{margin-top:.9rem;font-weight:700;color:var(--shu)}
+.photo{aspect-ratio:3/2;max-width:100%;border-radius:12px;background:
+  linear-gradient(160deg,#7FB7D9 0%,#E9E1C9 55%,#B9502F 100%);display:grid;place-items:center;color:#fff;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.4);margin-block:1.2rem}
+.photo span{background:rgba(0,0,0,.35);padding:.3rem .8rem;border-radius:6px;font-size:.9rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem}
+.stat{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:.9rem 1rem;min-width:0}
+.stat .v{font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
+.stat .k{font-size:.85rem;color:var(--muted)}
+.stat .src{font-size:.72rem;color:var(--muted);margin-top:.3rem}
+.voices{display:grid;gap:.75rem}
+.voice{background:var(--surface);border-left:4px solid var(--shu);padding:.8rem 1rem;border-radius:0 10px 10px 0}
+.voice q{font-weight:700;quotes:"「" "」"}
+.voice .who{font-size:.85rem;color:var(--muted);margin-top:.2rem}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:.88rem;background:var(--surface)}
+th,td{border:1px solid var(--rule);padding:.55rem .6rem;text-align:left;vertical-align:top}
+th{background:var(--bg);font-weight:700}
+td.hl,th.hl{background:rgba(248,136,0,.10);font-weight:700}
+.steps{display:grid;gap:.9rem;counter-reset:s}
+.step{display:grid;grid-template-columns:44px 1fr;gap:.8rem;align-items:start}
+.step .n{width:44px;height:44px;border-radius:50%;background:var(--orange);color:#fff;display:grid;place-items:center;font-weight:900;font-family:var(--font-display);font-size:1.2rem}
+.step .who{font-size:.8rem;font-weight:700;color:var(--shu);letter-spacing:.05em}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem}
+.box{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:1rem;min-width:0}
+.box h3{margin-bottom:.4rem}
+.box ul{margin:0;padding-left:1.2em}
+.box.warn{border-color:var(--shu)}
+.cond{display:grid;grid-template-columns:7.5em 1fr;gap:.4rem .8rem;font-size:.95rem}
+.cond dt{font-weight:700;color:var(--muted)}
+.cond dd{margin:0}
+details{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:.7rem 1rem;margin-bottom:.5rem}
+summary{font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:1rem}
+summary::after{content:"＋";color:var(--orange);font-weight:900}
+details[open] summary::after{content:"－"}
+details p{margin-top:.5rem;color:var(--fg);font-size:.95rem}
+.final{text-align:center;background:var(--surface);border-radius:14px;padding:2rem 1.2rem;border:2px solid var(--orange)}
+.final .cta{margin-top:1rem}
+.foot{font-size:.78rem;color:var(--muted);line-height:1.7}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--rule);padding:.6rem 16px;padding-bottom:calc(.6rem + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:9}
+.bar .cta{width:min(100%,560px)}
+.legend{background:var(--surface);border:1px dashed var(--muted);border-radius:10px;padding:.9rem 1rem;font-size:.9rem;margin-top:1.2rem}
+.legend b{color:var(--shu)}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--ki);outline-offset:3px}
+@media (prefers-reduced-motion:no-preference){ details p{animation:fade .25s ease} }
+@keyframes fade{from{opacity:.3}to{opacity:1}}
+</style>
+
+<div class="wrap">
+
+<div class="legend">
+  <b>この試作の読み方</b> — 本番の見た目ではなく「段の順番・書く内容・ボタンの置き方」を確かめるためのワイヤーフレームです。黄色の帯は制作チームへのメモで、本番には載りません。数字で<b>【要確認】</b>と付いたものは、出所URLで照合できるまで公開しません。
+</div>
+
+<!-- 1 ファーストビュー -->
+<section class="hero">
+  <div class="eyebrow"><b>1</b> ファーストビュー</div>
+  <h1>あなたの商品を探している海外の買い手に、<br>日本語のまま届ける販路。</h1>
+  <p class="lead">翻訳・商談・通関・代金回収は、沖縄の会社GLOWが代わりにやります。あなたがすることは、商品の写真と情報を渡して、いつも通りに出荷するだけ。</p>
+  <p class="mech">初期費用1万円。売れたときだけ3%。</p>
+  <div class="photo"><span>本物の沖縄の商品写真(例: 黒糖・マンゴー・やちむん)1枚</span></div>
+  <a class="cta" href="#final">LINEで相談する <small>無料・日本語</small></a>
+  <span class="note">見出しは「1万円」「Plan A」から始めない(相手はまだ手段を知らない段階)。ボタンは3つ→1つ。写真は「イメージです」を使わず実物に。</span>
+</section>
+
+<!-- 2 信頼の帯 -->
+<section>
+  <div class="eyebrow"><b>2</b> 信頼の帯(出所付きの数字だけ)</div>
+  <div class="stats">
+    <div class="stat"><div class="v">200以上</div><div class="k">の国と地域に、4,000万を超える登録バイヤー</div><div class="src">出所: アリババ株式会社公式サイト(b2b.alibaba.co.jp/service)◯年◯月時点【公開前に原文照合】</div></div>
+    <div class="stat"><div class="v">取引保護に対応</div><div class="k">Alibaba.comの取引保護サービス(Trade Assurance)を通した取引が基本。代金はAlibaba.comが預かり、受領後に支払われる仕組み</div><div class="src">出所: b2b-manual.alibaba.co.jp/ta-01【公開前に原文照合】</div></div>
+    <div class="stat"><div class="v">株式会社GLOW</div><div class="k">沖縄県・運営事業: 沖縄企業のミカタ ほか</div><div class="src">所在地・代表名を明記</div></div>
+  </div>
+  <span class="note">「Alibaba.com公式パートナー」「沖縄県支援事業」「Trade Assurance認定」のバッジは載せない(付録B: 「認定」制度ではなく、公式パートナー名はアリババ株式会社が個別に付与)。会員契約後は「Alibaba.com出展企業(ゴールドサプライヤー)」と書ける。</span>
+</section>
+
+<!-- 3 こんな方へ -->
+<section>
+  <div class="eyebrow"><b>3</b> こんな方へ(生産者の言葉で)</div>
+  <h2>「海外に売りたい。でも…」で止まっていませんか</h2>
+  <div class="voices">
+    <div class="voice"><q>英語ができない。問い合わせが来ても返せない。</q><div class="who">→ やりとりはGLOWが日本語で取り次ぎます</div></div>
+    <div class="voice"><q>お金を払ったのに商品が来ない、の逆で「送ったのにお金が来ない」が怖い。</q><div class="who">→ 代金は取引保護の仕組みを通して受け取ります</div></div>
+    <div class="voice"><q>展示会や商社の話は、桁が違いすぎて現実的じゃない。</q><div class="who">→ 初期費用は1万円。売れるまで追加費用はかかりません</div></div>
+  </div>
+  <span class="note">架空の人物カード(農業法人/個人農家/工芸職人)は廃止。最初の説明会・LINE相談で集めた実際の言葉に差し替える。実名の生産者が3社そろったら顔写真付きで復活。</span>
+</section>
+
+<!-- 4 比較表 -->
+<section>
+  <div class="eyebrow"><b>4</b> 他の方法との比較</div>
+  <h2>無料の相談窓口と、何が違うのか</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th></th><th>何もしない</th><th>県・JETROの無料支援</th><th>商社に預ける</th><th>海外展示会</th><th class="hl">Plan A</th></tr></thead>
+    <tbody>
+      <tr><th>初期費用</th><td>0円</td><td>0円(相談まで)</td><td>0円〜(条件次第)</td><td>数十万〜【要確認】</td><td class="hl">1万円</td></tr>
+      <tr><th>売れたときの費用</th><td>—</td><td>—</td><td>仕切り値・マージン</td><td>—</td><td class="hl">売上の3%</td></tr>
+      <tr><th>自分でやること</th><td>—</td><td>出店・翻訳・商談は自分</td><td>商品を渡す</td><td>渡航・接客・通訳手配</td><td class="hl">写真と情報を渡す、出荷する</td></tr>
+      <tr><th>言語</th><td>—</td><td>自分で対応</td><td>商社次第</td><td>通訳が必要</td><td class="hl">日本語のみでOK</td></tr>
+      <tr><th>代金の守り</th><td>—</td><td>自分で確認</td><td>商社の信用</td><td>自分で確認</td><td class="hl">取引保護の仕組みを利用</td></tr>
+      <tr><th>始められる時期</th><td>—</td><td>セミナー日程次第</td><td>先方次第</td><td>年1〜2回</td><td class="hl">随時(第1期募集中)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="note">差別化の芯は「相談で終わらず、出店から代金回収まで"やる"」こと。無料支援を悪く言わない(県との関係・守り部)。展示会費用の相場は出所付きで。</span>
+</section>
+
+<!-- 5 仕組み -->
+<section>
+  <div class="eyebrow"><b>5</b> 仕組み(3歩)</div>
+  <h2>あなたがすることは、2つだけ</h2>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div><div class="who">あなた</div><h3>商品の写真・説明・希望価格を渡す</h3><p>LINEで送るだけ。撮影のコツはGLOWが案内します。</p></div></div>
+    <div class="step"><div class="n">2</div><div><div class="who">GLOW</div><h3>出店・翻訳・商談・通関・代金回収</h3><p>Alibaba.com上のGLOWの店に、あなたの商品を掲載します(あなたからの販売許諾書をもとに)。買い手とのやりとりは日本語でお伝えします。</p></div></div>
+    <div class="step"><div class="n">3</div><div><div class="who">あなた</div><h3>注文が決まったら、いつも通り出荷</h3><p>海外向けの書類や手配はGLOW側。代金は日本円で受け取ります。</p></div></div>
+  </div>
+  <div class="two" style="margin-top:1rem">
+    <div class="box"><h3>1万円は何に使われる?</h3><ul><li>商品ページの作成と翻訳</li><li>写真の調整・掲載作業</li><li>初回の価格設定の相談</li></ul></div>
+    <div class="box"><h3>3%は何にかかる?</h3><ul><li>成約した売上に対してだけ</li><li>商談・書類・回収の手数料</li><li>送料・関税など実費は別(見積りを事前に提示)</li><li>Alibaba.comの取引保護手数料(支払額の4%・上限100米ドル)の負担者【要決裁】</li></ul></div>
+  </div>
+  <span class="note">「年間115万円」「97%があなたの利益」は外す。利益率は送料・関税・梱包で変わるため断定しない。実費の扱いを先に書くのが信頼の近道。</span>
+</section>
+
+<!-- 6 やること・やらないこと -->
+<section>
+  <div class="eyebrow"><b>6</b> やること・やらないこと</div>
+  <h2>正直に、ここまでやります</h2>
+  <div class="two">
+    <div class="box"><h3>GLOWがやること</h3><ul><li>掲載・翻訳・買い手とのやりとり</li><li>見積り・契約書類・通関手配</li><li>代金回収と日本円での送金</li></ul></div>
+    <div class="box"><h3>あなたがやること</h3><ul><li>商品情報と写真の提供</li><li>在庫と出荷(国内の指定先まで)</li><li>品質・表示に関する質問への回答</li></ul></div>
+    <div class="box warn"><h3>Plan Aで扱えないもの</h3><ul><li>輸出が規制されている品目【要確認・守り部】</li><li>相手国の植物検疫に通らない生鮮の果実・野菜(品目・仕向国で可否が変わる)</li><li>成果(売上・受注数)の約束</li></ul></div>
+  </div>
+  <span class="note">過大約束の防止策。輸出規制・検疫の具体例はリサーチ結果と守り部の確認で埋める。</span>
+</section>
+
+<!-- 7 第1期募集 -->
+<section>
+  <div class="eyebrow"><b>7</b> 第1期の募集条件</div>
+  <h2>第1期 生産者を募集しています</h2>
+  <dl class="cond">
+    <dt>募集数</dt><dd>【要決裁】社(商品を見てご相談のうえ決定)</dd>
+    <dt>対象</dt><dd>沖縄県内で商品をつくる農業法人・個人農家・食品・工芸</dd>
+    <dt>費用</dt><dd>初期1万円(税込【要確認】)+成約売上の3%</dd>
+    <dt>開始</dt><dd>【要決裁】年【要決裁】月〜</dd>
+    <dt>やめたいとき</dt><dd>いつでも掲載停止できます。初期費用の返金条件は【要決裁】</dd>
+  </dl>
+  <span class="note">「成功事例(イメージです)」3カードは廃止。実績が出る前は「第1期募集」と正直に書くほうが、沖縄の生産者には信用される(評議会・Ogilvy/Sutherland)。実例ができたらこの段を事例に差し替え。</span>
+</section>
+
+<!-- 8 運営者 -->
+<section>
+  <div class="eyebrow"><b>8</b> 運営者</div>
+  <h2>株式会社GLOW(沖縄)</h2>
+  <p>沖縄企業のミカタ(補助金・助成金の情報サイト)、ゆんたく経営相談室などを運営。代表: 【要確認】。所在地: 【要確認】。</p>
+  <span class="note">「30年の公庫経験」「200社支援」「100億円融資実績」は本人・会社・期間・定義を確認できるまで非表示(Check 1-1〜1-3)。確認できたら、数字より「何をしてきた人か」の1文で。</span>
+</section>
+
+<!-- 9 FAQ -->
+<section>
+  <div class="eyebrow"><b>9</b> よくある質問</div>
+  <h2>よくある質問</h2>
+  <details><summary>1万円はいつ払いますか</summary><p>掲載内容を確認して「進める」と決めたあとに。相談・見積りの段階ではかかりません。</p></details>
+  <details><summary>売れなかったらどうなりますか</summary><p>3%の費用はかかりません。掲載の継続・停止はいつでも選べます。【返金条件は要決裁】</p></details>
+  <details><summary>英語は本当に不要ですか</summary><p>買い手とのやりとりはGLOWが日本語でお伝えします。確認したい内容だけ日本語で返してください。</p></details>
+  <details><summary>代金は本当に入りますか</summary><p>Alibaba.comの取引保護サービス(Trade Assurance)を通した取引を基本にします。買い手が払った代金をAlibaba.comが預かり、商品の受領後に売り手側へ支払われる仕組みです。買い手を守る制度なので限界もあります。説明会で正直にお伝えします。</p></details>
+  <details><summary>少量・小ロットでも大丈夫ですか</summary><p>はい。最低注文数は商品ごとに一緒に決めます。</p></details>
+  <details><summary>個人事業主でも参加できますか</summary><p>できます。必要書類はご案内します。</p></details>
+  <details><summary>送料・関税は誰が払いますか</summary><p>商品ごとに事前に見積りを出し、価格に含めるか別途かを決めます。</p></details>
+  <details><summary>自治体の無料支援と併用できますか</summary><p>できます。むしろ補助金の活用はGLOWが得意です(沖縄企業のミカタ)。</p></details>
+  <span class="note">質問文はLINE相談で実際に来た質問に毎月入れ替える。回答の数字はすべて出所か決裁済み条件に基づく。</span>
+</section>
+
+<!-- 10 最後の一押し -->
+<section id="final">
+  <div class="eyebrow"><b>10</b> 最後の一押し</div>
+  <div class="final">
+    <h2>まずは、商品の写真を1枚送るところから。</h2>
+    <p>LINEで「海外」と送ってください。担当が日本語で返事をします。説明会の日程もLINEでお知らせします。</p>
+    <a class="cta" href="#final">LINEで相談する <small>無料・日本語</small></a>
+    <p class="foot" style="margin-top:.8rem">資料のお渡し・説明会の申し込みもLINE内で完結します。</p>
+  </div>
+  <span class="note">ボタンは3段(LINE/資料/説明会)→LINE1本に。資料・説明会はLINE内で渡し、メール・電話フォームは置かない(CV単一ルール。例外は小柳さん決裁)。/go/中間リンク経由・専用イベント名で計測。</span>
+</section>
+
+<!-- 11 脚注 -->
+<section>
+  <div class="eyebrow"><b>11</b> 脚注(法務)</div>
+  <p class="foot">※ 本サービスは販路の提供と業務の代行であり、売上や受注を保証するものではありません。<br>※ 品目・仕向国によっては輸出できない、または追加の手続きが必要な場合があります。<br>※ 掲載している数字の出所: (1) アリババ株式会社公式サイト https://www.b2b.alibaba.co.jp/service/ (2) Alibaba.com活用マニュアル https://b2b-manual.alibaba.co.jp/ta-01<br>※ 特定商取引法に基づく表記 / 個人情報の取り扱い / 運営会社</p>
+  <span class="note">成果保証の否定・数字の出所一覧・特商法表記を必ず置く(景表法・特商法: リサーチ結果で確認)。</span>
+</section>
+
+</div>
+
+<div class="bar"><a class="cta" href="#final">LINEで相談する <small>無料・日本語</small></a></div>
