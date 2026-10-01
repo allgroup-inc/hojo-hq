@@ -11,14 +11,14 @@ import json
 
 # ★山梨版のURL基底(独自ドメイン移行時はここだけ変更)
 # 2026-09-20 一本化: 公開URLは /yamanashi/(議事_20260902_山梨版第1段階)。/fukugiiro/yamanashi/ は廃止
-SITE_BASE = "https://allgroup-inc.github.io/hojo-hq/yamanashi"
+SITE_BASE = "https://moraiwasuredo.jp/yamanashi"
 
 # 独自ドメインへの引っ越し後、旧URL側が正規URLとして指す先(沖縄版 fg_seo.MOVED_TO の山梨版)。
 # moradou.jp 上では山梨版は /yamanashi/ 配下に置かれる。開通・表示確認が済むまで None。
 MOVED_TO = None
 
 # OGP画像はブランド共通(沖縄版と同じ)
-OGP_IMAGE = "https://allgroup-inc.github.io/hojo-hq/yamanashi/assets/ogp.jpg"  # 山梨版カード(桜と富士・2026-09-22作成)
+OGP_IMAGE = "https://moraiwasuredo.jp/yamanashi/assets/ogp.jpg"  # 山梨版カード(桜と富士・2026-09-22作成)
 
 # 山梨県 27市町村マスタ(名前→slug)。全国地方公共団体コード順。
 # 「山梨市」は県名と同じため slug を yamanashi-shi にして紛れを防ぐ。
@@ -39,7 +39,7 @@ HIDDEN_MUNIS = []
 VISIBLE_MUNIS = [(n, s) for n, s in MUNIS if n not in HIDDEN_MUNIS]
 
 # 山梨版LINE(@630pbjqq・2026-09-03開設)。ボタンは /go/ymn-* 経由(lin.ee直貼り禁止)
-GO_BASE = "https://allgroup-inc.github.io/hojo-hq/go"
+GO_BASE = "https://moraiwasuredo.jp/go"
 
 # 全ページ共通ヘッダー(Instagramは準備中のため置かない)
 HEADER = f'''<header class="siteheader">

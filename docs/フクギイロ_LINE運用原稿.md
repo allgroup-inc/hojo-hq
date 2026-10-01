@@ -100,7 +100,7 @@
 保存できました!このトークがそのまま控えになります。
 機種変更しても消えないので、いつでも見返してください。
 次の一歩は「申請準備シート」から。持ち物と窓口での言い方まで用意しています↓
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/
+https://moraiwasuredo.jp/fukugiiro/kit/
 
 💬 「受け取れた報告」を送ってくれた方へ
 ご報告、にふぇーでーびる(ありがとうございます)。
@@ -131,7 +131,7 @@ Messaging APIの自動化前でも、**人がトークを見て下のテンプ�
 お子さんに関わる制度がいくつか見つかりましたね🌱
 子育ての制度は「申請した月から」しか始まらないものが多いので、早めの確認がおすすめです。
 子育てでもらえるお金の一覧はこちらにまとめています↓
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/kosodate/
+https://moraiwasuredo.jp/fukugiiro/life/kosodate/
 気になる制度があれば、この トークで制度名を送ってください。準備シートをご案内します。
 ```
 
@@ -140,7 +140,7 @@ https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/kosodate/
 ご出産に関わる制度が見つかりましたね🌺
 出産関係は「面談や届出とセット」の給付が多いので、母子手帳まわりの手続きと一緒に確認すると取りこぼしにくいです。
 妊娠・出産でもらえるお金の一覧はこちら↓
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/shussan/
+https://moraiwasuredo.jp/fukugiiro/life/shussan/
 ```
 
 ### F-3 医療・健康(医療費助成・高額療養費など)
@@ -148,7 +148,7 @@ https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/shussan/
 医療費に関わる制度が見つかりましたね。
 医療費の助成は「同じ医療費を二重には受けられない」ものが多いので、どれが優先かは窓口で確認するのが確実です(シートに併用の注意をつけています)。
 病気・けがのときのお金の一覧はこちら↓
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/iryo/
+https://moraiwasuredo.jp/fukugiiro/life/iryo/
 ```
 
 ### F-4 入園・入学・教育(就学援助・奨学給付金など)
@@ -156,7 +156,7 @@ https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/iryo/
 学校関係の制度が見つかりましたね📚
 就学援助は年度の途中からでも申請できる市町村が多いです。締切がある給付型奨学金もあるので、お早めの確認がおすすめです。
 入園・入学でもらえるお金の一覧はこちら↓
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/nyugaku/
+https://moraiwasuredo.jp/fukugiiro/life/nyugaku/
 ```
 
 ### F-5 低所得・生活のお困りごと(減免・給付金・相談窓口)
@@ -164,7 +164,7 @@ https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/nyugaku/
 生活を支える制度がいくつか見つかりましたね。
 保険料や税金の「減免」は、申請しないと始まらないものがほとんどです。窓口で「減免の相談に来ました」と言えば大丈夫です。
 生活支援の一覧はこちら↓
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/seikatsu/
+https://moraiwasuredo.jp/fukugiiro/life/seikatsu/
 おつらい状況でしたら、無料の相談窓口(自立相談支援)も一覧に載せています。
 ```
 
@@ -173,7 +173,7 @@ https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/seikatsu/
 お仕事に関わる制度が見つかりましたね。
 会社都合などの離職では、国民健康保険料が軽くなる場合があります(雇用保険受給資格者証をお手元に)。
 失業・転職のときのお金の一覧はこちら↓
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/shitsugyo/
+https://moraiwasuredo.jp/fukugiiro/life/shitsugyo/
 ```
 
 ### F-7 住まい(家賃・リフォーム・耐震)
@@ -181,7 +181,7 @@ https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/shitsugyo/
 住まいに関わる制度が見つかりましたね🏠
 住宅系は「工事の前に申請」が原則のものが多いので、着工前の確認が大切です。
 住まいの制度一覧はこちら↓
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/sumai/
+https://moraiwasuredo.jp/fukugiiro/life/sumai/
 ```
 
 ### F-8 障がいのある方・お子さん
@@ -189,7 +189,7 @@ https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/sumai/
 障がいに関わる制度が見つかりましたね。
 手帳の等級や所得で対象が変わる制度が多いので、窓口に行く前に準備シートで持ち物を確認するとスムーズです。
 一覧はこちら↓
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/shogai/
+https://moraiwasuredo.jp/fukugiiro/life/shogai/
 ```
 
 ### F-9 介護・シニア(介護保険・補聴器・年金関係)
@@ -197,7 +197,7 @@ https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/shogai/
 介護・シニアの制度が見つかりましたね。
 年金に上乗せされる「年金生活者支援給付金」など、請求しないと受け取れない制度もあります(緑色の封筒が届いていたら捨てないでください)。
 介護・シニアの一覧はこちら↓
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/life/kaigo/
+https://moraiwasuredo.jp/fukugiiro/life/kaigo/
 ```
 
 **運用メモ**: 表現は断定しない(「〜場合があります」)。締切に触れるときは「約1か月前から」ルール準拠。

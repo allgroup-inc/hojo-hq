@@ -39,7 +39,7 @@ OUT_DIR = os.path.join(BASE, "posts", "carousel")
 # 2026-08-17: accuracy-check(締切・金額・出典URLはdata由来)/ deadline-alert(30日以上先のみ掲載)/
 #             humanizer(定型句なし)で確認。
 GATE_CHECKED = "2026-08-17"
-SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=carousel"
+SITE_URL = "https://moraiwasuredo.jp/?utm_source=instagram&utm_medium=social&utm_campaign=carousel"
 
 W, H = 1080, 1350  # IG推奨4:5(画面占有が最大)
 PAD = 96

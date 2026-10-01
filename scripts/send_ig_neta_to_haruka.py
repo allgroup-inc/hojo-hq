@@ -31,7 +31,7 @@ NETA_FILE = REPO_ROOT / "data" / "fukugiiro" / "ig_neta.json"
 SEIDO_FILE = REPO_ROOT / "data" / "fukugiiro" / "seido.json"
 CHECKLIST_DIR = REPO_ROOT / "docs"
 HARUKA_EMAIL = "t.h.n.s.8871@outlook.jp"
-BOARD_URL = "https://allgroup-inc.github.io/hojo-hq/staff/haruka/"
+BOARD_URL = "https://moraiwasuredo.jp/staff/haruka/"
 
 
 def load_json(path):

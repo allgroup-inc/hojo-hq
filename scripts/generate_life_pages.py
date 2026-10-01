@@ -65,12 +65,12 @@ ul.lifelist a{display:block;padding:10px 2px;border-bottom:1px dashed var(--fg-l
 """
 
 HEADER = '''<header class="siteheader">
-  <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂</a>
+  <a class="hlogo" href="https://moraiwasuredo.jp/fukugiiro/"><img src="https://moraiwasuredo.jp/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂</a>
   <nav>
-    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
-    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
-    <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
-    <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-life/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
+    <a href="https://moraiwasuredo.jp/fukugiiro/shindan/">3分診断</a>
+    <a href="https://moraiwasuredo.jp/fukugiiro/area/">市町村</a>
+    <a href="https://moraiwasuredo.jp/fukugiiro/kit/">準備シート</a>
+    <a href="https://moraiwasuredo.jp/go/fg-life/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
     <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
   </nav>
 </header>'''
@@ -133,7 +133,7 @@ def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
 {HEADER}
 <div class="wrap">
 {body}
-<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: {esc(updated)}(毎日自動更新) / もらいわすれ堂(運営: 株式会社フクギイロ)</div>
+<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://moraiwasuredo.jp/fukugiiro/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: {esc(updated)}(毎日自動更新) / もらいわすれ堂(運営: 株式会社フクギイロ)</div>
 {footer_links}
 </div>
 </body>
@@ -222,7 +222,7 @@ def life_page(slug, events, heading, kw, items, updated):
     total = len(hits)
     verified_n = sum(1 for it in hits if it.get("verified") is True)
     line_cta = (
-        '<a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-life/" '
+        '<a class="linebtn" href="https://moraiwasuredo.jp/go/fg-life/" '
         'target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'line_add_click\')">'
         f'💬 {esc(kw)}の制度の締切をLINEで受け取る'
         '<span>締切の約1か月前にお知らせ・新しい制度が増えたときも(無料)</span></a>'

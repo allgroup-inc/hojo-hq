@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3分でもらい忘れ診断 | もらいわすれ堂</title>
-<link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/yamanashi/shindan/">
+<link rel="canonical" href="https://moraiwasuredo.jp/yamanashi/shindan/">
 <meta name="description" content="山梨県にお住まいの世帯向け。家族の状況にあてはまる可能性のある給付金・手当を3分で診断します。名前や住所の入力は不要です。">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
@@ -307,7 +307,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var lines = ["【わたしの診断結果】対象の可能性 " + rs.length + "件(もらいわすれ堂)"];
         rs.slice(0, 8).forEach(function(r){ lines.push("・" + r.item.name + "(可能性" + r.likelihood + ")"); });
         if (rs.length > 8) lines.push("…ほか" + (rs.length - 8) + "件");
-        lines.push("くわしく見る: https://allgroup-inc.github.io/hojo-hq/yamanashi/shindan/");
+        lines.push("くわしく見る: https://moraiwasuredo.jp/yamanashi/shindan/");
         return lines.join("\n");
       }
       if (rs.length > 0) {
@@ -315,7 +315,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var shareBtn = h("button", {text:"家族に教える(共有)"});
         shareBtn.addEventListener("click", function(){
           if (window.fgTrack) window.fgTrack("share_click");
-          var url = "https://allgroup-inc.github.io/hojo-hq/yamanashi/shindan/";
+          var url = "https://moraiwasuredo.jp/yamanashi/shindan/";
           var text = "「もらいわすれ堂」で山梨の給付金・手当のもらい忘れを3分で診断できるよ(無料・匿名)";
           if (navigator.share) { navigator.share({title:"もらいわすれ堂|3分でもらい忘れ診断", text:text, url:url}).catch(function(){}); }
           else if (navigator.clipboard) { navigator.clipboard.writeText(text + " " + url); shareBtn.textContent = "リンクをコピーしました!"; }

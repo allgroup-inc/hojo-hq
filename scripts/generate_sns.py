@@ -41,7 +41,7 @@ OUT_DIR = os.path.join(BASE_DIR, "..", "posts", "launch")
 #             フック別の書き出しを含む全8投稿を同3観点で確認。
 GATE_CHECKED = "2026-09-11"
 # UTM付き(ヒロメさんのUTM運用: instagram/social/launch)。プロフィールリンクにも同URLを使用
-SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch"
+SITE_URL = "https://moraiwasuredo.jp/?utm_source=instagram&utm_medium=social&utm_campaign=launch"
 
 # 選定しきい値
 PROMOTE_MIN_DAYS = 30   # 通常投稿はこれ以上先の締切のみ

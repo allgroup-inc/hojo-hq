@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 BASE = r"C:\Users\takes\hojo-hq"
 OUT = os.path.join(BASE, "posts", "card")
-QR_URL = "https://allgroup-inc.github.io/hojo-hq/go/card/"
+QR_URL = "https://moraiwasuredo.jp/go/card/"
 NAVY = (0, 51, 92)
 ORANGE = (248, 136, 0)
 WHITE = (255, 255, 255)

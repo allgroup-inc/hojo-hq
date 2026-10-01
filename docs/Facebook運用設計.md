@@ -7,7 +7,7 @@
 1. Meta Business Suite(business.facebook.com)で Facebookページ作成
    - ページ名: 沖縄企業のミカタ / カテゴリ: 情報サイト
    - プロフィール画像: GLOWロゴ / カバー: posts/images/01_launch.png を流用可
-2. 自己紹介欄・ボタン: 「詳細はこちら」ボタン → **https://allgroup-inc.github.io/hojo-hq/go/fb/**
+2. 自己紹介欄・ボタン: 「詳細はこちら」ボタン → **https://moraiwasuredo.jp/go/fb/**
    (lin.ee直貼り禁止。go/fb はLINE友だち追加へ転送・経路計測付き・生成済み)
 3. InstagramアカウントとBusiness Suiteで接続(同時投稿を有効化)
 
@@ -17,7 +17,7 @@
 - **FBだけの違い**: キャプション内のURLがタップできる → IG用の
   「プロフィールのリンクからどうぞ」の行を、FB版ではURL直書きに差し替える:
   ```
-  https://allgroup-inc.github.io/hojo-hq/?utm_source=facebook&utm_medium=social&utm_campaign=launch
+  https://moraiwasuredo.jp/?utm_source=facebook&utm_medium=social&utm_campaign=launch
   ```
 - 頻度: IGのカレンダー(docs/SNS投稿カレンダー.md)と同一。ストーリーズはIGのみでよい
 - 締切3層ルール適用(SNSで告知するのは締切30日以上先の制度のみ)

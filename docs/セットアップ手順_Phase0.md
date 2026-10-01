@@ -37,7 +37,7 @@
 ## ③ Microsoft Clarity の登録(約10分)→ プロジェクトIDを技術部へ
 
 1. [Microsoft Clarity](https://clarity.microsoft.com/) にサインイン(Google/Microsoftアカウント可)
-2. 「新しいプロジェクト」→ 名前: `沖縄企業のミカタ` / URL: `https://allgroup-inc.github.io/hojo-hq/`
+2. 「新しいプロジェクト」→ 名前: `沖縄企業のミカタ` / URL: `https://moraiwasuredo.jp/`
 3. 設定 → セットアップ → **プロジェクトID**(10文字程度の英数字)をコピーして技術部へ共有
 
 ## ④ (①のついでに推奨)LIFFアプリの発行(約5分)→ Phase 1 の下準備
@@ -45,7 +45,7 @@
 ①でLINE Developersを開いたついでにやっておくと二度手間になりません。
 
 1. 同じチャネル(またはLINEログインチャネルを新規作成)→「**LIFF**」タブ → 追加
-2. LIFFアプリ名: `ミカタ診断` / サイズ: `Full` / エンドポイントURL: `https://allgroup-inc.github.io/hojo-hq/`(後で診断ページURLに変更可)/ Scope: `profile` にチェック
+2. LIFFアプリ名: `ミカタ診断` / サイズ: `Full` / エンドポイントURL: `https://moraiwasuredo.jp/`(後で診断ページURLに変更可)/ Scope: `profile` にチェック
 3. 発行された **LIFF ID**(`xxxx-xxxxxxxx` 形式)を技術部へ共有
 
 ---

@@ -53,7 +53,7 @@ CHANNELS = {
     # 診断ページなので event を必ず変える(既定の line_redirect のままだと
     # プロフィールのタップがLINE登録として数えられ、❹の現在地を見誤る)。
     # 着地側でも経路が分かるよう utm を付ける(GA4のイベントと二重に取れる)。
-    "fg-ig":      {"dest": "https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/"
+    "fg-ig":      {"dest": "https://moraiwasuredo.jp/fukugiiro/shindan/"
                            "?utm_source=instagram&utm_medium=social&utm_campaign=profile",
                    "label": "もらいわすれ堂: Instagramプロフィール → 3分診断",
                    "event": "shindan_redirect", "dest_name": "3分診断"},

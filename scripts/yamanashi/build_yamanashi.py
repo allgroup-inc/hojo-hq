@@ -205,14 +205,14 @@ def build_assets():
    ボタンは /go/ymn-* 経由(lin.ee直貼り禁止・channelで沖縄版と分けて集計)。
    Instagramは準備中のため設定しない(入口を勝手に作らない=約束5) */
 window.FG_ANALYTICS = {provider: "ga4", measurementId: "G-TQMX3MPFSR", domain: "allgroup-inc.github.io"};
-window.FG_LINE_URL = "https://allgroup-inc.github.io/hojo-hq/go/ymn-shindan/";
+window.FG_LINE_URL = "https://moraiwasuredo.jp/go/ymn-shindan/";
 window.FG_LINE_OA_ID = "630pbjqq";
 ''')
 
 def swap_ogp(s):
     """OGP画像を山梨版カードへ(沖縄版ページから変換する際の共通処理)"""
-    return s.replace("https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/ogp.jpg",
-                     "https://allgroup-inc.github.io/hojo-hq/yamanashi/assets/ogp.jpg")
+    return s.replace("https://moraiwasuredo.jp/fukugiiro/assets/ogp.jpg",
+                     "https://moraiwasuredo.jp/yamanashi/assets/ogp.jpg")
 
 def swap_header(s, depth=1):
     return re.sub(r'<header class="siteheader">.*?</header>', header(depth), s, count=1, flags=re.S)
@@ -239,9 +239,9 @@ def build_shindan():
     # Instagram行の削除(山梨は未開設)
     s = re.sub(r'<p style="margin-top:20px;text-align:center"><a class="iglink"[^\n]*</p>\n', '', s, count=1)
     # LINE準備中対応: 既定URLへのフォールバックをやめ、URLが無ければブロック自体を出さない
-    s = must_replace(s, 'href:(window.FG_LINE_URL || "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/")',
+    s = must_replace(s, 'href:(window.FG_LINE_URL || "https://moraiwasuredo.jp/go/fg-shindan/")',
                      'href:window.FG_LINE_URL', "topLineBtn fallback")
-    s = must_replace(s, 'var lineUrl = window.FG_LINE_URL || "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/";',
+    s = must_replace(s, 'var lineUrl = window.FG_LINE_URL || "https://moraiwasuredo.jp/go/fg-shindan/";',
                      'var lineUrl = window.FG_LINE_URL;', "lineUrl fallback")
     s = must_replace(s, '        app.appendChild(topLine);',
                      '        if (window.FG_LINE_URL) app.appendChild(topLine);', "topLine gate")
@@ -267,8 +267,8 @@ def build_shindan():
                      'text:"💬 受け取れたことを報告する(匿名・任意)"', "houkoku link text")
     # 共有・持ち出しテキストの沖縄残存を差し替える(2026-09-27 点検で発見。
     # 山梨の利用者が家族に送ったリンクが沖縄版診断へ飛んでいた)
-    assert s.count('https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/') == 2, "共有URLの箇所数が想定と違う"
-    s = s.replace('https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/',
+    assert s.count('https://moraiwasuredo.jp/fukugiiro/shindan/') == 2, "共有URLの箇所数が想定と違う"
+    s = s.replace('https://moraiwasuredo.jp/fukugiiro/shindan/',
                   f'{Y_BASE_URL}shindan/')
     s = must_replace(s, '「もらいわすれ堂」で沖縄の給付金・手当のもらい忘れを3分で診断できるよ',
                      '「もらいわすれ堂」で山梨の給付金・手当のもらい忘れを3分で診断できるよ', "share text")
@@ -368,7 +368,7 @@ def build_life(items):
         body.append(
             f'<p class="note" style="margin-top:22px;text-align:center">'
             f'{esc(heading)}に関する制度が増えたときや、締切が近づいたときに、LINEでそっとお知らせします。</p>'
-            '<a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/ymn-life/" '
+            '<a class="linebtn" href="https://moraiwasuredo.jp/go/ymn-life/" '
             'target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ymn_line_add_click\')">'
             '💬 締切をLINEで受け取る'
             '<span>締切の約1か月前にお知らせ(配信は順次開始)・新しい制度が増えたときも(無料)</span></a>'

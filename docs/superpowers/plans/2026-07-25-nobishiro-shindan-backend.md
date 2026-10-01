@@ -269,7 +269,7 @@ Expected: 新規3件が `backend.buildReportPrompt is not a function` 等でFAIL
       '<div style="background:#FAF7F0;border:1px solid #E4DCC9;border-radius:12px;padding:20px;">',
       body,
       "</div>",
-      '<p style="margin-top:24px;">より詳しいご相談は<a href="https://allgroup-inc.github.io/hojo-hq/nobishiro/contact/">無料相談予約ページ</a>からどうぞ。</p>',
+      '<p style="margin-top:24px;">より詳しいご相談は<a href="https://moraiwasuredo.jp/nobishiro/contact/">無料相談予約ページ</a>からどうぞ。</p>',
       '<p style="font-size:.85rem;color:#5C6B70;">本レポートはAIが自動生成したものであり、内容の詳細は改めてご相談の上ご確認ください。</p>',
       "</div>",
     ].join("");
@@ -1141,7 +1141,7 @@ Expected: GitHub Actionsでnobishiro-ciが実行され成功する
    - 新規のGoogle Sheetsを1つ作成し、シート名を`リード台帳`にする。ヘッダー行は必須ではない(コードは列位置で読み書きするため)
    - GASエディタの「プロジェクトの設定」→「スクリプト プロパティ」に以下を設定する:
      - `STRIPE_SECRET_KEY`
-     - `SITE_BASE_URL`(例: `https://allgroup-inc.github.io/hojo-hq/nobishiro`。**末尾にスラッシュを付けないこと**— `Code.gs`は`baseUrl + "/shindan/..."`と連結するため、末尾スラッシュがあると`//shindan/complete/`のような二重スラッシュになり決済後の遷移が404になる。ただし現在`site/nobishiro/`は公開パイプラインから除外中のため、掲載承認後の実URLを設定する)
+     - `SITE_BASE_URL`(例: `https://moraiwasuredo.jp/nobishiro`。**末尾にスラッシュを付けないこと**— `Code.gs`は`baseUrl + "/shindan/..."`と連結するため、末尾スラッシュがあると`//shindan/complete/`のような二重スラッシュになり決済後の遷移が404になる。ただし現在`site/nobishiro/`は公開パイプラインから除外中のため、掲載承認後の実URLを設定する)
      - `SHEET_ID`(作成したSheetsのID)
      - `ANTHROPIC_API_KEY`(既存キーを流用するか新規発行するか要判断)
      - `WEBHOOK_TOKEN`(32文字以上のランダム文字列を生成して設定。例: `openssl rand -hex 32`)

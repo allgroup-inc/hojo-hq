@@ -13,7 +13,7 @@
 デモの性質:
   - 計測(GA4)は無効化済み。デモの閲覧は本番の数字に混ざらない
   - LINEボタンだけ本物(@630pbjqq へ直接)。その他の内部リンクは案内トーストを出す
-  - 本番(mainへ反映)後は本番URL https://allgroup-inc.github.io/hojo-hq/yamanashi/ が正
+  - 本番(mainへ反映)後は本番URL https://moraiwasuredo.jp/yamanashi/ が正
 """
 import base64, re, sys, pathlib
 
@@ -101,7 +101,7 @@ def build_top():
     # 診断への導線は診断デモへ(それ以外の内部リンクはトースト)
     html = html.replace('href="shindan/"', 'href="%s"' % SHINDAN_URL)
     # LINEの/go/リンクは実際の友だち追加へ
-    html = html.replace('https://allgroup-inc.github.io/hojo-hq/go/ymn-top/', LINE_DIRECT)
+    html = html.replace('https://moraiwasuredo.jp/go/ymn-top/', LINE_DIRECT)
     html = BAND + html + '\n<script>\n' + YMN_FILM_JS + '\n</script>\n' + DEMO_JS
     (OUT / "demo_yamanashi_top.html").write_text(html)
     print("top:", len(html), "bytes")
@@ -112,17 +112,17 @@ def build_shindan():
     html = must_replace(html, '<link rel="stylesheet" href="../assets/fg-base.css">',
                         '<style>\n%s\n</style>' % FG_BASE_CSS, "fg-base.cssリンク")
     html = html.replace('src="../assets/icon.svg"', 'src="%s"' % ICON)
-    html = html.replace('src="https://allgroup-inc.github.io/hojo-hq/yamanashi/assets/icon.svg"', 'src="%s"' % ICON)
+    html = html.replace('src="https://moraiwasuredo.jp/yamanashi/assets/icon.svg"', 'src="%s"' % ICON)
     html = strip_analytics(html, "../")
     html = must_replace(html, '<script src="logic.js"></script>',
                         '<script>\n%s\n</script>' % LOGIC_JS, "logic.js")
     html = must_replace(html, 'fetch("../../data/yamanashi/seido.json").then(function(r){return r.json()})',
                         'Promise.resolve(window.FG_DB)', "制度データfetch")
     html = '<script>window.FG_DB=%s;</script>\n' % DB + html
-    html = html.replace('https://allgroup-inc.github.io/hojo-hq/go/ymn-shindan/', LINE_DIRECT)
+    html = html.replace('https://moraiwasuredo.jp/go/ymn-shindan/', LINE_DIRECT)
     # トップへ戻る導線はトップのデモへ
     for pat in ('href="../"', 'href="./"', 'href="../index.html"',
-                'href="https://allgroup-inc.github.io/hojo-hq/yamanashi/"'):
+                'href="https://moraiwasuredo.jp/yamanashi/"'):
         html = html.replace(pat, 'href="%s"' % TOP_URL)
     html = BAND + html + DEMO_JS
     (OUT / "demo_yamanashi_shindan.html").write_text(html)

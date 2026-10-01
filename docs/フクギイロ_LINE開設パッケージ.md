@@ -38,7 +38,7 @@
 あなたが受け取るまで、いっしょに。
 
 まずは3分診断で、あなたの世帯が使える可能性のある制度をチェックしてみてください(無料・匿名)。
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/?utm_source=line&utm_medium=social
+https://moraiwasuredo.jp/fukugiiro/shindan/?utm_source=line&utm_medium=social
 
 このアカウントでできること:
 ✅ 診断結果に合わせた締切のお知らせ

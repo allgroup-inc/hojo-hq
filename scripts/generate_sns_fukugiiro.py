@@ -24,8 +24,8 @@ JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA = os.path.join(BASE, "data", "fukugiiro", "seido.json")
 OUT_DIR = os.path.join(BASE, "posts", "fukugiiro")
-SHINDAN_URL = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/?utm_source=instagram&utm_medium=social"
-LP_URL = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/?utm_source=instagram&utm_medium=social"
+SHINDAN_URL = "https://moraiwasuredo.jp/fukugiiro/shindan/?utm_source=instagram&utm_medium=social"
+LP_URL = "https://moraiwasuredo.jp/fukugiiro/?utm_source=instagram&utm_medium=social"
 
 HASHTAGS = "#沖縄 #沖縄子育て #給付金 #手当 #沖縄ママ #沖縄パパ #家計 #もらいわすれ堂"
 DISCLAIMER = "※対象になるかの最終判断は各窓口で行われます。金額・要件は公式ページでご確認ください。"

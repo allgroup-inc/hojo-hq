@@ -31,7 +31,7 @@ from generate_monthly_report import AMOUNT_BANDS, CATEGORIES, categorize  # noqa
 
 OUT_DIR = os.path.join(BASE, "books", "kindle")
 ARCHIVE_PATH = os.path.join(BASE, "data", "gone_archive.json")
-SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=kindle&utm_medium=book&utm_campaign=annual"
+SITE_URL = "https://moraiwasuredo.jp/?utm_source=kindle&utm_medium=book&utm_campaign=annual"
 
 AI_DISCLOSURE = (
     "本書の本文は、著者(沖縄企業のミカタ AI編集部/運営: ALLGROUP)が構築した"

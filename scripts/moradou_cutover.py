@@ -103,8 +103,8 @@ def probe():
 # 旧URLを指している」という、いちばん効くページだけ抜けた状態になる。
 # そのため**両系統やったあとで、旧URLを指すcanonicalが1つも無いことを確かめる**。
 SITE_TREES = [
-    ("site/fukugiiro", "https://allgroup-inc.github.io/hojo-hq/fukugiiro", NEW_BASE),
-    ("site/yamanashi", "https://allgroup-inc.github.io/hojo-hq/yamanashi", YAMANASHI_BASE),
+    ("site/fukugiiro", "https://moraiwasuredo.jp/fukugiiro", NEW_BASE),
+    ("site/yamanashi", "https://moraiwasuredo.jp/yamanashi", YAMANASHI_BASE),
 ]
 _CANON = re.compile(r'(rel="canonical"\s+href=")([^"]*)(")')
 
@@ -267,7 +267,7 @@ def self_test():
     check("通信失敗ではなく『中身が違う』と書く", "中身が違う" in lines[0])
 
     # もらいわすれ堂の文字はあるが canonical が旧URLのまま = 配信前
-    half = '<html><link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/">もらいわすれ堂</html>'
+    half = '<html><link rel="canonical" href="https://moraiwasuredo.jp/fukugiiro/">もらいわすれ堂</html>'
     live, _ = judge(res(top=half))
     check("canonicalが旧URLのままなら開通としない", not live)
 
@@ -277,7 +277,7 @@ def self_test():
     live, _ = judge(res(smap="<urlset></urlset>"))
     check("sitemapが空なら開通としない", not live)
 
-    live, _ = judge(res(smap="<loc>https://allgroup-inc.github.io/hojo-hq/fukugiiro/</loc>"))
+    live, _ = judge(res(smap="<loc>https://moraiwasuredo.jp/fukugiiro/</loc>"))
     check("sitemapが旧URLのままなら開通としない", not live)
 
     check("『まだ』と『異常』の終了コードが違う", NOT_LIVE not in (0, 1))
@@ -301,7 +301,7 @@ def self_test():
             check(f"{rel} に MOVED_TO の行がある", bool(_MOVED_LINE.search(f.read())))
 
     # canonical の書き換え
-    old_b = "https://allgroup-inc.github.io/hojo-hq/fukugiiro"
+    old_b = "https://moraiwasuredo.jp/fukugiiro"
     page = (f'<link rel="canonical" href="{old_b}/kit/abc/">'
             f'<a href="{old_b}/kit/abc/">リンク</a>')
     out = rewrite_canonical_html(page, old_b, NEW_BASE)

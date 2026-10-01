@@ -40,7 +40,7 @@ SNAPSHOT_PATH = os.path.join(BASE, "data", "note_snapshot.json")
 SPONSORS_PATH = os.path.join(BASE, "data", "note_sponsors.json")
 OUT_DIR = os.path.join(BASE, "posts", "note")
 
-SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=note&utm_medium=article&utm_campaign=teiten"
+SITE_URL = "https://moraiwasuredo.jp/?utm_source=note&utm_medium=article&utm_campaign=teiten"
 
 PROMOTE_MIN_DAYS = 30      # 制度名を出して紹介できる最低残日数(締切3層ルール)
 AMOUNT_CAP = 100_000_000   # 総額参考値に含める上限(1億円以下 = 中小向けレンジ)

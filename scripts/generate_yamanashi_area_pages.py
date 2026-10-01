@@ -124,7 +124,7 @@ def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
 {HEADER}
 <div class="wrap">
 {body}
-<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://allgroup-inc.github.io/hojo-hq/yamanashi/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: {esc(updated)} / もらいわすれ堂 山梨版(運営: 株式会社フクギイロ)</div>
+<div class="disclaimer">掲載内容は各制度の公式ページと照合していますが、最終的な受給の可否は各窓口の判断となります。「要確認」表示の制度は内容の最終確認中です。金額・要件は必ず公式ページでご確認ください。申請手続きの代行は行っていません。<br>情報が古い・違うと気づいたら <a href="https://moraiwasuredo.jp/yamanashi/teisei/">こちらから教えてください</a>(24時間以内の修正を目指します)。<br>最終更新: {esc(updated)} / もらいわすれ堂 山梨版(運営: 株式会社フクギイロ)</div>
 {footer_links}
 </div>
 </body>
@@ -142,7 +142,7 @@ def muni_page(muni, items, updated):
     verified_n = sum(1 for it in shown if it.get("verified") is True)
     # 単一CV(LINE登録・@630pbjqq)。締切は「約1か月前」表現で統一(3層ルール準拠)。
     line_cta = (
-        '<a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/ymn-area/" '
+        '<a class="linebtn" href="https://moraiwasuredo.jp/go/ymn-area/" '
         'target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack(\'ymn_line_add_click\')">'
         f'💬 {esc(muni)}で使える制度の締切をLINEで受け取る'
         '<span>締切の約1か月前にお知らせ(配信は順次開始)・新しい制度が増えたときも(無料)</span></a>'

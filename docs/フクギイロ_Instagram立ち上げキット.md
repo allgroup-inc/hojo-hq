@@ -24,7 +24,7 @@
 ```
 - **プロフィールのリンク(UTM付き)**:
 ```
-https://allgroup-inc.github.io/hojo-hq/fukugiiro/?utm_source=instagram&utm_medium=social&utm_campaign=ig_bio
+https://moraiwasuredo.jp/fukugiiro/?utm_source=instagram&utm_medium=social&utm_campaign=ig_bio
 ```
   ※このUTMでPlausibleがInstagram流入を自動集計します。
   ※LINEへ直接誘導したい投稿では計測用の `…/hojo-hq/go/ig/`(IG専用LINEリンク)を使用。

@@ -16,7 +16,7 @@ import os
 import sys
 import urllib.request
 
-BOARD_URL = "https://allgroup-inc.github.io/hojo-hq/staff/haruka/"
+BOARD_URL = "https://moraiwasuredo.jp/staff/haruka/"
 NETA = os.path.join(os.path.dirname(__file__), "..", "data", "fukugiiro", "ig_neta.json")
 SEIDO = os.path.join(os.path.dirname(__file__), "..", "data", "fukugiiro", "seido.json")
 

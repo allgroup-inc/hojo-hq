@@ -33,7 +33,7 @@ from generate_note import (  # noqa: E402
 PREMIUM_DIR = os.path.join(BASE, "posts", "note", "premium")
 PARTNER_DIR = os.path.join(BASE, "reports", "partner")
 
-SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=note&utm_medium=article&utm_campaign=hakusho"
+SITE_URL = "https://moraiwasuredo.jp/?utm_source=note&utm_medium=article&utm_campaign=hakusho"
 CALENDAR_MONTHS = 3   # 締切カレンダーの範囲
 CAT_PICK_MAX = 3      # 目的別マップの代表制度数
 

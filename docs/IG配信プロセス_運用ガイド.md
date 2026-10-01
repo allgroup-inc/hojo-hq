@@ -83,7 +83,7 @@ scripts/send_ig_neta_to_haruka.py 実行
 2. 案のタイトル
 ...
 
-ボードはこちら：https://allgroup-inc.github.io/hojo-hq/staff/haruka/
+ボードはこちら：https://moraiwasuredo.jp/staff/haruka/
 
 画像を長押しして保存 → キャプションをコピー → Instagram へ投稿という流れでお願いします。
 

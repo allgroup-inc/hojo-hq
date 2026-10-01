@@ -42,7 +42,7 @@ DATA_PATH = os.path.join(BASE_DIR, "..", "data", "subsidies.json")
 GATE_CHECKED = "2026-08-17"
 OUT_MD = os.path.join(BASE_DIR, "..", "posts", "line", "alerts_latest.md")
 OUT_JSON = os.path.join(BASE_DIR, "..", "data", "line_alerts.json")
-SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert"
+SITE_URL = "https://moraiwasuredo.jp/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert"
 
 ALERT_MIN = 7    # これ未満は「次回公募予告」へ切替(急かさない)
 ALERT_MAX = 29   # これ超はSNS告知のみ(3層ルール)
