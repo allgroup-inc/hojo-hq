@@ -42,7 +42,7 @@ BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 SITE = os.path.join(BASE, "site")
 
 # 旧URL基底(公開ページはこの3つしか使っていない。increase したら verify が落ちる)
-OLD_ROOT = "https://allgroup-inc.github.io/hojo-hq"
+OLD_ROOT = "https://moraiwasuredo.jp"
 OLD_FUKUGIIRO = f"{OLD_ROOT}/fukugiiro"
 OLD_YAMANASHI = f"{OLD_ROOT}/yamanashi"
 OLD_GO = f"{OLD_ROOT}/go"

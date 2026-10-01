@@ -26,13 +26,13 @@ except Exception:
     pass
 
 JST = timezone(timedelta(hours=9))
-BASE = os.environ.get("SITE_BASE", "https://allgroup-inc.github.io/hojo-hq").rstrip("/")
+BASE = os.environ.get("SITE_BASE", "https://moraiwasuredo.jp").rstrip("/")
 STALE_HOURS = int(os.environ.get("STALE_HOURS", "30"))     # これを超えたら更新停止とみなし ERROR
 MIN_COUNT = int(os.environ.get("MIN_COUNT", "50"))          # これ未満は収集破損とみなし ERROR
 KPI_TARGET = int(os.environ.get("KPI_TARGET", "150"))       # 未達は WARNING
 REPORT_PATH = os.path.join(os.path.dirname(__file__), "..", "healthcheck_report.txt")
 
-UA = "hojo-hq-healthcheck/1.0 (+https://allgroup-inc.github.io/hojo-hq)"
+UA = "hojo-hq-healthcheck/1.0 (+https://moraiwasuredo.jp)"
 REQUIRED_FIELDS = ("id", "name", "deadline", "source_url", "status", "tag")
 
 errors: list[str] = []

@@ -17,7 +17,7 @@ import os
 BASE = os.path.join(os.path.dirname(__file__), "..")
 SITE = os.path.join(BASE, "site")
 DATA = os.path.join(BASE, "data", "fukugiiro", "seido.json")
-ORIGIN = "https://allgroup-inc.github.io/hojo-hq"
+ORIGIN = "https://moraiwasuredo.jp"
 
 # 除外するディレクトリ(先頭パス一致)とファイル
 EXCLUDE_DIRS = ("go", "staff", "assets")

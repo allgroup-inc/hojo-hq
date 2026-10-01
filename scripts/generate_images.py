@@ -44,7 +44,7 @@ GOLD = (248, 136, 0)       # #F88800
 WHITE = (247, 245, 241)    # #F7F5F1
 MUTED = (176, 196, 214)    # 白の淡色
 
-SITE = "沖縄企業のミカタ ｜ allgroup-inc.github.io/hojo-hq"
+SITE = "沖縄企業のミカタ ｜ moraiwasuredo.jp"
 
 # フォント候補(太字 / 標準)。先頭から存在するものを使用。
 BOLD_CANDIDATES = [
@@ -228,7 +228,7 @@ def draw_cta_band(d, gold=True):
     mf = fit_font(d, cta_main, True, W - PAD * 2 - 88, start=42, min_size=30)
     d.text((cx, cy), cta_main, font=mf, fill=txt)
     cy += mf.size + 18
-    d.text((cx, cy), "@okinawa_mikata ｜ allgroup-inc.github.io/hojo-hq",
+    d.text((cx, cy), "@okinawa_mikata ｜ moraiwasuredo.jp",
            font=font(False, 26), fill=txt)
 
 

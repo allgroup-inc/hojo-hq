@@ -4,7 +4,7 @@
 import { chromium } from "playwright";
 import { mkdirSync } from "fs";
 
-const SITE = "https://allgroup-inc.github.io/hojo-hq/";
+const SITE = "https://moraiwasuredo.jp/";
 const OUT = "posts/video/clips";
 mkdirSync(OUT, { recursive: true });
 

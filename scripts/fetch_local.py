@@ -26,7 +26,7 @@ from datetime import datetime, timezone, timedelta
 JST = timezone(timedelta(hours=9))
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "subsidies.json")
 
-UA = "hojo-hq-bot/1.0 (+https://allgroup-inc.github.io/hojo-hq; contact: bot@en-life.co.jp)"
+UA = "hojo-hq-bot/1.0 (+https://moraiwasuredo.jp; contact: bot@en-life.co.jp)"
 REQUEST_DELAY = 1.5  # 秒。自治体サーバへの配慮
 DETAIL_LIMIT = 60    # 1ソースあたり詳細取得の上限(暴走防止)
 

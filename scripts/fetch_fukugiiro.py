@@ -28,7 +28,7 @@ from validate_fukugiiro import validate  # noqa: E402
 from fg_combine import apply_default_combine  # noqa: E402 併給注意の自動付与(2026-08-25 小柳さん指示)
 
 JST = timezone(timedelta(hours=9))
-UA = "hojo-hq-bot/1.0 (+https://allgroup-inc.github.io/hojo-hq; contact: bot@en-life.co.jp)"
+UA = "hojo-hq-bot/1.0 (+https://moraiwasuredo.jp; contact: bot@en-life.co.jp)"
 BASE = os.path.join(os.path.dirname(__file__), "..")
 OUT = os.path.join(BASE, "data", "fukugiiro", "seido.json")
 

@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fetch_fukugiiro import robots_ok  # noqa: E402  収集側と同じ礼儀ルールを使う
 
 JST = timezone(timedelta(hours=9))
-UA = "hojo-hq-bot/1.0 (+https://allgroup-inc.github.io/hojo-hq; contact: bot@en-life.co.jp)"
+UA = "hojo-hq-bot/1.0 (+https://moraiwasuredo.jp; contact: bot@en-life.co.jp)"
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA = os.path.join(BASE, "data", "fukugiiro", "seido.json")
 OUT = os.path.join(BASE, "docs", "フクギイロ_突合レポート.md")

@@ -25,7 +25,7 @@ from datetime import datetime, timezone, timedelta
 from io import StringIO
 
 JST = timezone(timedelta(hours=9))
-UA = "hojo-hq-bot/1.0 (+https://allgroup-inc.github.io/hojo-hq; contact: bot@en-life.co.jp)"
+UA = "hojo-hq-bot/1.0 (+https://moraiwasuredo.jp; contact: bot@en-life.co.jp)"
 BASE = os.path.join(os.path.dirname(__file__), "..")
 OUT_MD = os.path.join(BASE, "docs", "企業のミカタ_robots監査結果.md")
 OUT_JSON = os.path.join(BASE, "data", "mikata_robots_audit.json")

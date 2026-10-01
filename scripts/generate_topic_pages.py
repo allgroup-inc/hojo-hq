@@ -25,7 +25,7 @@ JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA = os.path.join(BASE, "data", "subsidies.json")
 OUT_BASE = os.path.join(BASE, "site", "themes")
-SITE = "https://allgroup-inc.github.io/hojo-hq"
+SITE = "https://moraiwasuredo.jp"
 
 # slug: (表示名, 名称マッチ正規表現, 固有リード文)
 TOPICS = {
