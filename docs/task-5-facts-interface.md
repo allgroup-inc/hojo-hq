@@ -90,8 +90,8 @@ Each element represents one article published in the week.
 
 #### Rules
 
-1. **article_id must exist in KPI:** Every `article_id` must match a key in `kpi['articles']` (validated by `NumberVerifier`)
-2. **views source:** Copied from `weekly_metrics['note']['views_by_article'][article_id]` (no reordering or transformation)
+1. **article_id source:** Extracted from `weekly_metrics['note']['views_by_article']` keys (validated to exist in that source by `NumberVerifier`)
+2. **views source & constraints:** Copied from `weekly_metrics['note']['views_by_article'][article_id]` (no reordering or transformation). Not type-checked by the builder (NaN, boolean, strings may pass through; catch at output validation stage)
 3. **sales_jpy source & constraints:**
    - Copied from `weekly_metrics['note']['sales_by_article'][article_id]` if present
    - If `sales_by_article` dict is absent or empty, `sales_jpy` key is not added
@@ -115,7 +115,7 @@ Article `12` has no `sales_jpy` because it was not included in the sales report.
 
 ### `sales_by_segment: Dict[str, float]`
 
-Segment-wise breakdown of total sales, allocated proportionally to segment customer counts (if available).
+Segment-wise breakdown of total sales. Copied verbatim from source data with no allocation or estimation.
 
 #### Schema
 
@@ -127,12 +127,12 @@ Segment-wise breakdown of total sales, allocated proportionally to segment custo
 
 #### Rules
 
-1. **Keys must match KPI:** Each segment name must exist in `kpi['segment_thresholds']`
+1. **Keys are passed through:** Segment names come from the source `weekly_metrics['sales_by_segment']` or `weekly_metrics['note']['sales_by_segment']`. No validation against `kpi['segment_thresholds']` (unlike `segment_scores`, which must be defined in KPI).
 2. **Values are non-negative floats:** `>= 0.0`, never negative (validated by `NumberVerifier`)
 3. **Sum must match total:** Sum of all values must exactly equal `weekly_metrics['note']['total_sales_jpy']` (rounded float comparison is NOT performed; exact equality required)
 4. **Absent if no segment data:** If `weekly_metrics` has no `sales_by_segment` or it is `None` or empty dict, output is empty dict `{}`
 5. **Preserve insertion order:** Maintain key order from input (important for reproducible JSON output)
-6. **No modifications:** Dict is copied from input (not shared) but values are not reordered or aggregated
+6. **No modifications:** Dict is copied from input (not shared) but values are not reordered, aggregated, or estimated
 
 #### Examples
 
@@ -170,11 +170,12 @@ Performance scores for each segment, used by Task 6 (embedding context) and Task
    - Integer type (bool excluded, `isinstance(score, int) and not isinstance(score, bool)`)
    - Range: `kpi['segment_thresholds'][segment_name]['min'] <= score <= max` (typically 0–100)
    - Out-of-range values are rejected by `SegmentFitChecker`
-3. **Task 5 Placeholder Values:** All scores are set to `kpi['segment_thresholds'][segment_name]['threshold']` (default 60 for all segments in current KPI)
+3. **Task 5 Placeholder Values:** All scores are set to the constant **60** for all segments
    - This is a **placeholder** pending Task 8 refinement (score calculation from engagement metrics)
-   - Current value matches the threshold; intentionally not attempting to compute actual engagement-based scores (Absolute Rule 1: no estimation)
+   - The value 60 is intentionally constant, not read from `kpi['segment_thresholds'][...]['threshold']`
+   - No estimation is performed; the score is a fixed placeholder only (Absolute Rule 1)
 4. **Must have an entry for every segment:** If `kpi['segment_thresholds']` defines segments, all must appear in output (no omissions)
-5. **Every segment appears even if sales are zero:** segment_scores[name] = threshold for all defined segments
+5. **Every segment appears even if sales are zero:** All defined segments receive the placeholder score 60
 
 #### Thresholds (typical, from current KPI)
 
@@ -216,20 +217,22 @@ class FactsError(Exception):
 
 ### Error Message Format
 
-**Pattern:** `<guard_name>: <field_path> <violation> — <remediation>`
+**Pattern:** `<field_path> <violation> — <remediation hint>`
+
+No `<guard_name>:` prefix. Error is the message string alone.
 
 **Examples:**
 
 ```
-NumberVerifier: article '05' not found in weekly_metrics.note.views_by_article. Valid articles: ['05', '12']
+article '05' not found in weekly_metrics.note.views_by_article. Valid articles: ['05', '12']
 
-BannedPhrasesChecker: banned phrase '無料で' found in article_topics[0].title: 'フォロワーが無料でゲット'
+banned phrase '無料で' found in segment name 'sme'. Check data/kekka_kpi.json banned_phrases list
 
-SegmentFitChecker: segment 'xyz' not defined in kpi.segment_thresholds. Valid segments: ['enterprise', 'sme', 'startup', 'other']
+segment 'xyz' not defined in kpi.segment_thresholds. Valid segments: ['enterprise', 'sme', 'startup', 'other']
 
-SegmentFitChecker: segment 'enterprise' score 101 out of range [0, 100]
+segment 'enterprise' score 101 out of range [0, 100]
 
-FactsError: week must be ISO 8601 'YYYY-Www' (e.g. '2026-W40'), got '2026-40'
+week must be ISO 8601 'YYYY-Www' (e.g. '2026-W40'), got '2026-40'
 ```
 
 ### Guard Details
@@ -320,9 +323,10 @@ def build_facts(weekly_metrics: Dict[str, Any], kpi: Dict[str, Any]) -> Dict[str
 ### Typical Usage (Task 6)
 
 ```python
+import sys
 import json
-from scripts.build_facts import build_facts, FactsError
-from scripts.guards import NumberVerifier, BannedPhrasesChecker, SegmentFitChecker
+sys.path.insert(0, 'scripts')
+from build_facts import build_facts, FactsError
 
 # Load data
 with open('data/kekka_weekly_metrics.json') as f:
@@ -346,11 +350,16 @@ prompt_context = json.dumps(facts, ensure_ascii=False)
 
 ## Circular Import Caveat
 
-**Important for Task 5 usage:**
+**Important for Task 6 and later:**
 
 - `scripts/build_facts.py` imports guards lazily (inside `build_facts()` function) to avoid circular imports
 - `scripts/guards.py` imports `FactsError` from `build_facts` at module level
-- **Consequence:** Do NOT import all guards at the top level of `build_facts.py`; always use delayed import inside functions that call guards
+- **Supported pattern:** Put `scripts/` on `sys.path` and use `from build_facts import build_facts, FactsError` (as shown in the usage example above). This is the same pattern used by `tests/test_guards.py`.
+- **Unsupported pattern:** `from scripts.build_facts import build_facts, FactsError` **does not work**:
+  - `guards` is imported as a separate module object by `build_facts`
+  - Guard failures raise `build_facts.FactsError` (a different class from `scripts.build_facts.FactsError`)
+  - Your `except FactsError` clause will not catch guard errors, and they will propagate uncaught
+  - This silently breaks error handling in Task 6. Do not use this form.
 
 **Pattern (correct):**
 
@@ -456,9 +465,12 @@ See `tests/test_guards.py` for 80+ existing integration tests covering:
 ### Consumption Rules
 
 1. **Never modify facts after receipt:** Use as read-only input
-2. **Assume all numbers are verified:** No re-validation needed (guards were run)
-3. **Assume no banned phrases:** Text is already validated
-4. **Rely on segment_scores for embedding context:** Current placeholder (60) is valid for prompting; do not attempt to override
+2. **Input validation passed:** All numbers and phrases in `facts` have been verified by guards
+3. **Output validation required:** Task 6 must perform its own validation on Claude's output before publishing:
+   - Run `NumberVerifier` on any new numeric fields Task 6 generates
+   - Run `BannedPhrasesChecker` on any new text Task 6 generates
+   - Register the new output destination in `scripts/shipping_gate.py` → `TARGET_GROUPS` (see CLAUDE.md 再発防止メモ)
+4. **Do NOT use segment_scores for prompting or business logic:** `segment_scores` are placeholders (all 60). Do not include them in Claude prompts or use them for segment selection, pricing, or classification. Task 8 will compute real scores; Task 6 must not anticipate that.
 
 ### What NOT to Assume
 

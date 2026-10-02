@@ -12,7 +12,7 @@ FactsError: すべての Guard チェック失敗時に throw される例外。
 FactsDict: 検証済みの facts 辞書。week / article_topics / sales_by_segment / segment_scores の4層で構成。
 """
 import re
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from typing import Any, Dict, List
 
 

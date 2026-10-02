@@ -11,7 +11,7 @@ Guard 基底クラス:
 実装される Guard クラス:
 1. NumberVerifier: すべての数字が weekly_metrics/kpi の原文と照合(絶対ルール1)
 2. BannedPhrasesChecker: article_topics と segment 名に禁止表現が無いことを検査
-3. SegmentFitChecker: segment_scores が Task 8 ルール(0-100, threshold 60)に準拠
+3. SegmentFitChecker: segment_scores が [min, max] 範囲内に有ることを検査(threshold 60 は Task 6/8 の文脈情報であり、builder では検査しない)
 """
 import math
 import unicodedata
