@@ -3510,5 +3510,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-02",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "［第十一回］事業再構築補助金（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UbU66EAF",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(ブルーボンド/ブルーローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9wMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【関東監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuSMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「脱炭素化・エネルギー転換に資する我が国技術の国際実証事業」の2026年度第2回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdl2MAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【北海道監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYu3MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
