@@ -327,3 +327,180 @@ def test_real_kpi_json_accepts_scores_and_rejects_out_of_range():
     _seg({"other": 0}, kpi)
     with pytest.raises(FactsError, match="out of range"):
         _seg({"other": names["other"]["max"] + 1}, kpi)
+
+
+# ---- build_facts()(Guard チェーンの統合) ----
+
+import copy  # noqa: E402
+import json  # noqa: E402
+
+from build_facts import build_facts  # noqa: E402
+
+_REAL_KPI_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "kekka_kpi.json")
+
+
+def _real_kpi():
+    return json.load(open(_REAL_KPI_PATH, encoding="utf-8"))
+
+
+def _week(**note_overrides):
+    """weeks[] の1件(単一週)。"""
+    note = {
+        "week": "2026-W40",
+        "views_by_article": {"05": 13, "12": 5},
+        "total_likes": 3,
+        "total_sales_jpy": 5000,
+        "buyer_count": 2,
+    }
+    note.update(note_overrides)
+    return {"week": "2026-W40", "note": note}
+
+
+def test_build_facts_full_flow_returns_json_dict():
+    facts = build_facts(_week(), _real_kpi())
+    assert facts["week"] == "2026-W40"
+    assert [t["article_id"] for t in facts["article_topics"]] == ["05", "12"]
+    assert facts["article_topics"][0]["views"] == 13
+    assert set(facts) == {"week", "article_topics", "sales_by_segment", "segment_scores"}
+    json.dumps(facts, ensure_ascii=False)  # JSON シリアライズ可能
+
+
+def test_build_facts_segment_scores_are_placeholder_60_for_four_segments():
+    facts = build_facts(_week(), _real_kpi())
+    assert facts["segment_scores"] == {"enterprise": 60, "sme": 60, "startup": 60, "other": 60}
+
+
+def test_build_facts_sales_by_segment_empty_when_absent():
+    assert build_facts(_week(), _real_kpi())["sales_by_segment"] == {}
+
+
+def test_build_facts_includes_sales_by_article_when_present():
+    facts = build_facts(_week(sales_by_article={"05": 3000}), _real_kpi())
+    by_id = {t["article_id"]: t for t in facts["article_topics"]}
+    assert by_id["05"]["sales_jpy"] == 3000
+    assert "sales_jpy" not in by_id["12"]  # 無い記事は創作しない
+
+
+def test_build_facts_sales_by_segment_passes_through_and_keeps_order():
+    wm = _week()
+    wm["sales_by_segment"] = {"sme": 2000, "enterprise": 3000}
+    facts = build_facts(wm, _real_kpi())
+    assert list(facts["sales_by_segment"]) == ["sme", "enterprise"]
+    assert facts["sales_by_segment"] is not wm["sales_by_segment"]  # 入力と共有しない
+
+
+def test_build_facts_does_not_mutate_inputs():
+    wm, kpi = _week(sales_by_article={"05": 3000}), _real_kpi()
+    wm_before, kpi_before = copy.deepcopy(wm), copy.deepcopy(kpi)
+    build_facts(wm, kpi)
+    assert wm == wm_before and kpi == kpi_before
+
+
+def test_build_facts_week_falls_back_to_note_week():
+    wm = _week()
+    del wm["week"]
+    assert build_facts(wm, _real_kpi())["week"] == "2026-W40"
+
+
+@pytest.mark.parametrize("wm,kpi", [(None, KPI), (_week(), None), ({}, KPI), (_week(), {})])
+def test_build_facts_rejects_none_and_empty_inputs(wm, kpi):
+    with pytest.raises(FactsError):
+        build_facts(wm, kpi)
+
+
+def test_build_facts_rejects_non_dict_inputs():
+    with pytest.raises(FactsError, match="must be a dict"):
+        build_facts([_week()], _real_kpi())
+    with pytest.raises(FactsError, match="must be a dict"):
+        build_facts(_week(), "kpi")
+
+
+def test_build_facts_rejects_whole_file_instead_of_single_week():
+    with pytest.raises(FactsError, match="note"):
+        build_facts({"weeks": [_week()]}, _real_kpi())
+
+
+def test_build_facts_missing_views_by_article():
+    wm = _week()
+    del wm["note"]["views_by_article"]
+    with pytest.raises(FactsError, match="views_by_article"):
+        build_facts(wm, _real_kpi())
+
+
+@pytest.mark.parametrize("week", ["2026-40", "2026-W5", "2026-W54", "2026-W00", "26-W40", 202640])
+def test_build_facts_rejects_bad_week_format(week):
+    wm = _week()
+    wm["week"] = week
+    wm["note"]["week"] = week
+    with pytest.raises(FactsError, match="ISO 8601"):
+        build_facts(wm, _real_kpi())
+
+
+def test_build_facts_rejects_missing_or_conflicting_week():
+    wm = _week()
+    del wm["week"]
+    del wm["note"]["week"]
+    with pytest.raises(FactsError, match="no 'week'"):
+        build_facts(wm, _real_kpi())
+    wm = _week()
+    wm["note"]["week"] = "2026-W39"
+    with pytest.raises(FactsError, match="mismatch"):
+        build_facts(wm, _real_kpi())
+
+
+def test_build_facts_number_guard_failure_propagates():
+    wm = _week(sales_by_article={"05": 9999})  # total_sales_jpy 5000 を超過
+    with pytest.raises(FactsError, match="exceeds"):
+        build_facts(wm, _real_kpi())
+    wm = _week()
+    wm["sales_by_segment"] = {"enterprise": 1}  # 合計が total と不一致
+    with pytest.raises(FactsError, match="sum.*mismatch"):
+        build_facts(wm, _real_kpi())
+
+
+def test_build_facts_negative_article_sales_rejected():
+    with pytest.raises(FactsError, match="non-negative"):
+        build_facts(_week(sales_by_article={"05": -1}), _real_kpi())
+
+
+def test_build_facts_banned_phrase_in_segment_name_rejected():
+    wm = _week()
+    wm["sales_by_segment"] = {"無料で使える層": 5000}
+    with pytest.raises(FactsError, match="banned phrase"):
+        build_facts(wm, _real_kpi())
+
+
+def test_build_facts_banned_list_missing_fails_closed():
+    kpi = _real_kpi()
+    del kpi["banned_phrases"]
+    with pytest.raises(FactsError, match="banned_phrases"):
+        build_facts(_week(), kpi)
+
+
+def test_build_facts_segment_thresholds_missing_fails_closed():
+    kpi = _real_kpi()
+    del kpi["segment_thresholds"]
+    with pytest.raises(FactsError, match="segment_thresholds"):
+        build_facts(_week(), kpi)
+
+
+def test_build_facts_segment_guard_failure_propagates():
+    kpi = _real_kpi()
+    kpi["segment_thresholds"] = {"enterprise": {"min": 70, "max": 100, "threshold": 80}}  # 60 は範囲外
+    with pytest.raises(FactsError, match="out of range"):
+        build_facts(_week(), kpi)
+
+
+def test_build_facts_guard_order_number_before_banned(monkeypatch):
+    """数字ガード→禁止表現→セグメントの順に呼ばれる。"""
+    import guards
+    calls = []
+    for cls in (NumberVerifier, BannedPhrasesChecker, SegmentFitChecker):
+        monkeypatch.setattr(cls, "verify", lambda self, f, w, k, _n=cls.__name__: calls.append(_n))
+    build_facts(_week(), _real_kpi())
+    assert calls == ["NumberVerifier", "BannedPhrasesChecker", "SegmentFitChecker"]
+    assert guards  # 遅延importでも同じモジュールを使う
+
+
+def test_number_verifier_treats_empty_segments_as_no_segment_data():
+    _verify({"sales_by_segment": {}, "article_topics": [{"article_id": "05", "views": 13}]})

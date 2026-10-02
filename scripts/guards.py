@@ -92,14 +92,15 @@ class NumberVerifier(Guard):
                     raise FactsError(f"article '{aid}' sales_jpy must be a non-negative number: {sales!r}")
                 article_sales_sum += sales
 
-        if segments is None and not (topics and article_sales_sum):
+        no_segments = segments is None or (isinstance(segments, dict) and not segments)  # 空dict=セグメント別データ無し
+        if no_segments and not (topics and article_sales_sum):
             return  # 売上に関する数字が facts に無ければ total_sales_jpy の照合は不要
 
         total = note.get("total_sales_jpy")
         if not _is_number(total):
             raise FactsError("weekly_metrics.note.total_sales_jpy is missing; cannot verify sales numbers")
 
-        if segments is not None:
+        if not no_segments:
             if not isinstance(segments, dict):
                 raise FactsError(f"sales_by_segment must be a dict, got {type(segments).__name__}")
             for name, value in segments.items():
