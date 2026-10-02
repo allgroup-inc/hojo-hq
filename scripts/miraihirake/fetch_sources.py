@@ -46,7 +46,19 @@ def load_queue():
 def get(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-        return r.read(MAX_BYTES).decode(r.headers.get_content_charset() or "utf-8", "replace")
+        raw = r.read(MAX_BYTES)
+        charset = r.headers.get_content_charset()
+    if not charset:
+        # HTTPヘッダーにcharsetが無いサイト(古い自治体サイト等)向けに<meta>タグから推測する。
+        # 推測できない/デコードに失敗した場合はutf-8+replaceにフォールバックし、
+        # 文字化けのまま残さず壊れた箇所だけ目立たせる(2026-10-02 壺屋焼物博物館で発生)。
+        m = re.search(rb"charset=[\"']?\s*([a-zA-Z0-9_-]+)", raw[:2048], re.IGNORECASE)
+        charset = m.group(1).decode("ascii", "ignore") if m else None
+    charset = (charset or "utf-8").lower().replace("shift-jis", "cp932").replace("shift_jis", "cp932").replace("sjis", "cp932")
+    try:
+        return raw.decode(charset, "strict")
+    except (LookupError, UnicodeDecodeError):
+        return raw.decode("utf-8", "replace")
 
 
 def robots_for(url):
