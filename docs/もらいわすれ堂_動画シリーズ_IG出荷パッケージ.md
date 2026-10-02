@@ -41,7 +41,7 @@ content-calendar の考え方で、動画6本を**2週間**で出し切り、そ
 ## 4. 先に試す(トライアルリール)
 「あかりの島」は、**トライアルリール**(非フォロワーにだけ先に表示される機能)で冒頭違いの2本を試してから本投稿する。
 - A: 今回の版(0.4秒「知らないだけで、受け取りそびれる。」)
-- B: 冒頭フックなし版(以前の版・`git log` の1つ前のレンダリング)
+- B: 冒頭フックなし版(出荷ページの「先に試す」の欄に A・B の両方を置いてある)
 - 判断: 3秒の視聴維持と「送信/到達」が高い方を本投稿にする。差が小さければAを採用(音なしで伝わるため)
 
 ## 5. 何を見るか(Instagramインサイト・遥さんが週1で転記する5つ)
@@ -66,8 +66,11 @@ content-calendar の考え方で、動画6本を**2週間**で出し切り、そ
 - 制度に触れる投稿は、サイト掲載内容(公式照合済み)と一致していることを確認してから出す
 - 対外文面は accuracy-check → deadline-alert → humanizer の3スキル通過+`shipping_gate.py` で機械検査
 
-## 8. ファイル
+## 8. 出荷ページ(遥さんに渡すもの)
+動画6本の再生・ダウンロード、キャプションとハッシュタグの「コピー」ボタン、出し方の手順を1ページにまとめた: https://claude.ai/artifact/VxrCyAbrzRr6u29KYZnzNE
+(リンクを知っている人が開ける設定。中身は公開済みの動画と文面のみで、個人情報は含まない)
+
+## 9. ファイル
 - キャプション: `posts/moradou/video/01_akari_no_shima.md` 〜 `06_seido_memo_3_shussan_ichijikin.md`
 - 動画ソース: `video/anime-60s/`(あかりの島)/ `video/lp-film-60s/` / `video/tsukaikata-75s/` / `video/seido-30s/`
 - スキル土台: `docs/もらいわすれ堂_スキル土台/`(brand-profile / voice / audience / social-strategy / content-pillars)
-- 視聴ページ(非公開・小柳さんのみ): https://claude.ai/artifact/VxrCyAbrzRr6u29KYZnzNE
