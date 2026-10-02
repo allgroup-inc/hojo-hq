@@ -1,7 +1,7 @@
 # source_id: coderdojo-naha
 # url: https://coderdojonaha.hatenablog.jp/
 # org: CoderDojo那覇
-# fetched_at: 2026-09-27
+# fetched_at: 2026-10-02
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 CoderDojo那覇 

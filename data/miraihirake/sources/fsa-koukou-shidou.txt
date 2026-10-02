@@ -1,7 +1,7 @@
 # source_id: fsa-koukou-shidou
 # url: https://www.fsa.go.jp/news/r3/sonota/20220317/20220317.html
 # org: 金融庁
-# fetched_at: 2026-09-27
+# fetched_at: 2026-10-02
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 -->

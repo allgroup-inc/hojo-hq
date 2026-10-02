@@ -1,7 +1,7 @@
 # source_id: learningforall-faq
 # url: https://learningforall.or.jp/faq/
 # org: 認定NPO法人Learning for All
-# fetched_at: 2026-09-27
+# fetched_at: 2026-10-02
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 よくあるご質問 - Learning for All &#8211; 子どもの貧困に、本質的解決を。 

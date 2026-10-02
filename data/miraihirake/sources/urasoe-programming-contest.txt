@@ -1,7 +1,7 @@
 # source_id: urasoe-programming-contest
 # url: https://www.city.urasoe.lg.jp/doc/60d9b30bfd0cbe0821f9cf3e/
 # org: 浦添市
-# fetched_at: 2026-09-27
+# fetched_at: 2026-10-02
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 小中高校生のためのプログラミングコンテスト、開催します！ | 浦添市 

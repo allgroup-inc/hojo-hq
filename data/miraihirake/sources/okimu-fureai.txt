@@ -1,7 +1,7 @@
 # source_id: okimu-fureai
 # url: https://okimu.jp/museum/permanent/experience/
 # org: 沖縄県立博物館・美術館(おきみゅー)
-# fetched_at: 2026-09-27
+# fetched_at: 2026-10-02
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 ふれあい体験室（無料ゾーン）「ふれたい博士の手織りコースターづくり」 | 沖縄県立博物館・美術館（おきみゅー） 

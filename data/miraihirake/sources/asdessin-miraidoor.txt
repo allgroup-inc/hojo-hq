@@ -1,7 +1,7 @@
 # source_id: asdessin-miraidoor
 # url: https://www.asdessin.org/miraidoor
 # org: NPO法人アスデッサン
-# fetched_at: 2026-09-27
+# fetched_at: 2026-10-02
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 プログラム 

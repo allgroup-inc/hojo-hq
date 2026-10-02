@@ -1,7 +1,7 @@
 # source_id: miraino-manabi
 # url: https://www.mext.go.jp/miraino_manabi/
 # org: 未来の学びコンソーシアム(文部科学省・総務省・経済産業省ほか)
-# fetched_at: 2026-09-27
+# fetched_at: 2026-10-02
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 小学校を中心としたプログラミング教育ポータル Powered by 未来の学びコンソーシアム 

@@ -1,7 +1,7 @@
 # source_id: naha-hitorioya
 # url: https://www.city.naha.okinawa.jp/child/kosodateouen/1002864/1002873.html
 # org: 那覇市
-# fetched_at: 2026-09-27
+# fetched_at: 2026-10-02
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 ひとり親家庭の子どもの学習支援事業｜那覇市公式ホームページ 

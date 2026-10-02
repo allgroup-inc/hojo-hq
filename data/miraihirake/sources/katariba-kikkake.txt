@@ -1,7 +1,7 @@
 # source_id: katariba-kikkake
 # url: https://www.katariba.or.jp/activity/project/kikkake/
 # org: 認定NPO法人カタリバ
-# fetched_at: 2026-09-27
+# fetched_at: 2026-10-02
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 キッカケプログラム | 活動紹介 | 認定NPO法人カタリバ 
@@ -76,25 +76,15 @@
  中野区×若者PROJECT 
  能登半島地震・豪雨 子ども支援 
 
- 採用TOP Recruit 
+ 採用サイト さまざまな職種で積極採用中！ 
 
- クロストーク（対談） 
- スタッフインタビュー 
- NPOカタリバカルチャー 
+10代の可能性を信じ、情熱をもって集まった
 
- 社内制度 
- エントリーについて 
- 募集職種一覧 
+全国の仲間と、ともに未来をつくりましょう。 
 
- 採用説明会 
- 採用LINE＠ 
- よくあるご質問 
+ インターン Internship 
 
- インターン・ボランティア Intern&amp;Volunteer 
-
- インターンシップ 
-
- ボランティア 
+ ボランティア Volunteer 
 
  ご寄付いただいている方へ For Donar 
 
@@ -108,9 +98,9 @@
 
  寄付に関するご質問 
 
- 採用に関するご質問 
-
  法人向けのご質問 
+
+ 採用に関するご質問 
 
  お問い合わせ Contact 
 
@@ -260,9 +250,9 @@ CSR活動との協働が可能です。
 
  税制優遇について 
 
- 採用TOP Recruit 
+ 採用サイト Recruit 
 
- インターンTOP Intern 
+ インターンTOP Internship 
 
  News お知らせ一覧 
 
@@ -618,9 +608,9 @@ CSR活動との協働が可能です。
 
  税制優遇について 
 
- 採用TOP Recruit 
+ 採用サイト Recruit 
 
- インターンTOP Intern 
+ インターンTOP Internship 
 
  News お知らせ一覧 
 

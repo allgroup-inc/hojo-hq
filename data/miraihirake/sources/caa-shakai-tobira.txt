@@ -1,7 +1,7 @@
 # source_id: caa-shakai-tobira
 # url: https://www.caa.go.jp/policies/policy/consumer_education/public_awareness/teaching_material/material_010/
 # org: 消費者庁
-# fetched_at: 2026-09-27
+# fetched_at: 2026-10-02
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 社会への扉 ―12のクイズで学ぶ自立した消費者―(高校生(若年者)向け消費者教育教材 生徒用教材・教師用解説書) | 消費者庁 

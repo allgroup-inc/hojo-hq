@@ -1,7 +1,7 @@
 # source_id: coderdojo-jp
 # url: https://coderdojo.jp/
 # org: CoderDojo Japan
-# fetched_at: 2026-09-27
+# fetched_at: 2026-10-02
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 CoderDojo Japan - 子どものためのプログラミング道場 
@@ -497,16 +497,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  新座市で月2回開催
 
- 市川 (千葉) 
-
- Scratch
-
- micro:bit
-
- Python
-
- 市川市で毎月開催
-
  市川真間 (千葉) 
 
  Scratch
@@ -520,6 +510,16 @@ CoderDojo Japan - 子どものためのプログラミング道場
  toio
 
  JR市川駅近辺で毎月1～2回開催
+
+ 市川 (千葉) 
+
+ Scratch
+
+ micro:bit
+
+ Python
+
+ 市川市で毎月開催
 
  船橋 (千葉) 
 
@@ -619,12 +619,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  千代田区で毎月開催
 
- 日本橋 (東京) 
-
- Scratch
-
- 中央区で隔月開催
-
  晴海 (東京) 
 
  Scratch
@@ -632,6 +626,26 @@ CoderDojo Japan - 子どものためのプログラミング道場
  Webサイト
 
  中央区晴海で毎月開催
+
+ 日本橋 (東京) 
+
+ Scratch
+
+ 中央区で隔月開催
+
+ たまち (東京) 
+
+ Scratch
+
+ Hour of Code
+
+ 電子工作
+
+ Webサイト
+
+ アプリ開発
+
+ 港区JR田町駅周辺で毎月開催
 
  赤坂国際 (東京) 
 
@@ -662,28 +676,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  港区港南で毎月開催
 
- たまち (東京) 
-
- Scratch
-
- Hour of Code
-
- 電子工作
-
- Webサイト
-
- アプリ開発
-
- 港区JR田町駅周辺で毎月開催
-
- 神楽坂 (東京) 
-
- Scratch
-
- Minecraft
-
- 新宿区で毎月開催
-
  新宿 (東京) 
 
  Scratch
@@ -695,6 +687,14 @@ CoderDojo Japan - 子どものためのプログラミング道場
  Arduino
 
  電子工作
+
+ 新宿区で毎月開催
+
+ 神楽坂 (東京) 
+
+ Scratch
+
+ Minecraft
 
  新宿区で毎月開催
 
@@ -724,14 +724,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
 
  品川区で不定期開催
 
- 砧 (東京) 
-
- Scratch
-
- micro:bit
-
- 世田谷区で毎月開催
-
  新代田 (東京) 
 
  Scratch
@@ -745,6 +737,14 @@ CoderDojo Japan - 子どものためのプログラミング道場
  JavaScript
 
  世田谷区で不定期開催
+
+ 砧 (東京) 
+
+ Scratch
+
+ micro:bit
+
+ 世田谷区で毎月開催
 
  青山 (東京) 
 
@@ -2395,6 +2395,8 @@ CoderDojo Japan - 子どものためのプログラミング道場
  📰 
  最近の CoderDojo
 
+ 📢 AI × 教育に関する国際サミット『Raspberry Fields』の参加報告書を公開。日本を含む45ヶ国・200名以上が英国ケンブリッジに集まり、「子どもと AI 教育のこれから」について議論。
+
  📰 DojoLetter Vol.100 2026年07月号
 
  🎁 450 台の UIAPduino ボードを全国の CoderDojo 向けに寄贈
@@ -2412,8 +2414,6 @@ CoderDojo Japan - 子どものためのプログラミング道場
  📻 035 - How Coolest Projects Started in the CoderDojo community (Guest: Bill Liao)
 
  📰 DojoLetter Vol.95 2026年02月号
-
- 📢 神山まるごと高専と CoderDojo Japan、学びの選択肢を広げられる環境づくりなどで連携
 
  最新情報はメールで受け取れます。
 
