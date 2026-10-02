@@ -189,7 +189,8 @@ def verify_file(path, today=None):
 # グループを分けているのは、配信経路ごとに独立して止めるため
 # (LINE下書きの違反でInstagram投稿まで巻き添えで止めない)。
 TARGET_GROUPS = {
-    "sns":  ("posts/launch/*.md", "posts/carousel/caption.md"),
+    "sns":  ("posts/launch/*.md", "posts/carousel/caption.md",
+             "posts/moradou/video/*.md"),   # もらいわすれ堂 動画シリーズのキャプション(2026-10-02)
     "line": ("posts/line/*.md",),
 }
 
