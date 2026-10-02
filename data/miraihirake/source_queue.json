@@ -366,6 +366,13 @@
       "memo": "まちかぜ教室のチラシ等の固定ページURLを特定するためのWordPressサイトマップ取得。同一ドメイン審査済み(運用ルール2026-09-06)。ページ本文ではなくURL一覧の確認が目的"
     },
     {
+      "id": "machikaze-page-sitemap",
+      "org": "NPO法人まちのかぜ",
+      "url": "https://www.column.machinokaze.jp/page-sitemap.xml",
+      "robots_approved": true,
+      "memo": "machikaze-sitemap(索引)がpost/page/category等に分かれていたため、固定ページ一覧(page-sitemap.xml)を追加取得。『まちかぜ教室のチラシ』ページのURLを特定する目的。同一ドメイン審査済み(運用ルール2026-09-06)"
+    },
+    {
       "id": "aha-lab",
       "org": "Aha研究室(旧ITスタディ札幌)",
       "url": "https://www.itstudysapporo.com/",
