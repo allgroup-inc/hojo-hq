@@ -1,6 +1,6 @@
 /* Plan A LP — 計測とふるまい(個人情報は一切送らない)
    GA4: サイト本体(site/index.html)と同じ測定ID。イベントは plan_a_view と plan_a_cta_click のみ。
-   /go/plan-a-line/ 側で plan_a_line_redirect(channel=plan-a)が別に記録される(導線クリックと転送を別名で数える)。 */
+   /go/plan-a-line/ 側で plan_a_line_redirect(channel=plan-a-line)が別に記録される(導線クリックと転送を別名で数える)。 */
 (function () {
   var GA_ID = 'G-TW6M6WFB9T';
   var variant = document.body.getAttribute('data-variant') || 'a';
