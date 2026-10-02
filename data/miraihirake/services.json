@@ -6768,6 +6768,48 @@
       "updated_at": "2026-09-27",
       "review_status": "published",
       "notes": "2026-09-27 検証部照合・守り部審査でpublished。国の機関が公開するPowerPoint/PDF教材のみでA類型(接触なし)のため安全階層の対象外。原文に明示的な「無料」表記はないが、料金・購入手続きの記載が一切ない政府公開資料であることを根拠とする(既存published のmext-kyufu・caa-shakai-tobira等と同種の扱い)。原文に「（注）教材の中で触れている家計管理、ライフプラン、資産形成、借金に関するシミュレーターサイトは公開終了いたしました」と明記(令和7年12月26日更新)されているため、シミュレーター副教材への言及・リンクは掲載しない。教材本体(PowerPoint/PDF)は引き続き公開中と原文で確認"
+    },
+    {
+      "service_id": "svc-0152",
+      "service_name": "本部町立博物館",
+      "summary": "本部町立の博物館。本部の歴史・文化・自然をテーマにした常設展示を入館無料で見学できる",
+      "organization_name": "本部町立博物館(本部町立博物館・図書館)",
+      "organization_type": "公的機関",
+      "prefecture": "沖縄県",
+      "available_area": "沖縄県国頭郡本部町字大浜874-1",
+      "nationwide_available": false,
+      "okinawa_available": "○",
+      "okinawa_note": "沖縄県内の対面施設",
+      "online_available": false,
+      "offline_available": true,
+      "target_grade": [],
+      "target_conditions": [
+        "常設展示(本部の暮らし・文化・沖縄戦・自然)。学年区分の記載なし"
+      ],
+      "income_requirement": "なし",
+      "subject": [
+        "社会",
+        "理科",
+        "全般"
+      ],
+      "support_type": [
+        "体験・イベント"
+      ],
+      "group_lesson": true,
+      "price_type": "完全無料",
+      "price": "0円(入館料: 無料と原文に明記)",
+      "completely_free": true,
+      "frequency": "9:00〜17:00(月曜・祝祭日・12/29〜1/3休館。月曜が祝日の場合は翌火曜も休館)",
+      "application_method": "予約不要。常時入館可",
+      "official_url": "http://motobu-m.town.motobu.okinawa.jp/museumworks",
+      "application_url": "http://motobu-m.town.motobu.okinawa.jp/museumworks",
+      "contact": "本部町立博物館・図書館 0980-47-5217",
+      "recruitment_status": "常時募集",
+      "data_source": "http://motobu-m.town.motobu.okinawa.jp/museumworks",
+      "last_verified": "2026-10-02",
+      "updated_at": "2026-10-02",
+      "review_status": "published",
+      "notes": "2026-10-02 検証部照合・守り部審査でpublished。本部町立の公立博物館(A類型・接触なし)。トップページ(motobu-museum)には料金記載が無かったため、同一ドメインの『博物館利用案内』ページ(motobu-museumworks)で「入館料: 無料」と確認(2026-10-02の案内ページ起票ルール運用例)。対象学年の記載なし"
     }
   ]
 }
