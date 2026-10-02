@@ -29,6 +29,21 @@
       "threshold": 60
     }
   },
+  "_banned_phrases_readme": "売上自動化(facts builder)のBannedPhrasesChecker参照値。facts内の文字列(記事タイトル・説明・セグメント名等)に部分一致で含まれたら生成失敗。全角半角・大文字小文字は区別しない(NFKC正規化+casefold)。既存の生成ガード(generate_airecipe.py / 結果マガ_運転プロンプト.md の誇大表現禁止)と同じ語を含む。守り部が管理。",
+  "banned_phrases": [
+    "無料で",
+    "絶対",
+    "必ず",
+    "誰でも",
+    "楽して",
+    "確実に稼",
+    "保証",
+    "申請代行",
+    "確定",
+    "AI生成",
+    "自動生成された",
+    "ChatGPT"
+  ],
   "articles": {
     "05": {
       "title": "フォロワーが買うのではなかった",

@@ -14,6 +14,7 @@ Guard 基底クラス:
 3. SegmentFitChecker: segment_scores が Task 8 ルール(0-100, threshold 60)に準拠
 """
 import math
+import unicodedata
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
@@ -118,3 +119,65 @@ class NumberVerifier(Guard):
                 f"article_topics sales_jpy sum ({article_sales_sum}) exceeds "
                 f"weekly_metrics.note.total_sales_jpy ({total})"
             )
+
+
+def _normalize(text: str) -> str:
+    """全角半角・大文字小文字の揺れを吸収する(例: 'ＣｈａｔＧＰＴ' == 'chatgpt')。"""
+    return unicodedata.normalize("NFKC", text).casefold()
+
+
+def _iter_strings(value: Any, path: str):
+    """facts の中の文字列を (フィールドパス, 文字列) で再帰的に列挙する。"""
+    if isinstance(value, str):
+        yield path, value
+    elif isinstance(value, dict):
+        for key, child in value.items():
+            yield from _iter_strings(child, f"{path}.{key}")
+    elif isinstance(value, (list, tuple)):
+        for i, child in enumerate(value):
+            yield from _iter_strings(child, f"{path}[{i}]")
+
+
+class BannedPhrasesChecker(Guard):
+    """facts の文字列に守り部の禁止表現(kpi["banned_phrases"])が含まれないことを検査。
+
+    検査対象:
+      - article_topics の全文字列フィールド(title / description / topic 等。article_id は識別子なので除外)
+      - sales_by_segment / segment_scores のキー(セグメント名)
+    照合は部分一致のリテラル比較(正規表現ではない。'100%' 等もそのまま使える)。
+    NFKC正規化+casefold で全角半角・大文字小文字を区別しない。
+
+    禁止表現リストが無い・空・不正な場合は検査を黙って素通りさせず FactsError にする
+    (リスト欠落でガードが無効化されるのを防ぐ)。weekly_metrics は本クラスでは使わない。
+    """
+
+    def verify(self, facts: Dict[str, Any], weekly_metrics: Dict[str, Any], kpi: Dict[str, Any]) -> None:
+        phrases = kpi.get("banned_phrases") if isinstance(kpi, dict) else None
+        if not isinstance(phrases, list) or not phrases:
+            raise FactsError(
+                "kpi['banned_phrases'] is missing or empty; refusing to skip the banned-phrase check "
+                "(add the 守り部 list to data/kekka_kpi.json)"
+            )
+        normalized = []
+        for phrase in phrases:
+            if not isinstance(phrase, str) or not phrase.strip():
+                raise FactsError(f"kpi['banned_phrases'] contains an invalid entry: {phrase!r}")
+            normalized.append((phrase, _normalize(phrase)))
+
+        targets = []
+        for i, topic in enumerate(facts.get("article_topics") or []):
+            if not isinstance(topic, dict):
+                continue
+            for key, value in topic.items():
+                if key != "article_id":
+                    targets.extend(_iter_strings(value, f"article_topics[{i}].{key}"))
+        for section in ("sales_by_segment", "segment_scores"):
+            names = facts.get(section)
+            if isinstance(names, dict):
+                targets.extend((f"{section} key", name) for name in names if isinstance(name, str))
+
+        for field, text in targets:
+            haystack = _normalize(text)
+            for phrase, needle in normalized:
+                if needle in haystack:
+                    raise FactsError(f"banned phrase '{phrase}' found in {field}: {text!r}")
