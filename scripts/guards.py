@@ -181,3 +181,77 @@ class BannedPhrasesChecker(Guard):
             for phrase, needle in normalized:
                 if needle in haystack:
                     raise FactsError(f"banned phrase '{phrase}' found in {field}: {text!r}")
+
+
+_SEGMENT_DEFAULT_MIN = 0
+_SEGMENT_DEFAULT_MAX = 100
+_SEGMENT_DEFAULT_THRESHOLD = 60
+
+
+class SegmentFitChecker(Guard):
+    """facts["segment_scores"] が Task 8 の分類ルール(0-100 の整数・閾値60)に準拠することを検査。
+
+    kpi["segment_thresholds"][segment] = {"min": 0, "max": 100, "threshold": 60}。
+    min/max/threshold を省略した場合は 0 / 100 / 60 を使う。
+
+    検査項目(segment_scores の各セグメントについて):
+      1. セグメント名が kpi.segment_thresholds に定義されている
+      2. 閾値定義そのものが妥当(数値で 0 <= min <= threshold <= max <= 100)
+      3. スコアが整数(bool・小数は不可)
+      4. スコアが [min, max] の範囲内
+      5. スコアが threshold 以上
+
+    segment_scores が無い・空なら検査対象が無いので素通り。検査対象があるのに
+    segment_thresholds が無い・空・不正なときは、ガード無効化を防ぐため FactsError にする。
+    weekly_metrics は本クラスでは使わない。
+    """
+
+    def verify(self, facts: Dict[str, Any], weekly_metrics: Dict[str, Any], kpi: Dict[str, Any]) -> None:
+        scores = facts.get("segment_scores")
+        if scores is None or scores == {}:
+            return
+        if not isinstance(scores, dict):
+            raise FactsError(f"segment_scores must be a dict, got {type(scores).__name__}")
+
+        thresholds = kpi.get("segment_thresholds") if isinstance(kpi, dict) else None
+        if not isinstance(thresholds, dict) or not thresholds:
+            raise FactsError(
+                "kpi['segment_thresholds'] is missing or empty; refusing to skip the segment score check "
+                "(add segment_thresholds to data/kekka_kpi.json)"
+            )
+
+        for segment, score in scores.items():
+            if segment not in thresholds:
+                raise FactsError(
+                    f"segment '{segment}' not defined in kpi.segment_thresholds. "
+                    f"Valid segments: {sorted(thresholds)}"
+                )
+            min_val, max_val, threshold = self._rule(segment, thresholds[segment])
+
+            if not isinstance(score, int) or isinstance(score, bool):
+                raise FactsError(f"segment '{segment}' score must be an integer, got {score!r}")
+            if score < min_val or score > max_val:
+                raise FactsError(f"segment '{segment}' score {score} out of range [{min_val}, {max_val}]")
+            if score < threshold:
+                raise FactsError(
+                    f"segment '{segment}' score {score} is below threshold {threshold}; "
+                    f"segment does not meet the fit rule (score >= {threshold})"
+                )
+
+    @staticmethod
+    def _rule(segment: str, rule: Any):
+        """kpi の閾値定義を検証して (min, max, threshold) を返す。"""
+        if not isinstance(rule, dict):
+            raise FactsError(f"kpi.segment_thresholds['{segment}'] must be a dict, got {rule!r}")
+        min_val = rule.get("min", _SEGMENT_DEFAULT_MIN)
+        max_val = rule.get("max", _SEGMENT_DEFAULT_MAX)
+        threshold = rule.get("threshold", _SEGMENT_DEFAULT_THRESHOLD)
+        for label, value in (("min", min_val), ("max", max_val), ("threshold", threshold)):
+            if not _is_number(value):
+                raise FactsError(f"kpi.segment_thresholds['{segment}'].{label} must be a number, got {value!r}")
+        if not (_SEGMENT_DEFAULT_MIN <= min_val <= threshold <= max_val <= _SEGMENT_DEFAULT_MAX):
+            raise FactsError(
+                f"kpi.segment_thresholds['{segment}'] is invalid: need "
+                f"0 <= min({min_val}) <= threshold({threshold}) <= max({max_val}) <= 100"
+            )
+        return min_val, max_val, threshold

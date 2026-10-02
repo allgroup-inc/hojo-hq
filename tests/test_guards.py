@@ -7,9 +7,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts"))
 from build_facts import FactsError, FactsDict  # noqa: E402
-from guards import BannedPhrasesChecker, Guard, NumberVerifier  # noqa: E402
-
-# Note: SegmentFitChecker will be added in a later task
+from guards import BannedPhrasesChecker, Guard, NumberVerifier, SegmentFitChecker  # noqa: E402
 
 
 KPI = {"segment_thresholds": {"enterprise": {"min": 0, "max": 100, "threshold": 60}}}
@@ -209,3 +207,122 @@ def test_real_kpi_json_banned_phrases_valid_and_flag_known_bad_text():
         _banned({"article_topics": [{"article_id": "05", "title": a["title"]}]}, kpi)
     with pytest.raises(FactsError):
         _banned({"article_topics": [{"article_id": "05", "title": "必ず稼げる"}]}, kpi)
+
+
+# ---- SegmentFitChecker ----
+
+SEG_KPI = {
+    "segment_thresholds": {
+        "enterprise": {"min": 0, "max": 100, "threshold": 60},
+        "sme": {"min": 0, "max": 100, "threshold": 60},
+        "startup": {"min": 0, "max": 100, "threshold": 60},
+    }
+}
+
+
+def _seg(scores, kpi=None):
+    SegmentFitChecker().verify({"segment_scores": scores}, {}, SEG_KPI if kpi is None else kpi)
+
+
+def test_segment_checker_is_a_guard():
+    assert isinstance(SegmentFitChecker(), Guard)
+
+
+def test_segment_valid_scores_pass():
+    _seg({"enterprise": 75, "sme": 60, "startup": 100})
+
+
+def test_segment_boundaries_inclusive():
+    _seg({"enterprise": 100, "sme": 60})  # max と threshold ちょうどは通る
+
+
+def test_segment_rejects_negative_score():
+    with pytest.raises(FactsError, match="segment.*score.*out of range"):
+        _seg({"enterprise": -5})
+
+
+def test_segment_rejects_over_100():
+    with pytest.raises(FactsError, match="segment.*score.*out of range"):
+        _seg({"sme": 105})
+
+
+def test_segment_rejects_below_threshold():
+    with pytest.raises(FactsError, match=r"segment 'startup' score 59 is below threshold 60"):
+        _seg({"startup": 59})
+
+
+def test_segment_rejects_undefined_segment():
+    with pytest.raises(FactsError, match="segment.*not defined in kpi"):
+        _seg({"ghost_segment": 75})
+
+
+@pytest.mark.parametrize("bad", [75.5, "75", None, True])
+def test_segment_rejects_non_integer_score(bad):
+    with pytest.raises(FactsError, match="must be an integer"):
+        _seg({"enterprise": bad})
+
+
+@pytest.mark.parametrize("kpi", [{}, {"segment_thresholds": {}}, {"segment_thresholds": None}, {"segment_thresholds": []}])
+def test_segment_missing_or_empty_thresholds_fails_closed(kpi):
+    with pytest.raises(FactsError, match="segment_thresholds.*missing or empty"):
+        _seg({"enterprise": 75}, kpi)
+
+
+@pytest.mark.parametrize(
+    "rule",
+    [
+        {"min": 0, "max": 100, "threshold": "60"},
+        {"min": 0, "max": 100, "threshold": None},
+        {"min": 0, "max": 100, "threshold": float("nan")},
+        {"min": 0, "max": 100, "threshold": True},
+        {"min": 0, "max": 100, "threshold": 120},
+        {"min": 0, "max": 100, "threshold": -1},
+        {"min": 70, "max": 100, "threshold": 60},
+        {"min": 0, "max": 150, "threshold": 60},
+        "60",
+    ],
+)
+def test_segment_invalid_threshold_definition_rejected(rule):
+    with pytest.raises(FactsError, match="kpi.segment_thresholds"):
+        _seg({"enterprise": 75}, {"segment_thresholds": {"enterprise": rule}})
+
+
+def test_segment_rule_defaults_to_0_100_60():
+    kpi = {"segment_thresholds": {"enterprise": {}}}
+    _seg({"enterprise": 60}, kpi)
+    with pytest.raises(FactsError, match="below threshold 60"):
+        _seg({"enterprise": 59}, kpi)
+
+
+def test_segment_custom_threshold_is_honoured():
+    kpi = {"segment_thresholds": {"enterprise": {"min": 0, "max": 100, "threshold": 80}}}
+    _seg({"enterprise": 80}, kpi)
+    with pytest.raises(FactsError, match="below threshold 80"):
+        _seg({"enterprise": 79}, kpi)
+
+
+def test_segment_no_scores_passes():
+    SegmentFitChecker().verify({}, {}, {})
+    _seg({}, {})
+    SegmentFitChecker().verify({"segment_scores": None}, {}, SEG_KPI)
+
+
+def test_segment_scores_must_be_a_dict():
+    with pytest.raises(FactsError, match="segment_scores must be a dict"):
+        SegmentFitChecker().verify({"segment_scores": [75]}, {}, SEG_KPI)
+
+
+def test_segment_first_violation_names_segment():
+    with pytest.raises(FactsError, match="'sme'"):
+        _seg({"enterprise": 80, "sme": 10})
+
+
+def test_real_kpi_json_accepts_threshold_scores_and_rejects_below():
+    import json
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "kekka_kpi.json")
+    kpi = json.load(open(path, encoding="utf-8"))
+    names = kpi["segment_thresholds"]
+    assert {"enterprise", "sme", "startup", "other"} <= set(names)
+    _seg({n: names[n]["threshold"] for n in names}, kpi)
+    with pytest.raises(FactsError, match="below threshold"):
+        _seg({"other": names["other"]["threshold"] - 1}, kpi)
