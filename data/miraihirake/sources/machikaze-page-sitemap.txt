@@ -1,0 +1,13 @@
+# source_id: machikaze-page-sitemap
+# url: https://www.column.machinokaze.jp/page-sitemap.xml
+# org: NPO法人まちのかぜ
+# fetched_at: 2026-10-02
+# 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
+
+https://www.column.machinokaze.jp/ 
+
+ https://www.column.machinokaze.jp/contact/ 
+ 2023-11-05T02:05:00+00:00 
+
+ https://www.column.machinokaze.jp/result/ 
+ 2025-05-19T10:55:15+00:00
