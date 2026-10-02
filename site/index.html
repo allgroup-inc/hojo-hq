@@ -1100,14 +1100,27 @@
     'サービス':['サービス'],'その他':[]
   };
 
-  // ===== クイック検索機能 =====
+  // ===== クイック検索機能（Change 3: 検索精度リスク低減のため無効化） =====
   function initQuickSearch(data){
     const qsBtn=document.getElementById('qs-search');
     const qsKeyword=document.getElementById('qs-keyword');
     const qsArea=document.getElementById('qs-area');
     const qsResult=document.getElementById('qs-result');
     const qsList=document.getElementById('qs-list');
-    const qsCount=document.getElementById('qs-count');
+
+    // target_biz フィールド充実度を測定
+    const bizFilled=data.items.filter(it=>it.target_biz&&it.target_biz.trim()).length;
+    const bizRate=data.items.length>0?bizFilled/data.items.length:0;
+
+    // 充実度が 50% 未満の場合は検索を無効化（ユーザーに通知）
+    if(bizRate<0.5){
+      qsBtn.disabled=true;
+      qsKeyword.disabled=true;
+      qsArea.disabled=true;
+      qsResult.innerHTML='<p style="color:var(--sumi);font-size:.9rem;padding:12px;background:rgba(0,51,92,.05);border-radius:4px;">⚠️ クイック検索は現在、検索精度向上のため準備中です。<br>左側の「市町村・業種・従業員数」フィルターでお探しください。</p>';
+      qsResult.hidden=false;
+      return;
+    }
 
     const performSearch=()=>{
       const kw=(qsKeyword.value||'').toLowerCase().trim();
@@ -1124,7 +1137,7 @@
       });
 
       results=results.slice(0,20); // 20件まで表示
-      qsCount.textContent=results.length;
+      document.getElementById('qs-count').textContent=results.length;
       qsList.innerHTML=results.map(it=>`
         <div class="card">
           <h4>${esc(it.name||'')}</h4>
