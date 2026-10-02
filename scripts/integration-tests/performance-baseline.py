@@ -20,6 +20,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from statistics import mean, median, stdev
 from typing import Dict, List, Tuple
 import sys
+from pathlib import Path
 
 class PerformanceBaseline:
     def __init__(self, base_url="http://localhost:3000"):
@@ -170,6 +171,7 @@ class PerformanceBaseline:
 
         self._print_detailed_report(all_results)
         self._print_recommendations(all_results)
+        return all_results
 
     def _print_detailed_report(self, results: List[Dict]):
         """詳細レポート出力"""
@@ -188,6 +190,9 @@ class PerformanceBaseline:
                 endpoints[endpoint].append(result['mean_ms'])
 
         for endpoint, times in sorted(endpoints.items()):
+            if not times:
+                print(f"  {endpoint:<40} 計測なし(全リクエスト失敗)")
+                continue
             avg_time = sum(times) / len(times)
             print(f"  {endpoint:<40} 平均 {avg_time:>6.0f}ms")
 
@@ -202,6 +207,9 @@ class PerformanceBaseline:
                 scenarios[scenario].append(result['mean_ms'])
 
         for scenario, times in sorted(scenarios.items()):
+            if not times:
+                print(f"  {scenario:<50} 計測なし(全リクエスト失敗)")
+                continue
             avg_time = sum(times) / len(times)
             rps_values = [r.get('rps', 0) for r in results if r.get('scenario') == scenario]
             avg_rps = sum(rps_values) / len(rps_values) if rps_values else 0
@@ -305,20 +313,37 @@ def main():
     parser.add_argument('--base-url', default='http://localhost:3000', help='ベースURL')
     parser.add_argument('--stress-test', action='store_true', help='ストレステストも実行')
     parser.add_argument('--duration', type=int, default=60, help='ストレステスト期間 (秒)')
+    parser.add_argument('--results-dir', default=str(Path(__file__).parent / 'results'),
+                        help='結果JSON(performance.json)の出力先')
 
     args = parser.parse_args()
 
     baseline = PerformanceBaseline(base_url=args.base_url)
 
-    # ベースライン計測
-    baseline.run_baseline_suite()
+    # ベースライン計測。G1 基準(P95 ≤ 1000ms / エラー率 ≤ 1%)は results_writer で判定する。
+    # 計測途中で落ちても「不合格の記録」は必ず残す
+    import results_writer
+    import traceback
+    error = None
+    all_results = []
+    try:
+        all_results = baseline.run_baseline_suite() or []
+    except Exception:
+        error = traceback.format_exc()
+        print(error, file=sys.stderr)
+
+    summary = results_writer.summarize_performance(all_results)
+    if error:
+        summary['passed'] = False
+        summary['error'] = error.strip().splitlines()[-1]
+    results_writer.write_result(args.results_dir, 'performance', base_url=args.base_url, **summary)
 
     # ストレステスト（オプション）
     if args.stress_test:
-        success = baseline.run_stress_test(duration_seconds=args.duration)
-        sys.exit(0 if success else 1)
+        stress_ok = baseline.run_stress_test(duration_seconds=args.duration)
+        sys.exit(0 if (summary['passed'] and stress_ok) else 1)
     else:
-        sys.exit(0)
+        sys.exit(0 if summary['passed'] else 1)
 
 if __name__ == "__main__":
     main()

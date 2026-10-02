@@ -18,6 +18,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import sys
+from pathlib import Path
 
 class APIChainTest:
     def __init__(self, base_url="http://localhost:3000"):
@@ -348,6 +349,8 @@ def main():
     parser = argparse.ArgumentParser(description="Block 2 APIチェーンテスト")
     parser.add_argument('--base-url', default='http://localhost:3000', help='ベースURL')
     parser.add_argument('--repeat', type=int, default=1, help='テスト繰り返し回数')
+    parser.add_argument('--results-dir', default=str(Path(__file__).parent / 'results'),
+                        help='結果JSON(api-chain.json)の出力先')
 
     args = parser.parse_args()
 
@@ -362,6 +365,16 @@ def main():
 
         if not success and args.repeat > 1:
             print(f"\n⚠️  {i+1}回目の実行で失敗しました")
+
+    # 最終回の結果を記録する
+    import results_writer
+    results_writer.write_result(
+        args.results_dir, 'api-chain', passed=success,
+        passed_count=sum(1 for r in tester.results if '✅' in r['status']),
+        failed_count=sum(1 for r in tester.results if '❌' in r['status']),
+        total=len(tester.results),
+        base_url=args.base_url,
+    )
 
     sys.exit(0 if success else 1)
 

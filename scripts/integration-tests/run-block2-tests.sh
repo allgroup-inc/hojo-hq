@@ -8,6 +8,9 @@ set -e
 BASE_URL="${BASE_URL:-http://localhost:3000}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# 各テストの結果JSON(ワークフローの Parse test results が読む)。前回分が混ざらないよう毎回作り直す
+RESULTS_DIR="${RESULTS_DIR:-$SCRIPT_DIR/results}"
+rm -rf "$RESULTS_DIR" && mkdir -p "$RESULTS_DIR"
 
 # Colors
 RED='\033[0;31m'
@@ -39,7 +42,7 @@ run_test() {
     echo "  コマンド: python3 $test_script $test_args"
     echo ""
 
-    if python3 "$SCRIPT_DIR/$test_script" --base-url "$BASE_URL" $test_args; then
+    if python3 "$SCRIPT_DIR/$test_script" --base-url "$BASE_URL" --results-dir "$RESULTS_DIR" $test_args; then
         echo -e "${GREEN}✅ $test_name: 成功${NC}\n"
         TESTS_PASSED=$((TESTS_PASSED + 1))
         TEST_RESULTS+=("✅ $test_name")
@@ -64,24 +67,47 @@ run_test "パフォーマンスベースライン (Issue #8, #14)" "performance-
 
 # UI テスト (Playwright が必要)
 echo -e "${BLUE}------- Test 4: UI統合テスト (Playwright) -------${NC}"
-if command -v npx &> /dev/null; then
+# Playwright の JSON レポートを results/ui.json に変換する。実行できない場合も「未実行=不合格」として記録を残す
+write_ui_result() {
+    python3 - "$SCRIPT_DIR" "$RESULTS_DIR" "$1" "$2" <<'PY'
+import json, sys
+from pathlib import Path
+script_dir, results_dir, report_path, reason = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), sys.argv[4]
+sys.path.insert(0, str(script_dir))
+import results_writer as rw
+try:
+    report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.is_file() else {}
+except json.JSONDecodeError:
+    report = {}
+summary = rw.summarize_playwright(report)
+rw.write_result(results_dir, "ui", reason=reason, **summary)
+PY
+}
+
+if (cd "$SCRIPT_DIR" && npx --no-install playwright --version) &> /dev/null; then
     echo -e "${YELLOW}📋 テスト実行: UI統合テスト${NC}"
-    echo "  コマンド: npx playwright test ui-integration-tests.ts"
+    echo "  コマンド: npx playwright test ui-integration-tests.ts --reporter=json"
     echo ""
 
-    if npx playwright test ui-integration-tests.ts; then
+    UI_REPORT="$RESULTS_DIR/ui-playwright-report.json"
+    if (cd "$SCRIPT_DIR" && BASE_URL="$BASE_URL" npx playwright test ui-integration-tests.ts --reporter=json > "$UI_REPORT"); then
         echo -e "${GREEN}✅ UI統合テスト: 成功${NC}\n"
         TESTS_PASSED=$((TESTS_PASSED + 1))
         TEST_RESULTS+=("✅ UI統合テスト (Playwright)")
+        write_ui_result "$UI_REPORT" "playwright 実行"
     else
         echo -e "${RED}❌ UI統合テスト: 失敗${NC}\n"
         TESTS_FAILED=$((TESTS_FAILED + 1))
         TEST_RESULTS+=("❌ UI統合テスト (Playwright)")
+        write_ui_result "$UI_REPORT" "playwright 実行(失敗あり)"
     fi
 else
-    echo -e "${YELLOW}⚠️  Playwright がインストールされていません。UI テストをスキップします${NC}"
-    echo "  インストール: npm install -D @playwright/test"
+    echo -e "${YELLOW}⚠️  Playwright がインストールされていません。UI テストは未実行(不合格扱い)として記録します${NC}"
+    echo "  インストール: (cd $SCRIPT_DIR && npm install && npx playwright install --with-deps chromium)"
     echo ""
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+    TEST_RESULTS+=("❌ UI統合テスト (Playwright 未インストール・未実行)")
+    write_ui_result "/dev/null" "playwright 未インストールのため未実行"
 fi
 
 # テスト結果サマリー

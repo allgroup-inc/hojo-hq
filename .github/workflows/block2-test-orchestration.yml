@@ -16,18 +16,22 @@ jobs:
     name: Block 2 Integration Tests
 
     steps:
+      # 起動したブランチ自身を checkout する(main 固定だと作業ブランチからの workflow_dispatch でテスト一式が無い)
       - name: Checkout hojo-hq
         uses: actions/checkout@v4
         with:
-          repository: allgroup-inc/hojo-hq
-          ref: main
+          ref: ${{ github.sha }}
 
+# 非公開repoの checkout には GITHUB_TOKEN では権限が無い(PAT を KAKEI_CRM_TOKEN に入れた時だけ成功する)。
+      # 失敗しても結果は artifact に残すので、ここでジョブを止めない
       - name: Checkout kakei-crm (for coordination)
         uses: actions/checkout@v4
+        continue-on-error: true
         with:
           repository: allgroup-inc/kakei-crm
           path: kakei-crm-coordination
           ref: main
+          token: ${{ secrets.KAKEI_CRM_TOKEN || github.token }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -43,10 +47,13 @@ jobs:
         run: |
           cd scripts/integration-tests
           pip install -r requirements.txt
-          npm ci
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
 
+      # テストが失敗しても後続(結果の整形・G1ドラフト・artifact)は必ず走らせる
       - name: Run Block 2 integration tests
         id: test-run
+        continue-on-error: true
         run: |
           cd scripts/integration-tests
           bash run-block2-tests.sh
@@ -74,10 +81,12 @@ jobs:
               with open(result_file) as f:
                   results["tests"][result_file.stem] = json.load(f)
 
-          # Summary
-          all_passed = all(t.get("passed", False) for t in results["tests"].values())
+          # Summary(結果ファイルが1つも無い場合は all() が True になるので明示的に不合格にする)
+          all_passed = bool(results["tests"]) and all(t.get("passed", False) for t in results["tests"].values())
           results["summary"] = {
               "all_passed": all_passed,
+              "run_id": os.environ.get("GITHUB_RUN_ID", "unknown"),
+              "run_url": f"{os.environ.get('GITHUB_SERVER_URL', '')}/{os.environ.get('GITHUB_REPOSITORY', '')}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}",
               "total_tests": len(results["tests"]),
               "passed_count": sum(1 for t in results["tests"].values() if t.get("passed")),
               "failed_count": sum(1 for t in results["tests"].values() if not t.get("passed")),
@@ -137,38 +146,44 @@ jobs:
           print(f"G1_STATUS={g1_status}")
           EOF
 
+      # 実行証跡はまず artifact として必ず残す(kakei-crm への push は権限がある時だけ)
+      - name: Upload results as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block2-results-${{ github.run_id }}
+          path: |
+            block2-test-results.json
+            g1-judgment-draft.json
+            scripts/integration-tests/results/
+          if-no-files-found: warn
+          retention-days: 90
+
       - name: Upload test results to kakei-crm
         if: always()
         run: |
-          # Copy results to kakei-crm coordination repo
+          if [ ! -d kakei-crm-coordination/.git ]; then
+            echo "kakei-crm を checkout できていないため push は省略(artifact を参照)"
+            exit 0
+          fi
           mkdir -p kakei-crm-coordination/block2-results
           cp block2-test-results.json kakei-crm-coordination/block2-results/
           cp g1-judgment-draft.json kakei-crm-coordination/block2-results/
 
-          # Commit (if results changed)
           cd kakei-crm-coordination
           git config user.email "ci@allgroup-inc"
           git config user.name "KAKEHASHI CI"
           git add block2-results/
-          git commit -m "test: Block 2 test results from run #${{ github.run_id }}" || true
-          git push origin main || true
+          git commit -m "test: Block 2 test results from run #${{ github.run_id }}" || exit 0
+          git push origin main || echo "push 失敗(KAKEI_CRM_TOKEN 未設定か権限不足)。artifact を参照"
 
-      - name: Notify on failure
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const results = fs.existsSync('block2-test-results.json')
-              ? JSON.parse(fs.readFileSync('block2-test-results.json', 'utf8'))
-              : {};
-
-            github.rest.issues.createComment({
-              issue_number: 1,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `🚨 Block 2 Tests Failed\n\n\`\`\`json\n${JSON.stringify(results, null, 2)}\n\`\`\`\n\n小柳さんへ通知完了`
-            });
+      # 失敗時の通知: 公開repoの Issue へコメントを書く方式は廃止(テスト結果に家計側の情報が混じるため)。
+      # ジョブのサマリーと artifact を見る。外部通知は kakei-crm 側で設計する
+      - name: Mark job failed when tests failed
+        if: always() && steps.test-run.outcome == 'failure'
+        run: |
+          echo "::error::Block 2 integration tests failed. See job summary and artifact block2-results-${{ github.run_id }}"
+          exit 1
 
       - name: Generate summary
         if: always()

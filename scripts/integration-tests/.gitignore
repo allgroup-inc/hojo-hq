@@ -1,0 +1,9 @@
+# 実行時の生成物。実行証跡は CI の artifact / kakei-crm block2-results に残す
+results/
+test-results/
+playwright-report/
+node_modules/
+package-lock.json
+__pycache__/
+# リポジトリ直下の .gitignore が package.json を除外しているため、このディレクトリでは明示的に戻す
+!package.json

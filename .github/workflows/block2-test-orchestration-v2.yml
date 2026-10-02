@@ -53,8 +53,7 @@ jobs:
       - name: Checkout hojo-hq
         uses: actions/checkout@v4
         with:
-          repository: allgroup-inc/hojo-hq
-          ref: main
+          ref: ${{ github.sha }}
           fetch-depth: 1
 
       - name: Checkout kakei-crm (for coordination)
@@ -223,17 +222,17 @@ jobs:
               "business_axis_integration": {
                   "requirement": "10/10 成功",
                   "required": 10,
-                  "actual": results.get("tests", {}).get("business-axis", {}).get("passed", 0)
+                  "actual": results.get("tests", {}).get("business-axis", {}).get("passed_count", 0)
               },
               "api_chain": {
                   "requirement": "6/6 成功",
                   "required": 6,
-                  "actual": results.get("tests", {}).get("api-chain", {}).get("passed", 0)
+                  "actual": results.get("tests", {}).get("api-chain", {}).get("passed_count", 0)
               },
               "ui_smoke": {
                   "requirement": "12/12 成功",
                   "required": 12,
-                  "actual": results.get("tests", {}).get("ui", {}).get("passed", 0)
+                  "actual": results.get("tests", {}).get("ui", {}).get("passed_count", 0)
               },
               "performance": {
                   "requirement": "P95 ≤ 1000ms, Error ≤ 1%",

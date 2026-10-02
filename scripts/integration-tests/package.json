@@ -1,0 +1,11 @@
+{
+  "name": "block2-integration-tests",
+  "private": true,
+  "description": "Block 2 UI統合テスト(Playwright)。run-block2-tests.sh から呼ばれる",
+  "scripts": {
+    "test:ui": "playwright test ui-integration-tests.ts --reporter=json"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}

@@ -362,11 +362,23 @@ def main():
     parser = argparse.ArgumentParser(description="Block 2 統合テスト実行")
     parser.add_argument('--base-url', default='http://localhost:3000', help='API ベースURL')
     parser.add_argument('--api-key', help='API キー (オプション)')
+    parser.add_argument('--results-dir', default=str(Path(__file__).parent / 'results'),
+                        help='結果JSON(business-axis.json)の出力先')
 
     args = parser.parse_args()
 
     tester = BusinessAxisIntegrationTest(base_url=args.base_url, api_key=args.api_key)
     success = tester.run_all_tests()
+
+    import results_writer
+    results_writer.write_result(
+        args.results_dir, 'business-axis', passed=success,
+        passed_count=len(tester.test_results['passed']),
+        failed_count=len(tester.test_results['failed']),
+        blocked_count=len(tester.test_results['blocked']),
+        total=len(tester.test_results['passed']) + len(tester.test_results['failed']),
+        base_url=args.base_url,
+    )
 
     sys.exit(0 if success else 1)
 
