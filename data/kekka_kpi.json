@@ -6,6 +6,44 @@
     "M9_2027-05": 240000,
     "M12_2027-08": 300000
   },
+  "_segment_thresholds_readme": "売上自動化(facts builder)のガード参照値。segment_scoresは0-100の整数・推奨閾値60(Task 4/6/8で共用)。既存の台帳キー(targets/articles/weeks)とは独立。",
+  "segment_thresholds": {
+    "enterprise": {
+      "min": 0,
+      "max": 100,
+      "threshold": 60
+    },
+    "sme": {
+      "min": 0,
+      "max": 100,
+      "threshold": 60
+    },
+    "startup": {
+      "min": 0,
+      "max": 100,
+      "threshold": 60
+    },
+    "other": {
+      "min": 0,
+      "max": 100,
+      "threshold": 60
+    }
+  },
+  "_banned_phrases_readme": "売上自動化(facts builder)のBannedPhrasesChecker参照値。facts内の文字列(記事タイトル・説明・セグメント名等)に部分一致で含まれたら生成失敗。全角半角・大文字小文字は区別しない(NFKC正規化+casefold)。既存の生成ガード(generate_airecipe.py / 結果マガ_運転プロンプト.md の誇大表現禁止)と同じ語を含む。守り部が管理。",
+  "banned_phrases": [
+    "無料で",
+    "絶対",
+    "必ず",
+    "誰でも",
+    "楽して",
+    "確実に稼",
+    "保証",
+    "申請代行",
+    "確定",
+    "AI生成",
+    "自動生成された",
+    "ChatGPT"
+  ],
   "articles": {
     "05": {
       "title": "フォロワーが買うのではなかった",

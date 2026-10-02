@@ -1,0 +1,140 @@
+name: kekka-weekly-collect
+
+# 結果マガ(kekka_mag)の週次実績を data/kekka_weekly_metrics.json に追記する(売上自動化 Task 4)。
+# 集めるのは *前週*(ISO週・月曜〜日曜)。最新は前週の日曜 23:59 JST までの実績。
+#   例: 2026-10-05(月)09:00 JST の実行 → 2026-W40(9/28〜10/04)
+# 公開ファイル・ログには集計値だけを出す。購入者ID等は書かない
+#   (docs/議事_20261001_結果マガ購入者データの保管先.md)。
+
+on:
+  schedule:
+    # 毎週月曜 00:00 UTC(= 月曜 09:00 JST)
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+    inputs:
+      week:
+        description: "ISO週 'YYYY-Www'(例 '2026-W40')。指定なしは前週"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: kekka-weekly-collect
+  cancel-in-progress: true
+
+jobs:
+  collect:
+    name: Collect weekly metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # Secrets と入力を、依存のインストールや API 呼び出しより前に検査する
+      - name: Check secrets and input
+        env:
+          NOTE_API_TOKEN: ${{ secrets.NOTE_API_TOKEN }}
+          KEKKA_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
+          INPUT_WEEK: ${{ github.event.inputs.week }}
+        run: |
+          missing=0
+          for name in NOTE_API_TOKEN KEKKA_LINE_CHANNEL_ACCESS_TOKEN GA4_PROPERTY_ID GA4_SA_JSON; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret $name is not set"
+              missing=1
+            fi
+          done
+          if [ -n "$INPUT_WEEK" ] && ! [[ "$INPUT_WEEK" =~ ^[0-9]{4}-W[0-9]{2}$ ]]; then
+            echo "::error::week は 'YYYY-Www'(例 2026-W40)で指定してください"
+            missing=1
+          fi
+          exit $missing
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # note_api / line_api は標準ライブラリのみ。GA4 の認証に google-auth(+ requests)が要る
+      # (requirements.txt と同じ内容。失敗は隠さない = continue-on-error を付けない)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -q google-auth requests
+
+      # GA4 認証: Secrets の JSON を RUNNER_TEMP に所有者のみ読める権限で書き出す
+      - name: Setup GA4 credentials
+        env:
+          GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
+        run: |
+          umask 077
+          key="$RUNNER_TEMP/ga4_key.json"
+          printf '%s' "$GA4_SA_JSON" > "$key"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$key" >> "$GITHUB_ENV"
+
+      - name: Collect weekly metrics
+        env:
+          NOTE_API_TOKEN: ${{ secrets.NOTE_API_TOKEN }}
+          KEKKA_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          INPUT_WEEK: ${{ github.event.inputs.week }}
+        run: |
+          if [ -n "$INPUT_WEEK" ]; then
+            python scripts/collect_weekly_metrics.py -w "$INPUT_WEEK"
+          else
+            python scripts/collect_weekly_metrics.py
+          fi
+
+      - name: Cleanup GA4 credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/ga4_key.json"
+
+      - name: Commit and push
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          git config user.name "kekka-bot"
+          git config user.email "noreply@anthropic.com"
+          git add data/kekka_weekly_metrics.json
+          if git diff --cached --quiet; then
+            echo "変更なし"
+            exit 0
+          fi
+          git commit -m "data: update kekka weekly metrics (auto)"
+          # 実行中に他の push が入っても落ちないよう rebase してから push(最大3回)
+          for i in 1 2 3; do
+            if git pull --rebase origin "$REF_NAME" && git push -u origin "HEAD:$REF_NAME"; then
+              exit 0
+            fi
+            echo "push retry $i"; sleep $((i * 5))
+          done
+          echo "::error::push に3回失敗しました"
+          exit 1
+
+      # 失敗時: Issue を起票する(同名の Open Issue があれば追記)。本文は実行URLのみ(数値・PII は載せない)
+      - name: Open issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          INPUT_WEEK: ${{ github.event.inputs.week }}
+        run: |
+          title="結果マガ週次メトリクス集約(kekka-weekly-collect)失敗"
+          body="週次メトリクスの集約に失敗しました。対象週: ${INPUT_WEEK:-前週(既定)}
+          実行ログ: $RUN_URL
+          この週のデータは data/kekka_weekly_metrics.json に書かれていません。原因を直して workflow_dispatch で週を指定し再実行してください。"
+          existing=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi

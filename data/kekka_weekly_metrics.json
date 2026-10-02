@@ -1,0 +1,18 @@
+{
+  "_readme": "結果マガ(kekka_mag)の週次実績。scripts/collect_weekly_metrics.py(Task 4)が毎週月曜に前週(ISO週・月〜日)の1件を weeks に追記する(同じ週の再実行は置き換え)。数値はすべて各APIの実値のみ(推測・補完はしない。取得失敗の週は書かない)。本リポジトリはPUBLICのため、購入者ID・購入者属性はここに書かない(docs/議事_20261001_結果マガ購入者データの保管先.md)。",
+  "_schema": {
+    "week": "ISO週 'YYYY-Www'(2桁ゼロ埋め。例 2026-W40)。対象は月曜〜日曜",
+    "collected_at": "取得日時(ISO 8601・JST)",
+    "note": {
+      "week": "str — 上と同じISO週",
+      "views_by_article": "dict[str, int] — note記事ID → その週のビュー数",
+      "total_likes": "int — 対象記事のスキ合計",
+      "total_sales_jpy": "int — 対象記事の売上合計(円)",
+      "buyer_count": "int — その週のユニーク購入者数(集計値のみ。購入者ID・属性は公開しない)"
+    },
+    "ga4": "Task 2 の GA4Metrics",
+    "line": "Task 3 の LINEMetrics",
+    "line_source": "'line_messaging_api'(API の実値)または 'csv'(data/line_segment_stats_<week>.csv の手入力集計)"
+  },
+  "weeks": []
+}
