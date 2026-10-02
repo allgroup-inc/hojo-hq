@@ -143,6 +143,7 @@ jobs:
           rm -rf /tmp/pages-deploy/nobishiro
           rm -rf /tmp/pages-deploy/miraihirake
           rm -rf /tmp/pages-deploy/go/plan-a
+          rm -rf /tmp/pages-deploy/go/plan-a-line  # 転送先(LINE)の決裁まで除外。LP公開と同時に外す
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v5

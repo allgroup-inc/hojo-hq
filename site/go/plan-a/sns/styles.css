@@ -1,0 +1,58 @@
+/* Plan A LP v2 — B案(インパクト版)の上書き。../styles.css の後に読む */
+:root{--ink:#00335C;--ink-deep:#001F3A;--on-ink:#FFFBF4;--on-ink-muted:#B9C7D6}
+body{padding-bottom:96px}
+section{border-bottom:0}
+/* hero */
+.hero-b{background:radial-gradient(120% 90% at 85% 10%,rgba(248,136,0,.38),transparent 55%),linear-gradient(170deg,var(--ink) 0%,var(--ink-deep) 100%);color:var(--on-ink);padding-block:2.8rem 2.4rem}
+.hero-b h1{color:var(--on-ink);font-size:clamp(1.9rem,8vw,3.3rem);line-height:1.25;letter-spacing:.01em}
+.hero-b h1 em{font-style:normal;color:var(--orange);background:linear-gradient(transparent 68%,rgba(248,136,0,.38) 68%)}
+.kicker-b{display:inline-block;border:1px solid var(--orange);color:var(--orange);border-radius:4px;padding:.1rem .6rem;font-size:.8rem;font-weight:900;letter-spacing:.1em;margin-bottom:1.1rem}
+.lead-b{margin-top:1.2rem;font-size:1.08rem;max-width:34em}
+.photo-b{margin:1.4rem 0 0;border-radius:10px;overflow:hidden;aspect-ratio:16/9;background:#143B5E}
+.photo-b img{width:100%;height:100%;object-fit:cover}
+.hero-b .cta{margin-top:1.5rem;font-size:1.12rem;min-height:58px;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.micro-b{margin-top:.7rem;font-size:.86rem;color:var(--on-ink-muted)}
+/* band */
+.band-b{background:var(--orange);color:#1A1A1A;padding-block:1.3rem}
+.band-row{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem}
+.band-row .v{display:block;font-size:clamp(1.7rem,6vw,2.4rem);font-weight:900;line-height:1.05;font-variant-numeric:tabular-nums}
+.band-row .v small{font-size:.5em;margin-left:.1em}
+.band-row .k{display:block;font-size:.85rem;font-weight:700;margin-top:.15rem}
+.band-src{font-size:.72rem;margin-top:.7rem;opacity:.85}
+.band-src .todo{background:rgba(255,255,255,.6)}
+/* zeros */
+.zeros-b{padding-block:2.8rem}
+.zeros{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.zero{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:1.2rem 1rem;min-width:0}
+.zero .big{font-size:3rem;font-weight:900;line-height:1;color:var(--shu)}
+.zero .big small{font-size:1rem;font-weight:700;color:var(--fg);margin-left:.3rem}
+.zero p+p{margin-top:.5rem;font-size:.95rem}
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:.8rem;align-items:center;margin-top:1.5rem}
+.vs .col{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:1rem;min-width:0}
+.vs .col.win{border:2px solid var(--orange)}
+.vs .mid{font-weight:900;font-size:1.2rem;color:var(--muted)}
+.vs .label{font-size:.8rem;color:var(--muted);font-weight:700}
+.vs .num{font-size:1.4rem;font-weight:900;color:var(--navy);font-variant-numeric:tabular-nums}
+.vs ul{margin:.4rem 0 0;padding-left:1.1em;font-size:.9rem}
+@media(max-width:520px){.vs{grid-template-columns:1fr}.vs .mid{text-align:center}}
+/* manifesto */
+.manifesto-b{background:var(--ink);color:var(--on-ink);padding-block:2.8rem}
+.manifesto-b h2{color:var(--on-ink)}
+.promises{list-style:none;margin:0;padding:0;counter-reset:p;border-top:1px solid rgba(255,255,255,.18)}
+.promises li{display:grid;grid-template-columns:3.2rem 1fr;gap:1rem;padding:1.1rem 0;border-bottom:1px solid rgba(255,255,255,.18);align-items:start;counter-increment:p}
+.promises li::before{content:counter(p);font-size:2rem;font-weight:900;color:var(--orange);line-height:1;grid-row:1/3}
+.promises h3{color:var(--on-ink);font-size:1.2rem;font-weight:900}
+.promises p{color:var(--on-ink-muted);font-size:.95rem;margin-top:.25rem}
+.manifesto-b .todo{background:rgba(255,255,255,.9)}
+/* recruit */
+.recruit-b{padding-block:2.8rem}
+.card-b{background:var(--surface);border:2px solid var(--orange);border-radius:14px;padding:1.3rem 1.2rem}
+.seats{font-size:clamp(1.6rem,7vw,2.4rem);font-weight:900;color:var(--shu);line-height:1.2}
+.seats small{display:block;font-size:.95rem;color:var(--fg);font-weight:700}
+.recruit-b .cond{margin-top:1rem}
+.recruit-b .two{margin-top:1.2rem}
+/* final */
+.final-b{background:linear-gradient(170deg,var(--ink) 0%,var(--ink-deep) 100%);color:var(--on-ink);text-align:center;padding-block:3.4rem}
+.final-b h2{color:var(--on-ink);font-size:clamp(1.7rem,7vw,2.6rem)}
+.final-b p{color:var(--on-ink-muted);margin-top:.8rem}
+.final-b .cta{margin-top:1.4rem;font-size:1.12rem;min-height:58px;box-shadow:0 6px 0 rgba(0,0,0,.25)}

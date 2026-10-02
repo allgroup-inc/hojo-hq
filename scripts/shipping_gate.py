@@ -197,6 +197,9 @@ def verify_file(path, today=None):
 TARGET_GROUPS = {
     "sns":  ("posts/launch/*.md", "posts/carousel/caption.md"),
     "line": ("posts/line/*.md",),
+    # Plan A 海外販路LP(2026-10-02追加)。HTML末尾のコメントに記録を置く(行頭に ## 出荷ゲート)。
+    # 公開前に update.yml の除外を外すとき、このグループが通っていることを確認する。
+    "lp":   ("site/go/plan-a/*.html", "site/go/plan-a/sns/*.html"),
 }
 
 
@@ -314,11 +317,12 @@ def self_test():
     check("label", not ok and pr[0].startswith("posts/launch/01.md: "), f"got {pr}")
 
     # 8) 配信経路グループ(LINEの違反でSNS投稿を巻き添えにしない分離)
-    check("group.names", set(TARGET_GROUPS) == {"sns", "line"}, f"got {set(TARGET_GROUPS)}")
+    check("group.names", set(TARGET_GROUPS) == {"sns", "line", "lp"}, f"got {set(TARGET_GROUPS)}")
     sns_t = collect_targets(group="sns")
     line_t = collect_targets(group="line")
-    check("group.disjoint", not (set(sns_t) & set(line_t)))
-    check("group.all_is_union", set(collect_targets()) == set(sns_t) | set(line_t))
+    lp_t = collect_targets(group="lp")
+    check("group.disjoint", not (set(sns_t) & set(line_t)) and not (set(lp_t) & (set(sns_t) | set(line_t))))
+    check("group.all_is_union", set(collect_targets()) == set(sns_t) | set(line_t) | set(lp_t))
     check("group.sns_found", len(sns_t) >= 1, f"got {len(sns_t)}")
 
     if failed:

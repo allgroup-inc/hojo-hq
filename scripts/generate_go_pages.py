@@ -42,6 +42,13 @@ CHANNELS = {
     "fb":         {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: Facebookページ"},
     "card":       {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: 紙配布(QRカード・催事・紹介)"},
     "insurance-shindan": {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: 保険引き受け目安検索(LINE登録CTA)"},
+    # ── Plan A(GLOW・沖縄生産者の海外販路LP /go/plan-a/)──
+    # 転送先は暫定でミカタ公式LINE(共用案)。Plan A専用LINEを開設する決裁が出たら dest を差し替えて再実行。
+    # event は既定の line_redirect を使わない: Plan Aの相談がミカタのLINE登録1,000社(KGI)に混ざって
+    # 水増しになるため(設計書: docs/Plan A LP_構成設計書v2_20261001.md §5 / 議事_20261001 論点3)。
+    "plan-a-line": {"dest": "https://lin.ee/sh4bTUe",
+                    "label": "Plan A: 海外販路LP(/go/plan-a/ と /sns/)のLINE相談CTA【転送先は暫定・決裁待ち】",
+                    "event": "plan_a_line_redirect", "dest_name": "LINE"},
     # ── もらいわすれ堂/フクギイロ(小柳遥さん・2026-07-24開設) ──
     "fg-top":     {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: トップページ"},
     "fg-life":    {"dest": "https://lin.ee/7fH7vDQ", "label": "フクギイロ: ライフイベント別ページ"},
