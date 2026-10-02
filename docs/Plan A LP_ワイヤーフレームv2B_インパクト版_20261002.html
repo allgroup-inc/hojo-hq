@@ -1,0 +1,202 @@
+<title>Plan A 販路LP 挑戦者募集版</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Shippori+Mincho+B1:wght@700;800&display=swap">
+<style>
+/* Layout: full-bleed dark hero → stat band → "zero" contrast → manifesto (5 promises) → recruitment → FAQ → final. One accent (orange), one display face used huge. Wireframe B = impact version. */
+:root{
+  --bg:#FFFBF4; --surface:#FFFFFF; --fg:#17212B; --muted:#5B6672;
+  --ink:#00335C; --ink-deep:#001F3A; --on-ink:#FFFBF4; --on-ink-muted:#B9C7D6;
+  --shu:#B9502F; --ki:#F2B705; --orange:#F88800; --line:#06C755; --rule:#E7DFD2;
+  --note-bg:#FFF4D6; --note-fg:#6B4E00;
+  --font-display:"Shippori Mincho B1","Shippori Mincho","Noto Serif JP",serif;
+  --font-body:"Noto Sans JP","Meiryo",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0F151C; --surface:#182029; --fg:#F2EEE6; --muted:#A9B2BC; --ink:#0B1B2B; --ink-deep:#06111D; --on-ink:#FFFBF4; --on-ink-muted:#9FB0C2; --rule:#2A3542; --note-bg:#3A2F10; --note-fg:#FFE3A0; --shu:#E07A55; color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#0F151C; --surface:#182029; --fg:#F2EEE6; --muted:#A9B2BC; --ink:#0B1B2B; --ink-deep:#06111D; --on-ink:#FFFBF4; --on-ink-muted:#9FB0C2; --rule:#2A3542; --note-bg:#3A2F10; --note-fg:#FFE3A0; --shu:#E07A55; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.75;margin:0;padding-block:0 110px;padding-inline:0;font-size:16px}
+.gut{padding-inline:16px}
+.wrap{max-width:760px;margin:0 auto}
+h1,h2,h3{text-wrap:balance;word-break:auto-phrase;line-height:1.25;margin:0}
+h1{font-family:var(--font-display);font-weight:800;font-size:clamp(2rem,8.5vw,3.6rem);letter-spacing:.01em;color:var(--on-ink)}
+h1 em{font-style:normal;color:var(--orange);background:linear-gradient(transparent 70%,rgba(248,136,0,.35) 70%)}
+h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.5rem,5.5vw,2.3rem);color:var(--ink);margin-bottom:1rem}
+.on-ink h2{color:var(--on-ink)}
+h3{font-size:1.05rem;font-weight:700}
+p{margin:0}
+section{padding-block:3rem}
+.eyebrow{display:inline-flex;gap:.5rem;align-items:center;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:.8rem}
+.eyebrow b{display:inline-block;background:var(--orange);color:#fff;border-radius:999px;padding:0 .6em;font-size:.72rem;letter-spacing:0}
+.on-ink .eyebrow{color:var(--on-ink-muted)}
+.note{display:block;background:var(--note-bg);color:var(--note-fg);border-left:4px solid var(--ki);padding:.55rem .8rem;font-size:.84rem;border-radius:0 8px 8px 0;margin-top:1.2rem;line-height:1.6}
+.note::before{content:"制作メモ: ";font-weight:700}
+.cta{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:var(--line);color:#fff;font-weight:900;border-radius:999px;padding:1rem 1.8rem;text-decoration:none;font-size:1.1rem;min-height:56px;box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.cta small{font-weight:500;opacity:.92}
+/* hero */
+.hero{background:radial-gradient(120% 90% at 85% 10%,rgba(248,136,0,.35),transparent 55%),linear-gradient(170deg,var(--ink) 0%,var(--ink-deep) 100%);color:var(--on-ink);padding-block:3rem 2.5rem}
+.hero .kicker{display:inline-block;border:1px solid var(--orange);color:var(--orange);border-radius:4px;padding:.1rem .6rem;font-size:.8rem;font-weight:700;letter-spacing:.1em;margin-bottom:1.2rem}
+.hero .lead{font-size:1.1rem;color:var(--on-ink);margin-top:1.3rem;max-width:34em}
+.hero .photo{margin-top:1.6rem;aspect-ratio:16/9;max-width:100%;border-radius:10px;background:linear-gradient(120deg,#143B5E 0%,#B9502F 60%,#F2B705 100%);display:grid;place-items:center;color:#fff;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.hero .photo span{background:rgba(0,0,0,.4);padding:.3rem .8rem;border-radius:6px;font-size:.9rem}
+.hero .cta{margin-top:1.6rem}
+.hero .micro{margin-top:.7rem;font-size:.85rem;color:var(--on-ink-muted)}
+/* stat band */
+.band{background:var(--orange);color:#1A1A1A;padding-block:1.4rem}
+.band .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem}
+.band .v{font-family:var(--font-display);font-size:clamp(1.6rem,6vw,2.4rem);font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.band .k{font-size:.85rem;font-weight:700;margin-top:.2rem}
+.band .src{font-size:.7rem;opacity:.8;margin-top:.5rem;grid-column:1/-1}
+/* zero */
+.zeros{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.zero{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:1.2rem 1rem;min-width:0}
+.zero .big{font-family:var(--font-display);font-size:3rem;font-weight:800;line-height:1;color:var(--shu)}
+.zero .big small{font-size:1rem;font-family:var(--font-body);font-weight:700;color:var(--fg);margin-left:.3rem}
+.zero p{margin-top:.5rem;font-size:.95rem}
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:.8rem;align-items:center;margin-top:1.5rem}
+.vs .col{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:1rem;min-width:0}
+.vs .col.win{border:2px solid var(--orange)}
+.vs .mid{font-family:var(--font-display);font-weight:800;font-size:1.2rem;color:var(--muted)}
+.vs .label{font-size:.8rem;color:var(--muted);font-weight:700}
+.vs .num{font-family:var(--font-display);font-size:1.6rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.vs ul{margin:.4rem 0 0;padding-left:1.1em;font-size:.9rem}
+@media (max-width:520px){.vs{grid-template-columns:1fr}.vs .mid{text-align:center}}
+/* manifesto */
+.manifesto{background:var(--ink);color:var(--on-ink)}
+.promises{display:grid;gap:0;counter-reset:p;border-top:1px solid rgba(255,255,255,.18)}
+.promise{display:grid;grid-template-columns:3.2rem 1fr;gap:1rem;padding:1.1rem 0;border-bottom:1px solid rgba(255,255,255,.18);align-items:start}
+.promise .n{font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--orange);line-height:1}
+.promise h3{color:var(--on-ink);font-family:var(--font-display);font-size:1.25rem;font-weight:800}
+.promise p{color:var(--on-ink-muted);font-size:.95rem;margin-top:.25rem}
+/* recruit */
+.recruit .card{background:var(--surface);border:2px solid var(--orange);border-radius:14px;padding:1.4rem 1.2rem}
+.recruit .seats{font-family:var(--font-display);font-size:clamp(2rem,8vw,3rem);font-weight:800;color:var(--shu);line-height:1}
+.recruit .seats small{font-size:1rem;font-family:var(--font-body);color:var(--fg);font-weight:700}
+.cond{display:grid;grid-template-columns:7em 1fr;gap:.4rem .8rem;font-size:.95rem;margin-top:1rem}
+.cond dt{font-weight:700;color:var(--muted)}
+.cond dd{margin:0}
+.fit{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1.2rem}
+.fit .box{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:1rem;min-width:0}
+.fit .box.ng{border-color:var(--shu)}
+.fit ul{margin:.4rem 0 0;padding-left:1.2em;font-size:.95rem}
+/* faq */
+details{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:.7rem 1rem;margin-bottom:.5rem}
+summary{font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:1rem}
+summary::after{content:"＋";color:var(--orange);font-weight:900}
+details[open] summary::after{content:"－"}
+details p{margin-top:.5rem;font-size:.95rem}
+/* final */
+.final{background:linear-gradient(170deg,var(--ink) 0%,var(--ink-deep) 100%);color:var(--on-ink);text-align:center;padding-block:3.5rem}
+.final h2{color:var(--on-ink);font-size:clamp(1.7rem,7vw,2.8rem)}
+.final p{color:var(--on-ink-muted);margin-top:.8rem}
+.final .cta{margin-top:1.5rem}
+.foot{font-size:.78rem;color:var(--muted);line-height:1.7}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--rule);padding:.6rem 16px;padding-bottom:calc(.6rem + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:9}
+.bar .cta{width:min(100%,560px);box-shadow:none}
+.legend{background:var(--surface);border:1px dashed var(--muted);border-radius:10px;padding:.9rem 1rem;font-size:.9rem;margin-block:1.2rem}
+.legend b{color:var(--shu)}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--ki);outline-offset:3px}
+</style>
+
+<div class="gut"><div class="wrap legend">
+  <b>B案(インパクト版)の読み方</b> — A案(正直・丁寧版)と同じ事実・同じ法務ルールのまま、見出し・色・数字の見せ方だけを強くした試作です。黄色の帯は制作メモで本番には載りません。<b>【要確認】</b>の数字は出所で照合できるまで公開しません。架空の人物・体験談はB案でも使いません。
+</div></div>
+
+<!-- 1 HERO -->
+<section class="hero on-ink"><div class="gut"><div class="wrap">
+  <span class="kicker">沖縄の作り手へ ｜ 第1期 挑戦者募集</span>
+  <h1>「英語ができないから」で、<br>世界をあきらめるのは、<em>今日で終わり。</em></h1>
+  <p class="lead">翻訳も、商談も、通関も、代金回収も、沖縄の会社GLOWが引き受けます。あなたは、いつも通りに作って、いつも通りに出荷するだけ。</p>
+  <div class="photo"><span>本物の作り手の手と商品(黒糖・やちむん・泡盛など)。顔より「手」を大きく</span></div>
+  <a class="cta" href="#final">LINEで「海外」と送る <small>無料・日本語</small></a>
+  <p class="micro">初期費用1万円。売れたときだけ3%。送料などの実費は事前に見積り。</p>
+  <span class="note">A案の見出し(願望+事実)に対し、B案は「あきらめの理由」を名指しして断ち切る宣言型。Depopの反問型・Shopifyの自己投影型の流れ。感情は強いが成果の約束はしていないので景表法上は安全。ボタンは「相談する」より行動が具体的な「"海外"と送る」。</span>
+</div></div></section>
+
+<!-- 2 STAT BAND -->
+<div class="band"><div class="gut"><div class="wrap">
+  <div class="row">
+    <div><div class="v">200<span style="font-size:.5em">以上</span></div><div class="k">の国と地域のバイヤーへ</div></div>
+    <div><div class="v">4,000<span style="font-size:.5em">万超</span></div><div class="k">の登録バイヤー</div></div>
+    <div><div class="v">1<span style="font-size:.5em">万円</span></div><div class="k">初期費用はこれだけ</div></div>
+    <div><div class="v">3<span style="font-size:.5em">%</span></div><div class="k">売れたときだけ</div></div>
+    <div class="src">出所: アリババ株式会社公式サイト(b2b.alibaba.co.jp/service)◯年◯月時点【公開前に原文照合】。費用の内訳は下の表で全部出します。</div>
+  </div>
+</div></div></div>
+
+<!-- 3 ZERO -->
+<section><div class="gut"><div class="wrap">
+  <div class="eyebrow"><b>3</b> 3つのゼロ</div>
+  <h2>英語ゼロ。渡航ゼロ。前払いの大金ゼロ。</h2>
+  <div class="zeros">
+    <div class="zero"><div class="big">0<small>英語</small></div><p>買い手とのやりとりはGLOWが日本語で取り次ぎます。あなたは日本語で返すだけ。</p></div>
+    <div class="zero"><div class="big">0<small>渡航</small></div><p>海外出張も、展示会のブース番も要りません。畑と工房を離れない。</p></div>
+    <div class="zero"><div class="big">0<small>前払いの大金</small></div><p>初期費用は1万円。売れるまで、それ以上はかかりません。</p></div>
+  </div>
+  <div class="vs">
+    <div class="col"><div class="label">これまでの「海外に売る」</div><div class="num">数十万〜数百万円【要確認・出所】</div><ul><li>海外展示会の出展料・渡航費</li><li>通訳・翻訳の手配</li><li>成果が出るかは行ってみないと分からない</li></ul></div>
+    <div class="mid">vs</div>
+    <div class="col win"><div class="label">Plan A</div><div class="num">1万円 + 売れたら3%</div><ul><li>Alibaba.com上のGLOWの店にあなたの商品を掲載</li><li>翻訳・商談・通関・代金回収はGLOW</li><li>売れなければ3%はかからない</li></ul></div>
+  </div>
+  <span class="note">「3つのゼロ」はSutherland案(恐怖と手間の除去を主役に)。vs表の左の金額は、JETROや主催者の公開資料から出所付きの相場を入れるまで【要確認】。公的な無料支援を悪く言わない。</span>
+</div></div></section>
+
+<!-- 4 MANIFESTO -->
+<section class="manifesto on-ink"><div class="gut"><div class="wrap">
+  <div class="eyebrow"><b>4</b> 5つの約束</div>
+  <h2>私たちが、あなたに約束すること。</h2>
+  <div class="promises">
+    <div class="promise"><div class="n">1</div><div><h3>日本語だけでいい。</h3><p>英語の問い合わせは、こちらが日本語にして届けます。返事も日本語で。</p></div></div>
+    <div class="promise"><div class="n">2</div><div><h3>売れるまで、追加費用はとらない。</h3><p>初期費用1万円のあとは、成約した売上の3%だけ。送料・関税などの実費は、必ず事前に見積りを出す。</p></div></div>
+    <div class="promise"><div class="n">3</div><div><h3>代金は、取引保護の仕組みを通す。</h3><p>Alibaba.comの取引保護サービス(Trade Assurance)に対応した取引を基本にします。買い手が払った代金をAlibaba.comが預かり、受領後に支払われる仕組みです。</p></div></div>
+    <div class="promise"><div class="n">4</div><div><h3>できないことは、最初に言う。</h3><p>品目・仕向国によっては輸出できない、または追加の手続きが必要な場合があります。売上や受注は約束しません。</p></div></div>
+    <div class="promise"><div class="n">5</div><div><h3>第1期は、私たちも一緒に汗をかく。</h3><p>最初の数社は、商品写真の撮り方から価格の付け方まで、担当が隣で一緒にやります。</p></div></div>
+  </div>
+  <span class="note">宣言(マニフェスト)型はOgilvy「事実で売る」と相性がよい。約束4「できないことは最初に言う」が全体の信用を支える。架空事例ゼロでも「正直さ」そのものをインパクトにする設計。</span>
+</div></div></section>
+
+<!-- 5 RECRUIT -->
+<section class="recruit"><div class="gut"><div class="wrap">
+  <div class="eyebrow"><b>5</b> 第1期 挑戦者募集</div>
+  <h2>最初に世界へ出る沖縄の作り手は、あなたかもしれない。</h2>
+  <div class="card">
+    <div class="seats">第1期 【要決裁】社<small>まで(商品を見てご相談のうえ決定)</small></div>
+    <dl class="cond">
+      <dt>対象</dt><dd>沖縄県内で商品をつくる農業法人・個人農家・食品・工芸</dd>
+      <dt>向く商品</dt><dd>黒糖・加工食品・調味料・泡盛・工芸品など、常温で日持ちするもの</dd>
+      <dt>費用</dt><dd>初期1万円(税込【要確認】)+成約売上の3%</dd>
+      <dt>開始</dt><dd>【要決裁】年【要決裁】月〜</dd>
+      <dt>やめたいとき</dt><dd>いつでも掲載停止できます。初期費用の返金条件は【要決裁】</dd>
+    </dl>
+  </div>
+  <div class="fit">
+    <div class="box"><h3>こんな方に向いています</h3><ul><li>自分の商品に自信がある。でも売り先が県内で止まっている</li><li>英語・貿易の知識はない。学ぶ時間もない</li><li>大金は賭けられない。でも1万円なら試せる</li></ul></div>
+    <div class="box ng"><h3>こんな方には向きません</h3><ul><li>生鮮の果物・野菜だけを海外へ出したい(植物検疫の壁が先)</li><li>すぐに大きな売上を約束してほしい</li><li>商品の写真・情報を出す時間がまったく取れない</li></ul></div>
+  </div>
+  <span class="note">「選ばれる」「向かない人を先に帰す」はSutherland/Uber型。募集数は小柳さん決裁。実例が出たらこの段を「第1期の3社」の実名カードに差し替える(それまで架空の人物は置かない)。</span>
+</div></div></section>
+
+<!-- 6 FAQ -->
+<section><div class="gut"><div class="wrap">
+  <div class="eyebrow"><b>6</b> よくある質問</div>
+  <h2>不安は、ここで全部つぶす。</h2>
+  <details><summary>1万円はいつ払いますか</summary><p>掲載内容を確認して「進める」と決めたあとに。相談・見積りの段階ではかかりません。</p></details>
+  <details><summary>売れなかったら</summary><p>3%の費用はかかりません。掲載の継続・停止はいつでも選べます。【返金条件は要決裁】</p></details>
+  <details><summary>英語は本当に不要ですか</summary><p>買い手とのやりとりはGLOWが日本語でお伝えします。</p></details>
+  <details><summary>代金は本当に入りますか</summary><p>Alibaba.comの取引保護サービス(Trade Assurance)を通した取引を基本にします。買い手を守る制度なので限界もあります。説明会で正直にお伝えします。</p></details>
+  <details><summary>送料・関税・取引保護の手数料は誰が払いますか</summary><p>商品ごとに事前に見積りを出します。取引保護の手数料(支払額の4%・上限100米ドル)の負担者は【要決裁】。</p></details>
+  <details><summary>県の無料支援や補助金と一緒に使えますか</summary><p>使えます。沖縄県の海外展開支援の補助金をPlan Aの費用に充てられるか、一緒に調べます(補助金はGLOWの得意分野です)。</p></details>
+</div></div></section>
+
+<!-- 7 FINAL -->
+<section class="final on-ink" id="final"><div class="gut"><div class="wrap">
+  <h2>その商品、世界で待っている人がいる。</h2>
+  <p>LINEで「海外」と送ってください。担当が日本語で返事をします。<br>商品の写真を1枚、添えてくれたらもっと早い。</p>
+  <a class="cta" href="#final">LINEで「海外」と送る <small>無料・日本語</small></a>
+  <span class="note">最終段は感情のピーク。「待っている人がいる」は需要の断定ではなく呼びかけとして書く(「◯か国で売れています」とは書かない)。</span>
+</div></div></section>
+
+<section><div class="gut"><div class="wrap">
+  <p class="foot">※ 本サービスは販路の提供と業務の代行であり、売上や受注を保証するものではありません。<br>※ 品目・仕向国によっては輸出できない、または追加の手続きが必要な場合があります。<br>※ 数字の出所: (1) アリババ株式会社公式サイト https://www.b2b.alibaba.co.jp/service/ (2) Alibaba.com活用マニュアル https://b2b-manual.alibaba.co.jp/ta-01<br>※ 特定商取引法に基づく表記 / 個人情報の取り扱い / 運営会社: 株式会社GLOW(沖縄)</p>
+</div></div></section>
+
+<div class="bar"><a class="cta" href="#final">LINEで「海外」と送る <small>無料・日本語</small></a></div>
