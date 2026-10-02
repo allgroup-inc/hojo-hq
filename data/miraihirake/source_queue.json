@@ -315,6 +315,34 @@
       "url": "https://www.fsa.go.jp/news/r3/sonota/20220317/20220317.html",
       "robots_approved": true,
       "memo": "高校向け金融経済教育指導教材の公表について(2022-03-17)。PowerPoint/PDFの指導教材への案内ページ。fsa-kyouikuからのリンク先個別教材。同一ドメイン(www.fsa.go.jp)でrobots許可実測済みのため審査済み扱い(運用ルール2026-09-06)。2026-09-27 WebSearchで発見"
+    },
+    {
+      "id": "tsuboya-museum",
+      "org": "那覇市立壺屋焼物博物館",
+      "url": "http://www.edu.city.naha.okinawa.jp/tsuboya/",
+      "robots_approved": false,
+      "memo": "大学生以下(各種専門学校等含む)は観覧料無料との情報(身分証提示要)。収集候補リストE表「県内の博物館・美術館・科学館」。2026-10-02 WebSearchで発見・robots未監査"
+    },
+    {
+      "id": "motobu-museum",
+      "org": "本部町立博物館",
+      "url": "http://motobu-m.town.motobu.okinawa.jp/",
+      "robots_approved": false,
+      "memo": "入館料無料との情報。収集候補リストE表「県内の博物館・美術館・科学館」。2026-10-02 WebSearchで発見・robots未監査"
+    },
+    {
+      "id": "machikaze-online",
+      "org": "NPO法人まちのかぜ",
+      "url": "https://www.column.machinokaze.jp/introduce/",
+      "robots_approved": false,
+      "memo": "まちかぜ教室(完全無料・中学生対象のオンライン学習支援。毎週90分・講師1名が常駐して見守る形式)。全国型オンライン無料塾として2026-09-23に次回候補としてメモ済み(収集候補リストv1進捗メモ3)。2026-10-02 WebSearchで公式URL確認・robots未監査。沖縄からの利用可否・1対1か集団かは原文照合で確認"
+    },
+    {
+      "id": "aha-lab",
+      "org": "Aha研究室(旧ITスタディ札幌)",
+      "url": "https://www.itstudysapporo.com/",
+      "robots_approved": false,
+      "memo": "中学生〜高校生対象・英語数学・メール/LINEでの一問一答形式のオンライン指導(無料)。2026-09-23に次回候補としてメモ済み(収集候補リストv1進捗メモ3)。運営者が法人か個人かWebSearchでは確認できなかった。1対1接触の形態のため掲載基準§1-7のC/D類型に該当する可能性が高く、原文で運営者情報(法人名・実績)と安全4点(本人確認・保護者同意・見まもり体制・相談窓口)を確認できない場合はD類型(個人単独接触)として掲載不可。2026-10-02 WebSearchで発見・robots未監査"
     }
   ]
 }
