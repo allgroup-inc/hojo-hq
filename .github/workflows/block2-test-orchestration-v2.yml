@@ -91,9 +91,11 @@ jobs:
           echo "✅ Dependencies installed"
           cd ../..
 
+      # 到達性の確認。/health が無い環境でもテスト本体を止めないため continue-on-error
       - name: Health check
         id: health
         timeout-minutes: 5
+        continue-on-error: true
         run: |
           echo "🏥 Running health check on ${{ env.KAKEHASHI_TEST_URL }}..."
           max_attempts=30
