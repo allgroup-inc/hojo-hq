@@ -1,50 +1,50 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-24",
+  "updated_at": "2026-09-28",
   "period": "7d",
   "source": "ga4-data-api",
   "stages": [
     {
       "key": "shindan_start",
       "label": "診断開始",
-      "count": 1,
+      "count": 24,
       "cvr_from_prev": null,
       "drop_rate": null
     },
     {
       "key": "shindan_step_q2",
       "label": "Q2到達",
-      "count": 1,
-      "cvr_from_prev": 1.0,
-      "drop_rate": 0.0
+      "count": 17,
+      "cvr_from_prev": 0.7083333333333334,
+      "drop_rate": 0.29166666666666663
     },
     {
       "key": "shindan_step_q3",
       "label": "Q3到達",
-      "count": 1,
-      "cvr_from_prev": 1.0,
-      "drop_rate": 0.0
+      "count": 6,
+      "cvr_from_prev": 0.35294117647058826,
+      "drop_rate": 0.6470588235294117
     },
     {
       "key": "shindan_step_q4",
       "label": "Q4到達",
-      "count": 1,
-      "cvr_from_prev": 1.0,
-      "drop_rate": 0.0
+      "count": 15,
+      "cvr_from_prev": 2.5,
+      "drop_rate": -1.5
     },
     {
       "key": "shindan_step_q5",
       "label": "Q5到達",
-      "count": 1,
-      "cvr_from_prev": 1.0,
-      "drop_rate": 0.0
+      "count": 14,
+      "cvr_from_prev": 0.9333333333333333,
+      "drop_rate": 0.06666666666666665
     },
     {
       "key": "shindan_complete",
       "label": "診断完了(1件以上)",
-      "count": 1,
-      "cvr_from_prev": 1.0,
-      "drop_rate": 0.0
+      "count": 16,
+      "cvr_from_prev": 1.1428571428571428,
+      "drop_rate": -0.1428571428571428
     },
     {
       "key": "line_add_click",
@@ -58,19 +58,19 @@
     "kit_click": 1,
     "seido_done_mark": 0,
     "jukyu_report_click": 0,
-    "shindan_zero": 0,
+    "shindan_zero": 3,
     "jukyu_report_link_top": 0,
     "jukyu_report_link_shindan": 0,
     "jukyu_report_link_kit": 0,
     "jukyu_report_link_area": 0,
     "jukyu_report_link_life": 0,
-    "shindan_cta_click": 1,
+    "shindan_cta_click": 28,
     "shindan_redirect": 0
   },
   "key_rates": {
-    "finish_rate": 1.0,
+    "finish_rate": 0.7916666666666666,
     "line_cvr": 0.0,
-    "zero_rate": 0.0
+    "zero_rate": 0.15789473684210525
   },
   "worst_drop": {
     "stage": "line_add_click",
