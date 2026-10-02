@@ -1,74 +1,79 @@
 {
- "updated_at": "2026-09-25",
- "week": "2026-W40",
- "note": "照合済み(verified=True)かつ締切の無い制度だけから scripts/generate_ig_neta.py が生成。日付・金額は本文に書かない。",
- "items": [
-  {
-   "no": 1,
-   "seido_id": "fk-kuni-shugaku-shien",
-   "title": "「高等教育の修学支援新制度」、進学前に知っておこう",
-   "caption": "大学・短大・高専・専門学校への進学を考えている方へ。「高等教育の修学支援新制度」は、給付型奨学金(返還不要)と授業料・入学金の減免をセットで受けられる制度です。対象になる可能性があります。令和7年度からは、3人以上のお子さんがいるご家庭の所得制限が緩和される場合があります。進学先の学校で相談できます。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #教育 #給付金 #修学支援",
-   "caution": "金額・期限・対象条件は本文に書かない。「対象になる可能性があります」の言い方を崩さない。制度ID fk-kuni-shugaku-shien",
-   "source_url": "https://www.mext.go.jp/kyufu/",
-   "image_hint": "教育・進学のやさしいイラスト+「修学支援」"
-  },
-  {
-   "no": 2,
-   "seido_id": "fk-kuni-shotoku-shien",
-   "title": "「高等学校等就学支援金」、高校の費用が減ります",
-   "caption": "高校生のいるご家庭に知ってほしい制度です。「高等学校等就学支援金」。授業料負担を軽くするための支援です。一定の収入未満の世帯が対象になることがあります。在学している高校で申請できます。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず学校か公式ページでご確認ください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #教育 #高校 #就学支援",
-   "caution": "金額・期限・対象条件は本文に書かない。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-shotoku-shien",
-   "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/index.htm",
-   "image_hint": "教育・高校のやさしいイラスト+「就学支援金」"
-  },
-  {
-   "no": 3,
-   "seido_id": "fk-kuni-shogaiji-kyufu",
-   "title": "「特別児童扶養手当」、お子さんの障害をサポート",
-   "caption": "障害のあるお子さんを育てているご家庭に、支援があります。「特別児童扶養手当」。一定の障害状態にあるお子さんを育てている方が対象になることがあります。申し込みの窓口はお住まいの市区町村の窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #子育て #障害児 #特別児童扶養手当",
-   "caution": "金額・期限・対象条件は本文に書かない。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-shogaiji-kyufu",
-   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kodomo_kosodate/kodomo_kosodate_top/tokubetukodumo.html",
-   "image_hint": "子育て・障害児サポートのやさしいイラスト+「特別児童扶養手当」"
-  },
-  {
-   "no": 4,
-   "seido_id": "fk-kuni-syogaisya-teate",
-   "title": "「障害児福祉手当」、毎月のサポート",
-   "caption": "在宅で障害児のケアをしているご家庭へ。「障害児福祉手当」は、一定の障害状態にあるお子さんを育てている世帯が対象になることがあります。申し込みの窓口はお住まいの市区町村の窓口。手当の金額は月単位で支給されます。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #障害児 #福祉 #生活支援",
-   "caution": "金額・期限・対象条件は本文に書かない。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-syogaisya-teate",
-   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kodomo_kosodate/kodomo_kosodate_top/syogaiji_fukusiteate.html",
-   "image_hint": "福祉・障害児支援のやさしいイラスト+「障害児福祉手当」"
-  },
-  {
-   "no": 5,
-   "seido_id": "fk-okinawa-kokoro-iryo",
-   "title": "「沖縄県 こども医療費助成制度」、医療費が減ります",
-   "caption": "沖縄県内のお子さんがいるご家庭に朗報です。「沖縄県 こども医療費助成制度」。お子さんの医療費の一部または全部を補助する制度です。対象年齢や補助内容はお住まいの市町村で異なるので、詳しくはお住まいの市町村の福祉窓口でご確認ください。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず市町村窓口か公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #医療費 #子育て #こども医療費助成",
-   "caution": "金額・期限・対象条件は本文に書かない。「対象になる可能性があります」の言い方を崩さない。制度ID fk-okinawa-kokoro-iryo。市町村の個別制度との併給・重複を確認させる言い方が重要。",
-   "source_url": "https://www.pref.okinawa.lg.jp/iryokenko/iryo/1006488/1006512.html",
-   "image_hint": "医療・こどもサポートのやさしいイラスト+「こども医療費助成」"
-  }
- ],
- "used_ids": [
-  "fk-kuni-chiiki-houkatsu",
-  "fk-kuni-hitorioya-shien",
-  "fk-kuni-hoiku-mushoka",
-  "fk-kuni-ikuji-kyufu",
-  "fk-kuni-jidofuyoteate",
-  "fk-kuni-jiritsushien-iryo",
-  "fk-kuni-josei-sodan",
-  "fk-kuni-kaigokyugyo-kyufu",
-  "fk-kuni-kogaku-ryoyo",
-  "fk-kuni-kokunen-menjo",
-  "fk-kuni-shugaku-shien",
-  "fk-kuni-shotoku-shien",
-  "fk-kuni-shogaiji-kyufu",
-  "fk-kuni-syogaisya-teate",
-  "fk-okinawa-kokoro-iryo"
- ]
+  "updated_at": "2026-10-02",
+  "week": "2026-W42",
+  "note": "照合済み(verified=True)かつ締切の無い制度だけから scripts/generate_ig_neta.py が生成。日付・金額は本文に書かない。",
+  "items": [
+    {
+      "no": 1,
+      "seido_id": "fk-kuni-jidoteate",
+      "title": "毎月のサポート「児童手当」で子育ての負担を軽く",
+      "caption": "お子さんがいるご家庭へ。「児童手当」は、子どもたちの健やかな成長を支援する制度です。一定の条件を満たすご家庭が毎月手当を受け取ることができます。申し込みの窓口はお住まいの市区町村の窓口です。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず市町村窓口か公式ページを見てみてください。",
+      "hashtags": "#もらいわすれ堂 #沖縄 #子育て #児童手当 #毎月サポート",
+      "caution": "金額・期限・対象条件は本文に書かない。「対象になることがあります」「対象になる可能性があります」の言い方を崩さない。制度ID fk-kuni-jidoteate",
+      "source_url": "https://www.cfa.go.jp/policies/kokoseido/jidouteate",
+      "image_hint": "子育て・手当のやさしいイラスト+「児童手当で毎月サポート」"
+    },
+    {
+      "no": 2,
+      "seido_id": "fk-kuni-shussan-ichijikin",
+      "title": "赤ちゃんが生まれたら「出産育児一時金」で費用をサポート",
+      "caption": "出産予定のある方へ。「出産育児一時金」は、健康保険に加入していれば対象になる可能性があります。出産時の経済的な負担を軽くするための給付です。多くの医療機関では、病院に直接支払われる制度も利用できるので、まとまった費用の心配が減ります。加入している健康保険で詳しくお聞きください。「うちは対象かな?」と思ったら、まず公式ページか加入保険へ。",
+      "hashtags": "#もらいわすれ堂 #沖縄 #出産 #一時金 #妊娠・出産",
+      "caution": "金額・期限・対象条件は本文に書かない。「対象になることがあります」「対象になる可能性があります」の言い方を崩さない。制度ID fk-kuni-shussan-ichijikin",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/shussan/index.html",
+      "image_hint": "出産・新生児のやさしいイラスト+「出産育児一時金」"
+    },
+    {
+      "no": 3,
+      "seido_id": "fk-kuni-kyushokusha-shien",
+      "title": "職を失った時の強い味方「求職者支援制度」",
+      "caption": "お仕事を探されている方へ。「求職者支援制度」は、失業中の生活費を支援する制度です。職業訓練校での学びと生活費給付がセットになっている場合があります。ハローワークで相談することから始まります。細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まずハローワークか公式ページを見てみてください。",
+      "hashtags": "#もらいわすれ堂 #沖縄 #失業 #求職 #職業訓練",
+      "caution": "金額・期限・対象条件は本文に書かない。「対象になることがあります」「対象になる可能性があります」の言い方を崩さない。制度ID fk-kuni-kyushokusha-shien",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyushokusha_shien/index.html",
+      "image_hint": "就職・仕事探しのやさしいイラスト+「求職者支援」"
+    },
+    {
+      "no": 4,
+      "seido_id": "fk-kuni-seikatsu-konkyu",
+      "title": "生活が苦しい時に相談できる「生活困窮者自立支援制度」",
+      "caption": "お金のやりくりで困っているご家庭へ。「生活困窮者自立支援制度」は、生活費や住居費の相談・支援を受けられる制度です。専門の相談員が、あなたの状況に応じて必要な支援を一緒に考えてくれます。お住まいの市区町村の福祉事務所や相談窓口で相談できます。ご家庭の事情はいろいろです。「困ったな」と思ったら、まず気軽に相談してみてください。",
+      "hashtags": "#もらいわすれ堂 #沖縄 #生活支援 #困窮 #相談窓口",
+      "caution": "金額・期限・対象条件は本文に書かない。「対象になることがあります」「対象になる可能性があります」の言い方を崩さない。制度ID fk-kuni-seikatsu-konkyu",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000055454.html",
+      "image_hint": "生活支援・相談のやさしいイラスト+「生活困窮者支援」"
+    },
+    {
+      "no": 5,
+      "seido_id": "fk-kuni-shugaku-enjo",
+      "title": "学校生活を支える「就学援助」—学用品・給食費も対象",
+      "caption": "お子さんの学用品や給食費が心配なご家庭へ。「就学援助」は、学用品代や給食費、修学旅行費など、学校生活に必要な費用の一部をサポートする制度です。一定の収入未満のご家庭が対象になることがあります。申し込みはお子さんの通う学校や、お住まいの市区町村の教育委員会です。「うちは対象かな?」と思ったら、まず学校か教育委員会にご相談ください。",
+      "hashtags": "#もらいわすれ堂 #沖縄 #教育 #学用品 #給食費",
+      "caution": "金額・期限・対象条件は本文に書かない。「対象になることがあります」「対象になる可能性があります」の言い方を崩さない。制度ID fk-kuni-shugaku-enjo",
+      "source_url": "https://www.mext.go.jp/a_menu/shotou/career/05010502/017.htm",
+      "image_hint": "教育・学校生活のやさしいイラスト+「就学援助」"
+    }
+  ],
+  "used_ids": [
+    "fk-kuni-chiiki-houkatsu",
+    "fk-kuni-hitorioya-shien",
+    "fk-kuni-hoiku-mushoka",
+    "fk-kuni-ikuji-kyufu",
+    "fk-kuni-jidofuyoteate",
+    "fk-kuni-jidoteate",
+    "fk-kuni-jiritsushien-iryo",
+    "fk-kuni-josei-sodan",
+    "fk-kuni-kaigokyugyo-kyufu",
+    "fk-kuni-kogaku-ryoyo",
+    "fk-kuni-kokunen-menjo",
+    "fk-kuni-kyushokusha-shien",
+    "fk-kuni-seikatsu-konkyu",
+    "fk-kuni-shogaiji-kyufu",
+    "fk-kuni-shotoku-shien",
+    "fk-kuni-shugaku-enjo",
+    "fk-kuni-shugaku-shien",
+    "fk-kuni-shussan-ichijikin",
+    "fk-kuni-syogaisya-teate",
+    "fk-okinawa-kokoro-iryo"
+  ]
 }
