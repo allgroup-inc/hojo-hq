@@ -199,7 +199,9 @@ class SegmentFitChecker(Guard):
       2. 閾値定義そのものが妥当(数値で 0 <= min <= threshold <= max <= 100)
       3. スコアが整数(bool・小数は不可)
       4. スコアが [min, max] の範囲内
-      5. スコアが threshold 以上
+
+    threshold(既定60)は下流(Task 6/8 の分類)が使うメタデータで、本ガードは強制しない
+    (低スコアも正当なデータ。2026-10-02 統括裁定)。定義の妥当性だけ検査する。
 
     segment_scores が無い・空なら検査対象が無いので素通り。検査対象があるのに
     segment_thresholds が無い・空・不正なときは、ガード無効化を防ぐため FactsError にする。
@@ -226,17 +228,12 @@ class SegmentFitChecker(Guard):
                     f"segment '{segment}' not defined in kpi.segment_thresholds. "
                     f"Valid segments: {sorted(thresholds)}"
                 )
-            min_val, max_val, threshold = self._rule(segment, thresholds[segment])
+            min_val, max_val, _threshold = self._rule(segment, thresholds[segment])
 
             if not isinstance(score, int) or isinstance(score, bool):
                 raise FactsError(f"segment '{segment}' score must be an integer, got {score!r}")
             if score < min_val or score > max_val:
                 raise FactsError(f"segment '{segment}' score {score} out of range [{min_val}, {max_val}]")
-            if score < threshold:
-                raise FactsError(
-                    f"segment '{segment}' score {score} is below threshold {threshold}; "
-                    f"segment does not meet the fit rule (score >= {threshold})"
-                )
 
     @staticmethod
     def _rule(segment: str, rule: Any):

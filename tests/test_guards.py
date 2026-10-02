@@ -233,7 +233,12 @@ def test_segment_valid_scores_pass():
 
 
 def test_segment_boundaries_inclusive():
-    _seg({"enterprise": 100, "sme": 60})  # max と threshold ちょうどは通る
+    _seg({"enterprise": 100, "sme": 0})  # min / max ちょうどは通る
+
+
+def test_segment_below_threshold_is_not_enforced():
+    """threshold は下流向けメタデータ。低スコアは正当なデータとして通す(統括裁定)。"""
+    _seg({"startup": 45, "sme": 0})
 
 
 def test_segment_rejects_negative_score():
@@ -246,9 +251,7 @@ def test_segment_rejects_over_100():
         _seg({"sme": 105})
 
 
-def test_segment_rejects_below_threshold():
-    with pytest.raises(FactsError, match=r"segment 'startup' score 59 is below threshold 60"):
-        _seg({"startup": 59})
+
 
 
 def test_segment_rejects_undefined_segment():
@@ -287,18 +290,15 @@ def test_segment_invalid_threshold_definition_rejected(rule):
         _seg({"enterprise": 75}, {"segment_thresholds": {"enterprise": rule}})
 
 
-def test_segment_rule_defaults_to_0_100_60():
+def test_segment_rule_defaults_to_0_100():
     kpi = {"segment_thresholds": {"enterprise": {}}}
-    _seg({"enterprise": 60}, kpi)
-    with pytest.raises(FactsError, match="below threshold 60"):
-        _seg({"enterprise": 59}, kpi)
+    _seg({"enterprise": 0}, kpi)
+    _seg({"enterprise": 100}, kpi)
+    with pytest.raises(FactsError, match="out of range"):
+        _seg({"enterprise": 101}, kpi)
 
 
-def test_segment_custom_threshold_is_honoured():
-    kpi = {"segment_thresholds": {"enterprise": {"min": 0, "max": 100, "threshold": 80}}}
-    _seg({"enterprise": 80}, kpi)
-    with pytest.raises(FactsError, match="below threshold 80"):
-        _seg({"enterprise": 79}, kpi)
+
 
 
 def test_segment_no_scores_passes():
@@ -314,15 +314,16 @@ def test_segment_scores_must_be_a_dict():
 
 def test_segment_first_violation_names_segment():
     with pytest.raises(FactsError, match="'sme'"):
-        _seg({"enterprise": 80, "sme": 10})
+        _seg({"enterprise": 80, "sme": 101})
 
 
-def test_real_kpi_json_accepts_threshold_scores_and_rejects_below():
+def test_real_kpi_json_accepts_scores_and_rejects_out_of_range():
     import json
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "kekka_kpi.json")
     kpi = json.load(open(path, encoding="utf-8"))
     names = kpi["segment_thresholds"]
     assert {"enterprise", "sme", "startup", "other"} <= set(names)
     _seg({n: names[n]["threshold"] for n in names}, kpi)
-    with pytest.raises(FactsError, match="below threshold"):
-        _seg({"other": names["other"]["threshold"] - 1}, kpi)
+    _seg({"other": 0}, kpi)
+    with pytest.raises(FactsError, match="out of range"):
+        _seg({"other": names["other"]["max"] + 1}, kpi)
