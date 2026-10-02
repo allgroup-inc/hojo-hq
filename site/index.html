@@ -299,7 +299,9 @@
   .card h4{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-size:1.05rem;line-height:var(--lh-tight);overflow-wrap:anywhere;}
   .card .meta{margin-top:.5rem;font-size:.85rem;color:rgba(0,51,92,.78);display:flex;flex-wrap:wrap;gap:1em;}
   .card .deadline{color:#a03a2a;font-weight:700;}
-  .card a{color:var(--midori);font-weight:700;font-size:.9rem;}
+  .card .updated{color:#888;font-size:.8rem;}
+  .card a{color:var(--midori);font-weight:700;font-size:.9rem;display:inline-block;margin-top:.8rem;}
+  .card .source-link{color:var(--kin);text-decoration:underline;font-size:.9rem;}
     .card.locked{filter:blur(0px);position:relative;}
   .card.locked h4,.card.locked .meta{filter:blur(5px);user-select:none;}
   .back-result{position:fixed;right:16px;bottom:16px;z-index:60;font:inherit;font-weight:700;
@@ -1276,6 +1278,7 @@
         <h4>${locked?esc(maskName(it.name||'')):esc(it.name||'')}</h4>
         <div class="meta">
           <span class="deadline">締切 ${esc(it.deadline||'要確認')}</span>
+          ${it.fetched_at?`<span class="updated">🔄 更新: ${it.fetched_at.split(' ')[0]}</span>`:''}
           <span>${esc(it.target_area||'対象地域 要確認')}</span>
           ${Number(it.max_amount)>0?`<span>上限 ${Number(it.max_amount).toLocaleString()}円</span>`:''}
         </div>
@@ -1289,7 +1292,7 @@
           else if(S2.time&&dl2!==null&&dl2>=45&&dl2<=120)b+='<span class="apply-badge s2ok">準備が間に合いやすい</span>';
           return b;
         })()}
-        ${locked||!safeUrl(it.source_url)?'':`<a href="${esc(safeUrl(it.source_url))}" target="_blank" rel="noopener">公式ページで確認 →</a>`}
+        ${locked||!safeUrl(it.source_url)?'':`<a href="${esc(safeUrl(it.source_url))}" target="_blank" rel="noopener" class="source-link">✓ 公式ページで最新情報を確認</a>`}
       </div>`;
     const member=lsGet('mikata_member')==='1';
     let html='';
