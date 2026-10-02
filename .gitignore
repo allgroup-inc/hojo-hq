@@ -15,6 +15,11 @@ Thumbs.db
 *.swp
 __pycache__/
 
+# Python/pytest artifacts
+.coverage
+htmlcov/
+.pytest_cache/
+
 .claude/tools/.env
 .claude/settings.local.json
 
