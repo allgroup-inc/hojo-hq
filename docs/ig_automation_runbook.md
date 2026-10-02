@@ -76,7 +76,8 @@
 
 Task 13〜16 の報告で挙がった未解決点。解消するまでは「日曜の自動実行を信頼して放置」しない。
 
-1. **`update.yml`(1日4回)が `data/subsidies.json` を作り直す**ため、`verified` と `ig_*` が消える。日曜 21:00 の収集で照合結果が消える、`ig_*` が消えると生成が0件になる、という恐れがある。main 統合前に、収集側で既存フィールドを引き継ぐ対応が必要。
+1. **✅ 解決済み(2026-10-03): `update.yml` フィールド保持**  
+   `update.yml`(1日4回)が `data/subsidies.json` を作り直す際、`verified` と `ig_*` が消える問題 → `scripts/preserve_fields.py` で既存フィールドを自動保持。fetch の直後に実行。
 2. **`schedule` は main にあるファイルでしか発火しない。** 統合までは `workflow_dispatch` のみ。
 3. **下書きJSONが PUBLIC リポジトリにコミットされる**(承認前の文面が月曜前に公開状態になる)。公開範囲の変更にあたるため、非公開化または別置きを検討。
 4. **`scripts/shipping_gate.py` の `TARGET_GROUPS` に下書きJSONが未登録**(CLAUDE.md の再発防止メモ)。JSON対応を含め要対応。
