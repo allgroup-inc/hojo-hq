@@ -338,6 +338,27 @@
       "memo": "まちかぜ教室(完全無料・中学生対象のオンライン学習支援。毎週90分・講師1名が常駐して見守る形式)。全国型オンライン無料塾として2026-09-23に次回候補としてメモ済み(収集候補リストv1進捗メモ3)。2026-10-02 WebSearchで公式URL確認・robots承認2026-10-02(robots_report.json実測。単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)。沖縄からの利用可否・1対1か集団かは原文照合で確認"
     },
     {
+      "id": "tsuboya-access",
+      "org": "那覇市立壺屋焼物博物館",
+      "url": "http://www.edu.city.naha.okinawa.jp/tsuboya/access.html",
+      "robots_approved": true,
+      "memo": "トップページ(tsuboya-museum)には観覧料の記載がなかったため、同一ドメインの『アクセス』ページを追加取得(運用ルール2026-09-06)。開館時間・休館日・観覧料免除の詳細を確認する目的"
+    },
+    {
+      "id": "motobu-museumworks",
+      "org": "本部町立博物館",
+      "url": "http://motobu-m.town.motobu.okinawa.jp/museumworks",
+      "robots_approved": true,
+      "memo": "トップページ(motobu-museum)には入館料の記載がなかったため、同一ドメインの『博物館利用案内』ページを追加取得(運用ルール2026-09-06)"
+    },
+    {
+      "id": "machikaze-about",
+      "org": "NPO法人まちのかぜ",
+      "url": "https://www.column.machinokaze.jp/about/",
+      "robots_approved": true,
+      "memo": "/introduce/ページがブログ記事スタブで詳細が確認できなかったため、同一ドメインの『まちかぜ教室について』ページを追加取得(運用ルール2026-09-06)。対象学年・1対1か集団か・全国対応かを確認する目的"
+    },
+    {
       "id": "aha-lab",
       "org": "Aha研究室(旧ITスタディ札幌)",
       "url": "https://www.itstudysapporo.com/",
