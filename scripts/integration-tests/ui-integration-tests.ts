@@ -234,7 +234,7 @@ test.describe('Block 2 UI統合テスト - KAKEHASHI APO Management', () => {
   test('📱 レスポンシブデザイン (モバイル) 確認', async () => {
     // モバイルビューポートに設定
     await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
-    await page.goto(`${BASE_URL}/calendar?view=day`);
+    await page.goto(`${BASE_URL}/calendar?view=day`, { timeout: 7000 });
 
     // モバイルナビゲーション（ハンバーガーメニュー）の確認
     const hamburgerMenu = await page.locator('[data-testid="mobile-menu"]');
