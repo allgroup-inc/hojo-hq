@@ -10,8 +10,8 @@
 ## キャプション
 ⏳ 締切が目前の制度は、いま慌てて申請すると要件を満たせないことも。
 次の公募に備えて、国の電子申請(jGrants)で使う【GビズIDプライム】を用意しておきましょう。マイナンバーカードとスマホがあれば、オンライン申請なら24時間365日、速やかに発行されます（書類の郵送申請は審査に最大1か月）。
-例）令和8年度当初予算　二次公募　民間企業等による再エネの導入及び地域共生加速化事業のうち、ストレージパリティの達成に向けた太陽光発電設備等の価格低減促進事業（締切：2026-10-02（本日締切））
-参考: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeSJMA1
+例）情報通信利用促進支援事業費補助金「先進的設備等を活用した放送コンテンツ製作促進事業」三次公募（締切：2026-10-05（残り3日））
+参考: https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003cYWnUAM
 今回が難しくても、備えておけば次のチャンスをつかめます。
 制度一覧はこちら👇
 https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch
@@ -20,7 +20,7 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 #沖縄補助金 #GビズID #中小企業支援 #沖縄経営者 #沖縄企業のミカタ
 
 ## 出典
-https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeSJMA1
+https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003cYWnUAM
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
