@@ -1,43 +1,223 @@
 {
- "note": "もらいわすれ堂 Instagram(@moradou.okinawa)の投稿実績。2026-09-24 小柳さん決裁(案A: メール返信を記録先にする)。遥さんからの投稿報告メールを読んで、こちらで追記する。フォロワー数の台帳は moradou_ig_followers.json で別。個人情報(氏名・連絡先)は書かない。",
- "source": "遥さんからの投稿案メールへの返信",
- "updated_at": "2026-09-24",
- "posts": [
-  {
-   "date": "2026-08-14",
-   "no": 1,
-   "title": "ひとり親の手当・現況届(投稿⑨)",
-   "posted": true,
-   "why": "",
-   "seido_id": "fk-kuni-jidofuyoteate",
-   "source_url": "https://www.city.naha.okinawa.jp/child/kosodateouen/1002864/1002850.html",
-   "verified_at": "2026-09-24",
-   "status": "要修正: 提出期間の表記と出典。11月分の記載は原文と一致",
-   "source": "遥さんからのメール返信"
+  "note": "もらいわすれ堂 Instagram(@moradou.okinawa)の投稿実績。2026-09-24 小柳さん決裁(案A: メール返信を記録先にする)。遥さんからの投稿案メールを読んで、こちらで追記する。フォロワー数の台帳は moradou_ig_followers.json で別。個人情報(氏名・連絡先)は書かない。",
+  "source": "遥さんからの投稿案メールへの返信 + docs/点検_IG投稿済みの照合状況.md",
+  "updated_at": "2026-10-03",
+  "summary": {
+    "total_proposals": 15,
+    "verification_status": {
+      "照合記録あり": 1,
+      "未照合_断定値なし": 4,
+      "未照合_断定値あり": 7,
+      "制度DB登録済み": 3
+    },
+    "issues": {
+      "出典が県外": 1,
+      "数値が出典に見当たらない": 3,
+      "取得失敗": 1
+    }
   },
-  {
-   "date": "2026-08-14",
-   "no": 4,
-   "title": "8月の電気代",
-   "posted": false,
-   "why": "遥さんが投稿していない",
-   "seido_id": "",
-   "source_url": "",
-   "verified_at": "",
-   "status": "",
-   "source": "遥さんからのメール返信"
+  "posts": [
+    {
+      "date": "2026-08-11",
+      "batch": 1,
+      "no": "給付付き税額控除",
+      "title": "ニュースの『給付付き税額控除』って、私たちいつ・いくらもらえるの?",
+      "posted": true,
+      "断定値": "8月5日",
+      "seido_id": "fk-?-shotoku-shien",
+      "source_url": "https://www.gov-online.go.jp/press_conferences/prime_minister/202608/v",
+      "verified_at": "",
+      "verification_status": "未照合_取得失敗",
+      "note": "❌最優先: HTTPエラー403。環境制限の可能性。出典は存在するが確認不可"
+    },
+    {
+      "date": "2026-08-11",
+      "batch": 1,
+      "no": "奨学給付金_高校_1",
+      "title": "高校生がいる家庭へ。返さなくていい『奨学給付金』の申請が始まっています",
+      "posted": true,
+      "断定値": "2026年9月30日・7月1日",
+      "seido_id": "fk-kuni-shogaku-kyufukin-koko",
+      "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/gakko/1023180/1018620/1040680.html",
+      "verified_at": "",
+      "verification_status": "未照合_出典存在",
+      "note": "⚠️最優先: DB登録済みだが未照合。実際の期限が9月30日のままか確認が必要(後に10月30日延長が判明)"
+    },
+    {
+      "date": "2026-08-14",
+      "batch": 2,
+      "no": "おこめ券_那覇_1",
+      "title": "那覇市から届いた『おこめ券』、引き出しに眠っていませんか?(期限は9月末)",
+      "posted": true,
+      "断定値": "2026年9月30日",
+      "seido_id": "fk-okinawa-naha-kome-ken",
+      "source_url": "https://www.city.naha.okinawa.jp/fukusi/shakaifukushi/1003373/1007401/",
+      "verified_at": "",
+      "verification_status": "未照合_出典存在",
+      "note": "⚠️最優先: 出典に日付残っている、照合なし"
+    },
+    {
+      "date": "2026-08-14",
+      "batch": 2,
+      "no": "浦添市民支援",
+      "title": "浦添市民は1人5,000円(75歳以上は+3,000円)。確認書、返送しましたか",
+      "posted": true,
+      "断定値": "3,000円・5,000円",
+      "seido_id": "fk-okinawa-urasoe-shimin-shien",
+      "source_url": "https://www.city.urasoe.lg.jp/doc/2024121300021/",
+      "verified_at": "",
+      "verification_status": "未照合_出典存在",
+      "note": "⚠️最優先: 出典に数値残っている、照合なし"
+    },
+    {
+      "date": "2026-08-14",
+      "batch": 2,
+      "no": "ひとり親手当_⑨",
+      "title": "ひとり親の手当、8月中に『現況届』出しましたか?",
+      "posted": true,
+      "断定値": "8月1日・0円",
+      "seido_id": "fk-kuni-jidofuyoteate",
+      "source_url": "https://www.city.osaka.lg.jp/abeno/page/0000657120.html",
+      "source_url_corrected": "https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1008243/index.html",
+      "verified_at": "2026-09-24",
+      "verification_status": "修正中_出典誤り",
+      "note": "❌最優先: 出典が大阪市(県外) → 沖縄県に修正済み(2026-09-24)。値の『0円』は出典に記載なし"
+    },
+    {
+      "date": "2026-08-14",
+      "batch": 2,
+      "no": "商品券",
+      "title": "8月31日まで! 手元の商品券、使い忘れていませんか?",
+      "posted": true,
+      "断定値": "8月31日・3,000円",
+      "seido_id": "fk-okinawa-okinawa-shogyo-ken",
+      "source_url": "https://www.city.okinawa.okinawa.jp/k031-001/contents/p00046.html",
+      "verified_at": "",
+      "verification_status": "未照合_出典存在",
+      "note": "⚠️最優先: 出典に日付・金額残っている、照合なし"
+    },
+    {
+      "date": "2026-08-14",
+      "batch": 2,
+      "no": "おこめ券_那覇_2",
+      "title": "那覇市の『おこめ券』、期限は9月30日です",
+      "posted": true,
+      "断定値": "9月30日・4,400円",
+      "seido_id": "fk-okinawa-naha-kome-ken",
+      "source_url": "https://www.city.naha.okinawa.jp/fukusi/shakaifukushi/1003373/1007401/",
+      "verified_at": "",
+      "verification_status": "未照合_出典存在",
+      "note": "⚠️最優先: 出典に数値残っている、照合なし。投稿③と同じ制度"
+    },
+    {
+      "date": "2026-09-08",
+      "batch": 3,
+      "no": "電気代_⑩",
+      "title": "8月の電気代、実はいちばん値引きが大きい月です",
+      "posted": true,
+      "断定値": "18円・5円",
+      "seido_id": "fk-kuni-denkigas-gekihen",
+      "source_url": "https://denkigas-gekihenkanwa.go.jp/",
+      "verified_at": "",
+      "verification_status": "未照合_値出典未記載",
+      "note": "❌最優先: 『18円・5円』が出典に見当たらない。数値の根拠を確認・修正が必要"
+    },
+    {
+      "date": "2026-09-08",
+      "batch": 3,
+      "no": "奨学給付金_私立_⑤",
+      "title": "私立高校生の『奨学給付金』、申請は9月30日までです",
+      "posted": true,
+      "断定値": "9月30日",
+      "seido_id": "fk-kuni-shogaku-kyufukin-shiritsu",
+      "source_url": "https://www.pref.okinawa.jp/kyoiku/edu/1008819/1008843/1008848.html",
+      "verified_at": "",
+      "verification_status": "未照合_値出典未記載",
+      "note": "❌最優先: 『9月30日』が出典に見当たらない。期限確認・修正が必要。後に10月30日延長が判明"
+    },
+    {
+      "date": "2026-09-24",
+      "batch": 4,
+      "no": "電気代_申請不要",
+      "title": "8月の電気代、実は国の値引きがいちばん手厚い月です(申請不要)",
+      "posted": true,
+      "断定値": "なし",
+      "seido_id": "fk-kuni-denkigas-gekihen",
+      "source_url": "https://www.meti.go.jp/press/2026/06/20260612003/20260612003.html",
+      "verified_at": "",
+      "verification_status": "確認_断定なし",
+      "note": "✅確認用: 断定値がないため確認不要"
+    },
+    {
+      "date": "2026-09-24",
+      "batch": 4,
+      "no": "敬老の日_給付金",
+      "title": "敬老の日。年金に上乗せの『給付金』、緑の封筒は届いていませんか?",
+      "posted": true,
+      "断定値": "なし",
+      "seido_id": "fk-kuni-nenkin-kyufu",
+      "source_url": "https://www.nenkin.go.jp/service/jukyu/seido/sonota-kyufu/shienkyufuki",
+      "verified_at": "",
+      "verification_status": "確認_DB未照合",
+      "note": "✅確認用: DB登録済みだが未照合。断定値がないため確認不要"
+    },
+    {
+      "date": "2026-09-24",
+      "batch": 4,
+      "no": "聞こえサポート",
+      "title": "お子さんの『聞こえ』のサポート、先着・定員の市が増えています",
+      "posted": true,
+      "断定値": "なし",
+      "seido_id": "fk-okinawa-naha-koe-hosougu",
+      "source_url": "https://www.city.naha.okinawa.jp/fukusi/syougai/hosougu/nantyoujihotyo",
+      "verified_at": "",
+      "verification_status": "確認_DB未照合",
+      "note": "✅確認用: DB登録済みだが未照合。断定値がないため確認不要"
+    },
+    {
+      "date": "2026-09-24",
+      "batch": 4,
+      "no": "おこめ券_那覇_3",
+      "title": "那覇市の『おこめ券』、封筒のまま眠っていませんか?",
+      "posted": true,
+      "断定値": "なし",
+      "seido_id": "fk-okinawa-naha-kome-ken",
+      "source_url": "https://www.city.naha.okinawa.jp/fukusi/shakaifukushi/1003373/1007401/",
+      "verified_at": "",
+      "verification_status": "確認_断定なし",
+      "note": "✅確認用: 断定値がないため確認不要。投稿③⑦と同じ制度"
+    },
+    {
+      "date": "2026-09-24",
+      "batch": 4,
+      "no": "奨学給付金_高校_2",
+      "title": "私立高校生の『奨学給付金』、申請はお済みですか?",
+      "posted": true,
+      "断定値": "なし",
+      "seido_id": "fk-kuni-shogaku-kyufukin-koko",
+      "source_url": "https://www.pref.okinawa.jp/kyoiku/edu/1008819/1008843/1008848.html",
+      "verified_at": "2026-08-06",
+      "verification_status": "照合記録あり",
+      "note": "✅問題なし: 唯一の照合済み投稿。断定値なし"
+    }
+  ],
+  "action_items": {
+    "immediate_修正": [
+      "投稿⑤: 私立高校生奨学給付金 - 期限が10月30日に延長。『9月30日』テキスト修正",
+      "投稿⑨: ひとり親手当 - 『0円』の根拠確認。『手当が全部停止となっている方も』へ修正中",
+      "投稿⑩: 電気代 - 『18円・5円』の根拠確認。政策元ページで確認してテキスト修正"
+    ],
+    "出典確認待ち": [
+      "投稿①: 給付付き税額控除 - HTTP 403回避策(Haruka環境での確認)"
+    ],
+    "照合進行中": [
+      "投稿②: 高校生奨学給付金 - 期限が9月30日→10月30日延長。制度DB側は未更新",
+      "投稿③④⑥⑦: 各種手当・商品券 - 出典は存在、数値確認"
+    ]
   },
-  {
-   "date": "2026-09-24",
-   "no": 2,
-   "title": "私立高校生の奨学給付金(期限延長を反映した新投稿・旧投稿にも追記済み)",
-   "posted": true,
-   "why": "",
-   "seido_id": "fk-kuni-shogaku-kyufukin-koko",
-   "source_url": "https://www.pref.okinawa.jp/kyoiku/edu/1008819/1008843/1008848.html",
-   "verified_at": "2026-09-24",
-   "status": "遥さんが沖縄県公式ページで10月30日への延長を確認。制度DB側は未登録",
-   "source": "遥さんからのメール返信"
+  "見直し期限": "2026-10-24",
+  "管理": {
+    "更新者": "Claude Code",
+    "最終確認": "2026-10-03 docs/点検_IG投稿済みの照合状況.md から全15件を統合"
   }
- ]
 }
