@@ -3572,5 +3572,69 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-03",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 2,
+   "joined": 2
+  },
+  "items": [
+   {
+    "name": "産業人材育成・確保関係",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010151/index.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "稼ぐ海外展開モデル支援事業補助金",
+    "url": "https://okinawa-ric.jp/service/post-32-1.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「研究開発プロセスを起点とした動的なEBPMのための指標設計及びデータ活用戦略の策定に係る調査」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003F3K1UAK",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "エイジフレンドリー補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYbNMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（22次締切）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYimMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
