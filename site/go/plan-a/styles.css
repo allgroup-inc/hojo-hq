@@ -261,104 +261,99 @@ a:hover {
     position: relative;
     width: 100vw;
     margin-left: calc(50% - 50vw);
-    min-height: 100vh;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    background-image: url('assets/images/hero-shuri-calligraphy.jpg');
-    background-size: cover;
-    background-position: center top;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
+    aspect-ratio: 1600 / 1466;
     overflow: hidden;
+}
+
+.hero-bg {
+    position: absolute;
+    inset: -28px;
+    background: url('assets/images/hero-bg-shuri.jpg') center top / cover no-repeat;
+    animation: hero-zoom 5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.hero-stage {
+    position: absolute;
+    inset: 0;
+    animation: hero-shake 0.8s linear 2.75s both;
+}
+
+.hero-text {
+    position: absolute;
+    z-index: 1;
+    height: auto;
+    max-width: none;
+}
+
+.hero-text-1 {
+    left: 3%;
+    top: 1.64%;
+    width: 74%;
+    animation: brush-reveal 1.3s cubic-bezier(0.3, 0.6, 0.3, 1) 0.4s both;
+}
+
+/* 世界へ は大きく・ぼやけた状態から叩きつけるように着地させる */
+.hero-text-2 {
+    left: 0;
+    top: 23.46%;
+    width: 112%;
+    transform-origin: 45% 55%;
+    animation: slam 0.8s cubic-bezier(0.5, 0, 0.75, 0) 2s backwards, settle 0.45s ease-out 2.8s forwards;
+}
+
+@keyframes hero-zoom {
+    from { transform: scale(1.12); }
+    to   { transform: scale(1); }
+}
+
+@keyframes brush-reveal {
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes slam {
+    0%   { opacity: 0; transform: scale(2.2); filter: blur(14px); }
+    30%  { opacity: 0.9; }
+    100% { opacity: 1; transform: scale(0.96); filter: blur(0); }
+}
+
+@keyframes settle {
+    from { transform: scale(0.96); }
+    to   { transform: scale(1); }
+}
+
+@keyframes hero-shake {
+    0%, 100% { transform: translate(0, 0); }
+    8%  { transform: translate(-18px, 14px); }
+    20% { transform: translate(16px, -12px); }
+    34% { transform: translate(-12px, 9px); }
+    50% { transform: translate(9px, -6px); }
+    66% { transform: translate(-5px, 4px); }
+    82% { transform: translate(2px, -2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-bg, .hero-stage, .hero-text { animation: none; }
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
 .hero::after {
     content: "";
     position: absolute;
-    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 1) 100%);
+    height: 20%;
+    background: linear-gradient(180deg, transparent 0%, var(--color-bg) 100%);
     pointer-events: none;
-    z-index: 1;
-}
-
-.hero-inner {
-    position: relative;
-    z-index: 2;
-    max-width: var(--max-width-pc);
-    width: 100%;
-    padding: var(--spacing-xl) var(--size-gutter-pc);
-    margin: 0 auto;
-    background-color: #FFFFFF;
-}
-
-.hero-text {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.hero h1 {
-    color: var(--color-heading);
-    font-size: clamp(1.5rem, 1.2rem + 1.8vw, 2.5rem);
-    font-weight: 700;
-    line-height: 1.5;
-    max-width: 32em;
-    margin: 0;
-    word-break: auto-phrase;
-    text-wrap: balance;
-}
-
-.hero-description {
-    color: var(--color-text);
-    font-size: clamp(0.95rem, 0.9rem + 0.8vw, 1.1rem);
-    line-height: 1.6;
-    max-width: 48em;
-    margin: 0;
-}
-
-.hero .btn-primary {
-    background-color: var(--color-red);
-    color: var(--color-white);
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 14px 36px;
-    border-radius: 6px;
-    width: fit-content;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
-}
-
-.hero .btn-primary:hover {
-    background-color: #A0432A;
-    transform: translateY(-2px);
-}
-
-@media (max-width: 767px) {
-    .hero {
-        min-height: 80vh;
-        align-items: center;
-    }
-
-    .hero-inner {
-        padding: var(--spacing-lg) var(--size-gutter-mobile);
-    }
-
-    .hero h1 {
-        font-size: 1.25rem;
-    }
-
-    .hero-description {
-        font-size: 0.95rem;
-    }
-
-    .hero .btn-primary {
-        width: 100%;
-    }
 }
 
 /* ---------- Step 5: セクション2-3 Cards ---------- */
@@ -1042,7 +1037,6 @@ a:hover {
     }
     .card:hover,
     .btn-primary:hover,
-    .hero .btn-primary:hover,
     .cta-button:hover {
         transform: none;
     }
