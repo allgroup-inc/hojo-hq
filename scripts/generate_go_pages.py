@@ -80,6 +80,8 @@ CHANNELS = {
                 "event": "glow_line_redirect"},
     "glow-fb": {"dest": "https://line.me/R/ti/p/%40042wvrgo", "label": "GLOW: Facebookページ",
                 "event": "glow_line_redirect"},
+    "glow-deck": {"dest": "https://line.me/R/ti/p/%40042wvrgo", "label": "GLOW: 提案資料のQRコード",
+                  "event": "glow_line_redirect"},
 }
 
 TEMPLATE = """<!DOCTYPE html>
