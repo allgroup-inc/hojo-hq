@@ -3636,5 +3636,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-04",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(グリーンボンド/グリーンローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd5XMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「海外研究者招へい事業（STeP JAPAN）」2027年度海外招へい研究者受入機関の募集",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaooMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【沖縄】令和８年度中小企業最低賃金引上げ支援対策費補助金（業務改善助成金）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe6cMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "建築ＧＸ・ＤX推進事業（令和８年度）【代表事業者及び事業者の登録】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY7KMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度東京港物流効率化等事業補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY72MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
