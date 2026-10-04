@@ -572,6 +572,555 @@ function analyzeCallMetrics() {
 
 ---
 
+## 3ステップ実行フロー（Subtask A: 手順化）
+
+## Step 1: データ取得（自動・再現可能）
+
+**目的**: ソースから 1 つの信頼できるデータセットを取得する
+
+**1アクション = 1つの Sheets API / GA4 API / Zoom API 呼び出し**
+
+```
+実行例:
+  アクション 1.1: Google Sheets から「昨日の通話ログ」を取得
+    ├─ 入力: Zoom API キー、日付範囲（昨日 00:00 ~ 23:59 JST）
+    ├─ フィルタ: 通話時間 > 0（ボット呼び出しを除外）
+    └─ 出力: JSON
+       {
+         "calls": [
+           {"id": "zoom_001", "duration_min": 24, "participant_count": 2},
+           {"id": "zoom_002", "duration_min": 15, "participant_count": 1}
+         ],
+         "total": 25,
+         "date": "2026-10-03"
+       }
+
+  アクション 1.2: glow-ma Sheets から「昨日の成約/失注」を集計
+    ├─ 入力: Sheet ID、範囲（A:F、昨日の日付でフィルタ）
+    ├─ 計算: 成約数 / 失注数 / 失注理由カテゴリー
+    └─ 出力: JSON
+       {
+         "contracts": 3,
+         "losses": 2,
+         "loss_reasons": {
+           "payment_concern": 1,
+           "needs_review": 1
+         },
+         "contract_rate": 0.60
+       }
+
+  アクション 1.3: 両データを統合（left join on 通話 ID）
+    └─ 出力: 「通話 1 件 = 成約/失注の判定済み」となった単一テーブル
+```
+
+**チェック**:
+- [ ] データ取得エラー（400/403/404/500）がないか
+- [ ] 日付範囲がズレていないか（特に JST ⇔ UTC）
+- [ ] 重複排除（同じ通話 ID が 2 行以上ないか）が機能しているか
+
+---
+
+## Step 2: 仮説生成（異常検知 + 原因推測）
+
+**目的**: Step 1 で取得したデータから「何が異常なのか」と「なぜそれが起きたのか」を導き出す
+
+**1アクション = 1つの統計検定 or ビジネスルール**
+
+```
+実行例:
+  アクション 2.1: 時系列の急変を検知（前日比）
+    ├─ 入力: Step 1 の JSON（昨日・一昨日・今日のデータ）
+    ├─ 計算: (昨日の通話数 - 一昨日の通話数) / 一昨日の通話数
+    │         = (25 - 15) / 15 = +66.7%
+    ├─ 閾値判定: |+66.7%| > 20% → 異常フラグ ON
+    └─ 仮説候補:
+         • 営業が追加で手を打った
+         • 営業マン誰かが出勤（または欠勤）
+         • 顧客からの反応が異常に良い
+         → mamori.md / チームリーダーに質問を投げる
+
+  アクション 2.2: 失注理由のランク変化を検知
+    ├─ 入力: Step 1 の JSON + 過去 30 日分の失注理由
+    ├─ 計算: 昨日の失注理由 Top1 が「先月 Top3」に入っていないか?
+    │         → 「法務的懸念」が 5% → 30% へ増加
+    ├─ 判定: ランク外 → Top1 = 異常フラグ ON
+    └─ 仮説候補:
+         • 新しい機能説明が顧客に「法的リスク」に見えている
+         • 競合他社が「法務リスク」を強調し始めた
+         • 実際のコンプライアンス変化があった
+         → mamori.md (守り部)に即座に報告
+
+  アクション 2.3: 統計検定（移動平均との乖離）
+    ├─ 入力: 過去 7 日間の成約率
+    │         [60%, 62%, 58%, 61%, 59%, 63%, 60%]
+    ├─ 計算: 平均 60.4%、標準偏差 1.8%
+    │         許容範囲 = 60.4% ± 3σ = 54.8% ~ 65.8%
+    ├─ 今日の実績: 45% → 許容範囲外 = 異常フラグ ON
+    └─ 仮説候補:
+         • 新しい顧客層（単価の低い案件）が増えた
+         • 営業が新しい提案を試行中（習熟度不足）
+         • 競合他社が出現した
+         • 市場全体が慎重になった
+
+```
+
+**出力フォーマット**:
+```
+異常検知レポート（毎日朝 8 時に自動生成）:
+
+┌─ 異常 1: 通話数が +66.7% ──────────────────┐
+│ 数値: 15 件 → 25 件（昨日）                 │
+│ 仮説: 営業が追加で手を打った or           │
+│      営業マン誰かが出勤                    │
+│ 確度: 中（ビジネスルール：20%超）         │
+│ 提案: チームリーダーに「何をしたのか」  │
+│       質問し、それを他の営業に展開        │
+└──────────────────────────────────────────┘
+
+┌─ 異常 2: 失注理由「法務的懸念」が新出現 ──┐
+│ 昨月: Top3 外 (5% 未満)                   │
+│ 今月: Top1 (30%)                         │
+│ 仮説: 新機能説明 or 競合の攻撃 or         │
+│      実コンプ変化                         │
+│ 確度: 高（ランク変化は市場シグナル）     │
+│ 提案: mamori.md に即報告・対応検討       │
+└──────────────────────────────────────────┘
+
+```
+
+---
+
+## Step 3: 検証と実行（仮説の確定 + 改善実行）
+
+**目的**: Step 2 で生成した仮説を「確実」か「確度不足」かで分類し、改善を決定・実行する
+
+**1アクション = 1つの検証方法 or 改善実行**
+
+```
+実行例:
+  アクション 3.1: 複数ソース照合（音声 + Sheets + AI）
+    ├─ 仮説: 「営業が『成約』と入力したが、実際の通話では『検討が必要』」
+    ├─ 検証方法:
+    │   a. 音声記録を再生して「実際に何と言ったか」を確認
+    │   b. transcription-analysis-hojo で自動文字起こし
+    │   c. Claude + Gemini で「成約か失注か」を独立判定
+    │   d. Sheets の営業入力と照合
+    ├─ 結果:
+    │   • Claude: 失注判定、Gemini: 失注判定 → 確度 95%
+    │   • Sheets: 営業が「成約」と入力 → 入力エラー確定
+    └─ 対応: 営業に「修正してください」と即連絡
+
+  アクション 3.2: 改善案の実行（その日のうちに）
+    ├─ 仮説確定: 「Instagram 投稿の CTR が低い理由 = 
+    │             クリック誘導文がない」
+    ├─ 改善案: 投稿に「診断ボタンまで 30 秒」と明記
+    ├─ 実行: 次の投稿から適用
+    └─ 効果測定: 翌日の朝会で「CTR が 55% → 68% へ改善」を報告
+
+  アクション 3.3: 改善が効かなかった場合
+    ├─ 1 日目: 改善を実行 → CTR 55%
+    ├─ 2 日目: CTR 53%（改善効果なし or 悪化）
+    ├─ 判定: 仮説が外れた or 改善策が不十分
+    └─ 対応:
+         • 別の仮説を試す（例：画像の変更、投稿時刻の変更）
+         • SNS 部（hirome.md）に相談
+         • 翌週まで複数案を AB テスト
+
+```
+
+**出力フォーマット（改善実行履歴）**:
+```
+改善実行ログ（Git コミット or Sheets 記録）:
+
+日付: 2026-10-03
+異常: 診断完了 → LINE 登録率が 40% → 25% に低下
+仮説: ページの説明文が「登録のメリット」を伝えていない
+改善案: 「タイムリーな情報が LINE で届く」と明記
+実行者: tsunagu.md
+実行内容: site/fukugiiro/diagnostic-result.html の説明文を修正
+効果測定: 10/04 朝時点での登録率 = 35% → 再度確認予定
+次アクション: さらに登録後 3 つのメッセージを改善予定
+
+---
+
+日付: 2026-10-04
+効果測定: 登録率 35% → 42% （改善効果あり、継続）
+新たな異常: 診断開始 → 完了率が 72% → 62% に低下
+対応: 設問の複雑さを確認（tsunagu.md 指摘）
+改善案: 設問 3-5 を簡潔に書き換え
+```
+
+---
+
+## 実装例（Python）
+
+**目的**: JSON / CSV データから異常値を検知し、改善提案を自動生成する実装
+
+```python
+import pandas as pd
+import json
+from scipy import stats
+
+class DataInsightsAnalyzer:
+    """営業・マーケティングデータの異常検知と仮説生成"""
+    
+    def __init__(self, current_data: dict, historical_data: pd.DataFrame):
+        """
+        current_data: Step 1 で取得した JSON
+          {
+            "calls": 25,
+            "contracts": 3,
+            "contract_rate": 0.12,
+            "avg_call_duration": 24,
+            "loss_reasons": {"payment": 1, "review": 1}
+          }
+        historical_data: 過去 7 日間の DataFrame
+        """
+        self.current = current_data
+        self.historical = historical_data
+    
+    def detect_anomalies(self) -> list:
+        """Step 2: 複数の異常検知ルールを実行"""
+        anomalies = []
+        
+        # ルール 1: 前日比 20% 以上の変化
+        prev_calls = self.historical['calls'].iloc[-1]
+        curr_calls = self.current['calls']
+        pct_change = abs((curr_calls - prev_calls) / prev_calls) * 100
+        
+        if pct_change >= 20:
+            anomalies.append({
+                'type': 'time_series_spike',
+                'metric': 'calls',
+                'value': curr_calls,
+                'previous': prev_calls,
+                'change_pct': pct_change,
+                'severity': 'medium' if pct_change < 50 else 'high',
+                'hypothesis': [
+                    '営業が追加で手を打った',
+                    '営業マンの欠勤/出勤',
+                    '顧客反応が異常に良い'
+                ]
+            })
+        
+        # ルール 2: 移動平均との乖離（±3σ）
+        mean = self.historical['contract_rate'].mean()
+        std = self.historical['contract_rate'].std()
+        z_score = abs((self.current['contract_rate'] - mean) / std)
+        
+        if z_score > 3:
+            anomalies.append({
+                'type': 'moving_average_deviation',
+                'metric': 'contract_rate',
+                'value': self.current['contract_rate'],
+                'mean': mean,
+                'z_score': z_score,
+                'severity': 'high',
+                'hypothesis': [
+                    '新しい顧客層が増えた',
+                    '営業が新しい提案を試行中',
+                    '競合他社が出現',
+                    '市場全体が慎重に'
+                ]
+            })
+        
+        # ルール 3: 失注理由のランク変化
+        if 'loss_reasons' in self.current:
+            top_reason = max(self.current['loss_reasons'].items(), 
+                           key=lambda x: x[1])[0]
+            
+            # 過去 30 日の Top3 に入っていないか判定
+            if hasattr(self.historical, 'top_loss_reasons'):
+                if top_reason not in self.historical['top_loss_reasons']:
+                    anomalies.append({
+                        'type': 'loss_reason_shift',
+                        'metric': 'loss_reason_rank',
+                        'new_top': top_reason,
+                        'severity': 'high',
+                        'hypothesis': [
+                            '新機能説明が法的リスクに見えている',
+                            '競合他社が新しい営業を開始',
+                            '実コンプライアンス変化'
+                        ]
+                    })
+        
+        return anomalies
+    
+    def generate_hypothesis(self, anomalies: list) -> dict:
+        """仮説と改善案を生成"""
+        insights = {
+            'summary': f'本日の異常: {len(anomalies)} 件',
+            'anomalies': anomalies,
+            'priority_actions': []
+        }
+        
+        for anomaly in anomalies:
+            action = {
+                'anomaly_type': anomaly['type'],
+                'metric': anomaly['metric'],
+                'severity': anomaly['severity'],
+                'hypotheses': anomaly['hypothesis'],
+                'verification_method': self._select_verification(anomaly),
+                'owner': self._assign_owner(anomaly)
+            }
+            insights['priority_actions'].append(action)
+        
+        return insights
+    
+    def _select_verification(self, anomaly: dict) -> str:
+        """Step 3: 検証方法を自動選択"""
+        if anomaly['type'] == 'loss_reason_shift':
+            return '音声記録・transcription-analysis-hojo で確認'
+        elif anomaly['type'] == 'time_series_spike':
+            return 'チームリーダーに「何をしたのか」質問'
+        else:
+            return 'Claude + Gemini 独立判定（マルチAI連携）'
+    
+    def _assign_owner(self, anomaly: dict) -> str:
+        """改善の担当者を自動割り当て"""
+        if anomaly['type'] == 'loss_reason_shift':
+            return 'mamori.md (守り部)'
+        elif anomaly['metric'] in ['calls', 'contract_rate']:
+            return 'akari.md (統括)'
+        else:
+            return 'hirome.md (SNS 部)'
+
+
+# 使用例
+if __name__ == '__main__':
+    # Step 1: データ取得（JSON）
+    current_data = {
+        'calls': 25,
+        'contracts': 3,
+        'contract_rate': 0.12,
+        'avg_call_duration': 24,
+        'loss_reasons': {'payment': 1, 'review': 1}
+    }
+    
+    # 過去 7 日分のデータ
+    historical_data = pd.DataFrame({
+        'calls': [15, 18, 14, 20, 16, 19, 15],
+        'contract_rate': [0.60, 0.55, 0.58, 0.61, 0.57, 0.59, 0.60]
+    })
+    
+    # Step 2: 異常検知
+    analyzer = DataInsightsAnalyzer(current_data, historical_data)
+    anomalies = analyzer.detect_anomalies()
+    
+    # Step 3: 仮説生成と改善案
+    insights = analyzer.generate_hypothesis(anomalies)
+    
+    print(json.dumps(insights, indent=2, ensure_ascii=False))
+```
+
+---
+
+## 検証失敗時（Subtask C）
+
+### 失敗パターンと対応
+
+#### パターン 1: データ型エラー
+
+```
+現象:
+  "calls": "25" （文字列）vs （数値）
+  異常検知が失敗: TypeError: unsupported operand type(s) for -: 'str' and 'str'
+
+対応:
+  ├─ Issue 自動起票:
+  │   Title: "Data type mismatch in call log: calls is str, expected int"
+  │   Severity: ERROR
+  │   Action: データ取得スクリプト（fetch_zoom_logs.py）を確認
+  │
+  └─ 自動修復スクリプト:
+      def sanitize_data(data):
+          data['calls'] = int(data['calls'])
+          data['contract_rate'] = float(data['contract_rate'])
+          return data
+
+```
+
+#### パターン 2: 統計検定失敗
+
+```
+現象:
+  過去 7 日のデータが不足（3 日分だけ存在）
+  移動平均の計算が失敗: ValueError: not enough samples
+
+対応:
+  ├─ Issue 自動起票:
+  │   Title: "Statistical test aborted: insufficient historical data (3 days, need 7)"
+  │   Severity: WARNING
+  │   Action: Step 1 のデータ取得に遅延あり？確認が必要
+  │
+  └─ 代替ルール:
+      if len(historical_data) < 7:
+          # 移動平均での検定は使わず
+          # 前日比ルール（20%）に限定
+          use_simple_rules_only = True
+```
+
+#### パターン 3: 異常検知は成功したが検証失敗
+
+```
+現象:
+  異常検知: 「失注理由が『法務的懸念』に変わった」（確度 95%）
+  検証ステップで失敗: 音声記録が見つからない / 文字起こしタイムアウト
+
+対応:
+  ├─ Issue 自動起票:
+  │   Title: "Hypothesis verification failed: missing audio for call_id=zoom_001"
+  │   Severity: WARNING
+  │   Action: 音声ファイルが削除されたか、保管ルール確認
+  │
+  ├─ 部分検証（フォールバック）:
+  │   mamori.md へ報告
+  │   → 「法務的懸念が増えている（音声確認待ち）」とひとまず注意喚起
+  │
+  └─ 再検証スケジュール:
+      Retry: 翌日同時刻（音声ファイルが遅延アップロード）
+
+```
+
+### Issue 自動起票のテンプレート
+
+```yaml
+# .github/ISSUE_TEMPLATE/data-validation-failed.yml
+
+name: データ検証失敗
+description: データ取得・異常検知・検証ステップで失敗した際の自動起票
+
+body:
+  - type: textarea
+    attributes:
+      label: エラー内容
+      description: "Example: TypeError: unsupported operand type(s) for -"
+      placeholder: "エラーメッセージをコピー"
+    validations:
+      required: true
+  
+  - type: dropdown
+    attributes:
+      label: 失敗ステップ
+      options:
+        - Step 1 (データ取得)
+        - Step 2 (異常検知)
+        - Step 3 (検証・改善実行)
+    validations:
+      required: true
+  
+  - type: textarea
+    attributes:
+      label: 失敗ポイント
+      description: "Step 1 なら fetch_zoom_logs.py のどの行か / Step 2 なら detect_anomalies() のどの統計検定か"
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: 優先度
+      options:
+        - P0 (当日対応・異常検知全停止)
+        - P1 (24 時間以内・一部ルール停止)
+        - P2 (1 週間以内・ワーニング継続)
+
+```
+
+---
+
+## 本番前テスト（Subtask D）
+
+### ローカル検証手順
+
+```bash
+# 1. サンプルデータの準備
+mkdir -p tests/data-insights-extraction
+cat > tests/data-insights-extraction/sample_data.json << 'EOF'
+{
+  "current": {
+    "calls": 25,
+    "contracts": 3,
+    "contract_rate": 0.12,
+    "avg_call_duration": 24,
+    "loss_reasons": {"payment": 1, "review": 1}
+  },
+  "historical": [
+    {"date": "2026-09-27", "calls": 15, "contract_rate": 0.60},
+    {"date": "2026-09-28", "calls": 18, "contract_rate": 0.55},
+    {"date": "2026-09-29", "calls": 14, "contract_rate": 0.58},
+    {"date": "2026-09-30", "calls": 20, "contract_rate": 0.61},
+    {"date": "2026-10-01", "calls": 16, "contract_rate": 0.57},
+    {"date": "2026-10-02", "calls": 19, "contract_rate": 0.59},
+    {"date": "2026-10-03", "calls": 15, "contract_rate": 0.60}
+  ]
+}
+EOF
+
+# 2. 異常値検知テスト
+python -m pytest tests/data-insights-extraction/test_anomaly_detection.py -v
+
+# 3. 仮説生成テスト
+python -m pytest tests/data-insights-extraction/test_hypothesis_generation.py -v
+
+# 4. 統計検定失敗時の対応テスト
+python -m pytest tests/data-insights-extraction/test_fallback_rules.py -v
+
+```
+
+### テストチェックリスト（実行可能）
+
+```markdown
+## 本番投入前チェックリスト
+
+### データ取得確認（Step 1）
+- [ ] Sheets API キーが設定されているか（.env ファイル）
+- [ ] Zoom API キーが設定されているか（.env ファイル）
+- [ ] サンプル取得後、JSON の型がすべて正しいか
+  ```bash
+  python -c "import json; json.load(open('tests/data-insights-extraction/sample_data.json'))"
+  ```
+- [ ] 日付フォーマットが JST 統一されているか（UTC との混在なし）
+
+### 仮説検証 PASS（Step 2）
+- [ ] 前日比ルール（20%超）で異常フラグが立つか
+  ```bash
+  pytest tests/data-insights-extraction/test_anomaly_detection.py::test_pct_change_20_percent -v
+  ```
+- [ ] 移動平均（3σ）での乖離検知が機能するか
+  ```bash
+  pytest tests/data-insights-extraction/test_anomaly_detection.py::test_moving_average_3sigma -v
+  ```
+- [ ] 失注理由のランク変化（Top3 外→Top1）を検知するか
+  ```bash
+  pytest tests/data-insights-extraction/test_anomaly_detection.py::test_loss_reason_shift -v
+  ```
+
+### 異常値検知テスト（Step 3 準備）
+- [ ] サンプルデータで異常が 2 件以上検知されるか
+  ```bash
+  python .claude/skills/data-insights-extraction/analyzer.py tests/data-insights-extraction/sample_data.json
+  ```
+- [ ] 出力フォーマット（JSON）が崩れていないか
+  ```bash
+  python ... | python -m json.tool | head -20
+  ```
+
+### CI ワークフロー確認
+- [ ] GitHub Actions で pytest が自動実行されるか
+  ```bash
+  cat .github/workflows/data-insights-test.yml
+  ```
+- [ ] エラー時に自動 Issue が起票されるか（本番環境で）
+
+### 本番反映
+- [ ] main ブランチへの merge 前に上記 4 項目を全部 PASS
+- [ ] Slack 通知が正常に機能するか（ステージング環境テスト）
+- [ ] ダッシュボード表示（Sheets）が 3 分以内に更新されるか
+
+```
+
+---
+
 ## チェックリスト
 
 ```
@@ -593,6 +1142,19 @@ function analyzeCallMetrics() {
 □ データが「過去の記録」でなく「改善の羅針盤」として機能しているか
   └─ 「先月のデータ」を確認するだけではなく、
      「何が変わったか」から「明日何をすべきか」が導き出せるか
+
+□ 3 ステップフロー（データ取得 → 仮説生成 → 検証）が実装されているか
+  └─ 各ステップが 1 アクション = 1 つの再現可能なステップになっているか
+
+□ Python 実装例が実行可能で、異常値検知が動くか
+  └─ pandas を使った実装・40 行程度の例が提供されているか
+
+□ 検証失敗時の自動 Issue 起票と対応ルールが定義されているか
+  └─ データ型エラー / 統計検定失敗 / 音声記録欠落 ごとに対応が決まっているか
+
+□ ローカル検証手順が実行可能か
+  └─ pytest でテストが PASS し、チェックリストのすべて項目が確認可能か
+
 ```
 
 ---
