@@ -3386,5 +3386,255 @@
     "human_verdict": null
    }
   ]
+ },
+ {
+  "date": "2026-09-30",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 2,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "電気料金高騰に対する支援",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010146.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【沖縄】令和８年度中小企業最低賃金引上げ支援対策費補助金（業務改善助成金）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe6cMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "［第六回以降］事業再構築補助金（共同申請者）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000007Cos5EAC",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "稼ぐ海外展開モデル支援事業補助金",
+    "url": "https://okinawa-ric.jp/service/post-32-1.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "情報通信利用促進支援事業費補助金「先進的設備等を活用した放送コンテンツ製作促進事業」三次公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003cYWnUAM",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
+ },
+ {
+  "date": "2026-10-01",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "稼ぐ海外展開モデル支援事業補助金",
+    "url": "https://okinawa-ric.jp/service/post-32-1.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和７年度補正予算・令和８年度】二酸化炭素排出抑制対策事業費等補助金（業務用建築物ストックの省CO2改修調査支援事業（令和７年度補正予算二次公募・令和８年度一次公募））",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYaFMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和７年度（補正）　商用車等の電動化促進事業（建設機械）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXRpMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度 脱炭素成長型経済構造移行推進対策費補助金 （業務用建築物の脱炭素改修加速化事業）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDa1bMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "情報通信利用促進支援事業費補助金「先進的設備等を活用した放送コンテンツ製作促進事業」三次公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003cYWnUAM",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
+ },
+ {
+  "date": "2026-10-02",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "［第十一回］事業再構築補助金（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UbU66EAF",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(ブルーボンド/ブルーローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9wMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【関東監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuSMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「脱炭素化・エネルギー転換に資する我が国技術の国際実証事業」の2026年度第2回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdl2MAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【北海道監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYu3MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
+ },
+ {
+  "date": "2026-10-03",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 2,
+   "joined": 2
+  },
+  "items": [
+   {
+    "name": "産業人材育成・確保関係",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010151/index.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "稼ぐ海外展開モデル支援事業補助金",
+    "url": "https://okinawa-ric.jp/service/post-32-1.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「研究開発プロセスを起点とした動的なEBPMのための指標設計及びデータ活用戦略の策定に係る調査」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003F3K1UAK",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "エイジフレンドリー補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYbNMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（22次締切）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYimMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]

@@ -34,6 +34,11 @@ jobs:
         # 守り部審査済み(docs/守り部審査記録.md)。沖縄県・産業振興公社・那覇市を追加収集しマージ
         run: python scripts/fetch_local.py
 
+      - name: Preserve verified & ig_* fields (ブロッカー #1 対策)
+        # update.yml が毎日再生成する際、既存の verified / ig_priority などが消えるリスク対策
+        # fetch_jgrants + fetch_local の直後に実行し、新しい JSON に既存フィールドをマージ
+        run: python scripts/preserve_fields.py
+
       - name: Generate LINE deadline alerts
         # 締切7日以内の制度からLINE配信下書きを自動生成(配信は人が実行)
         run: python scripts/generate_line_alerts.py

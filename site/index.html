@@ -241,6 +241,17 @@
   .line-btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(248,136,0,.5);}
   .cta-note{margin-top:var(--sp-3);font-size:.85rem;color:rgba(247,245,241,.82);}
 
+  /* クイック検索 */
+  .quick-search{background:var(--shiro);color:var(--fukamidori);}
+  .quick-search-form{margin-top:var(--sp-4);display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:stretch;max-width:700px;}
+  .qs-input,.qs-select{flex:1;min-width:150px;padding:12px 14px;border:1px solid rgba(0,51,92,.2);border-radius:8px;font-size:.95rem;font-family:inherit;}
+  .qs-input:focus,.qs-select:focus{outline:none;border-color:var(--midori);box-shadow:0 0 0 3px rgba(0,80,136,.1);}
+  .qs-btn{padding:12px 28px;background:var(--kin);color:var(--sumi);border:none;border-radius:8px;font-weight:700;font-size:.95rem;cursor:pointer;white-space:nowrap;}
+  .qs-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(248,136,0,.3);}
+  .quick-search-result{margin-top:var(--sp-4);}
+  .result-meta{margin-bottom:var(--sp-2);color:rgba(0,51,92,.7);font-size:.9rem;font-weight:600;}
+  #qs-list{display:grid;gap:var(--sp-2);grid-template-columns:repeat(auto-fill,minmax(280px,1fr));}
+
   /* マッチング */
   .match{background:var(--shiro);color:var(--fukamidori);}
   .match .hero-logo{width:130px;height:auto;margin-bottom:1.6rem;filter:drop-shadow(0 0 8px rgba(255,255,255,.55));}
@@ -299,7 +310,9 @@
   .card h4{font-family:'Noto Serif JP','Yu Mincho','Hiragino Mincho ProN',serif;font-size:1.05rem;line-height:var(--lh-tight);overflow-wrap:anywhere;}
   .card .meta{margin-top:.5rem;font-size:.85rem;color:rgba(0,51,92,.78);display:flex;flex-wrap:wrap;gap:1em;}
   .card .deadline{color:#a03a2a;font-weight:700;}
-  .card a{color:var(--midori);font-weight:700;font-size:.9rem;}
+  .card .updated{color:#888;font-size:.8rem;}
+  .card a{color:var(--midori);font-weight:700;font-size:.9rem;display:inline-block;margin-top:.8rem;}
+  .card .source-link{color:var(--kin);text-decoration:underline;font-size:.9rem;}
     .card.locked{filter:blur(0px);position:relative;}
   .card.locked h4,.card.locked .meta{filter:blur(5px);user-select:none;}
   .back-result{position:fixed;right:16px;bottom:16px;z-index:60;font:inherit;font-weight:700;
@@ -684,6 +697,26 @@
   </div>
 </section>
 
+<!-- QUICK SEARCH -->
+<section class="quick-search" id="quick-search">
+  <h2 class="rv">今すぐ探す</h2>
+  <p class="sub rv">キーワードと地域で、使える制度を検索</p>
+  <div class="quick-search-form rv">
+    <input type="text" id="qs-keyword" class="qs-input" placeholder="例: 売上、IT、デジタル化、補助金...">
+    <select id="qs-area" class="qs-select">
+      <option value="">全て地域</option>
+      <option value="全国">全国</option>
+      <option value="沖縄">沖縄県</option>
+      <option value="事業承継">事業承継</option>
+    </select>
+    <button type="button" id="qs-search" class="qs-btn">検索</button>
+  </div>
+  <div id="qs-result" class="quick-search-result" hidden>
+    <p class="result-meta"><span id="qs-count">0</span>件見つかりました</p>
+    <div id="qs-list"></div>
+  </div>
+</section>
+
 <!-- MATCHING -->
 <section class="match" id="match">
   <p class="eyebrow rv">FREE MATCHING</p>
@@ -1047,7 +1080,17 @@
   let DB={items:[],updated_at:null};
   fetch('data/subsidies.json')
     .then(r=>r.json())
-    .then(d=>{DB=d;document.getElementById('updated-at').textContent=d.updated_at||'—';const lc=document.getElementById('live-count');if(lc)lc.textContent=d.count||d.items.length||'—';try{restoreState();}catch(e){}})
+    .then(d=>{
+      DB=d;
+      document.getElementById('updated-at').textContent=d.updated_at||'—';
+      const lc=document.getElementById('live-count');
+      if(lc)lc.textContent=d.count||d.items.length||'—';
+
+      // クイック検索の初期化
+      initQuickSearch(d);
+
+      try{restoreState();}catch(e){}
+    })
     .catch(()=>{document.getElementById('updated-at').textContent='取得エラー(公式サイトをご確認ください)';});
 
   const BIZ_KEYS={
@@ -1056,6 +1099,63 @@
     '情報通信・IT':['情報','IT','デジタル','DX'],'医療・福祉':['医療','福祉','介護'],
     'サービス':['サービス'],'その他':[]
   };
+
+  // ===== クイック検索機能（Change 3: 検索精度リスク低減のため無効化） =====
+  function initQuickSearch(data){
+    const qsBtn=document.getElementById('qs-search');
+    const qsKeyword=document.getElementById('qs-keyword');
+    const qsArea=document.getElementById('qs-area');
+    const qsResult=document.getElementById('qs-result');
+    const qsList=document.getElementById('qs-list');
+
+    // target_biz フィールド充実度を測定
+    const bizFilled=data.items.filter(it=>it.target_biz&&it.target_biz.trim()).length;
+    const bizRate=data.items.length>0?bizFilled/data.items.length:0;
+
+    // 充実度が 50% 未満の場合は検索を無効化（ユーザーに通知）
+    if(bizRate<0.5){
+      qsBtn.disabled=true;
+      qsKeyword.disabled=true;
+      qsArea.disabled=true;
+      qsResult.innerHTML='<p style="color:var(--sumi);font-size:.9rem;padding:12px;background:rgba(0,51,92,.05);border-radius:4px;">⚠️ クイック検索は現在、検索精度向上のため準備中です。<br>左側の「市町村・業種・従業員数」フィルターでお探しください。</p>';
+      qsResult.hidden=false;
+      return;
+    }
+
+    const performSearch=()=>{
+      const kw=(qsKeyword.value||'').toLowerCase().trim();
+      const area=qsArea.value||'';
+      if(!kw&&!area){qsResult.hidden=true;return;}
+
+      let results=data.items.filter(it=>{
+        if(area&&it.target_area!==area)return false;
+        if(kw){
+          const text=(it.name+' '+(it.target_biz||'')+' '+(it.employees||'')).toLowerCase();
+          return text.includes(kw);
+        }
+        return true;
+      });
+
+      results=results.slice(0,20); // 20件まで表示
+      document.getElementById('qs-count').textContent=results.length;
+      qsList.innerHTML=results.map(it=>`
+        <div class="card">
+          <h4>${esc(it.name||'')}</h4>
+          <div class="meta">
+            <span class="deadline">締切 ${esc(it.deadline||'要確認')}</span>
+            ${it.fetched_at?`<span class="updated">🔄 更新: ${it.fetched_at.split(' ')[0]}</span>`:''}
+            <span>${esc(it.target_area||'対象地域 要確認')}</span>
+            ${Number(it.max_amount)>0?`<span>上限 ${Number(it.max_amount).toLocaleString()}円</span>`:''}
+          </div>
+          ${!safeUrl(it.source_url)?'':`<a href="${esc(safeUrl(it.source_url))}" target="_blank" rel="noopener" class="source-link">✓ 公式ページで最新情報を確認</a>`}
+        </div>
+      `).join('');
+      qsResult.hidden=false;
+    };
+
+    qsBtn.addEventListener('click',performSearch);
+    qsKeyword.addEventListener('keypress',e=>{if(e.key==='Enter')performSearch();});
+  }
 
   // テーマチップの選択
   document.querySelectorAll('#f-theme .chip').forEach(c=>{
@@ -1276,6 +1376,7 @@
         <h4>${locked?esc(maskName(it.name||'')):esc(it.name||'')}</h4>
         <div class="meta">
           <span class="deadline">締切 ${esc(it.deadline||'要確認')}</span>
+          ${it.fetched_at?`<span class="updated">🔄 更新: ${it.fetched_at.split(' ')[0]}</span>`:''}
           <span>${esc(it.target_area||'対象地域 要確認')}</span>
           ${Number(it.max_amount)>0?`<span>上限 ${Number(it.max_amount).toLocaleString()}円</span>`:''}
         </div>
@@ -1289,7 +1390,7 @@
           else if(S2.time&&dl2!==null&&dl2>=45&&dl2<=120)b+='<span class="apply-badge s2ok">準備が間に合いやすい</span>';
           return b;
         })()}
-        ${locked||!safeUrl(it.source_url)?'':`<a href="${esc(safeUrl(it.source_url))}" target="_blank" rel="noopener">公式ページで確認 →</a>`}
+        ${locked||!safeUrl(it.source_url)?'':`<a href="${esc(safeUrl(it.source_url))}" target="_blank" rel="noopener" class="source-link">✓ 公式ページで最新情報を確認</a>`}
       </div>`;
     const member=lsGet('mikata_member')==='1';
     let html='';

@@ -74,3 +74,28 @@ CLAUDE.md「技術構成」が指すスキーマの実体。**正本は `scripts
 | 7日未満 | 次回公募予告に切り替える |
 
 「締切7日前アラート」は誤り。利用者向けの表現は「締切の約1か月前から」で統一する。
+
+---
+
+# 沖縄企業のミカタ `data/subsidies.json` の IG 自動化フィールド(2026-09-28 追加)
+
+上記は もらいわすれ堂(`seido.json`)のスキーマ。ここは企業向け `data/subsidies.json` の
+`items[]` に足した Instagram 自動化用フィールドのみを記す。検査: `tests/data/test_subsidies_schema.py`。
+
+ファイル全体は `{ "updated_at", "count", "by_tag", "items", "by_source" }`。整形は
+`json.dump(..., ensure_ascii=False, indent=1)`、末尾改行なし。ig_* は**各 item の末尾に、次の順で追加**する
+(既存フィールドの並びは変えない)。
+
+| フィールド | 型 | 既定値 | 規約 |
+|---|---|---|---|
+| `ig_template` | null \| "template1" \| "template2" \| "template3" | null | 使うIG投稿テンプレート。未割当は null |
+| `ig_priority` | int \| null | null | 投稿優先度。null は未設定 |
+| `ig_example_industry` | string \| null | null | 投稿に出す業種の例 |
+| `ig_before_amount` | int \| null | null | 活用前の金額例(円)。**断定表現に使わない**(絶対ルール1) |
+| `ig_after_amount` | int \| null | null | 活用後の金額例(円)。同上 |
+| `ig_exclude` | bool | false | true ならIG投稿の対象から外す |
+
+`ig_priority` / `ig_*_amount` の int に bool は含めない(JSON の true/false は不可)。
+
+**注意**: `scripts/fetch_jgrants.py` は毎回 API から items を作り直して上書きするため、
+この ig_* 値を引き継ぐ処理が入るまでは cron(1日4回)のたびに消える。
