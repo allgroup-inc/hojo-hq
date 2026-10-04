@@ -5,9 +5,108 @@ description: "GLOW・enLife・hojo-hq の既存システム（glow-ma 営業管�
 
 # システム設計パターン辞書（hojo-hq 専用版）
 
-実装が先行して「スクラッチから設計し直す」ことを避けるために、
+実装が先行って「スクラッチから設計し直す」ことを避けるために、
 GLOW・enLife グループで検証済みの実装パターンと、失敗から学んだ教訓を一冊の辞書にまとめたもの。
 新しいシステムを企画したら、まずここを読む。既存パターンが当てはまれば、半分の時間で実装できる。
+
+---
+
+## 設計プロセス（3段階フェーズ）
+
+新規システム企画時は必ず以下の順序で設計を進める。各フェーズの終了後に次へ進む。
+
+### Phase 1: アーキテクチャ設計
+
+**目的**: システム全体の構成要素と責務を定義
+
+**1-1 データフロー図を描く**
+- 入力（API / ユーザー入力 / 外部システム）
+- 処理（Apps Script / Python / 外部サービス）
+- 出力（Google Sheets / 通知 / 監査ログ）
+- 各要素の責務と境界を明記
+
+**1-2 既存パターン（原則 1～5）から流用可能な部分を特定**
+- 顧客マスタ: 既存の企業マスタで足りるか、新規作成が必要か
+- 権限モデル: L1/L2/L3 の 3 段階で収まるか
+- プロセス: Zapier / Power Automate で自動化できる部分はないか
+- データモデル: 正規化度と運用負荷のバランスは取れているか
+
+**1-3 関連ドキュメントを参照**
+- `user-research-hojo` — ユーザー権限要件・プロセスフロー決定
+- `mamori.md` — 個人情報・法務確認
+
+**合格条件**
+- [ ] システム全体を図解（コンポーネント・データフロー含む）
+- [ ] 既存パターンの流用判定が明記
+- [ ] 新規開発必要部分が特定
+
+---
+
+### Phase 2: コンポーネント設計
+
+**目的**: 各機能単位の設計詳細を決定
+
+**2-1 入力インタフェースを設計**
+- 手動入力フォーム か自動取得か
+- 入力検証ルール
+- エラーハンドリング方法
+- 冪等性が必要か（重複実行対応）
+
+**2-2 処理ロジックを実装**
+- 言語・フレームワーク選定（Apps Script / Python / Node.js など）
+- 複雑な条件分岐は Apps Script ではなく専用言語で実装
+- API 呼び出しの認証・エラー処理（原則 4 参照）
+
+**2-3 出力インタフェースを設計**
+- Google Sheets への書き込み方法
+- ログ・監査記録の形式
+- 配信通知の仕様（メール / SMS / LINE）
+
+**合格条件**
+- [ ] 各コンポーネントの入出力が定義
+- [ ] API キー・認証情報の管理方法が決定
+- [ ] トランザクション記録の仕様が明記
+
+---
+
+### Phase 3: データフロー検証
+
+**目的**: 設計が完全かつ実装可能か確認
+
+**3-1 データモデルの妥当性を検証**
+- 正規化度（原則 5 参照）が運用に耐えるか
+- 履歴管理が必要な項目は何か
+- 削除が発生する場合、物理削除ではなく論理削除か
+
+**3-2 権限フローを完全化**
+- 全ユーザーロール（L1/L2/L3 + 特例）をリストアップ
+- 各ロールが見える・編集できるデータを明記
+- 削除は禁止か、論理削除か
+
+**3-3 エラー・例外ケースを洗い出し**
+- API が 403 / 404 / 500 を返した場合
+- ネットワーク遮断時の再試行ロジック
+- 不完全なデータが投入された場合
+
+**3-4 本番前テスト計画を立案**
+- `## 本番前テスト` セクションで定義したチェックリストを実行
+
+**合格条件**
+- [ ] データモデル・権限フローの図解が完成
+- [ ] 例外ケースが全て定義
+- [ ] テスト手順とチェックリストが明記
+
+---
+
+## 原則一覧（参照順）
+
+- **原則 1**: 顧客マスタは一度だけ作る（分散すると死ぬ）
+- **原則 2**: 権限モデルは「3 段階」で十分
+- **原則 3**: プロセスフローは「Zapier / Power Automate」で自動化（手作業を減らす）
+- **原則 4**: API 連携は「認証情報」を安全に管理（誤公開・流出防止）
+- **原則 5**: データモデル設計（正規化と実運用のバランス）
+
+各原則の詳細は以下を参照。新規システム設計時は必ず全て確認する。
 
 ---
 
@@ -471,6 +570,130 @@ function callClaudeAPI(prompt) {
 
 ---
 
+## 実装例: マイクロサービスアーキテクチャ（TypeScript）
+
+### 概要
+
+複数の独立したサービスに分割し、API を介して連携。
+GLOW 営業管理・ミカタ・家計の見直しやさんをスケーラブルに統合する構成。
+
+### 構成要素
+
+```
+┌─────────────────┐
+│  LINE ユーザー   │
+└────────┬────────┘
+         │ プロフィール入力
+         ↓
+┌─────────────────────────────┐
+│ API Gateway                 │
+│ (認証・リクエスト振り分け)    │
+└────────┬────────┬────────────┘
+         │        │
+         ↓        ↓
+┌──────────────┐  ┌──────────────┐
+│ Customer     │  │ Matching     │
+│ Service      │  │ Service      │
+│ (企業マスタ)  │  │ (制度選抜)    │
+└──────┬───────┘  └──────┬───────┘
+       │                │
+       └────────┬───────┘
+                ↓
+         ┌──────────────┐
+         │ Notification │
+         │ Service      │
+         │ (配信管理)    │
+         └──────────────┘
+```
+
+### サンプル実装（50 行）
+
+```typescript
+// customer-service.ts — 企業マスタ管理
+interface Customer {
+  id: string;
+  name: string;
+  industry: string;
+  revenue: number;
+  createdAt: Date;
+}
+
+class CustomerService {
+  async getOrCreateCustomer(data: {
+    name: string;
+    industry: string;
+  }): Promise<Customer> {
+    // 企業マスタから検索（重複排除）
+    const existing = await this.findByName(data.name);
+    if (existing) return existing;
+
+    // なければ新規作成
+    const id = `glow-${Date.now()}`;
+    const customer = { id, ...data, createdAt: new Date() };
+    await this.saveToSheet(customer);
+    return customer;
+  }
+
+  private async findByName(name: string): Promise<Customer | null> {
+    // Google Sheets から検索
+    const sheet = await this.getSheet("CustomerMaster");
+    return sheet.values.find(row => row.name === name) || null;
+  }
+
+  private async saveToSheet(customer: Customer): Promise<void> {
+    // トランザクション記録も同時に行う
+    const sheet = await this.getSheet("CustomerMaster");
+    await sheet.append([
+      customer.id, customer.name, customer.industry, 
+      customer.revenue, customer.createdAt.toISOString()
+    ]);
+  }
+}
+
+// matching-service.ts — 制度マッチング
+class MatchingService {
+  async findApplicablePrograms(customer: Customer): Promise<Program[]> {
+    // 企業マスタの業種・売上から制度を抽出
+    const programDb = await this.getProgramDatabase();
+    return programDb.filter(p => 
+      p.targetIndustries.includes(customer.industry) &&
+      p.minRevenue <= customer.revenue
+    );
+  }
+}
+
+// notification-service.ts — 配信管理
+class NotificationService {
+  async notifyPrograms(customerId: string, programs: Program[]): Promise<void> {
+    const customer = await new CustomerService().getById(customerId);
+    
+    // Zapier との連携（メール送信トリガー）
+    await this.callZapier({
+      event: "program_notification",
+      customerId,
+      programs: programs.map(p => ({ id: p.id, name: p.name }))
+    });
+
+    // 配信ログを記録（履歴残存）
+    await this.logDelivery({
+      customerId,
+      programCount: programs.length,
+      timestamp: new Date(),
+      status: "pending"
+    });
+  }
+}
+```
+
+### TypeScript を選ぶ理由
+
+- 型安全: 顧客 ID や金額の取り違いを compile-time に検出
+- テスト容易: 各サービスを独立して単体テスト可能
+- スケーラビリティ: Apps Script では難しい複雑な条件分岐を実装
+- ローカル開発: Node.js で開発・テストしてから Google Cloud Run にデプロイ可能
+
+---
+
 ## 実装パターン: 新規システム導入チェックリスト
 
 ```
@@ -505,6 +728,246 @@ function callClaudeAPI(prompt) {
   ├─ このデータは個人情報を含むか（mamori.md 要確認）
   └─ 含む場合、マスク・匿名化・アクセス制限はどうするか
 ```
+
+---
+
+## 検証失敗時（設計レビュー NG パターン）
+
+### 検出ルール
+
+以下のいずれかに該当する設計は、Phase 3 で「要再検討」となり、Issue 自動起票。
+
+#### NG-1: 依存グラフが不完全
+
+```
+❌ 問題: 
+  Customer Service は「Notification Service を呼ぶ」と書いてあるが、
+  Notification Service が何の API を呼ぶかが未定義
+  → 実装時に想定外の外部 API 呼び出しが発生
+
+✅ 検証方法:
+  各サービスの「入力 → 処理 → 出力」を図化
+  出力先のサービスが入力として受け付けるか確認
+  例: Customer Service の出力（Customer JSON）が
+      Matching Service の入力スキーマと一致するか
+```
+
+#### NG-2: スケール非対応設計
+
+```
+❌ 問題:
+  「月 50 社のデータ処理」を想定したが、
+  実装では全行をメモリに読み込む設計
+  → 月 5,000 社になったとき、メモリ不足で落ちる
+
+✅ 検証方法:
+  想定データ量（現在・1 年後・5 年後）を明記
+  大量データ時の処理方法を事前に設計
+  例: Google Sheets ではなく BigQuery を検討
+  または: バッチ処理化（時間帯を分散）
+```
+
+#### NG-3: 権限モデルの穴
+
+```
+❌ 問題:
+  「営業 L1 は自分の顧客のみ見える」と書いてあるが、
+  「監査ログは全営業が見える」と矛盾している
+  → 営業 A が営業 B の顧客に対して無断で提案を見て、営業機密漏洩
+
+✅ 検証方法:
+  全ユーザーロールに対して、
+  「見える / 編集できる / 削除できる」を
+  データベースの「各テーブル × 各フィールド」単位で明記
+  矛盾があれば一覧表で検出
+```
+
+#### NG-4: トランザクション記録の欠落
+
+```
+❌ 問題:
+  「配信ログは保存する」と書いてあるが、
+  「API 呼び出しの失敗はどこに記録するのか」が未定義
+  → API 503 エラーで失敗したが、ログが無いため原因究明に 1 日要費
+
+✅ 検証方法:
+  すべてのアクション（成功 / 失敗 / 再試行）を
+  同じログテーブルに記録するか確認
+  失敗時の alert 仕様も記載
+```
+
+### Issue 自動起票仕様
+
+設計レビューで NG が検出された場合、以下情報を含む Issue を自動起票。
+
+```
+Title: [Design Review NG] <原則番号> — <NG理由>
+例: [Design Review NG] NG-1 — 依存グラフ未定義（CustomerService → NotificationService）
+
+Body:
+## 設計フェーズ
+Phase 2 (コンポーネント設計) / Phase 3 (データフロー検証)
+
+## NG パターン
+NG-1: 依存グラフが不完全
+
+## 詳細
+Customer Service の出力が Notification Service の入力スキーマと一致しない
+- Customer Service 出力: { id, name, industry, revenue, createdAt }
+- Notification Service 入力: { customerId, programs[] }
+→ 中間変換ロジックが未定義
+
+## 対応
+以下のいずれかで対応:
+1. 変換ロジックを明記（Services 間のアダプター）
+2. API Gateway で正規化
+3. サービス設計そのものを見直し
+
+## 期限
+Phase 3 の合格条件確認までに解決（推奨: 同日）
+
+Labels: design-review, ng-pattern, <原則名>
+```
+
+---
+
+## 本番前テスト（設計から実装への移行）
+
+### テスト前の準備
+
+```
+□ 依存グラフ図（Phase 2）が完成しているか
+□ データモデル・権限フローの図解（Phase 3）が完成しているか
+□ Issue や NG パターンが全て解決しているか
+□ チームのサインオフが取れているか
+```
+
+### サンプルプロジェクト構造（ローカルテスト用）
+
+```
+test-project/
+├── .env                           # API キー（.gitignore 必須）
+├── package.json
+├── src/
+│   ├── services/
+│   │   ├── customer.service.ts
+│   │   ├── matching.service.ts
+│   │   └── notification.service.ts
+│   ├── models/
+│   │   └── types.ts               # Customer, Program の型定義
+│   └── index.ts                   # 統合テスト エントリーポイント
+└── test/
+    ├── customer.test.ts
+    ├── matching.test.ts
+    └── integration.test.ts
+```
+
+### テストチェックリスト
+
+#### アーキテクチャ図作成
+```
+□ コンポーネント図を PNG で出力
+  └─ 各サービスの責務が明確か
+  └─ データ流向が一方向か（循環依存がないか）
+  
+□ データモデル図（Entity-Relationship Diagram）
+  └─ 各テーブル / Sheet のフィールドが一覧化
+  └─ 正規化度（1NF / 2NF / 3NF）が適切か
+```
+
+#### コンポーネント分離確認
+```
+□ 各サービスが独立してテスト可能か
+  └─ CustomerService.getOrCreateCustomer() を mock なしで実行
+  └─ MatchingService.findApplicablePrograms() に異なる customer を渡す
+  
+□ インタフェース（入出力）が型安全か
+  └─ TypeScript コンパイルエラーが 0 か
+  
+□ 外部依存（API キー、Google Sheets）が環境変数化されているか
+  └─ .env ファイルから読み込めるか
+```
+
+#### データフロー検証
+```
+□ Happy Path テスト（正常系）
+  手順:
+  1. ユーザー入力: { name: "ABC建設", industry: "建築", revenue: 5000万 }
+  2. Customer Service が企業マスタに保存
+  3. Matching Service が該当制度を抽出（3件以上）
+  4. Notification Service がログに記録
+  
+  検証:
+  - Google Sheets に企業 ID が自動採番されているか
+  - 制度検索が正しい結果を返すか
+  - 配信ログにタイムスタンプが記録されているか
+
+□ Edge Case テスト（異常系）
+  手順:
+  1. 同じ企業名を 2 回送信
+  2. API 403 エラーをシミュレート
+  3. データベースが空の状態で検索
+  
+  検証:
+  - 企業 ID の重複がないか
+  - 403 エラーがログに記録されるか
+  - 空結果が graceful に処理されるか
+
+□ 権限フロー検証
+  手順:
+  1. L1 ユーザーで自分の顧客データを取得
+  2. L1 ユーザーで他人の顧客データを取得（should fail）
+  3. L3 管理者で全データを取得
+  
+  検証:
+  - 権限なしアクセスが 403 を返すか
+  - L3 のみ監査ログを見られるか
+  - 誰が何をいつ変更したかが記録されているか
+```
+
+### CI/CD パイプラインでの自動検証
+
+```yaml
+# .github/workflows/design-validation.yml
+name: Design Validation
+
+on: [pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      # TypeScript コンパイル
+      - run: npx tsc --noEmit
+      
+      # 単体テスト（各 Service）
+      - run: npm test -- --testPathPattern="service"
+      
+      # 統合テスト（フロー全体）
+      - run: npm test -- --testPathPattern="integration"
+      
+      # 型安全チェック
+      - run: npx type-coverage --min 95
+      
+      # アーキテクチャ図の自動検証（Mermaid）
+      - run: npx mermaid --version
+```
+
+### テスト完了条件
+
+```
+✅ すべてのチェックリスト項目が完了
+✅ Happy Path テストが成功
+✅ Edge Case テストが成功（失敗ケースも期待通り）
+✅ 権限フロー検証が成功
+✅ CI/CD パイプラインが green
+✅ code coverage が 80% 以上
+✅ チームレビュー・承認が取れた
+```
+
+テスト完了後、本番環境への依頼（小柳さん決裁）へ進む。
 
 ---
 
