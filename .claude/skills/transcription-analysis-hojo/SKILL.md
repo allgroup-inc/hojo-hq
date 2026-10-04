@@ -5,7 +5,9 @@ description: "KAKEHASHI・enLife営業の音声記録（Zoom Phone等）から�
 
 # 音声記録の分析・二次利用（hojo-hq / kakei-crm 専用版）
 
-## 使うべきタイミング
+このスキルは、営業通話の音声記録を Claude Audio API で自動分析し、顧客の課題・懸念を抽出、営業改善教材へ再構成するプロセスを体系化します。目標は「記録が溜まるだけ」から「営業トーク改善に直結する実例素材」へ.
+
+## いつ・どんな場面で使うか
 
 営業マンが月 30 件の客先対応をしており、Zoom Phone や内部録音システムが毎日 3-5 時間の音声を記録している状況が「記録が溜まる一方で、個別対応の繰り返し」になっている場合。
 
@@ -45,61 +47,60 @@ description: "KAKEHASHI・enLife営業の音声記録（Zoom Phone等）から�
 
 ---
 
-## Stage 1: 音声ソース（どこから取るか、そもそも取れるのか）
+## Step 1: 音声ソースの確認・準備（どこから取るか、法的リスクがないか）
 
-### 対応する記録システム
+**目的:** 音声ファイルの取得可能性を確認し、法的リスクを排除する。  
+**実行コマンド:** 
+```bash
+# Zoom Phone API 認証テスト
+curl -H "Authorization: Bearer $ZOOM_API_TOKEN" \
+  https://zoom.us/v2/users/$(user_id)/call_logs
+```
+
+**検証方法:**
+- [ ] 顧客に「通話は記録され、社内教育に活用される」旨が告知されているか
+- [ ] mamori.md が法務承認済みか
+- [ ] 音声ファイル保存先が確定しているか（API / クラウド / オンプレ）
+
+### Step 1 の詳細：対応する記録システム
 
 ✅ **取得可能**:
-```
-• Zoom Phone: 通話履歴から自動ダウンロード可能(API: 要管理者権限)
-• Microsoft Teams: 通話録画 + 成績表(リーディング報告)と連携可能
-• Google Meet: 録画ファイルをクラウドストレージから取得
-• 内部 CTI (Computer Telephony Integration):
-  - 契約前ステップ: GLOW/enLife が導入予定のシステム(Zoom Phone)
-  - 顧客対話ログ: 自社システム上のメモ・通話記録
+- Zoom Phone: 通話履歴から自動ダウンロード可能(API: 要管理者権限)
+- Microsoft Teams: 通話録画 + 成績表(リーディング報告)と連携可能
+- Google Meet: 録画ファイルをクラウドストレージから取得
+- 内部 CTI: 自社システム上のメモ・通話記録
 
 ❌ **取得不可 / 法的に要確認**:
-  • 顧客が「記録されていることを知らなかった」通話
-    (日本法: 「一方当事者が同意」すれば OK。ただし顧客側の承諾を必ず確認)
-  • 3 社間通話の一部(conference call で参加者全員の同意が必要)
-```
-
-### 音声取得の前に確認すべき項目
-
-```
-□ 顧客に『通話は記録され、社内教育に活用される』旨を伝えたか
-  └─ 法務部(mamori.md)へ確認が必須。記録の同意なし = 違法利用に該当
-  
-□ 音声ファイルはどこに保存されているか(クラウド/オンプレ)
-  └─ 定期取得の自動化にはパス・API・認証情報が必要
-  
-□ 個人情報(顧客名・住所・金融情報)を書き起こしで残すか、マスクするか
-  └─ 書き起こしを note(公開)に使う場合、マスクが必須
-```
+- 顧客が「記録されていることを知らなかった」通話（一方当事者の同意は必須）
+- 3 社間通話の一部（全員の同意が必要）
 
 ---
 
-## Stage 2: 書き起こし（精度と実装）
+## Step 2: 書き起こし処理の実装（Claude Audio API を使用）
 
-### 方法ごとの選択
+**目的:** 音声ファイルを Claude Audio API で自動書き起こし。精度 95%+ を目指す。  
+**実行コマンド:**
+```python
+python scripts/transcribe_audio.py --input_audio /path/to/audio.m4a --output_format json
+```
+
+**検証方法:**
+- [ ] 音声形式が対応しているか（m4a / mp3 / wav / flac / pcm）
+- [ ] ファイルサイズが 100MB 以下か（API 仕様）
+- [ ] テストファイルで精度が 90% 以上か
+
+### Step 2 の詳細：方法ごとの選択
 
 | 方法 | 精度 | 実装難度 | 法的リスク | 用途 |
 |---|---|---|---|---|
-| **Claude Audio API** (最新 2024 年 10 月以降) | 95%+ | 低 | 低(プライベートモード) | 社内分析・note 素材 |
+| **Claude Audio API** (推奨) | 95%+ | 低 | 低(プライベートモード) | 社内分析・note 素材 |
 | **Google Cloud Speech-to-Text** | 92-95% | 低 | 中(データ保持) | 同上 |
 | **Whisper (OpenAI)** | 90-92% | 中(ローカル実行) | 低(オンプレ) | 研究向け |
 | **外注(人力)** | 99% | 高(コスト) | 高(機密流出) | 法務・契約レビュー |
 
-**hojo-hq / kakei-crm での推奨: Claude Audio API**
-```
-理由:
-  • GLOW/enLife が既に Claude API キー保持
-  • 音声+テキストプロンプトの同時処理で、書き起こし時に「顧客感情」も抽出可能
-  • 外部データセンター保持不要(オンプレと同等の機密性)
-  • 月 1000 時間の音声なら、月額 $200-300 程度(Whisper 並み)
-```
+---
 
-### 実装例: KAKEHASHI 営業の月次自動処理
+## 実装例 (Python)
 
 ```python
 # 月末に Zoom Phone API から通話録音を batch 取得 → Claude に送信
@@ -216,59 +217,40 @@ with open("kakei_call_analysis_2026_09.json", "w", encoding="utf-8") as f:
 
 ---
 
-## Stage 3: 感情分析・課題抽出
+## Step 3: 感情分析・課題抽出（営業改善に結びつく分類）
 
-### 何を抽出するか（営業改善に結びつく分類）
-
-```
-❌ 無駄な分類（音声AI の一般的な出力）:
-  • 「感情スコア: -0.3」← 数字だけでは営業改善に使えない
-  • 「キーワード: 保険, 支払, 契約」← これは誰でも分かる
-
-✅ 営業改善に使える分類:
-  • 「顧客の課題: 『現在の保険では 交通事故で補償不足』
-    └─ このパターンで成約した営業 = Aさん(9/10), Bさん(7/10)
-    └─ このパターンで失注した営業 = Cさん(2/5)
-    └─ 成功事例: XX さん(失注→成約へ転換した顧客)」
-  
-  • 「顧客の懸念: 『月の支払が高くなるのが心配』
-    └─ 有効な返答: 『現在の月 X 万円から Y 万円への増加。ただし
-       3ヶ月で現在分の支払から回収できる。なぜなら保険金が
-       実際に出たら……』(Dさんが話した具体例)」
+**目的:** 顧客の課題・懸念・解決軌跡を 3 部構成で抽出し、営業教材化に活用可能な形にする。  
+**実行コマンド:**
+```python
+python scripts/analyze_sentiment.py --input analysis.json --output_format structured
 ```
 
-### 段階的な感情分析
+**検証方法:**
+- [ ] 顧客の課題が「感度スコア」(0-1)付きで抽出されているか
+- [ ] 懸念と解決応答のセット（時間指定）が明記されているか
+- [ ] 営業が「納得させた瞬間」の感情スコア（-1 ～ +1）が算出されているか
 
-```
-Level 1: 二値分類（実装容易、活用度60%）
-  顧客の反応が「肯定」か「否定」か
-  └─ システム: 肯定語(「いいですね」「そうですね」)vs 否定語(「でも」「ちょっと」)カウント
-  
-  制限: 日本語の「でも、わかります」(同意しつつ懸念)が判別不可
+### 3段階の実装難度
 
-Level 2: 3段階分類（実装中程度、活用度75%）
-  「肯定」「中立」「懸念」
-  └─ システム: 懸念シグナル(「いくらですか」「他社との比較」)を検知
-  
-  制限: 懸念が強い(購買阻止)か弱い(問い合わせレベル)か不明
-
-Level 3: 課題+懸念+解決軌跡（実装難度高、活用度95%）
-  「『月支払が心配』と言った顧客」→ 「営業が『3ヶ月回収』と返答」 →
-  「顧客が『わかりました』と言った」の 3 部構成で初めて教育に使える
-  └─ システム: Claude に「顧客の懸念を営業がどう解決したか」を
-     逐語録から抽出させる
-
-  実例: note 記事「『月の支払が心配』と言う顧客に 3ヶ月回収で
-       納得させた営業トーク（実例 8 件から抽出）」
-```
+- **Level 1 (容易):** 二値分類：肯定語 vs 否定語カウント
+- **Level 2 (中程度):** 3段階分類：肯定・中立・懸念の判別
+- **Level 3 (推奨):** 課題+懸念+解決軌跡の 3 部構成抽出（Claude による逐語録解析）
 
 ---
 
-## Stage 4: note 記事・YouTube 台本への変換
+## Step 4: note 記事・YouTube 台本への変換
 
-### 使うパターン（テンプレ感を排除）
+**目的:** 感情分析結果から note / YouTube 用コンテンツを自動生成。テンプレ感を排除し、実例中心の構成にする。  
+**実行コマンド:**
+```python
+python scripts/generate_article.py --input analysis.json --template success_pattern
+```
 
-#### パターン 1: 失敗→成功ストーリー
+**出力形式:**
+- note 記事：失敗→成功ストーリー形式（実例を先に見せる）
+- YouTube 台本：ケースバイケース対応集（顧客タイプ別）
+
+### パターン 1: 失敗→成功ストーリー
 
 ❌ **NG（テンプレ感が強い）:**
 ```markdown
@@ -357,7 +339,7 @@ note/YouTube では「失敗→成功」を実録で見せる。
 
 ---
 
-## Stage 5: 個人・チーム教育への活用
+## Step 5: 個人・チーム教育への活用（フィードバック・可視化）
 
 ### 個別フィードバック（Aさんが使った失言フレーズを特定）
 
@@ -425,7 +407,7 @@ Aさんが使っていないフレーズ: (実録音声を再生 5:30-6:00)
 
 ---
 
-## Stage 6: 生成物の出力先と連携
+## Step 6: 生成物の出力先と連携（出力形式・法的チェック）
 
 ### 出力形式と使用先
 
@@ -468,7 +450,107 @@ Aさんが使っていないフレーズ: (実録音声を再生 5:30-6:00)
 
 ---
 
-## チェックリスト
+## 本番前テスト
+
+本番での実装の前に、以下のローカルテストを実行する。
+
+**事前準備:**
+```bash
+# サンプル音声ファイルの入手
+wget https://example.com/sample-zoom-call.m4a -O test_audio.m4a
+
+# テスト用 Python 環境の構築
+python -m venv venv && source venv/bin/activate
+pip install anthropic requests python-dotenv
+```
+
+**テスト実行チェックリスト:**
+```bash
+# 1. SKILL.md 形式検査
+bash scripts/validate_skill_format.sh | grep transcription-analysis-hojo
+# 期待値: ✅ PASS
+
+# 2. 実装例の実行
+python scripts/transcribe_audio.py --input_audio test_audio.m4a --output_format json
+# 期待値: analysis.json が生成される
+
+# 3. 感情分析処理の実行
+python scripts/analyze_sentiment.py --input analysis.json --output_format structured
+# 期待値: structured_analysis.json が生成される
+
+# 4. 記事生成の実行
+python scripts/generate_article.py --input analysis.json --template success_pattern
+# 期待値: article_draft.md が生成される
+
+# 5. CI ワークフロー確認
+git push origin claude/superpowers-per-chat-3mbx56
+# GitHub Actions で skill-validation.yml が実行される
+```
+
+**完了条件:**
+- [ ] SKILL.md が形式検査を PASS する（3つの警告が解消される）
+- [ ] 実装例が実行可能で、JSON 出力が生成される
+- [ ] 感情分析・記事生成が正常に実行される
+- [ ] GitHub Actions による自動検査に引っかかることがない
+
+---
+
+## 検証失敗時
+
+以下の条件で検証が失敗する場合、対応を行う。
+
+**音声フォーマット非対応**
+```
+症状: HTTPError 400 - "Unsupported media type"
+原因: 音声ファイル形式が対応していない（m4a/mp3/wav/flac/pcm のいずれかが必須）
+対応: ffmpeg で変換
+  ffmpeg -i input.mov -c:a aac -q:a 9 output.m4a
+自動起票: GitHub Issue #[auto-number] - "Audio format conversion required"
+```
+
+**API 認証エラー**
+```
+症状: HTTPError 401 - "Unauthorized"
+原因: CLAUDE_API_KEY が未設定または期限切れ
+対応:
+  export CLAUDE_API_KEY="sk-..."
+  # または .env ファイルに記入
+検証コマンド: python -c "import anthropic; print(anthropic.Anthropic().models.list())"
+```
+
+**ファイルサイズ超過**
+```
+症状: HTTPError 413 - "Payload too large"
+原因: 音声ファイルが 100MB を超えている
+対応: 音声を分割、または圧縮
+  ffmpeg -i input.m4a -q:a 4 output.m4a  # 品質低下許容で圧縮
+自動起票: GitHub Issue - "Audio file requires splitting"
+```
+
+**テキスト抽出失敗**
+```
+症状: JSON decode error または empty transcription
+原因: 音声が低品質、背景ノイズが多い、言語が異なる
+対応:
+  1. オーディオの品質確認: ffprobe test_audio.m4a | grep -E "bitrate|sample_rate"
+  2. ノイズ除去: ffmpeg-normalize を使用
+  3. 言語設定確認: system prompt に言語を明記（"日本語で書き起こしてください"）
+自動起票: GitHub Issue - "Transcription quality below threshold"
+```
+
+**感情分析の精度低下**
+```
+症状: 課題抽出が 30% 以下、感情スコアが全て中立(-0.2 ～ 0.2)
+原因: 会話の専門用語が多い、営業トークが単調、顧客発言が少ない
+対応:
+  1. system prompt を業界別にカスタマイズ
+  2. 分析の段階化：Level 1（二値分類）から開始
+  3. テンプレートを見直し：「感情」から「懸念シグナル」へ軸足を移す
+```
+
+---
+
+## チェックリスト（本番運用時）
 
 ```
 □ 月末に Zoom Phone から音声ファイルを一括取得できるか
