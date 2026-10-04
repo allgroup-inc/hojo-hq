@@ -15,10 +15,6 @@
     });
     updateSim();
 
-    document.querySelectorAll('[data-pending]').forEach((el) => {
-        el.addEventListener('click', (e) => e.preventDefault());
-    });
-
     // 数字は最初から最終値を表示しておき、見えた時だけ0から数え上げる
     const counters = document.querySelectorAll('.count');
     if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
