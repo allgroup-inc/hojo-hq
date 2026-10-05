@@ -1,0 +1,43 @@
+name: Skill Format Validation
+
+on:
+  pull_request:
+    paths:
+      - '.claude/skills/**'
+      - 'tests/skill_validation/**'
+      - 'scripts/validate_skill_format.sh'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run skill format validation
+        run: bash scripts/validate_skill_format.sh
+
+      - name: Run skill dependency tests
+        run: |
+          python -m pytest tests/skill_validation/test_dependencies.py -v
+
+      - name: Run skill format tests
+        run: |
+          python -m pytest tests/skill_validation/test_step_format.py -v
+
+      - name: Comment on PR if validation fails
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ Skill validation failed. Please check the logs above.'
+            })

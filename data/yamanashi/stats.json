@@ -1,8 +1,16 @@
 {
  "region": "yamanashi",
- "fetched_at": "2026-09-28",
+ "fetched_at": "2026-10-05",
  "source": "ga4-data-api",
  "this_week": {
+  "start": "2026-09-28",
+  "end": "2026-10-04",
+  "events": {},
+  "pageviews": 0,
+  "visitors": 0,
+  "line_forward": {}
+ },
+ "prev_week": {
   "start": "2026-09-21",
   "end": "2026-09-27",
   "events": {
@@ -37,14 +45,6 @@
   },
   "pageviews": 3,
   "visitors": 2,
-  "line_forward": {}
- },
- "prev_week": {
-  "start": "2026-09-14",
-  "end": "2026-09-20",
-  "events": {},
-  "pageviews": 0,
-  "visitors": 0,
   "line_forward": {}
  }
 }
