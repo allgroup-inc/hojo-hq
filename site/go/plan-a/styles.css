@@ -23,7 +23,7 @@
     --color-on-dark: #F4F1EA;
 
     --font-display: 'Shippori Mincho B1', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-    --font-body: 'Noto Sans JP', 'Meiryo', 'Hiragino Kaku Gothic ProN', sans-serif;
+    --font-body: 'BIZ UDPGothic', 'BIZ UDPゴシック', 'Noto Sans JP', 'Meiryo', 'Hiragino Kaku Gothic ProN', sans-serif;
 
     --wrap: 1080px;
     --gutter: clamp(16px, 4vw, 40px);
