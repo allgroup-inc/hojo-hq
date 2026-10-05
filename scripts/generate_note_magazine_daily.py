@@ -68,7 +68,12 @@ BANNED_PHRASES = ("必ず", "絶対", "誰でも", "確実に稼")
 def generate_article_with_claude(theme_config: dict, day_index: int) -> dict:
     """Claude API で高エンゲージメント記事を生成。"""
 
-    client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        print("[error] ANTHROPIC_API_KEY environment variable is not set")
+        return None
+
+    client = anthropic.Anthropic(api_key=api_key)
 
     # テーマを循環させる
     topic_list = theme_config["topics"]
@@ -168,7 +173,9 @@ def generate_article_with_claude(theme_config: dict, day_index: int) -> dict:
         }
 
     except Exception as e:
+        import traceback
         print(f"[error] Claude API エラー: {e}")
+        print(f"[error] Full traceback: {traceback.format_exc()}")
         return None
 
 
