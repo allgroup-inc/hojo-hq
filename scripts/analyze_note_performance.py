@@ -149,7 +149,7 @@ def analyze_with_claude(data: dict) -> str:
 
     try:
         message = client.messages.create(
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             max_tokens=2000,
             messages=[
                 {"role": "user", "content": prompt}

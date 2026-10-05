@@ -143,7 +143,7 @@ def generate_article_with_claude(theme_config: dict, day_index: int) -> dict:
 
     try:
         message = client.messages.create(
-            model="claude-opus-5",
+            model="claude-opus-5-5",
             max_tokens=3000,
             messages=[
                 {"role": "user", "content": prompt}

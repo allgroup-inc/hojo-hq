@@ -60,7 +60,7 @@ jobs:
 
       - name: Git push
         run: |
-          git push origin claude/note-ai-automation-revenue-apb22t || echo "Push failed or nothing to push"
+          git push origin main || echo "Push failed or nothing to push"
 
   analyze-performance:
     name: 週次分析・最適化提案
@@ -99,7 +99,7 @@ jobs:
 
       - name: Git push
         run: |
-          git push origin claude/note-ai-automation-revenue-apb22t || echo "Push failed or nothing to push"
+          git push origin main || echo "Push failed or nothing to push"
 
       - name: Slack 通知
         if: always()
