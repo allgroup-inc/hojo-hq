@@ -1,0 +1,17 @@
+name: glow-domain-check
+# 一時的な確認用(glow-okinawa.jp が HTTPS で開けるか)。確認が済んだら削除する
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/cool-bell-ugyalg]
+    paths: [".github/workflows/glow-domain-check.yml"]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for u in https://glow-okinawa.jp/ http://glow-okinawa.jp/ https://www.glow-okinawa.jp/ https://allgroup-inc.github.io/glow-world/ https://glow-okinawa.jp/glow-guide.pdf; do
+            echo "=== $u"; curl -sS -o /dev/null -m 20 -w "status=%{http_code} final=%{url_effective} ssl_verify=%{ssl_verify_result}\n" -L "$u" || echo "FAILED"
+          done
+          echo "=== title"; curl -sSL -m 20 https://glow-okinawa.jp/ | grep -o "<title>[^<]*" || true
+          echo "=== cert"; echo | openssl s_client -servername glow-okinawa.jp -connect glow-okinawa.jp:443 2>/dev/null | openssl x509 -noout -subject -issuer -enddate || echo "no cert"
