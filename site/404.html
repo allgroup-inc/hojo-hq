@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>ページが見つかりませんでした</title>
+<meta name="description" content="お探しのページが見つかりませんでした。トップページからお探しください。">
+<style>
+body{margin:0;font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  background:#FBF7F0;color:#3B322B;font-size:17px;line-height:1.9;
+  display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;box-sizing:border-box}
+.card{max-width:560px;width:100%;background:#fff;border:1px solid #EAE0D2;border-radius:20px;
+  padding:34px 28px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+p,a{word-break:auto-phrase;text-wrap:pretty}
+h1{font-size:1.3rem;margin:0 0 10px;line-height:1.6;text-wrap:balance;word-break:auto-phrase}
+p{margin:0 0 8px;color:#6d5c4d;font-size:.95rem}
+.links{margin-top:22px;display:grid;gap:10px}
+.links a{display:block;padding:14px 18px;min-height:44px;box-sizing:border-box;border:2px solid #C8BBA8;border-radius:12px;
+  color:#3B322B;text-decoration:none;font-weight:700;font-size:.98rem}
+.links a.main{background:#6B5E4F;border-color:#6B5E4F;color:#fff}
+.note{margin-top:18px;font-size:.85rem;color:#8B7C6E}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>お探しのページが<br>見つかりませんでした</h1>
+  <p>ページが移動したか、アドレスが少し違っているようです。<br>ご不便をおかけしてすみません。</p>
+  <div class="links" id="links">
+    <a class="main" href="/hojo-hq/">沖縄企業のミカタ(トップ)</a>
+    <a href="/hojo-hq/fukugiiro/">もらいわすれ堂(沖縄)</a>
+    <a href="/hojo-hq/yamanashi/">もらいわすれ堂 山梨版</a>
+  </div>
+  <p class="note">上のボタンから、お探しの内容にいちばん近い入口へお戻りください。</p>
+</div>
+<script>
+/* いま居た場所に合わせて、いちばん近い入口を先頭・強調にする(表示だけの並べ替え) */
+(function(){
+  try {
+    var path = location.pathname;
+    var box = document.getElementById("links");
+    var order = null;
+    if (path.indexOf("/yamanashi/") >= 0) {
+      order = [["/hojo-hq/yamanashi/", "もらいわすれ堂 山梨版(トップ)"],
+               ["/hojo-hq/yamanashi/shindan/", "3分でもらい忘れ診断をはじめる"],
+               ["/hojo-hq/yamanashi/kit/", "申請準備シート一覧"]];
+    } else if (path.indexOf("/fukugiiro/") >= 0) {
+      order = [["/hojo-hq/fukugiiro/", "もらいわすれ堂(トップ)"],
+               ["/hojo-hq/fukugiiro/shindan/", "3分でもらい忘れ診断をはじめる"],
+               ["/hojo-hq/fukugiiro/kit/", "申請準備シート一覧"]];
+    }
+    if (order) {
+      box.innerHTML = order.map(function(o, i){
+        return '<a' + (i === 0 ? ' class="main"' : '') + ' href="' + o[0] + '">' + o[1] + '</a>';
+      }).join("");
+    }
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

@@ -60,6 +60,12 @@ jobs:
           python scripts/yamanashi/build_yamanashi.py
           python scripts/generate_sitemap.py
 
+      # 山梨の県+市町村の制度(全国は上の沖縄版突合が照合済み)を公式ページと機械照合。
+      # レポート用途のため、照合が失敗しても収集・生成は止めない
+      - name: 山梨版 一次ソース突合レポート(検証部支援・2026-09-27 新設)
+        continue-on-error: true
+        run: python scripts/kensho_yamanashi.py
+
       - name: Commit data
         run: |
           git config user.name "hojo-hq-bot"
@@ -67,6 +73,8 @@ jobs:
           # 山梨版(site/yamanashi・data/yamanashi)もaddリストに入れる。addし忘れると直後の
           # git checkout/clean で生成物が消え、ビルドステップが無駄になる(2026-08-17 life追加漏れと同型)
           git add data/fukugiiro/seido.json data/fukugiiro/kensho_summary.json docs/フクギイロ_突合レポート.md site/fukugiiro/area site/fukugiiro/kit site/fukugiiro/life site/yamanashi data/yamanashi site/sitemap.xml site/robots.txt
+          # 山梨版突合レポート(2026-09-27 新設。生成ステップとaddリストは必ず対で更新)
+          [ -f "docs/山梨版_突合レポート.md" ] && git add "docs/山梨版_突合レポート.md" || true
           git diff --cached --quiet || git commit -m "auto: fukugiiro seido update $(date '+%Y-%m-%d %H:%M')"
           # addリスト外の生成残骸が pull --rebase を妨げないよう作業ツリーを掃除
           # (2026-08-17: life追加漏れ+未ステージ残骸でpullが3回失敗→無言でコミット消失した事故の再発防止)

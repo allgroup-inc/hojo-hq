@@ -27,6 +27,7 @@ GA4版の取得スクリプト。data/kpi/site_traffic.json に fetch_plausible_
 """
 import json
 import os
+import sys
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
@@ -35,6 +36,38 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(BASE, "data", "kpi", "site_traffic.json")
 LAUNCH_DATE = "2026-07-23"  # サイト公開日(all_time集計の起点)
 MORADOU_PREFIX = os.environ.get("MORADOU_PATH_PREFIX", "/hojo-hq/fukugiiro")
+
+
+def month_bounds(d):
+    """その日が属する月の初日と、集計の終端(今日 or 月末)を返す。
+
+    当月は「1日〜今日」で途中集計。過去月は「1日〜月末」で確定値になる。
+    """
+    first = d.replace(day=1)
+    nxt = (first + timedelta(days=32)).replace(day=1)
+    last = nxt - timedelta(days=1)
+    end = d if d < last else last
+    return first.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"), first.strftime("%Y-%m")
+
+
+def quality_note(rec):
+    """人数だけ見ると実態を誤る。直帰率と滞在時間から読み方の注意を付ける。
+
+    2026-09 上旬に「233人・直帰97%・滞在8秒」が記録され、その後7日値が3人まで
+    急落した。人数が増えたのではなく、人間でない訪問を数えていた疑いが強い。
+    数字を残すのは正しいが、注意なしで残すと月次が過大に読まれる。
+    """
+    if not rec:
+        return None
+    br, vd = rec.get("bounce_rate"), rec.get("visit_duration")
+    if br is None or vd is None:
+        return None
+    if br >= 90 and vd <= 15:
+        return ("直帰率が高く滞在が極端に短いため、実訪問として読まないこと"
+                f"(直帰{br}% / 滞在{vd}秒)。自動巡回の可能性")
+    if br >= 80:
+        return f"直帰率が高い(直帰{br}% / 滞在{vd}秒)。実訪問は表示より少ない可能性"
+    return None
 
 
 def get_token(sa_json: str) -> str:
@@ -82,7 +115,40 @@ def run_report(token: str, prop: str, start: str, end: str, moradou_only: bool):
     }
 
 
+def self_test():
+    """月境界の計算だけは外部依存なしで検証できる。ここが狂うと月次が全部ずれる。"""
+    from datetime import date
+    cases = [
+        (date(2026, 9, 22), ("2026-09-01", "2026-09-22", "2026-09")),   # 当月・途中
+        (date(2026, 9, 30), ("2026-09-01", "2026-09-30", "2026-09")),   # 当月・月末
+        (date(2026, 8, 31), ("2026-08-01", "2026-08-31", "2026-08")),   # 31日月
+        (date(2026, 2, 28), ("2026-02-01", "2026-02-28", "2026-02")),   # 2月
+        (date(2026, 12, 15), ("2026-12-01", "2026-12-15", "2026-12")),  # 年末
+        (date(2026, 1, 1), ("2026-01-01", "2026-01-01", "2026-01")),    # 月初
+    ]
+    ok = True
+    for d, want in cases:
+        got = month_bounds(d)
+        good = got == want
+        ok = ok and good
+        print(("  ok   " if good else "  NG   ") + f"{d} → {got}")
+    q = [
+        ({"bounce_rate": 97, "visit_duration": 8}, "実訪問として読まないこと"),
+        ({"bounce_rate": 85, "visit_duration": 120}, "直帰率が高い"),
+        ({"bounce_rate": 19, "visit_duration": 607}, None),
+    ]
+    for rec, want in q:
+        got = quality_note(rec)
+        good = (want is None and got is None) or (want and got and want in got)
+        ok = ok and good
+        print(("  ok   " if good else "  NG   ") + f"直帰{rec['bounce_rate']}% → {got}")
+    print("self-test:", "OK" if ok else "NG")
+    return 0 if ok else 1
+
+
 def main():
+    if "--self-test" in sys.argv:
+        return self_test()
     prop = os.environ.get("GA4_PROPERTY_ID")
     sa_json = os.environ.get("GA4_SA_JSON")
     if not prop or not sa_json:
@@ -119,6 +185,33 @@ def main():
                                  "moradou_pageviews": at_moradou.get("pageviews")}
     except Exception as e:  # noqa: BLE001
         print(f"[warn] 全期間累計の取得に失敗(継続): {type(e).__name__}")
+
+    # 月次。KGI❶は「月1万人」なのに7日ローリングしか持っていなかったため、
+    # 目標と測り方がずれていた(2026-09-22 小柳さんの指摘で追加)。
+    now = datetime.now(JST)
+    monthly = state.setdefault("monthly", {})
+    targets = [now]
+    prev_first = now.replace(day=1) - timedelta(days=1)
+    if prev_first.strftime("%Y-%m") not in monthly:
+        targets.append(prev_first)   # 前月がまだ無ければ確定値として一度だけ埋める
+    for d in targets:
+        m_start, m_end, key = month_bounds(d)
+        try:
+            m_dom = run_report(token, prop, m_start, m_end, moradou_only=False)
+            m_mor = run_report(token, prop, m_start, m_end, moradou_only=True)
+        except Exception as e:  # noqa: BLE001
+            print(f"[warn] {key} の月次取得に失敗(継続): {type(e).__name__}")
+            continue
+        monthly[key] = {
+            "period": f"{m_start}..{m_end}",
+            "confirmed": m_end != now.strftime("%Y-%m-%d"),   # 月末まで揃っているか
+            "as_of": now.strftime("%Y-%m-%d"),
+            "domain": m_dom, "moradou": m_mor,
+            "quality_note": quality_note(m_mor),
+        }
+        print(f"recorded(ga4) {key} 月次: domain={m_dom.get('visitors')}人 / "
+              f"moradou={m_mor.get('visitors')}人 "
+              f"({'確定' if monthly[key]['confirmed'] else '途中集計'})")
 
     state["history"] = [h for h in state.get("history", []) if h.get("date") != entry["date"]]
     state["history"].append(entry)

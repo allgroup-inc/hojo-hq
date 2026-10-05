@@ -8,6 +8,7 @@ on:
     branches: [main]  # 作業ブランチへのbot混入防止(resilient-agent-design監査 2026-08-07)
     paths:
       - "scripts/weekly_report_fukugiiro.py"
+      - "scripts/generate_ig_neta.py"
       - ".github/workflows/fukugiiro-weekly-report.yml"
   workflow_dispatch: {}
 
@@ -56,6 +57,16 @@ jobs:
           if [ -n "$GA4_PROPERTY_ID" ] && [ -n "$GA4_SA_JSON" ]; then pip install -q google-auth requests; fi
           python scripts/fetch_ga4_traffic.py
 
+      # 山梨版の週次数字(2026-09-23 新設。同じプロパティに相乗り・ymn_接頭辞で分離)
+      - name: 山梨版の週次数字取得 GA4(Secretsが有れば)
+        continue-on-error: true
+        env:
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
+        run: |
+          if [ -n "$GA4_PROPERTY_ID" ] && [ -n "$GA4_SA_JSON" ]; then pip install -q google-auth requests; fi
+          python scripts/yamanashi/fetch_yamanashi_stats.py
+
       - name: 週次レポート生成(統括ユイさん)
         run: python scripts/weekly_report_fukugiiro.py
 
@@ -68,9 +79,14 @@ jobs:
           curl -fsSL -o ~/.fonts/ShipporiMincho-SemiBold.ttf https://raw.githubusercontent.com/google/fonts/main/ofl/shipporimincho/ShipporiMincho-SemiBold.ttf || true
 
       - name: 遥さんボード生成(今週のIG投稿案・完成画像つき)
-        # data/fukugiiro/ig_neta.json(拡充ループが更新)→ 画像5枚+site/staff/haruka/
+        # 照合済みの制度から今週の5案を作り直す → 画像5枚 → site/staff/haruka/
+        # 2026-09-24: ig_neta.json は生成元が無い手置きファイルで、9月8日の内容が
+        # 16日間そのままだった。未照合の締切が使い回され遥さんの指摘で発覚したため、
+        # 毎週ここで作り直す。裏づけの検査に落ちたら止める(古い案は残る)。
         continue-on-error: true
         run: |
+          python scripts/generate_ig_neta.py
+          python scripts/check_ig_neta.py
           python scripts/generate_ig_images_fukugiiro.py || true
           python scripts/generate_haruka_board.py
           # LPのIG投稿プレビュー(軽量サムネ)を今週の投稿画像から再生成(2026-08-26 IG導線強化)
@@ -83,7 +99,12 @@ jobs:
           git add reports/fukugiiro
           [ -f data/fukugiiro/funnel.json ] && git add data/fukugiiro/funnel.json || true
           [ -f data/kpi/site_traffic.json ] && git add data/kpi/site_traffic.json || true
+          # 山梨版の週次数字(2026-09-23 新設。生成ステップとaddリストは必ず対で更新)
+          [ -f data/yamanashi/stats.json ] && git add data/yamanashi/stats.json || true
+          [ -f "docs/山梨版_週次数字.md" ] && git add "docs/山梨版_週次数字.md" || true
           [ -f site/staff/haruka/index.html ] && git add site/staff/haruka || true
+          # 生成ステップとaddリストは必ず対で更新する(CLAUDE.md 再発防止メモ)
+          [ -f data/fukugiiro/ig_neta.json ] && git add data/fukugiiro/ig_neta.json || true
           [ -d site/fukugiiro/assets/ig ] && git add site/fukugiiro/assets/ig || true
           git diff --cached --quiet || git commit -m "auto: もらいわすれ堂 週次レポート $(date '+%Y-%m-%d')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)

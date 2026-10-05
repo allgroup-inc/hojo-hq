@@ -34,6 +34,11 @@ jobs:
         # 守り部審査済み(docs/守り部審査記録.md)。沖縄県・産業振興公社・那覇市を追加収集しマージ
         run: python scripts/fetch_local.py
 
+      - name: Preserve verified & ig_* fields (ブロッカー #1 対策)
+        # update.yml が毎日再生成する際、既存の verified / ig_priority などが消えるリスク対策
+        # fetch_jgrants + fetch_local の直後に実行し、新しい JSON に既存フィールドをマージ
+        run: python scripts/preserve_fields.py
+
       - name: Generate LINE deadline alerts
         # 締切7日以内の制度からLINE配信下書きを自動生成(配信は人が実行)
         run: python scripts/generate_line_alerts.py
@@ -132,17 +137,17 @@ jobs:
             echo "GAS ledger secrets not set; ledger disabled"
           fi
 
-      - name: Prepare Pages artifact(ノビシロは掲載未承認のため除外)
-        # 配色・連絡先が未確定、小柳さんの掲載決裁前(絶対ルール5)。
-        # 詳細: docs/superpowers/plans/2026-07-25-gajumaru-site-skeleton.md
-        # 掲載承認が出たらこのステップを削除するだけで公開対象に戻る。
+      - name: Prepare Pages artifact(未承認コンテンツを除外)
+        # ノビシロ: 配色・連絡先が未確定、小柳さんの掲載決裁前(絶対ルール5)。
+        # みらいひらけ堂: 公開判定(掲載基準決裁+守り部審査+データ整備)クリアまで除外。
+        # Plan A LP: 事実検証・badge承認・CV方針・議事決定待ち(最終review: 2026-09-27)。
+        # 掲載承認が出たらこのステップから除外行を削除するだけで公開対象に戻る。
         run: |
           rm -rf /tmp/pages-deploy
           cp -r site /tmp/pages-deploy
           rm -rf /tmp/pages-deploy/nobishiro
-          # みらいひらけ堂は公開判定(掲載基準決裁+守り部審査+データ整備)クリアまで除外。
-          # 詳細: docs/みらいひらけ堂_掲載基準.md / docs/議事_20260905_無料学習支援検索サービス新設の上申.md 追記2
           rm -rf /tmp/pages-deploy/miraihirake
+          rm -rf /tmp/pages-deploy/go/plan-a
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v5

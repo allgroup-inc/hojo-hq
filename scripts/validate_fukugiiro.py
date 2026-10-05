@@ -160,6 +160,48 @@ def self_test():
     return failed == 0
 
 
+def check_national_seeds():
+    """area=全国 のシードに沖縄固有の内容が混ざっていないかを見る。
+
+    全国制度は山梨版がそのまま流用するので、出典が沖縄県のページだと
+    **山梨の利用者が沖縄県のページへ送られる**。
+    2026-09-22、fk-kuni-kokuho-genmen の出典を沖縄県ページへ差し替えたことで
+    fukugiiro-fetch が落ち、毎日4回の収集が止まった。
+
+    build_yamanashi.py の安全弁だけでは PR 時点で捕まらない。PRでは seido.json が
+    前回の出力(まだ正しい)なので通ってしまい、夜間に fetch がシードから
+    再構築した瞬間に初めて落ちる。だから**シードを直接見る**。
+    """
+    import importlib.util
+    seeds_py = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "fetch_fukugiiro_extra.py")
+    if not os.path.exists(seeds_py):
+        return []
+    try:
+        spec = importlib.util.spec_from_file_location("_seeds_check", seeds_py)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        seeds = getattr(mod, "EXTRA_SEEDS", [])
+    except Exception as e:  # noqa: BLE001
+        # 読めなかったことは「問題なし」ではないので、黙って通さず警告にする
+        return [f"[WARN] シードを読めませんでした({type(e).__name__}): 全国シードの点検をスキップ"]
+    errs = []
+    for sd in seeds:
+        if sd.get("area") != "全国":
+            continue
+        sid = sd.get("id", "?")
+        blob = json.dumps(sd, ensure_ascii=False)
+        if "沖縄" in blob:
+            fields = [k for k, v in sd.items()
+                      if "沖縄" in json.dumps(v, ensure_ascii=False)]
+            errs.append(f"{sid}: area=全国 なのに沖縄固有の内容を含む(フィールド {fields})。"
+                        "山梨版が同じデータを使うため、山梨の利用者に沖縄の情報が出ます")
+        if "okinawa" in (sd.get("source_url") or "").lower():
+            errs.append(f"{sid}: area=全国 なのに出典URLが沖縄ドメイン"
+                        f"({sd.get('source_url')})。全国制度の原文は全国の発信元にしてください")
+    return errs
+
+
 def main():
     if "--self-test" in sys.argv:
         ok = self_test()
@@ -170,12 +212,19 @@ def main():
         data = json.load(f)
     errors, warnings = validate(data)
 
+    # シード側の点検。seido.json は前回の出力なので、シードの誤りはここでしか捕まらない
+    seed_msgs = check_national_seeds()
+    seed_errs = [m for m in seed_msgs if not m.startswith("[WARN]")]
+    for m in seed_msgs:
+        print(m if m.startswith("[WARN]") else f"[ERROR] 全国シード: {m}")
+
     for w in warnings:
         print(f"[WARN] {w}")
     for e in errors:
         print(f"[ERROR] {e}")
-    print(f"検証完了: {len(data.get('items', []))}件 / エラー {len(errors)} / 警告 {len(warnings)}")
-    if errors:
+    print(f"検証完了: {len(data.get('items', []))}件 / エラー {len(errors)} / 警告 {len(warnings)}"
+          f" / 全国シードのエラー {len(seed_errs)}")
+    if errors or seed_errs:
         sys.exit(1)
 
 

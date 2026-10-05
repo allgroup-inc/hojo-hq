@@ -104,10 +104,18 @@ def summarize(prompt):
     for model in MODEL_CANDIDATES:
         try:
             resp = client.messages.create(
-                model=model, max_tokens=1200,
+                # 2026-09-21初回本番実行で1200だと本文が文の途中でmax_tokens切れし、
+                # 気づかず途中欠けのままファイルへ書かれた(#255直後の実行で発覚)。
+                # stop_reasonチェックと合わせて、切れたら書かず失敗扱いにする。
+                model=model, max_tokens=2000,
                 messages=[{"role": "user", "content": prompt}],
             )
             text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+            if resp.stop_reason == "max_tokens":
+                last_err = RuntimeError(
+                    f"{model}: max_tokensで本文が途中で切れた(stop_reason=max_tokens)"
+                )
+                continue
             if text.strip():
                 return text.strip(), model
         except anthropic.NotFoundError as e:  # モデル改名・廃止 → 次候補

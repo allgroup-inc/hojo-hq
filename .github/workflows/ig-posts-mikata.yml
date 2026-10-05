@@ -1,0 +1,109 @@
+name: Generate IG Posts (Mikata)
+
+# 沖縄企業のミカタ Instagram 投稿案の週次自動生成(Task 15)。
+# 毎週日曜 18:00 JST に 照合 → 生成 → commit & push → 承認者へ通知。
+# 公開(投稿)はしない。月曜朝の人の承認ゲートを通ったものだけが投稿される。
+#
+# 注意: schedule トリガーはデフォルトブランチ(main)上のファイルでしか発火しない。
+# main へ統合するまでは workflow_dispatch で手動実行して確認する。
+
+on:
+  schedule:
+    - cron: '0 9 * * 0'  # Every Sunday 09:00 UTC = 18:00 JST
+  workflow_dispatch: {}  # Allow manual trigger for testing
+
+# 同時に2本走らせない(data/subsidies.json を push し合って rebase が衝突するのを防ぐ)。
+# update-subsidies(03/09/15/21 JST)とは発火時刻が重ならない。
+concurrency:
+  group: ig-posts-mikata
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  generate-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      # 依存インストールなし: generate_ig_posts_mikata.py / verify_mikata_seido.py は
+      # 標準ライブラリのみ(urllib)で動く。requirements.txt はリポジトリに存在しない。
+
+      - name: Verify accuracy (Claude + Gemini dual-check)
+        # 生成より先に照合する: 生成側は verified が NG の制度を候補から外す(_verified_ng)ため、
+        # 後から照合すると今週NGになった制度が今週の投稿案に残ってしまう(絶対ルール1)。
+        # 対象は ig_priority のある制度のみ(--only-ig)。Claude キー未設定なら exit 2 で止まる。
+        # GEMINI_API_KEY 未設定なら Claude 単独照合(エラーにしない)。
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # モデル既定は claude-opus-5-5(スクリプト側)。変える場合は repo variable で上書き。
+          VERIFY_MIKATA_CLAUDE_MODEL: ${{ vars.VERIFY_MIKATA_CLAUDE_MODEL || 'claude-opus-5-5' }}
+        run: python scripts/verify_mikata_seido.py --only-ig
+
+      - name: Generate draft posts
+        # テンプレート写像+キャプション生成(API呼び出しなし・決定的)。
+        run: python scripts/generate_ig_posts_mikata.py
+
+      - name: Commit & push
+        id: push
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add data/subsidies.json data/kpi/verify_mikata_audit.jsonl
+          git add -f data/ig_posts_mikata_draft.json  # Force-add: gitignored until Week 4
+          WEEK=$(TZ=Asia/Tokyo date +%G-W%V)
+          git diff --cached --quiet || git commit -m "auto: IG投稿案生成・検証 ${WEEK}"
+          BRANCH="${GITHUB_REF_NAME}"
+          # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回・update.yml と同じ作法)。
+          pushed=0
+          for i in 1 2 3; do
+            if git pull --rebase -X theirs origin "$BRANCH" && git push origin "HEAD:$BRANCH"; then
+              pushed=1; break
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "push retry $i"; sleep 5
+          done
+          if [ "$pushed" != 1 ]; then
+            echo "::error::push に3回失敗しました"; exit 1
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Notify approvers
+        # 通知は任意: SLACK_WEBHOOK_IG_APPROVALS 未設定ならスキップ、送信失敗でもジョブは落とさない
+        # (ワークフローの成否は照合・生成・push の結果だけを表す)。
+        if: success()
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_IG_APPROVALS }}
+          DRAFT_URL: ${{ github.server_url }}/${{ github.repository }}/blob/${{ steps.push.outputs.sha }}/data/ig_posts_mikata_draft.json
+        run: |
+          if [ -z "$SLACK_WEBHOOK" ]; then
+            echo "[info] SLACK_WEBHOOK_IG_APPROVALS 未設定: 通知をスキップ"
+            exit 0
+          fi
+          PAYLOAD=$(python - <<'EOF'
+          import json, os
+          with open("data/ig_posts_mikata_draft.json", encoding="utf-8") as f:
+              drafts = json.load(f)
+          n = len(drafts)
+          blocked = sum(1 for d in drafts if isinstance(d, dict) and d.get("publish_blocked"))
+          text = f"IG投稿案 {n} 件が生成されました(月曜朝の承認待ち)"
+          if blocked:
+              text += f" / うち投稿止め {blocked} 件"
+          text += f"\n{os.environ['DRAFT_URL']}"
+          print(json.dumps({"text": text}, ensure_ascii=False))
+          EOF
+          )
+          curl -sS --fail -X POST "$SLACK_WEBHOOK" \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            --data "$PAYLOAD"

@@ -16,11 +16,17 @@ import json, os, re, shutil, subprocess, sys
 BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from seeds_yamanashi import YMN_PREF_SEEDS  # noqa: E402
+from seeds_yamanashi_muni import YMN_MUNI_SEEDS  # noqa: E402
 
 SRC = os.path.join(BASE, "site", "fukugiiro")
 OUT = os.path.join(BASE, "site", "yamanashi")
 DATA_OUT = os.path.join(BASE, "data", "yamanashi", "seido.json")
-Y_BASE_URL = "https://allgroup-inc.github.io/hojo-hq/yamanashi/"
+# 山梨版ページの**正規URL**の基底(canonicalにしか使わない)。
+# 独自ドメインへ引っ越したら fg_yamanashi.MOVED_TO が入るので、ここも自動で追従する
+# (scripts/moradou_cutover.py が開通を実測してから切り替える)。
+sys.path.insert(0, os.path.join(BASE, "scripts"))
+import fg_yamanashi as _fgy  # noqa: E402
+Y_BASE_URL = _fgy.canonical_base() + "/"
 
 MUNIS = ["甲府市","富士吉田市","都留市","山梨市","大月市","韮崎市","南アルプス市","北杜市","甲斐市","笛吹市","上野原市","甲州市","中央市",
          "市川三郷町","早川町","身延町","南部町","富士川町","昭和町","西桂町","富士河口湖町",
@@ -59,6 +65,12 @@ def must_replace(s, old, new, label):
     assert old in s, f"置換対象が見つからない: {label}"
     return s.replace(old, new)
 
+def must_sub(s, pattern, new, label, count=1):
+    """正規表現での置換。1件も当たらなければ落とす(置換したつもりで素通り、を防ぐ)。"""
+    out, n = re.subn(pattern, new, s, count=count)
+    assert n > 0, f"置換対象が見つからない: {label}"
+    return out
+
 def _pref_items(now):
     """山梨県の制度シードを、全国制度と同じ形に整えて返す(第2段階)。
 
@@ -84,24 +96,89 @@ def _pref_items(now):
     return out
 
 
+# A区分(個別ページへのリンク可)の市町村と本人確認済みドメイン(守り部審査記録_山梨版_2026-09-20)。
+# シードのURLがこの表に無いドメインなら機械で止める(検索由来URLの取り違え防止)
+# 2026-09-23 再監査(抜粋2窓化)で修正: 小菅村は「リンクフリー」の続きに
+# 「下層ページへの直リンクはご遠慮ください」とありB区分だったため除外。
+# 都留市・甲斐市は各ページへのリンク可が確認できたためA区分へ追加。
+A_MUNI_DOMAINS = {
+    "北杜市": "www.city.hokuto.yamanashi.jp",
+    "富士河口湖町": "www.town.fujikawaguchiko.lg.jp",
+    "南アルプス市": "www.city.minami-alps.yamanashi.jp",
+    "上野原市": "www.city.uenohara.yamanashi.jp",
+    "昭和町": "www.town.showa.yamanashi.jp",
+    "早川町": "www.town.hayakawa.yamanashi.jp",
+    "都留市": "www.city.tsuru.yamanashi.jp",
+    "甲斐市": "www.city.kai.yamanashi.jp",
+}
+
+
+def _muni_items(now):
+    """A区分市町村の制度シードを全国制度と同じ形に整えて返す(第2段階・2026-09-23)。
+
+    金額・締切は原文の逐語照合が済むまで status="要確認" / verified=False のまま(絶対ルール1)。
+    B区分・論点1の市町(トップページ限定/営利サイト条項)は決裁待ちのため含まれない。
+    """
+    import urllib.parse
+    out = []
+    for seed in YMN_MUNI_SEEDS:
+        it = dict(seed)
+        area = it["area"]
+        assert area in A_MUNI_DOMAINS, f'{it["id"]}: A区分外の市町村({area})'
+        host = urllib.parse.urlparse(it["source_url"]).netloc
+        assert host == A_MUNI_DOMAINS[area], f'{it["id"]}: 出典ドメイン不一致({host})'
+        it.setdefault("amount_note", "要確認(公式ページと窓口でご確認ください)")
+        it.setdefault("deadline_type", "常時")
+        it.setdefault("deadline", None)
+        it.update({
+            "verified": False,
+            "verified_at": None,
+            "verified_by": None,
+            "status": "要確認",
+            "notes": "出典: " + area + "ウェブサイト",
+            "fetched_at": now,
+        })
+        out.append(it)
+    return out
+
+
+def _assert_no_okinawa(item):
+    """山梨版に沖縄の内容が混ざるのを止める。
+
+    漢字の「沖縄」だけでは足りない。出典URLが okinawa ドメインのままだと、
+    山梨の利用者が沖縄県のページへ送られる(2026-09-22 実際に fukugiiro-fetch が
+    落ちた原因。全国制度 fk-kuni-kokuho-genmen の出典を沖縄県ページへ差し替えたため)。
+    表記は漢字・ローマ字の両方で見る。
+    """
+    blob = json.dumps(item, ensure_ascii=False)
+    assert "沖縄" not in blob, f'{item["id"]}: 内容に「沖縄」が含まれる'
+    url = (item.get("source_url") or "").lower()
+    assert "okinawa" not in url, f'{item["id"]}: 出典URLが沖縄ドメイン({url})'
+
+
 def build_data():
     src = json.load(open(os.path.join(BASE,"data","fukugiiro","seido.json"),encoding="utf-8"))
     items = src["items"]
     nat = [dict(i) for i in items if i.get("area") == "全国"]
     for i in nat:
-        assert "沖縄" not in json.dumps(i, ensure_ascii=False), i["id"]
+        _assert_no_okinawa(i)
     pref = _pref_items(src["updated_at"])
     for i in pref:
         # 沖縄版からの取り違えを機械で止める(全国制度と同じ守り)
-        assert "沖縄" not in json.dumps(i, ensure_ascii=False), i["id"]
+        _assert_no_okinawa(i)
         assert i["area"] == "山梨県", i["id"]
-    merged = nat + pref
+    muni = _muni_items(src["updated_at"])
+    for i in muni:
+        _assert_no_okinawa(i)
+    merged = nat + pref + muni
     ids = [i["id"] for i in merged]
     assert len(ids) == len(set(ids)), "IDが重複している"
     data = {"region":"yamanashi","updated_at": src["updated_at"],
             "count": len(merged), "items": merged,
-            "note": "国の制度(沖縄版で公式照合済みの全国制度を流用)+山梨県の制度。"
-                    "市町村独自の制度は守り部の論点(営利サイト可否・トップページ限定)の決裁後に追加"}
+            "note": "国の制度(沖縄版で公式照合済みの全国制度を流用)+山梨県の制度"
+                    "+A区分8市町村の制度(守り部審査でリンク可と判定済み・2026-09-23追加、"
+                    "同日の再監査で小菅村を撤去し都留市・甲斐市を追加)。"
+                    "B区分(トップページ限定)と論点対象の市町(営利サイト条項)は決裁後に追加"}
     os.makedirs(os.path.dirname(DATA_OUT), exist_ok=True)
     with open(DATA_OUT,"w",encoding="utf-8") as f:
         json.dump(data,f,ensure_ascii=False,indent=1); f.write("\n")
@@ -132,14 +209,22 @@ window.FG_LINE_URL = "https://allgroup-inc.github.io/hojo-hq/go/ymn-shindan/";
 window.FG_LINE_OA_ID = "630pbjqq";
 ''')
 
+def swap_ogp(s):
+    """OGP画像を山梨版カードへ(沖縄版ページから変換する際の共通処理)"""
+    return s.replace("https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/ogp.jpg",
+                     "https://allgroup-inc.github.io/hojo-hq/yamanashi/assets/ogp.jpg")
+
 def swap_header(s, depth=1):
     return re.sub(r'<header class="siteheader">.*?</header>', header(depth), s, count=1, flags=re.S)
 
 def build_shindan():
     s = open(os.path.join(SRC,"shindan","index.html"),encoding="utf-8").read()
     s = swap_header(s)
-    s = must_replace(s, '<link rel="canonical" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">',
-                     f'<link rel="canonical" href="{Y_BASE_URL}shindan/">', "canonical")
+    s = swap_ogp(s)
+    # 沖縄側のcanonicalの値は独自ドメイン移行で変わるため、URLの厳密一致では探さない。
+    # ただし「1件も置き換わらなかった」は静かに通さない(must_sub が落とす)。
+    s = must_sub(s, r'<link rel="canonical" href="[^"]*">',
+                 f'<link rel="canonical" href="{Y_BASE_URL}shindan/">', "canonical")
     s = must_replace(s, '<meta name="description" content="沖縄県にお住まいの世帯向け。',
                      '<meta name="description" content="山梨県にお住まいの世帯向け。', "desc")
     # 市町村リスト
@@ -180,14 +265,28 @@ def build_shindan():
     # 準備シート53ページを生成済みのため、結果カードの準備シートリンクは沖縄版のまま生かす(第2段階・2026-09-20)
     s = must_replace(s, 'text:"💬 受け取れた金額をLINEで報告する(匿名・任意)"',
                      'text:"💬 受け取れたことを報告する(匿名・任意)"', "houkoku link text")
+    # 共有・持ち出しテキストの沖縄残存を差し替える(2026-09-27 点検で発見。
+    # 山梨の利用者が家族に送ったリンクが沖縄版診断へ飛んでいた)
+    assert s.count('https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/') == 2, "共有URLの箇所数が想定と違う"
+    s = s.replace('https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/',
+                  f'{Y_BASE_URL}shindan/')
+    s = must_replace(s, '「もらいわすれ堂」で沖縄の給付金・手当のもらい忘れを3分で診断できるよ',
+                     '「もらいわすれ堂」で山梨の給付金・手当のもらい忘れを3分で診断できるよ', "share text")
+    s = must_replace(s, 'text:"沖縄県外にお住まい"', 'text:"山梨県外にお住まい"', "県外option")
     os.makedirs(os.path.join(OUT,"shindan"), exist_ok=True)
     open(os.path.join(OUT,"shindan","index.html"),"w",encoding="utf-8").write(s)
-    shutil.copy(os.path.join(SRC,"shindan","logic.js"), os.path.join(OUT,"shindan","logic.js"))
+    # 判定ロジックも沖縄版からの変換。area === "沖縄県" のままだと山梨県の制度(5件)が
+    # 診断で1件もヒットしない(2026-09-27 点検で発見)
+    lg = open(os.path.join(SRC,"shindan","logic.js"),encoding="utf-8").read()
+    lg = must_replace(lg, 'area === "沖縄県"', 'area === "山梨県"', "logic.js 県判定")
+    lg = lg.replace("地域: 全国 / 沖縄県 / 回答した市町村のみ", "地域: 全国 / 山梨県 / 回答した市町村のみ")
+    open(os.path.join(OUT,"shindan","logic.js"),"w",encoding="utf-8").write(lg)
 
 def build_static():
     # 受給報告
     s = open(os.path.join(SRC,"houkoku","index.html"),encoding="utf-8").read()
     s = swap_header(s)
+    s = swap_ogp(s)
     s = re.sub(r'<link rel="canonical" href="[^"]*">', f'<link rel="canonical" href="{Y_BASE_URL}houkoku/">', s, count=1)
     opts = '<select id="area"><option value="">選択しない</option>' + ''.join(f'<option>{m}</option>' for m in MUNIS) + '</select>'
     s = re.sub(r'<select id="area">.*?</select>', opts, s, count=1, flags=re.S)
@@ -197,6 +296,7 @@ def build_static():
     for page in ("privacy","teisei"):
         s = open(os.path.join(SRC,page,"index.html"),encoding="utf-8").read()
         s = swap_header(s)
+        s = swap_ogp(s)
         s = re.sub(r'<link rel="canonical" href="[^"]*">', f'<link rel="canonical" href="{Y_BASE_URL}{page}/">', s, count=1)
         os.makedirs(os.path.join(OUT,page), exist_ok=True)
         open(os.path.join(OUT,page,"index.html"),"w",encoding="utf-8").write(s)
@@ -307,7 +407,8 @@ def main():
     build_kit_and_area()
     nat = sum(1 for i in items if i["area"] == "全国")
     pref = sum(1 for i in items if i["area"] == "山梨県")
-    print(f"[ok] 山梨版ビルド完了: 制度{len(items)}件(国{nat}+県{pref}) / life9+一覧 / shindan / houkoku / privacy / teisei / kit53+一覧 / area27+一覧")
+    muni = len(items) - nat - pref
+    print(f"[ok] 山梨版ビルド完了: 制度{len(items)}件(国{nat}+県{pref}+市町村{muni}) / life9+一覧 / shindan / houkoku / privacy / teisei / kit53+一覧 / area27+一覧")
 
 if __name__ == "__main__":
     main()

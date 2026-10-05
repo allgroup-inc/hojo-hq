@@ -26,6 +26,10 @@
 | /go/ymn-kit/ | フクギイロ山梨: 準備シートページ | https://line.me/R/ti/p/%40630pbjqq |
 | /go/ymn-life/ | フクギイロ山梨: ライフイベント別ページ | https://line.me/R/ti/p/%40630pbjqq |
 | /go/ymn-jukyu/ | フクギイロ山梨: 受給報告(受け取れました) | https://line.me/R/ti/p/%40630pbjqq |
+| /go/glow-lp/ | GLOW: 世界へ推進LP | https://line.me/R/ti/p/%40042wvrgo |
+| /go/glow-ig/ | GLOW: Instagramプロフィール | https://line.me/R/ti/p/%40042wvrgo |
+| /go/glow-fb/ | GLOW: Facebookページ | https://line.me/R/ti/p/%40042wvrgo |
+| /go/glow-deck/ | GLOW: 提案資料のQRコード | https://line.me/R/ti/p/%40042wvrgo |
 
 ## 転送先を変えるとき
 1. `scripts/generate_go_pages.py` の CHANNELS の dest を書き換える

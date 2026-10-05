@@ -12,7 +12,12 @@ on:
   schedule:
     # JST 10:15(= UTC 01:15)。データ更新(09:00 JST)の後に照合。
     - cron: "15 1 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      sample_size:
+        description: "Sample size (default: 5, Phase 2: 20)"
+        required: false
+        default: "5"
 
 permissions:
   contents: write  # 照合履歴(data/kpi/verify_history.json)のコミットに必要
@@ -39,6 +44,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VERIFY_SAMPLE_SIZE: ${{ github.event.inputs.sample_size || '5' }}
         run: python scripts/verify_sources.py
 
       # ── 照合履歴を台帳へ蓄積(NG検知時も必ず実行。効果測定2026-11-06の根拠データ)──
