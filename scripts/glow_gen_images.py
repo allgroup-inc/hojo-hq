@@ -28,7 +28,7 @@ STYLE = ("Professional e-commerce product photograph, bright natural daylight, s
 
 IMAGES = {
     # 名前: (縦横比, 横幅px, 説明)  ※LPの売り場イメージの商品カードと同じ並び
-    "andagi": ("1:1", 640, "Okinawan sata andagi, round golden fried doughnuts, piled on a small plate. " + STYLE),
+    "andagi": ("1:1", 640, "Okinawan sata andagi: solid round ball-shaped fried dough snacks about the size of a golf ball, NO hole in the middle, cracked golden-brown surface, a few piled in a small ceramic dish. " + STYLE),
     "mozuku": ("1:1", 640, "Fresh Okinawan mozuku seaweed in vinegar served in a small glass bowl. " + STYLE),
     "umibudo": ("1:1", 640, "Fresh Okinawan sea grapes (umibudo) on a white dish, glossy green beads. " + STYLE),
     "pineapple": ("1:1", 640, "A whole ripe Okinawan pineapple next to a few cut golden pineapple pieces. " + STYLE),
