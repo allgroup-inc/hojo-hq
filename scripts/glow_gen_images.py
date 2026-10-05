@@ -5,7 +5,7 @@ GLOW 世界へ推進LPの「売り場のイメージ」用に、商品写真の�
 
   GEMINI_API_KEY=... python scripts/glow_gen_images.py
 
-出力: site/go/plan-a/assets/images/booth/<名前>.webp(すでにあるものは作り直さない)
+出力: site/go/plan-a/assets/images/booth/ai/<名前>.webp(LPの商品カードと同じ名前。差し替えはLP側で行う)(すでにあるものは作り直さない)
 すべてAIが作ったイメージ写真。実在の商品・ブランドではないので、ラベルの文字やロゴは入れない。
 LP・資料では必ず「※写真はイメージです」と併記する。
 """
@@ -19,7 +19,7 @@ import urllib.request
 
 from PIL import Image
 
-OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site", "go", "plan-a", "assets", "images", "booth")
+OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site", "go", "plan-a", "assets", "images", "booth", "ai")
 MODELS = ["gemini-2.5-flash-image", "gemini-2.5-flash-image-preview", "gemini-3-pro-image-preview"]
 
 STYLE = ("Professional e-commerce product photograph, bright natural daylight, soft shadow, "
@@ -27,19 +27,16 @@ STYLE = ("Professional e-commerce product photograph, bright natural daylight, s
          "no letters, no logos, no labels with writing, no watermark.")
 
 IMAGES = {
-    # 名前: (縦横比, 横幅px, 説明)
-    "hero": ("16:9", 1600, "Wide banner photo: a bright trade show booth decorated with red and gold Ryukyu (Okinawa) "
-             "motifs, international business buyers in suits smiling and tasting Okinawan specialty foods and drinks "
-             "displayed on a table (bottles of awamori, brown sugar, citrus juice, colorful textiles, blue glassware). "
-             "Photorealistic, warm and lively, no text, no logos, no watermark."),
-    "awamori": ("1:1", 640, "A traditional Okinawan awamori spirit in an elegant ceramic bottle and a small clay cup. " + STYLE),
-    "kokuto": ("1:1", 640, "Chunks of Okinawan brown sugar (kokuto) in a small wooden bowl. " + STYLE),
-    "shikuwasa": ("1:1", 640, "A glass bottle of green citrus juice with fresh small green Okinawan shikuwasa citrus fruits beside it. " + STYLE),
+    # 名前: (縦横比, 横幅px, 説明)  ※LPの売り場イメージの商品カードと同じ並び
+    "andagi": ("1:1", 640, "Okinawan sata andagi, round golden fried doughnuts, piled on a small plate. " + STYLE),
     "mozuku": ("1:1", 640, "Fresh Okinawan mozuku seaweed in vinegar served in a small glass bowl. " + STYLE),
-    "umibudo": ("1:1", 640, "Fresh Okinawan sea grapes (umibudo) in a white dish, glossy green beads. " + STYLE),
-    "beniimo": ("1:1", 640, "Purple sweet potato tarts (beni-imo tarts) from Okinawa arranged on a plate. " + STYLE),
-    "bingata": ("1:1", 640, "A folded piece of colorful Okinawan bingata dyed textile with bright floral patterns. " + STYLE),
-    "glass": ("1:1", 640, "Handmade Ryukyu glass tumblers in blue and green with bubbles, sunlight through them. " + STYLE),
+    "umibudo": ("1:1", 640, "Fresh Okinawan sea grapes (umibudo) on a white dish, glossy green beads. " + STYLE),
+    "pineapple": ("1:1", 640, "A whole ripe Okinawan pineapple next to a few cut golden pineapple pieces. " + STYLE),
+    "soba": ("1:1", 640, "A bowl of Okinawa soba noodles with braised pork belly, pickled ginger and green onion. " + STYLE),
+    "glass": ("1:1", 640, "Handmade Ryukyu glass tumblers in blue and green with tiny bubbles, sunlight through them. " + STYLE),
+    "bingata": ("1:1", 640, "A neatly folded piece of colorful Okinawan bingata dyed textile with bright floral patterns. " + STYLE),
+    "awamori": ("1:1", 640, "A traditional Okinawan awamori spirit in a plain ceramic bottle and a small clay cup. " + STYLE),
+    "kokuto": ("1:1", 640, "Chunks of Okinawan brown sugar (kokuto) in a small wooden bowl. " + STYLE),
 }
 
 
