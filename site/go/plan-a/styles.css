@@ -284,7 +284,7 @@ h3 { font-size: 1.12rem; line-height: 1.5; color: var(--color-heading); }
     background: rgba(255, 255, 255, .04);
     min-width: 0;
 }
-.wall-no { font-size: 1rem; font-weight: 700; letter-spacing: .12em; color: #F0A88E; }
+.wall-no { font-size: 1.35rem; display: block; margin-bottom: 4px; font-weight: 700; letter-spacing: .12em; color: #F0A88E; }
 .walls h3 { color: #FFFFFF; }
 .wall-cost { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; line-height: 1.4; color: #FFFFFF; }
 .walls li p:last-child { font-size: .9rem; color: #C7CFD5; line-height: 1.8; }
