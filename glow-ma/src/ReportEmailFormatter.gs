@@ -399,7 +399,7 @@ function formatReportEmail(reportData) {
         ①紹介: <strong>${reportData.routeConversion["①紹介"].contracts}</strong>成約 (${reportData.routeConversion["①紹介"].total}社, <span class="metric-compare">${reportData.routeConversion["①紹介"].rate}</span>)<br>
         ②手紙DM: <strong>${reportData.routeConversion["②手紙DM"].contracts}</strong>成約 (${reportData.routeConversion["②手紙DM"].total}社, <span class="metric-compare">${reportData.routeConversion["②手紙DM"].rate}</span>)<br>
         ③ミカタ経由: <strong>${reportData.routeConversion["③ミカタ経由"].contracts}</strong>成約 (${reportData.routeConversion["③ミカタ経由"].total}社, <span class="metric-compare">${reportData.routeConversion["③ミカタ経由"].rate}</span>)<br>
-        ④開拓架電: <strong>${reportData.routeConversion["④開拓架電"].contracts}</strong>成約 (${reportData.routeConversion["④開拓架電"].total}社, <span class="metric-compare">${reportData.routeConversion["④開拓架電"].rate}</span>)
+        ④世界の懸け橋(Alibaba): <strong>${reportData.routeConversion["④世界の懸け橋(Alibaba)"].contracts}</strong>成約 (${reportData.routeConversion["④世界の懸け橋(Alibaba)"].total}社, <span class="metric-compare">${reportData.routeConversion["④世界の懸け橋(Alibaba)"].rate}</span>)
       </div>
     </div>
 

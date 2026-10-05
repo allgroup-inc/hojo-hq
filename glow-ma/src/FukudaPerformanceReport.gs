@@ -185,7 +185,7 @@ function getFukudaPerformanceReport() {
     });
 
     Logger.log("  流入ルート別:");
-    ["①紹介", "②手紙DM", "③ミカタ経由", "④開拓架電"].forEach(route => {
+    ["①紹介", "②手紙DM", "③ミカタ経由", "④世界の懸け橋(Alibaba)"].forEach(route => {
       Logger.log("    " + route + ": " + (routeDist[route] || 0) + "社");
     });
 

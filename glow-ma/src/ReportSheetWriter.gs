@@ -31,7 +31,7 @@ function ensureReportSheet() {
       "①紹介成約",
       "②手紙DM成約",
       "③ミカタ経由成約",
-      "④開拓架電成約",
+      "④世界の懸け橋(Alibaba)成約",
       "記録時刻"
     ];
 
@@ -69,7 +69,7 @@ function writeReportToSheet(reportData) {
     reportData.routeConversion["①紹介"].contracts,
     reportData.routeConversion["②手紙DM"].contracts,
     reportData.routeConversion["③ミカタ経由"].contracts,
-    reportData.routeConversion["④開拓架電"].contracts,
+    reportData.routeConversion["④世界の懸け橋(Alibaba)"].contracts,
     new Date().toLocaleString("ja-JP")
   ];
 

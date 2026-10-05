@@ -422,7 +422,7 @@ function getScoreSegmentsWithPrevious(masterRecords, previousMasterRecords) {
  * @returns {Object} {"①紹介": {contracts: number, total: number, rate: string}, ...}
  */
 function getRouteConversionRates(masterRecords) {
-  const routes = ["①紹介", "②手紙DM", "③ミカタ経由", "④開拓架電"];
+  const routes = ["①紹介", "②手紙DM", "③ミカタ経由", "④世界の懸け橋(Alibaba)"];
   const result = {};
 
   routes.forEach(route => {
