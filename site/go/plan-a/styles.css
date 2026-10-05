@@ -317,8 +317,8 @@ h3 { font-size: 1.2rem; line-height: 1.5; color: var(--color-heading); }
 .bp-search { flex: 1; font-size: .72rem; color: #999; border: 1px solid #DDD; border-radius: 999px; padding: 4px 12px; }
 .bp-go { font-size: .72rem; font-weight: 700; color: #fff; background: #FF6A00; border-radius: 999px; padding: 4px 12px; }
 .bp-store { display: flex; gap: 14px; align-items: center; padding: 16px; color: #fff; background: linear-gradient(90deg, rgba(0, 31, 56, .94), rgba(0, 51, 92, .78)), url('assets/images/hero-bg-shuri.jpg') center 40% / cover; }
-.bp-logo { flex: none; width: 92px; padding: 8px 6px; border-radius: 6px; background: var(--color-red); text-align: center; line-height: 1.15; }
-.bp-logo b { display: block; font-family: var(--font-display); font-size: .95rem; letter-spacing: .06em; }
+.bp-logo { flex: none; min-width: 96px; padding: 8px 10px; white-space: nowrap; border-radius: 6px; background: var(--color-red); text-align: center; line-height: 1.15; }
+.bp-logo b { display: block; font-family: var(--font-display); font-size: .85rem; letter-spacing: .02em; }
 .bp-logo small { font-size: .55rem; opacity: .95; }
 .bp-store-name { font-weight: 700; font-size: 1.05rem; }
 .bp-store-meta { font-size: .7rem; opacity: .85; margin: 2px 0 6px; }
@@ -344,7 +344,7 @@ h3 { font-size: 1.2rem; line-height: 1.5; color: var(--color-heading); }
 .bp-phone { width: 250px; margin: 0 auto; background: #fff; border: 8px solid #1C1C1E; border-radius: 34px; overflow: hidden; box-shadow: 0 18px 50px rgba(20, 33, 43, .2); padding-bottom: 14px; line-height: 1.4; }
 .bp-notch { width: 90px; height: 18px; margin: 0 auto 4px; background: #1C1C1E; border-radius: 0 0 12px 12px; }
 .bp-store-sp { padding: 10px; gap: 8px; }
-.bp-store-sp .bp-logo { width: 64px; }
+.bp-store-sp .bp-logo { min-width: 0; padding: 6px 7px; }
 .bp-store-sp .bp-store-name { font-size: .8rem; }
 .bp-banner-sp { margin: 10px; min-height: 90px; padding: 12px; }
 .bp-banner-sp .bp-banner-title { font-size: 1.2rem; }
@@ -483,6 +483,6 @@ h3 { font-size: 1.2rem; line-height: 1.5; color: var(--color-heading); }
     *, *::before, *::after { transition: none !important; }
     .btn-line:hover { transform: none; }
 }
-.bp-store-sp .bp-logo b { font-size: .68rem; letter-spacing: .02em; }
+.bp-store-sp .bp-logo b { font-size: .6rem; letter-spacing: 0; }
 .bp-grid-sp .booth-yours { font-size: .62rem; padding: 2px 8px; top: -12px; }
 @media (max-width: 899px) { .bp-sp { display: none; } }
