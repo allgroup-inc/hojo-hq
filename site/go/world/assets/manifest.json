@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "base": "site/go/plan-a/assets/",
+  "base": "site/go/world/assets/",
   "status": "placeholder",
   "note": "全素材はプレースホルダー。実素材(CC0/社内ストック/実在事例)に差し替え時は同名で上書きしbytesを更新。生産者・事例写真がイメージの場合はHTMLに「※イメージです」を明示。信頼バッジは第三者の商標を含むため、使用許諾を確認するまで実ロゴを置かない。",
   "palette": {

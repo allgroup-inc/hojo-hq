@@ -147,7 +147,6 @@ jobs:
           cp -r site /tmp/pages-deploy
           rm -rf /tmp/pages-deploy/nobishiro
           rm -rf /tmp/pages-deploy/miraihirake
-          rm -rf /tmp/pages-deploy/go/plan-a
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v5
