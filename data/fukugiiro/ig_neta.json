@@ -1,57 +1,57 @@
 {
- "updated_at": "2026-09-28",
- "week": "2026-W40",
+ "updated_at": "2026-10-05",
+ "week": "2026-W41",
  "note": "照合済み(verified=True)かつ締切の無い制度だけから scripts/generate_ig_neta.py が生成。日付・金額は本文に書かない。",
  "items": [
   {
    "no": 1,
-   "seido_id": "fk-kuni-jidoteate",
-   "title": "「児童手当」、申し込みを忘れていませんか",
-   "caption": "子育て中のご家庭に、知らないままの方が多い制度です。「児童手当」。中学生以下(2024年10月以降は高校生年代まで拡充)のお子さんを育てている世帯が対象になることがあります。申し込みの窓口はお住まいの市区町村の窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #子育て #児童手当",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-22 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-jidoteate",
-   "source_url": "https://www.cfa.go.jp/policies/kokoseido/jidouteate",
-   "image_hint": "子育てのやさしいイラスト+「児童手当」"
+   "seido_id": "fk-kuni-kyushokusha-shien",
+   "title": "「求職者支援制度」、使える人が使えていません",
+   "caption": "仕事を離れたあとに使える制度です。「求職者支援制度(職業訓練受講給付金)」。雇用保険を受給できない求職中の方(フリーランス・自営業を廃業した方等を含む)が対象になることがあります。申し込みの窓口はハローワーク。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #仕事さがし #しごと #求職者支援制度",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-22 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-kyushokusha-shien",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyushokusha_shien/index.html",
+   "image_hint": "失業のやさしいイラスト+「求職者支援制度」"
   },
   {
    "no": 2,
-   "seido_id": "fk-kuni-kashitsuke",
-   "title": "「生活福祉資金貸付制度」、使える人が使えていません",
-   "caption": "家計が苦しいとき、相談できる窓口と制度があります。「生活福祉資金貸付制度」。低所得の世帯や、失業などで生活の立て直しが必要な世帯が対象になることがあります。申し込みの窓口はお住まいの市区町村の社会福祉協議会。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #くらしの支援 #仕事さがし #生活福祉資金貸付制度",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-08-06 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-kashitsuke",
-   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/seikatsu-fukushi-shikin1/kashitsukejoken.html",
-   "image_hint": "低所得・生活苦のやさしいイラスト+「生活福祉資金貸付制度」"
+   "seido_id": "fk-kuni-nenkin-kyufukin",
+   "title": "「年金生活者支援給付金」、遠慮しなくて大丈夫です",
+   "caption": "家計が苦しいとき、相談できる窓口と制度があります。「年金生活者支援給付金」。年金を受給していて所得が一定以下の方が対象となる可能性があります(年金に上乗せして支給されます)。申し込みの窓口は日本年金機構(年金事務所)への請求。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #くらしの支援 #年金生活者支援給付金",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-nenkin-kyufukin",
+   "source_url": "https://www.mhlw.go.jp/nenkinkyuufukin/",
+   "image_hint": "低所得・生活苦のやさしいイラスト+「年金生活者支援給付金」"
   },
   {
    "no": 3,
-   "seido_id": "fk-kuni-kosodate-green",
-   "title": "「子育てグリーン住宅支援事業」、見落とされがちです",
-   "caption": "住まいのことで困ったときに使える制度です。「子育てグリーン住宅支援事業(新築・リフォーム補助)」。省エネ住宅の新築や省エネリフォームを行う世帯(子育て・若者夫婦世帯は補助が手厚い)が対象になることがあります。申し込みの窓口は登録事業者(工務店・リフォーム会社)を通じた申請。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #住まい #子育て #子育てグリーン住宅支援事業",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-kosodate-green",
-   "source_url": "https://kosodate-green.mlit.go.jp/",
-   "image_hint": "住宅取得・引越のやさしいイラスト+「子育てグリーン住宅支援事」"
+   "seido_id": "fk-kuni-rousai",
+   "title": "「労災保険の給付」、名前だけでも覚えてください",
+   "caption": "治療が続くときに、負担を軽くする制度があります。「労災保険の給付(仕事中・通勤中のけが・病気)」。仕事中や通勤中のけが・病気で治療や休業が必要になった方が対象となる可能性があります(パート・アルバイトも対象です)。申し込みの窓口は労働基準監督署(多くは勤務先経由)。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #医療費 #労災保険の給付",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-rousai",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/rousai/index.html",
+   "image_hint": "病気・けがのやさしいイラスト+「労災保険の給付」"
   },
   {
    "no": 4,
-   "seido_id": "fk-kuni-koyohoken-kihonteate",
-   "title": "「雇用保険の基本手当」、遠慮しなくて大丈夫です",
-   "caption": "仕事を離れたあとに使える制度です。「雇用保険の基本手当(失業給付)」。離職して求職活動をしている、雇用保険に加入していた方が対象になることがあります。申し込みの窓口はハローワーク。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #仕事さがし #雇用保険の基本手当",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-koyohoken-kihonteate",
-   "source_url": "https://www.hellowork.mhlw.go.jp/insurance/insurance_basicbenefit.html",
-   "image_hint": "失業のやさしいイラスト+「雇用保険の基本手当」"
+   "seido_id": "fk-kuni-safetynet-jutaku",
+   "title": "「住宅セーフティネット制度」、見落とされがちです",
+   "caption": "住まいのことで困ったときに使える制度です。「住宅セーフティネット制度(住宅確保要配慮者の入居支援)」。低所得・ひとり親・高齢などの理由で民間賃貸住宅への入居にお困りの世帯が対象になることがあります。申し込みの窓口はお住まいの自治体の居住支援窓口・居住支援法人。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #住まい #くらしの支援 #住宅セーフティネット制度",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-safetynet-jutaku",
+   "source_url": "https://www.mlit.go.jp/jutakukentiku/house/jutakukentiku_house_tk3_000055.html",
+   "image_hint": "住宅取得・引越のやさしいイラスト+「住宅セーフティネット制度」"
   },
   {
    "no": 5,
-   "seido_id": "fk-kuni-kyoiku-kunren",
-   "title": "「教育訓練給付金」、見落とされがちです",
-   "caption": "働きはじめる前後で使える制度です。「教育訓練給付金」。働きながら(または離職後に)資格取得やスキルアップを目指す方が対象になることがあります。申し込みの窓口はハローワーク。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #しごと #教育訓練給付金",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-22 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-kyoiku-kunren",
-   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/jinzaikaihatsu/kyouiku.html",
-   "image_hint": "就職・転職のやさしいイラスト+「教育訓練給付金」"
+   "seido_id": "fk-kuni-saigai-choui",
+   "title": "「災害弔慰金・災害援護資金など」、知っていますか?",
+   "caption": "知らないままの方が多い制度です。「災害弔慰金・災害援護資金など(被災時の支援)」。台風などの自然災害で被害を受けた世帯が対象になることがあります。申し込みの窓口はお住まいの市区町村の窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #災害 #災害弔慰金災害援護資金など",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-saigai-choui",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/saigaikyujo/index.html",
+   "image_hint": "災害のやさしいイラスト+「災害弔慰金・災害援護資金」"
   }
  ],
  "used_ids": [
@@ -70,6 +70,11 @@
   "fk-kuni-kosodate-green",
   "fk-kuni-koyohoken-kihonteate",
   "fk-kuni-kyoiku-kunren",
+  "fk-kuni-kyushokusha-shien",
+  "fk-kuni-nenkin-kyufukin",
+  "fk-kuni-rousai",
+  "fk-kuni-safetynet-jutaku",
+  "fk-kuni-saigai-choui",
   "fk-kuni-shogaiji-kyufu",
   "fk-kuni-shotoku-shien",
   "fk-kuni-shugaku-shien",
