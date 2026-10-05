@@ -1,5 +1,6 @@
 name: glow-gen-images
-# GLOW 世界へ推進LP「売り場のイメージ」の商品写真(AIのイメージ写真)を Gemini で作り、同じブランチにコミットする。
+# GLOW 世界へ推進LP「売り場のイメージ」の商品写真を用意し、同じブランチにコミットする。
+# ①Wikimedia Commonsから自由な許諾の写真候補 ②GeminiでAIイメージ(有料枠があるときだけ)
 # 画像は site/go/plan-a/assets/images/booth/ に置く(既存は作り直さない)。plan-a は Pages の公開対象外。
 
 on:
@@ -8,6 +9,7 @@ on:
     branches: [claude/cool-bell-ugyalg]
     paths:
       - "scripts/glow_gen_images.py"
+      - "scripts/glow_fetch_photos.py"
       - ".github/workflows/glow-gen-images.yml"
 
 permissions:
@@ -27,7 +29,10 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install --quiet pillow
-      - name: 画像を作る
+      - name: 写真候補を集める(Wikimedia Commons・自由な許諾のみ)
+        run: python scripts/glow_fetch_photos.py
+      - name: AIで画像を作る(Gemini・有料枠が必要。失敗しても続ける)
+        continue-on-error: true
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python scripts/glow_gen_images.py
