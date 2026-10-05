@@ -19,7 +19,7 @@
     return global.GlowAlerting;
   }
 
-  var FUNNEL_ROUTES_ = ["①紹介", "②手紙DM", "③ミカタ経由"];
+  var FUNNEL_ROUTES_ = ["①紹介", "②手紙DM", "③ミカタ経由", "④世界の懸け橋(Alibaba)"];
   var WEEK_LABELS_ = ["今週", "先週", "2週前", "3週前", "4週前", "5週前"];
 
   function formatDate_(date) {
