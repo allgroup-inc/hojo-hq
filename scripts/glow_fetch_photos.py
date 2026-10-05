@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 GLOW 世界へ推進LP「売り場のイメージ」用に、沖縄の産品の写真候補を Wikimedia Commons から集める。
-自由に使える許諾(CC0・パブリックドメイン・CC BY・CC BY-SA)の写真だけを取り、作者と許諾を credits.json に残す。
+自由に使える許諾(CC0・パブリックドメイン・CC BY)の写真だけを取り、作者と許諾を credits.json に残す。
 
   python scripts/glow_fetch_photos.py
 
@@ -23,18 +23,25 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site", "go
 UA = "GLOW-LP-builder/1.0 (https://github.com/allgroup-inc/hojo-hq; info@g-low.co.jp)"
 API = "https://commons.wikimedia.org/w/api.php"
 PER = 4
-OK_LICENSE = re.compile(r"^(cc0|public domain|pd|cc by(-sa)? [0-9.]+)", re.I)
+# 継承(SA)条件つきは、合成した画面全体に条件が及ぶため使わない
+OK_LICENSE = re.compile(r"^(cc0|public domain|pd|cc by [0-9.]+)$", re.I)
 
 QUERIES = {
-    "awamori": ["awamori bottle", "awamori"],
-    "kokuto": ["kokuto brown sugar", "Okinawan brown sugar"],
-    "shikuwasa": ["shikuwasa", "Citrus depressa fruit"],
-    "mozuku": ["mozuku", "Cladosiphon okamuranus food"],
-    "umibudo": ["umibudo", "Caulerpa lentillifera food"],
-    "beniimo": ["beni imo tart", "purple sweet potato tart Okinawa"],
-    "bingata": ["bingata", "Ryukyu bingata textile"],
-    "glass": ["Ryukyu glass", "Ryukyu glassware"],
-    "hero": ["Okinawa market products", "Makishi public market"],
+    "awamori": ["awamori glass", "awamori"],
+    "kokuto": ["kokuto", "brown sugar lump Okinawa"],
+    "shikuwasa": ["shikuwasa", "Citrus depressa"],
+    "mozuku": ["mozuku"],
+    "umibudo": ["umibudo", "Caulerpa lentillifera"],
+    "beniimo": ["beni imo", "purple sweet potato Okinawa"],
+    "bingata": ["bingata"],
+    "glass": ["Ryukyu glass"],
+    "chinsuko": ["chinsuko"],
+    "andagi": ["sata andagi", "andagi"],
+    "goya": ["goya bitter melon", "Momordica charantia fruit"],
+    "pineapple": ["Okinawa pineapple", "pineapple fruit"],
+    "salt": ["Okinawa sea salt", "sea salt crystals"],
+    "soba": ["Okinawa soba"],
+    "mango": ["Okinawa mango", "mango fruit"],
 }
 
 
