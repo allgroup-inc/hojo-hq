@@ -3698,5 +3698,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-05",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "申請練習用補助金【補助金の支払いはありません】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDJWIMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(16次公募)_廃業・再チャレンジ枠",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003N1RbUAK",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和8年度沖縄県奨学金代理返還支援事業",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010156.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "エイジフレンドリー補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYbNMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和７年度補正予算・令和８年度】二酸化炭素排出抑制対策事業費等補助金（業務用建築物ストックの省CO2改修調査支援事業（令和７年度補正予算二次公募・令和８年度一次公募））",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYaFMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
