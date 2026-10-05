@@ -29,7 +29,7 @@
       { min: 60, max: 69, points: 10 },
       { min: 50, max: 59, points: 5 }
     ],
-    routeBonus: { "①紹介": 30, "②手紙DM": 0, "③ミカタ経由": 20 },
+    routeBonus: { "①紹介": 30, "②手紙DM": 0, "③ミカタ経由": 20, "④世界の懸け橋(Alibaba)": 20 },
     reactionPointsByType: {
       "レターURLアクセス": 5,
       "返信": 15,
