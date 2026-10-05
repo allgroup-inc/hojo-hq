@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-10-05 13:22",
+ "generated_at": "2026-10-05 14:27",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 6,
- "count": 28,
+ "count": 29,
  "items": [
   {
    "id": "a0W2x000007Cos5EAC",
@@ -65,6 +65,16 @@
    "tier": "まもなく締切(7〜14日)",
    "max_amount": 500000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003BpWvUAK",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDdonMAD",
+   "name": "経済安全保障重要技術育成プログラム／航空機エンジン向け先進材料技術の開発・実証/研究開発項目〔3〕「国産ニッケル基超合金における評価システム基盤整備」の公募",
+   "deadline": "2026-10-15",
+   "days_left": 10,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdonMAD",
    "tag": "nationwide"
   },
   {
