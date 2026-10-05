@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ※2026-10-05 サイト本体は allgroup-inc/glow-world に移設。作った画像は glow-world の assets/images/booth/ai/ へ入れること
 # -*- coding: utf-8 -*-
 """
 GLOW 世界へ推進LPの「売り場のイメージ」用に、商品写真のイメージ画像を Gemini で作る。
