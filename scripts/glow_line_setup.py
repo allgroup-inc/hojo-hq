@@ -37,8 +37,8 @@ INK = (31, 42, 46)
 
 MIKATA_URL = "https://allgroup-inc.github.io/hojo-hq/"
 YUNTAKU_URL = "https://allgroup-inc.github.io/yuntaku-lp/"
-# 世界へ推進LP(2026-10-05 公開・小柳さん決裁)。Variables GLOW_LP_URL があればそちらを優先
-LP_URL = "https://allgroup-inc.github.io/hojo-hq/go/world/"
+# 世界へ推進LP(2026-10-05 公開・小柳さん決裁。同日 allgroup-inc/glow-world に移設)。Variables GLOW_LP_URL があればそちらを優先
+LP_URL = "https://allgroup-inc.github.io/glow-world/"
 MENU_PREFIX = "GLOW-"
 
 BUTTONS = [

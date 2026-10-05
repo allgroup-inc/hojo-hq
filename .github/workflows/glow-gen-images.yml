@@ -1,4 +1,5 @@
 name: glow-gen-images
+# ※2026-10-05 サイト本体は allgroup-inc/glow-world に移設。作った画像は glow-world の assets/images/booth/ai/ へ入れること
 # GLOW 世界へ推進LP「売り場のイメージ」の商品写真を用意し、同じブランチにコミットする。
 # GeminiでAIイメージ写真を作る(有料枠が必要)。写真候補集めは scripts/glow_fetch_photos.py を手で実行
 # 画像は site/go/world/assets/images/booth/ に置く(既存は作り直さない)。2026-10-05 公開(/go/world/)。
