@@ -8,7 +8,7 @@ GLOW LINE公式アカウント(@042wvrgo)のリッチメニューを、画像の
 
 --apply には環境変数 GLOW_LINE_CHANNEL_ACCESS_TOKEN(GitHub Secrets)が必要。
 ボタン(左から):
-  世界へ挑戦  … 世界へ推進LP(GLOW_LP_URL があればそちら)
+  世界へ挑戦  … 世界の懸け橋のLP(GLOW_LP_URL があればそちら)
   補助金を探す … 沖縄企業のミカタ
   経営の相談   … ゆんたく経営相談室
 同じ名前(GLOW-)の古いメニューは登録後に消すので、何度流しても1つだけ残る。
@@ -42,7 +42,7 @@ LP_URL = "https://allgroup-inc.github.io/glow-world/"
 MENU_PREFIX = "GLOW-"
 
 BUTTONS = [
-    {"title": "世界へ挑戦", "sub": "沖縄の商品を、世界の買い手へ", "bg": RED, "fg": CREAM},
+    {"title": "世界へ挑戦", "sub": "世界の懸け橋(海外販路)", "bg": RED, "fg": CREAM},
     {"title": "補助金を探す", "sub": "沖縄企業のミカタ(無料)", "bg": NAVY, "fg": CREAM},
     {"title": "経営の相談", "sub": "ゆんたく経営相談室", "bg": CREAM, "fg": NAVY},
 ]
