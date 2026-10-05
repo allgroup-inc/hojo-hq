@@ -194,7 +194,7 @@ h2 {
 }
 h3 { font-size: 1.2rem; line-height: 1.5; color: var(--color-heading); }
 .eyebrow {
-    font-size: 1.05rem;
+    font-size: 1.25rem;
     font-weight: 700;
     letter-spacing: .14em;
     color: var(--color-red);
@@ -304,6 +304,39 @@ h3 { font-size: 1.2rem; line-height: 1.5; color: var(--color-heading); }
 .from { color: var(--color-muted); text-decoration: line-through; text-decoration-color: var(--color-red); text-decoration-thickness: 2px; font-size: 1rem; }
 .to { min-width: 0; }
 .to strong { display: block; font-size: 1.15rem; color: var(--color-red); line-height: 1.5; }
+
+/* ---------- ❸-2 売り場のイメージ ---------- */
+.booth { background: var(--color-cream); }
+.booth-lead { max-width: 760px; margin: 0 0 28px; font-size: 1.05rem; }
+.booth-frame { border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 18px 50px rgba(20, 33, 43, .16); border: 1px solid var(--color-border); }
+.booth-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: #ECE8E1; }
+.booth-bar span { width: 10px; height: 10px; border-radius: 50%; background: #C9C2B8; }
+.booth-bar p { margin-left: 10px; font-size: .8rem; color: var(--color-muted); background: #fff; padding: 2px 12px; border-radius: 999px; }
+.booth-hero { padding: 22px clamp(16px, 3vw, 28px); background: linear-gradient(120deg, var(--color-navy), var(--color-sea)); color: #fff; }
+.booth-brand { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.2rem, 1rem + 1vw, 1.7rem); letter-spacing: .06em; }
+.booth-brand small { font-size: .55em; font-weight: 700; letter-spacing: .1em; opacity: .85; margin-left: 6px; }
+.booth-tagline { font-size: .9rem; opacity: .9; }
+.booth-body { padding: 18px clamp(12px, 3vw, 28px) 26px; }
+.booth-tabs { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.booth-tabs li { font-size: .8rem; padding: 3px 14px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-muted); }
+.booth-tabs li.on { background: var(--color-navy); border-color: var(--color-navy); color: #fff; }
+.booth-grid { list-style: none; display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 700px) { .booth-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.booth-card { position: relative; border: 1px solid var(--color-border); border-radius: 8px; padding: 12px; display: grid; gap: 2px; background: #fff; line-height: 1.5; }
+.booth-pic { height: 130px; border-radius: 6px; background: #F6F2EC; display: grid; place-items: center; margin-bottom: 8px; }
+.booth-pic svg { height: 88px; width: auto; }
+.booth-name { font-weight: 700; font-size: 1rem; color: var(--color-ink); }
+.booth-sub { font-size: .8rem; color: var(--color-muted); }
+.booth-moq { font-size: .78rem; color: var(--color-muted); }
+.booth-btn { margin-top: 8px; justify-self: start; font-size: .75rem; font-weight: 700; color: #fff; background: var(--color-red); padding: 3px 12px; border-radius: 999px; }
+.booth-card.is-yours { border: 3px dashed var(--color-red); background: #FFF6F1; }
+.booth-card.is-yours .booth-sub { color: var(--color-red); font-weight: 700; font-size: .9rem; }
+.booth-yours { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: var(--color-red); color: #fff; font-size: .85rem; font-weight: 700; padding: 3px 14px; border-radius: 999px; box-shadow: 0 4px 10px rgba(185, 80, 47, .3); }
+.booth-points { list-style: none; counter-reset: bp; display: grid; gap: 14px; margin: 28px 0 12px; }
+@media (min-width: 800px) { .booth-points { grid-template-columns: repeat(3, 1fr); } }
+.booth-points li { counter-increment: bp; background: #fff; border-radius: 8px; padding: 16px 18px 16px 58px; position: relative; border: 1px solid var(--color-border); }
+.booth-points li::before { content: counter(bp); position: absolute; left: 16px; top: 16px; width: 30px; height: 30px; border-radius: 50%; background: var(--color-navy); color: #fff; font-weight: 700; display: grid; place-items: center; line-height: 1; }
+.booth-points strong { display: block; font-size: 1.1rem; color: var(--color-heading); }
 
 /* ---------- ❹ 世界の広さ ---------- */
 .world { background: linear-gradient(160deg, #0B6E8A 0%, #00335C 100%); color: #FFFFFF; }
