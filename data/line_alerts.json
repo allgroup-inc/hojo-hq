@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-10-05 12:41",
+ "generated_at": "2026-10-05 13:19",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 6,
- "count": 27,
+ "count": 28,
  "items": [
   {
    "id": "a0W2x000007Cos5EAC",
@@ -35,6 +35,16 @@
    "tier": "まもなく締切(7〜14日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdMRMA1",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDdoxMAD",
+   "name": "「地熱ポテンシャル高度利活用技術開発」の追加公募",
+   "deadline": "2026-10-15",
+   "days_left": 10,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdoxMAD",
    "tag": "nationwide"
   },
   {
