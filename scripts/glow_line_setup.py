@@ -8,8 +8,7 @@ GLOW LINE公式アカウント(@042wvrgo)のリッチメニューを、画像の
 
 --apply には環境変数 GLOW_LINE_CHANNEL_ACCESS_TOKEN(GitHub Secrets)が必要。
 ボタン(左から):
-  世界へ挑戦  … GLOW_LP_URL があればそのページ、無ければ「世界へ挑戦について知りたい」をトークに送る
-                (LP公開前でも、押した人がそのまま相談の入口になる)
+  世界へ挑戦  … 世界へ推進LP(GLOW_LP_URL があればそちら)
   補助金を探す … 沖縄企業のミカタ
   経営の相談   … ゆんたく経営相談室
 同じ名前(GLOW-)の古いメニューは登録後に消すので、何度流しても1つだけ残る。
@@ -38,6 +37,8 @@ INK = (31, 42, 46)
 
 MIKATA_URL = "https://allgroup-inc.github.io/hojo-hq/"
 YUNTAKU_URL = "https://allgroup-inc.github.io/yuntaku-lp/"
+# 世界へ推進LP(2026-10-05 公開・小柳さん決裁)。Variables GLOW_LP_URL があればそちらを優先
+LP_URL = "https://allgroup-inc.github.io/hojo-hq/go/world/"
 MENU_PREFIX = "GLOW-"
 
 BUTTONS = [
@@ -123,7 +124,7 @@ def apply(path):
     token = os.environ.get("GLOW_LINE_CHANNEL_ACCESS_TOKEN", "").strip()
     if not token:
         sys.exit("[error] GLOW_LINE_CHANNEL_ACCESS_TOKEN が未設定")
-    lp_url = os.environ.get("GLOW_LP_URL", "").strip()
+    lp_url = os.environ.get("GLOW_LP_URL", "").strip() or LP_URL
     api = "https://api.line.me/v2/bot"
     bot = call("GET", f"{api}/info", token)
     print(f"[ok] 接続先: {bot.get('displayName')} ({bot.get('basicId')})")

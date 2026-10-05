@@ -6,7 +6,7 @@ GLOW 世界へ推進LP「売り場のイメージ」用に、沖縄の産品の�
 
   python scripts/glow_fetch_photos.py
 
-出力: site/go/plan-a/assets/images/booth/cand/<名前>-<n>.webp と credits.json
+出力: site/go/world/assets/images/booth/cand/<名前>-<n>.webp と credits.json
 候補から使うものを選んだら、LP・資料に作者と許諾を表示する(CC BY / CC BY-SA の条件)。
 """
 import io
@@ -19,7 +19,7 @@ import urllib.request
 
 from PIL import Image
 
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site", "go", "plan-a", "assets", "images", "booth", "cand")
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site", "go", "world", "assets", "images", "booth", "cand")
 UA = "GLOW-LP-builder/1.0 (https://github.com/allgroup-inc/hojo-hq; info@g-low.co.jp)"
 API = "https://commons.wikimedia.org/w/api.php"
 PER = 4

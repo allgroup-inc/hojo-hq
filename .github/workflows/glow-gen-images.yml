@@ -1,7 +1,7 @@
 name: glow-gen-images
 # GLOW 世界へ推進LP「売り場のイメージ」の商品写真を用意し、同じブランチにコミットする。
 # GeminiでAIイメージ写真を作る(有料枠が必要)。写真候補集めは scripts/glow_fetch_photos.py を手で実行
-# 画像は site/go/plan-a/assets/images/booth/ に置く(既存は作り直さない)。plan-a は Pages の公開対象外。
+# 画像は site/go/world/assets/images/booth/ に置く(既存は作り直さない)。2026-10-05 公開(/go/world/)。
 
 on:
   workflow_dispatch:
@@ -36,7 +36,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site/go/plan-a/assets/images/booth/
+          git add site/go/world/assets/images/booth/
           if git diff --cached --quiet; then echo "変更なし"; exit 0; fi
           git commit -m "GLOW LP: 売り場イメージ用の商品写真(AIイメージ)を生成"
           git push origin HEAD:${GITHUB_REF_NAME}

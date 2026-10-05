@@ -5,7 +5,7 @@ GLOW 世界へ推進LPの「売り場のイメージ」用に、商品写真の�
 
   GEMINI_API_KEY=... python scripts/glow_gen_images.py
 
-出力: site/go/plan-a/assets/images/booth/ai/<名前>.webp(LPの商品カードと同じ名前。差し替えはLP側で行う)(すでにあるものは作り直さない)
+出力: site/go/world/assets/images/booth/ai/<名前>.webp(LPの商品カードと同じ名前。差し替えはLP側で行う)(すでにあるものは作り直さない)
 すべてAIが作ったイメージ写真。実在の商品・ブランドではないので、ラベルの文字やロゴは入れない。
 LP・資料では必ず「※写真はイメージです」と併記する。
 """
@@ -19,7 +19,7 @@ import urllib.request
 
 from PIL import Image
 
-OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site", "go", "plan-a", "assets", "images", "booth", "ai")
+OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site", "go", "world", "assets", "images", "booth", "ai")
 MODELS = ["gemini-2.5-flash-image", "gemini-2.5-flash-image-preview", "gemini-3-pro-image-preview"]
 
 STYLE = ("Professional e-commerce product photograph, bright natural daylight, soft shadow, "
