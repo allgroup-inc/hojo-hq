@@ -1,6 +1,11 @@
 # Block 2 統合テストスイート
 
-> **対象**: Phase 2 Block 2 統合テスト自動化  
+> **⚠️ 2026-10-05 注記: このスイートが叩くのは `apps/kakehashi-apo-poc` の PoC API(`/api/v1/...`)であり、軸(kakei-crm)の実窓口(`/api/appointments/{reserve,pending,receive,review,cancel}` 等)ではない。**
+> 軸との統合の証拠(Gateway G1)には使わない。軸の窓口仕様 v1 に沿った書き直しは kakei-crm 側で行う
+> (kakei-crm `docs/回答_20261005_❶Block2チャット→軸_pre-flight準備状況と残懸念.md`)。
+> 結果 JSON の配管(`results_writer.py`、`run-block2-tests.sh`)はそのまま流用する。
+
+> **対象**: Phase 2 Block 2 統合テスト自動化(PoC 向け)  
 > **Issue**: #5-8 (kakei-apo統合, 業務軸連携, UI統合)  
 > **目標**: 本番環境に向けたエンドツーエンド統合テスト  
 
