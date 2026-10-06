@@ -550,7 +550,8 @@ def test_absolute_path_rejected(): assert check_record({**OK,"path":"/home/user/
 def test_external_placeholder_ok(): assert check_record({**OK,"path":"<external>"}, "x") == []
 def test_long_field_rejected(): assert check_record({**OK,"path":"a"*501}, "x")
 def test_note_up_to_1000_ok(): assert check_record({**OK,"event":"note","text":"あ"*1000}, "x") == []
-def test_forbidden_content_rejected(): assert check_record({**OK,"event":"note","text":"環境変数 KAKEI_CRM_CHOICES_URL を"}, "x")
+def test_forbidden_content_rejected():  # 禁止語の実文字列を本計画に書かない(本計画自体が check_repo_scope の検査対象)
+    word = check_repo_scope.FORBIDDEN_CONTENT[0]; assert check_record({**OK,"event":"note","text":f"環境変数 {word} を"}, "x")
 def test_selftest_passes(): assert run(["--selftest"]).returncode == 0
 def test_scan_reports_file_and_reason(repo_with_bad_jsonl): hits = scan(repo_with_bad_jsonl); assert hits and hits[0][0].endswith(".jsonl")
 ```
