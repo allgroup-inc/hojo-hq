@@ -3,6 +3,7 @@
 プロンプト本文・Bash コマンド全文・プロジェクト外パスが JSONL に残らないこと、
 hojo-hq 以外の remote では必ず private になること、書込失敗が silent にならないことを固定する。
 """
+import io
 import json
 import os
 import subprocess
@@ -150,3 +151,171 @@ def test_append_event_failure_is_audited(repo, monkeypatch, capsys):
     with pytest.raises(ExperienceWriteError):
         append_event(repo, start_event(repo, "s1"))
     assert "disk full" in capsys.readouterr().err
+
+
+# ---- _program_of / パスの堅牢性 ----
+
+@pytest.mark.parametrize("command, program, leaked", [
+    ('API_KEY="abc def" curl https://x.example', "curl", ["abc", "def"]),
+    ('GIT_AUTHOR_NAME="Foo Bar" git commit -m x', "git", ["Foo", "Bar"]),
+    ("echo 'unbalanced", "<unknown>", ["unbalanced"]),
+    (None, "<unknown>", []),
+    (123, "<unknown>", []),
+    ("", "<unknown>", []),
+])
+def test_bash_program_parsing_never_leaks_values(repo, command, program, leaked):
+    ev = build_tool_event({"tool_name": "Bash", "tool_input": {"command": command}}, repo)
+    assert ev["program"] == program
+    for word in leaked:
+        assert word not in json.dumps(ev)
+
+
+@pytest.mark.parametrize("tin", [{}, {"file_path": ""}, {"file_path": None}, {"file_path": 5}])
+def test_file_tool_without_usable_path_is_unknown(repo, tin):
+    ev = build_tool_event({"tool_name": "Edit", "tool_input": tin}, repo)
+    assert ev["path"] == "<unknown>"
+
+
+# ---- _git の文字コード耐性 ----
+
+def test_git_replaces_undecodable_output_and_survives_decode_error(repo, monkeypatch):
+    seen = {}
+
+    class Done:
+        returncode = 0
+        stdout = " ok \n"
+
+    def fake_run(*a, **kw):
+        seen.update(kw)
+        return Done()
+
+    monkeypatch.setattr(experience_log.subprocess, "run", fake_run)
+    assert experience_log._git(repo, "status") == "ok"
+    assert seen["errors"] == "replace"
+
+    def boom(*a, **kw):
+        raise UnicodeDecodeError("utf-8", b"\xff", 0, 1, "invalid start byte")
+
+    monkeypatch.setattr(experience_log.subprocess, "run", boom)
+    assert experience_log._git(repo, "status") == ""
+
+
+# ---- hook モード / CLI(main を直接駆動) ----
+
+@pytest.fixture
+def cli(repo, monkeypatch, capsys):
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(repo))
+    monkeypatch.delenv("CLAUDE_SESSION_ID", raising=False)
+    monkeypatch.delenv("HOJO_MEMORY_OFF", raising=False)
+
+    def run(*argv, stdin=None):
+        if stdin is not None:
+            monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(stdin)))
+        capsys.readouterr()
+        rc = experience_log.main(["experience_log.py", *argv])
+        cap = capsys.readouterr()
+        return rc, cap.out, cap.err
+
+    run.repo = repo
+    return run
+
+
+def _events(repo, sid):
+    (path,) = (repo / ".claude/experience").glob(f"*/session-{sid}.jsonl")
+    return [json.loads(line) for line in path.read_text().splitlines()]
+
+
+def test_hook_session_start_writes_record_and_current_session(cli):
+    rc, out, _ = cli("hook", "SessionStart", stdin={"session_id": "s9", "source": "resume"})
+    assert rc == 0 and out == ""
+    (ev,) = _events(cli.repo, "s9")
+    assert ev["event"] == "session_start" and ev["source"] == "resume"
+    assert (cli.repo / ".claude/experience/_local/current_session").read_text().strip() == "s9"
+
+
+def test_hook_session_end_writes_summary_and_ended_marker(cli):
+    cli("hook", "SessionStart", stdin={"session_id": "s9"})
+    rc, out, _ = cli("hook", "SessionEnd", stdin={"session_id": "s9", "reason": "clear"})
+    assert rc == 0 and out == ""
+    evs = _events(cli.repo, "s9")
+    assert [e["event"] for e in evs] == ["session_start", "session_end"]
+    assert evs[-1]["reason"] == "clear"
+    assert (cli.repo / ".claude/experience/_local/s9.ended").exists()
+
+
+def test_hook_session_end_marker_survives_summary_failure(cli, monkeypatch):
+    def boom(root, sid):
+        raise RuntimeError("summary broke")
+
+    monkeypatch.setattr(experience_log, "summarize_session", boom)
+    rc, out, _ = cli("hook", "SessionEnd", stdin={"session_id": "s9"})
+    assert rc == 0
+    assert "systemMessage" in json.loads(out)
+    assert (cli.repo / ".claude/experience/_local/s9.ended").exists()
+    assert "summary broke" in (cli.repo / ".claude/experience/_audit.log").read_text()
+
+
+def test_hook_write_failure_warns_via_system_message_and_exits_0(cli, monkeypatch):
+    def failing_open(path):
+        raise OSError("disk full")
+
+    monkeypatch.setattr(experience_log, "_open_append", failing_open)
+    rc, out, _ = cli("hook", "PostToolUse",
+                     stdin={"session_id": "s9", "tool_name": "Bash", "tool_input": {"command": "ls"}})
+    assert rc == 0
+    msg = json.loads(out)["systemMessage"]
+    assert "Experience記録に失敗" in msg and "disk full" in msg and "_audit.log" in msg
+    assert "disk full" in (cli.repo / ".claude/experience/_audit.log").read_text()
+
+
+def test_hook_disabled_prints_empty_json_and_writes_nothing(cli, monkeypatch):
+    monkeypatch.setenv("HOJO_MEMORY_OFF", "1")
+    rc, out, _ = cli("hook", "SessionStart", stdin={"session_id": "s9"})
+    assert rc == 0 and json.loads(out) == {}
+    assert not (cli.repo / ".claude/experience").exists()
+
+
+def test_note_cli_appends_note_event_using_env_session(cli, monkeypatch):
+    monkeypatch.setenv("CLAUDE_SESSION_ID", "envsid")
+    rc, out, _ = cli("note", "decided X")
+    assert rc == 0 and "recorded:" in out
+    (ev,) = _events(cli.repo, "envsid")
+    assert ev["event"] == "note" and ev["text"] == "decided X"
+
+
+def test_note_cli_falls_back_to_current_session_file(cli):
+    cli("hook", "SessionStart", stdin={"session_id": "s9"})
+    rc, _, _ = cli("note", "via file")
+    assert rc == 0
+    assert [e["event"] for e in _events(cli.repo, "s9")] == ["session_start", "note"]
+    assert not list((cli.repo / ".claude/experience").glob("*/session-unknown-*.jsonl"))
+
+
+def test_note_survives_git_decode_failure(cli, monkeypatch):
+    def boom(*a, **kw):
+        raise UnicodeDecodeError("utf-8", b"\xff", 0, 1, "invalid start byte")
+
+    monkeypatch.setattr(experience_log.subprocess, "run", boom)
+    monkeypatch.setenv("CLAUDE_SESSION_ID", "s7")
+    rc, _, _ = cli("note", "still written")
+    assert rc == 0
+    assert _events(cli.repo, "s7")[0]["text"] == "still written"
+
+
+def test_note_unexpected_error_is_audited_not_a_traceback(cli, monkeypatch):
+    def boom(*a, **kw):
+        raise RuntimeError("kaboom")
+
+    monkeypatch.setattr(experience_log, "note_event", boom)
+    rc, _, err = cli("note", "x")
+    assert rc == 1 and "kaboom" in err and "Traceback" not in err
+    assert "kaboom" in (cli.repo / ".claude/experience/_audit.log").read_text()
+
+
+def test_summarize_ignores_invalid_head_and_audits(repo):
+    ev = start_event(repo, "s1")
+    ev["head"] = "--output=/tmp/x"
+    append_event(repo, ev)
+    s = summarize_session(repo, "s1")
+    assert s["commits"] == []
+    assert "invalid head" in (repo / ".claude/experience/_audit.log").read_text()

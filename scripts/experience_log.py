@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -48,6 +49,9 @@ EXTERNAL = "<external>"
 _COMPONENT = "experience_log"
 _ENV_ASSIGN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 _FILE_TOOLS = {"Edit", "Write", "MultiEdit"}
+_HEAD_RE = re.compile(r"^[0-9a-f]{7,40}$")
+_UNKNOWN = "<unknown>"
+CURRENT_SESSION = "current_session"
 
 
 class ExperienceWriteError(Exception):
@@ -58,9 +62,10 @@ def _git(root: Path, *args: str) -> str:
     """git を実行して stdout を返す。失敗は空文字(呼び元が既定値で扱う)。"""
     try:
         r = subprocess.run(
-            ["git", *args], cwd=str(root), capture_output=True, text=True, timeout=5
+            ["git", *args], cwd=str(root), capture_output=True, text=True,
+            errors="replace", timeout=5,
         )
-    except (OSError, subprocess.SubprocessError):
+    except (OSError, subprocess.SubprocessError, ValueError):
         return ""
     return r.stdout.strip() if r.returncode == 0 else ""
 
@@ -147,13 +152,30 @@ def note_event(session_id: str, text: str, root: Path | None = None) -> Event:
     return ev
 
 
-def _program_of(command: str) -> str:
-    """先頭トークン(プログラム名)だけ。先頭の VAR=値 は値が秘密になり得るので飛ばす。"""
-    for tok in str(command).split():
+def _program_of(command) -> str:
+    """プログラム名だけ(basename・64文字まで)。
+
+    shlex で分解し、先頭の VAR=値(引用符付きの値を含む)は丸ごと飛ばす。
+    分解できない/文字列でない場合は "<unknown>"(値の一部を残すより捨てる)。
+    """
+    if not isinstance(command, str):
+        return _UNKNOWN
+    try:
+        tokens = shlex.split(command)
+    except ValueError:
+        return _UNKNOWN
+    for tok in tokens:
         if _ENV_ASSIGN.match(tok):
             continue
-        return os.path.basename(tok.strip("'\"("))[:64] or "<unknown>"
-    return "<unknown>"
+        return os.path.basename(tok.lstrip("("))[:64] or _UNKNOWN
+    return _UNKNOWN
+
+
+def _tool_path(tin: dict, root: Path) -> str:
+    fp = tin.get("file_path")
+    if not isinstance(fp, str) or not fp.strip():
+        return _UNKNOWN
+    return sanitize_path(fp, root)
 
 
 def build_tool_event(payload: dict, root: Path) -> Event | None:
@@ -167,7 +189,7 @@ def build_tool_event(payload: dict, root: Path) -> Event | None:
         return ev
     if name in _FILE_TOOLS:
         ev = _base(root, session_id_of(payload), "tool")
-        ev.update({"tool": name, "path": sanitize_path(str(tin.get("file_path", "")), root)})
+        ev.update({"tool": name, "path": _tool_path(tin, root)})
         return ev
     if name == "Skill":
         ev = _base(root, session_id_of(payload), "skill")
@@ -225,6 +247,9 @@ def summarize_session(root: Path, session_id: str) -> Event:
             skills.append(e["skill"])
     commits = []
     head = start.get("head")
+    if head and not (isinstance(head, str) and _HEAD_RE.match(head)):
+        audit(root, _COMPONENT, "summarize_session: invalid head in JSONL; commits skipped")
+        head = None
     if head:
         out = _git(root, "log", f"{head}..HEAD", "--format=%h%x09%s")
         for line in out.splitlines()[:50]:
@@ -237,37 +262,70 @@ def summarize_session(root: Path, session_id: str) -> Event:
     return ev
 
 
+def _write_local(root: Path, name: str, content: str) -> None:
+    target = Path(root) / LOCAL_DIR / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(content, encoding="utf-8")
+
+
 def _mark_ended(root: Path, session_id: str) -> None:
-    marker = Path(root) / LOCAL_DIR / f"{_safe_id(session_id)}.ended"
-    marker.parent.mkdir(parents=True, exist_ok=True)
-    marker.write_text(iso(utc_now()) + "\n", encoding="utf-8")
+    _write_local(root, f"{_safe_id(session_id)}.ended", iso(utc_now()) + "\n")
+
+
+def _read_current_session(root: Path) -> str:
+    try:
+        text = (Path(root) / LOCAL_DIR / CURRENT_SESSION).read_text(encoding="utf-8")
+    except (OSError, ValueError):
+        return ""
+    return text.strip()[:200]
 
 
 def _hook(event_name: str) -> int:
     payload = read_hook_input()
     root = project_dir()
     if disabled(root):
+        emit(event_name)
         return 0
-    try:
-        sid = session_id_of(payload)
-        if event_name == "SessionStart":
+    warnings: list[str] = []
+
+    def fail(where: str, e: Exception) -> None:
+        if not isinstance(e, ExperienceWriteError):  # ExperienceWriteError は audit 済み
+            audit(root, _COMPONENT, f"{event_name} {where} failed: {type(e).__name__}: {e}")
+        warnings.append(f"{type(e).__name__}: {e}")
+
+    sid = session_id_of(payload)
+    if event_name == "SessionStart":
+        try:
             append_event(root, start_event(root, sid, str(payload.get("source") or "startup")))
-        elif event_name == "PostToolUse":
+        except Exception as e:  # noqa: BLE001 — hook は作業を止めない。ただし silent にもしない
+            fail("hook", e)
+        try:  # note CLI が session_id を引けるように(失敗しても記録は続ける)
+            _write_local(root, CURRENT_SESSION, sid + "\n")
+        except Exception as e:  # noqa: BLE001
+            fail("current_session marker", e)
+    elif event_name == "PostToolUse":
+        try:
             ev = build_tool_event(payload, root)
             if ev is not None:
                 append_event(root, ev)
-        elif event_name == "SessionEnd":
+        except Exception as e:  # noqa: BLE001
+            fail("hook", e)
+    elif event_name == "SessionEnd":
+        try:
             ev = summarize_session(root, sid)
             ev["reason"] = str(payload.get("reason") or "")[:40]
             append_event(root, ev)
+        except Exception as e:  # noqa: BLE001
+            fail("hook", e)
+        try:  # 要約・追記が失敗しても終了マーカーは必ず置く
             _mark_ended(root, sid)
-        else:
-            audit(root, _COMPONENT, f"unknown hook event: {event_name}")
-    except Exception as e:  # noqa: BLE001 — hook は作業を止めない。ただし silent にもしない
-        if not isinstance(e, ExperienceWriteError):
-            audit(root, _COMPONENT, f"{event_name} hook failed: {type(e).__name__}: {e}")
+        except Exception as e:  # noqa: BLE001
+            fail("ended marker", e)
+    else:
+        audit(root, _COMPONENT, f"unknown hook event: {event_name}")
+    if warnings:
         emit(event_name, system_message=(
-            f"⚠ Experience記録に失敗: {type(e).__name__}: {e}。audit: {EXPERIENCE_DIR}/_audit.log"
+            f"⚠ Experience記録に失敗: {'; '.join(warnings)}。audit: {EXPERIENCE_DIR}/_audit.log"
         ))
     return 0
 
@@ -276,10 +334,16 @@ def _note(text: str) -> int:
     root = project_dir()
     if disabled(root):
         return 0
-    sid = os.environ.get("CLAUDE_SESSION_ID", "").strip() or session_id_of({})
     try:
+        sid = (
+            os.environ.get("CLAUDE_SESSION_ID", "").strip()
+            or _read_current_session(root)
+            or session_id_of({})
+        )
         path = append_event(root, note_event(sid, text, root))
-    except ExperienceWriteError as e:
+    except Exception as e:  # noqa: BLE001 — 利用者の明示操作なので失敗は見せる(audit も残す)
+        if not isinstance(e, ExperienceWriteError):
+            audit(root, _COMPONENT, f"note failed: {type(e).__name__}: {e}")
         print(f"Experience記録に失敗: {e}(audit: {EXPERIENCE_DIR}/_audit.log)", file=sys.stderr)
         return 1
     print(f"recorded: {path.relative_to(root).as_posix()}")
