@@ -24,7 +24,20 @@ export HOJO_MEMORY_OFF=1
 - 効き方: `.claude/hooks/wikiskill-hook.sh` が Python を起動する前に判定し、`{}` を出して exit 0 する。Python が壊れていても止まる。Experience の記録も Memory Bootstrap の注入も、どちらも止まる。
 - **クラウドセッション**は作業コピーが毎回新しくなるので、各セッションで `touch .claude/memory.off` を実行する。全セッションに効かせたいときは `HOJO_MEMORY_OFF=1` を環境側に設定する。
 - 再開: `rm .claude/memory.off`(環境変数も外す)。
-- 確認: `bash -c 'echo "{}" | .claude/hooks/wikiskill-hook.sh SessionStart'` の出力が `{}` だけなら止まっている。
+- 確認: **出力が `{}` であることだけでは、停止の証明にならない**(停止していなくても、中身の空の入力なら `{}` が出る)。次の手順で「記録が作られないこと」を確かめる。
+
+```bash
+ls .claude/memory.off                                   # ファイルがあること(環境変数で止めているときは、このコマンドは不要で、下の hook 実行の前に HOJO_MEMORY_OFF=1 を付ける)
+before=$(cat .claude/experience/_audit.log 2>/dev/null | wc -l)
+echo '{"session_id":"rollback-check","hook_event_name":"SessionStart","source":"startup"}' \
+  | .claude/hooks/wikiskill-hook.sh SessionStart        # 出力は {} になる(これだけでは証明にならない)
+ls .claude/experience/*/session-rollback-check.jsonl 2>/dev/null   # 何も表示されなければ OK(記録が作られていない)
+after=$(cat .claude/experience/_audit.log 2>/dev/null | wc -l)
+[ "$before" = "$after" ] && echo "audit 増加なし" || echo "audit が増えた: 要確認"
+```
+
+  - 判定: `session-rollback-check.jsonl` が作られず、`_audit.log` の行数も増えていなければ、停止している。
+  - `session-rollback-check.jsonl` が表示されたら停止していない。確認用に作られた記録なので `rm .claude/experience/*/session-rollback-check.jsonl` で消し、`.claude/memory.off` の場所(リポジトリ直下の `.claude/`)と環境変数を見直す。
 
 ## 2. 正式 Rollback(Git)
 
@@ -74,5 +87,7 @@ git add .claude/experience && git commit -m "chore(wikiskill): Experienceの古�
 ```
 
 - 対象は「月フォルダ YYYY-MM の翌月1日から180日以上たった月」。`_local/`・`_audit.log`・`archive/` は対象外。
-- 固めた結果を読み戻して原本と一致を確かめてから元のファイルを消す。一致しない・想定外のファイルがある・同名の gz が既にある場合は、何も消さずにエラーで止まる(`_audit.log` に1行残る)。
+- 固めた結果を読み戻して原本と一致を確かめてから元のファイルを消す。想定外のファイルがある・同名の gz が既にあって内容が原本と合わない場合は、何も消さずにエラーで止まる(`_audit.log` に1行残る)。
+- 元フォルダの削除だけが失敗した場合(gz は検証済み)は、エラーに残りのファイルが出る。同じコマンドを再実行すると、gz が原本の全行を含むことを確かめた上で後始末を完了する。
+- `--dry-run` は、実行すると見送りになる月を `見送り(理由)` で先に表示する(見送りが出た月より後の月は `未実行`。実際の実行もそこで止まる)。
 - Phase 1 の CI は `--check` を呼ばない(守り部が見る。将来は月次 Routine)。実行は手動。

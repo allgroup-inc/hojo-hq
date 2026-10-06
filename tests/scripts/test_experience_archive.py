@@ -4,6 +4,7 @@
 dry-run が何も変えないこと、失敗時に黙って成功しないことを固定する。
 """
 import gzip
+import shutil
 import os
 import sys
 from datetime import date
@@ -248,3 +249,160 @@ def test_cli_unexpected_failure_audits_and_exits_1(repo, monkeypatch, capsys):
 
     monkeypatch.setattr(experience_archive, "total_size", boom)
     assert main(["--check"], root=repo) == 1
+
+
+# --- 失敗時の後始末・報告(レビュー指摘への対応) ---
+
+def _partial_rmtree(real):
+    """1ファイルだけ消して失敗する rmtree。"""
+    def fake(path, *a, **k):
+        victim = sorted(os.fspath(p) for p in path.glob("session-*.jsonl"))[0]
+        os.remove(victim)
+        raise OSError("simulated rmtree failure")
+    return fake
+
+
+def test_rmtree_failure_reports_verified_gz_and_leftovers(repo, monkeypatch):
+    lines = write_many(repo, "2026-03")
+    monkeypatch.setattr(shutil, "rmtree", _partial_rmtree(shutil.rmtree))
+    with pytest.raises(RuntimeError) as ei:
+        archive(repo, TODAY)
+    msg = str(ei.value)
+    assert "検証済みで完全" in msg and "2026-03" in msg
+    assert "session-b.jsonl" in msg and "session-c.jsonl" in msg  # 残りの一覧
+    assert "session-a.jsonl" not in msg  # 消えたものは載せない
+    assert gzip.open(gz_of(repo, "2026-03"), "rt", encoding="utf-8").read().splitlines() == lines
+    assert not list((exp(repo) / "archive").glob(".*.tmp"))
+
+
+def test_rerun_after_rmtree_failure_completes_cleanup(repo, monkeypatch):
+    lines = write_many(repo, "2026-03")
+    with monkeypatch.context() as m:
+        m.setattr(shutil, "rmtree", _partial_rmtree(shutil.rmtree))
+        with pytest.raises(RuntimeError):
+            archive(repo, TODAY)
+    assert (exp(repo) / "2026-03").exists()
+    done = archive(repo, TODAY)  # 本物の rmtree で再実行
+    assert [p.name for p in done] == ["2026-03.jsonl.gz"]
+    assert not (exp(repo) / "2026-03").exists()
+    assert gzip.open(gz_of(repo, "2026-03"), "rt", encoding="utf-8").read().splitlines() == lines
+
+
+def test_rerun_resume_when_gz_exists_and_originals_untouched(repo):
+    lines = write_many(repo, "2026-03")
+    # 前回: gz 作成まで成功し、フォルダを1つも消せなかった状態
+    import experience_archive as ea
+    files = sorted((exp(repo) / "2026-03").glob("session-*.jsonl"))
+    (exp(repo) / "archive").mkdir()
+    ea._write_gzip(gz_of(repo, "2026-03"), ea._month_bytes(files))
+    assert [p.name for p in archive(repo, TODAY)] == ["2026-03.jsonl.gz"]
+    assert not (exp(repo) / "2026-03").exists()
+    assert gzip.open(gz_of(repo, "2026-03"), "rt", encoding="utf-8").read().splitlines() == lines
+
+
+def test_existing_gz_with_different_content_still_refused_accurately(repo):
+    write_many(repo, "2026-03")
+    import experience_archive as ea
+    (exp(repo) / "archive").mkdir()
+    ea._write_gzip(gz_of(repo, "2026-03"), b'{"other":"content"}\n')
+    with pytest.raises(RuntimeError) as ei:
+        archive(repo, TODAY)
+    assert "内容が一致しない" in str(ei.value)
+    assert len(list((exp(repo) / "2026-03").glob("session-*.jsonl"))) == 3
+    assert gzip.open(gz_of(repo, "2026-03"), "rb").read() == b'{"other":"content"}\n'
+
+
+def test_gzip_write_failure_leaves_originals_and_no_tmp(repo, monkeypatch):
+    write_many(repo, "2026-03")
+    before = snapshot(repo)
+
+    def boom(path, data):
+        path.write_bytes(b"partial")
+        raise OSError("disk full")
+
+    monkeypatch.setattr(experience_archive, "_write_gzip", boom)
+    with pytest.raises(OSError):
+        archive(repo, TODAY)
+    assert not list((exp(repo) / "archive").glob("*"))  # .tmp も gz も残らない
+    after = [x for x in snapshot(repo) if "/archive/" not in x[0] and not x[0].endswith("/archive")]
+    assert after == [x for x in before if "/archive/" not in x[0] and not x[0].endswith("/archive")]
+    assert not gz_of(repo, "2026-03").exists()
+
+
+def test_gzip_readback_mismatch_leaves_originals_and_no_tmp(repo, monkeypatch):
+    write_many(repo, "2026-03")
+    real = experience_archive._write_gzip
+    monkeypatch.setattr(experience_archive, "_write_gzip", lambda path, data: real(path, data[:-5]))
+    with pytest.raises(RuntimeError, match="一致しません"):
+        archive(repo, TODAY)
+    assert not list((exp(repo) / "archive").glob("*"))
+    assert len(list((exp(repo) / "2026-03").glob("session-*.jsonl"))) == 3
+
+
+def test_gzip_truncated_file_is_runtime_error_and_clean(repo, monkeypatch):
+    write_many(repo, "2026-03")
+    real = experience_archive._write_gzip
+
+    def trunc(path, data):
+        real(path, data)
+        raw = path.read_bytes()
+        path.write_bytes(raw[:-6])  # gzip 末尾(CRC/サイズ)を欠く
+
+    monkeypatch.setattr(experience_archive, "_write_gzip", trunc)
+    with pytest.raises(RuntimeError):
+        archive(repo, TODAY)
+    assert not list((exp(repo) / "archive").glob("*"))
+    assert len(list((exp(repo) / "2026-03").glob("session-*.jsonl"))) == 3
+
+
+def test_archive_failure_reports_months_already_archived(repo):
+    lines02 = write_many(repo, "2026-02")
+    write_many(repo, "2026-03")
+    (exp(repo) / "2026-03" / "notes.txt").write_text("x")
+    with pytest.raises(RuntimeError) as ei:
+        archive(repo, TODAY)
+    msg = str(ei.value)
+    assert "2026-03" in msg and "2026-02.jsonl.gz" in msg and "固め終えた" in msg
+    assert gzip.open(gz_of(repo, "2026-02"), "rt", encoding="utf-8").read().splitlines() == lines02
+    assert not (exp(repo) / "2026-02").exists()
+    assert (exp(repo) / "2026-03").exists()
+
+
+def test_cli_failure_message_lists_archived_months(repo, capsys):
+    write_many(repo, "2026-02")
+    write_many(repo, "2026-03")
+    (exp(repo) / "2026-03" / "notes.txt").write_text("x")
+    assert main(["--archive", "--today", "2026-10-06"], root=repo) == 1
+    assert "2026-02.jsonl.gz" in capsys.readouterr().err
+    assert "2026-02.jsonl.gz" in (exp(repo) / "_audit.log").read_text(encoding="utf-8")
+
+
+def test_dry_run_predicts_refusals_and_skips_empty(repo, capsys):
+    write_many(repo, "2025-12")                      # 通常: 予定
+    mk(repo, "2026-01")                              # 空: 表示しない
+    write_many(repo, "2026-02")
+    (exp(repo) / "2026-02" / "notes.txt").write_text("x")   # 余計なファイル: 見送り
+    write_many(repo, "2026-03")                      # 見送りの後ろ: 未実行
+    before = snapshot(repo)
+    assert main(["--archive", "--dry-run", "--today", "2026-10-06"], root=repo) == 0
+    assert snapshot(repo) == before
+    out = capsys.readouterr().out
+    assert "2025-12: 3 ファイルを archive/2025-12.jsonl.gz に固める予定" in out
+    assert "2026-01" not in out
+    assert "2026-02: 見送り(" in out and "notes.txt" in out
+    assert "2026-03: 未実行" in out
+    assert "見送り 1 か月" in out
+
+
+def test_dry_run_predicts_gz_exists_refusal_and_resume(repo, capsys):
+    import experience_archive as ea
+    write_many(repo, "2026-01")
+    write_many(repo, "2026-02")
+    (exp(repo) / "archive").mkdir()
+    ea._write_gzip(gz_of(repo, "2026-01"), b"unrelated\n")                       # 内容違い: 見送り
+    files = sorted((exp(repo) / "2026-02").glob("session-*.jsonl"))
+    ea._write_gzip(gz_of(repo, "2026-02"), ea._month_bytes(files))               # 一致: 後始末
+    main(["--archive", "--dry-run", "--today", "2026-10-06"], root=repo)
+    out = capsys.readouterr().out
+    assert "2026-01: 見送り(" in out and "内容が一致しない" in out
+    assert "2026-02: 未実行" in out

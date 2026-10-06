@@ -96,13 +96,7 @@ def archivable_months(root: Path, today: date, older_than_days: int = 180) -> li
 
 def _month_bytes(files: list[Path]) -> bytes:
     """ファイル名順に連結。末尾改行のないファイルには改行を1つ足す(行数は変わらない)。"""
-    buf = io.BytesIO()
-    for f in files:
-        data = f.read_bytes()
-        buf.write(data)
-        if data and not data.endswith(b"\n"):
-            buf.write(b"\n")
-    return buf.getvalue()
+    return b"".join(_normalized(f) for f in files)
 
 
 def _write_gzip(path: Path, data: bytes) -> None:
@@ -112,41 +106,109 @@ def _write_gzip(path: Path, data: bytes) -> None:
             gz.write(data)
 
 
-def _archive_month(root: Path, month_dir: Path) -> Path | None:
+def _is_block_subsequence(gz_data: bytes, files_data: list[bytes]) -> bool:
+    """files_data(各ファイルの正規化済みバイト列)が、gz_data の中に順番どおり・行頭から現れるか。"""
+    pos = 0
+    for b in files_data:
+        idx = gz_data.find(b, pos)
+        while idx > 0 and gz_data[idx - 1:idx] != b"\n":
+            idx = gz_data.find(b, idx + 1)
+        if idx < 0:
+            return False
+        pos = idx + len(b)
+    return True
+
+
+def _read_gzip(path: Path) -> bytes:
+    try:
+        with gzip.open(path, "rb") as f:
+            return f.read()
+    except (OSError, EOFError) as e:  # BadGzipFile は OSError の仲間
+        raise RuntimeError(f"{path.name} を読み戻せません({type(e).__name__}: {e})") from e
+
+
+def _plan_month(root: Path, month_dir: Path) -> tuple[str, str, list[Path]]:
+    """月フォルダに対して archive() が何をするかを決める(読むだけで何も変えない)。
+
+    action: "skip"(固めるものがない)/ "archive"(新規に固める)/
+            "resume"(gz は既に完全。前回の削除失敗の後始末だけ行う)/ "refuse"(見送り。detail に理由)
+    """
     files = sorted(month_dir.glob("session-*.jsonl"))
     if not files:
-        return None  # 固めるものがない(空フォルダは触らない)
+        return "skip", "session-*.jsonl がない", files
     expected = {p.name for p in files}
     extra = sorted(p.name for p in month_dir.iterdir() if p.name not in expected)
     if extra:
+        return "refuse", f"session-*.jsonl 以外のものがある(原本は無傷): {', '.join(extra)}", files
+    dest = _exp(root) / ARCHIVE_DIR / f"{month_dir.name}.jsonl.gz"
+    if not dest.exists():
+        return "archive", "", files
+    try:
+        gz_data = _read_gzip(dest)
+    except RuntimeError as e:
+        return "refuse", f"{dest.name} が既にあり、読み戻せないため上書きしません(原本は無傷): {e}", files
+    if _is_block_subsequence(gz_data, [_normalized(f) for f in files]):
+        return "resume", f"{dest.name} は既に原本の全行を含む(前回の削除失敗の後始末)", files
+    return "refuse", f"{dest.name} が既にあり、残っている原本と内容が一致しないため上書きしません(原本は無傷)", files
+
+
+def _normalized(f: Path) -> bytes:
+    data = f.read_bytes()
+    return data + b"\n" if data and not data.endswith(b"\n") else data
+
+
+def _remove_month(month_dir: Path, dest: Path) -> None:
+    """検証済みの gz がある月フォルダを消す。失敗したら、何が残っているかを正確に伝える。"""
+    try:
+        shutil.rmtree(month_dir)
+    except Exception as e:  # noqa: BLE001
+        left = sorted(str(p) for p in month_dir.rglob("*") if p.is_file()) if month_dir.exists() else []
         raise RuntimeError(
-            f"{month_dir.name} に session-*.jsonl 以外のものがあるため固めません(原本は無傷): {', '.join(extra)}"
-        )
+            f"{dest.name} は検証済みで完全です。ただし {month_dir.name} フォルダの削除に失敗し、"
+            f"一部だけ消えている可能性があります({type(e).__name__}: {e})。"
+            f"残っているファイルを手で削除するか、同じコマンドを再実行すると後始末を完了します: "
+            f"{', '.join(left) if left else '(なし)'}"
+        ) from e
+
+
+def _archive_month(root: Path, month_dir: Path) -> Path | None:
+    action, detail, files = _plan_month(root, month_dir)
+    if action == "skip":
+        return None  # 固めるものがない(空フォルダは触らない)
+    if action == "refuse":
+        raise RuntimeError(f"{month_dir.name} は見送り: {detail}")
     arch = _exp(root) / ARCHIVE_DIR
     dest = arch / f"{month_dir.name}.jsonl.gz"
-    if dest.exists():
-        raise RuntimeError(f"{dest.name} が既にあるため上書きしません(原本は無傷)")
-    data = _month_bytes(files)
-    arch.mkdir(parents=True, exist_ok=True)
-    tmp = arch / f".{dest.name}.tmp"
-    try:
-        _write_gzip(tmp, data)
-        with gzip.open(tmp, "rb") as f:
-            if f.read() != data:
+    if action == "archive":
+        data = _month_bytes(files)
+        arch.mkdir(parents=True, exist_ok=True)
+        tmp = arch / f".{dest.name}.tmp"
+        try:
+            _write_gzip(tmp, data)
+            if _read_gzip(tmp) != data:
                 raise RuntimeError(f"{dest.name} の読み戻しが原本と一致しません(原本は無傷)")
-        os.replace(tmp, dest)
-    finally:
-        if tmp.exists():
-            tmp.unlink()
-    shutil.rmtree(month_dir)
+            os.replace(tmp, dest)
+        finally:
+            if tmp.exists():
+                tmp.unlink()
+    _remove_month(month_dir, dest)
     return dest
 
 
 def archive(root: Path, today: date, older_than_days: int = 180) -> list[Path]:
-    """対象の各月を archive/YYYY-MM.jsonl.gz に固めて元フォルダを削除。作った gz のパスを返す。"""
-    done = []
+    """対象の各月を archive/YYYY-MM.jsonl.gz に固めて元フォルダを削除。作った gz のパスを返す。
+
+    途中で失敗したら止まる(fail-fast)。それまでに固めた月はエラーメッセージに含める。
+    """
+    done: list[Path] = []
     for month_dir in archivable_months(root, today, older_than_days):
-        dest = _archive_month(root, month_dir)
+        try:
+            dest = _archive_month(root, month_dir)
+        except Exception as e:
+            if done:
+                names = ", ".join(p.name for p in done)
+                raise RuntimeError(f"{e} / 失敗より前に固め終えた月(変更済み・要コミット): {names}") from e
+            raise
         if dest is not None:
             done.append(dest)
     return done
@@ -195,10 +257,24 @@ def main(argv: list[str], root: Path | None = None) -> int:
         today = today or date.today()
         if dry:
             months = archivable_months(root, today)
+            would, refused, stopped = 0, 0, False
             for p in months:
-                n = len(list(p.glob("session-*.jsonl")))
-                print(f"[dry-run] {p.name}: {n} ファイルを archive/{p.name}.jsonl.gz に固める予定")
-            print(f"[dry-run] 対象 {len(months)} か月(何も変更していません)")
+                action, detail, files = _plan_month(root, p)
+                if action == "skip":
+                    continue
+                if action == "refuse":
+                    print(f"[dry-run] {p.name}: 見送り({detail})")
+                    refused += 1
+                    stopped = True
+                elif stopped:
+                    print(f"[dry-run] {p.name}: 未実行(前の月の見送りで実行が止まるため)")
+                elif action == "resume":
+                    print(f"[dry-run] {p.name}: 後始末のみ({detail})")
+                    would += 1
+                else:
+                    print(f"[dry-run] {p.name}: {len(files)} ファイルを archive/{p.name}.jsonl.gz に固める予定")
+                    would += 1
+            print(f"[dry-run] 実行予定 {would} か月 / 見送り {refused} か月(何も変更していません)")
             return 0
         done = archive(root, today)
         for p in done:
