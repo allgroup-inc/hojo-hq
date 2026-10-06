@@ -15,7 +15,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/wikiskill-hook.sh SessionStart"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/wikiskill-hook.sh SessionStart",
+            "timeout": 10
           }
         ]
       }
@@ -25,7 +26,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/wikiskill-hook.sh UserPromptSubmit"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/wikiskill-hook.sh UserPromptSubmit",
+            "timeout": 10
           }
         ]
       }
@@ -36,7 +38,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/wikiskill-hook.sh PostToolUse"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/wikiskill-hook.sh PostToolUse",
+            "timeout": 10
           }
         ]
       }
@@ -46,7 +49,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/wikiskill-hook.sh SessionEnd"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/wikiskill-hook.sh SessionEnd",
+            "timeout": 10
           }
         ]
       }

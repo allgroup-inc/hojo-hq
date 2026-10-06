@@ -294,6 +294,10 @@ def _hook(event_name: str) -> int:
         warnings.append(f"{type(e).__name__}: {e}")
 
     sid = session_id_of(payload)
+    _sid_in = payload.get("session_id")
+    if not (isinstance(_sid_in, str) and _sid_in.strip()) and not os.environ.get("CLAUDE_SESSION_ID", "").strip():
+        # payload にも環境変数にも無い → unknown-<時刻> で記録される。黙って別名にしない
+        audit(root, _COMPONENT, f"session_id missing in hook payload; using {sid}")
     if event_name == "SessionStart":
         try:
             append_event(root, start_event(root, sid, str(payload.get("source") or "startup")))
@@ -327,6 +331,8 @@ def _hook(event_name: str) -> int:
         emit(event_name, system_message=(
             f"⚠ Experience記録に失敗: {'; '.join(warnings)}。audit: {EXPERIENCE_DIR}/_audit.log"
         ))
+    else:
+        emit(event_name)  # 成功時も必ず JSON(`{}`)を出す。ラッパは空出力を失敗と見なす
     return 0
 
 

@@ -227,7 +227,7 @@ def _events(repo, sid):
 
 def test_hook_session_start_writes_record_and_current_session(cli):
     rc, out, _ = cli("hook", "SessionStart", stdin={"session_id": "s9", "source": "resume"})
-    assert rc == 0 and out == ""
+    assert rc == 0 and json.loads(out) == {}
     (ev,) = _events(cli.repo, "s9")
     assert ev["event"] == "session_start" and ev["source"] == "resume"
     assert (cli.repo / ".claude/experience/_local/current_session").read_text().strip() == "s9"
@@ -236,7 +236,7 @@ def test_hook_session_start_writes_record_and_current_session(cli):
 def test_hook_session_end_writes_summary_and_ended_marker(cli):
     cli("hook", "SessionStart", stdin={"session_id": "s9"})
     rc, out, _ = cli("hook", "SessionEnd", stdin={"session_id": "s9", "reason": "clear"})
-    assert rc == 0 and out == ""
+    assert rc == 0 and json.loads(out) == {}
     evs = _events(cli.repo, "s9")
     assert [e["event"] for e in evs] == ["session_start", "session_end"]
     assert evs[-1]["reason"] == "clear"
@@ -273,6 +273,35 @@ def test_hook_disabled_prints_empty_json_and_writes_nothing(cli, monkeypatch):
     rc, out, _ = cli("hook", "SessionStart", stdin={"session_id": "s9"})
     assert rc == 0 and json.loads(out) == {}
     assert not (cli.repo / ".claude/experience").exists()
+
+
+def test_hook_success_prints_empty_json_for_every_event(cli):
+    for ev, payload in (
+        ("SessionStart", {"session_id": "s9"}),
+        ("PostToolUse", {"session_id": "s9", "tool_name": "Bash", "tool_input": {"command": "ls"}}),
+        ("SessionEnd", {"session_id": "s9"}),
+    ):
+        rc, out, _ = cli("hook", ev, stdin=payload)
+        assert rc == 0 and out.strip() == "{}", ev
+
+
+def test_hook_audits_missing_session_id(cli):
+    rc, out, _ = cli("hook", "SessionStart", stdin={"hook_event_name": "SessionStart"})
+    assert rc == 0 and json.loads(out) == {}
+    log = (cli.repo / ".claude/experience/_audit.log").read_text()
+    assert "session_id missing in hook payload; using unknown-" in log
+
+
+def test_hook_does_not_audit_when_session_id_present(cli):
+    cli("hook", "SessionStart", stdin={"session_id": "s9"})
+    assert not (cli.repo / ".claude/experience/_audit.log").exists()
+
+
+def test_hook_missing_session_id_not_audited_when_env_provides_it(cli, monkeypatch):
+    monkeypatch.setenv("CLAUDE_SESSION_ID", "envsid")
+    cli("hook", "SessionStart", stdin={"hook_event_name": "SessionStart"})
+    assert not (cli.repo / ".claude/experience/_audit.log").exists()
+    assert _events(cli.repo, "envsid")
 
 
 def test_note_cli_appends_note_event_using_env_session(cli, monkeypatch):

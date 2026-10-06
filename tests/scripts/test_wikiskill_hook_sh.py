@@ -64,7 +64,7 @@ def test_session_start_writes_record(repo):
     r = run_hook(repo, "SessionStart", start_payload(repo))
     assert r.returncode == 0
     assert list((repo / ".claude/experience").glob("*/session-A.jsonl"))
-    json.loads(r.stdout)  # 常に妥当な JSON
+    assert r.stdout.strip() == "{}"  # 成功時は偽の失敗警告を出さない
 
 
 def test_hook_tolerates_missing_session_id(repo):
@@ -79,13 +79,13 @@ def test_disabled_by_memory_off_file(repo):
     (repo / ".claude/memory.off").touch()
     r = run_hook(repo, "SessionStart", start_payload(repo))
     assert r.returncode == 0 and r.stdout.strip() == "{}"
-    assert not list((repo / ".claude/experience").glob("*/*.jsonl"))
+    assert not (repo / ".claude/experience").exists()
 
 
 def test_post_tool_use_bash(repo):
     r = run_hook(repo, "PostToolUse", {"session_id": "A", "tool_name": "Bash",
                                        "tool_input": {"command": "python3 x.py --secret"}})
-    assert r.returncode == 0
+    assert r.returncode == 0 and r.stdout.strip() == "{}"
     text = read_session(repo, "A")
     assert '"program": "python3"' in text and "--secret" not in text
 
@@ -114,3 +114,95 @@ def test_hook_runtime_under_500ms(repo):
     elapsed = time.perf_counter() - t
     assert r.returncode == 0
     assert elapsed < 0.5, f"hook took {elapsed:.3f}s"
+
+
+# ---- 停止スイッチ・失敗系(ラッパ自身の不変条件) ----
+
+def test_stop_switch_wins_even_when_python_is_broken(repo):
+    (repo / ".claude/memory.off").touch()
+    (repo / "scripts/experience_log.py").write_text("raise SystemExit(3)")
+    r = run_hook(repo, "SessionStart", start_payload(repo))
+    assert r.returncode == 0 and r.stdout.strip() == "{}"
+    assert not (repo / ".claude/experience").exists()
+
+
+@pytest.mark.parametrize("value", ["1", "true", "YES", " On "])
+def test_stop_switch_by_env_var(repo, value):
+    r = run_hook(repo, "SessionStart", start_payload(repo), env={"HOJO_MEMORY_OFF": value})
+    assert r.returncode == 0 and r.stdout.strip() == "{}"
+    assert not (repo / ".claude/experience").exists()
+
+
+def test_falsy_env_var_does_not_stop_recording(repo):
+    r = run_hook(repo, "SessionStart", start_payload(repo), env={"HOJO_MEMORY_OFF": "0"})
+    assert r.returncode == 0 and r.stdout.strip() == "{}"
+    assert list((repo / ".claude/experience").glob("*/session-A.jsonl"))
+
+
+def test_python_missing_is_reported_and_exits_0(repo, tmp_path_factory):
+    bindir = tmp_path_factory.mktemp("bin")
+    for tool in ("cat", "date", "mkdir", "tr", "git"):
+        found = shutil.which(tool)
+        assert found, tool
+        (bindir / tool).symlink_to(found)
+    bash = shutil.which("bash")
+    r = subprocess.run(
+        [bash, ".claude/hooks/wikiskill-hook.sh", "SessionStart"],
+        input=json.dumps(start_payload(repo)), cwd=repo, capture_output=True, text=True,
+        env={"PATH": str(bindir), "CLAUDE_PROJECT_DIR": str(repo)},
+    )
+    assert r.returncode == 0
+    assert "systemMessage" in json.loads(r.stdout)
+    audit = (repo / ".claude/experience/_audit.log").read_text()
+    assert "\thook-wrapper\t" in audit and "SessionStart" in audit
+
+
+def test_python_exit0_with_empty_stdout_is_reported(repo):
+    (repo / "scripts/experience_log.py").write_text("")
+    r = run_hook(repo, "SessionStart", start_payload(repo))
+    assert r.returncode == 0
+    assert "systemMessage" in json.loads(r.stdout)
+    assert "empty stdout" in (repo / ".claude/experience/_audit.log").read_text()
+
+
+def test_python_exit0_with_non_json_stdout_is_reported(repo):
+    (repo / "scripts/experience_log.py").write_text("print('hello not json')")
+    r = run_hook(repo, "SessionStart", start_payload(repo))
+    assert r.returncode == 0
+    assert "systemMessage" in json.loads(r.stdout)
+    assert "non-JSON stdout" in (repo / ".claude/experience/_audit.log").read_text()
+
+
+def test_python_nonzero_exit_is_audited(repo):
+    (repo / "scripts/experience_log.py").write_text("raise SystemExit(3)")
+    run_hook(repo, "SessionStart", start_payload(repo))
+    line = (repo / ".claude/experience/_audit.log").read_text().strip().splitlines()[-1]
+    assert "\thook-wrapper\tSessionStart exit=3 " in line
+
+
+def test_unwritable_audit_never_breaks_wrapper(repo):
+    (repo / ".claude/experience").mkdir(parents=True)
+    (repo / ".claude/experience/_audit.log").mkdir()  # ファイルの場所がディレクトリ → 追記不可
+    (repo / "scripts/experience_log.py").write_text("raise SystemExit(3)")
+    r = run_hook(repo, "SessionStart", start_payload(repo))
+    assert r.returncode == 0 and "systemMessage" in json.loads(r.stdout)
+
+
+def test_user_prompt_submit_prints_empty_json(repo):
+    r = run_hook(repo, "UserPromptSubmit", {"session_id": "A", "prompt": "x"})
+    assert r.returncode == 0 and r.stdout.strip() == "{}"
+
+
+def test_non_ascii_payload_returns_valid_json(repo):
+    cwd = str(repo / "沖縄企業のミカタ")
+    payload = {"session_id": "A", "hook_event_name": "SessionStart", "source": "startup", "cwd": cwd}
+    e = {**os.environ, "CLAUDE_PROJECT_DIR": str(repo)}
+    e.pop("HOJO_MEMORY_OFF", None)
+    r = subprocess.run(
+        ["bash", ".claude/hooks/wikiskill-hook.sh", "SessionStart"],
+        input=json.dumps(payload, ensure_ascii=False).encode("utf-8"), cwd=repo, env=e,
+        capture_output=True,
+    )
+    assert r.returncode == 0
+    assert json.loads(r.stdout.decode("utf-8")) == {}
+    assert list((repo / ".claude/experience").glob("*/session-A.jsonl"))
