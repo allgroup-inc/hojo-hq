@@ -18,6 +18,7 @@ import baseline_debt as bd  # noqa: E402
 import check_repo_scope as crs  # noqa: E402
 
 TOP_KEYS = {"schema", "recorded_at", "commit", "base_ref", "phase1_origin", "note", "checks"}
+ALL_CHECKS = {"check_repo_scope", "skill_validation", "scripts_tests_preexisting"}
 CHECK_KEYS = {"command", "failure_count", "items", "cause", "introduced_by", "detected_at"}
 
 
@@ -26,18 +27,24 @@ def make_baseline():
         "checks": {
             "check_repo_scope": {"items": ["a::X", "b::X"]},
             "skill_validation": {"items": ["t::one", "t::two"]},
+            "scripts_tests_preexisting": {"items": ["s::one"]},
         }
     }
 
 
-def make_current(scope, skill):
-    return {"check_repo_scope": list(scope), "skill_validation": list(skill)}
+def make_current(scope, skill, scripts=("s::one",)):
+    return {
+        "check_repo_scope": list(scope),
+        "skill_validation": list(skill),
+        "scripts_tests_preexisting": list(scripts),
+    }
 
 
 def test_compare_same():
     verdict, table = bd.compare(make_baseline(), make_current(["b::X", "a::X"], ["t::two", "t::one"]))
     assert verdict == "SAME"
     assert "check_repo_scope" in table and "skill_validation" in table
+    assert "scripts_tests_preexisting" in table
 
 
 def test_compare_regression_lists_new_items():
@@ -54,6 +61,20 @@ def test_compare_improved_lists_removed_items():
     assert "b::X" in table
 
 
+def test_compare_third_check_new_item_is_regression():
+    verdict, table = bd.compare(
+        make_baseline(), make_current(["a::X", "b::X"], ["t::one", "t::two"], ["s::one", "s::new"])
+    )
+    assert verdict == "REGRESSION"
+    assert "s::new" in table
+
+
+def test_compare_third_check_removed_item_is_improved():
+    verdict, table = bd.compare(make_baseline(), make_current(["a::X", "b::X"], ["t::one", "t::two"], []))
+    assert verdict == "IMPROVED"
+    assert "s::one" in table
+
+
 def test_compare_regression_wins_over_improvement():
     # 1件減って別の1件が増えたら、件数が同じでも REGRESSION
     verdict, _ = bd.compare(make_baseline(), make_current(["a::X", "z::X"], ["t::one", "t::two"]))
@@ -65,9 +86,11 @@ def test_collect_items_are_sorted(monkeypatch):
     monkeypatch.setattr(crs, "find_violations", lambda paths: [("p2", "ZZ"), ("p1", "AA")])
     monkeypatch.setattr(crs, "read_text", lambda path: None)
     monkeypatch.setattr(bd, "collect_skill_validation", lambda: ["t::b", "t::a"])
+    monkeypatch.setattr(bd, "collect_scripts_tests_preexisting", lambda: ["s::b", "s::a"])
     got = bd.collect()
     assert got["check_repo_scope"] == ["p1::AA", "p2::ZZ"]
     assert got["skill_validation"] == ["t::a", "t::b"]
+    assert got["scripts_tests_preexisting"] == ["s::a", "s::b"]
 
 
 def test_scan_reports_every_forbidden_word_per_file(tmp_path, monkeypatch):
@@ -130,6 +153,40 @@ def fake_run(returncode, stdout="", stderr=""):
     return run
 
 
+def test_scripts_tests_collector_uses_fixed_file_list_only(monkeypatch):
+    seen = {}
+
+    def run(argv, **kwargs):
+        seen["argv"] = argv
+        out = "FAILED tests/scripts/test_verify_mikata_seido.py::x - e\n1 failed, 3 passed in 0.1s\n"
+        return subprocess.CompletedProcess(argv, 1, out, "")
+
+    monkeypatch.setattr(bd.subprocess, "run", run)
+    assert bd.collect_scripts_tests_preexisting() == ["tests/scripts/test_verify_mikata_seido.py::x"]
+    targets = [a for a in seen["argv"] if a.startswith("tests/")]
+    assert targets == [
+        "tests/scripts/test_generate_ig_posts_mikata.py",
+        "tests/scripts/test_verify_mikata_seido.py",
+    ]
+    assert targets == bd.SCRIPTS_TESTS_FILES
+    assert "-rfE" in seen["argv"]
+    # tests/scripts ディレクトリ全体や自分自身のテストは含めない
+    assert "tests/scripts" not in seen["argv"]
+    assert not any("test_baseline_debt" in a for a in seen["argv"])
+
+
+def test_skill_validation_collector_still_targets_its_directory(monkeypatch):
+    seen = {}
+
+    def run(argv, **kwargs):
+        seen["argv"] = argv
+        return subprocess.CompletedProcess(argv, 0, "1 passed in 0.1s\n", "")
+
+    monkeypatch.setattr(bd.subprocess, "run", run)
+    assert bd.collect_skill_validation() == []
+    assert [a for a in seen["argv"] if a.startswith("tests/")] == ["tests/skill_validation"]
+
+
 def test_collect_skill_validation_ok(monkeypatch):
     out = "FAILED t.py::b - x\nFAILED t.py::a - y\n2 failed, 3 passed in 0.1s\n"
     monkeypatch.setattr(bd.subprocess, "run", fake_run(1, out))
@@ -186,11 +243,12 @@ def test_cli_compare_exits_1_on_collection_failure(tmp_path, monkeypatch, capsys
     assert "pytest が落ちた" in capsys.readouterr().err
 
 
-def write_baseline(path: Path, scope, skill):
+def write_baseline(path: Path, scope, skill, scripts=("s::one",)):
     path.write_text(
         json.dumps({"schema": 1, "checks": {
             "check_repo_scope": {"items": scope},
             "skill_validation": {"items": skill},
+            "scripts_tests_preexisting": {"items": list(scripts)},
         }}),
         encoding="utf-8",
     )
@@ -221,7 +279,7 @@ def test_cli_compare_json_output(tmp_path, monkeypatch, capsys):
     assert bd.main(["--compare", "--json", "--path", str(base)]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["verdict"] == "SAME"
-    assert set(data["checks"]) == {"check_repo_scope", "skill_validation"}
+    assert set(data["checks"]) == ALL_CHECKS
 
 
 def test_record_refuses_overwrite_without_force(tmp_path, monkeypatch):
@@ -242,10 +300,18 @@ def test_record_json_has_required_schema_keys(tmp_path, monkeypatch):
     assert TOP_KEYS <= set(data)
     assert data["phase1_origin"] is False
     assert data["base_ref"] == "origin/main@04dbc28f4"
-    assert set(data["checks"]) == {"check_repo_scope", "skill_validation"}
+    assert set(data["checks"]) == ALL_CHECKS
     for check in data["checks"].values():
         assert CHECK_KEYS <= set(check)
         assert check["failure_count"] == len(check["items"])
+    third = data["checks"]["scripts_tests_preexisting"]
+    assert third["files"] == bd.SCRIPTS_TESTS_FILES
+    assert third["command"] == (
+        "python3 -m pytest tests/scripts/test_generate_ig_posts_mikata.py "
+        "tests/scripts/test_verify_mikata_seido.py -q"
+    )
+    assert third["introduced_by"] == []
+    assert "origin/main でも同一に失敗" in third["cause"]
 
 
 def test_baseline_json_path_is_allowed_by_scope_check():

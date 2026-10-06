@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "recorded_at": "2026-10-06T14:09:24Z",
-  "commit": "9c65a0c11",
+  "recorded_at": "2026-10-06T15:12:02Z",
+  "commit": "ceaa9b60d",
   "base_ref": "origin/main@04dbc28f4",
   "phase1_origin": false,
   "note": "Phase 1 開始時点の既知の赤。Phase 1 ではこれを増やさない(小柳さん 2026-10-06 承認)",
@@ -42,6 +42,21 @@
       "introduced_by": [
         "3a193392b"
       ],
+      "detected_at": "2026-10-06"
+    },
+    "scripts_tests_preexisting": {
+      "command": "python3 -m pytest tests/scripts/test_generate_ig_posts_mikata.py tests/scripts/test_verify_mikata_seido.py -q",
+      "files": [
+        "tests/scripts/test_generate_ig_posts_mikata.py",
+        "tests/scripts/test_verify_mikata_seido.py"
+      ],
+      "failure_count": 2,
+      "items": [
+        "tests/scripts/test_generate_ig_posts_mikata.py::test_real_data_smoke",
+        "tests/scripts/test_verify_mikata_seido.py::test_verify_priority_1_first"
+      ],
+      "cause": "2026-10-06 時点で origin/main でも同一に失敗(worktree で確認)。Phase 1 由来ではない。原因は未調査(別タスク)",
+      "introduced_by": [],
       "detected_at": "2026-10-06"
     }
   }

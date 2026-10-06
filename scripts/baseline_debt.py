@@ -29,7 +29,15 @@ import check_repo_scope  # noqa: E402
 DEFAULT_PATH = ROOT / "docs" / "wikiskill" / "baseline-debt.json"
 BASE_REF = "origin/main@04dbc28f4"
 NOTE = "Phase 1 開始時点の既知の赤。Phase 1 ではこれを増やさない(小柳さん 2026-10-06 承認)"
-CHECK_NAMES = ("check_repo_scope", "skill_validation")
+CHECK_NAMES = ("check_repo_scope", "skill_validation", "scripts_tests_preexisting")
+
+# tests/scripts 全体ではなく固定のファイル2本だけを走らせる。
+# Phase 1 が tests/scripts に足すタイミング依存のテストでゲートが揺れないようにするため。
+SCRIPTS_TESTS_FILES = [
+    "tests/scripts/test_generate_ig_posts_mikata.py",
+    "tests/scripts/test_verify_mikata_seido.py",
+]
+SKILL_VALIDATION_FILES = ["tests/skill_validation"]
 
 # 検査ごとの固定メタデータ(事実の記録。items だけが実測値)。
 CHECK_META = {
@@ -52,6 +60,13 @@ CHECK_META = {
             "CI skill-validation.yml は .claude/skills/** を触る PR でしか走らないため main では露見しない。"
         ),
         "introduced_by": ["3a193392b"],
+        "detected_at": "2026-10-06",
+    },
+    "scripts_tests_preexisting": {
+        "command": "python3 -m pytest " + " ".join(SCRIPTS_TESTS_FILES) + " -q",
+        "files": SCRIPTS_TESTS_FILES,
+        "cause": "2026-10-06 時点で origin/main でも同一に失敗(worktree で確認)。Phase 1 由来ではない。原因は未調査(別タスク)",
+        "introduced_by": [],
         "detected_at": "2026-10-06",
     },
 }
@@ -97,21 +112,22 @@ def summary_counts(output):
     return failed, errors
 
 
-def collect_skill_validation():
+def collect_pytest_failures(label, targets):
+    """pytest を targets に対して走らせ、FAILED / ERROR の項目(ソート済み)を返す。"""
     try:
         proc = subprocess.run(
-            [sys.executable, "-m", "pytest", "tests/skill_validation", "-q", "-rfE",
+            [sys.executable, "-m", "pytest", *targets, "-q", "-rfE",
              "--no-header", "-p", "no:cacheprovider"],
             capture_output=True, text=True, cwd=ROOT, timeout=SKILL_VALIDATION_TIMEOUT,
         )
     except subprocess.TimeoutExpired:
         raise CollectionError(
-            f"skill_validation が {SKILL_VALIDATION_TIMEOUT} 秒以内に終わりませんでした"
+            f"{label} が {SKILL_VALIDATION_TIMEOUT} 秒以内に終わりませんでした"
         ) from None
     # 0=全合格 / 1=テスト失敗。それ以外(収集エラー=2、テスト無し=5 等)は「失敗0件」と誤読しないよう止める。
     if proc.returncode not in (0, 1):
         raise CollectionError(
-            f"skill_validation を実行できませんでした(exit {proc.returncode}):\n{proc.stdout}{proc.stderr}"
+            f"{label} を実行できませんでした(exit {proc.returncode}):\n{proc.stdout}{proc.stderr}"
         )
     items = parse_failed(proc.stdout)
     if proc.returncode == 0:
@@ -130,6 +146,14 @@ def collect_skill_validation():
             f"(サマリー={counts} 項目: failed={n_failed} error={n_errors}):\n{proc.stdout}"
         )
     return items
+
+
+def collect_skill_validation():
+    return collect_pytest_failures("skill_validation", SKILL_VALIDATION_FILES)
+
+
+def collect_scripts_tests_preexisting():
+    return collect_pytest_failures("scripts_tests_preexisting", SCRIPTS_TESTS_FILES)
 
 
 def tracked_files():
@@ -165,6 +189,7 @@ def collect():
     return {
         "check_repo_scope": sorted(scan_scope_items(tracked_files())),
         "skill_validation": sorted(collect_skill_validation()),
+        "scripts_tests_preexisting": sorted(collect_scripts_tests_preexisting()),
     }
 
 
@@ -181,6 +206,7 @@ def record(path):
     for name in CHECK_NAMES:
         checks[name] = {
             "command": CHECK_META[name]["command"],
+            **({"files": CHECK_META[name]["files"]} if "files" in CHECK_META[name] else {}),
             "failure_count": len(current[name]),
             "items": current[name],
             "cause": CHECK_META[name]["cause"],
@@ -228,9 +254,9 @@ def compare(baseline, current):
     """(verdict, 人が読める delta 表) を返す。new が1件でもあれば REGRESSION。"""
     diff = diff_checks(baseline, current)
     verdict = verdict_of(diff)
-    lines = [f"{'検査名':<20}{'baseline':>9}{'current':>9}{'delta':>7}  新規 / 解消"]
+    lines = [f"{'検査名':<27}{'baseline':>9}{'current':>9}{'delta':>7}  新規 / 解消"]
     for name, d in diff.items():
-        lines.append(f"{name:<20}{d['baseline']:>9}{d['current']:>9}{d['delta']:>+7}")
+        lines.append(f"{name:<27}{d['baseline']:>9}{d['current']:>9}{d['delta']:>+7}")
         for item in d["new"]:
             lines.append(f"    + 新規: {item}")
         for item in d["removed"]:
