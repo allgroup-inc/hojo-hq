@@ -21,6 +21,7 @@ import re
 import shlex
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -30,6 +31,7 @@ from wikiskill_common import (  # noqa: E402
     EXPERIENCE_DIR,
     LOCAL_DIR,
     audit,
+    audit_if_slow,
     disabled,
     emit,
     iso,
@@ -45,6 +47,7 @@ Event = dict
 PUBLIC_REMOTES = {"allgroup-inc/hojo-hq"}
 
 NOTE_MAX = 1000
+SLOW_MS = 500  # hook 1回の実行時間がこれを超えたら _audit.log に `slow` を残す(画面警告なし)
 EXTERNAL = "<external>"
 _COMPONENT = "experience_log"
 _ENV_ASSIGN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
@@ -285,6 +288,7 @@ def _read_current_session(root: Path) -> str:
 
 
 def _hook(event_name: str) -> int:
+    started = time.perf_counter()
     payload = read_hook_input()
     root = project_dir()
     if disabled(root):
@@ -331,6 +335,7 @@ def _hook(event_name: str) -> int:
             fail("ended marker", e)
     else:
         audit(root, _COMPONENT, f"unknown hook event: {event_name}")
+    audit_if_slow(root, _COMPONENT, event_name, started, SLOW_MS)
     if warnings:
         emit(event_name, system_message=(
             f"⚠ Experience記録に失敗: {'; '.join(warnings)}。audit: {EXPERIENCE_DIR}/_audit.log"

@@ -31,6 +31,7 @@ import posixpath
 import re
 import subprocess
 import sys
+import time
 import unicodedata
 from itertools import groupby
 from pathlib import Path
@@ -42,6 +43,7 @@ from wikiskill_common import (  # noqa: E402
     EXPERIENCE_DIR,
     LOCAL_DIR,
     audit,
+    audit_if_slow,
     disabled,
     emit,
     project_dir,
@@ -85,11 +87,17 @@ EXPERIENCE_MAX_FILES = 50
 TAIL_BYTES = 4096
 TAIL_BYTES_RETRY = 65536
 MAX_COMMITS = 10
+FALLBACK_COMMITS = 5      # origin/main..HEAD が空(main 上など)のときに見る直近 commit 数
+SUBJECT_MAX = 60          # commit 件名から検索語を取る長さの上限
+MAX_QUERY_UNITS = 40      # 検索語の単位(語)の総数の上限(先頭から残す)
+SLOW_MS = 500             # hook 1回がこれを超えたら _audit.log に `slow <event> <ms>ms`(画面警告なし)
 MAX_FILES = 30
 PROMPT_MAX = 500
 TERMS_SHOWN = 200
-FIELD_MAX = 160
-DECISION_LINE_MAX = 600
+FIELD_MAX = 120
+DECISION_LINE_MAX = 700
+SHRINK_TO = 60            # 長すぎるとき 前提 → なぜ → 裁定 の順にここまで縮める
+UTAGAI_MIN = 80           # 最後の手段でもウタガイはこの長さ(以上)を残す
 TITLE_PREFIX_CHARS = 40
 NONE_LINE = "- 該当なし"
 TRIMMED_LINE = "- (文字数上限のため省略)"
@@ -195,18 +203,24 @@ def _norm(text: str) -> str:
 # ---------------------------------------------------------------- 検索語・採点
 
 def build_query(root: Path, prompt: str | None = None) -> list[str]:
-    """ブランチ名の語 + 直近10 commit の件名 + 変更ファイルの basename + prompt。定型語は除く。"""
+    """ブランチ名の語 → 変更ファイルの basename → このブランチだけの commit 件名(新しい順) → prompt。
+
+    commit は `origin/main..HEAD`(最大10件)。空(main 上・origin/main 不明)なら直近5件。
+    件名は先頭60字だけから語を取る。語の単位(語)は合計40個まで(先頭から残す)。定型語は除く。
+    """
     raw: list[str] = []
     branch = _git(root, "rev-parse", "--abbrev-ref", "HEAD")
     if branch and branch != "HEAD":
         raw.extend(re.split(r"[-_/]", branch))
-    log = _git(root, "log", f"-{MAX_COMMITS}", "--format=%s") or ""
-    for subject in log.splitlines():
-        raw.append(_COMMIT_PREFIX_RE.sub("", subject.strip()))
     names = _git(root, "diff", "--name-only", "origin/main...HEAD")
     if names is None:
         names = _git(root, "diff", "--name-only", f"HEAD~{MAX_COMMITS}..HEAD") or ""
     raw.extend(posixpath.basename(n.strip()) for n in names.splitlines()[:MAX_FILES])
+    log = _git(root, "log", "origin/main..HEAD", "--format=%s", f"-{MAX_COMMITS}") or ""
+    if not log.strip():
+        log = _git(root, "log", f"-{FALLBACK_COMMITS}", "--format=%s") or ""
+    for subject in log.splitlines():
+        raw.append(_COMMIT_PREFIX_RE.sub("", subject.strip())[:SUBJECT_MAX])
     if prompt:
         raw.append(str(prompt).strip()[:PROMPT_MAX])
     terms: list[str] = []
@@ -215,6 +229,10 @@ def build_query(root: Path, prompt: str | None = None) -> list[str]:
         if len(t) < 2 or t.lower() in STOP_TERMS or t in terms:
             continue
         terms.append(t)
+    units = query_units(terms)
+    if len(units) > MAX_QUERY_UNITS:
+        # 上限を超えたら、先頭(ブランチ名の語)から40単位だけを語として残す
+        terms = [word for _kind, word, _grams in units[:MAX_QUERY_UNITS]]
     return terms
 
 
@@ -309,8 +327,13 @@ def _src(kind: str, label: str, sid: str, path: str, title: str, body: str, line
 
 
 def _decision_line(d: dict, title: str) -> str:
-    """欄はそれぞれ自分の出典からだけ作る(読み替えない)。前の欄と同じ内容は出さない。600字まで。"""
-    fields: list[str] = []
+    """欄はそれぞれ自分の出典からだけ作る(読み替えない)。前の欄と同じ内容は出さない。700字まで。
+
+    欄ごとに120字まで。全体が長すぎるときは 前提 → なぜ → 裁定 の順に60字へ縮め、まだ長ければ
+    前提 → なぜ → ベッカイ の順に落とす。ウタガイ(最低80字)と見直し欄(期限切れ表示を含む)と
+    末尾の ` → <path>` は落とさない。
+    """
+    texts: dict[str, str] = {}
     shown: list[str] = []
     for label, value in (("裁定", d.get("outcome")), ("なぜ", d.get("why")), ("前提", d.get("premises")),
                          ("ウタガイ", d.get("utagai")), ("ベッカイ", d.get("bekkai"))):
@@ -320,31 +343,41 @@ def _decision_line(d: dict, title: str) -> str:
         if not text or any(text[:80] in s for s in shown):
             continue
         shown.append(text)
-        fields.append(f"{label}: {_trunc(text, FIELD_MAX)}")
+        texts[label] = text
+    caps = {label: FIELD_MAX for label in texts}
     review = ""
     if d.get("review_by"):
         mark = " **(期限切れ・再議論対象)**" if d.get("review_status") == "expired" else ""
         review = f"見直し: {d['review_by']}{mark}"
-    head = f"- [D] {d.get('date') or '????-??-??'} {title}"
+    head_title = [title]
     tail = f" → {d['path']}"
 
     def compose() -> str:
-        parts = fields + ([review] if review else [])
-        return head + (" — " + " / ".join(parts) if parts else "") + tail
+        parts = [f"{label}: {_trunc(text, caps[label])}" for label, text in texts.items()]
+        if review:
+            parts.append(review)
+        return f"- [D] {d.get('date') or '????-??-??'} {head_title[0]}" + (" — " + " / ".join(parts) if parts else "") + tail
 
-    line = compose()
-    # 長すぎるときは最後の内容欄から削る(見直し欄=期限切れ表示は削らない)
-    while len(line) > DECISION_LINE_MAX and fields:
-        excess = len(line) - DECISION_LINE_MAX
-        last = fields[-1]
-        if len(last) - excess - 1 >= 12:
-            fields[-1] = last[: len(last) - excess - 1] + "…"
-        else:
-            fields.pop()
-        line = compose()
-    if len(line) > DECISION_LINE_MAX:
-        line = line[: DECISION_LINE_MAX - 1] + "…"
-    return line
+    def over() -> int:
+        return len(compose()) - DECISION_LINE_MAX
+
+    def shrink(label: str, floor: int) -> None:
+        excess = over()
+        if excess > 0 and label in texts:
+            shown_len = min(len(texts[label]), caps[label])
+            caps[label] = min(caps[label], max(floor, shown_len - excess))
+
+    for label in ("前提", "なぜ", "裁定"):
+        if over() > 0 and label in texts:
+            caps[label] = min(caps[label], SHRINK_TO)
+    for label in ("前提", "なぜ", "ベッカイ"):
+        if over() > 0:
+            texts.pop(label, None)
+    shrink("ウタガイ", UTAGAI_MIN)  # 最後の手段(それでも80字は残す)
+    shrink("裁定", 20)
+    if over() > 0:
+        head_title[0] = _trunc(title, max(20, len(title) - over()))
+    return compose()
 
 
 def _decisions(root: Path) -> list[Source]:
@@ -688,37 +721,47 @@ def _stage2(root: Path, prompt: str) -> str | None:
 
 
 def _hook(event: str) -> int:
+    started = time.perf_counter()
     root = project_dir()
+
+    def finish(**kw) -> int:
+        """遅かったら audit に1行(監査のみ・画面警告なし)残してから、JSON を1つ出す。"""
+        try:
+            audit_if_slow(root, _COMPONENT, event, started, SLOW_MS)
+        except Exception:  # noqa: BLE001 — 計測の失敗で本来の出力を止めない
+            pass
+        emit(event, **kw)
+        return 0
+
     try:
         payload = read_hook_input()
         if disabled(root):
             emit(event)
             return 0
         if event == "SessionStart":
-            emit(event, additional_context=_stage1(root))
+            return finish(additional_context=_stage1(root))
         elif event == "UserPromptSubmit":
             sid = session_id_of(payload)
             if sid.startswith("unknown-"):
                 # セッションを特定できないと「1回だけ」を守れない(毎回注入になる)。注入せず警告する
                 audit(root, _COMPONENT, "UserPromptSubmit: session_id missing; stage 2 skipped")
-                emit(event, system_message=(
+                return finish(system_message=(
                     f"⚠ Memory Bootstrap: session_id が無いため段2(最初の指示からの検索)を省略しました。"
                     f"audit: {EXPERIENCE_DIR}/_audit.log"))
-                return 0
             marker = Path(root) / LOCAL_DIR / f"{_safe_id(sid)}.bootstrapped"
             if marker.exists():
-                emit(event)
-                return 0
+                return finish()
             marker.parent.mkdir(parents=True, exist_ok=True)
             marker.touch()  # 先に置く(失敗しても毎回の指示で繰り返し注入しない)
             prompt = payload.get("prompt")
-            emit(event, additional_context=_stage2(root, prompt if isinstance(prompt, str) else ""))
+            return finish(additional_context=_stage2(root, prompt if isinstance(prompt, str) else ""))
         else:
             emit(event)
     except Exception as e:  # noqa: BLE001 — hook は作業を止めない。ただし silent にもしない
         reason = f"{type(e).__name__}: {e}"
         try:
             audit(root, _COMPONENT, f"{event} failed: {reason}")
+            audit_if_slow(root, _COMPONENT, event, started, SLOW_MS)
         except Exception:  # noqa: BLE001
             pass
         emit(event, system_message=f"⚠ Memory Bootstrap 失敗: {reason}")

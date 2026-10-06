@@ -10,6 +10,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -88,6 +89,17 @@ def audit(root: Path, component: str, message: str) -> None:
             f.write(line)
     except OSError as e:
         print(f"[wikiskill audit unwritable: {e}] {line.rstrip()}", file=sys.stderr)
+
+
+def audit_if_slow(root: Path, component: str, event: str, started: float, limit_ms: int) -> int:
+    """started(time.perf_counter() の値)から limit_ms を超えていたら `slow <event> <ms>ms` を audit に残す。
+
+    監査ログのみ(画面警告は出さない)。経過ミリ秒(整数)を返す。
+    """
+    ms = int(round((time.perf_counter() - started) * 1000))
+    if ms > limit_ms:
+        audit(root, component, f"slow {event} {ms}ms")
+    return ms
 
 
 def emit(event: str, additional_context: str | None = None, system_message: str | None = None) -> None:

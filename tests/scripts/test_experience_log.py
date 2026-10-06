@@ -6,8 +6,10 @@ hojo-hq 以外の remote では必ず private になること、書込失敗が 
 import io
 import json
 import os
+import re
 import subprocess
 import sys
+import time
 
 import pytest
 
@@ -362,3 +364,59 @@ def test_summarize_ignores_invalid_head_and_audits(repo):
     s = summarize_session(repo, "s1")
     assert s["commits"] == []
     assert "invalid head" in (repo / ".claude/experience/_audit.log").read_text()
+
+
+# ---- slow 監査(hook 1回が SLOW_MS を超えたら _audit.log にだけ残す) ----
+
+def _audit_lines(repo):
+    p = repo / ".claude/experience/_audit.log"
+    return p.read_text(encoding="utf-8").splitlines() if p.exists() else []
+
+
+def test_slow_hook_is_audited_without_system_message(cli, monkeypatch):
+    monkeypatch.setattr(experience_log, "SLOW_MS", -1)  # どんな実行も「遅い」扱いにする
+    rc, out, _ = cli("hook", "SessionStart", stdin={"session_id": "s9"})
+    assert rc == 0 and json.loads(out) == {}  # 画面警告(systemMessage)は足さない
+    lines = [l for l in _audit_lines(cli.repo) if "\tslow " in l]
+    assert len(lines) == 1
+    assert re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ\texperience_log\tslow SessionStart \d+ms", lines[0])
+
+
+def test_slow_audit_format_with_forced_clock(cli, monkeypatch):
+    calls = []
+
+    def fake_clock():
+        calls.append(1)
+        return 0.0 if len(calls) == 1 else 0.612
+
+    monkeypatch.setattr(time, "perf_counter", fake_clock)
+    rc, out, _ = cli("hook", "PostToolUse",
+                     stdin={"session_id": "s9", "tool_name": "Bash", "tool_input": {"command": "ls"}})
+    assert rc == 0 and json.loads(out) == {}
+    assert _audit_lines(cli.repo)[-1].endswith("\texperience_log\tslow PostToolUse 612ms")
+
+
+def test_slow_line_coexists_with_write_failure_warning(cli, monkeypatch):
+    def failing_open(path):
+        raise OSError("disk full")
+
+    monkeypatch.setattr(experience_log, "_open_append", failing_open)
+    monkeypatch.setattr(experience_log, "SLOW_MS", -1)
+    rc, out, _ = cli("hook", "PostToolUse",
+                     stdin={"session_id": "s9", "tool_name": "Bash", "tool_input": {"command": "ls"}})
+    assert rc == 0 and "Experience記録に失敗" in json.loads(out)["systemMessage"]
+    assert "slow" not in json.loads(out)["systemMessage"]
+    assert any("\tslow PostToolUse " in l for l in _audit_lines(cli.repo))
+
+
+def test_fast_hook_writes_no_slow_line(cli):
+    cli("hook", "SessionStart", stdin={"session_id": "s9"})
+    assert not any("slow" in l for l in _audit_lines(cli.repo))
+
+
+def test_slow_not_measured_when_stopped(cli, monkeypatch):
+    monkeypatch.setattr(experience_log, "SLOW_MS", -1)
+    monkeypatch.setenv("HOJO_MEMORY_OFF", "1")
+    rc, out, _ = cli("hook", "SessionStart", stdin={"session_id": "s9"})
+    assert rc == 0 and json.loads(out) == {}
+    assert _audit_lines(cli.repo) == []

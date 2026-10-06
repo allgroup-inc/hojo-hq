@@ -6,6 +6,7 @@ root の外は読まない / private の Experience は出さない / 段2 は�
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -604,3 +605,177 @@ def test_hook_user_prompt_submit_under_500ms_on_real_copy(realcopy):
     assert r.returncode == 0 and json.loads(r.stdout) is not None
     print(f"UserPromptSubmit hook (first prompt): {elapsed * 1000:.0f} ms")
     assert elapsed < 0.5, f"UserPromptSubmit hook took {elapsed:.3f}s"
+
+
+# ---------------------------------------------------------------- 最終修正波(Task 7b): slow 監査 / [D] 行 / 検索語
+
+def _audit_text(root):
+    p = Path(root) / ".claude/experience/_audit.log"
+    return p.read_text(encoding="utf-8") if p.exists() else ""
+
+
+def _hook_env(kb, monkeypatch, payload):
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(kb))
+    monkeypatch.delenv("HOJO_MEMORY_OFF", raising=False)
+    monkeypatch.setattr(memory_bootstrap, "read_hook_input", lambda: payload)
+
+
+def test_slow_hook_audits_without_system_message(kb, monkeypatch, capsys):
+    _hook_env(kb, monkeypatch, {"session_id": "S1"})
+    monkeypatch.setattr(memory_bootstrap, "SLOW_MS", -1)  # どんな実行も「遅い」扱いにする
+    assert memory_bootstrap.main(["memory_bootstrap.py", "hook", "SessionStart"]) == 0
+    out = json.loads(capsys.readouterr().out)
+    assert "systemMessage" not in out and out["hookSpecificOutput"]["additionalContext"]
+    lines = [l for l in _audit_text(kb).splitlines() if "\tslow " in l]
+    assert len(lines) == 1
+    assert re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ\tbootstrap\tslow SessionStart \d+ms", lines[0])
+
+
+def test_slow_audit_format_with_forced_clock(kb, monkeypatch, capsys):
+    _hook_env(kb, monkeypatch, {"session_id": "S1"})
+    calls = []
+
+    def fake_clock():
+        calls.append(1)
+        return 0.0 if len(calls) == 1 else 0.612
+
+    monkeypatch.setattr(time, "perf_counter", fake_clock)
+    memory_bootstrap.main(["memory_bootstrap.py", "hook", "SessionStart"])
+    capsys.readouterr()
+    assert _audit_text(kb).strip().endswith("\tbootstrap\tslow SessionStart 612ms")
+
+
+def test_slow_audit_for_user_prompt_submit(kb, monkeypatch, capsys):
+    _hook_env(kb, monkeypatch, {"session_id": "S2", "prompt": "北極星 ボトルネック の話"})
+    monkeypatch.setattr(memory_bootstrap, "SLOW_MS", -1)
+    memory_bootstrap.main(["memory_bootstrap.py", "hook", "UserPromptSubmit"])
+    assert "systemMessage" not in json.loads(capsys.readouterr().out)
+    assert "\tbootstrap\tslow UserPromptSubmit " in _audit_text(kb)
+
+
+def test_fast_hook_writes_no_slow_line(kb, monkeypatch, capsys):
+    _hook_env(kb, monkeypatch, {"session_id": "S1"})
+    memory_bootstrap.main(["memory_bootstrap.py", "hook", "SessionStart"])
+    capsys.readouterr()
+    assert "slow" not in _audit_text(kb)
+
+
+def test_slow_not_measured_when_stopped(kb, monkeypatch, capsys):
+    _hook_env(kb, monkeypatch, {"session_id": "S1"})
+    monkeypatch.setattr(memory_bootstrap, "SLOW_MS", -1)
+    monkeypatch.setenv("HOJO_MEMORY_OFF", "1")
+    memory_bootstrap.main(["memory_bootstrap.py", "hook", "SessionStart"])
+    assert json.loads(capsys.readouterr().out) == {}
+    assert _audit_text(kb) == ""
+
+
+def _decision(**kw):
+    d = {"outcome": "裁定の本文", "why": "なぜの本文", "premises": "前提の本文", "utagai": "ウタガイの本文",
+         "bekkai": "ベッカイの本文", "review_by": "2027-04-01", "review_status": "active",
+         "date": "2026-10-01", "path": "docs/議事_20261001_x.md"}
+    d.update(kw)
+    return d
+
+
+def test_decision_line_short_decision_unchanged():
+    line = memory_bootstrap._decision_line(_decision(), "短い議事")
+    assert line == ("- [D] 2026-10-01 短い議事 — 裁定: 裁定の本文 / なぜ: なぜの本文 / 前提: 前提の本文 / "
+                    "ウタガイ: ウタガイの本文 / ベッカイ: ベッカイの本文 / 見直し: 2027-04-01 → docs/議事_20261001_x.md")
+
+
+def test_decision_line_keeps_utagai_and_review_when_long():
+    d = _decision(outcome="裁" * 400, why="理" * 400, premises="前" * 400, utagai="疑" * 150,
+                  bekkai="別" * 400)
+    line = memory_bootstrap._decision_line(d, "長い議事")
+    assert len(line) <= 700
+    assert "ウタガイ:" in line and line.count("疑") >= 80
+    assert "見直し: 2027-04-01" in line
+    assert line.endswith(" → docs/議事_20261001_x.md")
+    assert "裁定:" in line
+
+
+def test_decision_line_per_field_cap_is_120_with_ellipsis():
+    line = memory_bootstrap._decision_line(_decision(outcome="あ" * 130), "議事")
+    field = line.split("裁定: ")[1].split(" / ")[0]
+    assert len(field) == 120 and field.endswith("…")
+
+
+def test_decision_line_drop_order_premises_then_why_then_bekkai():
+    # 縮めるだけでは収まらない量: 欄を落としても ウタガイ・見直し・path は残る
+    d = _decision(outcome="裁" * 120, why="理" * 120, premises="前" * 120, utagai="疑" * 120,
+                  bekkai="別" * 120, path="docs/" + "p" * 300 + ".md")
+    line = memory_bootstrap._decision_line(d, "議事")
+    assert len(line) <= 700
+    assert "ウタガイ:" in line and "見直し:" in line and line.endswith("→ " + d["path"])
+    assert "前提:" not in line  # 前提が最初に落ちる
+    assert "裁定:" in line
+
+
+def test_decision_line_utagai_floor_is_80_chars_in_worst_case():
+    d = _decision(outcome="裁" * 120, why="理" * 120, premises="前" * 120, utagai="疑" * 120,
+                  bekkai="別" * 120, path="docs/" + "p" * 480 + ".md")
+    line = memory_bootstrap._decision_line(d, "議事")
+    assert "ウタガイ:" in line and line.count("疑") >= 79  # 80字(末尾は …)
+    assert "見直し:" in line and line.endswith(d["path"])
+
+
+# --- 段1の検索語(branch-local commit)
+
+def _commit(root, subject):
+    git(root, "commit", "-q", "--allow-empty", "-m", subject)
+
+
+def _unit_words(terms):
+    return [w for _k, w, _g in memory_bootstrap.query_units(terms)]
+
+
+def test_build_query_uses_only_branch_local_commits(kb):
+    for w in ("olderone", "oldertwo", "olderthree", "olderfour", "olderfive"):
+        _commit(kb, f"feat: {w}")
+    git(kb, "update-ref", "refs/remotes/origin/main", "HEAD")
+    for w in ("localone", "localtwo", "localthree"):
+        _commit(kb, f"feat: {w}")
+    words = _unit_words(build_query(kb))
+    assert {"localone", "localtwo", "localthree"} <= set(words)
+    assert not any(w.startswith("older") for w in words)
+    assert "lighthouse" in words  # ブランチ名の語は残る
+    # commit 件名の語は新しい順
+    assert words.index("localthree") < words.index("localtwo") < words.index("localone")
+
+
+def test_build_query_falls_back_to_last_five_without_local_commits(kb):
+    for i, w in enumerate(("fbone", "fbtwo", "fbthree", "fbfour", "fbfive", "fbsix", "fbseven")):
+        _commit(kb, f"feat: {w}")
+    git(kb, "update-ref", "refs/remotes/origin/main", "HEAD")  # origin/main..HEAD が空
+    words = _unit_words(build_query(kb))
+    assert {"fbseven", "fbsix", "fbfive", "fbfour", "fbthree"} <= set(words)
+    assert "fbtwo" not in words and "fbone" not in words
+
+
+def test_build_query_falls_back_when_origin_main_unknown(kb):
+    for w in ("ghone", "ghtwo", "ghthree", "ghfour", "ghfive", "ghsix"):
+        _commit(kb, f"feat: {w}")
+    words = _unit_words(build_query(kb))  # kb に origin/main の参照は無い
+    assert {"ghsix", "ghfive", "ghfour", "ghthree", "ghtwo"} <= set(words)
+    assert "ghone" not in words
+
+
+def test_build_query_truncates_subject_to_60_chars(kb):
+    git(kb, "update-ref", "refs/remotes/origin/main", "HEAD")
+    subject = "headword " + "x" * 50 + " " + "tailword " * 15  # 先頭59字が headword + x*50、tailword は60字より後
+    assert len(subject) > 190
+    _commit(kb, subject)
+    words = _unit_words(build_query(kb))
+    assert "headword" in words and "x" * 50 in words
+    assert "tailword" not in words
+
+
+def test_build_query_caps_units_at_40_keeping_branch_tokens(kb):
+    git(kb, "update-ref", "refs/remotes/origin/main", "HEAD")
+    for i in range(10):
+        _commit(kb, "feat: " + " ".join(f"w{c}{i}z" for c in "abcdefgh"))  # 1件に8語 × 10件 = 80語
+    terms = build_query(kb)
+    words = _unit_words(terms)
+    assert len(words) == 40
+    assert "lighthouse" in words and "css" in words  # ブランチ名の語は先頭なので必ず残る
+    assert len(memory_bootstrap.query_units(terms)) == 40
