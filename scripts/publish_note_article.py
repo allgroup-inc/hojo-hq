@@ -81,8 +81,8 @@ async def login_to_note(page, email: str, password: str) -> bool:
         await page.goto(NOTE_LOGIN_URL, wait_until="networkidle")
 
         # メールアドレス入力
-        await page.fill('input[type="email"]', email)
-        await page.fill('input[type="password"]', password)
+        await page.fill('input[name="login"]', email)
+        await page.fill('input[name="password"]', password)
 
         # ログインボタンクリック
         await page.click('button[type="submit"]')
