@@ -23,3 +23,17 @@ jobs:
 
       - name: 置き場所の検査
         run: python3 scripts/check_repo_scope.py
+
+      # 以下は「置き場所の検査」が既知の赤(Baseline Debt)でも必ず走らせる(赤で後続が止まると検査が素通りになる)
+      - name: Experience記録の公開可否 自己点検
+        if: ${{ !cancelled() }}
+        run: python3 scripts/check_experience_privacy.py --selftest
+
+      - name: Experience記録の公開可否
+        if: ${{ !cancelled() }}
+        run: python3 scripts/check_experience_privacy.py
+
+      # frontmatter の無い既存の議事は対象外として通る。日本語・空白を含むパスを壊さないよう -z と quotePath=false で渡す
+      - name: 議事(Decision)の必須項目検査
+        if: ${{ !cancelled() }}
+        run: git -c core.quotePath=false ls-files -z 'docs/議事_*.md' 'docs/議事/*.md' | xargs -0 python3 scripts/decision_memory.py --check

@@ -1,0 +1,71 @@
+name: wikiskill-tests
+
+# WikiSkill Phase 1(記憶の仕組み)のテスト。詳細: docs/wikiskill/README.md
+# 時間計測のテスト(500ms 以内)は実行環境に左右されるため CI では飛ばし、ローカルで測る(WIKISKILL_SKIP_TIMING=1)。
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/wikiskill_common.py'
+      - 'scripts/experience_log.py'
+      - 'scripts/decision_memory.py'
+      - 'scripts/memory_bootstrap.py'
+      - 'scripts/check_experience_privacy.py'
+      - 'scripts/experience_archive.py'
+      - 'scripts/baseline_debt.py'
+      - '.claude/hooks/wikiskill-hook.sh'
+      - 'tests/scripts/test_*.py'
+      - 'tests/integration/test_wikiskill_memory_e2e.py'
+      - '.github/workflows/wikiskill-tests.yml'
+  push:
+    paths:
+      - 'scripts/wikiskill_common.py'
+      - 'scripts/experience_log.py'
+      - 'scripts/decision_memory.py'
+      - 'scripts/memory_bootstrap.py'
+      - 'scripts/check_experience_privacy.py'
+      - 'scripts/experience_archive.py'
+      - 'scripts/baseline_debt.py'
+      - '.claude/hooks/wikiskill-hook.sh'
+      - 'tests/scripts/test_*.py'
+      - 'tests/integration/test_wikiskill_memory_e2e.py'
+      - '.github/workflows/wikiskill-tests.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: wikiskill-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      - name: pytest を入れる
+        run: pip install pytest
+
+      - name: git の作者を設定(テストが一時リポジトリでコミットする)
+        run: git config --global user.email ci@example.com && git config --global user.name ci
+
+      - name: WikiSkill のテスト
+        env:
+          WIKISKILL_SKIP_TIMING: "1"
+        run: >-
+          python3 -m pytest
+          tests/scripts/test_wikiskill_common.py
+          tests/scripts/test_experience_log.py
+          tests/scripts/test_wikiskill_hook_sh.py
+          tests/scripts/test_decision_memory.py
+          tests/scripts/test_memory_bootstrap.py
+          tests/scripts/test_check_experience_privacy.py
+          tests/scripts/test_experience_archive.py
+          tests/scripts/test_baseline_debt.py
+          tests/integration/test_wikiskill_memory_e2e.py
+          -q
