@@ -158,3 +158,86 @@ verdict: SAME
 | Delta | +0 | +0 | +0 |
 
 判定(SAME / IMPROVED / REGRESSION): **SAME**
+
+## 正式 Acceptance 結果(2026-10-06 小柳さん承認)
+
+2026-10-06(JST 2026-10-07 朝)、小柳さんが次を Phase 1 の正式な受け入れ結果として承認した。
+
+- 完全に新しい Session B で Decision 復元成功
+- なぜ復元成功
+- 前提復元成功
+- ウタガイ反対理由復元成功
+- 見直し期限復元成功
+- 失敗台帳 FK 復元成功
+- 再発防止情報復元成功
+- SessionStart 0.371秒
+- 停止スイッチ成功
+- 自動テスト 347件 Green
+- Phase 1 由来 Privacy 違反 0
+- 110 Skills 変更 0
+- 13リポ Skill 同期方式 変更 0
+
+補足(機械の結果):
+
+- Baseline 比較: Final 9/5/2、Delta +0/+0/+0(**SAME**)
+- CI(c0cb442c7): repo-scope の Experience 公開可否(自己点検・本検査)と Decision 検査が緑、置き場所の検査は Baseline の9件のみ赤、wikiskill-tests 緑
+
+## [Exp] 最終修正後の確認(修正波 2570e4ecf 以降)
+
+上の「所見」1 で ❌ だった `[Exp]` に Session A の行が出ない問題を、原因2つに分けて直し、実リポジトリで再確認した。
+
+**原因(今回の試験で見つかった2つ)**
+
+1. **detached HEAD**: Session B は detached HEAD で起動し、`git branch --show-current` が空(または `HEAD`)になった。ブランチ名の一致を条件にしていたため、どのセッションの記録とも一致しなかった。
+2. **session_end が commit されていない**: 記録の最新の `session_end` 行だけを見ていたため、`session_end` がまだ commit されていないセッション(別コンテナで起動した B から見た A など)が出なかった。
+
+**修正**
+
+- ブランチの特定を `git branch --show-current` から `git for-each-ref --points-at HEAD`(HEAD を指すブランチ)に変えた。**複数に当たって曖昧なとき、または無いときは unknown とし、ブランチでの絞り込みをしない**。
+- `session_end` が無いセッションは、そのファイルの**最新の1行**で代用する。
+- 並び順は、各ファイルの**最初の行の ts** で決める。
+
+**実リポジトリでの出力(そのまま・未加工)**
+
+```
+## 直近のExperience [Exp]（低信頼・参考。commitされたものだけ見える）
+- [Exp] 2026-10-06 session-2fa162fe-4733-5601-955c-492a60d37529: events 15
+- [Exp] 2026-10-06 session-84180d06-8f4d-4dcb-8c25-1d3cd976d937: commits 0 / skills: -
+- [Exp] 2026-10-06 session-88fbbce6-5a12-50ce-b8f3-4f86e601e77f: events 13 / note: 受け入れ試験 A 完了: 締切アラート案内時期の決定を記録した
+```
+
+- 関連ユニットテスト 79 件合格(`-k "detached or branch or session_end or ts_order or points_at or no_session_end or exp"`)。
+- 判定: ✅(Session A の行が note 付きで復元された)。
+- 2行目の `session-84180d06…` は、0秒で終了した並行セッションの残骸。低信頼のデータとして出るのは想定どおりで、`[Exp]` は参考情報にとどまる(Decision より下の信頼順)。
+
+## Rollback 実演(本番 main 非接触・2026-10-06)
+
+Rollback手順(`docs/wikiskill/Rollback手順.md` §2)を、本番の `main` に触れずに実演した。
+
+**手順と結果**
+
+1. `origin/main`(a220b0988)の worktree を作った。
+2. その上でローカルだけで `git merge --no-ff c0cb442c7` を実行し、マージコミット相当 958d774a2 を作った(ローカルのみ。38 files、+10021/−1)。
+3. `git revert -m 1 --no-commit HEAD` を実行した。
+4. 結果:
+   - `git diff --cached --stat origin/main` = 0 行(**完全に元へ戻る**)
+   - `.claude/settings.json` が origin/main と同一: yes
+   - revert 後に `.claude/hooks/wikiskill-hook.sh` が存在: no
+   - Experience の JSONL の履歴が git log に残っている: 4 commits(**履歴は消えない**)
+5. `git revert --abort` を実行し、worktree を削除した。**`origin/main` は無傷**。
+
+**その他**
+
+- 停止スイッチ: 上の「停止スイッチ」の節(Session B で実証)を参照。
+- 対象 commit の特定: マージ後は `git rev-list -n1 wikiskill-phase1-v1`。
+- 記録の方法: `docs/wikiskill/Rollback手順.md` §3(議事 `docs/議事_YYYYMMDD_WikiSkill緊急停止.md`、frontmatter はテンプレート使用、48時間以内に小柳さんの Decision Gate)。
+
+**小柳さんの5条件の判定**
+
+| 条件 | 判定 | 根拠 |
+|---|---|---|
+| 対象 commit を特定できる | ✅ | マージ後は `git rev-list -n1 wikiskill-phase1-v1`(実演では 958d774a2 を特定して revert) |
+| `memory.off` で即時停止できる | ✅ | 「停止スイッチ」の節: 置くと hook は `{}`、記録ファイルは作られない(Session B で実証) |
+| 安全な revert 手順がある | ✅ | `git revert -m 1` で `git diff --cached --stat origin/main` = 0 行。main 非接触で実演 |
+| Decision・議事へ記録できる | ✅ | `Rollback手順.md` §3(議事 + frontmatter テンプレート + 48時間以内の Decision Gate) |
+| 復旧を確認できる | ✅ | settings.json が origin/main と同一、`wikiskill-hook.sh` が消えた、Experience 履歴 4 commits が残った |

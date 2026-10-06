@@ -47,12 +47,13 @@ after=$(cat .claude/experience/_audit.log 2>/dev/null | wc -l)
 ```bash
 git fetch origin main
 git switch -c rollback/wikiskill-phase1 origin/main
-# <wikiskill-phase1-v1 のマージコミット> は、マージ後に実際のハッシュを書き入れる(Task 9 で記入)
-git revert -m 1 <wikiskill-phase1-v1 のマージコミット>
+# 対象 commit は wikiskill-phase1-v1 タグが指すマージコミット
+git revert -m 1 $(git rev-list -n1 wikiskill-phase1-v1)
 git push -u origin rollback/wikiskill-phase1     # PR を作り、小柳さんの決裁後にマージ
 ```
 
-- マージコミットは `wikiskill-phase1-v1` タグが指す(`git rev-parse wikiskill-phase1-v1^{commit}`)。ハッシュの確定はマージ後(Task 9)なので、この文書の `<...>` の部分はそのときに実際の値へ置き換える。
+- 対象 commit は `git rev-list -n1 wikiskill-phase1-v1`(タグがマージコミットを指す)。例: `git revert -m 1 $(git rev-list -n1 wikiskill-phase1-v1)`。
+- 実演記録(本番 main 非接触): `docs/wikiskill/Phase1受け入れ記録.md` の「Rollback 実演」
 - **Experience の JSONL(`.claude/experience/YYYY-MM/session-*.jsonl`。commit 後の続きの `session-*.part<N>.jsonl` を含む)は revert で消えない**。履歴に残る。消すかどうかは別途議事で決める。
 
 ## 3. 記録(48時間以内)
