@@ -5,6 +5,7 @@
 """
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -60,14 +61,41 @@ def test_compare_regression_wins_over_improvement():
 
 
 def test_collect_items_are_sorted(monkeypatch):
-    monkeypatch.setattr(crs, "tracked_files", lambda: ["p2", "p1"])
+    monkeypatch.setattr(bd, "tracked_files", lambda: ["p2", "p1"])
     monkeypatch.setattr(crs, "find_violations", lambda paths: [("p2", "ZZ"), ("p1", "AA")])
-    monkeypatch.setattr(crs, "scan_contents", lambda paths: [("p9", "MM")])
+    monkeypatch.setattr(crs, "read_text", lambda path: None)
     monkeypatch.setattr(bd, "collect_skill_validation", lambda: ["t::b", "t::a"])
     got = bd.collect()
-    assert got["check_repo_scope"] == sorted(got["check_repo_scope"])
-    assert got["check_repo_scope"] == ["p1::AA", "p2::ZZ", "p9::MM"]
+    assert got["check_repo_scope"] == ["p1::AA", "p2::ZZ"]
     assert got["skill_validation"] == ["t::a", "t::b"]
+
+
+def test_scan_reports_every_forbidden_word_per_file(tmp_path, monkeypatch):
+    # 1ファイルに複数の禁止語があっても、語ごとに1項目(check_repo_scope.scan_contents は最初の1語だけ)
+    w0, w1 = crs.FORBIDDEN_CONTENT[0], crs.FORBIDDEN_CONTENT[1]
+    (tmp_path / "both.md").write_text(f"{w0}\n{w1}\n", encoding="utf-8")
+    (tmp_path / "one.md").write_text(w0, encoding="utf-8")
+    (tmp_path / "clean.md").write_text("問題なし", encoding="utf-8")
+    monkeypatch.setattr(bd, "ROOT", tmp_path)
+    got = bd.scan_scope_items(["both.md", "one.md", "clean.md"])
+    assert got == {f"both.md::{w0}", f"both.md::{w1}", f"one.md::{w0}"}
+
+
+def test_scan_skips_allowed_paths_and_is_cwd_independent(tmp_path, monkeypatch):
+    word = crs.FORBIDDEN_CONTENT[0]
+    allowed = "docs/wikiskill/baseline-debt.json"
+    (tmp_path / "docs" / "wikiskill").mkdir(parents=True)
+    (tmp_path / allowed).write_text(word, encoding="utf-8")
+    monkeypatch.setattr(bd, "ROOT", tmp_path)
+    elsewhere = tmp_path / "docs"
+    monkeypatch.chdir(elsewhere)  # cwd が repo root でなくても読める
+    assert bd.scan_scope_items([allowed]) == set()
+
+
+def test_real_repo_scan_matches_baseline_count():
+    # 実リポジトリ: 既知の9ファイルは語ごとに数えても9件のまま(各ファイル1語のみ)
+    base = json.loads(bd.DEFAULT_PATH.read_text(encoding="utf-8"))
+    assert sorted(bd.scan_scope_items(bd.tracked_files())) == base["checks"]["check_repo_scope"]["items"]
 
 
 def test_parse_failed_lines_drops_reason_and_sorts():
@@ -78,6 +106,84 @@ def test_parse_failed_lines_drops_reason_and_sorts():
         "5 failed, 6 passed in 0.1s\n"
     )
     assert bd.parse_failed(out) == ["tests/x.py::T::a", "tests/x.py::T::b"]
+
+
+def test_parse_failed_captures_error_lines_with_prefix():
+    out = (
+        "FAILED tests/x.py::T::a - AssertionError\n"
+        "ERROR tests/x.py::T::b - fixture 'f' not found\n"
+    )
+    assert bd.parse_failed(out) == ["ERROR::tests/x.py::T::b", "tests/x.py::T::a"]
+
+
+def test_summary_counts():
+    assert bd.summary_counts("5 failed, 6 passed in 0.1s") == (5, 0)
+    assert bd.summary_counts("1 failed, 2 passed, 1 error in 0.30s") == (1, 1)
+    assert bd.summary_counts("2 errors in 0.1s") == (0, 2)
+    assert bd.summary_counts("no summary here") is None
+
+
+def fake_run(returncode, stdout="", stderr=""):
+    def run(*args, **kwargs):
+        assert kwargs.get("timeout") == bd.SKILL_VALIDATION_TIMEOUT
+        return subprocess.CompletedProcess(args[0], returncode, stdout, stderr)
+    return run
+
+
+def test_collect_skill_validation_ok(monkeypatch):
+    out = "FAILED t.py::b - x\nFAILED t.py::a - y\n2 failed, 3 passed in 0.1s\n"
+    monkeypatch.setattr(bd.subprocess, "run", fake_run(1, out))
+    assert bd.collect_skill_validation() == ["t.py::a", "t.py::b"]
+    monkeypatch.setattr(bd.subprocess, "run", fake_run(0, "5 passed in 0.1s\n"))
+    assert bd.collect_skill_validation() == []
+
+
+@pytest.mark.parametrize("code", [2, 5])
+def test_collect_skill_validation_rejects_unexpected_exit(monkeypatch, code):
+    monkeypatch.setattr(bd.subprocess, "run", fake_run(code, "", "boom"))
+    with pytest.raises(bd.CollectionError, match=f"exit {code}"):
+        bd.collect_skill_validation()
+
+
+def test_collect_skill_validation_rejects_exit1_without_items(monkeypatch):
+    monkeypatch.setattr(bd.subprocess, "run", fake_run(1, "1 failed in 0.1s\n"))
+    with pytest.raises(bd.CollectionError, match="読み取れませんでした"):
+        bd.collect_skill_validation()
+
+
+def test_collect_skill_validation_includes_error_items(monkeypatch):
+    out = (
+        "FAILED t.py::a - x\nERROR t.py::b - setup\n"
+        "1 failed, 1 error in 0.1s\n"
+    )
+    monkeypatch.setattr(bd.subprocess, "run", fake_run(1, out))
+    assert bd.collect_skill_validation() == ["ERROR::t.py::b", "t.py::a"]
+
+
+def test_collect_skill_validation_count_mismatch_is_collection_failure(monkeypatch):
+    # サマリーは 1 failed + 1 error だが ERROR 行が出ていない(-rE を取りこぼした等)
+    out = "FAILED t.py::a - x\n1 failed, 1 error in 0.1s\n"
+    monkeypatch.setattr(bd.subprocess, "run", fake_run(1, out))
+    with pytest.raises(bd.CollectionError, match="一致しません"):
+        bd.collect_skill_validation()
+
+
+def test_collect_skill_validation_timeout(monkeypatch):
+    def run(*args, **kwargs):
+        raise subprocess.TimeoutExpired(args[0], kwargs["timeout"])
+    monkeypatch.setattr(bd.subprocess, "run", run)
+    with pytest.raises(bd.CollectionError, match="秒以内"):
+        bd.collect_skill_validation()
+
+
+def test_cli_compare_exits_1_on_collection_failure(tmp_path, monkeypatch, capsys):
+    base = tmp_path / "b.json"
+    write_baseline(base, ["a::X"], ["t::one"])
+    def boom():
+        raise bd.CollectionError("pytest が落ちた")
+    monkeypatch.setattr(bd, "collect", boom)
+    assert bd.main(["--compare", "--path", str(base)]) == 1
+    assert "pytest が落ちた" in capsys.readouterr().err
 
 
 def write_baseline(path: Path, scope, skill):

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "recorded_at": "2026-10-06T14:05:04Z",
-  "commit": "2464566af",
+  "recorded_at": "2026-10-06T14:09:24Z",
+  "commit": "9c65a0c11",
   "base_ref": "origin/main@04dbc28f4",
   "phase1_origin": false,
   "note": "Phase 1 開始時点の既知の赤。Phase 1 ではこれを増やさない(小柳さん 2026-10-06 承認)",

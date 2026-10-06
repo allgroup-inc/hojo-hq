@@ -16,7 +16,7 @@
 import argparse
 import datetime as dt
 import json
-import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -57,40 +57,113 @@ CHECK_META = {
 }
 
 
+class CollectionError(RuntimeError):
+    """検査を実行できなかった/結果を読み取れなかった。「0件=改善」と誤読しないよう呼び出し側で止める。"""
+
+
+SKILL_VALIDATION_TIMEOUT = 300
+_SUMMARY_COUNT = re.compile(r"(\d+) (failed|errors?)\b")
+_SUMMARY_LINE = re.compile(r"\bin \d+(?:\.\d+)?s\b")
+
+
 def parse_failed(output):
-    """pytest の -rf 出力から FAILED の nodeid をソート済みで返す(' - ' 以降の理由は捨てる)。"""
+    """pytest の -rfE 出力から FAILED / ERROR の項目をソート済みで返す(' - ' 以降の理由は捨てる)。
+
+    FAILED は nodeid そのもの、ERROR は "ERROR::<nodeid>"(fixture/setup エラーを FAILED と区別する)。
+    """
     items = set()
     for line in output.splitlines():
-        if not line.startswith("FAILED "):
-            continue
-        items.add(line[len("FAILED "):].split(" - ", 1)[0].strip())
+        if line.startswith("FAILED "):
+            items.add(line[len("FAILED "):].split(" - ", 1)[0].strip())
+        elif line.startswith("ERROR "):
+            items.add("ERROR::" + line[len("ERROR "):].split(" - ", 1)[0].strip())
     return sorted(items)
 
 
+def summary_counts(output):
+    """pytest の最終サマリー行から (failed, errors) の件数を返す。サマリー行が無ければ None。"""
+    summary = None
+    for line in output.splitlines():
+        if _SUMMARY_LINE.search(line):
+            summary = line
+    if summary is None:
+        return None
+    failed = errors = 0
+    for count, kind in _SUMMARY_COUNT.findall(summary):
+        if kind == "failed":
+            failed = int(count)
+        else:
+            errors = int(count)
+    return failed, errors
+
+
 def collect_skill_validation():
-    proc = subprocess.run(
-        [sys.executable, "-m", "pytest", "tests/skill_validation", "-q", "-rf",
-         "--no-header", "-p", "no:cacheprovider"],
-        capture_output=True, text=True, cwd=ROOT,
-    )
-    # 0=全合格 / 1=テスト失敗。それ以外(収集エラー等)は「失敗0件」と誤読しないよう止める。
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-m", "pytest", "tests/skill_validation", "-q", "-rfE",
+             "--no-header", "-p", "no:cacheprovider"],
+            capture_output=True, text=True, cwd=ROOT, timeout=SKILL_VALIDATION_TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        raise CollectionError(
+            f"skill_validation が {SKILL_VALIDATION_TIMEOUT} 秒以内に終わりませんでした"
+        ) from None
+    # 0=全合格 / 1=テスト失敗。それ以外(収集エラー=2、テスト無し=5 等)は「失敗0件」と誤読しないよう止める。
     if proc.returncode not in (0, 1):
-        raise RuntimeError(
+        raise CollectionError(
             f"skill_validation を実行できませんでした(exit {proc.returncode}):\n{proc.stdout}{proc.stderr}"
         )
     items = parse_failed(proc.stdout)
-    if proc.returncode == 1 and not items:
-        raise RuntimeError(f"失敗行を読み取れませんでした:\n{proc.stdout}")
+    if proc.returncode == 0:
+        if items:
+            raise CollectionError(f"exit 0 なのに失敗行があります:\n{proc.stdout}")
+        return items
+    if not items:
+        raise CollectionError(f"失敗行を読み取れませんでした:\n{proc.stdout}")
+    # サマリー行の件数と読み取った項目数が合わなければ、取りこぼしがあるので止める。
+    counts = summary_counts(proc.stdout)
+    n_failed = sum(1 for i in items if not i.startswith("ERROR::"))
+    n_errors = len(items) - n_failed
+    if counts is None or counts != (n_failed, n_errors):
+        raise CollectionError(
+            f"サマリー行の件数と読み取った項目数が一致しません"
+            f"(サマリー={counts} 項目: failed={n_failed} error={n_errors}):\n{proc.stdout}"
+        )
+    return items
+
+
+def tracked_files():
+    """git 管理下のパス(ROOT 基準。呼び出し元の cwd に依存しない)。"""
+    out = subprocess.run(
+        ["git", "ls-files", "-z"], capture_output=True, text=True, check=True, cwd=ROOT
+    ).stdout
+    return [p for p in out.split("\0") if p]
+
+
+def scan_scope_items(paths):
+    """check_repo_scope の違反を "<path>::<pattern>" の集合で返す。
+
+    check_repo_scope.scan_contents は1ファイルにつき最初の1語しか返さない。
+    既存の違反ファイルに別の禁止語が足されても隠れないよう、ここでは全パターンを個別に数える。
+    (check_repo_scope 自体の挙動は変えない)
+    """
+    items = {f"{p}::{pat}" for p, pat in check_repo_scope.find_violations(paths)}
+    for path in paths:
+        if path in check_repo_scope.ALLOWED:
+            continue
+        text = check_repo_scope.read_text(str(ROOT / path))
+        if text is None:
+            continue
+        for pattern in check_repo_scope.FORBIDDEN_CONTENT:
+            if pattern in text:
+                items.add(f"{path}::{pattern}")
     return items
 
 
 def collect():
     """現在の違反を {検査名: ソート済み items} で返す。"""
-    paths = check_repo_scope.tracked_files()
-    scope = {f"{p}::{pat}" for p, pat in check_repo_scope.find_violations(paths)}
-    scope |= {f"{p}::{pat}" for p, pat in check_repo_scope.scan_contents(paths)}
     return {
-        "check_repo_scope": sorted(scope),
+        "check_repo_scope": sorted(scan_scope_items(tracked_files())),
         "skill_validation": sorted(collect_skill_validation()),
     }
 
@@ -176,18 +249,25 @@ def main(argv=None):
     parser.add_argument("--path", default=str(DEFAULT_PATH), help="記録先(既定: docs/wikiskill/baseline-debt.json)")
     args = parser.parse_args(argv)
     path = Path(args.path).resolve()
-    os.chdir(ROOT)  # tracked_files() は git ls-files を cwd で実行するため、どこから呼ばれても同じ結果にする
 
     if args.record:
         if path.exists() and not args.force:
             print(f"既に存在します: {path}(上書きするには --force)", file=sys.stderr)
             return 2
-        record(path)
+        try:
+            record(path)
+        except CollectionError as e:
+            print(f"収集に失敗しました: {e}", file=sys.stderr)
+            return 1
         print(f"記録しました: {path}")
         return 0
 
     baseline = json.loads(path.read_text(encoding="utf-8"))
-    current = collect()
+    try:
+        current = collect()
+    except CollectionError as e:
+        print(f"収集に失敗しました: {e}", file=sys.stderr)
+        return 1
     verdict, table = compare(baseline, current)
     if args.json:
         print(json.dumps(
