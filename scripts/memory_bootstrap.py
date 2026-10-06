@@ -11,8 +11,12 @@
 照合(語単位):
     検索語は文字種の切れ目で「語」に分ける(英数字の語 / カタカナ語 / 漢字などの語。ひらがなは捨てる)。
     英数字の語は文書の英数字トークンと完全一致で、日本語の語は bigram の6割以上(2個以下なら全部)が
-    文書にあれば一致。score = 一致した語の数(+ 見出し・名前で一致すれば +1)。
-    min_score = min(2, 語の数)。
+    文書にあれば一致。score = 一致した語の数(+ 見出し・名前で一致すれば +1。この加点は並び順にだけ使う)。
+    min_score = min(2, 語の数)。見出しの加点を除いた一致数がこれに届かないものは出さない
+    (Skill だけは名前での一致も1語に数える。名前は識別子なので、語がそのまま入っていれば関連が強い)。
+    区分ごとに、その区分の25%を超える項目(かつ3件以上)に当たる語は「ありふれた語」として照合に使わない。
+    ハッシュ・乱数らしい語(16進の6文字以上 / 数字2つ以上を含む英数6文字)と .claude/experience の
+    ファイル名は検索語にしない。段2は「最初の指示 + ブランチ名の語」で探す(指示から語が2つ取れなければ段1の語も使う)。
 
 使い方:
     python3 scripts/memory_bootstrap.py hook SessionStart       # 段1: ブランチ・直近commitから(stdin に hook JSON)
@@ -44,8 +48,10 @@ from wikiskill_common import (  # noqa: E402
     LOCAL_DIR,
     audit,
     audit_if_slow,
+    current_branch,
     disabled,
     emit,
+    group_session_files,
     project_dir,
     read_hook_input,
     session_id_of,
@@ -81,6 +87,9 @@ _ENGLISH_COMMON = frozenset(
 )
 PER_KIND = 5
 MIN_SCORE = 2
+DF_RATIO = 0.25           # 区分の項目のこの割合を超えて当たる語は、その区分では照合に使わない
+DF_MIN_COUNT = 3          # ただし当たる項目がこの数未満なら「ありふれた語」とは見なさない(小さな区分を守る)
+NOTE_SHOWN = 60           # session_end の無いセッションの [Exp] 行に出す note の長さ
 BUDGET_CHARS = 6000
 EXPERIENCE_MAX = 3
 EXPERIENCE_MAX_FILES = 50
@@ -118,6 +127,11 @@ _OWN_LABEL_RE = {
     "ベッカイ": re.compile(r"^[-*・\s]*ベッカイ(?:[(（][^)）]*[)）])?\s*[:：]\s*"),
 }
 _PIPE_RE = re.compile(r"(?<!\\)\|")
+# ハッシュ・乱数らしい英数字の語(検索語にしない): 16進の6文字以上(数字と a-f を両方含む)/
+# 数字2つ以上と英字を含む6文字(ブランチ名の末尾 3mbx56 など)
+_HEX_UNIT_RE = re.compile(r"^(?=.*\d)(?=.*[a-f])[0-9a-f]{6,}$")
+_RANDOM_UNIT_RE = re.compile(r"^(?=(?:.*\d){2})(?=.*[a-z])[a-z0-9]{6}$")
+_STATUS_LABEL = {"deferred": "[D:保留]", "rejected": "[D:却下]"}
 _BLOCK_SCALARS = {"", ">", ">-", ">+", "|", "|-", "|+"}
 
 
@@ -202,20 +216,41 @@ def _norm(text: str) -> str:
 
 # ---------------------------------------------------------------- 検索語・採点
 
+def _branch(root: Path) -> str:
+    """今のブランチ名(detached HEAD なら origin の唯一の一致。決められなければ "unknown")。"""
+    return current_branch(lambda *a: _git(root, *a))
+
+
+def _filter_terms(raw: list[str]) -> list[str]:
+    """空白を落とし、2文字未満・定型語・重複を除く(順序は保つ)。"""
+    terms: list[str] = []
+    for t in raw:
+        t = t.strip()
+        if len(t) < 2 or t.lower() in STOP_TERMS or t in terms:
+            continue
+        terms.append(t)
+    return terms
+
+
+def branch_terms(root: Path) -> list[str]:
+    """ブランチ名の語(ブランチが決められなければ空)。"""
+    branch = _branch(root)
+    return _filter_terms(re.split(r"[-_/]", branch)) if branch != "unknown" else []
+
+
 def build_query(root: Path, prompt: str | None = None) -> list[str]:
     """ブランチ名の語 → 変更ファイルの basename → このブランチだけの commit 件名(新しい順) → prompt。
 
     commit は `origin/main..HEAD`(最大10件)。空(main 上・origin/main 不明)なら直近5件。
     件名は先頭60字だけから語を取る。語の単位(語)は合計40個まで(先頭から残す)。定型語は除く。
+    .claude/experience/ の下のファイル名(session-<id>.jsonl)は検索語にしない(関係のない記録の雑音)。
     """
-    raw: list[str] = []
-    branch = _git(root, "rev-parse", "--abbrev-ref", "HEAD")
-    if branch and branch != "HEAD":
-        raw.extend(re.split(r"[-_/]", branch))
+    raw: list[str] = list(branch_terms(root))
     names = _git(root, "diff", "--name-only", "origin/main...HEAD")
     if names is None:
         names = _git(root, "diff", "--name-only", f"HEAD~{MAX_COMMITS}..HEAD") or ""
-    raw.extend(posixpath.basename(n.strip()) for n in names.splitlines()[:MAX_FILES])
+    files = [n.strip() for n in names.splitlines() if not n.strip().startswith(EXPERIENCE_DIR + "/")]
+    raw.extend(posixpath.basename(n) for n in files[:MAX_FILES])
     log = _git(root, "log", "origin/main..HEAD", "--format=%s", f"-{MAX_COMMITS}") or ""
     if not log.strip():
         log = _git(root, "log", f"-{FALLBACK_COMMITS}", "--format=%s") or ""
@@ -223,12 +258,7 @@ def build_query(root: Path, prompt: str | None = None) -> list[str]:
         raw.append(_COMMIT_PREFIX_RE.sub("", subject.strip())[:SUBJECT_MAX])
     if prompt:
         raw.append(str(prompt).strip()[:PROMPT_MAX])
-    terms: list[str] = []
-    for t in raw:
-        t = t.strip()
-        if len(t) < 2 or t.lower() in STOP_TERMS or t in terms:
-            continue
-        terms.append(t)
+    terms = _filter_terms(raw)
     units = query_units(terms)
     if len(units) > MAX_QUERY_UNITS:
         # 上限を超えたら、先頭(ブランチ名の語)から40単位だけを語として残す
@@ -284,6 +314,8 @@ def query_units(terms: list[str]) -> list[tuple[str, str, frozenset]]:
                 if cls == "a":
                     if len(run) < 2 or run.isdigit() or run in _ENGLISH_COMMON:
                         continue
+                    if _HEX_UNIT_RE.match(run) or _RANDOM_UNIT_RE.match(run):
+                        continue  # commit の SHA・セッション ID・ブランチ名の乱数部分
                     key, grams = ("a", run), frozenset()
                 else:
                     grams = frozenset(bigrams(run))
@@ -326,7 +358,7 @@ def _src(kind: str, label: str, sid: str, path: str, title: str, body: str, line
             "line": line, "date": date, "text": text, "match_title": match_title, "score": 0}
 
 
-def _decision_line(d: dict, title: str) -> str:
+def _decision_line(d: dict, title: str, kind_label: str = "[D]") -> str:
     """欄はそれぞれ自分の出典からだけ作る(読み替えない)。前の欄と同じ内容は出さない。700字まで。
 
     欄ごとに120字まで。全体が長すぎるときは 前提 → なぜ → 裁定 の順に60字へ縮め、まだ長ければ
@@ -356,7 +388,7 @@ def _decision_line(d: dict, title: str) -> str:
         parts = [f"{label}: {_trunc(text, caps[label])}" for label, text in texts.items()]
         if review:
             parts.append(review)
-        return f"- [D] {d.get('date') or '????-??-??'} {head_title[0]}" + (" — " + " / ".join(parts) if parts else "") + tail
+        return f"- {kind_label} {d.get('date') or '????-??-??'} {head_title[0]}" + (" — " + " / ".join(parts) if parts else "") + tail
 
     def over() -> int:
         return len(compose()) - DECISION_LINE_MAX
@@ -386,9 +418,14 @@ def _decisions(root: Path) -> list[Source]:
         path = d["path"]
         if path.startswith("/") or path.startswith(".."):
             continue  # root の外(シンボリックリンク経由など)は出さない
+        if d.get("status") == "superseded":
+            continue  # 置き換えられた決定は出さない(後継の議事が出る)
+        if any(str(t).strip().lower() == "test" for t in d.get("tags") or []):
+            continue  # 試験用の記録は本物の決定として扱わない
+        label = _STATUS_LABEL.get(d.get("status") or "", "[D]")
         title = _TITLE_PREFIX_RE.sub("", _clean(d["title"]))
-        line = _decision_line(d, title)
-        out.append(_src("decision", "[D]", path, path, title, line, line, d.get("date") or "",
+        line = _decision_line(d, title, label)
+        out.append(_src("decision", label, path, path, title, line, line, d.get("date") or "",
                         d.get("text_head") or title, title))
     return out
 
@@ -501,25 +538,36 @@ def _skills(root: Path) -> list[Source]:
     return out
 
 
-def _tail_lines(path: Path) -> list[str]:
-    """ファイル末尾の完全な行だけを返す(既定 4KB。末尾の行が窓より長く切れていたら 64KB で読み直す)。"""
-    with open(path, "rb") as fh:
-        fh.seek(0, os.SEEK_END)
-        size = fh.tell()
-        lines: list[str] = []
-        for n in (TAIL_BYTES, TAIL_BYTES_RETRY):
-            start = max(0, size - n)
-            fh.seek(start)
-            lines = fh.read(size - start).decode("utf-8", errors="replace").split("\n")
-            if start == 0:
-                return lines
-            partial, lines = lines[0], lines[1:]
-            if "session_end" in partial or not any(l.strip() for l in lines):
-                # 末尾の1行が窓より長く途中で切れている(event キーは行頭側にあるので見えないことがある)
-                if not any("session_end" in l for l in lines):
-                    continue
+def _tail_from(fh) -> list[str]:
+    """開いたファイルの末尾の完全な行だけを返す(既定 4KB。末尾の行が窓より長く切れていたら 64KB で読み直す)。"""
+    fh.seek(0, os.SEEK_END)
+    size = fh.tell()
+    lines: list[str] = []
+    for n in (TAIL_BYTES, TAIL_BYTES_RETRY):
+        start = max(0, size - n)
+        fh.seek(start)
+        lines = fh.read(size - start).decode("utf-8", errors="replace").split("\n")
+        if start == 0:
             return lines
+        partial, lines = lines[0], lines[1:]
+        if "session_end" in partial or not any(l.strip() for l in lines):
+            # 末尾の1行が窓より長く途中で切れている(event キーは行頭側にあるので見えないことがある)
+            if not any("session_end" in l for l in lines):
+                continue
         return lines
+    return lines
+
+
+def _tail_lines(path: Path) -> list[str]:
+    with open(path, "rb") as fh:
+        return _tail_from(fh)
+
+
+def _read_ends(path: Path, tail: bool = True) -> tuple[str, list[str]]:
+    """1回だけ開いて (先頭の1行, 末尾の完全な行) を返す。tail=False なら先頭の1行だけ。"""
+    with open(path, "rb") as fh:
+        first = fh.readline().decode("utf-8", errors="replace").rstrip("\r\n")
+        return first, (_tail_from(fh) if tail else [])
 
 
 def _mtime(p: Path) -> float:
@@ -529,16 +577,55 @@ def _mtime(p: Path) -> float:
         return 0.0
 
 
-def _experience(root: Path) -> list[Source]:
-    """同じブランチの session_end(public のみ)を新しい順に最大3件。スコアは使わない。
+def _ts_of(line: str) -> str:
+    """JSONL の1行の ts(読めなければ空文字。並び順にだけ使うので壊れていても数えない)。"""
+    try:
+        ev = json.loads(line)
+    except ValueError:
+        return ""
+    return str(ev.get("ts") or "") if isinstance(ev, dict) else ""
 
-    月フォルダを新しい順、ファイルを新しい順(更新時刻→名前)に見て、各ファイルの末尾だけを読む。
-    3件見つかるか 50 ファイル見たら打ち切る(古い月は開かない)。
+
+def _all_events(files: list[Path]) -> list[dict]:
+    events = []
+    for f in files:
+        with open(f, "rb") as fh:
+            for raw in fh.read().decode("utf-8", errors="replace").split("\n"):
+                if not raw.strip():
+                    continue
+                try:
+                    ev = json.loads(raw)
+                except ValueError:
+                    continue
+                if isinstance(ev, dict):
+                    events.append(ev)
+    return events
+
+
+def _current_session(root: Path) -> str:
+    """Experience Logger が SessionStart で置く「今のセッション」(自分自身の記録は [Exp] に出さない)。"""
+    try:
+        return (Path(root) / LOCAL_DIR / "current_session").read_text(encoding="utf-8").strip()[:200]
+    except (OSError, ValueError):
+        return ""
+
+
+def _experience(root: Path) -> list[Source]:
+    """同じブランチの直近のセッション(public のみ)を新しい順に最大3件。スコアは使わない。
+
+    1セッション = session-<sid>.jsonl + session-<sid>.part<N>.jsonl(番号順)。並び順は各セッションの
+    先頭行の ts(更新時刻は checkout で変わるので使わない)。各セッションの最後のファイルの末尾だけを読み、
+    最新の session_end があればそれを、無ければ(commit の後に終了したセッション)最新の行を使う。
+    今のブランチが決められない(detached HEAD で origin の一致が無い/複数)ときはブランチで絞らない。
+    月フォルダを新しい順に見て、3件そろった月より古い月は開かない。開くファイルは合計50まで。
+    今のセッション(_local/current_session)は出さない。
     """
     base = Path(root) / EXPERIENCE_DIR
     if not base.is_dir():
         return []
-    branch = _git(root, "rev-parse", "--abbrev-ref", "HEAD") or "unknown"
+    branch = _branch(root)
+    by_branch = branch != "unknown"
+    me = _current_session(root)
     months = sorted((d for d in base.iterdir() if d.is_dir() and _MONTH_RE.match(d.name)),
                     key=lambda d: d.name, reverse=True)
     rows = []
@@ -546,48 +633,74 @@ def _experience(root: Path) -> list[Source]:
     for month in months:
         if len(rows) >= EXPERIENCE_MAX or scanned >= EXPERIENCE_MAX_FILES:
             break
-        files = sorted(month.glob("session-*.jsonl"), key=lambda p: (_mtime(p), p.name), reverse=True)
-        for f in files:
-            if len(rows) >= EXPERIENCE_MAX or scanned >= EXPERIENCE_MAX_FILES:
+        groups = group_session_files(month.glob("session-*.jsonl"))
+        # どのセッションから開くか(上限50ファイルに収める順)は更新時刻→名前。表示の並びは先頭行の ts
+        order = sorted(groups.items(), key=lambda kv: (max(_mtime(p) for p in kv[1]), kv[0]), reverse=True)
+        for sid_name, files in order:
+            if scanned >= EXPERIENCE_MAX_FILES:
                 break
-            scanned += 1
+            if me and sid_name == _safe_id(me):
+                continue
             try:
-                _inside(root, f)
+                files = [f for f in files if _inside(root, f)]
             except ValueError:
                 continue
-            for raw in reversed(_tail_lines(f)):
-                if "session_end" not in raw:
+            if not files:
+                continue
+            first, tail = _read_ends(files[0], tail=len(files) == 1)
+            scanned += 1
+            if len(files) > 1:
+                _f, tail = _read_ends(files[-1])
+                scanned += 1
+            end_ev = latest = None
+            for raw in reversed(tail):
+                if not raw.strip():
                     continue
                 try:
                     ev = json.loads(raw)
                 except ValueError:
-                    malformed += 1
-                    continue
+                    ev = None
                 if not isinstance(ev, dict):
-                    malformed += 1
+                    if "session_end" in raw:
+                        malformed += 1
                     continue
-                if ev.get("event") != "session_end":
-                    continue
-                # このファイルの最新の session_end だけを見る
-                if ev.get("branch") == branch:
-                    if ev.get("visibility") == "public":
-                        rows.append((str(ev.get("ts") or ""), ev, f))
-                    else:
-                        hidden += 1
-                break
+                if latest is None:
+                    latest = ev
+                if ev.get("event") == "session_end":
+                    end_ev = ev
+                    break
+            ev = end_ev or latest
+            if ev is None:
+                continue
+            if by_branch and ev.get("branch") != branch:
+                continue
+            if ev.get("visibility") != "public":
+                hidden += 1
+                continue
+            rows.append((_ts_of(first) or str(ev.get("ts") or ""), ev, end_ev is not None, files))
     if hidden:
-        audit(root, _COMPONENT, f"experience: hidden {hidden} private/non-public session_end row(s) on branch {branch}")
+        audit(root, _COMPONENT, f"experience: hidden {hidden} private/non-public session row(s) on branch {branch}")
     if malformed:
         audit(root, _COMPONENT, f"experience: skipped {malformed} malformed session_end row(s)")
     rows.sort(key=lambda r: r[0], reverse=True)
     out = []
-    for ts, ev, f in rows[:EXPERIENCE_MAX]:
+    for first_ts, ev, ended, files in rows[:EXPERIENCE_MAX]:
+        ts = str(ev.get("ts") or first_ts)
         sid = str(ev.get("session_id") or "?")
-        commits = ev.get("commits") if isinstance(ev.get("commits"), list) else []
-        skills = ev.get("skills") if isinstance(ev.get("skills"), list) else []
-        skill_text = ", ".join(str(s) for s in skills) or "-"
-        line = f"- [Exp] {ts[:10] or '????-??-??'} session-{sid}: commits {len(commits)} / skills: {skill_text}"
-        rel = f.relative_to(Path(root)).as_posix()
+        date = ts[:10] or "????-??-??"
+        if ended:
+            commits = ev.get("commits") if isinstance(ev.get("commits"), list) else []
+            skills = ev.get("skills") if isinstance(ev.get("skills"), list) else []
+            skill_text = ", ".join(str(s) for s in skills) or "-"
+            line = f"- [Exp] {date} session-{sid}: commits {len(commits)} / skills: {skill_text}"
+        else:
+            # session_end が無い(commit・push の後に終了した)セッション: 件数と最新の note だけ
+            events = _all_events(files)
+            notes = [e for e in events if e.get("event") == "note" and isinstance(e.get("text"), str)]
+            line = f"- [Exp] {date} session-{sid}: events {len(events)}"
+            if notes:
+                line += f" / note: {_clean(notes[-1]['text'])[:NOTE_SHOWN]}"
+        rel = files[-1].relative_to(Path(root)).as_posix()
         out.append(_src("experience", "[Exp]", f"exp:{sid}:{ts}", rel, f"session-{sid}", line[2:], line,
                         ts[:10], "", ""))
     return out
@@ -626,23 +739,42 @@ def _feats(s: Source) -> tuple[set[str], set[str]]:
 
 def _select(sources: list[Source], terms: list[str], per_kind: int = PER_KIND, min_score: int = MIN_SCORE,
             exclude: frozenset | set = frozenset()) -> dict[str, list[Source]]:
-    """区分ごとに score 降順 → 日付降順で per_kind 件。exclude の id は順位付けの前に除く。"""
+    """区分ごとに score 降順 → 日付降順で per_kind 件。exclude の id は順位付けの前に除く。
+
+    区分ごとに、項目の DF_RATIO を超えて(かつ DF_MIN_COUNT 件以上に)当たる語はその区分では使わない。
+    見出しの加点は並び順にだけ使い、min_score の判定は加点を除いた一致数で行う(Skill の名前の一致は例外)。
+    """
     units = query_units(terms)
-    need = min(min_score, len(units))
+    need = max(min(min_score, len(units)), 1)
     picked: dict[str, list[Source]] = {k: [] for k in KIND_ORDER}
+    rows: dict[str, list[tuple[Source, frozenset]]] = {k: [] for k in KIND_ORDER}
     for s in sources:
-        if s["id"] in exclude:
-            continue
         if s["kind"] == "experience":
-            picked["experience"].append(s)
+            if s["id"] not in exclude:
+                picked["experience"].append(s)
             continue
         if not units:
             continue
-        f, tf = _feats(s)
-        sc = _match_score(units, f, tf)
-        if sc < max(need, 1):
-            continue
-        picked[s["kind"]].append({**s, "score": sc})
+        f, _tf = _feats(s)
+        rows[s["kind"]].append((s, frozenset(i for i, u in enumerate(units) if _unit_matches(u, f))))
+    for kind, entries in rows.items():
+        df: dict[int, int] = {}
+        for _s, matched in entries:
+            for i in matched:
+                df[i] = df.get(i, 0) + 1
+        common = {i for i, c in df.items() if c >= DF_MIN_COUNT and c > DF_RATIO * len(entries)}
+        for s, matched in entries:
+            if s["id"] in exclude:
+                continue
+            effective = matched - common
+            _f, tf = _feats(s)
+            bonus = 1 if effective and tf and any(_unit_matches(units[i], tf) for i in effective) else 0
+            # 見出しの加点は並び順だけ。ただし Skill の名前(識別子)での一致は1語として数える
+            # (名前に語がそのまま入っている Skill は、説明に1語しか無くても関連が強い)
+            counted = len(effective) + (bonus if kind == "skill" else 0)
+            if counted < need:
+                continue
+            picked[kind].append({**s, "score": len(effective) + bonus})
     for kind in KIND_ORDER:
         if kind == "experience":
             picked[kind] = picked[kind][:EXPERIENCE_MAX]
@@ -707,17 +839,26 @@ def _stage1(root: Path) -> str | None:
 
 
 def _stage2(root: Path, prompt: str) -> str | None:
-    """段1の検索語 + 最初の指示。段1で実際に表示した項目は順位付けの前に除く。新しい項目が無ければ None。"""
+    """最初の指示 + ブランチ名の語。指示から語が2つ取れなければ、段1の検索語 + 指示。
+
+    段1で実際に表示した項目は順位付けの前に除く。新しい項目が無ければ None。
+    """
     stage1_terms = build_query(root)
     sources = collect_sources(root)
     _text, shown = _stage1_render(root, sources, stage1_terms)
     prompt = str(prompt or "").strip()[:PROMPT_MAX]
-    prompt_terms = [prompt] if len(prompt) >= 2 and prompt not in stage1_terms else []
-    picked = _select(sources, stage1_terms + prompt_terms, exclude=shown)
+    prompt_terms = [prompt] if len(prompt) >= 2 else []
+    if len(query_units(prompt_terms)) >= 2:
+        context_terms = branch_terms(root)
+        terms = prompt_terms + [t for t in context_terms if t not in prompt_terms]
+    else:
+        context_terms = stage1_terms
+        terms = stage1_terms + [t for t in prompt_terms if t not in stage1_terms]
+    picked = _select(sources, terms, exclude=shown)
     if not any(picked.values()):
         return None
     # 指示の本文は出力に再掲しない(検索にだけ使う)
-    return _render(picked, "最初の指示 + " + ", ".join(stage1_terms), STAGE2_HEADING, BUDGET_CHARS)[0]
+    return _render(picked, "最初の指示 + " + ", ".join(context_terms), STAGE2_HEADING, BUDGET_CHARS)[0]
 
 
 def _hook(event: str) -> int:

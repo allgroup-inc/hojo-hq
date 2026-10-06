@@ -406,3 +406,15 @@ def test_dry_run_predicts_gz_exists_refusal_and_resume(repo, capsys):
     out = capsys.readouterr().out
     assert "2026-01: 見送り(" in out and "内容が一致しない" in out
     assert "2026-02: 未実行" in out
+
+
+def test_archive_keeps_base_and_part_files_of_a_session_together_in_order(repo):
+    # 1セッション = 本体 + part1, part2, part10(ファイル名順ではなく part の番号順に固める)
+    d = mk(repo, "2026-03")
+    order = ["session-a.jsonl", "session-a.part1.jsonl", "session-a.part2.jsonl",
+             "session-a.part10.jsonl", "session-b.jsonl"]
+    for name in order:
+        (d / name).write_text(f'{{"f":"{name}"}}\n', encoding="utf-8")
+    (gz,) = archive(repo, TODAY)
+    lines = gzip.decompress(gz.read_bytes()).decode("utf-8").splitlines()
+    assert lines == [f'{{"f":"{name}"}}' for name in order]

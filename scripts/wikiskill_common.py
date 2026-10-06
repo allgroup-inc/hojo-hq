@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -19,6 +20,15 @@ LOCAL_DIR = ".claude/experience/_local"
 AUDIT_LOG = "_audit.log"
 
 _FALSY = {"", "0", "false", "no", "off"}
+
+# Bash のプログラム名として記録してよい形(これ以外は "<unknown>")
+PROGRAM_RE = re.compile(r"^[A-Za-z0-9._+-]{1,32}$")
+_SECRET_PREFIXES = ("sk-", "ghp_", "gho_", "ghs_", "ghu_", "github_pat_", "xox", "akia", "aiza")
+_LONG_RUN_RE = re.compile(r"[A-Za-z0-9]{20,}")
+PROGRAM_PLACEHOLDERS = {"<unknown>", "<external>"}
+
+# session-<sid>.jsonl(本体)と session-<sid>.part<N>.jsonl(本体が commit された後の続き)
+_SESSION_FILE_RE = re.compile(r"^session-(.+?)(?:\.part([1-9][0-9]*))?\.jsonl$")
 
 
 def project_dir() -> Path:
@@ -100,6 +110,52 @@ def audit_if_slow(root: Path, component: str, event: str, started: float, limit_
     if ms > limit_ms:
         audit(root, component, f"slow {event} {ms}ms")
     return ms
+
+
+def valid_program_name(name) -> bool:
+    """記録してよいプログラム名か(PROGRAM_RE に合い、鍵らしい形でない)。"""
+    if not isinstance(name, str) or not PROGRAM_RE.match(name):
+        return False
+    if name.lower().startswith(_SECRET_PREFIXES) or _LONG_RUN_RE.search(name):
+        return False  # API キー・トークンの断片らしいもの(sk-… / 20字以上の英数字の連続)
+    return True
+
+
+def current_branch(git) -> str:
+    """今のブランチ名。git(*args) は stdout(失敗は空文字か None)を返す関数。
+
+    `git branch --show-current` → 空(detached HEAD。クラウドのセッションはこれで始まる)なら、
+    HEAD を指す refs/remotes/origin/* がちょうど1つのときその名前(origin/ を外す)。0件・2件以上は "unknown"。
+    """
+    name = (git("branch", "--show-current") or "").strip()
+    if name:
+        return name
+    out = git("for-each-ref", "--points-at", "HEAD", "--format=%(refname)", "refs/remotes/origin/") or ""
+    prefix = "refs/remotes/origin/"
+    names = sorted({
+        ref[len(prefix):] for ref in (l.strip() for l in out.splitlines())
+        if ref.startswith(prefix) and ref[len(prefix):] and ref[len(prefix):] != "HEAD"
+    })
+    return names[0] if len(names) == 1 else "unknown"
+
+
+def session_file_key(name: str) -> tuple[str, int] | None:
+    """`session-<sid>.jsonl` → (sid, 0)、`session-<sid>.part<N>.jsonl` → (sid, N)。それ以外は None。"""
+    m = _SESSION_FILE_RE.match(name)
+    if not m:
+        return None
+    return m.group(1), int(m.group(2) or 0)
+
+
+def group_session_files(paths) -> dict[str, list[Path]]:
+    """セッションごとに [本体, part1, part2, …] の順に並べる(1セッション = 本体 + 続きのファイル)。"""
+    groups: dict[str, list[tuple[int, Path]]] = {}
+    for p in paths:
+        key = session_file_key(Path(p).name)
+        if key is None:
+            continue
+        groups.setdefault(key[0], []).append((key[1], Path(p)))
+    return {sid: [p for _n, p in sorted(items, key=lambda t: t[0])] for sid, items in groups.items()}
 
 
 def emit(event: str, additional_context: str | None = None, system_message: str | None = None) -> None:

@@ -421,3 +421,84 @@ def test_slow_not_measured_when_stopped(cli, monkeypatch):
     rc, out, _ = cli("hook", "SessionStart", stdin={"session_id": "s9"})
     assert rc == 0 and json.loads(out) == {}
     assert _audit_lines(cli.repo) == []
+
+
+# ---- 最終修正波: part ファイル / プログラム名の検査 / detached HEAD のブランチ / first-parent ----
+
+def _commit_experience(repo):
+    git(repo, "add", ".claude/experience")
+    git(repo, "commit", "-q", "-m", "chore: experience")
+
+
+def test_append_goes_to_part_file_once_base_is_tracked(repo):
+    base = append_event(repo, start_event(repo, "s1"))
+    assert base.name == "session-s1.jsonl"
+    _commit_experience(repo)
+    p1 = append_event(repo, note_event("s1", "after commit", repo))
+    assert p1.name == "session-s1.part1.jsonl" and p1.parent == base.parent
+    assert len(base.read_text().splitlines()) == 1  # commit 済みの本体は汚さない
+    assert git(repo, "status", "--porcelain", "--untracked-files=no") == ""
+    # part1 も commit されたら part2 へ
+    _commit_experience(repo)
+    p2 = append_event(repo, note_event("s1", "after second commit", repo))
+    assert p2.name == "session-s1.part2.jsonl"
+    assert git(repo, "status", "--porcelain", "--untracked-files=no") == ""
+
+
+def test_summarize_reads_base_and_parts_as_one_session(repo):
+    append_event(repo, start_event(repo, "s1"))
+    append_event(repo, build_tool_event(
+        {"session_id": "s1", "tool_name": "Edit", "tool_input": {"file_path": str(repo / "README.md")}}, repo))
+    _commit_experience(repo)
+    append_event(repo, build_tool_event(
+        {"session_id": "s1", "tool_name": "Edit", "tool_input": {"file_path": str(repo / "README.md")}}, repo))
+    append_event(repo, build_tool_event(
+        {"session_id": "s1", "tool_name": "Skill", "tool_input": {"skill": "writing-plans"}}, repo))
+    s = summarize_session(repo, "s1")
+    assert s["tools"] == {"Edit": 2} and s["skills"] == ["writing-plans"]
+    assert [c["subject"] for c in s["commits"]] == ["chore: experience"]  # head は本体の session_start から
+
+
+@pytest.mark.parametrize("command, program", [
+    ("TOKEN=$(cat ~/.config/x) gh", "<unknown>"),
+    ("/home/user/other-repo/scripts/顧客A社_抽出.sh --all", "<external>"),
+    ("sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx", "<unknown>"),
+    ("python3 -m pytest", "python3"),
+    ("./scripts/run_all.sh", "run_all.sh"),
+    ("顧客A社.sh", "<unknown>"),
+])
+def test_bash_program_name_is_validated(repo, command, program):
+    ev = build_tool_event({"tool_name": "Bash", "tool_input": {"command": command}}, repo)
+    assert ev["program"] == program
+    assert "顧客" not in json.dumps(ev, ensure_ascii=False)
+
+
+def test_bash_absolute_program_inside_repo_keeps_basename(repo):
+    ev = build_tool_event({"tool_name": "Bash", "tool_input": {"command": f"{repo}/scripts/x.sh"}}, repo)
+    assert ev["program"] == "x.sh"
+
+
+def test_branch_on_detached_head_uses_the_single_origin_ref(repo):
+    git(repo, "update-ref", "refs/remotes/origin/claude/feature-x", "HEAD")
+    git(repo, "update-ref", "refs/remotes/origin/main", "HEAD~0")
+    (repo / "b.txt").write_text("b")
+    git(repo, "add", "b.txt")
+    git(repo, "commit", "-q", "-m", "feat: b")
+    git(repo, "update-ref", "refs/remotes/origin/claude/feature-x", "HEAD")
+    git(repo, "checkout", "-q", "--detach", "HEAD")
+    git(repo, "symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/claude/feature-x")
+    assert start_event(repo, "s1")["branch"] == "claude/feature-x"
+
+
+def test_branch_on_detached_head_ambiguous_is_unknown(repo):
+    git(repo, "update-ref", "refs/remotes/origin/a", "HEAD")
+    git(repo, "update-ref", "refs/remotes/origin/b", "HEAD")
+    git(repo, "checkout", "-q", "--detach", "HEAD")
+    assert start_event(repo, "s1")["branch"] == "unknown"
+    git(repo, "update-ref", "-d", "refs/remotes/origin/a")
+    git(repo, "update-ref", "-d", "refs/remotes/origin/b")
+    assert start_event(repo, "s1")["branch"] == "unknown"  # 0件も unknown("HEAD" にしない)
+
+
+def test_branch_on_normal_checkout(repo):
+    assert start_event(repo, "s1")["branch"] == "main"

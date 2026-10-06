@@ -12,6 +12,7 @@
     (<external> と <unknown> は許可)
   - note 以外の文字列値が 500 文字超 / note の text が 1,000 文字超(ネストした文字列も対象)
   - 本文が check_repo_scope.FORBIDDEN_CONTENT に触れる(禁止語リストは二重管理しない)
+  - program が `^[A-Za-z0-9._+-]{1,32}$` の形でない・鍵の断片らしい(<unknown> と <external> は許可)
   - 未知の event 名 / JSON オブジェクトでない行 / JSON として読めない行
 
 使い方:
@@ -30,6 +31,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from check_repo_scope import FORBIDDEN_CONTENT, find_content_violations, read_text  # noqa: E402,F401
+from wikiskill_common import PROGRAM_PLACEHOLDERS, valid_program_name  # noqa: E402
 
 PUBLIC_REPO = "allgroup-inc/hojo-hq"
 MAX_FIELD = 500
@@ -107,6 +109,12 @@ def check_record(rec, path: str) -> list[str]:
         why = _path_problem(value)
         if why:
             problems.append(f"{key} がプロジェクト相対パスではありません({why}): {str(value)[:80]!r}")
+
+    # Bash のプログラム名: 記録側(experience_log._program_of)と同じ形だけを通す
+    if "program" in rec:
+        prog = rec["program"]
+        if not (isinstance(prog, str) and (prog in PROGRAM_PLACEHOLDERS or valid_program_name(prog))):
+            problems.append(f"program が記録してよい形ではありません: {str(prog)[:40]!r}")
 
     # 文字列の長さ(ネストも再帰)。text だけ 1,000、他は 500
     strings: list[tuple[str, str]] = []
@@ -202,6 +210,8 @@ def selftest() -> int:
         ("禁止語を含むnote", {**ok, "event": "note", "text": f"環境変数 {word} を"}, True),
         ("未知のevent", {**ok, "event": "weird"}, True),
         ("JSONオブジェクトでない", ["x"], True),
+        ("記号入りのprogram", {**ok, "tool": "Bash", "program": "x)"}, True),
+        ("鍵らしいprogram", {**ok, "tool": "Bash", "program": "sk-" + "x" * 24}, True),
         # 通すべきもの
         ("通常のtool", ok, False),
         ("<external>", {**ok, "path": "<external>"}, False),
@@ -209,6 +219,8 @@ def selftest() -> int:
         ("note 1000文字(日本語)", {**ok, "event": "note", "text": "あ" * MAX_NOTE}, False),
         ("session_end(ネストあり)", end, False),
         ("名前に..を含むだけのファイル", {**ok, "path": "docs/a..b.md"}, False),
+        ("通常のprogram", {**ok, "tool": "Bash", "program": "python3"}, False),
+        ("<external>のprogram", {**ok, "tool": "Bash", "program": "<external>"}, False),
     ]
     failed = []
     for name, rec, should_hit in cases:

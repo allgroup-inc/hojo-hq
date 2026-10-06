@@ -355,3 +355,32 @@ def test_cli_unknown_argument_exits_2():
     r = run(["--selftst"])
     assert r.returncode == 2
     assert "使い方" in r.stderr
+
+
+# ---- 最終修正波: プログラム名の形 / part ファイル ----
+
+BASH = {**OK, "tool": "Bash", "program": "python3"}
+BASH.pop("path")
+
+
+@pytest.mark.parametrize("program", ["python3", "git", "run_all.sh", "<unknown>", "<external>"])
+def test_program_name_ok(program):
+    assert check_record({**BASH, "program": program}, "x.jsonl") == []
+
+
+@pytest.mark.parametrize("program", [
+    "x)", "顧客A社_抽出.sh", "sk-ant-xxxxxxxxxxxxxxxxxxxxxxxx", "a" * 33, "", "with space", 5,
+])
+def test_program_name_rejected(program):
+    problems = check_record({**BASH, "program": program}, "x.jsonl")
+    assert any("program" in p for p in problems)
+
+
+def test_scan_covers_part_files(tmp_path):
+    _init_repo(tmp_path)
+    root = tmp_path
+    _commit_jsonl(root, "session-A.jsonl", json.dumps(OK) + "\n")
+    bad = {**OK, "path": "/home/user/secret.md"}
+    _commit_jsonl(root, "session-A.part1.jsonl", json.dumps(bad) + "\n")
+    hits = scan(root)
+    assert [h[0] for h in hits] == [".claude/experience/2026-10/session-A.part1.jsonl"]

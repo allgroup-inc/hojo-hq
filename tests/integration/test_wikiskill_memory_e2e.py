@@ -25,6 +25,9 @@ SCRIPT_NAMES = [
     "check_repo_scope.py",
 ]
 DECISION_PATH = "docs/議事_20261006_E2Eテスト決定.md"
+COMMIT_SUBJECT = "docs: 締切アラート時期の決定"
+COMMIT_COMMAND = f'git commit -q -m "{COMMIT_SUBJECT}"'
+PROMPT_B = "マージで競合したときの手順を確認したい"
 
 FM_DECISION = """---
 decision_id: D20261006-e2e-test
@@ -119,10 +122,24 @@ def hook(world, event, sid, **payload):
     )
 
 
+def session_files(world, sid):
+    """1セッション = session-<sid>.jsonl + 本体が commit された後の session-<sid>.part<N>.jsonl(番号順)。"""
+    exp = Path(world) / ".claude" / "experience"
+    files = list(exp.glob(f"*/session-{sid}.jsonl")) + list(exp.glob(f"*/session-{sid}.part*.jsonl"))
+    part = lambda p: int(p.name.rsplit(".part", 1)[1][:-len(".jsonl")]) if ".part" in p.name else 0
+    return sorted(files, key=part)
+
+
 def read_session(world, sid):
-    files = sorted((Path(world) / ".claude" / "experience").glob(f"*/session-{sid}.jsonl"))
+    files = session_files(world, sid)
     assert files, f"session-{sid}.jsonl が無い"
-    return files[0].read_text(encoding="utf-8")
+    return "".join(f.read_text(encoding="utf-8") for f in files)
+
+
+def committable_experience(world):
+    """git が無視しない Experience の記録ファイル(_local / _audit.log は除く)をすべて。"""
+    out = git(world, "ls-files", "--others", "--cached", "--exclude-standard", "-z", "--", ".claude/experience")
+    return [Path(world) / p for p in out.split("\0") if p.endswith(".jsonl")]
 
 
 def _build_world(root, origin_url):
@@ -177,9 +194,10 @@ def _run_session_a(world):
     hook(world, "PostToolUse", sid="A", tool_name="Write",
          tool_input={"file_path": str(world / DECISION_PATH)})
     git(world, "add", "-A")
-    git(world, "commit", "-q", "-m", "docs: 締切アラート時期の決定")
+    git(world, "commit", "-q", "-m", COMMIT_SUBJECT)
+    # Claude Code が実際に渡すのと同じ、コマンド全文(引用符・フラグ付き)
     hook(world, "PostToolUse", sid="A", tool_name="Bash",
-         tool_input={"command": "git commit -m x"})
+         tool_input={"command": COMMIT_COMMAND})
     hook(world, "PostToolUse", sid="A", tool_name="Skill",
          tool_input={"skill": "writing-plans-hojo"})
     hook(world, "SessionEnd", sid="A", reason="exit")
@@ -206,7 +224,7 @@ def test_session_a_then_fresh_session_b_restores_decision_and_why(world):
     assert "- [Exp] " in ctx
     assert "session-A: commits 1 / skills: writing-plans-hojo" in ctx
 
-    r2 = hook(world, "UserPromptSubmit", sid="B", prompt="マージで競合したときの手順を確認したい")
+    r2 = hook(world, "UserPromptSubmit", sid="B", prompt=PROMPT_B)
     ctx2 = _context(r2)
     assert "[FK-002]" in ctx2                                           # 失敗が必要に応じて復元される
     # 再発防止は見出し(常に出る)ではなく項目行で判定する
@@ -220,6 +238,25 @@ def test_session_a_then_fresh_session_b_restores_decision_and_why(world):
 
     r3 = hook(world, "UserPromptSubmit", sid="B", prompt="次")
     assert r3.stdout.strip() == "{}"                                    # 段2は1セッション1回
+
+    # ---- 残してはいけないものが、commit され得る Experience のどこにも無い(計画 受け入れ条件4)----
+    files = committable_experience(world)
+    assert {f.name for f in session_files(world, "A")} <= {f.name for f in files}
+    assert any(".part" in f.name for f in session_files(world, "A"))  # commit 後の続きは part ファイルへ
+    for f in files:
+        text = f.read_text(encoding="utf-8")
+        assert PROMPT_B not in text, f.name                              # 利用者の指示の本文
+        assert COMMIT_COMMAND not in text and '-m "' not in text, f.name  # Bash コマンド全文(引用符・フラグ)
+        assert str(world) not in text, f.name                            # 絶対パス
+        # コミット件名は session_end の commits[].subject の中にだけ現れる
+        for raw in text.splitlines():
+            if "締切アラート時期の決定" not in raw:
+                continue
+            ev = json.loads(raw)
+            assert ev["event"] == "session_end", raw
+            assert [c["subject"] for c in ev["commits"]].count(COMMIT_SUBJECT) == 1
+            rest = {k: v for k, v in ev.items() if k != "commits"}
+            assert "締切アラート時期の決定" not in json.dumps(rest, ensure_ascii=False)
 
     # 受け入れ記録用に、実出力を残す(pytest -s で確認できる)
     print("\n=== STAGE1 additionalContext ===\n" + ctx)

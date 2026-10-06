@@ -137,6 +137,8 @@ grep -c "slow " .claude/experience/_audit.log    # ファイルが無ければ 0
 5. **未追跡の Experience が2件あった**: 本セッション(`session-2fa162fe-…`)と、0秒で終了した `session-84180d06-…`(Session A と同時刻 20:40:14 に起動し即終了、`reason: other`)。後者は試験の実行基盤が立ち上げた並行セッションの残骸とみられる。手順どおり `.claude/experience` ごと add する。
 6. `python3 scripts/check_experience_privacy.py` は「Experience記録 1件・違反なし」(追跡済みの Session A の記録のみが対象)。
 
+7. **試験用の議事は、試験の後で `docs/wikiskill/受け入れ試験_議事サンプル.md` へ移した**(最終修正 2026-10-06)。`docs/議事/` に置いたままだと、試験用の記録が `status: adopted`・`decided_by: 小柳` の本物の Decision として以後のすべてのセッションの `[D]` に出続けるため。移した先は議事の読み込み対象(`docs/議事_*.md` / `docs/議事/*.md`)の外で、`decided_by` は「受け入れ試験のサンプル・小柳さんの決定ではない」、`tags` に `test` を足した(Bootstrap は `test` タグの議事を出さない)。上の表 (e) と「Bootstrap 実出力」に残る `docs/議事/議事_20261006_受け入れ試験.md` は、試験時点の出力をそのまま引用したもの(書き換えない)。
+
 ## Baseline 比較
 
 `python3 scripts/baseline_debt.py --compare` の出力(2026-10-06 20:49 UTC・HEAD 7ed445d):

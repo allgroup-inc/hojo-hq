@@ -334,3 +334,11 @@ def test_baseline_json_is_not_exempt_and_has_no_forbidden_literal():
     for item in json.loads(text)["checks"]["check_repo_scope"]["items"]:
         assert "::FORBIDDEN_CONTENT[" in item or "::FORBIDDEN[" in item
 
+
+def test_pytest_missing_is_a_clear_collection_error(monkeypatch):
+    monkeypatch.setattr(
+        bd.subprocess, "run",
+        fake_run(1, "", "/usr/bin/python3: No module named pytest\n"),
+    )
+    with pytest.raises(bd.CollectionError, match=r"pytest が見つかりません\(pip install pytest\)"):
+        bd.collect_skill_validation()

@@ -11,6 +11,8 @@
     python3 scripts/experience_log.py note "<text>"                               # 1,000文字で切る
 
 保存先: .claude/experience/YYYY-MM/session-<session_id>.jsonl(Git にコミットする)
+      本体が commit 済み(git 管理下)なら、続きは session-<session_id>.part<N>.jsonl(未追跡の最初の N)へ書く。
+      commit 済みのファイルに追記して作業ツリーを汚さない(checkout / rebase を止めない)ため。
 失敗は作業を止めず、必ず _audit.log に残し、hook では systemMessage で警告する。
 """
 from __future__ import annotations
@@ -32,13 +34,16 @@ from wikiskill_common import (  # noqa: E402
     LOCAL_DIR,
     audit,
     audit_if_slow,
+    current_branch,
     disabled,
     emit,
+    group_session_files,
     iso,
     project_dir,
     read_hook_input,
     session_id_of,
     utc_now,
+    valid_program_name,
 )
 
 Event = dict
@@ -108,14 +113,61 @@ def _safe_id(session_id: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]", "_", str(session_id)) or "unknown"
 
 
+_TRACKED: set[str] = set()  # git 管理下と分かったパス(1プロセス内で使い回す。未追跡の結果は覚えない)
+
+
+def _is_tracked(root: Path, path: Path) -> bool:
+    """`git ls-files --error-unmatch <path>` が exit 0 なら True。git が使えなければ False(本体へ書く)。"""
+    key = str(path)
+    if key in _TRACKED:
+        return True
+    try:
+        rel = Path(path).resolve().relative_to(Path(root).resolve()).as_posix()
+        r = subprocess.run(
+            ["git", "ls-files", "--error-unmatch", "--", rel], cwd=str(root),
+            capture_output=True, text=True, errors="replace", timeout=5,
+        )
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return False
+    if r.returncode == 0:
+        _TRACKED.add(key)
+        return True
+    return False
+
+
+def _base_file(root: Path, session_id: str, ts: datetime) -> Path:
+    """セッションの本体ファイル(既にあればその月、無ければ ts の月)。"""
+    return _find_session_file(root, session_id) or (
+        Path(root) / EXPERIENCE_DIR / ts.strftime("%Y-%m") / f"session-{_safe_id(session_id)}.jsonl"
+    )
+
+
 def session_file(root: Path, session_id: str, ts: datetime) -> Path:
-    return Path(root) / EXPERIENCE_DIR / ts.strftime("%Y-%m") / f"session-{_safe_id(session_id)}.jsonl"
+    """追記先。本体が git 管理下なら、同じフォルダの未追跡の最初の session-<sid>.part<N>.jsonl(N=1,2,…)。"""
+    base = _base_file(root, session_id, ts)
+    if not _is_tracked(root, base):
+        return base
+    n = 1
+    while True:
+        part = base.with_name(f"session-{_safe_id(session_id)}.part{n}.jsonl")
+        if not _is_tracked(root, part):
+            return part
+        n += 1
 
 
 def _find_session_file(root: Path, session_id: str) -> Path | None:
-    """月をまたいだセッションでも1ファイルに寄せるため、既存ファイルを探す。"""
+    """月をまたいだセッションでも1ファイルに寄せるため、既存の本体ファイルを探す。"""
     found = sorted((Path(root) / EXPERIENCE_DIR).glob(f"[0-9][0-9][0-9][0-9]-[0-9][0-9]/session-{_safe_id(session_id)}.jsonl"))
     return found[0] if found else None
+
+
+def session_files(root: Path, session_id: str) -> list[Path]:
+    """セッションのファイルを [本体, part1, part2, …] の順で(本体が無くても part だけ返す)。"""
+    sid = _safe_id(session_id)
+    month = "[0-9][0-9][0-9][0-9]-[0-9][0-9]"
+    base = Path(root) / EXPERIENCE_DIR
+    found = list(base.glob(f"{month}/session-{sid}.jsonl")) + list(base.glob(f"{month}/session-{sid}.part*.jsonl"))
+    return group_session_files(sorted(found)).get(sid, [])
 
 
 def _parse_ts(value) -> datetime:
@@ -131,7 +183,7 @@ def _base(root: Path | None, session_id: str, event: str) -> Event:
         repo, branch = "unknown", "unknown"
     else:
         repo = repo_slug(root)
-        branch = _git(root, "rev-parse", "--abbrev-ref", "HEAD") or "unknown"
+        branch = current_branch(lambda *a: _git(root, *a))
     return {
         "ts": iso(utc_now()),
         "session_id": session_id,
@@ -155,11 +207,13 @@ def note_event(session_id: str, text: str, root: Path | None = None) -> Event:
     return ev
 
 
-def _program_of(command) -> str:
-    """プログラム名だけ(basename・64文字まで)。
+def _program_of(command, root: Path | None = None) -> str:
+    """プログラム名だけ(basename)。記録してよい形でなければ "<unknown>"。
 
     shlex で分解し、先頭の VAR=値(引用符付きの値を含む)は丸ごと飛ばす。
-    分解できない/文字列でない場合は "<unknown>"(値の一部を残すより捨てる)。
+    絶対パスでプロジェクトの外を指すものは "<external>"(他リポのスクリプト名を残さない)。
+    名前は `^[A-Za-z0-9._+-]{1,32}$` だけを通す(鍵の断片・日本語の名前・記号入りは "<unknown>")。
+    分解できない/文字列でない場合も "<unknown>"(値の一部を残すより捨てる)。
     """
     if not isinstance(command, str):
         return _UNKNOWN
@@ -170,7 +224,11 @@ def _program_of(command) -> str:
     for tok in tokens:
         if _ENV_ASSIGN.match(tok):
             continue
-        return os.path.basename(tok.lstrip("("))[:64] or _UNKNOWN
+        tok = tok.lstrip("(")
+        if tok.startswith("/") and (root is None or sanitize_path(tok, root) == EXTERNAL):
+            return EXTERNAL
+        name = os.path.basename(tok)
+        return name if valid_program_name(name) else _UNKNOWN
     return _UNKNOWN
 
 
@@ -188,7 +246,7 @@ def build_tool_event(payload: dict, root: Path) -> Event | None:
         tin = {}
     if name == "Bash":
         ev = _base(root, session_id_of(payload), "tool")
-        ev.update({"tool": "Bash", "program": _program_of(tin.get("command", ""))})
+        ev.update({"tool": "Bash", "program": _program_of(tin.get("command", ""), root)})
         return ev
     if name in _FILE_TOOLS:
         ev = _base(root, session_id_of(payload), "tool")
@@ -210,9 +268,7 @@ def append_event(root: Path, event: Event) -> Path:
     """1行追記。失敗は audit() してから ExperienceWriteError として投げ直す。"""
     path = None
     try:
-        path = _find_session_file(root, event["session_id"]) or session_file(
-            root, event["session_id"], _parse_ts(event.get("ts"))
-        )
+        path = session_file(root, event["session_id"], _parse_ts(event.get("ts")))
         path.parent.mkdir(parents=True, exist_ok=True)
         line = json.dumps(event, ensure_ascii=False) + "\n"
         with _open_append(path) as f:
@@ -240,10 +296,17 @@ def _read_events(path: Path) -> list[Event]:
     return events
 
 
+def _read_session_events(root: Path, session_id: str) -> list[Event]:
+    """本体 + part ファイルを順に読み、1セッションのイベント列にする。"""
+    events: list[Event] = []
+    for path in session_files(root, session_id):
+        events.extend(_read_events(path))
+    return events
+
+
 def summarize_session(root: Path, session_id: str) -> Event:
-    """session の JSONL を集計した session_end イベントを返す(追記は呼び元)。"""
-    path = _find_session_file(root, session_id)
-    events = _read_events(path) if path else []
+    """session の JSONL(本体 + part)を集計した session_end イベントを返す(追記は呼び元)。"""
+    events = _read_session_events(root, session_id)
     start = next((e for e in events if e.get("event") == "session_start"), {})
     tools: dict[str, int] = {}
     skills: list[str] = []

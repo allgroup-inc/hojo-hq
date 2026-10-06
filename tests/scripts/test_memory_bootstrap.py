@@ -302,7 +302,7 @@ def test_experience_shows_three_newest_same_branch_public(kb):
 def test_broken_source_is_audited_and_others_still_shown(kb):
     (kb / "docs/失敗台帳.md").unlink()
     (kb / "docs/失敗台帳.md").mkdir()  # 読めない(ディレクトリ)
-    out = retrieve(kb, ["北極星", "マージ", "競合"])
+    out = retrieve(kb, ["北極星", "ボトルネック", "マージ", "競合"])
     assert "[D] 2026-08-10" in out
     fk = out.split("## 過去の失敗 [FK]")[1].split("\n## ")[0]
     assert "該当なし" in fk
@@ -451,6 +451,10 @@ def test_stage2_excludes_stage1_ids_before_ranking(kb):
     d = kb / ".claude/skills/domain-guide"
     d.mkdir(parents=True)
     (d / "SKILL.md").write_text("---\nname: domain-guide\ndescription: ドメイン移行の手順を案内する\n---\n", encoding="utf-8")
+    for i in range(17):  # 区分の25%を超える語は使わない(DF)ので、6件が25%以下になるよう関係のない Skill を足す
+        d = kb / f".claude/skills/filler-{i}"
+        d.mkdir(parents=True)
+        (d / "SKILL.md").write_text(f"---\nname: filler-{i}\ndescription: 関係のない手引き {i}\n---\n", encoding="utf-8")
     s1 = context_of(run_bootstrap(kb, "hook", "SessionStart", payload={"session_id": "J"}).stdout)
     assert s1.count("[Skill] lighthouse-check-") == 5  # 1区分5件まで(6件目は段1で出ていない)
     s2 = context_of(run_bootstrap(kb, "hook", "UserPromptSubmit",
@@ -851,3 +855,247 @@ def test_build_query_caps_units_at_40_keeping_branch_tokens(kb):
     assert len(words) == 40
     assert "lighthouse" in words and "css" in words  # ブランチ名の語は先頭なので必ず残る
     assert len(memory_bootstrap.query_units(terms)) == 40
+
+
+# ---------------------------------------------------------------- 最終修正波(全体レビュー後)
+
+def _fm_decision(kb, name, status="adopted", tags="[キャッシュ, 集計]", title="集計キャッシュの置き場所"):
+    md = FM_DECISION_MD.replace("status: adopted", f"status: {status}").replace(
+        "tags: [キャッシュ, 集計]", f"tags: {tags}").replace("title: 集計キャッシュの置き場所", f"title: {title}")
+    (kb / "docs" / name).write_text(md, encoding="utf-8")
+
+
+# --- B1: 採用以外の Decision の表示 / superseded・test タグは出さない
+
+def test_deferred_and_rejected_decisions_are_labeled(kb):
+    _fm_decision(kb, "議事_20261001_保留.md", status="deferred", title="集計キャッシュ保留案")
+    _fm_decision(kb, "議事_20261002_却下.md", status="rejected", title="集計キャッシュ却下案")
+    out = retrieve(kb, ["集計キャッシュ"])
+    held = next(l for l in out.splitlines() if "集計キャッシュ保留案" in l)
+    rejected = next(l for l in out.splitlines() if "集計キャッシュ却下案" in l)
+    assert held.startswith("- [D:保留] 2026-10-01 集計キャッシュ保留案")
+    assert rejected.startswith("- [D:却下] 2026-10-01 集計キャッシュ却下案")
+
+
+def test_adopted_and_legacy_decisions_keep_plain_label(kb):
+    _fm_decision(kb, "議事_20261001_採用.md")
+    out = retrieve(kb, ["集計キャッシュ", "北極星", "ボトルネック"])
+    assert "- [D] 2026-10-01 集計キャッシュの置き場所" in out
+    assert "- [D] 2026-08-10" in out  # frontmatter の無い過去の議事
+
+
+def test_superseded_and_test_tagged_decisions_are_skipped(kb):
+    _fm_decision(kb, "議事_20261001_置換済み.md", status="superseded", title="集計キャッシュ旧案")
+    _fm_decision(kb, "議事_20261002_試験.md", tags="[acceptance, test]", title="集計キャッシュ試験")
+    _fm_decision(kb, "議事_20261003_採用.md", title="集計キャッシュ採用案")
+    out = retrieve(kb, ["集計キャッシュ"])
+    assert "集計キャッシュ採用案" in out
+    assert "集計キャッシュ旧案" not in out and "集計キャッシュ試験" not in out
+
+
+def test_real_acceptance_sample_is_not_a_decision():
+    sample = "docs/wikiskill/受け入れ試験_議事サンプル.md"
+    assert (REPO_ROOT / sample).exists()
+    assert all(d["path"] != sample for d in load_decisions(REPO_ROOT))
+    assert not (REPO_ROOT / "docs/議事/議事_20261006_受け入れ試験.md").exists()
+
+
+# --- B3: 検索語の雑音
+
+def test_build_query_skips_experience_basenames_and_random_units(kb):
+    git(kb, "update-ref", "refs/remotes/origin/main", "HEAD")
+    git(kb, "checkout", "-q", "-b", "claude/superpowers-per-chat-3mbx56")
+    d = kb / ".claude/experience/2026-10"
+    d.mkdir(parents=True)
+    (d / "session-88fbbce6-5a12-50ce-b8f3-4f86e601e77f.jsonl").write_text("{}\n", encoding="utf-8")
+    (kb / "docs/phase1-notes.md").write_text("x", encoding="utf-8")
+    git(kb, "add", "-A")
+    git(kb, "commit", "-q", "-m", "chore: Experience 追記 7d9825cab")
+    words = _unit_words(build_query(kb))
+    assert "superpowers" in words and "phase1" in words
+    for noise in ("3mbx56", "88fbbce6", "4f86e601e77f", "jsonl", "session", "7d9825cab"):
+        assert noise not in words, noise
+
+
+def test_query_units_drop_hex_and_random_suffix_but_keep_words():
+    words = _unit_words(["3mbx56 88fbbce6 1d3cd976d937 phase1 lighthouse decade css 7d9825cab"])
+    assert words == ["phase1", "lighthouse", "decade", "css"]
+
+
+def test_title_bonus_orders_but_does_not_reach_min_score(kb):
+    # 2語の検索で、題と本文に1語(キャッシュ)しか当たらない → 以前は 1 + 見出し加点 1 = 2 で通っていた
+    _fm_decision(kb, "議事_20261001_採用.md")
+    assert score(["キャッシュ", "zzzz"], "集計キャッシュの置き場所 本文", title="集計キャッシュの置き場所") == 2
+    assert "集計キャッシュの置き場所" not in retrieve(kb, ["キャッシュ", "zzzz"])
+    assert "集計キャッシュの置き場所" in retrieve(kb, ["キャッシュ", "再計算"])
+
+
+def test_skill_name_match_still_counts_as_one_word(kb):
+    # Skill の名前(識別子)に語がそのまま入っていれば、説明の一致と合わせて2語として数える
+    d = kb / ".claude/skills/cache-tool"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text("---\nname: cache-tool\ndescription: cache の点検\n---\n", encoding="utf-8")
+    assert "[Skill] cache-tool" in retrieve(kb, ["cache", "zzzz"])
+
+
+def test_common_unit_is_ignored_per_section(kb):
+    # Skill 区分の 5/6 に「確認」がある → この区分では「確認」を照合に使わない
+    for i in range(4):
+        d = kb / f".claude/skills/kakunin-{i}"
+        d.mkdir(parents=True)
+        (d / "SKILL.md").write_text(f"---\nname: kakunin-{i}\ndescription: 手順{i}の確認をする\n---\n",
+                                    encoding="utf-8")
+    d = kb / ".claude/skills/merge-check"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text("---\nname: merge-check\ndescription: マージの確認をする\n---\n", encoding="utf-8")
+    # 「確認」を数えれば merge-check は 2語(マージ・確認)で通るが、ありふれた語を外すと1語
+    out = retrieve(kb, ["確認", "マージ", "競合"])
+    assert "[Skill] merge-check" not in out and "[Skill] kakunin-" not in out
+    assert "[FK-002]" in out  # 失敗台帳の区分(1件)では「確認」も効く
+
+
+def test_df_filter_needs_enough_entries(kb):
+    # 1区分1件(kb の失敗台帳)では、当たった語が 100% でも「ありふれた語」と見なさない
+    assert "[FK-002]" in retrieve(kb, ["マージ", "競合"])
+
+
+def _stage2_without_stage1_exclusion(kb, monkeypatch, prompt):
+    # 段1で表示した項目は段2で除かれる。検索語の組み立てだけを見るため、段1の表示を空にする
+    monkeypatch.setattr(memory_bootstrap, "_stage1_render", lambda root, sources, terms: (None, set()))
+    return memory_bootstrap._stage2(kb, prompt) or ""
+
+
+def test_stage2_uses_prompt_and_branch_tokens_only(kb, monkeypatch):
+    _commit(kb, "docs: 北極星ボトルネックの裁定")
+    out = _stage2_without_stage1_exclusion(kb, monkeypatch, "マージで競合したときの手順を確認したい")
+    assert "[FK-002]" in out
+    assert DECISION not in out  # commit 件名だけに当たる議事は段2では出さない
+    assert out.splitlines()[1] == "検索語: 最初の指示 + lighthouse, css"
+
+
+def test_stage2_falls_back_to_stage1_terms_for_short_prompt(kb, monkeypatch):
+    _commit(kb, "docs: 北極星ボトルネックの裁定")
+    out = _stage2_without_stage1_exclusion(kb, monkeypatch, "はい")  # 指示から語が2つ取れない
+    assert DECISION in out
+    assert "北極星" in out.splitlines()[1]  # 段1の検索語を使っている
+
+
+# --- B3: 本物の文書で固定(受け入れ試験の指示 / Lighthouse / Step 6)
+
+ACCEPTANCE_PROMPT = "マージで競合したときの手順を確認したい"
+NOISY_DECISIONS = (
+    "docs/議事_20260912_経費精算の着工方針.md",
+    "docs/議事_20260828_独自ドメインmoradou.md",
+    "docs/議事_20260923_独自ドメイン配信範囲.md",
+)
+
+
+def test_real_acceptance_prompt_returns_merge_failure_without_noise(realcopy):
+    out = memory_bootstrap._stage2(realcopy, ACCEPTANCE_PROMPT) or ""
+    assert "- [FK-002]" in out
+    for path in NOISY_DECISIONS:
+        assert path not in out, path
+    assert "経費精算" not in out and "moradou" not in out
+
+
+def test_real_lighthouse_query_keeps_triage_skill_on_full_corpus(realcopy):
+    out = retrieve(realcopy, ["Lighthouse", "パフォーマンス", "CSS", "見出し"])
+    assert "[Skill] hojo-lighthouse-triage" in out
+
+
+def test_real_step6_query_keeps_update_skills_line_on_full_corpus(realcopy):
+    out = retrieve(realcopy, ["スキル改善", "13リポ", "配布"])
+    assert "`scripts/update-skills.sh` は現状スキルのみ同期" in out
+
+
+# --- B6 / B2: クラウド(detached HEAD)の [Exp] / part ファイル / 並び順
+
+def _write_lines(kb, name, rows, month="2026-10"):
+    d = kb / ".claude/experience" / month
+    d.mkdir(parents=True, exist_ok=True)
+    with open(d / name, "a", encoding="utf-8") as f:
+        for row in rows:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    return d / name
+
+
+def _ev(sid, ts, event, branch=BRANCH, **kw):
+    return {"ts": ts, "session_id": sid, "event": event, "repo": "allgroup-inc/hojo-hq",
+            "visibility": "public", "branch": branch, **kw}
+
+
+def test_experience_without_session_end_uses_latest_line(kb):
+    _write_lines(kb, "session-A.jsonl", [
+        _ev("A", "2026-10-06T20:40:13Z", "session_start"),
+        _ev("A", "2026-10-06T20:41:05Z", "note", text="受け入れ試験 A 完了: 締切アラート案内時期の決定を記録した" + "。" * 40),
+        _ev("A", "2026-10-06T20:43:17Z", "tool", tool="Bash", program="git"),
+    ])
+    (line,) = [s["line"] for s in memory_bootstrap._experience(kb)]
+    note60 = ("受け入れ試験 A 完了: 締切アラート案内時期の決定を記録した" + "。" * 40)[:60]
+    assert line == f"- [Exp] 2026-10-06 session-A: events 3 / note: {note60}"
+
+
+def test_experience_without_note_omits_note_part(kb):
+    _write_lines(kb, "session-B.jsonl", [_ev("B", "2026-10-06T01:00:00Z", "session_start")])
+    (line,) = [s["line"] for s in memory_bootstrap._experience(kb)]
+    assert line == "- [Exp] 2026-10-06 session-B: events 1"
+
+
+def test_experience_reads_base_and_parts_as_one_session(kb):
+    _write_lines(kb, "session-P.jsonl", [_ev("P", "2026-10-06T01:00:00Z", "session_start"),
+                                        _ev("P", "2026-10-06T01:01:00Z", "note", text="古いメモ")])
+    _write_lines(kb, "session-P.part1.jsonl", [_ev("P", "2026-10-06T02:00:00Z", "note", text="新しいメモ"),
+                                              _ev("P", "2026-10-06T02:01:00Z", "tool", tool="Bash", program="ls")])
+    (line,) = [s["line"] for s in memory_bootstrap._experience(kb)]
+    assert line == "- [Exp] 2026-10-06 session-P: events 4 / note: 新しいメモ"
+
+
+def test_experience_session_end_in_part_file_is_used(kb):
+    _write_lines(kb, "session-Q.jsonl", [_ev("Q", "2026-10-06T01:00:00Z", "session_start")])
+    write_session_end(kb, "Q", "2026-10-06T03:00:00Z")  # 本体に追記されるので、part へ移す
+    base = kb / ".claude/experience/2026-10/session-Q.jsonl"
+    start, end = base.read_text(encoding="utf-8").splitlines()
+    base.write_text(start + "\n", encoding="utf-8")
+    (base.parent / "session-Q.part1.jsonl").write_text(end + "\n", encoding="utf-8")
+    (line,) = [s["line"] for s in memory_bootstrap._experience(kb)]
+    assert line == "- [Exp] 2026-10-06 session-Q: commits 1 / skills: writing-plans"
+
+
+def test_experience_orders_by_first_line_ts_not_mtime(kb):
+    old = _write_lines(kb, "session-old.jsonl", [_ev("old", "2026-10-01T00:00:00Z", "session_start")])
+    new = _write_lines(kb, "session-new.jsonl", [_ev("new", "2026-10-05T00:00:00Z", "session_start")])
+    os.utime(new, (1_000_000, 1_000_000))   # 新しいセッションのファイルの方が更新時刻は古い
+    os.utime(old, (2_000_000, 2_000_000))
+    assert [s["title"] for s in memory_bootstrap._experience(kb)] == ["session-new", "session-old"]
+
+
+def _detach_with_origin_refs(kb, *names):
+    for n in names:
+        git(kb, "update-ref", f"refs/remotes/origin/{n}", "HEAD")
+    git(kb, "checkout", "-q", "--detach", "HEAD")
+
+
+def test_experience_on_detached_head_uses_the_single_origin_branch(kb):
+    _detach_with_origin_refs(kb, BRANCH)
+    write_session_end(kb, "mine", "2026-10-05T01:00:00Z")
+    write_session_end(kb, "theirs", "2026-10-05T02:00:00Z", branch="claude/other")
+    titles = [s["title"] for s in memory_bootstrap._experience(kb)]
+    assert titles == ["session-mine"]
+    assert "lighthouse" in _unit_words(build_query(kb))  # ブランチ名の語も detached で取れる
+
+
+def test_experience_on_ambiguous_detached_head_does_not_filter_by_branch(kb):
+    _detach_with_origin_refs(kb, BRANCH, "claude/other")
+    write_session_end(kb, "mine", "2026-10-05T01:00:00Z")
+    write_session_end(kb, "theirs", "2026-10-05T02:00:00Z", branch="claude/other")
+    titles = [s["title"] for s in memory_bootstrap._experience(kb)]
+    assert titles == ["session-theirs", "session-mine"]
+
+
+def test_experience_hides_the_current_session(kb):
+    write_session_end(kb, "other", "2026-10-05T01:00:00Z")
+    _write_lines(kb, "session-me.jsonl", [_ev("me", "2026-10-06T01:00:00Z", "session_start")])
+    (kb / ".claude/experience/_local").mkdir(parents=True)
+    (kb / ".claude/experience/_local/current_session").write_text("me\n", encoding="utf-8")
+    assert [s["title"] for s in memory_bootstrap._experience(kb)] == ["session-other"]
+

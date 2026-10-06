@@ -24,7 +24,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from wikiskill_common import EXPERIENCE_DIR, audit, project_dir  # noqa: E402
+from wikiskill_common import EXPERIENCE_DIR, audit, project_dir, session_file_key  # noqa: E402
 
 MB = 1024 * 1024
 ARCHIVE_DIR = "archive"
@@ -94,8 +94,13 @@ def archivable_months(root: Path, today: date, older_than_days: int = 180) -> li
     return out
 
 
+def _session_order(files) -> list[Path]:
+    """セッションごとに 本体 → part1 → part2 … の順(1セッションのファイルを続けて、番号順に並べる)。"""
+    return sorted(files, key=lambda p: session_file_key(p.name) or (p.name, 0))
+
+
 def _month_bytes(files: list[Path]) -> bytes:
-    """ファイル名順に連結。末尾改行のないファイルには改行を1つ足す(行数は変わらない)。"""
+    """(_session_order の順に)連結。末尾改行のないファイルには改行を1つ足す(行数は変わらない)。"""
     return b"".join(_normalized(f) for f in files)
 
 
@@ -133,7 +138,7 @@ def _plan_month(root: Path, month_dir: Path) -> tuple[str, str, list[Path]]:
     action: "skip"(固めるものがない)/ "archive"(新規に固める)/
             "resume"(gz は既に完全。前回の削除失敗の後始末だけ行う)/ "refuse"(見送り。detail に理由)
     """
-    files = sorted(month_dir.glob("session-*.jsonl"))
+    files = _session_order(month_dir.glob("session-*.jsonl"))
     if not files:
         return "skip", "session-*.jsonl がない", files
     expected = {p.name for p in files}

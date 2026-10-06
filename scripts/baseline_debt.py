@@ -127,6 +127,8 @@ def collect_pytest_failures(label, targets):
             f"{label} が {SKILL_VALIDATION_TIMEOUT} 秒以内に終わりませんでした"
         ) from None
     # 0=全合格 / 1=テスト失敗。それ以外(収集エラー=2、テスト無し=5 等)は「失敗0件」と誤読しないよう止める。
+    if "No module named pytest" in (proc.stderr or ""):
+        raise CollectionError("pytest が見つかりません(pip install pytest)")
     if proc.returncode not in (0, 1):
         raise CollectionError(
             f"{label} を実行できませんでした(exit {proc.returncode}):\n{proc.stdout}{proc.stderr}"
