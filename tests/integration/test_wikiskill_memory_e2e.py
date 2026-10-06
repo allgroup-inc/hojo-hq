@@ -78,13 +78,17 @@ def _real_ledger_lines():
     """実際の失敗台帳から、ヘッダ行・区切り行・FK-002 行をそのまま取る。"""
     lines = (REPO / "docs" / "失敗台帳.md").read_text(encoding="utf-8").splitlines()
     header = next(i for i, ln in enumerate(lines) if ln.startswith("| ID | 発生日"))
-    fk002 = next(ln for ln in lines if ln.startswith("| FK-002 |"))
+    fk002 = next((ln for ln in lines if ln.startswith("| FK-002 |")), None)
+    if fk002 is None:
+        pytest.fail("FK-002 row not found in docs/失敗台帳.md")
     return lines[header], lines[header + 1], fk002
 
 
 def git(cwd, *args):
+    # 開発者の gpgsign 設定に依存しない(fixture の commit は常に署名なし)
     return subprocess.run(
-        ["git", *args], cwd=cwd, check=True, capture_output=True, text=True
+        ["git", "-c", "commit.gpgsign=false", *args],
+        cwd=cwd, check=True, capture_output=True, text=True,
     ).stdout
 
 
@@ -97,7 +101,11 @@ def write(world, rel, text):
 
 def hook(world, event, sid, **payload):
     """wikiskill-hook.sh を Claude Code と同じ stdin JSON で呼ぶ。"""
-    env = {k: v for k, v in os.environ.items() if k != "HOJO_MEMORY_OFF"}
+    # 親セッション(Claude Code / git)由来の環境変数を持ち込まない
+    env = {
+        k: v for k, v in os.environ.items()
+        if not k.startswith(("CLAUDE_", "GIT_")) and k != "HOJO_MEMORY_OFF"
+    }
     env["CLAUDE_PROJECT_DIR"] = str(world)
     data = {"session_id": sid, "cwd": str(world), "hook_event_name": event, **payload}
     return subprocess.run(
@@ -129,6 +137,7 @@ def _build_world(root, origin_url):
     write(root, "docs/失敗台帳.md", "# 失敗台帳\n\n## 台帳\n\n" + "\n".join([header, sep, fk002]) + "\n")
     write(root, "docs/決裁キュー.md", "# 決裁キュー\n\n- 該当なし\n")
     write(root, ".claude/skills/writing-plans-hojo/SKILL.md", SKILL_MD)
+    # settings.json は複製するだけ(ラッパを直接呼ぶので hook 登録そのものは実行されない)。.gitignore は _local を除外するために必要
     for rel in (".claude/settings.json", ".gitignore"):
         write(root, rel, (REPO / rel).read_text(encoding="utf-8"))
     for name in SCRIPT_NAMES:
@@ -184,6 +193,7 @@ def test_session_a_then_fresh_session_b_restores_decision_and_why(world):
     _run_session_a(world)
     a = read_session(world, "A")
     assert '"event": "session_end"' in a and "締切アラート時期の決定" in a
+    assert '"visibility": "public"' in a and '"branch": "claude/e2e-memory"' in a
 
     # ---- Session B(完全に別の session_id・マーカー無し)----
     r1 = hook(world, "SessionStart", sid="B", source="startup")
@@ -192,14 +202,21 @@ def test_session_a_then_fresh_session_b_restores_decision_and_why(world):
     assert "なぜ: 締切7日前では準備が間に合わない" in ctx               # 「なぜ」が復元される
     assert "ウタガイ: 30日前は早すぎて忘れられる" in ctx               # 反対理由が復元される
     assert "見直し: 2027-04-04" in ctx                                  # 180日既定
-    assert "[Exp]" in ctx and "session-A" in ctx and "writing-plans-hojo" in ctx  # Experience(低信頼)
+    # Experience(低信頼)。見出しや検索語行ではなく項目行で判定する
+    assert "- [Exp] " in ctx
+    assert "session-A: commits 1 / skills: writing-plans-hojo" in ctx
 
     r2 = hook(world, "UserPromptSubmit", sid="B", prompt="マージで競合したときの手順を確認したい")
     ctx2 = _context(r2)
-    assert "[FK-002]" in ctx2 and "[再発防止]" in ctx2                  # 失敗・再発防止が必要に応じて復元される
+    assert "[FK-002]" in ctx2                                           # 失敗が必要に応じて復元される
+    # 再発防止は見出し(常に出る)ではなく項目行で判定する
+    assert "- [再発防止] " in ctx2
+    assert "マージで競合したら一覧を確認してから解決する" in ctx2
     # 段1の項目を再掲しない。見出しの検索語には議事ファイル名が載るので、項目行(出典ラベル付き)で判定する
     assert "[D] 2026-10-06 E2Eテスト決定" not in ctx2
     assert "なぜ: 締切7日前" not in ctx2 and "- [Exp]" not in ctx2
+    assert "→ docs/議事_20261006_E2Eテスト決定.md" not in ctx2
+    assert "ウタガイ: 30日前" not in ctx2
 
     r3 = hook(world, "UserPromptSubmit", sid="B", prompt="次")
     assert r3.stdout.strip() == "{}"                                    # 段2は1セッション1回
@@ -210,10 +227,18 @@ def test_session_a_then_fresh_session_b_restores_decision_and_why(world):
 
 
 def test_memory_off_disables_everything_without_breaking_session(world):
+    exp = world / ".claude/experience"
+    audit = exp / "_audit.log"
+    audit_before = audit.stat().st_size if audit.exists() else None
     (world / ".claude/memory.off").touch()
     r = hook(world, "SessionStart", sid="C", source="startup")
     assert r.returncode == 0 and r.stdout.strip() == "{}"
-    assert not list((world / ".claude/experience").glob("*/session-C.jsonl"))
+    assert not list(exp.glob("*/session-C.jsonl"))
+    # _local のマーカー(current-session / C.ended など)も作られない
+    assert not [p for p in (exp / "_local").rglob("*") if p.is_file()]
+    # 監査ログも作られない・伸びない
+    audit_after = audit.stat().st_size if audit.exists() else None
+    assert audit_after == audit_before
 
 
 def test_private_repo_session_never_marks_public(world_private):   # origin=glow-docs-private
