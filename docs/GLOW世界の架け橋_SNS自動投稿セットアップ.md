@@ -5,8 +5,8 @@
 ## しくみ(全体像)
 | もの | 場所 | 中身 |
 |---|---|---|
-| 投稿素材(32本) | `posts/glow/<id>.jpg` / `.md` | 画像1080×1350とキャプション。数字は提案資料で照合済みのものだけ |
-| 投稿の順番 | `posts/glow/order.json` | 最後まで出したら先頭に戻る(約11週で1周) |
+| 投稿素材(33本・第2版) | `posts/glow/<id>.jpg` / `.md` | 画像1080×1350とキャプション。サイトの文章を写さず、SNS向けのシリーズで構成: 海外販路クイズ・英語で言うと?・やりがちNG→OK・海外販路ことば辞典・比べてみた・世界で通用した話。数字は提案資料で照合済みのものだけ |
+| 投稿の順番 | `posts/glow/order.json` | 最後まで出したら先頭に戻る(約11週で1周)。商品写真は Gemini で作った高解像度版(`posts/glow/src/hi/`・workflow glow-gen-images) |
 | 素材の作成 | `scripts/glow_sns_build.py` | 手元で実行(フォントが必要)。`--restamp` で出荷ゲートの日付だけ更新 |
 | 投稿 | `scripts/glow_sns_post.py` + `.github/workflows/glow-sns-post.yml` | **月・水・金 12:05** にFacebookとInstagramへ1本ずつ。結果を小柳さんのLINEへ通知 |
 | どこまで出したか | `data/glow_sns_state.json` | 二重投稿の防止。片方だけ失敗したら、次の回にその片方だけ出し直す |

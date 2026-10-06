@@ -1,11 +1,16 @@
-# GLOW SNS投稿: about
+# GLOW SNS投稿: en-soba
 
 ## キャプション
-世界の架け橋を運営する株式会社GLOWの代表、嶺井忍です。
+英語で言うと?
 
-沖縄振興開発金融公庫に34年。創業のとき、苦しいとき、次の一歩を踏み出すとき、いつも沖縄の経営者のとなりで、資金のご相談に向き合ってきました。
+沖縄そば → Okinawa Soba
 
-その経験を、今度はみなさんの世界への挑戦に生かします。
+例: Thick wheat noodles in a light broth, topped with braised pork.
+(あっさりしたスープに太めの小麦麺、煮込んだ豚肉をのせて)
+
+乾麺やスープの素など、日持ちする形にすると海外へ届けやすくなります。どの形で出すかも、いっしょに考えます。
+
+※写真はAIで作ったイメージです。
 
 ▶ くわしく(世界の架け橋のサイト)
 https://glow-okinawa.jp/?utm_source=facebook&utm_medium=social&utm_campaign=glow_sns
