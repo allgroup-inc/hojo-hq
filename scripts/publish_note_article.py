@@ -80,6 +80,9 @@ async def login_to_note(page, email: str, password: str) -> bool:
     try:
         await page.goto(NOTE_LOGIN_URL, wait_until="networkidle")
 
+        # 入力フィールドが出現するまで待つ
+        await page.wait_for_selector('input[name="login"]', timeout=10000)
+
         # メールアドレス入力
         await page.fill('input[name="login"]', email)
         await page.fill('input[name="password"]', password)
