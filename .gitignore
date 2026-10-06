@@ -58,3 +58,9 @@ demo_out/
 # IG automation
 data/ig_posts_mikata_draft.json
 data/subsidies.json.backup
+
+# WikiSkill Phase 1: 一時マーカー・監査ログ・停止スイッチ・ロック(原本 .claude/experience/*/*.jsonl はコミットする)
+.claude/experience/_local/
+.claude/experience/_audit.log
+.claude/memory.off
+.claude/locks/
