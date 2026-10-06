@@ -3760,5 +3760,69 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-06",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 1
+  },
+  "items": [
+   {
+    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(16次公募)_廃業・再チャレンジ枠",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003N1RbUAK",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和７年度(補正予算) ゼロエミッション船等の建造促進事業 2次公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdnJMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度 脱炭素成長型経済構造移行推進対策費補助金（自律型資源 循環システム強靱化促進事業）（事前着手届出）【二次公募】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003N8hVUAS",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "［第六回以降］事業再構築補助金（共同申請者）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W2x000007Cos5EAC",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "沖縄ものづくり製品開発・技術導入支援事業",
+    "url": "https://okinawa-ric.jp/service/post-18.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": [],
+    "amount_in_source": "1,200万円以内(初年度) 1,200万円以内(翌年度)"
+   }
+  ]
  }
 ]
