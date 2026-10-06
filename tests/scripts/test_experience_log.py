@@ -4,6 +4,7 @@
 hojo-hq 以外の remote では必ず private になること、書込失敗が silent にならないことを固定する。
 """
 import io
+import itertools
 import json
 import os
 import re
@@ -383,11 +384,11 @@ def test_slow_hook_is_audited_without_system_message(cli, monkeypatch):
 
 
 def test_slow_audit_format_with_forced_clock(cli, monkeypatch):
-    calls = []
+    ticks = itertools.count()
 
-    def fake_clock():
-        calls.append(1)
-        return 0.0 if len(calls) == 1 else 0.612
+    def fake_clock():  # 呼び出し回数に依らない: 最初だけ 0、以降は 0.612 秒から単調増加(1回ごとに +1µs)
+        n = next(ticks)
+        return 0.0 if n == 0 else 0.612 + n * 1e-6
 
     monkeypatch.setattr(time, "perf_counter", fake_clock)
     rc, out, _ = cli("hook", "PostToolUse",

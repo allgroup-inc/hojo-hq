@@ -4,6 +4,7 @@
 だけを、信頼階層順・出典ラベル付き・文字数上限内で渡すことを固定する。
 root の外は読まない / private の Experience は出さない / 段2 はセッションに1回だけ。
 """
+import itertools
 import json
 import os
 import re
@@ -633,11 +634,11 @@ def test_slow_hook_audits_without_system_message(kb, monkeypatch, capsys):
 
 def test_slow_audit_format_with_forced_clock(kb, monkeypatch, capsys):
     _hook_env(kb, monkeypatch, {"session_id": "S1"})
-    calls = []
+    ticks = itertools.count()
 
-    def fake_clock():
-        calls.append(1)
-        return 0.0 if len(calls) == 1 else 0.612
+    def fake_clock():  # 呼び出し回数に依らない: 最初だけ 0、以降は 0.612 秒から単調増加(1回ごとに +1µs)
+        n = next(ticks)
+        return 0.0 if n == 0 else 0.612 + n * 1e-6
 
     monkeypatch.setattr(time, "perf_counter", fake_clock)
     memory_bootstrap.main(["memory_bootstrap.py", "hook", "SessionStart"])
@@ -683,40 +684,108 @@ def test_decision_line_short_decision_unchanged():
                     "ウタガイ: ウタガイの本文 / ベッカイ: ベッカイの本文 / 見直し: 2027-04-01 → docs/議事_20261001_x.md")
 
 
-def test_decision_line_keeps_utagai_and_review_when_long():
-    d = _decision(outcome="裁" * 400, why="理" * 400, premises="前" * 400, utagai="疑" * 150,
-                  bekkai="別" * 400)
-    line = memory_bootstrap._decision_line(d, "長い議事")
-    assert len(line) <= 700
-    assert "ウタガイ:" in line and line.count("疑") >= 80
-    assert "見直し: 2027-04-01" in line
-    assert line.endswith(" → docs/議事_20261001_x.md")
-    assert "裁定:" in line
+_ALL = {"裁定", "なぜ", "前提", "ウタガイ", "ベッカイ", "見直し"}
 
 
-def test_decision_line_per_field_cap_is_120_with_ellipsis():
-    line = memory_bootstrap._decision_line(_decision(outcome="あ" * 130), "議事")
-    field = line.split("裁定: ")[1].split(" / ")[0]
-    assert len(field) == 120 and field.endswith("…")
+def _long_decision(path_len):
+    """各欄が120字を超える議事。path の長さで、どの段階まで縮める/落とすかを決定的に変える。"""
+    assert path_len >= 12
+    return _decision(outcome="裁" * 200, why="理" * 200, premises="前" * 200, utagai="疑" * 200,
+                     bekkai="別" * 200, path="docs/" + "p" * (path_len - 8) + ".md")
 
 
-def test_decision_line_drop_order_premises_then_why_then_bekkai():
-    # 縮めるだけでは収まらない量: 欄を落としても ウタガイ・見直し・path は残る
-    d = _decision(outcome="裁" * 120, why="理" * 120, premises="前" * 120, utagai="疑" * 120,
-                  bekkai="別" * 120, path="docs/" + "p" * 300 + ".md")
+def _labels(line):
+    return {m for m in re.findall(r"(裁定|なぜ|前提|ウタガイ|ベッカイ|見直し): ", line)}
+
+
+def _field(line, label):
+    return line.split(f"{label}: ", 1)[1].split(" / ", 1)[0]
+
+
+# 長さの内訳(題「議事」): 先頭22 + 欄(「ラベル: 」込み 裁定/なぜ/前提=124, ウタガイ/ベッカイ=126, 見直し=15) + 区切り" / "×欄数-1
+#   + 末尾 " → " 3字 + path。全欄120字だと 679 + path。欄を60字へ縮めると1欄ごとに 60 減る。
+#   前提を落とすと 67、なぜを落とすと 67、ベッカイを落とすと 129 減る。
+
+def test_decision_line_stage0_nothing_trimmed_when_it_fits():
+    line = memory_bootstrap._decision_line(_long_decision(20), "議事")  # 679 + 20 = 699 <= 700
+    assert len(line) == 699
+    assert _labels(line) == _ALL
+    for label in ("裁定", "なぜ", "前提"):
+        assert len(_field(line, label)) == 120 and _field(line, label).endswith("…")
+
+
+def test_decision_line_stage1_shrinks_premises_why_outcome_to_60():
+    d = _long_decision(170)  # 849 → 前提60で789 → なぜ60で729 → 裁定60で669: 3欄とも縮めて初めて収まる
     line = memory_bootstrap._decision_line(d, "議事")
-    assert len(line) <= 700
-    assert "ウタガイ:" in line and "見直し:" in line and line.endswith("→ " + d["path"])
-    assert "前提:" not in line  # 前提が最初に落ちる
-    assert "裁定:" in line
+    assert len(line) == 669 and len(line) <= 700
+    assert _labels(line) == _ALL  # 欄はまだ1つも落ちない
+    for label in ("裁定", "なぜ", "前提"):
+        text = _field(line, label)
+        assert len(text) == 60 and text.endswith("…"), label
+    assert len(_field(line, "ウタガイ")) == 120 and len(_field(line, "ベッカイ")) == 120
+    assert line.endswith(" → " + d["path"])
 
 
-def test_decision_line_utagai_floor_is_80_chars_in_worst_case():
-    d = _decision(outcome="裁" * 120, why="理" * 120, premises="前" * 120, utagai="疑" * 120,
-                  bekkai="別" * 120, path="docs/" + "p" * 480 + ".md")
+def test_decision_line_stage2_drops_premises_first():
+    d = _long_decision(230)  # 縮めても 729 > 700 → 前提を落として 662
     line = memory_bootstrap._decision_line(d, "議事")
-    assert "ウタガイ:" in line and line.count("疑") >= 79  # 80字(末尾は …)
-    assert "見直し:" in line and line.endswith(d["path"])
+    assert len(line) == 662
+    assert _labels(line) == _ALL - {"前提"}
+    assert len(_field(line, "裁定")) == 60 and len(_field(line, "なぜ")) == 60
+    assert line.endswith(" → " + d["path"])
+
+
+def test_decision_line_stage3_then_drops_why():
+    d = _long_decision(300)  # 前提を落としても 732 → なぜも落として 665
+    line = memory_bootstrap._decision_line(d, "議事")
+    assert len(line) == 665
+    assert _labels(line) == _ALL - {"前提", "なぜ"}
+    assert line.endswith(" → " + d["path"])
+
+
+def test_decision_line_stage4_then_drops_bekkai():
+    d = _long_decision(400)  # なぜを落としても 765 → ベッカイも落として 636
+    line = memory_bootstrap._decision_line(d, "議事")
+    assert len(line) == 636
+    assert _labels(line) == {"裁定", "ウタガイ", "見直し"}
+    assert len(_field(line, "ウタガイ")) == 120  # ウタガイはまだ削らない
+    assert line.endswith(" → " + d["path"])
+
+
+def test_decision_line_stage5_cuts_utagai_only_as_much_as_needed():
+    d = _long_decision(480)  # 欄を落としきっても 716 → ウタガイを16字だけ削って 700
+    line = memory_bootstrap._decision_line(d, "議事")
+    assert len(line) == 700
+    assert _labels(line) == {"裁定", "ウタガイ", "見直し"}
+    assert len(_field(line, "ウタガイ")) == 104 and _field(line, "ウタガイ").endswith("…")
+    assert len(_field(line, "裁定")) == 60
+    assert line.endswith(" → " + d["path"])
+
+
+def test_decision_line_floor_utagai_is_exactly_80_then_outcome_gives_way():
+    d = _long_decision(530)  # ウタガイを床の80字まで削っても 726 → 裁定をさらに26字削って 700
+    line = memory_bootstrap._decision_line(d, "議事")
+    assert len(line) == 700
+    assert _labels(line) == {"裁定", "ウタガイ", "見直し"}
+    utagai = _field(line, "ウタガイ")
+    assert len(utagai) == 80 and utagai.endswith("…")
+    assert len(_field(line, "裁定")) == 34
+    assert "見直し: 2027-04-01" in line and line.endswith(" → " + d["path"])
+
+
+def test_decision_line_never_drops_utagai_review_or_path_even_when_oversized():
+    d = _long_decision(900)  # どうやっても 700 に収まらない病的な path
+    line = memory_bootstrap._decision_line(d, "議事")
+    assert {"ウタガイ", "見直し"} <= _labels(line)
+    assert len(_field(line, "ウタガイ")) == 80
+    assert line.endswith(" → " + d["path"])
+
+
+def test_decision_line_expired_label_survives_trimming():
+    d = _long_decision(400)
+    d["review_status"] = "expired"
+    line = memory_bootstrap._decision_line(d, "議事")
+    assert "見直し: 2027-04-01 **(期限切れ・再議論対象)**" in line and len(line) <= 700
 
 
 # --- 段1の検索語(branch-local commit)
