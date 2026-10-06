@@ -61,6 +61,7 @@ ALLOWED = {
     "docs/移設済み_アポ管理と営業指名_2026-08-22.md",
     "scripts/check_repo_scope.py",
     ".github/workflows/repo-scope.yml",
+    "docs/wikiskill/baseline-debt.json",  # 検査結果の記録ファイル。検査語を含まざるを得ない(Baseline Debt 固定・FK-006)
 }
 
 HINT = """
