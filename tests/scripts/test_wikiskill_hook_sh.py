@@ -35,6 +35,7 @@ def repo(tmp_path):
     (tmp_path / "scripts").mkdir()
     (tmp_path / ".claude/hooks").mkdir(parents=True)
     for rel in ("scripts/wikiskill_common.py", "scripts/experience_log.py",
+                "scripts/decision_memory.py", "scripts/memory_bootstrap.py",  # Task 4: SessionStart/UserPromptSubmit で使う
                 ".claude/hooks/wikiskill-hook.sh"):
         shutil.copy(REAL_ROOT / rel, tmp_path / rel)
     return tmp_path
