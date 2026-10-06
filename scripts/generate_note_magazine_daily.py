@@ -155,7 +155,7 @@ def generate_article_with_claude(theme_config: dict, day_index: int) -> dict:
             ]
         )
 
-        body = message.content[0].text.strip()
+        body = next((block.text for block in message.content if hasattr(block, 'text')), "").strip()
 
         # 禁止語チェック
         for phrase in BANNED_PHRASES:
