@@ -73,10 +73,10 @@ decided_by: 小柳
 
 次のいずれかが起きたら、期限(2027-04-04)を待たず再議論する。
 
-- hook の実行が 500ms を超える事象が週3回
-- Experience の privacy 検査で違反が1件
-- Memory Bootstrap の誤関連が利用者申告で3件
-- Baseline Debt が悪化(REGRESSION)
+- ① hook の遅延: `.claude/experience/_audit.log` の `slow` 行(各 hook 段が自分の実行時間を測り、500ms を超えたら `slow <event> <ms>ms` を記録する)が1週間に3件以上
+- ② privacy 違反: `python3 scripts/check_experience_privacy.py`(CI の repo-scope)が main で違反を1件でも報告
+- ③ 誤関連: `python3 scripts/experience_log.py note "誤関連: <どの項目が・なぜ無関係か>"` で残した note(`.claude/experience/` 内で `誤関連:` で始まるもの)が1か月に3件以上。月ごとに Experience の note から数える
+- ④ Baseline 悪化: `python3 scripts/baseline_debt.py --compare` が REGRESSION
 
 Phase 1 の受け入れ条件(新しい privacy 違反 0 / 新しい skill_validation 失敗 0 / Baseline 非悪化 / 110 Skills 不変 / 13リポ配布不変 / セッション A で決めた内容をセッション B が復元)は `docs/wikiskill/Phase1受け入れ記録.md` に記録する。
 

@@ -17,8 +17,21 @@ Task 8(手動 E2E と Baseline 比較)で記入する。それまで空欄のま
 | 1 | Session A: 開始直後に `# 🧠 Memory Bootstrap` が注入される(段1)。試験用の議事と note を commit・push して終了できる | | |
 | 2 | Session B(新しいセッション): 開始直後の Bootstrap に試験用の `[D]` と「なぜ:」「ウタガイ:」が出る | | |
 | 3 | Session B: 最初の指示(「マージ競合の手順」)で段2に `[FK-002]` と `[再発防止]` が出る。2回目の指示では何も注入されない | | |
-| 4 | Session B: 開始が遅くならない(`.claude/experience/_audit.log` に `slow` 警告が無い) | | |
+| 4 | 速度: 各 hook 段は自分の実行時間を測り、500ms を超えたら `.claude/experience/_audit.log` に `slow <event> <ms>ms` を追記する(監査ログのみ・画面警告なし)。下の「速度の実測」で、実測 0.5秒未満 かつ `slow` 行 0件 のとき ✅ | | |
 | 5 | Session C: `.claude/memory.off` を置くと Bootstrap も記録も止まり、消すと再開する | | |
+
+## 速度の実測(項目4)
+
+```bash
+time (echo '{"session_id":"timing-check","hook_event_name":"SessionStart","source":"startup"}' | bash .claude/hooks/wikiskill-hook.sh SessionStart > /dev/null)
+grep -c "slow " .claude/experience/_audit.log    # ファイルが無ければ 0 とみなす
+```
+
+測定後、作られた記録ファイル(`.claude/experience/` 以下の `session-timing-check.jsonl`)を削除する。
+
+| 測定値(real) | `slow` 行の数 | 判定(0.5秒未満 かつ 0件で ✅) |
+|---|---|---|
+| _ 秒 | _ 件 | |
 
 ## Bootstrap 実出力(先頭20行)
 
