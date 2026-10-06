@@ -25,6 +25,28 @@ from memory_bootstrap import bigrams, build_query, collect_sources, retrieve, sc
 PUBLIC_URL = "https://github.com/allgroup-inc/hojo-hq.git"
 BRANCH = "claude/lighthouse-css"
 DECISION = "docs/議事_20260810_北極星ボトルネック裁定.md"
+FM_DECISION = "docs/議事_20261001_集計キャッシュ.md"
+FM_DECISION_MD = """---
+decision_id: D-20261001-01
+date: 2026-10-01
+title: 集計キャッシュの置き場所
+status: adopted
+review_by: 2027-04-01
+tags: [キャッシュ, 集計]
+---
+# 議事: 集計キャッシュの置き場所
+
+## なぜ
+集計の再計算に毎回3分かかり、週次レポの生成が締切に間に合わないため。
+
+## 裁定
+集計キャッシュは data/cache に置き、生成のたびに作り直す。
+
+## 三名体制
+- スイシン: 置く
+- ウタガイ: キャッシュが古いまま公開される恐れ
+- ベッカイ: 再計算そのものを速くする別解もある
+"""
 COPY_SCRIPTS = ("wikiskill_common.py", "experience_log.py", "decision_memory.py", "memory_bootstrap.py")
 
 QUEUE = """# 決裁キュー(テスト用)
@@ -112,14 +134,15 @@ def run_bootstrap(kb, *args, payload=None, env=None):
     )
 
 
-def write_session_end(kb, sid, ts, branch=BRANCH, visibility="public", skills=("writing-plans",), commits=1):
+def write_session_end(kb, sid, ts, branch=BRANCH, visibility="public", skills=("writing-plans",), commits=1,
+                      subject="c"):
     month = ts[:7]
     d = kb / ".claude/experience" / month
     d.mkdir(parents=True, exist_ok=True)
     row = {
         "ts": ts, "session_id": sid, "event": "session_end", "repo": "allgroup-inc/hojo-hq",
         "visibility": visibility, "branch": branch,
-        "commits": [{"sha": f"abc{i}", "subject": f"c{i}"} for i in range(commits)],
+        "commits": [{"sha": f"abc{i}", "subject": f"{subject}{i}"} for i in range(commits)],
         "tools": {"Bash": 1}, "skills": list(skills), "duration_s": 10,
     }
     with open(d / f"session-{sid}.jsonl", "a", encoding="utf-8") as f:
@@ -143,7 +166,19 @@ def test_bigrams_drop_particle_only():
 
 def test_decision_retrieved_with_why_and_utagai(kb):
     out = retrieve(kb, ["北極星", "ボトルネック", "SEO"])
-    assert "[D] 2026-08-10" in out and "なぜ:" in out and "ウタガイ:" in out
+    decision = next(d for d in load_decisions(kb) if d["path"] == DECISION)
+    assert "[D] 2026-08-10" in out and "裁定:" in out and "ウタガイ:" in out
+    # なぜ: は本物の「なぜ」節があるときだけ(ベッカイ等を読み替えない)
+    assert ("なぜ:" in out) == bool(decision["why"])
+    assert "ベッカイ: 律速段階は流入" in out
+
+
+def test_frontmatter_decision_shows_real_why(kb):
+    (kb / FM_DECISION).write_text(FM_DECISION_MD, encoding="utf-8")
+    out = retrieve(kb, ["集計キャッシュ"])
+    assert "[D] 2026-10-01 集計キャッシュの置き場所" in out
+    assert "なぜ: 集計の再計算に毎回3分かかり" in out
+    assert "ウタガイ: キャッシュが古いまま公開される恐れ" in out
 
 
 def test_expired_decision_is_labeled_not_hidden(kb):
@@ -277,10 +312,12 @@ def test_collect_sources_kinds(kb):
     assert all(s["kind"] != "queue" or "moradou.jp採用" not in s["body"] for s in collect_sources(kb))
 
 
-def test_score_counts_shared_features():
-    assert score(["実装計画"], "実装計画を作る") == 3
-    assert score(["lighthouse"], "Lighthouse の実測") >= 1
+def test_score_counts_matched_terms():
+    assert score(["実装計画"], "実装計画を作る") == 1
+    assert score(["実装計画", "lighthouse"], "Lighthouse の実装計画") == 2
+    assert score(["lighthouse"], "Lighthouse の実測", title="hojo-lighthouse-triage") == 2  # 名前で一致 +1
     assert score(["zzzz"], "北極星") == 0
+    assert score(["AI", "LP"], "AIでLPを作る") == 2  # 2文字の英字語も照合する
 
 
 def test_hook_honors_stop_switch_but_query_does_not(kb):
@@ -339,10 +376,13 @@ def test_queue_steps_under_completed_item_are_hidden(kb):
     assert not any("ドメイン取得" in b for b in bodies)
 
 
-def test_short_query_needs_every_feature():
-    # 北極星 は特徴量2つ(北極・極星)。min_score 3 に届かない短い語は「全部一致」で拾う
-    assert score(["北極星"], "北極星4本の現在地") == 2
-    assert score(["北極星"], "北極の話") == 1
+def test_japanese_term_needs_most_of_its_bigrams():
+    # bigram 2個以下の語は全部、3個以上は6割以上(最低2個)
+    assert score(["北極星"], "北極星4本の現在地") == 1
+    assert score(["北極星"], "北極の話") == 0
+    # パフォーマンス(6個→4個必要)は フォーマット の3片(フォ・ォー・ーマ)では一致しない
+    assert score(["パフォーマンス"], "フォーマットを直す") == 0
+    assert score(["パフォーマンス"], "パフォーマンスの改善") == 1
 
 
 def test_english_common_words_and_numbers_do_not_match():
@@ -352,5 +392,215 @@ def test_english_common_words_and_numbers_do_not_match():
 def test_stage2_skipped_without_session_id(kb):
     e = {"CLAUDE_SESSION_ID": ""}
     r = run_bootstrap(kb, "hook", "UserPromptSubmit", payload={"prompt": "マージ競合"}, env=e)
-    assert r.returncode == 0 and r.stdout.strip() == "{}"
+    assert r.returncode == 0
+    out = json.loads(r.stdout)
+    assert "session_id" in out["systemMessage"] and "hookSpecificOutput" not in out
     assert "session_id missing" in (kb / ".claude/experience/_audit.log").read_text(encoding="utf-8")
+
+
+# ---------------------------------------------------------------- レビュー指摘の固定(2026-10-06)
+
+def _init_git(root, branch=BRANCH, message="init"):
+    git(root, "init", "-q", "-b", branch)
+    git(root, "config", "user.email", "t@example.com")
+    git(root, "config", "user.name", "t")
+    git(root, "config", "commit.gpgsign", "false")
+    git(root, "remote", "add", "origin", PUBLIC_URL)
+    git(root, "add", "-A")
+    git(root, "commit", "-q", "--allow-empty", "-m", message)
+
+
+@pytest.fixture
+def realish(tmp_path):
+    """本物の CLAUDE.md・hojo-lighthouse-triage・FK-006 行で、実際の検索語の結果を固定する。"""
+    root = tmp_path / "realish"
+    (root / "docs").mkdir(parents=True)
+    shutil.copy(REPO_ROOT / "CLAUDE.md", root / "CLAUDE.md")
+    real = (REPO_ROOT / "docs/失敗台帳.md").read_text(encoding="utf-8").splitlines()
+    header = next(l for l in real if l.startswith("| ID |"))
+    rows = [header, real[real.index(header) + 1], next(l for l in real if l.startswith("| FK-006 "))]
+    (root / "docs/失敗台帳.md").write_text("# 失敗台帳\n\n" + "\n".join(rows) + "\n", encoding="utf-8")
+    (root / "docs/決裁キュー.md").write_text("# 決裁キュー\n", encoding="utf-8")
+    skill = root / ".claude/skills/hojo-lighthouse-triage"
+    skill.mkdir(parents=True)
+    shutil.copy(REPO_ROOT / ".claude/skills/hojo-lighthouse-triage/SKILL.md", skill / "SKILL.md")
+    _init_git(root)
+    return root
+
+
+def test_real_lighthouse_query_finds_triage_skill_not_fk006(realish):
+    out = retrieve(realish, ["Lighthouse", "パフォーマンス", "CSS", "見出し"])
+    assert "[Skill] hojo-lighthouse-triage" in out
+    assert "[FK-006]" not in out
+
+
+def test_real_step6_query_shows_update_skills_prevention_line(realish):
+    out = retrieve(realish, ["スキル改善", "13リポ", "配布"])
+    assert "[再発防止] `.claude/commands/`" in out and "`scripts/update-skills.sh` は現状スキルのみ同期" in out
+
+
+def test_stage2_excludes_stage1_ids_before_ranking(kb):
+    for i in range(1, 7):  # 段1の検索語(lighthouse・css)に当たる Skill が6件
+        d = kb / f".claude/skills/lighthouse-check-{i}"
+        d.mkdir(parents=True)
+        (d / "SKILL.md").write_text(f"---\nname: lighthouse-check-{i}\ndescription: Lighthouse と CSS の点検手順 {i}\n---\n",
+                                    encoding="utf-8")
+    d = kb / ".claude/skills/domain-guide"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text("---\nname: domain-guide\ndescription: ドメイン移行の手順を案内する\n---\n", encoding="utf-8")
+    s1 = context_of(run_bootstrap(kb, "hook", "SessionStart", payload={"session_id": "J"}).stdout)
+    assert s1.count("[Skill] lighthouse-check-") == 5  # 1区分5件まで(6件目は段1で出ていない)
+    s2 = context_of(run_bootstrap(kb, "hook", "UserPromptSubmit",
+                                  payload={"session_id": "J", "prompt": "ドメイン移行"}).stdout)
+    assert "[Skill] domain-guide" in s2  # 段1の5件に押し出されない
+    shown1 = {l for l in s1.splitlines() if l.startswith("- [Skill]")}
+    assert not any(l in s2 for l in shown1)
+    assert "lighthouse-check-6" in s2  # 段1で表示されなかった6件目は新規として出る
+
+
+def _many_sessions(kb, month, n, prefix, branch=BRANCH):
+    for i in range(n):
+        write_session_end(kb, f"{prefix}{i:03d}", f"{month}-01T00:{i % 60:02d}:00Z", branch=branch)
+
+
+def _spy_open(monkeypatch, opened):
+    """builtins.open と io.open(Path.read_text 等が使う)の両方で開いたパスを記録する。"""
+    import builtins
+    import io
+    real_open = builtins.open
+
+    def spy(path, *a, **k):
+        opened.append(str(path))
+        return real_open(path, *a, **k)
+
+    monkeypatch.setattr(builtins, "open", spy)
+    monkeypatch.setattr(io, "open", spy)
+
+
+def test_experience_scan_stops_after_three_and_skips_older_months(kb, monkeypatch):
+    _many_sessions(kb, "2026-09", 60, "old")
+    _many_sessions(kb, "2026-10", 2, "other", branch="claude/other")
+    for i, ts in enumerate(["2026-10-02T01:00:00Z", "2026-10-03T01:00:00Z", "2026-10-04T01:00:00Z"]):
+        write_session_end(kb, f"new{i}", ts)
+    opened = []
+    _spy_open(monkeypatch, opened)
+    srcs = memory_bootstrap._experience(kb)
+    monkeypatch.undo()
+    assert [s["title"] for s in srcs] == ["session-new2", "session-new1", "session-new0"]
+    assert not any("/2026-09/" in p for p in opened)
+
+
+def test_experience_scan_caps_files(kb, monkeypatch):
+    _many_sessions(kb, "2026-10", 60, "other", branch="claude/other")
+    opened = []
+    _spy_open(monkeypatch, opened)
+    srcs = memory_bootstrap._experience(kb)
+    monkeypatch.undo()
+    assert srcs == []
+    assert len([p for p in opened if "/session-" in p]) == 50
+
+
+def test_experience_reads_only_file_tail(kb):
+    d = kb / ".claude/experience/2026-10"
+    d.mkdir(parents=True)
+    # 先頭に壊れた session_end 行 + 約40KBの詰め物。末尾だけ読むなら壊れた行は見えない
+    head = '{"event": "session_end", broken\n'
+    filler = "\n".join(json.dumps({"event": "tool", "tool": "Bash", "pad": "x" * 200}) for _ in range(200))
+    (d / "session-big.jsonl").write_text(head + filler + "\n", encoding="utf-8")
+    write_session_end(kb, "big", "2026-10-02T00:00:00Z")
+    assert [s["title"] for s in memory_bootstrap._experience(kb)] == ["session-big"]
+    audit_log = kb / ".claude/experience/_audit.log"
+    assert not audit_log.exists() or "malformed" not in audit_log.read_text(encoding="utf-8")
+
+
+def test_experience_long_session_end_line_is_read(kb):
+    # commit 50件の session_end は 4KB を超える → 読み直して拾う
+    write_session_end(kb, "long", "2026-10-02T00:00:00Z", commits=50, subject="件" * 200)
+    f = next((kb / ".claude/experience").glob("*/session-long.jsonl"))
+    assert f.stat().st_size > memory_bootstrap.TAIL_BYTES
+    srcs = memory_bootstrap._experience(kb)
+    assert [s["title"] for s in srcs] == ["session-long"] and "commits 50" in srcs[0]["line"]
+
+
+def test_experience_malformed_rows_audited_once(kb):
+    d = kb / ".claude/experience/2026-10"
+    d.mkdir(parents=True)
+    for i in range(3):
+        (d / f"session-bad{i}.jsonl").write_text('{"event": "session_end", broken\n', encoding="utf-8")
+    memory_bootstrap._experience(kb)
+    lines = [l for l in (kb / ".claude/experience/_audit.log").read_text(encoding="utf-8").splitlines()
+             if "malformed" in l]
+    assert len(lines) == 1 and "skipped 3 malformed" in lines[0]
+
+
+def test_non_repo_root_inside_another_repo_reads_no_git(kb):
+    sub = kb / "notarepo"
+    sub.mkdir()
+    assert build_query(sub) == []  # 外側(kb)のブランチ・commit を読まない
+    assert "git: root is not the top" in (sub / ".claude/experience/_audit.log").read_text(encoding="utf-8")
+
+
+def test_decision_line_capped_and_deduped(kb):
+    long = "とても長い裁定の本文。" * 60
+    (kb / "docs/議事_20261002_長文.md").write_text(
+        "---\ndecision_id: D-20261002-01\ndate: 2026-10-02\ntitle: 長文の議事\nstatus: adopted\n"
+        "review_by: 2026-10-03\n---\n# 議事: 長文の議事\n\n## なぜ\n" + long + "\n\n## 裁定\n" + long +
+        "\n\n- ウタガイ: 長すぎる\n", encoding="utf-8")
+    out = retrieve(kb, ["長文の議事"])
+    line = next(l for l in out.splitlines() if "長文の議事" in l)
+    assert len(line) <= 600
+    assert "裁定:" in line and "なぜ:" not in line  # 裁定と同じ本文の なぜ は出さない
+    assert "期限切れ・再議論対象" in line  # 長さを削っても見直し欄(期限切れ表示)は残す
+    assert line.endswith("→ docs/議事_20261002_長文.md")
+
+
+def test_merge_failure_reports_merge_exit_code(kb, tmp_path_factory):
+    bindir = tmp_path_factory.mktemp("bin")
+    for tool in ("cat", "date", "mkdir", "tr", "git"):
+        (bindir / tool).symlink_to(shutil.which(tool))
+    r = subprocess.run([shutil.which("bash"), ".claude/hooks/wikiskill-hook.sh", "SessionStart"],
+                       input=json.dumps({"session_id": "K"}), cwd=kb, capture_output=True, text=True,
+                       env={"PATH": str(bindir), "CLAUDE_PROJECT_DIR": str(kb)})
+    assert r.returncode == 0
+    assert "SessionStart/merge exit=127" in json.loads(r.stdout)["systemMessage"]
+
+
+# ---------------------------------------------------------------- hook 経路の実時間(本物の docs・Skill・scripts の写し)
+
+@pytest.fixture(scope="module")
+def realcopy(tmp_path_factory):
+    root = tmp_path_factory.mktemp("realcopy")
+    shutil.copytree(REPO_ROOT / "docs", root / "docs")
+    shutil.copy(REPO_ROOT / "CLAUDE.md", root / "CLAUDE.md")
+    for p in (REPO_ROOT / ".claude/skills").glob("*/SKILL.md"):
+        (root / ".claude/skills" / p.parent.name).mkdir(parents=True)
+        shutil.copy(p, root / ".claude/skills" / p.parent.name / "SKILL.md")
+    (root / "scripts").mkdir()
+    for p in SCRIPTS.glob("*.py"):
+        shutil.copy(p, root / "scripts" / p.name)
+    (root / ".claude/hooks").mkdir(parents=True)
+    shutil.copy(REPO_ROOT / ".claude/hooks/wikiskill-hook.sh", root / ".claude/hooks/wikiskill-hook.sh")
+    assert not (root / ".claude/memory.off").exists()
+    _init_git(root, branch="claude/skill-kaizen", message="feat: スキル改善の配布手順を13リポへ広げる")
+    return root
+
+
+def _timed_hook(root, event, payload):
+    t = time.perf_counter()
+    r = run_hook(root, event, payload)
+    return time.perf_counter() - t, r
+
+
+def test_hook_session_start_under_500ms_on_real_copy(realcopy):
+    elapsed, r = _timed_hook(realcopy, "SessionStart", {"session_id": "T1", "source": "startup"})
+    assert r.returncode == 0 and context_of(r.stdout).startswith("# 🧠 Memory Bootstrap")
+    print(f"SessionStart hook: {elapsed * 1000:.0f} ms")
+    assert elapsed < 0.5, f"SessionStart hook took {elapsed:.3f}s"
+
+
+def test_hook_user_prompt_submit_under_500ms_on_real_copy(realcopy):
+    elapsed, r = _timed_hook(realcopy, "UserPromptSubmit",
+                             {"session_id": "T2", "prompt": "Lighthouse のパフォーマンスを見出し限定のCSSで直したい"})
+    assert r.returncode == 0 and json.loads(r.stdout) is not None
+    print(f"UserPromptSubmit hook (first prompt): {elapsed * 1000:.0f} ms")
+    assert elapsed < 0.5, f"UserPromptSubmit hook took {elapsed:.3f}s"

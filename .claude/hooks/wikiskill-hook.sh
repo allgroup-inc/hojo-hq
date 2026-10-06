@@ -16,11 +16,12 @@ EVENT_SAFE="${EVENT//[^A-Za-z0-9_]/_}"
 ROOT="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 
 # ラッパ層の失敗を _audit.log に1行残す(best-effort: 書けなくてもラッパは落とさない)
+#   wrapper_audit <exit code> <理由>
 wrapper_audit() {
   local ts
   ts="$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown-time)"
   mkdir -p "$ROOT/.claude/experience" 2>/dev/null || return 0
-  printf '%s\thook-wrapper\t%s exit=%s %s\n' "$ts" "$EVENT_SAFE" "${code:-?}" "$1" \
+  printf '%s\thook-wrapper\t%s exit=%s %s\n' "$ts" "$EVENT_SAFE" "${1:-?}" "${2:-}" \
     >>"$ROOT/.claude/experience/_audit.log" 2>/dev/null || true
   return 0
 }
@@ -58,12 +59,11 @@ check_output() {
     CHECKED="$t"
     return 0
   fi
-  code="$rc"
   if [ -n "$label" ]; then
-    wrapper_audit "$label: $reason"
+    wrapper_audit "$rc" "$label: $reason"
     CHECKED="$(printf '{"systemMessage":"⚠ wikiskill hook 失敗: %s/%s exit=%s"}' "$EVENT_SAFE" "$label" "$rc")"
   else
-    wrapper_audit "$reason"
+    wrapper_audit "$rc" "$reason"
     CHECKED="$(printf '{"systemMessage":"⚠ wikiskill hook 失敗: %s exit=%s"}' "$EVENT_SAFE" "$rc")"
   fi
   return 1
@@ -104,11 +104,9 @@ case "$EVENT" in
     bres="$CHECKED"
     merged="$(python3 -c "$MERGE_PY" "$lres" "$bres" 2>/dev/null)"
     mcode=$?
-    if check_output "$merged" "$mcode" "merge"; then
-      printf '%s\n' "$CHECKED"
-    else
-      printf '{"systemMessage":"⚠ wikiskill hook 失敗: %s exit=%s"}\n' "$EVENT_SAFE" "$lcode"
-    fi
+    # 合成に失敗したら(python3 が無い等)、合成の exit code を載せた警告 JSON が CHECKED に入る
+    check_output "$merged" "$mcode" "merge"
+    printf '%s\n' "$CHECKED"
     exit 0
     ;;
   UserPromptSubmit)
