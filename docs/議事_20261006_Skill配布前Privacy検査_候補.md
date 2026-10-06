@@ -1,17 +1,19 @@
 ---
 decision_id: D20261006-skill-dist-privacy-gate
 date: 2026-10-06
-title: 自動配布対象Skillは配布前にPrivacy/Scope検査を通す(候補)
+title: 自動配布対象Skillは配布前にPrivacy/Scope検査を通す
 scope: hojo-hq/基盤
 tags: [skills, privacy, update-skills, distribution]
-status: deferred
-review_by: 2026-12-06
-decided_by: 小柳(決裁待ち)
+status: adopted
+review_by: 2027-04-04
+decided_by: 小柳
 ---
 
-# 議事: 自動配布対象Skillは配布前にPrivacy/Scope検査を通すか(候補・2026-10-06)
+# 議事: 自動配布対象Skillは配布前にPrivacy/Scope検査を通すか(2026-10-06)
 
-本議事は決裁待ちの候補。WikiSkill Phase 1 の Decision Memory が読む形式で記録する。
+2026-10-06 小柳さん採用(候補から昇格。ファイル名の『候補』は履歴維持のため据え置き)
+
+本議事は当初、決裁待ちの候補として起案した。WikiSkill Phase 1 の Decision Memory が読む形式で記録する。
 台帳: `docs/失敗台帳.md` FK-006 / 現状の固定: `docs/wikiskill/baseline-debt.json`
 
 ## なぜ(背景)
@@ -45,10 +47,10 @@ decided_by: 小柳(決裁待ち)
 
 ## 裁定
 
-未決(小柳さん決裁待ち)。Phase 1 では`update-skills.sh`を変更しない。採否が決まるまでは、Baseline Debtの比較(`python3 scripts/baseline_debt.py --compare`)で、Phase 1 が違反を増やしていないことだけを確認する。
+採用。今後の Skill 配布は原則 `Skill変更 → Skill Validation → Privacy / Scope → Security → Regression → 三名体制レビュー → 小柳 Decision Gate → 配布` の順とする。ただし Phase 1 では `scripts/update-skills.sh` そのものを変更しない。実装は別タスク(決裁キュー #23)として起票。
 
 ## 見直し条件
 
-- 是正タスク(禁止語を含むSKILL.mdと学び文書の是正・11リポ再配布・skill_validation不適合の是正)が完了した時
-- 同型の拡散(検査が赤のまま配布が進む)が再発した時
-- 見直し期限: 2026-12-06(期限切れは自動で再議論)
+- 実装タスク(決裁キュー #23)の完了時
+- 同型の拡散(FK-006)が再発した時
+- 見直し期限: 2027-04-04(期限切れは自動で再議論)
