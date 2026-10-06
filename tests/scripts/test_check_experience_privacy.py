@@ -317,3 +317,41 @@ def test_real_repo_runs_clean():
     r = run([])
     assert r.returncode == 0, r.stderr
     assert r.stdout.startswith("OK: Experience記録")
+
+
+# ---- レビュー指摘の修正 ----
+
+def test_line_separator_chars_in_note_scan_clean(tmp_path):
+    # experience_log.py は ensure_ascii=False で U+2028/U+2029/\x85 を raw のまま出力する
+    _init_repo(tmp_path)
+    rec = {**OK, "event": "note", "text": "a\u2028b\u2029c\x85d"}
+    line = json.dumps(rec, ensure_ascii=False)
+    assert "\u2028" in line and "\x85" in line  # raw で入っていること
+    _commit_jsonl(tmp_path, "session-sep.jsonl", line + "\n" + json.dumps(OK) + "\n")
+    assert scan(tmp_path) == []
+
+
+def test_crlf_lines_scan_clean(tmp_path):
+    _init_repo(tmp_path)
+    _commit_jsonl(tmp_path, "session-crlf.jsonl", json.dumps(OK) + "\r\n" + json.dumps(OK) + "\r\n")
+    assert scan(tmp_path) == []
+
+
+def test_leading_backslash_path_rejected():
+    assert check_record({**OK, "path": "\\x"}, "x")
+    assert check_record({**OK, "path": "\\\\srv\\share\\x"}, "x")
+    assert check_record({**END, "files_changed": ["\\x"]}, "x")
+
+
+def test_scan_deeply_nested_json_reported_not_crash(tmp_path):
+    _init_repo(tmp_path)
+    deep = "[" * 2000 + "]" * 2000
+    _commit_jsonl(tmp_path, "session-deep.jsonl", deep + "\n")
+    hits = scan(tmp_path)
+    assert len(hits) == 1 and "入れ子が深すぎます" in hits[0][1]
+
+
+def test_cli_unknown_argument_exits_2():
+    r = run(["--selftst"])
+    assert r.returncode == 2
+    assert "使い方" in r.stderr

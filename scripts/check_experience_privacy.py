@@ -56,7 +56,7 @@ def _path_problem(value) -> str | None:
         return "文字列ではありません"
     if value in PLACEHOLDERS:
         return None
-    if value.startswith("/"):
+    if value.startswith("/") or value.startswith("\\"):
         return "絶対パスです"
     if value.startswith("~"):
         return "~ で始まります"
@@ -149,15 +149,21 @@ def scan(root: Path) -> list[tuple[str, str]]:
         if text is None:
             hits.append((rel, "テキストとして読めません(バイナリ/読込失敗)"))
             continue
-        for lineno, line in enumerate(text.splitlines(), start=1):
+        # "\n" だけで分ける(str.splitlines は U+2028/U+2029/\x85 でも割れ、raw で出力される note を誤検知する)
+        for lineno, line in enumerate(text.split("\n"), start=1):
+            line = line.rstrip("\r")
             if not line.strip():
                 continue
             try:
                 rec = json.loads(line)
+                problems = check_record(rec, rel)
+            except RecursionError:
+                hits.append((rel, f"{lineno}行目: JSON の入れ子が深すぎます"))
+                continue
             except ValueError:
                 hits.append((rel, f"{lineno}行目: JSON として読めません"))
                 continue
-            for problem in check_record(rec, rel):
+            for problem in problems:
                 hits.append((rel, f"{lineno}行目: {problem}"))
     return hits
 
@@ -231,8 +237,11 @@ def _repo_root() -> Path:
 
 
 def main(argv: list[str]) -> int:
-    if "--selftest" in argv:
+    if argv == ["--selftest"]:
         return selftest()
+    if argv:
+        print("使い方: check_experience_privacy.py [--selftest]  (引数なしで git 管理下の Experience を検査)", file=sys.stderr)
+        return 2
     root = _repo_root()
     try:
         hits = scan(root)

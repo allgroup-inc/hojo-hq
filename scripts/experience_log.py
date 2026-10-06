@@ -223,7 +223,11 @@ def append_event(root: Path, event: Event) -> Path:
 
 def _read_events(path: Path) -> list[Event]:
     events = []
-    for raw in path.read_text(encoding="utf-8").splitlines():
+    # "\n" だけで分ける(splitlines は raw の U+2028/U+2029/\x85 でも割れ、note を含む行を壊す)
+    for raw in path.read_text(encoding="utf-8").split("\n"):
+        raw = raw.rstrip("\r")
+        if not raw.strip():
+            continue
         try:
             ev = json.loads(raw)
         except ValueError:

@@ -131,6 +131,20 @@ def test_summarize_session_collects_commits(repo):
     assert isinstance(s["duration_s"], int) and s["duration_s"] >= 0
 
 
+def test_note_with_line_separator_chars_round_trips(repo):
+    """raw の U+2028/U+2029/\\x85 を含む note が、読み戻しで行として割れない(記録件数が変わらない)。"""
+    append_event(repo, start_event(repo, "s1"))
+    path = append_event(repo, note_event("s1", "a\u2028b\u2029c\x85d", repo))
+    append_event(repo, build_tool_event(
+        {"session_id": "s1", "tool_name": "Edit", "tool_input": {"file_path": str(repo / "README.md")}}, repo))
+    assert "\u2028" in path.read_text(encoding="utf-8")  # raw で書かれている
+    events = experience_log._read_events(path)
+    assert len(events) == 3
+    assert events[1]["text"] == "a\u2028b\u2029c\x85d"
+    s = summarize_session(repo, "s1")
+    assert s["tools"] == {"Edit": 1}
+
+
 def test_append_event_failure_is_audited(repo, monkeypatch, capsys):
     def failing_open(path):
         raise OSError("disk full")
