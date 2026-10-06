@@ -23,3 +23,9 @@ jobs:
 
       - name: 置き場所の検査
         run: python3 scripts/check_repo_scope.py
+
+      - name: Experience記録の公開可否 自己点検
+        run: python3 scripts/check_experience_privacy.py --selftest
+
+      - name: Experience記録の公開可否
+        run: python3 scripts/check_experience_privacy.py
