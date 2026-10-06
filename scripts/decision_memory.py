@@ -27,13 +27,16 @@ SECTION_MAX = 600
 HEAD_BODY_CHARS = 600
 
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-_KEY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_-]*)\s*[:：]\s*(.*)$")
+_KEY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_-]*)\s*[:：](.*)$")
 _FILENAME_DATE_RE = re.compile(r"_(\d{8})_|_(\d{4})-(\d{2})-(\d{2})")
 _BODY_DATE_RE = re.compile(r"日付\s*[:：]\s*\**\s*(\d{4}-\d{2}-\d{2})")
 _REVIEW_RE = re.compile(r"見直し期限[:：]?\s*\**\s*(\d{4}-\d{2}-\d{2})")
 # ウタガイ(担当: ◯◯さん): 本文 / **ウタガイ(反対理由)**: 本文 / ウタガイ: 本文
 _UTAGAI_RE = re.compile(r"ウタガイ(?:[(（][^)）]*[)）])?[*\s]*[:：]\s*(.*)$")
-_WHY_PREFIXES = ("## なぜ", "## 背景", "## 目的")
+_WHY_WORDS = ("なぜ", "背景", "目的")
+_CHECK_WHY_WORDS = ("なぜ", "背景")
+_HEADING_RE = re.compile(r"^(#{1,6})\s")
+_UTAGAI_HEADING_RE = re.compile(r"^\s*#{1,6}\s*\**\s*ウタガイ")
 
 
 # ---------------------------------------------------------------- 基本部品
@@ -43,8 +46,17 @@ def _collapse(text: str, limit: int | None = None) -> str:
     return out[:limit] if limit else out
 
 
-def _parse_date(value: str | None) -> dt.date | None:
-    if not value or not _DATE_RE.match(value.strip()):
+def _s(value) -> str:
+    """frontmatter の値を文字列にする(リストは空白で連結、None は空文字)。"""
+    if value is None:
+        return ""
+    if isinstance(value, list):
+        return " ".join(str(v) for v in value)
+    return str(value)
+
+
+def _parse_date(value) -> dt.date | None:
+    if not isinstance(value, str) or not _DATE_RE.match(value.strip()):
         return None
     try:
         return dt.date.fromisoformat(value.strip())
@@ -65,8 +77,20 @@ def _read(path: Path) -> str:
 
 
 def _strip_comment(value: str) -> str:
-    """` # ...` 形式の行末コメントを落とす(空白に続く # のみ)。"""
-    return re.sub(r"\s+#.*$", "", value).strip()
+    """値から行末コメントを落とす。
+
+    `#` で始まる値は全体がコメント(→ 空)。引用符で囲んだ値は中身を切らない。
+    引用符なしの値は「空白 + # + 空白(または行末)」から後ろをコメントとして落とす
+    (`Issue #10 対応` の `#10` は残る)。
+    """
+    v = value.strip()
+    if v.startswith("#"):
+        return ""
+    if v[:1] in ("\"", "'"):
+        close = v.find(v[0], 1)
+        if close != -1:
+            return v[: close + 1]
+    return re.sub(r"\s+#(?:\s.*)?$", "", v).strip()
 
 
 def _unquote(value: str) -> str:
@@ -119,18 +143,33 @@ def parse_frontmatter(text: str) -> tuple[dict, str]:
     return fm, body
 
 
-def _section(lines: list[str], prefixes: tuple[str, ...]) -> str:
-    """見出し(## …)が prefixes のどれかで始まる最初の節の本文。次の `## ` まで。"""
-    for prefix in prefixes:
+def _find_heading(lines: list[str], words: tuple[str, ...]) -> tuple[int, int] | None:
+    """`##` または `###`(後ろの空白は任意)で words のどれかで始まる最初の見出し。
+
+    words の順が優先順位。返り値は (行番号, 見出しレベル)。
+    """
+    for word in words:
+        pattern = re.compile(r"^(#{2,3})\s*" + re.escape(word))
         for i, line in enumerate(lines):
-            if line.startswith(prefix):
-                chunk = []
-                for nxt in lines[i + 1:]:
-                    if nxt.startswith("## "):
-                        break
-                    chunk.append(nxt)
-                return _collapse(" ".join(chunk), SECTION_MAX)
-    return ""
+            m = pattern.match(line)
+            if m:
+                return i, len(m.group(1))
+    return None
+
+
+def _section(lines: list[str], words: tuple[str, ...]) -> str:
+    """見出しが words で始まる最初の節の本文。同じか上位レベルの次の見出しまで。"""
+    found = _find_heading(lines, words)
+    if found is None:
+        return ""
+    i, level = found
+    chunk = []
+    for nxt in lines[i + 1:]:
+        m = _HEADING_RE.match(nxt)
+        if m and len(m.group(1)) <= level:
+            break
+        chunk.append(nxt)
+    return _collapse(" ".join(chunk), SECTION_MAX)
 
 
 def _utagai_inline(line: str) -> str | None:
@@ -138,9 +177,18 @@ def _utagai_inline(line: str) -> str | None:
     return m.group(1).strip() if m else None
 
 
+def _indent(line: str) -> int:
+    return len(line) - len(line.lstrip(" \t"))
+
+
 def _utagai_continuation(lines: list[str], i: int) -> str:
-    """ウタガイ行のコロン後が空のとき、続く行(字下げ項目、または見出しの下の本文)を拾う。"""
-    heading = lines[i].lstrip().startswith("#")
+    """ウタガイ行のコロン後が空のとき、続く行を拾う。
+
+    - 見出しがウタガイで始まる場合: 次の見出しまでの行。
+    - それ以外: ウタガイ行より深く字下げされた行(同じ深さの兄弟項目は含めない)。
+    """
+    heading = bool(_UTAGAI_HEADING_RE.match(lines[i]))
+    base = _indent(lines[i])
     chunk = []
     for nxt in lines[i + 1:]:
         if not nxt.strip():
@@ -148,7 +196,7 @@ def _utagai_continuation(lines: list[str], i: int) -> str:
         if heading:
             if nxt.lstrip().startswith("#"):
                 break
-        elif not nxt[0].isspace():
+        elif _indent(nxt) <= base:
             break
         chunk.append(nxt.strip())
     return _collapse(" ".join(chunk), SECTION_MAX)
@@ -162,7 +210,7 @@ def _utagai_all(lines: list[str]) -> list[tuple[int, str]]:
             continue
         inline = _utagai_inline(line)
         if inline is None:
-            if line.lstrip().startswith("#"):
+            if _UTAGAI_HEADING_RE.match(line):
                 found.append((i, _utagai_continuation(lines, i)))
             else:
                 found.append((i, ""))
@@ -186,8 +234,8 @@ def _bekkai_text(lines: list[str]) -> str:
 
 
 def _title(fm: dict, lines: list[str], path: Path) -> str:
-    if fm.get("title"):
-        return fm["title"]
+    if _s(fm.get("title")).strip():
+        return _s(fm["title"]).strip()
     for line in lines:
         if line.startswith("# "):
             return line[2:].strip()
@@ -204,7 +252,7 @@ def parse_decision(path: Path, root: Path, today: dt.date | None = None) -> dict
     legacy = not fm
     lines = body.split("\n")
 
-    date = _parse_date(fm.get("date")) if not legacy else None
+    date = _parse_date(fm.get("date"))
     if date is None:
         m = _FILENAME_DATE_RE.search(path.name)
         if m:
@@ -221,7 +269,7 @@ def parse_decision(path: Path, root: Path, today: dt.date | None = None) -> dict
         if m:
             date = _parse_date(m.group(1))
 
-    review = _parse_date(fm.get("review_by")) if not legacy else None
+    review = _parse_date(fm.get("review_by"))
     if review is None:
         m = _REVIEW_RE.search(body)
         if m:
@@ -234,72 +282,88 @@ def parse_decision(path: Path, root: Path, today: dt.date | None = None) -> dict
     else:
         review_status = "active" if review >= today else "expired"
 
-    status = fm.get("status", "")
+    status = _s(fm.get("status")).strip()
     if status not in VALID_STATUS:
         status = "unknown"
 
     tags = fm.get("tags", [])
     if not isinstance(tags, list):
-        tags = [tags] if tags else []
+        tags = [str(tags)] if tags else []
+    tags = [str(t) for t in tags]
     title = _title(fm, lines, path)
     head = " ".join([title, " ".join(tags), body[:HEAD_BODY_CHARS]])
 
     return {
-        "id": fm.get("decision_id") or f"legacy:{path.stem}",
+        "id": _s(fm.get("decision_id")).strip() or f"legacy:{path.stem}",
         "path": _rel(path, root),
         "title": title,
         "date": date.isoformat() if date else None,
         "review_by": review.isoformat() if review else None,
         "review_status": review_status,
         "status": status,
-        "scope": fm.get("scope", ""),
+        "scope": _s(fm.get("scope")),
         "tags": tags,
-        "why": _section(lines, _WHY_PREFIXES),
-        "premises": _section(lines, ("## 前提",)),
-        "alternatives": _section(lines, ("## 代替案",)),
+        "why": _section(lines, _WHY_WORDS),
+        "premises": _section(lines, ("前提",)),
+        "alternatives": _section(lines, ("代替案",)),
         "utagai": _utagai_text(lines),
         "bekkai": _bekkai_text(lines),
-        "outcome": _section(lines, ("## 裁定", "## 結論", "## 決定")),
+        "outcome": _section(lines, ("裁定", "結論", "決定")),
         "legacy": legacy,
         "text_head": _collapse(head),
     }
 
 
 def load_decisions(root: Path, today: dt.date | None = None) -> list[dict]:
-    """DECISION_GLOBS に合う議事をすべて読む(パス順・重複なし)。"""
-    seen: dict[str, Path] = {}
+    """DECISION_GLOBS に合う議事をすべて読む(パス順・同じファイルは1回)。
+
+    1件が読めなくても全体は止めない。読めなかったファイルは stderr に警告して飛ばす。
+    """
+    seen: dict[Path, Path] = {}
     for pattern in DECISION_GLOBS:
         for p in sorted(Path(root).glob(pattern)):
             if p.is_file():
-                seen.setdefault(str(p), p)
-    return [parse_decision(p, Path(root), today) for p in seen.values()]
+                seen.setdefault(p.resolve(), p)
+    out = []
+    for p in seen.values():
+        try:
+            out.append(parse_decision(p, Path(root), today))
+        except Exception as exc:  # noqa: BLE001 - 1件の不具合でコーパス全体を止めない
+            print(f"警告: 議事を読めずスキップしました: {_rel(p, Path(root))} ({type(exc).__name__}: {exc})", file=sys.stderr)
+    return out
 
 
 # ---------------------------------------------------------------- 検査
 
 def check_decision(path: Path, root: Path) -> list[str]:
-    """frontmatter 付きの議事の書式違反を日本語で返す。frontmatter 無し(過去分)は検査しない。"""
-    fm, body = parse_frontmatter(_read(path))
-    if not fm:
-        return []
+    """frontmatter 付きの議事の書式違反を日本語で返す。frontmatter 無し(過去分)は検査しない。
+
+    ただし先頭が `---` なのに frontmatter を読めない場合は、検査をすり抜けさせず違反にする。
+    """
+    text = _read(path)
+    fm, body = parse_frontmatter(text)
     name = _rel(path, root)
+    if not fm:
+        if text.split("\n", 1)[0].strip() == "---":
+            return [f"{name}: frontmatter を読めません(対応形式: key: value / tags: [a, b])"]
+        return []
     errs: list[str] = []
 
     for key in REQUIRED_KEYS:
-        if not fm.get(key):
+        if not _s(fm.get(key)).strip():
             errs.append(f"{name}: frontmatter に必須キー {key} がありません(必須: {'/'.join(REQUIRED_KEYS)})")
 
-    status = fm.get("status")
+    status = _s(fm.get("status")).strip()
     if status and status not in VALID_STATUS:
         errs.append(f"{name}: status が許容値ではありません: {status}(許容: {' | '.join(VALID_STATUS)})")
 
     date = _parse_date(fm.get("date"))
-    if fm.get("date") and date is None:
-        errs.append(f"{name}: date が YYYY-MM-DD の日付ではありません: {fm['date']}")
-    if fm.get("review_by"):
+    if _s(fm.get("date")).strip() and date is None:
+        errs.append(f"{name}: date が YYYY-MM-DD の日付ではありません: {_s(fm['date'])}")
+    if _s(fm.get("review_by")).strip():
         review = _parse_date(fm["review_by"])
         if review is None:
-            errs.append(f"{name}: review_by が YYYY-MM-DD の日付ではありません: {fm['review_by']}")
+            errs.append(f"{name}: review_by が YYYY-MM-DD の日付ではありません: {_s(fm['review_by'])}")
         elif date is not None and review <= date:
             errs.append(f"{name}: review_by({fm['review_by']})は date({fm['date']})より後の日付にしてください")
 
@@ -307,10 +371,10 @@ def check_decision(path: Path, root: Path) -> list[str]:
     entries = _utagai_all(lines)
     if not entries:
         errs.append(f"{name}: ウタガイ(反対理由)の行がありません。ウタガイの反対理由は必須記録です")
-    elif not any(text for _i, text in entries):
-        errs.append(f"{name}: ウタガイの反対理由が空です。コロンの後(または直下の字下げ項目)に反対理由を書いてください")
+    elif not any(t for _i, t in entries):
+        errs.append(f"{name}: ウタガイの反対理由が空です。コロンの後(または直下の、より深く字下げした項目)に反対理由を書いてください")
 
-    if not any(re.match(r"##\s*(なぜ|背景)", l) for l in lines):
+    if _find_heading(lines, _CHECK_WHY_WORDS) is None:
         errs.append(f"{name}: 見出し `## なぜ` または `## 背景` がありません")
     return errs
 
@@ -333,6 +397,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.check:
         errors: list[str] = []
         for p in args.check:
+            if not Path(p).is_file():
+                errors.append(f"見つかりません: {p}")
+                continue
             errors.extend(check_decision(Path(p), root))
         for e in errors:
             print(e)

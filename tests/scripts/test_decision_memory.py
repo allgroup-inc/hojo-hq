@@ -15,6 +15,7 @@ import pytest
 SCRIPTS = os.path.join(os.path.dirname(__file__), "..", "..", "scripts")
 sys.path.insert(0, os.path.abspath(SCRIPTS))
 
+import decision_memory  # noqa: E402
 from decision_memory import (  # noqa: E402
     check_decision,
     load_decisions,
@@ -91,7 +92,27 @@ def test_legacy_date_from_body(tmp_docs):
 def test_load_scans_both_globs(tmp_docs):
     write(tmp_docs, "docs/議事_20260101_a.md", "# a\n")
     write(tmp_docs, "docs/議事/議事_20260102_b.md", "# b\n")
-    assert len(load_decisions(tmp_docs)) == 2
+    write(tmp_docs, "docs/議事/sub/x.md", "# nested\n")  # 下位ディレクトリは対象外
+    ds = load_decisions(tmp_docs)
+    assert len(ds) == 2
+    assert not any("sub" in d["path"] for d in ds)
+
+
+def test_load_dedupes_file_reachable_twice(tmp_docs, monkeypatch):
+    write(tmp_docs, "docs/議事_20260101_a.md", "# a\n")
+    monkeypatch.setattr(
+        decision_memory, "DECISION_GLOBS", ["docs/議事_*.md", "docs/議事_2026*.md"]
+    )
+    assert len(load_decisions(tmp_docs)) == 1
+
+
+def test_load_dedupes_symlink_to_same_file(tmp_docs):
+    real = write(tmp_docs, "docs/議事/議事_20260102_b.md", "# b\n")
+    try:
+        os.symlink(real, tmp_docs / "docs" / "議事_20260102_link.md")
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink 不可")
+    assert len(load_decisions(tmp_docs)) == 1
 
 
 def test_check_rejects_empty_utagai(tmp_docs):
@@ -155,7 +176,9 @@ def test_unsupported_yaml_file_is_read_as_legacy(tmp_docs):
     p = write(tmp_docs, "docs/議事_20260101_n.md", "---\nitems:\n  - a\n---\n# 議事: n\n")
     d = parse_decision(p, tmp_docs)
     assert d["legacy"] and d["date"] == "2026-01-01" and d["id"] == "legacy:議事_20260101_n"
-    assert check_decision(p, tmp_docs) == []
+    # 読み取りは legacy 扱いだが、--check の関門は素通りさせない(項目4)
+    errs = check_decision(p, tmp_docs)
+    assert len(errs) == 1 and "frontmatter を読めません" in errs[0]
 
 
 # ---- 追加: parse_decision --------------------------------------------------
@@ -294,3 +317,156 @@ def test_cli_list_and_json(tmp_docs):
     data = json.loads(rj.stdout)
     assert len(data) == 2 and {d["date"] for d in data} == {"2026-10-06", None}
     assert all(isinstance(d["tags"], list) for d in data)
+
+
+# ---- 追加(レビュー指摘): 値の型・壊れたファイル・コメント --------------------
+
+def test_list_valued_scalars_do_not_crash(tmp_docs):
+    text = FM.replace("date: 2026-10-06", "date: [2026-10-06]").replace(
+        "title: テスト決定", "title: [a, b]"
+    ).replace("tags: [a, b]", "tags: [a, b]\nreview_by: [2027-01-01]\nscope: [x, y]\nstatus: [adopted]")
+    text = text.replace("status: adopted\n", "", 1)
+    p = write(tmp_docs, "docs/議事_20261006_lst.md", text)
+    d = parse_decision(p, tmp_docs, today=TODAY)
+    assert d["title"] == "a b" and d["scope"] == "x y"
+    assert d["date"] == "2026-10-06"  # ファイル名の日付にフォールバック
+    errs = check_decision(p, tmp_docs)  # 例外を出さず、日付の違反として報告する
+    assert any("date" in e for e in errs) and any("review_by" in e for e in errs)
+
+
+def test_list_valued_decision_id_and_status(tmp_docs):
+    text = FM.replace("decision_id: D20261006-x", "decision_id: [D1, D2]").replace(
+        "status: adopted", "status: [adopted]"
+    )
+    p = write(tmp_docs, "docs/議事_20261006_ids.md", text)
+    d = parse_decision(p, tmp_docs)
+    assert d["id"] == "D1 D2" and d["status"] == "adopted"  # 1要素のリストは連結して読む
+    two = write(tmp_docs, "docs/議事_20261006_two.md", FM.replace("status: adopted", "status: [adopted, rejected]"))
+    assert parse_decision(two, tmp_docs)["status"] == "unknown"
+    assert any("status" in e for e in check_decision(two, tmp_docs))
+    assert isinstance(check_decision(p, tmp_docs), list)
+
+
+def test_broken_file_does_not_stop_load(tmp_docs, monkeypatch, capsys):
+    write(tmp_docs, "docs/議事_20260101_ok.md", "# ok\n")
+    write(tmp_docs, "docs/議事_20260102_boom.md", "# boom\n")
+    real = decision_memory.parse_decision
+
+    def flaky(path, root, today=None):
+        if "boom" in path.name:
+            raise RuntimeError("壊れた")
+        return real(path, root, today)
+
+    monkeypatch.setattr(decision_memory, "parse_decision", flaky)
+    ds = load_decisions(tmp_docs)
+    assert [d["path"] for d in ds] == ["docs/議事_20260101_ok.md"]
+    assert "boom" in capsys.readouterr().err
+
+
+# ---- 追加(レビュー指摘): ウタガイ継続行・見出し ------------------------------
+
+def test_check_rejects_sibling_indented_utagai(tmp_docs):
+    text = FM.replace(
+        "- **ウタガイ**: コストが高い\n", "  - **ウタガイ**:\n  - **ベッカイ**: b\n"
+    )
+    errs = check_decision(write(tmp_docs, "docs/議事_20261006_sib.md", text), tmp_docs)
+    assert any("ウタガイ" in e for e in errs)
+
+
+def test_check_accepts_deeper_indented_utagai(tmp_docs):
+    text = FM.replace(
+        "- **ウタガイ**: コストが高い\n", "  - **ウタガイ**:\n    - コストが高い\n  - **ベッカイ**: b\n"
+    )
+    assert check_decision(write(tmp_docs, "docs/議事_20261006_deep.md", text), tmp_docs) == []
+
+
+def test_empty_utagai_bullet_under_heading_mentioning_utagai_fails(tmp_docs):
+    text = FM.replace(
+        "## 三名体制の議論\n- **ウタガイ**: コストが高い\n",
+        "## 三名体制の議論(ウタガイ反対必須)\n- **ウタガイ**:\n- **ベッカイ**: b\n",
+    )
+    errs = check_decision(write(tmp_docs, "docs/議事_20261006_hd.md", text), tmp_docs)
+    assert any("ウタガイ" in e for e in errs)
+
+
+def test_utagai_heading_with_body_passes(tmp_docs):
+    for head in ("### ウタガイ(懐疑)", "### **ウタガイ**"):
+        text = FM.replace(
+            "- **ウタガイ**: コストが高い\n", f"{head}\n- コストが高い\n"
+        )
+        assert check_decision(write(tmp_docs, "docs/議事_20261006_hp.md", text), tmp_docs) == []
+
+
+# ---- 追加(レビュー指摘): frontmatter を読めない時の関門 ----------------------
+
+def test_check_flags_unreadable_frontmatter(tmp_docs):
+    nested = "---\ndecision_id: D1-x\nsupersedes:\n  - D0\n---\n## なぜ\nx\n- ウタガイ: y\n"
+    unclosed = "---\ndecision_id: D1-x\ndate: 2026-10-06\n## なぜ\nx\n- ウタガイ: y\n"
+    for i, text in enumerate((nested, unclosed)):
+        p = write(tmp_docs, f"docs/議事_2026100{i}_u.md", text)
+        errs = check_decision(p, tmp_docs)
+        assert len(errs) == 1 and "frontmatter を読めません" in errs[0]
+        assert parse_decision(p, tmp_docs)["legacy"] is True  # 読み取りは従来どおり legacy
+
+
+def test_check_still_ignores_files_not_starting_with_frontmatter(tmp_docs):
+    p = write(tmp_docs, "docs/議事_20260810_hr.md", "# 旧\n---\nkey: x\n---\n")
+    assert check_decision(p, tmp_docs) == []
+
+
+# ---- 追加(レビュー指摘): コメント処理とテンプレートの往復 --------------------
+
+def test_comment_stripping_rules():
+    fm, _ = parse_frontmatter(
+        "---\n"
+        'title: "a # b"\n'
+        "scope: Issue #10 対応\n"
+        "supersedes:   # コメントだけ\n"
+        "decided_by: 小柳 # 末尾コメント\n"
+        "decision_id: D1-x #\n"
+        "---\n"
+    )
+    assert fm["title"] == "a # b"
+    assert fm["scope"] == "Issue #10 対応"
+    assert fm["supersedes"] == ""
+    assert fm["decided_by"] == "小柳"
+    assert fm["decision_id"] == "D1-x"
+
+
+def test_template_frontmatter_round_trips():
+    template = Path(SCRIPT).parent.parent / "docs" / "wikiskill" / "議事frontmatterテンプレート.md"
+    block = template.read_text(encoding="utf-8").split("```yaml\n", 1)[1].split("```", 1)[0]
+    fm, _ = parse_frontmatter(block)
+    assert fm["supersedes"] == ""
+    assert fm["decision_id"] == "D20260101-example"
+    assert fm["status"] == "adopted" and fm["review_by"] == "2027-04-04"
+    assert fm["tags"] == ["memory", "hooks", "skills"]
+    assert fm["scope"] == "hojo-hq/基盤" and fm["decided_by"] == "小柳"
+
+
+# ---- 追加(レビュー指摘): CLI と ### 見出し ----------------------------------
+
+def test_cli_check_missing_file(tmp_docs):
+    r = run(["--check", str(tmp_docs / "docs" / "nope.md")])
+    assert r.returncode == 1 and "見つかりません" in r.stdout and "Traceback" not in r.stderr
+
+
+def test_sections_accept_h2_and_h3_headings(tmp_docs):
+    text = (
+        "# a\n###なぜ\n理由\n"
+        "### 前提\n前提の文\n#### 小見出し\n続き\n### 代替案\n案\n"
+        "### 結論(部門長の裁定)\n採用\n## 見直し\nx\n"
+    )
+    d = parse_decision(write(tmp_docs, "docs/議事_x6.md", text), tmp_docs)
+    assert d["why"] == "理由"
+    assert d["premises"] == "前提の文 #### 小見出し 続き"
+    assert d["alternatives"] == "案"
+    assert d["outcome"] == "採用"
+
+
+def test_check_why_heading_accepts_h3_and_no_space(tmp_docs):
+    for head in ("### なぜ", "##なぜ", "### 背景"):
+        p = write(tmp_docs, "docs/議事_20261006_h3.md", FM.replace("## なぜ", head))
+        assert check_decision(p, tmp_docs) == []
+    p = write(tmp_docs, "docs/議事_20261006_h4.md", FM.replace("## なぜ", "#### なぜ"))
+    assert any("なぜ" in e for e in check_decision(p, tmp_docs))
