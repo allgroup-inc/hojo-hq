@@ -1,0 +1,86 @@
+name: glow-sns-post
+
+# GLOW「世界の懸け橋」の Facebook ページ / Instagram 自動投稿(2026-10-06 小柳さん決裁・承認なしの全自動)。
+# 月・水・金 12:05 JST に posts/glow/order.json の順で1本ずつ投稿し、結果を小柳さんのLINEへ知らせる。
+# Secret GLOW_FB_PAGE_TOKEN が未登録の間は何もしない(緑のまま・通知なし)。
+# 素材を作り直すときは手元で scripts/glow_sns_build.py を実行してコミットする(フォントが手元にしか無いため)。
+
+on:
+  schedule:
+    - cron: "5 3 * * 1,3,5"   # JST 月水金 12:05
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "post=投稿する / status=つながり確認だけ / dry-run=選定と検査だけ"
+        default: status
+        type: choice
+        options: [status, dry-run, post]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: glow-sns-post
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 出荷ゲートの検査(未通過なら投稿しない)
+        run: |
+          python scripts/shipping_gate.py --self-test
+          python scripts/shipping_gate.py --check-group glow
+
+      - name: 投稿(またはつながり確認)
+        id: run
+        env:
+          GLOW_FB_PAGE_TOKEN: ${{ secrets.GLOW_FB_PAGE_TOKEN }}
+          MODE: ${{ github.event.inputs.mode || 'post' }}
+        run: |
+          case "$MODE" in
+            status)  python scripts/glow_sns_post.py --status ;;
+            dry-run) python scripts/glow_sns_post.py --dry-run ;;
+            *)       python scripts/glow_sns_post.py ;;
+          esac
+
+      # どこまで出したかの記録は、成否に関わらず残す(片方だけ成功した場合の二重投稿を防ぐ)
+      - name: 投稿の記録をコミット
+        if: always() && (github.event.inputs.mode || 'post') == 'post'
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add data/glow_sns_state.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "auto: GLOW SNS投稿の記録 $(date '+%Y-%m-%d')"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done
+
+      - name: LINE通知(投稿完了)
+        if: success() && steps.run.outputs.connected == 'yes'
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【世界の懸け橋】Instagram・Facebookに投稿しました
+            内容: ${{ steps.run.outputs.head }}
+            画像: https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/posts/glow/${{ steps.run.outputs.post_id }}.jpg
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【世界の懸け橋】SNS自動投稿が失敗しました(次の回に自動でやり直します)
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
