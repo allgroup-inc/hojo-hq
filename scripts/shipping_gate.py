@@ -197,6 +197,8 @@ def verify_file(path, today=None):
 TARGET_GROUPS = {
     "sns":  ("posts/launch/*.md", "posts/carousel/caption.md"),
     "line": ("posts/line/*.md",),
+    # GLOW「世界の懸け橋」のInstagram/Facebook(2026-10-06 追加・scripts/glow_sns_build.py が生成)
+    "glow": ("posts/glow/*.md",),
 }
 
 
@@ -314,11 +316,12 @@ def self_test():
     check("label", not ok and pr[0].startswith("posts/launch/01.md: "), f"got {pr}")
 
     # 8) 配信経路グループ(LINEの違反でSNS投稿を巻き添えにしない分離)
-    check("group.names", set(TARGET_GROUPS) == {"sns", "line"}, f"got {set(TARGET_GROUPS)}")
+    check("group.names", set(TARGET_GROUPS) == {"sns", "line", "glow"}, f"got {set(TARGET_GROUPS)}")
     sns_t = collect_targets(group="sns")
     line_t = collect_targets(group="line")
-    check("group.disjoint", not (set(sns_t) & set(line_t)))
-    check("group.all_is_union", set(collect_targets()) == set(sns_t) | set(line_t))
+    glow_t = collect_targets(group="glow")
+    check("group.disjoint", not (set(sns_t) & set(line_t)) and not (set(glow_t) & (set(sns_t) | set(line_t))))
+    check("group.all_is_union", set(collect_targets()) == set(sns_t) | set(line_t) | set(glow_t))
     check("group.sns_found", len(sns_t) >= 1, f"got {len(sns_t)}")
 
     if failed:
