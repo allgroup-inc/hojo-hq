@@ -8,7 +8,7 @@ GLOW LINE公式アカウント(@042wvrgo)のリッチメニューを、画像の
 
 --apply には環境変数 GLOW_LINE_CHANNEL_ACCESS_TOKEN(GitHub Secrets)が必要。
 ボタン(左から):
-  世界へ挑戦  … 世界の懸け橋のLP(GLOW_LP_URL があればそちら)
+  世界へ挑戦  … 世界の架け橋のLP(GLOW_LP_URL があればそちら)
   補助金を探す … 沖縄企業のミカタ
   経営の相談   … ゆんたく経営相談室
 同じ名前(GLOW-)の古いメニューは登録後に消すので、何度流しても1つだけ残る。
@@ -37,12 +37,12 @@ INK = (31, 42, 46)
 
 MIKATA_URL = "https://allgroup-inc.github.io/hojo-hq/"
 YUNTAKU_URL = "https://allgroup-inc.github.io/yuntaku-lp/"
-# 世界の懸け橋LP(2026-10-05 公開・小柳さん決裁。allgroup-inc/glow-world・独自ドメイン glow-okinawa.jp)。Variables GLOW_LP_URL があればそちらを優先
+# 世界の架け橋LP(2026-10-05 公開・小柳さん決裁。allgroup-inc/glow-world・独自ドメイン glow-okinawa.jp)。Variables GLOW_LP_URL があればそちらを優先
 LP_URL = "https://glow-okinawa.jp/"
 MENU_PREFIX = "GLOW-"
 
 BUTTONS = [
-    {"title": "世界へ挑戦", "sub": "世界の懸け橋(海外販路)", "bg": RED, "fg": CREAM},
+    {"title": "世界へ挑戦", "sub": "世界の架け橋(海外販路)", "bg": RED, "fg": CREAM},
     {"title": "補助金を探す", "sub": "沖縄企業のミカタ(無料)", "bg": NAVY, "fg": CREAM},
     {"title": "経営の相談", "sub": "ゆんたく経営相談室", "bg": CREAM, "fg": NAVY},
 ]

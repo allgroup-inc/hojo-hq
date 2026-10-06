@@ -1,6 +1,6 @@
 name: glow-sns-post
 
-# GLOW「世界の懸け橋」の Facebook ページ / Instagram 自動投稿(2026-10-06 小柳さん決裁・承認なしの全自動)。
+# GLOW「世界の架け橋」の Facebook ページ / Instagram 自動投稿(2026-10-06 小柳さん決裁・承認なしの全自動)。
 # 月・水・金 12:05 JST に posts/glow/order.json の順で1本ずつ投稿し、結果を小柳さんのLINEへ知らせる。
 # Secret GLOW_FB_PAGE_TOKEN が未登録の間は何もしない(緑のまま・通知なし)。
 # 素材を作り直すときは手元で scripts/glow_sns_build.py を実行してコミットする(フォントが手元にしか無いため)。
@@ -71,7 +71,7 @@ jobs:
           channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
           message: |
-            ✅【世界の懸け橋】Instagram・Facebookに投稿しました
+            ✅【世界の架け橋】Instagram・Facebookに投稿しました
             内容: ${{ steps.run.outputs.head }}
             画像: https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/posts/glow/${{ steps.run.outputs.post_id }}.jpg
 
@@ -82,5 +82,5 @@ jobs:
           channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
           message: |
-            🚨【世界の懸け橋】SNS自動投稿が失敗しました(次の回に自動でやり直します)
+            🚨【世界の架け橋】SNS自動投稿が失敗しました(次の回に自動でやり直します)
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

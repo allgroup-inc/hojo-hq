@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GLOW「世界の懸け橋」の Instagram / Facebook 投稿素材(画像+キャプション)を作る。
+GLOW「世界の架け橋」の Instagram / Facebook 投稿素材(画像+キャプション)を作る。
 
   python scripts/glow_sns_build.py            # 全投稿の画像とキャプションを作り直す(フォントのある手元で実行)
   python scripts/glow_sns_build.py --restamp  # 文面の再点検が済んだ日付で出荷ゲート記録だけ更新(画像は触らない)
@@ -9,15 +9,18 @@ GLOW「世界の懸け橋」の Instagram / Facebook 投稿素材(画像+キャ�
 出力: posts/glow/<id>.jpg(1080x1350)・posts/glow/<id>.md(キャプション+出荷ゲート記録)・posts/glow/order.json(投稿順)
 投稿は scripts/glow_sns_post.py(ワークフロー glow-sns-post)が order.json の順に1本ずつ行う。
 
-文面のルール(2026-10-06 小柳さん決裁・議事は glow-docs-private の議事_20261006_GLOW世界の懸け橋_SNS自動投稿):
+2026-10-06 第2版(小柳さん指示「もっと目を引くデザインや内容に。サイトから引っ張っている内容だとすぐわかるので」):
+サイトの文章を写さず、SNS向けのシリーズに作り直した。
+  海外販路クイズ / 英語で言うと? / やりがちNG→OK / 海外販路ことば辞典 / 比べてみた / 世界で通用した話
+文面のルール(議事は glow-docs-private の議事_20261006_GLOW世界の懸け橋_SNS自動投稿):
 - 数字・事例は提案資料で照合済みのものだけ。出典を必ず添える。新しい数字を足すときは照合してから
 - 「提携」「公式」とは書かない(Alibaba.com の名称・ロゴの使用ルールが未確認のため)。ロゴは使わない
-- 「懸け橋」をローマ字で書かない / M&A・承継の話題は出さない(出荷ゲートの禁止表現)
+- 「架け橋」をローマ字で書かない / M&A・承継の話題は出さない(出荷ゲートの禁止表現)
 - AIの商品写真には「※写真はAIで作ったイメージです」を必ず入れる
+- 健康や効果をうたう表現は使わない(商品の説明は見た目・味・使い方まで)
 """
 import json
 import os
-import re
 import sys
 from datetime import datetime, timedelta, timezone
 
@@ -31,8 +34,10 @@ import shipping_gate  # noqa: E402
 
 JST = timezone(timedelta(hours=9))
 W, H = 1080, 1350
-NAVY, RED, CREAM, INK, MUTED, SEA, WHITE = (0, 51, 92), (185, 80, 47), (255, 251, 244), (42, 50, 56), (102, 113, 122), (11, 110, 138), (255, 255, 255)
-LIGHT_SEA = (234, 244, 247)
+FOOT = 112  # 下の白い帯(ロゴ)の高さ
+NAVY, ORANGE, RED, SEA = (0, 51, 92), (248, 136, 0), (185, 80, 47), (11, 110, 138)
+CREAM, INK, MUTED, WHITE, YELLOW = (255, 251, 244), (31, 42, 46), (102, 113, 122), (255, 255, 255), (255, 210, 63)
+PALE = {"navy": (226, 234, 242), "sea": (226, 241, 245), "red": (248, 232, 226)}
 
 FONT_DIRS = [os.path.expanduser("~/.fonts"), "/usr/share/fonts/truetype", "/usr/share/fonts/opentype"]
 
@@ -52,258 +57,353 @@ def F(kind, size):
 
 SITE = "https://glow-okinawa.jp/?utm_source={src}&utm_medium=social&utm_campaign=glow_sns"
 LINE_GO = "https://allgroup-inc.github.io/hojo-hq/go/glow-{ch}/"
-TAGS = "#沖縄 #沖縄県産 #沖縄の生産者 #沖縄特産品 #海外販路 #輸出 #越境EC #Alibaba #世界の懸け橋 #GLOW"
+TAGS = "#沖縄 #沖縄県産 #沖縄の生産者 #沖縄特産品 #海外販路 #輸出 #越境EC #Alibaba #世界の架け橋 #GLOW"
 AI_NOTE = "※写真はAIで作ったイメージです。"
+SAVE = "あとで見返せるように、保存しておくと便利です。"
 
-# ---------------------------------------------------------------- 投稿の中身
-# kind: num(大きな数字)/ wall(5つの壁)/ item(沖縄の産品と英語名)/ case(事例)/ qa(よくある質問)/ text(説明)/ photo(写真+文)
+# ---------------------------------------------------------------- 投稿の中身(この順で投稿する)
 POSTS = [
-    {"id": "intro", "kind": "photo", "img": "hero-shuri-calligraphy.jpg", "kicker": "はじめまして",
-     "title": "沖縄の力強さを、\n世界へ。",
-     "lines": ["沖縄でつくったものを、世界の買い手へ。", "GLOWの「世界の懸け橋」です。"],
-     "cap": "はじめまして。株式会社GLOWの「世界の懸け橋」です。\n\n沖縄の生産者・企業のみなさんの商品を、世界最大級の企業どうしの取引サイト「Alibaba.com」の上にあるGLOWの沖縄の売り場に並べ、世界の買い手へ届けるお手伝いをしています。\n\nこのアカウントでは、世界の市場の数字や、海外へ売るときの壁と乗り越え方、沖縄の産品の英語での伝え方などを、わかりやすくお届けします。"},
-    {"id": "num-buyers", "kind": "num", "kicker": "世界の市場", "num": "4,000万", "unit": "以上",
-     "label": "世界の会社・お店が、\nAlibaba.comで仕入れ先を\n探しています", "src": "出典: Alibaba Group 公表(2024年度は4,800万以上)",
-     "cap": "世界で4,000万以上の会社やお店が、Alibaba.comで仕入れ先を探しています。\n\n沖縄にいながら、この人たちに商品を見てもらう方法があります。GLOWは、Alibaba.comの上に沖縄の商品を紹介する売り場を持ち、あなたの商品を並べます。\n\n出典: Alibaba Group 公表(2024年度は4,800万以上)"},
-    {"id": "wall-1", "kind": "wall", "no": 1, "title": "海外の展示会", "cost": "1回 約300万円",
-     "desc": "出展料・ブースの装飾・商品の輸送を\n合わせた目安。数日で終わり、\n成果が出る保証はありません。",
-     "glow": "365日ひらいている売り場に、\nあなたの商品がずっと並びます。",
-     "cap": "ふつうに世界へ売ろうとすると、5つの壁があります。\n\n壁1は「海外の展示会」。出展料・装飾・輸送を合わせると1回で約300万円が目安です(条件によって変わります)。しかも数日で終わり、成果が出る保証はありません。\n\nGLOWの売り場なら、365日あなたの商品が世界に並び続けます。"},
-    {"id": "item-andagi", "kind": "item", "img": "andagi.webp", "en": "Sata Andagi", "ja": "サーターアンダギー",
-     "cap": "サーターアンダギーは、英語の売り場では「Sata Andagi」。\n\n世界の買い手は、まず写真と英語の名前で商品を選びます。どんな味か、どう食べるかを英語でひとこと添えるだけで、伝わり方が変わります。\n\nGLOWの売り場では、英語の商品名と説明をいっしょに整えます。\n\n" + AI_NOTE},
-    {"id": "num-inquiries", "kind": "num", "kicker": "世界の市場", "num": "40万件", "unit": "以上",
-     "label": "毎日、世界から届く\n商品の問い合わせ", "src": "出典: アリババ株式会社 公式サイト",
-     "cap": "Alibaba.comには、毎日40万件以上の問い合わせが世界から届いています。\n\n展示会のように数日で終わるのではなく、一年中、世界の会社が仕入れ先を探しに来る場所です。\n\n出典: アリババ株式会社 公式サイト"},
-    {"id": "case-matcha", "kind": "case", "tag": "日本の地域産品", "num": "約720億円",
-     "title": "抹茶などの緑茶の輸出が、\n1年で約2倍に", "desc": "2025年の緑茶の輸出額。\n海外の抹茶人気で、\n前の年からほぼ倍に増えました。",
-     "src": "出典: 農林水産省(2026年2月公表)",
-     "cap": "2025年の緑茶の輸出額は約720億円。海外の抹茶人気で、前の年からほぼ倍に増えました。\n\n日本の地域の産品が、世界で選ばれています。沖縄の産品にも、まだ知られていない魅力がたくさんあります。\n\n出典: 農林水産省(2026年2月公表)"},
-    {"id": "qa-english", "kind": "qa", "q": "英語が話せなくても\n大丈夫?",
-     "a": "大丈夫です。\n日本語のままやり取りできます。\nGLOWもお手伝いします。",
-     "cap": "よく聞かれる質問「英語が話せなくても大丈夫?」\n\n大丈夫です。翻訳の仕組みを使い、日本語のままやり取りできます。英語の商品名や説明づくりも、GLOWがいっしょに進めます。"},
-    {"id": "item-mozuku", "kind": "item", "img": "mozuku.webp", "en": "Okinawa Mozuku", "ja": "もずく",
-     "cap": "もずくは、英語の売り場では「Okinawa Mozuku」。\n\n「Okinawa」を名前に入れると、どこの産品かがひと目で伝わります。産地の名前は、世界の買い手にとって大事な手がかりです。\n\n" + AI_NOTE},
-    {"id": "wall-2", "kind": "wall", "no": 2, "title": "海外への出張", "cost": "欧米1週間 約100万円",
-     "desc": "航空券・ホテル・滞在費の目安。\n行っても、決める立場の人に\n会える保証はありません。",
-     "glow": "沖縄にいながら、\n世界から問い合わせが届きます。",
-     "cap": "海外へ売るときの壁2は「海外への出張」。欧米へ1週間行くと、航空券・ホテル・滞在費で約100万円が目安です(条件によって変わります)。\n\nGLOWの売り場なら、沖縄にいながら、世界の買い手から問い合わせが届きます。"},
-    {"id": "fee", "kind": "text", "kicker": "料金はシンプル", "title": "値段は、\nあなたが決められます",
-     "lines": ["売り場への掲載  1商品 月1万円", "売れたときだけ  販売価格の20%", "国内の倉庫まで  送料のみ"],
-     "foot": "※売れなかった月も、掲載料の月1万円はかかります。", "fs": 52,
-     "cap": "世界の懸け橋の料金は3つだけです。\n\n・売り場への掲載: 1商品 月1万円\n・売れたときだけ: 販売価格の20%\n・国内の倉庫までの送料\n\n世界での販売価格は、あなたが決めます。手数料と送料を見込んで値段をつければ、売れたときに損をしません。\n※売れなかった月も、掲載料の月1万円はかかります。"},
-    {"id": "item-umibudo", "kind": "item", "img": "umibudo.webp", "en": "Sea Grapes", "ja": "海ぶどう",
-     "cap": "海ぶどうは、英語では「Sea Grapes」。\n\n見た目がそのまま名前になっているので、写真といっしょなら世界の買い手にもすぐ伝わります。食感や食べ方をひとこと添えると、もっと選ばれやすくなります。\n\n" + AI_NOTE},
-    {"id": "case-kagetsuen", "kind": "case", "tag": "Alibaba.comの事例", "num": "50数か国",
-     "title": "人口約12万人の町の\nお茶屋さんが、\n50数か国と取引", "desc": "愛媛県新居浜市の香月園は、\n出店から2年2か月で\n50数か国と取引するように。",
+    {"id": "intro", "kind": "brand", "img": "hero-shuri-calligraphy.jpg",
+     "head": "沖縄の宝を、\n世界の買い手へ。", "sub": "世界の架け橋 by GLOW、はじめます",
+     "cap": "はじめまして。株式会社GLOWの「世界の架け橋」です。\n\n沖縄の黒糖、泡盛、もずく、琉球ガラス。沖縄には、世界でまだ知られていない宝がたくさんあります。\n\n私たちは、世界最大級の企業どうしの取引サイト「Alibaba.com」の上に沖縄の売り場を持ち、生産者のみなさんの商品を世界の買い手へ届けるお手伝いをしています。\n\nこのアカウントでは\n・海外販路クイズ\n・英語で言うと?(沖縄の産品の英語での伝え方)\n・やりがちNG→OK\n・海外販路ことば辞典\nなどを、月・水・金にお届けします。"},
+    {"id": "qz-buyers", "kind": "quiz", "q": "Alibaba.comで\n仕入れ先を探している\n世界の会社・お店は\nどれくらい?",
+     "opts": ["40万", "400万", "4,000万以上"],
+     "cap": "海外販路クイズ\n\nQ. Alibaba.comで仕入れ先を探している世界の会社・お店は、どれくらい?\nA. 40万 / B. 400万 / C. 4,000万以上\n\n.\n.\n.\n正解は C. 4,000万以上 です。\n\n世界中の会社やお店が、ここで「次に仕入れる商品」を探しています。沖縄の商品も、その目にとまる場所に並べられます。\n\n出典: Alibaba Group 公表(2024年度は4,800万以上)"},
+    {"id": "en-andagi", "kind": "word", "img": "andagi", "ja": "サーターアンダギー", "en": "Sata Andagi",
+     "line": "Okinawan fried dough balls,\ncrispy outside and soft inside.",
+     "cap": "英語で言うと?\n\nサーターアンダギー → Sata Andagi\n\n名前はそのままでも大丈夫。大事なのは、どんな物かを英語で一文そえることです。\n\n例: Okinawan fried dough balls, crispy outside and soft inside.\n(外はカリッと、中はふんわりした沖縄の揚げ菓子)\n\n世界の買い手は、写真と英語の一文で「どんな味か」を想像します。\n\n" + AI_NOTE},
+    {"id": "cmp-expo", "kind": "compare", "head": "展示会1回分で、\n売り場に25年。",
+     "left": ("海外の展示会", ["1回 約300万円", "数日で終わる"]),
+     "right": ("世界の架け橋", ["1商品 月1万円", "365日並び続ける"]),
+     "foot": "300万円 ÷ 月1万円 = 300か月 = 25年(展示会の金額は目安)",
+     "cap": "比べてみた: 海外の展示会 vs 世界の架け橋\n\n海外の展示会は、出展料・装飾・輸送を合わせて1回約300万円が目安(条件によって変わります)。しかも数日で終わります。\n\n世界の架け橋の売り場は、1商品 月1万円。\n300万円あれば、計算上は1つの商品を25年間並べ続けられます。\n\n※売れたときは販売価格の20%、国内の倉庫までの送料がかかります。売れなかった月も月1万円はかかります。"},
+    {"id": "ng-name", "kind": "ngok", "head": "商品名、\n日本語だけになって\nいませんか?",
+     "ng": "「黒糖」「もずく」と\n日本語の名前だけ", "ok": "英語の名前 +\nどんな物かを英語で一文",
+     "cap": "やりがちNG→OK\n\nNG: 商品名が日本語だけ\nOK: 英語の名前に、どんな物かを英語で一文そえる\n\n世界の買い手は、日本語が読めません。名前だけでは、食べ物なのか、どう使うのかが伝わらないことも。\n\n英語の名前と説明づくりは、GLOWがいっしょに進めます。\n\n" + SAVE},
+    {"id": "dic-moq", "kind": "dict", "term": "MOQ", "yomi": "エム・オー・キュー", "mean": "最低注文数",
+     "body": "1回の注文で受ける、いちばん少ない数。\n企業どうしの取引では、\n最初に聞かれることが多い言葉です。",
+     "cap": "海外販路ことば辞典\n\nMOQ(エム・オー・キュー)= 最低注文数\nMinimum Order Quantity の略です。\n\n「1回の注文で、何個から受けますか?」という意味。会社やお店が仕入れ先を探す取引では、最初に聞かれることが多い言葉です。\n\n面談では、無理のないMOQをいっしょに決めます。\n\n" + SAVE},
+    {"id": "story-kagetsuen", "kind": "story", "color": "sea", "tag": "世界で通用した話",
+     "big": "50数か国", "head": "人口約12万人の町の\nお茶屋さんが、\n世界と取引。",
+     "body": "愛媛県新居浜市の香月園。\nAlibaba.comに出店して2年2か月で、\n50数か国と取引するように。",
      "src": "出典: アリババ株式会社 お客様事例",
-     "cap": "愛媛県新居浜市のお茶屋さん・香月園は、Alibaba.comに出店してから2年2か月で、50数か国と取引するようになりました。\n\n小さな町のお店でも、世界と取引できています。\n\n出典: アリババ株式会社 お客様事例"},
-    {"id": "wall-3", "kind": "wall", "no": 3, "title": "言葉", "cost": "通訳1日 約5万円",
-     "desc": "商品の説明や値段の交渉で\n言い間違いがあれば、\n大きなトラブルになります。",
-     "glow": "日本語のままで、\nやり取りできます。",
-     "cap": "海外へ売るときの壁3は「言葉」。通訳をお願いすると1日約5万円が目安です(条件によって変わります)。値段の交渉で言い間違いがあれば、大きなトラブルにもなります。\n\nGLOWの売り場なら、翻訳の仕組みとGLOWのお手伝いで、日本語のままやり取りできます。"},
-    {"id": "item-awamori", "kind": "item", "img": "awamori.webp", "en": "Okinawa Awamori", "ja": "泡盛",
-     "cap": "泡盛は、英語の売り場では「Okinawa Awamori」。\n\n沖縄にしかないお酒だからこそ、名前の前に「Okinawa」をつけて、どこで生まれたかを伝えます。\n\n※お酒の輸出は、国ごとのルールの確認が必要です。くわしくはご相談ください。\n" + AI_NOTE},
-    {"id": "num-export", "kind": "num", "kicker": "日本の輸出", "num": "1兆7,005", "unit": "億円", "small": True,
-     "label": "日本の農林水産物・食品の輸出額\n(2025年・13年連続で過去最高)", "src": "出典: 農林水産省(2026年2月公表)",
-     "cap": "2025年の日本の農林水産物・食品の輸出額は1兆7,005億円。13年連続で過去最高になりました。\n\n世界の食卓で、日本の産品が選ばれ続けています。\n\n出典: 農林水産省(2026年2月公表)"},
-    {"id": "qa-what", "kind": "qa", "q": "どんな商品が\n売れますか?",
-     "a": "食品、飲み物、工芸品、雑貨など、\n沖縄でつくられた商品です。\nまず商品名をお聞かせください。",
-     "cap": "よく聞かれる質問「どんな商品が売れますか?」\n\n食品、飲み物、工芸品、雑貨など、沖縄でつくられた商品が対象です。売れるかどうかは商品や国によって違うので、まずは商品名をお聞かせください。いっしょに考えます。"},
-    {"id": "item-glass", "kind": "item", "img": "glass.webp", "en": "Ryukyu Glass", "ja": "琉球ガラス",
-     "cap": "琉球ガラスは、英語では「Ryukyu Glass」。\n\n食品だけでなく、工芸品も世界の買い手に届けられます。手づくりであること、一つずつ色や形が違うことを英語で伝えると、魅力が伝わりやすくなります。\n\n" + AI_NOTE},
-    {"id": "wall-4", "kind": "wall", "no": 4, "title": "書類と発送", "cost": "専門用語だらけ",
-     "desc": "インボイス、通関、国際輸送。\nひとつでも間違えると、\n商品が港で止まります。",
-     "glow": "国内の倉庫へ送るだけ。\nその先はGLOWがつなぎます。",
-     "cap": "海外へ売るときの壁4は「書類と発送」。インボイス、通関、国際輸送と専門用語だらけで、ひとつでも間違えると商品が港で止まってしまいます。\n\nGLOWの売り場なら、あなたは日本国内の倉庫へ送るだけ。その先はGLOWがつなぎます。"},
-    {"id": "case-awamori-award", "kind": "case", "tag": "沖縄の産品", "num": "最高金賞",
-     "title": "泡盛が、世界の\n三大酒類コンペで\n最高金賞", "desc": "忠孝酒造(豊見城市)の\n泡盛『月の蒸溜所』が、\n三大コンペのすべてで最高金賞。",
+     "cap": "世界で通用した話\n\n愛媛県新居浜市(人口約12万人)のお茶屋さん・香月園は、Alibaba.comに出店してから2年2か月で、50数か国と取引するようになりました。\n\n大きな会社でなくても、世界と取引できる時代です。\n\n出典: アリババ株式会社 お客様事例"},
+    {"id": "en-umibudo", "kind": "word", "img": "umibudo", "ja": "海ぶどう", "en": "Sea Grapes",
+     "line": "A seaweed with tiny beads\nthat pop in your mouth.",
+     "cap": "英語で言うと?\n\n海ぶどう → Sea Grapes\n\n例: A seaweed with tiny beads that pop in your mouth.\n(口の中でプチプチはじける、小さな粒の海藻)\n\n食感を英語で伝えると、食べたことのない人にも魅力が伝わります。\n\n" + AI_NOTE},
+    {"id": "qz-inquiries", "kind": "quiz", "q": "Alibaba.comに\n世界から届く問い合わせは\n1日にどれくらい?",
+     "opts": ["4,000件", "4万件", "40万件以上"],
+     "cap": "海外販路クイズ\n\nQ. Alibaba.comに世界から届く問い合わせは、1日にどれくらい?\nA. 4,000件 / B. 4万件 / C. 40万件以上\n\n.\n.\n.\n正解は C. 40万件以上 です。\n\n一年中、毎日、世界のどこかで「この商品を仕入れたい」という声が上がっています。\n\n出典: アリババ株式会社 公式サイト"},
+    {"id": "cmp-trip", "kind": "compare", "head": "出張しなくても、\n世界と商談。",
+     "left": ("海外へ出張", ["欧米1週間", "約100万円"]),
+     "right": ("世界の架け橋", ["沖縄にいながら", "世界から問い合わせ"]),
+     "foot": "※金額は一般的な目安で、条件によって変わります。",
+     "cap": "比べてみた: 海外へ出張 vs 世界の架け橋\n\n欧米へ1週間出張すると、航空券・ホテル・滞在費で約100万円が目安(条件によって変わります)。行っても、決める立場の人に会えるとは限りません。\n\n世界の架け橋の売り場なら、沖縄にいながら、世界の買い手から問い合わせが届きます。"},
+    {"id": "ng-photo", "kind": "ngok", "head": "その写真、\n世界で選ばれますか?",
+     "ng": "暗い室内で撮った写真\n背景がごちゃごちゃ", "ok": "明るい自然光\nすっきりした背景で\n商品が主役",
+     "cap": "やりがちNG→OK\n\nNG: 暗い室内、背景がごちゃごちゃした写真\nOK: 明るい自然光、すっきりした背景で、商品が主役の写真\n\n世界の買い手は、まず写真で選びます。スマホでも、窓ぎわの明るい場所で、白っぽい布を背景にするだけで見え方が変わります。\n\n撮影のことも、ご相談ください。\n\n" + SAVE},
+    {"id": "en-glass", "kind": "word", "img": "glass", "ja": "琉球ガラス", "en": "Ryukyu Glass",
+     "line": "Handmade glassware with\ncolorful, bubbly textures.",
+     "cap": "英語で言うと?\n\n琉球ガラス → Ryukyu Glass\n\n例: Handmade glassware with colorful, bubbly textures.\n(色あざやかで、気泡が美しい手づくりのガラス)\n\n「Handmade(手づくり)」は、世界の買い手に響く言葉のひとつ。食べ物だけでなく、工芸品も世界へ届けられます。\n\n" + AI_NOTE},
+    {"id": "dic-b2b", "kind": "dict", "term": "B to B", "yomi": "ビー・トゥー・ビー", "mean": "会社どうしの取引",
+     "body": "お店や会社が、仕入れ先と行う取引。\nAlibaba.comは、世界の会社・お店が\n仕入れ先を探す、B to Bのサイトです。",
+     "cap": "海外販路ことば辞典\n\nB to B(ビー・トゥー・ビー)= 会社どうしの取引\nBusiness to Business の略です。\n\n一人ひとりのお客さんに売るのではなく、お店や会社が「仕入れ先」と取引すること。Alibaba.comは、世界の会社・お店が仕入れ先を探す、B to Bのサイトです。\n\n1回の注文が、まとまった数になりやすいのが特徴です。\n\n" + SAVE},
+    {"id": "qz-export", "kind": "quiz", "q": "2025年の\n日本の農林水産物・食品の\n輸出額は?",
+     "opts": ["1,700億円", "1兆7,005億円", "17兆円"],
+     "cap": "海外販路クイズ\n\nQ. 2025年の日本の農林水産物・食品の輸出額は?\nA. 1,700億円 / B. 1兆7,005億円 / C. 17兆円\n\n.\n.\n.\n正解は B. 1兆7,005億円 です。\n\n13年連続で過去最高。国は2030年に5兆円を目標にしています。日本の食べ物は、世界でますます選ばれています。\n\n出典: 農林水産省(2026年2月公表)"},
+    {"id": "en-mozuku", "kind": "word", "img": "mozuku", "ja": "もずく", "en": "Okinawa Mozuku",
+     "line": "A soft, slippery seaweed,\noften enjoyed with vinegar.",
+     "cap": "英語で言うと?\n\nもずく → Okinawa Mozuku\n\n例: A soft, slippery seaweed, often enjoyed with vinegar.\n(やわらかく、つるっとした海藻。お酢で食べることが多い)\n\n名前の前に「Okinawa」をつけると、どこの産品かがひと目で伝わります。\n\n" + AI_NOTE},
+    {"id": "cmp-lang", "kind": "compare", "head": "英語ができなくても、\n大丈夫。",
+     "left": ("通訳をたのむ", ["1日 約5万円", "言い間違いが心配"]),
+     "right": ("世界の架け橋", ["日本語のままでOK", "GLOWもお手伝い"]),
+     "foot": "※金額は一般的な目安で、条件によって変わります。",
+     "cap": "比べてみた: 通訳をたのむ vs 世界の架け橋\n\n通訳をお願いすると、1日約5万円が目安(条件によって変わります)。値段の交渉で言い間違いがあれば、大きなトラブルにもなりかねません。\n\n世界の架け橋なら、翻訳の仕組みとGLOWのお手伝いで、日本語のままやり取りできます。"},
+    {"id": "story-awamori", "kind": "story", "color": "red", "tag": "世界で通用した話",
+     "big": "最高金賞", "head": "沖縄の泡盛が、\n世界の三大コンペで。",
+     "body": "忠孝酒造(豊見城市)の『月の蒸溜所』が、\n世界三大酒類コンペティションの\nすべてで最高金賞。",
      "src": "出典: 忠孝酒造 発表、沖縄タイムス",
-     "cap": "忠孝酒造(豊見城市)の泡盛『月の蒸溜所』が、世界三大酒類コンペティション(IWSC・ISC・SFWSC)のすべてで最高金賞を受けました。\n\n沖縄の味は、世界の舞台で通用します。\n\n出典: 忠孝酒造 発表、沖縄タイムス"},
-    {"id": "item-pineapple", "kind": "item", "img": "pineapple.webp", "en": "Okinawa Pineapple", "ja": "パイナップル",
-     "cap": "パイナップルは、英語の売り場では「Okinawa Pineapple」。\n\n生のくだものは国ごとに持ち込みのルールがあります。ジャムやドライフルーツなど、加工した商品から考えるのも一つの方法です。くわしくはご相談ください。\n\n" + AI_NOTE},
-    {"id": "price-example", "kind": "text", "kicker": "値付けの例", "title": "原価2,000円なら、\n販売価格は4,125円",
-     "lines": ["(原価+利益+送料)÷0.8", "=(2,000+1,000+300)÷0.8", "=4,125円"],
-     "foot": "※為替や国ごとの相場は含みません。", "fs": 54,
-     "cap": "値付けの例です。原価2,000円、欲しい利益1,000円、倉庫までの送料300円なら、\n\n(2,000+1,000+300)÷0.8=4,125円\n\nこの値段なら、売れたときの手数料20%を引いても、欲しい利益が残ります。サイトの値付けシミュレーターでも同じ計算ができます。\n※為替や国ごとの相場は含みません。"},
-    {"id": "wall-5", "kind": "wall", "no": 5, "title": "代金の不安", "cost": "「払ってもらえる?」",
-     "desc": "知らない国の、知らない相手。\n送ったのに入金されない、\nという怖さがあります。",
-     "glow": "代金をAlibaba.comが\nいったん預かってから\n支払う仕組みがあります。",
-     "cap": "海外へ売るときの壁5は「代金の不安」。知らない国の、知らない相手に商品を送るのは怖いものです。\n\nAlibaba.comには、買い手の代金をいったん預かってから支払う仕組みがあります。"},
-    {"id": "item-bingata", "kind": "item", "img": "bingata.webp", "en": "Bingata Textile", "ja": "紅型",
-     "cap": "紅型は、英語の売り場では「Bingata Textile」。\n\nそのままの名前を残しながら、どんなものかを英語の言葉で添えると、はじめて見る人にも伝わります。\n\n" + AI_NOTE},
-    {"id": "num-countries", "kind": "num", "kicker": "世界の市場", "num": "200", "unit": "以上",
-     "label": "Alibaba.comを使う企業が\nいる国と地域", "src": "出典: アリババ株式会社 公式サイト",
-     "cap": "Alibaba.comは、200以上の国と地域の企業が使っています。\n\n沖縄の商品を、まだ出会ったことのない国の会社に見てもらえる場所です。\n\n出典: アリババ株式会社 公式サイト"},
-    {"id": "qa-ship", "kind": "qa", "q": "海外へ自分で\n発送するの?",
-     "a": "いいえ。\n送るのは日本国内の倉庫までです。\nその先はGLOWがつなぎます。",
-     "cap": "よく聞かれる質問「海外へ自分で発送するの?」\n\nいいえ。あなたが送るのは日本国内の倉庫までです。その先の海外への発送は、GLOWがつなぎます。"},
-    {"id": "item-kokuto", "kind": "item", "img": "kokuto.webp", "en": "Okinawan Brown Sugar", "en_size": 70, "ja": "黒糖",
-     "cap": "黒糖は、英語では「Okinawan Brown Sugar」。「Kokuto」という呼び名を添えるのも一つの方法です。\n\n世界の買い手が検索で使う言葉と、沖縄ならではの呼び名。両方を入れると、見つけてもらいやすくなります。\n\n" + AI_NOTE},
-    {"id": "case-okinawa-export", "kind": "case", "tag": "沖縄からの輸出", "num": "21.4億円",
-     "title": "沖縄からの\n飲み物の輸出が、\n過去最高に", "desc": "2024年の沖縄からの飲料の輸出額。\n前の年より28%増え、\n量・金額とも過去最高。",
+     "cap": "世界で通用した話\n\n忠孝酒造(豊見城市)の泡盛『月の蒸溜所』が、世界三大酒類コンペティション(IWSC・ISC・SFWSC)のすべてで最高金賞を受けました。\n\n沖縄の味は、世界の舞台で通用します。\n\n出典: 忠孝酒造 発表、沖縄タイムス"},
+    {"id": "ng-price", "kind": "ngok", "head": "海外向けの値段、\n国内と同じに\nしていませんか?",
+     "ng": "国内と同じ値段のまま\n売れても利益が残らない", "ok": "手数料と送料を見込む\n(原価+利益+送料)÷0.8",
+     "cap": "やりがちNG→OK\n\nNG: 海外向けも国内と同じ値段のまま\nOK: 手数料と送料を見込んで値段をつける\n\n世界の架け橋では、売れたときに販売価格の20%がかかります。だから\n(原価+欲しい利益+送料)÷0.8\nで値段をつければ、欲しい利益が残ります。\n\n例: 原価2,000円・利益1,000円・送料300円 → 4,125円\n※為替や国ごとの相場は含みません。\n\n" + SAVE},
+    {"id": "en-bingata", "kind": "word", "img": "bingata", "ja": "紅型", "en": "Bingata Textile",
+     "line": "Traditional Okinawan dyed fabric\nwith bright, bold patterns.",
+     "cap": "英語で言うと?\n\n紅型 → Bingata Textile\n\n例: Traditional Okinawan dyed fabric with bright, bold patterns.\n(あざやかで大胆な柄の、沖縄の伝統的な染物)\n\n「Bingata」という名前を残したまま、「Textile(布)」をそえると、はじめて見る人にも伝わります。\n\n" + AI_NOTE},
+    {"id": "dic-invoice", "kind": "dict", "term": "インボイス", "yomi": "Invoice", "mean": "送り状(商品の明細書)",
+     "body": "何を、いくつ、いくらで送るかを書いた書類。\n輸出の手続き(通関)で使われます。",
+     "cap": "海外販路ことば辞典\n\nインボイス(Invoice)= 送り状\n\n輸出のときに「何を、いくつ、いくらで送るか」を書いた書類です。国の境で商品を確認する手続き(通関)で使われます。\n\n書類づくりは慣れないと大変ですが、世界の架け橋では、国内の倉庫へ送った先をGLOWがつなぎます。\n\n" + SAVE},
+    {"id": "qz-matcha", "kind": "quiz", "q": "2025年、\n緑茶の輸出額は\n前の年から\nどれくらい増えた?",
+     "opts": ["約1割", "約2倍", "約10倍"],
+     "cap": "海外販路クイズ\n\nQ. 2025年、緑茶の輸出額は前の年からどれくらい増えた?\nA. 約1割 / B. 約2倍 / C. 約10倍\n\n.\n.\n.\n正解は B. 約2倍 です。\n\n2025年の緑茶の輸出額は約720億円。海外の抹茶人気で、1年でほぼ倍になりました。日本の産品が、世界のブームになることがあります。\n\n出典: 農林水産省(2026年2月公表)"},
+    {"id": "cmp-ship", "kind": "compare", "head": "書類と発送、\nむずかしくない。",
+     "left": ("自分で輸出", ["書類・通関・輸送", "間違えると止まる"]),
+     "right": ("世界の架け橋", ["国内の倉庫へ", "送るだけ"]),
+     "foot": "あなたが送るのは日本国内の倉庫まで。その先はGLOWがつなぎます。",
+     "cap": "比べてみた: 自分で輸出 vs 世界の架け橋\n\n自分で輸出しようとすると、インボイス、通関、国際輸送と専門用語だらけ。ひとつでも間違えると、商品が港で止まってしまいます。\n\n世界の架け橋なら、あなたは日本国内の倉庫へ送るだけ。その先はGLOWがつなぎます。"},
+    {"id": "en-kokuto", "kind": "word", "img": "kokuto", "ja": "黒糖", "en": "Okinawan Brown Sugar",
+     "line": "Rich, unrefined sugar\nmade from Okinawan sugarcane.",
+     "cap": "英語で言うと?\n\n黒糖 → Okinawan Brown Sugar\n(「Kokuto」という呼び名をそえるのも一つの方法)\n\n例: Rich, unrefined sugar made from Okinawan sugarcane.\n(沖縄のさとうきびからつくる、コクのある黒砂糖)\n\n世界の人が検索に使う言葉と、沖縄ならではの呼び名。両方を入れると、見つけてもらいやすくなります。\n\n" + AI_NOTE},
+    {"id": "about", "kind": "person", "img": "minei.webp",
+     "head": "沖縄の企業を\n34年支えてきた人が、\nとなりにいます。",
+     "body": "代表 嶺井 忍\n\n沖縄振興開発金融公庫に\n34年。創業のとき、\n苦しいとき、次の一歩を\n踏み出すとき。",
+     "cap": "世界の架け橋を運営する株式会社GLOWの代表、嶺井忍です。\n\n沖縄振興開発金融公庫に34年。創業のとき、苦しいとき、次の一歩を踏み出すとき、いつも沖縄の経営者のとなりで、資金のご相談に向き合ってきました。\n\nその経験を、今度はみなさんの世界への挑戦に生かします。"},
+    {"id": "ng-moq", "kind": "ngok", "head": "「何個から買えますか?」\nにすぐ答えられますか?",
+     "ng": "最低何個から売るか\n決めていない", "ok": "最低注文数(MOQ)と\nまとめ買いの値段を\n決めておく",
+     "cap": "やりがちNG→OK\n\nNG: 最低何個から売るか決めていない\nOK: 最低注文数(MOQ)と、まとめ買いのときの値段を決めておく\n\n会社どうしの取引では、「何個から買えますか?」と最初に聞かれることが多いです。すぐ答えられると、話が前に進みます。\n\n無理のない数を、面談でいっしょに決めます。\n\n" + SAVE},
+    {"id": "en-soba", "kind": "word", "img": "soba", "ja": "沖縄そば", "en": "Okinawa Soba",
+     "line": "Thick wheat noodles in a light broth,\ntopped with braised pork.",
+     "cap": "英語で言うと?\n\n沖縄そば → Okinawa Soba\n\n例: Thick wheat noodles in a light broth, topped with braised pork.\n(あっさりしたスープに太めの小麦麺、煮込んだ豚肉をのせて)\n\n乾麺やスープの素など、日持ちする形にすると海外へ届けやすくなります。どの形で出すかも、いっしょに考えます。\n\n" + AI_NOTE},
+    {"id": "dic-tsukan", "kind": "dict", "term": "通関", "yomi": "つうかん", "mean": "国の境の確認手続き",
+     "body": "商品を外国へ出す・外国から入れるときに、\n税関で中身を確認し、\n許可をもらう手続きです。",
+     "cap": "海外販路ことば辞典\n\n通関(つうかん)= 国の境の確認手続き\n\n商品を外国へ出すとき・入れるときに、税関で中身や書類を確認し、許可をもらう手続きです。書類に間違いがあると、商品が港で止まってしまうことも。\n\n世界の架け橋では、あなたが送るのは国内の倉庫まで。その先はGLOWがつなぎます。\n\n" + SAVE},
+    {"id": "story-okinawa", "kind": "story", "color": "navy", "tag": "世界で通用した話",
+     "big": "21.4億円", "head": "沖縄の飲み物の輸出、\n過去最高。",
+     "body": "2024年の沖縄からの飲料の輸出額。\nビール・ウイスキー・泡盛など。\n前の年より28%増え、過去最高に。",
      "src": "出典: 沖縄地区税関(2025年5月公表)",
-     "cap": "2024年の沖縄からの飲料(ビール・ウイスキー・泡盛など)の輸出額は21.4億円。前の年より28%増え、量・金額とも過去最高になりました。\n\n出典: 沖縄地区税関(2025年5月公表)"},
-    {"id": "about", "kind": "photo", "img": "minei.webp", "kicker": "株式会社GLOWについて",
-     "title": "沖縄の企業の、\nいちばん近くで。",
-     "lines": ["代表 嶺井 忍", "沖縄振興開発金融公庫に34年。", "沖縄の企業の資金のご相談に", "何十年も向き合ってきました。"],
-     "cap": "株式会社GLOWは、沖縄に根ざした企業支援の会社です。\n\n代表の嶺井は、沖縄振興開発金融公庫に34年。創業のとき、苦しいとき、次の一歩を踏み出すとき、いつも沖縄の経営者のとなりで支えてきました。\n\nその経験を、今度はみなさんの世界への挑戦に生かします。"},
-    {"id": "item-soba", "kind": "item", "img": "soba.webp", "en": "Okinawa Soba", "ja": "沖縄そば",
-     "cap": "沖縄そばは、英語の売り場では「Okinawa Soba」。\n\n乾麺やスープの素など、日持ちする形にすると海外へ届けやすくなります。どの形で出すかも、いっしょに考えます。\n\n" + AI_NOTE},
-    {"id": "qa-unsold", "kind": "qa", "q": "売れなかったら?",
-     "a": "販売価格の20%はかかりません。\nただし掲載料の月1万円は、\n売れなかった月もかかります。",
-     "cap": "よく聞かれる質問「売れなかったら?」\n\n売れたときにかかる販売価格の20%は、売れなければかかりません。ただし掲載料の月1万円は、売れなかった月もかかります。"},
-    {"id": "steps", "kind": "text", "kicker": "始めるまでの流れ", "title": "まずは話を聞く\nところから",
-     "lines": ["1  LINEで相談(商品名だけでもOK)", "2  面談で値段や数量を確認", "3  お申し込み", "4  売り場に掲載", "5  注文が入ったら国内の倉庫へ"],
-     "foot": "LINEで質問した時点では、お申し込みにはなりません。",
-     "cap": "世界の懸け橋を始めるまでの流れです。\n\n1. LINEで相談(商品名を送るだけでもOK)\n2. 面談で値段や数量をいっしょに確認\n3. お申し込み\n4. GLOWの売り場に掲載\n5. 注文が入ったら国内の倉庫へ送るだけ\n\nLINEで質問した時点では、お申し込みにはなりません。"},
-    {"id": "what-alibaba", "kind": "text", "kicker": "Alibaba.comとは", "title": "一年中ひらいている\n世界の展示会",
-     "lines": ["会社どうしが商品を見せ合い、", "取引の相手を見つける場所。", "それがインターネット上で", "毎日ひらかれています。"],
-     "foot": "※GLOWは、Alibaba.com上に沖縄の売り場を持ち、運営しています。",
-     "cap": "Alibaba.comは、世界最大級の企業どうしの取引サイトです。\n\n会社どうしが商品を見せ合い、取引の相手を見つける「展示会」が、インターネット上で毎日ひらかれているイメージです。\n\nGLOWは、その中に沖縄の売り場を持ち、運営しています。"},
+     "cap": "世界で通用した話\n\n2024年の沖縄からの飲料(ビール・ウイスキー・泡盛など)の輸出額は21.4億円。前の年より28%増え、量・金額とも過去最高になりました。\n\n沖縄の味を求める声は、世界で広がっています。\n\n出典: 沖縄地区税関(2025年5月公表)"},
+    {"id": "qz-countries", "kind": "quiz", "q": "Alibaba.comを使う\n企業がいる国と地域は?",
+     "opts": ["50", "100", "200以上"],
+     "cap": "海外販路クイズ\n\nQ. Alibaba.comを使う企業がいる国と地域は?\nA. 50 / B. 100 / C. 200以上\n\n.\n.\n.\n正解は C. 200以上 です。\n\n沖縄にいながら、まだ出会ったことのない国の会社に、商品を見てもらえる場所です。\n\n出典: アリババ株式会社 公式サイト"},
+    {"id": "cmp-pay", "kind": "compare", "head": "代金の心配、\n仕組みで小さく。",
+     "left": ("知らない相手と", ["送ったのに", "入金されない…"]),
+     "right": ("Alibaba.comなら", ["代金を", "いったん預かる"]),
+     "foot": "代金をAlibaba.comがいったん預かってから支払う仕組みがあります。",
+     "cap": "比べてみた: 知らない相手と直接 vs Alibaba.comの仕組み\n\n知らない国の、知らない相手に商品を送るのは怖いもの。「送ったのに入金されない」という心配があります。\n\nAlibaba.comには、買い手の代金をいったん預かってから支払う仕組みがあります。"},
+    {"id": "en-awamori", "kind": "word", "img": "awamori", "ja": "泡盛", "en": "Okinawa Awamori",
+     "line": "A traditional spirit\ndistilled in Okinawa from rice.",
+     "cap": "英語で言うと?\n\n泡盛 → Okinawa Awamori\n\n例: A traditional spirit distilled in Okinawa from rice.\n(お米からつくる、沖縄の伝統的な蒸留酒)\n\n沖縄にしかないお酒だからこそ、名前の前に「Okinawa」をつけて、どこで生まれたかを伝えます。\n\n※お酒の輸出は、国ごとのルールの確認が必要です。くわしくはご相談ください。\n" + AI_NOTE},
+    {"id": "ng-reply", "kind": "ngok", "head": "問い合わせへの返事、\n何日も後に\nなっていませんか?",
+     "ng": "返事が何日も後\nその間にほかの会社へ", "ok": "早めの返事が信頼に\n文面はGLOWもお手伝い",
+     "cap": "やりがちNG→OK\n\nNG: 問い合わせへの返事が何日も後になる\nOK: 早めに返事をする\n\n世界の買い手は、いくつもの仕入れ先を比べています。早い返事は、それだけで信頼につながります。\n\n英語の文面づくりは、GLOWもお手伝いします。\n\n" + SAVE},
+    {"id": "en-pineapple", "kind": "word", "img": "pineapple", "ja": "パイナップル", "en": "Okinawa Pineapple",
+     "line": "Sweet tropical pineapple grown\nin Okinawa's warm sunshine.",
+     "cap": "英語で言うと?\n\nパイナップル → Okinawa Pineapple\n\n例: Sweet tropical pineapple grown in Okinawa's warm sunshine.\n(沖縄のあたたかい日差しで育った、甘い南国のパイナップル)\n\n生のくだものは、国ごとに持ち込みのルールがあります。ジャムやドライフルーツなど、加工した商品から考えるのも一つの方法です。くわしくはご相談ください。\n\n" + AI_NOTE},
 ]
 
-# ---------------------------------------------------------------- 描画
-
-
-def text_w(draw, s, f):
-    return draw.textlength(s, font=f)
-
+# ---------------------------------------------------------------- 描画の道具
 
 FIT_ERRORS = []
 
 
-def lines_fit(draw, lines, f, maxw, who):
+def tw(d, s, f):
+    return d.textlength(s, font=f)
+
+
+def check_fit(d, lines, f, maxw, who):
     for ln in lines:
-        w = text_w(draw, ln, f)
+        w = tw(d, ln, f)
         if w > maxw:
             FIT_ERRORS.append(f"{who}: 「{ln}」{int(w)}px > {int(maxw)}px")
 
 
-def paste_logo(img, x, y, h):
-    lg = Image.open(os.path.join(SRC, "glow-logo.png")).convert("RGBA")
-    lg = lg.resize((round(lg.width * h / lg.height), h), Image.LANCZOS)
-    img.paste(lg, (x, y), lg)
-
-
-def base_canvas():
-    img = Image.new("RGB", (W, H), WHITE)
-    d = ImageDraw.Draw(img)
-    # 下の帯(ブランド)
-    d.rectangle([0, H - 120, W, H], fill=CREAM)
-    d.line([0, H - 120, W, H - 120], fill=(230, 225, 216), width=2)
-    paste_logo(img, 64, H - 102, 84)
-    d.text((W - 64, H - 78), "世界の懸け橋", font=F("gb", 30), fill=NAVY, anchor="ra")
-    d.text((W - 64, H - 40), "glow-okinawa.jp", font=F("g", 26), fill=MUTED, anchor="ra")
-    return img, d
-
-
-def draw_lines(d, x, y, lines, f, fill, gap, who, maxw=W - 128, anchor="la"):
-    lines_fit(d, lines, f, maxw, who)
-    for ln in lines:
+def lines_at(d, x, y, text, f, fill, gap, who, maxw=W - 140, anchor="la"):
+    ls = text.split("\n") if isinstance(text, str) else text
+    check_fit(d, ls, f, maxw, who)
+    for ln in ls:
         d.text((x, y), ln, font=f, fill=fill, anchor=anchor)
         y += gap
     return y
 
 
-def kicker_title(d, p, y=90):
-    d.text((64, y), p["kicker"], font=F("gb", 38), fill=RED)
-    return draw_lines(d, 64, y + 70, p["title"].split("\n"), F("m", 76), NAVY, 100, p["id"])
+def pill(d, x, y, text, bg, fg, size=34):
+    f = F("gb", size)
+    w = tw(d, text, f)
+    d.rounded_rectangle([x, y, x + w + 48, y + size + 30], (size + 30) // 2, fill=bg)
+    d.text((x + 24, y + 14), text, font=f, fill=fg)
+    return y + size + 30
 
 
-def render(p):
-    img, d = base_canvas()
-    k, who = p["kind"], p["id"]
-    if k == "num":
-        d.text((64, 90), p["kicker"], font=F("gb", 40), fill=RED)
-        box = [64, 200, W - 64, 900]
-        d.rounded_rectangle(box, 28, fill=LIGHT_SEA)
-        fn, fu = (F("gb", 130), F("gb", 52)) if p.get("small") else (F("gb", 160), F("gb", 56))
-        nw_, uw = text_w(d, p["num"], fn), text_w(d, p["unit"], fu)
-        if nw_ + uw + 20 > W - 160:
-            FIT_ERRORS.append(f"{who}: 数字が収まりません")
-        x0 = (W - (nw_ + uw + 20)) / 2
-        d.text((x0, 520), p["num"], font=fn, fill=SEA, anchor="ls")
-        d.text((x0 + nw_ + 20, 520), p["unit"], font=fu, fill=SEA, anchor="ls")
-        draw_lines(d, W / 2, 600, p["label"].split("\n"), F("gb", 50), INK, 74, who, W - 200, "ma")
-        draw_lines(d, 64, 960, [p["src"]], F("g", 30), MUTED, 40, who)
-        d.text((64, 1060), "沖縄にいながら、世界の買い手へ。", font=F("gb", 40), fill=NAVY)
-    elif k == "wall":
-        d.text((64, 90), "ふつうに世界へ売ろうとすると", font=F("gb", 38), fill=RED)
-        d.text((64, 150), f"壁{p['no']}", font=F("m", 120), fill=RED)
-        d.text((300, 175), p["title"], font=F("m", 84), fill=NAVY)
-        d.text((64, 320), p["cost"], font=F("gb", 64), fill=INK)
-        y = draw_lines(d, 64, 430, p["desc"].split("\n"), F("g", 46), INK, 74, who)
-        gl = p["glow"].split("\n")
-        bh = 130 + len(gl) * 84 + 40
-        top = y + max(40, (1180 - y - bh) // 2)
-        d.rounded_rectangle([64, top, W - 64, top + bh], 28, fill=CREAM, outline=RED, width=4)
-        d.text((104, top + 40), "GLOWといっしょなら", font=F("gb", 42), fill=RED)
-        draw_lines(d, 104, top + 120, gl, F("gb", 54), NAVY, 84, who, W - 208)
-    elif k == "item":
-        ph = Image.open(os.path.join(SRC, p["img"])).convert("RGB").resize((760, 760), Image.LANCZOS)
-        img.paste(ph, ((W - 760) // 2, 70))
-        fe = F("gb", p.get("en_size", 82))
-        d.text((W / 2, 900), p["en"], font=fe, fill=NAVY, anchor="ma")
-        d.text((W / 2, 1010), p["ja"] + " の英語名", font=F("g", 42), fill=MUTED, anchor="ma")
-        d.text((W / 2, 1080), "写真と英語の名前で、世界に選ばれる。", font=F("gb", 40), fill=RED, anchor="ma")
-        d.text((W - 64, 1190), AI_NOTE, font=F("g", 24), fill=MUTED, anchor="ra")
-        lines_fit(d, [p["en"]], fe, W - 128, who)
-    elif k == "case":
-        d.text((64, 90), "世界で通用した、地方の力", font=F("gb", 38), fill=RED)
-        d.rounded_rectangle([64, 170, W - 64, 1150], 28, fill=CREAM)
-        d.text((112, 220), p["tag"], font=F("gb", 38), fill=RED)
-        y = draw_lines(d, 112, 290, p["title"].split("\n"), F("gb", 58), NAVY, 82, who, W - 224)
-        d.text((112, y + 30), p["num"], font=F("m", 120), fill=NAVY)
-        draw_lines(d, 112, y + 200, p["desc"].split("\n"), F("g", 40), INK, 62, who, W - 224)
-        draw_lines(d, 112, 1080, [p["src"]], F("g", 28), MUTED, 40, who, W - 224)
-    elif k == "qa":
-        d.text((64, 90), "よくある質問", font=F("gb", 40), fill=RED)
-        d.text((64, 190), "Q", font=F("m", 150), fill=RED)
-        y = draw_lines(d, 64, 380, p["q"].split("\n"), F("m", 88), NAVY, 116, who)
-        al = p["a"].split("\n")
-        bh = 175 + len(al) * 84 + 50
-        top = y + max(40, (1180 - y - bh) // 2)
-        d.rounded_rectangle([64, top, W - 64, top + bh], 28, fill=CREAM)
-        d.text((112, top + 36), "A", font=F("m", 90), fill=NAVY)
-        draw_lines(d, 112, top + 175, al, F("gb", 50), INK, 84, who, W - 224)
-    elif k == "text":
-        y = kicker_title(d, p)
-        n = len(p["lines"])
-        fs, gap = (60, 130) if n <= 3 else (50, 104)
-        fs = p.get("fs", fs)
-        bh = 80 + n * gap
-        top = y + max(50, (1120 - y - bh) // 2)
-        d.rounded_rectangle([64, top, W - 64, top + bh], 28, fill=CREAM)
-        draw_lines(d, 112, top + 60, p["lines"], F("gb", fs), NAVY, gap, who, W - 224)
-        draw_lines(d, 64, top + bh + 30, [p["foot"]], F("g", 30), MUTED, 40, who)
-    elif k == "photo":
-        ph = Image.open(os.path.join(SRC, p["img"])).convert("RGB")
-        if p["img"].startswith("minei"):
-            ph = ph.resize((420, 420), Image.LANCZOS)
-            mask = Image.new("L", (420, 420), 0)
-            ImageDraw.Draw(mask).ellipse([0, 0, 420, 420], fill=255)
-            img.paste(ph, ((W - 420) // 2, 420), mask)
-            y = kicker_title(d, p)
-            draw_lines(d, W / 2, 880, p["lines"], F("gb", 46), INK, 70, who, W - 128, "ma")
-        else:
-            tw = W
-            th = round(ph.height * tw / ph.width)
-            ph = ph.resize((tw, th), Image.LANCZOS).crop((0, 0, W, 760))
-            img.paste(ph, (0, 0))
-            d.text((64, 800), p["kicker"], font=F("gb", 38), fill=RED)
-            y = draw_lines(d, 64, 860, p["title"].split("\n"), F("m", 72), NAVY, 92, who)
-            draw_lines(d, 64, y + 20, p["lines"], F("gb", 38), INK, 56, who)
+def footer(img, d):
+    d.rectangle([0, H - FOOT, W, H], fill=WHITE)
+    lg = Image.open(os.path.join(SRC, "glow-logo.png")).convert("RGBA")
+    h = 70
+    lg = lg.resize((round(lg.width * h / lg.height), h), Image.LANCZOS)
+    img.paste(lg, (60, H - FOOT + 21), lg)
+    d.text((W - 60, H - FOOT + 26), "世界の架け橋", font=F("gb", 30), fill=NAVY, anchor="ra")
+    d.text((W - 60, H - FOOT + 66), "glow-okinawa.jp", font=F("g", 24), fill=MUTED, anchor="ra")
+
+
+def photo(name, size):
+    """高解像度版(src/hi/)があればそれを使う。"""
+    for p in (os.path.join(SRC, "hi", name + ".webp"), os.path.join(SRC, name + ".webp"), os.path.join(SRC, name)):
+        if os.path.exists(p):
+            im = Image.open(p).convert("RGB")
+            break
     else:
-        raise SystemExit(f"[error] 不明な種類 {k}")
+        raise SystemExit(f"[error] 写真 {name} がありません")
+    sw, sh = size
+    r = max(sw / im.width, sh / im.height)
+    im = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
+    left, top = (im.width - sw) // 2, (im.height - sh) // 2
+    return im.crop((left, top, left + sw, top + sh))
+
+
+def gradient(img, y0, y1, color, a1=240):
+    """y0からy1へ、透明→colorになる帯を重ねる(写真の上の文字を読みやすくする)。"""
+    hgt = y1 - y0
+    col = Image.new("RGB", (W, hgt), color)
+    mask = Image.linear_gradient("L").resize((W, hgt))
+    mask = mask.point(lambda v: int(a1 * (v / 255) ** 1.1))
+    img.paste(col, (0, y0), mask)
+
+
+# ---------------------------------------------------------------- 種類ごとのデザイン
+
+def r_quiz(p, who):
+    img = Image.new("RGB", (W, H), NAVY)
+    d = ImageDraw.Draw(img)
+    pill(d, 60, 64, "海外販路クイズ", ORANGE, WHITE)
+    d.text((60, 140), "Q.", font=F("m", 130), fill=YELLOW)
+    y = lines_at(d, 60, 310, p["q"], F("gb", 62), WHITE, 86, who)
+    y = max(y + 40, 640)
+    for i, o in enumerate(p["opts"]):
+        top = y + i * 128
+        d.rounded_rectangle([60, top, W - 60, top + 108], 54, fill=WHITE)
+        d.ellipse([78, top + 14, 158, top + 94], fill=ORANGE)
+        d.text((118, top + 54), "ABC"[i], font=F("gb", 46), fill=WHITE, anchor="mm")
+        d.text((190, top + 54), o, font=F("gb", 52), fill=NAVY, anchor="lm")
+    d.text((W / 2, H - FOOT - 60), "答えはキャプションで ▼", font=F("gb", 44), fill=YELLOW, anchor="mm")
+    if y + 3 * 128 > H - FOOT - 100:
+        FIT_ERRORS.append(f"{who}: 選択肢が下にはみ出します")
+    footer(img, d)
     return img
+
+
+def r_word(p, who):
+    img = Image.new("RGB", (W, H), WHITE)
+    img.paste(photo(p["img"], (W, H - FOOT)), (0, 0))
+    gradient(img, 520, H - FOOT, NAVY)
+    d = ImageDraw.Draw(img)
+    pill(d, 60, 64, "英語で言うと?", ORANGE, WHITE)
+    d.text((60, 800), p["ja"], font=F("gb", 50), fill=WHITE)
+    fe = F("gb", 96)
+    for size in (78, 70):
+        if tw(d, p["en"], fe) > W - 120:
+            fe = F("gb", size)
+    d.text((60, 878), "→", font=F("gb", 50), fill=YELLOW)
+    lines_at(d, 60, 940, [p["en"]], fe, YELLOW, 100, who, W - 120)
+    lines_at(d, 60, 1068, p["line"], F("g", 36), WHITE, 50, who, W - 120)
+    d.text((W - 40, H - FOOT - 18), AI_NOTE, font=F("g", 22), fill=(215, 222, 230), anchor="rs")
+    footer(img, d)
+    return img
+
+
+def r_compare(p, who):
+    img = Image.new("RGB", (W, H), CREAM)
+    d = ImageDraw.Draw(img)
+    pill(d, 60, 64, "比べてみた", NAVY, WHITE)
+    y = lines_at(d, 60, 160, p["head"], F("m", 86), NAVY, 112, who)
+    top = y + max(60, (H - FOOT - 40 - y - 610) // 2)
+    bot = top + 520
+    gap = 50
+    cw = (W - 120 - gap) // 2
+    for i, (title, items) in enumerate((p["left"], p["right"])):
+        x = 60 + i * (cw + gap)
+        good = i == 1
+        d.rounded_rectangle([x, top, x + cw, bot], 30, fill=ORANGE if good else WHITE,
+                            outline=None if good else (214, 208, 198), width=3)
+        lines_at(d, x + cw / 2, top + 44, [title], F("gb", 40), WHITE if good else MUTED, 50, who, cw - 40, "ma")
+        d.line([x + 40, top + 118, x + cw - 40, top + 118], fill=WHITE if good else (214, 208, 198), width=3)
+        yy = top + 200
+        for it in items:
+            lines_at(d, x + cw / 2, yy, [it], F("gb", 46 if good else 42), WHITE if good else INK, 60, who, cw - 30, "ma")
+            yy += 130
+    d.text((W / 2, (top + bot) / 2), "▶", font=F("gb", 50), fill=NAVY, anchor="mm")
+    lines_at(d, W / 2, bot + 50, [p["foot"]], F("gb", 30), NAVY, 40, who, W - 100, "ma")
+    footer(img, d)
+    return img
+
+
+def r_ngok(p, who):
+    img = Image.new("RGB", (W, H), WHITE)
+    d = ImageDraw.Draw(img)
+    pill(d, 60, 64, "やりがち NG → OK", RED, WHITE)
+    y = lines_at(d, 60, 160, p["head"], F("m", 68), NAVY, 92, who)
+    top = max(y + 40, 420)
+    for i, (lab, txt, col, bg) in enumerate((("NG", p["ng"], RED, PALE["red"]), ("OK", p["ok"], SEA, PALE["sea"]))):
+        t = top + i * 300
+        d.rounded_rectangle([60, t, W - 60, t + 270], 30, fill=bg)
+        d.ellipse([95, t + 35, 225, t + 165], fill=col)
+        d.text((160, t + 100), "×" if i == 0 else "○", font=F("gb", 84), fill=WHITE, anchor="mm")
+        d.text((160, t + 215), lab, font=F("gb", 44), fill=col, anchor="mm")
+        n = len(txt.split("\n"))
+        lines_at(d, 270, t + 135 - n * 34, txt, F("gb", 48), INK, 70, who, W - 350)
+    if top + 570 > H - FOOT - 80:
+        FIT_ERRORS.append(f"{who}: NG/OKの箱が下にはみ出します")
+    d.text((W / 2, H - FOOT - 50), "保存して、あとで見返そう", font=F("gb", 34), fill=NAVY, anchor="mm")
+    footer(img, d)
+    return img
+
+
+def r_dict(p, who):
+    img = Image.new("RGB", (W, H), WHITE)
+    d = ImageDraw.Draw(img)
+    d.rectangle([0, 0, W, 560], fill=SEA)
+    pill(d, 60, 64, "海外販路ことば辞典", WHITE, SEA)
+    ft = F("gb", 150)
+    if tw(d, p["term"], ft) > W - 120:
+        ft = F("gb", 120)
+    lines_at(d, W / 2, 200, [p["term"]], ft, WHITE, 160, who, W - 120, "ma")
+    d.text((W / 2, 420), p["yomi"], font=F("g", 40), fill=(214, 236, 242), anchor="ma")
+    d.text((W / 2, 630), "=", font=F("gb", 70), fill=ORANGE, anchor="ma")
+    lines_at(d, W / 2, 730, [p["mean"]], F("m", 72), NAVY, 90, who, W - 100, "ma")
+    lines_at(d, W / 2, 890, p["body"], F("g", 42), INK, 68, who, W - 100, "ma")
+    footer(img, d)
+    return img
+
+
+def r_story(p, who):
+    bg = {"sea": SEA, "red": RED, "navy": NAVY}[p["color"]]
+    img = Image.new("RGB", (W, H), bg)
+    d = ImageDraw.Draw(img)
+    pill(d, 60, 64, p["tag"], WHITE, bg)
+    y = lines_at(d, 60, 170, p["head"], F("m", 76), WHITE, 100, who)
+    fb = F("m", 170)
+    if tw(d, p["big"], fb) > W - 120:
+        fb = F("m", 140)
+    lines_at(d, 60, y + 40, [p["big"]], fb, YELLOW, 190, who, W - 120)
+    lines_at(d, 60, y + 270, p["body"], F("g", 38), WHITE, 58, who)
+    lines_at(d, 60, H - FOOT - 60, [p["src"]], F("g", 26), (225, 230, 235), 36, who)
+    if y + 270 + 3 * 58 > H - FOOT - 80:
+        FIT_ERRORS.append(f"{who}: 本文が下にはみ出します")
+    footer(img, d)
+    return img
+
+
+def r_brand(p, who):
+    img = Image.new("RGB", (W, H), NAVY)
+    img.paste(photo(p["img"], (W, 820)), (0, 0))
+    d = ImageDraw.Draw(img)
+    y = lines_at(d, 60, 880, p["head"], F("m", 80), WHITE, 104, who)
+    d.text((60, y + 20), p["sub"], font=F("gb", 38), fill=YELLOW)
+    footer(img, d)
+    return img
+
+
+def r_person(p, who):
+    img = Image.new("RGB", (W, H), CREAM)
+    d = ImageDraw.Draw(img)
+    pill(d, 60, 64, "GLOWのひと", NAVY, WHITE)
+    y = lines_at(d, 60, 160, p["head"], F("m", 70), NAVY, 96, who)
+    ph = photo(p["img"], (420, 420))
+    mask = Image.new("L", (420, 420), 0)
+    ImageDraw.Draw(mask).ellipse([0, 0, 420, 420], fill=255)
+    img.paste(ph, (60, y + 60), mask)
+    lines_at(d, 530, y + 90, p["body"], F("gb", 38), INK, 62, who, W - 590)
+    footer(img, d)
+    return img
+
+
+RENDER = {"quiz": r_quiz, "word": r_word, "compare": r_compare, "ngok": r_ngok, "dict": r_dict,
+          "story": r_story, "brand": r_brand, "person": r_person}
 
 
 # ---------------------------------------------------------------- キャプション
 
-
 def caption(p):
     body = p["cap"].strip()
-    cta = ("\n\n▶ くわしく(世界の懸け橋のサイト)\n" + SITE.format(src="facebook") +
+    cta = ("\n\n▶ くわしく(世界の架け橋のサイト)\n" + SITE.format(src="facebook") +
            "\n▶ LINEで相談(商品名だけでもOK)\n" + LINE_GO.format(ch="fb"))
     return body + cta + "\n\n" + TAGS
 
@@ -321,13 +421,13 @@ def self_check():
     assert len(ids) == len(set(ids)), "id が重複しています"
     for p in POSTS:
         c = caption(p)
-        assert not re.search(r"KAKEHASHI|kakehashi", c), p["id"]
         assert "提携" not in c and "公式パートナー" not in c, p["id"]
-        if p["kind"] == "item":
+        if p["kind"] == "word":
             assert AI_NOTE in c, p["id"]
         probs = shipping_gate.check_forbidden(c)
         assert not probs, (p["id"], probs)
         assert len(c) <= 2200, (p["id"], "Instagramのキャプション上限2,200文字を超えています")
+        assert p["kind"] in RENDER, p["id"]
     print(f"[ok] 自己点検 {len(POSTS)}本")
 
 
@@ -340,12 +440,17 @@ def main():
             write_md(p, today)
         print(f"[ok] 出荷ゲート記録を {today} に更新({len(POSTS)}本)")
         return
-    imgs = {p["id"]: render(p) for p in POSTS}
+    imgs = {p["id"]: RENDER[p["kind"]](p, p["id"]) for p in POSTS}
     if FIT_ERRORS:
         print("[error] 枠に収まらない行があります(何も保存していません):")
         for e in FIT_ERRORS:
             print("  - " + e)
         raise SystemExit(1)
+    keep = {p["id"] for p in POSTS}
+    for f in os.listdir(OUT):  # 使わなくなった旧版の素材を消す(order.json に無いもの)
+        stem, ext = os.path.splitext(f)
+        if ext in (".jpg", ".md") and stem not in keep:
+            os.remove(os.path.join(OUT, f))
     for p in POSTS:
         imgs[p["id"]].save(os.path.join(OUT, p["id"] + ".jpg"), "JPEG", quality=90, optimize=True)
         write_md(p, today)
