@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GLOW「世界の懸け橋」の Instagram / Facebook 投稿素材(画像+キャプション)を作る。
+GLOW「世界の架け橋」の Instagram / Facebook 投稿素材(画像+キャプション)を作る。
 
   python scripts/glow_sns_build.py            # 全投稿の画像とキャプションを作り直す(フォントのある手元で実行)
   python scripts/glow_sns_build.py --restamp  # 文面の再点検が済んだ日付で出荷ゲート記録だけ更新(画像は触らない)
@@ -12,7 +12,7 @@ GLOW「世界の懸け橋」の Instagram / Facebook 投稿素材(画像+キャ�
 文面のルール(2026-10-06 小柳さん決裁・議事は glow-docs-private の議事_20261006_GLOW世界の懸け橋_SNS自動投稿):
 - 数字・事例は提案資料で照合済みのものだけ。出典を必ず添える。新しい数字を足すときは照合してから
 - 「提携」「公式」とは書かない(Alibaba.com の名称・ロゴの使用ルールが未確認のため)。ロゴは使わない
-- 「懸け橋」をローマ字で書かない / M&A・承継の話題は出さない(出荷ゲートの禁止表現)
+- 「架け橋」をローマ字で書かない / M&A・承継の話題は出さない(出荷ゲートの禁止表現)
 - AIの商品写真には「※写真はAIで作ったイメージです」を必ず入れる
 """
 import json
@@ -52,7 +52,7 @@ def F(kind, size):
 
 SITE = "https://glow-okinawa.jp/?utm_source={src}&utm_medium=social&utm_campaign=glow_sns"
 LINE_GO = "https://allgroup-inc.github.io/hojo-hq/go/glow-{ch}/"
-TAGS = "#沖縄 #沖縄県産 #沖縄の生産者 #沖縄特産品 #海外販路 #輸出 #越境EC #Alibaba #世界の懸け橋 #GLOW"
+TAGS = "#沖縄 #沖縄県産 #沖縄の生産者 #沖縄特産品 #海外販路 #輸出 #越境EC #Alibaba #世界の架け橋 #GLOW"
 AI_NOTE = "※写真はAIで作ったイメージです。"
 
 # ---------------------------------------------------------------- 投稿の中身
@@ -60,8 +60,8 @@ AI_NOTE = "※写真はAIで作ったイメージです。"
 POSTS = [
     {"id": "intro", "kind": "photo", "img": "hero-shuri-calligraphy.jpg", "kicker": "はじめまして",
      "title": "沖縄の力強さを、\n世界へ。",
-     "lines": ["沖縄でつくったものを、世界の買い手へ。", "GLOWの「世界の懸け橋」です。"],
-     "cap": "はじめまして。株式会社GLOWの「世界の懸け橋」です。\n\n沖縄の生産者・企業のみなさんの商品を、世界最大級の企業どうしの取引サイト「Alibaba.com」の上にあるGLOWの沖縄の売り場に並べ、世界の買い手へ届けるお手伝いをしています。\n\nこのアカウントでは、世界の市場の数字や、海外へ売るときの壁と乗り越え方、沖縄の産品の英語での伝え方などを、わかりやすくお届けします。"},
+     "lines": ["沖縄でつくったものを、世界の買い手へ。", "GLOWの「世界の架け橋」です。"],
+     "cap": "はじめまして。株式会社GLOWの「世界の架け橋」です。\n\n沖縄の生産者・企業のみなさんの商品を、世界最大級の企業どうしの取引サイト「Alibaba.com」の上にあるGLOWの沖縄の売り場に並べ、世界の買い手へ届けるお手伝いをしています。\n\nこのアカウントでは、世界の市場の数字や、海外へ売るときの壁と乗り越え方、沖縄の産品の英語での伝え方などを、わかりやすくお届けします。"},
     {"id": "num-buyers", "kind": "num", "kicker": "世界の市場", "num": "4,000万", "unit": "以上",
      "label": "世界の会社・お店が、\nAlibaba.comで仕入れ先を\n探しています", "src": "出典: Alibaba Group 公表(2024年度は4,800万以上)",
      "cap": "世界で4,000万以上の会社やお店が、Alibaba.comで仕入れ先を探しています。\n\n沖縄にいながら、この人たちに商品を見てもらう方法があります。GLOWは、Alibaba.comの上に沖縄の商品を紹介する売り場を持ち、あなたの商品を並べます。\n\n出典: Alibaba Group 公表(2024年度は4,800万以上)"},
@@ -90,7 +90,7 @@ POSTS = [
     {"id": "fee", "kind": "text", "kicker": "料金はシンプル", "title": "値段は、\nあなたが決められます",
      "lines": ["売り場への掲載  1商品 月1万円", "売れたときだけ  販売価格の20%", "国内の倉庫まで  送料のみ"],
      "foot": "※売れなかった月も、掲載料の月1万円はかかります。", "fs": 52,
-     "cap": "世界の懸け橋の料金は3つだけです。\n\n・売り場への掲載: 1商品 月1万円\n・売れたときだけ: 販売価格の20%\n・国内の倉庫までの送料\n\n世界での販売価格は、あなたが決めます。手数料と送料を見込んで値段をつければ、売れたときに損をしません。\n※売れなかった月も、掲載料の月1万円はかかります。"},
+     "cap": "世界の架け橋の料金は3つだけです。\n\n・売り場への掲載: 1商品 月1万円\n・売れたときだけ: 販売価格の20%\n・国内の倉庫までの送料\n\n世界での販売価格は、あなたが決めます。手数料と送料を見込んで値段をつければ、売れたときに損をしません。\n※売れなかった月も、掲載料の月1万円はかかります。"},
     {"id": "item-umibudo", "kind": "item", "img": "umibudo.webp", "en": "Sea Grapes", "ja": "海ぶどう",
      "cap": "海ぶどうは、英語では「Sea Grapes」。\n\n見た目がそのまま名前になっているので、写真といっしょなら世界の買い手にもすぐ伝わります。食感や食べ方をひとこと添えると、もっと選ばれやすくなります。\n\n" + AI_NOTE},
     {"id": "case-kagetsuen", "kind": "case", "tag": "Alibaba.comの事例", "num": "50数か国",
@@ -155,7 +155,7 @@ POSTS = [
     {"id": "steps", "kind": "text", "kicker": "始めるまでの流れ", "title": "まずは話を聞く\nところから",
      "lines": ["1  LINEで相談(商品名だけでもOK)", "2  面談で値段や数量を確認", "3  お申し込み", "4  売り場に掲載", "5  注文が入ったら国内の倉庫へ"],
      "foot": "LINEで質問した時点では、お申し込みにはなりません。",
-     "cap": "世界の懸け橋を始めるまでの流れです。\n\n1. LINEで相談(商品名を送るだけでもOK)\n2. 面談で値段や数量をいっしょに確認\n3. お申し込み\n4. GLOWの売り場に掲載\n5. 注文が入ったら国内の倉庫へ送るだけ\n\nLINEで質問した時点では、お申し込みにはなりません。"},
+     "cap": "世界の架け橋を始めるまでの流れです。\n\n1. LINEで相談(商品名を送るだけでもOK)\n2. 面談で値段や数量をいっしょに確認\n3. お申し込み\n4. GLOWの売り場に掲載\n5. 注文が入ったら国内の倉庫へ送るだけ\n\nLINEで質問した時点では、お申し込みにはなりません。"},
     {"id": "what-alibaba", "kind": "text", "kicker": "Alibaba.comとは", "title": "一年中ひらいている\n世界の展示会",
      "lines": ["会社どうしが商品を見せ合い、", "取引の相手を見つける場所。", "それがインターネット上で", "毎日ひらかれています。"],
      "foot": "※GLOWは、Alibaba.com上に沖縄の売り場を持ち、運営しています。",
@@ -192,7 +192,7 @@ def base_canvas():
     d.rectangle([0, H - 120, W, H], fill=CREAM)
     d.line([0, H - 120, W, H - 120], fill=(230, 225, 216), width=2)
     paste_logo(img, 64, H - 102, 84)
-    d.text((W - 64, H - 78), "世界の懸け橋", font=F("gb", 30), fill=NAVY, anchor="ra")
+    d.text((W - 64, H - 78), "世界の架け橋", font=F("gb", 30), fill=NAVY, anchor="ra")
     d.text((W - 64, H - 40), "glow-okinawa.jp", font=F("g", 26), fill=MUTED, anchor="ra")
     return img, d
 
@@ -303,7 +303,7 @@ def render(p):
 
 def caption(p):
     body = p["cap"].strip()
-    cta = ("\n\n▶ くわしく(世界の懸け橋のサイト)\n" + SITE.format(src="facebook") +
+    cta = ("\n\n▶ くわしく(世界の架け橋のサイト)\n" + SITE.format(src="facebook") +
            "\n▶ LINEで相談(商品名だけでもOK)\n" + LINE_GO.format(ch="fb"))
     return body + cta + "\n\n" + TAGS
 
@@ -321,7 +321,6 @@ def self_check():
     assert len(ids) == len(set(ids)), "id が重複しています"
     for p in POSTS:
         c = caption(p)
-        assert not re.search(r"KAKEHASHI|kakehashi", c), p["id"]
         assert "提携" not in c and "公式パートナー" not in c, p["id"]
         if p["kind"] == "item":
             assert AI_NOTE in c, p["id"]

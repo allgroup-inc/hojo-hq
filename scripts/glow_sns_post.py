@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-GLOW「世界の懸け橋」の Facebook ページ / Instagram に、posts/glow/ の投稿を順番に1本ずつ出す。
+GLOW「世界の架け橋」の Facebook ページ / Instagram に、posts/glow/ の投稿を順番に1本ずつ出す。
 
   python scripts/glow_sns_post.py --status    # つながっているページ・IGアカウントを表示するだけ(投稿しない)
   python scripts/glow_sns_post.py --dry-run   # 次に出す投稿を選び、出荷ゲートを検査するだけ(投稿しない)

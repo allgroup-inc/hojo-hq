@@ -197,7 +197,7 @@ def verify_file(path, today=None):
 TARGET_GROUPS = {
     "sns":  ("posts/launch/*.md", "posts/carousel/caption.md"),
     "line": ("posts/line/*.md",),
-    # GLOW「世界の懸け橋」のInstagram/Facebook(2026-10-06 追加・scripts/glow_sns_build.py が生成)
+    # GLOW「世界の架け橋」のInstagram/Facebook(2026-10-06 追加・scripts/glow_sns_build.py が生成)
     "glow": ("posts/glow/*.md",),
 }
 

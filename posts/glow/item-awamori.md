@@ -8,12 +8,12 @@
 ※お酒の輸出は、国ごとのルールの確認が必要です。くわしくはご相談ください。
 ※写真はAIで作ったイメージです。
 
-▶ くわしく(世界の懸け橋のサイト)
+▶ くわしく(世界の架け橋のサイト)
 https://glow-okinawa.jp/?utm_source=facebook&utm_medium=social&utm_campaign=glow_sns
 ▶ LINEで相談(商品名だけでもOK)
 https://allgroup-inc.github.io/hojo-hq/go/glow-fb/
 
-#沖縄 #沖縄県産 #沖縄の生産者 #沖縄特産品 #海外販路 #輸出 #越境EC #Alibaba #世界の懸け橋 #GLOW
+#沖縄 #沖縄県産 #沖縄の生産者 #沖縄特産品 #海外販路 #輸出 #越境EC #Alibaba #世界の架け橋 #GLOW
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
