@@ -83,12 +83,12 @@ def test_compare_regression_wins_over_improvement():
 
 def test_collect_items_are_sorted(monkeypatch):
     monkeypatch.setattr(bd, "tracked_files", lambda: ["p2", "p1"])
-    monkeypatch.setattr(crs, "find_violations", lambda paths: [("p2", "ZZ"), ("p1", "AA")])
+    monkeypatch.setattr(crs, "find_violations", lambda paths: [("p2", crs.FORBIDDEN[1]), ("p1", crs.FORBIDDEN[0])])
     monkeypatch.setattr(crs, "read_text", lambda path: None)
     monkeypatch.setattr(bd, "collect_skill_validation", lambda: ["t::b", "t::a"])
     monkeypatch.setattr(bd, "collect_scripts_tests_preexisting", lambda: ["s::b", "s::a"])
     got = bd.collect()
-    assert got["check_repo_scope"] == ["p1::AA", "p2::ZZ"]
+    assert got["check_repo_scope"] == ["p1::FORBIDDEN[0]", "p2::FORBIDDEN[1]"]
     assert got["skill_validation"] == ["t::a", "t::b"]
     assert got["scripts_tests_preexisting"] == ["s::a", "s::b"]
 
@@ -101,13 +101,25 @@ def test_scan_reports_every_forbidden_word_per_file(tmp_path, monkeypatch):
     (tmp_path / "clean.md").write_text("問題なし", encoding="utf-8")
     monkeypatch.setattr(bd, "ROOT", tmp_path)
     got = bd.scan_scope_items(["both.md", "one.md", "clean.md"])
-    assert got == {f"both.md::{w0}", f"both.md::{w1}", f"one.md::{w0}"}
+    assert got == {"both.md::FORBIDDEN_CONTENT[0]", "both.md::FORBIDDEN_CONTENT[1]", "one.md::FORBIDDEN_CONTENT[0]"}
+    # 記録する項目に禁止語の実文字列を入れない(記録ファイル自体が検査に引っかからないように)
+    assert not any(w0 in item or w1 in item for item in got)
+
+
+def test_scan_records_path_items_by_index(tmp_path, monkeypatch):
+    pat = crs.FORBIDDEN[2]
+    path = f"dir/{pat}/x.txt"
+    monkeypatch.setattr(bd, "ROOT", tmp_path)
+    got = bd.scan_scope_items([path])
+    assert f"{path}::FORBIDDEN[2]" in got
+    assert all(not item.endswith("::" + pat) for item in got)
 
 
 def test_scan_skips_allowed_paths_and_is_cwd_independent(tmp_path, monkeypatch):
     word = crs.FORBIDDEN_CONTENT[0]
-    allowed = "docs/wikiskill/baseline-debt.json"
-    (tmp_path / "docs" / "wikiskill").mkdir(parents=True)
+    allowed = "scripts/check_repo_scope.py"
+    (tmp_path / "scripts").mkdir(parents=True)
+    (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / allowed).write_text(word, encoding="utf-8")
     monkeypatch.setattr(bd, "ROOT", tmp_path)
     elsewhere = tmp_path / "docs"
@@ -314,8 +326,11 @@ def test_record_json_has_required_schema_keys(tmp_path, monkeypatch):
     assert "origin/main でも同一に失敗" in third["cause"]
 
 
-def test_baseline_json_path_is_allowed_by_scope_check():
-    assert "docs/wikiskill/baseline-debt.json" in crs.ALLOWED
-    word = crs.FORBIDDEN_CONTENT[0]
-    assert crs.find_content_violations("docs/wikiskill/baseline-debt.json", word) is None
-    assert crs.find_content_violations("docs/other.md", word) == word
+def test_baseline_json_is_not_exempt_and_has_no_forbidden_literal():
+    # 記録ファイルは ALLOWED に入れない(例外を広げない)。代わりに中身に禁止語を書かない。
+    assert "docs/wikiskill/baseline-debt.json" not in crs.ALLOWED
+    text = bd.DEFAULT_PATH.read_text(encoding="utf-8")
+    assert crs.find_content_violations("docs/wikiskill/baseline-debt.json", text) is None
+    for item in json.loads(text)["checks"]["check_repo_scope"]["items"]:
+        assert "::FORBIDDEN_CONTENT[" in item or "::FORBIDDEN[" in item
+

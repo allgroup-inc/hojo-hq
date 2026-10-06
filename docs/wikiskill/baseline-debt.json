@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "recorded_at": "2026-10-06T15:12:02Z",
-  "commit": "ceaa9b60d",
+  "recorded_at": "2026-10-06T21:15:24Z",
+  "commit": "b17fb0c99",
   "base_ref": "origin/main@04dbc28f4",
   "phase1_origin": false,
   "note": "Phase 1 開始時点の既知の赤。Phase 1 ではこれを増やさない(小柳さん 2026-10-06 承認)",
@@ -10,15 +10,15 @@
       "command": "python3 scripts/check_repo_scope.py",
       "failure_count": 9,
       "items": [
-        ".claude/skills/data-insights-extraction/SKILL.md::KAKEHASHI",
-        ".claude/skills/design-system-hojo/SKILL.md::KAKEHASHI",
-        ".claude/skills/figma-use-hojo/SKILL.md::KAKEHASHI",
-        ".claude/skills/slide-deck-hojo/SKILL.md::KAKEHASHI",
-        ".claude/skills/system-design-patterns/SKILL.md::KAKEHASHI",
-        ".claude/skills/transcription-analysis-hojo/SKILL.md::KAKEHASHI",
-        ".claude/skills/user-research-hojo/SKILL.md::KAKEHASHI",
-        ".claude/skills/writing-plans-hojo/SKILL.md::KAKEHASHI",
-        "docs/学び/学び_2026-W41.md::KAKEHASHI"
+        ".claude/skills/data-insights-extraction/SKILL.md::FORBIDDEN_CONTENT[0]",
+        ".claude/skills/design-system-hojo/SKILL.md::FORBIDDEN_CONTENT[0]",
+        ".claude/skills/figma-use-hojo/SKILL.md::FORBIDDEN_CONTENT[0]",
+        ".claude/skills/slide-deck-hojo/SKILL.md::FORBIDDEN_CONTENT[0]",
+        ".claude/skills/system-design-patterns/SKILL.md::FORBIDDEN_CONTENT[0]",
+        ".claude/skills/transcription-analysis-hojo/SKILL.md::FORBIDDEN_CONTENT[0]",
+        ".claude/skills/user-research-hojo/SKILL.md::FORBIDDEN_CONTENT[0]",
+        ".claude/skills/writing-plans-hojo/SKILL.md::FORBIDDEN_CONTENT[0]",
+        "docs/学び/学び_2026-W41.md::FORBIDDEN_CONTENT[0]"
       ],
       "cause": "2026-10-02 に追加された8つの SKILL.md と、2026-10-06 に自動生成された週次の学びが、check_repo_scope.FORBIDDEN_CONTENT の1語目(kakei-crm 側の統合名)を本文に含む。repo-scope CI は赤だが、赤でも配布 cron・マージを止める仕組みが無く、update-skills.sh にも配布前検査が無いため11リポジトリへ拡散した(台帳: FK-006)。",
       "introduced_by": [

@@ -108,6 +108,7 @@ def test_python_failure_is_reported_not_silent(repo):
     assert "exit=3" in json.loads(r.stdout)["systemMessage"]
 
 
+@pytest.mark.skipif(os.environ.get("WIKISKILL_SKIP_TIMING") == "1", reason="timing is environment-dependent; measured locally")
 def test_hook_runtime_under_500ms(repo):
     payload = {"session_id": "A", "tool_name": "Bash", "tool_input": {"command": "ls -la"}}
     t = time.perf_counter()

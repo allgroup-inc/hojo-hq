@@ -10,7 +10,9 @@
     python3 scripts/baseline_debt.py --record [--force]   # docs/wikiskill/baseline-debt.json を書く
     python3 scripts/baseline_debt.py --compare [--json]   # 現状と比較。REGRESSION なら exit 1
 
-注意: 記録先の JSON には検査語(禁止語)そのものが入る。そのため check_repo_scope.ALLOWED に登録してある。
+注意: 記録先の JSON に検査語(禁止語)そのものは書かない。項目は "<path>::FORBIDDEN_CONTENT[<i>]"
+      (本文の語)/ "<path>::FORBIDDEN[<i>]"(パスの語)と、check_repo_scope のリストの番号で記録する。
+      そのため記録ファイルを check_repo_scope.ALLOWED に入れる必要はない(例外を広げない)。
 """
 
 import argparse
@@ -165,22 +167,26 @@ def tracked_files():
 
 
 def scan_scope_items(paths):
-    """check_repo_scope の違反を "<path>::<pattern>" の集合で返す。
+    """check_repo_scope の違反を "<path>::FORBIDDEN[<i>]" / "<path>::FORBIDDEN_CONTENT[<i>]" の集合で返す。
 
     check_repo_scope.scan_contents は1ファイルにつき最初の1語しか返さない。
     既存の違反ファイルに別の禁止語が足されても隠れないよう、ここでは全パターンを個別に数える。
+    語そのものではなくリストの番号で記録するので、記録ファイルに禁止語の実文字列が入らない。
     (check_repo_scope 自体の挙動は変えない)
     """
-    items = {f"{p}::{pat}" for p, pat in check_repo_scope.find_violations(paths)}
+    items = {
+        f"{p}::FORBIDDEN[{check_repo_scope.FORBIDDEN.index(pat)}]"
+        for p, pat in check_repo_scope.find_violations(paths)
+    }
     for path in paths:
         if path in check_repo_scope.ALLOWED:
             continue
         text = check_repo_scope.read_text(str(ROOT / path))
         if text is None:
             continue
-        for pattern in check_repo_scope.FORBIDDEN_CONTENT:
+        for i, pattern in enumerate(check_repo_scope.FORBIDDEN_CONTENT):
             if pattern in text:
-                items.add(f"{path}::{pattern}")
+                items.add(f"{path}::FORBIDDEN_CONTENT[{i}]")
     return items
 
 

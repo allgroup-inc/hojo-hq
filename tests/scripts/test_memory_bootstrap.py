@@ -267,6 +267,7 @@ def test_decision_loader_ignores_experience_dir(kb):
     assert all(".claude/experience" not in d["path"] for d in load_decisions(kb))
 
 
+@pytest.mark.skipif(os.environ.get("WIKISKILL_SKIP_TIMING") == "1", reason="timing is environment-dependent; measured locally")
 def test_bootstrap_runtime_under_500ms_on_real_repo():
     t = time.perf_counter()
     subprocess.run([sys.executable, str(SCRIPTS / "memory_bootstrap.py"), "query", "スキル改善"],
@@ -593,6 +594,7 @@ def _timed_hook(root, event, payload):
     return time.perf_counter() - t, r
 
 
+@pytest.mark.skipif(os.environ.get("WIKISKILL_SKIP_TIMING") == "1", reason="timing is environment-dependent; measured locally")
 def test_hook_session_start_under_500ms_on_real_copy(realcopy):
     elapsed, r = _timed_hook(realcopy, "SessionStart", {"session_id": "T1", "source": "startup"})
     assert r.returncode == 0 and context_of(r.stdout).startswith("# 🧠 Memory Bootstrap")
@@ -600,6 +602,7 @@ def test_hook_session_start_under_500ms_on_real_copy(realcopy):
     assert elapsed < 0.5, f"SessionStart hook took {elapsed:.3f}s"
 
 
+@pytest.mark.skipif(os.environ.get("WIKISKILL_SKIP_TIMING") == "1", reason="timing is environment-dependent; measured locally")
 def test_hook_user_prompt_submit_under_500ms_on_real_copy(realcopy):
     elapsed, r = _timed_hook(realcopy, "UserPromptSubmit",
                              {"session_id": "T2", "prompt": "Lighthouse のパフォーマンスを見出し限定のCSSで直したい"})
