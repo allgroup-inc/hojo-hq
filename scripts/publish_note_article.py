@@ -80,24 +80,53 @@ async def login_to_note(page, email: str, password: str) -> bool:
     try:
         await page.goto(NOTE_LOGIN_URL, wait_until="networkidle")
 
-        # 入力フィールドが出現するまで待つ
-        await page.wait_for_selector('input[name="login"]', timeout=10000)
+        try:
+            # メールアドレス入力フィールドを見つけて入力
+            email_field = await page.query_selector('input[name="login"]')
+            if not email_field:
+                print("[error] メールアドレス入力フィールドが見つかりません")
+                return False
 
-        # メールアドレス入力
-        await page.fill('input[name="login"]', email)
-        await page.fill('input[name="password"]', password)
+            await email_field.fill(email)
+            print("[ok] メールアドレスを入力")
 
-        # ログインボタンクリック
-        await page.click('button[type="submit"]')
+            # パスワード入力フィールドを見つけて入力
+            password_field = await page.query_selector('input[type="password"]')
+            if not password_field:
+                print("[error] パスワード入力フィールドが見つかりません")
+                password_field = await page.query_selector('input[name="password"]')
+                if not password_field:
+                    print("[error] パスワード入力フィールド（代替）も見つかりません")
+                    return False
 
-        # ダッシュボードへのリダイレクトを待つ
-        await page.wait_for_url("**/me/**", timeout=10000)
+            await password_field.fill(password)
+            print("[ok] パスワードを入力")
 
-        print("[ok] note へのログインに成功しました")
-        return True
+            # ログインボタンをクリック
+            login_button = await page.query_selector('button[type="submit"]')
+            if not login_button:
+                print("[error] ログインボタンが見つかりません")
+                return False
+
+            await login_button.click()
+            print("[ok] ログインボタンをクリック")
+
+            # ダッシュボードへのリダイレクトを待つ
+            await page.wait_for_url("**/me/**", timeout=10000)
+
+            print("[ok] note へのログインに成功しました")
+            return True
+
+        except Exception as e:
+            print(f"[error] フロー内エラー: {e}")
+            import traceback
+            print(traceback.format_exc())
+            return False
 
     except Exception as e:
         print(f"[error] note ログイン失敗: {e}")
+        import traceback
+        print(traceback.format_exc())
         return False
 
 
