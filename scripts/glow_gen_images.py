@@ -20,7 +20,9 @@ import urllib.request
 
 from PIL import Image
 
-OUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site", "go", "world", "assets", "images", "booth", "ai")
+# 2026-10-06: SNS投稿の全面写真用に高解像度版を posts/glow/src/hi/ へ作る(環境変数で切り替え)
+OUT_DIR = os.environ.get("GLOW_IMG_OUT") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site", "go", "world", "assets", "images", "booth", "ai")
+WIDTH = int(os.environ.get("GLOW_IMG_WIDTH") or 0)
 MODELS = ["gemini-2.5-flash-image", "gemini-2.5-flash-image-preview", "gemini-3-pro-image-preview"]
 
 STYLE = ("Professional e-commerce product photograph, bright natural daylight, soft shadow, "
@@ -88,6 +90,7 @@ def main():
             failed.append(name)
             continue
         im = Image.open(io.BytesIO(raw)).convert("RGB")
+        width = WIDTH or width
         im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
         im.save(path, "WEBP", quality=80, method=6)
         print(f"[saved] {path} {im.size} {os.path.getsize(path) // 1024}KB")
