@@ -459,6 +459,18 @@ def test_summarize_reads_base_and_parts_as_one_session(repo):
     assert [c["subject"] for c in s["commits"]] == ["chore: experience"]  # head は本体の session_start から
 
 
+def test_summarize_lists_first_parent_commits_only(repo):
+    append_event(repo, start_event(repo, "s1"))
+    git(repo, "checkout", "-q", "-b", "side")
+    (repo / "side.txt").write_text("s")
+    git(repo, "add", "side.txt")
+    git(repo, "commit", "-q", "-m", "feat: side work")
+    git(repo, "checkout", "-q", "main")
+    git(repo, "merge", "-q", "--no-ff", "side", "-m", "merge: side")
+    subjects = [c["subject"] for c in summarize_session(repo, "s1")["commits"]]
+    assert subjects == ["merge: side"]
+
+
 @pytest.mark.parametrize("command, program", [
     ("TOKEN=$(cat ~/.config/x) gh", "<unknown>"),
     ("/home/user/other-repo/scripts/顧客A社_抽出.sh --all", "<external>"),

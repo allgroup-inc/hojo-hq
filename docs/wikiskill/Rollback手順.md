@@ -5,6 +5,7 @@ WikiSkill Phase 1(Experience の記録 + Memory Bootstrap)を止める・戻す�
 - 実行できる人: 守り部は 1 を単独で実行してよい(小柳さんの事前承認は不要)。2・4 は小柳さんの決裁後に行う。
 - 既存の superpowers の SessionStart hook(`.claude/hooks/superpowers-session-start.sh`)は、どの手順でも触らない・影響も受けない。
 - 全体の索引(Task 7 で作成): `docs/wikiskill/README.md`
+- Task 9(PR・マージ・タグ)に進む条件: repo-scope の Experience 検査(自己点検・本体)と Decision 検査(議事の必須項目)が緑で、置き場所の検査は Baseline の9件(`docs/wikiskill/baseline-debt.json`)だけが赤のままであること。repo-scope の Experience 検査と Decision 検査は、置き場所の検査が赤でも走る(`if: !cancelled()`)。
 
 ## 1. 緊急停止(守り部・単独可・数秒)
 
@@ -52,7 +53,7 @@ git push -u origin rollback/wikiskill-phase1     # PR を作り、小柳さん�
 ```
 
 - マージコミットは `wikiskill-phase1-v1` タグが指す(`git rev-parse wikiskill-phase1-v1^{commit}`)。ハッシュの確定はマージ後(Task 9)なので、この文書の `<...>` の部分はそのときに実際の値へ置き換える。
-- **Experience の JSONL(`.claude/experience/YYYY-MM/session-*.jsonl`)は revert で消えない**。履歴に残る。消すかどうかは別途議事で決める。
+- **Experience の JSONL(`.claude/experience/YYYY-MM/session-*.jsonl`。commit 後の続きの `session-*.part<N>.jsonl` を含む)は revert で消えない**。履歴に残る。消すかどうかは別途議事で決める。
 
 ## 3. 記録(48時間以内)
 

@@ -126,6 +126,10 @@ _TITLE_PREFIX_RE = re.compile(r"^議事\s*[:：]\s*")
 _OWN_LABEL_RE = {
     "ベッカイ": re.compile(r"^[-*・\s]*ベッカイ(?:[(（][^)）]*[)）])?\s*[:：]\s*"),
 }
+# 表の見出し・節の見出しから拾った「ベッカイ(別解)」だけのラベル(先頭に並んだものを落とす。「ベッカイの案」は残す)
+_HEADING_LABEL_RE = {
+    "ベッカイ": re.compile(r"^(?:[-*・\s]*ベッカイ(?:[(（][^)）]*[)）])?(?=\s|$)\s*)+"),
+}
 _PIPE_RE = re.compile(r"(?<!\\)\|")
 # ハッシュ・乱数らしい英数字の語(検索語にしない): 16進の6文字以上(数字と a-f を両方含む)/
 # 数字2つ以上と英字を含む6文字(ブランチ名の末尾 3mbx56 など)
@@ -359,7 +363,7 @@ def _src(kind: str, label: str, sid: str, path: str, title: str, body: str, line
 
 
 def _decision_line(d: dict, title: str, kind_label: str = "[D]") -> str:
-    """欄はそれぞれ自分の出典からだけ作る(読み替えない)。前の欄と同じ内容は出さない。700字まで。
+    """欄はそれぞれ自分の出典からだけ作る(読み替えない)。前の欄と同じ内容は出さない(ウタガイは例外で必ず出す)。700字まで。
 
     欄ごとに120字まで。全体が長すぎるときは 前提 → なぜ → 裁定 の順に60字へ縮め、まだ長ければ
     前提 → なぜ → ベッカイ の順に落とす。ウタガイ(最低80字)と見直し欄(期限切れ表示を含む)と
@@ -372,7 +376,12 @@ def _decision_line(d: dict, title: str, kind_label: str = "[D]") -> str:
         text = _flat(value or "")
         if label in _OWN_LABEL_RE:
             text = _OWN_LABEL_RE[label].sub("", text)
-        if not text or any(text[:80] in s for s in shown):
+        if label in _HEADING_LABEL_RE:
+            text = _HEADING_LABEL_RE[label].sub("", text).strip()
+        if not text:
+            continue
+        # 前の欄と同じ内容は出さない。ただしウタガイ(反対理由)は重複に見えても必ず出す
+        if label != "ウタガイ" and any(text[:80] in s for s in shown):
             continue
         shown.append(text)
         texts[label] = text

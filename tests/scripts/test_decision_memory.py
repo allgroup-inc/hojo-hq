@@ -361,6 +361,9 @@ def test_broken_file_does_not_stop_load(tmp_docs, monkeypatch, capsys):
     ds = load_decisions(tmp_docs)
     assert [d["path"] for d in ds] == ["docs/議事_20260101_ok.md"]
     assert "boom" in capsys.readouterr().err
+    # 監査ログにも残す(画面を見ていない hook 経由の読み込みでも silent にしない)
+    log = (tmp_docs / ".claude/experience/_audit.log").read_text(encoding="utf-8")
+    assert "\tdecision\t" in log and "docs/議事_20260102_boom.md" in log and "壊れた" in log
 
 
 # ---- 追加(レビュー指摘): ウタガイ継続行・見出し ------------------------------

@@ -321,7 +321,7 @@ def summarize_session(root: Path, session_id: str) -> Event:
         audit(root, _COMPONENT, "summarize_session: invalid head in JSONL; commits skipped")
         head = None
     if head:
-        out = _git(root, "log", f"{head}..HEAD", "--format=%h%x09%s")
+        out = _git(root, "log", "--first-parent", f"{head}..HEAD", "--format=%h%x09%s")
         for line in out.splitlines()[:50]:
             sha, _, subject = line.partition("\t")
             commits.append({"sha": sha, "subject": subject[:200]})

@@ -15,9 +15,14 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import re
 import sys
 from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from wikiskill_common import audit  # noqa: E402
 
 DECISION_GLOBS = ["docs/議事_*.md", "docs/議事/*.md"]
 VALID_STATUS = ("adopted", "rejected", "deferred", "superseded")
@@ -317,7 +322,7 @@ def parse_decision(path: Path, root: Path, today: dt.date | None = None) -> dict
 def load_decisions(root: Path, today: dt.date | None = None) -> list[dict]:
     """DECISION_GLOBS に合う議事をすべて読む(パス順・同じファイルは1回)。
 
-    1件が読めなくても全体は止めない。読めなかったファイルは stderr に警告して飛ばす。
+    1件が読めなくても全体は止めない。読めなかったファイルは stderr と _audit.log に残して飛ばす。
     """
     seen: dict[Path, Path] = {}
     for pattern in DECISION_GLOBS:
@@ -329,7 +334,9 @@ def load_decisions(root: Path, today: dt.date | None = None) -> list[dict]:
         try:
             out.append(parse_decision(p, Path(root), today))
         except Exception as exc:  # noqa: BLE001 - 1件の不具合でコーパス全体を止めない
-            print(f"警告: 議事を読めずスキップしました: {_rel(p, Path(root))} ({type(exc).__name__}: {exc})", file=sys.stderr)
+            msg = f"議事を読めずスキップしました: {_rel(p, Path(root))} ({type(exc).__name__}: {exc})"
+            print(f"警告: {msg}", file=sys.stderr)
+            audit(root, "decision", msg)
     return out
 
 

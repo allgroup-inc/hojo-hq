@@ -1099,3 +1099,25 @@ def test_experience_hides_the_current_session(kb):
     (kb / ".claude/experience/_local/current_session").write_text("me\n", encoding="utf-8")
     assert [s["title"] for s in memory_bootstrap._experience(kb)] == ["session-other"]
 
+
+# --- C4: ウタガイは重複判定で隠さない / ベッカイの見出しだけのラベルを重ねない
+
+def test_utagai_is_never_hidden_by_dedupe():
+    d = _decision(outcome="ウタガイの指摘どおり、キャッシュが古いまま公開される恐れがあるので毎回作り直す",
+                  utagai="キャッシュが古いまま公開される恐れ", bekkai="")
+    line = memory_bootstrap._decision_line(d, "議事")
+    assert "ウタガイ: キャッシュが古いまま公開される恐れ" in line
+
+
+def test_bekkai_heading_only_labels_are_stripped():
+    for raw, want in (
+        ("ベッカイ(別解) ベッカイ(別解) - 理由: 速い", "ベッカイ: - 理由: 速い"),
+        ("ベッカイ(別解・前提を疑う) 5. 段階通知にする", "ベッカイ: 5. 段階通知にする"),
+        ("ベッカイの案を採る", "ベッカイ: ベッカイの案を採る"),
+    ):
+        line = memory_bootstrap._decision_line(_decision(bekkai=raw), "議事")
+        assert want in line, (raw, line)
+        assert "ベッカイ: ベッカイ(" not in line
+    # 見出しのラベルしか無いときは欄ごと出さない
+    line = memory_bootstrap._decision_line(_decision(bekkai="ベッカイ(別解) ベッカイ(別解)"), "議事")
+    assert "ベッカイ:" not in line

@@ -145,4 +145,6 @@ Skill の自動更新は、人間の Gate を通さない形では行いませ�
 - 候補議事(決裁待ち): `docs/議事_20261006_Skill配布前Privacy検査_候補.md`
 - 失敗台帳: `docs/失敗台帳.md`(FK-006)
 
+Task 9(PR・マージ・タグ)に進む条件: repo-scope の Experience 検査(自己点検・本体)と Decision 検査(議事の必須項目)が緑で、置き場所の検査は Baseline の9件だけが赤のままであること(新しい赤が無いこと)。WikiSkill のテストは `wikiskill-tests` ワークフローで走ります。
+
 Phase 1 の受け入れ条件: 新しい privacy 違反 0 / 新しい skill_validation 失敗 0 / Baseline 非悪化 / 110 Skills 不変 / 13リポ配布不変 / セッション A で決めた内容(決定・なぜ・前提・ウタガイ・見直し期限・失敗台帳・再発防止)を、新しいセッション B が復元できること。
