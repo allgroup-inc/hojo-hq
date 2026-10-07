@@ -71,6 +71,7 @@ function updateDashboard() {
     var exitConversion = GlowDashboard.buildExitConversionSummary(interactionRecords, records, todayString, GlowDashboard.DEFAULT_CONFIG);
     var lineInquirySummary = buildLineInquirySummary();
     var instagramSummary = buildInstagramSummary();
+    var visitSummary = buildVisitAppointmentSummary(records, interactionRecords, todayString);
 
     dashboardSheet.clearContents();
     var row = 1;
@@ -120,6 +121,10 @@ function updateDashboard() {
     row = writeDashboardSection_(dashboardSheet, row, "Instagramメトリクスサマリー",
       ["指標", "数値"],
       instagramSummary.slice(2).map(function (r) { return [r[0], r[1]]; }));
+    row++;
+    row = writeDashboardSection_(dashboardSheet, row, "訪問・アポ・QRアクセスサマリー(当月)",
+      ["カテゴリ", "件数"],
+      visitSummary.slice(2).map(function (r) { return [r[0], r[1]]; }));
     row++;
 
     historySheet.appendRow([
