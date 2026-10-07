@@ -212,10 +212,10 @@ def _forbidden_index(path: str, texts: list[str]) -> int | None:
             for i, word in enumerate(FORBIDDEN_CONTENT):
                 if word.casefold() in folded:
                     return i
-        # ゼロ幅文字・ソフトハイフン・空白・記号を挟んだ書き方も止める(文字と数字だけで照合)
-        squashed = ws.normalize(t)
+        # ゼロ幅文字・ソフトハイフン・空白を挟んだ書き方も止める(記号は残す: 許された語を誤検知しない)
+        squashed = ws.strip_invisible(t)
         for i, word in enumerate(FORBIDDEN_CONTENT):
-            if ws.normalize(word) and ws.normalize(word) in squashed:
+            if ws.strip_invisible(word) and ws.strip_invisible(word) in squashed:
                 return i
     return None
 
@@ -776,6 +776,8 @@ def _st_cases() -> list[tuple[str, object, str | None]]:
         # V06
         ("summary に禁止語", lambda r: _st_cand(r, summary=f"x {word} y"), "V06"),
         ("本文に禁止語(小文字)", lambda r: _st_replace(r, "## 関連\nなし", f"## 関連\n{word.lower()}"), "V06"),
+        ("非公開リポ名の言及(禁止語ではない)", lambda r: _st_cand(
+            r, summary="移設先は " + FORBIDDEN_CONTENT[6].lower().replace("_", "-").strip("-") + " です"), None),
         ("ゼロ幅文字を挟んだ禁止語", lambda r: _st_cand(r, summary=f"x {word[:2]}\u200b{word[2:]} y"), "V06"),
         ("JSON エスケープした禁止語", lambda r: _st_replace(
             r, "related_skills: []", 'related_skills: ["' + "".join(f"\\u{ord(c):04x}" for c in word) + '"]'), "V06"),

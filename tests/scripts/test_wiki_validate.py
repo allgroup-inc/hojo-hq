@@ -7,6 +7,7 @@ fixture `wk` = 一時 git リポジトリ(origin = hojo-hq)+ commit 済み Exper
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -753,3 +754,30 @@ def test_review_by_at_183_days_passes(wk):
     p = next((wk / WIKI_DIR).glob("W*.md"))
     p.write_text(p.read_text(encoding="utf-8").replace("2027-04-21", "2027-04-22"), encoding="utf-8")
     assert "V09" in codes(wk)
+
+
+# ---------------------------------------------------------------- 修正ラウンド2(V06 の不可視文字照合を Cf/Z に限定)
+
+def _allowed_private_repo_name():
+    """FK-006 行に出てくる非公開リポ名(禁止語ではなく言及は許される)。実文字列はテストに書かない。"""
+    ledger = (REPO_ROOT / "docs/失敗台帳.md").read_text(encoding="utf-8")
+    row = next(l for l in ledger.splitlines() if l.startswith("| FK-006 "))
+    target = wiki_schema.normalize(FORBIDDEN_CONTENT[6])
+    names = {t for t in re.findall(r"[A-Za-z0-9-]+", row)
+             if wiki_schema.normalize(t) == target and FORBIDDEN_CONTENT[6] not in t}
+    assert names, "FK-006 行に非公開リポ名が見つからない"
+    return sorted(names)[0]
+
+
+def test_strip_invisible_keeps_symbols():
+    assert wiki_schema.strip_invisible("A​B­ C　D") == "abcd"
+    assert wiki_schema.strip_invisible("a-b_c/d") == "a-b_c/d"
+
+
+def test_allowed_private_repo_name_passes_v06(wk):
+    name = _allowed_private_repo_name()
+    assert codes(edit(wk, summary=f"移設先は {name} です")) == set()
+
+
+def test_forbidden_content_6_itself_fails(wk):
+    assert "V06" in codes(edit(wk, summary=f"環境変数 {FORBIDDEN_CONTENT[6]}X を使う"))

@@ -250,6 +250,15 @@ def iter_wiki(root: Path, place: str) -> list[Wiki]:
 
 # ---------------------------------------------------------------- 正規化・ID
 
+def strip_invisible(text: str) -> str:
+    """NFKC → casefold → 書式文字(Cf: ゼロ幅・ソフトハイフン等)と空白類(Z*)だけを除去。
+
+    禁止語の照合用。記号(`-` `_` `/` 等)は残すので、許された語と禁止語を同一視しない。
+    """
+    s = unicodedata.normalize("NFKC", str(text)).casefold()
+    return "".join(ch for ch in s if ch != "\u00ad" and not unicodedata.category(ch).startswith(("Cf", "Z")))
+
+
 def normalize(text: str) -> str:
     """NFKC → 小文字 → 文字(L*)と数字(N*)以外(空白・記号・制御文字)を除去。"""
     s = unicodedata.normalize("NFKC", str(text)).lower()
