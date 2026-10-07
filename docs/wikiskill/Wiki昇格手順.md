@@ -21,10 +21,10 @@
 
    | キー | 書き方 |
    |---|---|
-   | `wiki_id` | `W<YYYYMMDD>-<slug>`。ファイル名の stem と同じにする |
+   | `wiki_id` | `W<YYYYMMDD>-<slug>`。slug は小文字の ASCII(`[a-z0-9-]`)。ファイル名の stem と同じにする(`_archive/` に移したあとも同じ) |
    | `approved_by` | 承認した**人**の名前か GitHub ハンドル。bot 名・空は不可 |
    | `approved_at` | 承認日(日付)。候補の `created_at` 以降にする |
-   | `review_by` | 見直し期限。`approved_at` から183日以内 |
+   | `review_by` | 見直し期限。`approved_at` より後、かつ 183 日以内 |
    | `review` | スイシン / ウタガイ / ベッカイ の3役の意見。**ウタガイは必須**で、空・「なし」・「-」・「TBD」は不可 |
 
    `review_status` は `approved` に変える。`needs_review` は機械が判定する状態なので、人は書かない。

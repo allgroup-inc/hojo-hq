@@ -52,13 +52,15 @@ jobs:
       - name: Guard - only candidates are staged
         run: |
           set -eu
+          staged="$(git diff --cached --name-only)" || { echo "::error::ステージ一覧を取得できません"; exit 1; }
           bad=0
           while IFS= read -r f; do
+            [ -n "$f" ] || continue
             case "$f" in
               docs/wiki/_candidates/*) ;;
               *) echo "::error::候補以外がステージされています: $f"; bad=1 ;;
             esac
-          done < <(git diff --cached --name-only)
+          done <<< "$staged"
           [ "$bad" -eq 0 ] || exit 1
 
       - name: Check anything to propose
@@ -114,10 +116,21 @@ jobs:
           } > pr-body.md
           gh label create wiki-candidate --color 0E8A16 \
             --description "WikiSkill 知識候補(承認前)" 2>/dev/null || true
-          gh pr create --base main --head "wiki-candidates/$RUN_ID" \
-            --label wiki-candidate \
-            --title "Wiki候補 $RUN_ID(${n}件)" \
-            --body-file pr-body.md
+          if gh pr create --base main --head "wiki-candidates/$RUN_ID" \
+               --label wiki-candidate \
+               --title "Wiki候補 $RUN_ID(${n}件)" \
+               --body-file pr-body.md 2>pr_err.txt; then
+            echo "PR を作成しました"
+          else
+            cat pr_err.txt
+            echo "::warning::PR 作成に失敗(ブランチ wiki-candidates/$RUN_ID は push 済み。Settings > Actions > General の「Allow GitHub Actions to create and approve pull requests」を確認し、手動で PR を作成するかブランチを削除)"
+            {
+              echo "### PR 作成に失敗"
+              echo "- push 済みの候補ブランチ: wiki-candidates/$RUN_ID"
+              echo "- 手動で PR を作成するか、ブランチを削除してください"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
 
       - name: Open or update issue on failure
         if: failure()
@@ -128,7 +141,7 @@ jobs:
           gh label create knowledge-extract --color 5319E7 \
             --description "知識候補の抽出が失敗" 2>/dev/null || true
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          body="知識候補の抽出(knowledge-extract)が失敗しました。\n\n- 実行: $run_url\n- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')\n\n何も push していません(検証が通った場合だけ候補ブランチを作ります)。ログの wiki_validate の出力を確認してください。"
+          body="知識候補の抽出(knowledge-extract)が失敗しました。\n\n- 実行: $run_url\n- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')\n\n検証(wiki_validate)が失敗した場合は何も push していません。ただし、候補ブランチ wiki-candidates/<RUN_ID> が既に push されている可能性があります(PR 作成の段階で失敗したとき)。その場合は PR を手で作成するか、ブランチを削除してください。あわせて Settings > Actions > General の「Allow GitHub Actions to create and approve pull requests」が有効か確認してください。ログの wiki_validate の出力もご確認ください。"
           existing=$(gh issue list --state open --label knowledge-extract --json number --jq '.[0].number')
           if [ -n "$existing" ]; then
             printf "%b" "$body" | gh issue comment "$existing" --body-file -

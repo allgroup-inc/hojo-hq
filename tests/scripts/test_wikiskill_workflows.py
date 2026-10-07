@@ -64,7 +64,9 @@ def test_knowledge_extract_stages_only_candidates():
 
 def test_knowledge_extract_runs_validator_before_pr():
     t = read(WF)
-    assert t.index("wiki_validate.py") < t.index("git push") < t.index("gh pr create")
+    # 先頭の wiki_validate.py は selftest なので、本番の検証ステップ(出力を validate.txt へ)を指す
+    assert "scripts/wiki_validate.py 2>&1" in t
+    assert t.index("scripts/wiki_validate.py 2>&1") < t.index("git push") < t.index("gh pr create")
 
 
 def test_codeowners_covers_docs_wiki():
