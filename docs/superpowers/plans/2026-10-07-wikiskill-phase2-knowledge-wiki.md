@@ -6,7 +6,7 @@
 
 **Architecture:** 既存の Phase 1 基盤(`experience_log.py` / `decision_memory.py` / `memory_bootstrap.py` / `check_experience_privacy.py`)に、①共通 schema(`wiki_schema.py`)②検証器(`wiki_validate.py`。repo-scope CI のステップ)③規則ベース抽出器(`knowledge_extract.py --no-llm`。書込先は `docs/wiki/_candidates/` だけ)④ロック(`wikiskill_lock.py`)⑤Bootstrap の `[Wiki]` 区分 ⑥dispatch → PR の workflow と CODEOWNERS を足す。昇格は人がマージする PR だけ。Skill には一切反映しない。hook・settings.json は変えない。
 
-**Tech Stack:** Python 3.11 標準ライブラリのみ(後置の LLM 下書きだけ `anthropic` SDK。無ければ使わない)/ pytest(既存 `tests/scripts/`・`tests/integration/` の流儀・fixture `kb` `realcopy` `world` `world_private` と `hook()` を再利用)/ GitHub Actions
+**Tech Stack:** Python 3.11 標準ライブラリのみ(外部 SDK は使わない。LLM 下書き Task 10 は G3 不承認で実施禁止)/ pytest(既存 `tests/scripts/`・`tests/integration/` の流儀・fixture `kb` `realcopy` `world` `world_private` と `hook()` を再利用)/ GitHub Actions
 
 **Spec:** Phase 2 設計書(`docs/superpowers/specs/2026-10-07-wikiskill-phase2-knowledge-wiki-design.md`)/ 上位: `docs/superpowers/specs/2026-10-06-wikiskill-integration-design.md`(v1.1)
 
@@ -20,7 +20,7 @@
 - **Candidate は自動承認されない**。`docs/wiki/` 直下へ移すのは人がマージする PR だけ。AI は昇格 PR を用意してよいがマージしない
 - **Decision > Wiki**: Wiki と矛盾する新しい Decision は CI を止めない。Wiki 側を needs_review にして注入しない
 - **main へ直 push しない**(weekly-gakubi の直 push が FK-006 の一因)。抽出結果は必ずブランチ + PR
-- **stdlib のみ**(`anthropic` は後置 Task 10 の任意機能だけ)
+- **stdlib のみ**(外部 SDK は一切使わない。Task 10(LLM 下書き)は G3 不承認で実施禁止)
 - **G2(小柳さん決裁 2026-10-07): 抽出 workflow は `workflow_dispatch` のみ**。`schedule`(cron)による定期自動実行は禁止。実運用実績の後に別 Decision で再検討する
 - **各 Task 完了時のゲート(小柳さん指定)**: 各 Task 完了時に 実装内容 / 変更ファイル / 新規ファイル / テスト結果 / Privacy 確認 / Baseline Debt / Regression(Phase 1 テスト ID 固定) / 次 Task へ進んでよい状態か を確認し、異常なら STOP
 - **Baseline Debt SAME**: 各 Task の終了時に `python3 scripts/baseline_debt.py --compare` が `verdict: SAME`(IMPROVED も可)
@@ -680,9 +680,9 @@ R6(private 行だけの Experience は数えない)は Task 2 `test_private_and_
 
 ## 実装への遷移(停止点)
 
-本計画は **小柳さんのレビュー待ち** で停止する。実装は開始しない。承認後の実行方法:
+本計画は 2026-10-07 に小柳さんが承認済み(G1〜G6・最重要ルール・STOP 条件は Global Constraints 参照)。実行方法:
 
 - **Subagent-driven**(推奨): Task ごとに新しい subagent が実装し、別の reviewer が検査してから次へ。検証器の偽陰性が最大のリスクなので、Task 1・4 は reviewer に負例の追加を必ず依頼する
 - **Native**: 本セッションが全 Task を順に実装し、最後に1回レビュー
 
-承認時に併せて決めること: 設計書と本計画を `docs/superpowers/specs/` / `docs/superpowers/plans/` へ置くか(Task 7 の commit に含める)、Gate G1〜G6 のうち PR 前に決めるもの(少なくとも G1)。
+承認時に決まったこと: 設計書と本計画は承認時点で `docs/superpowers/specs/` / `docs/superpowers/plans/` へ保存済み。Gate G1〜G6 は Global Constraints に反映済み。Task 9 は A〜O 報告で STOP し、Release / Tag は小柳さんの最終承認後のみ作成する。
