@@ -793,9 +793,10 @@ NEG_DID = "D20261005-push-rule"
 
 
 def add_decision(root, did=NEG_DID, date_="2026-10-05", status="adopted", tags=None, outcome=FORBID,
-                 title=DECISION_TITLE, commit=True):
+                 title=DECISION_TITLE, commit=True, visibility=None):
     """否定語を含みうる議事を1件足して commit する(検証器は commit 済みの議事だけを読む)。"""
     tag_line = f"tags: [{', '.join(tags)}]\n" if tags else ""
+    tag_line += f"visibility: {visibility}\n" if visibility else ""
     text = (f"---\ndecision_id: {did}\ndate: {date_}\ntitle: {title}\nstatus: {status}\n{tag_line}---\n"
             f"# {title}\n\n## なぜ\n事故を防ぐ。\n\n## 三名体制の議論\n- **ウタガイ**: 遅くなる\n\n## 裁定\n{outcome}\n")
     rel = f"docs/議事/議事_{date_.replace('-', '')}_{did}.md"
@@ -1048,3 +1049,8 @@ def test_backdated_approved_at_is_v09(wk):
 def test_approved_at_same_day_as_created_at_passes(wk):
     promote(wk, approved_at="2026-10-07", review_by="2027-03-01")
     assert validate_tree(wk) == ([], [])
+
+
+def test_validator_treats_private_decision_as_private_source(wk):
+    add_decision(wk, visibility="private", did="DP")
+    assert "V05" in codes(edit(wk, source_decision=["DP"]))

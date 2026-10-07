@@ -1398,6 +1398,12 @@ def test_existing_kinds_match_frozen_phase1_output(kb):
     assert strip_wiki_section(out) == expected
 
 
+def _drop_bekkai_segment(text):
+    """[D] 行から「 / ベッカイ: …」の欄(次の ` / ` 区切りか行末まで)を取り除く。"""
+    return "".join(re.sub(r" / ベッカイ: .*?(?= / |$)", "", l) if l.startswith("- [D]") else l
+                   for l in text.splitlines(keepends=True))
+
+
 def test_existing_kinds_unchanged_without_wiki(kb, tmp_path):
     if not _has_rev(PHASE1_REV):
         pytest.skip(f"{PHASE1_REV} が無い(浅い clone 等)。凍結した出力との比較は別のテストで行う")
@@ -1406,7 +1412,9 @@ def test_existing_kinds_unchanged_without_wiki(kb, tmp_path):
         assert label in PHASE1_EXPECTED, label  # 既存6区分(Exp 以外)が実際に出ている状態で比べる
     out = retrieve(kb, WORDS)
     assert "[Wiki]" in out and section(out, "[Wiki]") == "- 該当なし"
-    assert strip_wiki_section(out) == PHASE1_EXPECTED  # 既存6区分の行は Phase 1 と同一
+    # 既存6区分の行は Phase 1 と同一。ただし [D] の「ベッカイ: …」欄だけは Phase 2 Task 6 で抽出元を
+    # 本来の欄に絞った(本文中の言及を拾わない)ため、両側から外して比べる(他の欄・他の区分は厳密に同一)
+    assert _drop_bekkai_segment(strip_wiki_section(out)) == _drop_bekkai_segment(PHASE1_EXPECTED)
 
 
 @pytest.mark.skipif(os.environ.get("WIKISKILL_SKIP_TIMING") == "1", reason="timing is environment-dependent; measured locally")

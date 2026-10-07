@@ -3,10 +3,18 @@
 
   python3 scripts/experience_archive.py --check
       .claude/experience の合計サイズを表示。exit 0=正常 / 1=3MB以上(警告) / 2=10MB以上(上限超え)
-  python3 scripts/experience_archive.py --archive [--dry-run] [--today YYYY-MM-DD]
+  python3 scripts/experience_archive.py --archive [--dry-run] [--force] [--today YYYY-MM-DD]
       翌月1日から180日以上たった月フォルダ YYYY-MM を archive/YYYY-MM.jsonl.gz に固めて元フォルダを消す。
       原本は gzip の中に全行そのまま残る。--dry-run は対象を表示するだけで何も変えない。
       実行後の差分は Git でコミットする(Phase 1 は手動。月次 Routine は将来)。
+
+引用ガード(Phase 2 Task 6): docs/wiki/*.md(公式 Wiki。approved かどうかを問わない)の source_experience
+(`session-<sid>@<ts>`)が根拠に引用している月は固めない。「引用している月」は次のどちらか
+  - <ts> の月(YYYY-MM)
+  - そのセッション <sid> のファイル(session-<sid>[.partN].jsonl)が入っている月フォルダ(セッション本体は最初の月に残るため)
+該当する月が1つでもあれば、何も変更せず exit 1(--dry-run も該当月を表示して exit 1)。
+`--force` で強制できる(その月ごとに _audit.log へ `experience_archive` として残す)。
+fail closed: docs/wiki を読めない・壊れた公式 Wiki がある場合は、引用の有無を確かめられないので同じく固めない。
 
 規律: 黙って成功しない。想定外の失敗は _audit.log に1行残し、stderr に出して exit 1。
       固めた結果を読み戻して原本と一致を確かめてから、はじめて元のファイルを消す。
@@ -29,7 +37,8 @@ from wikiskill_common import EXPERIENCE_DIR, audit, project_dir, session_file_ke
 MB = 1024 * 1024
 ARCHIVE_DIR = "archive"
 _MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
-USAGE = "使い方: experience_archive.py --check | --archive [--dry-run] [--today YYYY-MM-DD]"
+USAGE = "使い方: experience_archive.py --check | --archive [--dry-run] [--force] [--today YYYY-MM-DD]"
+_REF_MONTH_LEN = 7  # `YYYY-MM`
 
 
 def _exp(root: Path) -> Path:
@@ -219,9 +228,69 @@ def archive(root: Path, today: date, older_than_days: int = 180) -> list[Path]:
     return done
 
 
+def _citations(root: Path) -> tuple[dict[str, set[str]], dict[str, set[str]]]:
+    """公式 Wiki(docs/wiki/*.md)の source_experience が引用する ({月: {wiki_id}}, {sid: {wiki_id}})。
+
+    読めない(docs/wiki が列挙できない・iter_wiki が失敗・読めない/壊れた Wiki がある)なら
+    RuntimeError。引用が確かめられない状態で「引用なし」にはしない(fail closed)。
+    """
+    wd = Path(root) / "docs" / "wiki"
+    try:
+        if wd.exists() or wd.is_symlink():
+            if not wd.is_dir():
+                raise OSError(f"{wd} がディレクトリではない")
+            os.listdir(wd)
+        import wiki_schema  # 遅延 import(読み込み失敗も fail closed にする)
+        wikis = wiki_schema.iter_wiki(Path(root), "official")
+        ref_re = wiki_schema.EXP_SOURCE_RE
+    except Exception as e:  # noqa: BLE001
+        raise RuntimeError(f"Wiki を読めない({type(e).__name__}: {e})") from e
+    by_month: dict[str, set[str]] = {}
+    by_sid: dict[str, set[str]] = {}
+    for w in wikis:
+        if "_error" in w:
+            raise RuntimeError(f"Wiki を読めない: {w.get('_path')}({w['_error']})")
+        wid = str(w.get("wiki_id") or w.get("_path") or "?")
+        refs = w.get("source_experience")
+        for ref in ([refs] if isinstance(refs, str) else refs if isinstance(refs, list) else []):
+            m = ref_re.match(ref) if isinstance(ref, str) else None
+            if m:
+                by_sid.setdefault(m.group(1), set()).add(wid)
+                by_month.setdefault(m.group(2)[:_REF_MONTH_LEN], set()).add(wid)
+    return by_month, by_sid
+
+
+def _cited_by(month_dir: Path, by_month: dict[str, set[str]], by_sid: dict[str, set[str]]) -> list[str]:
+    """月フォルダを根拠に引用している公式 Wiki の id(重複なし・昇順)。"""
+    wids = set(by_month.get(month_dir.name, ()))
+    for f in month_dir.glob("session-*.jsonl"):
+        key = session_file_key(f.name)
+        if key is not None:
+            wids |= by_sid.get(key[0], set())
+    return sorted(wids)
+
+
+def _guard(root: Path, months: list[Path]) -> list[tuple[str, str]]:
+    """固めてはいけない月の [(月, 理由メッセージ)]。固めるものが無い(session-*.jsonl の無い)月は見ない。"""
+    targets = [p for p in months if any(p.glob("session-*.jsonl"))]
+    if not targets:
+        return []
+    try:
+        by_month, by_sid = _citations(root)
+    except RuntimeError as e:
+        return [(p.name, f"archive: 月 {p.name} は引用の有無を確かめられないため固めません(--force で強制): {e}")
+                for p in targets]
+    out = []
+    for p in targets:
+        wids = _cited_by(p, by_month, by_sid)
+        if wids:
+            out.append((p.name, f"archive: 月 {p.name} は Wiki {', '.join(wids)} の根拠に引用されているため固めません(--force で強制)"))
+    return out
+
+
 def _parse(argv: list[str]):
-    """(mode, dry_run, today) を返す。不正なら None。"""
-    mode, dry, today = None, False, None
+    """(mode, dry_run, today, force) を返す。不正なら None。"""
+    mode, dry, today, force = None, False, None, False
     args = list(argv)
     while args:
         a = args.pop(0)
@@ -231,6 +300,8 @@ def _parse(argv: list[str]):
             mode = a
         elif a == "--dry-run":
             dry = True
+        elif a == "--force":
+            force = True
         elif a == "--today":
             if not args:
                 return None
@@ -242,9 +313,9 @@ def _parse(argv: list[str]):
             return None
     if mode is None or (mode == "--check" and (dry or today is not None)):
         return None
-    if dry and mode != "--archive":
+    if (dry or force) and mode != "--archive":
         return None
-    return mode, dry, today
+    return mode, dry, today, force
 
 
 def main(argv: list[str], root: Path | None = None) -> int:
@@ -252,7 +323,7 @@ def main(argv: list[str], root: Path | None = None) -> int:
     if parsed is None:
         print(USAGE, file=sys.stderr)
         return 2
-    mode, dry, today = parsed
+    mode, dry, today, force = parsed
     root = Path(root) if root is not None else None
     try:
         if root is None:
@@ -260,8 +331,12 @@ def main(argv: list[str], root: Path | None = None) -> int:
         if mode == "--check":
             return check_size(root)
         today = today or date.today()
+        months = archivable_months(root, today)
+        blocked = _guard(root, months)
+        if blocked and not force:
+            for _m, msg in blocked:
+                print(msg, file=sys.stderr)
         if dry:
-            months = archivable_months(root, today)
             would, refused, stopped = 0, 0, False
             for p in months:
                 action, detail, files = _plan_month(root, p)
@@ -280,7 +355,13 @@ def main(argv: list[str], root: Path | None = None) -> int:
                     print(f"[dry-run] {p.name}: {len(files)} ファイルを archive/{p.name}.jsonl.gz に固める予定")
                     would += 1
             print(f"[dry-run] 実行予定 {would} か月 / 見送り {refused} か月(何も変更していません)")
-            return 0
+            if blocked and force:
+                print(f"[dry-run] --force: 引用ガードの対象 {len(blocked)} か月も強制して固める予定")
+            return 1 if blocked and not force else 0
+        if blocked and not force:
+            return 1  # 何も変更しない
+        for m, msg in blocked:
+            audit(root, "experience_archive", f"forced archive of cited month {m} ({msg.split('(--force')[0]})")
         done = archive(root, today)
         for p in done:
             print(f"archived: {p.name}")

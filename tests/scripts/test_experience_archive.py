@@ -4,6 +4,7 @@
 dry-run が何も変えないこと、失敗時に黙って成功しないことを固定する。
 """
 import gzip
+import json
 import shutil
 import os
 import sys
@@ -418,3 +419,108 @@ def test_archive_keeps_base_and_part_files_of_a_session_together_in_order(repo):
     (gz,) = archive(repo, TODAY)
     lines = gzip.decompress(gz.read_bytes()).decode("utf-8").splitlines()
     assert lines == [f'{{"f":"{name}"}}' for name in order]
+
+
+# --- WikiSkill Phase 2 Task 6: 公式 Wiki が根拠に引用している月は固めない ---------------
+
+def write_official_wiki(repo, wiki_id, refs, name=None):
+    d = repo / "docs" / "wiki"
+    d.mkdir(parents=True, exist_ok=True)
+    refs_line = json.dumps(refs)  # Wiki の frontmatter はリストを JSON で書く
+    (d / (name or f"{wiki_id}.md")).write_text(
+        f"---\nwiki_id: {wiki_id}\nstatus: approved\nsource_experience: {refs_line}\nsource_decision: []\n---\n## 知識\nx\n",
+        encoding="utf-8",
+    )
+
+
+def audit_text(repo):
+    p = exp(repo) / "_audit.log"
+    return p.read_text(encoding="utf-8") if p.exists() else ""
+
+
+def test_archive_refuses_month_cited_by_official_wiki(repo, capsys):
+    write_many(repo, "2026-01")
+    write_official_wiki(repo, "W20260301-cited", ["session-a@2026-01-15T03:04:05Z"])
+    before = snapshot(repo)
+    assert main(["--archive", "--today", "2026-10-06"], root=repo) == 1
+    assert snapshot(repo) == before                       # フォルダも gz も無傷
+    assert not gz_of(repo, "2026-01").exists()
+    err = capsys.readouterr()
+    assert "archive: 月 2026-01 は Wiki W20260301-cited の根拠に引用されているため固めません(--force で強制)" in err.out + err.err
+
+
+def test_dry_run_also_lists_cited_month_and_exits_1(repo, capsys):
+    write_many(repo, "2026-01")
+    write_many(repo, "2026-02")
+    write_official_wiki(repo, "W20260301-cited", ["session-a@2026-01-15T03:04:05Z"])
+    before = snapshot(repo)
+    assert main(["--archive", "--dry-run", "--today", "2026-10-06"], root=repo) == 1
+    assert snapshot(repo) == before
+    out = capsys.readouterr()
+    text = out.out + out.err
+    assert "月 2026-01 は Wiki W20260301-cited の根拠に引用されているため固めません" in text
+    assert "2026-02" in text
+
+
+def test_archive_refuses_session_whose_file_is_in_cited_sessions_month(repo):
+    # 引用の ts は 3月でも、そのセッション(a)のファイルは 1月フォルダにある(本体は最初の月に残る)。
+    write_many(repo, "2026-01")
+    write_official_wiki(repo, "W20260301-late", ["session-a@2026-03-01T00:00:00Z"])
+    before = snapshot(repo)
+    assert main(["--archive", "--today", "2026-10-06"], root=repo) == 1
+    assert snapshot(repo) == before
+
+
+def test_force_archives_cited_month_and_audits(repo):
+    write_many(repo, "2026-01")
+    write_official_wiki(repo, "W20260301-cited", ["session-a@2026-01-15T03:04:05Z"])
+    assert main(["--archive", "--force", "--today", "2026-10-06"], root=repo) == 0
+    assert gz_of(repo, "2026-01").exists() and not (exp(repo) / "2026-01").exists()
+    log = audit_text(repo)
+    assert "experience_archive" in log and "forced archive of cited month 2026-01" in log and "W20260301-cited" in log
+
+
+def test_uncited_month_is_unaffected_by_wiki_guard(repo):
+    write_many(repo, "2026-01")
+    write_many(repo, "2026-02")
+    write_official_wiki(repo, "W20260301-other", ["session-zzz@2026-02-15T03:04:05Z"])
+    assert main(["--archive", "--today", "2026-10-06"], root=repo) == 1     # 2026-02 は引用されている
+    # 1月だけが対象で、引用されていなければ通常どおり固まる
+    (exp(repo) / "2026-02").rename(repo / "moved")
+    assert main(["--archive", "--today", "2026-10-06"], root=repo) == 0
+    assert gz_of(repo, "2026-01").exists() and "forced" not in audit_text(repo)
+
+
+def test_no_wiki_dir_means_nothing_is_cited(repo):
+    write_many(repo, "2026-01")
+    assert main(["--archive", "--today", "2026-10-06"], root=repo) == 0
+    assert gz_of(repo, "2026-01").exists()
+
+
+def test_guard_fails_closed_when_wiki_unreadable(repo, monkeypatch, capsys):
+    import wiki_schema
+    write_many(repo, "2026-01")
+    write_official_wiki(repo, "W20260301-cited", ["session-zzz@2026-05-15T03:04:05Z"])
+
+    def boom(*_a, **_k):
+        raise OSError("wiki boom")
+
+    monkeypatch.setattr(wiki_schema, "iter_wiki", boom)
+    before = snapshot(repo)
+    assert main(["--archive", "--today", "2026-10-06"], root=repo) == 1
+    assert snapshot(repo) == before
+    assert "Wiki を読めない" in (lambda o: o.out + o.err)(capsys.readouterr())
+
+
+def test_guard_fails_closed_on_unparseable_official_wiki(repo):
+    write_many(repo, "2026-01")
+    d = repo / "docs" / "wiki"
+    d.mkdir(parents=True)
+    (d / "W20260301-broken.md").write_bytes(b"\xff\xfe\x00 not utf-8")
+    before = snapshot(repo)
+    assert main(["--archive", "--today", "2026-10-06"], root=repo) == 1
+    assert snapshot(repo) == before
+
+
+def test_force_without_archive_is_usage_error(repo):
+    assert main(["--check", "--force"], root=repo) == 2
