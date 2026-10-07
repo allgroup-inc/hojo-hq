@@ -8,13 +8,14 @@
       原本は gzip の中に全行そのまま残る。--dry-run は対象を表示するだけで何も変えない。
       実行後の差分は Git でコミットする(Phase 1 は手動。月次 Routine は将来)。
 
-引用ガード(Phase 2 Task 6): docs/wiki/*.md(公式 Wiki。approved かどうかを問わない)の source_experience
+引用ガード(Phase 2 Task 6): docs/wiki/ 配下の Wiki・候補・退役ページすべて(docs/wiki/*.md・_candidates/・_archive/。
+状態を問わない。却下の候補も退役ページも残るため)の source_experience
 (`session-<sid>@<ts>`)が根拠に引用している月は固めない。「引用している月」は次のどちらか
   - <ts> の月(YYYY-MM)
   - そのセッション <sid> のファイル(session-<sid>[.partN].jsonl)が入っている月フォルダ(セッション本体は最初の月に残るため)
 該当する月が1つでもあれば、何も変更せず exit 1(--dry-run も該当月を表示して exit 1)。
 `--force` で強制できる(その月ごとに _audit.log へ `experience_archive` として残す)。
-fail closed: docs/wiki を読めない・壊れた公式 Wiki がある場合は、引用の有無を確かめられないので同じく固めない。
+fail closed: docs/wiki を読めない・壊れたページがある場合は、引用の有無を確かめられないので同じく固めない。
 
 規律: 黙って成功しない。想定外の失敗は _audit.log に1行残し、stderr に出して exit 1。
       固めた結果を読み戻して原本と一致を確かめてから、はじめて元のファイルを消す。
@@ -229,9 +230,11 @@ def archive(root: Path, today: date, older_than_days: int = 180) -> list[Path]:
 
 
 def _citations(root: Path) -> tuple[dict[str, set[str]], dict[str, set[str]]]:
-    """公式 Wiki(docs/wiki/*.md)の source_experience が引用する ({月: {wiki_id}}, {sid: {wiki_id}})。
+    """docs/wiki/ 配下の Wiki・候補・退役ページすべて(正式 docs/wiki/*.md・_candidates/・_archive/)の
+    source_experience が引用する ({月: {id}}, {sid: {id}})。id は wiki_id → candidate_id → パスの順。
 
-    読めない(docs/wiki が列挙できない・iter_wiki が失敗・読めない/壊れた Wiki がある)なら
+    却下(rejected)の候補も退役ページも消さずに残るので、それらの引用元を固めると検証(V03/V04)が赤くなる。
+    読めない(docs/wiki が列挙できない・iter_wiki が失敗・読めない/壊れたページがある)なら
     RuntimeError。引用が確かめられない状態で「引用なし」にはしない(fail closed)。
     """
     wd = Path(root) / "docs" / "wiki"
@@ -241,7 +244,7 @@ def _citations(root: Path) -> tuple[dict[str, set[str]], dict[str, set[str]]]:
                 raise OSError(f"{wd} がディレクトリではない")
             os.listdir(wd)
         import wiki_schema  # 遅延 import(読み込み失敗も fail closed にする)
-        wikis = wiki_schema.iter_wiki(Path(root), "official")
+        wikis = [w for place in ("official", "candidates", "archive") for w in wiki_schema.iter_wiki(Path(root), place)]
         ref_re = wiki_schema.EXP_SOURCE_RE
     except Exception as e:  # noqa: BLE001
         raise RuntimeError(f"Wiki を読めない({type(e).__name__}: {e})") from e
@@ -250,7 +253,7 @@ def _citations(root: Path) -> tuple[dict[str, set[str]], dict[str, set[str]]]:
     for w in wikis:
         if "_error" in w:
             raise RuntimeError(f"Wiki を読めない: {w.get('_path')}({w['_error']})")
-        wid = str(w.get("wiki_id") or w.get("_path") or "?")
+        wid = str(w.get("wiki_id") or w.get("candidate_id") or w.get("_path") or "?")
         refs = w.get("source_experience")
         for ref in ([refs] if isinstance(refs, str) else refs if isinstance(refs, list) else []):
             m = ref_re.match(ref) if isinstance(ref, str) else None
@@ -261,7 +264,7 @@ def _citations(root: Path) -> tuple[dict[str, set[str]], dict[str, set[str]]]:
 
 
 def _cited_by(month_dir: Path, by_month: dict[str, set[str]], by_sid: dict[str, set[str]]) -> list[str]:
-    """月フォルダを根拠に引用している公式 Wiki の id(重複なし・昇順)。"""
+    """月フォルダを根拠に引用している Wiki・候補・退役ページの id(重複なし・昇順)。"""
     wids = set(by_month.get(month_dir.name, ()))
     for f in month_dir.glob("session-*.jsonl"):
         key = session_file_key(f.name)

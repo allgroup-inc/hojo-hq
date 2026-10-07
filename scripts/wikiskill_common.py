@@ -158,6 +158,70 @@ def group_session_files(paths) -> dict[str, list[Path]]:
     return {sid: [p for _n, p in sorted(items, key=lambda t: t[0])] for sid, items in groups.items()}
 
 
+class GitError(RuntimeError):
+    """commit 済みかどうかを git で確かめられない(呼び元は「commit 済みのものは無い」として fail closed)。"""
+
+
+_COMMITTED_MODES = ("100644", "100755")
+_GIT_TIMEOUT_S = 60
+
+
+def _git_out(root: Path, *args: str) -> str:
+    try:
+        r = subprocess.run(["git", "-c", "core.quotePath=false", *args], cwd=str(root), capture_output=True,
+                           text=True, encoding="utf-8", errors="strict", timeout=_GIT_TIMEOUT_S)
+    except (OSError, subprocess.SubprocessError, ValueError) as e:
+        raise GitError(f"git {args[0]} を実行できない: {type(e).__name__}") from e
+    if r.returncode != 0:
+        raise GitError(f"git {args[0]} が失敗(exit {r.returncode})")
+    return r.stdout
+
+
+def committed_files(root: Path, pathspec: str) -> set[str]:
+    """pathspec の下で「commit 済みのまま」のファイル(リポジトリ相対の POSIX パス)。
+
+    条件: git 管理下の通常ファイル(mode 100644/100755。symlink 120000・submodule 160000 は除く)、
+    作業ツリーでも symlink でない、`git diff --name-only HEAD` に出ない(作業ツリー・index とも HEAD と同じ)、
+    assume-unchanged(`git ls-files -v` の小文字の印)・skip-worktree(`S`)でない(diff が変更を報告しないため)。
+    検証器・抽出器・Bootstrap が共有する唯一の判定。root が git リポジトリの最上位でない・git が失敗したら GitError。
+    """
+    root = Path(root)
+    top = _git_out(root, "rev-parse", "--show-toplevel").strip()
+    try:
+        same = bool(top) and Path(top).resolve() == root.resolve()
+    except OSError as e:
+        raise GitError(f"リポジトリの最上位を確かめられない: {type(e).__name__}") from e
+    if not same:
+        raise GitError("root が git リポジトリの最上位ではない")
+    tracked: set[str] = set()
+    for entry in _git_out(root, "ls-files", "-s", "-v", "-z", "--", pathspec).split("\0"):
+        if not entry:
+            continue
+        meta, _tab, path = entry.partition("\t")
+        parts = meta.split(" ")
+        if len(parts) < 2 or not path:
+            continue
+        tag, mode = parts[0], parts[1]
+        if tag != tag.upper() or tag == "S":
+            continue  # assume-unchanged / skip-worktree: 作業ツリーの変更を git が報告しない
+        if mode not in _COMMITTED_MODES or (root / path).is_symlink():
+            continue
+        tracked.add(path)
+    changed = set(_git_out(root, "diff", "--name-only", "-z", "HEAD", "--", pathspec).split("\0"))
+    return tracked - changed
+
+
+_LEDGER_PIPE_RE = re.compile(r"(?<!\\)\|")
+
+
+def split_ledger_row(line: str) -> list[str]:
+    """失敗台帳(Markdown の表)の1行をセルに分ける。`\\|`(エスケープした縦棒)ではセルを切らない。
+
+    前後の空白と両端の `|` を落とし、各セルの前後の空白も落とす(セル内の `\\|` はそのまま残す)。
+    """
+    return [c.strip() for c in _LEDGER_PIPE_RE.split(str(line).strip().strip("|"))]
+
+
 def emit(event: str, additional_context: str | None = None, system_message: str | None = None) -> None:
     """hook 出力 JSON を stdout に1回だけ出す。両方 None なら {}。"""
     out: dict = {}

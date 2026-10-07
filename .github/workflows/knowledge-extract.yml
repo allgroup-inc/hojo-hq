@@ -6,7 +6,7 @@ name: knowledge-extract
 on:
   workflow_dispatch:
     inputs:
-      max: { description: "最大候補数", default: "10" }
+      max: { description: "最大候補数(10 以下。1回10件まで)", default: "10" }
 
 concurrency: { group: knowledge-extract, cancel-in-progress: false }
 
@@ -14,9 +14,18 @@ permissions: { contents: write, pull-requests: write, issues: write }
 
 jobs:
   extract:
+    # main からの実行だけ(別ブランチの未レビューのコード・データで候補を作らない)
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Refuse runs outside main
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::knowledge-extract は main からだけ実行できます(今は $GITHUB_REF)"
+            exit 1
+          fi
+
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
@@ -36,6 +45,7 @@ jobs:
         run: |
           set -euo pipefail
           case "$INPUT_MAX" in ''|*[!0-9]*) echo "::error::max は整数で指定してください: $INPUT_MAX"; exit 1 ;; esac
+          if [ "$INPUT_MAX" -gt 10 ]; then echo "::error::max は 10 以下(1回10件まで): $INPUT_MAX"; exit 1; fi
           RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-${{ github.run_id }}"
           echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
           python3 scripts/knowledge_extract.py --no-llm --max "$INPUT_MAX" --run-id "$RUN_ID" > summary.json

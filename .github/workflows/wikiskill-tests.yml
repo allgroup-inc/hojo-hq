@@ -29,6 +29,9 @@ on:
       - 'docs/wiki/**'
       - 'scripts/wikiskill_lock.py'
       - 'scripts/knowledge_extract.py'
+      - '.github/workflows/knowledge-extract.yml'
+      - '.github/workflows/repo-scope.yml'
+      - '.github/CODEOWNERS'
   push:
     paths:
       - 'scripts/wikiskill_common.py'
@@ -54,6 +57,9 @@ on:
       - 'docs/wiki/**'
       - 'scripts/wikiskill_lock.py'
       - 'scripts/knowledge_extract.py'
+      - '.github/workflows/knowledge-extract.yml'
+      - '.github/workflows/repo-scope.yml'
+      - '.github/CODEOWNERS'
   workflow_dispatch: {}
 
 concurrency:
@@ -95,6 +101,7 @@ jobs:
           tests/scripts/test_wiki_validate.py
           tests/scripts/test_wikiskill_lock.py
           tests/scripts/test_knowledge_extract.py
+          tests/scripts/test_wikiskill_workflows.py
           tests/integration/test_wikiskill_memory_e2e.py
           tests/integration/test_wikiskill_wiki_e2e.py
           -q

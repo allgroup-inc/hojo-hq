@@ -27,7 +27,8 @@
     python3 scripts/memory_bootstrap.py query "<語> <語>"        # 手動確認用(停止スイッチは見ない)
 
 規律: root(このリポジトリ)の外は読まない。private の Experience 行は出さない(audit に残す)。
-[Wiki] は docs/wiki/ 直下の approved(visibility がリポの公開性と一致)だけ。_candidates/ と _archive/ は開かない。
+[Wiki] は docs/wiki/ 直下の approved のうち、commit 済みのまま・visibility がリポの公開性と一致・承認の形がある
+(wiki_schema.injectable_reasons)・Decision と矛盾しない(injection_blockers)ものだけ。_candidates/ と _archive/ は開かない。
 .claude/wiki.off があれば [Wiki] だけ止める(.claude/memory.off は従来どおり全体を止める)。
 1区分の読み込み失敗は audit して `- 該当なし` にし、他の区分は出す。hook は必ず JSON を出し exit 0。
 """
@@ -53,6 +54,7 @@ from wikiskill_common import (  # noqa: E402
     LOCAL_DIR,
     audit,
     audit_if_slow,
+    committed_files,
     current_branch,
     disabled,
     emit,
@@ -60,6 +62,7 @@ from wikiskill_common import (  # noqa: E402
     project_dir,
     read_hook_input,
     session_id_of,
+    split_ledger_row,
 )
 
 if __name__ == "__main__":  # wiki_schema.decision_conflicts の `import memory_bootstrap` が2つ目の複製を読まない
@@ -149,7 +152,6 @@ _OWN_LABEL_RE = {
 _HEADING_LABEL_RE = {
     "ベッカイ": re.compile(r"^(?:[-*・\s]*ベッカイ(?:[(（][^)）]*[)）])?(?=\s|$)\s*)+"),
 }
-_PIPE_RE = re.compile(r"(?<!\\)\|")
 # ハッシュ・乱数らしい英数字の語(検索語にしない): 16進の6文字以上(数字と a-f を両方含む)/
 # 数字2つ以上と英字を含む6文字(ブランチ名の末尾 3mbx56 など)
 _HEX_UNIT_RE = re.compile(r"^(?=.*\d)(?=.*[a-f])[0-9a-f]{6,}$")
@@ -541,7 +543,7 @@ def _failures(root: Path) -> list[Source]:
     for line in _read_inside(root, FAILURE_PATH).splitlines():
         if not line.startswith("| FK-"):
             continue
-        cells = [c.strip() for c in _PIPE_RE.split(line.strip().strip("|"))]
+        cells = split_ledger_row(line)
         cells += [""] * (11 - len(cells))
         fid, date, cat, fact, _impact, _found, cause, measure = cells[:8]
         title = f"{fid} {date} {cat}"
@@ -601,11 +603,46 @@ def _wiki_line(w: dict) -> str:
             f"承認: {_clean(w.get('approved_by') or '')} {_clean(w.get('approved_at') or '')} → {w['_path']}")
 
 
-def _wiki(root: Path) -> list[Source]:
-    """docs/wiki/ 直下の approved だけ(visibility がリポの公開性と一致・needs_review でない)。
+_COMMITTED_WIKI: dict[str, frozenset[str] | None] = {}
+_WIKI_AUDITED: set[tuple[str, str]] = set()
 
-    needs_review(approved_at より新しい adopted Decision と矛盾・判定の例外を含む)の Wiki は出さず、
-    audit に `wiki: needs_review <wiki_id> <decision_id>` を1ページ1プロセスに1回。
+
+def _audit_once(root: Path, key: str, message: str) -> None:
+    """同じ (root, key) の audit は1プロセスに1回だけ。"""
+    k = (str(Path(root).resolve()), key)
+    if k not in _WIKI_AUDITED:
+        _WIKI_AUDITED.add(k)
+        audit(root, _COMPONENT, message)
+
+
+def _committed_wiki(root: Path) -> frozenset[str] | None:
+    """docs/wiki 配下で commit 済みのまま(wikiskill_common.committed_files)のパス。1プロセスに1回だけ git に聞く。
+
+    root がリポジトリの最上位でない・git が失敗したら None(= [Wiki] を1件も出さない)+ audit 1回。
+    """
+    key = str(Path(root).resolve())
+    if key not in _COMMITTED_WIKI:
+        try:
+            if not _git_ready(root):
+                raise RuntimeError("root is not the top of a git repository")
+            _COMMITTED_WIKI[key] = frozenset(committed_files(Path(root), _ws.WIKI_DIR))
+        except Exception as e:  # noqa: BLE001 — commit 済みか確かめられないページは注入しない(fail closed)
+            _COMMITTED_WIKI[key] = None
+            _audit_once(root, "committed_files", f"wiki: committed_files failed {type(e).__name__}: {e}; [Wiki] skipped")
+    return _COMMITTED_WIKI[key]
+
+
+def _wiki(root: Path) -> list[Source]:
+    """docs/wiki/ 直下の approved で、次をすべて満たすページだけ(どれかを欠けば注入しない = fail closed)。
+
+    - commit 済みのまま(git 管理下・HEAD と同じ内容。未追跡・手元で書き換えたページは出さない)。
+      確かめられなければ [Wiki] は1件も出さず、audit に `wiki: committed_files failed …` を1プロセスに1回
+    - visibility がリポの公開性と一致
+    - 承認の形(wiki_schema.injectable_reasons: 人の approved_by・空でないウタガイ・wiki_id = ファイル名・
+      repo = このリポ・出典が1件以上)。欠けたページは audit に `wiki: not injected <path> <理由>` を1ページ1プロセスに1回
+    - 矛盾なし(wiki_schema.injection_blockers: 日付を問わず全 adopted Decision と照合。acknowledged と、
+      否定を引き継ぐ出典 Decision は除く。判定の例外も矛盾扱い)。矛盾するページは audit に
+      `wiki: needs_review <wiki_id> <decision_id>` を1ページ1プロセスに1回
 
     _candidates/ と _archive/ は開かない(iter_wiki の official は直下だけ + `docs/wiki/_` で始まるパスを捨てる)。
     .claude/wiki.off があれば [] (audit は1プロセスに1回)。どんな失敗も [] + audit(fail closed)。
@@ -621,24 +658,35 @@ def _wiki(root: Path) -> list[Source]:
         if _ws is None:
             audit(root, _COMPONENT, f"wiki: wiki_schema unavailable ({_WS_ERROR}); [Wiki] skipped")
             return []
+        committed = _committed_wiki(root)
+        if committed is None:
+            return []
         out: list[Source] = []
-        visibility = decisions = None
+        visibility = decisions = slug = None
         unreadable = hidden = 0
         for w in _ws.iter_wiki(root, "official"):
             path = str(w.get("_path") or "")
             if (not path.startswith(_ws.WIKI_DIR + "/") or path.startswith(_ws.WIKI_DIR + "/_")
                     or "/" in path[len(_ws.WIKI_DIR) + 1:] or w.get("_place") != "official"):
                 continue  # 候補・置き換え済み・root の外は出さない(二重の除外)
+            if path not in committed:
+                _audit_once(root, "nc:" + path, f"wiki: not injected {path} uncommitted")
+                continue  # 未追跡・未 commit の変更があるページは、検証(CI)を通ったものとは限らない
             if "_error" in w:
                 unreadable += 1
                 continue
             if w.get("review_status") != "approved":
                 continue
-            if visibility is None:
+            if slug is None:
                 # root がリポジトリの最上位でなければ(外側のリポの remote を読まないよう)private 扱い
-                visibility = _ws.repo_visibility(root) if _git_ready(root) else "private"
+                slug = _ws.experience_log.repo_slug(root) if _git_ready(root) else "unknown"
+                visibility = "public" if slug in _ws.experience_log.PUBLIC_REMOTES else "private"
             if w.get("visibility") != visibility:
                 hidden += 1
+                continue
+            reasons = _ws.injectable_reasons(w, slug)
+            if reasons:
+                _audit_once(root, "ni:" + path, f"wiki: not injected {path} {','.join(reasons)}")
                 continue
             if decisions is None:
                 decisions = _decisions_cached(root)
@@ -675,6 +723,8 @@ def _clear_caches() -> None:
     _SYN_CACHE.clear()
     _WIKI_OFF_AUDITED.clear()
     _NEEDS_REVIEW_AUDITED.clear()
+    _COMMITTED_WIKI.clear()
+    _WIKI_AUDITED.clear()
     if _ws is not None and hasattr(_ws, "_clear_conflict_cache"):
         _ws._clear_conflict_cache()
 

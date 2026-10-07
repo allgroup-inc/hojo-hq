@@ -14,8 +14,10 @@ def read(rel):
 def test_wikiskill_tests_paths_cover_inputs():
     text = read(".github/workflows/wikiskill-tests.yml")
     for p in ["CLAUDE.md", "docs/**", ".claude/skills/**", ".claude/settings.json",
-              ".gitignore", "scripts/check_repo_scope.py"]:
+              ".gitignore", "scripts/check_repo_scope.py", ".github/workflows/knowledge-extract.yml",
+              ".github/workflows/repo-scope.yml", ".github/CODEOWNERS"]:
         assert text.count(f"'{p}'") == 2, p  # pull_request と push の両方
+    assert "tests/scripts/test_wikiskill_workflows.py" in text  # このテスト自体も CI で走らせる
 
 
 # ---- Task 5: Gate(CODEOWNERS・昇格手順書・knowledge-extract.yml) ----
@@ -53,7 +55,25 @@ def test_knowledge_extract_concurrency_group():
 
 def test_knowledge_extract_never_pushes_main():
     t = read(WF)
-    assert "push origin main" not in t and "refs/heads/main" not in t and "wiki-candidates/" in t
+    assert "push origin main" not in t and "wiki-candidates/" in t
+    # refs/heads/main は「main からだけ走る」ガード(if: と GITHUB_REF の確認)にだけ出てよい。push の行には出さない
+    for line in t.splitlines():
+        assert not ("push" in line and "refs/heads/main" in line), line
+        assert "HEAD:refs/heads/main" not in line, line
+
+
+def test_knowledge_extract_runs_only_from_main():
+    t = read(WF)
+    assert "    if: github.ref == 'refs/heads/main'" in t  # job の条件
+    first = re.search(r"    steps:\n      - name:[^\n]*\n(.*?)(?=\n      - )", t, re.S)
+    assert first and '"$GITHUB_REF" != "refs/heads/main"' in first.group(0) and "::error::" in first.group(0)
+    assert "exit 1" in first.group(0)
+
+
+def test_knowledge_extract_rejects_max_over_ten():
+    t = read(WF)
+    assert '[ "$INPUT_MAX" -gt 10 ]' in t and "::error::max は 10 以下" in t
+    assert t.index('[ "$INPUT_MAX" -gt 10 ]') < t.index("scripts/knowledge_extract.py --no-llm")
 
 
 def test_knowledge_extract_stages_only_candidates():

@@ -30,7 +30,8 @@ import experience_log  # noqa: E402
 import wiki_schema as ws  # noqa: E402  (規則は ws.<関数> で呼ぶ: テストで差し替えて fail-closed を確かめられる)
 from check_repo_scope import FORBIDDEN_CONTENT, find_content_violations, find_violations  # noqa: E402
 from decision_memory import load_decisions  # noqa: E402
-from wikiskill_common import group_session_files  # noqa: E402
+from wikiskill_common import GitError, group_session_files  # noqa: E402
+from wikiskill_common import committed_files as _common_committed_files  # noqa: E402
 
 Violation = tuple[str, str, str]  # (パス, コード, 理由)
 Warning = tuple[str, str, str]  # noqa: A001 — (パス, decision_id, 理由)。needs_review(V13)用
@@ -51,54 +52,30 @@ _LIST_STR_KEYS = ("related_wiki", "related_skills")
 _GIT_ENV_DROP = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE")
 
 
-class ContextError(RuntimeError):
-    """検査に必要な入力(git 等)を読めない。検査全体を違反として止める。"""
+class ContextError(GitError):
+    """検査に必要な入力(git 等)を読めない。検査全体を違反として止める(git の失敗は基底の GitError で上がる)。"""
 
 
 # ---------------------------------------------------------------- 入力(Context)
 
-def _git(root: Path, *args: str) -> str:
-    try:
-        r = subprocess.run(["git", "-c", "core.quotePath=false", *args], cwd=str(root), capture_output=True,
-                           text=True, encoding="utf-8", errors="strict", timeout=60)
-    except (OSError, subprocess.SubprocessError, ValueError) as e:
-        raise ContextError(f"git {args[0]} を実行できない: {type(e).__name__}") from e
-    if r.returncode != 0:
-        raise ContextError(f"git {args[0]} が失敗(exit {r.returncode})")
-    return r.stdout
+# commit 済みのまま(git 管理下の通常ファイル・HEAD と同じ内容・symlink / assume-unchanged / skip-worktree でない)の
+# 判定は wikiskill_common.committed_files ひとつを検証器・抽出器・Bootstrap が共有する(食い違わない)。
+# git が失敗すれば GitError(ContextError の基底。呼び元で fail-closed)。
+committed_files = _common_committed_files
 
 
-def committed_files(root: Path, pathspec: str) -> set[str]:
-    """git 管理下の通常ファイル(mode 100644/100755・symlink でない)で、`git diff --name-only HEAD` に出ない
-    (作業ツリー・index とも HEAD と同じ = commit 済みのまま)もの。検証器と抽出器が共有する唯一の判定。
-
-    シンボリックリンク(mode 120000)・submodule(160000)は除く: リンク先は commit されたものとは限らない。
-    git が失敗すれば ContextError(呼び元で fail-closed)。
-    """
-    tracked: set[str] = set()
-    for entry in _git(root, "ls-files", "-s", "-z", "--", pathspec).split("\0"):
-        if not entry:
-            continue
-        meta, _tab, path = entry.partition("\t")
-        if meta.split(" ", 1)[0] not in ("100644", "100755") or (Path(root) / path).is_symlink():
-            continue
-        tracked.add(path)
-    changed = set(_git(root, "diff", "--name-only", "-z", "HEAD", "--", pathspec).split("\0"))
-    return tracked - changed
-
-
-def _committed_experience(root: Path) -> list[str]:
+def committed_experience(root: Path) -> list[str]:
     """commit 済みのまま(committed_files)の Experience の JSONL(パス順)。"""
     return sorted(p for p in committed_files(root, EXP_DIR) if p.endswith(".jsonl"))
 
 
-def _committed_decisions(root: Path) -> list[dict]:
+def committed_decisions(root: Path) -> list[dict]:
     """load_decisions のうち、議事ファイルが commit 済みのまま(committed_files)のものだけ。"""
     committed = committed_files(root, "docs")
     return [d for d in load_decisions(root) if d.get("path") in committed]
 
 
-def _read_synonyms(root: Path) -> list[frozenset[str]]:
+def read_synonyms(root: Path) -> list[frozenset[str]]:
     """矛盾判定(V12・V13)用の同義語表。検証器は audit も書かない(形式違反の行は V14 が別に報告する)。"""
     path = Path(root) / ws.SYNONYMS_PATH
     if path.is_symlink() or not path.is_file():
@@ -110,7 +87,7 @@ def _read_synonyms(root: Path) -> list[frozenset[str]]:
     return ws.parse_synonyms(text)[0]
 
 
-def _read_ledger(root: Path, committed_only: bool = False) -> tuple[dict[str, str], set[str]]:
+def read_ledger(root: Path, committed_only: bool = False) -> tuple[dict[str, str], set[str]]:
     """失敗台帳の FK 行。committed_only なら、台帳が commit 済みのまま(committed_files)でなければ丸ごと空。"""
     path = Path(root) / FAILURE_LEDGER
     if not path.is_file():
@@ -130,7 +107,7 @@ def _read_ledger(root: Path, committed_only: bool = False) -> tuple[dict[str, st
 
 def build_context(root: Path) -> Context:
     root = Path(root)
-    decisions = _committed_decisions(root)  # 未追跡・未 commit の議事は根拠にも矛盾判定にも使わない(抽出器と同じ)
+    decisions = committed_decisions(root)  # 未追跡・未 commit の議事は根拠にも矛盾判定にも使わない(抽出器と同じ)
     by_id: dict[str, dict] = {}
     dup_dec: set[str] = set()
     for d in decisions:
@@ -138,11 +115,11 @@ def build_context(root: Path) -> Context:
         if did in by_id:
             dup_dec.add(did)
         by_id.setdefault(did, d)
-    fk_rows, dup_fk = _read_ledger(root, committed_only=True)
+    fk_rows, dup_fk = read_ledger(root, committed_only=True)
     exp_events: dict[tuple[str, str], dict] = {}
     exp_groups: dict[tuple[str, str], list[dict]] = {}
     exp_errors: list[tuple[str, str]] = []  # (読めない Experience のパス, 理由)
-    for sid, files in group_session_files(_committed_experience(root)).items():
+    for sid, files in group_session_files(committed_experience(root)).items():
         for f in files:
             try:
                 events = experience_log._read_events(root / f)
@@ -166,11 +143,11 @@ def build_context(root: Path) -> Context:
         "decisions": decisions, "decisions_by_id": by_id, "ambiguous_decisions": dup_dec,
         "fk_rows": fk_rows, "ambiguous_fk": dup_fk, "exp_events": exp_events, "exp_groups": exp_groups,
         "exp_errors": exp_errors, "official": official, "candidates": candidates, "archive": archive, "ids": ids,
-        "synonyms": _read_synonyms(root),
+        "synonyms": read_synonyms(root),
     }
 
 
-def _event_text(ev: dict) -> str:
+def event_text(ev: dict) -> str:
     texts = [ev[f] for f in EXP_TEXT_FIELDS if isinstance(ev.get(f), str) and ev[f]]
     return "\n".join(texts) if texts else json.dumps(ev, ensure_ascii=False)
 
@@ -186,7 +163,7 @@ def resolve_source(source: str, kind: str, ctx: Context) -> tuple[str, dict | No
             evs = ctx["exp_groups"].get((m.group(1), m.group(2))) if m else None
             if not evs:
                 return "", None
-            return "\n".join(_event_text(e) for e in evs), evs[0]
+            return "\n".join(event_text(e) for e in evs), evs[0]
         if k == "source_decision":
             d = ctx["decisions_by_id"].get(source)
             if d is None or source in ctx["ambiguous_decisions"]:
@@ -216,15 +193,11 @@ def _date(v) -> date | None:
 
 
 def _is_bot(name: str) -> bool:
-    n = unicodedata.normalize("NFKC", name).strip().lower()
-    return (n in ws.BOT_APPROVERS or n.endswith("[bot]") or n.startswith("github-actions") or "claude" in n
-            or "knowledge_extract" in n)
+    return ws.is_bot_approver(name)  # Bootstrap の注入前の確認(ws.injectable_reasons)と同じ規則
 
 
 def _empty_word(v) -> bool:
-    if not isinstance(v, str):
-        return True
-    return unicodedata.normalize("NFKC", v).strip().lower() in ws.EMPTY_WORDS or ws.normalize(v) in ws.EMPTY_WORDS
+    return ws.is_empty_word(v)
 
 
 def _forbidden_index(path: str, texts: list[str]) -> int | None:
@@ -246,7 +219,7 @@ def _forbidden_index(path: str, texts: list[str]) -> int | None:
     return None
 
 
-def _materialize(w: dict) -> dict:
+def materialize(w: dict) -> dict:
     """ファイルから読んでいない Wiki(抽出器の下書き)は、書いたときと同じ形に描いて読み直す。"""
     if "_text" in w:
         return w
@@ -622,7 +595,7 @@ def validate_file(w: dict, ctx: Context) -> list[Violation]:
     if "_error" in w:
         return [(p, "V01", f"読めない: {w['_error']}")]
     try:
-        w = _materialize(w)
+        w = materialize(w)
     except Exception as e:  # noqa: BLE001
         return [(p, "V01", f"読めない: {type(e).__name__}: {e}")]
     out: list[Violation] = []
@@ -987,7 +960,7 @@ def selftest() -> int:
 
 # ---------------------------------------------------------------- CLI
 
-def _repo_root() -> Path | None:
+def repo_root() -> Path | None:
     try:
         top = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=30)
     except (OSError, subprocess.SubprocessError):
@@ -1008,7 +981,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     if args.selftest:
         return selftest()
-    root = Path(args.root) if args.root else _repo_root()
+    root = Path(args.root) if args.root else repo_root()
     if root is None:
         print("Wiki を検査できませんでした: git リポジトリの中で実行してください(fail-closed)", file=sys.stderr)
         return 1
@@ -1032,6 +1005,16 @@ def main(argv: list[str] | None = None) -> int:
     m = len(ws.iter_wiki(root, "candidates"))
     print(f"OK: Wiki {n}件・候補 {m}件・違反なし")
     return 0
+
+
+# 旧名(先頭の _ 付き)。抽出器・テストの旧い呼び方のために残す
+_committed_experience = committed_experience
+_committed_decisions = committed_decisions
+_read_synonyms = read_synonyms
+_read_ledger = read_ledger
+_materialize = materialize
+_event_text = event_text
+_repo_root = repo_root
 
 
 if __name__ == "__main__":

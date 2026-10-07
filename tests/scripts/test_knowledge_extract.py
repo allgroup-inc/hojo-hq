@@ -606,3 +606,61 @@ def test_stop_terms_only_overlap_is_not_conflict(ex):
     add_decision(ex, outcome="origin と main の扱いを変えない運用は禁止")  # LESSON と origin・main だけ重なる
     lesson = [w for w in written(ex, run(ex)) if w["title"].startswith("学び: 生成物")][0]
     assert lesson["review_status"] == "candidate"
+
+
+# ---------------------------------------------------------------- 最終修正(I4・Minor 5・Minor 7)
+
+def add_many_notes(root, n=12):
+    topics = ["見出し", "配色", "締切", "台帳", "週次", "公開", "検索", "診断", "配信", "監査", "決裁", "連携",
+              "収集", "検証", "投稿"]
+    events = [ev("S9", f"2026-10-06T00:{i:02d}:00Z", "note", text=f"学び: {topics[i]}の作業は{topics[i]}専用の手順書を先に読む")
+              for i in range(n)]
+    write_session(root, "S9", events)
+    commit_all(root, "many notes")
+
+
+def test_run_clamps_max_candidates_to_ten(ex):
+    add_many_notes(ex)
+    s = run(ex, max_candidates=50, dry_run=True)
+    assert len(s["written"]) == knowledge_extract.MAX_CANDIDATES == 10
+    assert s["max_clamped"] is True and s["over_max"] >= 1
+
+
+def test_run_within_limit_is_not_marked_clamped(ex):
+    assert "max_clamped" not in run(ex, max_candidates=3, dry_run=True)
+
+
+def test_cli_max_50_writes_at_most_ten(ex):
+    add_many_notes(ex)
+    r = run_cli(ex, "--max", "50", "--run-id", "t-clamp")
+    assert r.returncode == 0, r.stderr
+    s = json.loads(r.stdout)
+    assert len(s["written"]) == 10 and s["max_clamped"] is True
+    assert len(list((ex / CANDIDATES_DIR).glob("K*.md"))) == 10
+
+
+ESCAPED_ROW = ("| FK-003 | 2026-08-01 | 手順 | 表の `a \\| b` を縦棒で分けて読んだ | 実害なし | 自己申告 | 分け方が2通り |"
+               " ルール化: 分け方を1つにする | 横展開 | 監視中 | 2027-02-01 |")
+
+
+def test_ledger_row_with_escaped_pipe_is_split_like_bootstrap(ex):
+    (ex / "docs/失敗台帳.md").write_text(LEDGER + ESCAPED_ROW + "\n", encoding="utf-8")
+    commit_all(ex, "escaped ledger row")
+    row = next(r for r in collect_inputs(ex)["failures"] if r["id"] == "FK-003")
+    assert row["fact"] == "表の `a \\| b` を縦棒で分けて読んだ"
+    assert row["measure"] == "ルール化: 分け方を1つにする"  # 素朴に `|` で分けると1列ずれる
+    import memory_bootstrap
+    from wikiskill_common import split_ledger_row
+    assert split_ledger_row(ESCAPED_ROW)[3] == row["fact"]
+    memory_bootstrap._clear_caches()
+    fk = [s for s in memory_bootstrap._failures(ex) if s["id"].endswith("#FK-003")]  # Bootstrap の [FK] も同じ列
+    assert fk and "ルール化: 分け方を1つにする" in fk[0]["body"]
+
+
+def test_extractor_uses_public_validator_helpers():
+    import wiki_validate
+    for name in ("committed_experience", "committed_decisions", "read_ledger", "read_synonyms", "materialize",
+                 "event_text", "repo_root"):
+        assert getattr(wiki_validate, name) is getattr(wiki_validate, "_" + name), name  # 旧名は別名として残す
+    src = SCRIPT.read_text(encoding="utf-8")
+    assert "wiki_validate._" not in src  # 抽出器は公開名だけを使う

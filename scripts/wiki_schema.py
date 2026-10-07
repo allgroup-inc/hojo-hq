@@ -542,5 +542,48 @@ def injection_blockers(w: Wiki, decisions: list[dict], synonyms: list[frozenset[
     return _unacknowledged(w, decisions, synonyms, after=None)
 
 
+def is_bot_approver(name) -> bool:
+    """承認者として認めない名前(bot・自動処理)。NFKC → 前後空白除去 → 小文字で比べる。
+
+    BOT_APPROVERS のどれか / `[bot]` で終わる / github-actions で始まる / claude・knowledge_extract を含む。
+    """
+    if not isinstance(name, str):
+        return True
+    n = unicodedata.normalize("NFKC", name).strip().lower()
+    return (n in BOT_APPROVERS or n.endswith("[bot]") or n.startswith("github-actions") or "claude" in n
+            or "knowledge_extract" in n)
+
+
+def is_empty_word(v) -> bool:
+    """文字列でない・空・空語(EMPTY_WORDS。「なし」「TBD」など)なら True。"""
+    if not isinstance(v, str):
+        return True
+    return unicodedata.normalize("NFKC", v).strip().lower() in EMPTY_WORDS or normalize(v) in EMPTY_WORDS
+
+
+def injectable_reasons(w: dict, repo_slug: str) -> list[str]:
+    """Bootstrap が注入してよい approved ページかの安い確認(承認の必須項目の一部)。空なら OK。
+
+    検証器(V09 等)を通らずに docs/wiki/ に入ったページでも、人の承認の形が無ければ注入しない(多重の守り)。
+    """
+    reasons: list[str] = []
+    ab = w.get("approved_by")
+    if not (isinstance(ab, str) and ab.strip()) or is_bot_approver(ab):
+        reasons.append("approved_by")
+    rv = w.get("review")
+    if not isinstance(rv, dict) or not isinstance(rv.get("ウタガイ"), str) or is_empty_word(rv.get("ウタガイ")):
+        reasons.append("review.ウタガイ")
+    wid = w.get("wiki_id")
+    stem = Path(str(w.get("_path") or "")).stem
+    if not (isinstance(wid, str) and WIKI_ID_RE.match(wid) and wid == stem):
+        reasons.append("wiki_id")
+    if not (isinstance(repo_slug, str) and repo_slug and repo_slug != "unknown" and w.get("repo") == repo_slug):
+        reasons.append("repo")
+    if not any(isinstance(w.get(k), list) and any(isinstance(x, str) and x.strip() for x in w[k])
+               for k in SOURCE_KEYS):
+        reasons.append("sources")
+    return reasons
+
+
 def _clear_conflict_cache() -> None:
     _DECISION_FEATS.clear()

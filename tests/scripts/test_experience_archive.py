@@ -524,3 +524,40 @@ def test_guard_fails_closed_on_unparseable_official_wiki(repo):
 
 def test_force_without_archive_is_usage_error(repo):
     assert main(["--check", "--force"], root=repo) == 2
+
+
+# --- 最終修正(I1): 却下の候補・退役ページ(_archive/)の引用も固めない -----------------
+
+def write_wiki_page(repo, sub, page_id, refs, status):
+    d = repo / "docs" / "wiki" / sub
+    d.mkdir(parents=True, exist_ok=True)
+    key = "candidate_id" if sub == "_candidates" else "wiki_id"
+    (d / f"{page_id}.md").write_text(
+        f"---\n{key}: {page_id}\nreview_status: {status}\nsource_experience: {json.dumps(refs)}\n---\n## 知識\nx\n",
+        encoding="utf-8",
+    )
+
+
+@pytest.mark.parametrize("sub,page_id,status", [
+    ("_candidates", "K20260301-cited-abcd", "rejected"),   # 却下の候補は消さずに残る
+    ("_candidates", "K20260301-cited-beef", "candidate"),
+    ("_archive", "W20260301-retired", "superseded"),      # 退役ページも残る
+])
+def test_archive_refuses_month_cited_by_candidate_or_archived_page(repo, capsys, sub, page_id, status):
+    write_many(repo, "2026-01")
+    write_wiki_page(repo, sub, page_id, ["session-a@2026-01-15T03:04:05Z"], status)
+    before = snapshot(repo)
+    assert main(["--archive", "--today", "2026-10-06"], root=repo) == 1
+    assert snapshot(repo) == before and not gz_of(repo, "2026-01").exists()
+    err = capsys.readouterr()
+    assert f"archive: 月 2026-01 は Wiki {page_id} の根拠に引用されているため固めません" in err.out + err.err
+
+
+def test_guard_fails_closed_on_unparseable_candidate(repo):
+    write_many(repo, "2026-01")
+    d = repo / "docs" / "wiki" / "_candidates"
+    d.mkdir(parents=True)
+    (d / "K20260301-broken-abcd.md").write_bytes(b"\xff\xfe\x00 not utf-8")
+    before = snapshot(repo)
+    assert main(["--archive", "--today", "2026-10-06"], root=repo) == 1
+    assert snapshot(repo) == before

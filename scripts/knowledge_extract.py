@@ -51,7 +51,7 @@ import wiki_schema as ws  # noqa: E402
 import wiki_validate  # noqa: E402
 import wikiskill_lock  # noqa: E402
 from decision_memory import load_decisions, parse_frontmatter  # noqa: E402
-from wikiskill_common import audit, group_session_files, iso, utc_now  # noqa: E402
+from wikiskill_common import audit, group_session_files, iso, split_ledger_row, utc_now  # noqa: E402
 from wikiskill_lock import LockHeld  # noqa: E402
 
 VERSION = "1.0"
@@ -130,7 +130,7 @@ def _read_experience(root: Path) -> tuple[dict[str, list[dict]], int]:
     """wiki_validate と同じ読み方(git 管理下・HEAD と同じ内容・symlink 除外)で、public・hojo-hq の行だけ。"""
     sessions: dict[str, list[dict]] = {}
     rows = 0
-    for sid, files in group_session_files(wiki_validate._committed_experience(root)).items():
+    for sid, files in group_session_files(wiki_validate.committed_experience(root)).items():
         kept: list[dict] = []
         for f in files:
             try:
@@ -181,12 +181,12 @@ def _read_failures(root: Path) -> list[dict]:
         return []
     if wiki_validate.FAILURE_LEDGER not in _committed_files(root, wiki_validate.FAILURE_LEDGER):
         raise _Uncommitted(wiki_validate.FAILURE_LEDGER)  # 未追跡・未 commit の変更がある台帳は丸ごと読まない
-    rows, dup = wiki_validate._read_ledger(root)
+    rows, dup = wiki_validate.read_ledger(root)
     out = []
     for fid, line in rows.items():
         if fid in dup:
             continue  # 同じ FK が2行ある台帳は検証器も解決しない
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        cells = split_ledger_row(line)  # Bootstrap と同じ分け方(`\|` ではセルを切らない)
         if len(cells) < 4 or not cells[3] or cells[3] == "-":
             continue
         out.append({"id": fid, "date": cells[1], "category": cells[2], "fact": cells[3],
@@ -250,7 +250,7 @@ def collect_inputs(root: Path, include_gakubi: bool = False) -> Inputs:
 # ---------------------------------------------------------------- 規則
 
 def _event_text(ev: dict) -> str:
-    return wiki_validate._event_text(ev)
+    return wiki_validate.event_text(ev)
 
 
 def rule_skill_success(inp: Inputs) -> list[Draft]:
@@ -549,9 +549,9 @@ def finalize(d: Draft, root: Path, run_id: str, today: date, existing_keys: set[
     w = {**fm, "_path": f"{ws.CANDIDATES_DIR}/{cid}.md", "_place": "candidates",
          "_sections": dict(d["sections"]), "_rule": d["rule"]}
     if decisions is None:
-        decisions = wiki_validate._committed_decisions(root)
+        decisions = wiki_validate.committed_decisions(root)
     if synonyms is None:
-        synonyms = wiki_validate._read_synonyms(root)
+        synonyms = wiki_validate.read_synonyms(root)
     _mark_decision_conflicts(w, d, decisions, synonyms)
     return w
 
@@ -661,7 +661,7 @@ def _similar(w: Wiki, ctx: dict) -> str | None:
 
 def _remember(ctx: dict, w: Wiki) -> None:
     """この実行で採った候補を検証の文脈に足す(V02 の一意性・V10 の類似・V15 の参照先がこの実行の分も見る)。"""
-    m = wiki_validate._materialize(w)
+    m = wiki_validate.materialize(w)
     ctx["candidates"].append(m)
     ctx["ids"]["candidate"].setdefault(w["candidate_id"], []).append(w["_path"])
 
@@ -682,6 +682,9 @@ def run(root: Path, *, llm: bool = False, include_gakubi: bool = False, dry_run:
         raise NotImplementedError(LLM_UNAVAILABLE)
     if isinstance(max_candidates, bool) or not isinstance(max_candidates, int) or max_candidates < 0:
         raise ValueError("max_candidates は 0 以上の整数")
+    clamped = max_candidates > MAX_CANDIDATES
+    if clamped:  # 「1回10件まで」は呼び方によらず機械で守る(--max 50 でも10件)
+        max_candidates = MAX_CANDIDATES
     now = utc_now()
     run_id = run_id or f"local-{now:%Y%m%dT%H%M%SZ}"
     if not _RUN_ID_RE.match(run_id):
@@ -689,9 +692,13 @@ def run(root: Path, *, llm: bool = False, include_gakubi: bool = False, dry_run:
     root = Path(root)
     lock = wikiskill_lock.acquire(root, LOCK_NAME, _session_id(session_id), break_stale=break_stale_lock)
     try:
-        return _run_locked(root, lock, now, run_id, include_gakubi, dry_run, max_candidates)
+        summary = _run_locked(root, lock, now, run_id, include_gakubi, dry_run, max_candidates)
     finally:
         wikiskill_lock.release(root, LOCK_NAME, lock)
+    if clamped:
+        summary["max_clamped"] = True
+        audit(root, _COMPONENT, f"max_candidates clamped to {MAX_CANDIDATES}")
+    return summary
 
 
 def _run_locked(root: Path, lock: dict, now, run_id: str, include_gakubi: bool, dry_run: bool,
@@ -831,7 +838,7 @@ def main(argv: list[str] | None = None) -> int:
     mode.add_argument("--llm", action="store_true", help="LLM 下書き(未実装)")
     ap.add_argument("--include-gakubi", action="store_true", help="docs/学び/ を evidence 専用の参考に読む")
     ap.add_argument("--dry-run", action="store_true", help="書かずに要約だけ出す")
-    ap.add_argument("--max", type=int, default=MAX_CANDIDATES, help=f"書く候補の上限(既定 {MAX_CANDIDATES})")
+    ap.add_argument("--max", type=int, default=MAX_CANDIDATES, help=f"書く候補の上限(既定・最大 {MAX_CANDIDATES}。超える値は {MAX_CANDIDATES} に切り詰め、要約に max_clamped)")
     ap.add_argument("--run-id", default=None, help="抽出実行の id(既定: local-<UTC時刻>)")
     ap.add_argument("--root", default=None, help="リポジトリルート(既定: 今いる git リポジトリの最上位)")
     ap.add_argument("--break-stale-lock", action="store_true", help="終了を確認できない古いロックを明示的に外す")
@@ -845,7 +852,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.run_id is not None and not _RUN_ID_RE.match(args.run_id):
         print("--run-id は英数字と . _ - の64字まで", file=sys.stderr)
         return 2
-    root = Path(args.root) if args.root else wiki_validate._repo_root()
+    root = Path(args.root) if args.root else wiki_validate.repo_root()
     if root is None:
         print("抽出できませんでした: git リポジトリの中で実行してください", file=sys.stderr)
         return 1
