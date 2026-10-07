@@ -75,49 +75,98 @@ async def read_markdown_file(filepath: str) -> tuple[str, str]:
 
 
 async def login_to_note(page, email: str, password: str) -> bool:
-    """note にログイン。"""
+    """note にログイン。改善版：より堅牢なセレクタと待機ロジック"""
 
     try:
         await page.goto(NOTE_LOGIN_URL, wait_until="networkidle")
+        await asyncio.sleep(1)  # ページ完全読み込み待機
 
         try:
-            # デバッグ：すべてのinput要素を確認
-            all_inputs = await page.query_selector_all('input')
-            print(f"[debug] ページ内のinput要素数: {len(all_inputs)}")
-            for i, inp in enumerate(all_inputs):
-                name = await inp.get_attribute('name')
-                type_attr = await inp.get_attribute('type')
-                placeholder = await inp.get_attribute('placeholder')
-                print(f"[debug] input#{i}: name={name}, type={type_attr}, placeholder={placeholder}")
+            # メールアドレス入力フィールド：複数セレクタを試す
+            email_selectors = [
+                'input[name="login"]',
+                'input[name="email"]',
+                'input[type="email"]',
+                'input[name="account"]',
+                'input[placeholder*="メール"]',
+                'input[placeholder*="ログイン"]',
+                'input[placeholder*="account"]',
+            ]
 
-            # メールアドレス入力フィールドを見つけて入力
-            email_field = await page.query_selector('input[name="login"]')
+            email_field = None
+            for selector in email_selectors:
+                try:
+                    await page.wait_for_selector(selector, timeout=3000)
+                    email_field = await page.query_selector(selector)
+                    if email_field:
+                        print(f"[ok] メールフィールド見つけました: {selector}")
+                        break
+                except:
+                    continue
+
             if not email_field:
-                print("[error] メールアドレス入力フィールド(name=login)が見つかりません")
-                # 代替：type=text の最初の入力フィールドを試す
-                email_field = await page.query_selector('input[type="text"]')
-                if not email_field:
-                    print("[error] メールアドレス入力フィールド(type=text)も見つかりません")
-                    return False
-                print("[info] 代替セレクタ(input[type=text])を使用します")
+                print("[error] メールアドレス入力フィールドが見つかりません")
+                all_inputs = await page.query_selector_all('input')
+                print(f"[debug] ページ内の全input要素: {len(all_inputs)}")
+                for i, inp in enumerate(all_inputs):
+                    name = await inp.get_attribute('name')
+                    type_attr = await inp.get_attribute('type')
+                    placeholder = await inp.get_attribute('placeholder')
+                    print(f"[debug] input#{i}: name={name}, type={type_attr}, placeholder={placeholder}")
+                return False
 
             await email_field.fill(email)
+            await email_field.press('Tab')  # 次フィールドへ移動
             print("[ok] メールアドレスを入力")
+            await asyncio.sleep(0.5)
 
-            # パスワード入力フィールドを見つけて入力
-            password_field = await page.query_selector('input[type="password"]')
+            # パスワード入力フィールド：複数セレクタを試す
+            password_selectors = [
+                'input[type="password"]',
+                'input[name="password"]',
+                'input[name="pass"]',
+                'input[placeholder*="パスワード"]',
+                'input[placeholder*="password"]',
+            ]
+
+            password_field = None
+            for selector in password_selectors:
+                try:
+                    await page.wait_for_selector(selector, timeout=3000)
+                    password_field = await page.query_selector(selector)
+                    if password_field:
+                        print(f"[ok] パスワードフィールド見つけました: {selector}")
+                        break
+                except:
+                    continue
+
             if not password_field:
                 print("[error] パスワード入力フィールドが見つかりません")
-                password_field = await page.query_selector('input[name="password"]')
-                if not password_field:
-                    print("[error] パスワード入力フィールド（代替）も見つかりません")
-                    return False
+                return False
 
             await password_field.fill(password)
             print("[ok] パスワードを入力")
+            await asyncio.sleep(0.5)
 
             # ログインボタンをクリック
-            login_button = await page.query_selector('button[type="submit"]')
+            button_selectors = [
+                'button[type="submit"]',
+                'button:has-text("ログイン")',
+                'button:has-text("Login")',
+                'input[type="submit"]',
+                'a[role="button"]:has-text("ログイン")',
+            ]
+
+            login_button = None
+            for selector in button_selectors:
+                try:
+                    login_button = await page.query_selector(selector)
+                    if login_button:
+                        print(f"[ok] ログインボタン見つけました: {selector}")
+                        break
+                except:
+                    continue
+
             if not login_button:
                 print("[error] ログインボタンが見つかりません")
                 return False
@@ -126,7 +175,11 @@ async def login_to_note(page, email: str, password: str) -> bool:
             print("[ok] ログインボタンをクリック")
 
             # ダッシュボードへのリダイレクトを待つ
-            await page.wait_for_url("**/me/**", timeout=10000)
+            try:
+                await page.wait_for_url("**/me/**", timeout=15000)
+            except:
+                # リダイレクト待機がタイムアウトした場合、ページ遷移を待つ
+                await page.wait_for_load_state("networkidle", timeout=15000)
 
             print("[ok] note へのログインに成功しました")
             return True
