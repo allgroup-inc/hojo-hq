@@ -781,3 +781,203 @@ def test_allowed_private_repo_name_passes_v06(wk):
 
 def test_forbidden_content_6_itself_fails(wk):
     assert "V06" in codes(edit(wk, summary=f"環境変数 {FORBIDDEN_CONTENT[6]}X を使う"))
+
+
+# ---------------------------------------------------------------- Phase 2 Task 4: 矛盾検知(V11〜V13)・needs_review
+
+FORBID = "自動生成物は main へ直接 push しない"
+CONFLICT_TITLE = "自動生成物の直接 push は速い"
+OPPOSITE = "マージ前の競合一覧の確認はしない"  # 承認済み(基本の候補)と「マージ・競合・一覧・確認」が重なる
+DECISION_TITLE = "生成物の取り扱い"           # 基本の候補の語(マージ・競合・公開…)と重ならない題
+NEG_DID = "D20261005-push-rule"
+
+
+def add_decision(root, did=NEG_DID, date_="2026-10-05", status="adopted", tags=None, outcome=FORBID,
+                 title=DECISION_TITLE, commit=True):
+    """否定語を含みうる議事を1件足して commit する(検証器は commit 済みの議事だけを読む)。"""
+    tag_line = f"tags: [{', '.join(tags)}]\n" if tags else ""
+    text = (f"---\ndecision_id: {did}\ndate: {date_}\ntitle: {title}\nstatus: {status}\n{tag_line}---\n"
+            f"# {title}\n\n## なぜ\n事故を防ぐ。\n\n## 三名体制の議論\n- **ウタガイ**: 遅くなる\n\n## 裁定\n{outcome}\n")
+    rel = f"docs/議事/議事_{date_.replace('-', '')}_{did}.md"
+    write(root, rel, text)
+    if commit:
+        git(root, "add", "-A", "docs/議事")
+        git(root, "commit", "-q", "-m", f"decision {did}")
+    return rel
+
+
+def make_conflicting(root):
+    add_decision(root)
+    return edit(root, title=CONFLICT_TITLE, review_status="conflict",
+                contradictions=[{"source": NEG_DID, "note": "Decision が否定(しない)"}])
+
+
+def promote_clean(root):
+    return promote(root)
+
+
+def boom(*a, **k):
+    raise RuntimeError("conflict boom")
+
+
+def test_contradictions_require_conflict_status(wk):
+    assert "V11" in codes(edit(wk, contradictions=[{"source": "x", "note": "y"}]))
+
+
+def test_negation_decision_two_unit_overlap_is_conflict(wk):
+    add_decision(wk, outcome="自動生成物は main へ直接 push しない")
+    assert "V12" in codes(edit(wk, title="自動生成物の直接 push は速い"))
+
+
+def test_one_unit_overlap_is_not_conflict(wk):
+    add_decision(wk, outcome="直接 push しない")
+    assert "V12" not in codes(edit(wk, title="push の速さ"))
+
+
+def test_non_adopted_or_test_tag_decisions_ignored(wk):
+    add_decision(wk, did="D20261005-deferred", status="deferred")
+    add_decision(wk, did="D20261006-test", date_="2026-10-06", tags=["test"])
+    assert "V12" not in codes(edit(wk, title=CONFLICT_TITLE))
+
+
+def test_conflict_candidate_cannot_be_approved(wk):
+    make_conflicting(wk)
+    promote(wk)
+    assert "V12" in codes(wk)
+
+
+def test_acknowledged_decision_allows_approval(wk):
+    make_conflicting(wk)
+    promote(wk, acknowledged_decisions=[{"decision": NEG_DID, "reason": "Decision と同じ向き"}])
+    assert "V12" not in codes(wk)
+
+
+def test_new_decision_marks_wiki_needs_review_exit0_warning(wk):
+    promote_clean(wk)
+    add_decision(wk, did="D20261101-opposite", date_="2026-11-01", outcome=OPPOSITE)
+    r = run([], cwd=wk)
+    assert r.returncode == 0 and "needs_review" in r.stdout, r.stdout + r.stderr
+
+
+def test_conflict_check_exception_fails_closed(wk, monkeypatch):
+    monkeypatch.setattr(wiki_schema, "decision_conflicts", boom)
+    assert "V12" in codes(wk)
+
+
+# ---------------------------------------------------------------- Task 4: 追加の境界(brief 外)
+
+def test_conflict_candidate_with_contradictions_passes(wk):
+    make_conflicting(wk)
+    assert validate_tree(wk) == ([], [])
+
+
+def test_decision_conflicts_returns_ids_and_units(wk):
+    add_decision(wk)
+    ds = [d for d in build_context(wk)["decisions"]]
+    got = wiki_schema.decision_conflicts(CONFLICT_TITLE, ds)
+    assert [g["decision"] for g in got] == [NEG_DID]
+    assert {"自動生成物", "直接", "push"} <= set(got[0]["units"])
+    assert wiki_schema.decision_conflicts(CONFLICT_TITLE, ds, after="2026-10-05") == []  # date > after だけ
+
+
+def test_decision_without_negation_is_not_conflict(wk):
+    add_decision(wk, outcome="自動生成物は main へ直接 push する")
+    assert "V12" not in codes(edit(wk, title=CONFLICT_TITLE))
+
+
+def test_synonym_counts_once_in_conflict(wk):
+    """同義語表の同じ行の語は1語。「push」と「プッシュ」だけの重なりは2語にならない。"""
+    add_decision(wk, outcome="プッシュ と push はしない")
+    assert "V12" in codes(edit(wk, title="push とプッシュの速さ"))  # 同義語表が無ければ2語
+    write(wk, "docs/wiki/_synonyms.txt", "push, プッシュ\n")
+    assert "V12" not in codes(wk)
+
+
+def test_acknowledged_other_decision_does_not_cover(wk):
+    make_conflicting(wk)
+    promote(wk, acknowledged_decisions=[{"decision": "D20990101-other", "reason": "別の議事"}])
+    assert "V12" in codes(wk)
+
+
+def test_approved_older_decision_is_v12_not_warning(wk):
+    """approved_at 以前の Decision と矛盾 = 承認の時点で分かっていた矛盾 → V12(warning ではない)。"""
+    make_conflicting(wk)
+    promote(wk)
+    vs, warns = validate_tree(wk)
+    assert "V12" in {c for _p, c, _r in vs} and warns == []
+
+
+def test_newer_decision_is_warning_not_violation(wk):
+    promote_clean(wk)
+    add_decision(wk, did="D20261101-opposite", date_="2026-11-01", outcome=OPPOSITE)
+    vs, warns = validate_tree(wk)
+    assert vs == [] and [d for _p, d, _r in warns] == ["D20261101-opposite"]
+
+
+def test_newer_decision_acknowledged_clears_warning(wk):
+    promote(wk, acknowledged_decisions=[{"decision": "D20261101-opposite", "reason": "同じ向き(確認済み)"}])
+    add_decision(wk, did="D20261101-opposite", date_="2026-11-01", outcome=OPPOSITE)
+    assert validate_tree(wk) == ([], [])
+
+
+def test_needs_review_exception_is_warning(wk, monkeypatch):
+    promote_clean(wk)
+    monkeypatch.setattr(wiki_schema, "needs_review", boom)
+    vs, warns = validate_tree(wk)
+    assert warns and warns[0][0].startswith("docs/wiki/W")
+
+
+def test_github_actions_needs_review_annotation(wk):
+    promote_clean(wk)
+    add_decision(wk, did="D20261101-opposite", date_="2026-11-01", outcome=OPPOSITE)
+    env = {**os.environ, "GITHUB_ACTIONS": "true"}
+    r = subprocess.run([sys.executable, str(SCRIPT)], cwd=str(wk), capture_output=True, text=True, env=env, timeout=120)
+    assert r.returncode == 0
+    assert "::warning file=docs/wiki/W20261020-merge-conflict.md::needs_review D20261101-opposite" in r.stdout
+
+
+def test_needs_review_map(wk):
+    promote_clean(wk)
+    assert wiki_validate.needs_review_map(wk) == {}
+    add_decision(wk, did="D20261101-opposite", date_="2026-11-01", outcome=OPPOSITE)
+    assert wiki_validate.needs_review_map(wk) == {"docs/wiki/W20261020-merge-conflict.md": ["D20261101-opposite"]}
+
+
+def test_uncommitted_decision_not_used_for_conflict(wk):
+    add_decision(wk, commit=False)
+    assert "V12" not in codes(edit(wk, title=CONFLICT_TITLE))
+
+
+# ---------------------------------------------------------------- Task 4: 検証器も commit 済みの議事・台帳だけを読む
+
+def test_untracked_decision_not_resolvable(wk):
+    rel = add_decision(wk, did="D20261005-untracked", outcome="マージ前に競合ファイル一覧を必ず見る", commit=False)
+    ev_ = [{"ref": "D20261005-untracked", "quote": "マージ前に競合ファイル一覧を必ず見る"}]
+    assert (wk / rel).is_file()
+    assert "V03" in codes(edit(wk, source_decision=["D20261005-untracked"], evidence=ev_))
+    git(wk, "add", "-A", "docs/議事")
+    git(wk, "commit", "-q", "-m", "commit it")
+    assert "V03" not in codes(wk)
+
+
+def test_modified_decision_not_resolvable(wk):
+    ev_ = [{"ref": DID, "quote": "マージ前に競合一覧を必ず確認する"}]
+    edit(wk, source_decision=[DID], evidence=ev_)
+    assert "V03" not in codes(wk)
+    p = wk / DECISION_REL
+    p.write_text(p.read_text(encoding="utf-8") + "\n追記(未 commit)\n", encoding="utf-8")
+    assert "V03" in codes(wk)
+
+
+def test_uncommitted_ledger_edit_makes_fk_unresolvable(wk):
+    edit(wk, source_failure=["FK-002"], evidence=[fk_quote()], source_experience=[])
+    assert "V03" not in codes(wk)
+    ledger = wk / "docs/失敗台帳.md"
+    ledger.write_text(ledger.read_text(encoding="utf-8") + FK_ROW.replace("FK-002", "FK-003") + "\n", encoding="utf-8")
+    assert "V03" in codes(wk)
+    assert build_context(wk)["fk_rows"] == {}
+
+
+def test_extractor_and_validator_share_committed_reader():
+    import knowledge_extract
+    assert knowledge_extract._committed_files is wiki_validate.committed_files

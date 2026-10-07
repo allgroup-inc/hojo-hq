@@ -412,3 +412,91 @@ def title_similarity(a: str, b: str) -> float:
     if not ua:
         return 0.0
     return len(ua & ub) / len(ua)
+
+
+# ---------------------------------------------------------------- 矛盾(V11〜V13・設計書 7.4)
+
+_DECISION_FEATS: dict[tuple[str, str], tuple[tuple[str, ...], frozenset[str]]] = {}
+
+
+def conflict_text(w_or_draft: dict) -> str:
+    """矛盾の照合に使う候補側の文: title + summary + 「## 知識」(ファイルの Wiki は _sections、下書きは sections)。"""
+    secs = w_or_draft.get("_sections")
+    if not isinstance(secs, dict):
+        secs = w_or_draft.get("sections")
+    knowledge = secs.get("## 知識", "") if isinstance(secs, dict) else ""
+    return " ".join(str(x or "") for x in (w_or_draft.get("title"), w_or_draft.get("summary"), knowledge))
+
+
+def _decision_feats(d: dict, mb) -> tuple[tuple[str, ...], frozenset[str]]:
+    """Decision 側(title + outcome)の否定語と features。同じ (title, outcome) は1プロセスに1回だけ計算する。"""
+    key = (str(d.get("title") or ""), str(d.get("outcome") or ""))
+    hit = _DECISION_FEATS.get(key)
+    if hit is None:
+        text = key[0] + " " + key[1]
+        folded = unicodedata.normalize("NFKC", text)
+        hit = (tuple(w for w in NEGATION_WORDS if w in folded), frozenset(mb.features(text)))
+        _DECISION_FEATS[key] = hit
+    return hit
+
+
+def _is_test_decision(d: dict) -> bool:
+    return any(str(t).strip().lower() == "test" for t in d.get("tags") or [])
+
+
+def decision_conflicts(text: str, decisions: list[dict], synonyms: list[frozenset[str]] | None = None,
+                       after: str | None = None, *, until: str | None = None) -> list[dict]:
+    """text と矛盾しうる adopted Decision: [{"decision": id, "units": [語…], "negations": [否定語…]}]。
+
+    対象: status == adopted・tags に test を含まない・(after 指定時)date > after・(until 指定時)date ≤ until
+    (date が読めない Decision は until では残す = 止めすぎる側、after では外す)。
+    判定: Decision の title + outcome に NEGATION_WORDS のどれかがあり、text の語(memory_bootstrap.query_groups。
+    同義語の同じ行は1語)が Decision 側の features に CONFLICT_MIN_UNITS 以上当たる。例外は呼び元で「矛盾あり」。
+    """
+    import memory_bootstrap as mb  # 循環 import を避ける(memory_bootstrap は wiki_schema を読む)
+
+    groups = mb.query_groups([str(text)], synonyms)
+    out: list[dict] = []
+    for d in decisions:
+        if d.get("status") != "adopted" or _is_test_decision(d):
+            continue
+        day = d.get("date")
+        day = day if isinstance(day, str) and day else None
+        if after is not None and (day is None or not day > after):
+            continue
+        if until is not None and day is not None and day > until:
+            continue
+        negations, feats = _decision_feats(d, mb)
+        if not negations:
+            continue
+        units = [g[0][1] for g in groups if mb._group_matches(g, feats)]
+        if len(units) >= CONFLICT_MIN_UNITS:
+            out.append({"decision": d.get("id"), "units": units, "negations": list(negations)})
+    return out
+
+
+def acknowledged_ids(w: dict) -> set[str]:
+    """acknowledged_decisions のうち decision と reason がどちらも空でないものの id。"""
+    out: set[str] = set()
+    for a in w.get("acknowledged_decisions") or []:
+        if isinstance(a, dict) and isinstance(a.get("decision"), str) and a["decision"].strip() \
+                and isinstance(a.get("reason"), str) and a["reason"].strip():
+            out.add(a["decision"].strip())
+    return out
+
+
+def needs_review(w: Wiki, decisions: list[dict], synonyms: list[frozenset[str]] | None = None) -> list[str]:
+    """approved の Wiki と、approved_at より新しい adopted Decision の矛盾(acknowledged の id を除く)。
+
+    approved_at が YYYY-MM-DD でなければ ValueError(呼び元で「矛盾あり」= 注入しない)。
+    """
+    aa = w.get("approved_at")
+    if not (isinstance(aa, str) and re.match(r"^\d{4}-\d{2}-\d{2}$", aa)):
+        raise ValueError("approved_at が YYYY-MM-DD ではない")
+    acked = acknowledged_ids(w)
+    ids = [c["decision"] for c in decision_conflicts(conflict_text(w), decisions, synonyms, after=aa)]
+    return [i for i in dict.fromkeys(ids) if i not in acked]
+
+
+def _clear_conflict_cache() -> None:
+    _DECISION_FEATS.clear()

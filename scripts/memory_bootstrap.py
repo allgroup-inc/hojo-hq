@@ -62,6 +62,9 @@ from wikiskill_common import (  # noqa: E402
     session_id_of,
 )
 
+if __name__ == "__main__":  # wiki_schema.decision_conflicts の `import memory_bootstrap` が2つ目の複製を読まない
+    sys.modules.setdefault("memory_bootstrap", sys.modules[__name__])
+
 try:  # 読めなくても Bootstrap 全体は止めない([Wiki] と同義語だけ無しになり、audit に残す)
     import wiki_schema as _ws  # noqa: E402
     _WS_ERROR = ""
@@ -570,12 +573,18 @@ def _preventions(root: Path) -> list[Source]:
 _WIKI_OFF_AUDITED: set[str] = set()
 
 
+_NEEDS_REVIEW_AUDITED: set[tuple[str, str]] = set()
+
+
 def _wiki_needs_review(w: dict, decisions: list[dict], synonyms: list[frozenset[str]] | None = None) -> list[str]:
     """承認後の新しい Decision と矛盾する Wiki の Decision id(非空なら注入しない)。
 
-    フック点: 中身は Phase 2 Task 4(wiki_schema.needs_review)で入れる。この Task では常に空。
+    wiki_schema.needs_review の例外は ["error"](判定できない Wiki は注入しない = fail-closed)。
     """
-    return []
+    try:
+        return list(_ws.needs_review(w, decisions, synonyms))
+    except Exception:  # noqa: BLE001
+        return ["error"]
 
 
 def _wiki_line(w: dict) -> str:
@@ -592,6 +601,9 @@ def _wiki_line(w: dict) -> str:
 
 def _wiki(root: Path) -> list[Source]:
     """docs/wiki/ 直下の approved だけ(visibility がリポの公開性と一致・needs_review でない)。
+
+    needs_review(approved_at より新しい adopted Decision と矛盾・判定の例外を含む)の Wiki は出さず、
+    audit に `wiki: needs_review <wiki_id> <decision_id>` を1ページ1プロセスに1回。
 
     _candidates/ と _archive/ は開かない(iter_wiki の official は直下だけ + `docs/wiki/_` で始まるパスを捨てる)。
     .claude/wiki.off があれば [] (audit は1プロセスに1回)。どんな失敗も [] + audit(fail closed)。
@@ -628,7 +640,13 @@ def _wiki(root: Path) -> list[Source]:
                 continue
             if decisions is None:
                 decisions = _decisions_cached(root)
-            if _wiki_needs_review(w, decisions, _synonyms(root)):
+            review = _wiki_needs_review(w, decisions, _synonyms(root))
+            if review:
+                wid = _clean(str(w.get("wiki_id") or path))
+                key = (str(root.resolve()), wid)
+                if key not in _NEEDS_REVIEW_AUDITED:  # 1ページ1プロセスに1回
+                    _NEEDS_REVIEW_AUDITED.add(key)
+                    audit(root, _COMPONENT, f"wiki: needs_review {wid} {','.join(review)}")
                 continue
             title = _clean(w.get("title") or "")
             summary = _clean(w.get("summary") or "")
@@ -647,6 +665,16 @@ def _wiki(root: Path) -> list[Source]:
 
 
 _SYN_CACHE: dict[str, tuple[tuple, list[frozenset[str]]]] = {}
+
+
+def _clear_caches() -> None:
+    """1プロセス内の memo(Decision・同義語・Decision 側の矛盾判定 features・audit 1回の記録)を空にする(テスト用)。"""
+    _DECISIONS_CACHE.clear()
+    _SYN_CACHE.clear()
+    _WIKI_OFF_AUDITED.clear()
+    _NEEDS_REVIEW_AUDITED.clear()
+    if _ws is not None and hasattr(_ws, "_clear_conflict_cache"):
+        _ws._clear_conflict_cache()
 
 
 def _synonyms(root: Path) -> list[frozenset[str]]:

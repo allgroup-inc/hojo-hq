@@ -68,29 +68,54 @@ def _git(root: Path, *args: str) -> str:
     return r.stdout
 
 
-def _committed_experience(root: Path) -> list[str]:
-    """git 管理下で、HEAD から変更されていない(= commit 済みのまま)Experience の JSONL。
+def committed_files(root: Path, pathspec: str) -> set[str]:
+    """git 管理下の通常ファイル(mode 100644/100755・symlink でない)で、`git diff --name-only HEAD` に出ない
+    (作業ツリー・index とも HEAD と同じ = commit 済みのまま)もの。検証器と抽出器が共有する唯一の判定。
 
-    シンボリックリンク(mode 120000)は除く: リンク先は commit されたものとは限らない。
+    シンボリックリンク(mode 120000)・submodule(160000)は除く: リンク先は commit されたものとは限らない。
+    git が失敗すれば ContextError(呼び元で fail-closed)。
     """
-    tracked = []
-    for entry in _git(root, "ls-files", "-s", "-z", "--", EXP_DIR).split("\0"):
+    tracked: set[str] = set()
+    for entry in _git(root, "ls-files", "-s", "-z", "--", pathspec).split("\0"):
         if not entry:
             continue
         meta, _tab, path = entry.partition("\t")
-        mode = meta.split(" ", 1)[0]
-        if mode not in ("100644", "100755") or not path.endswith(".jsonl"):  # 120000 = symlink, 160000 = submodule
+        if meta.split(" ", 1)[0] not in ("100644", "100755") or (Path(root) / path).is_symlink():
             continue
-        if (Path(root) / path).is_symlink():
-            continue
-        tracked.append(path)
-    changed = set(_git(root, "diff", "--name-only", "-z", "HEAD", "--", EXP_DIR).split("\0"))
-    return [p for p in tracked if p not in changed]
+        tracked.add(path)
+    changed = set(_git(root, "diff", "--name-only", "-z", "HEAD", "--", pathspec).split("\0"))
+    return tracked - changed
 
 
-def _read_ledger(root: Path) -> tuple[dict[str, str], set[str]]:
+def _committed_experience(root: Path) -> list[str]:
+    """commit 済みのまま(committed_files)の Experience の JSONL(パス順)。"""
+    return sorted(p for p in committed_files(root, EXP_DIR) if p.endswith(".jsonl"))
+
+
+def _committed_decisions(root: Path) -> list[dict]:
+    """load_decisions のうち、議事ファイルが commit 済みのまま(committed_files)のものだけ。"""
+    committed = committed_files(root, "docs")
+    return [d for d in load_decisions(root) if d.get("path") in committed]
+
+
+def _read_synonyms(root: Path) -> list[frozenset[str]]:
+    """矛盾判定(V12・V13)用の同義語表。検証器は audit も書かない(形式違反の行は V14 が別に報告する)。"""
+    path = Path(root) / ws.SYNONYMS_PATH
+    if path.is_symlink() or not path.is_file():
+        return []
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return []  # 同義語なし = 語を束ねない = 矛盾判定は止めすぎる側
+    return ws.parse_synonyms(text)[0]
+
+
+def _read_ledger(root: Path, committed_only: bool = False) -> tuple[dict[str, str], set[str]]:
+    """失敗台帳の FK 行。committed_only なら、台帳が commit 済みのまま(committed_files)でなければ丸ごと空。"""
     path = Path(root) / FAILURE_LEDGER
     if not path.is_file():
+        return {}, set()
+    if committed_only and FAILURE_LEDGER not in committed_files(root, FAILURE_LEDGER):
         return {}, set()
     rows: dict[str, str] = {}
     dup: set[str] = set()
@@ -105,7 +130,7 @@ def _read_ledger(root: Path) -> tuple[dict[str, str], set[str]]:
 
 def build_context(root: Path) -> Context:
     root = Path(root)
-    decisions = load_decisions(root)
+    decisions = _committed_decisions(root)  # 未追跡・未 commit の議事は根拠にも矛盾判定にも使わない(抽出器と同じ)
     by_id: dict[str, dict] = {}
     dup_dec: set[str] = set()
     for d in decisions:
@@ -113,7 +138,7 @@ def build_context(root: Path) -> Context:
         if did in by_id:
             dup_dec.add(did)
         by_id.setdefault(did, d)
-    fk_rows, dup_fk = _read_ledger(root)
+    fk_rows, dup_fk = _read_ledger(root, committed_only=True)
     exp_events: dict[tuple[str, str], dict] = {}
     exp_groups: dict[tuple[str, str], list[dict]] = {}
     exp_errors: list[tuple[str, str]] = []  # (読めない Experience のパス, 理由)
@@ -141,6 +166,7 @@ def build_context(root: Path) -> Context:
         "decisions": decisions, "decisions_by_id": by_id, "ambiguous_decisions": dup_dec,
         "fk_rows": fk_rows, "ambiguous_fk": dup_fk, "exp_events": exp_events, "exp_groups": exp_groups,
         "exp_errors": exp_errors, "official": official, "candidates": candidates, "archive": archive, "ids": ids,
+        "synonyms": _read_synonyms(root),
     }
 
 
@@ -481,7 +507,10 @@ def check_v09(w: dict, ctx: Context) -> list[Violation]:
 
 
 def check_v10(w: dict, ctx: Context) -> list[Violation]:
-    """重複: 正式 Wiki・他の候補とタイトルの語が DUPLICATE_RATIO 以上一致なら duplicate_of 必須。"""
+    """重複: 正式 Wiki・他の候補とタイトルの語が DUPLICATE_RATIO 以上一致なら duplicate_of 必須。
+
+    contradictions のある conflict 候補は除く(矛盾は重複として畳まず、人が個別に判断する)。
+    """
     p, out = w["_path"], []
     dup = w.get("duplicate_of")
     if w["_place"] == "official" and _s(dup):
@@ -490,6 +519,9 @@ def check_v10(w: dict, ctx: Context) -> list[Violation]:
     if w["_place"] != "candidates" or w.get("review_status") not in ("candidate", "conflict") or _s(dup) \
             or not isinstance(title, str):
         return out
+    cs = w.get("contradictions")
+    if w.get("review_status") == "conflict" and isinstance(cs, list) and cs:
+        return out  # 矛盾は人が個別に見る(Task 4)。重複(duplicate_of)に畳ませない
     others = [o for o in ctx["official"] if "_error" not in o]
     others += [o for o in ctx["candidates"] if "_error" not in o and o["_path"] != p]
     for o in others:
@@ -505,19 +537,54 @@ def check_v10(w: dict, ctx: Context) -> list[Violation]:
     return out
 
 
+_NO_CONFLICT_CHECK = ("rejected",)  # 却下済みの候補は矛盾を書いたまま残してよい(人が解消した記録)
+
+
 def check_v11(w: dict, ctx: Context) -> list[Violation]:
-    """矛盾①(contradictions 非空なら conflict)。Task 4 で実装する。"""
+    """矛盾①: 候補の contradictions が非空なら review_status は conflict(却下済みは除く)。"""
+    if w["_place"] != "candidates" or w.get("review_status") in ("conflict",) + _NO_CONFLICT_CHECK:
+        return []
+    cs = w.get("contradictions")
+    if isinstance(cs, list) and cs:
+        return [(w["_path"], "V11", "contradictions があるのに review_status が conflict ではない")]
     return []
+
+
+def _conflict_reason(c: dict) -> str:
+    neg = "・".join(c.get("negations") or []) or "否定語"
+    return f"Decision {c['decision']} の否定({neg})と語が {len(c['units'])} 個重なる({', '.join(c['units'][:6])})"
 
 
 def check_v12(w: dict, ctx: Context) -> list[Violation]:
-    """矛盾②(Decision の否定語と語が重なる)。Task 4 で実装する。"""
-    return []
+    """矛盾②: 採用済み Decision の否定と語が CONFLICT_MIN_UNITS 以上重なる。
+
+    候補(candidate)は conflict でなければ違反。approved は approved_at 以前の Decision について、該当 id が
+    すべて acknowledged_decisions(reason 非空)に無ければ違反(approved_at より新しい Decision は V13 の警告)。
+    判定関数の例外は validate_file が V12 の違反にする(fail-closed)。
+    """
+    p, place, st = w["_path"], w["_place"], w.get("review_status")
+    if place == "archive" or st in _NO_CONFLICT_CHECK:
+        return []
+    until = None
+    if place == "official":
+        aa = w.get("approved_at")
+        until = aa if _date(aa) is not None else None  # 読めない approved_at は全 Decision と比べる(止めすぎる側)
+    found = ws.decision_conflicts(ws.conflict_text(w), ctx["decisions"], ctx.get("synonyms"), until=until)
+    if place == "candidates":
+        if found and st != "conflict":
+            return [(p, "V12", f"{_conflict_reason(found[0])}: review_status を conflict にする")]
+        return []
+    acked = ws.acknowledged_ids(w)
+    return [(p, "V12", f"{_conflict_reason(c)}: 承認するなら acknowledged_decisions に同じ向きである理由を書く"
+                       "(逆向きなら承認しない)") for c in found if c["decision"] not in acked]
 
 
 def check_v13(w: dict, ctx: Context) -> list[Warning]:
-    """矛盾③(承認後の新しい Decision → needs_review の警告)。Task 4 で実装する。"""
-    return []
+    """矛盾③: approved の Wiki と、approved_at より新しい adopted Decision → needs_review の警告(違反ではない)。"""
+    if w["_place"] != "official" or w.get("review_status") != "approved":
+        return []
+    return [(w["_path"], did, "承認後の Decision と矛盾(Bootstrap は注入しない。再承認するか superseded にする)")
+            for did in ws.needs_review(w, ctx["decisions"], ctx.get("synonyms"))]
 
 
 def check_v15(w: dict, ctx: Context) -> list[Violation]:
@@ -614,7 +681,7 @@ def validate_tree(root: Path) -> tuple[list[Violation], list[Warning]]:
             try:
                 warnings.extend(check_v13(w, ctx))
             except Exception as e:  # noqa: BLE001 — 矛盾判定の失敗は needs_review 扱い
-                warnings.append((w["_path"], "", f"矛盾判定に失敗(needs_review 扱い): {type(e).__name__}"))
+                warnings.append((w["_path"], "error", f"矛盾判定に失敗(needs_review 扱い): {type(e).__name__}"))
     for rel, reason in ctx["exp_errors"]:
         violations.append((rel, "V03", f"commit 済みの Experience を読めない(根拠として解決できない): {reason}"))
     for code, fn in (("V08", stray_files), ("V14", validate_synonyms)):
@@ -623,6 +690,25 @@ def validate_tree(root: Path) -> tuple[list[Violation], list[Warning]]:
         except Exception as e:  # noqa: BLE001
             violations.append((".", code, f"検査中に例外(fail-closed): {type(e).__name__}: {e}"))
     return violations, warnings
+
+
+def needs_review_map(root: Path) -> dict[str, list[str]]:
+    """approved の Wiki のうち needs_review のもの: {パス: [decision_id…]}。判定の例外は ["error"](注入しない側)。
+
+    入力を読めなければ(build_context の例外)そのまま例外を上げる(呼び元が「全部 needs_review」として扱う)。
+    """
+    ctx = build_context(Path(root))
+    out: dict[str, list[str]] = {}
+    for w in ctx["official"]:
+        if "_error" in w or w.get("review_status") != "approved":
+            continue
+        try:
+            ids = ws.needs_review(w, ctx["decisions"], ctx.get("synonyms"))
+        except Exception:  # noqa: BLE001 — 判定できない Wiki は needs_review(fail-closed)
+            ids = ["error"]
+        if ids:
+            out[w["_path"]] = ids
+    return out
 
 
 # ---------------------------------------------------------------- 自己点検
@@ -720,6 +806,19 @@ def _st_cand(root: Path, **over) -> None:
     _st_write(root, _st_fm(**over))
 
 
+_ST_NEG_DID = "D20261005-selftest-neg"
+_ST_OPPOSITE = "マージ前の競合一覧の確認はしない"  # 基本の候補と「マージ・競合・一覧・確認」が重なる
+
+
+def _st_decision(root: Path, day: str = "2026-10-05", outcome: str = _ST_OPPOSITE, did: str = _ST_NEG_DID) -> None:
+    """否定語を含む adopted の議事を足して commit する(次の case の前に selftest がリセットする)。"""
+    text = (f"---\ndecision_id: {did}\ndate: {day}\ntitle: 作業順\nstatus: adopted\n---\n# 作業順\n\n"
+            f"## なぜ\n手戻り\n\n- **ウタガイ**: 事故\n\n## 裁定\n{outcome}\n")
+    (root / "docs/議事" / f"議事_{day.replace('-', '')}_neg.md").write_text(text, encoding="utf-8")
+    _st_git(root, "add", "-A", "docs/議事")
+    _st_git(root, "commit", "-q", "-m", "selftest decision")
+
+
 def _st_cases() -> list[tuple[str, object, str | None]]:
     word = FORBIDDEN_CONTENT[0]  # 禁止語の実文字列はソースに書かない
     fk_ev = [{"ref": "FK-002", "quote": "競合ファイル一覧を確認せず"}]
@@ -801,6 +900,24 @@ def _st_cases() -> list[tuple[str, object, str | None]]:
         ("approved のタイトル全体+語を足した候補", lambda r: (_st_promote(r), _st_write(r, _st_fm(
             title=long_title, source_failure=["FK-002"]))), "V10"),
         ("approved に duplicate_of", lambda r: _st_promote(r, duplicate_of=_ST_WID), "V10"),
+        # V11〜V13(矛盾)
+        ("contradictions のある conflict 候補", lambda r: _st_cand(
+            r, review_status="conflict", contradictions=[{"source": "K20261007-x-0000", "note": "逆向き"}]), None),
+        ("却下済みの候補に contradictions", lambda r: _st_cand(
+            r, review_status="rejected", rejected_reason="Decision が禁止",
+            contradictions=[{"source": _ST_NEG_DID, "note": "Decision が否定"}]), None),
+        ("contradictions があるのに candidate", lambda r: _st_cand(
+            r, contradictions=[{"source": "K20261007-x-0000", "note": "逆向き"}]), "V11"),
+        ("否定語の Decision と2語重なる candidate", lambda r: _st_decision(r), "V12"),
+        ("否定語の Decision と2語重なる conflict 候補", lambda r: (_st_decision(r), _st_cand(
+            r, review_status="conflict", contradictions=[{"source": _ST_NEG_DID, "note": "Decision が否定"}])), None),
+        ("否定語の Decision と1語だけ重なる", lambda r: _st_decision(r, outcome="競合の解消はしない"), None),
+        ("否定語の無い Decision と重なる", lambda r: _st_decision(r, outcome="マージ前の競合一覧の確認を急ぐ"), None),
+        ("承認前の Decision と矛盾する approved", lambda r: (_st_decision(r), _st_promote(r)), "V12"),
+        ("承認前の Decision を acknowledged した approved", lambda r: (_st_decision(r), _st_promote(
+            r, acknowledged_decisions=[{"decision": _ST_NEG_DID, "reason": "同じ向き"}])), None),
+        ("承認後の Decision と矛盾する approved(警告)", lambda r: (_st_promote(r), _st_decision(r, day="2026-11-01")),
+         "V13"),
         # V14
         ("同義語の同じ語が2行", lambda r: (r / ws.SYNONYMS_PATH).write_text("マージ, merge\nmerge, 統合\n", encoding="utf-8"),
          "V14"),
@@ -813,7 +930,10 @@ def _st_cases() -> list[tuple[str, object, str | None]]:
 
 
 def selftest() -> int:
-    """V01〜V10・V14・V15 の正例(通るべきもの)と負例(止まるべきもの)を一時 git リポジトリで確かめる。"""
+    """V01〜V15 の正例(通るべきもの)と負例(止まるべきもの)を一時 git リポジトリで確かめる。
+
+    期待 "V13" は「違反なし・needs_review の警告あり」。各 case の前に commit と docs/ を準備直後に戻す。
+    """
     saved = {k: os.environ.pop(k) for k in _GIT_ENV_DROP if k in os.environ}
     failed: list[str] = []
     cases = _st_cases()
@@ -821,7 +941,11 @@ def selftest() -> int:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             _st_setup(root)
+            base = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(root), check=True, capture_output=True,
+                                  text=True).stdout.strip()
             for name, mutate, expect in cases:
+                _st_git(root, "reset", "-q", "--hard", base)
+                _st_git(root, "clean", "-fdq", "--", "docs")
                 _st_reset(root)
                 (root / ws.SYNONYMS_PATH).unlink(missing_ok=True)
                 try:
@@ -831,7 +955,10 @@ def selftest() -> int:
                     failed.append(f"  {name}: 例外 {type(e).__name__}: {e}")
                     continue
                 got = sorted({c for _p, c, _r in vs})
-                if (expect is None and (vs or warns)) or (expect is not None and expect not in got):
+                if expect == "V13":
+                    if vs or not warns:
+                        failed.append(f"  {name}: 期待=警告のみ 実際={got or '違反なし'} 警告={warns[:2]}")
+                elif (expect is None and (vs or warns)) or (expect is not None and expect not in got):
                     failed.append(f"  {name}: 期待={expect or '違反なし'} 実際={got or '違反なし'} {vs[:3]}")
     except Exception as e:  # noqa: BLE001
         failed.append(f"  準備に失敗: {type(e).__name__}: {e}")

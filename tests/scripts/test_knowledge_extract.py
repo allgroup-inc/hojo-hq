@@ -360,7 +360,8 @@ def test_max_limits_output(ex):
 # ---------------------------------------------------------------- 追加の境界(brief 外)
 
 def test_similar_title_in_same_run_gets_duplicate_of(ex):
-    add_note(ex, "失敗: 生成物を作り直す前に origin/main を取り込まず新しいデータを消した")
+    # Task 4: 「学び:」と「失敗:」の組は矛盾(conflict)として duplicate_of を付けないので、同じ接頭辞で確かめる
+    add_note(ex, "学び: 生成物を作り直す前に origin/main を取り込めば新しいデータを消さない")
     s = run(ex)
     assert s["rejected_by_validator"] == [] and s["duplicate_of_marked"] >= 1
     marked = [load(ex, p) for p in s["written"] if load(ex, p).get("duplicate_of")]
@@ -454,3 +455,133 @@ def test_lock_lost_mid_run_exits_1_with_partial_summary(ex, monkeypatch, capsys)
 
 def test_lock_not_lost_reports_false(ex):
     assert run(ex, dry_run=True)["lock_lost"] is False
+
+
+# ---------------------------------------------------------------- Phase 2 Task 4: 矛盾の事前判定(conflict 付与)
+
+FORBID = "生成物を作り直すときに origin/main を取り込む運用は禁止"  # LESSON と「生成物・origin・main」が重なる
+FORBID_ID = "D20261004-regen-rule"
+C_ID = "D20261006-no-direct-push"
+NOTE_A = "学び: 自動生成した学びノートを main へ直接 push したら、PR 待ちが無く当日中に反映できた"
+NOTE_B = "失敗: 自動生成物を main へ直接 push したため、禁止語を含むノートがレビュー前に公開された"
+C_OUTCOME = "自動生成物は main へ直接 push しない。必ず PR を通し CI と人が見る"
+
+
+def add_decision(root, outcome=FORBID, did=FORBID_ID, date_="2026-10-04", title="再生成の進め方"):
+    text = (f"---\ndecision_id: {did}\ndate: {date_}\ntitle: {title}\nstatus: adopted\ntags: [wiki]\n---\n"
+            f"# {title}\n\n## なぜ\n事故を防ぐ。\n\n## 三名体制の議論\n- **ウタガイ**: 遅くなる\n\n## 裁定\n{outcome}\n")
+    (Path(root) / f"docs/議事/議事_{date_.replace('-', '')}_{did}.md").write_text(text, encoding="utf-8")
+    commit_all(root, f"decision {did}")
+
+
+def add_notes(root, *texts, sid="S3"):
+    write_session(root, sid, [ev(sid, f"2026-10-05T00:0{i}:00Z", "note", text=t) for i, t in enumerate(texts)])
+    commit_all(root, "notes")
+
+
+def written(root, s):
+    return [load(root, p) for p in s["written"]]
+
+
+def conflicts(s, root=None):
+    root = root or s["_root"]
+    return [w for w in written(root, s) if w["review_status"] == "conflict"]
+
+
+def run_ex(root, **kw):
+    s = run(root, **kw)
+    s["_root"] = root
+    return s
+
+
+def seed_abc(root):
+    write_session(root, "A", [ev("A", "2026-10-05T01:00:00Z", "note", text=NOTE_A)])
+    write_session(root, "B", [ev("B", "2026-10-05T02:00:00Z", "note", text=NOTE_B)])
+    commit_all(root, "A and B")
+    add_decision(root, outcome=C_OUTCOME, did=C_ID, date_="2026-10-06", title="自動生成物の公開経路")
+
+
+def by_note(s, sid):
+    root = s["_root"]
+    hits = [w for w in written(root, s) if any(r.startswith(f"session-{sid}@") for r in w.get("source_experience", []))]
+    assert len(hits) == 1, [w["title"] for w in hits]
+    return hits[0]
+
+
+def test_extractor_marks_conflict_and_records_contradiction(ex):
+    add_decision(ex, outcome=FORBID)
+    w = written(ex, run(ex))
+    assert any(x["review_status"] == "conflict" and x["contradictions"] for x in w)
+    lesson = [x for x in w if x["title"].startswith("学び: 生成物")][0]
+    assert lesson["review_status"] == "conflict"
+    assert {"source": FORBID_ID, "note": lesson["contradictions"][0]["note"]} in lesson["contradictions"]
+    assert "Decision が否定(禁止)" in lesson["contradictions"][0]["note"]
+    assert validate_tree(ex)[0] == []
+
+
+def test_opposite_note_prefixes_cross_reference(ex):
+    add_notes(ex, "学び: 直接 push で速く反映", "失敗: 直接 push で事故")
+    ws_ = conflicts(run_ex(ex))
+    assert len(ws_) == 2 and all(w["contradictions"] for w in ws_)
+    a, b = ws_
+    assert a["candidate_id"] in [c["source"] for c in b["contradictions"]]
+    assert b["candidate_id"] in [c["source"] for c in a["contradictions"]]
+    assert all("duplicate_of" not in w for w in ws_)
+    assert validate_tree(ex)[0] == []
+
+
+def test_a_success_b_failure_c_forbidden_c_wins(ex):  # 設計書8章の A/B/C
+    seed_abc(ex)
+    s = run_ex(ex)
+    ka, kb_ = by_note(s, "A"), by_note(s, "B")
+    assert ka["review_status"] == "conflict" and C_ID in [c["source"] for c in ka["contradictions"]]
+    assert kb_["review_status"] == "conflict" and C_ID in [c["source"] for c in kb_["contradictions"]]  # 偽陽性(設計どおり)
+    assert ka["candidate_id"] in [c["source"] for c in kb_["contradictions"]]
+    assert kb_["candidate_id"] in [c["source"] for c in ka["contradictions"]]
+    assert not list((ex / "docs/wiki").glob("*.md"))     # 何も正式にならない(自動統合しない)
+    assert s["conflict"] >= 2 and validate_tree(ex)[0] == []
+
+
+# ---------------------------------------------------------------- Task 4: 追加の境界(brief 外)
+
+def test_same_prefix_notes_are_not_cross_conflict(ex):
+    add_notes(ex, "学び: 直接 push で速く反映", "学び: 直接 push で手早く反映")
+    assert conflicts(run_ex(ex)) == []
+
+
+def test_one_unit_shared_notes_are_not_conflict(ex):
+    add_notes(ex, "学び: push の前に差分を読む", "失敗: push の後で気づいた")
+    assert conflicts(run_ex(ex)) == []
+
+
+def test_conflict_drops_duplicate_of(ex):
+    """矛盾は人が見るもの。似たタイトルの重複(duplicate_of)に畳まない。"""
+    add_note(ex, "失敗: 生成物を作り直す前に origin/main を取り込まず新しいデータを消した")
+    s = run_ex(ex)
+    cs = conflicts(s)
+    assert len(cs) == 2 and all("duplicate_of" not in w for w in cs)
+    assert s["rejected_by_validator"] == [] and validate_tree(ex)[0] == []
+
+
+def test_counterpart_over_max_is_referenced_by_its_source(ex):
+    """相手の候補が上限で作られないときは、相手の Experience を矛盾の相手として残す(実在しない id を書かない)。"""
+    add_notes(ex, "学び: 直接 push で速く反映", "失敗: 直接 push で事故")
+    s = run_ex(ex, max_candidates=6)  # 確信度順 R4 → R3 → R2(古い順)。最後の「失敗:」の note があふれる
+    ids = {Path(p).stem for p in s["written"]}
+    cs = conflicts(s)
+    assert len(cs) == 1 and s["over_max"] >= 1
+    src = [c["source"] for c in cs[0]["contradictions"]]
+    assert all(x in ids or x.startswith("session-") for x in src)
+    assert validate_tree(ex)[0] == []
+
+
+def test_decision_conflict_check_failure_fails_closed(ex, monkeypatch):
+    import wiki_schema
+
+    def boom(*a, **k):
+        raise RuntimeError("conflict boom")
+
+    monkeypatch.setattr(wiki_schema, "decision_conflicts", boom)
+    s = run(ex, dry_run=True)
+    assert s["written"] == []  # 判定できない候補は書かない(V12 で検証器が止める)
+    assert {"V12"} <= {c for r in s["rejected_by_validator"] for c in r["codes"]}

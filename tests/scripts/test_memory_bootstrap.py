@@ -113,6 +113,7 @@ def kb(tmp_path):
     shutil.copy(REPO_ROOT / ".claude/hooks/wikiskill-hook.sh", root / ".claude/hooks/wikiskill-hook.sh")
     git(root, "add", "-A")
     git(root, "commit", "-q", "-m", "fix: word-break を見出し限定に")
+    memory_bootstrap._clear_caches()  # 1プロセス内の memo(Decision・同義語・audit 1回)を前のテストから持ち越さない
     return root
 
 
@@ -1180,6 +1181,7 @@ def kbw(kb):
                 status="superseded", wiki_id="W20261001-merge-old")
     git(kb, "add", "-A")
     git(kb, "commit", "-q", "-m", "chore: wiki fixture")
+    memory_bootstrap._clear_caches()
     return kb
 
 
@@ -1378,7 +1380,27 @@ def test_terms_line_shows_normalized_units(kbw):
     assert lines[2] == "検索語(ブランチから): lighthouse, css"
 
 
+PHASE1_FIXTURE = Path(__file__).resolve().parent / "fixtures/bootstrap_phase1_expected.txt"  # Task 6 で再凍結する
+
+
+def _has_rev(rev):
+    r = subprocess.run(["git", "cat-file", "-e", f"{rev}^{{commit}}"], cwd=REPO_ROOT, capture_output=True)
+    return r.returncode == 0
+
+
+def test_existing_kinds_match_frozen_phase1_output(kb):
+    """凍結した Phase 1 の出力(kb・WORDS)と、[Wiki] 節と検索語行を除いて同一。浅い clone でも走る。"""
+    expected = PHASE1_FIXTURE.read_text(encoding="utf-8")
+    for label in ("[D]", "[FK-002]", "[再発防止]", "[Skill]", "[未解決]"):
+        assert label in expected, label
+    out = retrieve(kb, WORDS)
+    assert section(out, "[Wiki]") == "- 該当なし"
+    assert strip_wiki_section(out) == expected
+
+
 def test_existing_kinds_unchanged_without_wiki(kb, tmp_path):
+    if not _has_rev(PHASE1_REV):
+        pytest.skip(f"{PHASE1_REV} が無い(浅い clone 等)。凍結した出力との比較は別のテストで行う")
     PHASE1_EXPECTED = _phase1_query(kb, WORDS, tmp_path)
     for label in ("[D]", "[FK-002]", "[再発防止]", "[Skill]", "[未解決]"):
         assert label in PHASE1_EXPECTED, label  # 既存6区分(Exp 以外)が実際に出ている状態で比べる
@@ -1430,3 +1452,102 @@ def test_synonyms_failure_means_no_synonyms(kbw, monkeypatch):
     monkeypatch.setattr(memory_bootstrap._ws, "load_synonyms", boom)
     assert "[FK-002]" not in retrieve(kbw, ["merge", "競合"])  # 同義語なしで動く
     assert "synonyms: RuntimeError: syn boom" in _audit_text(kbw)
+
+
+# ---------------------------------------------------------------- Phase 2 Task 4: needs_review の Wiki は注入しない
+
+OPPOSITE_TO_APPROVED = "マージ競合の一覧確認は先にしない"  # 承認済み Wiki と「マージ・競合・一覧・確認」が重なる
+NEW_DID = "D20261101-merge-order"
+
+
+def add_decision(root, date="2026-11-01", outcome=OPPOSITE_TO_APPROVED, did=NEW_DID, title="作業順の見直し"):
+    text = (f"---\ndecision_id: {did}\ndate: {date}\ntitle: {title}\nstatus: adopted\ntags: [順序]\n---\n"
+            f"# 議事: {title}\n\n## なぜ\n手戻りを減らす。\n\n## 裁定\n{outcome}\n\n## 三名体制\n"
+            f"- スイシン: 変える\n- ウタガイ: 事故が増える恐れ\n- ベッカイ: 手順書で足りる\n")
+    (Path(root) / f"docs/議事_{date.replace('-', '')}_{did}.md").write_text(text, encoding="utf-8")
+    git(root, "add", "-A")
+    git(root, "commit", "-q", "-m", f"decision {did}")
+    memory_bootstrap._clear_caches()
+
+
+def audit_text(root):
+    return _audit_text(root)
+
+
+def test_needs_review_wiki_not_injected(kbw):
+    assert APPROVED_TITLE in retrieve(kbw, WORDS)
+    add_decision(kbw, date="2026-11-01", outcome=OPPOSITE_TO_APPROVED)
+    assert APPROVED_TITLE not in retrieve(kbw, WORDS) and "needs_review" in audit_text(kbw)
+    assert f"wiki: needs_review {APPROVED_ID} {NEW_DID}" in audit_text(kbw)
+
+
+def test_needs_review_wiki_not_in_stage1_or_stage2(kbw):
+    assert APPROVED_TITLE in stage2(kbw, "マージ競合の手順を確認したい")  # 対照
+    add_decision(kbw)
+    s1 = stage1_with_branch(kbw, "claude/merge-conflict")
+    s2 = stage2(kbw, "マージ競合の手順を確認したい")
+    assert APPROVED_TITLE not in s1 and APPROVED_TITLE not in s2
+    assert "[D]" in s2  # 新しい Decision の方は出る(Decision が勝つ)
+
+
+def test_older_decision_does_not_mark_needs_review(kbw):
+    """approved_at(2026-10-20)以前の Decision は needs_review にしない(承認の時点で V12 が見ている)。"""
+    add_decision(kbw, date="2026-10-19")
+    assert APPROVED_TITLE in retrieve(kbw, WORDS)
+
+
+def test_acknowledged_decision_keeps_wiki(kbw):
+    p = kbw / f"docs/wiki/{APPROVED_ID}.md"
+    fm, body = wiki_schema.parse_wiki_frontmatter(p.read_text(encoding="utf-8"))
+    _pre, secs, _order = wiki_schema.split_sections(body)
+    fm["acknowledged_decisions"] = [{"decision": NEW_DID, "reason": "同じ向き(先に一覧を見るのは任意)"}]
+    p.write_text(wiki_schema.render_wiki(fm, secs), encoding="utf-8")
+    add_decision(kbw)
+    assert APPROVED_TITLE in retrieve(kbw, WORDS)
+
+
+def test_needs_review_audited_once_per_page(kbw):
+    add_decision(kbw)
+    retrieve(kbw, WORDS)
+    retrieve(kbw, WORDS)
+    lines = [l for l in audit_text(kbw).splitlines() if f"wiki: needs_review {APPROVED_ID}" in l]
+    assert len(lines) == 1
+
+
+def test_needs_review_exception_drops_wiki_fail_closed(kbw, monkeypatch):
+    def boom(*_a, **_k):
+        raise RuntimeError("needs_review boom")
+
+    monkeypatch.setattr(memory_bootstrap._ws, "needs_review", boom)
+    out = retrieve(kbw, WORDS)
+    assert APPROVED_TITLE not in out and "[FK-002]" in out  # Wiki だけ落とし、他の区分は出す
+    assert f"wiki: needs_review {APPROVED_ID} error" in audit_text(kbw)
+
+
+def test_wiki_second_guard_drops_candidate_path(kbw, monkeypatch):
+    """iter_wiki が誤って _candidates/ のページを official として返しても、_wiki が二重に捨てる。"""
+    page = wiki_schema.load_wiki_file(kbw / f"docs/wiki/{APPROVED_ID}.md", kbw)
+    fake = {**page, "title": "候補なのに正式を名乗るページ", "_path": "docs/wiki/_candidates/x.md", "_place": "official"}
+    monkeypatch.setattr(memory_bootstrap._ws, "iter_wiki", lambda root, place: [fake] if place == "official" else [])
+    assert memory_bootstrap._wiki(kbw) == []
+    assert "候補なのに正式を名乗るページ" not in retrieve(kbw, WORDS)
+
+
+def test_clear_caches_resets_decision_and_synonym_memo(kbw):
+    memory_bootstrap._decisions_cached(kbw)
+    write_syn(kbw, "マージ, merge")
+    memory_bootstrap._synonyms(kbw)
+    assert memory_bootstrap._DECISIONS_CACHE and memory_bootstrap._SYN_CACHE
+    memory_bootstrap._clear_caches()
+    assert not memory_bootstrap._DECISIONS_CACHE and not memory_bootstrap._SYN_CACHE
+
+
+def test_needs_review_hook_path_runs_as_script(kbw):
+    """hook(スクリプトとして実行)でも needs_review の Wiki は出ない(wiki_schema が memory_bootstrap を読む経路)。"""
+    r0 = run_hook(kbw, "UserPromptSubmit", {"session_id": "NR0", "prompt": "マージ競合の手順を確認したい"})
+    assert APPROVED_TITLE in context_of(r0.stdout)  # Decision を足す前は出る(対照)
+    add_decision(kbw)
+    r = run_hook(kbw, "UserPromptSubmit", {"session_id": "NR1", "prompt": "マージ競合の手順を確認したい"})
+    assert r.returncode == 0
+    ctx = context_of(r.stdout)
+    assert ctx and APPROVED_TITLE not in ctx and "[D]" in ctx

@@ -22,6 +22,9 @@ commit 済み・public・hojo-hq の記録だけから、規則 R1〜R4 で Wiki
 書く前に各候補へ wiki_validate.validate_file を掛け、違反は書かずに要約へ(理由コードつき)。
 タイトルが既存(正式・候補・この実行で先に作った候補)と V10 の基準で似ているときは、
 `duplicate_of` に最も似た id を書いて人に判断を任せる(黙って捨てない・重複を隠さない)。
+矛盾の事前判定(設計書 7.4): 採用済み Decision の否定語と語が2つ以上重なる候補、`学び:` と `失敗:` で
+語を2つ以上共有する note の候補(互いの candidate_id を書く)は review_status: conflict + contradictions。
+conflict の候補には duplicate_of を付けない(矛盾は重複に畳まず人が見る)。自動統合はしない。
 
 使い方:
     python3 scripts/knowledge_extract.py [--no-llm] [--include-gakubi] [--dry-run] [--max N] [--run-id ID]
@@ -146,19 +149,8 @@ class _Uncommitted(Exception):
     """入力のファイルが commit 済みのまま(git 管理下・HEAD と同じ内容・symlink でない)ではない。"""
 
 
-def _committed_files(root: Path, pathspec: str) -> set[str]:
-    """`_committed_experience` と同じ判定: git 管理下の通常ファイル(mode 100644/100755・symlink でない)で、
-    `git diff --name-only HEAD` に出ない(作業ツリー・index とも HEAD と同じ)もの。git が失敗すれば ContextError。"""
-    tracked: set[str] = set()
-    for entry in wiki_validate._git(root, "ls-files", "-s", "-z", "--", pathspec).split("\0"):
-        if not entry:
-            continue
-        meta, _tab, path = entry.partition("\t")
-        if meta.split(" ", 1)[0] not in ("100644", "100755") or (Path(root) / path).is_symlink():
-            continue
-        tracked.add(path)
-    changed = set(wiki_validate._git(root, "diff", "--name-only", "-z", "HEAD", "--", pathspec).split("\0"))
-    return tracked - changed
+# commit 済みのまま(git 管理下・HEAD と同じ内容・symlink でない)の判定は検証器と1つを共有する(食い違わない)
+_committed_files = wiki_validate.committed_files
 
 
 def _read_decisions(root: Path, repo_vis: str) -> list[dict]:
@@ -376,7 +368,7 @@ def rule_note_prefix(inp: Inputs) -> list[Draft]:
             "source_experience": refs, "source_decision": [], "source_failure": [], "evidence": evidence,
             "confidence": _confidence("R2", sessions - 1),
             "confidence_basis": f"rule=R2 / Exp のみ / note {len(refs)}件・{sessions}セッション",
-            "related_skills": [],
+            "related_skills": [], "note_prefix": prefix, "note_body": body,
         })
     return sorted(drafts, key=lambda d: d["source_experience"][0].split("@", 1)[1] + d["source_experience"][0])
 
@@ -512,10 +504,28 @@ def _attach_gakubi(drafts: list[Draft], gakubi: list[dict]) -> None:
 
 # ---------------------------------------------------------------- 候補にする・書く
 
+def _mark_decision_conflicts(w: Wiki, d: Draft, decisions: list[dict], synonyms) -> None:
+    """矛盾②の事前判定: 採用済み Decision の否定と語が重なれば conflict + contradictions。判定の例外も conflict。"""
+    try:
+        found = ws.decision_conflicts(ws.conflict_text(d), decisions, synonyms)
+    except Exception as e:  # noqa: BLE001 — 判定できないものは「矛盾あり」(fail-closed。検証器の V12 も止める)
+        w["review_status"] = "conflict"
+        w["contradictions"].append({"source": "decision_conflicts", "note": f"矛盾判定に失敗(fail-closed): {type(e).__name__}"})
+        return
+    for c in found:
+        w["contradictions"].append({"source": c["decision"], "note": f"Decision が否定({'・'.join(c['negations'])})"
+                                    f" / 重なる語: {', '.join(c['units'][:6])}"})
+    if found:
+        w["review_status"] = "conflict"
+
+
 def finalize(d: Draft, root: Path, run_id: str, today: date, existing_keys: set[str], taken_ids: set[str], *,
-             created_at: str | None = None, repo: str | None = None, visibility: str | None = None) -> Wiki | None:
+             created_at: str | None = None, repo: str | None = None, visibility: str | None = None,
+             decisions: list[dict] | None = None, synonyms: list[frozenset[str]] | None = None) -> Wiki | None:
     """下書きを候補(Wiki)にする。dedup_key が既存(全状態・全置き場所)にあれば None。
 
+    採用済み Decision の否定と語が重なる(wiki_schema.decision_conflicts)なら review_status = conflict にし、
+    contradictions に Decision の id を書く。decisions を渡さなければ commit 済みの議事を読む(検証器と同じ)。
     candidate_id の衝突が6桁でも解けなければ ValueError(make_candidate_id)。
     """
     sources = {k: [s for s in d.get(k) or []] for k in ws.SOURCE_KEYS}
@@ -535,8 +545,71 @@ def finalize(d: Draft, root: Path, run_id: str, today: date, existing_keys: set[
     for k in ws.SOURCE_KEYS:
         if sources[k]:
             fm[k] = sources[k]
-    return {**fm, "_path": f"{ws.CANDIDATES_DIR}/{cid}.md", "_place": "candidates",
-            "_sections": dict(d["sections"]), "_rule": d["rule"]}
+    w = {**fm, "_path": f"{ws.CANDIDATES_DIR}/{cid}.md", "_place": "candidates",
+         "_sections": dict(d["sections"]), "_rule": d["rule"]}
+    if decisions is None:
+        decisions = wiki_validate._committed_decisions(root)
+    if synonyms is None:
+        synonyms = wiki_validate._read_synonyms(root)
+    _mark_decision_conflicts(w, d, decisions, synonyms)
+    return w
+
+
+def _shared_units(a: str, b: str, synonyms) -> list[str]:
+    """2つの note の本文が共有する語(memory_bootstrap の語単位・同義語は1語)。多い方向の数を採る。"""
+    import memory_bootstrap as mb  # 抽出器を Bootstrap に依存させるのはここだけ(語の数え方を揃える)
+
+    fa, fb = mb.features(a), mb.features(b)
+    ua = [g[0][1] for g in mb.query_groups([a], synonyms) if mb._group_matches(g, fb)]
+    ub = [g[0][1] for g in mb.query_groups([b], synonyms) if mb._group_matches(g, fa)]
+    return ua if len(ua) >= len(ub) else ub
+
+
+_OPPOSITE_PREFIXES = frozenset({"学び", "失敗"})
+
+
+def _cross_note_conflicts(items: list[tuple[Draft, Wiki | None, str | None]], synonyms) -> None:
+    """矛盾①の事前判定: `学び:` と `失敗:` の note が CONFLICT_MIN_UNITS 語以上を共有すれば、この実行で作る候補に
+    相手の id(この実行の candidate_id / 既にある候補・Wiki の id)を contradictions として書き、conflict にする。
+    判定の例外は、関係しうる R2 の候補すべてを conflict にする(fail-closed)。"""
+    notes = [(d, w, ident) for d, w, ident in items if d.get("note_prefix") in _OPPOSITE_PREFIXES and ident]
+    try:
+        pairs = []
+        for i, (da, wa, ia) in enumerate(notes):
+            for db, wb, ib in notes[i + 1:]:
+                if da["note_prefix"] == db["note_prefix"] or (wa is None and wb is None):
+                    continue
+                units = _shared_units(da["note_body"], db["note_body"], synonyms)
+                if len(units) >= ws.CONFLICT_MIN_UNITS:
+                    pairs.append(((da, wa, ia), (db, wb, ib), units))
+    except Exception as e:  # noqa: BLE001
+        for _d, w, _i in notes:
+            if w is not None:
+                w["review_status"] = "conflict"
+                w["contradictions"].append({"source": "note_conflicts",
+                                            "note": f"矛盾判定に失敗(fail-closed): {type(e).__name__}"})
+        return
+    for (da, wa, ia), (db, wb, ib), units in pairs:
+        for d_self, w_self, d_other, i_other in ((da, wa, db, ib), (db, wb, da, ia)):
+            if w_self is None:
+                continue  # 既にある候補・Wiki は書き換えない
+            w_self["review_status"] = "conflict"
+            w_self["contradictions"].append({
+                "source": i_other,
+                "note": f"`{d_other['note_prefix']}:` の note と逆向き / 共有する語: {', '.join(units[:6])}"})
+
+
+def _fix_unwritten_refs(accepted: list[Wiki], provisional: dict[str, Draft]) -> None:
+    """この実行で作られなかった候補(上限・検証で落ちた)を指す contradictions は、相手の根拠(Experience)を指し直す。"""
+    written = {w["candidate_id"] for w in accepted}
+    for w in accepted:
+        for c in w.get("contradictions") or []:
+            d = provisional.get(c.get("source"))
+            if d is None or c["source"] in written:
+                continue
+            refs = d.get("source_experience") or []
+            c["source"] = refs[0] if refs else "unwritten-candidate"
+            c["note"] += "(相手の候補はこの実行では作られていない)"
 
 
 def write_candidate(root: Path, w: Wiki) -> Path:
@@ -661,28 +734,56 @@ def _run_body(root: Path, lock: dict, now, run_id: str, include_gakubi: bool, dr
     drafts = [d for _i, d in sorted(enumerate(drafts), key=lambda t: (-t[1]["confidence"], order[t[1]["rule"]], t[0]))]
 
     ctx = wiki_validate.build_context(root)
-    existing = {w["dedup_key"] for w in ctx["official"] + ctx["candidates"] + ctx["archive"]
-                if isinstance(w.get("dedup_key"), str)}
+    existing_ids: dict[str, str] = {}
+    for w in ctx["official"] + ctx["candidates"] + ctx["archive"]:
+        if isinstance(w.get("dedup_key"), str):
+            oid = w.get("wiki_id") if w.get("_place") != "candidates" and w.get("wiki_id") else w.get("candidate_id")
+            existing_ids.setdefault(w["dedup_key"], oid if isinstance(oid, str) else "")
+    existing = set(existing_ids)
     taken = set(ctx["ids"]["candidate"]) | set(ctx["ids"]["wiki"])
     repo, visibility, created_at = ctx["repo_slug"], ctx["repo_visibility"], iso(now)
-    accepted: list[Wiki] = []
-    for d in drafts:
+    synonyms = ctx.get("synonyms") or []
+
+    # 1) 先に全下書きを候補にする(candidate_id を決めてから、note 同士の矛盾を互いの id で書くため)
+    items: list[tuple[Draft, Wiki | None, str | None]] = []
+    errors: dict[int, str] = {}
+    provisional: dict[str, Draft] = {}
+    for i, d in enumerate(drafts):
         beat()
-        if len(accepted) >= max_candidates:
-            summary["over_max"] += 1
-            continue
         ids = [s for k in ws.SOURCE_KEYS for s in d.get(k) or []]
         try:
             w = finalize(d, root, run_id, now.date(), existing, taken, created_at=created_at, repo=repo,
-                         visibility=visibility)
+                         visibility=visibility, decisions=ctx["decisions"], synonyms=synonyms)
         except ValueError as e:
+            errors[i] = str(e)[:200]
+            items.append((d, None, None))
+            continue
+        if w is None:
+            items.append((d, None, existing_ids.get(ws.dedup_key(d["title"], ids)) or None))
+            continue
+        existing.add(w["dedup_key"])
+        taken.add(w["candidate_id"])
+        provisional[w["candidate_id"]] = d
+        items.append((d, w, w["candidate_id"]))
+    _cross_note_conflicts(items, synonyms)
+
+    # 2) 上限・重複・検証(従来の順と同じ数え方)
+    accepted: list[Wiki] = []
+    for i, (d, w, _ident) in enumerate(items):
+        beat()
+        ids = [s for k in ws.SOURCE_KEYS for s in d.get(k) or []]
+        if len(accepted) >= max_candidates:
+            summary["over_max"] += 1
+            continue
+        if i in errors:
             summary["rejected_by_validator"].append({"rule": d["rule"], "candidate_id": None, "sources": ids,
-                                                     "codes": ["V02"], "reasons": [str(e)[:200]]})
+                                                     "codes": ["V02"], "reasons": [errors[i]]})
             continue
         if w is None:
             summary["skipped_duplicate"] += 1
             continue
-        dup = _similar(w, ctx)
+        # 矛盾は人が個別に見る: conflict の候補は重複(duplicate_of)に畳まない
+        dup = _similar(w, ctx) if w["review_status"] != "conflict" else None
         if dup:
             w["duplicate_of"] = dup
         violations = wiki_validate.validate_file(w, ctx)
@@ -693,9 +794,8 @@ def _run_body(root: Path, lock: dict, now, run_id: str, include_gakubi: bool, dr
             continue
         summary["duplicate_of_marked"] += 1 if dup else 0
         accepted.append(w)
-        existing.add(w["dedup_key"])
-        taken.add(w["candidate_id"])
         _remember(ctx, w)
+    _fix_unwritten_refs(accepted, provisional)
     summary["conflict"] = sum(1 for w in accepted if w["review_status"] == "conflict")
 
     if dry_run:
