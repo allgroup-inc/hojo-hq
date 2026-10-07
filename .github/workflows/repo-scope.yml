@@ -33,6 +33,14 @@ jobs:
         if: ${{ !cancelled() }}
         run: python3 scripts/check_experience_privacy.py
 
+      # Knowledge Wiki(docs/wiki/)の候補・正式の検査。根拠の解決・逐語引用・公開可否・置き場所(WikiSkill Phase 2)
+      - name: Wiki(候補・正式)の自己点検
+        if: ${{ !cancelled() }}
+        run: python3 scripts/wiki_validate.py --selftest
+      - name: Wiki(候補・正式)の検査
+        if: ${{ !cancelled() }}
+        run: python3 scripts/wiki_validate.py
+
       # frontmatter の無い既存の議事は対象外として通る。日本語・空白を含むパスを壊さないよう -z と quotePath=false で渡す
       - name: 議事(Decision)の必須項目検査
         if: ${{ !cancelled() }}
