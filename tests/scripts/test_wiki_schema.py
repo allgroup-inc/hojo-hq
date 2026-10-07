@@ -138,7 +138,7 @@ def test_title_similarity():
 import wiki_schema  # noqa: E402
 from wiki_schema import decision_conflicts, negation_sentences  # noqa: E402
 
-# 実データ(D20261006-skill-dist-privacy-gate・D20261006-wikiskill-phase1 の裁定)を写した長い裁定文。
+# 実データ(D20261006-skill-dist-privacy-gate・D20261006-wikiskill-phase1 の裁定)を要約した合成例の長い裁定文。
 # 組織全体の語(phase・議事・小柳・実装・skill)は否定語の無い文にあり、否定文は update-skills.sh の1文だけ。
 RULING_PROSE = ("採用。今後の Skill 配布は原則 Skill変更 → Privacy / Scope → 三名体制レビュー → 小柳 Decision Gate → 配布 "
                 "の順とする。ただし Phase 1 では `scripts/update-skills.sh` そのものを変更しない。"
@@ -248,3 +248,41 @@ def test_anaphoric_negation_conflicts_via_previous_sentence():
                  title="生成物の取り込み手順")
     got = decision_conflicts("学び: 生成物を作り直す前に origin/main を取り込むと、新しいデータを消さずに済む", [d])
     assert got and {"生成物", "データ"} <= set(got[0]["units"])
+
+
+def test_negation_sentences_demonstrative_after_opening_bracket():
+    """開き括弧・かぎの後の指示語も文頭として見る(「(この運用は禁止)」「「この運用は禁止」」)。"""
+    assert negation_sentences("A を使う。(この運用は禁止)") == ["A を使う", "(この運用は禁止)"]
+    assert negation_sentences("A を使う。（この運用は禁止）") == ["A を使う", "(この運用は禁止)"]
+    assert negation_sentences("A を使う。「「この運用は禁止」」") == ["A を使う", "「「この運用は禁止」」"]
+    assert negation_sentences("A を使う。【その案は却下】") == ["A を使う", "【その案は却下】"]
+
+
+def test_negation_sentences_mid_sentence_demonstrative_is_not_supported():
+    """文の途中の指示語(「…ため、この案は却下」)は直前の文を引かない(議事のウタガイ①に明記した未対応の形)。"""
+    assert negation_sentences("A を導入する。準備が間に合わないため、この案は却下") == ["準備が間に合わないため、この案は却下"]
+
+
+@pytest.mark.xfail(strict=True, reason="検出できない形: 件名が主題で裁定は「却下。…」だけ(件名は照合に含めない)。"
+                                       "件名を常に比較する案は小柳判断(議事 D20261007-wikiskill-conflict-scope)")
+def test_known_false_negative_title_subject_rejected_outcome():
+    d = _adopted("却下。準備が間に合わないため", title="締切7日前アラートの導入")
+    assert decision_conflicts("締切7日前にアラートを送ると登録率が上がる", [d])
+
+
+@pytest.mark.xfail(strict=True, reason="照合範囲の変更で落ちた形(ウタガイ③): 禁止の文は否定語の一覧に無い動詞で、"
+                                       "別の文の「しない」だけが否定語。全文照合では検出していた")
+def test_known_regression_negation_word_only_in_unrelated_sentence():
+    d = _adopted("締切7日前のアラートは送らない。Phase 1 では設定を変更しない")
+    assert decision_conflicts("締切7日前にアラートを送ると登録率が上がる", [d])
+
+
+def test_regression_shape_was_caught_by_whole_text_matching():
+    """上の xfail の形は、全文照合なら2語以上当たっていた(新しい照合範囲で落ちた回帰であることの確認)。"""
+    import memory_bootstrap as mb
+    text = "締切7日前にアラートを送ると登録率が上がる"
+    for title, outcome in (("配布の手順", "締切7日前のアラートは送らない。Phase 1 では設定を変更しない"),
+                           ("締切7日前アラートの導入", "却下。準備が間に合わないため")):
+        whole = mb.features(title + " " + outcome)
+        hit = [g[0][1] for g in wiki_schema._conflict_groups(text, None, mb) if mb._group_matches(g, whole)]
+        assert {"締切", "アラート"} <= set(hit)
