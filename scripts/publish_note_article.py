@@ -81,11 +81,25 @@ async def login_to_note(page, email: str, password: str) -> bool:
         await page.goto(NOTE_LOGIN_URL, wait_until="networkidle")
 
         try:
+            # デバッグ：すべてのinput要素を確認
+            all_inputs = await page.query_selector_all('input')
+            print(f"[debug] ページ内のinput要素数: {len(all_inputs)}")
+            for i, inp in enumerate(all_inputs):
+                name = await inp.get_attribute('name')
+                type_attr = await inp.get_attribute('type')
+                placeholder = await inp.get_attribute('placeholder')
+                print(f"[debug] input#{i}: name={name}, type={type_attr}, placeholder={placeholder}")
+
             # メールアドレス入力フィールドを見つけて入力
             email_field = await page.query_selector('input[name="login"]')
             if not email_field:
-                print("[error] メールアドレス入力フィールドが見つかりません")
-                return False
+                print("[error] メールアドレス入力フィールド(name=login)が見つかりません")
+                # 代替：type=text の最初の入力フィールドを試す
+                email_field = await page.query_selector('input[type="text"]')
+                if not email_field:
+                    print("[error] メールアドレス入力フィールド(type=text)も見つかりません")
+                    return False
+                print("[info] 代替セレクタ(input[type=text])を使用します")
 
             await email_field.fill(email)
             print("[ok] メールアドレスを入力")
