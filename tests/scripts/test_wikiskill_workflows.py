@@ -93,5 +93,24 @@ def test_codeowners_covers_docs_wiki():
     assert "docs/wiki/ @takeshikoyanagi9-lab" in read(".github/CODEOWNERS")
 
 
+TRUST_BOUNDARY = [
+    "scripts/memory_bootstrap.py", "scripts/experience_log.py", "scripts/decision_memory.py",
+    "scripts/wikiskill_common.py", "scripts/wiki_schema.py", "scripts/wiki_validate.py", "scripts/knowledge_extract.py",
+    "scripts/wikiskill_lock.py", "scripts/experience_archive.py", "scripts/check_experience_privacy.py",
+    "scripts/check_repo_scope.py", "scripts/baseline_debt.py", "docs/wikiskill/baseline-debt.json",
+    ".github/workflows/knowledge-extract.yml", ".github/workflows/wikiskill-tests.yml", ".github/workflows/repo-scope.yml",
+    ".github/CODEOWNERS", ".claude/hooks/wikiskill-hook.sh", ".claude/settings.json",
+]
+
+
+def test_codeowners_covers_trust_boundary():
+    """WikiSkill の Trust Boundary のファイルはすべて小柳さんが持ち主(G1)。指定先のファイルは実在する。"""
+    lines = set(read(".github/CODEOWNERS").splitlines())
+    for p in TRUST_BOUNDARY:
+        assert f"{p} @takeshikoyanagi9-lab" in lines, p
+        assert (ROOT / p).exists(), p
+    assert "branch protection はまだ有効ではない" in read(".github/CODEOWNERS")
+
+
 def test_promotion_doc_paths_resolve():
     assert unresolved_doc_paths("docs/wikiskill/Wiki昇格手順.md") == []

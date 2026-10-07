@@ -3,3 +3,25 @@
 # 小柳さんが有効にする必要がある(Gate G1)。有効になるまでは運用上の約束であり、機械の保証ではない。
 # 手順: docs/wikiskill/Wiki昇格手順.md
 docs/wiki/ @takeshikoyanagi9-lab
+
+# WikiSkill Trust Boundary(記録・注入・検証・抽出の仕組みそのもの。G1・小柳承認 2026-10-07)。
+# branch protection はまだ有効ではない(Release 後の独立タスク)。それまではこの指定も運用上の約束にとどまる。
+scripts/memory_bootstrap.py @takeshikoyanagi9-lab
+scripts/experience_log.py @takeshikoyanagi9-lab
+scripts/decision_memory.py @takeshikoyanagi9-lab
+scripts/wikiskill_common.py @takeshikoyanagi9-lab
+scripts/wiki_schema.py @takeshikoyanagi9-lab
+scripts/wiki_validate.py @takeshikoyanagi9-lab
+scripts/knowledge_extract.py @takeshikoyanagi9-lab
+scripts/wikiskill_lock.py @takeshikoyanagi9-lab
+scripts/experience_archive.py @takeshikoyanagi9-lab
+scripts/check_experience_privacy.py @takeshikoyanagi9-lab
+scripts/check_repo_scope.py @takeshikoyanagi9-lab
+scripts/baseline_debt.py @takeshikoyanagi9-lab
+docs/wikiskill/baseline-debt.json @takeshikoyanagi9-lab
+.github/workflows/knowledge-extract.yml @takeshikoyanagi9-lab
+.github/workflows/wikiskill-tests.yml @takeshikoyanagi9-lab
+.github/workflows/repo-scope.yml @takeshikoyanagi9-lab
+.github/CODEOWNERS @takeshikoyanagi9-lab
+.claude/hooks/wikiskill-hook.sh @takeshikoyanagi9-lab
+.claude/settings.json @takeshikoyanagi9-lab
