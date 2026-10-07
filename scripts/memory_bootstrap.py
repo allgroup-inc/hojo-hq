@@ -6,14 +6,17 @@
 
 区分(信頼階層順・出典ラベル付き):
     [D] 議事(Decision) > [未解決] 決裁キュー > [FK] 失敗台帳 > [再発防止] CLAUDE.md
-    > [Skill] 現在有効な Skill > [Exp] Experience(低信頼・参考)
+    > [Wiki] 承認済みの Official Wiki(docs/wiki/*.md・人が承認) > [Skill] 現在有効な Skill
+    > [Exp] Experience(低信頼・参考)
 
 照合(語単位):
     検索語は文字種の切れ目で「語」に分ける(英数字の語 / カタカナ語 / 漢字などの語。ひらがなは捨てる)。
     英数字の語は文書の英数字トークンと完全一致で、日本語の語は bigram の6割以上(2個以下なら全部)が
     文書にあれば一致。score = 一致した語の数(+ 見出し・名前で一致すれば +1。この加点は並び順にだけ使う)。
     min_score = min(2, 語の数)。見出しの加点を除いた一致数がこれに届かないものは出さない
-    (Skill だけは名前での一致も1語に数える。名前は識別子なので、語がそのまま入っていれば関連が強い)。
+    (Skill だけは名前での一致も1語に数える。名前は識別子なので、語がそのまま入っていれば関連が強い。
+    ただし段1では数えず、段2では最初の指示の語が名前に当たったときだけ数える。手動 query は従来どおり)。
+    同義語表(docs/wiki/_synonyms.txt)の同じ行の語は1つの語として扱う(どれか1つが当たれば1語)。
     区分ごとに、その区分の25%を超える項目(かつ3件以上)に当たる語は「ありふれた語」として照合に使わない。
     ハッシュ・乱数らしい語(16進の6文字以上 / 数字2つ以上を含む英数6文字)と .claude/experience の
     ファイル名は検索語にしない。段2は「最初の指示 + ブランチ名の語」で探す(指示から語が2つ取れなければ段1の語も使う)。
@@ -24,6 +27,8 @@
     python3 scripts/memory_bootstrap.py query "<語> <語>"        # 手動確認用(停止スイッチは見ない)
 
 規律: root(このリポジトリ)の外は読まない。private の Experience 行は出さない(audit に残す)。
+[Wiki] は docs/wiki/ 直下の approved(visibility がリポの公開性と一致)だけ。_candidates/ と _archive/ は開かない。
+.claude/wiki.off があれば [Wiki] だけ止める(.claude/memory.off は従来どおり全体を止める)。
 1区分の読み込み失敗は audit して `- 該当なし` にし、他の区分は出す。hook は必ず JSON を出し exit 0。
 """
 from __future__ import annotations
@@ -57,6 +62,13 @@ from wikiskill_common import (  # noqa: E402
     session_id_of,
 )
 
+try:  # 読めなくても Bootstrap 全体は止めない([Wiki] と同義語だけ無しになり、audit に残す)
+    import wiki_schema as _ws  # noqa: E402
+    _WS_ERROR = ""
+except Exception as _e:  # noqa: BLE001
+    _ws = None
+    _WS_ERROR = f"{type(_e).__name__}: {_e}"
+
 Source = dict
 
 _COMPONENT = "bootstrap"
@@ -69,6 +81,7 @@ KINDS = [
     ("queue", "[未解決]", "## 未解決（決裁キュー）"),
     ("failure", "[FK]", "## 過去の失敗 [FK]（失敗台帳）"),
     ("prevention", "[再発防止]", "## 再発防止メモ [再発防止]（CLAUDE.md）"),
+    ("wiki", "[Wiki]", "## 承認済みの知識 [Wiki](Official Wiki・人が承認)"),
     ("skill", "[Skill]", "## 現在有効な関連Skill [Skill]"),
     ("experience", "[Exp]", "## 直近のExperience [Exp]（低信頼・参考。commitされたものだけ見える）"),
 ]
@@ -108,6 +121,9 @@ DECISION_LINE_MAX = 700
 SHRINK_TO = 60            # 長すぎるとき 前提 → なぜ → 裁定 の順にここまで縮める
 UTAGAI_MIN = 80           # 最後の手段でもウタガイはこの長さ(以上)を残す
 TITLE_PREFIX_CHARS = 40
+WIKI_KNOWLEDGE_CHARS = 600  # [Wiki] の照合に使う「## 知識」の先頭の長さ
+WIKI_SUMMARY_SHOWN = getattr(_ws, "SHOWN_SUMMARY", 160)
+WIKI_OFF_PATH = getattr(_ws, "WIKI_OFF", ".claude/wiki.off")
 NONE_LINE = "- 該当なし"
 TRIMMED_LINE = "- (文字数上限のため省略)"
 
@@ -342,6 +358,54 @@ def _unit_matches(unit: tuple[str, str, frozenset], feats: set[str]) -> bool:
     return len(grams & feats) >= need
 
 
+def _syn_key(word: str) -> str:
+    return _ws.normalize(word) if _ws is not None else word
+
+
+def query_groups(terms: list[str], synonyms: list[frozenset[str]] | None = None
+                 ) -> list[tuple[tuple[str, str, frozenset], ...]]:
+    """query_units(terms) の各語に、同義語表で同じ行の語(query_units([語]) で1単位になるもの)を束ねる。
+
+    返り値は語ごとの tuple(先頭が検索語そのもの)。同じ行の語が検索語に2つあっても1つの tuple にまとめる
+    (1語として数える)。同義語が無ければ query_units の各単位を1つずつ包んだものと同じ。
+    """
+    index: dict[str, frozenset[str]] = {}
+    for group in synonyms or ():
+        for w in group:
+            index.setdefault(w, group)
+    groups: list[tuple[tuple[str, str, frozenset], ...]] = []
+    used: set[tuple[str, str]] = set()
+    for unit in query_units(terms):
+        key = (unit[0], unit[1])
+        if key in used:
+            continue
+        used.add(key)
+        bundle = [unit]
+        own = _syn_key(unit[1]) if index else ""
+        for w in sorted(index.get(own, frozenset()) - {own}):
+            extra = query_units([w])
+            if len(extra) != 1:
+                continue  # 2単位以上に割れる語は「どれか1つ」の言い換えにならない
+            k = (extra[0][0], extra[0][1])
+            if k in used:
+                continue
+            used.add(k)
+            bundle.append(extra[0])
+        groups.append(tuple(bundle))
+    return groups
+
+
+def _group_matches(group, feats: set[str]) -> bool:
+    """group のどれか1つの語が当たれば True(1語として数える)。"""
+    return any(_unit_matches(u, feats) for u in group)
+
+
+def _units_line(groups) -> str:
+    """検索語の行: 正規化後の語を `, ` で連結(同義語は `マージ(=merge)`)。TERMS_SHOWN で切る。"""
+    words = [g[0][1] + (f"(={'='.join(u[1] for u in g[1:])})" if len(g) > 1 else "") for g in groups]
+    return _trunc(", ".join(words) or "(なし)", TERMS_SHOWN)
+
+
 def _match_score(units, feats: set[str], title_feats: set[str]) -> int:
     matched = sum(1 for u in units if _unit_matches(u, feats))
     if matched and title_feats and any(_unit_matches(u, title_feats) for u in units):
@@ -421,9 +485,20 @@ def _decision_line(d: dict, title: str, kind_label: str = "[D]") -> str:
     return compose()
 
 
+_DECISIONS_CACHE: dict[str, list[dict]] = {}
+
+
+def _decisions_cached(root: Path) -> list[dict]:
+    """load_decisions(root) の1プロセス内 memo([D] と [Wiki] の needs_review 判定が共有)。失敗は memo しない。"""
+    key = str(Path(root).resolve())
+    if key not in _DECISIONS_CACHE:
+        _DECISIONS_CACHE[key] = load_decisions(root)
+    return _DECISIONS_CACHE[key]
+
+
 def _decisions(root: Path) -> list[Source]:
     out = []
-    for d in load_decisions(root):
+    for d in _decisions_cached(root):
         path = d["path"]
         if path.startswith("/") or path.startswith(".."):
             continue  # root の外(シンボリックリンク経由など)は出さない
@@ -490,6 +565,112 @@ def _preventions(root: Path) -> list[Source]:
                             text[:60], text, f"- [再発防止] {_trunc(text, 200)}", "", text,
                             text[:TITLE_PREFIX_CHARS]))
     return out
+
+
+_WIKI_OFF_AUDITED: set[str] = set()
+
+
+def _wiki_needs_review(w: dict, decisions: list[dict], synonyms: list[frozenset[str]] | None = None) -> list[str]:
+    """承認後の新しい Decision と矛盾する Wiki の Decision id(非空なら注入しない)。
+
+    フック点: 中身は Phase 2 Task 4(wiki_schema.needs_review)で入れる。この Task では常に空。
+    """
+    return []
+
+
+def _wiki_line(w: dict) -> str:
+    def count(key: str) -> int:
+        v = w.get(key)
+        return len(v) if isinstance(v, list) else 0
+
+    title = _clean(w.get("title") or "")
+    summary = _clean(w.get("summary") or "")[:WIKI_SUMMARY_SHOWN]
+    return (f"- [Wiki] {title} — {summary} / 根拠: Exp {count('source_experience')}・"
+            f"Decision {count('source_decision')}・FK {count('source_failure')} / "
+            f"承認: {_clean(w.get('approved_by') or '')} {_clean(w.get('approved_at') or '')} → {w['_path']}")
+
+
+def _wiki(root: Path) -> list[Source]:
+    """docs/wiki/ 直下の approved だけ(visibility がリポの公開性と一致・needs_review でない)。
+
+    _candidates/ と _archive/ は開かない(iter_wiki の official は直下だけ + `docs/wiki/_` で始まるパスを捨てる)。
+    .claude/wiki.off があれば [] (audit は1プロセスに1回)。どんな失敗も [] + audit(fail closed)。
+    """
+    root = Path(root)
+    try:
+        if (root / WIKI_OFF_PATH).exists():
+            key = str(root.resolve())
+            if key not in _WIKI_OFF_AUDITED:
+                _WIKI_OFF_AUDITED.add(key)
+                audit(root, _COMPONENT, "wiki: disabled by wiki.off")
+            return []
+        if _ws is None:
+            audit(root, _COMPONENT, f"wiki: wiki_schema unavailable ({_WS_ERROR}); [Wiki] skipped")
+            return []
+        out: list[Source] = []
+        visibility = decisions = None
+        unreadable = hidden = 0
+        for w in _ws.iter_wiki(root, "official"):
+            path = str(w.get("_path") or "")
+            if (not path.startswith(_ws.WIKI_DIR + "/") or path.startswith(_ws.WIKI_DIR + "/_")
+                    or "/" in path[len(_ws.WIKI_DIR) + 1:] or w.get("_place") != "official"):
+                continue  # 候補・置き換え済み・root の外は出さない(二重の除外)
+            if "_error" in w:
+                unreadable += 1
+                continue
+            if w.get("review_status") != "approved":
+                continue
+            if visibility is None:
+                # root がリポジトリの最上位でなければ(外側のリポの remote を読まないよう)private 扱い
+                visibility = _ws.repo_visibility(root) if _git_ready(root) else "private"
+            if w.get("visibility") != visibility:
+                hidden += 1
+                continue
+            if decisions is None:
+                decisions = _decisions_cached(root)
+            if _wiki_needs_review(w, decisions, _synonyms(root)):
+                continue
+            title = _clean(w.get("title") or "")
+            summary = _clean(w.get("summary") or "")
+            sections = w.get("_sections") if isinstance(w.get("_sections"), dict) else {}
+            knowledge = _clean(sections.get("## 知識") or "")[:WIKI_KNOWLEDGE_CHARS]
+            out.append(_src("wiki", "[Wiki]", str(w.get("wiki_id") or path), path, title, summary, _wiki_line(w),
+                            _clean(w.get("approved_at") or ""), f"{title} {summary} {knowledge}", title))
+        if unreadable:
+            audit(root, _COMPONENT, f"wiki: skipped {unreadable} unreadable page(s)")
+        if hidden:
+            audit(root, _COMPONENT, f"wiki: hidden {hidden} page(s) whose visibility differs from the repo")
+        return out
+    except Exception as e:  # noqa: BLE001 — [Wiki] の不具合で他の区分・hook を止めない
+        audit(root, _COMPONENT, f"wiki: {type(e).__name__}: {e}")
+        return []
+
+
+_SYN_CACHE: dict[str, tuple[tuple, list[frozenset[str]]]] = {}
+
+
+def _synonyms(root: Path) -> list[frozenset[str]]:
+    """同義語表(1プロセス内 memo。表の stat が変われば読み直す)。読めなければ空 + audit。"""
+    try:
+        if _ws is None:
+            return []
+        path = Path(root) / _ws.SYNONYMS_PATH
+        try:
+            st = path.stat()
+            stamp = (st.st_mtime_ns, st.st_size)
+        except OSError:
+            return []
+        key = str(Path(root).resolve())
+        hit = _SYN_CACHE.get(key)
+        if hit and hit[0] == stamp:
+            return hit[1]
+        _inside(root, path)  # シンボリックリンクで root の外を読まない
+        groups = _ws.load_synonyms(Path(root))  # V14 違反の行は load_synonyms が捨てて audit する
+        _SYN_CACHE[key] = (stamp, groups)
+        return groups
+    except Exception as e:  # noqa: BLE001
+        audit(root, _COMPONENT, f"synonyms: {type(e).__name__}: {e}; no synonyms")
+        return []
 
 
 def _unquote(value: str) -> str:
@@ -720,6 +901,7 @@ COLLECTORS = [
     ("queue", _queue),
     ("failure", _failures),
     ("prevention", _preventions),
+    ("wiki", _wiki),
     ("skill", _skills),
     ("experience", _experience),
 ]
@@ -739,22 +921,45 @@ def collect_sources(root: Path) -> list[Source]:
 # ---------------------------------------------------------------- 選択・出力
 
 def _feats(s: Source) -> tuple[set[str], set[str]]:
-    """候補の特徴量(1プロセス内で使い回す)。"""
+    """候補の特徴量(1プロセス内で使い回す)。
+
+    Skill の text は「名前 + 空白 + 説明」なので、名前と説明の特徴量の和集合と等しい(区切りの空白を
+    またぐ bigram・英数字の語は無い)。説明だけの特徴量(_body_feats)も使うので、両方を1回ずつ作って合わせる。
+    """
     if "_f" not in s:
-        s["_f"] = features(s["text"])
         s["_tf"] = features(s["match_title"]) if s.get("match_title") else set()
+        if s["kind"] == "skill" and s["text"] == f"{s['match_title']} {s['body']}":
+            s["_f"] = s["_tf"] | _body_feats(s)
+        else:
+            s["_f"] = features(s["text"])
     return s["_f"], s["_tf"]
 
 
+def _body_feats(s: Source) -> set[str]:
+    """Skill の説明(名前を除く)の特徴量。名前だけの一致を数えない段1・段2の照合に使う。"""
+    if "_bf" not in s:
+        s["_bf"] = features(s["body"])
+    return s["_bf"]
+
+
 def _select(sources: list[Source], terms: list[str], per_kind: int = PER_KIND, min_score: int = MIN_SCORE,
-            exclude: frozenset | set = frozenset()) -> dict[str, list[Source]]:
+            exclude: frozenset | set = frozenset(), name_terms: list[str] | None = None,
+            synonyms: list[frozenset[str]] | None = None) -> dict[str, list[Source]]:
     """区分ごとに score 降順 → 日付降順で per_kind 件。exclude の id は順位付けの前に除く。
 
-    区分ごとに、項目の DF_RATIO を超えて(かつ DF_MIN_COUNT 件以上に)当たる語はその区分では使わない。
-    見出しの加点は並び順にだけ使い、min_score の判定は加点を除いた一致数で行う(Skill の名前の一致は例外)。
+    照合の単位は query_groups(同義語表の同じ行の語は1語)。区分ごとに、項目の DF_RATIO を超えて
+    (かつ DF_MIN_COUNT 件以上に)当たる語はその区分では使わない。見出しの加点は並び順にだけ使い、
+    min_score の判定は加点を除いた一致数で行う。Skill の名前(識別子)での一致は例外で1語に数えるが、
+    それは name_terms の語が名前に当たったときだけ(None = 全語: 手動 query・retrieve の従来の挙動 /
+    [] = 数えない: 段1)。name_terms を渡したときは、name_terms 以外の語の一致は説明の本文だけで見る。
     """
-    units = query_units(terms)
-    need = max(min(min_score, len(units)), 1)
+    groups = query_groups(terms, synonyms)
+    need = max(min(min_score, len(groups)), 1)
+    if name_terms is None:
+        name_idx = frozenset(range(len(groups)))
+    else:
+        name_keys = {(k, w) for k, w, _g in query_units(list(name_terms))}
+        name_idx = frozenset(i for i, g in enumerate(groups) if any((u[0], u[1]) in name_keys for u in g))
     picked: dict[str, list[Source]] = {k: [] for k in KIND_ORDER}
     rows: dict[str, list[tuple[Source, frozenset]]] = {k: [] for k in KIND_ORDER}
     for s in sources:
@@ -762,10 +967,16 @@ def _select(sources: list[Source], terms: list[str], per_kind: int = PER_KIND, m
             if s["id"] not in exclude:
                 picked["experience"].append(s)
             continue
-        if not units:
+        if not groups:
             continue
         f, _tf = _feats(s)
-        rows[s["kind"]].append((s, frozenset(i for i, u in enumerate(units) if _unit_matches(u, f))))
+        if s["kind"] == "skill" and name_terms is not None:
+            bf = _body_feats(s)
+            matched = frozenset(i for i, g in enumerate(groups)
+                                if _group_matches(g, bf) or (i in name_idx and _group_matches(g, f)))
+        else:
+            matched = frozenset(i for i, g in enumerate(groups) if _group_matches(g, f))
+        rows[s["kind"]].append((s, matched))
     for kind, entries in rows.items():
         df: dict[int, int] = {}
         for _s, matched in entries:
@@ -777,7 +988,8 @@ def _select(sources: list[Source], terms: list[str], per_kind: int = PER_KIND, m
                 continue
             effective = matched - common
             _f, tf = _feats(s)
-            bonus = 1 if effective and tf and any(_unit_matches(units[i], tf) for i in effective) else 0
+            titled = effective & name_idx if kind == "skill" else effective
+            bonus = 1 if titled and tf and any(_group_matches(groups[i], tf) for i in titled) else 0
             # 見出しの加点は並び順だけ。ただし Skill の名前(識別子)での一致は1語として数える
             # (名前に語がそのまま入っている Skill は、説明に1語しか無くても関連が強い)
             counted = len(effective) + (bonus if kind == "skill" else 0)
@@ -793,19 +1005,19 @@ def _select(sources: list[Source], terms: list[str], per_kind: int = PER_KIND, m
     return picked
 
 
-def _render(picked: dict[str, list[Source]], terms_line: str | None, heading: str,
+def _render(picked: dict[str, list[Source]], terms_lines: list[str] | None, heading: str,
             budget_chars: int) -> tuple[str, set[str]]:
     """固定形で出力し、(本文, 実際に表示した項目の id) を返す。
 
-    terms_line が None なら検索語の行は出さない(手動 query の語は再掲しない)。
+    terms_lines は見出しの直後に置く検索語の行(`検索語: …` 等。None なら出さない: 手動 query の語は再掲しない)。
     """
     items = {k: list(picked.get(k, [])) for k in KIND_ORDER}
     trimmed = {k: False for k in KIND_ORDER}
 
     def build() -> str:
         parts = [heading]
-        if terms_line is not None:
-            parts.append("検索語: " + _trunc(terms_line or "(なし)", TERMS_SHOWN))
+        if terms_lines is not None:
+            parts.extend(terms_lines)
         for kind, _label, head in KINDS:
             parts.append(head)
             if items[kind]:
@@ -829,18 +1041,23 @@ def _render(picked: dict[str, list[Source]], terms_line: str | None, heading: st
 
 def retrieve(root: Path, terms: list[str], budget_chars: int = BUDGET_CHARS, per_kind: int = PER_KIND,
              min_score: int = MIN_SCORE) -> str:
-    """区分ごとに score 降順で per_kind 件(min(min_score, 語の数) 未満は落とす)。合計 budget_chars 以内。"""
-    picked = _select(collect_sources(root), list(terms), per_kind, min_score)
+    """区分ごとに score 降順で per_kind 件(min(min_score, 語の数) 未満は落とす)。合計 budget_chars 以内。
+
+    手動 query 用: Skill の名前一致は従来どおり全語で数える(name_terms=None)。同義語表は使う。
+    """
+    picked = _select(collect_sources(root), list(terms), per_kind, min_score, synonyms=_synonyms(root))
     return _render(picked, None, STAGE1_HEADING, budget_chars)[0]
 
 
 # ---------------------------------------------------------------- hook / CLI
 
 def _stage1_render(root: Path, sources: list[Source], terms: list[str]) -> tuple[str | None, set[str]]:
-    picked = _select(sources, terms)
+    """段1: ブランチ・commit の語で探す。Skill の名前だけの一致は数えない(name_terms=[])。"""
+    synonyms = _synonyms(root)
+    picked = _select(sources, terms, name_terms=[], synonyms=synonyms)
     if not any(picked.values()):
         return None, set()
-    return _render(picked, ", ".join(terms), STAGE1_HEADING, BUDGET_CHARS)
+    return _render(picked, ["検索語: " + _units_line(query_groups(terms, synonyms))], STAGE1_HEADING, BUDGET_CHARS)
 
 
 def _stage1(root: Path) -> str | None:
@@ -863,11 +1080,18 @@ def _stage2(root: Path, prompt: str) -> str | None:
     else:
         context_terms = stage1_terms
         terms = stage1_terms + [t for t in prompt_terms if t not in stage1_terms]
-    picked = _select(sources, terms, exclude=shown)
+    synonyms = _synonyms(root)
+    # Skill の名前一致は、最初の指示の語が名前に当たったときだけ1語に数える
+    picked = _select(sources, terms, exclude=shown, name_terms=prompt_terms, synonyms=synonyms)
     if not any(picked.values()):
         return None
-    # 指示の本文は出力に再掲しない(検索にだけ使う)
-    return _render(picked, "最初の指示 + " + ", ".join(context_terms), STAGE2_HEADING, BUDGET_CHARS)[0]
+    # 指示の本文は出力に再掲しない(検索に使った語だけを出す)
+    prompt_groups = query_groups(prompt_terms, synonyms)
+    seen = {(u[0], u[1]) for g in prompt_groups for u in g}
+    context_groups = [g for g in query_groups(context_terms, synonyms) if (g[0][0], g[0][1]) not in seen]
+    lines = ["検索語(指示から): " + _units_line(prompt_groups),
+             "検索語(ブランチから): " + _units_line(context_groups)]
+    return _render(picked, lines, STAGE2_HEADING, BUDGET_CHARS)[0]
 
 
 def _hook(event: str) -> int:

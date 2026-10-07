@@ -970,14 +970,16 @@ def test_stage2_uses_prompt_and_branch_tokens_only(kb, monkeypatch):
     out = _stage2_without_stage1_exclusion(kb, monkeypatch, "マージで競合したときの手順を確認したい")
     assert "[FK-002]" in out
     assert DECISION not in out  # commit 件名だけに当たる議事は段2では出さない
-    assert out.splitlines()[1] == "検索語: 最初の指示 + lighthouse, css"
+    # 検索語の行(Phase 2 Task 3 で書式を変更): 指示から取った語とブランチ名の語を分けて出す。指示の本文は出さない
+    assert out.splitlines()[1] == "検索語(指示から): マージ, 競合, 手順, 確認"
+    assert out.splitlines()[2] == "検索語(ブランチから): lighthouse, css"
 
 
 def test_stage2_falls_back_to_stage1_terms_for_short_prompt(kb, monkeypatch):
     _commit(kb, "docs: 北極星ボトルネックの裁定")
     out = _stage2_without_stage1_exclusion(kb, monkeypatch, "はい")  # 指示から語が2つ取れない
     assert DECISION in out
-    assert "北極星" in out.splitlines()[1]  # 段1の検索語を使っている
+    assert "北極星" in out.splitlines()[2]  # 段1の検索語を使っている(Phase 2 Task 3: 検索語の行は2行目が指示から・3行目がそれ以外)
 
 
 # --- B3: 本物の文書で固定(受け入れ試験の指示 / Lighthouse / Step 6)
@@ -1121,3 +1123,310 @@ def test_bekkai_heading_only_labels_are_stripped():
     # 見出しのラベルしか無いときは欄ごと出さない
     line = memory_bootstrap._decision_line(_decision(bekkai="ベッカイ(別解) ベッカイ(別解)"), "議事")
     assert "ベッカイ:" not in line
+
+
+# ---------------------------------------------------------------- Phase 2 Task 3: [Wiki] 区分・wiki.off・同義語・Skill名一致・検索語行
+
+import wiki_schema  # noqa: E402
+from wiki_schema import load_synonyms  # noqa: E402
+
+PHASE1_REV = "39f9d71c2"  # Phase 2 Task 3 より前の memory_bootstrap.py(回帰比較の基準)
+WORDS = ["北極星", "ボトルネック", "マージ", "競合", "議事", "docs", "実装計画", "構成設計", "Bing", "Webmaster"]
+APPROVED_TITLE = "マージ競合の解き方"
+CANDIDATE_TITLE = "マージ競合の候補ページ"
+ARCHIVED_TITLE = "マージ競合の旧版ページ"
+APPROVED_ID = "W20261020-merge-conflict"
+PAYLOAD = {"session_id": "W1", "source": "startup"}
+
+
+def _wiki_fm(title, summary, status="approved", visibility="public", wiki_id=APPROVED_ID):
+    fm = {
+        "candidate_id": "K20261019-merge-conflict-abcd", "title": title, "summary": summary,
+        "evidence": [{"source": DECISION, "quote": "マージで競合したら一覧を先に確認する"}],
+        "confidence": 0.8, "confidence_basis": "Decision 1件と Experience 1件が一致", "visibility": visibility,
+        "repo": "allgroup-inc/hojo-hq", "created_at": "2026-10-19", "proposed_by": "knowledge_extract",
+        "contradictions": [], "related_wiki": [], "related_skills": [], "review_status": status,
+        "dedup_key": "0" * 40, "extract_run": "run-test",
+        "source_experience": ["session-abc@2026-10-18T00:00:00Z"], "source_decision": [DECISION],
+        "source_failure": [],
+    }
+    if status in ("approved", "superseded"):
+        fm.update({"wiki_id": wiki_id, "approved_by": "小柳(テスト)", "approved_at": "2026-10-20",
+                   "review_by": "2027-04-18", "review": {"スイシン": "a", "ウタガイ": "b", "ベッカイ": "c"}})
+    return fm
+
+
+def _write_wiki(root, rel, title, summary, knowledge="競合ファイルの一覧を先に確認し、1件ずつ解く。", **kw):
+    sections = {"## 知識": f"{title}。{knowledge}",
+                "## 根拠(Provenance)": "- 議事", "## 反証(ウタガイ)": "- なし", "## 適用範囲と例外": "- 全般",
+                "## 関連": "- なし"}
+    p = Path(root) / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(wiki_schema.render_wiki(_wiki_fm(title, summary, **kw), sections), encoding="utf-8")
+    return p
+
+
+APPROVED_SUMMARY = "マージで競合したら、競合ファイルの一覧を先に確認してから個別に解く。"
+
+
+@pytest.fixture
+def kbw(kb):
+    """kb + 正式 Wiki 1件(approved)+ 候補 1件 + _archive 1件。hook 経路用に wiki_schema.py も写す。"""
+    shutil.copy(SCRIPTS / "wiki_schema.py", kb / "scripts" / "wiki_schema.py")
+    _write_wiki(kb, f"docs/wiki/{APPROVED_ID}.md", APPROVED_TITLE, APPROVED_SUMMARY)
+    _write_wiki(kb, "docs/wiki/_candidates/K20261021-merge-candidate-beef.md", CANDIDATE_TITLE, APPROVED_SUMMARY,
+                status="candidate")
+    _write_wiki(kb, "docs/wiki/_archive/W20261001-merge-old.md", ARCHIVED_TITLE, APPROVED_SUMMARY,
+                status="superseded", wiki_id="W20261001-merge-old")
+    git(kb, "add", "-A")
+    git(kb, "commit", "-q", "-m", "chore: wiki fixture")
+    return kb
+
+
+def add_approved(root, n, filler=0):
+    for i in range(n):
+        _write_wiki(root, f"docs/wiki/W20261020-merge-{i}.md", f"マージ競合の手順その{i}",
+                    f"マージで競合したときの手順その{i}。", wiki_id=f"W20261020-merge-{i}")
+    for i in range(filler):
+        _write_wiki(root, f"docs/wiki/W20261020-filler-{i}.md", f"関係のない知識その{i}",
+                    f"関係のない要約その{i}。", knowledge="別の話題の本文。", wiki_id=f"W20261020-filler-{i}")
+
+
+def set_summary(root, summary):
+    _write_wiki(root, f"docs/wiki/{APPROVED_ID}.md", APPROVED_TITLE, summary)
+
+
+def write_syn(root, *lines):
+    p = Path(root) / "docs/wiki/_synonyms.txt"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("# テスト用の同義語表\n" + "\n".join(lines) + "\n", encoding="utf-8")
+
+
+def section(out, label):
+    lines = out.splitlines()
+    start = next(i for i, l in enumerate(lines) if l.startswith("## ") and label in l)
+    body = []
+    for l in lines[start + 1:]:
+        if l.startswith("## "):
+            break
+        body.append(l)
+    return "\n".join(body)
+
+
+def wiki_line(out):
+    return next(l for l in out.splitlines() if l.startswith("- [Wiki]"))
+
+
+def record_opens(monkeypatch):
+    """builtins.open / io.open / Path.open / Path.read_text / Path.read_bytes で開いたパスを記録する。"""
+    import builtins
+    import io
+    opened = []
+    real_open = builtins.open
+
+    def spy(path, *a, **k):
+        opened.append(os.path.abspath(str(path)) if not isinstance(path, int) else str(path))
+        return real_open(path, *a, **k)
+
+    monkeypatch.setattr(builtins, "open", spy)
+    monkeypatch.setattr(io, "open", spy)
+    for name in ("open", "read_text", "read_bytes"):
+        real = getattr(Path, name)
+
+        def wrap(self, *a, _real=real, **k):
+            opened.append(str(Path(self).absolute()))
+            return _real(self, *a, **k)
+
+        monkeypatch.setattr(Path, name, wrap)
+    return opened
+
+
+def stage1_with_branch(root, branch):
+    git(root, "checkout", "-q", "-b", branch)
+    return memory_bootstrap._stage1(root) or ""
+
+
+def stage2(root, prompt):
+    return memory_bootstrap._stage2(root, prompt) or ""
+
+
+def strip_wiki_section(out):
+    keep, skipping = [], False
+    for l in out.splitlines(keepends=True):
+        if l.startswith("## "):
+            skipping = "[Wiki]" in l
+            if skipping:
+                continue
+        if skipping or l.startswith("検索語"):
+            continue
+        keep.append(l)
+    return "".join(keep)
+
+
+def _phase1_query(root, words, workdir):
+    """Phase 1 の memory_bootstrap.py(PHASE1_REV)を root で動かした query の出力。"""
+    d = workdir / "phase1-scripts"
+    d.mkdir()
+    for name in ("memory_bootstrap.py", "wikiskill_common.py", "experience_log.py", "decision_memory.py"):
+        src = subprocess.run(["git", "show", f"{PHASE1_REV}:scripts/{name}"], cwd=REPO_ROOT, check=True,
+                             capture_output=True, text=True).stdout
+        (d / name).write_text(src, encoding="utf-8")
+    e = {**os.environ, "CLAUDE_PROJECT_DIR": str(root)}
+    e.pop("HOJO_MEMORY_OFF", None)
+    r = subprocess.run([sys.executable, str(d / "memory_bootstrap.py"), "query", *words], cwd=root, env=e,
+                       check=True, capture_output=True, text=True)
+    return r.stdout
+
+
+def test_wiki_kind_order_between_prevention_and_skill(kbw):
+    out = retrieve(kbw, WORDS)
+    assert out.index("[再発防止]") < out.index("[Wiki]") < out.index("[Skill]")
+
+
+def test_wiki_only_approved_shown(kbw):
+    _write_wiki(kbw, "docs/wiki/W20261022-merge-private.md", "マージ競合の非公開ページ", APPROVED_SUMMARY,
+                visibility="private", wiki_id="W20261022-merge-private")
+    out = retrieve(kbw, WORDS)
+    assert APPROVED_TITLE in out and CANDIDATE_TITLE not in out and ARCHIVED_TITLE not in out
+    assert "マージ競合の非公開ページ" not in out  # リポの公開性(public)と違う visibility は出さない
+
+
+def test_candidates_dir_never_opened(kbw, monkeypatch):
+    opened = record_opens(monkeypatch)
+    out = retrieve(kbw, WORDS)
+    monkeypatch.undo()
+    assert APPROVED_TITLE in out
+    assert any(f"/docs/wiki/{APPROVED_ID}.md" in p for p in opened)  # 記録が効いている
+    assert not any("/docs/wiki/_candidates/" in p for p in opened)
+
+
+def test_archive_dir_never_opened(kbw, monkeypatch):
+    opened = record_opens(monkeypatch)
+    retrieve(kbw, WORDS)
+    memory_bootstrap._stage1(kbw)
+    memory_bootstrap._stage2(kbw, "マージ競合の手順を確認したい")
+    monkeypatch.undo()
+    assert opened
+    assert not any("/docs/wiki/_archive/" in p for p in opened)
+    assert not any("/docs/wiki/_candidates/" in p for p in opened)
+
+
+def test_wiki_line_shows_provenance_and_approver(kbw):
+    out = retrieve(kbw, WORDS)
+    assert "根拠: Exp 1・Decision 1・FK 0 / 承認: 小柳(テスト) 2026-10-20 → docs/wiki/" in out
+    assert wiki_line(out) == (f"- [Wiki] {APPROVED_TITLE} — {APPROVED_SUMMARY} / 根拠: Exp 1・Decision 1・FK 0 / "
+                              f"承認: 小柳(テスト) 2026-10-20 → docs/wiki/{APPROVED_ID}.md")
+
+
+def test_wiki_summary_truncated_160(kbw):
+    set_summary(kbw, "あ" * 200)
+    line = wiki_line(retrieve(kbw, WORDS))
+    assert "あ" * 160 in line and "あ" * 161 not in line
+
+
+def test_wiki_off_disables_only_wiki(kbw):
+    (kbw / ".claude/wiki.off").touch()
+    out = retrieve(kbw, WORDS)
+    retrieve(kbw, WORDS)
+    assert section(out, "[Wiki]") == "- 該当なし" and "[D]" in out and "[FK-002]" in out
+    lines = [l for l in _audit_text(kbw).splitlines() if "wiki: disabled by wiki.off" in l]
+    assert len(lines) == 1  # 1プロセスに1回だけ
+
+
+def test_memory_off_disables_wiki_too(kbw):
+    (kbw / ".claude/memory.off").touch()
+    r = run_hook(kbw, "SessionStart", PAYLOAD)
+    assert r.returncode == 0 and r.stdout.strip() == "{}"
+
+
+def test_wiki_per_kind_cap_and_budget(kbw):
+    add_approved(kbw, 8, filler=30)  # 一致 9件 / 39件 ≒ 23%(ありふれた語の判定 25% に掛からない)
+    full = retrieve(kbw, WORDS)
+    assert full.count("- [Wiki]") == 5  # 1区分5件まで
+    out = retrieve(kbw, WORDS, budget_chars=3000)
+    assert out.count("- [Wiki]") <= 5 and len(out) <= 3000
+
+
+def test_synonym_group_matches_either_word(kbw):
+    assert "[FK-002]" not in retrieve(kbw, ["merge", "競合"])  # 失敗台帳の行に merge は無い
+    write_syn(kbw, "マージ, merge")
+    assert "[FK-002]" in retrieve(kbw, ["merge", "競合"])
+
+
+def test_synonym_group_counts_once(kbw):
+    write_syn(kbw, "マージ, merge")
+    s = memory_bootstrap._select(collect_sources(kbw), ["マージ merge"], synonyms=load_synonyms(kbw))
+    assert s["failure"] and s["wiki"]
+    assert all(x["score"] <= 2 for x in s["failure"] + s["wiki"])  # 同じグループの語は1語(+見出し加点1)
+
+
+def test_skill_name_counts_only_for_prompt_terms(kbw):
+    # 段1(name_terms=[])では名前一致だけの Skill は出ない、段2(指示に名前)では出る
+    s1 = stage1_with_branch(kbw, "claude/writing-plans-x")
+    legacy = memory_bootstrap._select(collect_sources(kbw), build_query(kbw))  # 手動 query 相当(従来どおり)
+    assert any(s["title"] == "writing-plans-hojo" for s in legacy["skill"])
+    assert s1 and "writing-plans-hojo" not in s1
+    assert "writing-plans-hojo" in stage2(kbw, "writing-plans の手順")
+
+
+def test_terms_line_shows_normalized_units(kbw):
+    write_syn(kbw, "マージ, merge")
+    o = stage2(kbw, "マージ競合の手順を確認したい")
+    assert "検索語(指示から):" in o and "マージ" in o and "確認したい" not in o
+    lines = o.splitlines()
+    assert lines[1] == "検索語(指示から): マージ(=merge), 競合, 手順, 確認"
+    assert lines[2] == "検索語(ブランチから): lighthouse, css"
+
+
+def test_existing_kinds_unchanged_without_wiki(kb, tmp_path):
+    PHASE1_EXPECTED = _phase1_query(kb, WORDS, tmp_path)
+    for label in ("[D]", "[FK-002]", "[再発防止]", "[Skill]", "[未解決]"):
+        assert label in PHASE1_EXPECTED, label  # 既存6区分(Exp 以外)が実際に出ている状態で比べる
+    out = retrieve(kb, WORDS)
+    assert "[Wiki]" in out and section(out, "[Wiki]") == "- 該当なし"
+    assert strip_wiki_section(out) == PHASE1_EXPECTED  # 既存6区分の行は Phase 1 と同一
+
+
+@pytest.mark.skipif(os.environ.get("WIKISKILL_SKIP_TIMING") == "1", reason="timing is environment-dependent; measured locally")
+def test_bootstrap_runtime_under_500ms_with_wiki(realcopy):
+    wiki_dir = realcopy / "docs/wiki"
+    before = set(wiki_dir.glob("*.md")) if wiki_dir.is_dir() else set()
+    add_approved(realcopy, 5, filler=15)  # 承認済み20件(一致5件 = 25% で、ありふれた語の判定に掛からない)
+    try:
+        # 3回測って最速を見る(1回だけだと、この環境では Phase 1 の同じ hook も負荷で 500ms を跨ぐことがある)
+        t1s, t2s = [], []
+        for n in range(3):
+            t1, r1 = _timed_hook(realcopy, "SessionStart", {"session_id": f"TW1-{n}", "source": "startup"})
+            assert r1.returncode == 0 and context_of(r1.stdout).startswith("# 🧠 Memory Bootstrap")
+            t2, r2 = _timed_hook(realcopy, "UserPromptSubmit",
+                                 {"session_id": f"TW2-{n}", "prompt": "マージで競合したときの手順を確認したい"})
+            assert r2.returncode == 0 and "[Wiki] マージ競合の手順その" in context_of(r2.stdout)
+            t1s.append(t1)
+            t2s.append(t2)
+        print("with 20 Wikis: SessionStart " + "/".join(f"{t * 1000:.0f}" for t in t1s) + " ms, UserPromptSubmit "
+              + "/".join(f"{t * 1000:.0f}" for t in t2s) + " ms")
+        assert min(t1s) < 0.5 and min(t2s) < 0.5, (t1s, t2s)
+    finally:
+        for p in set(wiki_dir.glob("*.md")) - before:  # module 共有の realcopy を元に戻す
+            p.unlink()
+
+
+def test_wiki_failure_is_audited_and_others_still_shown(kbw, monkeypatch):
+    def boom(*_a, **_k):
+        raise RuntimeError("wiki boom")
+
+    monkeypatch.setattr(memory_bootstrap._ws, "iter_wiki", boom)
+    out = retrieve(kbw, WORDS)
+    assert section(out, "[Wiki]") == "- 該当なし" and "[FK-002]" in out
+    assert "wiki: RuntimeError: wiki boom" in _audit_text(kbw)
+
+
+def test_synonyms_failure_means_no_synonyms(kbw, monkeypatch):
+    write_syn(kbw, "マージ, merge")
+
+    def boom(*_a, **_k):
+        raise RuntimeError("syn boom")
+
+    monkeypatch.setattr(memory_bootstrap._ws, "load_synonyms", boom)
+    assert "[FK-002]" not in retrieve(kbw, ["merge", "競合"])  # 同義語なしで動く
+    assert "synonyms: RuntimeError: syn boom" in _audit_text(kbw)
