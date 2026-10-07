@@ -69,6 +69,7 @@ function updateDashboard() {
     var staleList = GlowAlerting.buildStaleList(records, todayString);
     var historySnapshot = GlowDashboard.buildHistorySnapshot(records, todayString, GlowDashboard.DEFAULT_CONFIG);
     var exitConversion = GlowDashboard.buildExitConversionSummary(interactionRecords, records, todayString, GlowDashboard.DEFAULT_CONFIG);
+    var lineInquirySummary = buildLineInquirySummary();
 
     dashboardSheet.clearContents();
     var row = 1;
@@ -110,6 +111,10 @@ function updateDashboard() {
     row = writeDashboardSection_(dashboardSheet, row, "出口転換実績(当月・提携部。LINE部側はミカタ側の別システムで管理)",
       ["対象月", "GLOW接続件数(当月・提携部)"],
       [[exitConversion["対象月"], exitConversion["GLOW接続件数(当月・提携部)"]]]);
+    row++;
+    row = writeDashboardSection_(dashboardSheet, row, "LINE問い合わせサマリー",
+      ["カテゴリ", "件数"],
+      lineInquirySummary.slice(2).map(function (r) { return [r[0], r[1]]; }));
     row++;
 
     historySheet.appendRow([
