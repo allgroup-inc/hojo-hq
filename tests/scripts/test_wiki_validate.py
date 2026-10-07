@@ -981,3 +981,70 @@ def test_uncommitted_ledger_edit_makes_fk_unresolvable(wk):
 def test_extractor_and_validator_share_committed_reader():
     import knowledge_extract
     assert knowledge_extract._committed_files is wiki_validate.committed_files
+
+
+# ---------------------------------------------------------------- Task 4 fix round 1
+
+NEG_REL_QUOTE = FORBID  # add_decision の議事本文に逐語である
+
+
+def cite_neg_decision(root, **over):
+    ev_ = [{"ref": NEG_DID, "quote": NEG_REL_QUOTE}]
+    return edit(root, source_decision=[NEG_DID], evidence=ev_, source_experience=[], **over)
+
+
+def test_self_source_restating_negation_is_not_conflict(wk):
+    """出典の Decision を否定ごと言い直した候補(R4 の形)は、その Decision と矛盾ではない。"""
+    add_decision(wk)
+    cite_neg_decision(wk, title="自動生成物は main へ直接 push しない")
+    assert codes(wk) == set()
+
+
+def test_self_source_dropping_negation_is_v12(wk):
+    """出典に Decision を書いても、否定語を落として言い直せば V12(出典を書くだけで逃げられない)。"""
+    add_decision(wk)
+    cite_neg_decision(wk, title=CONFLICT_TITLE)
+    assert "V12" in codes(wk)
+
+
+def test_self_source_rule_applies_to_approved(wk):
+    add_decision(wk)
+    cite_neg_decision(wk, title=CONFLICT_TITLE, review_status="conflict",
+                      contradictions=[{"source": NEG_DID, "note": "x"}])
+    promote(wk)
+    assert "V12" in codes(wk)
+
+
+def test_stop_terms_do_not_count_as_overlap(wk):
+    """{main, docs} だけの重なりは矛盾にしない(Bootstrap が検索語にしない定型語。しきい値は 2 のまま)。"""
+    add_decision(wk, outcome="main と docs への書き込みはしない")
+    got = wiki_schema.decision_conflicts("main と docs の整理", build_context(wk)["decisions"])
+    assert got == []
+    assert "V12" not in codes(edit(wk, title="main と docs の整理"))
+
+
+def test_stop_term_inside_synonym_group_is_dropped(wk):
+    add_decision(wk, outcome="main と docs への書き込みはしない")
+    write(wk, "docs/wiki/_synonyms.txt", "本線, main\n")
+    got = wiki_schema.decision_conflicts("本線 と docs の整理", build_context(wk)["decisions"],
+                                         wiki_schema.parse_synonyms("本線, main\n")[0])
+    assert got == []
+
+
+def test_decision_dated_exactly_approved_at_is_v12(wk):
+    add_decision(wk, did="D20261020-same-day", date_="2026-10-20")  # approved_at と同じ日
+    edit(wk, title=CONFLICT_TITLE, review_status="conflict",
+         contradictions=[{"source": "D20261020-same-day", "note": "x"}])
+    promote(wk)
+    vs, warns = validate_tree(wk)
+    assert "V12" in {c for _p, c, _r in vs} and warns == []
+
+
+def test_backdated_approved_at_is_v09(wk):
+    promote(wk, approved_at="2026-10-06", review_by="2027-03-01")  # created_at は 2026-10-07
+    assert "V09" in codes(wk)
+
+
+def test_approved_at_same_day_as_created_at_passes(wk):
+    promote(wk, approved_at="2026-10-07", review_by="2027-03-01")
+    assert validate_tree(wk) == ([], [])

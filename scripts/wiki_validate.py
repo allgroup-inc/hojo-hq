@@ -493,6 +493,9 @@ def check_v09(w: dict, ctx: Context) -> list[Violation]:
         out.append((p, "V09", "review_by は YYYY-MM-DD"))
     elif aa is not None and not aa < rb <= aa + timedelta(days=ws.MAX_REVIEW_DAYS):
         out.append((p, "V09", f"review_by は approved_at より後、{ws.MAX_REVIEW_DAYS} 日以内(6か月以内に見直す)"))
+    ca = _date(w["created_at"][:10]) if isinstance(w.get("created_at"), str) else None
+    if aa is not None and (ca is None or aa < ca):
+        out.append((p, "V09", "approved_at は created_at(候補の作成日)以降(承認日を遡らせない)"))
     rv = w.get("review")
     if not isinstance(rv, dict) or any(not isinstance(rv.get(r), str) for r in ws.REVIEW_ROLES):
         out.append((p, "V09", "review は {スイシン, ウタガイ, ベッカイ}(すべて文字列)"))
@@ -569,7 +572,8 @@ def check_v12(w: dict, ctx: Context) -> list[Violation]:
     if place == "official":
         aa = w.get("approved_at")
         until = aa if _date(aa) is not None else None  # 読めない approved_at は全 Decision と比べる(止めすぎる側)
-    found = ws.decision_conflicts(ws.conflict_text(w), ctx["decisions"], ctx.get("synonyms"), until=until)
+    found = ws.decision_conflicts(ws.conflict_text(w), ctx["decisions"], ctx.get("synonyms"), until=until,
+                                  self_sources=ws.source_decisions(w))
     if place == "candidates":
         if found and st != "conflict":
             return [(p, "V12", f"{_conflict_reason(found[0])}: review_status を conflict にする")]
@@ -916,6 +920,15 @@ def _st_cases() -> list[tuple[str, object, str | None]]:
         ("承認前の Decision と矛盾する approved", lambda r: (_st_decision(r), _st_promote(r)), "V12"),
         ("承認前の Decision を acknowledged した approved", lambda r: (_st_decision(r), _st_promote(
             r, acknowledged_decisions=[{"decision": _ST_NEG_DID, "reason": "同じ向き"}])), None),
+        ("出典の Decision を否定ごと言い直した候補", lambda r: (_st_decision(r), _st_cand(
+            r, source_decision=[_ST_NEG_DID], summary=_ST_OPPOSITE + "。",
+            evidence=[{"ref": _ST_NEG_DID, "quote": _ST_OPPOSITE}])), None),
+        ("出典の Decision の否定語を落とした候補", lambda r: (_st_decision(r), _st_cand(
+            r, source_decision=[_ST_NEG_DID], evidence=[{"ref": _ST_NEG_DID, "quote": _ST_OPPOSITE}])), "V12"),
+        ("定型語(main・docs)だけ重なる", lambda r: (_st_decision(r, outcome="main と docs の書き込みはしない"),
+                                             _st_cand(r, title="main と docs の整理")), None),
+        ("created_at より前の approved_at", lambda r: _st_promote(r, approved_at="2026-10-06", review_by="2027-03-01"),
+         "V09"),
         ("承認後の Decision と矛盾する approved(警告)", lambda r: (_st_promote(r), _st_decision(r, day="2026-11-01")),
          "V13"),
         # V14

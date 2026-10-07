@@ -1490,8 +1490,23 @@ def test_needs_review_wiki_not_in_stage1_or_stage2(kbw):
     assert "[D]" in s2  # 新しい Decision の方は出る(Decision が勝つ)
 
 
-def test_older_decision_does_not_mark_needs_review(kbw):
-    """approved_at(2026-10-20)以前の Decision は needs_review にしない(承認の時点で V12 が見ている)。"""
+def test_older_decision_also_blocks_injection(kbw):
+    """多重の守り(fix round 1): approved_at 以前の Decision と矛盾するページ(本来 V12 で止まる)も注入しない。"""
+    add_decision(kbw, date="2026-10-19")
+    assert APPROVED_TITLE not in retrieve(kbw, WORDS)
+    assert f"wiki: needs_review {APPROVED_ID} {NEW_DID}" in audit_text(kbw)
+    assert wiki_schema.needs_review(wiki_schema.load_wiki_file(kbw / f"docs/wiki/{APPROVED_ID}.md", kbw),
+                                    memory_bootstrap._decisions_cached(kbw)) == []  # V13 の警告の対象ではない
+
+
+def test_bootstrap_self_source_restating_negation_is_injected(kbw):
+    """出典の Decision の否定をそのまま引き継ぐ Wiki は、その Decision と矛盾扱いしない(自己矛盾の除外)。"""
+    p = kbw / f"docs/wiki/{APPROVED_ID}.md"
+    fm, body = wiki_schema.parse_wiki_frontmatter(p.read_text(encoding="utf-8"))
+    _pre, secs, _order = wiki_schema.split_sections(body)
+    fm["source_decision"] = [NEW_DID]
+    fm["summary"] = OPPOSITE_TO_APPROVED + "。"
+    p.write_text(wiki_schema.render_wiki(fm, secs), encoding="utf-8")
     add_decision(kbw, date="2026-10-19")
     assert APPROVED_TITLE in retrieve(kbw, WORDS)
 
@@ -1518,7 +1533,7 @@ def test_needs_review_exception_drops_wiki_fail_closed(kbw, monkeypatch):
     def boom(*_a, **_k):
         raise RuntimeError("needs_review boom")
 
-    monkeypatch.setattr(memory_bootstrap._ws, "needs_review", boom)
+    monkeypatch.setattr(memory_bootstrap._ws, "decision_conflicts", boom)
     out = retrieve(kbw, WORDS)
     assert APPROVED_TITLE not in out and "[FK-002]" in out  # Wiki だけ落とし、他の区分は出す
     assert f"wiki: needs_review {APPROVED_ID} error" in audit_text(kbw)

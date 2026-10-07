@@ -507,7 +507,8 @@ def _attach_gakubi(drafts: list[Draft], gakubi: list[dict]) -> None:
 def _mark_decision_conflicts(w: Wiki, d: Draft, decisions: list[dict], synonyms) -> None:
     """矛盾②の事前判定: 採用済み Decision の否定と語が重なれば conflict + contradictions。判定の例外も conflict。"""
     try:
-        found = ws.decision_conflicts(ws.conflict_text(d), decisions, synonyms)
+        found = ws.decision_conflicts(ws.conflict_text(d), decisions, synonyms,
+                                      self_sources=d.get("source_decision") or [])
     except Exception as e:  # noqa: BLE001 — 判定できないものは「矛盾あり」(fail-closed。検証器の V12 も止める)
         w["review_status"] = "conflict"
         w["contradictions"].append({"source": "decision_conflicts", "note": f"矛盾判定に失敗(fail-closed): {type(e).__name__}"})

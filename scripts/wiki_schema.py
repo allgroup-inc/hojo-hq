@@ -20,6 +20,7 @@ import sys
 import unicodedata
 from datetime import date
 from pathlib import Path
+from typing import Iterable
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -444,18 +445,35 @@ def _is_test_decision(d: dict) -> bool:
     return any(str(t).strip().lower() == "test" for t in d.get("tags") or [])
 
 
+def _conflict_groups(text: str, synonyms, mb) -> list[tuple]:
+    """text の語(query_groups)から、Bootstrap が検索語にしない定型語(STOP_TERMS。_ENGLISH_COMMON は
+    query_units が既に落とす)を除く。同義語の束の中の定型語も除き、空になった束は捨てる。"""
+    stop = {w.lower() for w in mb.STOP_TERMS} | set(mb._ENGLISH_COMMON)
+    out = []
+    for g in mb.query_groups([str(text)], synonyms):
+        kept = tuple(u for u in g if len(u[1]) >= 2 and u[1].lower() not in stop)
+        if kept:
+            out.append(kept)
+    return out
+
+
 def decision_conflicts(text: str, decisions: list[dict], synonyms: list[frozenset[str]] | None = None,
-                       after: str | None = None, *, until: str | None = None) -> list[dict]:
+                       after: str | None = None, *, until: str | None = None,
+                       self_sources: Iterable[str] = ()) -> list[dict]:
     """text と矛盾しうる adopted Decision: [{"decision": id, "units": [語…], "negations": [否定語…]}]。
 
     対象: status == adopted・tags に test を含まない・(after 指定時)date > after・(until 指定時)date ≤ until
     (date が読めない Decision は until では残す = 止めすぎる側、after では外す)。
     判定: Decision の title + outcome に NEGATION_WORDS のどれかがあり、text の語(memory_bootstrap.query_groups。
-    同義語の同じ行は1語)が Decision 側の features に CONFLICT_MIN_UNITS 以上当たる。例外は呼び元で「矛盾あり」。
+    同義語の同じ行は1語。STOP_TERMS は数えない)が Decision 側の features に CONFLICT_MIN_UNITS 以上当たる。
+    self_sources(候補自身の source_decision)の Decision は、その否定語がすべて text にもある(否定を引き継いで
+    言い直している)ときだけ除く。否定語を落とした言い直しは矛盾として残す。例外は呼び元で「矛盾あり」。
     """
     import memory_bootstrap as mb  # 循環 import を避ける(memory_bootstrap は wiki_schema を読む)
 
-    groups = mb.query_groups([str(text)], synonyms)
+    groups = _conflict_groups(text, synonyms, mb)
+    own = {s for s in self_sources if isinstance(s, str)}
+    folded_text = unicodedata.normalize("NFKC", str(text))
     out: list[dict] = []
     for d in decisions:
         if d.get("status") != "adopted" or _is_test_decision(d):
@@ -469,6 +487,8 @@ def decision_conflicts(text: str, decisions: list[dict], synonyms: list[frozense
         negations, feats = _decision_feats(d, mb)
         if not negations:
             continue
+        if d.get("id") in own and all(w in folded_text for w in negations):
+            continue  # 出典の Decision の否定をそのまま引き継いでいる(同じ向き)
         units = [g[0][1] for g in groups if mb._group_matches(g, feats)]
         if len(units) >= CONFLICT_MIN_UNITS:
             out.append({"decision": d.get("id"), "units": units, "negations": list(negations)})
@@ -490,12 +510,36 @@ def needs_review(w: Wiki, decisions: list[dict], synonyms: list[frozenset[str]] 
 
     approved_at が YYYY-MM-DD でなければ ValueError(呼び元で「矛盾あり」= 注入しない)。
     """
+    aa = _valid_approved_at(w)
+    return _unacknowledged(w, decisions, synonyms, after=aa)
+
+
+def _valid_approved_at(w: Wiki) -> str:
     aa = w.get("approved_at")
     if not (isinstance(aa, str) and re.match(r"^\d{4}-\d{2}-\d{2}$", aa)):
         raise ValueError("approved_at が YYYY-MM-DD ではない")
+    return aa
+
+
+def _unacknowledged(w: Wiki, decisions: list[dict], synonyms, after: str | None) -> list[str]:
     acked = acknowledged_ids(w)
-    ids = [c["decision"] for c in decision_conflicts(conflict_text(w), decisions, synonyms, after=aa)]
-    return [i for i in dict.fromkeys(ids) if i not in acked]
+    found = decision_conflicts(conflict_text(w), decisions, synonyms, after=after, self_sources=source_decisions(w))
+    return [i for i in dict.fromkeys(c["decision"] for c in found) if i not in acked]
+
+
+def source_decisions(w: dict) -> list[str]:
+    v = w.get("source_decision")
+    return [x for x in v if isinstance(x, str)] if isinstance(v, list) else []
+
+
+def injection_blockers(w: Wiki, decisions: list[dict], synonyms: list[frozenset[str]] | None = None) -> list[str]:
+    """Bootstrap 用(多重の守り): 日付を問わず全 adopted Decision と照合し、acknowledged でない矛盾の id。
+
+    承認前の Decision との矛盾は本来 V12 が止めるが、検証を通らずに入ったページでも注入しない。
+    approved_at が YYYY-MM-DD でなければ ValueError(注入しない)。
+    """
+    _valid_approved_at(w)
+    return _unacknowledged(w, decisions, synonyms, after=None)
 
 
 def _clear_conflict_cache() -> None:

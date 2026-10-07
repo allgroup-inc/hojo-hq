@@ -459,7 +459,7 @@ def test_lock_not_lost_reports_false(ex):
 
 # ---------------------------------------------------------------- Phase 2 Task 4: 矛盾の事前判定(conflict 付与)
 
-FORBID = "生成物を作り直すときに origin/main を取り込む運用は禁止"  # LESSON と「生成物・origin・main」が重なる
+FORBID = "生成物を作り直す前に新しいデータを取り込む運用は禁止"  # LESSON と「生成物・データ」が重なる(origin・main は数えない)
 FORBID_ID = "D20261004-regen-rule"
 C_ID = "D20261006-no-direct-push"
 NOTE_A = "学び: 自動生成した学びノートを main へ直接 push したら、PR 待ちが無く当日中に反映できた"
@@ -585,3 +585,24 @@ def test_decision_conflict_check_failure_fails_closed(ex, monkeypatch):
     s = run(ex, dry_run=True)
     assert s["written"] == []  # 判定できない候補は書かない(V12 で検証器が止める)
     assert {"V12"} <= {c for r in s["rejected_by_validator"] for c in r["codes"]}
+
+
+# ---------------------------------------------------------------- Task 4 fix round 1
+
+def test_r4_candidate_of_negating_decision_is_not_conflict(ex):
+    """R4 は出典の Decision の否定をそのまま言い直すので、自分の出典と矛盾扱いしない。"""
+    add_decision(ex, outcome=FORBID)
+    r4 = [w for w in written(ex, run(ex)) if w.get("source_decision") == [FORBID_ID]]
+    assert len(r4) == 1 and r4[0]["review_status"] == "candidate" and r4[0]["contradictions"] == []
+
+
+def test_abc_c_own_candidate_is_not_conflict(ex):
+    seed_abc(ex)
+    c = [w for w in written(ex, run(ex)) if w.get("source_decision") == [C_ID]]
+    assert len(c) == 1 and c[0]["review_status"] == "candidate"
+
+
+def test_stop_terms_only_overlap_is_not_conflict(ex):
+    add_decision(ex, outcome="origin と main の扱いを変えない運用は禁止")  # LESSON と origin・main だけ重なる
+    lesson = [w for w in written(ex, run(ex)) if w["title"].startswith("学び: 生成物")][0]
+    assert lesson["review_status"] == "candidate"

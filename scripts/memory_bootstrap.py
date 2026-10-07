@@ -577,12 +577,14 @@ _NEEDS_REVIEW_AUDITED: set[tuple[str, str]] = set()
 
 
 def _wiki_needs_review(w: dict, decisions: list[dict], synonyms: list[frozenset[str]] | None = None) -> list[str]:
-    """承認後の新しい Decision と矛盾する Wiki の Decision id(非空なら注入しない)。
+    """Decision と矛盾する Wiki の Decision id(非空なら注入しない)。
 
-    wiki_schema.needs_review の例外は ["error"](判定できない Wiki は注入しない = fail-closed)。
+    多重の守り: 承認後の Decision(needs_review)だけでなく、日付を問わず全 adopted Decision と照合する
+    (wiki_schema.injection_blockers。acknowledged と、否定を引き継ぐ出典 Decision は除く)。
+    例外は ["error"](判定できない Wiki は注入しない = fail-closed)。
     """
     try:
-        return list(_ws.needs_review(w, decisions, synonyms))
+        return list(_ws.injection_blockers(w, decisions, synonyms))
     except Exception:  # noqa: BLE001
         return ["error"]
 
