@@ -49,7 +49,7 @@ AI(エージェント・ワークフロー)は、候補の抽出 PR や昇格 PR
 
 ## 4. conflict の解消
 
-Decision の否定(「〜しない」「〜は誤り」など)と重なる候補は `review_status: conflict` になり、`contradictions` に相手の Decision が入ります。
+Decision の否定語(禁止 / しない / 却下 / やめる / 不可)を含む裁定と重なる候補は `review_status: conflict` になり、`contradictions` に相手の Decision が入ります。
 
 - Decision と同じ向きだと説明できるときは、`acknowledged_decisions: [{"decision": <Decision の id>, "reason": <Decision と同じ向きである理由>}]` を書いて承認できます。`reason` は必須です。
 - **Decision と逆向きの知識は acknowledged にしない。** Decision が優先です。その候補は却下(第3項)するか、先に Decision を議事で見直してから出し直します。
@@ -65,6 +65,7 @@ Decision の否定(「〜しない」「〜は誤り」など)と重なる候補
 
 1. 第4項と同じ `acknowledged_decisions` を付けて**再承認**する(`approved_at` と `review_by` も更新する)。
 2. `docs/wiki/_archive/` へ移し、`review_status: superseded` と `superseded_by`(置き換える approved の `wiki_id`)を書く。
+   - **置き換える後継のページが無いときは、この方法は使えません**(V09: superseded には superseded_by が必要 / V15: superseded_by は実在する approved の wiki_id を指す)。その場合は `docs/wiki/_candidates/` へ戻し(ファイル名は候補のときの `candidate_id`)、`review_status: rejected` と `rejected_reason`(退役の理由)を書き、承認のキー(`wiki_id`・`approved_by`・`approved_at`・`review_by`・`review`)を外します(2026-10-07 の受け入れ試験用 Wiki の退役はこの方法)。注入されず、再抽出でも重複として扱われます。後継の無い「退役」専用の状態は Phase 3 の課題です。
 
 なお、承認済みの Wiki が根拠に引いている Experience の月は、`experience_archive.py` でアーカイブしてはいけません(根拠が読めなくなるため)。ガードは機械側に入りますが、手で扱うときも同じ規則を守ってください。
 

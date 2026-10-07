@@ -117,7 +117,7 @@ rm .claude/wiki.off         # 再開する
 
 - `.claude/wiki.off` が止めるのは `[Wiki]` の注入だけ。Decision・失敗台帳・再発防止・Skill・Experience の記録と注入は動き続ける。
 - 全部止めるときは Phase 1 の 1(`.claude/memory.off` または `HOJO_MEMORY_OFF=1`)。`memory.off` は記録も注入も止める。
-- クラウドセッションは作業コピーが毎回新しいので、各セッションで `touch .claude/wiki.off` を実行する。
+- `.claude/wiki.off` はローカルの作業コピー用。クラウドセッションは作業コピーが毎回新しく、Bootstrap の注入は SessionStart(段1)と最初の指示(段2)で1回ずつ、どちらもセッションの中で最初のコマンドを打つより先に走るので、`touch .claude/wiki.off` は間に合わない。クラウドの緊急停止は、環境の設定に `HOJO_MEMORY_OFF=1` を入れる(記録も注入も全部止まる)か、該当の Wiki・Phase 2 を revert する(P2・P4)。
 - 確認: `python3 scripts/memory_bootstrap.py query "Wiki"` の `[Wiki]` の節が `- 該当なし` になる。
 
 ### P2. Wiki 1件を戻す(誤った知識が1件だけのとき)
@@ -125,7 +125,7 @@ rm .claude/wiki.off         # 再開する
 承認済みの Wiki 1件が誤っているだけなら、仕組みは止めずにその1件だけを外す。
 
 1. `git revert <その Wiki を昇格した commit>`(または PR のマージコミットなら `git revert -m 1 <マージコミット>`)。revert した結果、ファイルは `docs/wiki/` 直下から消える。
-2. 消さずに残したいときは、`docs/wiki/_archive/` へ移し、`review_status: superseded` と `superseded_by` を書く(`docs/wikiskill/Wiki昇格手順.md` の第5項)。
+2. 消さずに残したいときは、`docs/wiki/_archive/` へ移し、`review_status: superseded` と `superseded_by` を書く(`docs/wikiskill/Wiki昇格手順.md` の第5項)。ただし後継のページが無いときは superseded にできない(V09・V15)ので、`docs/wiki/_candidates/` へ戻して `review_status: rejected` と `rejected_reason` を書き、承認のキーを外す(2026-10-07 の受け入れ試験用 Wiki はこの方法で退役した)。後継の無い退役専用の状態は Phase 3 の課題。
 3. 昇格は小柳さんがマージした PR なので、revert の PR も小柳さんの決裁後にマージする。急ぐときは P1 で `[Wiki]` を先に止める。
 
 ### P3. 抽出ワークフローを止める

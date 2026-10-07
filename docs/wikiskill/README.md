@@ -175,9 +175,9 @@ python3 scripts/wiki_validate.py        # Wiki と候補の検査(違反があ�
 本リポジトリは PUBLIC です。抽出が作る候補は `wiki-candidates/<RUN_ID>` ブランチへの push で、**マージ前でも公開されます**。そのため、抽出は commit 済みで HEAD から変わっていない public の記録だけを読み、書く前に検証器に掛けます。それでも note は自由記述なので、2章のとおり顧客名・個人情報・非公開の数字・認証情報は書かないでください。
 
 - GitHub Actions の `GITHUB_TOKEN` で作った PR には CI が自動で走りません。PR 本文に貼られた検証結果が証拠です。PR の作成には、リポジトリ設定の「Allow GitHub Actions to create and approve pull requests」が要ります。
-- 同じ根拠(Experience の月)は、`docs/wiki/` 直下の Wiki(承認済みかどうかを問わない)が引いている間、`experience_archive.py --archive` で固められません(`--force` で上書きでき、監査記録が残ります)。
+- 同じ根拠(Experience の月)は、`docs/wiki/` 配下の Wiki・候補・退役ページすべて(承認済みかどうか・却下済みかどうかを問わない。却下の候補も退役ページも消さずに残るため)が引いている間、`experience_archive.py --archive` で固められません(`--force` で上書きでき、監査記録が残ります)。
 - 検索の同義語は `docs/wiki/_synonyms.txt`(1行1グループ。完全一致のみ)。語を足すと、その語での Bootstrap の結果が変わりえます。
-- conflict 判定は粗く、偽陽性が出ます(2026-10-07 の実測は候補9件中5件)。判定された件数は週に1度数えてください(議事の見直し条件)。
+- conflict 判定は粗く、偽陽性が出ます。2026-10-07 の実測は、導入議事(`docs/議事/議事_20261007_WikiSkill_Phase2導入.md`)を足した後の今のツリーで**候補10件中9件**(導入議事を足す前は9件中5件)。9件のうち8件が導入議事そのもの、6件が `D20261006-skill-dist-privacy-gate` と、phase・議事・小柳・skill・実装などの組織全体の語だけで重なっています(長い議事ほど当たりやすい)。閾値と照合の範囲は変えていません。判定された件数は週に1度数えてください(議事の見直し条件)。
 
 ## 10. まだ無いもの(Phase 3 以降)
 
