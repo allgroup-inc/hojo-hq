@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-10-07 12:54",
+ "generated_at": "2026-10-07 21:32",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 6,
- "count": 28,
+ "count": 29,
  "items": [
   {
    "id": "a0WJ200000CDdMRMA1",
@@ -175,6 +175,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 20000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003EZsDUAW",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDc0YMAT",
+   "name": "令和８年度都市ガス分野の災害対応・レジリエンス強化に係る支援事業費補助金",
+   "deadline": "2026-10-28",
+   "days_left": 21,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 130502000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0YMAT",
    "tag": "nationwide"
   },
   {
