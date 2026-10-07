@@ -1,0 +1,5 @@
+# WikiSkill Phase 2: 正式な Wiki(docs/wiki/)は小柳さんがレビューしてマージする。
+# 実際にマージを止めるには、GitHub の branch protection(Require review from Code Owners)を
+# 小柳さんが有効にする必要がある(Gate G1)。有効になるまでは運用上の約束であり、機械の保証ではない。
+# 手順: docs/wikiskill/Wiki昇格手順.md
+docs/wiki/ @takeshikoyanagi9-lab

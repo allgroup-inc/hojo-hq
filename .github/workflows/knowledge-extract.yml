@@ -1,0 +1,148 @@
+name: knowledge-extract
+
+# WikiSkill Phase 2: 知識候補の抽出。手動実行(workflow_dispatch)のみ。
+# 結果は「候補だけを載せた PR」として出す。main へは直接書かない。マージするのは人(小柳さん)。
+# schedule を足すのは Gate G2(受け入れ試験の後)まで禁止。
+on:
+  workflow_dispatch:
+    inputs:
+      max: { description: "最大候補数", default: "10" }
+
+concurrency: { group: knowledge-extract, cancel-in-progress: false }
+
+permissions: { contents: write, pull-requests: write, issues: write }
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      # 依存パッケージは不要(標準ライブラリのみ)。pip install はしない。
+
+      - name: Validator selftest
+        run: python3 scripts/wiki_validate.py --selftest
+
+      - name: Extract candidates
+        env:
+          INPUT_MAX: ${{ inputs.max }}
+        run: |
+          set -euo pipefail
+          case "$INPUT_MAX" in ''|*[!0-9]*) echo "::error::max は整数で指定してください: $INPUT_MAX"; exit 1 ;; esac
+          RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-${{ github.run_id }}"
+          echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
+          python3 scripts/knowledge_extract.py --no-llm --max "$INPUT_MAX" --run-id "$RUN_ID" > summary.json
+          cat summary.json
+
+      - name: Validate wiki
+        run: |
+          set -o pipefail
+          python3 scripts/wiki_validate.py 2>&1 | tee validate.txt
+
+      - name: Stage candidates
+        run: git add docs/wiki/_candidates
+
+      - name: Guard - only candidates are staged
+        run: |
+          set -eu
+          bad=0
+          while IFS= read -r f; do
+            case "$f" in
+              docs/wiki/_candidates/*) ;;
+              *) echo "::error::候補以外がステージされています: $f"; bad=1 ;;
+            esac
+          done < <(git diff --cached --name-only)
+          [ "$bad" -eq 0 ] || exit 1
+
+      - name: Check anything to propose
+        id: changes
+        run: |
+          if git diff --cached --quiet; then
+            echo "候補なし"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push candidate branch
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "wiki-candidates/$RUN_ID"
+          git commit -m "wiki: 知識候補 $RUN_ID(承認前の候補。人のレビュー待ち)"
+          git push origin "HEAD:refs/heads/wiki-candidates/$RUN_ID"
+
+      - name: Open pull request
+        if: steps.changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          n=$(git diff --name-only HEAD~1 HEAD | wc -l | tr -d ' ')
+          conflicts=$(git diff --name-only HEAD~1 HEAD | xargs -r grep -l '^review_status: conflict' 2>/dev/null | wc -l | tr -d ' ')
+          {
+            echo "## 抽出した知識候補(承認前)"
+            echo
+            echo "**これらは候補であり、承認されていません。** この PR のマージは「候補として受領」であって承認ではありません。"
+            echo "正式な Wiki にするには、手順書のとおり別の昇格 PR を作り、人が確定します。"
+            echo
+            echo "手順: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/main/docs/wikiskill/Wiki昇格手順.md"
+            echo
+            echo "- 候補ファイル数: $n"
+            echo "- うち conflict(Decision と矛盾の疑い): $conflicts"
+            echo
+            echo "**この PR は GITHUB_TOKEN で作られたため CI が自動で走りません。** 下の検証結果が証拠です。必要なら PR を手で更新して CI を起動してください。"
+            echo
+            echo "### 抽出サマリ(JSON)"
+            echo '```json'
+            cat summary.json
+            echo '```'
+            echo
+            echo "### 検証結果(wiki_validate.py)"
+            echo '```'
+            cat validate.txt
+            echo '```'
+          } > pr-body.md
+          gh label create wiki-candidate --color 0E8A16 \
+            --description "WikiSkill 知識候補(承認前)" 2>/dev/null || true
+          gh pr create --base main --head "wiki-candidates/$RUN_ID" \
+            --label wiki-candidate \
+            --title "Wiki候補 $RUN_ID(${n}件)" \
+            --body-file pr-body.md
+
+      - name: Open or update issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh label create knowledge-extract --color 5319E7 \
+            --description "知識候補の抽出が失敗" 2>/dev/null || true
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body="知識候補の抽出(knowledge-extract)が失敗しました。\n\n- 実行: $run_url\n- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')\n\n何も push していません(検証が通った場合だけ候補ブランチを作ります)。ログの wiki_validate の出力を確認してください。"
+          existing=$(gh issue list --state open --label knowledge-extract --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            printf "%b" "$body" | gh issue comment "$existing" --body-file -
+          else
+            printf "%b" "$body" | gh issue create --label knowledge-extract \
+              --title "知識候補の抽出に失敗" --body-file -
+          fi
+
+      - name: Auto-close issue on recovery
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --state open --label knowledge-extract --json number --jq '.[].number' 2>/dev/null || true); do
+            gh issue comment "$n" --body "抽出が回復しました。自動クローズします。"
+            gh issue close "$n"
+          done
