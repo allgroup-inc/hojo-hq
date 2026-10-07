@@ -687,3 +687,69 @@ def test_cli_outside_git_fails_closed(tmp_path):
 
 def test_cli_bad_args_exit_2():
     assert run(["--nope"]).returncode == 2
+
+
+# ---------------------------------------------------------------- 修正ラウンド1(レビュー指摘)
+
+LONG_TAIL = "のは、急ぎの修正でも夜間の自動生成でも休日のリリース作業でも、どの担当でも同じ"
+
+
+def test_superset_title_of_approved_is_duplicate(wk):
+    """承認済みタイトル全体 + 長い語尾の候補は、片方向の類似度だと 0.6 未満で素通りしていた。"""
+    long_title = TITLE + LONG_TAIL
+    assert wiki_schema.title_similarity(long_title, TITLE) < wiki_schema.DUPLICATE_RATIO  # 片方向では見逃す形
+    promote(wk)
+    add_candidate_same_words(wk, title=long_title)
+    assert "V10" in codes(wk)
+
+
+def test_superset_title_of_other_candidate_is_duplicate(wk):
+    add_candidate_same_words(wk, title=TITLE + LONG_TAIL)
+    assert "V10" in codes(wk)
+
+
+@pytest.mark.parametrize("n", [1, 7])
+def test_quote_shorter_than_min_fails(wk, n):
+    assert "V04" in codes(edit(wk, evidence=[{"ref": REF, "quote": QUOTE[:n]}]))
+
+
+def test_quote_exactly_min_passes(wk):
+    assert wiki_schema.MIN_QUOTE == 8
+    assert codes(edit(wk, evidence=[{"ref": REF, "quote": QUOTE[:8]}])) == set()
+
+
+def test_undecodable_committed_experience_is_v03(wk):
+    bad = wk / ".claude/experience/2026-10/session-X.jsonl"
+    bad.write_bytes(b'{"ts": "2026-10-01T00:00:00Z", "text": "\xff\xfe"}\n')
+    git(wk, "add", "-A")
+    git(wk, "commit", "-q", "-m", "bad")
+    vs = validate_tree(wk)[0]
+    assert (".claude/experience/2026-10/session-X.jsonl", "V03") in {(p, c) for p, c, _ in vs}
+
+
+def test_committed_symlink_experience_not_resolvable(wk):
+    link = wk / ".claude/experience/2026-10/session-L.jsonl"
+    link.symlink_to("session-s1.jsonl")  # 中身は s1 と同じ(解決できてしまえば素通り)
+    git(wk, "add", "-A")
+    git(wk, "commit", "-q", "-m", "link")
+    ref = f"session-L@{TS}"
+    assert "V03" in codes(edit(wk, source_experience=[ref], evidence=[{"ref": ref, "quote": QUOTE}]))
+
+
+@pytest.mark.parametrize("sep", ["​", "­", " "])
+def test_forbidden_content_with_inserted_chars_fails(wk, sep):
+    word = FORBIDDEN_CONTENT[0]
+    assert "V06" in codes(edit(wk, summary=f"x {word[:2]}{sep}{word[2:]} y"))
+
+
+def test_review_by_beyond_6_months_fails(wk):
+    promote(wk, review_by="2099-12-31")
+    assert "V09" in codes(wk)
+
+
+def test_review_by_at_183_days_passes(wk):
+    promote(wk, review_by="2027-04-21")  # 2026-10-20 + 183日
+    assert validate_tree(wk) == ([], [])
+    p = next((wk / WIKI_DIR).glob("W*.md"))
+    p.write_text(p.read_text(encoding="utf-8").replace("2027-04-21", "2027-04-22"), encoding="utf-8")
+    assert "V09" in codes(wk)

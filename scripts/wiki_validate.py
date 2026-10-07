@@ -21,7 +21,7 @@ import subprocess
 import sys
 import tempfile
 import unicodedata
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -69,8 +69,21 @@ def _git(root: Path, *args: str) -> str:
 
 
 def _committed_experience(root: Path) -> list[str]:
-    """git 管理下で、HEAD から変更されていない(= commit 済みのまま)Experience の JSONL。"""
-    tracked = [p for p in _git(root, "ls-files", "-z", "--", EXP_DIR).split("\0") if p.endswith(".jsonl")]
+    """git 管理下で、HEAD から変更されていない(= commit 済みのまま)Experience の JSONL。
+
+    シンボリックリンク(mode 120000)は除く: リンク先は commit されたものとは限らない。
+    """
+    tracked = []
+    for entry in _git(root, "ls-files", "-s", "-z", "--", EXP_DIR).split("\0"):
+        if not entry:
+            continue
+        meta, _tab, path = entry.partition("\t")
+        mode = meta.split(" ", 1)[0]
+        if mode not in ("100644", "100755") or not path.endswith(".jsonl"):  # 120000 = symlink, 160000 = submodule
+            continue
+        if (Path(root) / path).is_symlink():
+            continue
+        tracked.append(path)
     changed = set(_git(root, "diff", "--name-only", "-z", "HEAD", "--", EXP_DIR).split("\0"))
     return [p for p in tracked if p not in changed]
 
@@ -103,13 +116,13 @@ def build_context(root: Path) -> Context:
     fk_rows, dup_fk = _read_ledger(root)
     exp_events: dict[tuple[str, str], dict] = {}
     exp_groups: dict[tuple[str, str], list[dict]] = {}
-    exp_errors: list[str] = []
+    exp_errors: list[tuple[str, str]] = []  # (読めない Experience のパス, 理由)
     for sid, files in group_session_files(_committed_experience(root)).items():
         for f in files:
             try:
                 events = experience_log._read_events(root / f)
             except (OSError, UnicodeDecodeError) as e:
-                exp_errors.append(f"{Path(f).as_posix()}: {type(e).__name__}")
+                exp_errors.append((Path(f).as_posix(), f"{type(e).__name__}: {e}"))
                 continue
             for ev in events:
                 if isinstance(ev.get("ts"), str):
@@ -199,6 +212,11 @@ def _forbidden_index(path: str, texts: list[str]) -> int | None:
             for i, word in enumerate(FORBIDDEN_CONTENT):
                 if word.casefold() in folded:
                     return i
+        # ゼロ幅文字・ソフトハイフン・空白・記号を挟んだ書き方も止める(文字と数字だけで照合)
+        squashed = ws.normalize(t)
+        for i, word in enumerate(FORBIDDEN_CONTENT):
+            if ws.normalize(word) and ws.normalize(word) in squashed:
+                return i
     return None
 
 
@@ -348,8 +366,8 @@ def check_v04(w: dict, ctx: Context) -> list[Violation]:
             out.append((p, "V04", f"evidence[{i}] の ref が source_* のどれにも無い"))
             continue
         q = e["quote"].strip()
-        if not q or len(q) > ws.MAX_QUOTE:
-            out.append((p, "V04", f"evidence[{i}] の quote は1〜{ws.MAX_QUOTE}字"))
+        if len(q) < ws.MIN_QUOTE or len(q) > ws.MAX_QUOTE:
+            out.append((p, "V04", f"evidence[{i}] の quote は {ws.MIN_QUOTE}〜{ws.MAX_QUOTE} 字"))
             continue
         text, row = resolve_source(e["ref"], kinds[0], ctx)
         if row is None:
@@ -447,8 +465,8 @@ def check_v09(w: dict, ctx: Context) -> list[Violation]:
         out.append((p, "V09", "approved_at は YYYY-MM-DD"))
     if rb is None:
         out.append((p, "V09", "review_by は YYYY-MM-DD"))
-    elif aa is not None and rb <= aa:
-        out.append((p, "V09", "review_by は approved_at より後"))
+    elif aa is not None and not aa < rb <= aa + timedelta(days=ws.MAX_REVIEW_DAYS):
+        out.append((p, "V09", f"review_by は approved_at より後、{ws.MAX_REVIEW_DAYS} 日以内(6か月以内に見直す)"))
     rv = w.get("review")
     if not isinstance(rv, dict) or any(not isinstance(rv.get(r), str) for r in ws.REVIEW_ROLES):
         out.append((p, "V09", "review は {スイシン, ウタガイ, ベッカイ}(すべて文字列)"))
@@ -479,7 +497,8 @@ def check_v10(w: dict, ctx: Context) -> list[Violation]:
             continue  # 相手が自分を duplicate_of に書いている(自分が元)
         if not isinstance(o.get("title"), str):
             continue
-        r = ws.title_similarity(title, o["title"])
+        # 双方向: 既存のタイトル全体を含み語を足しただけの候補も重複として止める
+        r = max(ws.title_similarity(title, o["title"]), ws.title_similarity(o["title"], title))
         if r >= ws.DUPLICATE_RATIO:
             oid = o.get("wiki_id") if o["_place"] == "official" else o.get("candidate_id")
             out.append((p, "V10", f"{oid or o['_path']} とタイトルの語が {r:.0%} 一致(duplicate_of: <id> を書く)"))
@@ -596,6 +615,8 @@ def validate_tree(root: Path) -> tuple[list[Violation], list[Warning]]:
                 warnings.extend(check_v13(w, ctx))
             except Exception as e:  # noqa: BLE001 — 矛盾判定の失敗は needs_review 扱い
                 warnings.append((w["_path"], "", f"矛盾判定に失敗(needs_review 扱い): {type(e).__name__}"))
+    for rel, reason in ctx["exp_errors"]:
+        violations.append((rel, "V03", f"commit 済みの Experience を読めない(根拠として解決できない): {reason}"))
     for code, fn in (("V08", stray_files), ("V14", validate_synonyms)):
         try:
             violations.extend(fn(root))
@@ -706,6 +727,8 @@ def _st_cases() -> list[tuple[str, object, str | None]]:
     arch = _st_fm(title="古い手順", source_failure=["FK-002"], review_status="superseded",
                   wiki_id="W20261001-old", superseded_by=_ST_WID)
     pid = f"session-P@{_ST_TS}"
+    q = lambda s: [{"ref": _ST_REF, "quote": s}]  # noqa: E731
+    long_title = "マージ前に競合ファイル一覧を確認するのは、急ぎの修正でも夜間の自動生成でも休日のリリース作業でも同じ"
     return [
         # 通すべきもの
         ("有効な候補", lambda r: None, None),
@@ -720,6 +743,7 @@ def _st_cases() -> list[tuple[str, object, str | None]]:
             **other, related_wiki=[_ST_WID]))), None),
         ("approved を指す superseded", lambda r: (_st_promote(r), _st_write(r, arch, place="archive")), None),
         ("summary 200字ちょうど", lambda r: _st_cand(r, summary="あ" * ws.MAX_SUMMARY), None),
+        ("quote 8字ちょうど", lambda r: _st_cand(r, evidence=q(_ST_QUOTE[:ws.MIN_QUOTE])), None),
         # V01
         ("JSON が壊れた frontmatter", lambda r: _st_replace(r, '"ref"', "ref"), "V01"),
         ("summary が無い", lambda r: _st_replace(r, "\nsummary: ", "\nxsummary: "), "V01"),
@@ -740,8 +764,10 @@ def _st_cases() -> list[tuple[str, object, str | None]]:
         ("無い FK", lambda r: _st_cand(r, source_failure=["FK-999"]), "V03"),
         ("根拠節に id が無い", lambda r: _st_replace(r, f"- {_ST_REF}: 根拠", "- 根拠"), "V03"),
         # V04
-        ("逐語でない quote", lambda r: _st_cand(r, evidence=[{"ref": _ST_REF, "quote": "要約した別の文"}]), "V04"),
+        ("逐語でない quote", lambda r: _st_cand(r, evidence=q("要約して言い換えた別の文章")), "V04"),
         ("source に無い ref", lambda r: _st_cand(r, evidence=fk_ev), "V04"),
+        ("quote 1字", lambda r: _st_cand(r, evidence=q(_ST_QUOTE[:1])), "V04"),
+        ("quote 7字", lambda r: _st_cand(r, evidence=q(_ST_QUOTE[:ws.MIN_QUOTE - 1])), "V04"),
         # V05
         ("visibility が private", lambda r: _st_cand(r, visibility="private"), "V05"),
         ("private 行を source", lambda r: _st_cand(r, source_experience=[pid], evidence=[{"ref": pid, "quote": _ST_QUOTE}]),
@@ -750,6 +776,7 @@ def _st_cases() -> list[tuple[str, object, str | None]]:
         # V06
         ("summary に禁止語", lambda r: _st_cand(r, summary=f"x {word} y"), "V06"),
         ("本文に禁止語(小文字)", lambda r: _st_replace(r, "## 関連\nなし", f"## 関連\n{word.lower()}"), "V06"),
+        ("ゼロ幅文字を挟んだ禁止語", lambda r: _st_cand(r, summary=f"x {word[:2]}\u200b{word[2:]} y"), "V06"),
         ("JSON エスケープした禁止語", lambda r: _st_replace(
             r, "related_skills: []", 'related_skills: ["' + "".join(f"\\u{ord(c):04x}" for c in word) + '"]'), "V06"),
         # V07
@@ -765,9 +792,12 @@ def _st_cases() -> list[tuple[str, object, str | None]]:
         ("ウタガイが空語", lambda r: _st_promote(r, review={"スイシン": "a", "ウタガイ": "なし", "ベッカイ": "c"}), "V09"),
         ("bot が承認", lambda r: _st_promote(r, approved_by="github-actions[bot]"), "V09"),
         ("review_by が approved_at 以前", lambda r: _st_promote(r, review_by="2026-10-20"), "V09"),
+        ("review_by が6か月より先", lambda r: _st_promote(r, review_by="2099-12-31"), "V09"),
         ("wiki_id とファイル名が違う", lambda r: _st_promote(r, wiki_id="W20261020-other"), "V09"),
         # V10
         ("類似候補に duplicate_of なし", lambda r: (_st_promote(r), _st_write(r, _st_fm(source_failure=["FK-002"]))), "V10"),
+        ("approved のタイトル全体+語を足した候補", lambda r: (_st_promote(r), _st_write(r, _st_fm(
+            title=long_title, source_failure=["FK-002"]))), "V10"),
         ("approved に duplicate_of", lambda r: _st_promote(r, duplicate_of=_ST_WID), "V10"),
         # V14
         ("同義語の同じ語が2行", lambda r: (r / ws.SYNONYMS_PATH).write_text("マージ, merge\nmerge, 統合\n", encoding="utf-8"),
