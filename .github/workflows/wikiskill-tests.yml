@@ -16,6 +16,7 @@ on:
       - '.claude/hooks/wikiskill-hook.sh'
       - 'tests/scripts/test_*.py'
       - 'tests/integration/test_wikiskill_memory_e2e.py'
+      - 'tests/integration/test_wikiskill_wiki_e2e.py'
       - '.github/workflows/wikiskill-tests.yml'
       - 'CLAUDE.md'
       - 'docs/**'
@@ -40,6 +41,7 @@ on:
       - '.claude/hooks/wikiskill-hook.sh'
       - 'tests/scripts/test_*.py'
       - 'tests/integration/test_wikiskill_memory_e2e.py'
+      - 'tests/integration/test_wikiskill_wiki_e2e.py'
       - '.github/workflows/wikiskill-tests.yml'
       - 'CLAUDE.md'
       - 'docs/**'
@@ -94,4 +96,5 @@ jobs:
           tests/scripts/test_wikiskill_lock.py
           tests/scripts/test_knowledge_extract.py
           tests/integration/test_wikiskill_memory_e2e.py
+          tests/integration/test_wikiskill_wiki_e2e.py
           -q
