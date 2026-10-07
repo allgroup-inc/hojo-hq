@@ -116,3 +116,44 @@ F1〜F8・R4 はすべて ✅。❌ は無い。
 5. **Session C は手動 hook 起動で代替**(新規クローンは SessionStart 前に `wiki.off` を置けない)。Phase 1 の所見と同じ扱い。
 6. **SessionStart は 0.39〜0.43 秒**(Wiki 1 件・候補 1 件)。Phase 1(0.371 秒)から +0.02〜0.06 秒。`slow` は 0 件。全体テストの同時実行中だけ Phase 1 の単発計時テストが 0.5 秒を跨ぐことがある(負荷依存。残課題として報告)。
 7. **knowledge-extract workflow の dispatch は未実施**(main にまだ無い)。マージ後の最初の dispatch を Task 9 の残課題にする。
+
+## 矛盾判定の再測定(2026-10-07・照合範囲の修正後)
+
+議事: `docs/議事/議事_20261007_WikiSkill_Phase2_矛盾判定の照合範囲.md`。Decision 側の照合を、否定語を含む文(+ その文が この/その/これ/それ/上記/前記 で始まる場合は直前の1文)だけにし、コード断片を除いた。しきい値(2語)・否定語の一覧・fail-closed・V12/V13 は変えていない。
+
+正解の扱い: 同じ10件の候補は、どれも採用済みの Decision と本当には矛盾しない。conflict になったものは FP、ならなかったものは TN と数える。
+
+| | conflict | TP | FP | TN | FN | FP率(conflict のうち) |
+|---|---|---|---|---|---|---|
+| Before(全文照合・e60c3f609) | 9/10 | 0 | 9 | 1 | 0 | 100% |
+| After(修正 + この議事を commit した後) | 0/10 | 0 | 0 | 10 | 0 | —(conflict なし) |
+
+| 候補 id | Before | After |
+|---|---|---|
+| K20261007-d20261006-experience-storage-e39e | conflict(FP) | candidate(TN)※ |
+| K20261007-d20261006-skill-dist-privacy-gate-208e | conflict(FP) | candidate(TN) |
+| K20261007-d20261006-wikiskill-phase1-2486 | conflict(FP) | candidate(TN) |
+| K20261007-d20261007-wikiskill-phase2-6505 | conflict(FP) | candidate(TN) |
+| K20261007-fk-001-4a33 | conflict(FP) | candidate(TN) |
+| K20261007-fk-002-2041 | conflict(FP) | candidate(TN) |
+| K20261007-fk-003-6e0f | conflict(FP) | candidate(TN) |
+| K20261007-fk-004-6e31 | conflict(FP) | candidate(TN) |
+| K20261007-fk-005-def2 | candidate(TN) | candidate(TN) |
+| K20261007-fk-006-6196 | conflict(FP) | candidate(TN) |
+
+※ この議事を commit すると、議事の裁定から11件目の候補(`K20261007-d20261007-wikiskill-conflict-scope-226b`。R4・candidate・矛盾なし)ができる。そのため `--max 10` では experience-storage が上限からあふれて書かれない(`over_max`)。判定(review_status)はあふれる前に計算されており、candidate だった。
+
+真の矛盾を拾うテストは、fixture を変えずにすべて通る。
+
+- A/B/C(`test_a_success_b_failure_c_forbidden_c_wins`・`test_abc_forbidden_still_conflicts`)
+- E2E の逆方向(`test_reverse_wrong_experience_conflict_never_injected`)
+- E2E の R5(`test_needs_review_after_new_decision_stops_injection`。fixture「…手順は使わない。この手順は採用しない」は指示語の規則で拾う)
+- V12 の各テスト(`test_negation_decision_two_unit_overlap_is_conflict`・`test_conflict_candidate_cannot_be_approved`・`test_self_source_dropping_negation_is_v12`・`test_approved_older_decision_is_v12_not_warning` ほか)と `wiki_validate --selftest`(69件)
+- 締切アラートの真の矛盾(`test_genuinely_incompatible_alert_candidate_conflicts`)
+- 指示語(`test_anaphoric_negation_conflicts_via_previous_sentence`)
+
+既知の偽陰性の類型(否定語の一覧に無い動詞「送らない」など)は `test_known_false_negative_verb_not_in_negation_words`(`xfail` strict)に残した。否定語リストの拡張は別議事で扱う。
+
+## 既知の Performance Debt(2026-10-07)
+
+SessionStart hook の単発計時テスト `test_hook_session_start_under_500ms_on_real_copy` は、この実行環境では単独実行でも 0.5 秒を跨ぐことがある(実測 0.512 秒。origin/main の Phase 1 単体で 0.36〜0.42 秒、Phase 2 の追加分は約 0.04 秒 = `[Wiki]` の commit 確認 git 3 回と承認要件の検査)。ロジックの回帰ではなく性能余裕の不足。受け入れ基準 0.5 秒は変更しない。CI は `WIKISKILL_SKIP_TIMING=1` で計時を飛ばすため赤にならない。Phase 3 の最適化候補: `_git_ready` の toplevel 結果を `committed_files` で再利用(git 1 回減)、`docs/wiki` に承認ページが無いときは git を呼ばない、Decision の特徴語を 1 プロセス 1 回に限定。見直し: Phase 3 着手時。

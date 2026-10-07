@@ -49,6 +49,7 @@ decided_by: 小柳
    8. Archive の防護: `experience_archive.py --archive` は `docs/wiki/` 配下の Wiki・候補・退役ページすべてが根拠に引いている月を固めない(`--force` と監査記録でだけ上書き)。
 3. **Phase 3 へ持ち越し**: Skill Proposer / Validator / Evolution Gate、Conflict Resolver(自動統合)、Skill Metrics、LLM 下書き(G3)、Experience の索引と移動(#24)、月次 cron(G2)、極性を見る矛盾判定、Archive を考慮した V03(索引の `pinned`)、他リポジトリの読み取り。
 4. **実測した偽陽性(2026-10-07・実データ)**: 候補9件のうち5件が conflict と判定された。5件はすべて長い1件の Decision(`D20261006-skill-dist-privacy-gate`)から出ており、4件は組織全体の語(議事・三名体制・実装・phase・小柳)だけで一致、1件(SKILL.md と失敗台帳の候補)だけが本当の矛盾の可能性がある。閾値は計画どおり変えない。後で直す案(別の議事が要る): 否定語を含む文だけで照合する。**試算(参考)**: Task 4 のレビュー時の試算(stop語除外・自己出典除外を入れる前の 6 件時点)で、否定語を含む文だけで照合すると 6→3 件、さらに自己出典を除外すると 2 件。出荷版の実測は 9 件中 5 件。**追記(2026-10-07・最終レビュー)**: この議事を commit した後の今のツリーで同じ dry-run を測ると、候補10件(上限)のうち9件が conflict。9件のうち8件はこの議事そのもの(`D20261007-wikiskill-phase2`。phase・議事・小柳・skill・承認などで一致)、6件は `D20261006-skill-dist-privacy-gate` と重なる。長い議事が増えるほど偽陽性が増える。閾値と照合の範囲は変えていない(変えるには別の議事が要る)。
+   - **照合範囲の修正(2026-10-07)**: `docs/議事/議事_20261007_WikiSkill_Phase2_矛盾判定の照合範囲.md`(否定語を含む文 + 指示語で始まる否定文の直前1文だけ・コード断片を除く。しきい値は2のまま)。同じ10件の再測定で conflict は 9/10 → 0/10。
 
 ## 代替案
 
@@ -83,6 +84,11 @@ decided_by: 小柳
 - Rollback 条件 RB1〜RB5(`docs/wikiskill/Rollback手順.md` の Phase 2 節)のどれか(RB1 検証器の偽陰性で誤った知識が approved に入った / RB2 private 由来のテキストが候補に出た / RB3 Bootstrap の `slow` が週3回 / RB4 Baseline が REGRESSION / RB5 Decision と矛盾する Wiki が注入された)
 - 3か月たっても approved の Wiki が 0 件(仕組みが使われていない。ベッカイの問いへの答えが「要らない」)
 - conflict と判定されたもののうち、8割以上が偽陽性だった(矛盾判定の作り直しが要る)
+
+### 既知の Performance Debt
+
+SessionStart hook の単発計時テスト `test_hook_session_start_under_500ms_on_real_copy` は、この実行環境では単独でも 0.5 秒を跨ぐことがある(実測 0.512 秒。Phase 1 単体 0.36〜0.42 秒、Phase 2 の追加分は約 0.04 秒)。
+ロジックの回帰ではなく性能余裕の不足。基準 0.5 秒は変えず、最適化は Phase 3 着手時に見直す(詳細: `docs/wikiskill/Phase2受け入れ記録.md` の「既知の Performance Debt」)。
 
 ## Rollback
 
