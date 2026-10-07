@@ -27,6 +27,7 @@ on:
       - 'scripts/wiki_validate.py'
       - 'docs/wiki/**'
       - 'scripts/wikiskill_lock.py'
+      - 'scripts/knowledge_extract.py'
   push:
     paths:
       - 'scripts/wikiskill_common.py'
@@ -50,6 +51,7 @@ on:
       - 'scripts/wiki_validate.py'
       - 'docs/wiki/**'
       - 'scripts/wikiskill_lock.py'
+      - 'scripts/knowledge_extract.py'
   workflow_dispatch: {}
 
 concurrency:
@@ -90,5 +92,6 @@ jobs:
           tests/scripts/test_wiki_schema.py
           tests/scripts/test_wiki_validate.py
           tests/scripts/test_wikiskill_lock.py
+          tests/scripts/test_knowledge_extract.py
           tests/integration/test_wikiskill_memory_e2e.py
           -q

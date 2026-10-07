@@ -15,6 +15,7 @@ import pytest
 SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
+from test_knowledge_extract import ex, run_cli  # noqa: E402,F401  (ex は fixture)
 from wikiskill_lock import LockHeld, acquire, heartbeat, lock_path, lock_state, release  # noqa: E402
 
 T0 = datetime(2026, 10, 7, 9, 0, 0, tzinfo=timezone.utc)
@@ -72,3 +73,9 @@ def test_stale_without_marker_needs_break_flag(tmp_path):
     raises(LockHeld, acquire, tmp_path, "x", "T", now=T0 + timedelta(minutes=31))
     assert acquire(tmp_path, "x", "T", break_stale=True, now=T0 + timedelta(minutes=31))
 
+
+def test_extract_cli_exit_3_when_locked(ex):
+    acquire(ex, "knowledge-extract", "S")
+    r = run_cli(ex)
+    assert r.returncode == 3
+    assert "S" in r.stderr
