@@ -55,6 +55,7 @@ NOTE_MAX = 1000
 SLOW_MS = 500  # hook 1回の実行時間がこれを超えたら _audit.log に `slow` を残す(画面警告なし)
 EXTERNAL = "<external>"
 _COMPONENT = "experience_log"
+_SHELL_SYNTAX = re.compile(r"[()$`;|&<>]")
 _ENV_ASSIGN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 _FILE_TOOLS = {"Edit", "Write", "MultiEdit"}
 _HEAD_RE = re.compile(r"^[0-9a-f]{7,40}$")
@@ -97,6 +98,8 @@ def _visibility(slug: str) -> str:
 
 def sanitize_path(p: str, root: Path) -> str:
     """root 配下なら相対パス(posix)、それ以外は "<external>"。"""
+    if str(p).startswith("~"):  # ~ は展開されないまま root 配下の相対パスと誤認されるので外部扱い
+        return EXTERNAL
     try:
         base = Path(root).resolve()
         target = Path(p)
@@ -113,14 +116,15 @@ def _safe_id(session_id: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]", "_", str(session_id)) or "unknown"
 
 
-_TRACKED: set[str] = set()  # git 管理下と分かったパス(1プロセス内で使い回す。未追跡の結果は覚えない)
+_TRACKED: set[str] = set()  # git 管理下と分かったパス(1プロセス内で使い回す。未追跡・エラーの結果は覚えない)
+_GIT_ERROR_AUDITED: set[str] = set()  # git エラーを audit 済みの root(1プロセス1回だけ残す)
 
 
-def _is_tracked(root: Path, path: Path) -> bool:
-    """`git ls-files --error-unmatch <path>` が exit 0 なら True。git が使えなければ False(本体へ書く)。"""
+def _tracked_state(root: Path, path: Path) -> str:
+    """`git ls-files --error-unmatch <path>` の結果。exit 0 → "tracked" / exit 1 → "untracked" / それ以外・例外 → "error"。"""
     key = str(path)
     if key in _TRACKED:
-        return True
+        return "tracked"
     try:
         rel = Path(path).resolve().relative_to(Path(root).resolve()).as_posix()
         r = subprocess.run(
@@ -128,11 +132,16 @@ def _is_tracked(root: Path, path: Path) -> bool:
             capture_output=True, text=True, errors="replace", timeout=5,
         )
     except (OSError, subprocess.SubprocessError, ValueError):
-        return False
+        return "error"
     if r.returncode == 0:
         _TRACKED.add(key)
-        return True
-    return False
+        return "tracked"
+    return "untracked" if r.returncode == 1 else "error"
+
+
+def _is_tracked(root: Path, path: Path) -> bool:
+    """互換用。git 管理下なら True(untracked・error はどちらも False)。"""
+    return _tracked_state(root, path) == "tracked"
 
 
 def _base_file(root: Path, session_id: str, ts: datetime) -> Path:
@@ -143,14 +152,30 @@ def _base_file(root: Path, session_id: str, ts: datetime) -> Path:
 
 
 def session_file(root: Path, session_id: str, ts: datetime) -> Path:
-    """追記先。本体が git 管理下なら、同じフォルダの未追跡の最初の session-<sid>.part<N>.jsonl(N=1,2,…)。"""
+    """追記先。本体が git 管理下なら、同じフォルダの未追跡の最初の session-<sid>.part<N>.jsonl(N=1,2,…)。
+
+    git が失敗した(状態が "error")ときは、tracked かどうか分からないので本体へ追記せず、
+    ディスク上に存在しない最初の part へ書く(commit 済みの本体を汚さない側へ倒す)。1プロセス1回だけ audit。
+    """
     base = _base_file(root, session_id, ts)
-    if not _is_tracked(root, base):
+    state = _tracked_state(root, base)
+    if state == "untracked":
         return base
+    sid = _safe_id(session_id)
+    if state == "error":
+        if str(root) not in _GIT_ERROR_AUDITED:
+            _GIT_ERROR_AUDITED.add(str(root))
+            audit(root, _COMPONENT, "git ls-files failed; writing to part file")
+        n = 1
+        while True:
+            part = base.with_name(f"session-{sid}.part{n}.jsonl")
+            if not part.exists():
+                return part
+            n += 1
     n = 1
     while True:
-        part = base.with_name(f"session-{_safe_id(session_id)}.part{n}.jsonl")
-        if not _is_tracked(root, part):
+        part = base.with_name(f"session-{sid}.part{n}.jsonl")
+        if _tracked_state(root, part) != "tracked":  # untracked(または git が途中で失敗)ならここへ
             return part
         n += 1
 
@@ -225,6 +250,10 @@ def _program_of(command, root: Path | None = None) -> str:
         if _ENV_ASSIGN.match(tok):
             continue
         tok = tok.lstrip("(")
+        if tok.startswith("~") and not _SHELL_SYNTAX.search(tok):
+            # ~ 始まりのパス(ホーム配下=プロジェクト外)。`$(cat ~/x)` の断片のようなシェル構文を含むものは
+            # 下の名前検査で "<unknown>" になる(どちらもプログラム名は残らない)
+            return EXTERNAL
         if tok.startswith("/") and (root is None or sanitize_path(tok, root) == EXTERNAL):
             return EXTERNAL
         name = os.path.basename(tok)

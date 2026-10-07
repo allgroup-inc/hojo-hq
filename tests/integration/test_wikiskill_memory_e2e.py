@@ -23,6 +23,11 @@ SCRIPT_NAMES = [
     "check_experience_privacy.py",
     "experience_archive.py",
     "check_repo_scope.py",
+    # Phase 2(Knowledge Wiki)。Phase 2 E2E(test_wikiskill_wiki_e2e.py)もこの world を使う
+    "wiki_schema.py",
+    "wiki_validate.py",
+    "knowledge_extract.py",
+    "wikiskill_lock.py",
 ]
 DECISION_PATH = "docs/議事_20261006_E2Eテスト決定.md"
 COMMIT_SUBJECT = "docs: 締切アラート時期の決定"
@@ -159,6 +164,9 @@ def _build_world(root, origin_url):
         write(root, rel, (REPO / rel).read_text(encoding="utf-8"))
     for name in SCRIPT_NAMES:
         write(root, f"scripts/{name}", (REPO / "scripts" / name).read_text(encoding="utf-8"))
+    # Phase 2: 同義語表と候補の置き場所(実リポジトリと同じ形)
+    write(root, "docs/wiki/_synonyms.txt", (REPO / "docs/wiki/_synonyms.txt").read_text(encoding="utf-8"))
+    write(root, "docs/wiki/_candidates/.gitkeep", "")
     hook_dst = root / ".claude/hooks/wikiskill-hook.sh"
     hook_dst.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy(REPO / ".claude/hooks/wikiskill-hook.sh", hook_dst)

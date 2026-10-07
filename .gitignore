@@ -64,3 +64,4 @@ data/subsidies.json.backup
 .claude/experience/_audit.log
 .claude/memory.off
 .claude/locks/
+.claude/wiki.off

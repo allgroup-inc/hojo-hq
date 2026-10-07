@@ -1,8 +1,8 @@
-# WikiSkill Phase 1 運用ガイド(記憶の仕組み)
+# WikiSkill 運用ガイド(Phase 1 記憶の仕組み + Phase 2 Knowledge Wiki)
 
 小柳さん・守り部向け。Claude Code のセッションが終わっても、決めた理由・前提・反対意見・失敗の記録が次のセッションに引き継がれるようにする仕組みの説明書です。導入の経緯と決裁は `docs/議事_20261006_WikiSkill_Phase1導入.md`。
 
-この仕組みは **記録と取り出しだけ** をします。Skill を自動で書き換えることはしません。
+この仕組みは **記録と取り出し(Phase 2 では承認済みの知識の取り出しも)だけ** をします。Skill を自動で書き換えることはしません。Phase 2(Knowledge Wiki)は9章。
 
 ## 1. 何が記録されるか
 
@@ -124,21 +124,89 @@ python3 scripts/baseline_debt.py --compare
 
 クラウドセッションでは先に `pip install pytest`(入っていないと「pytest が見つかりません」で止まります)。
 
-## 9. まだ無いもの(Phase 2 以降)
+## 9. Phase 2: Knowledge Wiki(承認済みの知識)
 
-次は **未実装** です。Phase 1 では動きません。
+導入の経緯と決裁は `docs/議事/議事_20261007_WikiSkill_Phase2導入.md`。Phase 1 の記録(Experience)から「学びの候補」を機械が拾い、**人が承認したものだけ**を正式な知識(Wiki)として新しいセッションに届けます。Skill を書き換えることはしません。
 
-- Wiki(正式な知識ページへの昇格)
-- Skill の改善提案と検証(Proposal → Evaluation → 三名体制 → 小柳 Gate → Merge)
-- 編集の Lock(同時編集の衝突防止)
+### Wiki と候補の違い
+
+| | 置き場所 | 誰が作る | Bootstrap に出るか |
+|---|---|---|---|
+| 候補 | `docs/wiki/_candidates/` の `K….md` | 抽出(`knowledge-extract` ワークフロー。**手動実行のみ**。1回10件まで) | **出ない**(読まない。`review_status` が `approved` でないものは注入しない) |
+| 正式な Wiki | `docs/wiki/` 直下の `<wiki_id>.md` | 人が昇格 PR で承認し、小柳さんがマージ | `[Wiki]` として出る |
+| 置き換え済み | `docs/wiki/_archive/` | 人 | 出ない |
+
+信頼の順は Decision > 失敗台帳 > 再発防止 > Wiki > 候補 > Experience です。Decision と矛盾する知識は正式になれません(候補は `conflict`、承認済みでも後から新しい Decision と矛盾すれば `needs_review` になり、注入が止まります)。
+
+### `[Wiki]` 行の読み方
+
+セッション開始時(段1・段2)の注入に、次の形で出ます。
+
+- 題と要約(160字まで)
+- **根拠: Exp 〇・Decision 〇・FK 〇** — 何を元にした知識か(Experience の行数、議事の件数、失敗台帳の件数)
+- **承認: 〇〇 YYYY-MM-DD** — 誰がいつ承認したか(人の名前。bot は承認者になれません)
+- `→ docs/wiki/…` — 元のファイルのパス
+
+根拠の件数が少ない、承認が古い、題と中身が合わない、と感じたら信用せず、`docs/wiki/` の原本と原文を確認してください。Wiki は Decision や失敗台帳より下の信頼です。
+
+手元で何が出るかは次で確認できます。
+
+```bash
+python3 scripts/memory_bootstrap.py query "締切 マージ"
+python3 scripts/wiki_validate.py        # Wiki と候補の検査(違反があると exit 1)
+```
+
+### 止め方
+
+| やりたいこと | 方法 |
+|---|---|
+| `[Wiki]` だけ止める(他の区分と記録は動く) | `touch .claude/wiki.off`(再開は `rm .claude/wiki.off`。git に入らない) |
+| 全部止める(記録も注入も) | `touch .claude/memory.off` または `HOJO_MEMORY_OFF=1`(4章) |
+| 抽出ワークフローを止める | GitHub の Actions で `knowledge-extract` を無効化(`docs/wikiskill/Rollback手順.md` の Phase 2 節) |
+
+段階別の戻し方は `docs/wikiskill/Rollback手順.md`。
+
+### 候補の昇格(人の仕事)
+
+昇格 PR の作り方・却下・conflict と needs_review の解消は `docs/wikiskill/Wiki昇格手順.md`。承認は昇格 PR のマージだけで、抽出 PR のマージは「候補として受け取った」だけです(承認ではありません)。
+
+### 注意: 候補は commit・push した時点で公開される
+
+本リポジトリは PUBLIC です。抽出が作る候補は `wiki-candidates/<RUN_ID>` ブランチへの push で、**マージ前でも公開されます**。そのため、抽出は commit 済みで HEAD から変わっていない public の記録だけを読み、書く前に検証器に掛けます。それでも note は自由記述なので、2章のとおり顧客名・個人情報・非公開の数字・認証情報は書かないでください。
+
+- GitHub Actions の `GITHUB_TOKEN` で作った PR には CI が自動で走りません。PR 本文に貼られた検証結果が証拠です。PR の作成には、リポジトリ設定の「Allow GitHub Actions to create and approve pull requests」が要ります。
+- 同じ根拠(Experience の月)は、`docs/wiki/` 配下の Wiki・候補・退役ページすべて(承認済みかどうか・却下済みかどうかを問わない。却下の候補も退役ページも消さずに残るため)が引いている間、`experience_archive.py --archive` で固められません(`--force` で上書きでき、監査記録が残ります)。
+- 検索の同義語は `docs/wiki/_synonyms.txt`(1行1グループ。完全一致のみ)。語を足すと、その語での Bootstrap の結果が変わりえます。
+- conflict 判定は語の重なりだけを見る粗い判定です(向きは見ません)。Decision 側は、題と裁定のうち**否定語を含む文(+ その文が この/その/これ/それ/上記/前記 で始まる場合は直前の1文)だけ**と照合し、コード断片(`` `…` ``。パスやコマンド)は除きます(`docs/議事/議事_20261007_WikiSkill_Phase2_矛盾判定の照合範囲.md`)。しきい値は2語のままです。2026-10-07 の実測は、全文で照合していた頃は**候補10件中9件**が conflict(9件とも偽陽性。否定語の無い文の phase・議事・小柳などの語と、パス断片 `scripts`・`sh` で一致)で、照合範囲を直した後は同じ10件で **0件**。否定語の一覧に無い動詞(「使わない」「送らない」など)で書かれた禁止は拾えません(既知の偽陰性。否定語リストの拡張は別議事)。判定された件数は週に1度数えてください(議事の見直し条件)。
+
+## 10. まだ無いもの(Phase 3 以降)
+
+次は **未実装** です。Phase 2 でも動きません。
+
+- Skill の改善提案と検証(Skill Proposer / Validator / Evolution Gate。Proposal → Evaluation → 三名体制 → 小柳 Gate → Merge)
+- 衝突の自動統合(Conflict Resolver。Phase 2 の conflict は人が解決する)
+- Skill の使われ方の指標(Skill Metrics)
+- LLM による候補の下書き(Gate G3 で Phase 2 は不承認)
+- 抽出の定期実行(cron。Gate G2 で禁止。実績を見て別の議事で再検討)
+- Experience の索引と別ストレージへの移動(#24。方式は Phase 1 のまま)
+- 否定の向き(極性)まで見る矛盾判定
+- 他リポジトリの記録の読み取り
+
+(Phase 2 で入ったもの: Wiki(正式な知識への昇格)、編集の Lock(`scripts/wikiskill_lock.py`。抽出の同時実行を防ぐ)。)
 
 Skill の自動更新は、人間の Gate を通さない形では行いません。
 
-## 10. 関連文書
+## 11. 関連文書
 
-- 導入議事: `docs/議事_20261006_WikiSkill_Phase1導入.md`
-- 設計書: `docs/superpowers/specs/2026-10-06-wikiskill-integration-design.md`
-- 実装計画: `docs/superpowers/plans/2026-10-06-wikiskill-phase1-memory-foundation.md`
+- 導入議事(Phase 1): `docs/議事_20261006_WikiSkill_Phase1導入.md`
+- 設計書(Phase 1): `docs/superpowers/specs/2026-10-06-wikiskill-integration-design.md`
+- 実装計画(Phase 1): `docs/superpowers/plans/2026-10-06-wikiskill-phase1-memory-foundation.md`
+- 導入議事(Phase 2): `docs/議事/議事_20261007_WikiSkill_Phase2導入.md`
+- 設計書(Phase 2): `docs/superpowers/specs/2026-10-07-wikiskill-phase2-knowledge-wiki-design.md`
+- 実装計画(Phase 2): `docs/superpowers/plans/2026-10-07-wikiskill-phase2-knowledge-wiki.md`
+- Wiki 昇格手順: `docs/wikiskill/Wiki昇格手順.md`
+- Phase 2 受け入れ記録(Task 8 で記入): `docs/wikiskill/Phase2受け入れ記録.md`
+- 保存方式の候補議事(#24・保留): `docs/議事/議事_20261006_Experience長期保存方式_候補.md`
 - 議事のテンプレート: `docs/wikiskill/議事frontmatterテンプレート.md`
 - Rollback 手順: `docs/wikiskill/Rollback手順.md`
 - 受け入れ記録(Task 8 で記入): `docs/wikiskill/Phase1受け入れ記録.md`

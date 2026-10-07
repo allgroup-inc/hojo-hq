@@ -473,3 +473,57 @@ def test_check_why_heading_accepts_h3_and_no_space(tmp_docs):
         assert check_decision(p, tmp_docs) == []
     p = write(tmp_docs, "docs/議事_20261006_h4.md", FM.replace("## なぜ", "#### なぜ"))
     assert any("なぜ" in e for e in check_decision(p, tmp_docs))
+
+
+# ---- WikiSkill Phase 2 Task 6: ベッカイ抽出(g)と任意キー visibility ---------------
+
+def _parse_text(root, text):
+    return parse_decision(write(root, "docs/議事/議事_20261007_t6.md", text), root)
+
+
+def _check_text(root, text):
+    return check_decision(write(root, "docs/議事/議事_20261007_t6.md", text), root)
+
+
+def test_bekkai_from_heading_section(tmp_docs):
+    d = _parse_text(tmp_docs, "## ベッカイ\n前提を疑う案\n## 裁定\n採用\n")
+    assert d["bekkai"] == "前提を疑う案"
+
+
+def test_bekkai_from_bullet_line_and_continuation(tmp_docs):
+    d = _parse_text(tmp_docs, "- **ベッカイ**: 別案\n  - 補足A\n- **裁定**: x\n")
+    assert "別案" in d["bekkai"] and "補足A" in d["bekkai"] and "裁定" not in d["bekkai"]
+
+
+def test_bekkai_ignores_incidental_mentions(tmp_docs):
+    d = _parse_text(tmp_docs, "本文でベッカイ案に触れた。\n## 裁定\n採用\n")
+    assert d["bekkai"] == ""
+
+
+def test_bekkai_heading_wins_over_bullet_and_never_takes_other_rows(tmp_docs):
+    # 見出しがあれば箇条書きは見ない。ウタガイ・裁定の行や、ベッカイに触れただけの行は混ざらない
+    text = ("- **ウタガイ**: 反対理由(ベッカイ案も検討した)\n- ベッカイ: 箇条書きの別案\n"
+            "### ベッカイ(別解)\n見出しの別案\n- **裁定**: 採用\n### 裁定\n採用\n")
+    d = _parse_text(tmp_docs, text)
+    assert d["bekkai"] == "見出しの別案 - **裁定**: 採用"  # 同レベルの次の見出し(### 裁定)まで = 節の本文
+    assert "ウタガイ" not in d["bekkai"] and "反対理由" not in d["bekkai"] and "箇条書き" not in d["bekkai"]
+
+
+def test_bekkai_bullet_stops_at_sibling_and_is_capped(tmp_docs):
+    text = "- ベッカイ: " + "あ" * 700 + "\n- **ウタガイ**: 反対\n- 裁定: x\n"
+    d = _parse_text(tmp_docs, text)
+    assert d["bekkai"].startswith("あ")
+    assert len(d["bekkai"]) <= decision_memory.SECTION_MAX + 1 and "反対" not in d["bekkai"]
+
+
+def test_visibility_key_parsed(tmp_docs):
+    d = _parse_text(tmp_docs, FM.replace("status: adopted", "status: adopted\nvisibility: private"))
+    assert d["visibility"] == "private"
+    assert _parse_text(tmp_docs, FM)["visibility"] == ""
+
+
+def test_check_rejects_bad_visibility(tmp_docs):
+    errs = _check_text(tmp_docs, FM.replace("status: adopted", "status: adopted\nvisibility: secret"))
+    assert any("visibility" in e for e in errs)
+    for ok in ("public", "private"):
+        assert _check_text(tmp_docs, FM.replace("status: adopted", f"status: adopted\nvisibility: {ok}")) == []

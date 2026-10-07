@@ -16,7 +16,22 @@ on:
       - '.claude/hooks/wikiskill-hook.sh'
       - 'tests/scripts/test_*.py'
       - 'tests/integration/test_wikiskill_memory_e2e.py'
+      - 'tests/integration/test_wikiskill_wiki_e2e.py'
       - '.github/workflows/wikiskill-tests.yml'
+      - 'CLAUDE.md'
+      - 'docs/**'
+      - '.claude/skills/**'
+      - '.claude/settings.json'
+      - '.gitignore'
+      - 'scripts/check_repo_scope.py'
+      - 'scripts/wiki_schema.py'
+      - 'scripts/wiki_validate.py'
+      - 'docs/wiki/**'
+      - 'scripts/wikiskill_lock.py'
+      - 'scripts/knowledge_extract.py'
+      - '.github/workflows/knowledge-extract.yml'
+      - '.github/workflows/repo-scope.yml'
+      - '.github/CODEOWNERS'
   push:
     paths:
       - 'scripts/wikiskill_common.py'
@@ -29,7 +44,22 @@ on:
       - '.claude/hooks/wikiskill-hook.sh'
       - 'tests/scripts/test_*.py'
       - 'tests/integration/test_wikiskill_memory_e2e.py'
+      - 'tests/integration/test_wikiskill_wiki_e2e.py'
       - '.github/workflows/wikiskill-tests.yml'
+      - 'CLAUDE.md'
+      - 'docs/**'
+      - '.claude/skills/**'
+      - '.claude/settings.json'
+      - '.gitignore'
+      - 'scripts/check_repo_scope.py'
+      - 'scripts/wiki_schema.py'
+      - 'scripts/wiki_validate.py'
+      - 'docs/wiki/**'
+      - 'scripts/wikiskill_lock.py'
+      - 'scripts/knowledge_extract.py'
+      - '.github/workflows/knowledge-extract.yml'
+      - '.github/workflows/repo-scope.yml'
+      - '.github/CODEOWNERS'
   workflow_dispatch: {}
 
 concurrency:
@@ -67,5 +97,11 @@ jobs:
           tests/scripts/test_check_experience_privacy.py
           tests/scripts/test_experience_archive.py
           tests/scripts/test_baseline_debt.py
+          tests/scripts/test_wiki_schema.py
+          tests/scripts/test_wiki_validate.py
+          tests/scripts/test_wikiskill_lock.py
+          tests/scripts/test_knowledge_extract.py
+          tests/scripts/test_wikiskill_workflows.py
           tests/integration/test_wikiskill_memory_e2e.py
+          tests/integration/test_wikiskill_wiki_e2e.py
           -q

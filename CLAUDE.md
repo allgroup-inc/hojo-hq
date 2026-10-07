@@ -85,7 +85,8 @@ CVはLINE登録の1点のみ(締切アラートが登録特典)。
 - **Experience** = `.claude/experience/`(機械記録・低信頼・公開可能な範囲のみ。`python3 scripts/experience_log.py note "…"` で所感を残せる)
 - 新セッションは Memory Bootstrap が関連する Decision・失敗台帳・再発防止・Skill **だけ**を注入(段1: ブランチ/commit、段2: 最初の指示。6,000字上限。信頼順 Decision > 失敗台帳 > 再発防止 > Experience)
 - 止め方: `.claude/memory.off`(または `HOJO_MEMORY_OFF=1`)。Rollback: docs/wikiskill/Rollback手順.md
-- Skill の自動更新はしない(Proposal→Evaluation→三名体制→小柳Gate→Merge は Phase 2 以降)
+- 承認済みの知識(`docs/wiki/*.md`)は `[Wiki]` として注入。候補(`docs/wiki/_candidates/`)は読まない。部分停止は `.claude/wiki.off`
+- Skill の自動更新はしない(Skill の検証・Gate は Phase 3 以降・別承認)
 - Baseline Debt: `python3 scripts/baseline_debt.py --compare` が SAME/IMPROVED であること(新しい赤を増やさない)。詳細は docs/wikiskill/README.md
 
 ## マルチAI連携(2026-08-06 小柳さん決裁)
