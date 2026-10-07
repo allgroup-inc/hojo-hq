@@ -17,6 +17,12 @@ on:
       - 'tests/scripts/test_*.py'
       - 'tests/integration/test_wikiskill_memory_e2e.py'
       - '.github/workflows/wikiskill-tests.yml'
+      - 'CLAUDE.md'
+      - 'docs/**'
+      - '.claude/skills/**'
+      - '.claude/settings.json'
+      - '.gitignore'
+      - 'scripts/check_repo_scope.py'
   push:
     paths:
       - 'scripts/wikiskill_common.py'
@@ -30,6 +36,12 @@ on:
       - 'tests/scripts/test_*.py'
       - 'tests/integration/test_wikiskill_memory_e2e.py'
       - '.github/workflows/wikiskill-tests.yml'
+      - 'CLAUDE.md'
+      - 'docs/**'
+      - '.claude/skills/**'
+      - '.claude/settings.json'
+      - '.gitignore'
+      - 'scripts/check_repo_scope.py'
   workflow_dispatch: {}
 
 concurrency:

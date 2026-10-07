@@ -345,7 +345,9 @@ def test_note_survives_git_decode_failure(cli, monkeypatch):
     monkeypatch.setenv("CLAUDE_SESSION_ID", "s7")
     rc, _, _ = cli("note", "still written")
     assert rc == 0
-    assert _events(cli.repo, "s7")[0]["text"] == "still written"
+    # git が全滅(例外)なら tracked か分からないので part へ書く(Phase 2 Task 0b)。本体 or part のどちらかに残っていればよい
+    (path,) = (cli.repo / ".claude/experience").glob("*/session-s7*.jsonl")
+    assert json.loads(path.read_text(encoding="utf-8").splitlines()[0])["text"] == "still written"
 
 
 def test_note_unexpected_error_is_audited_not_a_traceback(cli, monkeypatch):
@@ -514,3 +516,75 @@ def test_branch_on_detached_head_ambiguous_is_unknown(repo):
 
 def test_branch_on_normal_checkout(repo):
     assert start_event(repo, "s1")["branch"] == "main"
+
+
+# ---- Phase 2 Task 0b: 持ち越しA群 (d) git エラー (e) ~ パス ----
+
+from datetime import datetime, timezone  # noqa: E402
+
+_NOW_0B = datetime(2026, 10, 7, 0, 0, 0, tzinfo=timezone.utc)
+
+
+def _audit_text_0b(root):
+    p = root / ".claude/experience/_audit.log"
+    return p.read_text(encoding="utf-8") if p.exists() else ""
+
+
+def _git_fails(monkeypatch, code=128):
+    real_run = subprocess.run
+
+    def fake_run(cmd, *a, **kw):
+        if isinstance(cmd, list) and cmd[:2] == ["git", "ls-files"]:
+            return subprocess.CompletedProcess(cmd, code, "", "fatal: boom")
+        return real_run(cmd, *a, **kw)
+
+    monkeypatch.setattr(experience_log.subprocess, "run", fake_run)
+    experience_log._TRACKED.clear()
+
+
+def test_is_tracked_untracked_exit1_writes_base(repo):
+    p = experience_log.session_file(repo, "s1", _NOW_0B)
+    assert p.name == "session-s1.jsonl"
+
+
+def test_tracked_state_values(repo, monkeypatch):
+    f = repo / "README.md"
+    assert experience_log._tracked_state(repo, f) == "tracked"
+    assert experience_log._is_tracked(repo, f) is True
+    assert experience_log._tracked_state(repo, repo / "nope.txt") == "untracked"
+    _git_fails(monkeypatch)
+    assert experience_log._tracked_state(repo, repo / "nope.txt") == "error"
+    assert experience_log._is_tracked(repo, repo / "nope.txt") is False
+
+
+def test_tracked_state_exception_is_error(repo, monkeypatch):
+    def boom(*a, **kw):
+        raise FileNotFoundError("git")
+
+    monkeypatch.setattr(experience_log.subprocess, "run", boom)
+    assert experience_log._tracked_state(repo, repo / "x.txt") == "error"
+
+
+def test_is_tracked_git_error_writes_part_file(repo, monkeypatch):
+    _git_fails(monkeypatch)
+    p = experience_log.session_file(repo, "s1", _NOW_0B)
+    assert ".part1." in p.name
+    # ディスク上に既にある part は飛ばす
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("{}\n", encoding="utf-8")
+    assert ".part2." in experience_log.session_file(repo, "s1", _NOW_0B).name
+
+
+def test_git_error_is_audited_once(repo, monkeypatch):
+    _git_fails(monkeypatch)
+    for _ in range(3):
+        experience_log.session_file(repo, "s1", _NOW_0B)
+    assert _audit_text_0b(repo).count("git ls-files failed") == 1
+
+
+def test_sanitize_path_tilde_is_external(repo):
+    assert sanitize_path("~/glow/x.md", repo) == "<external>"
+
+
+def test_program_tilde_is_external(repo):
+    assert experience_log._program_of("~/bin/tool --x", repo) == "<external>"
