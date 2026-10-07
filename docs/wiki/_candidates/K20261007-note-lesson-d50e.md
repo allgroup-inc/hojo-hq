@@ -12,15 +12,11 @@ proposed_by: knowledge_extract.py@1.0 rule-based
 contradictions: []
 related_wiki: []
 related_skills: []
-review_status: approved
+review_status: rejected
 dedup_key: d50e97216a34cdd6e62f27b9aed2d0282e544ee1
 extract_run: acceptance-20261007
 source_experience: ["session-2e204a20-0518-5c71-9ca3-85007c32d8ea@2026-10-07T04:48:07Z"]
-wiki_id: W20261007-uketsuke-shiken-origin-main
-approved_by: 小柳(受け入れ試験)
-approved_at: 2026-10-07
-review_by: 2027-04-05
-review: {"スイシン": "再発防止メモと同じ向きの手順で害が無い", "ウタガイ": "note 1件が根拠で再現例が無い。origin/main の取り込みで競合が増える場合の手順は書かれていない", "ベッカイ": "再発防止メモで足りる"}
+rejected_reason: WikiSkill Phase 2 受け入れ試験(Task 8)用の知識。試験完了後に退役(本物の知識として残さない)
 ---
 
 ## 知識

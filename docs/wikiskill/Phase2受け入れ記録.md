@@ -1,30 +1,30 @@
 # WikiSkill Phase 2 受け入れ記録
 
-Task 8(自動 E2E と、実セッション A → B → C の手動 E2E)の記入結果。**未記入(Task 8 で記入する空の台帳)。**
+Task 8(自動 E2E と、実セッション A → B → C の手動 E2E)の記入結果。**2026-10-07 記入済み(Task 8 完了)。**
 導入議事: `docs/議事/議事_20261007_WikiSkill_Phase2導入.md`
 設計書の合格条件: `docs/superpowers/specs/2026-10-07-wikiskill-phase2-knowledge-wiki-design.md`(13章)
 
-試験用の Wiki は題の先頭を「受け入れ試験:」にし、試験後に `docs/wiki/_archive/` へ superseded として移す(本物の知識として残さない)。試験の note に顧客情報・private の内容を書かない。
+試験用の Wiki は題の先頭を「受け入れ試験:」にし、試験後は本物の知識として残さない。計画では `docs/wiki/_archive/` へ superseded として移す予定だったが、検証器 V09 は `superseded` に後継 `superseded_by`(承認済み Wiki)を要求するため、後継の無い試験用 Wiki は `docs/wiki/_candidates/` に `review_status: rejected` + `rejected_reason` で退役させた(注入されず、再抽出でも重複として作られない)。後継の無い退役のための状態は Phase 3 持ち越し。試験の note に顧客情報・private の内容を書かない。
 
 ## 実セッション E2E(A → B → C)
 
 | 項目 | 内容 |
 |---|---|
-| 実施日時 | 2026-10-07 05:03 UTC(Session B) |
-| session_id(A) | |
-| session_id(B) | a0fd1848-3e6b-5193-b939-d50edf9139b4 |
-| session_id(C) | |
+| 実施日時 | 2026-10-07 04:47〜05:12 UTC(Session A 04:47 / 抽出・昇格 04:55〜04:57 / Session B 05:03 / Session C 相当 05:01 / 退役 05:10) |
+| session_id(A) | 2e204a20-0518-5c71-9ca3-85007c32d8ea(クラウドセッション session_01Sbb1GdzyMc7H6wivatT9PL) |
+| session_id(B) | a0fd1848-3e6b-5193-b939-d50edf9139b4(クラウドセッション session_011zwQi8VU2W1oy6yyTviUZM・3回目。1回目 session_01UEWSc2Ug4EJjWXQWTGhb6t と2回目 session_01HksZazM2fYCpdn5A2keNoD は最初の応答が API 側の安全装置エラーで停止し、hook の記録以外は残っていない。所見1) |
+| session_id(C) | C-manual / C-manual-2(本セッションの作業コピーで hook を手動起動。新規クローンは SessionStart 前に `wiki.off` を置けないため、Phase 1 と同じ機械確認で代替。記録ファイルは commit しない) |
 
 | # | 確認項目 | 結果(✅ / ❌) | 備考 |
 |---|---|---|---|
-| F1 | Session A: note `学び: …` を記録し、Experience と関連する議事を commit・push する | | |
-| F2 | 抽出(knowledge-extract を dispatch、またはローカルで `--max 3`)が候補を `docs/wiki/_candidates/` に作る | | |
-| F3 | 候補が検証(`python3 scripts/wiki_validate.py`)を通る | | |
-| F4 | ウタガイが空のままの昇格は検証で止まる | | |
-| F5 | 人の承認(昇格 PR 相当)後、検証が通り commit できる | | |
+| F1 | Session A: note `学び: …` を記録し、Experience と関連する議事を commit・push する | ✅ | note「学び: 受け入れ試験: 生成物を作り直す前に origin/main を取り込むと、新しいデータを消さずに済む」を `.claude/experience/2026-10/session-2e204a20-….jsonl` に記録(`visibility: public`・`repo: allgroup-inc/hojo-hq`)。commit ec88e58b5・dc4efe262(part1)を push。関連する議事は導入議事(D20261007-wikiskill-phase2)が既に commit 済み |
+| F2 | 抽出(knowledge-extract を dispatch、またはローカルで `--max 3`)が候補を `docs/wiki/_candidates/` に作る | ✅ | ローカルで `--max 10 --run-id acceptance-20261007`(`--max 3` では信頼度順で議事・失敗台帳の候補が先に選ばれ note が入らないため)。written 10(議事3・FK6・note1)/ conflict 8 / rejected_by_validator 0 / errors 0。Session A の note は `K20261007-note-lesson-d50e.md`(R2・confidence 0.4・`source_experience` 1件・引用は逐語)。試験で使う note の候補1件だけを残し、他9件は削除(マージ後の最初の dispatch で再生成される)。dispatch は main にまだ workflow が無いため未実施(残課題) |
+| F3 | 候補が検証(`python3 scripts/wiki_validate.py`)を通る | ✅ | `OK: Wiki 0件・候補 10件・違反なし`(10件時点)/ 受領 commit 0b1307aa9 |
+| F4 | ウタガイが空のままの昇格は検証で止まる | ✅ | `review: {"ウタガイ": "なし"}` で昇格 → `docs/wiki/W20261007-uketsuke-shiken-origin-main.md: V09 review.ウタガイ(反対理由)が空・空語`・exit 1 |
+| F5 | 人の承認(昇格 PR 相当)後、検証が通り commit できる | ✅ | ウタガイ「note 1件が根拠で再現例が無い…」を記入、`approved_by: 小柳(受け入れ試験)`・`approved_at: 2026-10-07`・`review_by: 2027-04-05` → `OK: Wiki 1件・候補 0件・違反なし` → commit 3905bb517 を push(件名に Wiki の語を含めて段1の検索語に当たるようにした。Phase 1 E2E と同じ方式) |
 | F6 | Session B: 注入の並びが [再発防止] → [Wiki] → [Skill] | ✅ | 段1の見出し順: [D] → 未解決 → [FK] → [再発防止] → [Wiki] → [Skill] → [Exp] |
 | F7 | Session B: `[Wiki]` 行に題・要約・`根拠:`・`承認:`・パスが出る | ✅ | 題「受け入れ試験: 生成物を作り直す前に origin/main を取り込むと、新しいデータを消さずに済む」・「根拠: Exp 1・Decision 0・FK 0」・「承認: 小柳(受け入れ試験) 2026-10-07」・「→ docs/wiki/W20261007-uketsuke-shiken-origin-main.md」の4点を grep -F で確認 |
-| F8 | Session C: `.claude/wiki.off` で `[Wiki]` だけ止まり、他の区分と記録は動く。消すと戻る | | |
+| F8 | Session C: `.claude/wiki.off` で `[Wiki]` だけ止まり、他の区分と記録は動く。消すと戻る | ✅ | `touch .claude/wiki.off` → hook SessionStart(sid C-manual): `[Wiki]` の節は `- 該当なし`、[D]・未解決・[FK]・[再発防止]・[Skill]・[Exp] は出る、`session-C-manual.jsonl` が作られる、`_audit.log` に `wiki: disabled by wiki.off` 1行。`rm .claude/wiki.off` → sid C-manual-2 で `[Wiki]` 行が戻る |
 | R4 | 逆方向: 矛盾した候補(conflict)が Session B の注入(段1・段2)に一切出ない。`docs/wiki/` 直下に該当ファイルが無い | ✅ | 段1・段2とも conflict 候補の注入なし(段1に「conflict」の語が1回あるが、Phase 2 導入議事 [D] のウタガイ本文の引用で候補ではない)。`ls docs/wiki/*.md` は W20261007-uketsuke-shiken-origin-main.md の1件のみ。備考: Session B 開始時の自分自身のコンテキスト(SessionStart hook の注入)にも `[Wiki]` の行: あり |
 
 ## Session B の注入テキスト(`[Wiki]` 行の前後20行)
@@ -86,22 +86,33 @@ Task 8(自動 E2E と、実セッション A → B → C の手動 E2E)の記入
 
 | 測定値(real) | `_audit.log` の `slow` 行の数 | 判定(0.5秒未満 かつ 0件で ✅) |
 |---|---|---|
-| | | |
+| 0.387 s / 0.385 s / 0.429 s(本セッションの作業コピーで実 hook を3回。Session B の hook 実出力は上の節) | 0 | ✅ |
 
 ## 自動 E2E と全体テスト
 
 | 項目 | 結果 |
 |---|---|
-| `python3 -m pytest tests/integration/test_wikiskill_wiki_e2e.py -q` | |
-| 全体テスト(Phase 1 の固定テスト ID が全て PASS / failed は Baseline の2件のみ)・Phase 2 の新規テスト数(実数) | |
-| `python3 scripts/wiki_validate.py && python3 scripts/check_experience_privacy.py` | |
+| `python3 -m pytest tests/integration/test_wikiskill_wiki_e2e.py -q` | `6 passed`(順方向 F2〜F7・逆方向 R2〜R4・候補の非注入・wiki.off・needs_review・private 側) |
+| 全体テスト(Phase 1 の固定テスト ID が全て PASS / failed は Baseline の2件のみ)・Phase 2 の新規テスト数(実数) | `tests/scripts tests/integration`: `3 failed, 647 passed`(failed は Baseline の scripts tests 2件 + 制度データ件数に依存する `test_ig_automation_e2e`(origin/main でも失敗する既知の赤)。Phase 1 固定 ID 347件: `347 passed`(1回目は負荷依存の SessionStart 計時テスト1件だけが落ち、単独では3回とも合格)。新規テスト: 収集ノード 303件のうち WikiSkill Phase 2 由来 274件(test_wiki_validate 144 / test_knowledge_extract 38 / test_memory_bootstrap 28 / test_wiki_schema 17 / test_wikiskill_lock 10 / test_experience_archive 9 / test_wikiskill_workflows 8 / test_experience_log 7 / test_decision_memory 7 / test_wikiskill_wiki_e2e 6)、残り29件は Phase 1 の固定リストに無かった IG・ミカタ系の既存テスト |
+| `python3 scripts/wiki_validate.py && python3 scripts/check_experience_privacy.py` | `OK: Wiki 0件・候補 1件・違反なし` / `OK: Experience記録 5件・違反なし`(退役後) |
 
 ## Baseline 比較
 
 ```text
-(`python3 scripts/baseline_debt.py --compare` の出力を貼る)
+skill_validation                   5        5     +0
+scripts_tests_preexisting          2        2     +0
+verdict: SAME
 ```
+(check_repo_scope の置き場所の検査は Baseline の 9 件のまま)
 
 ## 所見
 
-(Task 8 で記入。❌ が出たら PR をマージせず、該当の Task に戻る)
+F1〜F8・R4 はすべて ✅。❌ は無い。
+
+1. **Session B は3回目で成功した。** 1回目・2回目は、最初の応答が API 側の安全装置(reasoning_extraction)で止まり、出力 0 トークンで終了した(hook は動いて SessionStart の記録はできている)。両回とも「開始時に注入されたブロックを一字も変えずに貼れ」という指示を含んでおり、3回目はその指示をやめて **hook をツールとして再実行した実出力**(同じリポ状態なら決定的に同じ)を記録させたところ成功した。モデルに「自分のコンテキストの逐語引用」を求める指示が安全装置に当たる可能性がある。次回以降の受け入れ試験はこの方式(hook の再実行)を標準にする。
+2. **段2の `[FK-002]`(マージ競合)は出ない。** 段1で既に `[FK-002]` が出ているため、段2は段1に出たものを除外する規則(Phase 1 どおり)で `[FK-001]` が選ばれた。設計どおりで、自動 E2E の逆方向テストもこの性質を踏まえて陽性対照を置いている。
+3. **実データの矛盾検知は 10 件中 8 件が conflict**(Task 4 時点の 9 件中 5 件から増加。Phase 2 導入議事が否定語「しない」を多く含むため)。試験用の note 候補は conflict にならなかった。導入議事のウタガイ①(偽陽性がレビュー負債になる)のとおりで、しきい値・照合範囲は変えていない。文単位の照合は別 Decision で検討(議事に試算を記載)。
+4. **試験用 Wiki の退役先。** `_archive/` の `superseded` は後継 Wiki を要求する(V09)ため、`_candidates/` に `rejected` で退役させた。後継の無い退役(試験用・陳腐化)のための状態は Phase 3 持ち越し。
+5. **Session C は手動 hook 起動で代替**(新規クローンは SessionStart 前に `wiki.off` を置けない)。Phase 1 の所見と同じ扱い。
+6. **SessionStart は 0.39〜0.43 秒**(Wiki 1 件・候補 1 件)。Phase 1(0.371 秒)から +0.02〜0.06 秒。`slow` は 0 件。全体テストの同時実行中だけ Phase 1 の単発計時テストが 0.5 秒を跨ぐことがある(負荷依存。残課題として報告)。
+7. **knowledge-extract workflow の dispatch は未実施**(main にまだ無い)。マージ後の最初の dispatch を Task 9 の残課題にする。
