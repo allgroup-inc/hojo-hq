@@ -1,6 +1,6 @@
 ---
 candidate_id: K20261007-note-lesson-d50e
-title: 学び: 受け入れ試験: 生成物を作り直す前に origin/main を取り込むと、新しいデータを消さずに済む
+title: 受け入れ試験: 生成物を作り直す前に origin/main を取り込むと、新しいデータを消さずに済む
 summary: 学び(手順・気づき): 受け入れ試験: 生成物を作り直す前に origin/main を取り込むと、新しいデータを消さずに済む
 evidence: [{"ref": "session-2e204a20-0518-5c71-9ca3-85007c32d8ea@2026-10-07T04:48:07Z", "quote": "受け入れ試験: 生成物を作り直す前に origin/main を取り込むと、新しいデータを消さずに済む"}]
 confidence: 0.4
@@ -12,10 +12,15 @@ proposed_by: knowledge_extract.py@1.0 rule-based
 contradictions: []
 related_wiki: []
 related_skills: []
-review_status: candidate
+review_status: approved
 dedup_key: d50e97216a34cdd6e62f27b9aed2d0282e544ee1
 extract_run: acceptance-20261007
 source_experience: ["session-2e204a20-0518-5c71-9ca3-85007c32d8ea@2026-10-07T04:48:07Z"]
+wiki_id: W20261007-uketsuke-shiken-origin-main
+approved_by: 小柳(受け入れ試験)
+approved_at: 2026-10-07
+review_by: 2027-04-05
+review: {"スイシン": "再発防止メモと同じ向きの手順で害が無い", "ウタガイ": "note 1件が根拠で再現例が無い。origin/main の取り込みで競合が増える場合の手順は書かれていない", "ベッカイ": "再発防止メモで足りる"}
 ---
 
 ## 知識
