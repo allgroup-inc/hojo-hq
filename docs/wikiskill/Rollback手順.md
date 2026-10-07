@@ -132,7 +132,8 @@ rm .claude/wiki.off         # 再開する
 
 - GitHub の Actions 画面で `knowledge-extract` ワークフローを無効化する(Disable workflow)。実行は手動(`workflow_dispatch`)のみなので、これで抽出は完全に止まる。cron は無い(Gate G2)。
 - 抽出が作った `wiki-candidates/<RUN_ID>` ブランチの PR は、マージせずにクローズする。ブランチの push の時点で公開されているので、RB2(private 由来のテキスト)のときは、PR のクローズだけでなくブランチの削除と履歴の扱いを議事で決める。
-- 残った実行の鍵(`.claude/locks/knowledge-extract.lock`)が古くなったときは、`python3 scripts/knowledge_extract.py --break-stale-lock`。
+- ローカルで抽出を走らせない(`python3 scripts/knowledge_extract.py` を実行しない)。`--break-stale-lock` は鍵を外すだけのコマンドではなく、抽出そのものを実行する(最大10件の候補をローカルに書く)ので、止めたいときには使わない。
+- 古くなった鍵(`.claude/locks/knowledge-extract.lock`)が後の実行を止めているときは、`python3 scripts/knowledge_extract.py --dry-run --break-stale-lock`(何も書かない)で外すか、動いている実行が無いことを確かめてから鍵のファイルを手で削除する。鍵が効くのはローカルだけで、Actions の実行環境は毎回新しい checkout なので鍵は残らない。
 
 ### P4. 正式 Rollback: Phase 2 全体を元に戻す(PR 全体の revert)
 

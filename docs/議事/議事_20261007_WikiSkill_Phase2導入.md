@@ -40,7 +40,7 @@ decided_by: 小柳
    6. **G6**: Phase 2 の実装開始を承認。Release/Tag `wikiskill-phase2-v1` は、Task 9 の報告を小柳さんが最終承認してから。
 2. **仕組み(Candidate → Validation → Human Approval → Official Wiki)**
    1. 抽出(`scripts/knowledge_extract.py`)は commit 済みで HEAD から変わっていない public かつ hojo-hq の Experience 行と、commit 済みの議事・失敗台帳だけを読む。書き込み先は `docs/wiki/_candidates/` の `K….md` だけ。書く前に自分の出力を検証器に掛け、違反した候補は書かない。排他は `.claude/locks/knowledge-extract.lock`(30分・heartbeat。stale の自動解除は終了印または pid 死亡のときだけ。それ以外は `--break-stale-lock`)。
-   2. 検証(`scripts/wiki_validate.py`)は V01〜V15。引用の最小長 `MIN_QUOTE = 8`、見直し期限は承認日から `MAX_REVIEW_DAYS = 183` 日以内、`approved_at >= created_at`、題と根拠の類似度は双方向で 0.6 以上、禁止語は不可視文字を除いて検査する。
+   2. 検証(`scripts/wiki_validate.py`)は V01〜V15。引用の最小長 `MIN_QUOTE = 8`、見直し期限は承認日から `MAX_REVIEW_DAYS = 183` 日以内、`approved_at >= created_at`、題が既存の Wiki・他の候補と双方向で 0.6 以上似ていたら重複として止める(`duplicate_of` の明記が必要)、禁止語は不可視文字を除いて検査する。
    3. 正式な Wiki は `docs/wiki/` 直下の `<wiki_id>.md`。置き換えられたものは `docs/wiki/_archive/`。昇格の道は人がマージする PR だけ(`docs/wikiskill/Wiki昇格手順.md`)。
    4. Bootstrap は `[Wiki]` 行に、題・要約(160字)・根拠の件数(Exp / Decision / FK)・承認者・承認日・パスを出す。
    5. 同義語表 `docs/wiki/_synonyms.txt`(初期4行: マージ/merge、コミット/commit、締切/期限/deadline、議事/decision。完全一致のみ)。これらの語では Bootstrap の結果が変わりうる。
@@ -48,7 +48,7 @@ decided_by: 小柳
    7. 部分停止は `.claude/wiki.off`(`[Wiki]` だけ止まる)。全体停止は `.claude/memory.off`(従来どおり記録も注入も止まる)。
    8. Archive の防護: `experience_archive.py --archive` は `docs/wiki/` 直下の Wiki が根拠に引いている月を固めない(`--force` と監査記録でだけ上書き)。
 3. **Phase 3 へ持ち越し**: Skill Proposer / Validator / Evolution Gate、Conflict Resolver(自動統合)、Skill Metrics、LLM 下書き(G3)、Experience の索引と移動(#24)、月次 cron(G2)、極性を見る矛盾判定、Archive を考慮した V03(索引の `pinned`)、他リポジトリの読み取り。
-4. **実測した偽陽性(2026-10-07・実データ)**: 候補9件のうち5件が conflict と判定された。5件はすべて長い1件の Decision(`D20261006-skill-dist-privacy-gate`)から出ており、4件は組織全体の語(議事・三名体制・実装・phase・小柳)だけで一致、1件(SKILL.md と失敗台帳の候補)だけが本当の矛盾の可能性がある。閾値は計画どおり変えない。後で直す案(別の議事が要る): 否定語を含む文だけで照合する(実測で 6 件が 3 件、出典の自己除外後は 2 件)。
+4. **実測した偽陽性(2026-10-07・実データ)**: 候補9件のうち5件が conflict と判定された。5件はすべて長い1件の Decision(`D20261006-skill-dist-privacy-gate`)から出ており、4件は組織全体の語(議事・三名体制・実装・phase・小柳)だけで一致、1件(SKILL.md と失敗台帳の候補)だけが本当の矛盾の可能性がある。閾値は計画どおり変えない。後で直す案(別の議事が要る): 否定語を含む文だけで照合する。**試算(参考)**: Task 4 のレビュー時の試算(stop語除外・自己出典除外を入れる前の 6 件時点)で、否定語を含む文だけで照合すると 6→3 件、さらに自己出典を除外すると 2 件。出荷版の実測は 9 件中 5 件。
 
 ## 代替案
 
