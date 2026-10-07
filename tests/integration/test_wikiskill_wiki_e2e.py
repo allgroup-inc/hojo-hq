@@ -302,6 +302,7 @@ def test_reverse_wrong_experience_conflict_never_injected(world):
     [rel] = _note_candidates(world, s)
     w = load(world, rel)
     assert w["review_status"] == "conflict"                                                   # R2
+    assert "当日中に反映" in w["title"] or "当日中に反映" in w["summary"]                         # 下の不在検査は候補の文を狙う
     assert [c["source"] for c in w["contradictions"]] == [did]
     assert validate(world).returncode == 0                                                    # conflict の候補は置いてよい
     commit_all(world, "docs: wiki 候補(自動生成物を直接 push)")
@@ -312,9 +313,13 @@ def test_reverse_wrong_experience_conflict_never_injected(world):
     undo_promote(world)
     assert (world / rel).exists() and validate(world).returncode == 0                         # 候補に戻った
 
-    ctx = context(hook(world, "SessionStart", sid="B", source="startup")) + stage2(world, "B", "直接 push の手順")
+    ctx = context(hook(world, "SessionStart", sid="B", source="startup"))
     assert "[D] " in ctx                                                                       # 検索語は当たっている(空振りでない)
-    assert "当日中に反映" not in ctx and not list((world / "docs/wiki").glob("*.md"))           # R4
+    assert "当日中に反映" not in ctx and not list((world / "docs/wiki").glob("*.md"))           # R4(段1)
+    # 段2は段1で出した項目を除くので、段1に無いもの(FK-002・再発防止のマージ競合)にも当たる指示で、段2が実際に動いたことを示す
+    s2 = stage2(world, "B", "直接 push で当日中に反映する手順と、マージで競合したときの手順")
+    assert s2 and ("- [FK-002]" in s2 or "- [再発防止] " in s2), s2                              # 陽性対照
+    assert "当日中に反映" not in s2                                                            # R4(段2)
 
 
 def test_candidate_never_injected_before_approval(world):
