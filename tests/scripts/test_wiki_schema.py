@@ -131,3 +131,120 @@ def test_title_similarity():
     assert title_similarity("マージ前に競合一覧を確認する", "マージ前に競合一覧を確認する") == 1.0
     assert title_similarity("git push の手順", "締切アラートの配信") < 0.6
     assert title_similarity("", "x") == 0.0
+
+
+# ---------------------------------------------------------------- 矛盾判定の照合範囲(議事 D20261007-wikiskill-conflict-scope)
+
+import wiki_schema  # noqa: E402
+from wiki_schema import decision_conflicts, negation_sentences  # noqa: E402
+
+# 実データ(D20261006-skill-dist-privacy-gate・D20261006-wikiskill-phase1 の裁定)を写した長い裁定文。
+# 組織全体の語(phase・議事・小柳・実装・skill)は否定語の無い文にあり、否定文は update-skills.sh の1文だけ。
+RULING_PROSE = ("採用。今後の Skill 配布は原則 Skill変更 → Privacy / Scope → 三名体制レビュー → 小柳 Decision Gate → 配布 "
+                "の順とする。ただし Phase 1 では `scripts/update-skills.sh` そのものを変更しない。"
+                "実装は別タスクとして起票。議事は Phase 2 の実装で参照する。")
+FK003_LESSON = ("事故+プロセス: Lighthouse CI が performance スコア基準未達で連続失敗し、Issue が開いたまま"
+                "自動 bot コメントが積まれ続けた。レイアウト系 CSS の適用範囲を広げる変更は議事と三名体制で決め、"
+                "実装を本番で実測する。")
+PHASE1_RULING = ("WikiSkill Phase 1(記憶基盤)の導入 裁定: 2026-10-06 小柳さん承認。Task 9(PR・マージ・タグ)は別承認。"
+                 " - ウタガイの3点は受け入れ条件として実装に取り込む。 - 実装は Subagent-driven で進め、skill と議事を参照する。")
+
+
+def _adopted(outcome, title="配布の手順", did="D20261006-x"):
+    return {"id": did, "status": "adopted", "date": "2026-10-06", "title": title, "outcome": outcome, "tags": []}
+
+
+@pytest.fixture(autouse=True)
+def _fresh_conflict_cache():
+    wiki_schema._clear_conflict_cache()
+    yield
+    wiki_schema._clear_conflict_cache()
+
+
+def test_negation_sentences_split_on_period_newline_and_bullets():
+    text = "A はする。B はしない\nC は禁止 - D は進める - E は却下 ・F はやめる ① G は不可 1. H は進める 2) I はしない"
+    assert negation_sentences(text) == ["B はしない", "C は禁止", "E は却下", "F はやめる", "G は不可", "I はしない"]
+
+
+def test_negation_sentences_midword_marks_do_not_split():
+    """空白の直後でない ・ や丸数字(規則①・scripts・sh)は文の区切りにしない。丸数字の範囲はかなを含まない。"""
+    assert negation_sentences("規則①と scripts・sh の変更はしない") == ["規則1と scripts・sh の変更はしない"]
+    assert negation_sentences("ひらがなとカタカナだけの文はしない") == ["ひらがなとカタカナだけの文はしない"]
+
+
+def test_negation_sentences_title_only_negation():
+    assert negation_sentences("直接 push は禁止\n本文は手順の説明だけ。例外もある") == ["直接 push は禁止"]
+
+
+def test_negation_sentences_removes_code_spans():
+    assert negation_sentences("Phase 1 では `scripts/update-skills.sh` を変更しない") == ["Phase 1 では   を変更しない"]
+
+
+def test_negation_inside_code_span_is_not_a_negation_sentence():
+    """コード断片の中の否定語は数えない(パス・コマンドは Decision の文ではない)。"""
+    assert negation_sentences("手順は `--no-verify しない` を参照する") == []
+
+
+def test_negation_sentences_demonstrative_pulls_one_previous_sentence():
+    assert negation_sentences("生成物を作り直すときに新しいデータを取り込む手順は使わない。この手順は採用しない") == [
+        "生成物を作り直すときに新しいデータを取り込む手順は使わない", "この手順は採用しない"]
+    # 箇条書きの印・空白の後でも指示語として見る。遡るのは1文だけ
+    assert negation_sentences("A を使う。B を作る。 - その案は却下") == ["B を作る", "その案は却下"]
+
+
+def test_negation_sentences_demonstrative_without_negation_pulls_nothing():
+    assert negation_sentences("A を使う。この方法は速い。B は禁止") == ["B は禁止"]
+
+
+def test_negation_sentences_negation_without_demonstrative_stays_alone():
+    assert negation_sentences("A を使う。B は禁止") == ["B は禁止"]
+
+
+def test_decision_feats_cache_key_and_negation_only_features():
+    import memory_bootstrap as mb
+    d = _adopted(RULING_PROSE)
+    negs, feats = wiki_schema._decision_feats(d, mb)
+    assert negs == ("しない",)
+    assert (d["title"], d["outcome"]) in wiki_schema._DECISION_FEATS
+    assert "小柳" not in feats and "scripts" not in feats and "phase" in feats
+
+
+def test_real_data_ruling_prose_is_not_conflict():
+    """実データの偽陽性の再現: 裁定文の否定語の無い文の語(phase・議事・小柳・実装・skill)では当てない。"""
+    import memory_bootstrap as mb
+    whole = mb.features(_adopted(RULING_PROSE)["title"] + " " + RULING_PROSE)
+    for text in (FK003_LESSON, PHASE1_RULING):
+        old_units = [g[0][1] for g in wiki_schema._conflict_groups(text, None, mb) if mb._group_matches(g, whole)]
+        assert len(old_units) >= wiki_schema.CONFLICT_MIN_UNITS  # 全文で照合していた頃は矛盾になっていた
+        assert decision_conflicts(text, [_adopted(RULING_PROSE)]) == []
+
+
+def test_backtick_path_only_overlap_is_not_conflict():
+    d = _adopted("Phase 1 では `scripts/update-skills.sh` を変更しない")
+    assert decision_conflicts("Phase 1 の scripts と update-skills.sh の手順", [d]) == []
+
+
+def test_abc_forbidden_still_conflicts():
+    got = decision_conflicts("学び: 自動生成物を main へ直接 push したら当日中に反映できた",
+                             [_adopted("自動生成物は main へ直接 push しない")])
+    assert [g["decision"] for g in got] == ["D20261006-x"] and {"自動生成物", "直接", "push"} <= set(got[0]["units"])
+
+
+def test_genuinely_incompatible_alert_candidate_conflicts():
+    got = decision_conflicts("締切7日前にアラートを送ると登録率が上がる",
+                             [_adopted("締切7日前のアラートは配信しない。利用者向けは約1か月前から")])
+    assert got and {"締切", "アラート"} <= set(got[0]["units"])
+
+
+@pytest.mark.xfail(strict=True, reason="既知の偽陰性: 「送らない」は NEGATION_WORDS に無い。否定語リストの拡張は別議事")
+def test_known_false_negative_verb_not_in_negation_words():
+    assert decision_conflicts("締切7日前にアラートを送ると登録率が上がる",
+                              [_adopted("締切7日前のアラートは送らない。利用者向けは約1か月前から")])
+
+
+def test_anaphoric_negation_conflicts_via_previous_sentence():
+    """R5 の fixture と同じ形: 禁止の中身は前の文、否定語は「この手順は採用しない」にある。"""
+    d = _adopted("生成物を作り直すときに新しいデータを取り込む手順は使わない。この手順は採用しない",
+                 title="生成物の取り込み手順")
+    got = decision_conflicts("学び: 生成物を作り直す前に origin/main を取り込むと、新しいデータを消さずに済む", [d])
+    assert got and {"生成物", "データ"} <= set(got[0]["units"])

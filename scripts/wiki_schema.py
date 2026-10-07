@@ -429,14 +429,53 @@ def conflict_text(w_or_draft: dict) -> str:
     return " ".join(str(x or "") for x in (w_or_draft.get("title"), w_or_draft.get("summary"), knowledge))
 
 
+# 照合範囲(議事 D20261007-wikiskill-conflict-scope): Decision 側は否定語を含む文だけ・コード断片は除く。
+_CODE_SPAN_RE = re.compile(r"`[^`\n]*`")
+# 丸数字はブロック単位で書く(①〜⑳ U+2460–2473 / ㉑〜㉟ U+3251–325F / ㊱〜㊿ U+32B1–32BF。かなを含めない)
+_CIRCLED_DIGITS = "\u2460-\u2473\u3251-\u325f\u32b1-\u32bf"
+# 文の区切り: 句点・改行・箇条書きの頭(行頭か空白の直後の `- ` `* ` `・` 丸数字 `1. ` `1) `)。
+# 議事の裁定は decision_memory が改行を空白に畳むため、箇条書きの頭は「空白の直後」でも区切る。
+_SENTENCE_SPLIT_RE = re.compile(rf"。|\n|(?:^|(?<=\s))(?:[-*](?=\s)|・|[{_CIRCLED_DIGITS}]|\d{{1,3}}[.)](?=\s))")
+
+# 否定文の先頭がこれらなら直前の1文も照合に含める(指示語で前の文の禁止の中身を受けている)
+DEMONSTRATIVES = ("この", "その", "これ", "それ", "上記", "前記")
+_BULLET_HEAD_RE = re.compile(r"^[\s\-*・]+")
+
+
+def negation_sentences(text: str) -> list[str]:
+    """text からコード断片(`…`)を除き、文に分けて、否定語(NEGATION_WORDS)を含む文を返す(各文は NFKC・文書順)。
+
+    否定語を含む文が指示語(DEMONSTRATIVES。先頭の空白・箇条書きの印を除いて判定)で始まるときは、直前の1文も
+    返す(「…手順は使わない。この手順は採用しない」の禁止の中身は前の文にある)。遡るのは1文だけ。
+    コード断片の中の否定語は数えない(パス・コマンドは Decision の文ではない)。返す文は前後の空白を除いたもの。
+    文に分けてから NFKC にする(NFKC は丸数字を数字に変えるため、先に畳むと箇条書きの頭が消える)。
+    """
+    s = _CODE_SPAN_RE.sub(" ", str(text or ""))
+    parts = [p for p in (unicodedata.normalize("NFKC", x).strip() for x in _SENTENCE_SPLIT_RE.split(s)) if p]
+    keep: set[int] = set()
+    for i, part in enumerate(parts):
+        if any(w in part for w in NEGATION_WORDS):
+            keep.add(i)
+            if i > 0 and _BULLET_HEAD_RE.sub("", part).startswith(DEMONSTRATIVES):
+                keep.add(i - 1)
+    return [parts[i] for i in sorted(keep)]
+
+
 def _decision_feats(d: dict, mb) -> tuple[tuple[str, ...], frozenset[str]]:
-    """Decision 側(title + outcome)の否定語と features。同じ (title, outcome) は1プロセスに1回だけ計算する。"""
+    """Decision 側(title + outcome)の否定語と features。同じ (title, outcome) は1プロセスに1回だけ計算する。
+
+    否定語(自己出典の判定に使う)は title + outcome 全体から、features は否定語を含む文(+ その文が この/その 等で
+    始まる場合は直前の1文。negation_sentences。コード断片を除く)だけから作る。
+    """
     key = (str(d.get("title") or ""), str(d.get("outcome") or ""))
     hit = _DECISION_FEATS.get(key)
     if hit is None:
-        text = key[0] + " " + key[1]
+        text = key[0] + "\n" + key[1]
         folded = unicodedata.normalize("NFKC", text)
-        hit = (tuple(w for w in NEGATION_WORDS if w in folded), frozenset(mb.features(text)))
+        feats: set[str] = set()
+        for sentence in negation_sentences(text):
+            feats |= mb.features(sentence)
+        hit = (tuple(w for w in NEGATION_WORDS if w in folded), frozenset(feats))
         _DECISION_FEATS[key] = hit
     return hit
 
@@ -465,7 +504,8 @@ def decision_conflicts(text: str, decisions: list[dict], synonyms: list[frozense
     対象: status == adopted・tags に test を含まない・(after 指定時)date > after・(until 指定時)date ≤ until
     (date が読めない Decision は until では残す = 止めすぎる側、after では外す)。
     判定: Decision の title + outcome に NEGATION_WORDS のどれかがあり、text の語(memory_bootstrap.query_groups。
-    同義語の同じ行は1語。STOP_TERMS は数えない)が Decision 側の features に CONFLICT_MIN_UNITS 以上当たる。
+    同義語の同じ行は1語。STOP_TERMS は数えない)が Decision 側の features(否定語を含む文 + 指示語で始まる否定文の
+    直前の1文・コード断片を除く。negation_sentences)に CONFLICT_MIN_UNITS 以上当たる。
     self_sources(候補自身の source_decision)の Decision は、その否定語がすべて text にもある(否定を引き継いで
     言い直している)ときだけ除く。否定語を落とした言い直しは矛盾として残す。例外は呼び元で「矛盾あり」。
     """
