@@ -385,3 +385,72 @@ def test_cli_dry_run_prints_summary(ex):
     s = json.loads(r.stdout)
     assert s["run_id"] == "t-1" and len(s["written"]) == 3 and s["inputs"]["experience_rows"] == PUBLIC_ROWS
     assert not list((ex / CANDIDATES_DIR).glob("K*.md"))
+
+
+# ---------------------------------------------------------------- fix round 1(commit 済みの議事・台帳だけ・途中でロックを失う)
+
+UNTRACKED_ID = "D20261003-untracked-rule"
+UNTRACKED_DECISION = ADOPTED_TEXT.replace(ADOPTED_ID, UNTRACKED_ID).replace(
+    "マージ前に競合ファイル一覧を必ず確認してからコミットする", "未追跡の議事に書いた裁定は候補にしない")
+
+
+def test_untracked_or_uncommitted_decision_not_read(ex):
+    (ex / "docs/議事/議事_20261003_未追跡.md").write_text(UNTRACKED_DECISION, encoding="utf-8")
+    deferred = ex / "docs/議事/議事_20261002_長期保存.md"
+    deferred.write_text(deferred.read_text(encoding="utf-8") + "\n追記(未 commit)\n", encoding="utf-8")
+    inp = collect_inputs(ex)
+    ids = {d["id"] for d in inp["decisions"]}
+    assert ids == {ADOPTED_ID} and inp["counts"]["decisions"] == 1
+    assert [d["source_decision"] for d in rule_decision_ruling(inp)] == [[ADOPTED_ID]]
+    assert not any(UNTRACKED_ID in (ex / p).read_text(encoding="utf-8") for p in run(ex)["written"])
+    commit_all(ex, "commit decisions")
+    assert {d["id"] for d in collect_inputs(ex)["decisions"]} == {ADOPTED_ID, DEFERRED_ID, UNTRACKED_ID}
+
+
+def test_uncommitted_ledger_not_read(ex):
+    ledger = ex / "docs/失敗台帳.md"
+    ledger.write_text(ledger.read_text(encoding="utf-8") + FK_ROW.replace("FK-002", "FK-003") + "\n", encoding="utf-8")
+    inp = collect_inputs(ex)
+    assert inp["failures"] == [] and "failures-uncommitted" in inp["errors"]
+    assert rule_failure_ledger(inp) == []
+    s = run(ex)
+    assert "failures-uncommitted" in s["input_errors"] and not any("FK-" in p for p in s["written"])
+    commit_all(ex, "commit ledger")
+    assert [r["id"] for r in collect_inputs(ex)["failures"]] == ["FK-002", "FK-003"]
+
+
+def test_untracked_ledger_not_read(ex):
+    git(ex, "rm", "-q", "--cached", "docs/失敗台帳.md")
+    git(ex, "commit", "-q", "-m", "untrack ledger")  # ファイルは作業ツリーに残る(未追跡)
+    assert (ex / "docs/失敗台帳.md").is_file()
+    inp = collect_inputs(ex)
+    assert inp["failures"] == [] and "failures-uncommitted" in inp["errors"]
+
+
+def test_lock_lost_mid_run_exits_1_with_partial_summary(ex, monkeypatch, capsys):
+    import wikiskill_lock
+    from wikiskill_lock import LockHeld
+
+    writes = []
+    real_write = knowledge_extract.write_candidate
+
+    def counting_write(root, w):
+        writes.append(w["candidate_id"])
+        return real_write(root, w)
+
+    def beat(root, name, lock, now=None):
+        if writes:  # 1件書いた後で、ロックを他人に取られた
+            raise LockHeld({"session_id": "R"}, 0, "lost")
+
+    monkeypatch.setattr(wikiskill_lock, "HEARTBEAT_EVERY_S", 0)
+    monkeypatch.setattr(wikiskill_lock, "heartbeat", beat)
+    monkeypatch.setattr(knowledge_extract, "write_candidate", counting_write)
+    code = knowledge_extract.main(["--root", str(ex)])
+    s = json.loads(capsys.readouterr().out)
+    assert code == 1 and s["lock_lost"] is True and len(s["written"]) == 1 and len(writes) == 1
+    assert any("lock lost" in e for e in s["errors"])
+    assert len(list((ex / CANDIDATES_DIR).glob("K*.md"))) == 1
+
+
+def test_lock_not_lost_reports_false(ex):
+    assert run(ex, dry_run=True)["lock_lost"] is False

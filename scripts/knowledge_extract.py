@@ -5,10 +5,11 @@ commit 済み・public・hojo-hq の記録だけから、規則 R1〜R4 で Wiki
 `docs/wiki/_candidates/` にだけ書く(設計書 7.1)。正式化(承認)はしない。
 
 入力(collect_inputs):
+    共通        どの区分も「git 管理下・HEAD から変わっていない・symlink でない」ファイルだけを読む
     Experience  git 管理下で HEAD から変わっていない JSONL(wiki_validate と同じ読み方)の、
                 visibility == "public" かつ repo == "allgroup-inc/hojo-hq" の行だけ。他の行は読み捨て・数えない
     Decision    load_decisions の status ∈ {adopted, deferred} かつ public のもの
-    失敗台帳    docs/失敗台帳.md の `| FK-xxx |` 行(wiki_validate と同じ読み方)
+    失敗台帳    docs/失敗台帳.md の `| FK-xxx |` 行。台帳が未 commit なら丸ごと読まない(input_errors に残す)
     学び        (--include-gakubi のときだけ)docs/学び/*.md の箇条書き。evidence 専用で、単独では根拠にしない
     リポジトリ自体が public(hojo-hq)でなければ、どの区分も読まない(private → public の経路を作らない)
 
@@ -25,7 +26,7 @@ commit 済み・public・hojo-hq の記録だけから、規則 R1〜R4 で Wiki
 使い方:
     python3 scripts/knowledge_extract.py [--no-llm] [--include-gakubi] [--dry-run] [--max N] [--run-id ID]
                                          [--root PATH] [--break-stale-lock]
-    exit 0 / 1(書込・検証の失敗)/ 2(使い方。--llm は未実装)/ 3(ロック中)
+    exit 0 / 1(書込・検証の失敗・実行中にロックを失った)/ 2(使い方。--llm は未実装)/ 3(ロック中)
 """
 from __future__ import annotations
 
@@ -141,8 +142,28 @@ def _read_experience(root: Path) -> tuple[dict[str, list[dict]], int]:
     return sessions, rows
 
 
+class _Uncommitted(Exception):
+    """入力のファイルが commit 済みのまま(git 管理下・HEAD と同じ内容・symlink でない)ではない。"""
+
+
+def _committed_files(root: Path, pathspec: str) -> set[str]:
+    """`_committed_experience` と同じ判定: git 管理下の通常ファイル(mode 100644/100755・symlink でない)で、
+    `git diff --name-only HEAD` に出ない(作業ツリー・index とも HEAD と同じ)もの。git が失敗すれば ContextError。"""
+    tracked: set[str] = set()
+    for entry in wiki_validate._git(root, "ls-files", "-s", "-z", "--", pathspec).split("\0"):
+        if not entry:
+            continue
+        meta, _tab, path = entry.partition("\t")
+        if meta.split(" ", 1)[0] not in ("100644", "100755") or (Path(root) / path).is_symlink():
+            continue
+        tracked.add(path)
+    changed = set(wiki_validate._git(root, "diff", "--name-only", "-z", "HEAD", "--", pathspec).split("\0"))
+    return tracked - changed
+
+
 def _read_decisions(root: Path, repo_vis: str) -> list[dict]:
-    decisions = load_decisions(root)
+    committed = _committed_files(root, "docs")
+    decisions = [d for d in load_decisions(root) if d.get("path") in committed]  # 未追跡・未 commit の議事は読まない
     ids = Counter(d.get("id") for d in decisions)
     out = []
     for d in decisions:
@@ -163,6 +184,11 @@ def _read_decisions(root: Path, repo_vis: str) -> list[dict]:
 
 
 def _read_failures(root: Path) -> list[dict]:
+    ledger = Path(root) / wiki_validate.FAILURE_LEDGER
+    if not ledger.exists() and not ledger.is_symlink():
+        return []
+    if wiki_validate.FAILURE_LEDGER not in _committed_files(root, wiki_validate.FAILURE_LEDGER):
+        raise _Uncommitted(wiki_validate.FAILURE_LEDGER)  # 未追跡・未 commit の変更がある台帳は丸ごと読まない
     rows, dup = wiki_validate._read_ledger(root)
     out = []
     for fid, line in rows.items():
@@ -178,8 +204,7 @@ def _read_failures(root: Path) -> list[dict]:
 
 def _read_gakubi(root: Path) -> list[dict]:
     out = []
-    listing = wiki_validate._git(root, "ls-files", "-z", "--", GAKUBI_DIR)
-    for rel in sorted(p for p in listing.split("\0") if p.endswith(".md")):
+    for rel in sorted(p for p in _committed_files(root, GAKUBI_DIR) if p.endswith(".md")):
         path = Path(root) / rel
         if path.is_symlink() or Path(rel).parent.as_posix() != GAKUBI_DIR:
             continue
@@ -213,6 +238,10 @@ def collect_inputs(root: Path, include_gakubi: bool = False) -> Inputs:
     for name, fn in steps:
         try:
             got = fn()
+        except _Uncommitted as e:
+            inp["errors"].append(f"{name}-uncommitted")
+            audit(root, _COMPONENT, f"input {name} skipped: {e} is untracked or has uncommitted changes")
+            continue
         except Exception as e:  # noqa: BLE001 — 区分ごとに続ける(要約の errors に出す)
             inp["errors"].append(name)
             audit(root, _COMPONENT, f"input {name} unreadable: {type(e).__name__}: {e}")
@@ -593,6 +622,21 @@ def run(root: Path, *, llm: bool = False, include_gakubi: bool = False, dry_run:
 
 def _run_locked(root: Path, lock: dict, now, run_id: str, include_gakubi: bool, dry_run: bool,
                 max_candidates: int) -> dict:
+    """ロックを途中で失ったら(heartbeat が LockHeld)、そこで止めて途中までの要約に lock_lost を付けて返す(exit 1)。"""
+    summary = {"run_id": run_id, "dry_run": dry_run, "written": [], "skipped_duplicate": 0, "conflict": 0,
+               "duplicate_of_marked": 0, "over_max": 0, "rejected_by_validator": [], "post_write_violations": [],
+               "errors": [], "input_errors": [], "lock_lost": False, "inputs": {}}
+    try:
+        _run_body(root, lock, now, run_id, include_gakubi, dry_run, max_candidates, summary)
+    except LockHeld as e:  # ここで出る LockHeld は heartbeat からだけ(取得失敗は run() の外で exit 3)
+        summary["lock_lost"] = True
+        summary["errors"].append(f"lock lost mid-run: {e}")
+        audit(root, _COMPONENT, f"lock lost mid-run; stopped after {len(summary['written'])} write(s): {e}")
+    return summary
+
+
+def _run_body(root: Path, lock: dict, now, run_id: str, include_gakubi: bool, dry_run: bool,
+              max_candidates: int, summary: dict) -> None:
     last_beat = time.monotonic()
 
     def beat(force: bool = False) -> None:
@@ -601,9 +645,6 @@ def _run_locked(root: Path, lock: dict, now, run_id: str, include_gakubi: bool, 
             wikiskill_lock.heartbeat(root, LOCK_NAME, lock)
             last_beat = time.monotonic()
 
-    summary = {"run_id": run_id, "dry_run": dry_run, "written": [], "skipped_duplicate": 0, "conflict": 0,
-               "duplicate_of_marked": 0, "over_max": 0, "rejected_by_validator": [], "post_write_violations": [],
-               "errors": [], "input_errors": [], "inputs": {}}
     inp = collect_inputs(root, include_gakubi=include_gakubi)
     summary["inputs"], summary["input_errors"] = dict(inp["counts"]), list(inp["errors"])
     beat(force=True)
@@ -659,7 +700,7 @@ def _run_locked(root: Path, lock: dict, now, run_id: str, include_gakubi: bool, 
 
     if dry_run:
         summary["written"] = [w["_path"] for w in accepted]
-        return summary
+        return
     for w in accepted:
         beat()
         try:
@@ -678,7 +719,6 @@ def _run_locked(root: Path, lock: dict, now, run_id: str, include_gakubi: bool, 
                 summary["post_write_violations"].append([rel, "V01", f"読めない: {type(e).__name__}"])
                 continue
             summary["post_write_violations"].extend(list(v) for v in wiki_validate.validate_file(w2, ctx2))
-    return summary
 
 
 # ---------------------------------------------------------------- CLI

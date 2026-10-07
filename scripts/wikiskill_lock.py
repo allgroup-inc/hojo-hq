@@ -4,10 +4,11 @@
 `.claude/locks/<name>.lock`(git-ignored)に JSON `{session_id, host, pid, acquired_at, heartbeat_at}` を置く。
 状態:
     free         ロックファイルが無い
-    held         最終 heartbeat から TIMEOUT_S 以内
+    held         最終 heartbeat から TIMEOUT_S 以内(時計ずれで heartbeat が TIMEOUT_S 未満だけ未来にある場合も含む)
     stale_safe   TIMEOUT_S 超 かつ(持ち主のセッションの ended マーカーがある / 同じ host で pid が死んでいる)
     stale_unsure TIMEOUT_S 超だが、持ち主が終わった証拠が無い(読めないロックファイルもここ)
 自動で外してよいのは stale_safe だけ(audit に残す)。stale_unsure は break_stale=True の明示指定でだけ外す。
+外す直前・heartbeat で書き換える直前にファイルを読み直し、判定したときの中身と違えば held として扱う(取り合いの安全側)。
 """
 from __future__ import annotations
 
@@ -21,6 +22,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from experience_log import _safe_id  # noqa: E402  (ended マーカーのファイル名は SessionEnd と同じ規則で作る)
 from wikiskill_common import LOCAL_DIR, audit, iso, utc_now  # noqa: E402
 
 LOCK_DIR = ".claude/locks"
@@ -39,7 +41,7 @@ class LockHeld(Exception):
         self.age_s = age_s
         self.state = state
         sid = holder.get("session_id") if isinstance(holder, dict) else None
-        minutes = max(0, age_s) // 60 if age_s >= 0 else "?"
+        minutes = max(0, age_s) // 60 if age_s is not None and age_s >= -TIMEOUT_S else "?"
         hint = "(終了済みと確認できないので自動では外しません。確かめてから --break-stale-lock)" \
             if state == "stale_unsure" else ""
         super().__init__(f"{sid or '<不明>'} が実行中(最終 heartbeat {minutes}分前){hint}")
@@ -78,13 +80,14 @@ def _read(path: Path) -> dict | None:
     return data if isinstance(data, dict) else {}
 
 
-def _age_s(holder: dict, now: datetime) -> int:
+def _age_s(holder: dict, now: datetime) -> int | None:
+    """最終 heartbeat(無ければ取得時刻)からの秒数。時刻が読めなければ None。未来なら負。"""
     ts = _parse_iso(holder.get("heartbeat_at")) or _parse_iso(holder.get("acquired_at"))
-    return int((now - ts).total_seconds()) if ts else -1
+    return int((now - ts).total_seconds()) if ts else None
 
 
-def _safe_id(session_id: str) -> str:
-    return re.sub(r"[^A-Za-z0-9._-]", "_", str(session_id)) or "unknown"
+def _shown_age(age: int | None) -> int:
+    return -1 if age is None else age
 
 
 def _pid_dead(pid) -> bool:
@@ -111,10 +114,12 @@ def _classify(root: Path, holder: dict | None, now: datetime) -> tuple[str, int]
     if holder is None:
         return "free", 0
     age = _age_s(holder, now)
-    if age < 0:  # 時刻が読めない = 判断材料なし
-        return "stale_unsure", age
-    if age <= TIMEOUT_S:
+    if age is None:  # 時刻が読めない = 判断材料なし
+        return "stale_unsure", -1
+    if -TIMEOUT_S < age <= TIMEOUT_S:  # 少し未来の heartbeat は時計ずれ。持ち主は生きている側に倒す
         return "held", age
+    if age < 0:  # TIMEOUT_S 以上も未来 = 時刻が信用できない
+        return "stale_unsure", age
     same_host_dead = holder.get("host") == socket.gethostname() and _pid_dead(holder.get("pid"))
     if _ended(root, holder) or same_host_dead:
         return "stale_safe", age
@@ -157,6 +162,11 @@ def acquire(root: Path, name: str, session_id: str, *, break_stale: bool = False
             continue  # 消えた直後。もう一度だけ作る
         if state == "held" or (state == "stale_unsure" and not break_stale):
             raise LockHeld(holder or {}, age, state)
+        again = _read(path)
+        if again is None:
+            continue  # 判定の間に消えた。もう一度だけ作る
+        if again != holder:  # 判定の間に別の持ち主が取った / heartbeat した → 外さない
+            raise LockHeld(again, _shown_age(_age_s(again, n)), "held")
         try:
             path.unlink()
         except FileNotFoundError:
@@ -165,7 +175,7 @@ def acquire(root: Path, name: str, session_id: str, *, break_stale: bool = False
         how = "auto (ended marker or dead pid)" if state == "stale_safe" else "--break-stale-lock"
         audit(root, _COMPONENT, f"{name}: stale lock released ({how}); holder={who} age_s={age} by={session_id}")
     holder = _read(path) or {}
-    raise LockHeld(holder, _age_s(holder, n))
+    raise LockHeld(holder, _shown_age(_age_s(holder, n)))
 
 
 def heartbeat(root: Path, name: str, lock: dict, now: datetime | None = None) -> None:
@@ -173,12 +183,16 @@ def heartbeat(root: Path, name: str, lock: dict, now: datetime | None = None) ->
     path = lock_path(root, name)
     holder = _read(path)
     if not holder or not _same_owner(holder, lock):
-        raise LockHeld(holder or {}, _age_s(holder or {}, _now(now)), "lost")
-    lock["heartbeat_at"] = iso(_now(now))
+        raise LockHeld(holder or {}, _shown_age(_age_s(holder or {}, _now(now))), "lost")
+    beat_at = iso(_now(now))
     tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-    tmp.write_text(json.dumps({**holder, "heartbeat_at": lock["heartbeat_at"]}, ensure_ascii=False) + "\n",
-                   encoding="utf-8")
+    tmp.write_text(json.dumps({**holder, "heartbeat_at": beat_at}, ensure_ascii=False) + "\n", encoding="utf-8")
+    again = _read(path)
+    if again != holder:  # 読んでから書き換えるまでの間に中身が変わった(他人が取った・消えた)→ 上書きしない
+        tmp.unlink(missing_ok=True)
+        raise LockHeld(again or {}, _shown_age(_age_s(again or {}, _now(now))), "lost")
     os.replace(tmp, path)
+    lock["heartbeat_at"] = beat_at
 
 
 def release(root: Path, name: str, lock: dict) -> None:
