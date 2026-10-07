@@ -3824,5 +3824,68 @@
     "amount_in_source": "1,200万円以内(初年度) 1,200万円以内(翌年度)"
    }
   ]
+ },
+ {
+  "date": "2026-10-07",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 2,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和７年度(補正予算) ゼロエミッション船等の建造促進事業 2次公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdnJMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和8年度】省CO2型システムへの改修支援事業（三次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003BpWvUAK",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「Boost Up OKINAWA 2026」参加企業の募集",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1034726.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "沖縄ものづくり製品開発・技術導入支援事業",
+    "url": "https://okinawa-ric.jp/service/post-18.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": [],
+    "amount_in_source": "1,200万円以内(初年度) 1,200万円以内(翌年度)"
+   },
+   {
+    "name": "令和８年度データセンターのゼロエミッション化・レジリエンス強化促進事業（二次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeZuMAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
