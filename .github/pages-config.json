@@ -1,0 +1,11 @@
+{
+  "source": {
+    "branch": "main",
+    "path": "/site"
+  },
+  "build_type": "workflow",
+  "cname": null,
+  "public": true,
+  "updated_at": "2026-10-08T00:00:00Z",
+  "note": "moraiwasuredo.jp DNS未設定のため、GitHub Pages デフォルトドメイン(allgroup-inc.github.io/hojo-hq/)で一時公開"
+}
