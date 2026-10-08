@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3分でもらい忘れ診断 | もらいわすれ堂</title>
-<link rel="canonical" href="https://moraiwasuredo.jp/yamanashi/shindan/">
+<link rel="canonical" href="moradou.jp/shindan/">
 <meta name="description" content="山梨県にお住まいの世帯向け。家族の状況にあてはまる可能性のある給付金・手当を3分で診断します。名前や住所の入力は不要です。">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
@@ -307,7 +307,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var lines = ["【わたしの診断結果】対象の可能性 " + rs.length + "件(もらいわすれ堂)"];
         rs.slice(0, 8).forEach(function(r){ lines.push("・" + r.item.name + "(可能性" + r.likelihood + ")"); });
         if (rs.length > 8) lines.push("…ほか" + (rs.length - 8) + "件");
-        lines.push("くわしく見る: https://moraiwasuredo.jp/yamanashi/shindan/");
+        lines.push("くわしく見る: moradou.jp/shindan/");
         return lines.join("\n");
       }
       if (rs.length > 0) {
@@ -315,7 +315,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var shareBtn = h("button", {text:"家族に教える(共有)"});
         shareBtn.addEventListener("click", function(){
           if (window.fgTrack) window.fgTrack("share_click");
-          var url = "https://moraiwasuredo.jp/yamanashi/shindan/";
+          var url = "moradou.jp/shindan/";
           var text = "「もらいわすれ堂」で山梨の給付金・手当のもらい忘れを3分で診断できるよ(無料・匿名)";
           if (navigator.share) { navigator.share({title:"もらいわすれ堂|3分でもらい忘れ診断", text:text, url:url}).catch(function(){}); }
           else if (navigator.clipboard) { navigator.clipboard.writeText(text + " " + url); shareBtn.textContent = "リンクをコピーしました!"; }
@@ -344,16 +344,24 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var topLine = h("div", {style:"margin:8px 0 4px;padding:16px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
         topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この結果" + sum.total + "件、今日のままとは限りません"}));
         topLine.appendChild(h("p", {class:"note", style:"margin-bottom:6px", text:"制度は増えたり、変わったりします(いまの掲載は" + seidoCount + "件・毎日更新)。LINEに登録しておくと、新しい制度が増えたときや締切が近づいたときにお知らせが届きます。"}));
-        topLine.appendChild(h("p", {class:"note", style:"margin-bottom:10px", text:"いまの結果もコピーして残せます。制度の一覧は登録なしでも、ぜんぶ見られます。"}));
         var topLineBtn = h("a", {href:window.FG_LINE_URL, target:"_blank", rel:"noopener",
-          style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"LINEで「見逃し」をなくす(無料)"});
-        var topCopied = h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名 ・ いつでも解除"});
+          style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"LINEで登録する(無料)"});
         topLineBtn.addEventListener("click", function(){
           if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_top"});
-          try { if (navigator.clipboard) { navigator.clipboard.writeText(resultText()); topCopied.textContent = "結果をコピーしました。LINEで「もらいわすれ堂」のトークに貼り付けると保存できます。"; } } catch(e){}
         });
         topLine.appendChild(topLineBtn);
-        topLine.appendChild(topCopied);
+        topLine.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"無料 ・ 匿名 ・ いつでも解除"}));
+        var saveTip = h("p", {class:"note", style:"margin-top:12px;padding-top:12px;border-top:1px solid #B7E4C7"});
+        saveTip.textContent = "📌 結果を保存したい: LINEに登録後、このページから結果をコピーして、トークに貼り付けてください。";
+        var copySaveBtn = h("button", {text:"この結果をコピーする", style:"display:block;width:100%;max-width:280px;margin:8px auto 0;padding:9px;border-radius:8px;border:1.5px solid #B7E4C7;background:#fff;color:#0f5138;font-size:.85rem;font-weight:700;cursor:pointer"});
+        var copyMsg = h("p", {class:"note", style:"margin-top:4px;display:none"});
+        copySaveBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("result_copy_click");
+          try { if (navigator.clipboard) { navigator.clipboard.writeText(resultText()); copyMsg.textContent = "✓ コピーしました"; copyMsg.style.display = "block"; setTimeout(function(){ copyMsg.style.display = "none"; }, 3000); } } catch(e){}
+        });
+        saveTip.appendChild(copySaveBtn);
+        saveTip.appendChild(copyMsg);
+        topLine.appendChild(saveTip);
         if (window.FG_LINE_URL) app.appendChild(topLine);
         var kindMsg = h("p", {class:"kind-msg"});
         kindMsg.innerHTML = "もらい忘れは、知らなかっただけ。<br>あなたは悪くありません。<br>ぜんぶ一度にやらなくて大丈夫。ひとつずつ、いっしょに進めましょう。";
@@ -443,7 +451,6 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         style:"display:block;max-width:420px;margin:0 auto;padding:15px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700;font-size:1.05rem", text:"LINEでお知らせを受け取る(無料)"});
       lineBtn.addEventListener("click", function(){
         if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_bottom"});
-        try { if (rs.length && navigator.clipboard) navigator.clipboard.writeText(resultText()); } catch(e){}
       });
       lineBox.appendChild(lineBtn);
       lineBox.appendChild(h("p", {class:"note", style:"margin-top:8px", text:"登録は無料・名前や住所の入力は不要です。いつでも解除できます。"}));

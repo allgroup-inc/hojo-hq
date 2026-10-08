@@ -18,7 +18,7 @@ SITE_BASE = "https://moraiwasuredo.jp/fukugiiro"
 # 先に入れると、まだ開いていないドメインを正規URLとして教えてしまう
 # (議事_20260828 ウタガイ②)。切替は scripts/moradou_cutover.py が
 # 開通を実測してから行う。
-MOVED_TO = None
+MOVED_TO = "moradou.jp"
 
 OGP_IMAGE = f"{SITE_BASE}/assets/ogp.jpg"
 

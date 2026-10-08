@@ -15,7 +15,7 @@ SITE_BASE = "https://moraiwasuredo.jp/yamanashi"
 
 # 独自ドメインへの引っ越し後、旧URL側が正規URLとして指す先(沖縄版 fg_seo.MOVED_TO の山梨版)。
 # moradou.jp 上では山梨版は /yamanashi/ 配下に置かれる。開通・表示確認が済むまで None。
-MOVED_TO = None
+MOVED_TO = "moradou.jp"
 
 # OGP画像はブランド共通(沖縄版と同じ)
 OGP_IMAGE = "https://moraiwasuredo.jp/yamanashi/assets/ogp.jpg"  # 山梨版カード(桜と富士・2026-09-22作成)
