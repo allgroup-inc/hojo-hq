@@ -95,12 +95,20 @@ jobs:
           : > truncated.txt
           while read -r sha; do
             [ -n "$sha" ] || continue
+            # commits API はブランチだけにある commit でも返す(main 以外の SHA を dispatch で検査できる)。
+            # 見つからない SHA(typo・他リポ)は明示的に失敗させる。
+            if ! gh api "repos/$GITHUB_REPOSITORY/commits/$sha" > commit.json; then
+              echo "::error::commit $sha がこのリポジトリに見つかりません(SHA を確認してください)"
+              echo "## ❌ commit $sha が見つかりません" >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
             prs=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/pulls" --jq 'length')
             haspr=""
             [ "$prs" -gt 0 ] && haspr="--has-pr"
-            gh api "repos/$GITHUB_REPOSITORY/commits/$sha" > commit.json
             python3 -c "import json;[print(f['filename']) for f in json.load(open('commit.json')).get('files',[])]" > changed.txt
             nfiles=$(wc -l < changed.txt)
+            # commits API は変更ファイルを 300 件までしか返さない。300 件に達した commit は一覧が不完全なので、
+            # この run を失敗させる(黙認しない)。判定は取得できた範囲で続ける。
             [ "$nfiles" -ge 300 ] && echo "${sha:0:9}" >> truncated.txt
             rc=0
             python3 scripts/direct_push_watch.py --files-from changed.txt $haspr > matched.txt || rc=$?
@@ -123,8 +131,12 @@ jobs:
             echo "## ✅ 直接 commit の検知: 該当なし($(wc -l < shas.txt) commit を検査)" >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ -s truncated.txt ]; then
-            echo "## ⚠️ 変更ファイルが 300 件以上で一覧が切れた commit(対象漏れの可能性)" >> "$GITHUB_STEP_SUMMARY"
+            echo "truncated=true" >> "$GITHUB_OUTPUT"
+            echo "## ❌ 変更ファイルが 300 件以上で一覧が切れた commit(検査が不完全。手動確認が必要)" >> "$GITHUB_STEP_SUMMARY"
             sed 's/^/- /' truncated.txt >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::変更ファイルが 300 件以上の commit があり、検査が不完全です: $(tr '\n' ' ' < truncated.txt)"
+          else
+            echo "truncated=false" >> "$GITHUB_OUTPUT"
           fi
 
       # reuse(既存 Issue あり)/ new(起票)/ failed(3 回失敗)を区別して記録する。
@@ -216,3 +228,11 @@ jobs:
             ⚠️【ミカタ】main への直接 commit が守りの範囲(CODEOWNERS / 正式Wiki)を変更しました。
             Issue(ラベル direct-push-watch)を確認してください。起票 ${{ steps.issue.outputs.created }} 件・既存 ${{ steps.issue.outputs.reused }} 件・失敗 ${{ steps.issue.outputs.failed }} 件
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      # 検査が不完全(300 ファイル上限)だった run は、Issue・LINE を済ませた後で明示的に失敗させる。
+      # LINE が無くても Actions 一覧の赤い run と Step Summary で追える。
+      - name: 検査が不完全なら失敗にする(黙認しない)
+        if: always() && steps.scan.outputs.truncated == 'true'
+        run: |
+          echo "::error::変更ファイル一覧が切れた commit があるため、この run の検査は不完全です。Step Summary の commit を手動で確認してください。"
+          exit 1

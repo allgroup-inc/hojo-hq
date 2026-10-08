@@ -170,5 +170,17 @@ def test_workflow_line_runs_even_if_issue_step_failed_and_only_on_new_or_failed(
     assert "if: always() && steps.scan.outputs.found == 'true' && (steps.issue.outputs.created != '0' || steps.issue.outputs.failed != '0')" in t
 
 
+def test_workflow_fails_explicitly_when_file_list_is_truncated_or_sha_missing():
+    t = read(WF)
+    assert '-ge 300' in t and "truncated=true" in t
+    assert "if: always() && steps.scan.outputs.truncated == 'true'" in t  # Issue・LINE の後で run を失敗にする
+    assert "が見つかりません" in t  # 存在しない SHA は明示的に失敗
+
+
+def test_workflow_dedupe_covers_closed_issues_too():
+    # 試験 Issue をクローズした後に同じ SHA を再検査しても増殖しない(--state all)
+    assert "--state all --label direct-push-watch --limit 500 --json title" in read(WF)
+
+
 def test_wikiskill_tests_runs_this_file():
     assert "tests/scripts/test_direct_push_watch.py" in read(".github/workflows/wikiskill-tests.yml")
