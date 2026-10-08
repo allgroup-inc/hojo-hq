@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-10-08 07:35",
+ "generated_at": "2026-10-08 13:08",
  "alert_window": [
   7,
   29
  ],
- "soon_closed_count": 6,
- "count": 38,
+ "soon_closed_count": 5,
+ "count": 39,
  "items": [
   {
    "id": "a0WJ200000CDdMRMA1",
@@ -186,6 +186,16 @@
    "max_amount": 130502000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0YMAT",
    "tag": "nationwide"
+  },
+  {
+   "id": "a0WfQ000003iZLKUA2",
+   "name": "令和８年度酒類業振興支援事業費補助金（第６期）",
+   "deadline": "2026-10-28",
+   "days_left": 20,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 15000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003iZLKUA2",
+   "tag": "okinawa"
   },
   {
    "id": "a0WJ200000CDPyeMAH",
