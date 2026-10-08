@@ -16,7 +16,7 @@ def test_wikiskill_tests_paths_cover_inputs():
     for p in ["CLAUDE.md", "docs/**", ".claude/skills/**", ".claude/settings.json",
               ".gitignore", "scripts/check_repo_scope.py", ".github/workflows/knowledge-extract.yml",
               ".github/workflows/repo-scope.yml", ".github/CODEOWNERS"]:
-        assert text.count(f"'{p}'") == 2, p  # pull_request と push の両方
+        assert text.count(f"'{p}'") == 1, p  # push 側だけ(pull_request は全 PR 起動・判定は scripts/wikiskill_scope.py)
     assert "tests/scripts/test_wikiskill_workflows.py" in text  # このテスト自体も CI で走らせる
 
 
