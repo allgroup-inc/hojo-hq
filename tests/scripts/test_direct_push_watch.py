@@ -222,13 +222,77 @@ FAKE_GH = textwrap.dedent(r'''
 ''').lstrip()
 
 
+def run_block(workflow_text, step_name_prefix):
+    """`- name: <prefix>…` の step の `run: |` ブロック本文を、標準ライブラリだけで取り出す。
+
+    CI の runner には PyYAML が無い(2026-10-08: `import yaml` で回帰テスト 5 件が CI でだけ失敗)。
+    YAML のブロックスカラー(`|`)の規則どおり、本文の字下げは最初の非空行で決まり、
+    それより浅い字下げの非空行が来たらブロック終了。空行は本文に含める(末尾の空行は落とす)。
+    """
+    lines = workflow_text.splitlines()
+    start = None
+    for i, line in enumerate(lines):
+        if line.strip().startswith("- name: " + step_name_prefix):
+            start = i
+            break
+    assert start is not None, f"step not found: {step_name_prefix}"
+    step_indent = len(lines[start]) - len(lines[start].lstrip())
+    run_at = None
+    for i in range(start + 1, len(lines)):
+        s = lines[i]
+        if s.strip() and (len(s) - len(s.lstrip())) <= step_indent:
+            break  # 次の step に入った
+        if s.strip() == "run: |":
+            run_at = i
+            break
+    assert run_at is not None, f"run: | not found in step {step_name_prefix}"
+    body, indent = [], None
+    for s in lines[run_at + 1:]:
+        if not s.strip():
+            body.append("")
+            continue
+        cur = len(s) - len(s.lstrip())
+        if indent is None:
+            indent = cur
+        if cur < indent:
+            break
+        body.append(s[indent:])
+    while body and body[-1] == "":
+        body.pop()
+    return "\n".join(body) + "\n"
+
+
 def issue_step_script():
-    import yaml  # PyYAML は CI(setup-python)にも入っている
+    return run_block(read(WF), "Issue 起票")
+
+
+def test_run_block_extracts_the_issue_step_exactly():
+    body = issue_step_script()
+    # 先頭・要所・末尾が workflow の実際の run ブロックと一致する(字下げが正しく剥がれている)
+    assert body.startswith("# 実行時エラーを握りつぶさない")
+    assert "\nset -eo pipefail\n" in body
+    assert "\nsed -nE 's/^- `([0-9a-f]{9})`.*/\\1/p' hits.md > hit_shas.txt\n" in body
+    assert body.rstrip("\n").endswith('[ "$failed" -eq 0 ]')
+    assert not any(l.startswith(" ") and l.strip().startswith(("gh ", "sed ", "set ")) for l in body.splitlines()[:3])
+    # 隣の step(LINE 通知)の内容は含まない
+    assert "line-notify" not in body and "channel-access-token" not in body
+    try:
+        import yaml  # 手元に PyYAML があれば、YAML パーサの結果と完全一致することも確かめる(CI では無いので飛ばす)
+    except ImportError:
+        return
     wf = yaml.safe_load(read(WF))
-    for s in wf["jobs"]["watch"]["steps"]:
-        if s.get("name", "").startswith("Issue 起票"):
-            return s["run"]
-    raise AssertionError("Issue 起票 step not found")
+    expected = next(s["run"] for s in wf["jobs"]["watch"]["steps"] if s.get("name", "").startswith("Issue 起票"))
+    assert body == expected
+
+
+def test_run_block_handles_blank_lines_and_stops_at_dedent():
+    sample = (
+        "jobs:\n  j:\n    steps:\n"
+        "      - name: Alpha step\n        run: |\n          echo a\n\n          echo b\n"
+        "      - name: Beta step\n        run: |\n          echo c\n"
+    )
+    assert run_block(sample, "Alpha") == "echo a\n\necho b\n"
+    assert run_block(sample, "Beta") == "echo c\n"
 
 
 def run_issue_step(tmp_path, hits_md, existing_titles="", create_fail=False, issues_json=None):
