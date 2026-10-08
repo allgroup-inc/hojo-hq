@@ -1,0 +1,133 @@
+name: main-direct-push-watch
+
+# 決裁 #26 S1(議事: docs/議事/議事_20261008_決裁26_Rulesets段階導入.md)。
+# main への push のうち「PR を経由しない直接 commit」が守りの範囲
+# (.github/CODEOWNERS のパス = Trust Boundary + docs/wiki/、および正式な Wiki docs/wiki/*.md 直下)
+# を変えていたら Issue と LINE で可視化する。止めはしない(本番設定・ruleset は変えない)。
+# S7a(branch ruleset)の前後で「直接 commit が 0 件」の基線を作り、有効化後は bypass の記録になる。
+#
+# 挙動の注意:
+# - GITHUB_TOKEN で push された bot の commit ではこの workflow は起動しない(GitHub の仕様)。
+#   S5 で自動処理が App トークンになると起動するが、bot は守りの範囲を書かないので起票されない。
+# - PR のマージコミット(squash 含む)は commits/<sha>/pulls が非空なので対象外。
+# - 変更ファイル一覧は commits API の上限(300 ファイル)まで。超える commit は対象漏れがあり得る。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "検査する commit SHA(省略時は main の先頭)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: 判定ロジックの自己点検
+        run: python3 scripts/direct_push_watch.py --selftest
+
+      - name: 検査する commit を決める
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          INPUT_SHA: ${{ github.event.inputs.sha }}
+        run: |
+          set -e
+          if [ -n "$INPUT_SHA" ]; then
+            echo "$INPUT_SHA" > shas.txt
+          elif [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "$AFTER" > shas.txt
+          else
+            gh api "repos/$GITHUB_REPOSITORY/compare/$BEFORE...$AFTER" --jq '.commits[].sha' > shas.txt \
+              || echo "$AFTER" > shas.txt
+          fi
+          echo "検査対象: $(wc -l < shas.txt) commit"
+
+      - name: 直接 commit の判定
+        id: scan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          : > hits.md
+          while read -r sha; do
+            [ -n "$sha" ] || continue
+            prs=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/pulls" --jq 'length')
+            haspr=""
+            [ "$prs" -gt 0 ] && haspr="--has-pr"
+            gh api "repos/$GITHUB_REPOSITORY/commits/$sha" --jq '.files[].filename' > changed.txt
+            rc=0
+            python3 scripts/direct_push_watch.py --files-from changed.txt $haspr > matched.txt || rc=$?
+            if [ "$rc" -eq 3 ]; then
+              subject=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha" --jq '.commit.message | split("\n")[0]')
+              {
+                echo "- \`${sha:0:9}\` ${subject}"
+                sed 's/^/    - /' matched.txt
+              } >> hits.md
+              echo "::warning::直接 commit ${sha:0:9} が守りの範囲を変更: $(tr '\n' ' ' < matched.txt)"
+            elif [ "$rc" -ne 0 ]; then
+              exit "$rc"
+            fi
+          done < shas.txt
+          if [ -s hits.md ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "守りの範囲を変えた直接 commit はありません"
+          fi
+
+      # 同じ commit を 2 回起票しない: ラベル + SHA(先頭 9 桁)で既存 Issue を検索する
+      - name: Issue 起票(記録。止めはしない)
+        if: steps.scan.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          gh label create direct-push-watch --color B60205 \
+            --description "main への直接 commit が守りの範囲を変えた(決裁 #26 S1)" 2>/dev/null || true
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          grep -oE '^- `[0-9a-f]{9}`' hits.md | tr -d '`- ' | while read -r sha9; do
+            dup=$(gh issue list --state all --label direct-push-watch --search "$sha9" --json number --jq 'length')
+            if [ "$dup" -gt 0 ]; then
+              echo "既に起票済み: $sha9"
+              continue
+            fi
+            {
+              echo "main への **PR を経由しない直接 commit** が守りの範囲(CODEOWNERS のパス・正式な Wiki)を変更しました。"
+              echo "これは記録であり、変更を止めるものではありません(決裁 #26 S1)。"
+              echo ""
+              echo "- 実行: $run_url"
+              echo "- push した主体: ${GITHUB_ACTOR}"
+              echo "- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')"
+              echo ""
+              echo "対象の commit と変更パス:"
+              echo ""
+              awk -v s="$sha9" 'BEGIN{p=0} /^- `/{p=index($0,s)>0} p{print}' hits.md
+              echo ""
+              echo "確認すること: ①PR を経由すべき変更だったか ②bypass の記録(議事)が要るか ③必要なら revert。"
+            } > issue_body.md
+            gh issue create --label direct-push-watch \
+              --title "⚠️ main への直接 commit が守りの範囲を変更: $sha9" \
+              --body-file issue_body.md
+          done
+
+      - name: LINE通知(小柳さんへ)
+        if: steps.scan.outputs.found == 'true'
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            ⚠️【ミカタ】main への直接 commit が守りの範囲(CODEOWNERS / 正式Wiki)を変更しました。
+            Issue(ラベル direct-push-watch)を確認してください。
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
