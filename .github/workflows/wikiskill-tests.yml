@@ -102,6 +102,7 @@ jobs:
           tests/scripts/test_wikiskill_lock.py
           tests/scripts/test_knowledge_extract.py
           tests/scripts/test_wikiskill_workflows.py
+          tests/scripts/test_direct_push_watch.py
           tests/integration/test_wikiskill_memory_e2e.py
           tests/integration/test_wikiskill_wiki_e2e.py
           -q

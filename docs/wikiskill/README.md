@@ -108,6 +108,8 @@ Experience は Git にコミットして初めて、別のセッションや別�
 
 Experience の原本は消さずに残します。180日より古い月は `python3 scripts/experience_archive.py --archive` で gzip にまとめます。容量は `--check` で見られます(3MB で警告、10MB で失敗)。
 
+**main には直接 push せず、ブランチを切って PR にします**(決裁 #26・E1)。クラウドセッションは `claude/*` ブランチで作業するので、Experience は普段の PR に同梱されて main に入ります。main をチェックアウトして作業しているときは、commit の前に `git switch -c claude/<話題>` でブランチへ移してから push → PR にしてください。PR を経由せずに main へ入った commit が CODEOWNERS のパス(Trust Boundary・`docs/wiki/`)や正式な Wiki `docs/wiki/*.md` を変えていると、workflow `main-direct-push-watch` が Issue(ラベル `direct-push-watch`)と LINE で知らせます。これは記録であり、変更を止めるものではありません(止めるのは決裁 #26 の後の段階で入る branch ruleset)。判定は `python3 scripts/direct_push_watch.py --selftest` で自己点検できます。
+
 ## 8. Baseline Debt の見方
 
 導入時点で既に赤かった検査(privacy 9件 / skill_validation 5件 / scripts tests 2件。2026-10-06 に固定)は、この仕組みとは別に是正します(`docs/失敗台帳.md` の FK-006)。Phase 1 の約束は「新しい赤を増やさない」ことです。
