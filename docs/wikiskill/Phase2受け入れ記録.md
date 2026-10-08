@@ -1,6 +1,6 @@
 # WikiSkill Phase 2 受け入れ記録
 
-Task 8(自動 E2E と、実セッション A → B → C の手動 E2E)の記入結果。**2026-10-07 記入済み(Task 8 完了)。**
+Task 8(自動 E2E と、実セッション A → B → C の手動 E2E)の記入結果。**2026-10-07 記入済み(Task 8 完了)。2026-10-08 Release / Tag 作成完了(末尾の節)。**
 導入議事: `docs/議事/議事_20261007_WikiSkill_Phase2導入.md`
 設計書の合格条件: `docs/superpowers/specs/2026-10-07-wikiskill-phase2-knowledge-wiki-design.md`(13章)
 
@@ -157,3 +157,18 @@ F1〜F8・R4 はすべて ✅。❌ は無い。
 ## 既知の Performance Debt(2026-10-07)
 
 SessionStart hook の単発計時テスト `test_hook_session_start_under_500ms_on_real_copy` は、この実行環境では単独実行でも 0.5 秒を跨ぐことがある(実測 0.512 秒。origin/main の Phase 1 単体で 0.36〜0.42 秒、Phase 2 の追加分は約 0.04 秒 = `[Wiki]` の commit 確認 git 3 回と承認要件の検査)。ロジックの回帰ではなく性能余裕の不足。受け入れ基準 0.5 秒は変更しない。CI は `WIKISKILL_SKIP_TIMING=1` で計時を飛ばすため赤にならない。Phase 3 の最適化候補: `_git_ready` の toplevel 結果を `committed_files` で再利用(git 1 回減)、`docs/wiki` に承認ページが無いときは git を呼ばない、Decision の特徴語を 1 プロセス 1 回に限定。見直し: Phase 3 着手時。
+
+## Release / Tag 作成完了(2026-10-08)
+
+| 項目 | 値 |
+|---|---|
+| PR | #441(WikiSkill Phase 2: Knowledge Wiki)。小柳さん最終承認 2026-10-07 → merge 方式でマージ |
+| マージコミット(Rollback 対象) | `1e19530df1608f970d3732c27c9cb397e8660f54`(parents: `9955c7a0e` main / `3b4fa5076` PR head) |
+| タグ | `wikiskill-phase2-v1` → 同じ SHA(小柳さんが GitHub の Release 画面で作成。lightweight) |
+| Release | https://github.com/allgroup-inc/hojo-hq/releases/tag/wikiskill-phase2-v1(公開 2026-10-08 00:04 UTC・タイトル「WikiSkill Phase 2 Knowledge Wiki」) |
+| 作成経路 | このセッションからの `git push` のタグ送信と API はどちらも proxy で拒否(Phase 1 と同じ)。迂回せず STOP し、小柳さんが画面で作成 |
+
+マージ後検証(main のマージコミットを clean worktree で実施): `wiki_validate --selftest` 69件 OK / `wiki_validate` OK(Wiki 0件・候補 1件)/ Experience Privacy 自己点検 23件 + 記録 10件 OK / 全議事 `--check` OK / Baseline `SAME` / Bootstrap 実 hook 段1 OK(`[Wiki]` は該当なし)/ 抽出 dry-run conflict 0/10 / Phase 2 E2E 6本 + Phase 1 E2E 4本 PASS / 全体 700 passed(failed は Baseline の 2件 + 制度データ件数依存の既知 1件)。Release 後の確認: リモートタグと Release の対象 SHA が一致・Release 公開状態・main にマージコミット存在・Phase 3 未着手。
+
+これをもって **WikiSkill Phase 2 は正式完了**。Phase 3(Conflict の文脈/極性理解・否定語リスト拡張・「却下。」型・文中指示語・SessionStart 最適化・Experience 長期保存・Skill Metrics/Proposer/Validator/Evolution Gate・LLM Draft・Conflict Resolver)は小柳さんの別承認まで開始しない。Branch Protection と `knowledge-extract` の初回 dispatch も未実施(決裁キュー #26)。
+
