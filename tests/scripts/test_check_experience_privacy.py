@@ -59,14 +59,19 @@ def git(root, *args):
     ).stdout.strip()
 
 
-def _init_repo(root):
+# 本物の .gitignore と同じ約束(記録はコミットする / _local と _audit.log はローカル限定)
+STANDARD_GITIGNORE = ".claude/experience/_local/\n.claude/experience/_audit.log\n"
+
+
+def _init_repo(root, gitignore=STANDARD_GITIGNORE):
     git(root, "init", "-q", "-b", "main")
     git(root, "config", "user.email", "t@example.com")
     git(root, "config", "user.name", "t")
     git(root, "config", "commit.gpgsign", "false")
     git(root, "remote", "add", "origin", PUBLIC_URL)
     (root / "README.md").write_text("x")
-    git(root, "add", "README.md")
+    (root / ".gitignore").write_text(gitignore, encoding="utf-8")
+    git(root, "add", "README.md", ".gitignore")
     git(root, "commit", "-q", "-m", "init")
 
 
@@ -317,6 +322,91 @@ def test_real_repo_runs_clean():
     r = run([])
     assert r.returncode == 0, r.stderr
     assert r.stdout.startswith("OK: Experience記録")
+
+
+# ---- 決裁 #26 S2 PR-D: ignore と追跡状態(2026-10-08 802a00cbf の再発を機械で止める) ----
+
+from check_experience_privacy import EXPERIENCE_DIR, MUST_IGNORE, RECORD_PROBE, check_tracking  # noqa: E402
+
+
+def _cli(root):
+    return subprocess.run([sys.executable, SCRIPT], cwd=root, capture_output=True, text=True)
+
+
+def test_tracking_probe_paths_are_fixed():
+    # 検査対象の具体的なパスを固定する(変えるときはこのテストと .gitignore の約束を一緒に見直す)
+    assert EXPERIENCE_DIR == ".claude/experience"
+    assert RECORD_PROBE == ".claude/experience/2026-01/session-probe.jsonl"
+    assert MUST_IGNORE == (".claude/experience/_local/probe", ".claude/experience/_audit.log")
+
+
+def test_tracking_ok_with_standard_gitignore(tmp_path):
+    # 正常系: 本物と同じ約束の .gitignore なら違反 0。記録ファイルが追跡されていても通る
+    _init_repo(tmp_path)
+    _commit_jsonl(tmp_path, "session-good.jsonl", json.dumps(OK) + "\n")
+    assert check_tracking(tmp_path) == []
+    r = _cli(tmp_path)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "ignore・追跡状態 OK" in r.stdout
+
+
+def test_tracking_fails_when_record_dir_is_ignored(tmp_path):
+    # 異常系 1(802a00cbf 型): .claude/experience/ 丸ごと ignore → 記録パスの違反 1 件で exit 1
+    _init_repo(tmp_path, gitignore=STANDARD_GITIGNORE + ".claude/experience/\n")
+    hits = check_tracking(tmp_path)
+    assert [p for p, _ in hits] == [RECORD_PROBE]
+    assert "記録パスを除外" in hits[0][1]
+    r = _cli(tmp_path)
+    assert r.returncode == 1
+    assert RECORD_PROBE in r.stderr and ".claude/memory.off" in r.stderr
+
+
+@pytest.mark.parametrize("pattern", [".claude/*", "**/experience/**", "*.jsonl"])
+def test_tracking_catches_other_spellings_of_the_same_exclusion(tmp_path, pattern):
+    # .gitignore の文字列検査ではすり抜ける書き方も、git 自身の判定なら止まる
+    _init_repo(tmp_path, gitignore=STANDARD_GITIGNORE + pattern + "\n")
+    assert [p for p, _ in check_tracking(tmp_path)] == [RECORD_PROBE]
+
+
+def test_tracking_fails_when_local_only_paths_are_not_ignored(tmp_path):
+    # 異常系 2: .gitignore が空 → _local/ と _audit.log の「ignore されていない」違反 2 件(正例・負例の両方で検査が効く)
+    _init_repo(tmp_path, gitignore="")
+    hits = check_tracking(tmp_path)
+    assert [p for p, _ in hits] == list(MUST_IGNORE)
+    assert all("ignore されていません" in why for _, why in hits)
+    assert _cli(tmp_path).returncode == 1
+
+
+def test_tracking_fails_when_local_only_file_is_already_tracked(tmp_path):
+    # 異常系 3: ignore はされているが、_audit.log と _local/ のファイルが既に追跡されている(-f で add された)
+    _init_repo(tmp_path)
+    exp = tmp_path / ".claude" / "experience"
+    (exp / "_local").mkdir(parents=True)
+    (exp / "_audit.log").write_text("x\n", encoding="utf-8")
+    (exp / "_local" / "current-session").write_text("S\n", encoding="utf-8")
+    git(tmp_path, "add", "-f", ".claude/experience/_audit.log", ".claude/experience/_local/current-session")
+    git(tmp_path, "commit", "-q", "-m", "oops")
+    hits = check_tracking(tmp_path)
+    assert sorted(p for p, _ in hits) == [".claude/experience/_audit.log", ".claude/experience/_local/current-session"]
+    assert all("追跡されています" in why for _, why in hits)
+    r = _cli(tmp_path)
+    assert r.returncode == 1 and "git rm --cached" in r.stderr
+
+
+def test_tracking_fails_closed_when_git_cannot_answer(tmp_path):
+    # git リポジトリでない場所: check-ignore は「判定できない」(None)、CLI 全体は exit 1(検査できなかったことを違反なしにしない)
+    from check_experience_privacy import _is_ignored
+    assert _is_ignored(tmp_path, RECORD_PROBE) is None
+    r = _cli(tmp_path)
+    assert r.returncode == 1 and "検査できませんでした" in r.stderr
+
+
+def test_tracking_ignores_user_global_excludes(tmp_path):
+    # 利用者の global excludes(例: *.jsonl)で記録パスが除外されていても、コミットされた .gitignore だけを見る
+    _init_repo(tmp_path)
+    (tmp_path / "global_ignore").write_text("*.jsonl\n", encoding="utf-8")
+    git(tmp_path, "config", "core.excludesFile", str(tmp_path / "global_ignore"))
+    assert check_tracking(tmp_path) == []
 
 
 # ---- レビュー指摘の修正 ----
