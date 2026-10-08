@@ -114,3 +114,48 @@ def test_codeowners_covers_trust_boundary():
 
 def test_promotion_doc_paths_resolve():
     assert unresolved_doc_paths("docs/wikiskill/Wiki昇格手順.md") == []
+
+
+# ---- 決裁 #26 S2 PR-A1: repo-scope.yml の 2 ジョブ分割 ----
+RS = ".github/workflows/repo-scope.yml"
+
+
+def _job_block(text, job_id):
+    """`  <job_id>:` から次のジョブ(同じ字下げの `  xxx:`)直前までを返す。PyYAML に依存しない。"""
+    m = re.search(rf"^  {job_id}:\n(.*?)(?=^  [A-Za-z_-]+:\n|\Z)", text, re.S | re.M)
+    assert m, f"job not found: {job_id}"
+    return m.group(1)
+
+
+def test_repo_scope_has_two_jobs_with_unique_check_names():
+    t = read(RS)
+    check, guard = _job_block(t, "check"), _job_block(t, "guard")
+    assert "name: repo-scope-check" in check and "name: repo-scope-guard" in guard
+    # 他 workflow と重複する素の `check` / `test` を check-run 名にしない
+    assert re.search(r"^    name: check$", t, re.M) is None
+
+
+def test_repo_scope_check_job_keeps_placement_check_only():
+    check = _job_block(read(RS), "check")
+    assert "scripts/check_repo_scope.py --selftest" in check
+    assert "run: python3 scripts/check_repo_scope.py\n" in check
+    for s in ("check_experience_privacy", "wiki_validate", "decision_memory", "baseline_debt"):
+        assert s not in check, s  # 守りの検査は guard 側へ移した
+
+
+def test_repo_scope_guard_job_keeps_all_guard_checks_and_baseline_compare():
+    guard = _job_block(read(RS), "guard")
+    for s in ("scripts/check_experience_privacy.py --selftest", "run: python3 scripts/check_experience_privacy.py\n",
+              "scripts/wiki_validate.py --selftest", "run: python3 scripts/wiki_validate.py\n",
+              "scripts/decision_memory.py --check", "scripts/baseline_debt.py --compare"):
+        assert s in guard, s
+    assert "check_repo_scope.py\n" not in guard  # 置き場所の検査(Baseline 赤)は guard に入れない
+    assert "pip install pytest" in guard  # baseline_debt --compare は pytest を使う
+    # 先行の赤で後続が止まらない(検査の素通り防止)
+    assert guard.count("if: ${{ !cancelled() }}") >= 6
+
+
+def test_repo_scope_triggers_unchanged():
+    t = read(RS)
+    assert "on:\n  push:\n  pull_request:\n  workflow_dispatch: {}" in t
+    assert "concurrency:\n  group: repo-scope-${{ github.ref }}" in t

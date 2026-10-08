@@ -2,6 +2,12 @@ name: repo-scope
 
 # 公開リポジトリに家計の見直しやさん(enLife)のシステムが混入していないか検査する。
 # 経緯: docs/移設済み_アポ管理と営業指名_2026-08-22.md
+#
+# 2026-10-08 決裁 #26 S2(PR-A1): 2 ジョブに分割。
+# - repo-scope-check: 置き場所の検査(Baseline Debt 9 件 = #22 が是正されるまで赤のまま。必須 check にしない)
+# - repo-scope-guard: Experience 公開可否・Wiki・議事の検査 + Baseline 比較(新しい赤が増えたら REGRESSION で失敗)
+#   → 常に走って常に緑であるべきジョブ。S7a の branch ruleset で必須 check にする候補。
+# 名前(name:)は check-run 名として一意にする(他 workflow の `check` と区別するため)。
 
 on:
   push:
@@ -14,6 +20,7 @@ concurrency:
 
 jobs:
   check:
+    name: repo-scope-check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -21,10 +28,26 @@ jobs:
       - name: 検査ロジックの自己点検
         run: python3 scripts/check_repo_scope.py --selftest
 
+      # 既知の赤(Baseline Debt 9 件・docs/wikiskill/baseline-debt.json)。是正は #22。
+      # 新しい違反は repo-scope-guard の「Baseline 比較」で止める。
       - name: 置き場所の検査
         run: python3 scripts/check_repo_scope.py
 
-      # 以下は「置き場所の検査」が既知の赤(Baseline Debt)でも必ず走らせる(赤で後続が止まると検査が素通りになる)
+  guard:
+    name: repo-scope-guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      # Baseline 比較は skill_validation と固定 2 本の scripts テストを pytest で走らせる
+      - name: pytest を入れる
+        run: pip install pytest
+
+      # 各検査は独立に赤にする(先行が赤でも後続を必ず走らせ、検査の素通りを防ぐ)
       - name: Experience記録の公開可否 自己点検
         if: ${{ !cancelled() }}
         run: python3 scripts/check_experience_privacy.py --selftest
@@ -45,3 +68,9 @@ jobs:
       - name: 議事(Decision)の必須項目検査
         if: ${{ !cancelled() }}
         run: git -c core.quotePath=false ls-files -z 'docs/議事_*.md' 'docs/議事/*.md' | xargs -0 python3 scripts/decision_memory.py --check
+
+      # 置き場所・skill_validation・固定 scripts テストの「既知の赤」が増えていないこと(SAME / IMPROVED)。
+      # 1 件でも新しい赤があれば REGRESSION で exit 1 = このジョブが赤になる(repo-scope-check の赤に埋もれない)。
+      - name: Baseline 比較(新しい赤を増やさない)
+        if: ${{ !cancelled() }}
+        run: python3 scripts/baseline_debt.py --compare
