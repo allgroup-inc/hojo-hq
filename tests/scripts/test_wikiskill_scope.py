@@ -78,6 +78,7 @@ def test_workflow_push_paths_equal_patterns_and_pull_request_has_no_paths():
 def test_workflow_job_name_and_conditional_steps():
     t = read(WF)
     assert "name: wikiskill-tests-all" in t
+    assert "fetch-depth: 0" in t  # 対象判定の `origin/<base>...HEAD` 差分はマージベースが要る(浅い checkout では取れない)
     assert t.count("if: steps.scope.outputs.skip != 'true'") == 4  # setup-python / pytest / git config / テスト
     assert "scripts/wikiskill_scope.py --selftest" in t and "--check-workflow" in t
     assert "--no-renames" in t  # リネームは削除+追加として両方のパスを見る
