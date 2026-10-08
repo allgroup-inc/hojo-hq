@@ -6,11 +6,20 @@ name: main-direct-push-watch
 # を変えていたら Issue と LINE で可視化する。止めはしない(本番設定・ruleset は変えない)。
 # S7a(branch ruleset)の前後で「直接 commit が 0 件」の基線を作り、有効化後は bypass の記録になる。
 #
+# 設計(2026-10-08 三名体制レビュー反映):
+# - 検査範囲 = main の first-parent 直近 SCAN_DEPTH 件 ∪ この push の before...after(compare API)。
+#   毎回同じ窓を再検査する(冪等)ので、並行実行で run が取り消されても次の run が拾う。
+#   compare が上限(250 commit)で切れた場合は「検知漏れ」として run を失敗させる(黙認しない)。
+# - 重複判定は Issue 一覧 API(即時反映)の title にある SHA 先頭 9 桁で行い、reuse / new / failed を区別する。
+# - 同時実行は concurrency で直列化(cancel しない)。それでも二重起票した場合は、起票後の掃除で
+#   同じ SHA の Issue の新しい方を閉じる(自己修復)。
+# - Issue 起票は 3 回リトライ。失敗したら run を失敗にし、LINE も送る(always())。
+# - 結果は常に Step Summary に書く(LINE が無くても GitHub 上で追える)。
+#
 # 挙動の注意:
 # - GITHUB_TOKEN で push された bot の commit ではこの workflow は起動しない(GitHub の仕様)。
-#   S5 で自動処理が App トークンになると起動するが、bot は守りの範囲を書かないので起票されない。
-# - PR のマージコミット(squash 含む)は commits/<sha>/pulls が非空なので対象外。
-# - 変更ファイル一覧は commits API の上限(300 ファイル)まで。超える commit は対象漏れがあり得る。
+# - PR のマージコミット(squash・rebase 含む)は commits/<sha>/pulls が非空なので対象外(実測済み)。
+# - 変更ファイル一覧は commits API の上限(300 ファイル)まで。超えた commit は summary に注記する。
 
 on:
   push:
@@ -18,7 +27,7 @@ on:
   workflow_dispatch:
     inputs:
       sha:
-        description: "検査する commit SHA(省略時は main の先頭)"
+        description: "検査する commit SHA(省略時は main の first-parent 直近 SCAN_DEPTH 件)"
         required: false
         default: ""
 
@@ -26,30 +35,53 @@ permissions:
   contents: read
   issues: write
 
+concurrency:
+  group: main-direct-push-watch
+  cancel-in-progress: false
+
+env:
+  SCAN_DEPTH: "20"   # first-parent で遡る件数(1 日約 10 push なので 2 日分)
+
 jobs:
   watch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 30
 
       - name: 判定ロジックの自己点検
         run: python3 scripts/direct_push_watch.py --selftest
 
-      - name: 検査する commit を決める
+      - name: 検査する commit を決める(直近 SCAN_DEPTH 件 ∪ push の範囲)
+        id: range
         env:
           GH_TOKEN: ${{ github.token }}
+          INPUT_SHA: ${{ github.event.inputs.sha }}
           BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.sha }}
-          INPUT_SHA: ${{ github.event.inputs.sha }}
         run: |
           set -e
           if [ -n "$INPUT_SHA" ]; then
             echo "$INPUT_SHA" > shas.txt
-          elif [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
-            echo "$AFTER" > shas.txt
+            echo "mode=dispatch" >> "$GITHUB_OUTPUT"
           else
-            gh api "repos/$GITHUB_REPOSITORY/compare/$BEFORE...$AFTER" --jq '.commits[].sha' > shas.txt \
-              || echo "$AFTER" > shas.txt
+            git log --first-parent -n "$SCAN_DEPTH" --format=%H > shas.txt
+            echo "mode=window" >> "$GITHUB_OUTPUT"
+            # push の範囲も必ず含める。compare が 250 件で切れたら検知漏れとして失敗(黙認しない)。
+            if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+              gh api "repos/$GITHUB_REPOSITORY/compare/$BEFORE...$AFTER" > compare.json
+              total=$(python3 -c "import json;print(json.load(open('compare.json'))['total_commits'])")
+              listed=$(python3 -c "import json;print(len(json.load(open('compare.json'))['commits']))")
+              python3 -c "import json;[print(c['sha']) for c in json.load(open('compare.json'))['commits']]" >> shas.txt
+              if [ "$total" -gt "$listed" ]; then
+                echo "::error::push の範囲 $total commit のうち $listed 件しか列挙できず、検知漏れの可能性があります(before=${BEFORE:0:9} after=${AFTER:0:9})"
+                echo "## ⚠️ 検知漏れの可能性" >> "$GITHUB_STEP_SUMMARY"
+                echo "push の範囲 $total commit のうち $listed 件しか列挙できません。手動で \`workflow_dispatch\` に SHA を渡して検査してください。" >> "$GITHUB_STEP_SUMMARY"
+                exit 1
+              fi
+            fi
+            sort -u shas.txt -o shas.txt
           fi
           echo "検査対象: $(wc -l < shas.txt) commit"
 
@@ -60,16 +92,20 @@ jobs:
         run: |
           set -e
           : > hits.md
+          : > truncated.txt
           while read -r sha; do
             [ -n "$sha" ] || continue
             prs=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/pulls" --jq 'length')
             haspr=""
             [ "$prs" -gt 0 ] && haspr="--has-pr"
-            gh api "repos/$GITHUB_REPOSITORY/commits/$sha" --jq '.files[].filename' > changed.txt
+            gh api "repos/$GITHUB_REPOSITORY/commits/$sha" > commit.json
+            python3 -c "import json;[print(f['filename']) for f in json.load(open('commit.json')).get('files',[])]" > changed.txt
+            nfiles=$(wc -l < changed.txt)
+            [ "$nfiles" -ge 300 ] && echo "${sha:0:9}" >> truncated.txt
             rc=0
             python3 scripts/direct_push_watch.py --files-from changed.txt $haspr > matched.txt || rc=$?
             if [ "$rc" -eq 3 ]; then
-              subject=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha" --jq '.commit.message | split("\n")[0]')
+              subject=$(python3 -c "import json;print(json.load(open('commit.json'))['commit']['message'].splitlines()[0])")
               {
                 echo "- \`${sha:0:9}\` ${subject}"
                 sed 's/^/    - /' matched.txt
@@ -84,23 +120,39 @@ jobs:
           else
             echo "found=false" >> "$GITHUB_OUTPUT"
             echo "守りの範囲を変えた直接 commit はありません"
+            echo "## ✅ 直接 commit の検知: 該当なし($(wc -l < shas.txt) commit を検査)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -s truncated.txt ]; then
+            echo "## ⚠️ 変更ファイルが 300 件以上で一覧が切れた commit(対象漏れの可能性)" >> "$GITHUB_STEP_SUMMARY"
+            sed 's/^/- /' truncated.txt >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      # 同じ commit を 2 回起票しない: ラベル + SHA(先頭 9 桁)で既存 Issue を検索する
+      # reuse(既存 Issue あり)/ new(起票)/ failed(3 回失敗)を区別して記録する。
+      # 既存判定は Issue 一覧 API(検索 API の索引遅延を避ける)。
       - name: Issue 起票(記録。止めはしない)
+        id: issue
         if: steps.scan.outputs.found == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -e
+          set +e
           gh label create direct-push-watch --color B60205 \
             --description "main への直接 commit が守りの範囲を変えた(決裁 #26 S1)" 2>/dev/null || true
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          grep -oE '^- `[0-9a-f]{9}`' hits.md | tr -d '`- ' | while read -r sha9; do
-            dup=$(gh issue list --state all --label direct-push-watch --search "$sha9" --json number --jq 'length')
-            if [ "$dup" -gt 0 ]; then
-              echo "既に起票済み: $sha9"
-              continue
+          if ! gh issue list --state all --label direct-push-watch --limit 500 --json title --jq '.[].title' > existing.txt; then
+            echo "::error::既存 Issue の一覧取得に失敗(重複判定ができないため起票しない)"
+            echo "## ❌ Issue 一覧の取得に失敗(起票なし)" >> "$GITHUB_STEP_SUMMARY"
+            cat hits.md >> "$GITHUB_STEP_SUMMARY"
+            echo "reused=0" >> "$GITHUB_OUTPUT"; echo "created=0" >> "$GITHUB_OUTPUT"; echo "failed=1" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          grep -oE '^- `[0-9a-f]{9}`' hits.md | tr -d '`- ' > hit_shas.txt
+          python3 scripts/direct_push_watch.py --plan --existing existing.txt --shas hit_shas.txt > plan.txt
+          reused=0; created=0; failed=0
+          : > result.md
+          while read -r kind sha9; do
+            if [ "$kind" = "reuse" ]; then
+              reused=$((reused + 1)); echo "| \`$sha9\` | 既存 Issue を再利用(起票なし) |" >> result.md; continue
             fi
             {
               echo "main への **PR を経由しない直接 commit** が守りの範囲(CODEOWNERS のパス・正式な Wiki)を変更しました。"
@@ -116,18 +168,51 @@ jobs:
               echo ""
               echo "確認すること: ①PR を経由すべき変更だったか ②bypass の記録(議事)が要るか ③必要なら revert。"
             } > issue_body.md
-            gh issue create --label direct-push-watch \
-              --title "⚠️ main への直接 commit が守りの範囲を変更: $sha9" \
-              --body-file issue_body.md
-          done
+            ok=0
+            for i in 1 2 3; do
+              if url=$(gh issue create --label direct-push-watch \
+                   --title "⚠️ main への直接 commit が守りの範囲を変更: $sha9" \
+                   --body-file issue_body.md); then ok=1; break; fi
+              sleep $((i * 5))
+            done
+            if [ "$ok" -eq 1 ]; then
+              created=$((created + 1)); echo "| \`$sha9\` | 新規起票 $url |" >> result.md
+            else
+              failed=$((failed + 1)); echo "| \`$sha9\` | **起票失敗(3 回)** |" >> result.md
+              echo "::error::Issue 起票に失敗: $sha9(内容は本 run の Step Summary に残す)"
+            fi
+          done < plan.txt
+          # 自己修復: 並行実行で同じ SHA が二重起票されていたら、新しい方を閉じる
+          closed=0
+          if gh issue list --state open --label direct-push-watch --limit 500 --json number,title > issues.json; then
+            python3 scripts/direct_push_watch.py --dups --issues issues.json > dups.txt
+            while read -r _ num sha9 keep; do
+              [ -n "$num" ] || continue
+              gh issue close "$num" --comment "同じ commit \`$sha9\` の Issue が重複したため閉じます(残す方: #${keep#keep=}。並行実行による二重起票の自己修復)" && closed=$((closed + 1))
+            done < dups.txt
+          fi
+          {
+            echo "## 直接 commit の検知: 起票 $created 件・既存再利用 $reused 件・失敗 $failed 件・重複を閉じた $closed 件"
+            echo ""
+            echo "| commit | 結果 |"; echo "|---|---|"; cat result.md
+            echo ""
+            echo "### 検知した commit と変更パス"; echo ""; cat hits.md
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "reused=$reused" >> "$GITHUB_OUTPUT"
+          echo "created=$created" >> "$GITHUB_OUTPUT"
+          echo "failed=$failed" >> "$GITHUB_OUTPUT"
+          echo "closed=$closed" >> "$GITHUB_OUTPUT"
+          [ "$failed" -eq 0 ]
 
+      # 新規起票があった時と起票に失敗した時だけ送る(reuse だけの再実行では送らない)。
+      # Issue 起票が失敗しても送る(always())。本文は run URL と件数のみ(commit 内容・パスは載せない)。
       - name: LINE通知(小柳さんへ)
-        if: steps.scan.outputs.found == 'true'
+        if: always() && steps.scan.outputs.found == 'true' && (steps.issue.outputs.created != '0' || steps.issue.outputs.failed != '0')
         uses: ./.github/actions/line-notify
         with:
           channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
           message: |
             ⚠️【ミカタ】main への直接 commit が守りの範囲(CODEOWNERS / 正式Wiki)を変更しました。
-            Issue(ラベル direct-push-watch)を確認してください。
+            Issue(ラベル direct-push-watch)を確認してください。起票 ${{ steps.issue.outputs.created }} 件・既存 ${{ steps.issue.outputs.reused }} 件・失敗 ${{ steps.issue.outputs.failed }} 件
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
