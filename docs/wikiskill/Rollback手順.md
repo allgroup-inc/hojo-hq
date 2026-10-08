@@ -140,12 +140,12 @@ rm .claude/wiki.off         # 再開する
 ```bash
 git fetch origin main
 git switch -c rollback/wikiskill-phase2 origin/main
-# 対象 commit は wikiskill-phase2-v1 タグが指すマージコミット(Task 9 のマージ後に追記)
-git revert -m 1 <マージコミット: Task 9 のマージ後に追記>
+# 対象 commit = PR #441 のマージコミット(2026-10-07 マージ・タグ wikiskill-phase2-v1 が指す)
+git revert -m 1 1e19530df1608f970d3732c27c9cb397e8660f54
 git push -u origin rollback/wikiskill-phase2     # PR を作り、小柳さんの決裁後にマージ
 ```
 
-- タグ `wikiskill-phase2-v1` は小柳さんの最終承認の後に付く。付いた後は `git revert -m 1 $(git rev-list -n1 wikiskill-phase2-v1)` でも同じ commit を指せる。
+- タグ `wikiskill-phase2-v1` は 2026-10-08 に小柳さんが Release と同時に作成済み(https://github.com/allgroup-inc/hojo-hq/releases/tag/wikiskill-phase2-v1)。`git revert -m 1 $(git rev-list -n1 wikiskill-phase2-v1)` でも同じ commit `1e19530df` を指す。
 - revert で戻るもの: 検証・抽出・Bootstrap の `[Wiki]`・CI のステップ・workflow・CODEOWNERS・文書。Phase 1(記録と `[D]` などの注入)は戻らない(Phase 1 の戻し方は上の 2)。
 - **`docs/wiki/` に承認済みの Wiki が入った後は、revert でそれらも消える**。残すかどうかは別途議事で決める(消す前に `_archive/` へ移すこともできる)。
 - GitHub の branch protection(G1。Code Owners の承認必須)は小柳さんの GitHub 設定で、revert では戻らない。外すかどうかは小柳さんが決める。

@@ -80,7 +80,7 @@ CVはLINE登録の1点のみ(締切アラートが登録特典)。
 - GAS Web App規律: スタッフ許可リスト認証(`Session.getActiveUser()`照合)を使うWeb Appは、デプロイの実行ユーザーを**「ウェブアプリケーションにアクセスしているユーザー」にする**(個人Gmail運用で「自分」にするとメールが空になり所有者以外全員が締め出される。2026-08-17 apo-kanriレビュー#1で本番投入前に検出)。本番投入・大規模改修の前に独立実行の`/review`(code-review)を通すこと
 - 監査・横断レビューは必ず`git fetch origin main`した最新版を対象にする。ローカル作業ブランチがmainから乖離した状態で判定すると、既に解決済みの問題を「未解決」と誤報告し、逆に新たな問題を見落とす(組織総点検2026-08-17で、526コミット遅れたブランチ上での点検が前提を何度も覆した実例あり)
 
-## 記憶の仕組み(WikiSkill Phase 1・2026-10-06 導入)
+## 記憶の仕組み(WikiSkill Phase 1・2 導入済み: Phase 1 2026-10-06 / Phase 2 Knowledge Wiki 2026-10-08 Release `wikiskill-phase2-v1`)
 - 正本は GitHub。**Decision** = 議事 + frontmatter(テンプレート: docs/wikiskill/議事frontmatterテンプレート.md。見直し期限は未指定なら180日。ウタガイ空欄は `python3 scripts/decision_memory.py --check <議事>` で止まる)
 - **Experience** = `.claude/experience/`(機械記録・低信頼・公開可能な範囲のみ。`python3 scripts/experience_log.py note "…"` で所感を残せる)
 - 新セッションは Memory Bootstrap が関連する Decision・失敗台帳・再発防止・Skill **だけ**を注入(段1: ブランチ/commit、段2: 最初の指示。6,000字上限。信頼順 Decision > 失敗台帳 > 再発防止 > Experience)
