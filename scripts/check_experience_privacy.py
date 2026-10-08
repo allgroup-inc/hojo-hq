@@ -15,6 +15,15 @@
   - program が `^[A-Za-z0-9._+-]{1,32}$` の形でない・鍵の断片らしい(<unknown> と <external> は許可)
   - 未知の event 名 / JSON オブジェクトでない行 / JSON として読めない行
 
+ignore と追跡状態(決裁 #26 S2 PR-D・2026-10-08):
+  - 記録パス(.claude/experience/<月>/*.jsonl)が .gitignore で除外されていたら止める。
+    2026-10-08 に別セッションの直接 push(802a00cbf)が `.claude/experience/` を ignore に足し、
+    記録が Git に残らず、この検査も空振りで緑になった(PR #450 で修復)。CODEOWNERS は承認を求めるだけで
+    壊す変更そのものは止めないので、ここで機械的に止める。
+  - ローカル限定のもの(_local/ と _audit.log)は ignore 必須。ignore されていない・既に追跡されている、のどちらも止める。
+  - 判定は git 自身(`git check-ignore --no-index`)に任せる(.gitignore の文字列検査では別の書き方をすり抜ける)。
+    利用者ごとの global excludes は見ない(core.excludesFile を空にする)= コミットされた .gitignore だけを検査する。
+
 使い方:
     python3 scripts/check_experience_privacy.py            # git 管理下の Experience を検査(cwd が対象リポ)
     python3 scripts/check_experience_privacy.py --selftest # 検査ロジック自体の自己点検
@@ -42,11 +51,20 @@ VALID_EVENTS = {"session_start", "session_resume", "tool", "skill", "note", "ses
 PLACEHOLDERS = {"<external>", "<unknown>"}
 _DRIVE = re.compile(r"^[A-Za-z]:")
 
+# ignore と追跡状態の検査対象(パスは存在しなくてよい。git check-ignore はパターンだけで判定する)
+RECORD_PROBE = f"{EXPERIENCE_DIR}/2026-01/session-probe.jsonl"   # 記録パス: ignore されてはいけない
+MUST_IGNORE = (                                                    # ローカル限定: ignore 必須・追跡禁止
+    f"{EXPERIENCE_DIR}/_local/probe",
+    f"{EXPERIENCE_DIR}/_audit.log",
+)
+
 HINT = """
 Experience 記録は【公開リポジトリにそのまま載る】ものです。公開して問題のある内容は残せません。
   - 記録してよいのは hojo-hq の、プロジェクト内の相対パスとプログラム名など、機械が観測した事実だけ
   - 他リポ・private の記録 / 絶対パス / 長い本文 / 禁止語を含む行は、コミットから外してください
   - 該当ファイルを直す(または git rm する)か、記録自体を止めるなら .claude/memory.off を置いてください
+  - .gitignore の違反: 記録パス(.claude/experience/<月>/*.jsonl)は除外しない / _local/ と _audit.log は除外する。
+    記録自体を止めたいときは .gitignore ではなく .claude/memory.off を使ってください
 
   詳細: docs/wikiskill/README.md
 """
@@ -180,6 +198,57 @@ def _count_targets(root: Path) -> int:
     return sum(1 for rel in _tracked_experience(root) if _is_target(rel))
 
 
+def _is_local_only(rel: str) -> bool:
+    """_local/ 配下と _audit.log は Git に載せないローカル限定(記録側 experience_log.py の約束)。"""
+    parts = rel.split("/")
+    return "_local" in parts or parts[-1] == "_audit.log"
+
+
+def _is_ignored(root: Path, rel: str) -> bool | None:
+    """git 自身の判定で rel が ignore されるか。True/False、git が答えられなければ None(fail-closed 用)。
+
+    --no-index: 追跡済みでもパターンで判定する(追跡されている _audit.log を「ignore されている」と誤らない)。
+    core.excludesFile を空にして、利用者ごとの global excludes ではなくコミットされた .gitignore だけを見る。
+    """
+    r = subprocess.run(
+        ["git", "-c", "core.excludesFile=/dev/null", "check-ignore", "-q", "--no-index", "--", rel],
+        cwd=str(root), capture_output=True, text=True,
+    )
+    if r.returncode == 0:
+        return True
+    if r.returncode == 1:
+        return False
+    return None
+
+
+def check_tracking(root: Path) -> list[tuple[str, str]]:
+    """ignore と追跡状態の違反を (パス, 理由) で返す(空なら正常)。
+
+    - 記録パスが ignore されている → 記録が Git に残らず、公開可否の検査が空振りで緑になる
+    - ローカル限定のパスが ignore されていない → 一時マーカー・監査ログがコミットされ得る
+    - ローカル限定のファイルが既に追跡されている → ignore だけでは外れない(git rm --cached が要る)
+    - git が判定できない → 検査できなかったことを「違反なし」にしない
+    """
+    root = Path(root)
+    hits: list[tuple[str, str]] = []
+    ig = _is_ignored(root, RECORD_PROBE)
+    if ig is None:
+        hits.append((RECORD_PROBE, "git check-ignore で判定できません(検査不能)"))
+    elif ig:
+        hits.append((RECORD_PROBE, ".gitignore が Experience の記録パスを除外しています"
+                                   "(記録が Git に残らず、公開可否の検査も素通りします。2026-10-08 の再発)"))
+    for rel in MUST_IGNORE:
+        ig = _is_ignored(root, rel)
+        if ig is None:
+            hits.append((rel, "git check-ignore で判定できません(検査不能)"))
+        elif not ig:
+            hits.append((rel, "ローカル限定のパスが ignore されていません(一時マーカー・監査ログがコミットされ得ます)"))
+    for rel in _tracked_experience(root):
+        if _is_local_only(rel):
+            hits.append((rel, "ローカル限定のファイルが Git に追跡されています(git rm --cached で外してください)"))
+    return hits
+
+
 def selftest() -> int:
     """検査が効いていること(止めるべきものを止める)・誤検知しないこと(通すべきものを通す)を確かめる。"""
     word = FORBIDDEN_CONTENT[0]  # 禁止語の実文字列はソースに書かない
@@ -256,14 +325,14 @@ def main(argv: list[str]) -> int:
         return 2
     root = _repo_root()
     try:
-        hits = scan(root)
+        hits = scan(root) + check_tracking(root)
         count = _count_targets(root)
     except (OSError, subprocess.SubprocessError) as e:
         # 検査できなかったことを「違反なし」にしない(fail-closed)
         print(f"Experience記録を検査できませんでした: {type(e).__name__}: {e}", file=sys.stderr)
         return 1
     if not hits:
-        print(f"OK: Experience記録 {count}件・違反なし")
+        print(f"OK: Experience記録 {count}件・違反なし(ignore・追跡状態 OK)")
         return 0
     print("公開できない Experience 記録があります:\n", file=sys.stderr)
     for path, reason in hits:
