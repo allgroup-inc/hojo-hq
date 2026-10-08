@@ -186,5 +186,125 @@ def test_workflow_dedupe_covers_closed_issues_too():
     assert "--state all --label direct-push-watch --limit 500 --json title" in read(WF)
 
 
+def test_workflow_issue_step_extracts_sha_with_sed_and_does_not_swallow_errors():
+    t = read(WF)
+    assert "sed -nE 's/^- `([0-9a-f]{9})`.*/\\1/p' hits.md > hit_shas.txt" in t
+    assert "| tr -d" not in t  # 2026-10-08 手順 3: tr の範囲解釈で抽出が空になった(コマンドとしては使わない)
+    assert "set -eo pipefail" in t
+    assert not any(line.strip() == "set +e" for line in t.splitlines())  # コマンドとしての set +e は無い(注釈は可)
+    assert "内部エラー" in t  # 検知あり・抽出 0 / 処理 0 は失敗にする
+
+
+# ---- 回帰テスト: Issue 起票 step の run: 本文を、偽の gh と一緒に本物の bash で実行する ----
+
+import os
+import shutil
+import stat
+import textwrap
+
+FAKE_GH = textwrap.dedent(r'''
+    #!/usr/bin/env bash
+    # テスト用の偽 gh。呼び出しを $FAKE_LOG に記録し、応答は環境変数で決める。
+    echo "$*" >> "$FAKE_LOG"
+    case "$1 $2" in
+      "label create") exit 0 ;;
+      "issue list")
+        if printf '%s\n' "$@" | grep -q '^number,title$'; then cat "${FAKE_ISSUES_JSON:-/dev/null}"; [ -n "${FAKE_ISSUES_JSON:-}" ] || echo "[]"
+        else cat "${FAKE_EXISTING:-/dev/null}"; fi
+        exit 0 ;;
+      "issue create")
+        [ "${FAKE_CREATE_FAIL:-0}" = "1" ] && exit 1
+        n=$(( $(cat "$FAKE_COUNTER" 2>/dev/null || echo 0) + 1 )); echo "$n" > "$FAKE_COUNTER"
+        echo "https://github.com/example/repo/issues/$n"; exit 0 ;;
+      "issue close") exit 0 ;;
+    esac
+    echo "fake gh: unexpected args: $*" >&2; exit 99
+''').lstrip()
+
+
+def issue_step_script():
+    import yaml  # PyYAML は CI(setup-python)にも入っている
+    wf = yaml.safe_load(read(WF))
+    for s in wf["jobs"]["watch"]["steps"]:
+        if s.get("name", "").startswith("Issue 起票"):
+            return s["run"]
+    raise AssertionError("Issue 起票 step not found")
+
+
+def run_issue_step(tmp_path, hits_md, existing_titles="", create_fail=False, issues_json=None):
+    """step の run: 本文を bash で実行し、(returncode, outputs dict, summary text, gh call log) を返す。"""
+    work = tmp_path / "work"; work.mkdir()
+    (work / "scripts").mkdir()
+    shutil.copy(ROOT / "scripts" / "direct_push_watch.py", work / "scripts" / "direct_push_watch.py")
+    (work / "hits.md").write_text(hits_md, encoding="utf-8")
+    bindir = tmp_path / "bin"; bindir.mkdir()
+    (bindir / "gh").write_text(FAKE_GH, encoding="utf-8")
+    (bindir / "sleep").write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")  # リトライ待ちを省く
+    for f in ("gh", "sleep"):
+        p = bindir / f; p.chmod(p.stat().st_mode | stat.S_IEXEC)
+    out = tmp_path / "output.txt"; summ = tmp_path / "summary.md"; log = tmp_path / "gh.log"
+    out.touch(); summ.touch(); log.touch()
+    existing = tmp_path / "existing_titles.txt"; existing.write_text(existing_titles, encoding="utf-8")
+    env = dict(os.environ)
+    env.update({
+        "PATH": f"{bindir}:{env['PATH']}",
+        "GITHUB_OUTPUT": str(out), "GITHUB_STEP_SUMMARY": str(summ),
+        "GITHUB_SERVER_URL": "https://github.com", "GITHUB_REPOSITORY": "example/repo",
+        "GITHUB_RUN_ID": "1", "GITHUB_ACTOR": "tester", "GH_TOKEN": "x",
+        "FAKE_LOG": str(log), "FAKE_COUNTER": str(tmp_path / "counter"),
+        "FAKE_EXISTING": str(existing), "FAKE_CREATE_FAIL": "1" if create_fail else "0",
+    })
+    if issues_json is not None:
+        p = tmp_path / "issues.json"; p.write_text(issues_json, encoding="utf-8"); env["FAKE_ISSUES_JSON"] = str(p)
+    r = subprocess.run(["bash", "-c", issue_step_script()], cwd=work, env=env, capture_output=True, text=True)
+    outputs = dict(l.split("=", 1) for l in out.read_text(encoding="utf-8").splitlines() if "=" in l)
+    return r, outputs, summ.read_text(encoding="utf-8"), log.read_text(encoding="utf-8")
+
+
+HITS_TWO = "- `d04120050` test: S1 直接 commit 検知の試験\n    - docs/wiki/_s1_test.md\n- `742426679` test: S1 競合試験\n    - docs/wiki/_s1_test2.md\n"
+
+
+def test_issue_step_creates_one_issue_per_sha(tmp_path):
+    r, outputs, summary, log = run_issue_step(tmp_path, HITS_TWO)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert outputs["created"] == "2" and outputs["reused"] == "0" and outputs["failed"] == "0"
+    creates = [l for l in log.splitlines() if l.startswith("issue create")]
+    assert len(creates) == 2 and "d04120050" in creates[0] and "742426679" in creates[1]
+    assert "起票 2 件・既存再利用 0 件・失敗 0 件" in summary
+
+
+def test_issue_step_reuses_existing_issue_and_creates_only_new(tmp_path):
+    r, outputs, summary, log = run_issue_step(tmp_path, HITS_TWO, existing_titles="⚠️ …: d04120050\n")
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert outputs == {**outputs, "created": "1", "reused": "1", "failed": "0"}
+    creates = [l for l in log.splitlines() if l.startswith("issue create")]
+    assert len(creates) == 1 and "742426679" in creates[0]
+    assert "既存 Issue を再利用" in summary
+
+
+def test_issue_step_fails_loudly_when_sha_cannot_be_extracted(tmp_path):
+    r, outputs, summary, log = run_issue_step(tmp_path, "* d04120050 形式が違う行\n")
+    assert r.returncode != 0
+    assert outputs["failed"] == "1" and outputs["created"] == "0"
+    assert "内部エラー" in summary and "issue create" not in log
+
+
+def test_issue_step_fails_and_counts_when_create_fails_three_times(tmp_path):
+    r, outputs, summary, log = run_issue_step(tmp_path, HITS_TWO, create_fail=True)
+    assert r.returncode != 0
+    assert outputs["failed"] == "2" and outputs["created"] == "0"
+    assert len([l for l in log.splitlines() if l.startswith("issue create")]) == 6  # 3 回 × 2 SHA
+    assert "起票失敗(3 回)" in summary
+
+
+def test_issue_step_closes_duplicate_issue_keeping_oldest(tmp_path):
+    dup = '[{"number": 7, "title": "⚠️ …: 742426679"}, {"number": 5, "title": "⚠️ …: 742426679"}]'
+    r, outputs, summary, log = run_issue_step(tmp_path, HITS_TWO, issues_json=dup)
+    assert r.returncode == 0, r.stdout + r.stderr
+    closes = [l for l in log.splitlines() if l.startswith("issue close")]
+    assert len(closes) == 1 and closes[0].startswith("issue close 7 ")
+    assert outputs["closed"] == "1"
+
+
 def test_wikiskill_tests_runs_this_file():
     assert "tests/scripts/test_direct_push_watch.py" in read(".github/workflows/wikiskill-tests.yml")
