@@ -25,3 +25,12 @@ docs/wikiskill/baseline-debt.json @takeshikoyanagi9-lab
 .github/CODEOWNERS @takeshikoyanagi9-lab
 .claude/hooks/wikiskill-hook.sh @takeshikoyanagi9-lab
 .claude/settings.json @takeshikoyanagi9-lab
+
+# 決裁 #26 S2(PR-C・2026-10-08): main 直接 commit の検知(S1)一式と、守りの仕組みが依存する .gitignore。
+# 2026-10-08 に別セッションの直接 push が .gitignore に .claude/experience/ を足し、Experience の記録を壊した(PR #450 で修復)。
+# `/.gitignore` はルートのものだけを指す(先頭の / で固定)。scripts/wiki_guard.py は PR-B で作成予定(未作成の間は何にも一致しない)。
+.github/workflows/main-direct-push-watch.yml @takeshikoyanagi9-lab
+scripts/direct_push_watch.py @takeshikoyanagi9-lab
+tests/scripts/test_direct_push_watch.py @takeshikoyanagi9-lab
+/.gitignore @takeshikoyanagi9-lab
+scripts/wiki_guard.py @takeshikoyanagi9-lab

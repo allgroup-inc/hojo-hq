@@ -112,6 +112,79 @@ def test_codeowners_covers_trust_boundary():
     assert "branch protection はまだ有効ではない" in read(".github/CODEOWNERS")
 
 
+# 決裁 #26 S2 PR-C: S1 の検知一式と、守りの仕組みが依存する .gitignore(2026-10-08 直接 push で壊された)
+S2_PROTECTED_EXISTING = [
+    ".github/workflows/main-direct-push-watch.yml",
+    "scripts/direct_push_watch.py",
+    "tests/scripts/test_direct_push_watch.py",
+]
+S2_PROTECTED_PLANNED = ["scripts/wiki_guard.py"]  # PR-B で作成予定。未作成の間は何にも一致しない
+
+
+def codeowners_rules():
+    """コメント・空行を除いた (pattern, owners) の並び(先頭から順。後の行が優先)。"""
+    out = []
+    for line in read(".github/CODEOWNERS").splitlines():
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        parts = s.split()
+        out.append((parts[0], parts[1:]))
+    return out
+
+
+def _codeowners_match(pattern, path):
+    """CODEOWNERS(gitignore 流)の最小限の一致: / を含むパターンはルート基準、`dir/` は配下すべて、
+    先頭 / はルート固定。ワイルドカードは本リポの CODEOWNERS に無いので扱わない。"""
+    pat = pattern.lstrip("/")
+    if pattern.endswith("/"):
+        return path.startswith(pat)
+    if "/" in pattern:
+        return path == pat
+    return path.split("/")[-1] == pat  # スラッシュ無しはどの階層のその名前にも一致
+
+
+def owners_of(path):
+    """後の行が優先(GitHub の規則)。一致する行が無ければ空。"""
+    owners = []
+    for pattern, who in codeowners_rules():
+        if _codeowners_match(pattern, path):
+            owners = who
+    return owners
+
+
+def test_codeowners_covers_s1_detection_files_and_root_gitignore():
+    lines = set(read(".github/CODEOWNERS").splitlines())
+    for p in S2_PROTECTED_EXISTING:
+        assert f"{p} @takeshikoyanagi9-lab" in lines, p
+        assert (ROOT / p).exists(), p
+        assert owners_of(p) == ["@takeshikoyanagi9-lab"], p
+    assert "/.gitignore @takeshikoyanagi9-lab" in lines  # ルートの .gitignore だけ(先頭 / で固定)
+    assert owners_of(".gitignore") == ["@takeshikoyanagi9-lab"]
+    assert owners_of("site/.gitignore") == []  # 配下の同名ファイルには当てない
+
+
+def test_codeowners_planned_file_is_listed_but_may_not_exist_yet():
+    lines = set(read(".github/CODEOWNERS").splitlines())
+    for p in S2_PROTECTED_PLANNED:
+        assert f"{p} @takeshikoyanagi9-lab" in lines, p
+        assert owners_of(p) == ["@takeshikoyanagi9-lab"], p
+        # 存在してもしなくてもよい(PR-B で作る)。存在しない間は GitHub 側で何にも一致しないだけ
+
+
+def test_codeowners_rules_do_not_contradict():
+    """すべての行の持ち主が同一(小柳さん 1 人)で、後勝ちの規則でも持ち主が変わる組み合わせが無い。"""
+    rules = codeowners_rules()
+    assert rules, "CODEOWNERS が空"
+    assert {tuple(who) for _, who in rules} == {("@takeshikoyanagi9-lab",)}
+    patterns = [p for p, _ in rules]
+    assert len(patterns) == len(set(patterns)), "同じパターンの重複行"
+    for p in TRUST_BOUNDARY + S2_PROTECTED_EXISTING + S2_PROTECTED_PLANNED + ["docs/wiki/W001.md", ".gitignore"]:
+        assert owners_of(p) == ["@takeshikoyanagi9-lab"], p
+    for p in ["scripts/fg_seo.py", "site/index.html", "docs/決裁キュー.md", "docs/wiki/_candidates/c.md"]:
+        assert owners_of(p) == ([] if p != "docs/wiki/_candidates/c.md" else ["@takeshikoyanagi9-lab"]), p
+
+
 def test_promotion_doc_paths_resolve():
     assert unresolved_doc_paths("docs/wikiskill/Wiki昇格手順.md") == []
 
