@@ -170,11 +170,15 @@ def test_workflow_line_runs_even_if_issue_step_failed_and_only_on_new_or_failed(
     assert "if: always() && steps.scan.outputs.found == 'true' && (steps.issue.outputs.created != '0' || steps.issue.outputs.failed != '0')" in t
 
 
-def test_workflow_fails_explicitly_when_file_list_is_truncated_or_sha_missing():
+def test_workflow_lists_files_with_git_not_the_capped_commits_api():
     t = read(WF)
-    assert '-ge 300' in t and "truncated=true" in t
-    assert "if: always() && steps.scan.outputs.truncated == 'true'" in t  # Issue・LINE の後で run を失敗にする
-    assert "が見つかりません" in t  # 存在しない SHA は明示的に失敗
+    # commits API は 300 件で切れる(bot の site 再生成は 424 件)。一覧は git の first-parent diff から取る
+    assert 'git diff --name-only "${sha}^1" "$sha" > changed.txt' in t
+    assert ".files[].filename" not in t and "truncated" not in t
+    # main に無い SHA は SHA 指定で fetch(dispatch で他ブランチの commit を検査できる)
+    assert 'git fetch -q --depth=2 origin "$sha"' in t
+    # 取得できない SHA・一覧を取れない commit は明示的に失敗
+    assert "が見つかりません" in t and "変更ファイル一覧を取得できませんでした" in t
 
 
 def test_workflow_dedupe_covers_closed_issues_too():
