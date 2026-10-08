@@ -129,6 +129,7 @@ jobs:
           tests/scripts/test_knowledge_extract.py
           tests/scripts/test_wikiskill_workflows.py
           tests/scripts/test_direct_push_watch.py
+          tests/scripts/test_direct_push_watch_steps.py
           tests/scripts/test_wikiskill_scope.py
           tests/integration/test_wikiskill_memory_e2e.py
           tests/integration/test_wikiskill_wiki_e2e.py
