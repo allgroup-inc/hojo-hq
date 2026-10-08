@@ -148,7 +148,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set +e
+          # 実行時エラーを握りつぶさない(2026-10-08 手順 3: `tr -d` の範囲解釈エラーが set +e で隠れ、起票 0 で緑になった)。
+          # 失敗を許す箇所だけ `|| true` / `if` で明示する。
+          set -eo pipefail
           gh label create direct-push-watch --color B60205 \
             --description "main への直接 commit が守りの範囲を変えた(決裁 #26 S1)" 2>/dev/null || true
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
@@ -159,7 +161,15 @@ jobs:
             echo "reused=0" >> "$GITHUB_OUTPUT"; echo "created=0" >> "$GITHUB_OUTPUT"; echo "failed=1" >> "$GITHUB_OUTPUT"
             exit 1
           fi
-          grep -oE '^- `[0-9a-f]{9}`' hits.md | tr -d '`- ' > hit_shas.txt
+          # hits.md の「- `<sha9>` 件名」行から SHA 先頭 9 桁を取り出す(tr の範囲解釈を避けて sed で)
+          sed -nE 's/^- `([0-9a-f]{9})`.*/\1/p' hits.md > hit_shas.txt
+          if [ -s hits.md ] && ! [ -s hit_shas.txt ]; then
+            echo "::error::内部エラー: 検知結果(hits.md)から SHA を抽出できませんでした。workflow の不具合です"
+            echo "## ❌ 内部エラー: 検知結果から SHA を抽出できない(起票なし)" >> "$GITHUB_STEP_SUMMARY"
+            cat hits.md >> "$GITHUB_STEP_SUMMARY"
+            echo "reused=0" >> "$GITHUB_OUTPUT"; echo "created=0" >> "$GITHUB_OUTPUT"; echo "failed=1" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
           python3 scripts/direct_push_watch.py --plan --existing existing.txt --shas hit_shas.txt > plan.txt
           reused=0; created=0; failed=0
           : > result.md
@@ -203,6 +213,14 @@ jobs:
               [ -n "$num" ] || continue
               gh issue close "$num" --comment "同じ commit \`$sha9\` の Issue が重複したため閉じます(残す方: #${keep#keep=}。並行実行による二重起票の自己修復)" && closed=$((closed + 1))
             done < dups.txt
+          fi
+          # 検知があったのに起票・再利用・失敗がすべて 0 なら、ループが回っていない = 内部エラー(緑で黙らない)
+          if [ $((created + reused + failed)) -eq 0 ]; then
+            echo "::error::内部エラー: 検知があったのに起票・再利用・失敗がすべて 0 件です。workflow の不具合です"
+            echo "## ❌ 内部エラー: 検知あり・処理 0 件" >> "$GITHUB_STEP_SUMMARY"
+            cat hits.md >> "$GITHUB_STEP_SUMMARY"
+            echo "reused=0" >> "$GITHUB_OUTPUT"; echo "created=0" >> "$GITHUB_OUTPUT"; echo "failed=1" >> "$GITHUB_OUTPUT"
+            exit 1
           fi
           {
             echo "## 直接 commit の検知: 起票 $created 件・既存再利用 $reused 件・失敗 $failed 件・重複を閉じた $closed 件"
