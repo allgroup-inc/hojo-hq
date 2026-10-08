@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-10-08 13:08",
+ "generated_at": "2026-10-08 21:42",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 5,
- "count": 39,
+ "count": 40,
  "items": [
   {
    "id": "a0WJ200000CDdMRMA1",
@@ -196,6 +196,16 @@
    "max_amount": 15000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003iZLKUA2",
    "tag": "okinawa"
+  },
+  {
+   "id": "a0WJ200000CDXscMAH",
+   "name": "IP360 海外展開支援（ローカライズ支援）",
+   "deadline": "2026-10-29",
+   "days_left": 21,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 40000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXscMAH",
+   "tag": "nationwide"
   },
   {
    "id": "a0WJ200000CDPyeMAH",
