@@ -3887,5 +3887,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-08",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "地上基幹放送等に関する耐災害性強化支援事業（令和８年度公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFjMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【倉敷市】実証実験サポート事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY6KMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（23次締切）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtMMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "経済安全保障重要技術育成プログラム／航空機エンジン向け先進材料技術の開発・実証/研究開発項目〔3〕「国産ニッケル基超合金における評価システム基盤整備」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdonMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度酒類業振興支援事業費補助金（第６期）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003iZLKUA2",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
