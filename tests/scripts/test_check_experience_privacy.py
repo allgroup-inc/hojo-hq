@@ -409,6 +409,95 @@ def test_tracking_ignores_user_global_excludes(tmp_path):
     assert check_tracking(tmp_path) == []
 
 
+# ---- 決裁 #26 S2 PR-D3: 追跡済み Experience 記録全件の ignore 判定(月・part を狙った除外を見逃さない) ----
+
+from check_experience_privacy import _ignored_among  # noqa: E402
+
+A_REL = ".claude/experience/2026-10/session-a.jsonl"
+PART_REL = ".claude/experience/2026-10/session-a.part1.jsonl"
+
+
+def _repo_with_two_records(tmp_path, gitignore):
+    _init_repo(tmp_path, gitignore=gitignore)
+    _commit_jsonl(tmp_path, "session-a.jsonl", json.dumps(OK) + "\n")          # _commit_jsonl は add -f(除外されていても追跡させる)
+    _commit_jsonl(tmp_path, "session-a.part1.jsonl", json.dumps(OK) + "\n")
+    return tmp_path
+
+
+def _paths(hits):
+    return [p for p, _ in hits]
+
+
+def test_tracked_records_ok_with_standard_gitignore(tmp_path):
+    # 正常系: 本物と同じ約束なら追跡済み 2 件とも違反なし。_ignored_among は空 dict(None ではない)
+    _repo_with_two_records(tmp_path, STANDARD_GITIGNORE)
+    assert _ignored_among(tmp_path, [A_REL, PART_REL]) == {}
+    assert _ignored_among(tmp_path, []) == {}
+    assert check_tracking(tmp_path) == []
+    r = _cli(tmp_path)
+    assert r.returncode == 0 and "ignore・追跡状態 OK" in r.stdout
+
+
+def test_tracked_records_month_targeted_exclusion_is_caught(tmp_path):
+    # 異常系 1: 月を狙った除外。探り用パス(2026-01)は当たらない = PR-D だけでは見逃していた壊し方
+    _repo_with_two_records(tmp_path, STANDARD_GITIGNORE + ".claude/experience/2026-10/\n")
+    hits = check_tracking(tmp_path)
+    assert _paths(hits) == [A_REL, PART_REL]
+    assert RECORD_PROBE not in _paths(hits)
+    for _, why in hits:
+        assert "追跡済みの記録が .gitignore で除外" in why and ".gitignore:3" in why and "2026-10/" in why
+    r = _cli(tmp_path)
+    assert r.returncode == 1 and A_REL in r.stderr and PART_REL in r.stderr
+
+
+def test_tracked_records_part_targeted_exclusion_is_caught(tmp_path):
+    # 異常系 2: part だけを狙った除外 → part の 1 件だけが違反
+    _repo_with_two_records(tmp_path, STANDARD_GITIGNORE + "*.part1.jsonl\n")
+    hits = check_tracking(tmp_path)
+    assert _paths(hits) == [PART_REL]
+    assert "`*.part1.jsonl`" in hits[0][1]
+    assert _cli(tmp_path).returncode == 1
+
+
+def test_tracked_records_whole_dir_exclusion_with_negation_still_caught(tmp_path):
+    # 異常系 3: 丸ごと除外 + `!` で再包含したつもり。git は親ディレクトリの除外を `!` で覆せないので全件 ignore 扱い
+    _repo_with_two_records(tmp_path, STANDARD_GITIGNORE + ".claude/experience/\n!.claude/experience/2026-10/\n")
+    hits = check_tracking(tmp_path)
+    assert _paths(hits) == [RECORD_PROBE, A_REL, PART_REL]
+    assert _cli(tmp_path).returncode == 1
+
+
+def test_tracked_records_japanese_and_space_path_is_handled(tmp_path):
+    # 日本語・空白を含むパスが壊れずに違反として出る(-z の固定)
+    _init_repo(tmp_path, gitignore=STANDARD_GITIGNORE + ".claude/experience/2026-11/\n")
+    _commit_jsonl(tmp_path, "session-日本語 空白.jsonl", json.dumps(OK) + "\n", month="2026-11")
+    rel = ".claude/experience/2026-11/session-日本語 空白.jsonl"
+    hits = check_tracking(tmp_path)
+    assert _paths(hits) == [rel]
+    r = _cli(tmp_path)
+    assert r.returncode == 1 and rel in r.stderr
+
+
+def test_tracked_records_reincluded_by_negation_are_not_flagged(tmp_path):
+    # 否定パターンで正しく再包含されたファイルは違反にしない(`-v` は再包含されただけのパスも出し、終了コードも 0 になる。実測)
+    gi = STANDARD_GITIGNORE + ".claude/experience/2026-10/*.jsonl\n!.claude/experience/2026-10/session-a.jsonl\n"
+    _init_repo(tmp_path, gitignore=gi)
+    _commit_jsonl(tmp_path, "session-a.jsonl", json.dumps(OK) + "\n")   # 再包含 → 追跡されてよい
+    _commit_jsonl(tmp_path, "session-b.jsonl", json.dumps(OK) + "\n")   # 除外されたまま(add -f で追跡)
+    b_rel = ".claude/experience/2026-10/session-b.jsonl"
+    assert _ignored_among(tmp_path, [A_REL]) == {}                       # 再包含だけのパスは「ignore なし」
+    ignored = _ignored_among(tmp_path, [A_REL, b_rel])
+    assert list(ignored) == [b_rel] and "!" not in ignored[b_rel]
+    hits = check_tracking(tmp_path)
+    assert _paths(hits) == [b_rel]
+    assert _cli(tmp_path).returncode == 1
+
+
+def test_tracked_records_fail_closed_outside_git(tmp_path):
+    # git リポジトリでなければ判定不能(None)。CLI は既存の fail-closed 経路で exit 1
+    assert _ignored_among(tmp_path, [A_REL]) is None
+
+
 # ---- レビュー指摘の修正 ----
 
 def test_line_separator_chars_in_note_scan_clean(tmp_path):
