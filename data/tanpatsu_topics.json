@@ -663,6 +663,16 @@
       "status": "log_drafted",
       "drafted_at": "2026-10-02",
       "note": "週次無料ログ(議事_20260916 案1)。公開後は publish-record --id L03"
+    },
+    {
+      "id": "L04",
+      "slug": "unei_log",
+      "genre": "実録ログ(無料)",
+      "title_hint": "実録・第10週 — 累計94ビュー、スキ18の現在地と、バグで遅れた週次ログ",
+      "paid_price": 0,
+      "status": "log_drafted",
+      "drafted_at": "2026-10-09",
+      "note": "週次無料ログ(議事_20260916 案1)。公開後は publish-record --id L04"
     }
   ]
 }
