@@ -74,3 +74,50 @@ jobs:
       - name: Baseline 比較(新しい赤を増やさない)
         if: ${{ !cancelled() }}
         run: python3 scripts/baseline_debt.py --compare
+
+      # 決裁 #26 S2 PR-B: wiki-guard。正式な Wiki(docs/wiki/*.md 直下)を変える PR の作者が Claude 用アカウント
+      # (repository variable HOJO_CLAUDE_LOGIN)なら赤にする。S7b(アカウント分離)で小柳さんが variable を登録するまで
+      # は休眠: ①この `if:` で step ごと skipped ②本文の先頭でも空なら exit 0 ③scripts/wiki_guard.py も login 空なら違反なし。
+      # pull_request イベントだけ(push・dispatch では走らない)。ruleset・必須 check・CODEOWNERS・variable は触らない。
+      # 変更ファイルはページネーションで全件取り、PR の changed_files 件数と一致しなければ検査不完全として失敗(fail-closed)。
+      - name: wiki-guard(正式 Wiki を変える PR の作者が Claude 用アカウントなら赤。S7b まで休眠)
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && vars.HOJO_CLAUDE_LOGIN != '' }}
+        env:
+          CLAUDE_LOGIN: ${{ vars.HOJO_CLAUDE_LOGIN }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_CHANGED_FILES: ${{ github.event.pull_request.changed_files }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eo pipefail
+          if [ -z "$CLAUDE_LOGIN" ]; then
+            echo "休眠: HOJO_CLAUDE_LOGIN が未登録のため wiki-guard は検査しません"
+            exit 0
+          fi
+          python3 scripts/wiki_guard.py --selftest
+          if ! gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --jq '.[].filename' > changed.txt; then
+            echo "::error::wiki-guard: PR #$PR_NUMBER の変更ファイル一覧を取得できません(検査不完全のため失敗)"
+            exit 1
+          fi
+          got=$(wc -l < changed.txt)
+          case "$PR_CHANGED_FILES" in ''|*[!0-9]*)
+            echo "::error::wiki-guard: PR の changed_files が取れません('$PR_CHANGED_FILES')。検査不完全のため失敗"; exit 1 ;;
+          esac
+          if [ "$got" -ne "$PR_CHANGED_FILES" ]; then
+            echo "::error::wiki-guard: 変更ファイル $PR_CHANGED_FILES 件のうち $got 件しか取得できません(検査不完全のため失敗)"
+            exit 1
+          fi
+          rc=0
+          python3 scripts/wiki_guard.py --files-from changed.txt --author "$PR_AUTHOR" --claude-login "$CLAUDE_LOGIN" > hits.txt || rc=$?
+          if [ "$rc" -eq 3 ]; then
+            echo "::error::wiki-guard: 正式 Wiki(docs/wiki/*.md)を変える PR の作者が Claude 用アカウントです: $(tr '\n' ' ' < hits.txt)"
+            {
+              echo "## ❌ wiki-guard: 正式 Wiki の変更は小柳さんのアカウントで PR を開いてください(docs/wikiskill/Wiki昇格手順.md)"
+              sed 's/^/- /' hits.txt
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          elif [ "$rc" -ne 0 ]; then
+            echo "::error::wiki-guard: 判定に失敗(exit $rc)"
+            exit "$rc"
+          fi
+          echo "wiki-guard: 違反なし($got ファイルを検査・作者 $PR_AUTHOR)"

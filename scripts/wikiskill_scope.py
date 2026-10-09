@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ".github/workflows/wikiskill-tests.yml"
 EXIT_MATCHED = 3
 
-# wikiskill-tests.yml の push: paths と同じ 26 件(順序も同じ)。変えるときは両方を変える。
+# wikiskill-tests.yml の push: paths と同じ 27 件(順序も同じ)。変えるときは両方を変える。
 PATTERNS = [
     "scripts/wikiskill_common.py",
     "scripts/experience_log.py",
@@ -54,6 +54,7 @@ PATTERNS = [
     ".github/workflows/knowledge-extract.yml",
     ".github/workflows/repo-scope.yml",
     ".github/CODEOWNERS",
+    "scripts/wiki_guard.py",
 ]
 
 

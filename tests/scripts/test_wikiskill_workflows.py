@@ -117,8 +117,9 @@ S2_PROTECTED_EXISTING = [
     ".github/workflows/main-direct-push-watch.yml",
     "scripts/direct_push_watch.py",
     "tests/scripts/test_direct_push_watch.py",
+    "scripts/wiki_guard.py",  # PR-B(2026-10-09)で作成。CODEOWNERS 行は PR-C で先に登録済み
 ]
-S2_PROTECTED_PLANNED = ["scripts/wiki_guard.py"]  # PR-B で作成予定。未作成の間は何にも一致しない
+S2_PROTECTED_PLANNED: list[str] = []  # PR-B で wiki_guard.py が実在するようになり、予定だけの行は無くなった
 
 
 def codeowners_rules():
