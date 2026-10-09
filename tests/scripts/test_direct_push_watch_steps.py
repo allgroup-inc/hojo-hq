@@ -274,7 +274,7 @@ def test_run_block_extracts_range_and_scan_steps_exactly():
     t = read(WF)
     rng = run_block(t, RANGE_STEP)
     assert rng.startswith("set -e\n")
-    assert '\ngit log --first-parent -n "$SCAN_DEPTH" --format=%H > shas.txt\n' in rng.replace("\n  ", "\n")
+    assert 'git log --first-parent -n "$SCAN_DEPTH" --format=%H > shas.txt' in [l.strip() for l in rng.splitlines()]  # 字下げ幅に依らない
     assert rng.rstrip("\n").endswith('echo "検査対象: $(wc -l < shas.txt) commit"')
     scan = run_block(t, SCAN_STEP)
     assert scan.startswith("set -e\n: > hits.md\n")

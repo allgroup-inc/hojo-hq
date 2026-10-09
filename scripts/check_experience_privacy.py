@@ -23,6 +23,10 @@ ignore と追跡状態(決裁 #26 S2 PR-D・2026-10-08):
   - ローカル限定のもの(_local/ と _audit.log)は ignore 必須。ignore されていない・既に追跡されている、のどちらも止める。
   - 判定は git 自身(`git check-ignore --no-index`)に任せる(.gitignore の文字列検査では別の書き方をすり抜ける)。
     利用者ごとの global excludes は見ない(core.excludesFile を空にする)= コミットされた .gitignore だけを検査する。
+  - 追跡済みの記録ファイル全件(ローカル限定を除く)も ignore されていないことを検査する(S2 PR-D3・2026-10-09)。
+    探り用パス 1 つの代表検査では、月(.claude/experience/2026-10/)や part(*.part1.jsonl)を狙った除外を見逃すため。
+    判定は `-v` 無しの `check-ignore --stdin -z`(出力 = ignore されたパスそのもの)で行い、`-v` は違反の理由を
+    添えるためだけに使う(`-v` は否定パターン `!` で再包含されただけのパスも出力し、終了コードも 0 になる。実測)。
 
 使い方:
     python3 scripts/check_experience_privacy.py            # git 管理下の Experience を検査(cwd が対象リポ)
@@ -221,12 +225,53 @@ def _is_ignored(root: Path, rel: str) -> bool | None:
     return None
 
 
+_GIT_NO_GLOBAL = ["git", "-c", "core.excludesFile=/dev/null"]
+
+
+def _ignored_among(root: Path, rels: list[str]) -> dict[str, str] | None:
+    """rels のうち ignore されるものを {パス: 理由の補足} で返す。判定できなければ None(fail-closed 用)。
+
+    1 段目(判定): `check-ignore -z --no-index --stdin`(-v 無し)。出力は ignore されるパスだけで、
+                  終了コード 0 = 1 件以上 / 1 = 0 件(空入力も 1)。否定パターンで再包含されたパスは出ない。
+    2 段目(理由): 違反があったときだけ `-v` で「どの .gitignore の何行目のパターンか」を取る。
+                  `-v` は再包含されただけのパスも `!` 付きで出力し終了コードも 0 になるため、判定には使わない。
+                  `!` で始まるパターンの行は理由にも採らない(万一出ても無視する)。
+    パスは NUL 区切り(-z)で渡す・受け取る(日本語・空白・改行を含むパスを壊さない)。
+    """
+    if not rels:
+        return {}
+    payload = "".join(r + "\0" for r in rels)
+    r = subprocess.run(
+        [*_GIT_NO_GLOBAL, "check-ignore", "-z", "--no-index", "--stdin"],
+        cwd=str(root), input=payload, capture_output=True, text=True,
+    )
+    if r.returncode == 1:
+        return {}
+    if r.returncode != 0:
+        return None
+    ignored = {p: "" for p in r.stdout.split("\0") if p}
+    if not ignored:
+        return None  # 終了コード 0 なのに出力が無い = 想定外。検査できたことにしない
+    v = subprocess.run(
+        [*_GIT_NO_GLOBAL, "check-ignore", "-z", "-v", "--no-index", "--stdin"],
+        cwd=str(root), input="".join(p + "\0" for p in ignored), capture_output=True, text=True,
+    )
+    if v.returncode == 0:
+        fields = v.stdout.split("\0")
+        for i in range(0, len(fields) - 3, 4):
+            source, lineno, pattern, path = fields[i:i + 4]
+            if path in ignored and pattern and not pattern.startswith("!"):
+                ignored[path] = f"{source}:{lineno} `{pattern[:80]}`"
+    return ignored
+
+
 def check_tracking(root: Path) -> list[tuple[str, str]]:
     """ignore と追跡状態の違反を (パス, 理由) で返す(空なら正常)。
 
     - 記録パスが ignore されている → 記録が Git に残らず、公開可否の検査が空振りで緑になる
     - ローカル限定のパスが ignore されていない → 一時マーカー・監査ログがコミットされ得る
     - ローカル限定のファイルが既に追跡されている → ignore だけでは外れない(git rm --cached が要る)
+    - 追跡済みの記録ファイル(ローカル限定を除く全件)が ignore されている → 月・part を狙った除外
     - git が判定できない → 検査できなかったことを「違反なし」にしない
     """
     root = Path(root)
@@ -243,9 +288,21 @@ def check_tracking(root: Path) -> list[tuple[str, str]]:
             hits.append((rel, "git check-ignore で判定できません(検査不能)"))
         elif not ig:
             hits.append((rel, "ローカル限定のパスが ignore されていません(一時マーカー・監査ログがコミットされ得ます)"))
-    for rel in _tracked_experience(root):
+    tracked = _tracked_experience(root)
+    for rel in tracked:
         if _is_local_only(rel):
             hits.append((rel, "ローカル限定のファイルが Git に追跡されています(git rm --cached で外してください)"))
+    records = [rel for rel in tracked if not _is_local_only(rel)]
+    ignored = _ignored_among(root, records)
+    if ignored is None:
+        hits.append((f"{EXPERIENCE_DIR}/(追跡済み {len(records)} 件)", "git check-ignore で判定できません(検査不能)"))
+    else:
+        for rel in records:  # 追跡順(= ls-files の順)で安定して出す
+            if rel in ignored:
+                why = ignored[rel]
+                hits.append((rel, "追跡済みの記録が .gitignore で除外されています"
+                                  + (f"({why})" if why else "")
+                                  + "。月や part を狙った除外は、記録の更新が Git に残らなくなります"))
     return hits
 
 
