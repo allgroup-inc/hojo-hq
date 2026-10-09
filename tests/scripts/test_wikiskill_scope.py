@@ -68,7 +68,7 @@ def test_selftest_and_cli_exit_codes(tmp_path):
 def test_workflow_push_paths_equal_patterns_and_pull_request_has_no_paths():
     t = read(WF)
     assert ws.workflow_push_paths(t) == ws.PATTERNS
-    assert len(ws.PATTERNS) == 26  # 2026-10-08 時点の push 側 paths の実数(計画書の「28」は誤記)
+    assert len(ws.PATTERNS) == 27  # 2026-10-09 PR-B で scripts/wiki_guard.py を追加(26 → 27。計画書の「28」は誤記)
     assert not ws.workflow_pull_request_has_paths(t)
     assert "\non:\n  pull_request:\n  push:\n" in t
     r = subprocess.run([sys.executable, "scripts/wikiskill_scope.py", "--check-workflow", WF], cwd=ROOT, capture_output=True, text=True)

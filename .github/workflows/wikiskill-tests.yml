@@ -39,6 +39,7 @@ on:
       - '.github/workflows/knowledge-extract.yml'
       - '.github/workflows/repo-scope.yml'
       - '.github/CODEOWNERS'
+      - 'scripts/wiki_guard.py'
   workflow_dispatch: {}
 
 concurrency:
@@ -131,6 +132,7 @@ jobs:
           tests/scripts/test_direct_push_watch.py
           tests/scripts/test_direct_push_watch_steps.py
           tests/scripts/test_wikiskill_scope.py
+          tests/scripts/test_wiki_guard.py
           tests/integration/test_wikiskill_memory_e2e.py
           tests/integration/test_wikiskill_wiki_e2e.py
           -q
