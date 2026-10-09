@@ -20,7 +20,11 @@
       "mcp__claude-code-remote__list_sessions",
       "mcp__bf7c680d-5fdc-5ef4-b4a0-abadb619bf0a__add_repo",
       "mcp__bf7c680d-5fdc-5ef4-b4a0-abadb619bf0a__list_repos",
-      "mcp__bf7c680d-5fdc-5ef4-b4a0-abadb619bf0a__list_sessions"
+      "mcp__bf7c680d-5fdc-5ef4-b4a0-abadb619bf0a__list_sessions",
+      "mcp__Gmail__send_message",
+      "mcp__Gmail__reply",
+      "mcp__Gmail__search_threads",
+      "mcp__Gmail__get_thread"
     ]
   }
 }
