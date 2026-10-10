@@ -4011,5 +4011,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-10",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "「脱炭素化・エネルギー転換に資する我が国技術の国際実証事業」の2026年度第2回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdl2MAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(16次公募)_専門家活用枠(小規模売り手支援類型)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003N1RZUA0",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山の鉱害防止に係るエネルギー使用合理化事業費補助金（令和８年度）【中国監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYvnMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和７年度（補正予算）地域脱炭素実現に向けた具体的施策実装支援事業（四次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd3OMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【倉敷市】実証実験サポート事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY6KMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
