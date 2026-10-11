@@ -4073,5 +4073,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-11",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "【令和８年度】働き方改革推進支援助成金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYEGMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度子育て【建設型】初年度",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSAMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度都市ガス分野の災害対応・レジリエンス強化に係る支援事業費補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0YMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度東京港物流効率化等事業補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY72MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(ブルーボンド/ブルーローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9wMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
