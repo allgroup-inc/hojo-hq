@@ -2,6 +2,9 @@ name: Post Resort Kingdom to Instagram
 
 on:
   workflow_dispatch: {}
+  schedule:
+    # 毎日 10:00 JST に自動実行
+    - cron: "0 1 * * *"
 
 permissions:
   contents: read
