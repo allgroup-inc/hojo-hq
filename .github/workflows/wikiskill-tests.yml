@@ -142,6 +142,7 @@ jobs:
           tests/scripts/test_wiki_guard.py
           tests/scripts/test_weekly_gakubi.py
           tests/scripts/test_weekly_gakubi_workflow.py
+          tests/scripts/test_prb1_skills_public.py
           tests/integration/test_wikiskill_memory_e2e.py
           tests/integration/test_wikiskill_wiki_e2e.py
           -q
