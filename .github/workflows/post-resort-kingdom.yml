@@ -35,7 +35,8 @@ jobs:
           GRAPH = "https://graph.facebook.com/v21.0"
 
           # 投稿情報
-          CAPTION = """📺 テレビ番組リゾートキングダムに GLOW代表 嶺井が出演しました
+          now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
+          CAPTION = f"""📺 テレビ番組リゾートキングダムに GLOW代表 嶺井が出演しました
 
           地場産業の資金調達と事業承継について、GLOW代表の嶺井がお話ししています。
 
@@ -43,7 +44,9 @@ jobs:
           https://allgroup-inc.github.io/hojo-hq/go/ig/resort-kingdom
 
           💚 LINE登録で、資金調達情報・承継支援の最新情報をゲット
-          https://allgroup-inc.github.io/hojo-hq/go/ig/"""
+          https://allgroup-inc.github.io/hojo-hq/go/ig/
+
+          [{now} JST]"""
 
           IMAGE_URL = "https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/posts/images/resort-kingdom-ig-preview.png"
 
