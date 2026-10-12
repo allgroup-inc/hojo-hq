@@ -89,6 +89,15 @@ def test_guard_test_file_exists():
     assert (ROOT / TEST_FILE).exists()
 
 
+def test_workflow_has_no_body_display_env():
+    """dry-run の本文表示を有効にする env は workflow のどこにも無い(案 A: 本文は公開ログに出さない)。"""
+    text = WF.read_text(encoding="utf-8")
+    assert "SHOW_BODY" not in text
+    _, steps = _steps()
+    for s in steps:
+        assert "SHOW_BODY" not in " ".join(str(k) for k in (s.get("env") or {}).keys())
+
+
 # ---------------------------------------------------------------- PR 時の CI(wikiskill-tests)への登録
 
 WIKISKILL_WF = ROOT / ".github" / "workflows" / "wikiskill-tests.yml"

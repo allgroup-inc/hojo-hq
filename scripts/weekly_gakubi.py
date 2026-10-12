@@ -23,10 +23,11 @@ Obsidian(allgroup-inc/obsidian-vault)へは、整理担当セッションが作�
 
 使い方:
   python scripts/weekly_gakubi.py            # docs/学び/学び_YYYY-Www.md を生成
-  python scripts/weekly_gakubi.py --dry-run  # 標準出力のみ
+  python scripts/weekly_gakubi.py --dry-run  # 生成して検査するがファイルは書かない。ログにはメタデータ行(+同内容の ::notice::)のみ。本文は出さない
   python scripts/weekly_gakubi.py --self-test
 """
 import argparse
+import hashlib
 import os
 import re
 import subprocess
@@ -210,6 +211,20 @@ def render_note(label, span, body, model):
     )
 
 
+def dry_run_summary(note, path, model):
+    """dry-run で公開 Actions ログに出してよいメタデータだけを 1 行にする(本文・断片は含めない)。
+
+    2026-10-12 小柳さん方針(案 A): push 起動の dry-run は合格した本文を公開ログに出さない。
+    行数・文字数・sha256(先頭 12 桁)・モデル・[非公開名称] の残存数だけを出す。本文を表示する
+    切替(opt-in)は持たない(将来の設定ミスによる再露出経路を作らない)。
+    """
+    digest = hashlib.sha256(note.encode("utf-8")).hexdigest()[:12]
+    return (
+        f"dry-run OK: {os.path.basename(path)} lines={len(note.splitlines())} chars={len(note)} "
+        f"sha256={digest} model={model} guard=PASS mask_marks={note.count(MASK)}"
+    )
+
+
 def out_path(label):
     return os.path.join(OUT_DIR, f"学び_{label}.md")
 
@@ -267,8 +282,10 @@ def main():
             f"位置: 文字{pos}(検査: {how})。材料のマスク漏れか要約側の補完が原因。"
         )
         return 1
-    if args.dry_run:
-        print(f"=== {os.path.basename(path)} (dry-run) ===\n{note}")
+    if args.dry_run:  # 本文は出さない(公開ログ)。メタデータ 1 行 + ::notice:: のみ
+        line = dry_run_summary(note, path, model)
+        print(line)
+        print(f"::notice::{line}")
         return 0
     os.makedirs(OUT_DIR, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
