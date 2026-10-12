@@ -38,15 +38,17 @@ jobs:
           now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
           CAPTION = f"""📺 テレビ番組リゾートキングダムに GLOW代表 嶺井が出演しました
 
-          地場産業の資金調達と事業承継について、GLOW代表の嶺井がお話ししています。
+地場産業の資金調達と事業承継について、GLOW代表の嶺井がお話ししています。
 
-          🎬 動画を見る
-          https://allgroup-inc.github.io/hojo-hq/go/ig/resort-kingdom
+🎬 動画を見る
+https://allgroup-inc.github.io/hojo-hq/go/ig/resort-kingdom
 
-          💚 LINE登録で、資金調達情報・承継支援の最新情報をゲット
-          https://allgroup-inc.github.io/hojo-hq/go/ig/
+💚 LINE登録で、資金調達情報・承継支援の最新情報をゲット
+https://allgroup-inc.github.io/hojo-hq/go/ig/
 
-          [{now} JST]"""
+📱 プロフィールのリンクからもアクセス可能
+
+[{now} JST]"""
 
           IMAGE_URL = "https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/posts/images/resort-kingdom-ig-preview.png"
 
