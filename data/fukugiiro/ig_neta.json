@@ -1,57 +1,57 @@
 {
- "updated_at": "2026-10-05",
- "week": "2026-W41",
+ "updated_at": "2026-10-12",
+ "week": "2026-W42",
  "note": "照合済み(verified=True)かつ締切の無い制度だけから scripts/generate_ig_neta.py が生成。日付・金額は本文に書かない。",
  "items": [
   {
    "no": 1,
-   "seido_id": "fk-kuni-kyushokusha-shien",
-   "title": "「求職者支援制度」、使える人が使えていません",
-   "caption": "仕事を離れたあとに使える制度です。「求職者支援制度(職業訓練受講給付金)」。雇用保険を受給できない求職中の方(フリーランス・自営業を廃業した方等を含む)が対象になることがあります。申し込みの窓口はハローワーク。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #仕事さがし #しごと #求職者支援制度",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-22 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-kyushokusha-shien",
-   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyushokusha_shien/index.html",
-   "image_hint": "失業のやさしいイラスト+「求職者支援制度」"
+   "seido_id": "fk-kuni-seikatsu-hogo",
+   "title": "「生活保護制度」、相談だけでも大丈夫です",
+   "caption": "ひとりで抱えなくて大丈夫です。相談できる窓口があります。「生活保護制度(相談窓口)」。収入や資産だけでは生活が難しい世帯のための、最後のセーフティネットの相談窓口です。ためらわずに相談できます。相談先はお住まいの地域の福祉事務所。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #くらしの支援 #生活保護制度",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-seikatsu-hogo",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/seikatuhogo/index.html",
+   "image_hint": "低所得・生活苦のやさしいイラスト+「生活保護制度」"
   },
   {
    "no": 2,
-   "seido_id": "fk-kuni-nenkin-kyufukin",
-   "title": "「年金生活者支援給付金」、遠慮しなくて大丈夫です",
-   "caption": "家計が苦しいとき、相談できる窓口と制度があります。「年金生活者支援給付金」。年金を受給していて所得が一定以下の方が対象となる可能性があります(年金に上乗せして支給されます)。申し込みの窓口は日本年金機構(年金事務所)への請求。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #くらしの支援 #年金生活者支援給付金",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-nenkin-kyufukin",
-   "source_url": "https://www.mhlw.go.jp/nenkinkyuufukin/",
-   "image_hint": "低所得・生活苦のやさしいイラスト+「年金生活者支援給付金」"
+   "seido_id": "fk-kuni-shogaiji-fukushi",
+   "title": "「障害児福祉手当」、申し込みを忘れていませんか",
+   "caption": "子育て中のご家庭に、知らないままの方が多い制度です。「障害児福祉手当」。重度の障がいのあるお子さん(20歳未満)を育てている世帯が対象になることがあります。申し込みの窓口はお住まいの市区町村の窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #子育て #障がい福祉 #障害児福祉手当",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-shogaiji-fukushi",
+   "source_url": "https://www.mhlw.go.jp/bunya/shougaihoken/jidou/hukushi.html",
+   "image_hint": "子育てのやさしいイラスト+「障害児福祉手当」"
   },
   {
    "no": 3,
-   "seido_id": "fk-kuni-rousai",
-   "title": "「労災保険の給付」、名前だけでも覚えてください",
-   "caption": "治療が続くときに、負担を軽くする制度があります。「労災保険の給付(仕事中・通勤中のけが・病気)」。仕事中や通勤中のけが・病気で治療や休業が必要になった方が対象となる可能性があります(パート・アルバイトも対象です)。申し込みの窓口は労働基準監督署(多くは勤務先経由)。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #医療費 #労災保険の給付",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-rousai",
-   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/rousai/index.html",
-   "image_hint": "病気・けがのやさしいイラスト+「労災保険の給付」"
+   "seido_id": "fk-kuni-shugaku-enjo",
+   "title": "「就学援助」、手続きをしないと始まりません",
+   "caption": "進学や入園のタイミングで使える制度です。「就学援助(小・中学生の学用品費・給食費など)」。経済的な理由で小・中学校の就学にお困りの世帯が対象になることがあります。申し込みの窓口はお子さんが通う学校・お住まいの市区町村の教育委員会。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #入園入学 #くらしの支援 #就学援助",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-shugaku-enjo",
+   "source_url": "https://www.mext.go.jp/a_menu/shotou/career/05010502/017.htm",
+   "image_hint": "入園・入学のやさしいイラスト+「就学援助」"
   },
   {
    "no": 4,
-   "seido_id": "fk-kuni-safetynet-jutaku",
-   "title": "「住宅セーフティネット制度」、見落とされがちです",
-   "caption": "住まいのことで困ったときに使える制度です。「住宅セーフティネット制度(住宅確保要配慮者の入居支援)」。低所得・ひとり親・高齢などの理由で民間賃貸住宅への入居にお困りの世帯が対象になることがあります。申し込みの窓口はお住まいの自治体の居住支援窓口・居住支援法人。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #住まい #くらしの支援 #住宅セーフティネット制度",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-safetynet-jutaku",
-   "source_url": "https://www.mlit.go.jp/jutakukentiku/house/jutakukentiku_house_tk3_000055.html",
-   "image_hint": "住宅取得・引越のやさしいイラスト+「住宅セーフティネット制度」"
+   "seido_id": "fk-kuni-shussan-ichijikin",
+   "title": "「出産育児一時金」、手続きをしないと始まりません",
+   "caption": "赤ちゃんを迎える準備のなかで、見落とされがちな制度です。「出産育児一時金」。健康保険に加入している方(被扶養者を含む)が出産したときに対象となる可能性があります。申し込みの窓口は加入している健康保険(協会けんぽ・国保など)への申請。多くは医療機関での直接支払制度が利用できます。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #出産 #出産育児一時金",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-22 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-shussan-ichijikin",
+   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/shussan/index.html",
+   "image_hint": "妊娠・出産のやさしいイラスト+「出産育児一時金」"
   },
   {
    "no": 5,
-   "seido_id": "fk-kuni-saigai-choui",
-   "title": "「災害弔慰金・災害援護資金など」、知っていますか?",
-   "caption": "知らないままの方が多い制度です。「災害弔慰金・災害援護資金など(被災時の支援)」。台風などの自然災害で被害を受けた世帯が対象になることがあります。申し込みの窓口はお住まいの市区町村の窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #災害 #災害弔慰金災害援護資金など",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-saigai-choui",
-   "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/saigaikyujo/index.html",
-   "image_hint": "災害のやさしいイラスト+「災害弔慰金・災害援護資金」"
+   "seido_id": "fk-kuni-tokubetsu-shogaisha",
+   "title": "「特別障害者手当」、名前だけでも覚えてください",
+   "caption": "障がいのあるご本人・ご家族に向けた制度です。「特別障害者手当」。重度の障がいがあり日常生活で常時特別の介護が必要な方(20歳以上)が対象になることがあります。申し込みの窓口はお住まいの市区町村の窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #障がい福祉 #特別障害者手当",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-23 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-kuni-tokubetsu-shogaisha",
+   "source_url": "https://www.mhlw.go.jp/bunya/shougaihoken/jidou/tokubetsu.html",
+   "image_hint": "障がいのやさしいイラスト+「特別障害者手当」"
   }
  ],
  "used_ids": [
@@ -75,10 +75,15 @@
   "fk-kuni-rousai",
   "fk-kuni-safetynet-jutaku",
   "fk-kuni-saigai-choui",
+  "fk-kuni-seikatsu-hogo",
+  "fk-kuni-shogaiji-fukushi",
   "fk-kuni-shogaiji-kyufu",
   "fk-kuni-shotoku-shien",
+  "fk-kuni-shugaku-enjo",
   "fk-kuni-shugaku-shien",
+  "fk-kuni-shussan-ichijikin",
   "fk-kuni-syogaisya-teate",
+  "fk-kuni-tokubetsu-shogaisha",
   "fk-okinawa-kokoro-iryo"
  ]
 }
