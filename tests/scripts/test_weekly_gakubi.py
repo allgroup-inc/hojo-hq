@@ -6,11 +6,13 @@
 禁止語の実文字列はこのファイルに書かない(check_repo_scope.FORBIDDEN_CONTENT を実行時に読む)。
 ネットワークと Claude API は使わない(summarize と collect_changes を差し替える)。
 """
+import hashlib
 import io
 import os
+import re
 import sys
 import unicodedata
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 import pytest
@@ -204,7 +206,7 @@ def isolated(monkeypatch, tmp_path):
 def _run_main(monkeypatch, argv):
     monkeypatch.setattr(sys, "argv", ["weekly_gakubi.py", *argv])
     buf = io.StringIO()
-    with redirect_stdout(buf):
+    with redirect_stdout(buf), redirect_stderr(buf):  # stderr も公開ログに出るので一緒に検査する
         rc = _call(wg.main)
     return rc, buf.getvalue()
 
@@ -238,12 +240,55 @@ def test_main_error_line_has_position_only(isolated, monkeypatch):
     assert "位置" in err[0] and any(ch.isdigit() for ch in err[0])
 
 
-def test_main_dry_run_prints_clean_note(isolated, monkeypatch):
-    monkeypatch.setattr(wg, "summarize", lambda prompt: ("- 今週は大きな進展なし", "test-model"))
+CLEAN_BODY = "- 今週は大きな進展なし\n- 制度 143 件を確認した\n- 次は締切の約1か月前アラート"
+
+
+def test_main_dry_run_prints_metadata_only(isolated, monkeypatch):
+    """dry-run は本文を公開ログに出さず、メタデータ 1 行(+ ::notice::)だけを出す(2026-10-12 小柳さん方針・案 A)。"""
+    monkeypatch.setattr(wg, "summarize", lambda prompt: (CLEAN_BODY, "test-model"))
     rc, out = _run_main(monkeypatch, ["--dry-run"])
     assert rc == 0
-    assert "今週は大きな進展なし" in out
-    assert not isolated.exists()
+    assert not isolated.exists()  # ファイルは作らない
+    for line in CLEAN_BODY.splitlines():
+        assert line[:10] not in out, "本文の断片が出力に含まれている"
+    assert "(dry-run)" not in out  # 旧形式の見出し(=== … (dry-run) ===)も出さない
+    meta = [l for l in out.splitlines() if l.startswith("dry-run OK:")]
+    assert len(meta) == 1
+    assert "lines=" in meta[0] and "chars=" in meta[0] and "sha256=" in meta[0] and "model=test-model" in meta[0]
+    assert "mask_marks=0" in meta[0]
+    assert any(l.startswith("::notice::dry-run OK:") for l in out.splitlines())
+
+
+def test_dry_run_summary_matches_note_and_has_no_body():
+    note = _call(wg.render_note, "2026-W42", "2026-10-12〜2026-10-18", CLEAN_BODY, "m")
+    line = _call(wg.dry_run_summary, note, "/x/学び_2026-W42.md", "m")
+    assert f"sha256={hashlib.sha256(note.encode('utf-8')).hexdigest()[:12]}" in line
+    assert f"lines={len(note.splitlines())}" in line and f"chars={len(note)}" in line  # wc -l と同じ数え方
+    assert "学び_2026-W42.md" in line and "model=m" in line
+    assert "\n" not in line  # 1 行
+    for frag in [l[:10] for l in note.splitlines() if l.strip()]:
+        assert frag not in line
+
+
+def test_dry_run_summary_counts_mask_marks(isolated, monkeypatch):
+    monkeypatch.setattr(wg, "summarize", lambda prompt: (f"- {wg.MASK} の件\n- もう一つ {wg.MASK}", "test-model"))
+    rc, out = _run_main(monkeypatch, ["--dry-run"])
+    assert rc == 0
+    assert "mask_marks=2" in out
+    assert "の件" not in out  # 本文は出ない
+
+
+def test_dry_run_has_no_body_display_switch():
+    """本文を表示する opt-in は持たない(将来の設定ミスによる再露出経路を作らない)。
+
+    名前の一致だけでなく、スクリプトが読む環境変数を許可リストで固定する(別名の切替も通さない)。
+    """
+    src = (SCRIPTS / "weekly_gakubi.py").read_text(encoding="utf-8")
+    assert "SHOW_BODY" not in src
+    assert "(dry-run) ===" not in src
+    env_keys = set(re.findall(r'os\.environ(?:\.get)?\(\s*["\']([A-Z0-9_]+)["\']', src))
+    env_keys |= set(re.findall(r'os\.environ\[\s*["\']([A-Z0-9_]+)["\']\s*\]', src))
+    assert env_keys <= {"ANTHROPIC_API_KEY", "GAKUBI_MODEL"}, sorted(env_keys)
 
 
 def test_main_writes_clean_note(isolated, monkeypatch):
