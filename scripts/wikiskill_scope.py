@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ".github/workflows/wikiskill-tests.yml"
 EXIT_MATCHED = 3
 
-# wikiskill-tests.yml の push: paths と同じ 27 件(順序も同じ)。変えるときは両方を変える。
+# wikiskill-tests.yml の push: paths と同じ 29 件(順序も同じ)。変えるときは両方を変える。
 PATTERNS = [
     "scripts/wikiskill_common.py",
     "scripts/experience_log.py",
@@ -55,6 +55,10 @@ PATTERNS = [
     ".github/workflows/repo-scope.yml",
     ".github/CODEOWNERS",
     "scripts/wiki_guard.py",
+    # 2026-10-12 CI 赤 PR-A: 週次学びの禁止語ガード。ガード自体だけを変える PR でも
+    # tests/scripts/test_weekly_gakubi*.py を省略しない(2026-10-12 PR-A のレビュー指摘)
+    "scripts/weekly_gakubi.py",
+    ".github/workflows/weekly-gakubi.yml",
 ]
 
 
@@ -121,6 +125,9 @@ def selftest() -> int:
         (".gitignore", True),
         ("site/index.html", False),
         ("data/subsidies.json", False),
+        ("scripts/weekly_gakubi.py", True),               # 2026-10-12 PR-A: ガード自体の変更も対象
+        (".github/workflows/weekly-gakubi.yml", True),
+        (".github/workflows/update.yml", False),          # 他の workflow は対象外のまま
     ]
     failed = 0
     for path, expected in cases:
