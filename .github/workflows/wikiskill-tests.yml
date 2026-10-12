@@ -6,7 +6,7 @@ name: wikiskill-tests
 # 2026-10-08 決裁 #26 S2(PR-A2): pull_request は paths フィルタ無しで**全 PR** で起動する
 # (S7a で必須 status check にするため。paths で起動しない PR は「Expected」のまま詰まる)。
 # 代わりに「対象判定」step が PR の変更ファイルを scripts/wikiskill_scope.py の PATTERNS
-# (= 下の push 側 paths と同じ 26 件)と突き合わせ、当たらなければテストを省略して緑で終わる。
+# (= 下の push 側 paths と同じ 29 件)と突き合わせ、当たらなければテストを省略して緑で終わる。
 # 差分の取得や判定に失敗した場合は安全側に倒して全テストを実行する。push 起動は従来どおり paths で絞る。
 
 on:
@@ -40,6 +40,10 @@ on:
       - '.github/workflows/repo-scope.yml'
       - '.github/CODEOWNERS'
       - 'scripts/wiki_guard.py'
+      - 'scripts/weekly_gakubi.py'
+      - '.github/workflows/weekly-gakubi.yml'
+      # ↑ 2026-10-12 PR-A: 週次学びの禁止語ガード(ガード自体の変更でもテストを省略しない。scripts/wikiskill_scope.py の
+      #   PATTERNS と対。paths の一覧は wikiskill_scope.py が文字列で読むため、一覧の途中にコメント行を挟まない)
   workflow_dispatch: {}
 
 concurrency:
@@ -104,7 +108,10 @@ jobs:
 
       - name: pytest を入れる
         if: steps.scope.outputs.skip != 'true'
-        run: pip install pytest
+        # pyyaml: tests/scripts/test_weekly_gakubi_workflow.py(weekly-gakubi.yml の構造検査)が YAML を読む。
+        # 無いと importorskip で skip = 緑に見えてしまうため明示的に入れる(2026-10-12 PR-A)。
+        # 既存テストの `import yaml` を使う任意の照合(test_direct_push_watch 等)も runner で有効になる。
+        run: pip install pytest pyyaml
 
       - name: git の作者を設定(テストが一時リポジトリでコミットする)
         if: steps.scope.outputs.skip != 'true'
@@ -133,6 +140,8 @@ jobs:
           tests/scripts/test_direct_push_watch_steps.py
           tests/scripts/test_wikiskill_scope.py
           tests/scripts/test_wiki_guard.py
+          tests/scripts/test_weekly_gakubi.py
+          tests/scripts/test_weekly_gakubi_workflow.py
           tests/integration/test_wikiskill_memory_e2e.py
           tests/integration/test_wikiskill_wiki_e2e.py
           -q

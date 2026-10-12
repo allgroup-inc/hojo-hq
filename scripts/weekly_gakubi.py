@@ -15,6 +15,11 @@ Obsidian(allgroup-inc/obsidian-vault)へは、整理担当セッションが作�
 - リトライ: Claude API は SDK の max_retries、モデル改名は候補リストで追従
 - 失敗の可視化: API失敗は握りつぶさず非ゼロ終了 → ワークフローが Issue を起票
 - 個人情報: 公開リポジトリに置くため、プロンプトで氏名・連絡先の記載を禁止し件数に丸める
+- 禁止語ガード(2026-10-12 PR-A / 決裁キュー #22): 材料(コミット件名・差分・週次レポ)の禁止語
+  (check_repo_scope.FORBIDDEN_CONTENT)を [非公開名称] にマスクしてから要約し、生成文に
+  禁止語が残っていれば書かない・dry-run でも表示しない・非ゼロ終了(fail-closed)。
+  ログには禁止語の番号と位置だけを出す。2026-10-06 に学び W41 が禁止語を含んだまま main へ
+  直 push され、repo-scope の赤 9 件のうち 1 件になった再発防止
 
 使い方:
   python scripts/weekly_gakubi.py            # docs/学び/学び_YYYY-Www.md を生成
@@ -23,12 +28,18 @@ Obsidian(allgroup-inc/obsidian-vault)へは、整理担当セッションが作�
 """
 import argparse
 import os
+import re
 import subprocess
 import sys
+import unicodedata
 from datetime import datetime, timedelta, timezone
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from check_repo_scope import FORBIDDEN_CONTENT  # noqa: E402  (禁止語の正本。ここに実文字列は書かない)
 
 JST = timezone(timedelta(hours=9))
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+MASK = "[非公開名称]"
 OUT_DIR = os.path.join(REPO_ROOT, "docs", "学び")
 MODEL_CANDIDATES = [
     os.environ.get("GAKUBI_MODEL", "claude-sonnet-5"),
@@ -36,6 +47,63 @@ MODEL_CANDIDATES = [
 ]
 MAX_PROMPT_CHARS = 40_000
 WATCH_PATHS = ["docs", "reports", "CLAUDE.md", ".claude/skills/README.md"]
+
+
+def _squash(text):
+    """NFKC → casefold → 書式文字(ゼロ幅・ソフトハイフン等)と空白類を除去(wiki_schema.strip_invisible と同じ規則)。"""
+    s = unicodedata.normalize("NFKC", str(text)).casefold()
+    return "".join(ch for ch in s if ch != "\u00ad" and not unicodedata.category(ch).startswith(("Cf", "Z")))
+
+
+def _loose_pattern(word):
+    """禁止語 1 語を、大小・半角全角の揺れごと拾う正規表現。文全体を正規化せずに済ませるため(①→1 等の副作用を避ける)。"""
+    parts = []
+    for ch in unicodedata.normalize("NFKC", word):
+        alts = {ch, ch.upper(), ch.lower()}
+        if 0x21 <= ord(ch) <= 0x7E:  # ASCII の印字文字には全角形(U+FF01〜FF5E)がある
+            alts |= {chr(ord(a) + 0xFEE0) for a in list(alts)}
+        parts.append("[" + "".join(re.escape(a) for a in sorted(alts)) + "]")
+    return "".join(parts)
+
+
+_LOOSE_PATTERNS = [re.compile(_loose_pattern(w)) for w in FORBIDDEN_CONTENT if w]
+
+
+def mask_forbidden(text):
+    """材料から禁止語を消す(大小・半角全角の揺れも対象)。
+
+    変えるのは禁止語の部分(→ MASK)と、語を分断して隠すのに使えるゼロ幅・ソフトハイフン等の書式文字の除去だけ。
+    それ以外の文字(丸数字・全角括弧など)は正規化しない。
+    """
+    t = "".join(ch for ch in str(text) if ch != "\u00ad" and unicodedata.category(ch) != "Cf")
+    for pat in _LOOSE_PATTERNS:
+        t = pat.sub(MASK, t)
+    return t
+
+
+def find_forbidden(text):
+    """生成文に禁止語が残っていれば (FORBIDDEN_CONTENT の番号, 文字位置, 検査名)。無ければ None。
+
+    原文 → NFKC → NFKC+casefold → 書式文字・空白を除いた形、の順に見る(wiki_validate の V06 と同じ考え方)。
+    文字位置は「検査名」の形に直した文の中の位置(空白・書式文字を除いた形では原文より手前にずれる。ログの手がかり用)。
+    """
+    text = str(text)
+    nfkc = unicodedata.normalize("NFKC", text)
+    variants = (
+        ("raw", text, lambda w: w),
+        ("nfkc", nfkc, lambda w: unicodedata.normalize("NFKC", w)),
+        ("casefold", nfkc.casefold(), lambda w: unicodedata.normalize("NFKC", w).casefold()),
+        ("squashed", _squash(text), _squash),
+    )
+    for how, hay, needle_of in variants:
+        for i, word in enumerate(FORBIDDEN_CONTENT):
+            needle = needle_of(word)
+            if not needle:
+                continue
+            pos = hay.find(needle)
+            if pos >= 0:
+                return i, pos, how
+    return None
 
 
 def run_git(args):
@@ -86,14 +154,16 @@ def build_prompt(changes, week_label):
         "- 事実だけを書く。変更に無いことを推測で足さない。数字は出典(週次レポ等)を添える\n"
         "- 顧客の氏名・連絡先など個人情報は書かない(件数・割合に丸める)。公開リポジトリに置かれる\n"
         "- 大きな進展が無ければ「今週は大きな進展なし」+気づき1〜2行だけにする\n"
-        "- 見出しは付けず本文の箇条書きのみ(見出しはこちらで付けます)\n\n"
+        "- 見出しは付けず本文の箇条書きのみ(見出しはこちらで付けます)\n"
+        f"- 材料中の「{MASK}」は非公開の名称を伏せた印です。元の名称を推測して書かず、必要なら「非公開側」と書く\n\n"
         f"## 対象週\n{week_label}\n\n"
         f"## コミットログ\n{changes['log'] or '(なし)'}\n\n"
         "## 変更ファイル\n" + ("\n".join(changes["changed_files"]) or "(なし)") + "\n\n"
         f"## 決裁キューの差分\n{changes['queue_diff'] or '(変更なし)'}\n\n"
         f"## 最新の週次レポート\n{changes['latest_report'] or '(なし)'}\n"
     )
-    return body[:MAX_PROMPT_CHARS]
+    # 材料(件名・ファイル名・差分・週次レポ)に混ざった禁止語は、モデルに渡す前にここで一括マスクする
+    return mask_forbidden(body)[:MAX_PROMPT_CHARS]
 
 
 def summarize(prompt):
@@ -156,6 +226,16 @@ def self_test():
     note = render_note(label, span, "- テスト", "test-model")
     assert note.startswith("# 学び・決定事項まとめ 2026-W39")
     assert out_path(label).endswith("docs/学び/学び_2026-W39.md")
+    # 禁止語ガード: 正例(通る)と負例(止まる)を、実文字列を書かずに check_repo_scope から取って試す
+    word = FORBIDDEN_CONTENT[0]
+    assert find_forbidden("今週は大きな進展なし。制度 143 件。") is None
+    assert find_forbidden(p) is None, "プロンプトの定型文に禁止語が混ざっている"
+    for bad in (word, word.upper(), word[:2] + "\u200b" + word[2:], word[:3] + "\u00ad" + word[3:]):
+        hit = find_forbidden(f"- 決定: {bad} を移設")
+        assert hit is not None and hit[0] == 0, hit
+    masked = mask_forbidden(f"abc 2026-10-05 docs: {word.lower()} / {word.upper()} の是正")
+    assert MASK in masked and find_forbidden(masked) is None
+    assert find_forbidden(build_prompt({"log": f"x {word}", "changed_files": [], "queue_diff": "", "latest_report": ""}, label)) is None
     print("self-test OK")
 
 
@@ -178,6 +258,15 @@ def main():
         return 0
     body, model = summarize(build_prompt(collect_changes(args.days), f"{label}({span})"))
     note = render_note(label, span, body, model)
+    hit = find_forbidden(note)
+    if hit:  # fail-closed: 本文は書かない・表示しない。語そのものはログに出さず番号と位置だけ
+        i, pos, how = hit
+        print(
+            f"::error::生成文に禁止語(check_repo_scope.FORBIDDEN_CONTENT[{i}])が残ったため、"
+            f"{os.path.basename(path)} を書きません(dry-run でも本文を表示しません)。"
+            f"位置: 文字{pos}(検査: {how})。材料のマスク漏れか要約側の補完が原因。"
+        )
+        return 1
     if args.dry_run:
         print(f"=== {os.path.basename(path)} (dry-run) ===\n{note}")
         return 0
