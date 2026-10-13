@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-10-13 09:05",
+ "generated_at": "2026-10-13 22:25",
  "alert_window": [
   7,
   29
  ],
- "soon_closed_count": 12,
- "count": 30,
+ "soon_closed_count": 11,
+ "count": 31,
  "items": [
   {
    "id": "a0WJ200000CDeVeMAL",
@@ -206,6 +206,16 @@
    "max_amount": 4000000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe4JMAT",
    "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDapWMAT",
+   "name": "【令和８年度】先進的な資源循環投資促進事業（第２回）",
+   "deadline": "2026-11-06",
+   "days_left": 24,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 36500000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapWMAT",
+   "tag": "okinawa"
   },
   {
    "id": "a0WfQ000003N1RXUA0",
