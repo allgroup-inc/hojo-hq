@@ -8,7 +8,7 @@
 |---|---|---|
 | /go/site/ | 沖縄企業のミカタ: サイト最下部CTA | https://lin.ee/sh4bTUe |
 | /go/shindan/ | 沖縄企業のミカタ: 診断結果CTA | https://lin.ee/sh4bTUe |
-| /go/ig/ | 沖縄企業のミカタ: Instagramプロフィール | https://lin.ee/sh4bTUe |
+| /go/ig/ | 沖縄企業のミカタ: Instagramプロフィール → リゾートキングダム動画 | https://allgroup-inc.github.io/hojo-hq/go/ig/resort-kingdom/ |
 | /go/fb/ | 沖縄企業のミカタ: Facebookページ | https://lin.ee/sh4bTUe |
 | /go/card/ | 沖縄企業のミカタ: 紙配布(QRカード・催事・紹介) | https://lin.ee/sh4bTUe |
 | /go/insurance-shindan/ | 沖縄企業のミカタ: 保険引き受け目安検索(LINE登録CTA) | https://lin.ee/sh4bTUe |

@@ -38,7 +38,7 @@ CHANNELS = {
     # ── 沖縄企業のミカタ(@345pqedv) ──
     "site":       {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: サイト最下部CTA"},
     "shindan":    {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: 診断結果CTA"},
-    "ig":         {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: Instagramプロフィール"},
+    "ig":         {"dest": "https://allgroup-inc.github.io/hojo-hq/go/ig/resort-kingdom/", "label": "沖縄企業のミカタ: Instagramプロフィール → リゾートキングダム動画"},
     "fb":         {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: Facebookページ"},
     "card":       {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: 紙配布(QRカード・催事・紹介)"},
     "insurance-shindan": {"dest": "https://lin.ee/sh4bTUe", "label": "沖縄企業のミカタ: 保険引き受け目安検索(LINE登録CTA)"},
