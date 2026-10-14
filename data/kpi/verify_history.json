@@ -4259,5 +4259,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-14",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "高度安全機械等導入支援補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYq2MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【近畿支部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY89MAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "［第十一回］事業再構築補助金（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UbU66EAF",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "2026年度「ディープテック・スタートアップ支援基金／国際共同研究開発」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeC1MAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【農林水産省】中山間地域所得確保推進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDCMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
