@@ -6,6 +6,10 @@
 #
 # 開通後は自動で無効化される(MOVED_TO が入っていたら即終了)。
 # 切り戻しは scripts/fg_seo.py と scripts/fg_yamanashi.py の MOVED_TO を None に戻すだけ。
+#
+# 承認ゲート: scripts/moradou_cutover_policy.json が approved になるまで、開通していても切り替えない
+# (2026-10-15 山梨版の公開停止で開通判定を緩めたため。承認者と承認日の記録が必要)。
+# 山梨版(site/yamanashi)は公開停止中のため、再生成も配信もしない(scripts/stopped_sites.json)。
 name: moradou-cutover
 on:
   schedule:
@@ -38,6 +42,11 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: 承認ゲートの状態を確認
+        id: policy
+        if: steps.done.outputs.skip == 'false'
+        run: python scripts/moradou_cutover.py --policy >> "$GITHUB_OUTPUT"
+
       - name: moradou.jp の開通を実測
         id: check
         if: steps.done.outputs.skip == 'false'
@@ -55,20 +64,20 @@ jobs:
             echo "::error::開通確認が異常終了しました (exit $rc)"; exit "$rc"
           fi
 
+      # 山梨版は再生成しない(公開停止中)。生成対象は福岡版(fukugiiro)のみ。
       - name: 正規URLを新ドメインへ切り替えて再生成
-        if: steps.check.outputs.live == 'true'
+        if: steps.check.outputs.live == 'true' && steps.policy.outputs.approved == 'true'
         run: |
           python scripts/moradou_cutover.py --apply
           python scripts/generate_area_pages.py
           python scripts/generate_kit_pages.py
           python scripts/generate_life_pages.py
-          python scripts/yamanashi/build_yamanashi.py
           python scripts/generate_sitemap.py
 
       # 「ほとんど切り替わったが入口だけ旧URL」を出さないための最終確認。
       # 1つでも残っていれば、ここで落としてコミットしない。
       - name: 取りこぼしが無いか確認
-        if: steps.check.outputs.live == 'true'
+        if: steps.check.outputs.live == 'true' && steps.policy.outputs.approved == 'true'
         run: |
           python - <<'PY'
           import sys
@@ -86,17 +95,18 @@ jobs:
           python scripts/deploy_moradou.py --out /tmp/moradou-after
 
       - name: コミット
-        if: steps.check.outputs.live == 'true'
+        if: steps.check.outputs.live == 'true' && steps.policy.outputs.approved == 'true'
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add scripts/fg_seo.py scripts/fg_yamanashi.py site/fukugiiro site/yamanashi site/sitemap.xml
+          # site/yamanashi は公開停止中のため追加しない(addし忘れ・誤追加のどちらも防ぐ)
+          git add scripts/fg_seo.py scripts/fg_yamanashi.py site/fukugiiro site/sitemap.xml
           if git diff --cached --quiet; then
             echo "[info] 差分なし"; exit 0
           fi
           git commit -m "moradou.jp の開通を確認したため、旧URL側の正規URLを新ドメインへ切替
 
-          scripts/moradou_cutover.py が3点(トップ・山梨版・sitemap)を実測し、
+          scripts/moradou_cutover.py が2点(トップ・sitemap)を実測し、
           canonical が moradou.jp を指していることまで確かめた上での自動切替。
           旧URLのページはそのまま残り、正規URLだけが新ドメインを指す。
 

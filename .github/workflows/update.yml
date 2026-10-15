@@ -192,6 +192,8 @@ jobs:
           cp -r site /tmp/pages-deploy
           rm -rf /tmp/pages-deploy/nobishiro
           rm -rf /tmp/pages-deploy/miraihirake
+          # 公開を停止したサイト(山梨版)を成果物から外し、sitemap の該当URLを除く(scripts/stopped_sites.json)。
+          python scripts/stop_publish.py --root /tmp/pages-deploy --config scripts/stopped_sites.json --apply
 
       - name: Verify artifact (C3・公開するファイルそのものの同一性確認)
         # Pages に渡す実体 /tmp/pages-deploy/data/subsidies.json が Guard 合格時のバイト列と同一でなければ公開しない。
@@ -215,6 +217,12 @@ jobs:
         run: |
           python scripts/check_ledger_stub.py --selftest
           python scripts/check_ledger_stub.py --root /tmp/pages-deploy
+
+      - name: 公開停止の検査(停止したサイトが成果物に残っていないこと)
+        # 停止したパス・sitemap・どのテキストにも停止先への参照がなければ通る。残っていれば公開を止める。
+        shell: bash
+        run: |
+          python scripts/stop_publish.py --root /tmp/pages-deploy --config scripts/stopped_sites.json --check
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v5

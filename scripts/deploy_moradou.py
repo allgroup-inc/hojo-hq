@@ -9,7 +9,7 @@ site/ のうち「もらいわすれ堂のもの」だけを取り出し、URL�
 そのまま push できる形にする。
 
   site/fukugiiro/   → /            (沖縄版=トップ)
-  site/yamanashi/   → /yamanashi/  (山梨版。2026-09-20 一本化で site/ 直下へ移動)
+  site/yamanashi/   → 配信しない(山梨版は公開停止中。scripts/stopped_sites.json で管理)
   site/go/fg-*      → /go/fg-*     (もらいわすれ堂のLINE導線のみ)
   site/go/ymn-*     → /go/ymn-*
 
@@ -32,6 +32,10 @@ import os
 import re
 import shutil
 import sys
+from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import stop_publish  # noqa: E402  公開を停止したサイト(山梨版)の一覧と検査を共有する
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -58,8 +62,8 @@ GO_PREFIXES = ("fg-", "ymn-")
 # 配信先リポジトリで消してはいけないもの(リポジトリ自身のものと、自分を動かす仕組み)
 PRESERVE = {".git", ".github"}
 
-# 配信ツリーに現れてはいけない表記(ブランド混同の検知)
-FORBIDDEN_IN_OUTPUT = ["沖縄企業のミカタ", OLD_ROOT, OLD_HOST]
+# 配信ツリーに現れてはいけない表記(ブランド混同の検知。停止したサイトのパスも含む)
+FORBIDDEN_IN_OUTPUT = ["沖縄企業のミカタ", OLD_ROOT, OLD_HOST, "/yamanashi/"]
 
 
 def rewrites(domain):
@@ -129,7 +133,7 @@ def filter_sitemap(xml, domain):
         if not loc:
             continue
         u = loc.group(1).strip()
-        if u.startswith(OLD_FUKUGIIRO + "/") or u.startswith(OLD_YAMANASHI + "/"):
+        if u.startswith(OLD_FUKUGIIRO + "/"):
             keep.append(rewrite_text(block, domain))
     head = ('<?xml version="1.0" encoding="UTF-8"?>\n'
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
@@ -185,7 +189,6 @@ p{{margin:0 0 8px;color:#6d5c4d;font-size:.95rem}}
 <div class="links">
 <a class="main" href="https://{domain}/">もらいわすれ堂 トップ</a>
 <a href="https://{domain}/shindan/">3分診断でさがす</a>
-<a href="https://{domain}/yamanashi/">山梨版</a>
 </div>
 </div>
 </body>
@@ -214,7 +217,7 @@ def verify(out_dir):
 
 
 def build(out_dir, domain):
-    for need in ("fukugiiro", "yamanashi", "go", "sitemap.xml"):
+    for need in ("fukugiiro", "go", "sitemap.xml"):
         if not os.path.exists(os.path.join(SITE, need)):
             print(f"::error::site/{need} が無い。先にサイトを生成してください", file=sys.stderr)
             return 1
@@ -232,7 +235,6 @@ def build(out_dir, domain):
 
     stats = {"rewritten": 0, "copied": 0, "unknown": []}
     copy_tree(os.path.join(SITE, "fukugiiro"), out_dir, domain, stats)
-    copy_tree(os.path.join(SITE, "yamanashi"), os.path.join(out_dir, "yamanashi"), domain, stats)
 
     go_src = os.path.join(SITE, "go")
     channels = sorted(c for c in os.listdir(go_src)
@@ -262,6 +264,11 @@ def build(out_dir, domain):
         return 1
 
     bad = verify(out_dir)
+    stopped = stop_publish.check(Path(out_dir), stop_publish.load_config())
+    for rel, label, n in stopped:
+        print(f"::error::公開停止の検査 FAIL {rel}: {label} ({n}件)", file=sys.stderr)
+    if stopped:
+        return 1
     n_urls = sm.count("<loc>")
     print(f"[deploy_moradou] domain={domain} 書換{stats['rewritten']}ファイル / "
           f"複製{stats['copied']}ファイル / go {len(channels)}チャネル / sitemap {n_urls}件")
@@ -334,14 +341,16 @@ def self_test():
         f"<url><loc>{OLD_ROOT}/</loc></url>"
         "</urlset>")
     sm = filter_sitemap(sample, d)
-    check("sitemap: もらいわすれ堂の2件だけ残る", sm.count("<loc>") == 2)
+    check("sitemap: もらいわすれ堂のトップだけ残る(山梨は配信しない)", sm.count("<loc>") == 1)
     check("sitemap: ミカタのthemesを落とす", "themes" not in sm)
-    check("sitemap: URLが書き換わる", "https://moradou.jp/yamanashi/kit/" in sm)
+    check("sitemap: 山梨のURLを載せない", "yamanashi" not in sm)
+    check("sitemap: URLが書き換わる", "https://moradou.jp/" in sm)
     check("sitemap: 旧URLが残らない", OLD_ROOT not in sm)
 
     check("404はもらいわすれ堂の導線のみ",
           "https://moradou.jp/shindan/" in NOT_FOUND.format(domain=d)
           and "ミカタ" not in NOT_FOUND.format(domain=d))
+    check("404に山梨版への導線がない", "yamanashi" not in NOT_FOUND.format(domain=d))
     check("robotsのSitemapが新ドメイン",
           "Sitemap: https://moradou.jp/sitemap.xml" in ROBOTS.format(domain=d))
     check("robotsは /go/ を除外", "Disallow: /go/" in ROBOTS.format(domain=d))
@@ -374,6 +383,9 @@ def self_test():
         with open(os.path.join(t, "x.jpg"), "w", encoding="utf-8") as f:
             f.write(OLD_FUKUGIIRO)
         check("verify: 画像は検査しない", len(verify(t)) == 3)
+        with open(os.path.join(t, "yama.html"), "w", encoding="utf-8") as f:
+            f.write("<a href='https://moradou.jp/yamanashi/kit/'>山梨</a>")
+        check("verify: 山梨のパスの残存を検知", len(verify(t)) == 4)
 
     print(f"自己テスト: OK {ok} / NG {ng}")
     return 1 if ng else 0
