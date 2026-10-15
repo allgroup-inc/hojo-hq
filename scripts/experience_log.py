@@ -17,6 +17,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -60,6 +61,8 @@ _ENV_ASSIGN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 _FILE_TOOLS = {"Edit", "Write", "MultiEdit"}
 _HEAD_RE = re.compile(r"^[0-9a-f]{7,40}$")
 _UNKNOWN = "<unknown>"
+_SKILL_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+_DURATION_MAX_MS = 24 * 3600 * 1000
 CURRENT_SESSION = "current_session"
 
 
@@ -268,6 +271,62 @@ def _tool_path(tin: dict, root: Path) -> str:
     return sanitize_path(fp, root)
 
 
+def skill_content_key(data: bytes) -> str:
+    """SKILL.md の内容の識別子(sha256 の先頭12桁)。記録側と集計側が同じ関数で照合する。"""
+    return hashlib.sha256(data).hexdigest()[:12]
+
+
+_VERSION_LINE = re.compile(r"^version:\s*[\"']?([0-9A-Za-z._+-]{1,32})[\"']?\s*$")
+
+
+def skill_frontmatter_version(text: str) -> str | None:
+    """frontmatter(先頭の --- から次の ---)の version だけ読む。無ければ None。"""
+    lines = text.splitlines()[:40]
+    if not lines or lines[0].strip() != "---":
+        return None
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        m = _VERSION_LINE.match(line)
+        if m:
+            return m.group(1)
+    return None
+
+
+def skill_facts(raw_name, root: Path) -> dict:
+    """Skill について記録してよい事実だけ。名前はリポジトリの .claude/skills に実在するものだけ通す。
+
+    実在しない名前(プラグイン・削除済み・不正な文字)は "<external>" か "<unknown>" にする(名前を残さない)。
+    返す: {"skill": 名前|"<external>"|"<unknown>", "skill_key": 内容の識別子|None, "skill_version": 版|None}
+    """
+    none = {"skill_key": None, "skill_version": None}
+    if not isinstance(raw_name, str):
+        return {"skill": _UNKNOWN, **none}
+    name = raw_name.strip()[:100]
+    if not _SKILL_NAME_RE.match(name):
+        return {"skill": EXTERNAL if ":" in name else _UNKNOWN, **none}
+    base = Path(root) / ".claude" / "skills" / name
+    path = base / "SKILL.md"
+    try:
+        if not path.is_file() or not path.resolve().is_relative_to(Path(root).resolve()):
+            return {"skill": EXTERNAL, **none}
+        data = path.read_bytes()
+    except OSError:
+        return {"skill": EXTERNAL, **none}
+    return {"skill": name, "skill_key": skill_content_key(data),
+            "skill_version": skill_frontmatter_version(data.decode("utf-8", errors="replace"))}
+
+
+def _duration_ms(payload: dict) -> int | None:
+    """hook の duration_ms(仕様上は任意の数値)。整数で妥当な範囲のものだけ残す。"""
+    v = payload.get("duration_ms")
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return None
+    if not (0 <= v <= _DURATION_MAX_MS):
+        return None
+    return int(v)
+
+
 def build_tool_event(payload: dict, root: Path) -> Event | None:
     name = payload.get("tool_name")
     tin = payload.get("tool_input")
@@ -282,10 +341,34 @@ def build_tool_event(payload: dict, root: Path) -> Event | None:
         ev.update({"tool": name, "path": _tool_path(tin, root)})
         return ev
     if name == "Skill":
+        # PostToolUse は成功した呼び出しで発火する(仕様)。tool_use_id・tool_response の中身は記録しない
         ev = _base(root, session_id_of(payload), "skill")
-        ev["skill"] = str(tin.get("skill", ""))[:100]
+        ev.update(skill_facts(tin.get("skill"), root))
+        dur = _duration_ms(payload)
+        if dur is not None:
+            ev["duration_ms"] = dur
         return ev
     return None
+
+
+def build_failure_event(payload: dict, root: Path) -> Event | None:
+    """PostToolUseFailure の Skill 失敗だけを記録する。error の本文は残さない(パス・秘密が混ざりうる)。
+
+    注意: Skill で PostToolUseFailure が発火するかは仕様書に記載が無く、未確認(実機確認が必要)。
+    """
+    if payload.get("tool_name") != "Skill":
+        return None
+    tin = payload.get("tool_input")
+    if not isinstance(tin, dict):
+        tin = {}
+    ev = _base(root, session_id_of(payload), "skill_failure")
+    ev.update(skill_facts(tin.get("skill"), root))
+    dur = _duration_ms(payload)
+    if dur is not None:
+        ev["duration_ms"] = dur
+    if isinstance(payload.get("is_interrupt"), bool):
+        ev["interrupted"] = payload["is_interrupt"]
+    return ev
 
 
 def _open_append(path: Path):
@@ -410,6 +493,14 @@ def _hook(event_name: str) -> int:
     elif event_name == "PostToolUse":
         try:
             ev = build_tool_event(payload, root)
+            if ev is not None:
+                append_event(root, ev)
+        except Exception as e:  # noqa: BLE001
+            fail("hook", e)
+    elif event_name == "PostToolUseFailure":
+        # 未登録(settings.json に無い)ので、現時点では実際には呼ばれない。登録は別途承認が要る
+        try:
+            ev = build_failure_event(payload, root)
             if ev is not None:
                 append_event(root, ev)
         except Exception as e:  # noqa: BLE001

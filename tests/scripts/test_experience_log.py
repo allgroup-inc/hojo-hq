@@ -5,6 +5,7 @@ hojo-hq 以外の remote では必ず private になること、書込失敗が 
 """
 import io
 import itertools
+from pathlib import Path
 import json
 import os
 import re
@@ -103,7 +104,15 @@ def test_bash_tool_event_keeps_only_program(repo):
     assert "hunter2" not in json.dumps(ev) and "x.example" not in json.dumps(ev)
 
 
+def _skill(root, name="writing-plans", body="本文\n"):
+    """リポジトリに実在する Skill を置く(記録側は実在する名前だけを残すため)。"""
+    d = root / ".claude" / "skills" / name
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "SKILL.md").write_text(f"---\nname: {name}\n---\n{body}", encoding="utf-8")
+
+
 def test_skill_tool_event(repo):
+    _skill(repo)
     ev = build_tool_event({"tool_name": "Skill", "tool_input": {"skill": "writing-plans"}}, repo)
     assert ev["skill"] == "writing-plans"
     assert ev["event"] == "skill"
@@ -118,6 +127,7 @@ def test_note_truncated_to_1000(repo):
 
 
 def test_summarize_session_collects_commits(repo):
+    _skill(repo)
     append_event(repo, start_event(repo, "s1"))  # head を記録
     append_event(repo, build_tool_event(
         {"session_id": "s1", "tool_name": "Edit", "tool_input": {"file_path": str(repo / "README.md")}}, repo))
@@ -448,6 +458,7 @@ def test_append_goes_to_part_file_once_base_is_tracked(repo):
 
 
 def test_summarize_reads_base_and_parts_as_one_session(repo):
+    _skill(repo)
     append_event(repo, start_event(repo, "s1"))
     append_event(repo, build_tool_event(
         {"session_id": "s1", "tool_name": "Edit", "tool_input": {"file_path": str(repo / "README.md")}}, repo))
@@ -588,3 +599,120 @@ def test_sanitize_path_tilde_is_external(repo):
 
 def test_program_tilde_is_external(repo):
     assert experience_log._program_of("~/bin/tool --x", repo) == "<external>"
+
+
+# ---------------------------------------------------------------- Skill 記録の強化(合成データ・外部接続なし)
+# 記録してよいのは Skill の名前(実在するもの)・内容の識別子・版番号・所要時間・成否だけ。
+# error 本文・tool_use_id・tool_response の中身は、どのイベントにも残らないことを確かめる。
+
+def _versioned_skill(root, version="1.2", body="本文\n", name="writing-plans"):
+    d = root / ".claude" / "skills" / name
+    d.mkdir(parents=True, exist_ok=True)
+    data = f"---\nname: {name}\nversion: \"{version}\"\n---\n{body}".encode("utf-8")
+    (d / "SKILL.md").write_bytes(data)
+    return data
+
+
+def test_skill_event_carries_key_version_and_duration_but_no_tool_use_id(repo):
+    data = _versioned_skill(repo)
+    ev = build_tool_event({"tool_name": "Skill", "tool_input": {"skill": "writing-plans"},
+                           "tool_use_id": "toolu_SECRET_ID", "tool_response": {"text": "本文の中身"},
+                           "duration_ms": 12, "session_id": "s1"}, repo)
+    assert ev["skill"] == "writing-plans" and ev["event"] == "skill"
+    assert ev["skill_key"] == experience_log.skill_content_key(data)
+    assert len(ev["skill_key"]) == 12
+    assert ev["skill_version"] == "1.2"
+    assert ev["duration_ms"] == 12
+    dumped = json.dumps(ev, ensure_ascii=False)
+    assert "toolu_SECRET_ID" not in dumped and "本文の中身" not in dumped and "tool_use_id" not in ev
+
+
+def test_skill_key_changes_when_content_changes(repo):
+    _versioned_skill(repo, body="v1 の本文\n")
+    k1 = build_tool_event({"tool_name": "Skill", "tool_input": {"skill": "writing-plans"}}, repo)["skill_key"]
+    _versioned_skill(repo, version="1.3", body="v2 の本文\n")
+    k2 = build_tool_event({"tool_name": "Skill", "tool_input": {"skill": "writing-plans"}}, repo)["skill_key"]
+    assert k1 != k2
+
+
+def test_bad_duration_values_are_dropped(repo):
+    _versioned_skill(repo)
+    for bad in (True, -1, 10**12, "12", 1.5e9):
+        ev = build_tool_event({"tool_name": "Skill", "tool_input": {"skill": "writing-plans"},
+                               "duration_ms": bad}, repo)
+        assert "duration_ms" not in ev, bad
+
+
+def test_unregistered_and_plugin_skill_names_are_not_recorded(repo):
+    cases = {"superpowers:brainstorming": "<external>", "removed-skill": "<external>",
+             "../../etc/passwd": "<unknown>", "": "<unknown>"}
+    for raw, expected in cases.items():
+        ev = build_tool_event({"tool_name": "Skill", "tool_input": {"skill": raw}}, repo)
+        assert ev["skill"] == expected, raw
+        assert "skill_key" not in ev or ev["skill_key"] is None
+        assert raw not in json.dumps(ev, ensure_ascii=False) or raw == ""
+
+
+def test_failure_event_keeps_facts_and_drops_error_text(repo):
+    _versioned_skill(repo)
+    ev = experience_log.build_failure_event({
+        "tool_name": "Skill", "tool_input": {"skill": "writing-plans"},
+        "error": "Exit code 1 /home/someone/secret-path 秘密の本文", "is_interrupt": False,
+        "tool_use_id": "toolu_FAIL_ID", "duration_ms": 5, "session_id": "s1"}, repo)
+    assert ev["event"] == "skill_failure"
+    assert ev["skill"] == "writing-plans"
+    assert ev["interrupted"] is False and ev["duration_ms"] == 5
+    dumped = json.dumps(ev, ensure_ascii=False)
+    for leaked in ("Exit code", "secret-path", "秘密の本文", "toolu_FAIL_ID", "error"):
+        assert leaked not in dumped, leaked
+
+
+def test_failure_for_other_tools_is_not_recorded(repo):
+    assert experience_log.build_failure_event({"tool_name": "Bash", "tool_input": {"command": "false"}}, repo) is None
+
+
+def test_post_tool_use_failure_hook_appends_skill_failure(repo, cli):
+    _versioned_skill(repo)
+    rc, out, _ = cli("hook", "SessionStart", stdin={"session_id": "s5"})
+    assert rc == 0
+    rc, out, _ = cli("hook", "PostToolUseFailure", stdin={
+        "session_id": "s5", "tool_name": "Skill", "tool_input": {"skill": "writing-plans"},
+        "error": "秘密の失敗文", "is_interrupt": True})
+    assert rc == 0 and json.loads(out) == {}
+    lines = [json.loads(x) for x in (repo / ".claude/experience").rglob("session-s5.jsonl").__next__().read_text(
+        encoding="utf-8").splitlines() if x.strip()]
+    failures = [e for e in lines if e["event"] == "skill_failure"]
+    assert len(failures) == 1 and failures[0]["interrupted"] is True
+    assert "秘密の失敗文" not in json.dumps(lines, ensure_ascii=False)
+    assert not (repo / ".claude/experience/_audit.log").exists()  # 未知のイベントとして記録されない
+
+
+def test_old_skill_event_shape_summarizes_the_same(repo):
+    """既存の形(skill だけを持つ行)も、新しい項目つきの行も、要約と Bootstrap の見え方が変わらない。"""
+    _skill(repo)
+    old_row = {"ts": "2026-10-03T01:05:00Z", "session_id": "s7", "event": "skill", "repo": "allgroup-inc/hojo-hq",
+               "visibility": "public", "branch": "main", "skill": "writing-plans"}
+    new_row = {**old_row, "skill_key": "0123456789ab", "skill_version": "1.2", "duration_ms": 9}
+    summaries = []
+    for row in (old_row, new_row):
+        d = repo / ".claude" / "experience" / "2026-10"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "session-s7.jsonl").write_text(
+            json.dumps(start_event(repo, "s7"), ensure_ascii=False) + "\n" + json.dumps(row, ensure_ascii=False) + "\n",
+            encoding="utf-8")
+        summaries.append(summarize_session(repo, "s7")["skills"])
+    assert summaries[0] == summaries[1] == ["writing-plans"]
+
+
+def test_skill_symlink_pointing_outside_repo_is_not_recorded(repo):
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:  # repo(= tmp_path)の外に置く
+        outside = Path(td) / "outside-skill"
+        outside.mkdir()
+        (outside / "SKILL.md").write_text("---\nversion: \"9.9\"\n---\n外の本文\n", encoding="utf-8")
+        (repo / ".claude" / "skills").mkdir(parents=True)
+        (repo / ".claude" / "skills" / "linked-skill").symlink_to(outside, target_is_directory=True)
+        ev = build_tool_event({"tool_name": "Skill", "tool_input": {"skill": "linked-skill"}}, repo)
+    assert ev["skill"] == "<external>"
+    assert ev.get("skill_key") is None and ev.get("skill_version") is None
+    assert "外の本文" not in json.dumps(ev, ensure_ascii=False)
