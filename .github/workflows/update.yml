@@ -182,22 +182,6 @@ jobs:
           print("items:", n, ">= MIN_TOTAL", min_total)
           EOF
 
-      - name: Inject ledger config (基準❺)
-        # 企業台帳の送信先URL・トークンはGitHub Secretsのみが持つ(公開リポジトリに置かない)。
-        # commitステップの後に注入するため、リポジトリ上のファイルは常に空設定のまま。
-        # Secrets未登録の間は空のままデプロイされ、台帳送信は無効(サイトは通常動作)。
-        env:
-          GAS_LEDGER_ENDPOINT: ${{ secrets.GAS_LEDGER_ENDPOINT }}
-          GAS_LEDGER_TOKEN: ${{ secrets.GAS_LEDGER_TOKEN }}
-        run: |
-          if [ -n "$GAS_LEDGER_ENDPOINT" ] && [ -n "$GAS_LEDGER_TOKEN" ]; then
-            printf 'window.MIKATA_LEDGER={endpoint:"%s",token:"%s"};\n' \
-              "$GAS_LEDGER_ENDPOINT" "$GAS_LEDGER_TOKEN" > site/assets/ledger-config.js
-            echo "ledger config injected"
-          else
-            echo "GAS ledger secrets not set; ledger disabled"
-          fi
-
       - name: Prepare Pages artifact(未承認コンテンツを除外)
         # ノビシロ: 配色・連絡先が未確定、小柳さんの掲載決裁前(絶対ルール5)。
         # みらいひらけ堂: 公開判定(掲載基準決裁+守り部審査+データ整備)クリアまで除外。
@@ -221,6 +205,16 @@ jobs:
             exit 1
           fi
           echo "C3 OK: artifact sha256=$actual"
+
+      - name: Guard (C4・台帳設定が固定スタブと一致すること)
+        # 公開物に設定値を含めない(議事 docs/議事_20261014_公開成果物の検査強化.md)。
+        # 公開直前の assets/ledger-config.js が固定スタブと完全一致しなければ、アップロードせず止める。
+        # 失敗時は Upload / Deploy が走らず、Pages は直前に成功した公開版を配信し続ける。
+        # この step は秘密の値を env で受け取らない(公開デプロイ工程に秘密の値を渡さない)。
+        shell: bash
+        run: |
+          python scripts/check_ledger_stub.py --selftest
+          python scripts/check_ledger_stub.py --root /tmp/pages-deploy
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v5
