@@ -1,0 +1,2 @@
+{"ts": "2026-10-09T00:47:38Z", "session_id": "87bca547-1acd-4a06-8fab-27959e15deb4", "event": "session_start", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "source": "startup", "head": "6834543ece632e74acf29bb4ace9f7e8b7858e35"}
+{"ts": "2026-10-09T00:47:38Z", "session_id": "87bca547-1acd-4a06-8fab-27959e15deb4", "event": "session_end", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "commits": [], "tools": {}, "skills": [], "duration_s": 0, "reason": "other"}
