@@ -33,7 +33,6 @@ import decision_memory as dm  # noqa: E402
 import memory_bootstrap as mb  # noqa: E402  — 失敗台帳の読み取り(_failures)を再利用する
 import skill_metrics as sm  # noqa: E402  — Skill Metrics v2 の集計を再利用する
 import wiki_schema as ws  # noqa: E402  — 決定の公開範囲(decision_visibility)を再利用する
-from wikiskill_common import project_dir  # noqa: E402
 
 PROPOSALS_DIR = "docs/proposals"
 SKILLS_DIR = ".claude/skills"
@@ -280,10 +279,15 @@ def run(root: Path, skill: str, save: bool, today: dt.date) -> int:
     return EXIT_OK
 
 
+def default_root() -> Path:
+    """このスクリプトのあるリポジトリ。CLAUDE_PROJECT_DIR(別の作業ツリーを指すことがある)は使わない。"""
+    return Path(__file__).resolve().parents[1]
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Skill 改善提案を、根拠つきで手動生成する(WikiSkill F)")
     ap.add_argument("--skill", required=True, help="対象 Skill の名前(.claude/skills のフォルダ名)")
-    ap.add_argument("--root", default=None, help="対象リポジトリ(既定は作業中のリポジトリ)")
+    ap.add_argument("--root", default=None, help="対象リポジトリ(既定はこのスクリプトのリポジトリ)")
     ap.add_argument("--save", action="store_true", help="docs/proposals/ へ提案書を保存する(明示指示のとき)")
     ap.add_argument("--date", default=None, help="生成日(YYYY-MM-DD)。既定は今日")
     a = ap.parse_args(argv)
@@ -291,7 +295,7 @@ def main(argv: list[str] | None = None) -> int:
         today = dt.date.fromisoformat(a.date) if a.date else dt.date.today()
     except ValueError:
         ap.error("--date は YYYY-MM-DD の形で指定してください")
-    root = Path(a.root) if a.root else project_dir()
+    root = Path(a.root) if a.root else default_root()  # 明示の --root があればそれを使う
     return run(root, a.skill, a.save, today)
 
 

@@ -358,3 +358,25 @@ def test_real_repo_dry_run_is_read_only_and_well_formed(capsys):
     assert sp.main(["--root", str(ROOT), "--skill", "writing-plans", "--date", TODAY.isoformat()]) in (0, 3)
     capsys.readouterr()
     assert _digest(ROOT) == before
+
+
+def test_default_root_is_the_script_repository_not_the_environment_project(monkeypatch, tmp_path, capsys):
+    """既定の参照先は、このスクリプトのリポジトリ。CLAUDE_PROJECT_DIR が別の作業ツリーを指しても従わない。"""
+    other = _base_repo(tmp_path)  # ab-testing を持たない別の作業ツリー(環境変数はこちらを指す)
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(other))
+    assert sp.default_root() == ROOT
+    assert sp.main(["--skill", "ab-testing", "--date", TODAY.isoformat()]) == sp.EXIT_OK
+    assert "ab-testing" in capsys.readouterr().out
+
+
+def test_explicit_root_is_respected_even_when_environment_points_elsewhere(monkeypatch, tmp_path, capsys):
+    """明示の --root は、環境変数より優先する。Skill が無ければ、その場で止まる。"""
+    other = _base_repo(tmp_path)  # ab-testing は実リポジトリにだけある Skill
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(ROOT))
+    assert sp.main(["--root", str(other), "--skill", "ab-testing", "--date", TODAY.isoformat()]) == sp.EXIT_USAGE
+    assert "見つかりません" in capsys.readouterr().err
+    assert not (other / "docs" / "proposals").exists()
+
+
+def test_proposer_source_does_not_read_the_environment_project():
+    assert "project_dir" not in (ROOT / "scripts" / "skill_proposer.py").read_text(encoding="utf-8")
