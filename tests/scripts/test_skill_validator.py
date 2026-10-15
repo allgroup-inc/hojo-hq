@@ -78,6 +78,17 @@ def _pair(n, old_pass, new_pass):
     return rows
 
 
+def _prov(tmp_path, evals, results, dataset="syn-eval-01", independent=True, corrupt=False):
+    """出どころの申告。ハッシュは評価データと結果ファイルの今の内容から作る。"""
+    import hashlib as _h
+    m = {"dataset_id": dataset, "independent_of_candidate": independent,
+         "evals_sha256": _h.sha256(evals.read_bytes()).hexdigest(),
+         "results_sha256": _h.sha256(results.read_bytes()).hexdigest()}
+    p = tmp_path / "provenance.json"
+    p.write_text("{ 壊れた" if corrupt else json.dumps(m, ensure_ascii=False), encoding="utf-8")
+    return p
+
+
 def _run(root, *args):
     return sv.main(["--root", str(root), "--date", TODAY.isoformat(), "--skill", "writing-plans", *args])
 
@@ -173,13 +184,17 @@ def test_too_few_common_cases_is_undecidable(repo, tmp_path, capsys):
     assert "判定: **判定不能**" in out and f"必要: {sv.MIN_CASES} 件以上" in out
 
 
-def test_measured_improvement_passes_but_is_not_approval(repo, tmp_path, capsys):
+def test_measured_improvement_passes_only_on_the_given_data(repo, tmp_path, capsys):
     cand = _candidate(tmp_path, LIVE.replace("2. タスクに分ける。", "2. タスクを細かく分ける。"))
-    res = _results(tmp_path, _pair(12, 6, 9))
-    assert _run(repo, "--candidate", str(cand), "--evals", str(_evals(tmp_path, 12)), "--results", str(res)) == 0
+    ev, res = _evals(tmp_path, 12), _results(tmp_path, _pair(12, 6, 9))
+    prov = _prov(tmp_path, ev, res)
+    assert _run(repo, "--candidate", str(cand), "--evals", str(ev), "--results", str(res),
+                "--provenance", str(prov)) == 0
     out = capsys.readouterr().out
-    assert "判定: **合格**" in out and "0.5 → 0.75" in out
+    assert "判定: **合格**(指定された評価データ上のみ。実運用の改善ではない)" in out
+    assert "0.5 → 0.75" in out and "syn-eval-01" in out
     assert "承認ではない" in out and "自動採用・自動反映はしていません" in out
+    assert "実際のタスクの自動実行・測定はしていない" in out and "実運用での改善は確認していない" in out
 
 
 def test_regression_fails_and_names_the_count(repo, tmp_path, capsys):
@@ -205,8 +220,9 @@ def test_error_and_conflicting_results_are_not_counted(repo, tmp_path, capsys):
     rows = _pair(12, 6, 9)
     rows += [{"case_id": "c01", "variant": "new", "outcome": "error"},
              {"case_id": "c02", "variant": "old", "outcome": "fail"}]  # c02 の old は食い違う(採らない)
-    res = _results(tmp_path, rows)
-    assert _run(repo, "--candidate", str(cand), "--evals", str(_evals(tmp_path, 12)), "--results", str(res)) == 0
+    ev, res = _evals(tmp_path, 12), _results(tmp_path, rows)
+    assert _run(repo, "--candidate", str(cand), "--evals", str(ev), "--results", str(res),
+                "--provenance", str(_prov(tmp_path, ev, res))) == 0
     out = capsys.readouterr().out
     # c01(error)と c02(結果が食い違う)は外れ、共通ケースは10件になる。10件は必要件数を満たす
     assert "判定: **合格**" in out and "共通ケース 10 件" in out
@@ -216,8 +232,9 @@ def test_bad_result_lines_do_not_crash(repo, tmp_path, capsys):
     cand = _candidate(tmp_path, LIVE.replace("2. タスクに分ける。", "2. タスクを細かく分ける。"))
     rows = ["これはJSONではない", json.dumps(["配列"]), json.dumps({"case_id": "c00", "variant": "x", "outcome": "pass"})]
     rows += _pair(12, 6, 9)
-    res = _results(tmp_path, rows)
-    assert _run(repo, "--candidate", str(cand), "--evals", str(_evals(tmp_path, 12)), "--results", str(res)) == 0
+    ev, res = _evals(tmp_path, 12), _results(tmp_path, rows)
+    assert _run(repo, "--candidate", str(cand), "--evals", str(ev), "--results", str(res),
+                "--provenance", str(_prov(tmp_path, ev, res))) == 0
     assert "判定: **合格**" in capsys.readouterr().out
 
 
@@ -306,3 +323,73 @@ def test_default_root_is_the_script_repository_not_the_environment_project():
     """既定の基準は、このスクリプトのリポジトリ(別の作業ツリーを指す CLAUDE_PROJECT_DIR は使わない)。"""
     assert sv.default_root() == ROOT
     assert "project_dir" not in (ROOT / "scripts" / "skill_validator.py").read_text(encoding="utf-8")
+
+
+# ---------------------------------------------------------------- 評価結果の厳密さ(出どころの申告)
+
+def _improved_inputs(tmp_path):
+    cand = _candidate(tmp_path, LIVE.replace("2. タスクに分ける。", "2. タスクを細かく分ける。"))
+    ev, res = _evals(tmp_path, 12), _results(tmp_path, _pair(12, 6, 9))
+    return cand, ev, res
+
+
+def test_improvement_without_provenance_is_undecidable(repo, tmp_path, capsys):
+    cand, ev, res = _improved_inputs(tmp_path)
+    assert _run(repo, "--candidate", str(cand), "--evals", str(ev), "--results", str(res)) == 0
+    out = capsys.readouterr().out
+    assert "判定: **判定不能**" in out and "出どころの申告(--provenance)がない" in out
+    assert "判定: **合格**" not in out
+
+
+def test_provenance_hash_mismatch_is_undecidable(repo, tmp_path, capsys):
+    cand, ev, res = _improved_inputs(tmp_path)
+    prov = _prov(tmp_path, ev, res)
+    res.write_text(res.read_text(encoding="utf-8") + "\n", encoding="utf-8")  # 申告の後に結果を書き換えた
+    assert _run(repo, "--candidate", str(cand), "--evals", str(ev), "--results", str(res),
+                "--provenance", str(prov)) == 0
+    out = capsys.readouterr().out
+    assert "判定: **判定不能**" in out and "一致しない" in out
+
+
+def test_not_independent_is_undecidable(repo, tmp_path, capsys):
+    cand, ev, res = _improved_inputs(tmp_path)
+    prov = _prov(tmp_path, ev, res, independent=False)
+    assert _run(repo, "--candidate", str(cand), "--evals", str(ev), "--results", str(res),
+                "--provenance", str(prov)) == 0
+    out = capsys.readouterr().out
+    assert "判定: **判定不能**" in out and "独立していると申告されていない" in out
+
+
+def test_unreadable_provenance_is_undecidable_not_a_crash(repo, tmp_path, capsys):
+    cand, ev, res = _improved_inputs(tmp_path)
+    prov = _prov(tmp_path, ev, res, corrupt=True)
+    assert _run(repo, "--candidate", str(cand), "--evals", str(ev), "--results", str(res),
+                "--provenance", str(prov)) == 0
+    assert "判定: **判定不能**" in capsys.readouterr().out
+
+
+def test_every_report_states_the_scope_and_never_claims_production_improvement(repo, tmp_path, capsys):
+    cand, ev, res = _improved_inputs(tmp_path)
+    cases = [
+        [],                                                            # 修正案なし
+        ["--candidate", str(cand)],                                    # 測定なし
+        ["--candidate", str(cand), "--evals", str(ev), "--results", str(res)],  # 申告なし
+        ["--candidate", str(cand), "--evals", str(ev), "--results", str(res),
+         "--provenance", str(_prov(tmp_path, ev, res))],               # 合格
+    ]
+    for args in cases:
+        capsys.readouterr()
+        assert _run(repo, *args) == 0
+        out = capsys.readouterr().out
+        assert "実際のタスクの自動実行・測定はしていない" in out
+        assert "実運用での改善は確認していない" in out
+        assert "実運用で改善した" not in out and "改善が確認された" not in out
+
+
+def test_provenance_hash_is_not_claimed_as_authenticity(repo, tmp_path, capsys):
+    cand, ev, res = _improved_inputs(tmp_path)
+    assert _run(repo, "--candidate", str(cand), "--evals", str(ev), "--results", str(res),
+                "--provenance", str(_prov(tmp_path, ev, res))) == 0
+    out = capsys.readouterr().out
+    assert "(真正性)は確認していない" in out          # 報告は、真正性を確認したとは書かない
+    assert "真正性を確認" not in out

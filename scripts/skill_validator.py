@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import re
 import subprocess
@@ -48,6 +49,7 @@ MIN_CASES = 10            # 比べられたケースがこれより少なけれ�
 MAX_BYTES = 200_000       # 修正案の大きさの上限
 _NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 _CASE_ID = re.compile(r"^[A-Za-z0-9._:-]{1,64}$")
+_DATASET_ID = re.compile(r"^[A-Za-z0-9._:-]{1,64}$")
 _COMMITTED = re.compile(rf"^HEAD:{re.escape(SKILLS_DIR)}/[A-Za-z0-9][A-Za-z0-9._-]{{0,63}}/SKILL\.md$")
 OUTCOMES = {"pass", "fail", "error"}
 VARIANTS = {"old", "new"}
@@ -181,6 +183,52 @@ def load_results(path: Path) -> tuple[dict[str, dict[str, str]], int]:
     return result, bad
 
 
+PROVENANCE_REASON = {
+    "missing": "評価データの出どころの申告(--provenance)がない",
+    "unreadable": "評価データの出どころの申告を読めない・形が正しくない",
+    "not_independent": "評価データが修正案と独立していると申告されていない",
+    "mismatch": "申告されたハッシュと評価データ・結果ファイルが一致しない(作成後に変わった可能性)",
+    "no_inputs": "出どころの申告を照合する評価データ・結果がない",
+}
+PROVENANCE_LABEL = {"ok": "照合済み(ファイルは申告と一致)", **PROVENANCE_REASON}
+
+
+def sha256_of(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def check_provenance(path: Path | None, evals_path: Path | None,
+                     results_path: Path | None) -> tuple[str, str | None]:
+    """評価データの出どころの申告を、ファイルと照らす。(状態, dataset_id)。
+
+    申告の形: {"dataset_id": "...", "independent_of_candidate": true,
+              "evals_sha256": "...", "results_sha256": "..."}
+    ハッシュの一致は「申告の後で評価データが変わっていない」ことだけを示す。
+    誰がどう測ったか(真正性)は、この検査では確認できない。
+    """
+    if path is None:
+        return "missing", None
+    try:
+        m = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return "unreadable", None
+    if not isinstance(m, dict):
+        return "unreadable", None
+    ds = m.get("dataset_id")
+    if not (isinstance(ds, str) and _DATASET_ID.match(ds)):
+        return "unreadable", None
+    if m.get("independent_of_candidate") is not True:
+        return "not_independent", ds
+    if evals_path is None or results_path is None:
+        return "no_inputs", ds
+    try:
+        ok = (m.get("evals_sha256") == sha256_of(evals_path)
+              and m.get("results_sha256") == sha256_of(results_path))
+    except OSError:
+        ok = False
+    return ("ok", ds) if ok else ("mismatch", ds)
+
+
 def evaluate(evals: set[str] | None, results: dict[str, dict[str, str]] | None) -> dict:
     """成功率の比較。測定できた共通のケースだけで数える。"""
     if evals is None or results is None:
@@ -202,7 +250,7 @@ def evaluate(evals: set[str] | None, results: dict[str, dict[str, str]] | None) 
 
 
 def judge(skill: str, candidate_text: str | None, old: str | None, problems: list[str],
-          measurement: dict, same_as_live: bool) -> tuple[str, list[str]]:
+          measurement: dict, same_as_live: bool, provenance: str = "missing") -> tuple[str, list[str]]:
     if candidate_text is None:
         return "判定不能", ["検証対象の修正案がない(修正案を明示的に指定してください)"]
     if same_as_live:
@@ -216,24 +264,39 @@ def judge(skill: str, candidate_text: str | None, old: str | None, problems: lis
     if not measurement.get("measured"):
         return "判定不能", [measurement["reason"], "互換性の検査は通過(改善効果は未測定)"]
     if measurement["new_rate"] > measurement["old_rate"]:
-        return "合格", ["回帰なし・測定された改善あり(承認ではない。三名体制レビューと決裁が必要)"]
-    return "判定不能", ["改善が測定されなかった(成功率が旧と同等以下)"]
+        if provenance != "ok":  # 出どころを確認できない評価は、合格とは扱わない
+            return "判定不能", [f"指定データ上で成功率は上がったが、{PROVENANCE_REASON[provenance]}"]
+        return "合格", ["指定された評価データ上で、回帰なしに成功率が上がった"
+                        "(実運用の改善とは別。承認ではない。三名体制レビューと決裁が必要)"]
+    return "判定不能", ["指定データ上で改善が測定されなかった(成功率が旧と同等以下)"]
+
+
+SCOPE_LINE = ("- 適用範囲: 指定された評価結果ファイルの集計のみ。実際のタスクの自動実行・測定はしていない。"
+              "実運用での改善は確認していない。")
 
 
 def render(skill: str, verdict: str, reasons: list[str], diff: dict | None, measurement: dict,
-           proposal_ref: str | None, today: dt.date) -> str:
+           proposal_ref: str | None, today: dt.date, provenance: str = "missing",
+           dataset_id: str | None = None) -> str:
+    qualifier = "(指定された評価データ上のみ。実運用の改善ではない)" if verdict == "合格" else ""
     out = [f"# Skill 検証報告(G): {skill}", "",
-           f"- 判定: **{verdict}**(生成日 {today.isoformat()}・手動実行)",
+           f"- 判定: **{verdict}**{qualifier}(生成日 {today.isoformat()}・手動実行)",
            "- 状態: 検証のみ。自動採用・自動反映はしていません。",
+           SCOPE_LINE,
+           f"- 評価データの出どころ: {PROVENANCE_LABEL.get(provenance, provenance)}"
+           + (f"(dataset_id: `{dataset_id}`)" if dataset_id and provenance == 'ok' else ""),
+           "- 出どころの限界: 申告との一致は、申告の後に評価データが変わっていないことだけを示す。"
+           "誰がどう測ったか(真正性)は確認していない。",
            f"- 参照した提案: {proposal_ref or 'なし'}"]
     if diff:
         out.append(f"- 変更の大きさ: 行数 {diff['lines_old']}→{diff['lines_new']}、"
                    f"バイト {diff['bytes_old']}→{diff['bytes_new']}、見出しの追加 {diff['headings_added']}・削除 {diff['headings_removed']}")
     if measurement.get("measured"):
-        out.append(f"- 測定(共通ケース {measurement['n']} 件): 成功率 {measurement['old_rate']} → {measurement['new_rate']}"
-                   f"、回帰 {len(measurement['regressions'])} 件、改善 {len(measurement['improved'])} 件")
+        out.append(f"- 評価結果の集計(共通ケース {measurement['n']} 件・実行はしていない): "
+                   f"成功率 {measurement['old_rate']} → {measurement['new_rate']}、"
+                   f"回帰 {len(measurement['regressions'])} 件、旧で不合格・新で合格 {len(measurement['improved'])} 件")
     else:
-        out.append(f"- 測定: 未実施または不足 — {measurement.get('reason', '')}")
+        out.append(f"- 評価結果の集計: 未実施または不足 — {measurement.get('reason', '')}")
     out.append("- 利用実績の注意: Skill Metrics の利用実績が少ない・0件の場合、実運用での効果は確認できません。")
     if reasons:
         out.append("")
@@ -256,7 +319,7 @@ def save_report(root: Path, skill: str, today: dt.date, text: str) -> Path:
 
 
 def run(root: Path, skill: str, candidate: Path | None, evals: Path | None, results: Path | None,
-        proposal: Path | None, save: bool, today: dt.date) -> int:
+        proposal: Path | None, save: bool, today: dt.date, provenance_path: Path | None = None) -> int:
     root = Path(root)
     if not _NAME.match(skill) or not (root / SKILLS_DIR / skill / "SKILL.md").is_file():
         print(f"エラー: Skill `{skill}` がリポジトリに見つかりません", file=sys.stderr)
@@ -291,8 +354,9 @@ def run(root: Path, skill: str, candidate: Path | None, evals: Path | None, resu
     measurement = evaluate(eval_cases, result_map)
     if results is not None:
         measurement["unusable_result_lines"] = bad
-    verdict, reasons = judge(skill, candidate_text, old, problems, measurement, same)
-    text = render(skill, verdict, reasons, diff, measurement, proposal_ref, today)
+    prov, dataset_id = check_provenance(provenance_path, evals, results)
+    verdict, reasons = judge(skill, candidate_text, old, problems, measurement, same, prov)
+    text = render(skill, verdict, reasons, diff, measurement, proposal_ref, today, prov, dataset_id)
     hits = sp.scan_text(text)
     if hits:
         print(f"機密の検査で止めました(規則: {', '.join(sorted(set(hits)))})。報告は表示・保存しません。",
@@ -323,6 +387,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--evals", default=None, help="Evaluation Set(JSONL)")
     ap.add_argument("--results", default=None, help="測定結果(JSONL)")
     ap.add_argument("--proposal", default=None, help="参照する F の提案書(docs/proposals/ の中)")
+    ap.add_argument("--provenance", default=None,
+                    help="評価データの出どころの申告(JSON)。合格には必須。ハッシュの一致は改変がないことだけを示す")
     ap.add_argument("--root", default=None)
     ap.add_argument("--date", default=None)
     ap.add_argument("--save", action="store_true")
@@ -337,7 +403,7 @@ def main(argv: list[str] | None = None) -> int:
                Path(a.evals) if a.evals else None,
                Path(a.results) if a.results else None,
                Path(a.proposal) if a.proposal else None,
-               a.save, today)
+               a.save, today, Path(a.provenance) if a.provenance else None)
 
 
 if __name__ == "__main__":
