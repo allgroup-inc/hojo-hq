@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ".github/workflows/wikiskill-tests.yml"
 EXIT_MATCHED = 3
 
-# wikiskill-tests.yml の push: paths と同じ 29 件(順序も同じ)。変えるときは両方を変える。
+# wikiskill-tests.yml の push: paths と同じ 32 件(順序も同じ)。変えるときは両方を変える。
 PATTERNS = [
     "scripts/wikiskill_common.py",
     "scripts/experience_log.py",
@@ -59,6 +59,10 @@ PATTERNS = [
     # tests/scripts/test_weekly_gakubi*.py を省略しない(2026-10-12 PR-A のレビュー指摘)
     "scripts/weekly_gakubi.py",
     ".github/workflows/weekly-gakubi.yml",
+    # 2026-10-15 CI 統合: Skill の実績集計(E)・改善提案(F)・検証(G)。変更で WikiSkill テストを必ず起動する
+    "scripts/skill_metrics.py",
+    "scripts/skill_proposer.py",
+    "scripts/skill_validator.py",
 ]
 
 
@@ -126,6 +130,9 @@ def selftest() -> int:
         ("site/index.html", False),
         ("data/subsidies.json", False),
         ("scripts/weekly_gakubi.py", True),               # 2026-10-12 PR-A: ガード自体の変更も対象
+        ("scripts/skill_metrics.py", True),
+        ("scripts/skill_proposer.py", True),
+        ("scripts/skill_validator.py", True),
         (".github/workflows/weekly-gakubi.yml", True),
         (".github/workflows/update.yml", False),          # 他の workflow は対象外のまま
     ]

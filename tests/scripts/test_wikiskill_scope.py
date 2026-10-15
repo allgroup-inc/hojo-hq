@@ -68,7 +68,7 @@ def test_selftest_and_cli_exit_codes(tmp_path):
 def test_workflow_push_paths_equal_patterns_and_pull_request_has_no_paths():
     t = read(WF)
     assert ws.workflow_push_paths(t) == ws.PATTERNS
-    assert len(ws.PATTERNS) == 29  # 2026-10-09 PR-B で scripts/wiki_guard.py を追加(26 → 27。計画書の「28」は誤記)。2026-10-12 CI 赤 PR-A で weekly-gakubi の 2 パスを追加(27 → 29)
+    assert len(ws.PATTERNS) == 32  # 2026-10-09 PR-B で scripts/wiki_guard.py を追加(26 → 27。計画書の「28」は誤記)。2026-10-12 CI 赤 PR-A で weekly-gakubi の 2 パスを追加(27 → 29)。2026-10-15 CI 統合で E・F・G の 3 パスを追加(29 → 32)
     assert not ws.workflow_pull_request_has_paths(t)
     assert "\non:\n  pull_request:\n  push:\n" in t
     r = subprocess.run([sys.executable, "scripts/wikiskill_scope.py", "--check-workflow", WF], cwd=ROOT, capture_output=True, text=True)
@@ -84,6 +84,29 @@ def test_workflow_job_name_and_conditional_steps():
     assert "--no-renames" in t  # リネームは削除+追加として両方のパスを見る
     assert "安全側" in t  # 差分取得・判定の失敗は全テスト実行
     assert "tests/scripts/test_wikiskill_scope.py" in t  # このテスト自体も CI で走る
+
+
+# ---- 機能ごとの CI 対象: 変更で WikiSkill テストが起動し、対応テストが明示の pytest 一覧で走る ----
+
+COVERAGE = {
+    "scripts/memory_bootstrap.py": "tests/scripts/test_memory_bootstrap.py",    # M1 の検索・注入
+    "scripts/experience_log.py": "tests/scripts/test_experience_log.py",        # Skill 記録の強化
+    "scripts/skill_metrics.py": "tests/scripts/test_skill_metrics.py",          # E: Skill Metrics
+    "scripts/skill_proposer.py": "tests/scripts/test_skill_proposer.py",        # F: Skill Proposer
+    "scripts/skill_validator.py": "tests/scripts/test_skill_validator.py",      # G: Skill Validator
+}
+
+
+def test_each_wikiskill_module_triggers_ci_and_its_test_runs():
+    t = read(WF)
+    push_paths = ws.workflow_push_paths(t)
+    explicit = t[t.index("python3 -m pytest"):].split("\n          -q")[0]
+    for module, test in COVERAGE.items():
+        assert module in push_paths, f"push: paths に無い(変更でテストが起動しない): {module}"
+        assert ws.matches(module), f"対象判定に当たらない(PR で省略される): {module}"
+        assert ws.matches(test), f"テストが対象判定に当たらない: {test}"
+        assert (ROOT / test).is_file(), f"テストファイルが無い: {test}"
+        assert test in explicit, f"pytest の明示一覧に無い(CI で走らない): {test}"
 
 
 # ---- 「対象判定」step を本物の git で実行する ----
