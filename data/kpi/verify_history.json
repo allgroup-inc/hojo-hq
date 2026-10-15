@@ -4321,5 +4321,68 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-15",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "流通環境整備支援事業(農林水産物県外出荷・流通合理化 実証事業)",
+    "url": "https://okinawa-ric.jp/service/post-55.html",
+    "method": "ai",
+    "judges": [
+     "Claude"
+    ],
+    "ok": true,
+    "issues": [],
+    "amount_in_source": "２千万円"
+   },
+   {
+    "name": "京都市企業立地促進制度補助金［お試し立地支援制度］",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFiMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "［第十二回］事業再構築補助金（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ2000000qhOQMAY",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「脱炭素化・エネルギー転換に資する我が国技術の国際実証事業」の2026年度第2回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdl2MAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「地域未利用バイオマスを活用したバイオガスの産業熱利用推進に向けた動向調査」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDeN8MAL",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
