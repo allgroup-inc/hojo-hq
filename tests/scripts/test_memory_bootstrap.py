@@ -1711,3 +1711,161 @@ def test_injectable_reasons_ok_for_fixture_page(kbw):
     w = wiki_schema.load_wiki_file(kbw / f"docs/wiki/{APPROVED_ID}.md", kbw)
     assert wiki_schema.injectable_reasons(w, "allgroup-inc/hojo-hq") == []
     assert wiki_schema.injectable_reasons(w, "unknown") == ["repo"]
+
+
+# ---------------------------------------------------------------- M1: query の拡張と Decision の公開判定
+# 検索(query)と注入(collect_sources → _decisions)は同じ判定を通る。どちらも読み取り専用。
+
+def _vis_decision(kb, name, decision_id, title, visibility=None, status="adopted", tags="[キャッシュ, 集計]"):
+    """FM_DECISION_MD を元に、visibility・status・id を変えた議事を docs/ に書く(commit はしない)。"""
+    md = FM_DECISION_MD.replace("decision_id: D-20261001-01", f"decision_id: {decision_id}").replace(
+        "status: adopted", f"status: {status}").replace("tags: [キャッシュ, 集計]", f"tags: {tags}").replace(
+        "title: 集計キャッシュの置き場所", f"title: {title}")
+    if visibility is not None:
+        md = md.replace("tags: ", f"visibility: {visibility}\ntags: ", 1)
+    (kb / "docs" / name).write_text(md, encoding="utf-8")
+
+
+def _tree_digest(root):
+    import hashlib
+    h = hashlib.sha256()
+    for p in sorted(Path(root).rglob("*")):
+        if ".git" in p.parts or "__pycache__" in p.parts or not p.is_file():
+            continue
+        h.update(str(p.relative_to(root)).encode())
+        h.update(p.read_bytes())
+    return h.hexdigest()
+
+
+def _set_remote(kb, url):
+    if url is None:
+        git(kb, "remote", "remove", "origin")
+    else:
+        git(kb, "remote", "set-url", "origin", url)
+    memory_bootstrap._clear_caches()
+
+
+def _decision_titles(kb):
+    return [s["title"] for s in collect_sources(kb) if s["kind"] == "decision"]
+
+
+def test_public_repo_hides_private_and_invalid_visibility_decisions(kb):
+    _vis_decision(kb, "議事_20261002_社内.md", "D-PRIV-01", "社内限定の集計方針", visibility="private")
+    _vis_decision(kb, "議事_20261003_公開.md", "D-PUB-01", "公開してよい集計方針", visibility="public")
+    _vis_decision(kb, "議事_20261004_誤記.md", "D-BAD-01", "誤記の集計方針", visibility="社外秘")
+    _vis_decision(kb, "議事_20261005_通常.md", "D-NOKEY-01", "通常の集計方針")
+    memory_bootstrap._clear_caches()
+    titles = _decision_titles(kb)
+    assert any("公開してよい集計方針" in t for t in titles)
+    assert any("通常の集計方針" in t for t in titles)
+    assert not any("社内限定" in t for t in titles)   # 注入(collect_sources)に出ない
+    assert not any("誤記の集計方針" in t for t in titles)  # 不明な値は fail closed
+    out = retrieve(kb, ["集計方針"])
+    assert "社内限定の集計方針" not in out and "誤記の集計方針" not in out
+    assert "公開してよい集計方針" in out
+
+
+def test_private_repo_keeps_every_decision_including_private_marked(kb):
+    _set_remote(kb, "https://github.com/example-org/private-sample.git")
+    _vis_decision(kb, "議事_20261002_社内.md", "D-PRIV-01", "社内限定の集計方針", visibility="private")
+    memory_bootstrap._clear_caches()
+    assert any("社内限定の集計方針" in t for t in _decision_titles(kb))  # 非公開リポでは従来どおり全件
+
+
+def test_unknown_repo_applies_the_public_rule(kb):
+    _set_remote(kb, None)
+    _vis_decision(kb, "議事_20261002_社内.md", "D-PRIV-01", "社内限定の集計方針", visibility="private")
+    _vis_decision(kb, "議事_20261005_通常.md", "D-NOKEY-01", "通常の集計方針")
+    memory_bootstrap._clear_caches()
+    titles = _decision_titles(kb)
+    assert not any("社内限定" in t for t in titles)
+    assert any("通常の集計方針" in t for t in titles)
+
+
+def test_superseded_and_test_tagged_decisions_not_in_query(kb):
+    _vis_decision(kb, "議事_20261002_旧.md", "D-OLD-01", "旧集計方針", status="superseded")
+    _vis_decision(kb, "議事_20261003_試験.md", "D-TEST-01", "試験集計方針", tags="[test, 集計]")
+    memory_bootstrap._clear_caches()
+    out = retrieve(kb, ["集計方針"])
+    assert "旧集計方針" not in out and "試験集計方針" not in out
+
+
+def test_query_json_refs_are_human_ids(kb):
+    _fm_decision(kb, "議事_20261001_集計キャッシュ.md")
+    memory_bootstrap._clear_caches()
+    r = run_bootstrap(kb, "query", "キャッシュ", "--json")
+    assert r.returncode == 0, r.stderr
+    out = json.loads(r.stdout)
+    assert out["terms"] == ["キャッシュ"]
+    decisions = [x for x in out["results"] if x["kind"] == "decision"]
+    assert decisions and decisions[0]["ref"] == "D-20261001-01"
+    assert all(not x["ref"].startswith("docs/") for x in out["results"] if x["kind"] == "decision")
+
+
+def test_json_ref_for_failure_is_fk_number(kb):
+    picked = {"failure": memory_bootstrap._failures(kb)}
+    rows = json.loads(memory_bootstrap._query_json(picked, ["x"], ["failure"], 5))["results"]
+    assert rows and rows[0]["ref"] == "FK-002" and rows[0]["kind"] == "failure"
+
+
+def test_query_kind_filter_limits_sources(kb):
+    _fm_decision(kb, "議事_20261001_集計キャッシュ.md")
+    memory_bootstrap._clear_caches()
+    only_fail = memory_bootstrap.query(kb, ["キャッシュ"], kinds=["failure"])
+    assert not only_fail.get("decision")
+    only_dec = memory_bootstrap.query(kb, ["キャッシュ"], kinds=["decision"])
+    assert only_dec.get("decision") and set(k for k, v in only_dec.items() if v) == {"decision"}
+
+
+def test_query_unknown_kind_is_rejected(kb):
+    r = run_bootstrap(kb, "query", "キャッシュ", "--kind", "candidate")
+    assert r.returncode == 2 and "未知の区分" in r.stderr
+
+
+def test_query_limit_applies_per_kind(kb):
+    _fm_decision(kb, "議事_20261001_集計キャッシュ.md")
+    _fm_decision(kb, "議事_20261002_集計キャッシュ2.md", title="集計キャッシュの別案")
+    memory_bootstrap._clear_caches()
+    assert len(memory_bootstrap.query(kb, ["キャッシュ"], limit=1)["decision"]) == 1
+
+
+def test_query_default_text_output_matches_retrieve(kb):
+    _fm_decision(kb, "議事_20261001_集計キャッシュ.md")
+    memory_bootstrap._clear_caches()
+    r = run_bootstrap(kb, "query", "キャッシュ")
+    assert r.returncode == 0
+    assert r.stdout == retrieve(kb, ["キャッシュ"])
+
+
+def test_query_writes_nothing_and_audits_nothing(kb):
+    (kb / ".claude").mkdir(exist_ok=True)
+    (kb / ".claude" / "wiki.off").write_text("", encoding="utf-8")  # 通常の収集なら監査が1行増える
+    _fm_decision(kb, "議事_20261001_集計キャッシュ.md")
+    memory_bootstrap._clear_caches()
+    log = kb / ".claude" / "experience" / "_audit.log"
+    before_tree, before_log = _tree_digest(kb), (log.read_bytes() if log.exists() else b"")
+    r = run_bootstrap(kb, "query", "キャッシュ", "--json")
+    assert r.returncode == 0, r.stderr
+    assert _tree_digest(kb) == before_tree
+    assert (log.read_bytes() if log.exists() else b"") == before_log
+
+
+def test_query_on_empty_repository_is_safe(tmp_path):
+    root = tmp_path / "empty"
+    root.mkdir()
+    git(root, "init", "-q")
+    git(root, "remote", "add", "origin", PUBLIC_URL)
+    (root / "scripts").mkdir()
+    for name in COPY_SCRIPTS:
+        shutil.copy(SCRIPTS / name, root / "scripts" / name)
+    memory_bootstrap._clear_caches()
+    r = run_bootstrap(root, "query", "締切", "--json")
+    assert r.returncode == 0, r.stderr
+    assert json.loads(r.stdout)["results"] == []
+
+
+def test_query_wiki_kind_lists_only_approved_official_page(kbw):
+    memory_bootstrap._clear_caches()
+    out = memory_bootstrap.query(kbw, ["マージ"], kinds=["wiki"])
+    ids = [s.get("ref") or s["id"] for s in out.get("wiki", [])]
+    assert ids == [APPROVED_ID]
