@@ -59,6 +59,7 @@ PATTERNS = [
     # tests/scripts/test_weekly_gakubi*.py を省略しない(2026-10-12 PR-A のレビュー指摘)
     "scripts/weekly_gakubi.py",
     ".github/workflows/weekly-gakubi.yml",
+    "scripts/skill_metrics.py",
 ]
 
 
