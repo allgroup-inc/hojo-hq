@@ -65,10 +65,30 @@ jobs:
           npm install -g @google/clasp@3.4.1
           printf '%s' "$CLASPRC_JSON" > "$HOME/.clasprc.json"
           chmod 600 "$HOME/.clasprc.json"
+          # 貼り付け時に紛れ込んだ空白・改行を除く(スクリプトIDに空白は含まれない)
+          SCRIPT_ID=$(printf '%s' "$SCRIPT_ID" | tr -d '[:space:]')
+          echo "::notice::スクリプトIDの長さ: ${#SCRIPT_ID}文字(通常57文字)"
+          # 反映前に、ライブ側のファイル一覧を読めるか確かめる(ID・権限の誤りをここで切り分ける)
+          mkdir -p /tmp/live && printf '{"scriptId":"%s","rootDir":"."}' "$SCRIPT_ID" > /tmp/live/.clasp.json
+          if (cd /tmp/live && clasp pull >/tmp/pull.log 2>&1); then
+            echo "::notice::ライブのファイル数: $(ls /tmp/live | grep -c -E '\.(gs|js|json|html)$')(読み取りOK)"
+          else
+            echo "::error title=ライブの読み取りに失敗::$(grep -v -i -E 'token|secret' /tmp/pull.log | tail -5 | tr '\n' ' ' | cut -c1-600)"
+          fi
+          rm -rf /tmp/live
           printf '{"scriptId":"%s","rootDir":"./src"}' "$SCRIPT_ID" > glow-ma/.clasp.json
           cd glow-ma
-          clasp push --force
+          # 失敗理由を Actions の画面(注記)に出す。clasp の出力に認証情報は含まれない
+          set +e
+          out=$(clasp push --force 2>&1); code=$?
+          set -e
+          echo "$out"
           rm -f "$HOME/.clasprc.json" .clasp.json
+          if [ $code -ne 0 ]; then
+            msg=$(echo "$out" | grep -v -i -E "token|secret" | tail -8 | tr '\n' ' ' | cut -c1-900)
+            echo "::error title=clasp push failed::$msg"
+            exit $code
+          fi
 
       - name: LINE通知(反映完了)
         if: steps.creds.outputs.ready == 'true' && success()
