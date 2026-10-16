@@ -20,6 +20,16 @@ permissions:
 jobs:
   fetch-and-deploy:
     runs-on: ubuntu-latest
+    # U3 fetch guard(設計 v1.2・判断事項 A〜I 決裁 2026-10-11)。
+    # 2026-10-05 に jGrants API が 66 クエリすべて 503 → 0 件で上書き → 自治体 17 件だけで公開ゲート(10 件)を
+    # 通過し約 10 時間 17 件のサイトが公開された事故の再発防止。方針は fail-closed:
+    # 「検査に成功したデータ(バイト列)だけが main に push され、Pages に公開される」。
+    #   Snapshot(G0) → fetch → Guard C1(G1〜G6・sha256 を記録) → 生成 → Commit(C2: push 対象の HEAD blob の sha 一致、
+    #   push 3 回失敗で job 失敗) → Validate(件数 ≥ MIN_TOTAL) → Prepare → Verify artifact C3(公開物の sha 一致) → Deploy
+    # 例外通過(dispatch 入力・環境変数・特例分岐による迂回)は無い。正当な急減は人が検証したデータを PR で入れて基準を更新する。
+    # 既知の制約(I-6): Guard C1 が FAIL した run では Record KGI / IG の日次記録も commit されない(空白が生じる)。
+    # 取得状況ファイル(FETCH_STATUS_PATH)は Fetch 2 step と Guard step の env で指定する。job レベルの env では
+    # runner コンテキストが使えない(独立レビュー C-1 で検出)。
     steps:
       - uses: actions/checkout@v7
 
@@ -27,17 +37,42 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Snapshot previous data (G0・基準データの検証と退避)
+        # main に入っている前回の正常データを fetch の前に退避する。読めない/空なら取得を始めずに止める(回復は人の PR)。
+        run: python scripts/guard_subsidies.py snapshot --src data/subsidies.json --dst "$RUNNER_TEMP/subsidies.prev.json"
+
       - name: Fetch jGrants data
+        # 失敗は $FETCH_STATUS_PATH に記録(exit code は 0 のまま。判定は Guard に一本化)
+        env:
+          FETCH_STATUS_PATH: ${{ runner.temp }}/fetch_status.json
         run: python scripts/fetch_jgrants.py
 
       - name: Fetch local (自治体) data
         # 守り部審査済み(docs/守り部審査記録.md)。沖縄県・産業振興公社・那覇市を追加収集しマージ
+        env:
+          FETCH_STATUS_PATH: ${{ runner.temp }}/fetch_status.json
         run: python scripts/fetch_local.py
 
       - name: Preserve verified & ig_* fields (ブロッカー #1 対策)
         # update.yml が毎日再生成する際、既存の verified / ig_priority などが消えるリスク対策
         # fetch_jgrants + fetch_local の直後に実行し、新しい JSON に既存フィールドをマージ
         run: python scripts/preserve_fields.py
+
+      - name: Guard (C1・取得結果の検査と検査済みハッシュの記録)
+        # selftest → G1〜G6。1 つでも該当したら exit 1(生成・commit・公開はすべて行われない)。
+        # guard が検査したバイト列そのものの sha256 を guard.sha に残し(--sha-out)、C2(push 直前)と
+        # C3(公開直前)で同一性を確認する。
+        env:
+          FETCH_STATUS_PATH: ${{ runner.temp }}/fetch_status.json
+        shell: bash
+        run: |
+          python scripts/guard_subsidies.py --selftest
+          python scripts/guard_subsidies.py check \
+            --prev "$RUNNER_TEMP/subsidies.prev.json" \
+            --new data/subsidies.json \
+            --status "$FETCH_STATUS_PATH" \
+            --sha-out "$RUNNER_TEMP/guard.sha" --explain
+          echo "guard.sha=$(cat "$RUNNER_TEMP/guard.sha")"
 
       - name: Generate LINE deadline alerts
         # 締切7日以内の制度からLINE配信下書きを自動生成(配信は人が実行)
@@ -85,7 +120,8 @@ jobs:
           MORADOU_IG_TOKEN: ${{ secrets.MORADOU_IG_TOKEN }}
         run: python scripts/record_ig_followers.py
 
-      - name: Commit updated data
+      - name: Commit updated data (C2・push 対象の同一性確認つき)
+        shell: bash
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
@@ -94,11 +130,32 @@ jobs:
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)。
           # -X theirs: 自動生成ファイル同士のコンフリクトは自分の新しい生成分で解決し、
           # マーカーを作業ツリーに残さない。失敗したらrebaseを必ずabortして原状回復する。
+          # C2(U3): rebase で data/subsidies.json の blob が Guard 合格時と変わっていたら push しない(再試行しない)。
+          # push 自体の失敗だけを最大 3 回試し、3 回とも失敗したら job を失敗させる(未 push のまま公開へ進まない)。
+          expected="$(cat "$RUNNER_TEMP/guard.sha")"
+          pushed=0
           for i in 1 2 3; do
-            git pull --rebase -X theirs origin main && git push && break
+            if git pull --rebase -X theirs origin main; then
+              # blob のバイト列をそのまま sha256sum に流す(シェル変数を経由すると末尾改行が変わり得る)。
+              # pipefail 下では git show の失敗がパイプライン全体の失敗になり、if ! で捕まる。
+              if ! actual="$(git show HEAD:data/subsidies.json | sha256sum | cut -d' ' -f1)"; then
+                echo "::error::C2: HEAD の data/subsidies.json を読めない。push を中止"; exit 1
+              fi
+              if [ "$actual" != "$expected" ]; then
+                echo "::error::C2: rebase 後の data/subsidies.json(HEAD blob)が検査済みハッシュと一致しない。push を中止 (expected=$expected actual=$actual)"
+                exit 1
+              fi
+              if git push; then
+                pushed=1; break
+              fi
+            fi
             git rebase --abort 2>/dev/null || true
             echo "push retry $i"; sleep 5
           done
+          if [ "$pushed" != 1 ]; then
+            echo "::error::push に3回失敗しました(公開へ進みません)"; exit 1
+          fi
+          echo "C2 OK: HEAD blob sha256=$actual"
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
@@ -109,33 +166,21 @@ jobs:
       - name: Validate data before deploy (壊れたJSONを公開しないゲート)
         # 2026-08-04: マーカー入りJSONが公開され診断が全停止した事故の再発防止。
         # ここで落ちればデプロイされず、公開中の正常なサイトがそのまま残る。
+        # 件数の下限は guard_subsidies.py の MIN_TOTAL(判断事項 B/D)。YAML に数値を書かない(I-4)。
         run: |
+          MIN_TOTAL="$(python scripts/guard_subsidies.py const MIN_TOTAL)"
+          export MIN_TOTAL
           python - <<'EOF'
-          import json, sys
+          import json, os, sys
           for p in ["site/data/subsidies.json", "site/data/line_alerts.json"]:
               d = json.load(open(p, encoding="utf-8"))
               print(p, "ok")
           n = len(json.load(open("site/data/subsidies.json", encoding="utf-8")).get("items", []))
-          if n < 10:
-              sys.exit(f"subsidies items={n} — 少なすぎるため公開を中止")
-          print("items:", n)
+          min_total = int(os.environ["MIN_TOTAL"])
+          if n < min_total:
+              sys.exit(f"subsidies items={n} < MIN_TOTAL={min_total} — 少なすぎるため公開を中止")
+          print("items:", n, ">= MIN_TOTAL", min_total)
           EOF
-
-      - name: Inject ledger config (基準❺)
-        # 企業台帳の送信先URL・トークンはGitHub Secretsのみが持つ(公開リポジトリに置かない)。
-        # commitステップの後に注入するため、リポジトリ上のファイルは常に空設定のまま。
-        # Secrets未登録の間は空のままデプロイされ、台帳送信は無効(サイトは通常動作)。
-        env:
-          GAS_LEDGER_ENDPOINT: ${{ secrets.GAS_LEDGER_ENDPOINT }}
-          GAS_LEDGER_TOKEN: ${{ secrets.GAS_LEDGER_TOKEN }}
-        run: |
-          if [ -n "$GAS_LEDGER_ENDPOINT" ] && [ -n "$GAS_LEDGER_TOKEN" ]; then
-            printf 'window.MIKATA_LEDGER={endpoint:"%s",token:"%s"};\n' \
-              "$GAS_LEDGER_ENDPOINT" "$GAS_LEDGER_TOKEN" > site/assets/ledger-config.js
-            echo "ledger config injected"
-          else
-            echo "GAS ledger secrets not set; ledger disabled"
-          fi
 
       - name: Prepare Pages artifact(未承認コンテンツを除外)
         # ノビシロ: 配色・連絡先が未確定、小柳さんの掲載決裁前(絶対ルール5)。
@@ -147,6 +192,37 @@ jobs:
           cp -r site /tmp/pages-deploy
           rm -rf /tmp/pages-deploy/nobishiro
           rm -rf /tmp/pages-deploy/miraihirake
+          # 公開を停止したサイト(山梨版)を成果物から外し、sitemap の該当URLを除く(scripts/stopped_sites.json)。
+          python scripts/stop_publish.py --root /tmp/pages-deploy --config scripts/stopped_sites.json --apply
+
+      - name: Verify artifact (C3・公開するファイルそのものの同一性確認)
+        # Pages に渡す実体 /tmp/pages-deploy/data/subsidies.json が Guard 合格時のバイト列と同一でなければ公開しない。
+        # (SHA 一致はデータの同一性だけを保証する。公開の成功は Upload / Deploy の step 結論で別途確認する)
+        shell: bash
+        run: |
+          expected="$(cat "$RUNNER_TEMP/guard.sha")"
+          actual="$(sha256sum /tmp/pages-deploy/data/subsidies.json | cut -d' ' -f1)"
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::C3: 公開物 data/subsidies.json が検査済みハッシュと一致しない。公開を中止 (expected=$expected actual=$actual)"
+            exit 1
+          fi
+          echo "C3 OK: artifact sha256=$actual"
+
+      - name: Guard (C4・台帳設定が固定スタブと一致すること)
+        # 公開物に設定値を含めない(議事 docs/議事_20261014_公開成果物の検査強化.md)。
+        # 公開直前の assets/ledger-config.js が固定スタブと完全一致しなければ、アップロードせず止める。
+        # 失敗時は Upload / Deploy が走らず、Pages は直前に成功した公開版を配信し続ける。
+        # この step は秘密の値を env で受け取らない(公開デプロイ工程に秘密の値を渡さない)。
+        shell: bash
+        run: |
+          python scripts/check_ledger_stub.py --selftest
+          python scripts/check_ledger_stub.py --root /tmp/pages-deploy
+
+      - name: 公開停止の検査(停止したサイトが成果物に残っていないこと)
+        # 停止したパス・sitemap・どのテキストにも停止先への参照がなければ通る。残っていれば公開を止める。
+        shell: bash
+        run: |
+          python scripts/stop_publish.py --root /tmp/pages-deploy --config scripts/stopped_sites.json --check
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v5

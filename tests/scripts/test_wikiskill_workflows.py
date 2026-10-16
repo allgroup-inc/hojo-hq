@@ -16,7 +16,7 @@ def test_wikiskill_tests_paths_cover_inputs():
     for p in ["CLAUDE.md", "docs/**", ".claude/skills/**", ".claude/settings.json",
               ".gitignore", "scripts/check_repo_scope.py", ".github/workflows/knowledge-extract.yml",
               ".github/workflows/repo-scope.yml", ".github/CODEOWNERS"]:
-        assert text.count(f"'{p}'") == 2, p  # pull_request と push の両方
+        assert text.count(f"'{p}'") == 1, p  # push 側だけ(pull_request は全 PR 起動・判定は scripts/wikiskill_scope.py)
     assert "tests/scripts/test_wikiskill_workflows.py" in text  # このテスト自体も CI で走らせる
 
 
@@ -112,5 +112,124 @@ def test_codeowners_covers_trust_boundary():
     assert "branch protection はまだ有効ではない" in read(".github/CODEOWNERS")
 
 
+# 決裁 #26 S2 PR-C: S1 の検知一式と、守りの仕組みが依存する .gitignore(2026-10-08 直接 push で壊された)
+S2_PROTECTED_EXISTING = [
+    ".github/workflows/main-direct-push-watch.yml",
+    "scripts/direct_push_watch.py",
+    "tests/scripts/test_direct_push_watch.py",
+    "scripts/wiki_guard.py",  # PR-B(2026-10-09)で作成。CODEOWNERS 行は PR-C で先に登録済み
+]
+S2_PROTECTED_PLANNED: list[str] = []  # PR-B で wiki_guard.py が実在するようになり、予定だけの行は無くなった
+
+
+def codeowners_rules():
+    """コメント・空行を除いた (pattern, owners) の並び(先頭から順。後の行が優先)。"""
+    out = []
+    for line in read(".github/CODEOWNERS").splitlines():
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        parts = s.split()
+        out.append((parts[0], parts[1:]))
+    return out
+
+
+def _codeowners_match(pattern, path):
+    """CODEOWNERS(gitignore 流)の最小限の一致: / を含むパターンはルート基準、`dir/` は配下すべて、
+    先頭 / はルート固定。ワイルドカードは本リポの CODEOWNERS に無いので扱わない。"""
+    pat = pattern.lstrip("/")
+    if pattern.endswith("/"):
+        return path.startswith(pat)
+    if "/" in pattern:
+        return path == pat
+    return path.split("/")[-1] == pat  # スラッシュ無しはどの階層のその名前にも一致
+
+
+def owners_of(path):
+    """後の行が優先(GitHub の規則)。一致する行が無ければ空。"""
+    owners = []
+    for pattern, who in codeowners_rules():
+        if _codeowners_match(pattern, path):
+            owners = who
+    return owners
+
+
+def test_codeowners_covers_s1_detection_files_and_root_gitignore():
+    lines = set(read(".github/CODEOWNERS").splitlines())
+    for p in S2_PROTECTED_EXISTING:
+        assert f"{p} @takeshikoyanagi9-lab" in lines, p
+        assert (ROOT / p).exists(), p
+        assert owners_of(p) == ["@takeshikoyanagi9-lab"], p
+    assert "/.gitignore @takeshikoyanagi9-lab" in lines  # ルートの .gitignore だけ(先頭 / で固定)
+    assert owners_of(".gitignore") == ["@takeshikoyanagi9-lab"]
+    assert owners_of("site/.gitignore") == []  # 配下の同名ファイルには当てない
+
+
+def test_codeowners_planned_file_is_listed_but_may_not_exist_yet():
+    lines = set(read(".github/CODEOWNERS").splitlines())
+    for p in S2_PROTECTED_PLANNED:
+        assert f"{p} @takeshikoyanagi9-lab" in lines, p
+        assert owners_of(p) == ["@takeshikoyanagi9-lab"], p
+        # 存在してもしなくてもよい(PR-B で作る)。存在しない間は GitHub 側で何にも一致しないだけ
+
+
+def test_codeowners_rules_do_not_contradict():
+    """すべての行の持ち主が同一(小柳さん 1 人)で、後勝ちの規則でも持ち主が変わる組み合わせが無い。"""
+    rules = codeowners_rules()
+    assert rules, "CODEOWNERS が空"
+    assert {tuple(who) for _, who in rules} == {("@takeshikoyanagi9-lab",)}
+    patterns = [p for p, _ in rules]
+    assert len(patterns) == len(set(patterns)), "同じパターンの重複行"
+    for p in TRUST_BOUNDARY + S2_PROTECTED_EXISTING + S2_PROTECTED_PLANNED + ["docs/wiki/W001.md", ".gitignore"]:
+        assert owners_of(p) == ["@takeshikoyanagi9-lab"], p
+    for p in ["scripts/fg_seo.py", "site/index.html", "docs/決裁キュー.md", "docs/wiki/_candidates/c.md"]:
+        assert owners_of(p) == ([] if p != "docs/wiki/_candidates/c.md" else ["@takeshikoyanagi9-lab"]), p
+
+
 def test_promotion_doc_paths_resolve():
     assert unresolved_doc_paths("docs/wikiskill/Wiki昇格手順.md") == []
+
+
+# ---- 決裁 #26 S2 PR-A1: repo-scope.yml の 2 ジョブ分割 ----
+RS = ".github/workflows/repo-scope.yml"
+
+
+def _job_block(text, job_id):
+    """`  <job_id>:` から次のジョブ(同じ字下げの `  xxx:`)直前までを返す。PyYAML に依存しない。"""
+    m = re.search(rf"^  {job_id}:\n(.*?)(?=^  [A-Za-z_-]+:\n|\Z)", text, re.S | re.M)
+    assert m, f"job not found: {job_id}"
+    return m.group(1)
+
+
+def test_repo_scope_has_two_jobs_with_unique_check_names():
+    t = read(RS)
+    check, guard = _job_block(t, "check"), _job_block(t, "guard")
+    assert "name: repo-scope-check" in check and "name: repo-scope-guard" in guard
+    # 他 workflow と重複する素の `check` / `test` を check-run 名にしない
+    assert re.search(r"^    name: check$", t, re.M) is None
+
+
+def test_repo_scope_check_job_keeps_placement_check_only():
+    check = _job_block(read(RS), "check")
+    assert "scripts/check_repo_scope.py --selftest" in check
+    assert "run: python3 scripts/check_repo_scope.py\n" in check
+    for s in ("check_experience_privacy", "wiki_validate", "decision_memory", "baseline_debt"):
+        assert s not in check, s  # 守りの検査は guard 側へ移した
+
+
+def test_repo_scope_guard_job_keeps_all_guard_checks_and_baseline_compare():
+    guard = _job_block(read(RS), "guard")
+    for s in ("scripts/check_experience_privacy.py --selftest", "run: python3 scripts/check_experience_privacy.py\n",
+              "scripts/wiki_validate.py --selftest", "run: python3 scripts/wiki_validate.py\n",
+              "scripts/decision_memory.py --check", "scripts/baseline_debt.py --compare"):
+        assert s in guard, s
+    assert "check_repo_scope.py\n" not in guard  # 置き場所の検査(Baseline 赤)は guard に入れない
+    assert "pip install pytest" in guard  # baseline_debt --compare は pytest を使う
+    # 先行の赤で後続が止まらない(検査の素通り防止)
+    assert guard.count("if: ${{ !cancelled() }}") >= 6
+
+
+def test_repo_scope_triggers_unchanged():
+    t = read(RS)
+    assert "on:\n  push:\n  pull_request:\n  workflow_dispatch: {}" in t
+    assert "concurrency:\n  group: repo-scope-${{ github.ref }}" in t

@@ -1,0 +1,142 @@
+name: Post Resort Kingdom to Instagram
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # 毎日 10:00 JST に自動実行
+    - cron: "0 1 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Post to Instagram
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: python3 << 'EOF'
+import json
+import os
+import sys
+import urllib.parse
+import urllib.request
+from datetime import datetime, timezone, timedelta
+
+JST = timezone(timedelta(hours=9))
+GRAPH = "https://graph.facebook.com/v21.0"
+
+now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
+CAPTION = f"""📺 テレビ番組リゾートキングダムに GLOW代表 嶺井が出演しました
+
+地場産業の資金調達と事業承継について、GLOW代表の嶺井がお話ししています。
+
+🎬 動画を見る
+https://allgroup-inc.github.io/hojo-hq/go/ig/resort-kingdom
+
+💚 LINE登録で、資金調達情報・承継支援の最新情報をゲット
+https://allgroup-inc.github.io/hojo-hq/go/ig/
+
+📱 プロフィールのリンクからもアクセス可能
+
+[{now} JST]"""
+
+IMAGE_URL = "https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/posts/images/resort-kingdom-ig-preview.png"
+
+FB_PAGE_ID = os.getenv("FB_PAGE_ID")
+FB_PAGE_ACCESS_TOKEN = os.getenv("FB_PAGE_ACCESS_TOKEN")
+IG_USER_ID = os.getenv("IG_USER_ID")
+
+if not all([FB_PAGE_ID, FB_PAGE_ACCESS_TOKEN, IG_USER_ID]):
+    print("❌ エラー: トークンが未設定です")
+    sys.exit(1)
+
+print("🚀 Instagram 投稿を実行します...")
+print(f"📱 IG User ID: {IG_USER_ID}")
+print(f"📝 キャプション: {len(CAPTION)} 文字")
+print(f"📷 画像: {IMAGE_URL}")
+
+try:
+    create_url = f"{GRAPH}/{IG_USER_ID}/media"
+    params = {
+        "image_url": IMAGE_URL,
+        "caption": CAPTION,
+        "access_token": FB_PAGE_ACCESS_TOKEN
+    }
+
+    data = urllib.parse.urlencode(params).encode('utf-8')
+    req = urllib.request.Request(create_url, data=data, method='POST')
+
+    print("\n⏳ Media オブジェクトを作成中...")
+    with urllib.request.urlopen(req) as response:
+        result = json.loads(response.read().decode('utf-8'))
+
+    if 'id' not in result:
+        print(f"❌ メディア作成失敗: {result}")
+        sys.exit(1)
+
+    media_id = result['id']
+    print(f"✅ Media ID: {media_id}")
+
+    publish_url = f"{GRAPH}/{IG_USER_ID}/media_publish"
+    publish_params = {
+        "creation_id": media_id,
+        "access_token": FB_PAGE_ACCESS_TOKEN
+    }
+
+    publish_data = urllib.parse.urlencode(publish_params).encode('utf-8')
+    publish_req = urllib.request.Request(publish_url, data=publish_data, method='POST')
+
+    print("⏳ 投稿を公開中...")
+    with urllib.request.urlopen(publish_req) as response:
+        publish_result = json.loads(response.read().decode('utf-8'))
+
+    if 'id' not in publish_result:
+        print(f"❌ 投稿公開失敗: {publish_result}")
+        sys.exit(1)
+
+    post_id = publish_result['id']
+    print(f"\n✅ 投稿完了！")
+    print(f"📱 Post ID: {post_id}")
+    print(f"🔗 URL: https://instagram.com/p/{post_id}/")
+
+except urllib.error.HTTPError as e:
+    error_body = e.read().decode('utf-8')
+    print(f"❌ HTTP エラー: {e.code}")
+    print(f"   詳細: {error_body}")
+    sys.exit(1)
+except Exception as e:
+    print(f"❌ エラー: {e}")
+    sys.exit(1)
+
+EOF
+
+      - name: LINE通知(投稿完了)
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【ミカタ】リゾートキングダム投稿を公開しました
+            📺 QAB『リゾートキングダム』特集
+            Instagram をご確認ください。
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【ミカタ】リゾートキングダム投稿が失敗しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
