@@ -14,6 +14,7 @@
   - 本文が check_repo_scope.FORBIDDEN_CONTENT に触れる(禁止語リストは二重管理しない)
   - program が `^[A-Za-z0-9._+-]{1,32}$` の形でない・鍵の断片らしい(<unknown> と <external> は許可)
   - 未知の event 名 / JSON オブジェクトでない行 / JSON として読めない行
+  - skill_failure(Skill の失敗)は、記録してよい項目以外(error 本文など)と、秘密情報の形を含む値を止める
 
 ignore と追跡状態(決裁 #26 S2 PR-D・2026-10-08):
   - 記録パス(.claude/experience/<月>/*.jsonl)が .gitignore で除外されていたら止める。
@@ -51,9 +52,29 @@ MAX_FIELD = 500
 MAX_NOTE = 1000
 
 EXPERIENCE_DIR = ".claude/experience"
-VALID_EVENTS = {"session_start", "session_resume", "tool", "skill", "note", "session_end"}
+VALID_EVENTS = {"session_start", "session_resume", "tool", "skill", "skill_failure", "note", "session_end"}
 PLACEHOLDERS = {"<external>", "<unknown>"}
 _DRIVE = re.compile(r"^[A-Za-z]:")
+
+# skill_failure(PostToolUseFailure の Skill 失敗)は、記録側 experience_log.build_failure_event が書く項目だけを通す。
+# error 本文などの自由記述は記録しない設計なので、ここでは項目を限定し、残った文字列に秘密情報の形がないかを検査する。
+# 既存のイベント(skill・tool など)には適用しない(既存の扱いを変えないため)。
+SKILL_FAILURE_FIELDS = frozenset({
+    "ts", "session_id", "event", "repo", "visibility", "branch",
+    "skill", "skill_key", "skill_version", "duration_ms", "interrupted",
+})
+# 違反の理由には、一致した値そのものを出さない(CI のログに秘密を残さないため)。規則名だけを出す。
+_SKILL_FAILURE_SECRET_RULES = {
+    "鍵の接頭辞": re.compile(
+        r"\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}"
+        r"|xox[abprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{30,})"),
+    "資格情報の代入": re.compile(r"(?i)\b(?:api[_-]?key|secret|token|password|passwd)\s*[:=]\s*\S{6,}"),
+    "bearer トークン": re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._\-]{16,}"),
+    "秘密鍵": re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+    "メールアドレス": re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"),
+    "URL 内の資格情報": re.compile(r"https?://[^\s/@]+:[^\s/@]+@"),
+    "40 文字以上の連続トークン": re.compile(r"[A-Za-z0-9_\-]{40,}"),
+}
 
 # ignore と追跡状態の検査対象(パスは存在しなくてよい。git check-ignore はパターンだけで判定する)
 RECORD_PROBE = f"{EXPERIENCE_DIR}/2026-01/session-probe.jsonl"   # 記録パス: ignore されてはいけない
@@ -146,6 +167,16 @@ def check_record(rec, path: str) -> list[str]:
         limit = MAX_NOTE if key == "text" else MAX_FIELD
         if len(value) > limit:
             problems.append(f"{key} の文字列が {limit} 文字を超えています({len(value)} 文字)")
+
+    if event == "skill_failure":
+        extra = sorted(str(k)[:40] for k in rec if k not in SKILL_FAILURE_FIELDS)
+        if extra:
+            problems.append(f"skill_failure に許可されていない項目があります: {extra[:5]}")
+        for key, value in strings:
+            for rule, pat in _SKILL_FAILURE_SECRET_RULES.items():
+                if pat.search(value):
+                    problems.append(f"skill_failure の {key} に秘密情報らしい値があります({rule})")
+                    break
 
     word = find_content_violations(path, json.dumps(rec, ensure_ascii=False))
     if word:
@@ -321,6 +352,13 @@ def selftest() -> int:
         "commits": [{"sha": "abc1234", "subject": "feat: x"}],
         "files_changed": ["docs/a.md"],
     }
+    # 記録側(experience_log.build_failure_event)が書く形そのもの
+    skill_failure_ok = {
+        "ts": "2026-10-06T00:00:00Z", "session_id": "S", "event": "skill_failure",
+        "repo": PUBLIC_REPO, "visibility": "public", "branch": "main",
+        "skill": "demo-skill", "skill_key": "0123456789ab", "skill_version": "1.0.0",
+        "duration_ms": 40, "interrupted": False,
+    }
     # (名前, レコード, 違反として止まるべきか)
     cases = [
         ("private visibility", {**ok, "visibility": "private"}, True),
@@ -347,6 +385,13 @@ def selftest() -> int:
         ("名前に..を含むだけのファイル", {**ok, "path": "docs/a..b.md"}, False),
         ("通常のprogram", {**ok, "tool": "Bash", "program": "python3"}, False),
         ("<external>のprogram", {**ok, "tool": "Bash", "program": "<external>"}, False),
+        # skill_failure(D1): 通すべき正常な記録 / 止めるべき項目・秘密
+        ("skill_failure 正常", skill_failure_ok, False),
+        ("skill_failure 未知の項目(error 本文)", {**skill_failure_ok, "error": "本文"}, True),
+        ("skill_failure の絶対パス", {**skill_failure_ok, "path": "/home/x/y"}, True),
+        ("skill_failure の鍵らしい値", {**skill_failure_ok, "branch": "ghp_" + "a" * 20}, True),
+        ("skill_failure の資格情報の代入", {**skill_failure_ok, "session_id": "password=hunter2hunter2"}, True),
+        ("未知の event(skill_failure に似た名前)", {**skill_failure_ok, "event": "skill_failures"}, True),
     ]
     failed = []
     for name, rec, should_hit in cases:

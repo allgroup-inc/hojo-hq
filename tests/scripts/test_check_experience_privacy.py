@@ -563,3 +563,118 @@ def test_scan_covers_part_files(tmp_path):
     _commit_jsonl(root, "session-A.part1.jsonl", json.dumps(bad) + "\n")
     hits = scan(root)
     assert [h[0] for h in hits] == [".claude/experience/2026-10/session-A.part1.jsonl"]
+
+
+# ---- skill_failure(P1-a・D1): 記録側が書く失敗記録を、公開可否の検査が正しく扱うこと ----
+
+# 記録側(experience_log.build_failure_event)が書く形そのもの(架空の値)
+SKILL_FAILURE_OK = {
+    "ts": "2026-10-16T00:00:00Z",
+    "session_id": "S",
+    "event": "skill_failure",
+    "repo": "allgroup-inc/hojo-hq",
+    "visibility": "public",
+    "branch": "main",
+    "skill": "demo-skill",
+    "skill_key": "0123456789ab",
+    "skill_version": "1.0.0",
+    "duration_ms": 40,
+    "interrupted": False,
+}
+
+
+def test_skill_failure_is_a_valid_event():
+    assert "skill_failure" in check_experience_privacy.VALID_EVENTS
+
+
+def test_skill_failure_normal_record_passes():
+    # 必須テスト1: 正常な skill_failure は合格する
+    assert check_record(SKILL_FAILURE_OK, "x.jsonl") == []
+
+
+def test_skill_failure_without_optional_fields_passes():
+    rec = {k: v for k, v in SKILL_FAILURE_OK.items() if k not in ("duration_ms", "interrupted")}
+    assert check_record(rec, "x.jsonl") == []
+
+
+def test_skill_failure_unknown_name_next_to_it_still_rejected():
+    # 必須テスト2: 未知イベントは引き続き不合格(似た名前も通さない)
+    assert check_record({**SKILL_FAILURE_OK, "event": "skill_failures"}, "x")
+    assert check_record({**SKILL_FAILURE_OK, "event": "skill_failed"}, "x")
+    assert check_record({**SKILL_FAILURE_OK, "event": "weird"}, "x")
+
+
+def test_skill_failure_absolute_path_rejected():
+    # 必須テスト3: skill_failure に絶対パスが含まれると不合格
+    problems = check_record({**SKILL_FAILURE_OK, "path": "/home/someone/private.txt"}, "x")
+    assert problems and any("絶対パス" in p for p in problems)
+
+
+@pytest.mark.parametrize("field, value", [
+    ("branch", "ghp_" + "a" * 20),                          # 鍵の接頭辞
+    ("branch", "sk-" + "b" * 24),                           # 鍵の接頭辞
+    ("session_id", "password=hunter2hunter2"),              # 資格情報の代入
+    ("session_id", "api_key: abcdef123456"),                # 資格情報の代入
+    ("branch", "Bearer " + "C" * 20),                       # bearer トークン
+    ("branch", "user@example.com"),                         # メールアドレス
+    ("branch", "https://user:secretpw@example.com/x"),      # URL 内の資格情報
+    ("branch", "A" * 40),                                   # 40 文字以上の連続トークン
+])
+def test_skill_failure_secret_rejected(field, value):
+    # 必須テスト4: skill_failure に秘密情報が含まれると不合格
+    problems = check_record({**SKILL_FAILURE_OK, field: value}, "x")
+    assert problems, f"{field}={value!r} が通ってしまった"
+    assert any("秘密情報らしい値" in p for p in problems)
+
+
+def test_skill_failure_secret_value_not_echoed_in_reason():
+    # 違反の理由(CI のログに出る)に、一致した秘密の値そのものを出さない
+    secret = "ghp_" + "Z" * 20
+    problems = check_record({**SKILL_FAILURE_OK, "branch": secret}, "x")
+    assert problems and all(secret not in p for p in problems)
+
+
+def test_skill_failure_extra_field_rejected():
+    # 記録側が書かない項目(error 本文など)は、値が無害でも不合格
+    problems = check_record({**SKILL_FAILURE_OK, "error": "ふつうの文章"}, "x")
+    assert problems and any("許可されていない項目" in p for p in problems)
+
+
+def test_skill_failure_forbidden_content_rejected():
+    word = check_repo_scope.FORBIDDEN_CONTENT[0]  # 禁止語の実文字列はソースに書かない
+    assert check_record({**SKILL_FAILURE_OK, "branch": f"x-{word}"}, "x")
+
+
+def test_skill_failure_long_field_rejected():
+    assert check_record({**SKILL_FAILURE_OK, "branch": "b" * (MAX_FIELD + 1)}, "x")
+
+
+def test_existing_event_checks_unchanged_after_skill_failure_added():
+    # 必須テスト5: 既存イベントの扱いは変わらない(skill・tool・note・session_end)
+    assert check_record({**OK, "event": "skill", "skill": "demo-skill", "skill_key": "0123456789ab",
+                         "skill_version": "1.0.0", "duration_ms": 1}, "x") == []
+    assert check_record({**OK, "path": "/home/x"}, "x")  # 既存の絶対パス検査は残る
+    assert check_record({**OK, "event": "note", "text": "あ" * (MAX_NOTE + 1)}, "x")  # 既存の長さ検査は残る
+    assert check_record(END, "x") == []
+
+
+def test_skill_failure_committed_record_scan_passes(tmp_path):
+    # 必須テスト6(D1 の再現): 失敗記録を含むコミットが、未知の event として止まらないこと
+    _init_repo(tmp_path)
+    _commit_jsonl(tmp_path, "session-fail.jsonl", json.dumps(SKILL_FAILURE_OK) + "\n")
+    assert scan(tmp_path) == []
+
+
+def test_skill_failure_committed_with_secret_scan_fails(tmp_path):
+    _init_repo(tmp_path)
+    bad = {**SKILL_FAILURE_OK, "branch": "ghp_" + "a" * 20}
+    _commit_jsonl(tmp_path, "session-fail-secret.jsonl", json.dumps(bad) + "\n")
+    hits = scan(tmp_path)
+    assert hits and any("秘密情報らしい値" in reason for _, reason in hits)
+
+
+def test_skill_failure_selftest_cases_are_part_of_selftest():
+    # 自己点検にも skill_failure の正例・負例が入っている
+    r = run(["--selftest"])
+    assert r.returncode == 0, r.stderr
+    assert "自己点検OK" in r.stdout
