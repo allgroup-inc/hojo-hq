@@ -1,0 +1,10 @@
+{"ts": "2026-10-12T09:04:41Z", "session_id": "da53b31d-f686-505b-ab3c-2e8a9945f982", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "git"}
+{"ts": "2026-10-12T09:05:58Z", "session_id": "da53b31d-f686-505b-ab3c-2e8a9945f982", "event": "session_start", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "source": "compact", "head": "5ab7e5b7b0ce598fba3ee10e9ce80bc8c5c05790"}
+{"ts": "2026-10-12T09:06:10Z", "session_id": "da53b31d-f686-505b-ab3c-2e8a9945f982", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "git"}
+{"ts": "2026-10-12T09:06:13Z", "session_id": "da53b31d-f686-505b-ab3c-2e8a9945f982", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "gh"}
+{"ts": "2026-10-12T09:06:16Z", "session_id": "da53b31d-f686-505b-ab3c-2e8a9945f982", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "gh"}
+{"ts": "2026-10-12T09:06:18Z", "session_id": "da53b31d-f686-505b-ab3c-2e8a9945f982", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "git"}
+{"ts": "2026-10-12T09:06:22Z", "session_id": "da53b31d-f686-505b-ab3c-2e8a9945f982", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "gh"}
+{"ts": "2026-10-12T09:06:25Z", "session_id": "da53b31d-f686-505b-ab3c-2e8a9945f982", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "cat"}
+{"ts": "2026-10-12T09:08:53Z", "session_id": "da53b31d-f686-505b-ab3c-2e8a9945f982", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "until"}
+{"ts": "2026-10-12T09:09:09Z", "session_id": "da53b31d-f686-505b-ab3c-2e8a9945f982", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "git"}

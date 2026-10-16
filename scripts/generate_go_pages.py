@@ -71,6 +71,17 @@ CHANNELS = {
     "ymn-kit":     {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 準備シートページ"},
     "ymn-life":    {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: ライフイベント別ページ"},
     "ymn-jukyu":   {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 受給報告(受け取れました)"},
+    # ── 株式会社GLOW(@042wvrgo・2026-10-04開設) ──
+    # ミカタのLINEとは別アカウント。line_redirect のまま数えるとミカタのKGI(LINE登録1,000社)に
+    # 混ざるので、専用のイベント名にする。lin.ee の短縮URLが発行されたら dest を差し替えて再実行。
+    "glow-lp": {"dest": "https://line.me/R/ti/p/%40042wvrgo", "label": "GLOW: 世界へ推進LP",
+                "event": "glow_line_redirect"},
+    "glow-ig": {"dest": "https://line.me/R/ti/p/%40042wvrgo", "label": "GLOW: Instagramプロフィール",
+                "event": "glow_line_redirect"},
+    "glow-fb": {"dest": "https://line.me/R/ti/p/%40042wvrgo", "label": "GLOW: Facebookページ",
+                "event": "glow_line_redirect"},
+    "glow-deck": {"dest": "https://line.me/R/ti/p/%40042wvrgo", "label": "GLOW: 提案資料のQRコード",
+                  "event": "glow_line_redirect"},
 }
 
 TEMPLATE = """<!DOCTYPE html>

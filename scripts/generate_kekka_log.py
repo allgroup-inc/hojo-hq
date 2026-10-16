@@ -15,7 +15,10 @@ hojo-hq — 結果マガ 無料実録ログ記事の週次自動生成(2026-09-1
 - 有料記事への内部導線は AI 出力ではなくコードが末尾に付加(AI出力へのリンク混入はガードで禁止)
 - 同日重複ガード: キューのL系エントリの drafted_at が今日ならスキップ(リトライ枠の二重生成防止)
 
-使い方: python scripts/generate_kekka_log.py [--dry-run]
+- 検査の自己テスト(--self-test): 公開済みL01本文=正例が通り、負例が弾かれることを生成前に確認
+  (ニドナシ#23: 検査側の正規表現バグで日本語全文を弾き、9/25の2枠とも生成失敗)
+
+使い方: python scripts/generate_kekka_log.py [--dry-run] / --self-test
 出力(GITHUB_OUTPUT形式): stem= / title= / log_id= / eyecatch= または skipped=
 """
 import argparse
@@ -37,6 +40,66 @@ BASE = gx.BASE
 ARTICLE_DIR = os.path.join(BASE, "posts", "note", "tanpatsu")
 PASTE_DIR = os.path.join(BASE, "posts", "note", "paste")
 MAGAZINE_URL = "https://note.com/kekka_mag"
+POSITIVE_SAMPLE = os.path.join(ARTICLE_DIR, "L01_unei_log_20260918.md")  # 公開済み=通るべき正例
+
+# 丸数字(内部の記事ID)。Unicodeの丸数字は3ブロックに分かれている:
+#   ①〜⑳ U+2460-2473 / ⓪⓫〜⓴ U+24EA-24FF / ㉑〜㉟ U+3251-325F / ㊱〜㊿ U+32B1-32BF
+# ニドナシ#23: `[①-㊿]` と範囲指定すると U+2460〜U+32BF の全域=ひらがな・カタカナを含んで
+# しまい、日本語の本文すべてを不合格にした(9/25 無料ログ2枠とも生成失敗)。範囲は必ずブロック単位で書く
+CIRCLED_RE = re.compile(r"[①-⑳⓪-⓿㉑-㉟㊱-㊿]")
+# 素の内部ID: 「13」「L01」のようにカギ括弧で括った2桁ID、または L+2桁(無料ログのID)
+BARE_ID_RE = re.compile(r"「L?\d{2}」|(?<![A-Za-z0-9])L\d{2}(?![0-9])")
+
+
+def circled_to_int(ch: str):
+    o = ord(ch)
+    if 0x2460 <= o <= 0x2473:
+        return o - 0x2460 + 1
+    if o == 0x24EA:
+        return 0
+    if 0x24EB <= o <= 0x24F4:
+        return o - 0x24EB + 11
+    if 0x3251 <= o <= 0x325F:
+        return o - 0x3251 + 21
+    if 0x32B1 <= o <= 0x32BF:
+        return o - 0x32B1 + 36
+    return None
+
+
+def expand_internal_ids(text: str, titles: dict) -> str:
+    """factsの中の丸数字ID(⑫など)を記事名に置き換える。
+
+    週次メモやピックアップ記録は運営内部の書き方(⑫noteマネー等)で書かれている。
+    そのままAIに渡すと出力にも丸数字が出て検査で落ちるので、渡す前に記事名へ展開する。
+    """
+    def repl(m):
+        n = circled_to_int(m.group(0))
+        title = titles.get(f"{n:02d}") if n is not None else None
+        return f"「{title}」" if title else "ある記事"
+    return CIRCLED_RE.sub(repl, text)
+
+
+def expand_all(obj, titles: dict):
+    if isinstance(obj, str):
+        return expand_internal_ids(obj, titles)
+    if isinstance(obj, dict):
+        return {expand_all(k, titles): expand_all(v, titles) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [expand_all(v, titles) for v in obj]
+    return obj
+
+
+def article_titles(kpi: dict, topics: dict) -> dict:
+    """記事ID("12"等)→読者向けの記事名。KPI台帳を優先し、無ければお題キューの題名(前半)。"""
+    titles = {}
+    for t in topics.get("queue", []):
+        hint = (t.get("title_hint") or "").split(" — ")[0].strip()
+        if hint:
+            titles[str(t.get("id"))] = hint
+    for aid, a in (kpi.get("articles") or {}).items():
+        if isinstance(a, dict) and a.get("title"):
+            titles[str(aid)] = a["title"]
+    return titles
 
 
 def load_topics():
@@ -63,23 +126,84 @@ def guard_log(text: str, allowed: set):
     for ng in ("小柳", "ミカタ", "ALLGROUP", "GLOW", "フクギイロ", "嶺井"):
         if ng in text:
             problems.append(f"名義分離違反: {ng}")
-    if re.search(r"[①-㊿⓪]", text):
+    if CIRCLED_RE.search(text):
         problems.append("内部ID(丸数字)は読者に通じない。記事名で書く")
+    # 素の内部ID(「13」「L01」等。ニドナシ#24: 記事別ビューのfactsがID鍵のままでL02に混入)
+    if BARE_ID_RE.search(text):
+        problems.append("内部ID(「13」「L01」等)は読者に通じない。記事名で書く")
     return problems
 
 
-def build_week_facts():
-    """体験共有のfactsに、週次の実測(前週比・記事別)を足す。"""
+def self_test() -> int:
+    """検査の自己テスト(ニドナシ#23)。通るべき正例(公開済みL01の本文)と、弾くべき負例の両方を確認する。
+
+    ワークフローは生成の前にこれを走らせる。検査側のバグ(偽陽性)で正しい本文を弾き続ける事故を、
+    APIを呼ぶ前・毎回・機械が検知するため。
+    """
+    fails = []
+    raw = open(POSITIVE_SAMPLE, encoding="utf-8").read()
+    body = raw[raw.index("\n# ") + 1:]
+    body = body.split("\n---\n", 1)[0].strip()
+    allowed = gx.allowed_numbers(body)  # 数字検査は別の試験。ここは数字以外の検査を見る
+    p = guard_log(body, allowed)
+    if p:
+        fails.append(f"正例(L01本文)が不合格: {p}")
+    for kana in ("あいうえお", "カタカナ", "漢字", "ｶﾅ"):
+        if CIRCLED_RE.search(kana):
+            fails.append(f"丸数字検査がかな/漢字に反応: {kana}")
+    for ch in "①⑫⑳⓪⓫㉑㉟㊱㊿":
+        if not CIRCLED_RE.search(ch):
+            fails.append(f"丸数字を見逃し: {ch}")
+    negatives = {
+        "丸数字": body + "\n⑫の記事が伸びた",
+        "素のID(括弧)": body + "\n「13」が25ビュー",
+        "素のID(L)": body + "\nL01の末尾の導線",
+        "名義分離": body + "\n小柳さんが決めた",
+        "リンク": body + "\nhttps://example.com",
+        "禁止語": body + "\n必ず伸びる",
+    }
+    for name, text in negatives.items():
+        if not guard_log(text, gx.allowed_numbers(text)):
+            fails.append(f"負例({name})を見逃し")
+    titles = {"12": "地方だから不利", "13": "開封率の経営学"}
+    out = expand_internal_ids("⑫noteマネーに続く⑬の2件目。㊿は未登録", titles)
+    if out != "「地方だから不利」noteマネーに続く「開封率の経営学」の2件目。ある記事は未登録":
+        fails.append(f"ID展開の結果が想定外: {out}")
+    for i, ch in ((1, "①"), (20, "⑳"), (0, "⓪"), (11, "⓫"), (21, "㉑"), (35, "㉟"), (36, "㊱"), (50, "㊿")):
+        if circled_to_int(ch) != i:
+            fails.append(f"丸数字→整数の変換ズレ: {ch}={circled_to_int(ch)}")
+    if fails:
+        for f in fails:
+            print(f"self-test NG: {f}", file=sys.stderr)
+        return 1
+    print(f"self-test OK: 正例1件通過・負例{len(negatives)}件検知・丸数字9文字検知・かな非反応")
+    return 0
+
+
+def build_week_facts(topics=None):
+    """体験共有のfactsに、週次の実測(前週比・記事別)を足す。丸数字IDは記事名へ展開してから渡す。"""
     facts = gx.build_facts()
     kpi = gx.load_json(gx.KPI_PATH, {})
     weeks = kpi.get("weeks", [])
     latest = weeks[-1] if weeks else {}
     prev = weeks[-2] if len(weeks) >= 2 else {}
-    facts["今週の記事別ビュー"] = latest.get("note", {}).get("views_by_article", {})
+    titles = article_titles(kpi, topics if topics is not None else load_topics())
+    # 記事別の数字はID鍵のまま渡さない(ニドナシ#24: 「13」が25ビュー、と読者に通じない書き方で出力された)
+    def by_title(d):
+        return {titles.get(str(k), f"記事名未登録({k})"): v for k, v in (d or {}).items()}
+    facts["今週の記事別ビュー"] = by_title(latest.get("note", {}).get("views_by_article"))
+    facts["今週の記事別スキ"] = by_title(latest.get("note", {}).get("likes_by_article"))
     facts["前週の累計ビュー"] = prev.get("note", {}).get("total_views")
     facts["今週の週次メモ(実測の文脈)"] = latest.get("memo", "")
     facts["週番号"] = facts["初公開からの日数"] // 7 + 1
-    return facts
+    # X体験共有の現在値(メモの要約で方向を誤読させない。#24: 朝へ移設したのに「朝→深夜」と逆に書かれた)
+    xlog = gx.load_json(gx.LOG_PATH, {"posts": []})
+    posts = xlog.get("posts") if isinstance(xlog, dict) else xlog
+    dates = sorted(p.get("date") or p.get("posted_at", "")[:10] for p in (posts or []) if isinstance(p, dict))
+    facts["X体験共有の投稿枠(現在)"] = "毎週月曜・木曜の朝7〜9時(日本時間)。2026-09-21にJST夜の枠から朝へ移設"
+    facts["X体験共有の直近投稿日"] = dates[-1] if dates else None
+    facts["X体験共有の投稿回数(累計)"] = len(dates)
+    return expand_all(facts, titles)
 
 
 def build_prompt(facts):
@@ -111,7 +235,10 @@ def build_prompt(facts):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--self-test", action="store_true", help="検査の自己テスト(正例・負例)。APIキー不要")
     args = ap.parse_args()
+    if args.self_test:
+        return self_test()
 
     topics = load_topics()
     today = gx.today_jst().isoformat()
@@ -127,7 +254,7 @@ def main():
         return 1
     import anthropic
 
-    facts = build_week_facts()
+    facts = build_week_facts(topics)
     allowed = gx.allowed_numbers(facts)
     client = anthropic.Anthropic(api_key=api_key)
     prompt = build_prompt(facts)

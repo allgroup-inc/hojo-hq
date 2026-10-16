@@ -1,0 +1,5 @@
+# hojo-hq ルートの Python 依存(scripts/ 配下のうち、標準ライブラリ以外が要るもの)
+# - google-auth / requests: scripts/ga4_api.py の GA4 サービスアカウント認証
+#   (.github/workflows/kekka-weekly-collect.yml は同じものを明示インストールしている。増やすときは両方を直す)
+google-auth
+requests

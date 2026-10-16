@@ -13,6 +13,27 @@ on:
       - "site/fukugiiro/**"
       - "scripts/fetch_plausible_funnel.py"
       - "tests/golden_funnel.json"
+      # シードとビルドの変更もCIで見る。ここが対象外だったため、全国制度の出典を
+      # 沖縄県ページに変えたPRが緑で通り、その夜 fukugiiro-fetch が落ちた(2026-09-22)
+      - "scripts/fetch_fukugiiro.py"
+      - "scripts/fetch_fukugiiro_extra.py"
+      - "scripts/fg_seo.py"
+      - "scripts/kensho_fukugiiro.py"
+      - "scripts/kensho_yamanashi.py"
+      - "scripts/yamanashi/**"
+      - "scripts/selfcheck_moradou.py"
+      - "tests/selfcheck_baseline.json"
+      - "scripts/generate_go_pages.py"
+      - "scripts/deploy_moradou.py"
+      - "scripts/moradou_cutover.py"
+      - "scripts/check_ig_neta.py"
+      - "scripts/generate_ig_neta.py"
+      - "scripts/audit_ig_history.py"
+      - "scripts/record_ig_post.py"
+      - "scripts/quote_source.py"
+      - "data/fukugiiro/ig_neta.json"
+      - "docs/**"
+      - ".github/workflows/fukugiiro-fetch.yml"
   pull_request:
     paths:
       - "data/fukugiiro/**"
@@ -25,6 +46,27 @@ on:
       - "site/fukugiiro/**"
       - "scripts/fetch_plausible_funnel.py"
       - "tests/golden_funnel.json"
+      # シードとビルドの変更もCIで見る。ここが対象外だったため、全国制度の出典を
+      # 沖縄県ページに変えたPRが緑で通り、その夜 fukugiiro-fetch が落ちた(2026-09-22)
+      - "scripts/fetch_fukugiiro.py"
+      - "scripts/fetch_fukugiiro_extra.py"
+      - "scripts/fg_seo.py"
+      - "scripts/kensho_fukugiiro.py"
+      - "scripts/kensho_yamanashi.py"
+      - "scripts/yamanashi/**"
+      - "scripts/selfcheck_moradou.py"
+      - "tests/selfcheck_baseline.json"
+      - "scripts/generate_go_pages.py"
+      - "scripts/deploy_moradou.py"
+      - "scripts/moradou_cutover.py"
+      - "scripts/check_ig_neta.py"
+      - "scripts/generate_ig_neta.py"
+      - "scripts/audit_ig_history.py"
+      - "scripts/record_ig_post.py"
+      - "scripts/quote_source.py"
+      - "data/fukugiiro/ig_neta.json"
+      - "docs/**"
+      - ".github/workflows/fukugiiro-fetch.yml"
   workflow_dispatch: {}
 
 # 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
@@ -55,6 +97,48 @@ jobs:
 
       - name: LP検査(サイズ予算・禁止表現・基本要件)
         run: python scripts/check_lp_fukugiiro.py
+
+      # 山梨版は夜間cronの中でしかビルドされておらず、PR時点で検査されていなかった。
+      # ビルドを通しておかないと、壊れたときに気づくのが翌朝の収集失敗になる
+      - name: 山梨版ビルド(沖縄の内容が混ざらないかの安全弁を通す)
+        run: python scripts/yamanashi/build_yamanashi.py
+
+      # 突合スクリプトはCIで一度も実行されておらず、バグが夜間の収集でしか出てこなかった。
+      # 文字コードの取り違えとエラーの読み分けはネットワーク無しで検証できる
+      - name: 突合スクリプトの自己テスト(文字コード・エラー種別)
+        run: |
+          python scripts/kensho_fukugiiro.py --self-test
+          python scripts/kensho_yamanashi.py --self-test
+
+      # このリポジトリが実際に繰り返した失敗だけを見張る(CLAUDE.md 再発防止メモ)。
+      # 既知の負債は tests/selfcheck_baseline.json で許容し、新しく増えた分だけ止める。
+      - name: 自己点検(再発防止メモの機械化)
+        run: |
+          python scripts/selfcheck_moradou.py --self-test
+          python scripts/selfcheck_moradou.py
+
+      # 独自ドメイン配信ツリーが今この瞬間も組み立てられることを確かめる。
+      # 旧URLの書き換え漏れ・ミカタ(別ブランド)の混入があればここで落ちる。
+      - name: 独自ドメイン配信ツリーの組み立て検査
+        run: |
+          python scripts/deploy_moradou.py --self-test
+          python scripts/deploy_moradou.py --out /tmp/moradou-ci
+
+      # 開通判定と正規URL切替のロジック。開通前でも毎回テストしておき、
+      # 「その日に初めて動かして壊れていた」を避ける
+      - name: 独自ドメイン切替ロジックの自己テスト
+        run: python scripts/moradou_cutover.py --self-test
+
+      # 投稿案が、照合の裏づけがない日付・金額を断定していないか
+      # (2026-09-24: 未照合の締切を3週間使い回していた)
+      - name: IG投稿案の裏づけ検査
+        run: |
+          python scripts/check_ig_neta.py --self-test
+          python scripts/check_ig_neta.py
+          python scripts/generate_ig_neta.py --self-test
+          python scripts/audit_ig_history.py --self-test
+          python scripts/record_ig_post.py --self-test
+          python scripts/quote_source.py --self-test
 
       - uses: actions/setup-node@v6
         with:

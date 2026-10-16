@@ -12,7 +12,12 @@ on:
   schedule:
     # JST 10:15(= UTC 01:15)。データ更新(09:00 JST)の後に照合。
     - cron: "15 1 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      sample_size:
+        description: "Sample size (default: 5, Phase 2: 20)"
+        required: false
+        default: "5"
 
 permissions:
   contents: write  # 照合履歴(data/kpi/verify_history.json)のコミットに必要
@@ -26,19 +31,20 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
 
-      - name: Install deps
-        run: pip install anthropic
+      - name: Install deps  # ハッシュ固定(決裁 #26 S4 事前条件)。版の正本は .github/requirements/verify-sources.txt
+        run: python -m pip install --require-hashes -r .github/requirements/verify-sources.txt
 
       - name: Run source verification
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VERIFY_SAMPLE_SIZE: ${{ github.event.inputs.sample_size || '5' }}
         run: python scripts/verify_sources.py
 
       # ── 照合履歴を台帳へ蓄積(NG検知時も必ず実行。効果測定2026-11-06の根拠データ)──

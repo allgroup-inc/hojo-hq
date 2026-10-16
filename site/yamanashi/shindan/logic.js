@@ -34,10 +34,10 @@
       }
       if (excluded) continue;
 
-      // 地域: 全国 / 沖縄県 / 回答した市町村のみ。県外回答なら全国のみ
+      // 地域: 全国 / 山梨県 / 回答した市町村のみ。県外回答なら全国のみ
       var area = it.area || "全国";
       var areaOk = area === "全国" ||
-        (a.municipality !== "県外" && (area === "沖縄県" || area === a.municipality));
+        (a.municipality !== "県外" && (area === "山梨県" || area === a.municipality));
       if (!areaOk) continue;
 
       // 子育て・教育カテゴリは子どもがいる世帯のみ

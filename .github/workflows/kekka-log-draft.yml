@@ -29,6 +29,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: 検査の自己テスト(正例が通ること・APIを呼ぶ前に)
+        run: python scripts/generate_kekka_log.py --self-test
+
       - name: 実録ログ記事の生成(数字ガード=台帳実数のみ)
         id: gen
         env:

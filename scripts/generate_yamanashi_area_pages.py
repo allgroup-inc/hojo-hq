@@ -46,6 +46,8 @@ ul.seidolist{list-style:none;columns:1}
 ul.seidolist li{margin:0;border-bottom:1px dashed var(--fg-line);break-inside:avoid}
 ul.seidolist a{display:block;padding:8px 0}
 ul.areas a{display:inline-block;padding:8px 4px}
+ul.areas .lbadge{font-size:.72rem;font-weight:700;background:#F2B705;color:#3B322B;border-radius:8px;padding:1px 7px;margin-left:5px;white-space:nowrap}
+.lastmuni{background:#EFF5F0;border:1px solid #D5E5DA;border-radius:12px;padding:10px 14px;margin:12px 0;font-size:.95rem;display:none}
 .card a{display:inline-block;padding:4px 0;white-space:nowrap}
 @media(min-width:900px){ul.seidolist{columns:2;column-gap:28px}}
 .cardgrid{display:grid;gap:14px}
@@ -240,22 +242,48 @@ def muni_page(muni, items, updated):
                 canon_path=f"area/{slug}/")
 
 
-def index_page(updated):
-    lis = "\n".join(
-        f'<li><a href="{slug}/">{esc(name)}</a></li>' for name, slug in VISIBLE_MUNIS
+def index_page(updated, items=None):
+    # 独自制度を掲載できている市町村に「独自◯件」を表示(2026-09-27 おもてなし改善。
+    # どの市町村に独自制度があるか、一覧で探させない)
+    local_count = {}
+    for it in (items or []):
+        a = it.get("area")
+        if a and a not in ("全国", "山梨県"):
+            local_count[a] = local_count.get(a, 0) + 1
+    def li(name, slug):
+        n = local_count.get(name, 0)
+        badge = f'<span class="lbadge">独自{n}件</span>' if n else ""
+        return f'<li><a href="{slug}/">{esc(name)}{badge}</a></li>'
+    lis = "\n".join(li(name, slug) for name, slug in VISIBLE_MUNIS)
+    listed = len(local_count)
+    # 前回の診断で選んだ市町村へのショートカット(端末内のlocalStorageのみ・送信なし)。
+    # 同じ保存キーを沖縄版とも共有しているため、山梨の27市町村名のときだけ出す
+    slug_js = json.dumps({n: sl for n, sl in VISIBLE_MUNIS}, ensure_ascii=False)
+    shortcut = (
+        '<p class="lastmuni" id="lastmuni"></p>\n'
+        '<script>(function(){try{'
+        f'var M={slug_js};'
+        'var a=JSON.parse(localStorage.getItem("fg_shindan_answers")||"null");'
+        'if(!a||!a.municipality||!M[a.municipality])return;'
+        'var el=document.getElementById("lastmuni");'
+        'el.innerHTML="前回の診断でお選びの<a href=\\""+M[a.municipality]+"/\\"><b>"+a.municipality+"</b>のページ</a>からどうぞ。";'
+        'el.style.display="block";'
+        '}catch(e){}})();</script>'
     )
     body = (
         "<h1>市町村別 給付金・手当まとめ</h1>"
         '<p class="note">お住まいの市町村を選んでください。'
         '場面から探したい方は<a href="../life/">ライフイベント別の一覧</a>もどうぞ。</p>'
-        '<p class="note">いま掲載しているのは全国共通の国の制度です。各市町村独自の制度は、'
-        '掲載のご了解を確認できたところから順に追加します(準備中)。</p>'
+        '<p class="note">どの市町村でも、全国共通の国の制度がご覧いただけます。'
+        f'「独自◯件」の表示がある市町村({listed}市町)は、その市町村だけの制度も掲載中です。'
+        'ほかの市町村の独自制度も、掲載のご了解を確認できたところから順に追加します。</p>'
+        + shortcut +
         f'<ul class="areas">{lis}</ul>'
         '<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'
     )
     return page(
         f"山梨県 市町村別の給付金・手当まとめ({len(VISIBLE_MUNIS)}市町村)|もらいわすれ堂",
-        "甲府市・甲斐市・南アルプス市・富士吉田市など山梨県の市町村ごとに、児童手当・出産育児一時金・ひとり親支援などの給付金・手当をまとめて確認できます。公式ページと照合して掲載(市町村独自の制度は準備中)。無料・匿名の3分診断つき。",
+        "甲府市・甲斐市・南アルプス市・富士吉田市など山梨県の市町村ごとに、児童手当・出産育児一時金・ひとり親支援などの給付金・手当をまとめて確認できます。公式ページと照合して掲載。市町村独自の制度も確認できたところから順次掲載中。無料・匿名の3分診断つき。",
         body, updated, depth=1,
         head_extra=breadcrumb_jsonld([("もらいわすれ堂 山梨版", ""), ("市町村別まとめ", None)]),
         canon_path="area/")
@@ -272,7 +300,7 @@ def main():
         shutil.rmtree(OUT_DIR)
     os.makedirs(OUT_DIR, exist_ok=True)
     with open(os.path.join(OUT_DIR, "index.html"), "w", encoding="utf-8") as f:
-        f.write(index_page(updated))
+        f.write(index_page(updated, items))
     for name, slug in VISIBLE_MUNIS:
         d = os.path.join(OUT_DIR, slug)
         os.makedirs(d, exist_ok=True)

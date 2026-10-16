@@ -41,6 +41,21 @@ FORBIDDEN = [
     "引受けの目安",
 ]
 
+# 本文に含まれていたら止める語(部分一致)。名前が無害でも中身が kakei-crm の運用仕様なら公開できない。
+# 2026-09-29: KAKEHASHI統合検証メモ5点が、名前に禁止語を含まないためパス検査を素通りした。
+# 言及ではなく仕様そのものに出る語(APIの入口・権限定数・環境変数名)だけを並べる。
+FORBIDDEN_CONTENT = [
+    "KAKEHASHI",              # enLife 9システム統合の名称
+    "/api/aftercheck/",       # kakei-crm の API 入口
+    "/api/retention/",
+    "/api/handoffs/",
+    "/api/customers/",
+    "kakei-crm/api",
+    "KAKEI_CRM_",             # kakei-crm の環境変数名
+    "LAYER_VIEW",             # kakei-crm の権限層の定数
+    "LAYER_EDIT",
+]
+
 # 例外。移設したことを案内する文書など、名前に禁止語を含むが置いてよいもの。
 ALLOWED = {
     "docs/移設済み_アポ管理と営業指名_2026-08-22.md",
@@ -56,7 +71,8 @@ allgroup-inc/kakei-crm(非公開)に置いてください。
   根拠:         kakei-crm/CLAUDE.md 絶対ルール7(2026-08-22 小柳さん決定)
 
 判断に迷う置き場所は、先に非公開側へ置いてください。
-文書の中で言及するだけなら問題ありません(検査しているのはファイルのパスだけです)。
+文書の中で言及するだけなら問題ありません。ただし API の入口・権限の層・環境変数名など
+運用仕様そのものは、ファイル名が無害でも本文で検査して止めます(FORBIDDEN_CONTENT)。
 """
 
 
@@ -70,6 +86,40 @@ def find_violations(paths):
             if pattern in path:
                 hits.append((path, pattern))
                 break
+    return hits
+
+
+def find_content_violations(path, text):
+    """本文が FORBIDDEN_CONTENT に触れていれば最初の1語を返す。ALLOWED は除く。"""
+    if path in ALLOWED:
+        return None
+    for pattern in FORBIDDEN_CONTENT:
+        if pattern in text:
+            return pattern
+    return None
+
+
+def read_text(path):
+    """テキストとして読めるファイルだけ返す。バイナリ(NULを含む)と読めないものは None。"""
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+    except OSError:
+        return None
+    if b"\0" in data[:8192]:
+        return None
+    return data.decode("utf-8", errors="ignore")
+
+
+def scan_contents(paths):
+    hits = []
+    for path in paths:
+        text = read_text(path)
+        if text is None:
+            continue
+        pattern = find_content_violations(path, text)
+        if pattern:
+            hits.append((path, pattern))
     return hits
 
 
@@ -104,11 +154,28 @@ def selftest():
         hit = bool(find_violations([path]))
         if hit != should_hit:
             failed.append(f"  {path}: 期待={should_hit} 実際={hit}")
+
+    content_cases = [
+        ("docs/検証メモ.md", "POST /api/aftercheck/pending を第1層で", True),
+        ("docs/統合.md", "# KAKEHASHI 統合検証チェックリスト", True),
+        ("docs/手順.md", "環境変数 KAKEI_CRM_CHOICES_URL を投入", True),
+        ("docs/権限.md", "actor.layer < schema.LAYER_EDIT", True),
+        # 置いてよいもの(言及・無関係のAPI・日本語の本文)
+        ("CLAUDE.md", "出口3: 法人保険・家計の見直しやさんへのクロス導線", False),
+        ("docs/plan.md", "POST to `/api/meeting-signup` or Google Form", False),
+        ("docs/メモ.md", "後確認チャットへ連携メモを送った(詳細は非公開側)", False),
+        ("scripts/check_repo_scope.py", "KAKEHASHI /api/aftercheck/", False),
+    ]
+    for path, text, should_hit in content_cases:
+        hit = find_content_violations(path, text) is not None
+        if hit != should_hit:
+            failed.append(f"  本文 {path}: 期待={should_hit} 実際={hit}")
+
     if failed:
         print("自己点検に失敗しました:", file=sys.stderr)
         print("\n".join(failed), file=sys.stderr)
         return 1
-    print(f"自己点検OK({len(cases)}件)")
+    print(f"自己点検OK({len(cases) + len(content_cases)}件)")
     return 0
 
 
@@ -116,14 +183,21 @@ def main():
     if "--selftest" in sys.argv:
         return selftest()
 
-    violations = find_violations(tracked_files())
-    if not violations:
+    paths = tracked_files()
+    violations = find_violations(paths)
+    content_violations = scan_contents(paths)
+    if not violations and not content_violations:
         print("OK: 家計の見直しやさんのシステムは本リポジトリに含まれていません")
         return 0
 
-    print("本リポジトリに置けないファイルがあります:\n", file=sys.stderr)
-    for path, pattern in violations:
-        print(f"  {path}\n    → 禁止パターン: {pattern}", file=sys.stderr)
+    if violations:
+        print("本リポジトリに置けないファイルがあります:\n", file=sys.stderr)
+        for path, pattern in violations:
+            print(f"  {path}\n    → 禁止パターン: {pattern}", file=sys.stderr)
+    if content_violations:
+        print("\n本文に kakei-crm の運用仕様を含むファイルがあります:\n", file=sys.stderr)
+        for path, pattern in content_violations:
+            print(f"  {path}\n    → 本文の禁止語: {pattern}", file=sys.stderr)
     print(HINT, file=sys.stderr)
     return 1
 

@@ -23,6 +23,13 @@ OUT_DIR = os.path.join(BASE, "site", "staff", "haruka", "img")
 SHIPPORI = os.path.expanduser("~/.fonts/ShipporiMincho-SemiBold.ttf")
 SHIPPORI_ALT = "fonts/ShipporiMincho-SemiBold.ttf"  # CI用(リポジトリ外キャッシュ or 事前DL)
 NOTO = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+# 上2つが無い環境(ローカル・サンドボックス)向けの最後の受け皿。
+# ここまで全滅すると日本語が豆腐(□)になるため、下の assert_cjk_font で止める。
+FALLBACKS = [
+    "/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",
+    "/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf",
+    "/usr/share/fonts/truetype/fonts-japanese-mincho.ttf",
+]
 
 SHU = (185, 80, 47)      # 朱(琉球赤瓦)#B9502F
 KI = (242, 183, 5)       # 黄 #F2B705
@@ -32,13 +39,34 @@ UMI = (111, 174, 164)    # 島の海
 
 
 def font(path_candidates, size):
-    for p in path_candidates:
+    for p in list(path_candidates) + FALLBACKS:
         if os.path.exists(p):
             try:
                 return ImageFont.truetype(p, size)
             except Exception:
                 continue
+    # ここに落ちると load_default() で日本語が全部豆腐(□)になる。
+    # 画像は遥さんがそのままInstagramへ投稿するものなので、
+    # 読めない画像を無言で出すより止めるほうが安全(assert_cjk_font が先に止める)。
     return ImageFont.load_default()
+
+
+def assert_cjk_font():
+    """日本語フォントが1つも無ければ生成せず終了する。
+
+    フォントが無いと PIL は例外を出さず豆腐(□)で描画してしまう。
+    ワークフロー側は `|| true` で続行するため、ここで止めれば
+    前週の(読める)画像がそのまま残る。無言で読めない画像に
+    差し替わるほうが実害が大きい。
+    """
+    for p in [SHIPPORI, SHIPPORI_ALT, NOTO] + FALLBACKS:
+        if os.path.exists(p):
+            return p
+    raise SystemExit(
+        "[ng] 日本語フォントが見つかりません。画像を生成すると全て豆腐(□)になるため中止します。\n"
+        "     CI: apt-get install fonts-noto-cjk / ローカル: fonts-ipafont-gothic 等を入れてください。\n"
+        f"     探した場所: {[SHIPPORI, SHIPPORI_ALT, NOTO] + FALLBACKS}"
+    )
 
 
 def wrap(draw, text, fnt, max_w):
@@ -113,6 +141,8 @@ def make_image(item):
 
 
 def main():
+    used = assert_cjk_font()   # フォント不在なら1枚も書かずに終了(豆腐画像の上書きを防ぐ)
+    print(f"[font] {used}")
     with open(NETA, encoding="utf-8") as f:
         data = json.load(f)
     os.makedirs(OUT_DIR, exist_ok=True)

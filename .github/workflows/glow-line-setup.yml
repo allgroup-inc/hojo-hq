@@ -1,0 +1,48 @@
+name: glow-line-setup
+# GLOW LINE公式アカウント(@042wvrgo)のリッチメニューを自動で作り、全員の既定メニューにする。
+# 必要: Secrets GLOW_LINE_CHANNEL_ACCESS_TOKEN(未設定なら何もせず終わる)
+# 任意: Variables GLOW_LP_URL(世界へ推進LPの公開URL。未設定の間は左ボタンがトークへの送信になる)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/glow_line_setup.py"
+      - ".github/workflows/glow-line-setup.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: glow-line-setup
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: 日本語フォントと画像ライブラリ
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends fonts-noto-cjk
+          python -m pip install --quiet pillow
+      - name: リッチメニューを作って設定
+        env:
+          GLOW_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.GLOW_LINE_CHANNEL_ACCESS_TOKEN }}
+          GLOW_LP_URL: ${{ vars.GLOW_LP_URL }}
+        run: |
+          if [ -z "$GLOW_LINE_CHANNEL_ACCESS_TOKEN" ]; then
+            python scripts/glow_line_setup.py --render
+            echo "::notice::GLOW_LINE_CHANNEL_ACCESS_TOKEN が未設定のため、画像の作成だけ行いました"
+            exit 0
+          fi
+          python scripts/glow_line_setup.py --apply
+      - uses: actions/upload-artifact@v4
+        with:
+          name: glow-line-richmenu
+          path: posts/images/glow-line-richmenu.png
