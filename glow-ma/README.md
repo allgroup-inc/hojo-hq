@@ -24,6 +24,23 @@ Googleスプレッドシートに保持し、このディレクトリにはGAS(G
 5. `cd glow-ma && clasp push` でコードをApps Scriptに反映する
 6. Apps Scriptエディタで `ensureLedgerTabs` を一度だけ手動実行し、10タブを作成する
 
+## 自動反映(2026-10-16〜)
+
+main の `glow-ma/src/` が変わると、GitHub Actions(`.github/workflows/glow-ma-deploy.yml`)が
+Apps Script へ `clasp push` する。PCからの手作業は不要。最初に一度だけ次を行う。
+
+1. PCで `npx @google/clasp@3.4.1 login`(GLOW企業リレーション台帳の所有者アカウントで)
+2. https://script.google.com/home/usersettings で「Google Apps Script API」をオンにする
+3. GitHub の Settings → Secrets and variables → Actions に2つ登録する
+   - `CLASPRC_JSON`: PCの `~/.clasprc.json`(Windowsは `C:\Users\<名前>\.clasprc.json`)の中身をそのまま
+   - `GLOW_MA_SCRIPT_ID`: Apps Script のスクリプトID
+4. Actions の「glow-ma-deploy」を Run workflow で一度実行する
+
+反映後は、毎分動く音声ログ処理が6時間に1回「自己点検・修復」(`OpsStatus.gs` の `runSelfHeal`)を
+呼び、ダッシュボードの欠落・非表示と、BlueBean同期・日次メンテナンスのトリガー欠落を自動で直す。
+各処理の最終結果は台帳の「稼働状況」タブに残る。失敗はSlack(未設定ならスクリプト所有者へメール)で
+1日1通届く。
+
 ## 7000件リストのインポート
 
 1. スプレッドシートに「インポート待ち」タブを作り、元データを貼り付ける
@@ -58,8 +75,32 @@ Googleスプレッドシートに保持し、このディレクトリにはGAS(G
   必ずプルダウンから選択すること(自由入力の表記ゆれは集計に反映されない)
 - 企業マスタの「流入ルート」列はコード(ImportRunner.gs/dedupe.js)が複数値を「、」区切りで
   書き込む列であり、プルダウン入力規則は設定していない。手動で編集する場合は
-  設計書に定義された①紹介/②手紙DM/③ミカタ経由の正確な文字列以外を入力しないこと
+  設計書に定義された①紹介/②手紙DM/③ミカタ経由/④世界の架け橋(Alibaba)の正確な文字列以外を入力しないこと
   (この列には表記ゆれを防ぐ自動チェックが存在しない)
+
+## 流入ルート別ボーナス設定
+
+企業のスコアリングで「流入ルート」による加点（ルートボーナス）が適用されます。
+各ルートのボーナス値は `glow-ma/src/scoring.js` の `DEFAULT_CONFIG.routeBonus` で定義されています：
+
+```javascript
+routeBonus: {
+  "①紹介": 30,          // 嶺井さんの紹介案件(M&A・不動産)：最高加点
+  "②手紙DM": 0,         // 手紙DMキャンペーン：加点なし
+  "③ミカタ経由": 20,    // 沖縄企業のミカタ：中程度加点
+  "④世界の架け橋(Alibaba)": 20  // 世界販路拡大(Alibaba)：中程度加点（2026-10-05追加）
+}
+```
+
+**ルートボーナスを変更する場合:**
+1. `glow-ma/src/scoring.js` の上記値を編集
+2. `clasp push` でApps Scriptに反映
+3. `recalculateAllScores` を実行してスコアを再計算
+
+**④世界の架け橋(Alibaba)について:**
+- GLOWが沖縄の生産者・企業の商品をAlibaba.comに出品するプログラム
+- 相談進捗の追跡は対応履歴ログで管理（新規フィールド追加は実装なし）
+- ダッシュボード・レポートで他ルートと同等に集計・表示
 
 ## 掘り起こしアラート・即時アラート(Phase 3)
 
@@ -788,6 +829,40 @@ Gemini APIで文字起こし・構造化データ抽出を行い、LINE上のボ
   従来どおり手動で編集フローから補完すること
 - LINE公式アカウントの新規開設・Gemini APIの利用料など、新たに発生する費用の契約・予算は
   小柳さんの決裁事項(CLAUDE.md絶対ルール5)
+
+## LINE/Instagram/QRコード統合ダッシュボード(Phase 11 - 2026-10-07)
+
+営業KPI（LINE問い合わせ・Instagramフォロワー・訪問数・アポ数・QRアクセス）をリアルタイムダッシュボードに統合し、システムを見ればすぐに現在の営業進捗が把握できる状態を実現した。
+
+**セットアップ手順:**
+
+1. スクリプト プロパティに以下を設定（Apps Scriptエディタ → プロジェクトの設定）：
+   - `INSTAGRAM_ACCESS_TOKEN`: Meta Developers から取得したInstagram Business Account アクセストークン（任意・未設定の場合はInstagram集計をスキップ）
+
+2. `clasp push` で最新コードを反映
+
+3. Apps Scriptエディタで `ensureLedgerTabs` を実行（新シート「LINE問い合わせ履歴」「Instagramメトリクス」「訪問・アポ実績」を作成）
+
+4. Apps Scriptエディタで `updateDashboard` を実行
+
+5. ダッシュボードタブに以下の新セクションが表示されることを確認：
+   - LINE問い合わせサマリー：受信・対応待ち・対応済み件数
+   - Instagramメトリクスサマリー：合計フォロワー数・リーチ数・集計企業数
+   - 訪問・アポ・QRアクセスサマリー(当月)：訪問実績・アポ設定・QRアクセス・合計営業活動数
+
+**集計対象・動作仕様:**
+
+- **LINE問い合わせ**: LINE音声ログシート（既存）の「ステータス」列から、受信済み/処理中/確認待ちを「対応待ち」、確定を「対応済み」として集計
+- **Instagramメトリクス**: 企業マスタの「Instagramアカウント（@で始まる）」列に記載されたBusiness Account について、Graph API経由でフォロワー数・リーチ・インプレッションを自動取得（取得失敗時は0で集計）
+- **訪問・アポ・QRアクセス**: 対応履歴ログの「種別」列から訪問/アポ獲得/レターURLアクセスを抽出し、当月分のみを集計。毎月初日に自動リセット（ダッシュボード履歴には累積）
+- **QRコード追跡**: 既存の `TrackingWebApp.gs` によるQRアクセス記録を活用（新規実装なし）
+
+**現時点の制約:**
+
+- Instagram メトリクス取得は認証済みアカウント（Business Account）が必須で、Meta Developers での事前設定が必要
+- LINE問い合わせ数は音声ログシートの集計のため、フリーテキスト送信・スタンプ等は対象外
+- ダッシュボード更新は `MaintenanceRunner.gs` の日次トリガーで自動実行、または手動で `updateDashboard` を実行
+- 見直し期限: 2027-01-07。実運用での集計精度・メトリクス鮮度を見て、API呼び出し頻度・集計対象の追加削除を再検討
 
 ## BlueBean CTI通話履歴の自動取り込み(2026-08-19)
 

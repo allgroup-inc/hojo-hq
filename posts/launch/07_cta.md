@@ -9,6 +9,7 @@
 ## キャプション
 「うちに使える制度、あるのかな」。30秒でわかります。
 沖縄の事業者のための、補助金・助成金ナビ。会社名の入力は不要です🌺
+公募ページへは、プロフィールのリンクからタップで移動できます(本文のURLは押せないため)。
 診断も登録も無料です👇
 https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch
 
@@ -19,5 +20,5 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-09-11
+- checked: 2026-10-16
 - by: scripts/generate_sns.py(SNS部・ヒロメさん)

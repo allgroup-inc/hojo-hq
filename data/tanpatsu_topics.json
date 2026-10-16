@@ -673,6 +673,16 @@
       "status": "log_drafted",
       "drafted_at": "2026-10-09",
       "note": "週次無料ログ(議事_20260916 案1)。公開後は publish-record --id L04"
+    },
+    {
+      "id": "L05",
+      "slug": "unei_log",
+      "genre": "実録ログ(無料)",
+      "title_hint": "実録・第11週 — 累計94ビューと、売上0円が続く現在地",
+      "paid_price": 0,
+      "status": "log_drafted",
+      "drafted_at": "2026-10-16",
+      "note": "週次無料ログ(議事_20260916 案1)。公開後は publish-record --id L05"
     }
   ]
 }
