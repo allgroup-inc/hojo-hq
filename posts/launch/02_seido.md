@@ -16,6 +16,8 @@
 🗓 締切：2026-11-30（残り45日）
 💰 上限 600万円（6,000,000円）
 🏝 実施主体：要確認
+経理担当や顧問の先生に送っておくと、相談が早く進みます。
+制度のページを開くときは、プロフィールのリンクからどうぞ。この投稿の制度がまとまっています。
 公募要領の原文はこちら👇
 https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe6cMAD
 ※要件・締切・金額は必ず原文の公募要領でご確認ください。
@@ -27,5 +29,5 @@ https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe6cMAD
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-09-11
+- checked: 2026-10-16
 - by: scripts/generate_sns.py(SNS部・ヒロメさん)

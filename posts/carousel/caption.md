@@ -1,5 +1,5 @@
 ## キャプション
-締切まで30日以上ある補助金だけ、5件選びました。今から準備が間に合います🌺
+いま募集中の補助金5件。いちばん大きいものは上限10億円です。どれも対象地域に沖縄が入ります🌺
 
 1. 令和７年度補正 ディマンドリスポンスの拡大に向けたIoT化推進事業
 　締切 2026-11-28・残り43日 / 上限 2,000万円
@@ -13,6 +13,9 @@
 　締切 2026-11-30・残り45日 / 上限 10億円
 
 🔖 保存しておくと、締切前に見返せます。
+経理担当や顧問の先生に送っておくと、相談が早く進みます。
+7枚目に、申請前に確認したい3つをまとめました。
+本文のURLはタップできません。プロフィールのリンクを開くと、この投稿の制度ページへそのまま飛べます。
 うちの会社で使えるかは30秒診断で👇
 https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=carousel
 ※要件・締切・金額は必ず原文の公募要領でご確認ください。
@@ -29,5 +32,5 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-08-17
+- checked: 2026-10-16
 - by: scripts/generate_carousel.py(SNS部・ヒロメさん)

@@ -14,6 +14,8 @@
 💰 上限 10億円（1,000,000,000円）
 🏝 実施主体：脱炭素成長型経済構造移行推進対策費補助金（業務用建築物の脱炭素改修加速化事業）
 沖縄の事業者も、要件に合えば申請できます。準備の時間も取りやすい制度です。
+経理担当や顧問の先生に送っておくと、相談が早く進みます。
+本文のURLはタップできません。プロフィールのリンクを開くと、この投稿の制度ページへそのまま飛べます。
 申請できるかは原文で確認を👇
 https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDa1bMAD
 ※要件・締切・金額は必ず原文の公募要領でご確認ください。
@@ -25,5 +27,5 @@ https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDa1bMAD
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-09-11
+- checked: 2026-10-16
 - by: scripts/generate_sns.py(SNS部・ヒロメさん)

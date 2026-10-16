@@ -14,6 +14,8 @@
 💰 上限額は要確認（原文でご確認ください）
 🏝 実施主体：ポスト５Ｇ情報通信システム基盤強化研究開発事業
 沖縄の事業者も、要件に合えば申請できます。準備の時間も取りやすい制度です。
+経理担当や顧問の先生に送っておくと、相談が早く進みます。
+制度のページを開くときは、プロフィールのリンクからどうぞ。この投稿の制度がまとまっています。
 まずは原文をざっと見てみてください👇
 https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003CYIjUAO
 ※要件・締切・金額は必ず原文の公募要領でご確認ください。
@@ -25,5 +27,5 @@ https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003CYIjUAO
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-09-11
+- checked: 2026-10-16
 - by: scripts/generate_sns.py(SNS部・ヒロメさん)
