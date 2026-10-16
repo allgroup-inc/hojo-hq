@@ -35,8 +35,17 @@ SHINDAN_URL = "../?utm_source=instagram&utm_medium=social&utm_campaign=ig_hub#ma
 LINE_URL = "../go/ig/"
 
 # キャプションに入れる案内文(generate_sns.py / generate_carousel.py が共通で使う)
-HUB_GUIDE = ("📲 本文のURLはタップできません。プロフィールのリンクを開くと、"
-             "この投稿の制度ページへそのまま飛べます。")
+# 同じ文が全投稿で繰り返されると定型感が出るため(check_humanizer.pyの横断検査)、3通りを回す。
+HUB_GUIDES = [
+    "本文のURLはタップできません。プロフィールのリンクを開くと、この投稿の制度ページへそのまま飛べます。",
+    "公募ページへは、プロフィールのリンクからタップで移動できます(本文のURLは押せないため)。",
+    "制度のページを開くときは、プロフィールのリンクからどうぞ。この投稿の制度がまとまっています。",
+]
+HUB_GUIDE = HUB_GUIDES[0]
+
+
+def hub_guide(n):
+    return HUB_GUIDES[n % len(HUB_GUIDES)]
 
 DATE_RE = re.compile(r"(\d{4})-(\d{2})-(\d{2})")
 
