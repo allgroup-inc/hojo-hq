@@ -29,6 +29,11 @@ SCRIPT_NAMES = [
     "knowledge_extract.py",
     "wikiskill_lock.py",
 ]
+# session_id は架空の固定 UUID(Claude Code の session_id と同じ形。実在のセッションではない)
+SID_A = "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d"
+SID_B = "2b3c4d5e-6f70-4b8c-9d0e-1f2a3b4c5d6e"
+SID_C = "3c4d5e6f-7081-4c9d-8e1f-2a3b4c5d6e7f"
+SID_P = "4d5e6f70-8192-4dae-9f20-3b4c5d6e7f80"
 DECISION_PATH = "docs/議事_20261006_E2Eテスト決定.md"
 COMMIT_SUBJECT = "docs: 締切アラート時期の決定"
 COMMIT_COMMAND = f'git commit -q -m "{COMMIT_SUBJECT}"'
@@ -197,18 +202,18 @@ def _context(proc):
 
 
 def _run_session_a(world):
-    hook(world, "SessionStart", sid="A", source="startup")
+    hook(world, "SessionStart", sid=SID_A, source="startup")
     write(world, DECISION_PATH, FM_DECISION)
-    hook(world, "PostToolUse", sid="A", tool_name="Write",
+    hook(world, "PostToolUse", sid=SID_A, tool_name="Write",
          tool_input={"file_path": str(world / DECISION_PATH)})
     git(world, "add", "-A")
     git(world, "commit", "-q", "-m", COMMIT_SUBJECT)
     # Claude Code が実際に渡すのと同じ、コマンド全文(引用符・フラグ付き)
-    hook(world, "PostToolUse", sid="A", tool_name="Bash",
+    hook(world, "PostToolUse", sid=SID_A, tool_name="Bash",
          tool_input={"command": COMMIT_COMMAND})
-    hook(world, "PostToolUse", sid="A", tool_name="Skill",
+    hook(world, "PostToolUse", sid=SID_A, tool_name="Skill",
          tool_input={"skill": "writing-plans-hojo"})
-    hook(world, "SessionEnd", sid="A", reason="exit")
+    hook(world, "SessionEnd", sid=SID_A, reason="exit")
     # クラウドでは push まで必要。ここでは commit までで原本を Git に載せる
     git(world, "add", ".claude/experience")
     git(world, "commit", "-q", "-m", "chore: experience")
@@ -217,12 +222,12 @@ def _run_session_a(world):
 def test_session_a_then_fresh_session_b_restores_decision_and_why(world):
     # ---- Session A ----
     _run_session_a(world)
-    a = read_session(world, "A")
+    a = read_session(world, SID_A)
     assert '"event": "session_end"' in a and "締切アラート時期の決定" in a
     assert '"visibility": "public"' in a and '"branch": "claude/e2e-memory"' in a
 
     # ---- Session B(完全に別の session_id・マーカー無し)----
-    r1 = hook(world, "SessionStart", sid="B", source="startup")
+    r1 = hook(world, "SessionStart", sid=SID_B, source="startup")
     ctx = _context(r1)
     assert "[D] 2026-10-06 E2Eテスト決定" in ctx                       # Decision が復元される
     assert "なぜ: 締切7日前では準備が間に合わない" in ctx               # 「なぜ」が復元される
@@ -230,9 +235,9 @@ def test_session_a_then_fresh_session_b_restores_decision_and_why(world):
     assert "見直し: 2027-04-04" in ctx                                  # 180日既定
     # Experience(低信頼)。見出しや検索語行ではなく項目行で判定する
     assert "- [Exp] " in ctx
-    assert "session-A: commits 1 / skills: writing-plans-hojo" in ctx
+    assert f"session-{SID_A}: commits 1 / skills: writing-plans-hojo" in ctx
 
-    r2 = hook(world, "UserPromptSubmit", sid="B", prompt=PROMPT_B)
+    r2 = hook(world, "UserPromptSubmit", sid=SID_B, prompt=PROMPT_B)
     ctx2 = _context(r2)
     assert "[FK-002]" in ctx2                                           # 失敗が必要に応じて復元される
     # 再発防止は見出し(常に出る)ではなく項目行で判定する
@@ -244,13 +249,13 @@ def test_session_a_then_fresh_session_b_restores_decision_and_why(world):
     assert "→ docs/議事_20261006_E2Eテスト決定.md" not in ctx2
     assert "ウタガイ: 30日前" not in ctx2
 
-    r3 = hook(world, "UserPromptSubmit", sid="B", prompt="次")
+    r3 = hook(world, "UserPromptSubmit", sid=SID_B, prompt="次")
     assert r3.stdout.strip() == "{}"                                    # 段2は1セッション1回
 
     # ---- 残してはいけないものが、commit され得る Experience のどこにも無い(計画 受け入れ条件4)----
     files = committable_experience(world)
-    assert {f.name for f in session_files(world, "A")} <= {f.name for f in files}
-    assert any(".part" in f.name for f in session_files(world, "A"))  # commit 後の続きは part ファイルへ
+    assert {f.name for f in session_files(world, SID_A)} <= {f.name for f in files}
+    assert any(".part" in f.name for f in session_files(world, SID_A))  # commit 後の続きは part ファイルへ
     for f in files:
         text = f.read_text(encoding="utf-8")
         assert PROMPT_B not in text, f.name                              # 利用者の指示の本文
@@ -276,9 +281,9 @@ def test_memory_off_disables_everything_without_breaking_session(world):
     audit = exp / "_audit.log"
     audit_before = audit.stat().st_size if audit.exists() else None
     (world / ".claude/memory.off").touch()
-    r = hook(world, "SessionStart", sid="C", source="startup")
+    r = hook(world, "SessionStart", sid=SID_C, source="startup")
     assert r.returncode == 0 and r.stdout.strip() == "{}"
-    assert not list(exp.glob("*/session-C.jsonl"))
+    assert not list(exp.glob(f"*/session-{SID_C}.jsonl"))
     # _local のマーカー(current-session / C.ended など)も作られない
     assert not [p for p in (exp / "_local").rglob("*") if p.is_file()]
     # 監査ログも作られない・伸びない
@@ -287,8 +292,8 @@ def test_memory_off_disables_everything_without_breaking_session(world):
 
 
 def test_private_repo_session_never_marks_public(world_private):   # origin=glow-docs-private
-    hook(world_private, "SessionStart", sid="P", source="startup")
-    text = read_session(world_private, "P")
+    hook(world_private, "SessionStart", sid=SID_P, source="startup")
+    text = read_session(world_private, SID_P)
     assert '"visibility": "private"' in text
     assert '"visibility": "public"' not in text
 
@@ -296,7 +301,7 @@ def test_private_repo_session_never_marks_public(world_private):   # origin=glow
 def test_privacy_check_passes_on_e2e_output(world):   # Session A の記録が CI 検査を通る
     _run_session_a(world)
     tracked = git(world, "ls-files", "--", ".claude/experience")
-    assert "session-A.jsonl" in tracked                                 # 検査対象が実在する(空振りでない)
+    assert f"session-{SID_A}.jsonl" in tracked                                 # 検査対象が実在する(空振りでない)
     r = subprocess.run(["python3", "scripts/check_experience_privacy.py"],
                        cwd=world, capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr

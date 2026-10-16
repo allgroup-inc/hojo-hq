@@ -199,16 +199,68 @@ def _is_target(rel: str) -> bool:
     return "_local" not in parts and parts[-1] != "_audit.log"
 
 
+# 記録ファイル名 .claude/experience/<月>/session-<識別子>[.partN].jsonl の形。
+# 識別子は Claude Code の session_id(小文字の UUID)か、session_id が無いときの unknown-<UTC時刻>
+# (記録側 wikiskill_common.session_id_of)。part は記録側 experience_log.session_file が N=1,2,… で付ける。
+_UUID = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+_RECORD_NAME = re.compile(rf"^session-(?:{_UUID}|unknown-\d{{8}}T\d{{6}}Z)(?:\.part[1-9]\d*)?\.jsonl$")
+_MONTH_DIR = re.compile(r"^\d{4}-(?:0[1-9]|1[0-2])$")
+
+
+def record_name_problem(rel: str) -> str | None:
+    """記録ファイルの相対パスが命名規則に合うかを返す(合えば None、違えば理由)。
+
+    理由には名前そのものを入れない(秘密らしい値を CI のログに残さないため)。
+    """
+    parts = rel.split("/")
+    if len(parts) != 4 or parts[0] != ".claude" or parts[1] != "experience":
+        return "置き場所が .claude/experience/<月>/ の形ではありません"
+    if not _MONTH_DIR.match(parts[2]):
+        return "月のフォルダ名が YYYY-MM(01〜12 月)の形ではありません"
+    name = parts[3]
+    if _RECORD_NAME.match(name):
+        return None
+    if any(pat.search(name) for pat in _SKILL_FAILURE_SECRET_RULES.values()):
+        return "ファイル名に秘密情報らしい識別子を含みます"
+    if ".." in name or "/" in name or "\\" in name:
+        return "ファイル名にパス区切りや .. を含みます"
+    if any(not (c.isalnum() and c.isascii()) and c not in "._-" for c in name):
+        return "ファイル名に使えない文字を含みます"
+    return "ファイル名が session-<UUID> でも unknown-<時刻> でもありません"
+
+
+def _label(rel: str) -> str:
+    """違反の表示用の名前。形式に合う記録はそのままの名前、合わない記録は名前を伏せて長さだけ出す。"""
+    if record_name_problem(rel) is None:
+        return rel
+    return f"<不正な記録パス: 長さ {len(rel)}>"
+
+
+def _local_label(rel: str) -> str:
+    """ローカル限定ファイルの表示用の名前。安全な文字だけ・秘密の形でないものだけ表示する(session_id が入りうるため)。"""
+    safe = len(rel) <= 120 and re.fullmatch(r"[A-Za-z0-9._/\-]+", rel) is not None
+    if safe and not any(pat.search(rel) for pat in _SKILL_FAILURE_SECRET_RULES.values()):
+        return rel
+    return f"<ローカル限定の記録パス: 長さ {len(rel)}>"
+
+
 def scan(root: Path) -> list[tuple[str, str]]:
-    """git 管理下の Experience JSONL を全行検査し、(パス, 理由) を違反ごとに返す。"""
+    """git 管理下の Experience JSONL を全行検査し、(パス, 理由) を違反ごとに返す。
+
+    ファイル名の命名規則も検査する(合わなければ名前を伏せて表示)。名前が合わなくても内容の検査は続けて行う。
+    """
     root = Path(root)
     hits: list[tuple[str, str]] = []
     for rel in _tracked_experience(root):
         if not _is_target(rel):
             continue
+        label = _label(rel)
+        name_problem = record_name_problem(rel)
+        if name_problem:
+            hits.append((label, f"ファイル名の形式: {name_problem}"))
         text = read_text(str(root / rel))
         if text is None:
-            hits.append((rel, "テキストとして読めません(バイナリ/読込失敗)"))
+            hits.append((label, "テキストとして読めません(バイナリ/読込失敗)"))
             continue
         # "\n" だけで分ける(str.splitlines は U+2028/U+2029/\x85 でも割れ、raw で出力される note を誤検知する)
         for lineno, line in enumerate(text.split("\n"), start=1):
@@ -219,13 +271,13 @@ def scan(root: Path) -> list[tuple[str, str]]:
                 rec = json.loads(line)
                 problems = check_record(rec, rel)
             except RecursionError:
-                hits.append((rel, f"{lineno}行目: JSON の入れ子が深すぎます"))
+                hits.append((label, f"{lineno}行目: JSON の入れ子が深すぎます"))
                 continue
             except ValueError:
-                hits.append((rel, f"{lineno}行目: JSON として読めません"))
+                hits.append((label, f"{lineno}行目: JSON として読めません"))
                 continue
             for problem in problems:
-                hits.append((rel, f"{lineno}行目: {problem}"))
+                hits.append((label, f"{lineno}行目: {problem}"))
     return hits
 
 
@@ -322,7 +374,7 @@ def check_tracking(root: Path) -> list[tuple[str, str]]:
     tracked = _tracked_experience(root)
     for rel in tracked:
         if _is_local_only(rel):
-            hits.append((rel, "ローカル限定のファイルが Git に追跡されています(git rm --cached で外してください)"))
+            hits.append((_local_label(rel), "ローカル限定のファイルが Git に追跡されています(git rm --cached で外してください)"))
     records = [rel for rel in tracked if not _is_local_only(rel)]
     ignored = _ignored_among(root, records)
     if ignored is None:
@@ -331,7 +383,7 @@ def check_tracking(root: Path) -> list[tuple[str, str]]:
         for rel in records:  # 追跡順(= ls-files の順)で安定して出す
             if rel in ignored:
                 why = ignored[rel]
-                hits.append((rel, "追跡済みの記録が .gitignore で除外されています"
+                hits.append((_label(rel), "追跡済みの記録が .gitignore で除外されています"
                                   + (f"({why})" if why else "")
                                   + "。月や part を狙った除外は、記録の更新が Git に残らなくなります"))
     return hits

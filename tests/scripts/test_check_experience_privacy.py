@@ -8,6 +8,7 @@ import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -17,8 +18,15 @@ sys.path.insert(0, SCRIPTS)
 import check_repo_scope  # noqa: E402
 import check_experience_privacy  # noqa: E402
 from check_experience_privacy import MAX_FIELD, MAX_NOTE, PUBLIC_REPO, check_record, scan  # noqa: E402
+from check_experience_privacy import _label, _local_label, record_name_problem  # noqa: E402
 
 PUBLIC_URL = "https://github.com/allgroup-inc/hojo-hq.git"
+# 記録ファイル名に使う識別子(session_id と同じ形の UUID。実在のセッションではない架空の値)
+SID_X = "5f0c2e7a-1b3d-4e8f-9a6b-2c4d6e8f0a1b"
+SID_A = "6a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d"
+SID_B = "7b2c3d4e-5f60-4b7c-9d8e-0f1a2b3c4d5e"
+SID_BAD = "8c3d4e5f-6071-4c8d-8e9f-1a2b3c4d5e6f"
+SID_GOOD = "9d4e5f60-7182-4d9e-9f0a-2b3c4d5e6f70"
 SCRIPT = os.path.join(SCRIPTS, "check_experience_privacy.py")
 
 OK = {
@@ -89,7 +97,7 @@ def _commit_jsonl(root, name, text, month="2026-10"):
 def repo_with_bad_jsonl(tmp_path):
     _init_repo(tmp_path)
     bad = {**OK, "visibility": "private"}
-    _commit_jsonl(tmp_path, "session-bad.jsonl", json.dumps(bad) + "\n")
+    _commit_jsonl(tmp_path, f"session-{SID_BAD}.jsonl", json.dumps(bad) + "\n")
     return tmp_path
 
 
@@ -97,7 +105,7 @@ def repo_with_bad_jsonl(tmp_path):
 def repo_with_good_jsonl(tmp_path):
     _init_repo(tmp_path)
     lines = [json.dumps(OK), json.dumps(END, ensure_ascii=False)]
-    _commit_jsonl(tmp_path, "session-good.jsonl", "\n".join(lines) + "\n")
+    _commit_jsonl(tmp_path, f"session-{SID_GOOD}.jsonl", "\n".join(lines) + "\n")
     return tmp_path
 
 
@@ -248,7 +256,7 @@ def test_scan_no_experience_dir(tmp_path):
 
 def test_scan_non_json_line_reports_line_number(tmp_path):
     _init_repo(tmp_path)
-    _commit_jsonl(tmp_path, "session-x.jsonl", json.dumps(OK) + "\nnot json\n")
+    _commit_jsonl(tmp_path, f"session-{SID_X}.jsonl", json.dumps(OK) + "\nnot json\n")
     hits = scan(tmp_path)
     assert len(hits) == 1
     assert "2" in hits[0][1] and "JSON" in hits[0][1]
@@ -256,17 +264,17 @@ def test_scan_non_json_line_reports_line_number(tmp_path):
 
 def test_scan_non_object_line_rejected(tmp_path):
     _init_repo(tmp_path)
-    _commit_jsonl(tmp_path, "session-x.jsonl", "[1,2]\n")
+    _commit_jsonl(tmp_path, f"session-{SID_X}.jsonl", "[1,2]\n")
     assert scan(tmp_path)
 
 
 def test_scan_multiple_violations_one_tuple_each(tmp_path):
     _init_repo(tmp_path)
     bad = {**OK, "visibility": "private", "repo": "x/y"}
-    _commit_jsonl(tmp_path, "session-x.jsonl", json.dumps(bad) + "\n")
+    _commit_jsonl(tmp_path, f"session-{SID_X}.jsonl", json.dumps(bad) + "\n")
     hits = scan(tmp_path)
     assert len(hits) >= 2
-    assert all(h[0].endswith("session-x.jsonl") for h in hits)
+    assert all(h[0].endswith(f"session-{SID_X}.jsonl") for h in hits)
 
 
 def test_scan_skips_non_jsonl_and_audit_and_local(tmp_path):
@@ -291,7 +299,7 @@ def test_scan_ignores_untracked_jsonl(tmp_path):
 
 def test_scan_blank_lines_ignored(tmp_path):
     _init_repo(tmp_path)
-    _commit_jsonl(tmp_path, "session-x.jsonl", json.dumps(OK) + "\n\n")
+    _commit_jsonl(tmp_path, f"session-{SID_X}.jsonl", json.dumps(OK) + "\n\n")
     assert scan(tmp_path) == []
 
 
@@ -301,8 +309,8 @@ def test_cli_exit_codes(tmp_path):
     for r in (bad_root, good_root):
         r.mkdir()
         _init_repo(r)
-    _commit_jsonl(bad_root, "session-bad.jsonl", json.dumps({**OK, "visibility": "private"}) + "\n")
-    _commit_jsonl(good_root, "session-good.jsonl", json.dumps(OK) + "\n" + json.dumps(END) + "\n")
+    _commit_jsonl(bad_root, f"session-{SID_BAD}.jsonl", json.dumps({**OK, "visibility": "private"}) + "\n")
+    _commit_jsonl(good_root, f"session-{SID_GOOD}.jsonl", json.dumps(OK) + "\n" + json.dumps(END) + "\n")
 
     def cli(root):
         return subprocess.run(
@@ -311,7 +319,7 @@ def test_cli_exit_codes(tmp_path):
 
     bad = cli(bad_root)
     assert bad.returncode == 1
-    assert "session-bad.jsonl" in bad.stderr and "→" in bad.stderr
+    assert f"session-{SID_BAD}.jsonl" in bad.stderr and "→" in bad.stderr
     assert "docs/wikiskill/README.md" in bad.stderr
     good = cli(good_root)
     assert good.returncode == 0
@@ -343,7 +351,7 @@ def test_tracking_probe_paths_are_fixed():
 def test_tracking_ok_with_standard_gitignore(tmp_path):
     # 正常系: 本物と同じ約束の .gitignore なら違反 0。記録ファイルが追跡されていても通る
     _init_repo(tmp_path)
-    _commit_jsonl(tmp_path, "session-good.jsonl", json.dumps(OK) + "\n")
+    _commit_jsonl(tmp_path, f"session-{SID_GOOD}.jsonl", json.dumps(OK) + "\n")
     assert check_tracking(tmp_path) == []
     r = _cli(tmp_path)
     assert r.returncode == 0, r.stdout + r.stderr
@@ -413,14 +421,14 @@ def test_tracking_ignores_user_global_excludes(tmp_path):
 
 from check_experience_privacy import _ignored_among  # noqa: E402
 
-A_REL = ".claude/experience/2026-10/session-a.jsonl"
-PART_REL = ".claude/experience/2026-10/session-a.part1.jsonl"
+A_REL = f".claude/experience/2026-10/session-{SID_A}.jsonl"
+PART_REL = f".claude/experience/2026-10/session-{SID_A}.part1.jsonl"
 
 
 def _repo_with_two_records(tmp_path, gitignore):
     _init_repo(tmp_path, gitignore=gitignore)
-    _commit_jsonl(tmp_path, "session-a.jsonl", json.dumps(OK) + "\n")          # _commit_jsonl は add -f(除外されていても追跡させる)
-    _commit_jsonl(tmp_path, "session-a.part1.jsonl", json.dumps(OK) + "\n")
+    _commit_jsonl(tmp_path, f"session-{SID_A}.jsonl", json.dumps(OK) + "\n")          # _commit_jsonl は add -f(除外されていても追跡させる)
+    _commit_jsonl(tmp_path, f"session-{SID_A}.part1.jsonl", json.dumps(OK) + "\n")
     return tmp_path
 
 
@@ -468,23 +476,26 @@ def test_tracked_records_whole_dir_exclusion_with_negation_still_caught(tmp_path
 
 
 def test_tracked_records_japanese_and_space_path_is_handled(tmp_path):
-    # 日本語・空白を含むパスが壊れずに違反として出る(-z の固定)
+    # 日本語・空白を含むパスでも git の判定(-z)は壊れない。名前が命名規則に合わないので、表示は伏せる
     _init_repo(tmp_path, gitignore=STANDARD_GITIGNORE + ".claude/experience/2026-11/\n")
-    _commit_jsonl(tmp_path, "session-日本語 空白.jsonl", json.dumps(OK) + "\n", month="2026-11")
-    rel = ".claude/experience/2026-11/session-日本語 空白.jsonl"
+    name = "session-日本語 空白.jsonl"
+    _commit_jsonl(tmp_path, name, json.dumps(OK) + "\n", month="2026-11")
+    rel = ".claude/experience/2026-11/" + name
+    ignored = _ignored_among(tmp_path, [rel])
+    assert list(ignored) == [rel]                       # git の判定は実際のパスで行われる
     hits = check_tracking(tmp_path)
-    assert _paths(hits) == [rel]
+    assert _paths(hits) == [f"<不正な記録パス: 長さ {len(rel)}>"]
     r = _cli(tmp_path)
-    assert r.returncode == 1 and rel in r.stderr
+    assert r.returncode == 1 and rel not in r.stderr and "日本語 空白" not in r.stderr
 
 
 def test_tracked_records_reincluded_by_negation_are_not_flagged(tmp_path):
     # 否定パターンで正しく再包含されたファイルは違反にしない(`-v` は再包含されただけのパスも出し、終了コードも 0 になる。実測)
-    gi = STANDARD_GITIGNORE + ".claude/experience/2026-10/*.jsonl\n!.claude/experience/2026-10/session-a.jsonl\n"
+    gi = STANDARD_GITIGNORE + f".claude/experience/2026-10/*.jsonl\n!.claude/experience/2026-10/session-{SID_A}.jsonl\n"
     _init_repo(tmp_path, gitignore=gi)
-    _commit_jsonl(tmp_path, "session-a.jsonl", json.dumps(OK) + "\n")   # 再包含 → 追跡されてよい
-    _commit_jsonl(tmp_path, "session-b.jsonl", json.dumps(OK) + "\n")   # 除外されたまま(add -f で追跡)
-    b_rel = ".claude/experience/2026-10/session-b.jsonl"
+    _commit_jsonl(tmp_path, f"session-{SID_A}.jsonl", json.dumps(OK) + "\n")   # 再包含 → 追跡されてよい
+    _commit_jsonl(tmp_path, f"session-{SID_B}.jsonl", json.dumps(OK) + "\n")   # 除外されたまま(add -f で追跡)
+    b_rel = f".claude/experience/2026-10/session-{SID_B}.jsonl"
     assert _ignored_among(tmp_path, [A_REL]) == {}                       # 再包含だけのパスは「ignore なし」
     ignored = _ignored_among(tmp_path, [A_REL, b_rel])
     assert list(ignored) == [b_rel] and "!" not in ignored[b_rel]
@@ -506,13 +517,13 @@ def test_line_separator_chars_in_note_scan_clean(tmp_path):
     rec = {**OK, "event": "note", "text": "a\u2028b\u2029c\x85d"}
     line = json.dumps(rec, ensure_ascii=False)
     assert "\u2028" in line and "\x85" in line  # raw で入っていること
-    _commit_jsonl(tmp_path, "session-sep.jsonl", line + "\n" + json.dumps(OK) + "\n")
+    _commit_jsonl(tmp_path, f"session-{SID_X}.jsonl", line + "\n" + json.dumps(OK) + "\n")
     assert scan(tmp_path) == []
 
 
 def test_crlf_lines_scan_clean(tmp_path):
     _init_repo(tmp_path)
-    _commit_jsonl(tmp_path, "session-crlf.jsonl", json.dumps(OK) + "\r\n" + json.dumps(OK) + "\r\n")
+    _commit_jsonl(tmp_path, f"session-{SID_X}.jsonl", json.dumps(OK) + "\r\n" + json.dumps(OK) + "\r\n")
     assert scan(tmp_path) == []
 
 
@@ -525,7 +536,7 @@ def test_leading_backslash_path_rejected():
 def test_scan_deeply_nested_json_reported_not_crash(tmp_path):
     _init_repo(tmp_path)
     deep = "[" * 2000 + "]" * 2000
-    _commit_jsonl(tmp_path, "session-deep.jsonl", deep + "\n")
+    _commit_jsonl(tmp_path, f"session-{SID_X}.jsonl", deep + "\n")
     hits = scan(tmp_path)
     assert len(hits) == 1 and "入れ子が深すぎます" in hits[0][1]
 
@@ -558,11 +569,11 @@ def test_program_name_rejected(program):
 def test_scan_covers_part_files(tmp_path):
     _init_repo(tmp_path)
     root = tmp_path
-    _commit_jsonl(root, "session-A.jsonl", json.dumps(OK) + "\n")
+    _commit_jsonl(root, f"session-{SID_A}.jsonl", json.dumps(OK) + "\n")
     bad = {**OK, "path": "/home/user/secret.md"}
-    _commit_jsonl(root, "session-A.part1.jsonl", json.dumps(bad) + "\n")
+    _commit_jsonl(root, f"session-{SID_A}.part1.jsonl", json.dumps(bad) + "\n")
     hits = scan(root)
-    assert [h[0] for h in hits] == [".claude/experience/2026-10/session-A.part1.jsonl"]
+    assert [h[0] for h in hits] == [f".claude/experience/2026-10/session-{SID_A}.part1.jsonl"]
 
 
 # ---- skill_failure(P1-a・D1): 記録側が書く失敗記録を、公開可否の検査が正しく扱うこと ----
@@ -661,14 +672,14 @@ def test_existing_event_checks_unchanged_after_skill_failure_added():
 def test_skill_failure_committed_record_scan_passes(tmp_path):
     # 必須テスト6(D1 の再現): 失敗記録を含むコミットが、未知の event として止まらないこと
     _init_repo(tmp_path)
-    _commit_jsonl(tmp_path, "session-fail.jsonl", json.dumps(SKILL_FAILURE_OK) + "\n")
+    _commit_jsonl(tmp_path, f"session-{SID_X}.jsonl", json.dumps(SKILL_FAILURE_OK) + "\n")
     assert scan(tmp_path) == []
 
 
 def test_skill_failure_committed_with_secret_scan_fails(tmp_path):
     _init_repo(tmp_path)
     bad = {**SKILL_FAILURE_OK, "branch": "ghp_" + "a" * 20}
-    _commit_jsonl(tmp_path, "session-fail-secret.jsonl", json.dumps(bad) + "\n")
+    _commit_jsonl(tmp_path, f"session-{SID_BAD}.jsonl", json.dumps(bad) + "\n")
     hits = scan(tmp_path)
     assert hits and any("秘密情報らしい値" in reason for _, reason in hits)
 
@@ -678,3 +689,134 @@ def test_skill_failure_selftest_cases_are_part_of_selftest():
     r = run(["--selftest"])
     assert r.returncode == 0, r.stderr
     assert "自己点検OK" in r.stdout
+
+
+# ---- 記録ファイル名の検査(P1-b・案C): 命名規則・境界値・表示の伏せ方・内容検査の非緩和 ----
+
+SECRET_NAME_TOKEN = "ghp_" + "a" * 20   # 架空の鍵らしい値(実在の認証情報ではない)
+
+NAME_OK = [
+    f".claude/experience/2026-10/session-{SID_A}.jsonl",
+    f".claude/experience/2026-10/session-{SID_A}.part1.jsonl",
+    f".claude/experience/2026-10/session-{SID_A}.part12.jsonl",
+    ".claude/experience/2026-10/session-unknown-20261016T101112Z.jsonl",
+    ".claude/experience/2026-01/session-unknown-20261016T101112Z.part3.jsonl",
+    f".claude/experience/2026-12/session-{SID_A}.jsonl",             # 境界: 12 月
+    f".claude/experience/2026-01/session-{SID_A}.jsonl",             # 境界: 1 月
+]
+
+NAME_BAD = [
+    f".claude/experience/2026-10/session-{SID_A.upper()}.jsonl",     # 大文字の UUID
+    ".claude/experience/2026-10/session-" + SID_A.replace("-", "") + ".jsonl",   # ハイフンなし
+    ".claude/experience/2026-10/session-6a1b2c3d-4e5f.jsonl",        # 短い UUID
+    f".claude/experience/2026-10/session-{SID_A}x.jsonl",            # 余計な文字
+    ".claude/experience/2026-10/session-unknown-2026.jsonl",         # unknown の時刻が無い
+    ".claude/experience/2026-10/session-unknown-20261016T1011Z.jsonl",  # 時刻の形が違う
+    ".claude/experience/2026-10/session-a.jsonl",                    # 短い名前(旧テストの形)
+    ".claude/experience/2026-10/notes.jsonl",                        # session- で始まらない
+    f".claude/experience/2026-10/session-{SID_A}.part0.jsonl",       # part は 1 から
+    f".claude/experience/2026-10/session-{SID_A}.part.jsonl",        # part の番号が無い
+    f".claude/experience/2026-10/session-{SID_A}.part01.jsonl",      # 先頭に 0
+    f".claude/experience/2026-10/session-{SID_A}.partX.jsonl",       # 番号でない
+    f".claude/experience/2026-10/session-{SID_A}.part1.part2.jsonl", # part が二重
+    f".claude/experience/2026-10/session-{SID_A}.json",              # 拡張子違い
+    f".claude/experience/2026-00/session-{SID_A}.jsonl",             # 境界: 0 月
+    f".claude/experience/2026-13/session-{SID_A}.jsonl",             # 境界: 13 月
+    f".claude/experience/2026-1/session-{SID_A}.jsonl",              # 月の桁が足りない
+    f".claude/experience/2026-10/extra/session-{SID_A}.jsonl",       # 余計なフォルダ
+    f"docs/session-{SID_A}.jsonl",                                   # 記録の置き場所ではない
+    f".claude/experience/2026-10/session-{SID_A}..jsonl",            # .. を含む
+    f".claude/experience/../2026-10/session-{SID_A}.jsonl",          # .. のフォルダ
+    ".claude/experience/2026-10/session-a\\b.jsonl",                 # バックスラッシュ
+    f".claude/experience/2026-10/session-{SID_A} .jsonl",            # 空白
+    f".claude/experience/2026-10/session-{SECRET_NAME_TOKEN}.jsonl", # 鍵らしい識別子
+    ".claude/experience/2026-10/session-AKIA" + "B" * 16 + ".jsonl",  # 鍵らしい識別子(AWS 形式)
+]
+
+
+@pytest.mark.parametrize("rel", NAME_OK)
+def test_record_name_ok(rel):
+    # 必須テスト(互換): 既存の正当な命名(UUID・unknown-<時刻>・.partN)と、月・part の境界値は通る
+    assert record_name_problem(rel) is None
+
+
+@pytest.mark.parametrize("rel", NAME_BAD)
+def test_record_name_bad_is_rejected(rel):
+    # 異常系: パストラバーサル・不正なファイル名・秘密らしい識別子は拒否する
+    assert record_name_problem(rel) is not None
+
+
+def test_secret_name_reason_does_not_echo_the_value():
+    rel = f".claude/experience/2026-10/session-{SECRET_NAME_TOKEN}.jsonl"
+    why = record_name_problem(rel)
+    assert "秘密情報" in why
+    assert SECRET_NAME_TOKEN not in why and "ghp_" not in why
+
+
+def test_label_hides_invalid_record_names_and_keeps_valid_ones():
+    bad = f".claude/experience/2026-10/session-{SECRET_NAME_TOKEN}.jsonl"
+    assert _label(bad) == f"<不正な記録パス: 長さ {len(bad)}>"
+    assert SECRET_NAME_TOKEN not in _label(bad)
+    good = f".claude/experience/2026-10/session-{SID_A}.jsonl"
+    assert _label(good) == good
+
+
+def test_local_label_keeps_plain_names_and_hides_secret_like_ones():
+    # _local/ や _audit.log の名前には session_id が入りうる。安全な名前だけ表示する
+    assert _local_label("_local/current-session") == "_local/current-session"
+    assert _local_label(".claude/experience/_audit.log") == ".claude/experience/_audit.log"
+    secret_local = ".claude/experience/_local/" + SECRET_NAME_TOKEN + ".ended"
+    assert SECRET_NAME_TOKEN not in _local_label(secret_local)
+    assert _local_label("_local/with space") == f"<ローカル限定の記録パス: 長さ {len('_local/with space')}>"
+
+
+def test_scan_reports_invalid_name_redacted_and_cli_hides_it(tmp_path):
+    # 異常系: 鍵らしい識別子のファイル名は、違反として止まり、名前そのものは表示されない
+    _init_repo(tmp_path)
+    name = f"session-{SECRET_NAME_TOKEN}.jsonl"
+    _commit_jsonl(tmp_path, name, json.dumps(OK) + "\n")
+    hits = scan(tmp_path)
+    assert len(hits) == 1
+    label, reason = hits[0]
+    assert label == f"<不正な記録パス: 長さ {len('.claude/experience/2026-10/' + name)}>"
+    assert "ファイル名の形式" in reason and SECRET_NAME_TOKEN not in reason
+    r = _cli(tmp_path)
+    assert r.returncode == 1 and "不正な記録パス" in r.stderr
+    assert SECRET_NAME_TOKEN not in r.stderr and "ghp_" not in r.stderr
+
+
+def test_scan_invalid_name_still_checks_content(tmp_path):
+    # 名前が合わなくても、内容の検査は止まらない(検査の緩和をしない)
+    _init_repo(tmp_path)
+    _commit_jsonl(tmp_path, "session-notauuid.jsonl", json.dumps({**OK, "path": "/home/x/y"}) + "\n")
+    hits = scan(tmp_path)
+    reasons = [r for _, r in hits]
+    assert any("ファイル名の形式" in r for r in reasons)
+    assert any("絶対パス" in r for r in reasons)
+    assert all(label.startswith("<不正な記録パス") for label, _ in hits)
+
+
+def test_scan_valid_name_still_checks_content(tmp_path):
+    # 名前が正しくても、内容の違反は従来どおり止まる(境界: 正しい名前で緩めない)
+    _init_repo(tmp_path)
+    _commit_jsonl(tmp_path, f"session-{SID_A}.jsonl", json.dumps({**OK, "visibility": "private"}) + "\n")
+    hits = scan(tmp_path)
+    assert len(hits) == 1 and hits[0][0] == f".claude/experience/2026-10/session-{SID_A}.jsonl"
+    assert "visibility" in hits[0][1]
+
+
+def test_scan_valid_names_including_part_pass(tmp_path):
+    # 正常系: UUID・unknown-<時刻>・.partN の全部が、違反なしで通る
+    _init_repo(tmp_path)
+    _commit_jsonl(tmp_path, f"session-{SID_A}.jsonl", json.dumps(OK) + "\n")
+    _commit_jsonl(tmp_path, f"session-{SID_A}.part1.jsonl", json.dumps(OK) + "\n")
+    _commit_jsonl(tmp_path, "session-unknown-20261016T101112Z.jsonl", json.dumps(OK) + "\n")
+    assert scan(tmp_path) == []
+
+
+def test_real_repo_record_names_all_match():
+    # 必須テスト(互換): 本物のリポジトリの追跡済みの記録(既存 60 件)の名前がすべて通る
+    root = Path(__file__).resolve().parents[2]
+    targets = [n for n in check_experience_privacy._tracked_experience(root) if check_experience_privacy._is_target(n)]
+    assert targets, "追跡済みの記録が 1 件も見つからない(検査できていない)"
+    assert [n for n in targets if record_name_problem(n)] == []
