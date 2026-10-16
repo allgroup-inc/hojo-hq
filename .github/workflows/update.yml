@@ -101,6 +101,11 @@ jobs:
         # carousel-writerスキル準拠の7枚組。金曜のsocial-postがこの素材を使う。
         run: python scripts/generate_carousel.py
 
+      - name: Generate IG summary page (プロフィールのリンク先・議事20261016)
+        # Instagramは本文URLを押せないため、投稿に載せた制度をタップで開けるページ(site/ig/)を作る。
+        # 入力は上で生成した投稿素材そのもの。必ずカルーセル・SNS生成の後に実行する。
+        run: python scripts/generate_ig_hub.py
+
       - name: Generate topic pages (目的別pSEO・議事20260809)
         # 設備投資/IT/省エネ/雇用/創業/承継の6ページを最新データで再生成
         run: python scripts/generate_topic_pages.py
@@ -125,7 +130,7 @@ jobs:
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
-          git add data/subsidies.json data/line_alerts.json data/kpi posts/launch posts/images posts/line posts/carousel site/themes
+          git add data/subsidies.json data/line_alerts.json data/kpi posts/launch posts/images posts/line posts/carousel site/themes site/ig
           git diff --cached --quiet || git commit -m "auto: update subsidies & images $(date '+%Y-%m-%d %H:%M')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)。
           # -X theirs: 自動生成ファイル同士のコンフリクトは自分の新しい生成分で解決し、
