@@ -27,7 +27,8 @@ except Exception:
     pass
 
 import shipping_gate
-from generate_ig_hub import HUB_GUIDE
+from generate_ig_hub import hub_guide
+from region_filter import other_region
 
 JST = timezone(timedelta(hours=9))
 BASE_DIR = os.path.dirname(__file__)
@@ -59,6 +60,8 @@ HASHTAG_SETS = {
 }
 DEFAULT_HASHTAGS = "#沖縄企業のミカタ #沖縄経営者 #沖縄補助金 #沖縄助成金 #中小企業支援"
 DISCLAIMER = "※要件・締切・金額は必ず原文の公募要領でご確認ください。"
+# 送る(シェア)を促す一文。非フォロワーへの配信は「送る」が効く(docs/SNS_バズ投稿調査_20261016.md)
+SEND_CTA = "経理担当や顧問の先生に送っておくと、相談が早く進みます。"
 
 
 # 画像に載せる制度名の上限。これを超える場合は意味の切れ目で丸める。
@@ -218,7 +221,8 @@ def main():
     count = data["count"]
     today = datetime.now(JST).date()
 
-    dated = [it for it in items if parse_date(it.get("deadline"))]
+    # 他地域の自治体制度(target_areaが「全国」でも)は投稿に使わない(region_filter.py参照)
+    dated = [it for it in items if parse_date(it.get("deadline")) and not other_region(it)]
     dated.sort(key=lambda it: it["deadline"])
 
     def dleft(it):
@@ -360,8 +364,9 @@ def main():
             f"💰 {amount_text(it.get('max_amount'))}\n"
             f"🏝 実施主体：{it.get('issuer') or '要確認'}\n"
             f"{body_line}"
+            f"{SEND_CTA}\n"
+            f"{hub_guide(i)}\n"
             f"{seido_closers[(i - 1) % len(seido_closers)]}\n{it['source_url']}\n"
-            f"{HUB_GUIDE}\n"
             f"{DISCLAIMER}"
         )
         template = hook_templates[hook][(week + i) % len(hook_templates[hook])]
@@ -394,8 +399,9 @@ def main():
             f"🗓 {deadline_line(shokei, today)}\n"
             f"💰 {amount_text(shokei.get('max_amount'))}\n"
             "沖縄の事業者も、要件に合えば申請できます。\n"
+            f"{SEND_CTA}\n"
+            f"{hub_guide(6)}\n"
             f"制度の詳細・申請は原文で👇\n{shokei['source_url']}\n"
-            f"{HUB_GUIDE}\n"
             f"{DISCLAIMER}"
         )
         tpl5 = ["brand", "news"][week % 2]
@@ -421,8 +427,8 @@ def main():
         caption=(
             "「うちに使える制度、あるのかな」。30秒でわかります。\n"
             "沖縄の事業者のための、補助金・助成金ナビ。会社名の入力は不要です🌺\n"
-            f"診断も登録も無料です👇\n{SITE_URL}\n"
-            f"{HUB_GUIDE}"
+            f"{hub_guide(7)}\n"
+            f"診断も登録も無料です👇\n{SITE_URL}"
         ),
         source=SITE_URL,
     ))
@@ -449,8 +455,8 @@ def main():
                 "（書類の郵送申請は審査に最大1か月）。\n"
                 f"{ex}"
                 "今回が難しくても、備えておけば次のチャンスをつかめます。\n"
+                f"{hub_guide(8)}\n"
                 f"制度一覧はこちら👇\n{SITE_URL}\n"
-                f"{HUB_GUIDE}\n"
                 f"{DISCLAIMER}"
             ),
             source=yokoku_item["source_url"],
