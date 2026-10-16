@@ -637,7 +637,7 @@ def _bash(script, cwd, env=None, pipefail=True):
 
 def _prepare_tree(root):
     """update.yml の Commit step が git add するパスを最低限そろえる。"""
-    for d in ("data/kpi", "posts/launch", "posts/images", "posts/line", "posts/carousel", "site/themes"):
+    for d in ("data/kpi", "posts/launch", "posts/images", "posts/line", "posts/carousel", "site/themes", "site/ig"):
         (root / d).mkdir(parents=True, exist_ok=True)
         (root / d / ".keep").write_text("", encoding="utf-8")
     (root / "data" / "line_alerts.json").write_text("{}", encoding="utf-8")
