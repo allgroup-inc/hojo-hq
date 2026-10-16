@@ -24,9 +24,13 @@
 使い方:
     python3 scripts/memory_bootstrap.py hook SessionStart       # 段1: ブランチ・直近commitから(stdin に hook JSON)
     python3 scripts/memory_bootstrap.py hook UserPromptSubmit   # 段2: 最初の指示から(セッションに1回だけ)
-    python3 scripts/memory_bootstrap.py query "<語> <語>"        # 手動確認用(停止スイッチは見ない)
+    python3 scripts/memory_bootstrap.py query "<語> <語>"        # 手動確認用(停止スイッチは見ない・読み取り専用)
+    python3 scripts/memory_bootstrap.py query "<語>" --kind decision,failure --limit 3 --json
+        # --kind: 区分で絞る(省略で全区分) / --limit: 区分ごとの件数 / --json: ref に D番号・FK番号を入れて出す
 
 規律: root(このリポジトリ)の外は読まない。private の Experience 行は出さない(audit に残す)。
+Decision は、公開リポ(PUBLIC_REMOTES)では議事の visibility が無い・public のものだけ出す(private・誤記の値は出さない)。
+既知の非公開リポは絞らない(リポ自体が非公開)。remote が読めないリポ(unknown)は公開リポと同じ判定で絞る(fail closed)。conflict 判定は全件で行う。
 [Wiki] は docs/wiki/ 直下の approved のうち、commit 済みのまま・visibility がリポの公開性と一致・承認の形がある
 (wiki_schema.injectable_reasons)・Decision と矛盾しない(injection_blockers)ものだけ。_candidates/ と _archive/ は開かない。
 .claude/wiki.off があれば [Wiki] だけ止める(.claude/memory.off は従来どおり全体を止める)。
@@ -34,6 +38,8 @@
 """
 from __future__ import annotations
 
+import argparse
+import contextlib
 import json
 import math
 import os
@@ -501,8 +507,31 @@ def _decisions_cached(root: Path) -> list[dict]:
     return _DECISIONS_CACHE[key]
 
 
+def _repo_slug_of(root: Path) -> str:
+    """このリポジトリの remote の "owner/name"。読めなければ "unknown"(wiki_schema が無くても動く)。"""
+    if _ws is None or not _git_ready(root):
+        return "unknown"
+    return _ws.experience_log.repo_slug(root)
+
+
+def _decision_visible(d: dict, slug: str) -> bool:
+    """この場所の注入・検索に Decision を出してよいか(visibility の判定)。
+
+    - 既知の非公開リポ: 全件(従来どおり。リポ自体が非公開なので、議事の visibility では絞らない)
+    - 公開リポ(PUBLIC_REMOTES)または不明(unknown): 議事の visibility が無い・空・public のものだけ。
+      private や誤記の値は出さない(fail closed)。公開側へ非公開の決定を漏らさないための判定
+    """
+    if slug != "unknown" and slug not in _ws.experience_log.PUBLIC_REMOTES:  # unknown なら _ws は必ず有る
+        return True
+    v = d.get("visibility")
+    if v is None or (isinstance(v, str) and not v.strip()):
+        return True
+    return isinstance(v, str) and v.strip() == "public"
+
+
 def _decisions(root: Path) -> list[Source]:
     out = []
+    slug = _repo_slug_of(root)
     for d in _decisions_cached(root):
         path = d["path"]
         if path.startswith("/") or path.startswith(".."):
@@ -511,11 +540,15 @@ def _decisions(root: Path) -> list[Source]:
             continue  # 置き換えられた決定は出さない(後継の議事が出る)
         if any(str(t).strip().lower() == "test" for t in d.get("tags") or []):
             continue  # 試験用の記録は本物の決定として扱わない
+        if not _decision_visible(d, slug):
+            continue  # 公開リポで非公開の決定は、注入も検索も出さない(conflict 判定には残す)
         label = _STATUS_LABEL.get(d.get("status") or "", "[D]")
         title = _TITLE_PREFIX_RE.sub("", _clean(d["title"]))
         line = _decision_line(d, title, label)
-        out.append(_src("decision", label, path, path, title, line, line, d.get("date") or "",
-                        d.get("text_head") or title, title))
+        src = _src("decision", label, path, path, title, line, line, d.get("date") or "",
+                   d.get("text_head") or title, title)
+        src["ref"] = d.get("id") or path  # 人が読める番号(D…)。query の JSON 出力用
+        out.append(src)
     return out
 
 
@@ -1222,13 +1255,75 @@ def _hook(event: str) -> int:
     return 0
 
 
+@contextlib.contextmanager
+def _read_only():
+    """query は読み取り専用。監査ログ(.claude/experience/_audit.log)へ書かない(hook ではないので記録も要らない)。"""
+    g = globals()
+    saved = (g["audit"], g["_audit_once"])
+    g["audit"] = lambda *a, **k: None
+    g["_audit_once"] = lambda *a, **k: None
+    try:
+        yield
+    finally:
+        g["audit"], g["_audit_once"] = saved
+
+
+def query(root: Path, terms: list[str], kinds: list[str] | None = None,
+          limit: int = PER_KIND) -> dict[str, list[Source]]:
+    """手動 query の選別。Hook と同じ収集・同じ信頼の規則(_select)を使い、書き込みはしない。
+
+    kinds が None なら全区分。区分ごとに score 降順で limit 件。
+    """
+    with _read_only():
+        sources = collect_sources(root)
+        if kinds is not None:
+            sources = [s for s in sources if s.get("kind") in kinds]
+        return _select(sources, list(terms), limit, MIN_SCORE, synonyms=_synonyms(root))
+
+
+def _query_json(picked: dict[str, list[Source]], terms: list[str], kinds: list[str], limit: int) -> str:
+    rows = []
+    for k in KIND_ORDER:
+        for s in picked.get(k, []):
+            rows.append({
+                "kind": k, "label": s.get("label", ""),
+                "ref": s.get("ref") or str(s.get("id", "")).split("#")[-1],
+                "title": s.get("title", ""), "date": s.get("date") or "",
+                "path": s.get("path", ""), "line": s.get("line", ""), "score": s.get("score", 0),
+            })
+    return json.dumps({"terms": terms, "kinds": kinds, "limit": limit, "results": rows},
+                      ensure_ascii=False, indent=2)
+
+
+def _query_main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="memory_bootstrap.py query",
+                                 description="決定・失敗・Wiki などを読み取り専用で検索する(Bootstrap と同じ規則)")
+    ap.add_argument("terms", nargs="*", help="検索語(空白で複数指定できます)")
+    ap.add_argument("--kind", default="", help=f"区分のカンマ区切り({','.join(KIND_ORDER)})。省略で全区分")
+    ap.add_argument("--limit", type=int, default=PER_KIND, help=f"区分ごとの件数(既定 {PER_KIND})")
+    ap.add_argument("--json", action="store_true", help="JSON で出す(ref に決定番号・FK番号など)")
+    a = ap.parse_args(argv)
+    kinds = [k.strip() for k in a.kind.split(",") if k.strip()] or None
+    bad = [k for k in kinds or [] if k not in KIND_ORDER]
+    if bad:
+        ap.error(f"未知の区分: {', '.join(bad)}(使えるもの: {', '.join(KIND_ORDER)})")
+    if a.limit < 1:
+        ap.error("--limit は1以上")
+    terms = [t for x in a.terms for t in x.split() if t.strip()]
+    root = project_dir()
+    picked = query(root, terms, kinds, a.limit)
+    if a.json:
+        print(_query_json(picked, terms, kinds or list(KIND_ORDER), a.limit))
+    else:
+        print(_render(picked, None, STAGE1_HEADING, BUDGET_CHARS)[0], end="")
+    return 0
+
+
 def main(argv: list[str]) -> int:
     if len(argv) == 3 and argv[1] == "hook":
         return _hook(argv[2])
     if len(argv) >= 3 and argv[1] == "query":
-        terms = [t for a in argv[2:] for t in a.split() if t.strip()]
-        print(retrieve(project_dir(), terms), end="")
-        return 0
+        return _query_main(argv[2:])
     print(__doc__, file=sys.stderr)
     return 2
 
