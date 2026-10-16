@@ -373,6 +373,13 @@
       "memo": "machikaze-sitemap(索引)がpost/page/category等に分かれていたため、固定ページ一覧(page-sitemap.xml)を追加取得。『まちかぜ教室のチラシ』ページのURLを特定する目的。同一ドメイン審査済み(運用ルール2026-09-06)"
     },
     {
+      "id": "machikaze-result",
+      "org": "NPO法人まちのかぜ",
+      "url": "https://www.column.machinokaze.jp/result/",
+      "robots_approved": true,
+      "memo": "page-sitemap.xmlで確認した固定ページ(home/contact/result の3つのみ。チラシ専用の固定ページは存在しなかった)。「合格実績」ページに授業形式(集団か1対1か)の記載がないか最後に確認する。無ければmachikaze-onlineは保留のまま確定する。同一ドメイン審査済み(運用ルール2026-09-06)"
+    },
+    {
       "id": "aha-lab",
       "org": "Aha研究室(旧ITスタディ札幌)",
       "url": "https://www.itstudysapporo.com/",
