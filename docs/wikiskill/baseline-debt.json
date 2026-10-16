@@ -1,22 +1,16 @@
 {
   "schema": 1,
-  "recorded_at": "2026-10-12T07:32:20Z",
-  "commit": "147063f94",
+  "recorded_at": "2026-10-15T17:25:07Z",
+  "commit": "b662f5a67",
   "base_ref": "origin/main@04dbc28f4",
   "phase1_origin": false,
   "note": "Phase 1 開始時点の既知の赤。Phase 1 ではこれを増やさない(小柳さん 2026-10-06 承認)",
   "checks": {
     "check_repo_scope": {
       "command": "python3 scripts/check_repo_scope.py",
-      "failure_count": 5,
-      "items": [
-        ".claude/skills/data-insights-extraction/SKILL.md::FORBIDDEN_CONTENT[0]",
-        ".claude/skills/design-system-hojo/SKILL.md::FORBIDDEN_CONTENT[0]",
-        ".claude/skills/system-design-patterns/SKILL.md::FORBIDDEN_CONTENT[0]",
-        ".claude/skills/transcription-analysis-hojo/SKILL.md::FORBIDDEN_CONTENT[0]",
-        ".claude/skills/writing-plans-hojo/SKILL.md::FORBIDDEN_CONTENT[0]"
-      ],
-      "cause": "2026-10-02 に追加された8つの SKILL.md と、2026-10-06 に自動生成された週次の学びが、check_repo_scope.FORBIDDEN_CONTENT の1語目(kakei-crm 側の統合名)を本文に含む。repo-scope CI は赤だが、赤でも配布 cron・マージを止める仕組みが無く、update-skills.sh にも配布前検査が無いため11リポジトリへ拡散した(台帳: FK-006)。",
+      "failure_count": 0,
+      "items": [],
+      "cause": "#484(M0: 公開 Experience 記録と SKILL.md 見出しの禁止語修正)と本 PR(design-system-hojo の公開向け再構成) を適用した状態で、repo-scope の本文検査は 0 件。解消した5件を外した。新規の登録は無し。本 PR は #484 の上に積むため、#484 がマージされるまで単独では成立しない。",
       "introduced_by": [
         "6044bb918",
         "f065ef5a7",
