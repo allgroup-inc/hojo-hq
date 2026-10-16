@@ -67,8 +67,17 @@ jobs:
           chmod 600 "$HOME/.clasprc.json"
           printf '{"scriptId":"%s","rootDir":"./src"}' "$SCRIPT_ID" > glow-ma/.clasp.json
           cd glow-ma
-          clasp push --force
+          # 失敗理由を Actions の画面(注記)に出す。clasp の出力に認証情報は含まれない
+          set +e
+          out=$(clasp push --force 2>&1); code=$?
+          set -e
+          echo "$out"
           rm -f "$HOME/.clasprc.json" .clasp.json
+          if [ $code -ne 0 ]; then
+            msg=$(echo "$out" | grep -v -i -E "token|secret" | tail -8 | tr '\n' ' ' | cut -c1-900)
+            echo "::error title=clasp push failed::$msg"
+            exit $code
+          fi
 
       - name: LINE通知(反映完了)
         if: steps.creds.outputs.ready == 'true' && success()
