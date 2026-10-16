@@ -165,13 +165,3 @@ function quickRepairDashboard() {
   Logger.log("3. ダッシュボードシートにデータが表示されているか");
 }
 
-// 既存の ensureTab_ をここでも使用（SheetSetup.gs から）
-function ensureTab_(spreadsheet, sheetName, headers) {
-  var sheet = spreadsheet.getSheetByName(sheetName);
-  if (!sheet) {
-    sheet = spreadsheet.insertSheet(sheetName);
-  }
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  sheet.setFrozenRows(1);
-  return sheet;
-}

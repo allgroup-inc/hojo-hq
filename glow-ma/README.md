@@ -24,6 +24,23 @@ Googleスプレッドシートに保持し、このディレクトリにはGAS(G
 5. `cd glow-ma && clasp push` でコードをApps Scriptに反映する
 6. Apps Scriptエディタで `ensureLedgerTabs` を一度だけ手動実行し、10タブを作成する
 
+## 自動反映(2026-10-16〜)
+
+main の `glow-ma/src/` が変わると、GitHub Actions(`.github/workflows/glow-ma-deploy.yml`)が
+Apps Script へ `clasp push` する。PCからの手作業は不要。最初に一度だけ次を行う。
+
+1. PCで `npx @google/clasp@3.4.1 login`(GLOW企業リレーション台帳の所有者アカウントで)
+2. https://script.google.com/home/usersettings で「Google Apps Script API」をオンにする
+3. GitHub の Settings → Secrets and variables → Actions に2つ登録する
+   - `CLASPRC_JSON`: PCの `~/.clasprc.json`(Windowsは `C:\Users\<名前>\.clasprc.json`)の中身をそのまま
+   - `GLOW_MA_SCRIPT_ID`: Apps Script のスクリプトID
+4. Actions の「glow-ma-deploy」を Run workflow で一度実行する
+
+反映後は、毎分動く音声ログ処理が6時間に1回「自己点検・修復」(`OpsStatus.gs` の `runSelfHeal`)を
+呼び、ダッシュボードの欠落・非表示と、BlueBean同期・日次メンテナンスのトリガー欠落を自動で直す。
+各処理の最終結果は台帳の「稼働状況」タブに残る。失敗はSlack(未設定ならスクリプト所有者へメール)で
+1日1通届く。
+
 ## 7000件リストのインポート
 
 1. スプレッドシートに「インポート待ち」タブを作り、元データを貼り付ける

@@ -15,8 +15,10 @@
  *      共用で開始。共用のままパスワードが変更されると連携が無言で止まるため、失敗時は
  *      「業務ID」欄のエラー(E002/E003)をまず確認すること。Slack通知でも検知できる)
  *    - BLUEBEAN_PASSWORD: 上記のパスワード(受け渡しはメール・チャット禁止。口頭かLINEで)
- *    - BLUEBEAN_CAMPAIGN_ID: BlueBeanの作業グループID(ACD番号)。法人開拓専用の作業グループを
- *      1つ作り、その番号を設定する(実際の番号も公開リポジトリには書かない)
+ *    - BLUEBEAN_CAMPAIGN_ID: BlueBeanの作業グループID。**カンマ区切りで複数指定できる**
+ *      (2026-10-16: 接続時に設定した作業グループと、福田さんが実際に架電している作業グループが
+ *      別だったため、取得が0件のまま誰も気づかなかった。現場が使う作業グループをすべて並べる。
+ *      実際の番号は公開リポジトリには書かない)
  * 2. ensureLedgerTabs を実行し、「CTI通話履歴」タブを作成する
  * 3. installCtiSyncTrigger を1度だけ実行し、1時間おきの同期トリガーを登録する
  *    (BlueBeanの架電はキャンペーン単位でまとまって行われるため、LINE音声ログ(1分間隔)ほど
@@ -30,7 +32,24 @@
  * 止まり続けることを防ぐための仕組みで、新しいプロパティの追加は不要(未設定の場合は
  * Slack通知だけスキップされ、実行ログへの記録は従来どおり行われる)。
  */
+/**
+ * トリガーから呼ばれる入口。結果を「稼働状況」タブへ記録し、失敗は通知する(OpsStatus.gs)。
+ * 0件でも「成功・0件」と残るので、「動いているのに取れていない」も台帳から見える。
+ */
 function syncCtiCallHistory() {
+  try {
+    var summary = syncCtiCallHistoryCore_();
+    recordOpsStatus_("BlueBean架電履歴の同期", true, summary);
+  } catch (error) {
+    recordOpsStatus_("BlueBean架電履歴の同期", false, String(error));
+    notifyOpsFailure_("BlueBean架電履歴の同期",
+      "認証情報(BLUEBEAN_USERNAME/PASSWORD)の変更や、作業グループID(BLUEBEAN_CAMPAIGN_ID)の誤りがないか確認してください。\n" +
+      "エラー: " + error);
+    throw error;
+  }
+}
+
+function syncCtiCallHistoryCore_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var callLogSheet = ss.getSheetByName(GlowSchema.CTI_CALL_LOG_SHEET_NAME);
   if (!callLogSheet) {
@@ -56,23 +75,22 @@ function syncCtiCallHistory() {
       Utilities.formatDate(new Date(Date.now() - 24 * 60 * 60 * 1000), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
     var endDate = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
 
-    var apiResponse;
-    try {
-      apiResponse = callBlueBeanApi_(startDate, endDate);
+    // BLUEBEAN_USERNAME/PASSWORDは人間の管理者アカウントと共用のため、パスワード変更等で
+    // 無言のまま止まりうる(docs/議事_20260819_BlueBean CTI連携.md参照)。失敗は呼び出し元の
+    // syncCtiCallHistory が稼働状況タブへの記録と通知(Slack未設定ならメール)を行う。
+    var campaignIds = readCampaignIds_();
+    var calls = [];
+    var perCampaign = [];
+    campaignIds.forEach(function (campaignId, index) {
+      var apiResponse = callBlueBeanApi_(startDate, endDate, campaignId);
       if (apiResponse.result !== "OK") {
-        throw new Error("BlueBean APIがエラーを返しました: " + JSON.stringify(apiResponse));
+        throw new Error("BlueBean APIがエラーを返しました(作業グループ" + (index + 1) + "件目): " +
+          JSON.stringify(apiResponse));
       }
-    } catch (error) {
-      // BLUEBEAN_USERNAME/PASSWORDは人間の管理者アカウントと共用のため、パスワード変更等で
-      // 無言のまま止まりうる(docs/議事_20260819_BlueBean CTI連携.md参照)。実行ログだけに
-      // 頼らず、Slackにも通知して気づけるようにする(resilient-agent-design原則: 無言の失敗を作らない)。
-      postToSlackWithRetry_(
-        "⚠️ BlueBean CTI通話履歴の同期に失敗しました。認証情報(BLUEBEAN_USERNAME/PASSWORD)が" +
-        "変更されていないか確認してください。エラー: " + error
-      );
-      throw error;
-    }
-    var calls = GlowCtiContent.flattenBlueBeanCalls(apiResponse);
+      var got = GlowCtiContent.flattenBlueBeanCalls(apiResponse);
+      perCampaign.push("グループ" + (index + 1) + ": " + got.length + "件");
+      calls = calls.concat(got);
+    });
 
     var existingCallIds = readExistingGroupCallIds_(callLogSheet);
     var newCalls = calls.filter(function (call) {
@@ -104,6 +122,8 @@ function syncCtiCallHistory() {
       "件、未記録(未マッチ・複数企業ヒット・キャンセル等) " + skippedCount + "件)。" +
       "取得済みのためスキップ " + (calls.length - newCalls.length) + "件。"
     );
+    return startDate + "〜" + endDate + " / 作業グループ" + campaignIds.length + "件(" + perCampaign.join("、") +
+      ") / 新規 " + newCalls.length + "件(対応履歴へ記録 " + recordedCount + "件)";
   } finally {
     lock.releaseLock();
   }
@@ -127,9 +147,24 @@ function readExistingGroupCallIds_(sheet) {
   return ids;
 }
 
-function callBlueBeanApi_(startDate, endDate) {
+/** BLUEBEAN_CAMPAIGN_ID をカンマ区切りで読み、空要素・重複を除いた配列を返す。 */
+function readCampaignIds_() {
+  var raw = PropertiesService.getScriptProperties().getProperty("BLUEBEAN_CAMPAIGN_ID") || "";
+  var seen = {};
+  var ids = raw.split(/[,、\s]+/).filter(function (id) {
+    if (!id || seen[id]) return false;
+    seen[id] = true;
+    return true;
+  });
+  if (ids.length === 0) {
+    throw new Error("BLUEBEAN_CAMPAIGN_ID が未設定です。スクリプト プロパティで設定してください。");
+  }
+  return ids;
+}
+
+function callBlueBeanApi_(startDate, endDate, campaignId) {
   return GlowResilience.withRetry(
-    function () { return callBlueBeanApiOnce_(startDate, endDate); },
+    function () { return callBlueBeanApiOnce_(startDate, endDate, campaignId); },
     {
       maxAttempts: 3,
       backoffMs: [2000, 10000],
@@ -144,12 +179,11 @@ function callBlueBeanApi_(startDate, endDate) {
   );
 }
 
-function callBlueBeanApiOnce_(startDate, endDate) {
+function callBlueBeanApiOnce_(startDate, endDate, campaignId) {
   var properties = PropertiesService.getScriptProperties();
   var domain = properties.getProperty("BLUEBEAN_DOMAIN");
   var username = properties.getProperty("BLUEBEAN_USERNAME");
   var password = properties.getProperty("BLUEBEAN_PASSWORD");
-  var campaignId = properties.getProperty("BLUEBEAN_CAMPAIGN_ID");
   if (!domain || !username || !password || !campaignId) {
     throw new Error(
       "BLUEBEAN_DOMAIN / BLUEBEAN_USERNAME / BLUEBEAN_PASSWORD / BLUEBEAN_CAMPAIGN_ID が" +

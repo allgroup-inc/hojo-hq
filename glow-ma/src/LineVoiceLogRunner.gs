@@ -441,6 +441,14 @@ function installVoiceLogProcessingTrigger() {
 function processQueuedVoiceLogs() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
+  // 毎分動くこのトリガーに、6時間に1回の自己点検・修復を相乗りさせる(OpsStatus.gs)。
+  // 人がエディタで修復用の関数を押さなくても、反映後に自動でダッシュボード等が直る。
+  try {
+    runSelfHealIfDue_();
+  } catch (error) {
+    Logger.log("自己点検・修復の呼び出しに失敗しました: " + error);
+  }
+
   try {
     sweepStaleVoiceLogs_(ss);
   } catch (error) {
