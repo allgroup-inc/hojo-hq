@@ -390,15 +390,15 @@
       "id": "miyakojima-museum",
       "org": "宮古島市総合博物館",
       "url": "https://www.city.miyakojima.lg.jp/soshiki/kyouiku/syougaigakusyu/hakubutsukan/nyuukan-annai.html",
-      "robots_approved": false,
-      "memo": "小中高生は土日・春夏冬休み期間中入館料免除との情報(平日は有料)。収集候補リストE表「県内の博物館・美術館・科学館」。2026-10-16 WebSearchで発見・robots未監査。条件付き無料のため掲載時はprice_typeを条件付き無料にする想定"
+      "robots_approved": true,
+      "memo": "小中高生は土日・春夏冬休み期間中入館料免除との情報(平日は有料)。収集候補リストE表「県内の博物館・美術館・科学館」。2026-10-16 WebSearchで発見・robots承認2026-10-16(robots_report.json実測。単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)。条件付き無料のため掲載時はprice_typeを条件付き無料にする想定"
     },
     {
       "id": "kaiyobunkakan",
       "org": "国営沖縄記念公園(海洋博公園) 海洋文化館",
       "url": "https://oki-park.jp/kaiyohaku/info/32",
-      "robots_approved": false,
-      "memo": "高校生以上190円・中学生以下無料(プラネタリウム含む)との情報。収集候補リストE表「県内の博物館・美術館・科学館」。2026-10-16 WebSearchで発見・robots未監査"
+      "robots_approved": true,
+      "memo": "高校生以上190円・中学生以下無料(プラネタリウム含む)との情報。収集候補リストE表「県内の博物館・美術館・科学館」。2026-10-16 WebSearchで発見・robots承認2026-10-16(robots_report.json実測。単発取得のみ。docs/みらいひらけ堂_守り部審査記録.md)"
     },
     {
       "id": "aha-lab",
