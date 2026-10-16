@@ -141,12 +141,11 @@ test("紹介実績ログのタブ名・見出しが定義されている(紹介�
   ]);
 });
 
-test("企業マスタに事前選定ランク・事前選定スコア列が末尾に追加されている", () => {
-  assert.ok(schema.COMPANY_MASTER_HEADERS.includes("事前選定ランク"));
-  assert.ok(schema.COMPANY_MASTER_HEADERS.includes("事前選定スコア"));
+test("企業マスタの列は末尾に追加していく(既存列の位置を動かさない)", () => {
+  // 事前選定(2026-09)の後ろに、Phase 11(2026-10)のLINE/Instagram/QR列が続く
   assert.deepEqual(
-    schema.COMPANY_MASTER_HEADERS.slice(-2),
-    ["事前選定ランク", "事前選定スコア"]
+    schema.COMPANY_MASTER_HEADERS.slice(-5),
+    ["事前選定ランク", "事前選定スコア", "LINE User ID", "Instagramアカウント（@で始まる）", "QRコード URL"]
   );
 });
 

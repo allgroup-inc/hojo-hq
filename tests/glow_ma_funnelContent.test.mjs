@@ -49,7 +49,7 @@ test("buildWeeklyFunnel: 週ごとにLP閲覧・LINE友だち・新規登録・�
   assert.equal(thisWeek.lineFollowersEnd, 9);
   assert.equal(thisWeek.lineNet, 1); // 9 - 8(前週末)
   assert.equal(thisWeek.newCompanies, 1);
-  assert.deepEqual(thisWeek.newByRoute, { "①紹介": 0, "②手紙DM": 1, "③ミカタ経由": 0 });
+  assert.deepEqual(thisWeek.newByRoute, { "①紹介": 0, "②手紙DM": 1, "③ミカタ経由": 0, "④世界の架け橋(Alibaba)": 0 });
   assert.equal(thisWeek.meetings, 2);
   assert.equal(thisWeek.proposals, 1);
   assert.equal(thisWeek.closings, 0);
