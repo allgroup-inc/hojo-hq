@@ -29,6 +29,7 @@ except Exception:
     pass
 
 import shipping_gate
+from generate_ig_hub import HUB_GUIDE
 
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
@@ -38,7 +39,7 @@ OUT_DIR = os.path.join(BASE, "posts", "carousel")
 # 出荷ゲート(運用規程1-3)の通過日。**キャプション文面を書き換えたら必ず更新する。**
 # 2026-08-17: accuracy-check(締切・金額・出典URLはdata由来)/ deadline-alert(30日以上先のみ掲載)/
 #             humanizer(定型句なし)で確認。
-GATE_CHECKED = "2026-08-17"
+GATE_CHECKED = "2026-10-16"
 SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=carousel"
 
 W, H = 1080, 1350  # IG推奨4:5(画面占有が最大)
@@ -261,6 +262,7 @@ def main():
         "",
         "🔖 保存しておくと、締切前に見返せます。",
         f"うちの会社で使えるかは30秒診断で👇\n{SITE_URL}",
+        HUB_GUIDE,
         "※要件・締切・金額は必ず原文の公募要領でご確認ください。",
         "",
         "#沖縄補助金 #沖縄助成金 #沖縄経営者 #中小企業支援 #沖縄企業のミカタ",

@@ -27,6 +27,7 @@ except Exception:
     pass
 
 import shipping_gate
+from generate_ig_hub import HUB_GUIDE
 
 JST = timezone(timedelta(hours=9))
 BASE_DIR = os.path.dirname(__file__)
@@ -39,7 +40,7 @@ OUT_DIR = os.path.join(BASE_DIR, "..", "posts", "launch")
 #             humanizer(定型句・過剰な絵文字なし)で確認。
 # 2026-09-11: 構成変更(自己紹介系カード廃止・制度5枠=沖縄2/金額2/締切1+shokei/30秒診断/予告)。
 #             フック別の書き出しを含む全8投稿を同3観点で確認。
-GATE_CHECKED = "2026-09-11"
+GATE_CHECKED = "2026-10-16"
 # UTM付き(ヒロメさんのUTM運用: instagram/social/launch)。プロフィールリンクにも同URLを使用
 SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=launch"
 
@@ -360,6 +361,7 @@ def main():
             f"🏝 実施主体：{it.get('issuer') or '要確認'}\n"
             f"{body_line}"
             f"{seido_closers[(i - 1) % len(seido_closers)]}\n{it['source_url']}\n"
+            f"{HUB_GUIDE}\n"
             f"{DISCLAIMER}"
         )
         template = hook_templates[hook][(week + i) % len(hook_templates[hook])]
@@ -393,6 +395,7 @@ def main():
             f"💰 {amount_text(shokei.get('max_amount'))}\n"
             "沖縄の事業者も、要件に合えば申請できます。\n"
             f"制度の詳細・申請は原文で👇\n{shokei['source_url']}\n"
+            f"{HUB_GUIDE}\n"
             f"{DISCLAIMER}"
         )
         tpl5 = ["brand", "news"][week % 2]
@@ -418,7 +421,8 @@ def main():
         caption=(
             "「うちに使える制度、あるのかな」。30秒でわかります。\n"
             "沖縄の事業者のための、補助金・助成金ナビ。会社名の入力は不要です🌺\n"
-            f"診断も登録も無料です👇\n{SITE_URL}"
+            f"診断も登録も無料です👇\n{SITE_URL}\n"
+            f"{HUB_GUIDE}"
         ),
         source=SITE_URL,
     ))
@@ -446,6 +450,7 @@ def main():
                 f"{ex}"
                 "今回が難しくても、備えておけば次のチャンスをつかめます。\n"
                 f"制度一覧はこちら👇\n{SITE_URL}\n"
+                f"{HUB_GUIDE}\n"
                 f"{DISCLAIMER}"
             ),
             source=yokoku_item["source_url"],
