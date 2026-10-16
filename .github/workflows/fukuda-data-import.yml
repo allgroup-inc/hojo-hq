@@ -1,0 +1,135 @@
+name: Fukuda Historical Data Auto-Import
+
+on:
+  schedule:
+    # 毎日午前1時（JST）に実行
+    - cron: '0 16 * * *'  # UTC 16:00 = JST 01:00
+  workflow_dispatch:
+
+jobs:
+  validate-and-import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install openpyxl google-auth-oauthlib google-auth-httplib2 google-api-python-client
+
+      - name: Setup Google Sheets API credentials
+        run: |
+          echo "${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}" > /tmp/service_account.json
+
+      - name: Detect latest Fukuda email
+        id: detect-email
+        run: |
+          python glow-ma/scripts/detect_fukuda_email.py \
+            --output /tmp/fukuda_email.json \
+            --gmail-creds "${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}"
+
+          if [ -f /tmp/fukuda_email.json ]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+            cat /tmp/fukuda_email.json
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download attachment from Google Drive
+        if: steps.detect-email.outputs.found == 'true'
+        id: download-file
+        run: |
+          python glow-ma/scripts/download_fukuda_attachment.py \
+            --email-json /tmp/fukuda_email.json \
+            --output /tmp/fukuda_data.xlsx \
+            --creds "${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}"
+
+          if [ -f /tmp/fukuda_data.xlsx ]; then
+            echo "success=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate Fukuda data
+        if: steps.download-file.outputs.success == 'true'
+        id: validate
+        run: |
+          python glow-ma/scripts/validate_fukuda_data.py \
+            /tmp/fukuda_data.xlsx \
+            /tmp/validation_result.json
+
+          # バリデーション結果を確認
+          if [ -f /tmp/validation_result.json ]; then
+            python -c "
+            import json
+            with open('/tmp/validation_result.json') as f:
+              result = json.load(f)
+            print(f\"✓ 有効データ: {result['valid_rows_count']}件\")
+            print(f\"✗ エラー: {result['error_count']}件\")
+            print(f\"⚠ 警告: {result['warning_count']}件\")
+            "
+          fi
+
+      - name: Upload data to Google Sheets
+        if: steps.validate.outcome == 'success'
+        id: upload-sheet
+        run: |
+          python glow-ma/scripts/upload_to_staging_sheet.py \
+            --xlsx /tmp/fukuda_data.xlsx \
+            --sheet-id "${{ secrets.GLOW_SHEET_ID }}" \
+            --creds "${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}" \
+            --validation-result /tmp/validation_result.json
+
+      - name: Trigger Apps Script import
+        if: steps.upload-sheet.outcome == 'success'
+        run: |
+          python glow-ma/scripts/trigger_gas_import.py \
+            --deployment-id "${{ secrets.GAS_DEPLOYMENT_ID }}" \
+            --creds "${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}"
+
+      - name: Wait for import completion
+        if: steps.upload-sheet.outcome == 'success'
+        run: |
+          python glow-ma/scripts/wait_import_completion.py \
+            --sheet-id "${{ secrets.GLOW_SHEET_ID }}" \
+            --creds "${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}" \
+            --timeout 600
+
+      - name: Generate import report
+        if: always()
+        run: |
+          python glow-ma/scripts/generate_import_report.py \
+            --sheet-id "${{ secrets.GLOW_SHEET_ID }}" \
+            --creds "${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}" \
+            --output /tmp/import_report.md
+
+      - name: Comment on workflow run
+        if: always()
+        run: |
+          if [ -f /tmp/import_report.md ]; then
+            cat /tmp/import_report.md
+          fi
+
+      - name: Commit validation results
+        if: always()
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          if [ -f /tmp/validation_result.json ]; then
+            mkdir -p docs/logs/fukuda-import
+            cp /tmp/validation_result.json docs/logs/fukuda-import/result_$(date +%Y%m%d_%H%M%S).json
+
+            git add docs/logs/fukuda-import/
+            git commit -m "chore: update fukuda import validation log" || true
+            git push || true
+          fi
