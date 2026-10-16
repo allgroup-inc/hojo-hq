@@ -1,7 +1,7 @@
 # source_id: fsa-koukou-shidou
 # url: https://www.fsa.go.jp/news/r3/sonota/20220317/20220317.html
 # org: 金融庁
-# fetched_at: 2026-10-02
+# fetched_at: 2026-10-16
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 -->
@@ -179,6 +179,8 @@
 
  報道発表資料 
 
+ 報道発表資料（令和３年７月～令和４年６月） 
+
 高校向け 金融経済教育指導教材の公表について
 
  Note: This page is machine translated. Translated pages are not necessarily correct.
@@ -266,8 +268,7 @@
 
  PDF版 （1,025KB）
 
- 第４章：「貯める・増やす」（本編） 
- 「貯める・増やす」（応用編）
+ 第４章：「貯める・増やす」（本編） 「貯める・増やす」（応用編）
 
  PowerPoint版 （2,663KB）
  PowerPoint版 （2,965KB）

@@ -1,7 +1,7 @@
 # source_id: motobu-museum
 # url: http://motobu-m.town.motobu.okinawa.jp/
 # org: 本部町立博物館
-# fetched_at: 2026-10-02
+# fetched_at: 2026-10-16
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 本部町立博物館 :: Home 

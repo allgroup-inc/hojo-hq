@@ -1,7 +1,7 @@
 # source_id: tsuboya-access
 # url: http://www.edu.city.naha.okinawa.jp/tsuboya/access.html
 # org: 那覇市立壺屋焼物博物館
-# fetched_at: 2026-10-02
+# fetched_at: 2026-10-16
 # 注意: 機械抽出テキスト。照合の最終根拠は url の原文。
 
 アクセス&nbsp;-&nbsp;那覇市立壺屋焼物博物館 
