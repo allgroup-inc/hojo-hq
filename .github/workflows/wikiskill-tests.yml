@@ -42,6 +42,7 @@ on:
       - 'scripts/wiki_guard.py'
       - 'scripts/weekly_gakubi.py'
       - '.github/workflows/weekly-gakubi.yml'
+      - 'scripts/skill_metrics.py'
       # ↑ 2026-10-12 PR-A: 週次学びの禁止語ガード(ガード自体の変更でもテストを省略しない。scripts/wikiskill_scope.py の
       #   PATTERNS と対。paths の一覧は wikiskill_scope.py が文字列で読むため、一覧の途中にコメント行を挟まない)
   workflow_dispatch: {}
@@ -143,6 +144,7 @@ jobs:
           tests/scripts/test_weekly_gakubi.py
           tests/scripts/test_weekly_gakubi_workflow.py
           tests/scripts/test_prb1_skills_public.py
+          tests/scripts/test_skill_metrics.py
           tests/scripts/test_prb2_design_system_public.py
           tests/integration/test_wikiskill_memory_e2e.py
           tests/integration/test_wikiskill_wiki_e2e.py
