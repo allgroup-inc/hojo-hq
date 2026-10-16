@@ -6,7 +6,7 @@ name: wikiskill-tests
 # 2026-10-08 決裁 #26 S2(PR-A2): pull_request は paths フィルタ無しで**全 PR** で起動する
 # (S7a で必須 status check にするため。paths で起動しない PR は「Expected」のまま詰まる)。
 # 代わりに「対象判定」step が PR の変更ファイルを scripts/wikiskill_scope.py の PATTERNS
-# (= 下の push 側 paths と同じ 29 件)と突き合わせ、当たらなければテストを省略して緑で終わる。
+# (= 下の push 側 paths と同じ 32 件)と突き合わせ、当たらなければテストを省略して緑で終わる。
 # 差分の取得や判定に失敗した場合は安全側に倒して全テストを実行する。push 起動は従来どおり paths で絞る。
 
 on:
@@ -43,6 +43,8 @@ on:
       - 'scripts/weekly_gakubi.py'
       - '.github/workflows/weekly-gakubi.yml'
       - 'scripts/skill_metrics.py'
+      - 'scripts/skill_proposer.py'
+      - 'scripts/skill_validator.py'
       # ↑ 2026-10-12 PR-A: 週次学びの禁止語ガード(ガード自体の変更でもテストを省略しない。scripts/wikiskill_scope.py の
       #   PATTERNS と対。paths の一覧は wikiskill_scope.py が文字列で読むため、一覧の途中にコメント行を挟まない)
   workflow_dispatch: {}
@@ -146,6 +148,8 @@ jobs:
           tests/scripts/test_prb1_skills_public.py
           tests/scripts/test_skill_metrics.py
           tests/scripts/test_prb2_design_system_public.py
+          tests/scripts/test_skill_proposer.py
+          tests/scripts/test_skill_validator.py
           tests/integration/test_wikiskill_memory_e2e.py
           tests/integration/test_wikiskill_wiki_e2e.py
           -q
