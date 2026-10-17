@@ -9,7 +9,7 @@ import csv
 import sys
 from pathlib import Path
 
-# 営業マン名一覧（2つのファイルで取得）
+# 営業マン名一覧
 STAFF_NAMES = [
     '前原　芳乃',
     '奈須　章',
@@ -42,7 +42,7 @@ MONTHS = ['5月', '6月', '7月', '8月', '9月']
 
 def extract_monthly_data(file_path, sheet_name, month):
     """
-    月別シートからデータを抽出
+    月別シートからデータを抽出（File1用）
     戻り値: {営業マン: {KPI: 値}}
     """
     wb = openpyxl.load_workbook(file_path, data_only=True)
@@ -80,34 +80,15 @@ def extract_monthly_data(file_path, sheet_name, month):
     wb.close()
     return data
 
-def extract_cumulative_average_data(file_path):
-    """
-    3ヶ月累計平均データを抽出（File2から）
-    戻り値: {営業マン: {KPI: 値}}
-    """
-    wb = openpyxl.load_workbook(file_path, data_only=True)
-    ws = wb['Sheet1']
-
-    data = {}
-
-    # 3ヶ月累計平均（行4〜12）
-    for row, staff_name in enumerate(STAFF_NAMES, start=4):
-        data[staff_name] = {}
-
-        for col, header in enumerate(KPI_HEADERS, start=3):
-            value = ws.cell(row, col).value
-            if value is not None:
-                try:
-                    data[staff_name][header] = float(value)
-                except (ValueError, TypeError):
-                    data[staff_name][header] = value
-
-    wb.close()
-    return data
-
 def extract_monthly_data_from_file2(file_path):
     """
-    File2から月別データを抽出（8月・9月）
+    File2から月別データを抽出（7月・8月・9月）
+
+    File2の構造:
+      行16-24: 9月（営業マン）
+      行29-37: 8月（営業マン）
+      行41-49: 7月（営業マン）
+
     戻り値: {月: {営業マン: {KPI: 値}}}
     """
     wb = openpyxl.load_workbook(file_path, data_only=True)
@@ -115,21 +96,23 @@ def extract_monthly_data_from_file2(file_path):
 
     data = {}
 
-    # 各月のセクション（例：9月は行16〜25、8月は行29〜38、7月は行41〜50）
+    # 各月のセクション（データ行開始, データ行終了）
     sections = {
-        '9月': range(16, 26),
-        '8月': range(29, 39),
-        '7月': range(41, 51),
+        '9月': (17, 25),    # 行17-24がデータ（25は合計なので除外）
+        '8月': (30, 38),    # 行30-37がデータ（38は合計なので除外）
+        '7月': (42, 50),    # 行42-49がデータ（50は合計なので除外）
     }
 
-    for month, row_range in sections.items():
+    for month, (data_start, data_end) in sections.items():
         data[month] = {}
 
-        for row in row_range:
-            staff_name_cell = ws.cell(row, 5).value
+        # データ行（営業マン）をループ
+        for row in range(data_start, data_end):
+            staff_name_cell = ws.cell(row, 2).value  # B列（列2）に営業マン名
             if not staff_name_cell:
                 continue
 
+            # 営業マン名を正規化
             found_staff = None
             for staff in STAFF_NAMES:
                 if staff in str(staff_name_cell):
@@ -141,7 +124,9 @@ def extract_monthly_data_from_file2(file_path):
 
             data[month][found_staff] = {}
 
-            for col, header in enumerate(KPI_HEADERS, start=6):
+            # KPI値を抽出（C列以降、KPI_HEADERSの個数分）
+            for col_idx, header in enumerate(KPI_HEADERS):
+                col = 3 + col_idx  # C列（列3）から開始
                 value = ws.cell(row, col).value
                 if value is not None:
                     try:
@@ -201,21 +186,33 @@ def main():
         except Exception as e:
             print(f"  ✗ エラー: {e}")
 
-    # File2から8月〜9月と累計平均を抽出
-    print(f"\n📊 8月・9月のデータを抽出中...")
+    # File2から8月・9月を抽出
+    print(f"\n📊 8月・9月・7月のデータを抽出中...")
     try:
         file2_monthly = extract_monthly_data_from_file2(file2)
-        for month in ['8月', '9月']:
+        for month in ['7月', '8月', '9月']:
             if month in file2_monthly:
-                all_data[month] = file2_monthly[month]
+                if month not in all_data:
+                    all_data[month] = {}
+                all_data[month].update(file2_monthly[month])
                 print(f"  ✓ {month}: {len(file2_monthly[month])}名分のデータを取得")
     except Exception as e:
         print(f"  ✗ エラー: {e}")
+        import traceback
+        traceback.print_exc()
 
     # 出力
     print("\n" + "=" * 80)
     output_file = "/tmp/sales_performance_for_sheets.csv"
     export_google_sheets_format(all_data, output_file)
+
+    # 統計
+    total_records = sum(len(month_data) for month_data in all_data.values())
+    print(f"\n【取得データ統計】")
+    print(f"  総レコード数: {total_records}件")
+    for month in MONTHS:
+        if month in all_data:
+            print(f"  {month}: {len(all_data[month])}名")
 
     print("\n【使い方】")
     print(f"1. {output_file} をテキストエディタで開く")
