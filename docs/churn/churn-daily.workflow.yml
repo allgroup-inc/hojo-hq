@@ -1,0 +1,92 @@
+# ============================================================================
+# 早期解約リスク保全システム 日次パイプライン（GitHub Actions 雛形）
+# ----------------------------------------------------------------------------
+# ⚠️ これは「雛形」です。**この公開リポジトリ（allgroup-inc/hojo-hq）の
+#    .github/workflows/ には絶対に置かないでください。**
+#    公開リポで動かすと顧客個人情報（PII）が公開環境を通ることになります。
+#
+# 配置先: 統制環境の非公開リポジトリ（hojo-churn）の .github/workflows/ のみ。
+# 前提: 守り部審査（Issue #142）完了 ＋ 小柳さんご決裁 ＋ hojo-churn 隔離実行、の3点が
+#       揃うまで有効化しない（docs/churn/守り部審査_データ保存論点.md）。
+#
+# 設計（resilient-agent-design 4層）:
+#   トリガー  = schedule（日次）＋ 手動（workflow_dispatch）
+#   ワークフロー = scripts.churn.cli pipeline（preflight→fit→backtest→AUCゲート→…）
+#   エージェント = 各サブコマンド
+#   ガードレール = AUCゲート／スキーマ停止／べき等（run:<日付>）／最小権限
+# ============================================================================
+
+name: churn-daily
+
+on:
+  schedule:
+    # 06:20 JST = 21:20 UTC（前日）。cron は UTC。データ更新後に走らせる想定。
+    - cron: "20 21 * * *"
+  workflow_dispatch:
+    inputs:
+      run_date:
+        description: "実行日 YYYY-MM-DD（べき等キー run:<日付>。未指定は当日）"
+        required: false
+
+# 最小権限: このジョブはリポジトリへ書き込まない（成果物は private/ に留め、コミットしない）
+permissions:
+  contents: read
+
+concurrency:
+  # 同日の多重起動を抑止（べき等はコード側にもあるが、二重起動自体を避ける）
+  group: churn-daily
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: self-hosted   # 統制環境の self-hosted runner（PIIを外に出さない）
+    timeout-minutes: 30
+    steps:
+      - name: Checkout（コードのみ。顧客データはリポジトリに置かない）
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 実行日を決める（未指定は当日 JST）
+        id: date
+        run: |
+          if [ -n "${{ github.event.inputs.run_date }}" ]; then
+            echo "run_date=${{ github.event.inputs.run_date }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_date=$(TZ=Asia/Tokyo date +%F)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: preflight（投入前チェック。不可なら以降を止める）
+        run: |
+          python -m scripts.churn.cli preflight \
+            --csv "$CHURN_CSV" \
+            --column-map "$CHURN_CMAP" \
+            --as-of "${{ steps.date.outputs.run_date }}"
+        env:
+          # データ・設定のパスは runner 側のシークレット/変数で与える（リポジトリに置かない）
+          CHURN_CSV: ${{ secrets.CHURN_CSV_PATH }}
+          CHURN_CMAP: ${{ secrets.CHURN_CMAP_PATH }}
+
+      - name: pipeline（本番実行ハーネス。AUC未満/スキーマ不正なら安全停止）
+        run: |
+          python -m scripts.churn.cli pipeline \
+            --csv "$CHURN_CSV" \
+            --column-map "$CHURN_CMAP" \
+            --out-dir "$CHURN_OUT" \
+            --as-of "${{ steps.date.outputs.run_date }}" \
+            --split "$CHURN_SPLIT" \
+            --run-date "${{ steps.date.outputs.run_date }}"
+          # AUC閾値（--auc-min）とキャパ（--capacity）は config の決裁値を既定に使う。
+          # 決裁で変える場合のみ明示指定する（docs/churn/業務定数_決裁ログ.md）。
+        env:
+          CHURN_CSV: ${{ secrets.CHURN_CSV_PATH }}
+          CHURN_CMAP: ${{ secrets.CHURN_CMAP_PATH }}
+          CHURN_OUT: ${{ secrets.CHURN_OUT_DIR }}     # private/ 配下。統制環境内に留める
+          CHURN_SPLIT: ${{ vars.CHURN_SPLIT }}        # バックテスト分割日 YYYY-MM-DD
+
+      # 注意: 成果物（list/today/cohort/snapshot）は PII を含む。
+      # actions/upload-artifact で GitHub 側へ上げない。統制環境内の配布に限る。
+      # 配信（LINE/Power Automate）は別ジョブ・別権限で、必要な集計のみを渡す。

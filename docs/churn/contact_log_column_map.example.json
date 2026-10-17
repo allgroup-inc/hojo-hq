@@ -1,0 +1,12 @@
+{
+  "customer_id": "顧客ID",
+  "apply_date": "契約日",
+  "contact_date": "接触日",
+  "action": "対応内容",
+  "result": "結果区分",
+  "reaction": "顧客反応",
+  "medium": "接触手段",
+  "concern": "懸念",
+  "approach": "返し方",
+  "next_action": "次アクション"
+}

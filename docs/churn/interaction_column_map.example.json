@@ -1,0 +1,8 @@
+{
+  "customer_id": "顧客ID",
+  "date": "接触日",
+  "kind": "種別",
+  "agent": "担当",
+  "content": "案内内容",
+  "memo": "メモ"
+}

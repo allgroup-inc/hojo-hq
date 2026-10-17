@@ -1,0 +1,19 @@
+{
+  "customer_id": "顧客ID",
+  "apply_id": "顧客ID",
+  "policy_number": "証券番号",
+  "apply_date": "契約日",
+  "cancel_date": "初回保険料着金日",
+  "product": "申し込み商品",
+  "channel": "リスト種類",
+  "apply_form": "申込方法",
+  "amount": "保険料￥",
+  "age": "年齢",
+  "gender": "契：性別",
+  "area": "市町村",
+  "agent_id": "営業担当者",
+  "debit_due": "初回引落予定日",
+  "status": "現ステータス",
+  "payment_route": "払込経路",
+  "unpaid": "Ⅳ"
+}
