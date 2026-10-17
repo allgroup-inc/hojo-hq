@@ -1,6 +1,6 @@
 {
  "updated_at": "2026-10-16 08:28",
- "count": 261,
+ "count": 260,
  "items": [
   {
    "id": "fk-kuni-jidoteate",
@@ -761,33 +761,6 @@
    ],
    "deadline_type": "常時",
    "deadline": null,
-   "verified": true,
-   "verified_at": "2026-07-28",
-   "verified_by": "小柳(公式ページ照合)",
-   "status": "検証済み",
-   "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-10-16 08:28"
-  },
-  {
-   "id": "fk-ken-hitorioya-kurashi-ouen",
-   "name": "沖縄県ひとり親家庭暮らし応援事業",
-   "category": "生活支援",
-   "life_events": [
-    "子育て",
-    "低所得・生活苦"
-   ],
-   "issuer": "沖縄県",
-   "area": "沖縄県",
-   "target_household": "児童扶養手当の受給世帯など、ひとり親家庭の方が対象となる可能性があります",
-   "how_to_apply": "申請は専用キャンペーンサイト(電子クーポン)から。問い合わせは事業事務局(沖縄JTB株式会社・050-1794-2924)",
-   "amount_note": "電子クーポン 児童1人あたり1万円(2人目以降 各5千円加算)",
-   "deadline": "2026-10-15",
-   "deadline_type": "期限あり",
-   "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/1036531/1039524.html",
-   "match_tokens": [
-    "ひとり親",
-    "暮らし応援"
-   ],
    "verified": true,
    "verified_at": "2026-07-28",
    "verified_by": "小柳(公式ページ照合)",
