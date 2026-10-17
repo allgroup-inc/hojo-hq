@@ -4446,5 +4446,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-17",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "申請練習用補助金【補助金の支払いはありません】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDJWIMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(ブルーボンド/ブルーローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd9wMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度子育て【建設型】初年度",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSAMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「脱炭素化・エネルギー転換に資する我が国技術の国際実証事業」の2026年度第2回公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdl2MAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "[３次公募]中小企業成長加速化補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdjfMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]

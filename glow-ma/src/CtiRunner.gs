@@ -88,7 +88,7 @@ function syncCtiCallHistoryCore_() {
           JSON.stringify(apiResponse));
       }
       var got = GlowCtiContent.flattenBlueBeanCalls(apiResponse);
-      perCampaign.push("グループ" + (index + 1) + ": " + got.length + "件");
+      perCampaign.push("グループ" + (index + 1) + "(ID " + campaignId + "): " + got.length + "件");
       calls = calls.concat(got);
     });
 
@@ -151,7 +151,7 @@ function readExistingGroupCallIds_(sheet) {
 function readCampaignIds_() {
   var raw = PropertiesService.getScriptProperties().getProperty("BLUEBEAN_CAMPAIGN_ID") || "";
   var seen = {};
-  var ids = raw.split(/[,、\s]+/).filter(function (id) {
+  var ids = raw.split(/[,，、\s]+/).filter(function (id) {
     if (!id || seen[id]) return false;
     seen[id] = true;
     return true;
