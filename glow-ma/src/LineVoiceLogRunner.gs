@@ -81,17 +81,33 @@ function parseLineWebhookBody_(e) {
 
 /**
  * 音声メッセージとpostback(ボタン操作)の両方をここで振り分ける。
+ * 注: iPhoneは音声を「audio」型で、Androidは「file」型で送信することがあるため、両方を受け取る。
  */
 function handleLineEvent_(event) {
-  if (event.type === "message" && event.message && event.message.type === "audio") {
-    withUserFacingErrorReply_(event.replyToken, function () { handleAudioMessage_(event); });
-    return;
+  if (event.type === "message" && event.message) {
+    // iOS: audio型、Android: file型(contentType=audio/m4a等)で受信される可能性がある
+    var isAudioMessage = event.message.type === "audio" ||
+                         (event.message.type === "file" && isAudioFile_(event.message));
+    if (isAudioMessage) {
+      withUserFacingErrorReply_(event.replyToken, function () { handleAudioMessage_(event); });
+      return;
+    }
   }
   if (event.type === "postback") {
     withUserFacingErrorReply_(event.replyToken, function () { handleLinePostback_(event); });
     return;
   }
   // テキストメッセージ・フォロー等、音声・postback以外のイベントは今回のスコープ外のため無視する
+}
+
+/**
+ * ファイルメッセージが音声ファイルかどうかを判定する(Android対応)。
+ */
+function isAudioFile_(message) {
+  if (!message.fileName) return false;
+  var audioExtensions = ["m4a", "mp3", "wav", "ogg", "aac"];
+  var ext = (message.fileName.split(".").pop() || "").toLowerCase();
+  return audioExtensions.indexOf(ext) !== -1;
 }
 
 /**
