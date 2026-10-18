@@ -106,6 +106,40 @@ Excelファイルから月別営業成績データを抽出し、Google Sheets �
 - **カチトーク（営業管理システム）**: https://kachitalk-line-enlife.azurewebsites.net/admin
 - **Google Sheets**: エンライフの営業管理スプレッドシート
 
+## 🔗 カチトークとの連携
+
+Google Sheetの営業成績データを、カチトーク（エンライフ営業管理システム）と自動連携できます。
+
+### 連携の流れ
+1. Google Sheetの「営業成績（月別）」シートにデータを入力
+2. Apps Scriptで分析を実行
+3. Python スクリプトでカチトークへ自動送信
+4. カチトークのダッシュボードで営業成績を確認
+
+### セットアップ
+詳細は以下のドキュメントを参照:
+- **連携ガイド**: `README_KACHITALK_INTEGRATION.md`
+
+### 毎月の実行（簡単版）
+```bash
+# 一括処理スクリプト
+bash scripts/sync_all.sh
+```
+
+### 毎月の実行（ステップバイステップ）
+```bash
+# Step 1: Excelからデータを抽出
+python3 scripts/extract_sales_performance.py
+
+# Step 2: Google Sheetに手動で貼り付け（A1セルから）
+
+# Step 3: カチトークへ同期
+python3 scripts/sync_to_kachitalk.py \
+  --csv /tmp/sales_performance_for_sheets.csv \
+  --endpoint "$KACHITALK_ENDPOINT" \
+  --token "$KACHITALK_API_TOKEN"
+```
+
 ## 📝 ライセンス
 
 エンライフ内部用システム
