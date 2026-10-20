@@ -59,7 +59,9 @@ demo_out/
 data/ig_posts_mikata_draft.json
 data/subsidies.json.backup
 
-# WikiSkill Phase 1: 一時マーカー・監査ログ・停止スイッチ・ロック(原本 .claude/experience/*/*.jsonl はコミットする)
+# WikiSkill Phase 1: 一時マーカー・監査ログ・停止スイッチ・ロック
+# Experience の新規セッション記録は未追跡のまま残す(2026-10-20 小柳さん決裁)。既に追跡中のファイルは影響を受けない。
+.claude/experience/*/session-*.jsonl
 .claude/experience/_local/
 .claude/experience/_audit.log
 .claude/memory.off
