@@ -4632,5 +4632,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-20",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "産業車両等の脱炭素化促進事業のうち、空港における脱炭素化促進事業②空港におけるEV・FCV型車両導入事業（二酸化炭素排出抑制対策事業費等補助金）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZDHMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(16次公募)_専門家活用枠(小規模売り手支援類型)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003N1RZUA0",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "地上基幹放送等に関する耐災害性強化支援事業（令和８年度公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFjMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "京都市企業立地促進制度補助金［市内初進出支援制度］",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFfMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "IP360 海外展開支援（ローカライズ支援）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXscMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
