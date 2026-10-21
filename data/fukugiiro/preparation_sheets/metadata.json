@@ -1,0 +1,1332 @@
+{
+  "generated_at": "2026-10-21T10:00:18.186069",
+  "total_sheets": 265,
+  "version": "1.0",
+  "items": [
+    {
+      "id": "fk-kuni-jidoteate",
+      "name": "児童手当",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-jidofuyoteate",
+      "name": "児童扶養手当",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shussan-ichijikin",
+      "name": "出産育児一時金",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-ikuji-kyufu",
+      "name": "育児休業給付(雇用保険)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-jukyo-kakuho",
+      "name": "住居確保給付金",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-kogaku-ryoyo",
+      "name": "高額療養費制度",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shugaku-shien",
+      "name": "高等教育の修学支援新制度(授業料等減免・給付型奨学金)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-hitorioya-shien",
+      "name": "ひとり親家庭への支援制度(全体案内)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shugakushienkin-koko",
+      "name": "高等学校等就学支援金",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shogaku-kyufukin-koko",
+      "name": "高校生等奨学給付金",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-kyushokusha-shien",
+      "name": "求職者支援制度(職業訓練受講給付金)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-seikatsu-konkyu",
+      "name": "生活困窮者自立支援制度(相談窓口)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-kyoiku-kunren",
+      "name": "教育訓練給付金",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-hoiku-mushoka",
+      "name": "幼児教育・保育の無償化",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-tokubetsu-jifute",
+      "name": "特別児童扶養手当",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shogaiji-fukushi",
+      "name": "障害児福祉手当",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-tokubetsu-shogaisha",
+      "name": "特別障害者手当",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-jiritsushien-iryo",
+      "name": "自立支援医療(医療費の自己負担軽減)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-koyohoken-kihonteate",
+      "name": "雇用保険の基本手当(失業給付)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-kaigokyugyo-kyufu",
+      "name": "介護休業給付金(雇用保険)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-rousai",
+      "name": "労災保険の給付(仕事中・通勤中のけが・病気)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-miharai-chingin",
+      "name": "未払賃金立替払制度",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-seikatsu-hogo",
+      "name": "生活保護制度(相談窓口)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-nenkin-kyufukin",
+      "name": "年金生活者支援給付金",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-saigai-choui",
+      "name": "災害弔慰金・災害援護資金など(被災時の支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shugaku-enjo",
+      "name": "就学援助(小・中学生の学用品費・給食費など)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-tokushi-shorei",
+      "name": "特別支援教育就学奨励費",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-safetynet-jutaku",
+      "name": "住宅セーフティネット制度(住宅確保要配慮者の入居支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-kosodate-green",
+      "name": "子育てグリーン住宅支援事業(新築・リフォーム補助)",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-boshi-fushi-kafu-shikin",
+      "name": "母子父子寡婦福祉資金貸付金",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-hitorioya-jutaku-shikin",
+      "name": "沖縄県ひとり親家庭住宅支援資金貸付",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-hitorioya-kurashi-ouen",
+      "name": "沖縄県ひとり親家庭暮らし応援事業",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-kenei-jutaku",
+      "name": "沖縄県営住宅",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-senshiniryo-funin",
+      "name": "沖縄県 先進医療不妊治療費助成事業",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-fuiku-kensa",
+      "name": "沖縄県 不育症検査費用助成事業",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-kodomo-iryohi",
+      "name": "沖縄県 こども医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-boshi-fushi-iryohi",
+      "name": "沖縄県 母子及び父子家庭等医療費助成事業",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-judo-shinshin-iryohi",
+      "name": "沖縄県 重度心身障害者医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-nanbyo-iryohi",
+      "name": "沖縄県 特定医療費(指定難病)助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-kodomo-iryo",
+      "name": "那覇市 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-shugaku-enjo",
+      "name": "那覇市 就学援助",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-sango-care",
+      "name": "那覇市 産後ケア事業",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawa-kodomo-iryo",
+      "name": "沖縄市 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawa-shugaku-enjo",
+      "name": "沖縄市 就学援助(準要保護児童生徒)",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawa-sango-care",
+      "name": "沖縄市 産後ケア事業",
+      "generated": true
+    },
+    {
+      "id": "fk-uruma-kodomo-iryo",
+      "name": "うるま市 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-uruma-shugaku-enjo",
+      "name": "うるま市 就学援助制度",
+      "generated": true
+    },
+    {
+      "id": "fk-uruma-boshi-iryo",
+      "name": "うるま市 母子及び父子家庭等医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-uruma-sango-care",
+      "name": "うるま市 産後ケア事業",
+      "generated": true
+    },
+    {
+      "id": "fk-urasoe-kodomo-iryo",
+      "name": "浦添市 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-urasoe-shugaku-enjo",
+      "name": "浦添市 就学援助",
+      "generated": true
+    },
+    {
+      "id": "fk-urasoe-kyushoku",
+      "name": "浦添市 学校給食費の無償化(令和8年度)",
+      "generated": true
+    },
+    {
+      "id": "fk-urasoe-sango-care",
+      "name": "浦添市 産後ケア事業",
+      "generated": true
+    },
+    {
+      "id": "fk-ginowan-kodomo-iryo",
+      "name": "宜野湾市 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-ginowan-kyushoku",
+      "name": "宜野湾市 学校給食費の助成(小学生半額・食材費補助)",
+      "generated": true
+    },
+    {
+      "id": "fk-tomigusuku-kodomo-iryo",
+      "name": "豊見城市 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-tomigusuku-kodomo-iryo-2",
+      "name": "豊見城市 こども医療費助成貸付制度",
+      "generated": true
+    },
+    {
+      "id": "fk-haebaru-kodomo-iryo",
+      "name": "南風原町 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-haebaru-shogai-iryo",
+      "name": "南風原町 重度心身障がい者(児)医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-miyakojima-kodomo-iryo",
+      "name": "宮古島市 こども医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-miyakojima-sango-care",
+      "name": "宮古島市 産後ケア事業",
+      "generated": true
+    },
+    {
+      "id": "fk-ishigaki-kodomo-iryo",
+      "name": "石垣市 こども医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-ishigaki-shugaku-enjo",
+      "name": "石垣市 就学援助",
+      "generated": true
+    },
+    {
+      "id": "fk-ishigaki-shingaku-shien",
+      "name": "石垣市 児童生徒進学等支援金給付事業",
+      "generated": true
+    },
+    {
+      "id": "fk-nago-kodomo-iryo",
+      "name": "名護市 こども医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-nago-famisapo",
+      "name": "名護市 ファミリー・サポート・センター",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shussan-ouen",
+      "name": "出産・子育て応援給付金(妊婦のための支援給付・伴走型相談支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-hisaisha-saiken",
+      "name": "被災者生活再建支援金",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-hello-training",
+      "name": "ハロートレーニング(公共職業訓練・求職者支援訓練)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-josei-sodan",
+      "name": "女性相談支援センター(困難な問題を抱える女性への支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-kokuho-genmen",
+      "name": "国民健康保険料(税)の軽減・減免",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-chiiki-houkatsu",
+      "name": "地域包括支援センター(高齢者の総合相談・生活支援の窓口)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-kashitsuke",
+      "name": "生活福祉資金貸付制度",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-kokunen-menjo",
+      "name": "国民年金保険料の免除・納付猶予制度",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-boshi-jiritsu-kyufu",
+      "name": "母子家庭等自立支援給付金(自立支援教育訓練給付金・高等職業訓練促進給付金)",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-tsugakuhi",
+      "name": "沖縄県遠距離等通学費補助金",
+      "generated": true
+    },
+    {
+      "id": "fk-itoman-kodomo-iryo",
+      "name": "糸満市 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-itoman-shugaku-enjo",
+      "name": "糸満市 就学援助制度",
+      "generated": true
+    },
+    {
+      "id": "fk-nanjo-kodomo-iryo",
+      "name": "南城市 子ども医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-nanjo-sango-care",
+      "name": "南城市 産後ケア事業",
+      "generated": true
+    },
+    {
+      "id": "fk-yaese-kodomo-iryo",
+      "name": "八重瀬町 子ども医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-yaese-kyushoku",
+      "name": "八重瀬町 学校給食費の無償化(令和8年度)",
+      "generated": true
+    },
+    {
+      "id": "fk-yaese-shugaku-enjo",
+      "name": "八重瀬町 就学援助制度",
+      "generated": true
+    },
+    {
+      "id": "fk-nishihara-kodomo-iryo",
+      "name": "西原町 こども医療費助成事業",
+      "generated": true
+    },
+    {
+      "id": "fk-nishihara-boshi-iryo",
+      "name": "西原町 母子父子家庭等医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-yonabaru-kodomo-iryo",
+      "name": "与那原町 こども医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-yonabaru-sango-care",
+      "name": "与那原町 産後ケア事業",
+      "generated": true
+    },
+    {
+      "id": "fk-yomitan-kodomo-iryo",
+      "name": "読谷村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-yomitan-kyushoku",
+      "name": "読谷村 学校給食費の補助(無償化)",
+      "generated": true
+    },
+    {
+      "id": "fk-yomitan-boshi-iryo",
+      "name": "読谷村 母子及び父子家庭等医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-chatan-kodomo-iryo",
+      "name": "北谷町 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-chatan-boshi-iryo",
+      "name": "北谷町 母子及び父子家庭等医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-kadena-kodomo-iryo",
+      "name": "嘉手納町 子ども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-kadena-kyushoku",
+      "name": "嘉手納町 学校給食費の無償化",
+      "generated": true
+    },
+    {
+      "id": "fk-kitanakagusuku-kodomo-iryo",
+      "name": "北中城村 子ども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-kitanakagusuku-kyushoku",
+      "name": "北中城村 学校給食費補助金交付事業",
+      "generated": true
+    },
+    {
+      "id": "fk-kitanakagusuku-shugaku-enjo",
+      "name": "北中城村 就学援助制度(要保護・準要保護)",
+      "generated": true
+    },
+    {
+      "id": "fk-nakagusuku-kodomo-iryo",
+      "name": "中城村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-nakagusuku-boshi-iryo",
+      "name": "中城村 母子及び父子家庭等医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-kunigami-kodomo-iryo",
+      "name": "国頭村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-higashi-kodomo-iryo",
+      "name": "東村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-ogimi-sango-care",
+      "name": "大宜味村 産後ケア事業",
+      "generated": true
+    },
+    {
+      "id": "fk-ogimi-shugaku-enjo",
+      "name": "大宜味村 就学援助",
+      "generated": true
+    },
+    {
+      "id": "fk-nakijin-kodomo-iryo",
+      "name": "今帰仁村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-nakijin-kyushoku",
+      "name": "今帰仁村 学校給食費無償化支援",
+      "generated": true
+    },
+    {
+      "id": "fk-motobu-kodomo-iryo",
+      "name": "本部町 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-motobu-sango-care",
+      "name": "本部町 産後ケア事業",
+      "generated": true
+    },
+    {
+      "id": "fk-onna-kodomo-iryo",
+      "name": "恩納村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-onna-shugaku-enjo",
+      "name": "恩納村 就学援助",
+      "generated": true
+    },
+    {
+      "id": "fk-kumejima-kodomo-iryo",
+      "name": "久米島町 こども医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-kumejima-shussan-josei",
+      "name": "久米島町 出産助成金・出産奨励金",
+      "generated": true
+    },
+    {
+      "id": "fk-taketomi-tokou-iryo",
+      "name": "竹富町 こどもの通院にかかる渡航費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-taketomi-kodomo-iryo",
+      "name": "竹富町 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-yonaguni-shogaku",
+      "name": "与那国町 貸与型及び給付型奨学金基金",
+      "generated": true
+    },
+    {
+      "id": "fk-ie-kodomo-iryo",
+      "name": "伊江村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-kin-kodomo-iryo",
+      "name": "金武町 こども医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-ginoza-kyushoku",
+      "name": "宜野座村 給食費無償化",
+      "generated": true
+    },
+    {
+      "id": "fk-ginoza-kodomo-iryo",
+      "name": "宜野座村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-minamidaito-shussan-iwai",
+      "name": "南大東村 出産祝い金",
+      "generated": true
+    },
+    {
+      "id": "fk-minamidaito-kodomo-iryo",
+      "name": "南大東村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-kitadaito-shussan-iwai",
+      "name": "北大東村 出産お祝い金",
+      "generated": true
+    },
+    {
+      "id": "fk-kitadaito-tosen-hojo",
+      "name": "北大東村 こどもの通院に係る渡船運賃補助制度",
+      "generated": true
+    },
+    {
+      "id": "fk-kitadaito-kodomo-iryo",
+      "name": "北大東村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-kitadaito-ninpu-tokohi",
+      "name": "北大東村 妊婦健康診査の渡航費・宿泊費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-iheya-kodomo-iryo",
+      "name": "伊平屋村 子ども医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-iheya-tsuinhi-shien",
+      "name": "伊平屋村 離島患者等通院費支援事業",
+      "generated": true
+    },
+    {
+      "id": "fk-iheya-kokosei-kotsuhi",
+      "name": "伊平屋村 高校生保護者交通費負担軽減補助金",
+      "generated": true
+    },
+    {
+      "id": "fk-izena-kodomo-iryo",
+      "name": "伊是名村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-izena-shussan-iwai",
+      "name": "伊是名村 出産祝い金",
+      "generated": true
+    },
+    {
+      "id": "fk-izena-tsuinhi-shien",
+      "name": "伊是名村 患者等通院費支援事業",
+      "generated": true
+    },
+    {
+      "id": "fk-tarama-shussei-iwai",
+      "name": "多良間村 出生祝金",
+      "generated": true
+    },
+    {
+      "id": "fk-tarama-jutaku-shorei",
+      "name": "多良間村 定住促進住宅建築等奨励金",
+      "generated": true
+    },
+    {
+      "id": "fk-tarama-kodomo-iryo",
+      "name": "多良間村 こども医療費の無料化(高校生まで)",
+      "generated": true
+    },
+    {
+      "id": "fk-tokashiki-nyuyoji-iryo",
+      "name": "渡嘉敷村 乳幼児医療費助成事業",
+      "generated": true
+    },
+    {
+      "id": "fk-tokashiki-sango-care",
+      "name": "渡嘉敷村 産後ケア事業",
+      "generated": true
+    },
+    {
+      "id": "fk-tokashiki-kokosei-iryo",
+      "name": "渡嘉敷村 離島高校生医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-zamami-shussan-josei",
+      "name": "座間味村 出産助成金",
+      "generated": true
+    },
+    {
+      "id": "fk-zamami-kodomo-iryo",
+      "name": "座間味村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-zamami-hoikuryo-keigen",
+      "name": "座間味村 幼稚園入園料・保育料の軽減",
+      "generated": true
+    },
+    {
+      "id": "fk-zamami-tokosen-hojo",
+      "name": "座間味村 長期・定期治療の渡航船賃の半額補助",
+      "generated": true
+    },
+    {
+      "id": "fk-aguni-tsuinhi-josei",
+      "name": "粟国村 離島患者等通院費助成事業",
+      "generated": true
+    },
+    {
+      "id": "fk-aguni-kokosei-shugaku",
+      "name": "粟国村 離島高校生就学支援",
+      "generated": true
+    },
+    {
+      "id": "fk-aguni-boshi-iryo",
+      "name": "粟国村 母子及び父子家庭等医療費助成事業",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shobyo-teate",
+      "name": "傷病手当金",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shussan-teate",
+      "name": "出産手当金",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-maisoryo",
+      "name": "埋葬料・埋葬費(健康保険)/葬祭費(国保・後期高齢者)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-kogaku-kaigo-service",
+      "name": "高額介護サービス費",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-kogaku-iryo-kaigo-gassan",
+      "name": "高額医療・高額介護合算療養費制度",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-kaigo-jutaku-kaishu",
+      "name": "居宅介護(介護予防)住宅改修費",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shoni-mansei",
+      "name": "小児慢性特定疾病医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-nyuin-shokuji-gengaku",
+      "name": "入院時食事療養費の標準負担額減額(住民税非課税世帯など)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-iryohi-kojo",
+      "name": "医療費控除(セルフメディケーション税制含む)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-koki-korei-hokenryo-keigen",
+      "name": "後期高齢者医療制度の保険料軽減",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-shiritsu-shogaku-kyufu",
+      "name": "沖縄県 私立高等学校等奨学のための給付金",
+      "generated": true
+    },
+    {
+      "id": "fk-kunigami-nyugaku-iwaikin",
+      "name": "国頭村 入学祝金・卒業祝金(定住支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-higashi-kyushoku-josei",
+      "name": "東村 学校給食費の助成",
+      "generated": true
+    },
+    {
+      "id": "fk-higashi-shussan-iwaikin",
+      "name": "東村 出産祝金",
+      "generated": true
+    },
+    {
+      "id": "fk-higashi-influenza-josei",
+      "name": "東村 インフルエンザ予防接種費用助成",
+      "generated": true
+    },
+    {
+      "id": "fk-ie-kosodate-shienkin",
+      "name": "伊江村 子育て支援金(出産祝金)",
+      "generated": true
+    },
+    {
+      "id": "fk-kin-shugaku-enjo",
+      "name": "金武町 就学援助",
+      "generated": true
+    },
+    {
+      "id": "fk-yonaguni-judo-iryohi",
+      "name": "与那国町 重度心身障害者(児)医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-yonaguni-haken-hojo",
+      "name": "与那国町 児童生徒の派遣費補助金",
+      "generated": true
+    },
+    {
+      "id": "fk-yonaguni-rito-kokosei-hogosha",
+      "name": "与那国町 離島高校生保護者負担軽減補助金",
+      "generated": true
+    },
+    {
+      "id": "fk-kunigami-shussan-iwaikin",
+      "name": "国頭村 出産祝金",
+      "generated": true
+    },
+    {
+      "id": "fk-kunigami-kekkon-iwaikin",
+      "name": "国頭村 結婚祝金",
+      "generated": true
+    },
+    {
+      "id": "fk-iejima-gakushi-taiyo",
+      "name": "伊江村 学資費用貸与",
+      "generated": true
+    },
+    {
+      "id": "fk-kin-boshi-fushi-iryohi",
+      "name": "金武町 母子及び父子家庭等医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-tonaki-kodomo-iryo",
+      "name": "渡名喜村 こども医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-tonaki-shussan-josei",
+      "name": "渡名喜村 出産助成金",
+      "generated": true
+    },
+    {
+      "id": "fk-tonaki-ninpu-senpaku",
+      "name": "渡名喜村 妊婦健診に係る船舶運賃助成",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-kokuho-genmen",
+      "name": "那覇市 国民健康保険税の軽減・減免",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawashi-hoikuryo",
+      "name": "沖縄市 保育料の軽減(多子世帯・非課税世帯など)",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-hitorioya-sodan",
+      "name": "沖縄県 ひとり親家庭支援(相談・就業支援の窓口)",
+      "generated": true
+    },
+    {
+      "id": "fk-nago-horitsu-sodan",
+      "name": "名護市 無料法律相談",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-shimin-sodan",
+      "name": "那覇市 くらし・法律の相談窓口(市民相談)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-nhk-menjo",
+      "name": "NHK放送受信料の免除",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-hosougu",
+      "name": "補装具費支給制度",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-nichijo-yougu",
+      "name": "日常生活用具給付等事業",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-hochouki",
+      "name": "那覇市 加齢性難聴者に対する補聴器購入費の助成",
+      "generated": true
+    },
+    {
+      "id": "fk-uruma-hochouki",
+      "name": "うるま市 加齢性難聴者補聴器購入費助成事業",
+      "generated": true
+    },
+    {
+      "id": "fk-tomigusuku-hochouki",
+      "name": "豊見城市 加齢性難聴者補聴器購入費助成事業",
+      "generated": true
+    },
+    {
+      "id": "fk-nishihara-hochouki",
+      "name": "西原町 加齢性難聴者に対する補聴器購入費用の助成",
+      "generated": true
+    },
+    {
+      "id": "fk-urasoe-kaigo-yohin",
+      "name": "浦添市 介護用品支給事業(紙おむつ等)",
+      "generated": true
+    },
+    {
+      "id": "fk-ginowan-kinkyu-tsuho",
+      "name": "宜野湾市 緊急通報システム設置事業",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawashi-reform",
+      "name": "沖縄市 住宅リフォーム支援事業補助金",
+      "generated": true
+    },
+    {
+      "id": "fk-uruma-jokaso",
+      "name": "うるま市 合併処理浄化槽設置事業補助金",
+      "generated": true
+    },
+    {
+      "id": "fk-itoman-gesuido",
+      "name": "糸満市 公共下水道接続促進事業補助金",
+      "generated": true
+    },
+    {
+      "id": "fk-miyakojima-gesuido",
+      "name": "宮古島市 公共下水道接続促進事業補助金",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-goodjob-center",
+      "name": "グッジョブセンターおきなわ(就労総合支援・無料職業紹介)",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-career-center",
+      "name": "沖縄県キャリアセンター(若年者・就職氷河期世代の就職支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-shokuno-kunren",
+      "name": "沖縄県立職業能力開発校の公共職業訓練",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-hitorioya-ginou",
+      "name": "沖縄県 ひとり親家庭技能習得支援事業",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-hitorioya-challenge",
+      "name": "沖縄県 ひとり親就労チャレンジ事業",
+      "generated": true
+    },
+    {
+      "id": "fk-uruma-jukenryo",
+      "name": "うるま市 資格試験等受験料支援事業",
+      "generated": true
+    },
+    {
+      "id": "fk-uruma-kaigo-iroukin",
+      "name": "うるま市 家族介護慰労金支給事業",
+      "generated": true
+    },
+    {
+      "id": "fk-itoman-kaigo-iroukin",
+      "name": "糸満市 家族介護慰労金",
+      "generated": true
+    },
+    {
+      "id": "fk-miyakojima-kaigo-iroukin",
+      "name": "宮古島市 家族介護慰労金",
+      "generated": true
+    },
+    {
+      "id": "fk-ginowan-kaigo-yohin",
+      "name": "宜野湾市 家族介護用品支給事業",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawashi-kaigo-yohin",
+      "name": "沖縄市 介護用品給付(在宅高齢者介護家族支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-saigai-mimai",
+      "name": "那覇市 災害見舞金",
+      "generated": true
+    },
+    {
+      "id": "fk-ginowan-saigai-mimai",
+      "name": "宜野湾市 災害見舞金制度",
+      "generated": true
+    },
+    {
+      "id": "fk-tomigusuku-saigai-mimai",
+      "name": "豊見城市 災害見舞金制度",
+      "generated": true
+    },
+    {
+      "id": "fk-chatan-shosaigai-mimai",
+      "name": "北谷町 小災害見舞金",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-nenkin-shien-kyufukin",
+      "name": "年金生活者支援給付金(老齢・障害・遺族)",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawashi-block-bei",
+      "name": "沖縄市 ブロック塀等撤去工事補助金",
+      "generated": true
+    },
+    {
+      "id": "fk-haebaru-shugaku-enjo",
+      "name": "南風原町 就学援助制度",
+      "generated": true
+    },
+    {
+      "id": "fk-yonabaru-tsugaku-shien",
+      "name": "与那原町 高校生等学び応援通学支援事業",
+      "generated": true
+    },
+    {
+      "id": "fk-yonabaru-gakushu-tanmatsu",
+      "name": "与那原町育英会 高校進学 学習端末購入補助",
+      "generated": true
+    },
+    {
+      "id": "fk-kadena-hochoki",
+      "name": "嘉手納町 高齢者補聴器購入助成事業",
+      "generated": true
+    },
+    {
+      "id": "fk-nakagusuku-shussan-ouen",
+      "name": "中城村 出産・子育て応援給付金",
+      "generated": true
+    },
+    {
+      "id": "fk-nakagusuku-daisanshi-hoiku",
+      "name": "中城村 第3子以降保育料無料化事業",
+      "generated": true
+    },
+    {
+      "id": "fk-nanjo-shussan-ouen",
+      "name": "南城市 出産・子育て応援給付金(伴走型相談支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-motobu-shugaku-enjo",
+      "name": "本部町 就学援助(準要保護)",
+      "generated": true
+    },
+    {
+      "id": "fk-nakijin-shussan-ouen",
+      "name": "今帰仁村 出産・子育て応援給付金(出産応援ギフト・子育て応援ギフト)",
+      "generated": true
+    },
+    {
+      "id": "fk-onna-shussan-ouen",
+      "name": "恩納村 出産・子育て応援給付金事業",
+      "generated": true
+    },
+    {
+      "id": "fk-kumejima-omutsuken",
+      "name": "久米島町 出産祝品贈呈事業(おむつ券)",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawashi-kokuho-genmen",
+      "name": "沖縄市 国民健康保険料の減免",
+      "generated": true
+    },
+    {
+      "id": "fk-uruma-kokuho-genmen",
+      "name": "うるま市 国民健康保険税の減免・非自発的失業者の軽減",
+      "generated": true
+    },
+    {
+      "id": "fk-urasoe-kokuho-genmen",
+      "name": "浦添市 国民健康保険税の減免・非自発的失業者の軽減",
+      "generated": true
+    },
+    {
+      "id": "fk-itoman-kokuho-genmen",
+      "name": "糸満市 国民健康保険税の減免・非自発的失業者への軽減",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-kaigo-hokenryo-genmen",
+      "name": "那覇市 介護保険料の減免・徴収猶予",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-kouki-korei-keigen",
+      "name": "那覇市 後期高齢者医療保険料の軽減(低所得者軽減)",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-jiritsu-sodan",
+      "name": "那覇市 生活困窮者自立支援(自立相談支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-kouto-shokugyo-kunren",
+      "name": "那覇市 ひとり親家庭高等職業訓練促進給付金",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-jukyo-kakuho-tenkyo",
+      "name": "那覇市 住居確保給付金(転居費用補助)",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-judo-iryo",
+      "name": "那覇市 重度心身障がい者(児)医療費等助成",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawashi-judo-iryo",
+      "name": "沖縄市 重度心身障がい者(児)医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-uruma-judo-iryo",
+      "name": "うるま市 重度心身障害者(児)医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-urasoe-judo-iryo",
+      "name": "浦添市 重度心身障害者(児)医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-ginowan-judo-iryo",
+      "name": "宜野湾市 重度心身障害者(障害児)医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-nancho-hochoki",
+      "name": "那覇市 軽度・中等度難聴児 補聴器購入費等助成",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawashi-nancho-hochoki",
+      "name": "沖縄市 軽度・中等度難聴児 補聴器購入費等助成",
+      "generated": true
+    },
+    {
+      "id": "fk-ogimi-shussan-iwai",
+      "name": "大宜味村 出産祝金",
+      "generated": true
+    },
+    {
+      "id": "fk-urasoe-taishin-genzei",
+      "name": "浦添市 住宅の耐震改修に係る固定資産税の減額",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawashi-kaigo-hokenryo-genmen",
+      "name": "沖縄市 介護保険料の減免",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-juminzei-genmen",
+      "name": "那覇市 個人市民税・県民税(住民税)の減免",
+      "generated": true
+    },
+    {
+      "id": "fk-ginowan-jiritsu-sodan",
+      "name": "宜野湾市 生活困窮者自立支援制度",
+      "generated": true
+    },
+    {
+      "id": "fk-urasoe-jiritsu-sodan",
+      "name": "浦添市 自立相談支援(自立サポートセンター・てだこ未来)",
+      "generated": true
+    },
+    {
+      "id": "fk-ken-kouto-shokugyo-kunren",
+      "name": "沖縄県 高等職業訓練促進給付金等事業(町村部在住のひとり親向け)",
+      "generated": true
+    },
+    {
+      "id": "fk-ginowan-kokuho-genmen",
+      "name": "宜野湾市 国民健康保険税の減免",
+      "generated": true
+    },
+    {
+      "id": "fk-tomigusuku-kokuho-genmen",
+      "name": "豊見城市 国民健康保険税の減免・非自発的失業者の軽減",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawashi-jiritsu-sodan",
+      "name": "沖縄市 生活困窮者自立支援(自立相談支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-uruma-jiritsu-sodan",
+      "name": "うるま市 生活困窮者自立支援(自立相談支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-tomigusuku-jiritsu-sodan",
+      "name": "豊見城市 生活困窮者自立支援(自立相談支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-nago-jiritsu-sodan",
+      "name": "名護市 生活困窮者自立支援(自立相談支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-miyakojima-jiritsu-sodan",
+      "name": "宮古島市 生活困窮者自立支援(自立相談支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-ishigaki-jiritsu-sodan",
+      "name": "石垣市 生活困窮者自立支援(自立相談支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-nanjo-jiritsu-sodan",
+      "name": "南城市 生活困窮者自立支援(自立相談支援)",
+      "generated": true
+    },
+    {
+      "id": "fk-nanjo-kaigo-yohin",
+      "name": "南城市 家族介護用品支給事業(紙おむつ等)",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-kaigo-yohin",
+      "name": "那覇市 介護用品支給事業(紙おむつ等)",
+      "generated": true
+    },
+    {
+      "id": "fk-ishigaki-gomibukuro",
+      "name": "石垣市 有料指定ごみ袋の無料配布(在宅で常時おむつを使う要介護の方)",
+      "generated": true
+    },
+    {
+      "id": "fk-naha-boshi-iryo",
+      "name": "那覇市 母子及び父子家庭等医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawashi-boshi-iryo",
+      "name": "沖縄市 母子父子家庭医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-urasoe-boshi-iryo",
+      "name": "浦添市 母子及び父子家庭等医療費助成事業",
+      "generated": true
+    },
+    {
+      "id": "fk-ginowan-boshi-iryo",
+      "name": "宜野湾市 母子及び父子家庭等医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-itoman-hitorioya-iryo",
+      "name": "糸満市 ひとり親家庭等医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-tomigusuku-boshi-iryo",
+      "name": "豊見城市 母子及び父子家庭等医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-nago-boshi-iryo",
+      "name": "名護市 母子及び父子家庭等医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-ishigaki-boshi-iryo",
+      "name": "石垣市 母子及び父子家庭等医療費助成制度",
+      "generated": true
+    },
+    {
+      "id": "fk-nanjo-boshi-iryo",
+      "name": "南城市 母子及び父子家庭等医療費助成",
+      "generated": true
+    },
+    {
+      "id": "fk-itoman-sodan-madoguchi",
+      "name": "糸満市 くらしの困りごと相談窓口(失業・収入減など)",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shotoku-shien",
+      "name": "高等学校等就学支援金",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-shogaiji-kyufu",
+      "name": "特別児童扶養手当",
+      "generated": true
+    },
+    {
+      "id": "fk-kuni-syogaisya-teate",
+      "name": "障害児福祉手当",
+      "generated": true
+    },
+    {
+      "id": "fk-okinawa-kokoro-iryo",
+      "name": "沖縄県 こども医療費助成制度",
+      "generated": true
+    }
+  ]
+}
