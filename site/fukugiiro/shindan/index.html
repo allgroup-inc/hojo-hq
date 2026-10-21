@@ -92,6 +92,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
 </div>
 <script src="../analytics-config.js"></script>
 <script src="../assets/fg-analytics.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="logic.js"></script>
 <script>
 (function(){
@@ -302,6 +303,15 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       if (rs.length === 0) {
         app.appendChild(h("p", {text:"今回の回答では、該当の可能性が高い制度は見つかりませんでした。制度は毎日更新されるので、状況が変わったらまた診断してみてください。"}));
       }
+      // 全準備シート一括DL ボタン(複数件の結果がある場合)
+      if (rs.length > 1) {
+        var bulkDlBtn = h("button", {style:"display:block;margin:12px auto;padding:10px 16px;background:#F2B705;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:.95rem", text:"📥 全 " + rs.length + " 件の準備シートをまとめてダウンロード"});
+        bulkDlBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("download_sheet", {sheet_type:"bulk", count: rs.length});
+          downloadBulkSheets(rs);
+        });
+        app.appendChild(bulkDlBtn);
+      }
       // 共有・印刷は結果一覧の下へ降格(主CTA=LINEの1つに絞る。2026-08-10 三名体制裁定・第2着手)
       var actions = null;
       // 結果の持ち出しテキスト(LINEのトークに貼れば端末が変わっても消えない=嘘のない「保存」)
@@ -414,6 +424,13 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var kitLink = h("a", {href:"../kit/" + it.id + "/", class:"cardlink", text:"申請準備シート(持ち物リストつき)"});
         kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("kit_click"); });
         card.appendChild(kitLink);
+        // 準備シート個別DL
+        var dlBtn = h("button", {style:"display:block;width:100%;margin-top:8px;padding:10px 12px;min-height:44px;border-radius:8px;border:2px solid #F2B705;background:#FFF;color:#B9502F;font-size:.9rem;font-weight:700;cursor:pointer", text:"📥 このシートをダウンロード(Markdown)"});
+        dlBtn.addEventListener("click", function(){
+          if (window.fgTrack) window.fgTrack("download_sheet", {sheet_type:"single", seido_id: it.id});
+          downloadSingleSheet(it.id, it.name);
+        });
+        card.appendChild(dlBtn);
         card.appendChild(h("p", {class:"note", style:"margin-top:6px", text:"準備の目安がそろったら、お住まいの窓口へ。最終的な受給の可否は窓口で確認されます。"}));
         if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
         var mk = h("button", {class:"markbtn" + (isMarked ? " marked" : ""),
@@ -467,6 +484,85 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       app.appendChild(h("p", {text:"データの読み込みに失敗しました(電波の弱い場所などで起こることがあります)。", style:"margin-bottom:6px"}));
       app.appendChild(h("p", {class:"note", text:"ご安心ください。あなたの回答は消えていません。", style:"margin-bottom:12px"}));
       app.appendChild(h("button", {class:"next", text:"もう一度読み込む", style:"width:100%;max-width:420px;display:block;margin:0 auto;padding:13px;border-radius:999px;border:none;font-weight:700;cursor:pointer", onclick:function(){ showResult(); }}));
+    });
+  }
+  // 準備シートファイル名マップ(キャッシュ)
+  var sheetFilenameMap = null;
+  function loadSheetFilenames(){
+    if (sheetFilenameMap) return Promise.resolve(sheetFilenameMap);
+    return fetch("https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/data/fukugiiro/preparation_sheets/metadata.json").then(function(r){return r.json()}).then(function(meta){
+      sheetFilenameMap = {};
+      (meta.items || []).forEach(function(item){
+        if (item.generated) sheetFilenameMap[item.id] = item.name;
+      });
+      return sheetFilenameMap;
+    });
+  }
+  // 準備シート単一DL
+  function downloadSingleSheet(itemId, itemName){
+    loadSheetFilenames().then(function(map){
+      if (!map[itemId]) { alert("シートが見つかりません"); return; }
+      var safeName = map[itemId].replace(/[<>:"/\\|?*]/g, "");
+      var actualUrl = "https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/data/fukugiiro/preparation_sheets/" + itemId + "_" + safeName + ".md";
+      fetch(actualUrl).then(function(r){
+        if (!r.ok) throw new Error("File not found");
+        return r.text();
+      }).then(function(content){
+        var blob = new Blob([content], {type:"text/markdown;charset=utf-8"});
+        var link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = itemId + "_" + safeName + ".md";
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }).catch(function(e){
+        alert("シートのダウンロードに失敗しました。時間をおいてお試しください。");
+      });
+    }).catch(function(){
+      alert("シートのダウンロードに失敗しました。時間をおいてお試しください。");
+    });
+  }
+  // 準備シート一括DL（ZIP形式）
+  function downloadBulkSheets(results){
+    if (!window.JSZip) { alert("ダウンロード機能が読み込まれていません。時間をおいてお試しください。"); return; }
+    var dlBtn = document.querySelector("button[style*='#F2B705']");
+    if (dlBtn) dlBtn.disabled = true;
+    var zip = new JSZip();
+    var pending = results.length;
+    loadSheetFilenames().then(function(map){
+      results.forEach(function(r){
+        var item = r.item;
+        if (!map[item.id]) {
+          pending--;
+          if (pending === 0) buildZip();
+          return;
+        }
+        var safeName = map[item.id].replace(/[<>:"/\\|?*]/g, "");
+        var actualUrl = "https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/data/fukugiiro/preparation_sheets/" + item.id + "_" + safeName + ".md";
+        fetch(actualUrl).then(function(resp){
+          if (!resp.ok) throw new Error("File not found");
+          return resp.text();
+        }).then(function(content){
+          zip.file(item.id + "_" + safeName + ".md", content);
+          pending--;
+          if (pending === 0) buildZip();
+        }).catch(function(e){
+          pending--;
+          if (pending === 0) buildZip();
+        });
+      });
+      function buildZip(){
+        if (dlBtn) dlBtn.disabled = false;
+        zip.generateAsync({type:"blob"}).then(function(blob){
+          var link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "moradou_preparation_sheets_" + new Date().toISOString().slice(0,10) + ".zip";
+          link.click();
+          URL.revokeObjectURL(link.href);
+        });
+      }
+    }).catch(function(){
+      if (dlBtn) dlBtn.disabled = false;
+      alert("シートのダウンロードに失敗しました。時間をおいてお試しください。");
     });
   }
   if (/[?&]resume=1/.test(location.search)) {
