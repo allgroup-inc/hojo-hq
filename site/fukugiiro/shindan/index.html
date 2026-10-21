@@ -289,7 +289,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         childAges: state.childAges, lifeEvents: state.lifeEvents
       }));
     } catch(e){}
-    fetch("../../data/fukugiiro/seido.json").then(function(r){return r.json()}).then(function(db){
+    fetch("https://raw.githubusercontent.com/allgroup-inc/hojo-hq/main/data/fukugiiro/seido.json").then(function(r){return r.json()}).then(function(db){
       var answers = {
         municipality: state.municipality, children: state.children,
         childAges: state.childAges,
