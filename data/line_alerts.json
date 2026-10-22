@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-10-22 11:59",
+ "generated_at": "2026-10-22 20:02",
  "alert_window": [
   7,
   29
  ],
- "soon_closed_count": 7,
- "count": 33,
+ "soon_closed_count": 5,
+ "count": 32,
  "items": [
   {
    "id": "a0WJ200000CDXscMAH",
@@ -96,16 +96,6 @@
    "max_amount": null,
    "source_url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1039661.html",
    "tag": "okinawa"
-  },
-  {
-   "id": "a0WJ200000CDYbNMAX",
-   "name": "エイジフレンドリー補助金",
-   "deadline": "2026-10-31",
-   "days_left": 9,
-   "tier": "まもなく締切(7〜14日)",
-   "max_amount": 1000000,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYbNMAX",
-   "tag": "nationwide"
   },
   {
    "id": "a0WJ200000CDY4mMAH",
