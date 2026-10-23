@@ -1,71 +1,99 @@
 {
-  "updated_at": "2026-10-21T00:10:00Z",
-  "week": "2026-W42",
-  "note": "照合済み(verified=True)かつ締切の無い制度だけから選定。日付・金額は本文に書かない。",
-  "items": [
-    {
-      "week": "W44",
-      "updated_at": "2026-10-21T00:10:00Z",
-      "note": "Step 3: IG posting ideas selection for W44 (2026-10-21)",
-      "items": [
-        {
-          "program_name": "幼児教育・保育の無償化",
-          "target": "3～5歳のお子さんを育てているご家庭・非課税世帯の0～2歳のご家庭",
-          "how": "通園先の幼稚園・保育所・認定こども園の窓口で手続き",
-          "deadline": "常時"
-        },
-        {
-          "program_name": "教育訓練給付金",
-          "target": "スキルアップや資格取得を目指す働く方・離職後の方",
-          "how": "ハローワークで訓練講座を相談・受講申し込み",
-          "deadline": "常時"
-        },
-        {
-          "program_name": "自立支援医療(医療費の自己負担軽減)",
-          "target": "心身の治療を続けている方(精神通院・更生医療など)",
-          "how": "お住まいの市町村の福祉事務所へ申請",
-          "deadline": "常時"
-        },
-        {
-          "program_name": "生活困窮者自立支援制度(相談窓口)",
-          "target": "生活にお困りごとを抱えているご家庭",
-          "how": "お住まいの自治体の自立相談支援機関に相談",
-          "deadline": "常時"
-        },
-        {
-          "program_name": "特別児童扶養手当",
-          "target": "障がいのあるお子さん(20歳未満)を育てているご家庭",
-          "how": "お住まいの市町村の窓口で申請",
-          "deadline": "常時"
-        }
-      ]
-    }
-  ],
-  "used_ids": [
-    "fk-kuni-hoiku-mushoka",
-    "fk-kuni-seikatsu-konkyu",
-    "fk-kuni-shogaiji-kyufu",
-    "fk-kuni-josei-sodan",
-    "fk-kuni-jidofuyoteate",
-    "fk-kuni-chiiki-houkatsu",
-    "fk-kuni-shugaku-shien",
-    "fk-kuni-hitorioya-shien",
-    "fk-kuni-ikuji-kyufu",
-    "fk-kuni-shussan-ichijikin",
-    "fk-kuni-kaigokyugyo-kyufu",
-    "fk-kuni-kogaku-ryoyo",
-    "fk-okinawa-kokoro-iryo",
-    "fk-kuni-jiritsushien-iryo",
-    "fk-kuni-jidoteate",
-    "fk-kuni-shugaku-enjo",
-    "fk-kuni-kokunen-menjo",
-    "fk-kuni-shotoku-shien",
-    "fk-kuni-kyushokusha-shien",
-    "fk-kuni-syogaisya-teate",
-    "fk-kuni-kyoiku-kunren",
-    "fk-kuni-tokubetsu-jifute",
-    "fk-kuni-koyohoken-kihonteate",
-    "fk-kuni-nenkin-kyufukin",
-    "fk-kuni-seikatsu-hogo"
-  ]
+ "updated_at": "2026-10-19",
+ "week": "2026-W43",
+ "note": "照合済み(verified=True)かつ締切の無い制度だけから scripts/generate_ig_neta.py が生成。日付・金額は本文に書かない。",
+ "items": [
+  {
+   "no": 1,
+   "seido_id": "fk-ken-boshi-fushi-iryohi",
+   "title": "「沖縄県 母子及び父子家庭等医療費助成事業」、使っていますか?",
+   "caption": "子育て中のご家庭に、知らないままの方が多い制度です。「沖縄県 母子及び父子家庭等医療費助成事業」。健康保険に加入するひとり親家庭などで、対象年齢のお子さん等がいる世帯が対象になることがあります。申し込みの窓口はお住まいの市町村の窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #子育て #くらしの支援 #沖縄県母子及び父子家庭等医療",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-28 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-ken-boshi-fushi-iryohi",
+   "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/1036529/1036519.html",
+   "image_hint": "子育てのやさしいイラスト+「沖縄県 母子及び父子家庭」"
+  },
+  {
+   "no": 2,
+   "seido_id": "fk-ken-judo-shinshin-iryohi",
+   "title": "「沖縄県 重度心身障害者医療費助成制度」、名前だけでも覚えてください",
+   "caption": "障がいのあるご本人・ご家族に向けた制度です。「沖縄県 重度心身障害者医療費助成制度」。重度の心身障害のある方が対象となる可能性があります(自動償還で口座振込)。申し込みの窓口はお住まいの市町村の担当窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #障がい福祉 #医療費 #沖縄県重度心身障害者医療費助",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-28 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-ken-judo-shinshin-iryohi",
+   "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/shogaifukushi/1007022/1018788/1006977/1006987.html",
+   "image_hint": "障がいのやさしいイラスト+「沖縄県 重度心身障害者医」"
+  },
+  {
+   "no": 3,
+   "seido_id": "fk-ken-kenei-jutaku",
+   "title": "「沖縄県営住宅」、見落とされがちです",
+   "caption": "住まいのことで困ったときに使える制度です。「沖縄県営住宅」。住まいにお困りで、所得などの要件にあてはまる世帯が対象になることがあります。申し込みの窓口は沖縄県住宅供給公社・県の住宅窓口へ。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #住まい #くらしの支援 #沖縄県営住宅",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-08-06 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-ken-kenei-jutaku",
+   "source_url": "https://www.pref.okinawa.lg.jp/machizukuri/jutakutochi/1012327/1012334/index.html",
+   "image_hint": "住宅取得・引越のやさしいイラスト+「沖縄県営住宅」"
+  },
+  {
+   "no": 4,
+   "seido_id": "fk-ken-nanbyo-iryohi",
+   "title": "「沖縄県 特定医療費助成制度」、見落とされがちです",
+   "caption": "治療が続くときに、負担を軽くする制度があります。「沖縄県 特定医療費(指定難病)助成制度」。国が定める指定難病と診断された方が対象になることがあります。申し込みの窓口はお住まいの地域の保健所へ申請。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #医療費 #沖縄県特定医療費助成制度",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-28 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-ken-nanbyo-iryohi",
+   "source_url": "https://www.pref.okinawa.lg.jp/iryokenko/hokenjo/1008066/1008086/1028432.html",
+   "image_hint": "病気・けがのやさしいイラスト+「沖縄県 特定医療費助成制」"
+  },
+  {
+   "no": 5,
+   "seido_id": "fk-ken-senshiniryo-funin",
+   "title": "「沖縄県 先進医療不妊治療費助成事業」、申し込みを忘れていませんか",
+   "caption": "赤ちゃんを迎える準備のなかで、見落とされがちな制度です。「沖縄県 先進医療不妊治療費助成事業」。保険診療と併用する先進医療の不妊治療を受けている方が対象になることがあります。申し込みの窓口はお住まいの地域を管轄する保健所へ申請(那覇市は那覇市保健所)。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #沖縄 #出産 #沖縄県先進医療不妊治療費助成",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-28 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-ken-senshiniryo-funin",
+   "source_url": "https://www.pref.okinawa.lg.jp/iryokenko/kenko/1006303/1006171.html",
+   "image_hint": "妊娠・出産のやさしいイラスト+「沖縄県 先進医療不妊治療」"
+  }
+ ],
+ "used_ids": [
+  "fk-ken-boshi-fushi-iryohi",
+  "fk-ken-fuiku-kensa",
+  "fk-ken-hitorioya-jutaku-shikin",
+  "fk-ken-judo-shinshin-iryohi",
+  "fk-ken-kenei-jutaku",
+  "fk-ken-nanbyo-iryohi",
+  "fk-ken-senshiniryo-funin",
+  "fk-kuni-chiiki-houkatsu",
+  "fk-kuni-hitorioya-shien",
+  "fk-kuni-hoiku-mushoka",
+  "fk-kuni-ikuji-kyufu",
+  "fk-kuni-jidofuyoteate",
+  "fk-kuni-jidoteate",
+  "fk-kuni-jiritsushien-iryo",
+  "fk-kuni-josei-sodan",
+  "fk-kuni-kaigokyugyo-kyufu",
+  "fk-kuni-kashitsuke",
+  "fk-kuni-kogaku-ryoyo",
+  "fk-kuni-kokunen-menjo",
+  "fk-kuni-kosodate-green",
+  "fk-kuni-koyohoken-kihonteate",
+  "fk-kuni-kyoiku-kunren",
+  "fk-kuni-kyushokusha-shien",
+  "fk-kuni-nenkin-kyufukin",
+  "fk-kuni-rousai",
+  "fk-kuni-safetynet-jutaku",
+  "fk-kuni-saigai-choui",
+  "fk-kuni-seikatsu-hogo",
+  "fk-kuni-seikatsu-konkyu",
+  "fk-kuni-shogaiji-fukushi",
+  "fk-kuni-shogaiji-kyufu",
+  "fk-kuni-shotoku-shien",
+  "fk-kuni-shugaku-enjo",
+  "fk-kuni-shugaku-shien",
+  "fk-kuni-shussan-ichijikin",
+  "fk-kuni-syogaisya-teate",
+  "fk-kuni-tokubetsu-jifute",
+  "fk-kuni-tokubetsu-shogaisha",
+  "fk-kuni-tokushi-shorei",
+  "fk-okinawa-kokoro-iryo"
+ ]
 }
