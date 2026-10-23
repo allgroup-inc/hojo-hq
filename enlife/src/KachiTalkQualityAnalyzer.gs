@@ -33,7 +33,8 @@ const SHEET_NAMES = {
   quality_analysis: '品質分析',
   checklist_compliance: 'チェックリスト合致度',
   correlation: '成績相関分析',
-  summary: 'サマリー'
+  summary: 'サマリー',
+  consolidated_dashboard: '統合ダッシュボード'
 };
 
 /**
@@ -56,6 +57,7 @@ function ensureKachiTalkAnalysisTabs() {
   initializeChecklistComplianceHeaders_(ss.getSheetByName(SHEET_NAMES.checklist_compliance));
   initializeCorrelationHeaders_(ss.getSheetByName(SHEET_NAMES.correlation));
   initializeSummaryHeaders_(ss.getSheetByName(SHEET_NAMES.summary));
+  initializeConsolidatedDashboardHeaders_(ss.getSheetByName(SHEET_NAMES.consolidated_dashboard));
 
   console.log('✓ KachiTalk分析タブの初期化完了');
 }
@@ -165,6 +167,62 @@ function initializeSummaryHeaders_(sheet) {
 }
 
 /**
+ * Initialize consolidated dashboard with all data in one view
+ */
+function initializeConsolidatedDashboardHeaders_(sheet) {
+  sheet.clear();
+
+  // Main title
+  sheet.getRange('A1:H1').merge().setValue('【KachiTalk品質管理 統合ダッシュボード】')
+    .setFontSize(18).setFontWeight('bold').setHorizontalAlignment('center')
+    .setBackground('#1f4788').setFontColor('#ffffff');
+
+  // Refresh date
+  sheet.getRange('A2').setValue('更新日時: ').setFontWeight('bold');
+  sheet.getRange('B2').setValue('=NOW()').setNumberFormat('yyyy/m/d hh:mm:ss');
+
+  // Section 1: Team overview (Row 4-6)
+  sheet.getRange('A4:B4').merge().setValue('チーム全体統計').setFontWeight('bold').setBackground('#e8f4f8');
+  sheet.getRange('A5').setValue('平均品質スコア');
+  sheet.getRange('B5').setValue('=IFERROR(AVERAGE(品質分析!K2:K9),"-")').setHorizontalAlignment('center').setNumberFormat('0.0');
+  sheet.getRange('C5').setValue('点');
+
+  sheet.getRange('A6').setValue('総通話件数');
+  sheet.getRange('B6').setValue('=IFERROR(SUM(品質分析!C2:C9),"-")').setHorizontalAlignment('center');
+  sheet.getRange('C6').setValue('件');
+
+  // Section 2: Rankings (Row 8-17)
+  sheet.getRange('A8:H8').merge().setValue('営業マン別品質スコア・実施率一覧').setFontWeight('bold').setBackground('#e8f4f8');
+
+  const headers = ['順位', '営業マン', '品質スコア', '評価', '①実施', '②実施', '③実施', '④実施'];
+  sheet.getRange('A9:H9').setValues([headers]).setFontWeight('bold').setBackground('#4a90e2').setFontColor('#ffffff');
+
+  // Placeholder rows for rankings (actual data filled by buildConsolidatedDashboard)
+  for (let i = 0; i < 8; i++) {
+    sheet.getRange(`A${10 + i}:H${10 + i}`).setBackground(i % 2 === 0 ? '#ffffff' : '#f5f5f5');
+  }
+
+  // Section 3: 6-step implementation rates (Row 19-20)
+  sheet.getRange('A19:H19').merge().setValue('⑤申込・⑥紹介の実施率分析').setFontWeight('bold').setBackground('#e8f4f8');
+  const strengthHeaders = ['営業マン', '⑤申込契約', '⑥紹介入手', '改善優先度'];
+  sheet.getRange('A20:D20').setValues([strengthHeaders.slice(0, 4)]).setFontWeight('bold').setBackground('#50c878').setFontColor('#ffffff');
+
+  for (let i = 0; i < 8; i++) {
+    sheet.getRange(`A${21 + i}:D${21 + i}`).setBackground(i % 2 === 0 ? '#ffffff' : '#f5f5f5');
+  }
+
+  // Set column widths
+  sheet.setColumnWidth(1, 120);  // A
+  sheet.setColumnWidth(2, 120);  // B
+  sheet.setColumnWidth(3, 100);  // C
+  sheet.setColumnWidth(4, 80);   // D
+  sheet.setColumnWidth(5, 80);   // E
+  sheet.setColumnWidth(6, 80);   // F
+  sheet.setColumnWidth(7, 80);   // G
+  sheet.setColumnWidth(8, 80);   // H
+}
+
+/**
  * Analyze KachiTalk logs and update quality metrics
  * @param {string} month - '8月' or '9月'
  */
@@ -198,6 +256,9 @@ function analyzeKachiTalkQuality(month = '9月') {
       metrics.averageScore, rating
     ]);
   });
+
+  // Update consolidated dashboard
+  buildConsolidatedDashboard();
 
   console.log('✓ 品質分析の更新完了: ' + month);
 }
@@ -287,6 +348,81 @@ function buildCorrelationAnalysis() {
   });
 
   console.log('✓ 相関分析の更新完了');
+}
+
+/**
+ * Build consolidated dashboard with all analysis data
+ */
+function buildConsolidatedDashboard() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const qualitySheet = ss.getSheetByName(SHEET_NAMES.quality_analysis);
+  const dashboardSheet = ss.getSheetByName(SHEET_NAMES.consolidated_dashboard);
+
+  const data = qualitySheet.getDataRange().getValues();
+
+  // Parse quality analysis data
+  const staffData = [];
+  data.forEach((row, idx) => {
+    if (idx > 0 && row[0]) {
+      staffData.push({
+        name: row[0],
+        callCount: row[2] || 0,
+        avgCallTime: row[3] || 0,
+        step1Rate: row[4] || 0,
+        step2Rate: row[5] || 0,
+        step3Rate: row[6] || 0,
+        step4Rate: row[7] || 0,
+        step5Rate: row[8] || 0,
+        step6Rate: row[9] || 0,
+        score: parseFloat(row[10]) || 0,
+        rating: row[11] || '要改善'
+      });
+    }
+  });
+
+  // Sort by score (descending)
+  staffData.sort((a, b) => b.score - a.score);
+
+  // Fill rankings section (rows 10-17)
+  staffData.forEach((staff, idx) => {
+    const rowNum = 10 + idx;
+    const colors = staff.score >= 85 ? '#c8e6c9' : staff.score >= 70 ? '#fff9c4' : '#ffccbc';
+
+    dashboardSheet.getRange(`A${rowNum}`).setValue(idx + 1).setHorizontalAlignment('center').setBackground(colors);
+    dashboardSheet.getRange(`B${rowNum}`).setValue(staff.name).setBackground(colors);
+    dashboardSheet.getRange(`C${rowNum}`).setValue(staff.score).setHorizontalAlignment('center').setNumberFormat('0.0').setBackground(colors);
+    dashboardSheet.getRange(`D${rowNum}`).setValue(staff.rating).setHorizontalAlignment('center').setBackground(colors);
+    dashboardSheet.getRange(`E${rowNum}`).setValue(staff.step1Rate + '%').setHorizontalAlignment('center').setBackground(colors);
+    dashboardSheet.getRange(`F${rowNum}`).setValue(staff.step2Rate + '%').setHorizontalAlignment('center').setBackground(colors);
+    dashboardSheet.getRange(`G${rowNum}`).setValue(staff.step3Rate + '%').setHorizontalAlignment('center').setBackground(colors);
+    dashboardSheet.getRange(`H${rowNum}`).setValue(staff.step4Rate + '%').setHorizontalAlignment('center').setBackground(colors);
+  });
+
+  // Fill improvement focus section (rows 21-28)
+  staffData.forEach((staff, idx) => {
+    const rowNum = 21 + idx;
+
+    // Determine improvement priority (lower step5/step6 rates = higher priority)
+    const avgStep56 = (staff.step5Rate + staff.step6Rate) / 2;
+    let priority = '◎良好';
+    if (avgStep56 < 50) priority = '◆要注力';
+    else if (avgStep56 < 75) priority = '▲要改善';
+
+    dashboardSheet.getRange(`A${rowNum}`).setValue(staff.name);
+    dashboardSheet.getRange(`B${rowNum}`).setValue(staff.step5Rate + '%').setHorizontalAlignment('center').setNumberFormat('0');
+    dashboardSheet.getRange(`C${rowNum}`).setValue(staff.step6Rate + '%').setHorizontalAlignment('center').setNumberFormat('0');
+    dashboardSheet.getRange(`D${rowNum}`).setValue(priority).setHorizontalAlignment('center');
+
+    // Color by priority
+    let bgColor = '#ffffff';
+    if (priority === '◆要注力') bgColor = '#ffcccc';
+    else if (priority === '▲要改善') bgColor = '#ffe0b2';
+    else bgColor = '#c8e6c9';
+
+    dashboardSheet.getRange(`A${rowNum}:D${rowNum}`).setBackground(bgColor);
+  });
+
+  console.log('✓ 統合ダッシュボードの更新完了');
 }
 
 /**
