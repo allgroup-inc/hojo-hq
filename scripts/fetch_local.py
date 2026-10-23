@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 import time
 import urllib.parse
 import urllib.request
@@ -26,7 +27,16 @@ from datetime import datetime, timezone, timedelta
 JST = timezone(timedelta(hours=9))
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "subsidies.json")
 
+<<<<<<< HEAD
 UA = "hojo-hq-bot/1.0 (+https://moraiwasuredo.jp; contact: bot@en-life.co.jp)"
+=======
+# 取得状況の記録先(U3 fetch guard)。fetch_jgrants.py が作ったファイルに local を追記する。
+# exit code は従来どおり 0。判定は guard_subsidies.py に一本化(I-1/I-5)。
+STATUS_PATH = os.environ.get("FETCH_STATUS_PATH") or os.path.join(tempfile.gettempdir(), "hojo_fetch_status.json")
+STATUS_SCHEMA = 1
+
+UA = "hojo-hq-bot/1.0 (+https://allgroup-inc.github.io/hojo-hq; contact: bot@en-life.co.jp)"
+>>>>>>> origin/main
 REQUEST_DELAY = 1.5  # 秒。自治体サーバへの配慮
 DETAIL_LIMIT = 60    # 1ソースあたり詳細取得の上限(暴走防止)
 
@@ -173,11 +183,19 @@ def decide_tag(base_tag: str, name: str) -> str:
     return base_tag
 
 
-def crawl_source(src: dict, robots_cache: dict) -> list:
+def crawl_source(src: dict, robots_cache: dict, fetch_state: dict = None) -> list:
+    """1 ソースを巡回して items を返す。fetch_state(dict)を渡すと取得状況を書き込む:
+    ok(一覧が取得できたか)/ listing_skipped(robots 不許可)/ listing_entries / detail_skipped / items。
+    robots 不許可・一覧失敗はどちらも「そのソースの前回掲載分が失われる」ので guard が止める(判断事項 E/G1)。
+    (関数内の変数 status は制度の掲載状態「募集中/要確認」なので、引数名は fetch_state にして区別する)"""
     items = []
+    st = fetch_state if fetch_state is not None else {}
+    st.update({"label": src["label"], "ok": False, "listing_skipped": False,
+               "listing_entries": 0, "detail_skipped": 0, "items": 0})
     listing_url = src["listing"]
     if not robots_ok(listing_url, robots_cache):
         print(f"[skip] robots disallow: {listing_url}", file=sys.stderr)
+        st["listing_skipped"] = True
         return items
 
     html = http_get(listing_url)
@@ -185,6 +203,7 @@ def crawl_source(src: dict, robots_cache: dict) -> list:
     if not html:
         print(f"[warn] listing fetch failed: {listing_url}", file=sys.stderr)
         return items
+    st["ok"] = True
 
     lmain = MAIN_RE.search(html)
     scope = lmain.group(1) if lmain else html
@@ -213,6 +232,7 @@ def crawl_source(src: dict, robots_cache: dict) -> list:
         entries.append((name, abs_url))
 
     print(f"[info] {src['label']}: 一覧 {len(entries)} 件", file=sys.stderr)
+    st["listing_entries"] = len(entries)
 
     today = datetime.now(JST).date()
     fetch_detail = src.get("fetch_detail", True)
@@ -227,6 +247,7 @@ def crawl_source(src: dict, robots_cache: dict) -> list:
             if fetched >= DETAIL_LIMIT:
                 break
             if not robots_ok(url, robots_cache):
+                st["detail_skipped"] += 1
                 continue
             dhtml = http_get(url)
             fetched += 1
@@ -267,7 +288,32 @@ def crawl_source(src: dict, robots_cache: dict) -> list:
         })
 
     print(f"[info] {src['label']}: 採用 {len(items)} 件", file=sys.stderr)
+    st["items"] = len(items)
     return items
+
+
+def write_status(local: dict, incomplete: bool) -> None:
+    """fetch_jgrants.py が書いた status に local を追記して必ず書く(I-1)。
+    元ファイルが無い/読めない場合は local だけで書く(jgrants 欠落は guard が止める)。"""
+    status = {}
+    try:
+        if os.path.exists(STATUS_PATH):
+            with open(STATUS_PATH, encoding="utf-8") as f:
+                status = json.load(f)
+            if not isinstance(status, dict):
+                status = {}
+    except Exception as e:
+        print(f"[warn] status 読み込み失敗 {STATUS_PATH}: {e}", file=sys.stderr)
+        status = {}
+    status.setdefault("schema_version", STATUS_SCHEMA)
+    status["local"] = local
+    status["local_incomplete"] = incomplete
+    try:
+        os.makedirs(os.path.dirname(STATUS_PATH) or ".", exist_ok=True)
+        with open(STATUS_PATH, "w", encoding="utf-8") as f:
+            json.dump(status, f, ensure_ascii=False, indent=1)
+    except Exception as e:
+        print(f"[warn] status 書き込み失敗 {STATUS_PATH}: {e}", file=sys.stderr)
 
 
 def main() -> None:
@@ -282,34 +328,44 @@ def main() -> None:
 
     robots_cache: dict = {}
     added = []
-    for src in SOURCES:
-        for it in crawl_source(src, robots_cache):
-            if it["source_url"] in existing_urls or it["id"] in existing_ids:
-                continue
-            existing_urls.add(it["source_url"])
-            existing_ids.add(it["id"])
-            added.append(it)
+    local_status: dict = {}
+    incomplete = True
+    try:
+        for src in SOURCES:
+            st: dict = {}
+            local_status[src["key"]] = st
+            for it in crawl_source(src, robots_cache, st):
+                if it["source_url"] in existing_urls or it["id"] in existing_ids:
+                    continue
+                existing_urls.add(it["source_url"])
+                existing_ids.add(it["id"])
+                added.append(it)
 
-    merged = existing + added
-    merged.sort(key=lambda x: (x.get("deadline") or "9999"))
+        merged = existing + added
+        merged.sort(key=lambda x: (x.get("deadline") or "9999"))
 
-    by_tag: dict = {}
-    by_source: dict = {}
-    for it in merged:
-        by_tag[it.get("tag", "?")] = by_tag.get(it.get("tag", "?"), 0) + 1
-        s = it.get("source", "jGrants")
-        by_source[s] = by_source.get(s, 0) + 1
+        by_tag: dict = {}
+        by_source: dict = {}
+        for it in merged:
+            by_tag[it.get("tag", "?")] = by_tag.get(it.get("tag", "?"), 0) + 1
+            s = it.get("source", "jGrants")
+            by_source[s] = by_source.get(s, 0) + 1
 
-    payload["updated_at"] = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
-    payload["count"] = len(merged)
-    payload["by_tag"] = by_tag
-    payload["by_source"] = by_source
-    payload["items"] = merged
+        payload["updated_at"] = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
+        payload["count"] = len(merged)
+        payload["by_tag"] = by_tag
+        payload["by_source"] = by_source
+        payload["items"] = merged
 
-    with open(OUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=1)
-    print(f"[ok] local +{len(added)} 件 / 合計 {len(merged)} 件 → data/subsidies.json")
-    print(f"[by_source] {by_source}")
+        with open(OUT_PATH, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=1)
+        incomplete = False
+        print(f"[ok] local +{len(added)} 件 / 合計 {len(merged)} 件 → data/subsidies.json")
+        print(f"[by_source] {by_source}")
+    finally:
+        write_status(local_status, incomplete)
+        print(f"[status] {STATUS_PATH}: local={ {k: (v.get('ok'), v.get('items')) for k, v in local_status.items()} }",
+              file=sys.stderr)
 
 
 if __name__ == "__main__":

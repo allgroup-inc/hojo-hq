@@ -356,7 +356,11 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         var topLine = h("div", {style:"margin:8px 0 4px;padding:16px;background:#EAF7EE;border:1px solid #B7E4C7;border-radius:12px;text-align:center"});
         topLine.appendChild(h("p", {style:"font-weight:800;margin-bottom:4px", text:"この結果" + sum.total + "件、今日のままとは限りません"}));
         topLine.appendChild(h("p", {class:"note", style:"margin-bottom:6px", text:"制度は増えたり、変わったりします(いまの掲載は" + seidoCount + "件・毎日更新)。LINEに登録しておくと、新しい制度が増えたときや締切が近づいたときにお知らせが届きます。"}));
+<<<<<<< HEAD
         var topLineBtn = h("a", {href:(window.FG_LINE_URL || "https://moraiwasuredo.jp/go/fg-shindan/"), target:"_blank", rel:"noopener",
+=======
+        var topLineBtn = h("a", {href:(window.FG_LINE_URL || "https://allgroup-inc.github.io/hojo-hq/go/fg-shindan/"), target:"_blank", rel:"noopener",
+>>>>>>> origin/main
           style:"display:block;max-width:420px;margin:0 auto;padding:14px 24px;background:#22382A;color:#fff;text-decoration:none;border-radius:999px;font-weight:700", text:"LINEで登録する(無料)"});
         topLineBtn.addEventListener("click", function(){
           if (window.fgTrack) window.fgTrack("line_add_click", {pos:"result_top"});

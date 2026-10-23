@@ -29,7 +29,10 @@ p{margin:0 0 8px;color:#6d5c4d;font-size:.95rem}
   <div class="links" id="links">
     <a class="main" href="/hojo-hq/">沖縄企業のミカタ(トップ)</a>
     <a href="/hojo-hq/fukugiiro/">もらいわすれ堂(沖縄)</a>
+<<<<<<< HEAD
     <a href="/hojo-hq/yamanashi/">もらいわすれ堂 山梨版</a>
+=======
+>>>>>>> origin/main
   </div>
   <p class="note">上のボタンから、お探しの内容にいちばん近い入口へお戻りください。</p>
 </div>
@@ -40,11 +43,15 @@ p{margin:0 0 8px;color:#6d5c4d;font-size:.95rem}
     var path = location.pathname;
     var box = document.getElementById("links");
     var order = null;
+<<<<<<< HEAD
     if (path.indexOf("/yamanashi/") >= 0) {
       order = [["/hojo-hq/yamanashi/", "もらいわすれ堂 山梨版(トップ)"],
                ["/hojo-hq/yamanashi/shindan/", "3分でもらい忘れ診断をはじめる"],
                ["/hojo-hq/yamanashi/kit/", "申請準備シート一覧"]];
     } else if (path.indexOf("/fukugiiro/") >= 0) {
+=======
+    if (path.indexOf("/fukugiiro/") >= 0) {
+>>>>>>> origin/main
       order = [["/hojo-hq/fukugiiro/", "もらいわすれ堂(トップ)"],
                ["/hojo-hq/fukugiiro/shindan/", "3分でもらい忘れ診断をはじめる"],
                ["/hojo-hq/fukugiiro/kit/", "申請準備シート一覧"]];

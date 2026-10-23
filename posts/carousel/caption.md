@@ -1,6 +1,7 @@
 ## キャプション
-締切まで30日以上ある補助金だけ、5件選びました。今から準備が間に合います🌺
+締切まで、まだ36日以上。今から準備が間に合う補助金だけ、5件選びました🌺
 
+<<<<<<< HEAD
 1. ［第十三回］事業再構築補助金_GX進出類型（交付申請等）
 　締切 2026-10-29・残り31日 / 上限 1.5億円
 2. 産業車両等の脱炭素化促進事業のうち、空港における脱炭素化促進事業① 空港における再エネ活用型GPU等導入支援（二酸化炭素排出抑制対策事業費等補助金）
@@ -11,8 +12,23 @@
 　締切 2026-10-30・残り32日 / 上限 3億円
 5. 令和７年度補正 業務産業用蓄電システム導入支援事業
 　締切 2026-10-31・残り33日 / 上限 1,500万円
+=======
+1. 令和７年度補正 ディマンドリスポンスの拡大に向けたIoT化推進事業
+　締切 2026-11-28・残り36日 / 上限 2,000万円
+2. 【令和８年度】二酸化炭素排出抑制対策事業費等補助金（地域再エネ水素ステーション保守点検等支援事業）
+　締切 2026-11-28・残り36日 / 上限 220万円
+3. 令和8年度SDS電子化補助金
+　締切 2026-11-30・残り38日 / 上限 100万円
+4. 令和８年度二酸化炭素排出抑制対策事業費等補助金（運輸部門等の脱炭素化に向けた先進的システム社会実装促進事業のうち、農業機械の電動化促進事業）
+　締切 2026-11-30・残り38日 / 上限 7,200万円
+5. 令和８年度 脱炭素成長型経済構造移行推進対策費補助金 （業務用建築物の脱炭素改修加速化事業）
+　締切 2026-11-30・残り38日 / 上限 10億円
+>>>>>>> origin/main
 
 🔖 保存しておくと、締切前に見返せます。
+経理担当や顧問の先生に送っておくと、相談が早く進みます。
+7枚目に、申請前に確認したい3つをまとめました。
+本文のURLはタップできません。プロフィールのリンクを開くと、この投稿の制度ページへそのまま飛べます。
 うちの会社で使えるかは30秒診断で👇
 https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=carousel
 ※要件・締切・金額は必ず原文の公募要領でご確認ください。
@@ -21,13 +37,21 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 
 
 ## 出典
+<<<<<<< HEAD
 - ［第十三回］事業再構築補助金_GX進出類型（交付申請等）: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDPyeMAH
 - 産業車両等の脱炭素化促進事業のうち、空港における脱炭素化促進事業① 空港における再エネ活用型GPU等導入支援（二酸化炭素排出抑制対策事業費等補助金）: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYzVMAX
 - 産業車両等の脱炭素化促進事業のうち、港湾における脱炭素化促進事業（二酸化炭素排出抑制対策事業費等補助金）: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZ04MAH
 - 【令和８年度】二酸化炭素排出抑制対策事業費等補助金（再エネ等由来水素を活用した自立・分散型エネルギーシステム構築等事業）: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDaotMAD
 - 令和７年度補正 業務産業用蓄電システム導入支援事業: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY4mMAH
+=======
+- 令和７年度補正 ディマンドリスポンスの拡大に向けたIoT化推進事業: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY5GMAX
+- 【令和８年度】二酸化炭素排出抑制対策事業費等補助金（地域再エネ水素ステーション保守点検等支援事業）: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZzQMAX
+- 令和8年度SDS電子化補助金: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDderMAD
+- 令和８年度二酸化炭素排出抑制対策事業費等補助金（運輸部門等の脱炭素化に向けた先進的システム社会実装促進事業のうち、農業機械の電動化促進事業）: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDa1gMAD
+- 令和８年度 脱炭素成長型経済構造移行推進対策費補助金 （業務用建築物の脱炭素改修加速化事業）: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDa1bMAD
+>>>>>>> origin/main
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-08-17
+- checked: 2026-10-16
 - by: scripts/generate_carousel.py(SNS部・ヒロメさん)

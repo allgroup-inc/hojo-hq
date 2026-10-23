@@ -211,8 +211,13 @@ window.FG_LINE_OA_ID = "630pbjqq";
 
 def swap_ogp(s):
     """OGP画像を山梨版カードへ(沖縄版ページから変換する際の共通処理)"""
+<<<<<<< HEAD
     return s.replace("https://moraiwasuredo.jp/fukugiiro/assets/ogp.jpg",
                      "https://moraiwasuredo.jp/yamanashi/assets/ogp.jpg")
+=======
+    return s.replace("https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/ogp.jpg",
+                     "https://allgroup-inc.github.io/hojo-hq/yamanashi/assets/ogp.jpg")
+>>>>>>> origin/main
 
 def swap_header(s, depth=1):
     return re.sub(r'<header class="siteheader">.*?</header>', header(depth), s, count=1, flags=re.S)
@@ -267,8 +272,13 @@ def build_shindan():
                      'text:"💬 受け取れたことを報告する(匿名・任意)"', "houkoku link text")
     # 共有・持ち出しテキストの沖縄残存を差し替える(2026-09-27 点検で発見。
     # 山梨の利用者が家族に送ったリンクが沖縄版診断へ飛んでいた)
+<<<<<<< HEAD
     assert s.count('https://moraiwasuredo.jp/fukugiiro/shindan/') == 2, "共有URLの箇所数が想定と違う"
     s = s.replace('https://moraiwasuredo.jp/fukugiiro/shindan/',
+=======
+    assert s.count('https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/') == 2, "共有URLの箇所数が想定と違う"
+    s = s.replace('https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/',
+>>>>>>> origin/main
                   f'{Y_BASE_URL}shindan/')
     s = must_replace(s, '「もらいわすれ堂」で沖縄の給付金・手当のもらい忘れを3分で診断できるよ',
                      '「もらいわすれ堂」で山梨の給付金・手当のもらい忘れを3分で診断できるよ', "share text")

@@ -1,0 +1,299 @@
+=== SKILL.md Format Validation ===
+
+⚠️  [ab-testing] Step セクションが0個です
+⚠️  [ab-testing] 「検証失敗時」セクションが見つかりません
+⚠️  [ab-testing] 「本番前テスト」セクションが見つかりません
+⚠️  [ad-creative] Step セクションが0個です
+⚠️  [ad-creative] 「検証失敗時」セクションが見つかりません
+⚠️  [ad-creative] 「本番前テスト」セクションが見つかりません
+⚠️  [ads] Step セクションが0個です
+⚠️  [ads] 「検証失敗時」セクションが見つかりません
+⚠️  [ads] 「本番前テスト」セクションが見つかりません
+⚠️  [ai-seo] Step セクションが0個です
+⚠️  [ai-seo] 「検証失敗時」セクションが見つかりません
+⚠️  [ai-seo] 「本番前テスト」セクションが見つかりません
+⚠️  [analytics] Step セクションが0個です
+⚠️  [analytics] 「検証失敗時」セクションが見つかりません
+⚠️  [analytics] 「本番前テスト」セクションが見つかりません
+⚠️  [aso] Step セクションが0個です
+⚠️  [aso] 「検証失敗時」セクションが見つかりません
+⚠️  [aso] 「本番前テスト」セクションが見つかりません
+⚠️  [attribution] Step セクションが0個です
+⚠️  [attribution] 「検証失敗時」セクションが見つかりません
+⚠️  [attribution] 「本番前テスト」セクションが見つかりません
+⚠️  [brainstorming] Step セクションが0個です
+⚠️  [brainstorming] 「検証失敗時」セクションが見つかりません
+⚠️  [brainstorming] 「本番前テスト」セクションが見つかりません
+⚠️  [caption-writer] 「検証失敗時」セクションが見つかりません
+⚠️  [caption-writer] 「本番前テスト」セクションが見つかりません
+⚠️  [carousel-writer] 「検証失敗時」セクションが見つかりません
+⚠️  [carousel-writer] 「本番前テスト」セクションが見つかりません
+⚠️  [churn-model-quality-gate] Step セクションが0個です
+⚠️  [churn-model-quality-gate] 「検証失敗時」セクションが見つかりません
+⚠️  [churn-model-quality-gate] 「本番前テスト」セクションが見つかりません
+⚠️  [churn-pii-guard] Step セクションが0個です
+⚠️  [churn-pii-guard] 「検証失敗時」セクションが見つかりません
+⚠️  [churn-pii-guard] 「本番前テスト」セクションが見つかりません
+⚠️  [churn-prevention] Step セクションが0個です
+⚠️  [churn-prevention] 「検証失敗時」セクションが見つかりません
+⚠️  [churn-prevention] 「本番前テスト」セクションが見つかりません
+⚠️  [churn-retention-ops] Step セクションが0個です
+⚠️  [churn-retention-ops] 「検証失敗時」セクションが見つかりません
+⚠️  [churn-retention-ops] 「本番前テスト」セクションが見つかりません
+⚠️  [co-marketing] Step セクションが0個です
+⚠️  [co-marketing] 「検証失敗時」セクションが見つかりません
+⚠️  [co-marketing] 「本番前テスト」セクションが見つかりません
+⚠️  [cold-email] Step セクションが0個です
+⚠️  [cold-email] 「検証失敗時」セクションが見つかりません
+⚠️  [cold-email] 「本番前テスト」セクションが見つかりません
+⚠️  [community-marketing] Step セクションが0個です
+⚠️  [community-marketing] 「検証失敗時」セクションが見つかりません
+⚠️  [community-marketing] 「本番前テスト」セクションが見つかりません
+⚠️  [competitor-profiling] Step セクションが0個です
+⚠️  [competitor-profiling] 「検証失敗時」セクションが見つかりません
+⚠️  [competitor-profiling] 「本番前テスト」セクションが見つかりません
+⚠️  [competitors] Step セクションが0個です
+⚠️  [competitors] 「検証失敗時」セクションが見つかりません
+⚠️  [competitors] 「本番前テスト」セクションが見つかりません
+⚠️  [content-calendar] 「検証失敗時」セクションが見つかりません
+⚠️  [content-calendar] 「本番前テスト」セクションが見つかりません
+⚠️  [content-strategy] Step セクションが0個です
+⚠️  [content-strategy] 「検証失敗時」セクションが見つかりません
+⚠️  [content-strategy] 「本番前テスト」セクションが見つかりません
+⚠️  [context-limit-handoff] Step セクションが0個です
+⚠️  [context-limit-handoff] 「検証失敗時」セクションが見つかりません
+⚠️  [context-limit-handoff] 「本番前テスト」セクションが見つかりません
+⚠️  [copy-editing] Step セクションが0個です
+⚠️  [copy-editing] 「検証失敗時」セクションが見つかりません
+⚠️  [copy-editing] 「本番前テスト」セクションが見つかりません
+⚠️  [copywriting] Step セクションが0個です
+⚠️  [copywriting] 「検証失敗時」セクションが見つかりません
+⚠️  [copywriting] 「本番前テスト」セクションが見つかりません
+⚠️  [cro] Step セクションが0個です
+⚠️  [cro] 「検証失敗時」セクションが見つかりません
+⚠️  [cro] 「本番前テスト」セクションが見つかりません
+⚠️  [customer-research] Step セクションが0個です
+⚠️  [customer-research] 「検証失敗時」セクションが見つかりません
+⚠️  [customer-research] 「本番前テスト」セクションが見つかりません
+⚠️  [data-insights-extraction] Step セクションが0個です
+⚠️  [data-insights-extraction] 「検証失敗時」セクションが見つかりません
+⚠️  [data-insights-extraction] 「本番前テスト」セクションが見つかりません
+⚠️  [design-system-hojo] Step セクションが0個です
+⚠️  [design-system-hojo] 「検証失敗時」セクションが見つかりません
+⚠️  [design-system-hojo] 「本番前テスト」セクションが見つかりません
+⚠️  [directory-submissions] Step セクションが0個です
+⚠️  [directory-submissions] 「検証失敗時」セクションが見つかりません
+⚠️  [directory-submissions] 「本番前テスト」セクションが見つかりません
+⚠️  [dispatching-parallel-agents] Step セクションが0個です
+⚠️  [dispatching-parallel-agents] 「検証失敗時」セクションが見つかりません
+⚠️  [dispatching-parallel-agents] 「本番前テスト」セクションが見つかりません
+⚠️  [educational-content-design] Step セクションが0個です
+⚠️  [educational-content-design] 「検証失敗時」セクションが見つかりません
+⚠️  [educational-content-design] 「本番前テスト」セクションが見つかりません
+⚠️  [emails] Step セクションが0個です
+⚠️  [emails] 「検証失敗時」セクションが見つかりません
+⚠️  [emails] 「本番前テスト」セクションが見つかりません
+⚠️  [executing-plans] Step セクションが0個です
+⚠️  [executing-plans] 「検証失敗時」セクションが見つかりません
+⚠️  [executing-plans] 「本番前テスト」セクションが見つかりません
+⚠️  [feature-factory] Step セクションが0個です
+⚠️  [feature-factory] 「検証失敗時」セクションが見つかりません
+⚠️  [feature-factory] 「本番前テスト」セクションが見つかりません
+⚠️  [figma-use-hojo] Step セクションが0個です
+⚠️  [figma-use-hojo] 「検証失敗時」セクションが見つかりません
+⚠️  [figma-use-hojo] 「本番前テスト」セクションが見つかりません
+⚠️  [finishing-a-development-branch] 「検証失敗時」セクションが見つかりません
+⚠️  [finishing-a-development-branch] 「本番前テスト」セクションが見つかりません
+⚠️  [free-tools] Step セクションが0個です
+⚠️  [free-tools] 「検証失敗時」セクションが見つかりません
+⚠️  [free-tools] 「本番前テスト」セクションが見つかりません
+⚠️  [glow-ma-triangle-review] Step セクションが0個です
+⚠️  [glow-ma-triangle-review] 「検証失敗時」セクションが見つかりません
+⚠️  [glow-ma-triangle-review] 「本番前テスト」セクションが見つかりません
+⚠️  [hashtag-strategy] 「検証失敗時」セクションが見つかりません
+⚠️  [hashtag-strategy] 「本番前テスト」セクションが見つかりません
+⚠️  [hojo-accuracy-check] Step セクションが0個です
+⚠️  [hojo-accuracy-check] 「検証失敗時」セクションが見つかりません
+⚠️  [hojo-accuracy-check] 「本番前テスト」セクションが見つかりません
+⚠️  [hojo-deadline-alert] Step セクションが0個です
+⚠️  [hojo-deadline-alert] 「検証失敗時」セクションが見つかりません
+⚠️  [hojo-deadline-alert] 「本番前テスト」セクションが見つかりません
+⚠️  [hojo-lighthouse-triage] Step セクションが0個です
+⚠️  [hojo-lighthouse-triage] 「検証失敗時」セクションが見つかりません
+⚠️  [hojo-lighthouse-triage] 「本番前テスト」セクションが見つかりません
+⚠️  [hojo-triangle-review] Step セクションが0個です
+⚠️  [hojo-triangle-review] 「検証失敗時」セクションが見つかりません
+⚠️  [hojo-triangle-review] 「本番前テスト」セクションが見つかりません
+⚠️  [hook-writer] 「検証失敗時」セクションが見つかりません
+⚠️  [hook-writer] 「本番前テスト」セクションが見つかりません
+⚠️  [humanizer] Step セクションが0個です
+⚠️  [humanizer] 「検証失敗時」セクションが見つかりません
+⚠️  [humanizer] 「本番前テスト」セクションが見つかりません
+⚠️  [image] Step セクションが0個です
+⚠️  [image] 「検証失敗時」セクションが見つかりません
+⚠️  [image] 「本番前テスト」セクションが見つかりません
+⚠️  [influencer-marketing] Step セクションが0個です
+⚠️  [influencer-marketing] 「検証失敗時」セクションが見つかりません
+⚠️  [influencer-marketing] 「本番前テスト」セクションが見つかりません
+⚠️  [instagram-growth] 「検証失敗時」セクションが見つかりません
+⚠️  [instagram-growth] 「本番前テスト」セクションが見つかりません
+⚠️  [kgi-ksf-kpi-cascade] Step セクションが0個です
+⚠️  [kgi-ksf-kpi-cascade] 「検証失敗時」セクションが見つかりません
+⚠️  [kgi-ksf-kpi-cascade] 「本番前テスト」セクションが見つかりません
+⚠️  [last30days] 「検証失敗時」セクションが見つかりません
+⚠️  [last30days] 「本番前テスト」セクションが見つかりません
+⚠️  [launch] Step セクションが0個です
+⚠️  [launch] 「検証失敗時」セクションが見つかりません
+⚠️  [launch] 「本番前テスト」セクションが見つかりません
+⚠️  [lead-magnets] Step セクションが0個です
+⚠️  [lead-magnets] 「検証失敗時」セクションが見つかりません
+⚠️  [lead-magnets] 「本番前テスト」セクションが見つかりません
+⚠️  [lean-app-validation] Step セクションが0個です
+⚠️  [lean-app-validation] 「検証失敗時」セクションが見つかりません
+⚠️  [lean-app-validation] 「本番前テスト」セクションが見つかりません
+⚠️  [log-analysis-playbook] Step セクションが0個です
+⚠️  [log-analysis-playbook] 「検証失敗時」セクションが見つかりません
+⚠️  [log-analysis-playbook] 「本番前テスト」セクションが見つかりません
+⚠️  [marketing-council] Step セクションが0個です
+⚠️  [marketing-council] 「検証失敗時」セクションが見つかりません
+⚠️  [marketing-council] 「本番前テスト」セクションが見つかりません
+⚠️  [marketing-ideas] Step セクションが0個です
+⚠️  [marketing-ideas] 「検証失敗時」セクションが見つかりません
+⚠️  [marketing-ideas] 「本番前テスト」セクションが見つかりません
+⚠️  [marketing-loops] Step セクションが0個です
+⚠️  [marketing-loops] 「検証失敗時」セクションが見つかりません
+⚠️  [marketing-loops] 「本番前テスト」セクションが見つかりません
+⚠️  [marketing-plan] Step セクションが0個です
+⚠️  [marketing-plan] 「検証失敗時」セクションが見つかりません
+⚠️  [marketing-plan] 「本番前テスト」セクションが見つかりません
+⚠️  [marketing-psychology] Step セクションが0個です
+⚠️  [marketing-psychology] 「検証失敗時」セクションが見つかりません
+⚠️  [marketing-psychology] 「本番前テスト」セクションが見つかりません
+⚠️  [mindshare-arbitrage] Step セクションが0個です
+⚠️  [mindshare-arbitrage] 「検証失敗時」セクションが見つかりません
+⚠️  [mindshare-arbitrage] 「本番前テスト」セクションが見つかりません
+⚠️  [multi-ai-crosscheck] Step セクションが0個です
+⚠️  [multi-ai-crosscheck] 「検証失敗時」セクションが見つかりません
+⚠️  [multi-ai-crosscheck] 「本番前テスト」セクションが見つかりません
+⚠️  [offers] Step セクションが0個です
+⚠️  [offers] 「検証失敗時」セクションが見つかりません
+⚠️  [offers] 「本番前テスト」セクションが見つかりません
+⚠️  [onboarding] Step セクションが0個です
+⚠️  [onboarding] 「検証失敗時」セクションが見つかりません
+⚠️  [onboarding] 「本番前テスト」セクションが見つかりません
+⚠️  [paywalls] Step セクションが0個です
+⚠️  [paywalls] 「検証失敗時」セクションが見つかりません
+⚠️  [paywalls] 「本番前テスト」セクションが見つかりません
+⚠️  [platform-specs-and-validation] Step セクションが0個です
+⚠️  [platform-specs-and-validation] 「検証失敗時」セクションが見つかりません
+⚠️  [platform-specs-and-validation] 「本番前テスト」セクションが見つかりません
+⚠️  [popups] Step セクションが0個です
+⚠️  [popups] 「検証失敗時」セクションが見つかりません
+⚠️  [popups] 「本番前テスト」セクションが見つかりません
+⚠️  [pricing] Step セクションが0個です
+⚠️  [pricing] 「検証失敗時」セクションが見つかりません
+⚠️  [pricing] 「本番前テスト」セクションが見つかりません
+⚠️  [product-marketing] 「検証失敗時」セクションが見つかりません
+⚠️  [product-marketing] 「本番前テスト」セクションが見つかりません
+⚠️  [programmatic-seo] Step セクションが0個です
+⚠️  [programmatic-seo] 「検証失敗時」セクションが見つかりません
+⚠️  [programmatic-seo] 「本番前テスト」セクションが見つかりません
+⚠️  [prospecting] Step セクションが0個です
+⚠️  [prospecting] 「検証失敗時」セクションが見つかりません
+⚠️  [prospecting] 「本番前テスト」セクションが見つかりません
+⚠️  [public-relations] Step セクションが0個です
+⚠️  [public-relations] 「検証失敗時」セクションが見つかりません
+⚠️  [public-relations] 「本番前テスト」セクションが見つかりません
+⚠️  [receiving-code-review] Step セクションが0個です
+⚠️  [receiving-code-review] 「検証失敗時」セクションが見つかりません
+⚠️  [receiving-code-review] 「本番前テスト」セクションが見つかりません
+⚠️  [referrals] Step セクションが0個です
+⚠️  [referrals] 「検証失敗時」セクションが見つかりません
+⚠️  [referrals] 「本番前テスト」セクションが見つかりません
+⚠️  [requesting-code-review] Step セクションが0個です
+⚠️  [requesting-code-review] 「検証失敗時」セクションが見つかりません
+⚠️  [requesting-code-review] 「本番前テスト」セクションが見つかりません
+⚠️  [resilient-agent-design] Step セクションが0個です
+⚠️  [resilient-agent-design] 「検証失敗時」セクションが見つかりません
+⚠️  [resilient-agent-design] 「本番前テスト」セクションが見つかりません
+⚠️  [revops] Step セクションが0個です
+⚠️  [revops] 「検証失敗時」セクションが見つかりません
+⚠️  [revops] 「本番前テスト」セクションが見つかりません
+⚠️  [sales-enablement] Step セクションが0個です
+⚠️  [sales-enablement] 「検証失敗時」セクションが見つかりません
+⚠️  [sales-enablement] 「本番前テスト」セクションが見つかりません
+⚠️  [schema] Step セクションが0個です
+⚠️  [schema] 「検証失敗時」セクションが見つかりません
+⚠️  [schema] 「本番前テスト」セクションが見つかりません
+⚠️  [seo-audit] Step セクションが0個です
+⚠️  [seo-audit] 「検証失敗時」セクションが見つかりません
+⚠️  [seo-audit] 「本番前テスト」セクションが見つかりません
+⚠️  [shiryo-sakusei] Step セクションが0個です
+⚠️  [shiryo-sakusei] 「検証失敗時」セクションが見つかりません
+⚠️  [shiryo-sakusei] 「本番前テスト」セクションが見つかりません
+⚠️  [signup] Step セクションが0個です
+⚠️  [signup] 「検証失敗時」セクションが見つかりません
+⚠️  [signup] 「本番前テスト」セクションが見つかりません
+⚠️  [site-architecture] Step セクションが0個です
+⚠️  [site-architecture] 「検証失敗時」セクションが見つかりません
+⚠️  [site-architecture] 「本番前テスト」セクションが見つかりません
+⚠️  [slide-deck-hojo] Step セクションが0個です
+⚠️  [slide-deck-hojo] 「検証失敗時」セクションが見つかりません
+⚠️  [slide-deck-hojo] 「本番前テスト」セクションが見つかりません
+⚠️  [sms] Step セクションが0個です
+⚠️  [sms] 「検証失敗時」セクションが見つかりません
+⚠️  [sms] 「本番前テスト」セクションが見つかりません
+⚠️  [social] Step セクションが0個です
+⚠️  [social] 「検証失敗時」セクションが見つかりません
+⚠️  [social] 「本番前テスト」セクションが見つかりません
+⚠️  [subagent-driven-development] Step セクションが0個です
+⚠️  [subagent-driven-development] 「検証失敗時」セクションが見つかりません
+⚠️  [subagent-driven-development] 「本番前テスト」セクションが見つかりません
+⚠️  [system-design-patterns] Step セクションが0個です
+⚠️  [system-design-patterns] 「検証失敗時」セクションが見つかりません
+⚠️  [system-design-patterns] 「本番前テスト」セクションが見つかりません
+⚠️  [systematic-debugging] Step セクションが0個です
+⚠️  [systematic-debugging] 「検証失敗時」セクションが見つかりません
+⚠️  [systematic-debugging] 「本番前テスト」セクションが見つかりません
+⚠️  [taste-skill] Step セクションが0個です
+⚠️  [taste-skill] 「検証失敗時」セクションが見つかりません
+⚠️  [taste-skill] 「本番前テスト」セクションが見つかりません
+⚠️  [test-driven-development] Step セクションが0個です
+⚠️  [test-driven-development] 「検証失敗時」セクションが見つかりません
+⚠️  [test-driven-development] 「本番前テスト」セクションが見つかりません
+⚠️  [thread-writer] 「検証失敗時」セクションが見つかりません
+⚠️  [thread-writer] 「本番前テスト」セクションが見つかりません
+⚠️  [transcription-analysis-hojo] Step セクションが0個です
+⚠️  [transcription-analysis-hojo] 「検証失敗時」セクションが見つかりません
+⚠️  [transcription-analysis-hojo] 「本番前テスト」セクションが見つかりません
+⚠️  [user-research-hojo] Step セクションが0個です
+⚠️  [user-research-hojo] 「検証失敗時」セクションが見つかりません
+⚠️  [user-research-hojo] 「本番前テスト」セクションが見つかりません
+⚠️  [using-git-worktrees] 「検証失敗時」セクションが見つかりません
+⚠️  [using-git-worktrees] 「本番前テスト」セクションが見つかりません
+⚠️  [using-superpowers] Step セクションが0個です
+⚠️  [using-superpowers] 「検証失敗時」セクションが見つかりません
+⚠️  [using-superpowers] 「本番前テスト」セクションが見つかりません
+⚠️  [verification-before-completion] Step セクションが0個です
+⚠️  [verification-before-completion] 「検証失敗時」セクションが見つかりません
+⚠️  [verification-before-completion] 「本番前テスト」セクションが見つかりません
+⚠️  [video] Step セクションが0個です
+⚠️  [video] 「検証失敗時」セクションが見つかりません
+⚠️  [video] 「本番前テスト」セクションが見つかりません
+⚠️  [voice-of-customer-analysis] Step セクションが0個です
+⚠️  [voice-of-customer-analysis] 「検証失敗時」セクションが見つかりません
+⚠️  [voice-of-customer-analysis] 「本番前テスト」セクションが見つかりません
+⚠️  [writing-plans] Step セクションが0個です
+⚠️  [writing-plans] 「検証失敗時」セクションが見つかりません
+⚠️  [writing-plans] 「本番前テスト」セクションが見つかりません
+⚠️  [writing-plans-hojo] Step セクションが0個です
+⚠️  [writing-plans-hojo] 「検証失敗時」セクションが見つかりません
+⚠️  [writing-plans-hojo] 「本番前テスト」セクションが見つかりません
+⚠️  [writing-skills] Step セクションが0個です
+⚠️  [writing-skills] 「検証失敗時」セクションが見つかりません
+⚠️  [writing-skills] 「本番前テスト」セクションが見つかりません
+
+=== Summary ===
+Errors: 0
+Warnings: 292
+⚠️  292 個の警告を検出しました (改善推奨)

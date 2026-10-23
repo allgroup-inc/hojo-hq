@@ -1,0 +1,2 @@
+{"ts": "2026-10-06T20:40:14Z", "session_id": "84180d06-8f4d-4dcb-8c25-1d3cd976d937", "event": "session_start", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/superpowers-per-chat-3mbx56", "source": "startup", "head": "0f0789cce0b5f3310568d90da387aa5917f575a5"}
+{"ts": "2026-10-06T20:40:14Z", "session_id": "84180d06-8f4d-4dcb-8c25-1d3cd976d937", "event": "session_end", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/superpowers-per-chat-3mbx56", "commits": [], "tools": {}, "skills": [], "duration_s": 0, "reason": "other"}

@@ -1,7 +1,12 @@
 {
  "region": "yamanashi",
+<<<<<<< HEAD
  "updated_at": "2026-09-24 08:22",
  "count": 76,
+=======
+ "updated_at": "2026-10-15 22:49",
+ "count": 75,
+>>>>>>> origin/main
  "items": [
   {
    "id": "fk-kuni-jidoteate",
@@ -23,6 +28,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
   },
   {
@@ -51,6 +57,9 @@
     "type": "adjust",
     "note": "公的年金(遺族年金・障害年金など)を受け取れる場合は、手当額が調整される(全部または一部が支給されない)場合があります。窓口でご確認ください(要確認)"
    }
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-shussan-ichijikin",
@@ -72,7 +81,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-ikuji-kyufu",
@@ -96,7 +109,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-jukyo-kakuho",
@@ -120,7 +137,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22",
+=======
+   "fetched_at": "2026-10-15 22:49",
+>>>>>>> origin/main
    "combine": {
     "type": "adjust",
     "note": "生活保護(住宅扶助)を受けている場合は対象外となる場合があります。窓口でご確認ください(要確認)"
@@ -146,7 +167,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-shugaku-shien",
@@ -168,7 +193,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22",
+=======
+   "fetched_at": "2026-10-15 22:49",
+>>>>>>> origin/main
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -198,7 +227,11 @@
    "verified_by": "kensho(突合レポート○・match_tokens修正後)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-shugakushienkin-koko",
@@ -221,7 +254,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 文部科学省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-shogaku-kyufukin-koko",
@@ -245,7 +282,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 文部科学省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-kyushokusha-shien",
@@ -269,7 +310,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-seikatsu-konkyu",
@@ -295,7 +340,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-kyoiku-kunren",
@@ -317,7 +366,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-hoiku-mushoka",
@@ -343,7 +396,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-tokubetsu-jifute",
@@ -369,7 +426,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22",
+=======
+   "fetched_at": "2026-10-15 22:49",
+>>>>>>> origin/main
    "combine": {
     "type": "adjust",
     "note": "公的年金(遺族年金・障害年金など)を受け取れる場合は、手当額が調整される(全部または一部が支給されない)場合があります。窓口でご確認ください(要確認)"
@@ -399,7 +460,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-tokubetsu-shogaisha",
@@ -424,7 +489,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-jiritsushien-iryo",
@@ -450,7 +519,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22",
+=======
+   "fetched_at": "2026-10-15 22:49",
+>>>>>>> origin/main
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -479,7 +552,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-kaigokyugyo-kyufu",
@@ -505,7 +582,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-rousai",
@@ -530,7 +611,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-miharai-chingin",
@@ -556,7 +641,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-seikatsu-hogo",
@@ -581,7 +670,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-nenkin-kyufukin",
@@ -606,7 +699,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-saigai-choui",
@@ -631,7 +728,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-shugaku-enjo",
@@ -657,7 +758,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22",
+=======
+   "fetched_at": "2026-10-15 22:49",
+>>>>>>> origin/main
    "combine": {
     "type": "adjust",
     "note": "就学援助(給食費の援助)を受けている場合や他の給食費助成との重複時の取り扱いは、窓口でご確認ください(要確認)"
@@ -688,7 +793,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-safetynet-jutaku",
@@ -714,7 +823,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 国土交通省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-kosodate-green",
@@ -740,7 +853,11 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 国土交通省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-shussan-ouen",
@@ -764,7 +881,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22",
+=======
+   "fetched_at": "2026-10-15 22:49",
+>>>>>>> origin/main
    "combine": {
     "type": "adjust",
     "note": "国の出産・子育て応援給付金(妊婦のための支援給付)に基づく支給のため、転入前の市町村などで既に受け取った分と重ねては受けられない場合があります。窓口でご確認ください(要確認)"
@@ -799,7 +920,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 内閣府ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-hello-training",
@@ -827,7 +952,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-josei-sodan",
@@ -850,7 +979,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-kokuho-genmen",
@@ -878,7 +1011,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22",
+=======
+   "fetched_at": "2026-10-15 22:49",
+>>>>>>> origin/main
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -905,7 +1042,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-kashitsuke",
@@ -929,7 +1070,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-kokunen-menjo",
@@ -953,7 +1098,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 日本年金機構ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-boshi-jiritsu-kyufu",
@@ -981,7 +1130,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22",
+=======
+   "fetched_at": "2026-10-15 22:49",
+>>>>>>> origin/main
    "combine": {
     "type": "adjust",
     "note": "求職者支援制度(職業訓練受講給付金)や雇用保険の教育訓練給付との併給には条件がある場合があります。窓口でご確認ください(要確認)"
@@ -1011,7 +1164,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-shussan-teate",
@@ -1037,7 +1194,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-maisoryo",
@@ -1059,7 +1220,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-kogaku-kaigo-service",
@@ -1086,7 +1251,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 市区町村ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-kogaku-iryo-kaigo-gassan",
@@ -1116,7 +1285,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 各医療保険者ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-kaigo-jutaku-kaishu",
@@ -1141,7 +1314,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 市区町村ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-shoni-mansei",
@@ -1167,7 +1344,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 都道府県・指定都市・中核市等ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22",
+=======
+   "fetched_at": "2026-10-15 22:49",
+>>>>>>> origin/main
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -1201,7 +1382,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-iryohi-kojo",
@@ -1227,7 +1412,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 国ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-koki-korei-hokenryo-keigen",
@@ -1257,7 +1446,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 都道府県の後期高齢者医療広域連合・市区町村ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-nhk-menjo",
@@ -1285,7 +1478,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: NHKウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-hosougu",
@@ -1308,7 +1505,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-nichijo-yougu",
@@ -1336,7 +1537,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "fk-kuni-nenkin-shien-kyufukin",
@@ -1361,7 +1566,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 日本年金機構ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-ken-nyuyoji-iryo",
@@ -1384,7 +1593,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 山梨県ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-ken-hitorioya-iryo",
@@ -1411,7 +1624,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 山梨県ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-ken-judo-shinshin-iryo",
@@ -1434,7 +1651,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 山梨県ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-ken-nanbyo-iryo",
@@ -1459,7 +1680,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 山梨県ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-ken-iju-shienkin",
@@ -1485,7 +1710,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 山梨県ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-hokuto-kodomo-iryo",
@@ -1508,7 +1737,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 北杜市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-hokuto-kosodate-ouenkin",
@@ -1531,7 +1764,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 北杜市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-fujikawaguchiko-jutaku-shinchiku",
@@ -1553,7 +1790,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 富士河口湖町ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-minamialps-kodomo-iryo",
@@ -1576,7 +1817,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 南アルプス市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-minamialps-kosodate-jutaku",
@@ -1599,7 +1844,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 南アルプス市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-uenohara-jutaku-reform",
@@ -1621,7 +1870,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 上野原市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-uenohara-akiya-reform",
@@ -1643,7 +1896,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 上野原市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-uenohara-iju-shienkin",
@@ -1666,7 +1923,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 上野原市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-showa-kosodate-iryo",
@@ -1689,7 +1950,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 昭和町ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-showa-ninkagai-hoiku",
@@ -1712,7 +1977,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 昭和町ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-hayakawa-kosodate-iryo",
@@ -1735,7 +2004,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 早川町ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-hayakawa-kyushoku-hojo",
@@ -1758,7 +2031,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 早川町ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-hayakawa-ijusha-kaishu",
@@ -1780,7 +2057,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 早川町ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-tsuru-sukoyaka-iryo",
@@ -1803,7 +2084,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 都留市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-tsuru-kosodate-jutaku",
@@ -1826,7 +2111,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 都留市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-tsuru-iju-teiju",
@@ -1848,7 +2137,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 都留市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-kai-kodomo-iryo",
@@ -1871,7 +2164,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 甲斐市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-kai-jutaku-shutoku",
@@ -1894,7 +2191,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 甲斐市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   },
   {
    "id": "ym-kai-iju-shien",
@@ -1917,7 +2218,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 甲斐市ウェブサイト",
+<<<<<<< HEAD
    "fetched_at": "2026-09-24 08:22"
+=======
+   "fetched_at": "2026-10-15 22:49"
+>>>>>>> origin/main
   }
  ],
  "note": "国の制度(沖縄版で公式照合済みの全国制度を流用)+山梨県の制度+A区分8市町村の制度(守り部審査でリンク可と判定済み・2026-09-23追加、同日の再監査で小菅村を撤去し都留市・甲斐市を追加)。B区分(トップページ限定)と論点対象の市町(営利サイト条項)は決裁後に追加"

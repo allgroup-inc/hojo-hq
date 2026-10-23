@@ -1,0 +1,190 @@
+{
+  "post_id": "test_post_3",
+  "template": "template3",
+  "template_type": "business_transformation_carousel",
+  "seido_id": "a0WJ200000CDNDnMAP",
+  "seido_name": "令和８年度_Scope3排出量削減のための企業間連携による省CO2設備投資促進事業",
+  "english_name": "Scope3 Emissions Reduction via Inter-company Collaboration: CO2-saving Equipment Investment Promotion (FY2026)",
+  "industry": "製造業",
+  "support_level": {
+    "max_amount": 1500000000,
+    "subsidy_rate": "要確認（DB未記載）",
+    "description": "Up to ¥1.5B (15億円) per DB max_amount; subsidy rate not in DB"
+  },
+  "example_data": {
+    "before_amount": 50000000,
+    "after_amount": 15000000,
+    "example_industry": "製造業",
+    "use_case": "Scope3排出量削減・企業間連携・省CO2設備投資への転換"
+  },
+  "created_at": "2026-09-28",
+  "status": "revised",
+  "approval_history": [
+    {
+      "stage": "week_1_approval_gate",
+      "reviewer": "humanizer",
+      "status": "pending",
+      "date": null,
+      "notes": "Awaiting humanizer Japanese language check and content verification"
+    },
+    {
+      "stage": "revision_after_gate",
+      "reviewer": "claude",
+      "status": "revised",
+      "date": "2026-09-29",
+      "notes": "プログラム名・金額(15億)を修正、採択企業の声を削除、試算例ラベル追加"
+    }
+  ],
+  "content": {
+    "title": "設備投資を検討していますか？ 国が最大15億円サポートします。",
+    "hook": "事業転換は『大きなリスク』と思ってませんか？国が最大15億円サポートします。",
+    "pages": [
+      {
+        "page": 1,
+        "type": "hero",
+        "elements": {
+          "background_color": "#00335C",
+          "large_text": "事業転換を検討していますか？",
+          "subsidy_amount": "最大15億円",
+          "subsidy_name": "Scope3排出量削減・企業間連携・省CO2設備投資促進事業"
+        }
+      },
+      {
+        "page": 2,
+        "type": "transformation_example",
+        "elements": {
+          "industry": "製造業",
+          "before": "人手による製造プロセス",
+          "after": "IoT活用による自動化製造",
+          "benefit": "生産性40%向上 / コスト30%削減 / 労働環境改善",
+          "label": "事業転換のイメージ（試算例）— この補助金の採択事例ではない",
+          "benefit_label": "効果（試算例）"
+        }
+      },
+      {
+        "page": 3,
+        "type": "transformation_example",
+        "elements": {
+          "industry": "小売業",
+          "before": "実店舗のみの販売体制",
+          "after": "ECサイト展開で全国販売",
+          "benefit": "顧客層2倍拡大 / 売上50%増加 / 24時間営業",
+          "label": "事業転換のイメージ（試算例）— この補助金の採択事例ではない",
+          "benefit_label": "効果（試算例）"
+        }
+      },
+      {
+        "page": 4,
+        "type": "transformation_example",
+        "elements": {
+          "industry": "飲食業",
+          "before": "店舗飲食のみの営業体制",
+          "after": "宅配・中食事業へ展開",
+          "benefit": "営業時間外の収益化 / 店舗負荷軽減 / 収益源多角化",
+          "label": "事業転換のイメージ（試算例）— この補助金の採択事例ではない",
+          "benefit_label": "効果（試算例）"
+        }
+      },
+      {
+        "page": 5,
+        "type": "checklist",
+        "elements": {
+          "title": "事業転換の準備チェックリスト",
+          "timeline": "6か月の計画例（試算例）",
+          "items": [
+            {
+              "timing": "6ヶ月前",
+              "task": "経営課題の整理と転換目標の設定"
+            },
+            {
+              "timing": "3ヶ月前",
+              "task": "事業計画ドラフト作成・資金試算"
+            },
+            {
+              "timing": "1ヶ月前",
+              "task": "申請書類の準備・経理資料確認"
+            },
+            {
+              "timing": "申請直前",
+              "task": "書類チェック・最終提出準備"
+            }
+          ]
+        }
+      },
+      {
+        "page": 6,
+        "type": "cta",
+        "elements": {
+          "primary_text": "詳しくはプロフィールのLINEから相談できます",
+          "secondary_text": "無料相談受付中",
+          "qr_code": {
+            "url": "https://lin.ee/...",
+            "placeholder": "LINE friend-add QR code (180×180px)",
+            "target": "沖縄企業のミカタ公式LINE"
+          }
+        }
+      }
+    ]
+  },
+  "image": {
+    "filename": "ig_test_3_p*.png",
+    "dimensions": "1080×1350px per page",
+    "format": "PNG carousel (6 pages)",
+    "colors": {
+      "primary": "#00335C",
+      "accent": "#F88800",
+      "background_light": "#F5F5F5",
+      "text_dark": "#333333"
+    },
+    "pages": [
+      {
+        "number": 1,
+        "filename": "ig_test_3_p1.png",
+        "type": "hero",
+        "note": "P1 regenerated: 15億円 and program name"
+      },
+      {
+        "number": 2,
+        "filename": "ig_test_3_p2.png",
+        "type": "transformation_example"
+      },
+      {
+        "number": 3,
+        "filename": "ig_test_3_p3.png",
+        "type": "transformation_example"
+      },
+      {
+        "number": 4,
+        "filename": "ig_test_3_p4.png",
+        "type": "transformation_example"
+      },
+      {
+        "number": 5,
+        "filename": "ig_test_3_p5.png",
+        "type": "checklist"
+      },
+      {
+        "number": 6,
+        "filename": "ig_test_3_p6.png",
+        "type": "cta"
+      }
+    ]
+  },
+  "caption": {
+    "filename": "test_post_3_caption.md",
+    "hooks": 1,
+    "hashtags": 5
+  },
+  "quality_checks": {
+    "japanese_naturalness": "pending",
+    "accuracy_check": "pending",
+    "brand_compliance": "pending",
+    "link_validation": "pending",
+    "transformation_narrative": "examples labelled 試算例 / not adopted cases"
+  },
+  "issuer": "脱炭素成長型経済構造移行推進対策費補助金",
+  "target_area": "全国",
+  "deadline": "2026-11-13",
+  "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDNDnMAP",
+  "revised_at": "2026-09-29"
+}

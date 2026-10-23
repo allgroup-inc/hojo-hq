@@ -1,0 +1,113 @@
+name: glow-ma-deploy
+
+# glow-ma(営業管理システム)のコードを Apps Script へ自動反映する
+# (2026-10-16 小柳さん承認・docs/議事_20261016_glow-ma自動反映と自己修復.md)。
+# これまでは小柳さんのPCから `clasp push` するしかなく、PCを開けない日は修正が止まっていた。
+#
+# 必要なSecrets(一度だけ登録):
+#   CLASPRC_JSON      … PCで `npx @google/clasp@3.4.1 login` した後の ~/.clasprc.json の中身
+#   GLOW_MA_SCRIPT_ID … Apps Script のスクリプトID(公開リポジトリには書かない)
+# 未登録の間は「未接続」と表示して何もしない(ワークフローは赤くしない)。
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "glow-ma/src/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: glow-ma-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: 同名の .gs と .js が並んでいないか(並ぶと clasp push が止まる)
+        run: |
+          dup=$(cd glow-ma/src && ls *.gs *.js 2>/dev/null | sed -E 's/\.(gs|js)$//' | sort | uniq -d)
+          if [ -n "$dup" ]; then
+            echo "::error::同じ名前の .gs と .js があります: $dup"
+            exit 1
+          fi
+
+      - name: 接続情報の確認
+        id: creds
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ secrets.GLOW_MA_SCRIPT_ID }}
+        run: |
+          if [ -z "$CLASPRC_JSON" ] || [ -z "$SCRIPT_ID" ]; then
+            echo "::warning::未接続: CLASPRC_JSON / GLOW_MA_SCRIPT_ID が未登録のため、Apps Scriptへの反映をスキップしました(手順: glow-ma/README.md「自動反映」)"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v6
+        if: steps.creds.outputs.ready == 'true'
+        with:
+          node-version: "22"
+
+      - name: Apps Script へ反映(clasp push)
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ secrets.GLOW_MA_SCRIPT_ID }}
+        run: |
+          npm install -g @google/clasp@3.4.1
+          printf '%s' "$CLASPRC_JSON" > "$HOME/.clasprc.json"
+          chmod 600 "$HOME/.clasprc.json"
+          # 貼り付け時に紛れ込んだ空白・改行を除く(スクリプトIDに空白は含まれない)
+          SCRIPT_ID=$(printf '%s' "$SCRIPT_ID" | tr -d '[:space:]')
+          echo "::notice::スクリプトIDの長さ: ${#SCRIPT_ID}文字(通常57文字)"
+          # 反映前に、ライブ側のファイル一覧を読めるか確かめる(ID・権限の誤りをここで切り分ける)
+          mkdir -p /tmp/live && printf '{"scriptId":"%s","rootDir":"."}' "$SCRIPT_ID" > /tmp/live/.clasp.json
+          if (cd /tmp/live && clasp pull >/tmp/pull.log 2>&1); then
+            echo "::notice::ライブのファイル数: $(ls /tmp/live | grep -c -E '\.(gs|js|json|html)$')(読み取りOK)"
+          else
+            echo "::error title=ライブの読み取りに失敗::$(grep -v -i -E 'token|secret' /tmp/pull.log | tail -5 | tr '\n' ' ' | cut -c1-600)"
+          fi
+          rm -rf /tmp/live
+          printf '{"scriptId":"%s","rootDir":"./src"}' "$SCRIPT_ID" > glow-ma/.clasp.json
+          cd glow-ma
+          # 失敗理由を Actions の画面(注記)に出す。clasp の出力に認証情報は含まれない
+          set +e
+          out=$(clasp push --force 2>&1); code=$?
+          set -e
+          echo "$out"
+          rm -f "$HOME/.clasprc.json" .clasp.json
+          if [ $code -ne 0 ]; then
+            msg=$(echo "$out" | grep -v -i -E "token|secret" | tail -8 | tr '\n' ' ' | cut -c1-900)
+            echo "::error title=clasp push failed::$msg"
+            exit $code
+          fi
+
+      - name: LINE通知(反映完了)
+        if: steps.creds.outputs.ready == 'true' && success()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【GLOW台帳】営業管理システムのコードをApps Scriptへ反映しました
+            6時間以内に自己点検が走り、ダッシュボード等を自動で直します。
+            結果は台帳の「稼働状況」タブで確認できます。
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            ⚠️【GLOW台帳】Apps Scriptへの反映に失敗しました
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Googleのログイン情報(CLASPRC_JSON)の期限切れが多い原因です。

@@ -11,7 +11,18 @@ import json
 
 # ページが実際に置かれている場所。ここは変えない。
 # 独自ドメイン(moradou.jp)側の配信物は scripts/deploy_moradou.py が配信時に書き換える。
+<<<<<<< HEAD
 SITE_BASE = "https://moraiwasuredo.jp/fukugiiro"
+
+# 独自ドメインへ引っ越したあと、旧URL(github.io)側が「正規URLは新ドメイン」と
+# 検索エンジンに伝えるための設定。**moradou.jp が実際に開通して表示確認が済むまで None**。
+# 先に入れると、まだ開いていないドメインを正規URLとして教えてしまう
+# (議事_20260828 ウタガイ②)。切替は scripts/moradou_cutover.py が
+# 開通を実測してから行う。
+MOVED_TO = "moradou.jp"
+=======
+SITE_BASE = "https://allgroup-inc.github.io/hojo-hq/fukugiiro"
+>>>>>>> origin/main
 
 # 独自ドメインへ引っ越したあと、旧URL(github.io)側が「正規URLは新ドメイン」と
 # 検索エンジンに伝えるための設定。**moradou.jp が実際に開通して表示確認が済むまで None**。

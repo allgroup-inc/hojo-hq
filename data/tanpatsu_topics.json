@@ -219,7 +219,7 @@
       "title_hint": "副業解禁と複業人材の受け入れ — 容認率過去最高の実態データと実例研究",
       "angle": "noteの成長3位カテゴリ『複業・在宅ワーク実践』へ、稼ぎ方勧誘ではなく経営側の切り口で参入する。容認率64.3%・受入率29.1%の一次データを軸に、人手不足の中小企業が外部の複業人材を受け入れる実務(契約・労働時間通算・過重労働リスク)へ翻訳する",
       "paid_price": 1280,
-      "status": "pending",
+      "status": "drafted",
       "facts": [
         {
           "claim": "企業の副業容認率は64.3%で過去最高(2023年比+3.4pt)。ルールや制限なく認める全面容認は2018年の約2倍",
@@ -254,7 +254,8 @@
       ],
       "x_hook_a": "企業の副業容認率、64.3%で過去最高。でも受け入れる側の中小企業は29.1%。人手不足の答えがここにある気がして、一次データを調べました",
       "x_hook_b": "「採用できないなら、週1日だけ借りる」。複業人材の受け入れという選択肢を、統計と実務で整理しました",
-      "x_hook_c": "社員に副業を認めるか迷っていますか?それとも、よその会社の優秀な人を週1で迎えますか?"
+      "x_hook_c": "社員に副業を認めるか迷っていますか?それとも、よその会社の優秀な人を週1で迎えますか?",
+      "drafted_at": "2026-10-08"
     },
     {
       "id": "16",
@@ -648,10 +649,47 @@
       "status": "published",
       "drafted_at": "2026-09-27",
       "note": "週次無料ログ(議事_20260916 案1)。公開後は publish-record --id L02",
+<<<<<<< HEAD
       "published_url": "https://note.com/kekka_mag/n/NXXXXXXX",
       "published_at": "2026-09-27",
       "x_post_url": "https://x.com/kekka_mag/status/2104166318278602811",
       "x_posted_at": "2026-09-27"
+=======
+      "published_url": "https://note.com/kekka_mag/n/n339fc17311a7",
+      "published_at": "2026-09-29",
+      "x_post_url": "https://x.com/kekka_mag/status/2104166318278602811",
+      "x_posted_at": "2026-09-27"
+    },
+    {
+      "id": "L03",
+      "slug": "unei_log",
+      "genre": "実録ログ(無料)",
+      "title_hint": "実録・第9週 — 累計94ビューの現在地と、2日遅れた金曜の正体",
+      "paid_price": 0,
+      "status": "log_drafted",
+      "drafted_at": "2026-10-02",
+      "note": "週次無料ログ(議事_20260916 案1)。公開後は publish-record --id L03"
+    },
+    {
+      "id": "L04",
+      "slug": "unei_log",
+      "genre": "実録ログ(無料)",
+      "title_hint": "実録・第10週 — 累計94ビュー、スキ18の現在地と、バグで遅れた週次ログ",
+      "paid_price": 0,
+      "status": "log_drafted",
+      "drafted_at": "2026-10-09",
+      "note": "週次無料ログ(議事_20260916 案1)。公開後は publish-record --id L04"
+    },
+    {
+      "id": "L05",
+      "slug": "unei_log",
+      "genre": "実録ログ(無料)",
+      "title_hint": "実録・第11週 — 累計94ビューと、売上0円が続く現在地",
+      "paid_price": 0,
+      "status": "log_drafted",
+      "drafted_at": "2026-10-16",
+      "note": "週次無料ログ(議事_20260916 案1)。公開後は publish-record --id L05"
+>>>>>>> origin/main
     }
   ]
 }

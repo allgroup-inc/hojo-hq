@@ -1,0 +1,92 @@
+{
+  "post_id": "test_post_2",
+  "template": "template2",
+  "template_type": "3_step_flow",
+  "seido_id": "okinawa_ric-3",
+  "seido_name": "事業承継推進事業",
+  "english_name": "Business Succession Promotion Project (Okinawa Industry Promotion Public Corporation)",
+  "industry": "All industries (要確認)",
+  "support_type": "要確認",
+  "created_at": "2026-09-28",
+  "status": "revised",
+  "approval_history": [
+    {
+      "stage": "week_1_approval_gate",
+      "reviewer": "humanizer",
+      "status": "pending",
+      "date": null,
+      "notes": "Awaiting humanizer Japanese language check"
+    },
+    {
+      "stage": "revision_after_gate",
+      "reviewer": "claude",
+      "status": "revised",
+      "date": "2026-09-29",
+      "notes": "金額100万円・無料表現を削除、プログラム名をDB(okinawa_ric-3)に合わせ修正、要確認を明示"
+    }
+  ],
+  "content": {
+    "title": "沖縄県で事業承継の支援を受けられるって知ってますか？",
+    "hook": "沖縄県で事業承継の支援を受けられるって知ってますか？",
+    "steps": [
+      {
+        "order": 1,
+        "label": "相談",
+        "description": "LINEで気軽に相談"
+      },
+      {
+        "order": 2,
+        "label": "確認",
+        "description": "公式ページで支援内容を確認（要確認）"
+      },
+      {
+        "order": 3,
+        "label": "申込",
+        "description": "申込方法・締切を確認（要確認）"
+      }
+    ],
+    "contact_phone": null,
+    "qr_code": {
+      "url": "/go/ (Task 13 で実装予定。lin.ee 直貼りは出荷ゲートで不可)",
+      "placeholder": "LINE friend-add QR code (150×150px)",
+      "target": "沖縄企業のミカタ公式LINE"
+    },
+    "contact_note": "相談受付中（LINE）。電話番号は掲載しない",
+    "link": {
+      "label": "詳細は公式ページで",
+      "url": "/go/ (Task 13 で実装予定)"
+    }
+  },
+  "image": {
+    "filename": "test_post_2.png",
+    "dimensions": "1080×1350px",
+    "format": "PNG",
+    "gradient": {
+      "start_color": "#00335C",
+      "end_color": "#F88800",
+      "direction": "top_to_bottom"
+    },
+    "note": "テキストを追記して再生成（フック・プログラム名・要確認表示）"
+  },
+  "caption": {
+    "filename": "test_post_2_caption.md",
+    "hooks": 1,
+    "hashtags": 5
+  },
+  "quality_checks": {
+    "readability": "pending",
+    "medical_accuracy": "pending",
+    "brand_compliance": "pending",
+    "link_validation": "pending"
+  },
+  "issuer": "沖縄県産業振興公社",
+  "source_url": "https://okinawa-ric.jp/service/post-3.html",
+  "max_amount": null,
+  "deadline": "要確認",
+  "revised_at": "2026-09-29",
+  "accuracy_flags": [
+    "max_amount: 要確認",
+    "deadline: 要確認",
+    "support_type/fee: 要確認"
+  ]
+}

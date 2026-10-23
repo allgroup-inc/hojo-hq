@@ -271,11 +271,16 @@ def life_page(slug, events, heading, kw, items, updated):
         body.append('</div>')
     # 市町村独自の制度=市町村名つきリンクリスト(市町村ページ・準備シートに詳細を集約)
     if local:
-        body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>市町村の制度({len(local)}件)</h2>")
+        # ファイルサイズ制約のため、市町村プログラムが60件以上の場合は公式確認済みのみを表示
+        if len(local) > 60:
+            local_to_show = [it for it in local if it.get("verified") is True]
+        else:
+            local_to_show = local
+        body.append(f"<h2 style='font-size:1.1rem;margin-top:20px'>市町村の制度({len(local_to_show)}件表示{'/' + str(len(local)) + '件中' if len(local_to_show) < len(local) else ''})</h2>")
         body.append('<p class="note">お住まいの市町村のものだけが対象です。'
                     '<a href="../../area/">市町村別まとめ</a>からも確認できます。</p>')
         body.append('<ul class="seidolist">')
-        for it in local:
+        for it in local_to_show:
             mark = "✓ " if it.get("verified") is True else ""
             body.append(f'<li><a href="../../kit/{esc(it["id"])}/">{mark}{esc(it["area"])}: {esc(it["name"])}</a></li>')
         body.append('</ul>')

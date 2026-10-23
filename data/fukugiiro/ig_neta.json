@@ -1,99 +1,57 @@
 {
- "updated_at": "2026-10-19",
- "week": "2026-W43",
- "note": "照合済み(verified=True)かつ締切の無い制度だけから scripts/generate_ig_neta.py が生成。日付・金額は本文に書かない。",
- "items": [
-  {
-   "no": 1,
-   "seido_id": "fk-ken-boshi-fushi-iryohi",
-   "title": "「沖縄県 母子及び父子家庭等医療費助成事業」、使っていますか?",
-   "caption": "子育て中のご家庭に、知らないままの方が多い制度です。「沖縄県 母子及び父子家庭等医療費助成事業」。健康保険に加入するひとり親家庭などで、対象年齢のお子さん等がいる世帯が対象になることがあります。申し込みの窓口はお住まいの市町村の窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #子育て #くらしの支援 #沖縄県母子及び父子家庭等医療",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-28 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-ken-boshi-fushi-iryohi",
-   "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/1036529/1036519.html",
-   "image_hint": "子育てのやさしいイラスト+「沖縄県 母子及び父子家庭」"
-  },
-  {
-   "no": 2,
-   "seido_id": "fk-ken-judo-shinshin-iryohi",
-   "title": "「沖縄県 重度心身障害者医療費助成制度」、名前だけでも覚えてください",
-   "caption": "障がいのあるご本人・ご家族に向けた制度です。「沖縄県 重度心身障害者医療費助成制度」。重度の心身障害のある方が対象となる可能性があります(自動償還で口座振込)。申し込みの窓口はお住まいの市町村の担当窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #障がい福祉 #医療費 #沖縄県重度心身障害者医療費助",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-28 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-ken-judo-shinshin-iryohi",
-   "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/shogaifukushi/1007022/1018788/1006977/1006987.html",
-   "image_hint": "障がいのやさしいイラスト+「沖縄県 重度心身障害者医」"
-  },
-  {
-   "no": 3,
-   "seido_id": "fk-ken-kenei-jutaku",
-   "title": "「沖縄県営住宅」、見落とされがちです",
-   "caption": "住まいのことで困ったときに使える制度です。「沖縄県営住宅」。住まいにお困りで、所得などの要件にあてはまる世帯が対象になることがあります。申し込みの窓口は沖縄県住宅供給公社・県の住宅窓口へ。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #住まい #くらしの支援 #沖縄県営住宅",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-08-06 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-ken-kenei-jutaku",
-   "source_url": "https://www.pref.okinawa.lg.jp/machizukuri/jutakutochi/1012327/1012334/index.html",
-   "image_hint": "住宅取得・引越のやさしいイラスト+「沖縄県営住宅」"
-  },
-  {
-   "no": 4,
-   "seido_id": "fk-ken-nanbyo-iryohi",
-   "title": "「沖縄県 特定医療費助成制度」、見落とされがちです",
-   "caption": "治療が続くときに、負担を軽くする制度があります。「沖縄県 特定医療費(指定難病)助成制度」。国が定める指定難病と診断された方が対象になることがあります。申し込みの窓口はお住まいの地域の保健所へ申請。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #医療費 #沖縄県特定医療費助成制度",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-28 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-ken-nanbyo-iryohi",
-   "source_url": "https://www.pref.okinawa.lg.jp/iryokenko/hokenjo/1008066/1008086/1028432.html",
-   "image_hint": "病気・けがのやさしいイラスト+「沖縄県 特定医療費助成制」"
-  },
-  {
-   "no": 5,
-   "seido_id": "fk-ken-senshiniryo-funin",
-   "title": "「沖縄県 先進医療不妊治療費助成事業」、申し込みを忘れていませんか",
-   "caption": "赤ちゃんを迎える準備のなかで、見落とされがちな制度です。「沖縄県 先進医療不妊治療費助成事業」。保険診療と併用する先進医療の不妊治療を受けている方が対象になることがあります。申し込みの窓口はお住まいの地域を管轄する保健所へ申請(那覇市は那覇市保健所)。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #沖縄 #出産 #沖縄県先進医療不妊治療費助成",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-07-28 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-ken-senshiniryo-funin",
-   "source_url": "https://www.pref.okinawa.lg.jp/iryokenko/kenko/1006303/1006171.html",
-   "image_hint": "妊娠・出産のやさしいイラスト+「沖縄県 先進医療不妊治療」"
-  }
- ],
- "used_ids": [
-  "fk-ken-boshi-fushi-iryohi",
-  "fk-ken-fuiku-kensa",
-  "fk-ken-hitorioya-jutaku-shikin",
-  "fk-ken-judo-shinshin-iryohi",
-  "fk-ken-kenei-jutaku",
-  "fk-ken-nanbyo-iryohi",
-  "fk-ken-senshiniryo-funin",
-  "fk-kuni-chiiki-houkatsu",
-  "fk-kuni-hitorioya-shien",
-  "fk-kuni-hoiku-mushoka",
-  "fk-kuni-ikuji-kyufu",
-  "fk-kuni-jidofuyoteate",
-  "fk-kuni-jidoteate",
-  "fk-kuni-jiritsushien-iryo",
-  "fk-kuni-josei-sodan",
-  "fk-kuni-kaigokyugyo-kyufu",
-  "fk-kuni-kashitsuke",
-  "fk-kuni-kogaku-ryoyo",
-  "fk-kuni-kokunen-menjo",
-  "fk-kuni-kosodate-green",
-  "fk-kuni-koyohoken-kihonteate",
-  "fk-kuni-kyoiku-kunren",
-  "fk-kuni-kyushokusha-shien",
-  "fk-kuni-nenkin-kyufukin",
-  "fk-kuni-rousai",
-  "fk-kuni-safetynet-jutaku",
-  "fk-kuni-saigai-choui",
-  "fk-kuni-seikatsu-hogo",
-  "fk-kuni-seikatsu-konkyu",
-  "fk-kuni-shogaiji-fukushi",
-  "fk-kuni-shogaiji-kyufu",
-  "fk-kuni-shotoku-shien",
-  "fk-kuni-shugaku-enjo",
-  "fk-kuni-shugaku-shien",
-  "fk-kuni-shussan-ichijikin",
-  "fk-kuni-syogaisya-teate",
-  "fk-kuni-tokubetsu-jifute",
-  "fk-kuni-tokubetsu-shogaisha",
-  "fk-kuni-tokushi-shorei",
-  "fk-okinawa-kokoro-iryo"
- ]
+  "updated_at": "2026-10-23",
+  "week": "2026-W44",
+  "note": "照合済み(verified=True)かつ締切の無い制度だけから scripts/generate_ig_neta.py が生成。日付・金額は本文に書かない。",
+  "items": [
+    {
+      "no": 1,
+      "seido_id": "fk-kuni-jidoteate",
+      "title": "「児童手当」、毎月ではなく「年3回」支給、知っていましたか？",
+      "caption": "「児童手当」は、お子さんを育てている世帯の生活を支えるための制度です。中学生までのお子さんを育てている世帯が対象になることがあります。注意点は、「毎月支給」ではなく「年3回」—6月・10月・2月に、2か月分をまとめて支給されることです。金額や条件は変わることがあるので、お住まいの市区町村の窓口、またはこちらの公式ページでご確認ください。",
+      "hashtags": "#もらいわすれ堂 #沖縄 #子育て #児童手当 #毎月ではなく",
+      "caution": "支給は年3回(6月・10月・2月)。金額・具体的な支給日は本文に書かない(2024年10月の改正で対象が高校生年代まで拡充されたため、世帯の判定が変わった可能性があります。最新情報をご確認ください)。制度ID fk-kuni-jidoteate",
+      "source_url": "https://www.cfa.go.jp/policies/kokoseido/jidouteate",
+      "image_hint": "子育てのやさしいイラスト+「児童手当」「年3回」"
+    },
+    {
+      "no": 2,
+      "seido_id": "fk-kuni-shussan-ichijikin",
+      "title": "赤ちゃんが生まれるとき、「出産育児一時金」、申し込みましたか？",
+      "caption": "赤ちゃんを迎えるときに大きな支援になる制度です。「出産育児一時金」。赤ちゃんが生まれたとき、健康保険に加入している方が対象になります。出産にかかるお金の負担を軽くする一時金が支給されることがあります。申し込みの窓口は出産予定の病院・診療所、または加入している保険(健保組合・協会けんぽなど)へ。金額や条件は制度によって異なるので、事前に確認をおすすめします。",
+      "hashtags": "#もらいわすれ堂 #沖縄 #妊娠・出産 #出産育児一時金",
+      "caution": "金額・申請方法は制度(健保組合・協会けんぽ・市町村国保など)で異なります。本文に具体的な金額・期限は書かない。「対象になります」ではなく「対象になることがあります」で統一。制度ID fk-kuni-shussan-ichijikin",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/shussan/index.html",
+      "image_hint": "赤ちゃん・家族のやさしいイラスト+「出産育児一時金」"
+    },
+    {
+      "no": 3,
+      "seido_id": "fk-kuni-ikuji-kyufu",
+      "title": "育児休業中の生活を支える「育児休業給付」、存在を知っていましたか？",
+      "caption": "育児休業を取っているときの生活を支える制度です。「育児休業給付」。赤ちゃんのお世話をするために育児休業を取っている方が、雇用保険から給付を受けることがあります。お子さんが1歳(場合によっては2歳)になるまでの間、生活を支える給付が受けられる可能性があります。申し込みの窓口は会社の人事部門、またはハローワーク(公共職業安定所)へ。条件や給付額は個人の状況により異なるため、事前に確認をおすすめします。",
+      "hashtags": "#もらいわすれ堂 #沖縄 #子育て #育児休業給付 #育休",
+      "caution": "給付率・給付期間は個人の勤務状況・給与により異なります。「~万円」のような金額は本文に書かない。本人の給与額に連動する給付額のため、目安は公式ページで確認するよう誘導。制度ID fk-kuni-ikuji-kyufu",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000158500.html",
+      "image_hint": "赤ちゃんのお世話をしている親のやさしいイラスト+「育児休業給付」"
+    },
+    {
+      "no": 4,
+      "seido_id": "fk-kuni-kogaku-ryoyo",
+      "title": "医療費が高くなったとき、「高額療養費制度」で戻ってくることがあります",
+      "caption": "大きな医療費がかかったときに支援する制度です。「高額療養費制度」。健康保険に加入している方が、治療や検査で高額な医療費がかかったとき、一定額を超えた分が健康保険から払い戻されることがあります。月ごとの医療費の自己負担が軽くなる可能性があります。申し込みの窓口は、加入している保険(協会けんぽ・市町村国保など)の窓口へ。給付額は年齢や収入により異なるので、この公式ページで確認してください。",
+      "hashtags": "#もらいわすれ堂 #沖縄 #医療費 #高額療養費制度 #健康保険",
+      "caution": "給付額は年齢・年収・加入保険により異なります。具体的な金額を本文に書かない。手続きは保険者により異なるため「確認してください」で統一。制度ID fk-kuni-kogaku-ryoyo",
+      "source_url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iryouhoken/juuyou/kougakuiryou/index.html",
+      "image_hint": "医療・病院のやさしいイラスト+「高額療養費制度」"
+    },
+    {
+      "no": 5,
+      "seido_id": "fk-kuni-shugaku-shien",
+      "title": "大学進学費用の「授業料減免」と「給付型奨学金」を知っていますか？",
+      "caption": "高等学校や大学への進学にかかる費用を支える制度です。「高等教育の修学支援新制度」。大学や短大、専門学校などへ進学を考えている方が対象になることがあります。授業料などが減免される場合と、返済不要の給付型奨学金が支給される場合があります。申し込みの窓口は進学予定の学校、または日本学生支援機構へ。支援の内容は学校・進学先によって異なるので、進路指導の先生や学校の窓口でご確認ください。",
+      "hashtags": "#もらいわすれ堂 #沖縄 #教育 #給付型奨学金 #高等教育",
+      "caution": "減免額・給付額は学校・課程・世帯所得により異なります。「~万円」のような金額を本文に書かない。対象になることがあるという言い方を崩さない。制度ID fk-kuni-shugaku-shien",
+      "source_url": "https://www.mext.go.jp/kyufu/",
+      "image_hint": "勉強・進学のやさしいイラスト+「修学支援新制度」"
+    }
+  ]
 }
