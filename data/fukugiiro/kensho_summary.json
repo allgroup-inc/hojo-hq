@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-10-16 08:37",
-  "total": 261,
-  "ng": 0,
+  "updated_at": "2026-10-23 08:56",
+  "total": 260,
+  "ng": 8,
   "unreachable": 0,
-  "skipped_known_block": 30,
+  "skipped_known_block": 33,
   "skipped_robots": 0,
-  "verified_but_unconfirmed": 5,
+  "verified_but_unconfirmed": 9,
   "verified_but_unreachable": 0,
   "items": [
     {
@@ -37,6 +37,30 @@
       "area": "嘉手納町",
       "mark": "△",
       "url": "https://www.town.kadena.okinawa.jp/life/kadena-kosodate-2025.pdf"
+    },
+    {
+      "name": "恩納村 こども医療費助成",
+      "area": "恩納村",
+      "mark": "×",
+      "url": "https://www.vill.onna.okinawa.jp/living/childcare/1648364682/"
+    },
+    {
+      "name": "恩納村 就学援助",
+      "area": "恩納村",
+      "mark": "×",
+      "url": "https://www.vill.onna.okinawa.jp/living/education/1497599570/1772067691/"
+    },
+    {
+      "name": "竹富町 こどもの通院にかかる渡航費助成制度",
+      "area": "竹富町",
+      "mark": "×",
+      "url": "https://www.town.taketomi.lg.jp/guide/kosodate/kosodateshien/1632457955/"
+    },
+    {
+      "name": "竹富町 こども医療費助成",
+      "area": "竹富町",
+      "mark": "×",
+      "url": "https://www.town.taketomi.lg.jp/guide/kosodate/kodomo_kenkou/1531276571/"
     }
   ]
 }

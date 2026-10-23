@@ -1,57 +1,57 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-15",
+  "updated_at": "2026-10-19",
   "period": "7d",
   "source": "ga4-data-api",
   "stages": [
     {
       "key": "shindan_start",
       "label": "診断開始",
-      "count": 9,
+      "count": 6,
       "cvr_from_prev": null,
       "drop_rate": null
     },
     {
       "key": "shindan_step_q2",
       "label": "Q2到達",
-      "count": 6,
-      "cvr_from_prev": 0.6666666666666666,
-      "drop_rate": 0.33333333333333337
+      "count": 5,
+      "cvr_from_prev": 0.8333333333333334,
+      "drop_rate": 0.16666666666666663
     },
     {
       "key": "shindan_step_q3",
       "label": "Q3到達",
-      "count": 6,
+      "count": 5,
       "cvr_from_prev": 1.0,
       "drop_rate": 0.0
     },
     {
       "key": "shindan_step_q4",
       "label": "Q4到達",
-      "count": 6,
+      "count": 5,
       "cvr_from_prev": 1.0,
       "drop_rate": 0.0
     },
     {
       "key": "shindan_step_q5",
       "label": "Q5到達",
-      "count": 6,
+      "count": 5,
       "cvr_from_prev": 1.0,
       "drop_rate": 0.0
     },
     {
       "key": "shindan_complete",
       "label": "診断完了(1件以上)",
-      "count": 6,
+      "count": 5,
       "cvr_from_prev": 1.0,
       "drop_rate": 0.0
     },
     {
       "key": "line_add_click",
       "label": "LINE誘導クリック",
-      "count": 1,
-      "cvr_from_prev": 0.16666666666666666,
-      "drop_rate": 0.8333333333333334
+      "count": 0,
+      "cvr_from_prev": 0.0,
+      "drop_rate": 1.0
     }
   ],
   "engagement": {
@@ -64,17 +64,17 @@
     "jukyu_report_link_kit": 0,
     "jukyu_report_link_area": 0,
     "jukyu_report_link_life": 0,
-    "shindan_cta_click": 10,
+    "shindan_cta_click": 9,
     "shindan_redirect": 0
   },
   "key_rates": {
-    "finish_rate": 0.6666666666666666,
-    "line_cvr": 0.16666666666666666,
+    "finish_rate": 0.8333333333333334,
+    "line_cvr": 0.0,
     "zero_rate": 0.0
   },
   "worst_drop": {
     "stage": "line_add_click",
     "label": "診断完了(1件以上)→LINE誘導クリック",
-    "drop_rate": 0.8333333333333334
+    "drop_rate": 1.0
   }
 }
