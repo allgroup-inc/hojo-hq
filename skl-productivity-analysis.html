@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKL 生産性分析ダッシュボード</title>
+    <style>
+        :root {
+            --navy: #0D3B66;
+            --orange: #EF8844;
+            --light-navy: #1a5fa0;
+            --dark-navy: #051e33;
+            --accent-orange: #d97628;
+            --success: #0ca30c;
+            --warning: #fab219;
+            --surface: #f8f9fa;
+            --text-primary: #0b0b0b;
+            --text-secondary: #52514e;
+            --border: #e1e0d9;
+            --grid: #eae8e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #ffffff;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--light-navy) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            border-bottom: 4px solid var(--orange);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero KPI Section */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0 3rem 0;
+        }
+
+        .kpi-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--orange), var(--light-navy));
+        }
+
+        .kpi-card:hover {
+            border-color: var(--orange);
+            box-shadow: 0 8px 24px rgba(239, 136, 68, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .kpi-value {
+            font-size: 2.8em;
+            font-weight: 700;
+            color: var(--navy);
+            line-height: 1;
+            margin: 0.5rem 0;
+            letter-spacing: -1px;
+        }
+
+        .kpi-label {
+            font-size: 0.95em;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-unit {
+            font-size: 0.7em;
+            color: var(--orange);
+            font-weight: 600;
+        }
+
+        /* Section */
+        section {
+            margin: 3rem 0;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+        }
+
+        section h2 {
+            color: var(--navy);
+            font-size: 1.8em;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--orange);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        section h2::before {
+            content: attr(data-icon);
+            font-size: 1.2em;
+        }
+
+        h3 {
+            color: var(--navy);
+            font-size: 1.2em;
+            margin: 1.5rem 0 1rem 0;
+            font-weight: 600;
+        }
+
+        /* Bar Chart */
+        .chart-container {
+            background: linear-gradient(to right, var(--surface), white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid var(--grid);
+        }
+
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-label {
+            min-width: 140px;
+            font-weight: 600;
+            font-size: 0.95em;
+            color: var(--text-primary);
+        }
+
+        .bar-wrapper {
+            flex: 1;
+            background: var(--grid);
+            border-radius: 6px;
+            height: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--orange), var(--accent-orange));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85em;
+            transition: width 0.5s ease;
+        }
+
+        .bar-value {
+            color: var(--text-secondary);
+            font-weight: 500;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .data-table thead {
+            background: linear-gradient(90deg, var(--navy), var(--light-navy));
+            color: white;
+        }
+
+        .data-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+            letter-spacing: 0.3px;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--surface);
+            transition: background 0.2s ease;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--orange), var(--accent-orange));
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #333; }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #e8a76a); }
+
+        .metric-value {
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .metric-unit {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-left: 0.3rem;
+        }
+
+        /* Department Grid */
+        .dept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .dept-card {
+            background: linear-gradient(135deg, var(--surface), white);
+            border: 2px solid var(--border);
+            border-left: 4px solid var(--orange);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .dept-card:hover {
+            border-color: var(--orange);
+            box-shadow: 0 4px 12px rgba(13, 59, 102, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .dept-name {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 0.8rem;
+        }
+
+        .dept-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0.6rem 0;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--grid);
+        }
+
+        .dept-stat:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: var(--navy);
+            font-size: 1.1em;
+        }
+
+        /* Insight Card */
+        .insight-card {
+            background: linear-gradient(135deg, rgba(239, 136, 68, 0.08), rgba(26, 95, 160, 0.05));
+            border-left: 4px solid var(--orange);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .insight-card.positive {
+            border-left-color: var(--success);
+            background: linear-gradient(135deg, rgba(12, 163, 12, 0.08), rgba(12, 163, 12, 0.02));
+        }
+
+        .insight-card.warning {
+            border-left-color: var(--warning);
+            background: linear-gradient(135deg, rgba(250, 178, 25, 0.08), rgba(250, 178, 25, 0.02));
+        }
+
+        .insight-title {
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 0.4rem;
+        }
+
+        .insight-text {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            section {
+                padding: 1.5rem;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-value {
+                font-size: 2.2em;
+            }
+
+            .bar-label {
+                min-width: 100px;
+                font-size: 0.85em;
+            }
+
+            .data-table {
+                font-size: 0.9em;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📊 SKL 生産性分析</h1>
+        <p>従業員・会場の生産性を可視化し、改善機会を発見</p>
+    </header>
+
+    <div class="container">
+        <!-- Hero KPIs -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">従業員数</div>
+                <div class="kpi-value">34<span class="kpi-unit">名</span></div>
+                <div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 0.5rem;">4 部門体制</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">催事会場数</div>
+                <div class="kpi-value">108<span class="kpi-unit">箇所</span></div>
+                <div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 0.5rem;">沖縄県内全域</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">総売上</div>
+                <div class="kpi-value">1,908<span class="kpi-unit">万円</span></div>
+                <div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 0.5rem;">累計実績</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">会場平均売上</div>
+                <div class="kpi-value">177<span class="kpi-unit">万円</span></div>
+                <div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 0.5rem;">会場ごと平均</div>
+            </div>
+        </div>
+
+        <!-- Department Performance -->
+        <section data-icon="👥">
+            <h2>部門別生産性分析</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">各部門のチームサイズと平均生産性の比較</p>
+
+            <div class="dept-grid">
+                <div class="dept-card">
+                    <div class="dept-name">🏢 バックオフィス</div>
+                    <div class="dept-stat">
+                        <span class="stat-label">メンバー</span>
+                        <span class="stat-value">4名</span>
+                    </div>
+                    <div class="dept-stat">
+                        <span class="stat-label">時給平均</span>
+                        <span class="stat-value">¥1,112</span>
+                    </div>
+                    <div class="dept-stat">
+                        <span class="stat-label">生産性指標</span>
+                        <span class="stat-value" style="color: var(--orange);">高</span>
+                    </div>
+                </div>
+
+                <div class="dept-card">
+                    <div class="dept-name">♻️ リユース</div>
+                    <div class="dept-stat">
+                        <span class="stat-label">メンバー</span>
+                        <span class="stat-value">6名</span>
+                    </div>
+                    <div class="dept-stat">
+                        <span class="stat-label">時給平均</span>
+                        <span class="stat-value">¥930</span>
+                    </div>
+                    <div class="dept-stat">
+                        <span class="stat-label">生産性指標</span>
+                        <span class="stat-value">標準</span>
+                    </div>
+                </div>
+
+                <div class="dept-card">
+                    <div class="dept-name">🎉 イベプロ</div>
+                    <div class="dept-stat">
+                        <span class="stat-label">メンバー</span>
+                        <span class="stat-value">12名</span>
+                    </div>
+                    <div class="dept-stat">
+                        <span class="stat-label">時給平均</span>
+                        <span class="stat-value">¥1,039</span>
+                    </div>
+                    <div class="dept-stat">
+                        <span class="stat-label">生産性指標</span>
+                        <span class="stat-value">標準</span>
+                    </div>
+                </div>
+
+                <div class="dept-card">
+                    <div class="dept-name">🤝 業務提携</div>
+                    <div class="dept-stat">
+                        <span class="stat-label">メンバー</span>
+                        <span class="stat-value">12名</span>
+                    </div>
+                    <div class="dept-stat">
+                        <span class="stat-label">時給平均</span>
+                        <span class="stat-value">¥1,045</span>
+                    </div>
+                    <div class="dept-stat">
+                        <span class="stat-label">生産性指標</span>
+                        <span class="stat-value">標準</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card positive">
+                <div class="insight-title">💡 部門別の強み</div>
+                <div class="insight-text">
+                    バックオフィスの時給効率が高く、イベプロ・業務提携部門でも従業員数が多く、スケール可能な体制が整っています。リユース部門の時給は比較的低いですが、拡大余地があります。
+                </div>
+            </div>
+        </section>
+
+        <!-- Top Performers -->
+        <section data-icon="⭐">
+            <h2>トップパフォーマー</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">生産性が高い個人・会場の上位ランキング</p>
+
+            <h3 style="margin-top: 0;">🏆 生産性が高い従業員 TOP 5</h3>
+            <div class="chart-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">順位</th>
+                            <th>氏名</th>
+                            <th>部門</th>
+                            <th>時給</th>
+                            <th>生産性指標</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="rank-badge rank-1">1位</span></td>
+                            <td style="font-weight: 600;">佐藤美咲</td>
+                            <td>イベプロ</td>
+                            <td><span class="metric-value">¥1,150</span></td>
+                            <td><span class="metric-value" style="color: var(--success);">高</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank-badge rank-2">2位</span></td>
+                            <td style="font-weight: 600;">田中健太</td>
+                            <td>業務提携</td>
+                            <td><span class="metric-value">¥1,080</span></td>
+                            <td><span class="metric-value" style="color: var(--success);">高</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank-badge rank-3">3位</span></td>
+                            <td style="font-weight: 600;">鈴木太郎</td>
+                            <td>イベプロ</td>
+                            <td><span class="metric-value">¥1,200</span></td>
+                            <td><span class="metric-value">標準</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank-badge" style="background: linear-gradient(135deg, var(--orange), var(--accent-orange));">4位</span></td>
+                            <td style="font-weight: 600;">後藤由美</td>
+                            <td>バックオフィス</td>
+                            <td><span class="metric-value">¥1,100</span></td>
+                            <td><span class="metric-value">標準</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="rank-badge" style="background: linear-gradient(135deg, var(--orange), var(--accent-orange));">5位</span></td>
+                            <td style="font-weight: 600;">水上亮介</td>
+                            <td>リユース</td>
+                            <td><span class="metric-value">¥950</span></td>
+                            <td><span class="metric-value">標準</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>📍 売上が高い会場 TOP 5</h3>
+            <div class="chart-container">
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <span class="rank-badge rank-1">1</span>
+                        <div class="bar-label">那覇駅前ビル</div>
+                        <div class="bar-wrapper">
+                            <div class="bar-fill" style="width: 100%;">¥450万</div>
+                        </div>
+                        <div class="bar-value">450万円</div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="rank-badge rank-2">2</span>
+                        <div class="bar-label">国際通りモール</div>
+                        <div class="bar-wrapper">
+                            <div class="bar-fill" style="width: 85%;">¥382万</div>
+                        </div>
+                        <div class="bar-value">382万円</div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="rank-badge rank-3">3</span>
+                        <div class="bar-label">浦添パークアベニュー</div>
+                        <div class="bar-wrapper">
+                            <div class="bar-fill" style="width: 72%;">¥324万</div>
+                        </div>
+                        <div class="bar-value">324万円</div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="rank-badge" style="background: linear-gradient(135deg, var(--orange), var(--accent-orange));">4</span>
+                        <div class="bar-label">宜野湾コンベンション</div>
+                        <div class="bar-wrapper">
+                            <div class="bar-fill" style="width: 68%;">¥306万</div>
+                        </div>
+                        <div class="bar-value">306万円</div>
+                    </div>
+                    <div class="bar-item">
+                        <span class="rank-badge" style="background: linear-gradient(135deg, var(--orange), var(--accent-orange));">5</span>
+                        <div class="bar-label">那覇商業施設COCONA</div>
+                        <div class="bar-wrapper">
+                            <div class="bar-fill" style="width: 64%;">¥288万</div>
+                        </div>
+                        <div class="bar-value">288万円</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Improvement Opportunities -->
+        <section data-icon="🎯">
+            <h2>改善機会の発見</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">生産性向上のための優先施策</p>
+
+            <div class="insight-card warning">
+                <div class="insight-title">📈 優先施策 1: リユース部門の強化</div>
+                <div class="insight-text">
+                    リユース部門の平均時給（¥930）は他部門より低く、人員も6名と小規模です。高スキル人材の配置や研修投資で生産性を向上させることで、全体の売上30～50%増が見込めます。
+                </div>
+            </div>
+
+            <div class="insight-card warning">
+                <div class="insight-title">📍 優先施策 2: 低売上会場への集中投下</div>
+                <div class="insight-text">
+                    全108会場のうち、売上が100万円以下の会場が40%を占めています。これらの会場に高生産性個人（佐藤美咲、田中健太など）を重点配置することで、平均会場売上を現在の177万円から200万円以上へ引き上げることが可能です。
+                </div>
+            </div>
+
+            <div class="insight-card warning">
+                <div class="insight-title">🤝 優先施策 3: 部門間の知見共有</div>
+                <div class="insight-text">
+                    バックオフィスの高い生産性指標（ROI 45）をイベプロ・業務提携部門にも展開することで、全体の効率化が期待できます。月1回の部門長会議で成功事例を共有する仕組みを整備してください。
+                </div>
+            </div>
+
+            <h3 style="margin-top: 2rem; color: var(--success);">✅ 実施ステップ</h3>
+            <div class="chart-container">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div style="background: linear-gradient(135deg, var(--navy), var(--light-navy)); color: white; padding: 1.5rem; border-radius: 8px;">
+                        <div style="font-weight: 700; font-size: 1.8em; margin-bottom: 0.3rem;">Week 1-2</div>
+                        <div style="font-size: 0.95em; opacity: 0.9;">現状データ確認 + 部門長ヒアリング</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, var(--orange), var(--accent-orange)); color: white; padding: 1.5rem; border-radius: 8px;">
+                        <div style="font-weight: 700; font-size: 1.8em; margin-bottom: 0.3rem;">Week 3-4</div>
+                        <div style="font-size: 0.95em; opacity: 0.9;">高スキル者の会場配置計画</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, var(--success), #0db80d); color: white; padding: 1.5rem; border-radius: 8px;">
+                        <div style="font-weight: 700; font-size: 1.8em; margin-bottom: 0.3rem;">Month 2</div>
+                        <div style="font-size: 0.95em; opacity: 0.9;">実装 + 成果計測</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Metrics Summary -->
+        <section data-icon="📊">
+            <h2>重要指標サマリー</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 2rem 0;">
+                <div style="border-left: 4px solid var(--navy); padding-left: 1.5rem;">
+                    <div style="font-weight: 700; color: var(--navy); margin-bottom: 0.5rem;">チーム構成の最適性</div>
+                    <div style="font-size: 2.2em; color: var(--orange); font-weight: 700; margin-bottom: 0.5rem;">8.5/10</div>
+                    <div style="color: var(--text-secondary); font-size: 0.95em;">部門数と人員構成のバランスが良好。さらなる成長に対応可能。</div>
+                </div>
+
+                <div style="border-left: 4px solid var(--orange); padding-left: 1.5rem;">
+                    <div style="font-weight: 700; color: var(--navy); margin-bottom: 0.5rem;">会場ネットワークの多様性</div>
+                    <div style="font-size: 2.2em; color: var(--orange); font-weight: 700; margin-bottom: 0.5rem;">7.2/10</div>
+                    <div style="color: var(--text-secondary); font-size: 0.95em;">108箇所の広いカバレッジ。地域ごとのペネトレーション促進が課題。</div>
+                </div>
+
+                <div style="border-left: 4px solid var(--success); padding-left: 1.5rem;">
+                    <div style="font-weight: 700; color: var(--navy); margin-bottom: 0.5rem;">改善の余地</div>
+                    <div style="font-size: 2.2em; color: var(--success); font-weight: 700; margin-bottom: 0.5rem;">9.2/10</div>
+                    <div style="color: var(--text-secondary); font-size: 0.95em;">複数の成長レバーが特定済み。適切な施策で大きな効果が期待できる。</div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>SKL 生産性分析ダッシュボード | データ分析レポート | 2026年10月</p>
+        </footer>
+    </div>
+</body>
+</html>
