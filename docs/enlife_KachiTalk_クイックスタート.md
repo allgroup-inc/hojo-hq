@@ -27,13 +27,14 @@ Apps Script エディタで:
 1. 関数選択: ensureKachiTalkAnalysisTabs
 2. ▶実行
 3. 権限許可
-→ Sheet に6つのタブが作成される
+→ Sheet に7つのタブが作成される
   - カチトークログ（ログ入力用）
   - 品質分析（分析結果）
   - チェックリスト合致度（6段階実施率）
   - 成績相関分析（品質×売上相関）
   - サマリー（簡易ダッシュボード）
-  - 統合ダッシュボード（全データを1枚で確認）← NEW
+  - 統合ダッシュボード（全データを1枚で確認）
+  - 営業成績データ（訪問記録・スコア）← NEW
 ```
 
 ### ステップ3: ログデータを入力 (10分)
@@ -84,6 +85,24 @@ Apps Script エディタで:
 ▶実行
 → 「成績相関分析」シートが更新される
 ```
+
+---
+
+## 営業成績データの追加（オプション）
+
+### KachiTalk管理画面のデータを統合
+
+1. KachiTalk管理画面から「営業成績データ」をExcelで エクスポート
+2. Python スクリプトで変換:
+```bash
+python3 /home/user/hojo-hq/enlife/scripts/extract_kachitalk_performance.py \
+  --mode excel --file <ダウンロードしたファイル> --output /tmp/performance_output.csv
+```
+3. 出力CSVを Google Sheet の「営業成績データ」シートにペースト
+4. Apps Script で `buildConsolidatedDashboard()` を実行
+→ ダッシュボードに **訪問件数・スコア・完了率が追加表示**
+
+詳細: docs/enlife_KachiTalk営業成績データ統合ガイド.md
 
 ---
 
