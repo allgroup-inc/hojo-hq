@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKL社 統合管理システム - データプレビュー</title>
+    <style>
+        :root {
+            --navy: #0D3B66;
+            --orange: #EF8844;
+            --light: #F5F5F5;
+            --border: #DDD;
+            --text: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--navy) 0%, #1a5580 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 0.8rem 1.5rem;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            background: var(--orange);
+            color: white;
+            border-color: var(--orange);
+        }
+
+        .tab-button:hover {
+            border-color: var(--orange);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 0 8px 8px 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 2rem;
+            min-height: 500px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content h2 {
+            color: var(--navy);
+            margin-bottom: 1.5rem;
+            font-size: 1.8em;
+            border-bottom: 3px solid var(--orange);
+            padding-bottom: 0.5rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, var(--navy) 0%, #1a5580 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        thead {
+            background: var(--navy);
+            color: white;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .dept-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: white;
+        }
+
+        .dept-backoffice {
+            background: #4CAF50;
+        }
+
+        .dept-reuse {
+            background: #2196F3;
+        }
+
+        .dept-event {
+            background: #FF9800;
+        }
+
+        .dept-partnership {
+            background: #9C27B0;
+        }
+
+        .search-box {
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--orange);
+            box-shadow: 0 0 0 3px rgba(239, 136, 68, 0.1);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(135deg, var(--navy) 0%, #1a5580 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-card h3 {
+            margin-bottom: 0.8rem;
+            font-size: 1.2em;
+        }
+
+        .dashboard-card .value {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: var(--orange);
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .scroll-container {
+            overflow-x: auto;
+            border-radius: 8px;
+        }
+
+        .page-info {
+            background: #FFF3CD;
+            border-left: 4px solid var(--orange);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+            color: #856404;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                border-radius: 6px;
+            }
+
+            .tab-content {
+                padding: 1.5rem;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SKL社 統合管理システム</h1>
+        <p>従業員・催事会場・KPI 統合ダッシュボード</p>
+    </header>
+
+    <div class="container">
+        <!-- タブボタン -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('dashboard')">📊 ダッシュボード</button>
+            <button class="tab-button" onclick="switchTab('employees')">👥 従業員マスター</button>
+            <button class="tab-button" onclick="switchTab('venues')">📍 催事会場マスター</button>
+        </div>
+
+        <!-- ダッシュボード -->
+        <div id="dashboard" class="tab-content active">
+            <h2>📊 KPI ダッシュボード</h2>
+
+            <div class="page-info">
+                💡 このダッシュボードは Google Sheets の「部門KPI」シートから自動集計されます。
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3>稼働従業員数</h3>
+                    <div class="value">34</div>
+                    <p>全従業員（4部門）</p>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>催事会場数</h3>
+                    <div class="value">108</div>
+                    <p>登録済み会場</p>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>部門数</h3>
+                    <div class="value">4</div>
+                    <p>バックオフィス・リユース・イベプロ・業務提携</p>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>実装フェーズ</h3>
+                    <div class="value">Phase 1</div>
+                    <p>基本構造構築中</p>
+                </div>
+            </div>
+
+            <h3 style="color: var(--navy); margin-top: 2rem;">部門別サマリー</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>部門</th>
+                        <th>人数</th>
+                        <th>説明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="dept-badge dept-backoffice">バックオフィス</span></td>
+                        <td style="text-align: center; font-weight: 600;">8名</td>
+                        <td>システム管理・データ入力・レポート作成</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dept-badge dept-reuse">リユース</span></td>
+                        <td style="text-align: center; font-weight: 600;">10名</td>
+                        <td>中古品販売・催事実施</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dept-badge dept-event">イベプロ</span></td>
+                        <td style="text-align: center; font-weight: 600;">12名</td>
+                        <td>イベント企画・運営</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dept-badge dept-partnership">業務提携</span></td>
+                        <td style="text-align: center; font-weight: 600;">4名</td>
+                        <td>パートナー企業</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 従業員マスター -->
+        <div id="employees" class="tab-content">
+            <h2>👥 従業員マスター</h2>
+
+            <div class="page-info">
+                📌 全 34 名の従業員データ。Google Sheets の「従業員マスター」シートと連動します。
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="employeeSearch" placeholder="氏名または部門で検索..." onkeyup="filterTable('employees', 'employeeSearch', 'employeeTable')">
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number">34</div>
+                    <div class="stat-label">従業員数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">部門数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">A001～A034</div>
+                    <div class="stat-label">従業員ID（自動採番）</div>
+                </div>
+            </div>
+
+            <div class="scroll-container">
+                <table id="employeeTable">
+                    <thead>
+                        <tr>
+                            <th>従業員ID</th>
+                            <th>氏名</th>
+                            <th>フリガナ</th>
+                            <th>部門</th>
+                            <th>チーム</th>
+                            <th>雇用形態</th>
+                            <th>時給</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>A001</td><td>田中太郎</td><td>タナカタロウ</td><td><span class="dept-badge dept-backoffice">バックオフィス</span></td><td>管理チーム</td><td>正社員</td><td>¥1,500</td></tr>
+                        <tr><td>A002</td><td>佐藤花子</td><td>サトウハナコ</td><td><span class="dept-badge dept-reuse">リユース</span></td><td>販売チーム</td><td>契約社員</td><td>¥1,200</td></tr>
+                        <tr><td>A003</td><td>鈴木一郎</td><td>スズキイチロウ</td><td><span class="dept-badge dept-event">イベプロ</span></td><td>企画チーム</td><td>正社員</td><td>¥1,400</td></tr>
+                        <tr><td>A004</td><td>高橋美咲</td><td>タカハシミサキ</td><td><span class="dept-badge dept-partnership">業務提携</span></td><td>提携部隊</td><td>外部委託</td><td>¥1,000</td></tr>
+                        <tr><td>A005</td><td>渡辺洋介</td><td>ワタナベヨウスケ</td><td><span class="dept-badge dept-backoffice">バックオフィス</span></td><td>データチーム</td><td>正社員</td><td>¥1,400</td></tr>
+                        <tr><td colspan="7" style="text-align: center; color: #999; padding: 1rem;">... 他 29 名（詳細は Google Sheets の「従業員マスター」シートを確認）</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 催事会場マスター -->
+        <div id="venues" class="tab-content">
+            <h2>📍 催事会場マスター</h2>
+
+            <div class="page-info">
+                📌 全 108 箇所の催事会場データ。Google Sheets の「催事会場マスター」シートと連動します。
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="venueSearch" placeholder="会場名または地域で検索..." onkeyup="filterTable('venues', 'venueSearch', 'venueTable')">
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number">108</div>
+                    <div class="stat-label">会場数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">V001～V108</div>
+                    <div class="stat-label">会場ID（自動採番）</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">会場グループ</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">沖縄県内</div>
+                    <div class="stat-label">対応地域</div>
+                </div>
+            </div>
+
+            <div class="scroll-container">
+                <table id="venueTable">
+                    <thead>
+                        <tr>
+                            <th>会場ID</th>
+                            <th>会場名</th>
+                            <th>グループ</th>
+                            <th>地域</th>
+                            <th>会場規模</th>
+                            <th>過去6ヶ月催事数</th>
+                            <th>累計売上</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>V001</td><td>那覇ビジネスパーク</td><td>A</td><td>那覇市</td><td>大型</td><td>8</td><td>¥2,400,000</td></tr>
+                        <tr><td>V002</td><td>浦添ショッピングモール</td><td>B</td><td>浦添市</td><td>大型</td><td>6</td><td>¥1,800,000</td></tr>
+                        <tr><td>V003</td><td>北谷港湾地区</td><td>C</td><td>北谷町</td><td>中型</td><td>4</td><td>¥900,000</td></tr>
+                        <tr><td>V004</td><td>宜野湾コンベンション</td><td>A</td><td>宜野湾市</td><td>大型</td><td>7</td><td>¥2,100,000</td></tr>
+                        <tr><td>V005</td><td>沖縄市戸口</td><td>B</td><td>沖縄市</td><td>中型</td><td>3</td><td>¥650,000</td></tr>
+                        <tr><td colspan="7" style="text-align: center; color: #999; padding: 1rem;">... 他 103 箇所（詳細は Google Sheets の「催事会場マスター」シートを確認）</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // すべてのタブ非表示
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // すべてのボタンを非アクティブに
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // 指定されたタブをアクティブに
+            document.getElementById(tabName).classList.add('active');
+
+            // 対応するボタンをアクティブに
+            event.target.classList.add('active');
+        }
+
+        function filterTable(tabId, searchInputId, tableId) {
+            const input = document.getElementById(searchInputId);
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById(tableId);
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                const text = rows[i].textContent || rows[i].innerText;
+                if (text.toUpperCase().indexOf(filter) > -1) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
