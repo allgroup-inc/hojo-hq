@@ -34,7 +34,8 @@ const SHEET_NAMES = {
   checklist_compliance: 'チェックリスト合致度',
   correlation: '成績相関分析',
   summary: 'サマリー',
-  consolidated_dashboard: '統合ダッシュボード'
+  consolidated_dashboard: '統合ダッシュボード',
+  performance_data: '営業成績データ'
 };
 
 /**
@@ -58,6 +59,7 @@ function ensureKachiTalkAnalysisTabs() {
   initializeCorrelationHeaders_(ss.getSheetByName(SHEET_NAMES.correlation));
   initializeSummaryHeaders_(ss.getSheetByName(SHEET_NAMES.summary));
   initializeConsolidatedDashboardHeaders_(ss.getSheetByName(SHEET_NAMES.consolidated_dashboard));
+  initializePerformanceDataHeaders_(ss.getSheetByName(SHEET_NAMES.performance_data));
 
   console.log('✓ KachiTalk分析タブの初期化完了');
 }
@@ -211,6 +213,15 @@ function initializeConsolidatedDashboardHeaders_(sheet) {
     sheet.getRange(`A${21 + i}:D${21 + i}`).setBackground(i % 2 === 0 ? '#ffffff' : '#f5f5f5');
   }
 
+  // Section 4: Performance data (訪問記録) (Row 31-32)
+  sheet.getRange('A31:F31').merge().setValue('営業マン訪問記録（KachiTalk admin）').setFontWeight('bold').setBackground('#e8f4f8');
+  const perfHeaders = ['営業マン', '対象月', '訪問件数', '平均スコア', '平均完了率', 'OK件数'];
+  sheet.getRange('A32:F32').setValues([perfHeaders]).setFontWeight('bold').setBackground('#4caf50').setFontColor('#ffffff');
+
+  for (let i = 0; i < 8; i++) {
+    sheet.getRange(`A${33 + i}:F${33 + i}`).setBackground(i % 2 === 0 ? '#ffffff' : '#f5f5f5');
+  }
+
   // Set column widths
   sheet.setColumnWidth(1, 120);  // A
   sheet.setColumnWidth(2, 120);  // B
@@ -220,6 +231,67 @@ function initializeConsolidatedDashboardHeaders_(sheet) {
   sheet.setColumnWidth(6, 80);   // F
   sheet.setColumnWidth(7, 80);   // G
   sheet.setColumnWidth(8, 80);   // H
+  sheet.setColumnWidth(9, 100);  // I
+  sheet.setColumnWidth(10, 100); // J
+}
+
+/**
+ * Initialize headers for performance data (営業マン訪問記録)
+ */
+function initializePerformanceDataHeaders_(sheet) {
+  sheet.clear();
+  const headers = [
+    '営業マン',
+    '対象月',
+    '訪問件数',
+    '平均スコア',
+    '平均完了率',
+    'OK件数'
+  ];
+  sheet.appendRow(headers);
+  sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#4caf50');
+
+  // Column widths
+  sheet.setColumnWidth(1, 120);  // 営業マン
+  sheet.setColumnWidth(2, 100);  // 対象月
+  sheet.setColumnWidth(3, 100);  // 訪問件数
+  sheet.setColumnWidth(4, 100);  // 平均スコア
+  sheet.setColumnWidth(5, 100);  // 平均完了率
+  sheet.setColumnWidth(6, 100);  // OK件数
+}
+
+/**
+ * Import performance data from CSV
+ * Expects CSV format: 営業マン, 対象月, 訪問件数, 平均スコア, 平均完了率, OK件数
+ */
+function importPerformanceDataFromCSV(csvText) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const perfSheet = ss.getSheetByName(SHEET_NAMES.performance_data);
+
+  if (!perfSheet) {
+    console.log('✗ 営業成績データシートが見つかりません');
+    return false;
+  }
+
+  // Clear existing data (keep headers)
+  const range = perfSheet.getRange('A2:Z1000');
+  range.clearContent();
+
+  // Parse CSV and append rows
+  const lines = csvText.split('\n').filter(line => line.trim());
+  let rowCount = 0;
+
+  lines.forEach((line, idx) => {
+    if (idx === 0) return; // Skip header
+    const fields = line.split(',').map(f => f.trim());
+    if (fields[0]) {
+      perfSheet.appendRow(fields);
+      rowCount++;
+    }
+  });
+
+  console.log(`✓ 営業成績データを${rowCount}件インポート`);
+  return true;
 }
 
 /**
@@ -351,6 +423,37 @@ function buildCorrelationAnalysis() {
 }
 
 /**
+ * Load performance data from performance sheet
+ */
+function loadPerformanceData_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const perfSheet = ss.getSheetByName(SHEET_NAMES.performance_data);
+
+  if (!perfSheet) {
+    return {};
+  }
+
+  const data = perfSheet.getDataRange().getValues();
+  const perfData = {};
+
+  data.forEach((row, idx) => {
+    if (idx > 0 && row[0]) {
+      const key = row[0] + '_' + row[1]; // name_month
+      perfData[key] = {
+        name: row[0],
+        month: row[1],
+        visitCount: row[2] || 0,
+        avgScore: parseFloat(row[3]) || 0,
+        avgCompletion: parseFloat(row[4]) || 0,
+        okCount: row[5] || 0
+      };
+    }
+  });
+
+  return perfData;
+}
+
+/**
  * Build consolidated dashboard with all analysis data
  */
 function buildConsolidatedDashboard() {
@@ -359,6 +462,7 @@ function buildConsolidatedDashboard() {
   const dashboardSheet = ss.getSheetByName(SHEET_NAMES.consolidated_dashboard);
 
   const data = qualitySheet.getDataRange().getValues();
+  const perfData = loadPerformanceData_();
 
   // Parse quality analysis data
   const staffData = [];
@@ -366,6 +470,7 @@ function buildConsolidatedDashboard() {
     if (idx > 0 && row[0]) {
       staffData.push({
         name: row[0],
+        month: row[1] || '9月',
         callCount: row[2] || 0,
         avgCallTime: row[3] || 0,
         step1Rate: row[4] || 0,
@@ -377,6 +482,16 @@ function buildConsolidatedDashboard() {
         score: parseFloat(row[10]) || 0,
         rating: row[11] || '要改善'
       });
+    }
+  });
+
+  // Merge with performance data where available
+  staffData.forEach(staff => {
+    const perfKey = staff.name + '_' + staff.month;
+    if (perfData[perfKey]) {
+      staff.visitCount = perfData[perfKey].visitCount;
+      staff.perfScore = perfData[perfKey].avgScore;
+      staff.completion = perfData[perfKey].avgCompletion;
     }
   });
 
@@ -420,6 +535,19 @@ function buildConsolidatedDashboard() {
     else bgColor = '#c8e6c9';
 
     dashboardSheet.getRange(`A${rowNum}:D${rowNum}`).setBackground(bgColor);
+  });
+
+  // Fill performance data section (rows 33-40)
+  staffData.forEach((staff, idx) => {
+    const rowNum = 33 + idx;
+    const colors = idx % 2 === 0 ? '#ffffff' : '#f5f5f5';
+
+    dashboardSheet.getRange(`A${rowNum}`).setValue(staff.name).setBackground(colors);
+    dashboardSheet.getRange(`B${rowNum}`).setValue(staff.month || '9月').setHorizontalAlignment('center').setBackground(colors);
+    dashboardSheet.getRange(`C${rowNum}`).setValue(staff.visitCount || '-').setHorizontalAlignment('center').setBackground(colors);
+    dashboardSheet.getRange(`D${rowNum}`).setValue(staff.perfScore || '-').setHorizontalAlignment('center').setNumberFormat('0.0').setBackground(colors);
+    dashboardSheet.getRange(`E${rowNum}`).setValue(staff.completion ? staff.completion + '%' : '-').setHorizontalAlignment('center').setBackground(colors);
+    dashboardSheet.getRange(`F${rowNum}`).setValue(staff.okCount || '-').setHorizontalAlignment('center').setBackground(colors);
   });
 
   console.log('✓ 統合ダッシュボードの更新完了');
