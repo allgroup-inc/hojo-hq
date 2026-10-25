@@ -1,9 +1,12 @@
 name: Fukuda Historical Data Auto-Import
 
+# 2026-10-25 定期実行を停止(小柳さん承認「問題箇所を即対応」)。
+# このワークフローが呼ぶ detect_fukuda_email.py / download_fukuda_attachment.py /
+# trigger_gas_import.py / wait_import_completion.py / generate_import_report.py が
+# リポジトリに存在せず、2026-10-17 から毎晩失敗していた(未完成のまま定期実行に載っていた)。
+# 福田さんのデータ取り込みは glow-ma の取り込み機能(インポート待ちタブ)で行う。
+# 再開する場合は、上記スクリプトを実装し、検証結果を公開リポジトリへコミットしない形に直してから戻す。
 on:
-  schedule:
-    # 毎日午前1時（JST）に実行
-    - cron: '0 16 * * *'  # UTC 16:00 = JST 01:00
   workflow_dispatch:
 
 jobs:
