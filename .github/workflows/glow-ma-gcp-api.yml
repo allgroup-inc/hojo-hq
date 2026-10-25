@@ -1,0 +1,68 @@
+name: glow-ma-gcp-api
+
+# glow-ma(営業管理システム)が使う Google Cloud の API を有効にする(手動実行のみ)。
+# 2026-10-25: 台帳の日次バックアップが「Permission denied while enabling APIs: drive」で
+# 失敗していた。Apps Script の実行時の権限では API を有効にできないため、
+# 自動反映と同じ Googleログイン情報(CLASPRC_JSON)で `clasp enable-api` を実行する。
+#
+# 入力:
+#   gcp_project … Apps Script に紐づく Google Cloud のプロジェクト番号(エラー文に出ている数字)。
+#                 公開リポジトリには書かない(ログには伏せ字で出る)
+#   apis        … 有効にするAPI(空白区切り。既定は drive)
+
+on:
+  workflow_dispatch:
+    inputs:
+      gcp_project:
+        description: "Google Cloud のプロジェクト番号"
+        required: true
+      apis:
+        description: "有効にするAPI(空白区切り)"
+        required: false
+        default: "drive"
+
+permissions:
+  contents: read
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 入力を伏せ字にする
+        env:
+          GCP_PROJECT: ${{ inputs.gcp_project }}
+        run: echo "::add-mask::$GCP_PROJECT"
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: API を有効にする
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ secrets.GLOW_MA_SCRIPT_ID }}
+          GCP_PROJECT: ${{ inputs.gcp_project }}
+          APIS: ${{ inputs.apis }}
+        run: |
+          if [ -z "$CLASPRC_JSON" ] || [ -z "$SCRIPT_ID" ]; then
+            echo "::error::CLASPRC_JSON / GLOW_MA_SCRIPT_ID が未登録です"; exit 1
+          fi
+          case "$GCP_PROJECT" in (*[!0-9a-z-]*|'') echo "::error::プロジェクト番号の形式が不正です"; exit 1;; esac
+          npm install -g @google/clasp@3.4.1 >/dev/null
+          printf '%s' "$CLASPRC_JSON" > "$HOME/.clasprc.json"
+          chmod 600 "$HOME/.clasprc.json"
+          SCRIPT_ID=$(printf '%s' "$SCRIPT_ID" | tr -d '[:space:]')
+          mkdir -p /tmp/gcp && cd /tmp/gcp
+          printf '{"scriptId":"%s","rootDir":".","projectId":"%s"}' "$SCRIPT_ID" "$GCP_PROJECT" > .clasp.json
+          status=0
+          for api in $APIS; do
+            if out=$(clasp enable-api "$api" 2>&1); then
+              echo "::notice::$api API を有効にしました"
+            else
+              echo "::error title=$api API を有効にできません::$(echo "$out" | grep -v -i -E 'token|secret' | tail -5 | tr '\n' ' ' | cut -c1-600)"
+              status=1
+            fi
+          done
+          rm -f "$HOME/.clasprc.json" .clasp.json
+          exit $status
