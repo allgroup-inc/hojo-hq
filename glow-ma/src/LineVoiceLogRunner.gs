@@ -465,6 +465,14 @@ function processQueuedVoiceLogs() {
     Logger.log("自己点検・修復の呼び出しに失敗しました: " + error);
   }
 
+  // 福田さんが「福田_履歴インポート」タブに過去の手紙・架電記録を貼ったら、数分以内に取り込む
+  // (HistoricalDataImporter.gs。行が無ければシートを1回見るだけで終わる)
+  try {
+    runHistoryImportIfPending_();
+  } catch (error) {
+    Logger.log("過去記録の取り込みの呼び出しに失敗しました: " + error);
+  }
+
   try {
     sweepStaleVoiceLogs_(ss);
   } catch (error) {
