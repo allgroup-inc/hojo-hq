@@ -55,6 +55,9 @@ jobs:
           SCRIPT_ID=$(printf '%s' "$SCRIPT_ID" | tr -d '[:space:]')
           mkdir -p /tmp/gcp && cd /tmp/gcp
           printf '{"scriptId":"%s","rootDir":".","projectId":"%s"}' "$SCRIPT_ID" "$GCP_PROJECT" > .clasp.json
+          # clasp enable-api はローカルの appsscript.json(マニフェスト)を書き換えてから API を有効にする作り。
+          # ここではライブへ push しないので、作業用の空マニフェストで足りる(本番のマニフェストは変わらない)
+          printf '{"timeZone":"Asia/Tokyo"}' > appsscript.json
           status=0
           for api in $APIS; do
             if out=$(clasp enable-api "$api" 2>&1); then
@@ -64,5 +67,5 @@ jobs:
               status=1
             fi
           done
-          rm -f "$HOME/.clasprc.json" .clasp.json
+          rm -f "$HOME/.clasprc.json" .clasp.json appsscript.json
           exit $status
