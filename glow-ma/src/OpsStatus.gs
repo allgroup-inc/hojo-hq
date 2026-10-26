@@ -107,7 +107,8 @@ function runSelfHeal() {
   var detail = results.concat(failures).join(" / ");
   recordOpsStatus_("自己点検・修復", failures.length === 0, detail);
   if (failures.length > 0) notifyOpsFailure_("自己点検・修復", failures.join("\n"));
-  Logger.log("自己点検・修復: " + detail);
+  // console.log は Cloud Logging に残る(外から点検結果を確認できる)
+  console.log("自己点検・修復: " + detail);
 }
 
 function ensureDashboardVisible_() {
