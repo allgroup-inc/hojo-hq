@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, timezone
 
 JST = timezone(timedelta(hours=9))
 # エラー文のうち、出してよい定型の先頭部分だけを残す(数字の羅列・メールアドレス等は伏せる)
-SAFE_ERROR_LEN = 70
+SAFE_ERROR_LEN = 120
 
 
 def access_token(clasprc):
@@ -75,6 +75,7 @@ def safe_error(text):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=int, default=48)
+    ap.add_argument("--grep", default="", help="この語を含むログ(INFO含む)の先頭だけを最大5件表示する")
     args = ap.parse_args()
     project = os.environ["GCP_PROJECT"].strip()
     token = access_token(os.environ["CLASPRC_JSON"])
@@ -95,6 +96,13 @@ def main():
             payload = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or "(詳細なし)"
             s["msgs"][safe_error(payload)] += 1
 
+    if args.grep:
+        shown = 0
+        for e in entries:
+            text = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or ""
+            if args.grep in text and shown < 5:
+                print(f"[{args.grep}] {safe_error(text)}")
+                shown += 1
     print(f"## 直近{args.hours}時間の実行記録(ログ {len(entries)} 件)")
     if not entries:
         print("::warning::実行記録が1件もありません(トリガーが止まっている可能性)")

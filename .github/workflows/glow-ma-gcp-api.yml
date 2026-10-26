@@ -24,6 +24,10 @@ on:
         description: "実行記録の点検: 直近何時間を見るか(0なら点検しない)"
         required: false
         default: "48"
+      grep:
+        description: "実行記録から探す語(例: 受付フォルダ)。空なら探さない"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -88,4 +92,5 @@ jobs:
         env:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
           GCP_PROJECT: ${{ inputs.gcp_project }}
-        run: python3 scripts/glow_ma_exec_health.py --hours "${{ inputs.health_hours }}"
+          GREP_WORD: ${{ inputs.grep }}
+        run: python3 scripts/glow_ma_exec_health.py --hours "${{ inputs.health_hours }}" --grep "$GREP_WORD"
