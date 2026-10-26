@@ -36,7 +36,25 @@
  * トリガーから呼ばれる入口。結果を「稼働状況」タブへ記録し、失敗は通知する(OpsStatus.gs)。
  * 0件でも「成功・0件」と残るので、「動いているのに取れていない」も台帳から見える。
  */
+/** 同期を試みた時刻(成否を問わない)。毎分の処理から1時間おきに呼ぶ判定に使う */
+var CTI_SYNC_LAST_ATTEMPT_PROP = "CTI_SYNC_LAST_ATTEMPT_MS";
+var CTI_SYNC_INTERVAL_MS = 60 * 60 * 1000;
+
+/**
+ * 毎分の音声ログ処理(processQueuedVoiceLogs)に相乗りして、前回の試行から1時間たっていれば同期する。
+ * 2026-10-24 9時以降、1時間おきのトリガーが毎回「承認が必要です」で止まり、同期が1件も走っていなかった
+ * (毎分のトリガーは正常に動いている)。トリガーの状態に左右されないよう、こちらでも同期する。
+ */
+function runCtiSyncIfDue_() {
+  var props = PropertiesService.getScriptProperties();
+  if (!props.getProperty("BLUEBEAN_DOMAIN")) return;
+  var last = Number(props.getProperty(CTI_SYNC_LAST_ATTEMPT_PROP) || 0);
+  if (Date.now() - last < CTI_SYNC_INTERVAL_MS) return;
+  syncCtiCallHistory();
+}
+
 function syncCtiCallHistory() {
+  PropertiesService.getScriptProperties().setProperty(CTI_SYNC_LAST_ATTEMPT_PROP, String(Date.now()));
   try {
     var summary = syncCtiCallHistoryCore_();
     recordOpsStatus_("BlueBean架電履歴の同期", true, summary);

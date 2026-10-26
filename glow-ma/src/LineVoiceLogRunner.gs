@@ -473,6 +473,13 @@ function processQueuedVoiceLogs() {
     Logger.log("過去記録の取り込みの呼び出しに失敗しました: " + error);
   }
 
+  // BlueBeanの架電履歴を1時間おきに同期する(CtiRunner.gs。専用トリガーが止まっても同期が続くように)
+  try {
+    runCtiSyncIfDue_();
+  } catch (error) {
+    console.error("BlueBean架電履歴の同期に失敗しました: " + error);
+  }
+
   // ドライブの「GLOW音声ログ受付」フォルダに入れられた録音ファイルを受け付ける(DriveVoiceRunner.gs)
   try {
     enqueueDriveVoiceFiles_(ss);
