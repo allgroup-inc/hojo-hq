@@ -64,12 +64,12 @@ def list_entries(token, project, since):
             return entries
 
 
-def safe_error(text):
+def safe_error(text, limit=None):
     t = re.sub(r"AKfyc\S*", "(デプロイID)", str(text))
     t = re.sub(r"[A-Za-z0-9_\-]{25,}", "(ID)", t)
     t = re.sub(r"\S+@\S+", "(メール)", t)
     t = re.sub(r"\d{6,}", "(番号)", t)
-    return t.replace("\n", " ")[:SAFE_ERROR_LEN]
+    return re.sub(r"\s+", " ", t)[:limit or SAFE_ERROR_LEN]
 
 
 def main():
@@ -114,7 +114,7 @@ def main():
                 fn = e.get("resource", {}).get("labels", {}).get("function_name", "(不明)")
                 ts = e.get("timestamp", "")[:19]
                 when = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST) if ts else None
-                print(f"[{args.grep}] {when:%m-%d %H:%M} {fn} {e.get('severity', '')}: {safe_error(text)}" if when
+                print(f"[{args.grep}] {when:%m-%d %H:%M} {fn} {e.get('severity', '')}: {safe_error(text, 400)}" if when
                       else f"[{args.grep}] {fn}: {safe_error(text)}")
                 shown += 1
         hits = [e for e in entries if args.grep in (e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or "")]
