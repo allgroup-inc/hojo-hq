@@ -494,6 +494,14 @@ function processQueuedVoiceLogs() {
     Logger.log("放置された音声ログの自動取り消しに失敗しました: " + error);
   }
 
+  // Geminiの支払いエラー(402)のあとは1時間待ってから再開する(DriveVoiceRunner.gs)。待つ間は録音を処理しない
+  if (isGeminiBillingBlocked_()) return;
+  try {
+    requeueBillingHeldVoiceLogs_(ss);
+  } catch (error) {
+    console.error("支払いエラーで止まった音声ログを再開できませんでした: " + error);
+  }
+
   var pending = readVoiceLogRows_(ss).filter(function (record) { return record["ステータス"] === "受信済み"; });
   pending.forEach(function (record) {
     var claimed;
@@ -514,6 +522,10 @@ function processQueuedVoiceLogs() {
       processOneVoiceLog_(ss, record);
     } catch (error) {
       Logger.log("音声ログの処理に失敗しました(処理ID " + record["処理ID"] + "): " + error);
+      if (GlowVoiceFileIntake.isBillingError(error)) {
+        holdVoiceLogForBilling_(ss, record, error);
+        return;
+      }
       var isTransient = GlowLineVoiceLogContent.isTransientProcessingError(error);
       // 一時的な障害(混雑・5xx)は「エラー」で確定させず「受信済み」へ戻し、次回のトリガーに
       // 再試行させる。processOneVoiceLog_ は毎回LINEから音声を取り直すので、戻すだけで再開できる。

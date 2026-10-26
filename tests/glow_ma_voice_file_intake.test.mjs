@@ -77,3 +77,13 @@ test("1人が複数のメールアドレス(区切りは , 、 ; 空白)を登�
   assert.equal(plan.accept.length, 1);
   assert.equal(plan.accept[0].staff.name, "福田");
 });
+
+test("Geminiの支払いエラー(402)を見分ける(一時的な混雑・ほかのエラーとは区別する)", () => {
+  const e = new Error("x"); e.statusCode = 402;
+  assert.ok(v.isBillingError(e));
+  assert.ok(v.isBillingError("Error: Geminiへのアップロード開始に失敗しました(HTTP 402)"));
+  assert.ok(v.isBillingError("Error: Gemini APIの呼び出しに失敗しました(ステータスコード 402): {}"));
+  assert.ok(!v.isBillingError("Error: Gemini APIの呼び出しに失敗しました(ステータスコード 429): {}"));
+  assert.ok(!v.isBillingError("HTTP 4021"));
+  assert.ok(!v.isBillingError(null));
+});
