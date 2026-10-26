@@ -422,7 +422,9 @@
 
     var contentMemo = String(source["内容メモ"] || "").trim();
     if (contentMemo) {
-      var digest = "【" + todayString + " " + (String(source["種別候補"] || "").trim() || "対応") + "(LINE音声)】" +
+      // ドライブの「GLOW音声ログ受付」から来た録音(DriveVoiceRunner.gs)は「録音」と書き分ける
+      var via = String(source["LINEメッセージID"] || "").indexOf("drive:") === 0 ? "録音" : "LINE音声";
+      var digest = "【" + todayString + " " + (String(source["種別候補"] || "").trim() || "対応") + "(" + via + ")】" +
         contentMemo + (nextAction ? " ▶次: " + nextAction : "");
       var existingMemo = String(target["関係メモ"] || "");
       var combined = existingMemo ? digest + "\n" + existingMemo : digest;
