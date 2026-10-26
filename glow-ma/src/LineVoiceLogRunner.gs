@@ -473,6 +473,13 @@ function processQueuedVoiceLogs() {
     Logger.log("過去記録の取り込みの呼び出しに失敗しました: " + error);
   }
 
+  // ドライブの「GLOW音声ログ受付」フォルダに入れられた録音ファイルを受け付ける(DriveVoiceRunner.gs)
+  try {
+    enqueueDriveVoiceFiles_(ss);
+  } catch (error) {
+    Logger.log("録音ファイルの受け付けに失敗しました: " + error);
+  }
+
   try {
     sweepStaleVoiceLogs_(ss);
   } catch (error) {
@@ -531,8 +538,9 @@ function processQueuedVoiceLogs() {
  * (担当者が確認画面で見た値と、対応履歴ログに実際に記録される値を一致させるため)。
  */
 function processOneVoiceLog_(ss, record) {
-  var audioBlob = fetchLineAudioContent_(record["LINEメッセージID"]);
-  var extracted = callGeminiForVoiceLog_(audioBlob);
+  // LINEの音声メッセージか、ドライブの録音ファイル(DriveVoiceRunner.gs)かで取り方を変える
+  var audio = prepareVoiceAudio_(record);
+  var extracted = callGeminiForVoiceLog_(audio);
 
   var companyNameCandidate = GlowLineVoiceLogContent.sanitizeSheetText(extracted.companyName);
   var interactionType = GlowLineVoiceLogContent.normalizeInteractionType(extracted.interactionType);
@@ -611,9 +619,9 @@ function fetchLineAudioContent_(messageId) {
   return response.getBlob();
 }
 
-function callGeminiForVoiceLog_(audioBlob) {
+function callGeminiForVoiceLog_(audio) {
   return GlowResilience.withRetry(
-    function () { return callGeminiForVoiceLogOnce_(audioBlob); },
+    function () { return callGeminiForVoiceLogOnce_(audio); },
     {
       maxAttempts: 3,
       backoffMs: [2000, 10000],
@@ -628,7 +636,7 @@ function callGeminiForVoiceLog_(audioBlob) {
   );
 }
 
-function callGeminiForVoiceLogOnce_(audioBlob) {
+function callGeminiForVoiceLogOnce_(audio) {
   var apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY が未設定です。スクリプト プロパティで設定してください。");
@@ -636,8 +644,11 @@ function callGeminiForVoiceLogOnce_(audioBlob) {
   var payload = {
     contents: [{
       parts: [
-        { text: buildGeminiPrompt_(Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd")) },
-        { inline_data: { mime_type: audioBlob.getContentType() || "audio/m4a", data: Utilities.base64Encode(audioBlob.getBytes()) } }
+        { text: buildGeminiPrompt_(Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd")) + (audio.hint ? "\n" + audio.hint : "") },
+        audio.fileUri
+          // 大きな録音ファイルは、先にGeminiのファイル置き場へ分割アップロード済み(DriveVoiceRunner.gs)
+          ? { file_data: { mime_type: audio.mimeType, file_uri: audio.fileUri } }
+          : { inline_data: { mime_type: audio.blob.getContentType() || "audio/m4a", data: Utilities.base64Encode(audio.blob.getBytes()) } }
       ]
     }]
   };
@@ -674,7 +685,8 @@ function buildGeminiPrompt_(todayString) {
     "\"respondentType\": \"" + GlowSchema.RESPONDENT_TYPES.join("/") +
       "のいずれか。音声だけでは相手がオーナー社長本人か窓口担当か判別できない場合は、" +
       "推測で決めつけず「不明」と正直に出力すること\", " +
-    "\"contentMemo\": \"話の内容の要約(2〜3文程度)\", " +
+    "\"contentMemo\": \"話の内容の要約。短いメモなら2〜3文。面談をそのまま録音した長い音声なら、" +
+      "相手の状況・課題・こちらの提案・相手の反応・決まったことを、要点ごとに「・」で始まる行で最大8行にまとめる\", " +
     "\"nextAction\": \"次にやるべきこと(無ければ空文字)\", " +
     "\"successorStatus\": \"後継者・跡継ぎの話が出た場合のみ " + GlowSchema.SUCCESSOR_STATUS_TYPES.join("/") +
       " のいずれか。話に出ていなければ空文字。推測で決めつけないこと\", " +

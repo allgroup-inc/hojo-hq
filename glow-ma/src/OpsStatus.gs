@@ -94,7 +94,8 @@ function runSelfHeal() {
     { name: "ダッシュボードの表示", run: ensureDashboardVisible_ },
     { name: "BlueBean同期トリガー", run: ensureCtiSyncTrigger_ },
     { name: "日次メンテナンストリガー", run: ensureDailyMaintenanceTrigger_ },
-    { name: "過去記録の取り込みタブ", run: function () { return ensureHistoryImportSheet_() ? "作成" : "あり"; } }
+    { name: "過去記録の取り込みタブ", run: function () { return ensureHistoryImportSheet_() ? "作成" : "あり"; } },
+    { name: "録音ファイルの受付フォルダ", run: ensureVoiceDriveFolder_ }
   ];
   checks.forEach(function (check) {
     try {
