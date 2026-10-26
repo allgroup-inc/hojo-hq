@@ -1,0 +1,227 @@
+/**
+ * GLOW企業リレーション台帳: 録音ファイル(Googleドライブ経由)の受付(2026-10-26 追加)
+ *
+ * 使い方(担当者): 録音アプリ(PCM録音など)で録った WAV / AAC / M4A / MP3 を、
+ * ドライブの「GLOW音声ログ受付」フォルダに入れるだけ(スマホのドライブアプリから「アップロード」)。
+ * 数分以内に受け付けられ(ファイル名の先頭に「受付済_」が付く)、LINE音声と同じ流れで
+ * 文字起こし・要約 → LINEで確認ボタン → 対応履歴ログへ記録 → 企業の関係メモへ要約を追記、まで進む。
+ * ファイル名に会社名を入れておく(例: 「株式会社◯◯_1026.wav」)と、会社の特定が確実になる。
+ *
+ * 前提: 「スタッフ」タブに、その人のメールアドレス(ドライブにアップロードするアカウント)と
+ * LINE User ID が登録されていること(確認ボタンをLINEで送るため)。
+ * 判断のロジックは voiceFileIntake.js(テストあり)。
+ */
+
+var VOICE_DRIVE_FOLDER_NAME = "GLOW音声ログ受付";
+var VOICE_DRIVE_FOLDER_PROP = "VOICE_DRIVE_FOLDER_ID";
+var VOICE_UPLOAD_STATE_PREFIX = "VOICE_UPLOAD_";
+// 1回の実行(上限6分)のうち、分割アップロードに使ってよい時間。超えたら続きは次の実行へ
+var VOICE_UPLOAD_TIME_BUDGET_MS = 4 * 60 * 1000;
+
+/** 受付フォルダを用意し、有効なスタッフを編集者に加える(自己点検から呼ぶ・冪等) */
+function ensureVoiceDriveFolder_() {
+  var folder = getVoiceDriveFolder_(true);
+  var editors = {};
+  folder.getEditors().forEach(function (u) { editors[String(u.getEmail()).toLowerCase()] = true; });
+  var owner = folder.getOwner();
+  if (owner) editors[String(owner.getEmail()).toLowerCase()] = true;
+  var added = [];
+  readVoiceStaff_().forEach(function (s) {
+    var email = String(s.email || "").trim().toLowerCase();
+    if (!email || editors[email]) return;
+    folder.addEditor(email);
+    added.push(s.name || email);
+  });
+  return "あり(" + folder.getUrl() + ")" + (added.length ? " / 共有を追加: " + added.join("、") : "");
+}
+
+function getVoiceDriveFolder_(create) {
+  var props = PropertiesService.getScriptProperties();
+  var id = props.getProperty(VOICE_DRIVE_FOLDER_PROP);
+  if (id) {
+    try {
+      var existing = DriveApp.getFolderById(id);
+      if (!existing.isTrashed()) return existing;
+    } catch (error) {
+      Logger.log("音声ログ受付フォルダが見つからないため作り直します: " + error);
+    }
+  }
+  if (!create) return null;
+  var found = DriveApp.getFoldersByName(VOICE_DRIVE_FOLDER_NAME);
+  var folder = found.hasNext() ? found.next() : DriveApp.createFolder(VOICE_DRIVE_FOLDER_NAME);
+  props.setProperty(VOICE_DRIVE_FOLDER_PROP, folder.getId());
+  return folder;
+}
+
+/** スタッフタブの有効な人: {name, email, lineUserId} */
+function readVoiceStaff_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(GlowSchema.STAFF_SHEET_NAME);
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  var headers = GlowSchema.STAFF_HEADERS;
+  var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, headers.length).getValues();
+  var nameI = headers.indexOf("氏名"), emailI = headers.indexOf("メールアドレス");
+  var activeI = headers.indexOf("有効"), lineI = headers.indexOf("LINE User ID");
+  return values.filter(function (r) { return r[activeI] === true; }).map(function (r) {
+    return { name: String(r[nameI] || ""), email: String(r[emailI] || ""), lineUserId: String(r[lineI] || "").trim() };
+  });
+}
+
+/** 毎分のトリガーから呼ぶ。フォルダに新しい録音があれば「音声ログ処理状況」へ受け付ける */
+function enqueueDriveVoiceFiles_(ss) {
+  var folder = getVoiceDriveFolder_(false);
+  if (!folder) {
+    // 初回: フォルダを作ってスタッフに共有する(以後は自己点検でも見直す)
+    recordOpsStatus_("録音ファイルの受付フォルダ", true, ensureVoiceDriveFolder_());
+    return 0;
+  }
+  var files = [];
+  var iter = folder.getFiles();
+  while (iter.hasNext()) {
+    var f = iter.next();
+    if (f.isTrashed() || !GlowVoiceFileIntake.isAcceptableFileName(f.getName())) continue;
+    var owner = f.getOwner();
+    files.push({ id: f.getId(), name: f.getName(), ownerEmail: owner ? owner.getEmail() : "", file: f });
+  }
+  if (!files.length) return 0;
+
+  var rows = readVoiceLogRows_(ss);
+  var known = rows.map(function (r) { return r["LINEメッセージID"]; });
+  var busy = rows.filter(function (r) { return VOICE_LOG_IN_PROGRESS_STATUSES.indexOf(r["ステータス"]) !== -1; })
+    .map(function (r) { return r["LINEユーザーID"]; });
+  var plan = GlowVoiceFileIntake.planIntake(files, readVoiceStaff_(), known, busy);
+  plan.skip.forEach(function (s) {
+    Logger.log("録音ファイルを受け付けませんでした(" + s.file.name + "): " + s.reason);
+  });
+
+  plan.accept.forEach(function (item) {
+    var processId = "P-" + Utilities.getUuid();
+    var receivedAt = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm");
+    appendVoiceLogRow_(ss, [
+      processId, item.staff.lineUserId, GlowVoiceFileIntake.toDriveMessageId(item.file.id), "受信済み",
+      receivedAt, "", "", "", "", "", "", "", "", "", ""
+    ]);
+    item.file.file.setName(GlowVoiceFileIntake.DONE_PREFIX + item.file.name);
+    linePush_(item.staff.lineUserId, [{
+      text: "録音ファイル「" + item.file.name + "」を受け付けました。文字起こしと要約が終わったら、確認のご連絡をします(長い録音は数分〜十数分かかります)。"
+    }]);
+  });
+  return plan.accept.length;
+}
+
+/**
+ * 文字起こしに渡す音声を用意する。
+ * 戻り値: { blob } (そのまま送る) / { fileUri, mimeType } (Geminiへアップロード済み)。どちらにも hint が付く
+ */
+function prepareVoiceAudio_(record) {
+  var driveId = GlowVoiceFileIntake.driveFileIdOf(record["LINEメッセージID"]);
+  if (!driveId) {
+    return { blob: fetchLineAudioContent_(record["LINEメッセージID"]), hint: "" };
+  }
+  var file = DriveApp.getFileById(driveId);
+  var name = file.getName();
+  var mimeType = GlowVoiceFileIntake.audioMimeType(name, file.getMimeType());
+  var hint = GlowVoiceFileIntake.fileNameHint(name);
+  var size = file.getSize();
+  if (size <= GlowVoiceFileIntake.INLINE_MAX_BYTES) {
+    return { blob: file.getBlob().setContentType(mimeType), hint: hint };
+  }
+  var uploaded = uploadDriveFileToGemini_(record["処理ID"], driveId, size, mimeType);
+  return { fileUri: uploaded.uri, mimeType: mimeType, hint: hint };
+}
+
+/**
+ * ドライブのファイルを分割して読み、Gemini のファイル置き場へ分割アップロードする。
+ * 1回の実行で終わらなければ進み具合を保存し、一時的な障害(503)として次の実行へ回す
+ * (processQueuedVoiceLogs が「受信済み」へ戻して、続きから再開する)。
+ */
+function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
+  var apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
+  if (!apiKey) throw new Error("GEMINI_API_KEY が未設定です。スクリプト プロパティで設定してください。");
+  var props = PropertiesService.getScriptProperties();
+  var stateKey = VOICE_UPLOAD_STATE_PREFIX + processId;
+  var state = JSON.parse(props.getProperty(stateKey) || "null");
+
+  if (!state) {
+    var start = UrlFetchApp.fetch("https://generativelanguage.googleapis.com/upload/v1beta/files?key=" + apiKey, {
+      method: "post",
+      contentType: "application/json",
+      headers: {
+        "X-Goog-Upload-Protocol": "resumable",
+        "X-Goog-Upload-Command": "start",
+        "X-Goog-Upload-Header-Content-Length": String(size),
+        "X-Goog-Upload-Header-Content-Type": mimeType
+      },
+      payload: JSON.stringify({ file: { display_name: processId } }),
+      muteHttpExceptions: true
+    });
+    var headers = start.getAllHeaders();
+    var url = headers["x-goog-upload-url"] || headers["X-Goog-Upload-URL"];
+    if (start.getResponseCode() !== 200 || !url) {
+      var startError = new Error("Geminiへのアップロード開始に失敗しました(HTTP " + start.getResponseCode() + ")");
+      startError.statusCode = start.getResponseCode() >= 500 ? start.getResponseCode() : 400;
+      throw startError;
+    }
+    state = { url: url, offset: 0 };
+    props.setProperty(stateKey, JSON.stringify(state));
+  }
+
+  var token = ScriptApp.getOAuthToken();
+  var began = Date.now();
+  var result = null;
+  var chunk;
+  while ((chunk = GlowVoiceFileIntake.nextChunk(state.offset, size))) {
+    if (Date.now() - began > VOICE_UPLOAD_TIME_BUDGET_MS) {
+      var pause = new Error("録音ファイルのアップロード途中です(" + Math.round(state.offset / 1048576) + "MB / " +
+        Math.round(size / 1048576) + "MB)。続きは次の実行で行います");
+      pause.statusCode = 503;
+      throw pause;
+    }
+    var part = UrlFetchApp.fetch("https://www.googleapis.com/drive/v3/files/" + driveId + "?alt=media", {
+      headers: { Authorization: "Bearer " + token, Range: "bytes=" + chunk.start + "-" + chunk.end },
+      muteHttpExceptions: true
+    });
+    if (part.getResponseCode() !== 206 && part.getResponseCode() !== 200) {
+      var readError = new Error("ドライブから録音ファイルを読めませんでした(HTTP " + part.getResponseCode() + ")");
+      readError.statusCode = part.getResponseCode() >= 500 ? part.getResponseCode() : 400;
+      throw readError;
+    }
+    var put = UrlFetchApp.fetch(state.url, {
+      method: "post",
+      contentType: mimeType,
+      headers: {
+        "X-Goog-Upload-Command": chunk.isLast ? "upload, finalize" : "upload",
+        "X-Goog-Upload-Offset": String(chunk.start)
+      },
+      payload: part.getContent(),
+      muteHttpExceptions: true
+    });
+    if (put.getResponseCode() !== 200) {
+      var putError = new Error("Geminiへのアップロードに失敗しました(HTTP " + put.getResponseCode() + ")");
+      putError.statusCode = put.getResponseCode() >= 500 || put.getResponseCode() === 429 ? put.getResponseCode() : 400;
+      throw putError;
+    }
+    state.offset = chunk.end + 1;
+    props.setProperty(stateKey, JSON.stringify(state));
+    if (chunk.isLast) result = JSON.parse(put.getContentText()).file;
+  }
+  props.deleteProperty(stateKey);
+  if (!result || !result.uri) throw new Error("Geminiへのアップロード結果を読めませんでした");
+  return waitGeminiFileActive_(result, apiKey);
+}
+
+function waitGeminiFileActive_(file, apiKey) {
+  var current = file;
+  for (var i = 0; i < 30 && current.state === "PROCESSING"; i++) {
+    Utilities.sleep(3000);
+    current = JSON.parse(UrlFetchApp.fetch(
+      "https://generativelanguage.googleapis.com/v1beta/" + file.name + "?key=" + apiKey, { muteHttpExceptions: true }
+    ).getContentText());
+  }
+  if (current.state && current.state !== "ACTIVE") {
+    var error = new Error("Gemini側で録音ファイルの準備が終わりませんでした(状態: " + current.state + ")");
+    error.statusCode = current.state === "PROCESSING" ? 503 : 400;
+    throw error;
+  }
+  return current;
+}
