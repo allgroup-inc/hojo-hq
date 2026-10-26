@@ -110,6 +110,13 @@ def main():
                 shown += 1
         hits = [e for e in entries if args.grep in (e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or "")]
         print(f"[{args.grep}] 該当 {len(hits)} 件")
+        by_fn = collections.defaultdict(list)
+        for e in hits:
+            by_fn[e.get("resource", {}).get("labels", {}).get("function_name", "(不明)")].append(e.get("timestamp", "")[:19])
+        for fn, ts in sorted(by_fn.items()):
+            first = datetime.strptime(min(ts), "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST)
+            last = datetime.strptime(max(ts), "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST)
+            print(f"[{args.grep}] {fn}: {len(ts)} 件 / 最初 {first:%m-%d %H:%M} / 最後 {last:%m-%d %H:%M}(日本時間)")
         # 実行した利用者が、毎分の音声ログ処理(台帳の持ち主のトリガー)と同じかどうかだけを出す(値そのものは出さない)
         def user_key(e):
             labels = e.get("labels", {}) or {}
