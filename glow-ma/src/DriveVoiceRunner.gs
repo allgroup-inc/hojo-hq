@@ -119,7 +119,12 @@ function enqueueDriveVoiceFiles_(ss) {
 function prepareVoiceAudio_(record) {
   var driveId = GlowVoiceFileIntake.driveFileIdOf(record["LINEメッセージID"]);
   if (!driveId) {
-    return { blob: fetchLineAudioContent_(record["LINEメッセージID"]), hint: "" };
+    var lineBlob = fetchLineAudioContent_(record["LINEメッセージID"]);
+    if (lineBlob.getBytes().length <= GlowVoiceFileIntake.INLINE_MAX_BYTES) return { blob: lineBlob, hint: "" };
+    // LINEで送られた長めの録音ファイル(14MB超)は、そのままでは送れないためGeminiへ一括アップロードする
+    var lineMime = lineBlob.getContentType() || "audio/mp4";
+    var lineUploaded = uploadBlobToGemini_(lineBlob, lineMime, record["処理ID"]);
+    return { fileUri: lineUploaded.uri, mimeType: lineMime, hint: "" };
   }
   var file = DriveApp.getFileById(driveId);
   var name = file.getName();
@@ -211,6 +216,45 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
   props.deleteProperty(stateKey);
   if (!result || !result.uri) throw new Error("Geminiへのアップロード結果を読めませんでした");
   return waitGeminiFileActive_(result, apiKey);
+}
+
+/** 手元にある音声(LINEから受け取ったもの。上限50MB)を、Gemini のファイル置き場へ1回で送る */
+function uploadBlobToGemini_(blob, mimeType, displayName) {
+  var apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
+  if (!apiKey) throw new Error("GEMINI_API_KEY が未設定です。スクリプト プロパティで設定してください。");
+  var bytes = blob.getBytes();
+  var start = UrlFetchApp.fetch("https://generativelanguage.googleapis.com/upload/v1beta/files?key=" + apiKey, {
+    method: "post",
+    contentType: "application/json",
+    headers: {
+      "X-Goog-Upload-Protocol": "resumable",
+      "X-Goog-Upload-Command": "start",
+      "X-Goog-Upload-Header-Content-Length": String(bytes.length),
+      "X-Goog-Upload-Header-Content-Type": mimeType
+    },
+    payload: JSON.stringify({ file: { display_name: displayName } }),
+    muteHttpExceptions: true
+  });
+  var headers = start.getAllHeaders();
+  var url = headers["x-goog-upload-url"] || headers["X-Goog-Upload-URL"];
+  if (start.getResponseCode() !== 200 || !url) {
+    var startError = new Error("Geminiへのアップロード開始に失敗しました(HTTP " + start.getResponseCode() + ")");
+    startError.statusCode = start.getResponseCode() >= 500 ? start.getResponseCode() : 400;
+    throw startError;
+  }
+  var put = UrlFetchApp.fetch(url, {
+    method: "post",
+    contentType: mimeType,
+    headers: { "X-Goog-Upload-Command": "upload, finalize", "X-Goog-Upload-Offset": "0" },
+    payload: bytes,
+    muteHttpExceptions: true
+  });
+  if (put.getResponseCode() !== 200) {
+    var putError = new Error("Geminiへのアップロードに失敗しました(HTTP " + put.getResponseCode() + ")");
+    putError.statusCode = put.getResponseCode() >= 500 || put.getResponseCode() === 429 ? put.getResponseCode() : 400;
+    throw putError;
+  }
+  return waitGeminiFileActive_(JSON.parse(put.getContentText()).file, apiKey);
 }
 
 function waitGeminiFileActive_(file, apiKey) {
