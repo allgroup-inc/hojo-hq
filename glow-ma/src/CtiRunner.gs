@@ -190,9 +190,20 @@ function callBlueBeanApiOnce_(startDate, endDate, campaignId) {
       "未設定です。スクリプト プロパティで設定してください。"
     );
   }
+  // 2026-10 から BlueBean のサーバー入口に「1回目のログイン」(ベーシック認証)が追加された
+  // (福田さん 2026-10-26: 毎日の初回ログインで2重ログインを求められる)。これが無いと、
+  // APIの手前で 401「Authentication required!」が返る。入口のID/パスワードはスクリプトプロパティ
+  // BLUEBEAN_BASIC_USER / BLUEBEAN_BASIC_PASSWORD に置く(未設定なら従来どおり送らない)
+  var headers = {};
+  var basicUser = properties.getProperty("BLUEBEAN_BASIC_USER");
+  var basicPassword = properties.getProperty("BLUEBEAN_BASIC_PASSWORD");
+  if (basicUser && basicPassword) {
+    headers.Authorization = "Basic " + Utilities.base64Encode(basicUser + ":" + basicPassword, Utilities.Charset.UTF_8);
+  }
   var response = UrlFetchApp.fetch("https://" + domain + "/quick/api/export_customer_call_history.php", {
     method: "post",
     contentType: "application/json",
+    headers: headers,
     payload: JSON.stringify({
       username: username,
       password: password,
@@ -204,8 +215,16 @@ function callBlueBeanApiOnce_(startDate, endDate, campaignId) {
   });
   var responseCode = response.getResponseCode();
   if (responseCode < 200 || responseCode >= 300) {
+    var body = response.getContentText();
+    var hint = "";
+    if (responseCode === 401 && /Authentication required/i.test(body)) {
+      hint = basicUser
+        ? "BlueBeanの入口のログイン(1回目)が通りません。BLUEBEAN_BASIC_USER / BLUEBEAN_BASIC_PASSWORD が最新か確認してください"
+        : "BlueBeanの入口のログイン(1回目)が必要です。スクリプトプロパティ BLUEBEAN_BASIC_USER / BLUEBEAN_BASIC_PASSWORD を設定してください";
+    }
     var error = new Error(
-      "BlueBean APIの呼び出しに失敗しました(ステータスコード " + responseCode + "): " + response.getContentText()
+      "BlueBean APIの呼び出しに失敗しました(ステータスコード " + responseCode + ")" +
+      (hint ? ": " + hint : ": " + body.slice(0, 300))
     );
     error.statusCode = responseCode;
     throw error;

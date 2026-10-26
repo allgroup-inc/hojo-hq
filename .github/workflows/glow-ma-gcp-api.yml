@@ -17,9 +17,13 @@ on:
         description: "Google Cloud のプロジェクト番号"
         required: true
       apis:
-        description: "有効にするAPI(空白区切り)"
+        description: "有効にするAPI(空白区切り)。空なら有効化はしない"
         required: false
-        default: "drive"
+        default: ""
+      health_hours:
+        description: "実行記録の点検: 直近何時間を見るか(0なら点検しない)"
+        required: false
+        default: "48"
 
 permissions:
   contents: read
@@ -39,6 +43,7 @@ jobs:
           node-version: "22"
 
       - name: API を有効にする
+        if: inputs.apis != ''
         env:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
           SCRIPT_ID: ${{ secrets.GLOW_MA_SCRIPT_ID }}
@@ -69,3 +74,18 @@ jobs:
           done
           rm -f "$HOME/.clasprc.json" .clasp.json appsscript.json
           exit $status
+
+      - uses: actions/checkout@v7
+        if: inputs.health_hours != '0'
+
+      - uses: actions/setup-python@v7
+        if: inputs.health_hours != '0'
+        with:
+          python-version: "3.12"
+
+      - name: 実行記録の点検(各処理が動いているか)
+        if: inputs.health_hours != '0'
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          GCP_PROJECT: ${{ inputs.gcp_project }}
+        run: python3 scripts/glow_ma_exec_health.py --hours "${{ inputs.health_hours }}"
