@@ -96,11 +96,44 @@ jobs:
         with:
           python-version: "3.12"
 
+      # プロジェクト番号は公開リポジトリに書かない。手動実行で1回指定された番号を Actions のキャッシュに覚えておき、
+      # 毎日の自動点検(番号の入力が無い)ではそれを使う
+      - name: 覚えているプロジェクト番号を取り出す
+        if: inputs.health_hours != '0'
+        uses: actions/cache/restore@v4
+        with:
+          path: .glow_ma_gcp_project
+          key: glow-ma-gcp-project-${{ github.run_id }}
+          restore-keys: glow-ma-gcp-project-
+
+      - name: プロジェクト番号を決める
+        if: inputs.health_hours != '0'
+        id: project
+        env:
+          GIVEN: ${{ inputs.gcp_project }}
+        run: |
+          num="$GIVEN"
+          if [ -z "$num" ] && [ -f .glow_ma_gcp_project ]; then num=$(tr -d '[:space:]' < .glow_ma_gcp_project); fi
+          case "$num" in (*[!0-9a-z-]*) echo "::error::プロジェクト番号の形式が不正です"; exit 1;; esac
+          if [ -n "$num" ]; then
+            echo "::add-mask::$num"
+            printf '%s' "$num" > .glow_ma_gcp_project
+            echo "save=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "number=$num" >> "$GITHUB_OUTPUT"
+
+      - name: プロジェクト番号を覚えておく
+        if: inputs.health_hours != '0' && steps.project.outputs.save == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .glow_ma_gcp_project
+          key: glow-ma-gcp-project-${{ github.run_id }}
+
       - name: 実行記録の点検(各処理が動いているか)
         if: inputs.health_hours != '0'
         env:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
-          GCP_PROJECT: ${{ inputs.gcp_project }}
+          GCP_PROJECT: ${{ steps.project.outputs.number }}
           GREP_WORD: ${{ inputs.grep }}
           SAMPLE_FN: ${{ inputs.sample }}
           HOURS: ${{ inputs.health_hours || '8' }}

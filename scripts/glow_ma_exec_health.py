@@ -64,31 +64,6 @@ def list_entries(token, project, since):
             return entries
 
 
-def discover_project(token):
-    """GCP_PROJECT が無いとき(毎日の自動点検)は、台帳のスクリプトの実行記録がある Cloud プロジェクトを探す。
-    プロジェクト番号は公開ログに出さない(::add-mask:: で伏せる)。"""
-    req = urllib.request.Request("https://cloudresourcemanager.googleapis.com/v1/projects?filter=lifecycleState:ACTIVE",
-                                 headers={"Authorization": "Bearer " + token})
-    projects = json.load(urllib.request.urlopen(req, timeout=30)).get("projects", [])
-    since = (datetime.now(timezone.utc) - timedelta(days=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    for p in projects:
-        number = str(p.get("projectNumber", ""))
-        if not number:
-            continue
-        flt = ('resource.type="app_script_function" AND resource.labels.function_name="processQueuedVoiceLogs"'
-               ' AND timestamp>="%s"' % since)
-        body = json.dumps({"resourceNames": ["projects/" + number], "filter": flt, "pageSize": 1}).encode()
-        r = urllib.request.Request("https://logging.googleapis.com/v2/entries:list", data=body, method="POST",
-                                   headers={"Authorization": "Bearer " + token, "Content-Type": "application/json"})
-        try:
-            if json.load(urllib.request.urlopen(r, timeout=30)).get("entries"):
-                print("::add-mask::" + number)
-                return number
-        except Exception:
-            continue
-    sys.exit("::error::台帳のスクリプトの実行記録がある Cloud プロジェクトが見つかりません(GCP_PROJECT を指定してください)")
-
-
 def safe_error(text):
     t = re.sub(r"AKfyc\S*", "(デプロイID)", str(text))
     t = re.sub(r"[A-Za-z0-9_\-]{25,}", "(ID)", t)
@@ -106,7 +81,9 @@ def main():
     ap.add_argument("--sample", default="", help="この処理名の最新ログ3件の中身の形(重要度・項目名・本文の先頭)を表示する")
     args = ap.parse_args()
     token = access_token(os.environ["CLASPRC_JSON"])
-    project = os.environ.get("GCP_PROJECT", "").strip() or discover_project(token)
+    project = os.environ.get("GCP_PROJECT", "").strip()
+    if not project:
+        sys.exit("::error::Google Cloud のプロジェクト番号がありません(手動実行で gcp_project を1回指定すると、以後は覚えて使います)")
     since = (datetime.now(timezone.utc) - timedelta(hours=args.hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
     entries = list_entries(token, project, since)
 
