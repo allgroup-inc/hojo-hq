@@ -107,8 +107,20 @@ def main():
                 print(f"[{args.grep}] {when:%m-%d %H:%M} {fn} {e.get('severity', '')}: {safe_error(text)}" if when
                       else f"[{args.grep}] {fn}: {safe_error(text)}")
                 shown += 1
-        hits = sum(1 for e in entries if args.grep in (e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or ""))
-        print(f"[{args.grep}] 該当 {hits} 件")
+        hits = [e for e in entries if args.grep in (e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or "")]
+        print(f"[{args.grep}] 該当 {len(hits)} 件")
+        # 実行した利用者が、毎分の音声ログ処理(台帳の持ち主のトリガー)と同じかどうかだけを出す(値そのものは出さない)
+        def user_key(e):
+            labels = e.get("labels", {}) or {}
+            return next((v for k, v in labels.items() if k.endswith("user_key")), "")
+        owner = collections.Counter(user_key(e) for e in entries
+                                    if e.get("resource", {}).get("labels", {}).get("function_name") == "processQueuedVoiceLogs")
+        owner_key = owner.most_common(1)[0][0] if owner else ""
+        same = sum(1 for e in hits if owner_key and user_key(e) == owner_key)
+        print(f"[{args.grep}] 実行した利用者: 台帳の持ち主と同じ {same} 件 / 別の利用者 {len(hits) - same} 件"
+              + ("" if owner_key else "(利用者の情報なし)"))
+        kinds = collections.Counter(k for e in hits for k in (e.get("labels", {}) or {}).keys())
+        print(f"[{args.grep}] ログの項目名: {', '.join(sorted(kinds))}")
     print(f"## 直近{args.hours}時間の実行記録(ログ {len(entries)} 件)")
     if not entries:
         print("::warning::実行記録が1件もありません(トリガーが止まっている可能性)")
