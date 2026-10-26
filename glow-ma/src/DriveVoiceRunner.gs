@@ -27,10 +27,13 @@ function ensureVoiceDriveFolder_() {
   if (owner) editors[String(owner.getEmail()).toLowerCase()] = true;
   var added = [];
   readVoiceStaff_().forEach(function (s) {
-    var email = String(s.email || "").trim().toLowerCase();
-    if (!email || editors[email]) return;
-    folder.addEditor(email);
-    added.push(s.name || email);
+    // 1人が複数のアカウントを使う場合に備え、「メールアドレス」欄の全アドレスに共有する
+    GlowVoiceFileIntake.staffEmails(s.email).forEach(function (email) {
+      if (editors[email]) return;
+      folder.addEditor(email);
+      editors[email] = true;
+      added.push(s.name || "スタッフ");
+    });
   });
   return "あり(" + folder.getUrl() + ")" + (added.length ? " / 共有を追加: " + added.join("、") : "");
 }
@@ -78,6 +81,7 @@ function enqueueDriveVoiceFiles_(ss) {
     return 0;
   }
   logVoiceFolderHeartbeat_(folder);
+  syncVoiceFolderSharingIfDue_();
   var files = [];
   var iter = folder.getFiles();
   while (iter.hasNext()) {
@@ -95,6 +99,7 @@ function enqueueDriveVoiceFiles_(ss) {
   var plan = GlowVoiceFileIntake.planIntake(files, readVoiceStaff_(), known, busy);
   plan.skip.forEach(function (s) {
     console.warn("録音ファイルを受け付けませんでした: " + s.reason);
+    notifyVoiceFileSkippedOnce_(s);
   });
 
   plan.accept.forEach(function (item) {
@@ -111,6 +116,38 @@ function enqueueDriveVoiceFiles_(ss) {
   });
   if (plan.accept.length) console.log("録音ファイルを受け付けました: " + plan.accept.length + "件");
   return plan.accept.length;
+}
+
+/**
+ * スタッフタブに足したメールアドレスへ、10分以内に共有を広げる(自己点検の6時間を待たない)。
+ * 2026-10-26: 福田さんがスタッフタブとは別のアカウントでフォルダを開こうとして「アクセス権のリクエスト」になった。
+ */
+function syncVoiceFolderSharingIfDue_() {
+  var props = PropertiesService.getScriptProperties();
+  var last = Number(props.getProperty("VOICE_DRIVE_SHARE_SYNC_MS") || 0);
+  if (Date.now() - last < 10 * 60 * 1000) return;
+  props.setProperty("VOICE_DRIVE_SHARE_SYNC_MS", String(Date.now()));
+  try {
+    ensureVoiceDriveFolder_();
+  } catch (error) {
+    console.error("録音ファイルの受付フォルダの共有を更新できませんでした: " + error);
+  }
+}
+
+/**
+ * 受け付けられない録音ファイル(スタッフ登録の無いアカウント・LINE User ID 未登録)は、本人へLINEで返せないため、
+ * 管理者へ1ファイルにつき1回だけ知らせる(黙って置きっぱなしにしない)。
+ */
+function notifyVoiceFileSkippedOnce_(skip) {
+  if (skip.reason === "同じ担当者の別の録音を処理中") return;
+  var props = PropertiesService.getScriptProperties();
+  var key = "VOICE_SKIP_NOTICE_" + skip.file.id;
+  if (props.getProperty(key)) return;
+  props.setProperty(key, String(Date.now()));
+  notifyOpsFailure_("録音ファイルの受付",
+    "「GLOW音声ログ受付」フォルダに、受け付けられない録音ファイルがあります(" + skip.reason + ")。\n" +
+    "台帳の「スタッフ」タブで、そのファイルを入れた人の「メールアドレス」欄にアカウントを追加してください" +
+    "(複数あるときは「,」で区切って並べられます)。追加すると数分で自動的に受け付けます。");
 }
 
 /** 受付フォルダが使える状態かを、6時間に1回だけ実行記録(Cloud Logging)に残す(外から稼働を確かめるため) */

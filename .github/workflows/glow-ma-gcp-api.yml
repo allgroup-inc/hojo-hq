@@ -11,11 +11,16 @@ name: glow-ma-gcp-api
 #   apis        … 有効にするAPI(空白区切り。既定は drive)
 
 on:
+  # 毎日の自動点検(2026-10-26 追加): 承認切れ・稼働記録なしを見つけたら失敗させ、GitHubの失敗通知で気づけるようにする。
+  # 10/16〜26 に自動処理が承認切れで止まっていたのを10日間誰も気づけなかった反省(失敗台帳 FK-007)。
+  schedule:
+    - cron: "23 23 * * *"   # 毎日 8:23(日本時間)。日次メンテナンス(7時台)の後
   workflow_dispatch:
     inputs:
       gcp_project:
-        description: "Google Cloud のプロジェクト番号"
-        required: true
+        description: "Google Cloud のプロジェクト番号(空なら実行記録から自動で探す)"
+        required: false
+        default: ""
       apis:
         description: "有効にするAPI(空白区切り)。空なら有効化はしない"
         required: false
@@ -98,4 +103,6 @@ jobs:
           GCP_PROJECT: ${{ inputs.gcp_project }}
           GREP_WORD: ${{ inputs.grep }}
           SAMPLE_FN: ${{ inputs.sample }}
-        run: python3 scripts/glow_ma_exec_health.py --hours "${{ inputs.health_hours }}" --grep "$GREP_WORD" --sample "$SAMPLE_FN"
+          HOURS: ${{ inputs.health_hours || '8' }}
+          ALERT: ${{ github.event_name == 'schedule' && '--alert' || '' }}
+        run: python3 scripts/glow_ma_exec_health.py --hours "$HOURS" --grep "$GREP_WORD" --sample "$SAMPLE_FN" $ALERT

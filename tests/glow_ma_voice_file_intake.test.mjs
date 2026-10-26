@@ -67,3 +67,13 @@ test("ファイル名のヒントは受付済みの印と拡張子を外して�
   assert.match(v.fileNameHint("受付済_株式会社テスト_1026.wav"), /「株式会社テスト_1026」/);
   assert.equal(v.fileNameHint(""), "");
 });
+
+test("1人が複数のメールアドレス(区切りは , 、 ; 空白)を登録でき、どれから入れても受け付ける", () => {
+  assert.deepEqual(v.staffEmails("A@example.com, b@example.com、c@example.com"), ["a@example.com", "b@example.com", "c@example.com"]);
+  assert.deepEqual(v.staffEmails(""), []);
+  assert.deepEqual(v.staffEmails("メモ"), []);
+  const staff = [{ name: "福田", email: "work@example.com\nDrive@example.com", lineUserId: "Uaaa" }];
+  const plan = v.planIntake([{ id: "f1", name: "a.wav", ownerEmail: "drive@example.com" }], staff, [], []);
+  assert.equal(plan.accept.length, 1);
+  assert.equal(plan.accept[0].staff.name, "福田");
+});

@@ -44,6 +44,17 @@
     return s.indexOf(DRIVE_ID_PREFIX) === 0 ? s.slice(DRIVE_ID_PREFIX.length) : "";
   }
 
+  /**
+   * スタッフタブの「メールアドレス」欄から、メールアドレスの一覧を取り出す。
+   * 1人が複数のGoogleアカウントを使うことがある(仕事用とドライブ用が別など)ため、
+   * 「,」「、」「;」・空白・改行で区切って複数書けるようにする(2026-10-26)。小文字にそろえる。
+   */
+  function staffEmails(cell) {
+    return String(cell || "").split(/[,、;；\s]+/).map(function (e) {
+      return e.trim().toLowerCase();
+    }).filter(function (e) { return e.indexOf("@") > 0; });
+  }
+
   /** 次に送る範囲 {start, end(含む), isLast}。全部送り終えていれば null */
   function nextChunk(offset, totalBytes, chunkBytes) {
     var size = chunkBytes || CHUNK_BYTES;
@@ -66,7 +77,8 @@
     (busyLineUserIds || []).forEach(function (id) { busy[String(id)] = true; });
     var byEmail = {};
     (staff || []).forEach(function (s) {
-      if (s && s.email) byEmail[String(s.email).trim().toLowerCase()] = s;
+      if (!s) return;
+      staffEmails(s.email).forEach(function (email) { byEmail[email] = s; });
     });
     var accept = [], skip = [];
     (files || []).forEach(function (f) {
@@ -95,6 +107,7 @@
     CHUNK_BYTES: CHUNK_BYTES,
     INLINE_MAX_BYTES: INLINE_MAX_BYTES,
     audioMimeType: audioMimeType,
+    staffEmails: staffEmails,
     isAcceptableFileName: isAcceptableFileName,
     toDriveMessageId: toDriveMessageId,
     driveFileIdOf: driveFileIdOf,
