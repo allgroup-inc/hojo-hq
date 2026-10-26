@@ -65,7 +65,9 @@ def list_entries(token, project, since):
 
 
 def safe_error(text):
-    t = re.sub(r"\S+@\S+", "(メール)", str(text))
+    t = re.sub(r"AKfyc\S*", "(デプロイID)", str(text))
+    t = re.sub(r"[A-Za-z0-9_\-]{25,}", "(ID)", t)
+    t = re.sub(r"\S+@\S+", "(メール)", t)
     t = re.sub(r"\d{6,}", "(番号)", t)
     return t.replace("\n", " ")[:SAFE_ERROR_LEN]
 
@@ -89,7 +91,8 @@ def main():
             s["last"] = ts
         if e.get("severity") in ("ERROR", "CRITICAL", "ALERT", "EMERGENCY"):
             s["errors"] += 1
-            payload = e.get("textPayload") or json.dumps(e.get("jsonPayload", {}), ensure_ascii=False)
+            # メッセージ欄だけを見る(serviceContext 等にはデプロイIDが入っているため出さない)
+            payload = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or "(詳細なし)"
             s["msgs"][safe_error(payload)] += 1
 
     print(f"## 直近{args.hours}時間の実行記録(ログ {len(entries)} 件)")
