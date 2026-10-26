@@ -96,15 +96,15 @@ echo "📊 分析結果を保管中..."
 
 # 結果の統計サマリーを抽出
 SUMMARY_FILE="/tmp/kachitalk_analysis_summary_${TIMESTAMP}.txt"
-python3 << 'PYTHON_SUMMARY'
+python3 << EOF
 import json
 import sys
 
 try:
-    with open("'"$OUTPUT_JSON"'", 'r', encoding='utf-8') as f:
+    with open("$OUTPUT_JSON", 'r', encoding='utf-8') as f:
         results = json.load(f)
 
-    with open("'"$SUMMARY_FILE"'", 'w', encoding='utf-8') as out:
+    with open("$SUMMARY_FILE", 'w', encoding='utf-8') as out:
         out.write("=" * 80 + "\n")
         out.write("KachiTalk 分析結果 サマリー\n")
         out.write(f"分析日時: {results.get('timestamp', 'N/A')}\n")
@@ -119,10 +119,10 @@ try:
             out.write(f"  平均プロセス完全性: {analysis.get('avg_completeness', 0):.1f} 点\n")
             out.write("\n")
 
-    print(f"✓ サマリー保存: {SUMMARY_FILE}")
+    print(f"✓ サマリー保存: $SUMMARY_FILE")
 except Exception as e:
     print(f"⚠️  サマリー生成失敗: {e}")
-PYTHON_SUMMARY
+EOF
 
 # 7. Google Sheets 統合の準備
 echo ""
