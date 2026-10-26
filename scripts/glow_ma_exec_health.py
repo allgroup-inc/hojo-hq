@@ -76,6 +76,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=int, default=48)
     ap.add_argument("--grep", default="", help="この語を含むログ(INFO含む)の先頭だけを最大5件表示する")
+    ap.add_argument("--sample", default="", help="この処理名の最新ログ3件の中身の形(重要度・項目名・本文の先頭)を表示する")
     args = ap.parse_args()
     project = os.environ["GCP_PROJECT"].strip()
     token = access_token(os.environ["CLASPRC_JSON"])
@@ -121,6 +122,14 @@ def main():
               + ("" if owner_key else "(利用者の情報なし)"))
         kinds = collections.Counter(k for e in hits for k in (e.get("labels", {}) or {}).keys())
         print(f"[{args.grep}] ログの項目名: {', '.join(sorted(kinds))}")
+    if args.sample:
+        picked = sorted((e for e in entries if e.get("resource", {}).get("labels", {}).get("function_name") == args.sample),
+                        key=lambda e: e.get("timestamp", ""), reverse=True)[:3]
+        for e in picked:
+            body = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or ""
+            keys = sorted((e.get("jsonPayload") or {}).keys())
+            print(f"[見本 {args.sample}] {e.get('timestamp', '')[:19]} {e.get('severity', '')} "
+                  f"logName末尾={e.get('logName', '').rsplit('/', 1)[-1]} 項目={keys} 本文={safe_error(body)}")
     print(f"## 直近{args.hours}時間の実行記録(ログ {len(entries)} 件)")
     if not entries:
         print("::warning::実行記録が1件もありません(トリガーが止まっている可能性)")
