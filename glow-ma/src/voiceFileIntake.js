@@ -102,7 +102,21 @@
       "音声の内容と食い違う場合は音声を優先すること。";
   }
 
+  /**
+   * Gemini が「支払いが必要(402)」を返した失敗か(前払い残高の不足など)。
+   * この失敗は待っても直らないが、残高を補充すれば同じ録音でそのまま処理できるため、
+   * 「エラー」で確定させずに待機させる(2026-10-26 福田さんの録音3件で発生)。
+   */
+  function isBillingError(error) {
+    if (error && Number(error.statusCode) === 402) return true;
+    return /(HTTP |ステータスコード )402\b/.test(String(error || ""));
+  }
+
+  var BILLING_WAIT_NOTE = "AIの利用枠(残高)の不足で待機中。補充されしだい自動で再開します";
+
   var api = {
+    isBillingError: isBillingError,
+    BILLING_WAIT_NOTE: BILLING_WAIT_NOTE,
     DONE_PREFIX: DONE_PREFIX,
     CHUNK_BYTES: CHUNK_BYTES,
     INLINE_MAX_BYTES: INLINE_MAX_BYTES,

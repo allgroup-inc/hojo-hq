@@ -213,8 +213,9 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
     var headers = start.getAllHeaders();
     var url = headers["x-goog-upload-url"] || headers["X-Goog-Upload-URL"];
     if (start.getResponseCode() !== 200 || !url) {
-      var startError = new Error("Geminiへのアップロード開始に失敗しました(HTTP " + start.getResponseCode() + ")");
-      startError.statusCode = start.getResponseCode() >= 500 ? start.getResponseCode() : 400;
+      var startError = new Error("Geminiへのアップロード開始に失敗しました(HTTP " + start.getResponseCode() + "): " +
+      String(start.getContentText()).slice(0, 300));
+      startError.statusCode = start.getResponseCode();
       throw startError;
     }
     state = { url: url, offset: 0 };
@@ -252,8 +253,9 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
       muteHttpExceptions: true
     });
     if (put.getResponseCode() !== 200) {
-      var putError = new Error("Geminiへのアップロードに失敗しました(HTTP " + put.getResponseCode() + ")");
-      putError.statusCode = put.getResponseCode() >= 500 || put.getResponseCode() === 429 ? put.getResponseCode() : 400;
+      var putError = new Error("Geminiへのアップロードに失敗しました(HTTP " + put.getResponseCode() + "): " +
+      String(put.getContentText()).slice(0, 300));
+      putError.statusCode = put.getResponseCode();
       throw putError;
     }
     state.offset = chunk.end + 1;
@@ -285,8 +287,9 @@ function uploadBlobToGemini_(blob, mimeType, displayName) {
   var headers = start.getAllHeaders();
   var url = headers["x-goog-upload-url"] || headers["X-Goog-Upload-URL"];
   if (start.getResponseCode() !== 200 || !url) {
-    var startError = new Error("Geminiへのアップロード開始に失敗しました(HTTP " + start.getResponseCode() + ")");
-    startError.statusCode = start.getResponseCode() >= 500 ? start.getResponseCode() : 400;
+    var startError = new Error("Geminiへのアップロード開始に失敗しました(HTTP " + start.getResponseCode() + "): " +
+      String(start.getContentText()).slice(0, 300));
+    startError.statusCode = start.getResponseCode();
     throw startError;
   }
   var put = UrlFetchApp.fetch(url, {
@@ -297,8 +300,9 @@ function uploadBlobToGemini_(blob, mimeType, displayName) {
     muteHttpExceptions: true
   });
   if (put.getResponseCode() !== 200) {
-    var putError = new Error("Geminiへのアップロードに失敗しました(HTTP " + put.getResponseCode() + ")");
-    putError.statusCode = put.getResponseCode() >= 500 || put.getResponseCode() === 429 ? put.getResponseCode() : 400;
+    var putError = new Error("Geminiへのアップロードに失敗しました(HTTP " + put.getResponseCode() + "): " +
+      String(put.getContentText()).slice(0, 300));
+    putError.statusCode = put.getResponseCode();
     throw putError;
   }
   return waitGeminiFileActive_(JSON.parse(put.getContentText()).file, apiKey);
@@ -319,3 +323,59 @@ function waitGeminiFileActive_(file, apiKey) {
   }
   return current;
 }
+
+/* ---------- Gemini の支払いエラー(402)の待機と自動再開(2026-10-26 追加) ---------- */
+var GEMINI_BILLING_BLOCK_PROP = "GEMINI_BILLING_BLOCKED_UNTIL_MS";
+var GEMINI_BILLING_RETRY_MS = 60 * 60 * 1000;
+
+/** 支払いエラーのあと、次に試すまでの待ち時間の間か */
+function isGeminiBillingBlocked_() {
+  var until = Number(PropertiesService.getScriptProperties().getProperty(GEMINI_BILLING_BLOCK_PROP) || 0);
+  return Date.now() < until;
+}
+
+/**
+ * 支払いエラーになった録音を「受信済み」に戻して待機させる(エラーで確定させない)。
+ * LINEの音声はLINE側の保存期間が過ぎると取り直せなくなるため、受付フォルダへ写してから待たせる。
+ * 担当者へはその日1回だけ、管理者へは失敗通知(1日1回)で知らせる。
+ */
+function holdVoiceLogForBilling_(ss, record, error) {
+  var props = PropertiesService.getScriptProperties();
+  props.setProperty(GEMINI_BILLING_BLOCK_PROP, String(Date.now() + GEMINI_BILLING_RETRY_MS));
+  var updates = { "ステータス": "受信済み", "エラー内容": GlowVoiceFileIntake.BILLING_WAIT_NOTE };
+  if (!GlowVoiceFileIntake.driveFileIdOf(record["LINEメッセージID"])) {
+    try {
+      var blob = fetchLineAudioContent_(record["LINEメッセージID"]);
+      var ext = String(blob.getContentType() || "").indexOf("wav") !== -1 ? "wav" : "m4a";
+      var copy = getVoiceDriveFolder_(true).createFile(
+        blob.setName(GlowVoiceFileIntake.DONE_PREFIX + "LINE_" + record["処理ID"] + "." + ext));
+      updates["LINEメッセージID"] = GlowVoiceFileIntake.toDriveMessageId(copy.getId());
+    } catch (copyError) {
+      console.error("LINEの音声を受付フォルダへ写せませんでした: " + copyError);
+    }
+  }
+  transitionVoiceLogStatus_(ss, record.sheetRow, VOICE_LOG_IN_PROGRESS_STATUSES, updates);
+  notifyOpsFailure_("音声ログの文字起こし(Gemini)",
+    "Gemini API が「支払いが必要(HTTP 402)」を返しました。Google AI Studio の請求(前払い残高)を確認し、補充してください。\n" +
+    "録音は保存してあり、補充後は1時間以内に自動で処理を再開します。\n詳細: " + String(error).slice(0, 300));
+  var today = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  var noticeKey = "VOICE_BILLING_NOTICE_" + record["LINEユーザーID"];
+  if (record["LINEユーザーID"] && props.getProperty(noticeKey) !== today) {
+    props.setProperty(noticeKey, today);
+    linePush_(record["LINEユーザーID"], [{
+      text: "録音は受け取っています。いまAIの処理が一時的に止まっているため、再開しだい自動で要約して確認をお送りします(録音はそのまま保存されています)。"
+    }]);
+  }
+  console.warn("Geminiの支払いエラーのため、音声ログを待機させました");
+}
+
+/** 支払いエラーで「エラー」になっていた行を、待ち時間が明けたら「受信済み」に戻して再開する */
+function requeueBillingHeldVoiceLogs_(ss) {
+  readVoiceLogRows_(ss).forEach(function (r) {
+    if (r["ステータス"] !== "エラー" || !GlowVoiceFileIntake.isBillingError(r["エラー内容"])) return;
+    transitionVoiceLogStatus_(ss, r.sheetRow, ["エラー"], {
+      "ステータス": "受信済み", "エラー内容": GlowVoiceFileIntake.BILLING_WAIT_NOTE
+    });
+  });
+}
+
