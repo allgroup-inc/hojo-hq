@@ -77,6 +77,7 @@ function enqueueDriveVoiceFiles_(ss) {
     console.log("録音ファイルの受付フォルダを用意しました");
     return 0;
   }
+  logVoiceFolderHeartbeat_(folder);
   var files = [];
   var iter = folder.getFiles();
   while (iter.hasNext()) {
@@ -110,6 +111,15 @@ function enqueueDriveVoiceFiles_(ss) {
   });
   if (plan.accept.length) console.log("録音ファイルを受け付けました: " + plan.accept.length + "件");
   return plan.accept.length;
+}
+
+/** 受付フォルダが使える状態かを、6時間に1回だけ実行記録(Cloud Logging)に残す(外から稼働を確かめるため) */
+function logVoiceFolderHeartbeat_(folder) {
+  var props = PropertiesService.getScriptProperties();
+  var last = Number(props.getProperty("VOICE_DRIVE_HEARTBEAT_MS") || 0);
+  if (Date.now() - last < 6 * 60 * 60 * 1000) return;
+  props.setProperty("VOICE_DRIVE_HEARTBEAT_MS", String(Date.now()));
+  console.log("録音ファイルの受付フォルダ: 稼働中(共有 " + folder.getEditors().length + " 人)");
 }
 
 /**
