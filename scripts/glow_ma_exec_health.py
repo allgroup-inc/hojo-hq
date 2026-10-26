@@ -101,8 +101,14 @@ def main():
         for e in entries:
             text = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or ""
             if args.grep in text and shown < 5:
-                print(f"[{args.grep}] {safe_error(text)}")
+                fn = e.get("resource", {}).get("labels", {}).get("function_name", "(不明)")
+                ts = e.get("timestamp", "")[:19]
+                when = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST) if ts else None
+                print(f"[{args.grep}] {when:%m-%d %H:%M} {fn} {e.get('severity', '')}: {safe_error(text)}" if when
+                      else f"[{args.grep}] {fn}: {safe_error(text)}")
                 shown += 1
+        hits = sum(1 for e in entries if args.grep in (e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or ""))
+        print(f"[{args.grep}] 該当 {hits} 件")
     print(f"## 直近{args.hours}時間の実行記録(ログ {len(entries)} 件)")
     if not entries:
         print("::warning::実行記録が1件もありません(トリガーが止まっている可能性)")
