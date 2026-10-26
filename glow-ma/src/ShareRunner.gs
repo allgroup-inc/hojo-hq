@@ -45,6 +45,8 @@ function onOpen() {
     .addSeparator()
     .addItem("G1フェーズA試験を実行", "showPhaseATestDialog")
     .addItem("福田データ：100件インポート", "importFukudaHistoricalData")
+    .addSeparator()
+    .addItem("自動処理を復旧する(権限の再許可)", "restoreAutomation")
     .addToUi();
 }
 
