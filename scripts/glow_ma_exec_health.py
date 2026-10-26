@@ -91,7 +91,12 @@ def main():
         ts = e.get("timestamp", "")
         if ts > s["last"]:
             s["last"] = ts
-        if e.get("severity") in ("ERROR", "CRITICAL", "ALERT", "EMERGENCY"):
+        body_text = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or ""
+        # 承認切れはNOTICEで記録されるが、処理が1行も動いていない(2026-10-24〜26に見逃した)のでエラーとして数える
+        auth_missing = "Authorization is required" in body_text or "承認が必要" in body_text
+        if auth_missing:
+            s["auth"] = s.get("auth", 0) + 1
+        if e.get("severity") in ("ERROR", "CRITICAL", "ALERT", "EMERGENCY") or auth_missing:
             s["errors"] += 1
             # メッセージ欄だけを見る(serviceContext 等にはデプロイIDが入っているため出さない)
             payload = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or "(詳細なし)"
@@ -143,6 +148,8 @@ def main():
     for fn, s in sorted(stats.items(), key=lambda kv: kv[1]["last"], reverse=True):
         last = datetime.strptime(s["last"][:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST)
         print(f"- {fn}: ログ{s['count']}件 / エラー{s['errors']}件 / 最終 {last:%m-%d %H:%M}(日本時間)")
+        if s.get("auth"):
+            print(f"::error title={fn} が承認切れで止まっています::{s['auth']}回。台帳の持ち主がApps Scriptエディタで関数を1回実行し、権限を許可し直してください")
         for msg, n in s["msgs"].most_common(3):
             print(f"    エラー例({n}件): {msg}")
 
