@@ -5007,5 +5007,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-26",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "［第十三回］事業再構築補助金_促進上乗せ措置（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDQEJMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "地上基幹放送等に関する耐災害性強化支援事業（令和８年度公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFjMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度「水力発電導入促進支援事業費補助金（事業性評価支援事業）」（新規事業　追加公募分）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003EZsDUAW",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度子育て【宅配ボックス】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSPMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(16次公募)_事業承継促進枠",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003N1RaUAK",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
