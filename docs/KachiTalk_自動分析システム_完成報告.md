@@ -55,12 +55,25 @@ analyzeKachiTalkCorrelation();      // 分析実行
 **ファイル**: `/home/user/hojo-hq/scripts/auto_kachitalk_analysis.sh`
 
 実装済み機能:
+- **認証キーを使用した自動ダウンロード**（KachiTalk admin API）
 - `/tmp` 配下の CSV ファイルを監視
 - 400+ 件データの存在を自動確認
 - ファイルエンコーディングの自動検出・変換（Shift-JIS → UTF-8）
 - Python 分析エンジンの自動実行
 - 結果の自動保管と整理
 - サマリー統計の自動生成
+
+### ✅ 5. KachiTalk 認証キー管理（NEW・2026-10-26 実装）
+**ファイル**: 
+- `/home/user/hojo-hq/enlife/scripts/download_kachitalk_csv.py` （ダウンロードスクリプト）
+- `/home/user/hojo-hq/docs/kachitalk_auth_setup.md` （認証キー設定ガイド）
+
+実装済み機能:
+- KachiTalk admin API からの自動ダウンロード
+- 環境変数 `KACHITALK_AUTH_TOKEN` で認証キーを安全に管理
+- GitHub Secrets との連携対応
+- トークン有効期限切れ検出
+- エラー時の自動フォールバック（手動配置に切り替え）
 
 実行トリガー（自動化）:
 - **周期**: 毎週月曜 9:00 JST（UTC 00:00）
@@ -76,32 +89,43 @@ bash /home/user/hojo-hq/scripts/auto_kachitalk_analysis.sh
 
 ## 自動化の仕組み
 
-### 実行フロー
+### 実行フロー（完全自動化版・2026-10-26）
 
 ```
-①【毎週月曜 9:00 JST】
+①【毎週月曜 9:00 JST】定期トリガー発動
    ↓
 ②【auto_kachitalk_analysis.sh 起動】
    ↓
-③【/tmp/ で kachitalk_logs_full_export_*.csv を検出】
+③【認証キーを確認】
+   ├→ KACHITALK_AUTH_TOKEN が未設定
+   │  └→ ⑤へスキップ（ダウンロード省略）
+   └→ トークン設定あり
+      ↓
+④【KachiTalk admin から CSV を自動ダウンロード】
+   └→ download_kachitalk_csv.py 実行
+      - API リクエスト（期間: 2026年7月1日～10月31日）
+      - Bearer トークンで認証
+      - CSV を /tmp に保存
+   ↓
+⑤【/tmp/ で kachitalk_logs_full_export_*.csv を検出】
    ├→ ファイルが無い: 待機メッセージ表示
-   └→ ファイルある: ④へ進む
+   └→ ファイルある: ⑥へ進む
    ↓
-④【データ件数を確認】400+ 件か検証
+⑥【データ件数を確認】400+ 件か検証
    ↓
-⑤【エンコーディングを確認】
+⑦【エンコーディングを確認】
    └→ Shift-JIS → UTF-8 自動変換
    ↓
-⑥【Python 分析エンジン実行】
+⑧【Python 分析エンジン実行】
    - 6段階プロセス判定
    - プロセス完全性スコア計算
    - 営業スタイル分類
    - チーム相関分析
    ↓
-⑦【結果を JSON で保管】
+⑨【結果を JSON で保管】
    /tmp/kachitalk_analysis_YYYYMMDD_HHMMSS.json
    ↓
-⑧【サマリー統計を生成】
+⑩【サマリー統計を生成】
    /tmp/kachitalk_analysis_summary_YYYYMMDD_HHMMSS.txt
 ```
 
@@ -132,9 +156,32 @@ bash /home/user/hojo-hq/scripts/auto_kachitalk_analysis.sh
 
 ---
 
-## 次のステップ（ユーザー実施）
+## 次のステップ（ユーザー実施・2026-10-26 更新）
 
-### 📌 ステップ1: KachiTalk admin dashboard からログをエクスポート
+### 📌 ステップ 0: 認証キーを設定（新規・推奨）
+
+**完全自動化を実現するため、認証キーの設定が必要です。**
+
+**設定ファイル**: `docs/kachitalk_auth_setup.md` を参照
+
+**クイックスタート:**
+```bash
+# 1. ブラウザで KachiTalk admin を開き、Network タブで認証トークンをコピー
+# 2. シェルで環境変数を設定
+export KACHITALK_AUTH_TOKEN="Bearer <your-token>"
+
+# 3. 設定確認
+echo $KACHITALK_AUTH_TOKEN
+```
+
+**GitHub Secrets で管理する場合（推奨・最も安全）:**
+- リポジトリ Settings → Secrets and variables → Actions
+- `KACHITALK_AUTH_TOKEN` を追加
+- GitHub Actions が毎週自動で実行
+
+---
+
+### 📌 ステップ1: KachiTalk admin dashboard からログをエクスポート（手動フォールバック）
 
 **URL**: `https://kachitalk-line-enlife.azurewebsites.net/admin`
 
@@ -163,23 +210,35 @@ bash /home/user/hojo-hq/scripts/auto_kachitalk_analysis.sh
 ✓ メモ / notes
 ```
 
-### 📌 ステップ2: CSV を /tmp に配置
+### 📌 ステップ 2: 自動分析が開始
 
+**パターン A: 完全自動（認証キー設定済みの場合）**
 ```bash
-cp ~/Downloads/kachitalk_logs_full_export_*.csv /tmp/
-```
-
-### 📌 ステップ3: 自動分析が開始
-
-**パターン A: 次の月曜まで待機**
-- 次の月曜 9:00 JST に自動実行
-
-**パターン B: 今すぐ実行**
-```bash
+# 次の月曜 9:00 JST に自動実行
+# または手動実行:
 bash /home/user/hojo-hq/scripts/auto_kachitalk_analysis.sh
 ```
 
-### 📌 ステップ4: 結果を確認
+実行内容：
+1. ✅ 認証キーで KachiTalk admin API に接続
+2. ✅ CSV を自動ダウンロード
+3. ✅ データ検証・変換
+4. ✅ Python 分析エンジン実行
+5. ✅ 結果を自動保管
+
+**パターン B: 手動フォールバック（認証キー未設定の場合）**
+```bash
+# KachiTalk admin からダウンロード
+# https://kachitalk-line-enlife.azurewebsites.net/admin
+
+# ダウンロード後、/tmp にコピー
+cp ~/Downloads/kachitalk_logs_full_export_*.csv /tmp/
+
+# 分析を手動実行
+bash /home/user/hojo-hq/scripts/auto_kachitalk_analysis.sh
+```
+
+### 📌 ステップ 3: 結果を確認
 
 ```bash
 # JSON 形式の詳細分析結果
@@ -189,15 +248,17 @@ cat /tmp/kachitalk_analysis_*.json | jq .
 cat /tmp/kachitalk_analysis_summary_*.txt
 ```
 
-### 📌 ステップ5: Google Sheets へ統合（オプション）
+### 📌 ステップ 4: Google Sheets へ統合（オプション）
 
-glow-ma スプレッドシートで:
+glow-ma スプレッドシートで自動分析結果を反映：
 ```javascript
 // Apps Script エディタで実行
 ensureKachiTalkTabs();              // タブ初期化
 importKachiTalkLogsFromAdmin();     // CSV インポート
 analyzeKachiTalkCorrelation();      // 分析実行
 ```
+
+**所要時間:** 約 10～30 秒
 
 ---
 
@@ -247,21 +308,23 @@ analyzeKachiTalkCorrelation();      // 分析実行
 
 ---
 
-## ファイル構成
+## ファイル構成（2026-10-26 更新）
 
 ```
 /home/user/hojo-hq/
 ├── enlife/scripts/
 │   ├── kachitalk_full_correlation_analysis.py      ← メイン分析エンジン
+│   ├── download_kachitalk_csv.py                   ← CSV自動ダウンロード（NEW）
 │   └── extract_kachitalk_logs.py（既存）
 ├── enlife/data/
 │   └── kachitalk_sample_logs.json                   ← テスト用16件サンプル
 ├── glow-ma/src/
 │   └── KachiTalkIntegration.gs                      ← Google Sheets統合
 ├── scripts/
-│   └── auto_kachitalk_analysis.sh                   ← 自動実行パイプライン（NEW）
+│   └── auto_kachitalk_analysis.sh                   ← 自動実行パイプライン（ダウンロード統合版）
 └── docs/
     ├── kachitalk_complete_analysis_setup.md         ← 詳細ガイド
+    ├── kachitalk_auth_setup.md                      ← 認証キー設定ガイド（NEW）
     └── KachiTalk_自動分析システム_完成報告.md        ← このファイル
 ```
 
