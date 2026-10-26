@@ -72,7 +72,9 @@ function enqueueDriveVoiceFiles_(ss) {
   var folder = getVoiceDriveFolder_(false);
   if (!folder) {
     // 初回: フォルダを作ってスタッフに共有する(以後は自己点検でも見直す)
-    recordOpsStatus_("録音ファイルの受付フォルダ", true, ensureVoiceDriveFolder_());
+    var created = ensureVoiceDriveFolder_();
+    recordOpsStatus_("録音ファイルの受付フォルダ", true, created);
+    console.log("録音ファイルの受付フォルダを用意しました");
     return 0;
   }
   var files = [];
@@ -91,7 +93,7 @@ function enqueueDriveVoiceFiles_(ss) {
     .map(function (r) { return r["LINEユーザーID"]; });
   var plan = GlowVoiceFileIntake.planIntake(files, readVoiceStaff_(), known, busy);
   plan.skip.forEach(function (s) {
-    Logger.log("録音ファイルを受け付けませんでした(" + s.file.name + "): " + s.reason);
+    console.warn("録音ファイルを受け付けませんでした: " + s.reason);
   });
 
   plan.accept.forEach(function (item) {
@@ -106,6 +108,7 @@ function enqueueDriveVoiceFiles_(ss) {
       text: "録音ファイル「" + item.file.name + "」を受け付けました。文字起こしと要約が終わったら、確認のご連絡をします(長い録音は数分〜十数分かかります)。"
     }]);
   });
+  if (plan.accept.length) console.log("録音ファイルを受け付けました: " + plan.accept.length + "件");
   return plan.accept.length;
 }
 

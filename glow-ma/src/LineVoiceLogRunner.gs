@@ -477,7 +477,8 @@ function processQueuedVoiceLogs() {
   try {
     enqueueDriveVoiceFiles_(ss);
   } catch (error) {
-    Logger.log("録音ファイルの受け付けに失敗しました: " + error);
+    // console.error は Cloud Logging に残る(Logger.log は残らず、失敗が外から見えなかった)
+    console.error("録音ファイルの受け付けに失敗しました: " + error);
   }
 
   try {
