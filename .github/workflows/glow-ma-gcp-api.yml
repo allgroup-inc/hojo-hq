@@ -28,6 +28,10 @@ on:
         description: "実行記録から探す語(例: 受付フォルダ)。空なら探さない"
         required: false
         default: ""
+      sample:
+        description: "中身の形を見る処理名(例: processQueuedVoiceLogs)。空なら見ない"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -93,4 +97,5 @@ jobs:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
           GCP_PROJECT: ${{ inputs.gcp_project }}
           GREP_WORD: ${{ inputs.grep }}
-        run: python3 scripts/glow_ma_exec_health.py --hours "${{ inputs.health_hours }}" --grep "$GREP_WORD"
+          SAMPLE_FN: ${{ inputs.sample }}
+        run: python3 scripts/glow_ma_exec_health.py --hours "${{ inputs.health_hours }}" --grep "$GREP_WORD" --sample "$SAMPLE_FN"

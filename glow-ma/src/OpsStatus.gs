@@ -149,3 +149,26 @@ function ensureDailyMaintenanceTrigger_() {
   installDailyMaintenanceTrigger();
   return "未登録だったため登録した";
 }
+
+/**
+ * 自動処理の復旧(メニュー「GLOW台帳 → 自動処理を復旧する」から1回押す)。
+ * 2026-10-26: 毎分の音声ログ処理・BlueBean同期・日次メンテナンスのトリガーが「承認が必要です」で
+ * 動いていなかった(実行記録で確認。少なくとも10/16から)。メニューから押すとGoogleの権限確認が出るので
+ * 「許可」すると、押した人の権限で3つのトリガーを登録し直し、自己点検もすぐに走らせる。
+ */
+function restoreAutomation() {
+  installVoiceLogProcessingTrigger();
+  installCtiSyncTrigger();
+  installDailyMaintenanceTrigger();
+  PropertiesService.getScriptProperties().deleteProperty("SELF_HEAL_LAST_RUN_MS");
+  runSelfHeal();
+  var msg = "自動処理を復旧しました(毎分の音声ログ処理・BlueBean同期・日次メンテナンス)。" +
+    "数分後に「稼働状況」タブで結果を確認できます。";
+  console.log(msg);
+  try {
+    SpreadsheetApp.getUi().alert(msg);
+  } catch (error) {
+    // Apps Scriptエディタから実行したときは画面が無いので、実行ログだけに残す
+  }
+  return msg;
+}

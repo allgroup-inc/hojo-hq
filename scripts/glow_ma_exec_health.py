@@ -76,6 +76,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=int, default=48)
     ap.add_argument("--grep", default="", help="この語を含むログ(INFO含む)の先頭だけを最大5件表示する")
+    ap.add_argument("--sample", default="", help="この処理名の最新ログ3件の中身の形(重要度・項目名・本文の先頭)を表示する")
     args = ap.parse_args()
     project = os.environ["GCP_PROJECT"].strip()
     token = access_token(os.environ["CLASPRC_JSON"])
@@ -90,7 +91,12 @@ def main():
         ts = e.get("timestamp", "")
         if ts > s["last"]:
             s["last"] = ts
-        if e.get("severity") in ("ERROR", "CRITICAL", "ALERT", "EMERGENCY"):
+        body_text = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or ""
+        # 承認切れはNOTICEで記録されるが、処理が1行も動いていない(2026-10-24〜26に見逃した)のでエラーとして数える
+        auth_missing = "Authorization is required" in body_text or "承認が必要" in body_text
+        if auth_missing:
+            s["auth"] = s.get("auth", 0) + 1
+        if e.get("severity") in ("ERROR", "CRITICAL", "ALERT", "EMERGENCY") or auth_missing:
             s["errors"] += 1
             # メッセージ欄だけを見る(serviceContext 等にはデプロイIDが入っているため出さない)
             payload = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or "(詳細なし)"
@@ -109,6 +115,13 @@ def main():
                 shown += 1
         hits = [e for e in entries if args.grep in (e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or "")]
         print(f"[{args.grep}] 該当 {len(hits)} 件")
+        by_fn = collections.defaultdict(list)
+        for e in hits:
+            by_fn[e.get("resource", {}).get("labels", {}).get("function_name", "(不明)")].append(e.get("timestamp", "")[:19])
+        for fn, ts in sorted(by_fn.items()):
+            first = datetime.strptime(min(ts), "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST)
+            last = datetime.strptime(max(ts), "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST)
+            print(f"[{args.grep}] {fn}: {len(ts)} 件 / 最初 {first:%m-%d %H:%M} / 最後 {last:%m-%d %H:%M}(日本時間)")
         # 実行した利用者が、毎分の音声ログ処理(台帳の持ち主のトリガー)と同じかどうかだけを出す(値そのものは出さない)
         def user_key(e):
             labels = e.get("labels", {}) or {}
@@ -121,12 +134,22 @@ def main():
               + ("" if owner_key else "(利用者の情報なし)"))
         kinds = collections.Counter(k for e in hits for k in (e.get("labels", {}) or {}).keys())
         print(f"[{args.grep}] ログの項目名: {', '.join(sorted(kinds))}")
+    if args.sample:
+        picked = sorted((e for e in entries if e.get("resource", {}).get("labels", {}).get("function_name") == args.sample),
+                        key=lambda e: e.get("timestamp", ""), reverse=True)[:3]
+        for e in picked:
+            body = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or ""
+            keys = sorted((e.get("jsonPayload") or {}).keys())
+            print(f"[見本 {args.sample}] {e.get('timestamp', '')[:19]} {e.get('severity', '')} "
+                  f"logName末尾={e.get('logName', '').rsplit('/', 1)[-1]} 項目={keys} 本文={safe_error(body)}")
     print(f"## 直近{args.hours}時間の実行記録(ログ {len(entries)} 件)")
     if not entries:
         print("::warning::実行記録が1件もありません(トリガーが止まっている可能性)")
     for fn, s in sorted(stats.items(), key=lambda kv: kv[1]["last"], reverse=True):
         last = datetime.strptime(s["last"][:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST)
         print(f"- {fn}: ログ{s['count']}件 / エラー{s['errors']}件 / 最終 {last:%m-%d %H:%M}(日本時間)")
+        if s.get("auth"):
+            print(f"::error title={fn} が承認切れで止まっています::{s['auth']}回。台帳の持ち主がApps Scriptエディタで関数を1回実行し、権限を許可し直してください")
         for msg, n in s["msgs"].most_common(3):
             print(f"    エラー例({n}件): {msg}")
 
