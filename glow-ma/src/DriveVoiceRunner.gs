@@ -224,12 +224,15 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
     // 続きから送る前に、Gemini側が実際に受け取った量を問い合わせる。前回の実行が送信直後に止まると、
     // 手元の記録が遅れて「wrong offset」で失敗する(2026-10-27 福田さんの188MBの録音)
     var received = queryGeminiUploadOffset_(state.url);
+    console.log("録音の送信を再開します(記録 " + mb_(state.offset) + "MB / Gemini側 " +
+      (received === null ? "不明" : mb_(received) + "MB") + " / " + mb_(size) + "MB)");
     if (received === null) {
       props.deleteProperty(stateKey);
       return uploadDriveFileToGemini_(processId, driveId, size, mimeType);
     }
     state.offset = received;
   }
+  var realigned = 0;
 
   var token = ScriptApp.getOAuthToken();
   var began = Date.now();
@@ -262,10 +265,24 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
       muteHttpExceptions: true
     });
     if (put.getResponseCode() !== 200) {
+      // 送った位置のずれは、Gemini が待っている位置がエラー文に書いてあるので、そこから送り直す
+      var expected = GlowVoiceFileIntake.expectedUploadOffset(put.getContentText());
+      if (expected !== null && expected < size && expected !== chunk.start && realigned < 3) {
+        realigned++;
+        console.log("録音の送信位置を合わせ直しました(" + mb_(chunk.start) + "MB → " + mb_(expected) + "MB / " + mb_(size) + "MB)");
+        state.offset = expected;
+        props.setProperty(stateKey, JSON.stringify(state));
+        continue;
+      }
       var putError = new Error("Geminiへのアップロードに失敗しました(HTTP " + put.getResponseCode() + "): " +
       String(put.getContentText()).slice(0, 300));
-      // 送った位置のずれは、次の実行で受け取り量を問い合わせ直せば続けられる(一時的な障害として扱う)
-      putError.statusCode = /wrong offset/i.test(put.getContentText()) ? 503 : put.getResponseCode();
+      if (expected !== null) {
+        // 合わせ直せない(既に全部届いている等)ときは、最初から送り直す
+        props.deleteProperty(stateKey);
+        putError.statusCode = 503;
+      } else {
+        putError.statusCode = put.getResponseCode();
+      }
       throw putError;
     }
     state.offset = chunk.end + 1;
@@ -275,6 +292,10 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
   props.deleteProperty(stateKey);
   if (!result || !result.uri) throw new Error("Geminiへのアップロード結果を読めませんでした");
   return waitGeminiFileActive_(result, apiKey);
+}
+
+function mb_(bytes) {
+  return Math.round(bytes / 104857.6) / 10;
 }
 
 /**

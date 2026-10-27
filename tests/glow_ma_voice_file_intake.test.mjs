@@ -63,6 +63,14 @@ test("分割アップロードの区切り: 16MiBずつ、最後だけ端数", (
   assert.equal((16 * MB) % (8 * MB), 0, "途中の区切りは 8MiB の倍数");
 });
 
+test("送信位置のずれ(wrong offset)から、Gemini が待っている位置を取り出す", () => {
+  const body = '{"error":{"code":400,"message":"Client uploaded to the wrong offset (134217728 instead of 117440512)."}}';
+  assert.equal(v.expectedUploadOffset(body), 117440512);
+  assert.equal(v.expectedUploadOffset("Client uploaded to the wrong offset (0 instead of 16777216)."), 16777216);
+  assert.equal(v.expectedUploadOffset("HTTP 500 Internal error"), null);
+  assert.equal(v.expectedUploadOffset(""), null);
+});
+
 test("ファイル名のヒントは受付済みの印と拡張子を外して渡す", () => {
   assert.match(v.fileNameHint("受付済_株式会社テスト_1026.wav"), /「株式会社テスト_1026」/);
   assert.equal(v.fileNameHint(""), "");
