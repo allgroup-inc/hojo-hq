@@ -1,6 +1,11 @@
 /**
  * GLOW企業リレーション台帳: BlueBean CTI通話履歴の取得・企業マスタ突合・対応履歴ログ自動記録
  *
+ * 2026-10-27 から、通話の取得は「発着信履歴ダウンロードAPI(CDR)」が主(callBlueBeanCdr_)。
+ * 番号を貼り付けて発信した通話(顧客データに紐づかない通話)は、下の顧客発着信履歴出力APIでは取れないため
+ * (ソフツー回答)。CDRが使えない版のときだけ、従来のAPIへ切り替える。従来のAPIの campaign_id には
+ * 作業グループ(ACD)ではなく「業務ID」を指定する(顧客情報管理 > 発信リスト一覧 > 業務リンク > 業務照会の「ID」)。
+ *
  * BlueBean(ソフツー)の「顧客発着信履歴出力API」(pull型。webhookは存在しない)を時間主導
  * トリガーで定期ポーリングし、通話履歴を「CTI通話履歴」タブへ記録する。電話番号が企業マスタと
  * 一意にマッチし、かつ通話ステータスが「完了」の場合のみ、対応履歴ログへも自動記録する
@@ -36,7 +41,27 @@
  * トリガーから呼ばれる入口。結果を「稼働状況」タブへ記録し、失敗は通知する(OpsStatus.gs)。
  * 0件でも「成功・0件」と残るので、「動いているのに取れていない」も台帳から見える。
  */
+/** 同期を試みた時刻(成否を問わない)。毎分の処理から1時間おきに呼ぶ判定に使う */
+var CTI_SYNC_LAST_ATTEMPT_PROP = "CTI_SYNC_LAST_ATTEMPT_MS";
+// 1時間おきの専用トリガーが主。毎分の処理からは、専用トリガーが90分以上動いていないときだけ同期する
+// (両方が同時に動いて「他の処理がCTI通話履歴を操作中」になるのを避ける)
+var CTI_SYNC_INTERVAL_MS = 90 * 60 * 1000;
+
+/**
+ * 毎分の音声ログ処理(processQueuedVoiceLogs)に相乗りして、前回の試行から1時間たっていれば同期する。
+ * 2026-10-24 9時以降、1時間おきのトリガーが毎回「承認が必要です」で止まり、同期が1件も走っていなかった
+ * (毎分のトリガーは正常に動いている)。トリガーの状態に左右されないよう、こちらでも同期する。
+ */
+function runCtiSyncIfDue_() {
+  var props = PropertiesService.getScriptProperties();
+  if (!props.getProperty("BLUEBEAN_DOMAIN")) return;
+  var last = Number(props.getProperty(CTI_SYNC_LAST_ATTEMPT_PROP) || 0);
+  if (Date.now() - last < CTI_SYNC_INTERVAL_MS) return;
+  syncCtiCallHistory();
+}
+
 function syncCtiCallHistory() {
+  PropertiesService.getScriptProperties().setProperty(CTI_SYNC_LAST_ATTEMPT_PROP, String(Date.now()));
   try {
     var summary = syncCtiCallHistoryCore_();
     recordOpsStatus_("BlueBean架電履歴の同期", true, summary);
@@ -78,52 +103,79 @@ function syncCtiCallHistoryCore_() {
     // BLUEBEAN_USERNAME/PASSWORDは人間の管理者アカウントと共用のため、パスワード変更等で
     // 無言のまま止まりうる(docs/議事_20260819_BlueBean CTI連携.md参照)。失敗は呼び出し元の
     // syncCtiCallHistory が稼働状況タブへの記録と通知(Slack未設定ならメール)を行う。
-    var campaignIds = readCampaignIds_();
+    // 2026-10-27: 番号を貼り付けて発信した通話は「顧客発着信履歴出力API」では取れない(ソフツー回答)。
+    // すべての発着信を返す「発着信履歴ダウンロードAPI(CDR)」を主に使い、使えない版のときだけ従来のAPIへ切り替える。
+    // CDRの取得済み時点は別に持つ(初回は直近30日をさかのぼって取り込む。取得済みの通話は通話IDで重複を除く)
     var calls = [];
-    var perCampaign = [];
-    campaignIds.forEach(function (campaignId, index) {
-      var apiResponse = callBlueBeanApi_(startDate, endDate, campaignId);
-      if (apiResponse.result !== "OK") {
-        throw new Error("BlueBean APIがエラーを返しました(作業グループ" + (index + 1) + "件目): " +
-          JSON.stringify(apiResponse));
-      }
-      var got = GlowCtiContent.flattenBlueBeanCalls(apiResponse);
-      perCampaign.push("グループ" + (index + 1) + "(ID " + campaignId + "): " + got.length + "件");
-      calls = calls.concat(got);
-    });
+    var sourceSummary = "";
+    var usedCdr = false;
+    var cdrStart = properties.getProperty("BLUEBEAN_CDR_SYNCED_AT") ||
+      Utilities.formatDate(new Date(Date.now() - CDR_BACKFILL_DAYS * 24 * 60 * 60 * 1000), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
+    try {
+      // 通話中・発信中の通話を途中の状態で記録しないよう、終わりは15分前までにする。
+      // 1回に取るのは最大5日分(30日分を1度に取ると6分の上限を超えた。2026-10-27)。残りは次の実行で続きから取る
+      var latestEnd = Date.now() - 15 * 60 * 1000;
+      var chunkEnd = Math.min(parseCtiDate_(cdrStart).getTime() + CDR_CHUNK_DAYS * 24 * 60 * 60 * 1000, latestEnd);
+      var cdrEnd = Utilities.formatDate(new Date(chunkEnd), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
+      calls = GlowCtiContent.parseCdrCsv(callBlueBeanCdr_(cdrStart, cdrEnd)).filter(function (call) {
+        return call.call_status !== "発着信中" && call.call_status !== "通話中";
+      });
+      usedCdr = true;
+      startDate = cdrStart;
+      endDate = cdrEnd;
+      sourceSummary = "全通話(CDR) " + calls.length + "件";
+    } catch (cdrError) {
+      if (cdrError.statusCode === 401) throw cdrError;
+      console.warn("BlueBeanのCDR取得に失敗したため、従来の顧客発着信履歴APIで取得します: " + cdrError);
+      var campaignIds = readCampaignIds_();
+      var perCampaign = [];
+      campaignIds.forEach(function (campaignId, index) {
+        var apiResponse = callBlueBeanApi_(startDate, endDate, campaignId);
+        if (apiResponse.result !== "OK") {
+          throw new Error("BlueBean APIがエラーを返しました(作業グループ" + (index + 1) + "件目): " +
+            JSON.stringify(apiResponse));
+        }
+        var got = GlowCtiContent.flattenBlueBeanCalls(apiResponse);
+        perCampaign.push("グループ" + (index + 1) + "(ID " + campaignId + "): " + got.length + "件");
+        calls = calls.concat(got);
+      });
+      sourceSummary = "作業グループ" + campaignIds.length + "件(" + perCampaign.join("、") + ")";
+    }
 
     var existingCallIds = readExistingGroupCallIds_(callLogSheet);
     var newCalls = calls.filter(function (call) {
       return !existingCallIds[String(call.group_callid)];
     });
 
-    var companies = readCompanyRecords_(companySheet);
+    var phoneIndex = GlowCtiContent.buildPhoneIndex(readCompanyRecords_(companySheet));
     var recordedCount = 0;
     var skippedCount = 0;
+    var callLogRows = [];
+    var interactionRows = [];
     newCalls.forEach(function (call) {
-      var matchedCompany = GlowCtiContent.matchCompanyByPhone(companies, call.phone);
-      var callLogRow = GlowCtiContent.buildCallLogRow("CTI-" + call.group_callid, call, matchedCompany);
-      callLogSheet.appendRow(callLogRow);
+      var matchedCompany = GlowCtiContent.matchCompanyByPhoneIndex(phoneIndex, call.phone);
+      callLogRows.push(GlowCtiContent.buildCallLogRow("CTI-" + call.group_callid, call, matchedCompany));
 
       if (GlowCtiContent.shouldRecordInteractionLog(call, matchedCompany)) {
         var logId = "H-" + Utilities.getUuid();
-        var interactionRow = GlowCtiContent.buildInteractionLogRowForCall(logId, call, matchedCompany);
-        logSheet.appendRow(interactionRow);
+        interactionRows.push(GlowCtiContent.buildInteractionLogRowForCall(logId, call, matchedCompany));
         recordedCount++;
       } else {
         skippedCount++;
       }
     });
+    appendRowsAtEnd_(callLogSheet, callLogRows);
+    appendRowsAtEnd_(logSheet, interactionRows);
 
-    properties.setProperty("BLUEBEAN_LAST_SYNCED_AT", endDate);
+    properties.setProperty(usedCdr ? "BLUEBEAN_CDR_SYNCED_AT" : "BLUEBEAN_LAST_SYNCED_AT", endDate);
     Logger.log(
       "CTI通話履歴の同期完了(" + startDate + " 〜 " + endDate + "): " +
       "新規取得 " + newCalls.length + "件(うち対応履歴ログへ自動記録 " + recordedCount +
       "件、未記録(未マッチ・複数企業ヒット・キャンセル等) " + skippedCount + "件)。" +
       "取得済みのためスキップ " + (calls.length - newCalls.length) + "件。"
     );
-    return startDate + "〜" + endDate + " / 作業グループ" + campaignIds.length + "件(" + perCampaign.join("、") +
-      ") / 新規 " + newCalls.length + "件(対応履歴へ記録 " + recordedCount + "件)";
+    return startDate + "〜" + endDate + " / " + sourceSummary +
+      " / 新規 " + newCalls.length + "件(対応履歴へ記録 " + recordedCount + "件)";
   } finally {
     lock.releaseLock();
   }
@@ -162,6 +214,86 @@ function readCampaignIds_() {
   return ids;
 }
 
+/**
+ * 複数行を、1列目(ID)が入っている最後の行の次へまとめて書き込む(1行ずつの appendRow は遅く、
+ * 30日分の取り込みで6分の上限を超えた)。書式だけの行は1列目が空なので、その上に書いてよい。
+ */
+function appendRowsAtEnd_(sheet, rows) {
+  if (!rows.length) return;
+  var maxRows = sheet.getMaxRows();
+  var ids = sheet.getRange(1, 1, maxRows, 1).getValues();
+  var last = 0;
+  for (var i = ids.length - 1; i >= 0; i--) {
+    if (String(ids[i][0]) !== "") { last = i + 1; break; }
+  }
+  var need = last + rows.length - maxRows;
+  if (need > 0) sheet.insertRowsAfter(maxRows, need);
+  sheet.getRange(last + 1, 1, rows.length, rows[0].length).setValues(rows);
+}
+
+/** "yyyy-MM-dd HH:mm:ss"(日本時間)を Date にする */
+function parseCtiDate_(text) {
+  var m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(String(text || ""));
+  if (!m) return new Date();
+  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] - 9, +m[5], +m[6]));
+}
+
+var CDR_BACKFILL_DAYS = 30;
+var CDR_CHUNK_DAYS = 5;
+
+/**
+ * 発着信履歴ダウンロードAPI(CDR)でCSVを取る(ソフツー仕様書 V1.3。2026-10-27)。
+ * 入口のベーシック認証は従来のAPIと同じ。lang=en でUTF-8のCSVを受け取る。
+ * CSVに見えない応答(エラー文など)は失敗として扱う。
+ */
+function callBlueBeanCdr_(startDate, endDate) {
+  var properties = PropertiesService.getScriptProperties();
+  var domain = properties.getProperty("BLUEBEAN_DOMAIN");
+  var username = properties.getProperty("BLUEBEAN_USERNAME");
+  var password = properties.getProperty("BLUEBEAN_PASSWORD");
+  if (!domain || !username || !password) {
+    throw new Error("BLUEBEAN_DOMAIN / BLUEBEAN_USERNAME / BLUEBEAN_PASSWORD が未設定です。スクリプト プロパティで設定してください。");
+  }
+  var headers = {};
+  var basicUser = properties.getProperty("BLUEBEAN_BASIC_USER");
+  var basicPassword = properties.getProperty("BLUEBEAN_BASIC_PASSWORD");
+  if (basicUser && basicPassword) {
+    headers.Authorization = "Basic " + Utilities.base64Encode(basicUser + ":" + basicPassword, Utilities.Charset.UTF_8);
+  }
+  var response = GlowResilience.withRetry(function () {
+    var res = UrlFetchApp.fetch("https://" + domain + "/quick/actions/api.php?action=download_cdr", {
+      method: "post",
+      headers: headers,
+      payload: { username: username, password: password, start_date: startDate, end_date: endDate, lang: "en" },
+      muteHttpExceptions: true
+    });
+    var code = res.getResponseCode();
+    if (code < 200 || code >= 300) {
+      var httpError = new Error("BlueBeanのCDR取得に失敗しました(ステータスコード " + code + "): " +
+        res.getContentText().slice(0, 200));
+      httpError.statusCode = code;
+      throw httpError;
+    }
+    return res;
+  }, {
+    maxAttempts: 3,
+    backoffMs: [2000, 10000],
+    sleepFn: Utilities.sleep,
+    isRetryable: function (error) {
+      return !error.statusCode || GlowResilience.isRetryableHttpStatus(error.statusCode);
+    }
+  });
+  var text = response.getContentText("UTF-8");
+  var trimmed = text.trim();
+  if (trimmed && trimmed.indexOf(",") === -1) {
+    throw new Error("BlueBeanのCDRがCSVではない応答を返しました: " + trimmed.slice(0, 200));
+  }
+  if (/^\s*[\[{]/.test(trimmed) || /<html/i.test(trimmed.slice(0, 200))) {
+    throw new Error("BlueBeanのCDRがCSVではない応答を返しました: " + trimmed.slice(0, 200));
+  }
+  return text;
+}
+
 function callBlueBeanApi_(startDate, endDate, campaignId) {
   return GlowResilience.withRetry(
     function () { return callBlueBeanApiOnce_(startDate, endDate, campaignId); },
@@ -190,9 +322,20 @@ function callBlueBeanApiOnce_(startDate, endDate, campaignId) {
       "未設定です。スクリプト プロパティで設定してください。"
     );
   }
+  // 2026-10 から BlueBean のサーバー入口に「1回目のログイン」(ベーシック認証)が追加された
+  // (福田さん 2026-10-26: 毎日の初回ログインで2重ログインを求められる)。これが無いと、
+  // APIの手前で 401「Authentication required!」が返る。入口のID/パスワードはスクリプトプロパティ
+  // BLUEBEAN_BASIC_USER / BLUEBEAN_BASIC_PASSWORD に置く(未設定なら従来どおり送らない)
+  var headers = {};
+  var basicUser = properties.getProperty("BLUEBEAN_BASIC_USER");
+  var basicPassword = properties.getProperty("BLUEBEAN_BASIC_PASSWORD");
+  if (basicUser && basicPassword) {
+    headers.Authorization = "Basic " + Utilities.base64Encode(basicUser + ":" + basicPassword, Utilities.Charset.UTF_8);
+  }
   var response = UrlFetchApp.fetch("https://" + domain + "/quick/api/export_customer_call_history.php", {
     method: "post",
     contentType: "application/json",
+    headers: headers,
     payload: JSON.stringify({
       username: username,
       password: password,
@@ -204,8 +347,16 @@ function callBlueBeanApiOnce_(startDate, endDate, campaignId) {
   });
   var responseCode = response.getResponseCode();
   if (responseCode < 200 || responseCode >= 300) {
+    var body = response.getContentText();
+    var hint = "";
+    if (responseCode === 401 && /Authentication required/i.test(body)) {
+      hint = basicUser
+        ? "BlueBeanの入口のログイン(1回目)が通りません。BLUEBEAN_BASIC_USER / BLUEBEAN_BASIC_PASSWORD が最新か確認してください"
+        : "BlueBeanの入口のログイン(1回目)が必要です。スクリプトプロパティ BLUEBEAN_BASIC_USER / BLUEBEAN_BASIC_PASSWORD を設定してください";
+    }
     var error = new Error(
-      "BlueBean APIの呼び出しに失敗しました(ステータスコード " + responseCode + "): " + response.getContentText()
+      "BlueBean APIの呼び出しに失敗しました(ステータスコード " + responseCode + ")" +
+      (hint ? ": " + hint : ": " + body.slice(0, 300))
     );
     error.statusCode = responseCode;
     throw error;

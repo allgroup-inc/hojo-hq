@@ -77,6 +77,33 @@
   }
 
   /**
+   * 企業マスタを「正規化した電話番号 → 企業の一覧」の索引にする(2026-10-27 追加)。
+   * 通話1件ごとに3,000社の番号を正規化し直すと、30日分の取り込みが6分の上限を超えたため。
+   */
+  function buildPhoneIndex(companies) {
+    var normalizePhoneNumber = getGlowDedupe_().normalizePhoneNumber;
+    var index = {};
+    (companies || []).forEach(function (company) {
+      var seen = {};
+      ["電話番号", "携帯番号"].forEach(function (key) {
+        var n = company[key] ? normalizePhoneNumber(company[key]) : "";
+        if (!n || seen[n]) return;
+        seen[n] = true;
+        (index[n] = index[n] || []).push(company);
+      });
+    });
+    return index;
+  }
+
+  /** buildPhoneIndex の索引で突合する。結果は matchCompanyByPhone と同じ(複数企業ヒットは null) */
+  function matchCompanyByPhoneIndex(index, phone) {
+    var target = getGlowDedupe_().normalizePhoneNumber(phone);
+    if (!target) return null;
+    var hits = (index || {})[target] || [];
+    return hits.length === 1 ? hits[0] : null;
+  }
+
+  /**
    * 対応履歴ログへ自動記録してよい通話かどうかを判定する。
    * 一意マッチ かつ 通話ステータスが完了 かつ 取得対象の種別(内線以外)であることが条件。
    */
@@ -125,10 +152,102 @@
     ];
   }
 
+  /** RFC4180 相当のCSVを2次元配列にする(引用符・改行入りの項目に対応。文字起こし・要約は改行を含みうる) */
+  function parseCsv(text) {
+    var rows = [], row = [], field = "", inQuotes = false;
+    var s = String(text || "").replace(/^\uFEFF/, "");
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charAt(i);
+      if (inQuotes) {
+        if (c === '"') {
+          if (s.charAt(i + 1) === '"') { field += '"'; i++; } else { inQuotes = false; }
+        } else {
+          field += c;
+        }
+      } else if (c === '"') {
+        inQuotes = true;
+      } else if (c === ",") {
+        row.push(field); field = "";
+      } else if (c === "\n" || c === "\r") {
+        if (c === "\r" && s.charAt(i + 1) === "\n") i++;
+        row.push(field); field = "";
+        if (row.length > 1 || row[0] !== "") rows.push(row);
+        row = [];
+      } else {
+        field += c;
+      }
+    }
+    if (field !== "" || row.length) { row.push(field); if (row.length > 1 || row[0] !== "") rows.push(row); }
+    return rows;
+  }
+
+  function cdrCallType_(value) {
+    var v = String(value || "").trim();
+    if (/^[0-3]$/.test(v)) return v;
+    if (/内線/.test(v)) return CALL_TYPE_INTERNAL;
+    if (/着信/.test(v)) return CALL_TYPE_INBOUND;
+    if (/PD/i.test(v)) return CALL_TYPE_OUTBOUND_PD;
+    if (/PV|発信/i.test(v)) return CALL_TYPE_OUTBOUND_PV;
+    return v;
+  }
+
+  function cdrCallStatus_(value) {
+    var v = String(value || "").trim();
+    if (/^SUCCESS$/i.test(v) || v === COMPLETED_CALL_STATUS) return COMPLETED_CALL_STATUS;
+    if (/^CANCEL$/i.test(v)) return "キャンセル";
+    if (/^DIALING$/i.test(v)) return "発着信中";
+    if (/^TALKING$/i.test(v)) return "通話中";
+    return v;
+  }
+
+  /**
+   * BlueBean「発着信履歴ダウンロードAPI(CDRダウンロードAPI)」のCSVを、通話の配列に変換する(2026-10-27 追加)。
+   * 顧客発着信履歴出力APIは顧客データに紐づく通話しか返さず、番号を貼り付けて発信した通話が取れなかった
+   * (ソフツー回答 2026-10-27)。CDRはすべての発着信を返す。
+   * - V10.19.0以降: Group_CallId,種類,発信元,着信先,外線番号,総時間,通話時間,状態,発着信時間,オペレータ,オプション,録音ファイル名,文字起こし,要約
+   * - V8.5.2以降 : 種類,発信元,着信先,外線番号,総時間,通話時間,状態,発着信時間,オペレータ,オプション,録音ファイル名
+   * 見出し行があれば読み飛ばす。内線は除く。返す形は flattenBlueBeanCalls と同じ
+   * {group_callid, call_type, phone, start_date, operator_name, call_status, note}。
+   */
+  function parseCdrCsv(text) {
+    var calls = [];
+    parseCsv(text).forEach(function (cols) {
+      var first = String(cols[0] || "").trim();
+      if (/Group_CallId|種類/i.test(first)) return;
+      var v10 = cols.length >= 14;
+      if (!v10 && cols.length < 9) return;
+      var o = v10 ? 1 : 0;
+      var callType = cdrCallType_(cols[o]);
+      if (callType === CALL_TYPE_INTERNAL) return;
+      var src = String(cols[o + 1] || "").trim();
+      var dst = String(cols[o + 2] || "").trim();
+      var startDate = String(cols[o + 7] || "").trim();
+      var phone = callType === CALL_TYPE_INBOUND ? src : dst;
+      var talkSeconds = String(cols[o + 5] || "").trim();
+      var summary = v10 ? String(cols[13] || "").trim() : "";
+      var note = (talkSeconds ? "通話時間 " + talkSeconds : "") +
+        (summary ? (talkSeconds ? " / " : "") + "要約: " + summary.replace(/\s+/g, " ").slice(0, 400) : "");
+      calls.push({
+        group_callid: v10 && first ? first : "CDR-" + startDate.replace(/\D/g, "") + "-" + phone.replace(/\D/g, ""),
+        call_type: callType,
+        phone: phone,
+        start_date: startDate,
+        operator_name: String(cols[o + 8] || "").trim(),
+        call_status: cdrCallStatus_(cols[o + 6]),
+        note: note
+      });
+    });
+    return calls;
+  }
+
   var api = {
+    parseCsv: parseCsv,
+    parseCdrCsv: parseCdrCsv,
     mapCallTypeToInteractionType: mapCallTypeToInteractionType,
     flattenBlueBeanCalls: flattenBlueBeanCalls,
     matchCompanyByPhone: matchCompanyByPhone,
+    buildPhoneIndex: buildPhoneIndex,
+    matchCompanyByPhoneIndex: matchCompanyByPhoneIndex,
     shouldRecordInteractionLog: shouldRecordInteractionLog,
     buildCallLogRow: buildCallLogRow,
     buildInteractionLogRowForCall: buildInteractionLogRowForCall

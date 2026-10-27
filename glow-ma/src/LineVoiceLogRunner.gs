@@ -228,6 +228,8 @@ var VOICE_LOG_IN_PROGRESS_STATUSES = [
 /** 途中で放置された音声ログを自動的に取り消すまでの時間(2時間)。 */
 var VOICE_LOG_STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000;
 var VOICE_LOG_STALE_ERROR_MESSAGE = "一定時間操作がなかったため自動的に取り消しました";
+// 文字起こしが終わった時刻(放置検知の起点)を、処理IDごとにスクリプト プロパティへ残す
+var VOICE_LOG_CLOCK_PREFIX = "VOICE_LOG_CLOCK_";
 
 /**
  * 指定したLINEユーザーIDについて、まだ確定・破棄・エラーになっていない
@@ -322,7 +324,11 @@ function sweepStaleVoiceLogs_(ss) {
   var now = new Date().getTime();
   readVoiceLogRows_(ss).forEach(function (record) {
     if (VOICE_LOG_IN_PROGRESS_STATUSES.indexOf(record["ステータス"]) === -1) return;
-    var receivedAt = parseVoiceLogReceivedAt_(record["受信日時"]);
+    // Geminiの残高不足で待機中の録音は、担当者の操作待ちではないので取り消さない(2026-10-27 福田さんの3件が取り消された)
+    if (record["エラー内容"] === GlowVoiceFileIntake.BILLING_WAIT_NOTE) return;
+    // 文字起こしが終わった時刻があれば、そこから数える(待機の後に処理された録音を、確認する間もなく取り消さない)
+    var clock = Number(PropertiesService.getScriptProperties().getProperty(VOICE_LOG_CLOCK_PREFIX + record["処理ID"]) || 0);
+    var receivedAt = clock ? new Date(clock) : parseVoiceLogReceivedAt_(record["受信日時"]);
     if (!receivedAt) {
       Logger.log("受信日時を解釈できないため放置検知の対象外としました(処理ID " + record["処理ID"] + ")。");
       return;
@@ -473,10 +479,34 @@ function processQueuedVoiceLogs() {
     Logger.log("過去記録の取り込みの呼び出しに失敗しました: " + error);
   }
 
+  // BlueBeanの架電履歴を1時間おきに同期する(CtiRunner.gs。専用トリガーが止まっても同期が続くように)
+  try {
+    runCtiSyncIfDue_();
+  } catch (error) {
+    console.error("BlueBean架電履歴の同期に失敗しました: " + error);
+  }
+
+  // ドライブの「GLOW音声ログ受付」フォルダに入れられた録音ファイルを受け付ける(DriveVoiceRunner.gs)
+  try {
+    enqueueDriveVoiceFiles_(ss);
+  } catch (error) {
+    // console.error は Cloud Logging に残る(Logger.log は残らず、失敗が外から見えなかった)
+    console.error("録音ファイルの受け付けに失敗しました: " + error);
+  }
+
   try {
     sweepStaleVoiceLogs_(ss);
   } catch (error) {
     Logger.log("放置された音声ログの自動取り消しに失敗しました: " + error);
+  }
+
+  // Geminiの支払いエラー(402)のあとは1時間待ってから再開する(DriveVoiceRunner.gs)。待つ間は録音を処理しない
+  if (isGeminiBillingBlocked_()) return;
+  try {
+    recoverBillingSweptVoiceLogsOnce_(ss);
+    requeueBillingHeldVoiceLogs_(ss);
+  } catch (error) {
+    console.error("支払いエラーで止まった音声ログを再開できませんでした: " + error);
   }
 
   var pending = readVoiceLogRows_(ss).filter(function (record) { return record["ステータス"] === "受信済み"; });
@@ -499,6 +529,10 @@ function processQueuedVoiceLogs() {
       processOneVoiceLog_(ss, record);
     } catch (error) {
       Logger.log("音声ログの処理に失敗しました(処理ID " + record["処理ID"] + "): " + error);
+      if (GlowVoiceFileIntake.isBillingError(error)) {
+        holdVoiceLogForBilling_(ss, record, error);
+        return;
+      }
       var isTransient = GlowLineVoiceLogContent.isTransientProcessingError(error);
       // 一時的な障害(混雑・5xx)は「エラー」で確定させず「受信済み」へ戻し、次回のトリガーに
       // 再試行させる。processOneVoiceLog_ は毎回LINEから音声を取り直すので、戻すだけで再開できる。
@@ -531,8 +565,9 @@ function processQueuedVoiceLogs() {
  * (担当者が確認画面で見た値と、対応履歴ログに実際に記録される値を一致させるため)。
  */
 function processOneVoiceLog_(ss, record) {
-  var audioBlob = fetchLineAudioContent_(record["LINEメッセージID"]);
-  var extracted = callGeminiForVoiceLog_(audioBlob);
+  // LINEの音声メッセージか、ドライブの録音ファイル(DriveVoiceRunner.gs)かで取り方を変える
+  var audio = prepareVoiceAudio_(record);
+  var extracted = callGeminiForVoiceLog_(audio);
 
   var companyNameCandidate = GlowLineVoiceLogContent.sanitizeSheetText(extracted.companyName);
   var interactionType = GlowLineVoiceLogContent.normalizeInteractionType(extracted.interactionType);
@@ -565,6 +600,7 @@ function processOneVoiceLog_(ss, record) {
     Logger.log("文字起こし結果の書き込み前に他の処理が状態を変更したため中断しました(処理ID " + record["処理ID"] + ")。");
     return;
   }
+  PropertiesService.getScriptProperties().setProperty(VOICE_LOG_CLOCK_PREFIX + record["処理ID"], String(Date.now()));
 
   var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
   var companies = companySheet ? readCompanyRecords_(companySheet) : [];
@@ -611,9 +647,9 @@ function fetchLineAudioContent_(messageId) {
   return response.getBlob();
 }
 
-function callGeminiForVoiceLog_(audioBlob) {
+function callGeminiForVoiceLog_(audio) {
   return GlowResilience.withRetry(
-    function () { return callGeminiForVoiceLogOnce_(audioBlob); },
+    function () { return callGeminiForVoiceLogOnce_(audio); },
     {
       maxAttempts: 3,
       backoffMs: [2000, 10000],
@@ -628,7 +664,7 @@ function callGeminiForVoiceLog_(audioBlob) {
   );
 }
 
-function callGeminiForVoiceLogOnce_(audioBlob) {
+function callGeminiForVoiceLogOnce_(audio) {
   var apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY が未設定です。スクリプト プロパティで設定してください。");
@@ -636,8 +672,11 @@ function callGeminiForVoiceLogOnce_(audioBlob) {
   var payload = {
     contents: [{
       parts: [
-        { text: buildGeminiPrompt_(Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd")) },
-        { inline_data: { mime_type: audioBlob.getContentType() || "audio/m4a", data: Utilities.base64Encode(audioBlob.getBytes()) } }
+        { text: buildGeminiPrompt_(Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd")) + (audio.hint ? "\n" + audio.hint : "") },
+        audio.fileUri
+          // 大きな録音ファイルは、先にGeminiのファイル置き場へ分割アップロード済み(DriveVoiceRunner.gs)
+          ? { file_data: { mime_type: audio.mimeType, file_uri: audio.fileUri } }
+          : { inline_data: { mime_type: audio.blob.getContentType() || "audio/m4a", data: Utilities.base64Encode(audio.blob.getBytes()) } }
       ]
     }]
   };
@@ -674,7 +713,8 @@ function buildGeminiPrompt_(todayString) {
     "\"respondentType\": \"" + GlowSchema.RESPONDENT_TYPES.join("/") +
       "のいずれか。音声だけでは相手がオーナー社長本人か窓口担当か判別できない場合は、" +
       "推測で決めつけず「不明」と正直に出力すること\", " +
-    "\"contentMemo\": \"話の内容の要約(2〜3文程度)\", " +
+    "\"contentMemo\": \"話の内容の要約。短いメモなら2〜3文。面談をそのまま録音した長い音声なら、" +
+      "相手の状況・課題・こちらの提案・相手の反応・決まったことを、要点ごとに「・」で始まる行で最大8行にまとめる\", " +
     "\"nextAction\": \"次にやるべきこと(無ければ空文字)\", " +
     "\"successorStatus\": \"後継者・跡継ぎの話が出た場合のみ " + GlowSchema.SUCCESSOR_STATUS_TYPES.join("/") +
       " のいずれか。話に出ていなければ空文字。推測で決めつけないこと\", " +

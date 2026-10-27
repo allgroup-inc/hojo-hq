@@ -11,15 +11,32 @@ name: glow-ma-gcp-api
 #   apis        … 有効にするAPI(空白区切り。既定は drive)
 
 on:
+  # 毎日の自動点検(2026-10-26 追加): 承認切れ・稼働記録なしを見つけたら失敗させ、GitHubの失敗通知で気づけるようにする。
+  # 10/16〜26 に自動処理が承認切れで止まっていたのを10日間誰も気づけなかった反省(失敗台帳 FK-007)。
+  schedule:
+    - cron: "23 23 * * *"   # 毎日 8:23(日本時間)。日次メンテナンス(7時台)の後
   workflow_dispatch:
     inputs:
       gcp_project:
-        description: "Google Cloud のプロジェクト番号"
-        required: true
-      apis:
-        description: "有効にするAPI(空白区切り)"
+        description: "Google Cloud のプロジェクト番号(空なら実行記録から自動で探す)"
         required: false
-        default: "drive"
+        default: ""
+      apis:
+        description: "有効にするAPI(空白区切り)。空なら有効化はしない"
+        required: false
+        default: ""
+      health_hours:
+        description: "実行記録の点検: 直近何時間を見るか(0なら点検しない)"
+        required: false
+        default: "48"
+      grep:
+        description: "実行記録から探す語(例: 受付フォルダ)。空なら探さない"
+        required: false
+        default: ""
+      sample:
+        description: "中身の形を見る処理名(例: processQueuedVoiceLogs)。空なら見ない"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -39,6 +56,7 @@ jobs:
           node-version: "22"
 
       - name: API を有効にする
+        if: inputs.apis != ''
         env:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
           SCRIPT_ID: ${{ secrets.GLOW_MA_SCRIPT_ID }}
@@ -69,3 +87,55 @@ jobs:
           done
           rm -f "$HOME/.clasprc.json" .clasp.json appsscript.json
           exit $status
+
+      - uses: actions/checkout@v7
+        if: inputs.health_hours != '0'
+
+      - uses: actions/setup-python@v7
+        if: inputs.health_hours != '0'
+        with:
+          python-version: "3.12"
+
+      # プロジェクト番号は公開リポジトリに書かない。手動実行で1回指定された番号を Actions のキャッシュに覚えておき、
+      # 毎日の自動点検(番号の入力が無い)ではそれを使う
+      - name: 覚えているプロジェクト番号を取り出す
+        if: inputs.health_hours != '0'
+        uses: actions/cache/restore@v4
+        with:
+          path: .glow_ma_gcp_project
+          key: glow-ma-gcp-project-${{ github.run_id }}
+          restore-keys: glow-ma-gcp-project-
+
+      - name: プロジェクト番号を決める
+        if: inputs.health_hours != '0'
+        id: project
+        env:
+          GIVEN: ${{ inputs.gcp_project }}
+        run: |
+          num="$GIVEN"
+          if [ -z "$num" ] && [ -f .glow_ma_gcp_project ]; then num=$(tr -d '[:space:]' < .glow_ma_gcp_project); fi
+          case "$num" in (*[!0-9a-z-]*) echo "::error::プロジェクト番号の形式が不正です"; exit 1;; esac
+          if [ -n "$num" ]; then
+            echo "::add-mask::$num"
+            printf '%s' "$num" > .glow_ma_gcp_project
+            echo "save=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "number=$num" >> "$GITHUB_OUTPUT"
+
+      - name: プロジェクト番号を覚えておく
+        if: inputs.health_hours != '0' && steps.project.outputs.save == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .glow_ma_gcp_project
+          key: glow-ma-gcp-project-${{ github.run_id }}
+
+      - name: 実行記録の点検(各処理が動いているか)
+        if: inputs.health_hours != '0'
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          GCP_PROJECT: ${{ steps.project.outputs.number }}
+          GREP_WORD: ${{ inputs.grep }}
+          SAMPLE_FN: ${{ inputs.sample }}
+          HOURS: ${{ inputs.health_hours || '8' }}
+          ALERT: ${{ github.event_name == 'schedule' && '--alert' || '' }}
+        run: python3 scripts/glow_ma_exec_health.py --hours "$HOURS" --grep "$GREP_WORD" --sample "$SAMPLE_FN" $ALERT
