@@ -240,7 +240,7 @@
     return calls;
   }
 
-  /** "北之坊　絵梨奈(olm001)" のようなオペレーター表記から、空白を除いた氏名部分を取り出す */
+  /** "山田　花子(ext001)" のようなオペレーター表記から、空白を除いた氏名部分を取り出す */
   function operatorPersonName(operator) {
     return String(operator || "").replace(/[（(].*$/, "").replace(/[\s　]+/g, "");
   }
