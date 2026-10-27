@@ -1,3 +1,5 @@
+> ⚠️ **2026-10-25 この手順は不要になりました。** 取り込みは作り直し、glow-ma の自動反映(glow-ma-deploy)で本番に入ります。使い方は、台帳の「福田_履歴インポート」タブ(自己点検で自動作成)に表を貼るだけで、数分以内に自動で取り込まれ、結果は「福田_インポート結果」タブに出ます。詳しくは `glow-ma/src/HistoricalDataImporter.gs` の冒頭を参照。旧版は列名が台帳と合っておらず、一度も実行されていません。
+
 # HistoricalDataImporter.gs - Apps Script デプロイ手順
 
 このドキュメントは、HistoricalDataImporter.gs を Google Apps Script プロジェクトに追加・デプロイするための手順です。
