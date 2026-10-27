@@ -240,7 +240,30 @@
     return calls;
   }
 
+  /** "北之坊　絵梨奈(olm001)" のようなオペレーター表記から、空白を除いた氏名部分を取り出す */
+  function operatorPersonName(operator) {
+    return String(operator || "").replace(/[（(].*$/, "").replace(/[\s　]+/g, "");
+  }
+
+  /**
+   * CDR(全発着信)には、同じBlueBeanを使う他の組織のオペレーターの通話も含まれる(2026-10-27 判明・1日数千件)。
+   * GLOWのスタッフ(スタッフタブの氏名)の通話だけを残す。氏名は空白を無視して完全一致で照合する。
+   * allowedNames が空なら、何も残さない(取り違えを防ぐため、許可した人の通話だけを台帳に入れる)。
+   */
+  function filterCallsByOperators(calls, allowedNames) {
+    var allowed = {};
+    (allowedNames || []).forEach(function (n) {
+      var key = operatorPersonName(n);
+      if (key) allowed[key] = true;
+    });
+    return (calls || []).filter(function (call) {
+      return !!allowed[operatorPersonName(call.operator_name)];
+    });
+  }
+
   var api = {
+    operatorPersonName: operatorPersonName,
+    filterCallsByOperators: filterCallsByOperators,
     parseCsv: parseCsv,
     parseCdrCsv: parseCdrCsv,
     mapCallTypeToInteractionType: mapCallTypeToInteractionType,
