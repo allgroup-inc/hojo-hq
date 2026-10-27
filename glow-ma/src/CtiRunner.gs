@@ -43,7 +43,9 @@
  */
 /** 同期を試みた時刻(成否を問わない)。毎分の処理から1時間おきに呼ぶ判定に使う */
 var CTI_SYNC_LAST_ATTEMPT_PROP = "CTI_SYNC_LAST_ATTEMPT_MS";
-var CTI_SYNC_INTERVAL_MS = 60 * 60 * 1000;
+// 1時間おきの専用トリガーが主。毎分の処理からは、専用トリガーが90分以上動いていないときだけ同期する
+// (両方が同時に動いて「他の処理がCTI通話履歴を操作中」になるのを避ける)
+var CTI_SYNC_INTERVAL_MS = 90 * 60 * 1000;
 
 /**
  * 毎分の音声ログ処理(processQueuedVoiceLogs)に相乗りして、前回の試行から1時間たっていれば同期する。
@@ -110,8 +112,11 @@ function syncCtiCallHistoryCore_() {
     var cdrStart = properties.getProperty("BLUEBEAN_CDR_SYNCED_AT") ||
       Utilities.formatDate(new Date(Date.now() - CDR_BACKFILL_DAYS * 24 * 60 * 60 * 1000), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
     try {
-      // 通話中・発信中の通話を途中の状態で記録しないよう、終わりは15分前までにする
-      var cdrEnd = Utilities.formatDate(new Date(Date.now() - 15 * 60 * 1000), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
+      // 通話中・発信中の通話を途中の状態で記録しないよう、終わりは15分前までにする。
+      // 1回に取るのは最大5日分(30日分を1度に取ると6分の上限を超えた。2026-10-27)。残りは次の実行で続きから取る
+      var latestEnd = Date.now() - 15 * 60 * 1000;
+      var chunkEnd = Math.min(parseCtiDate_(cdrStart).getTime() + CDR_CHUNK_DAYS * 24 * 60 * 60 * 1000, latestEnd);
+      var cdrEnd = Utilities.formatDate(new Date(chunkEnd), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
       calls = GlowCtiContent.parseCdrCsv(callBlueBeanCdr_(cdrStart, cdrEnd)).filter(function (call) {
         return call.call_status !== "発着信中" && call.call_status !== "通話中";
       });
@@ -142,13 +147,13 @@ function syncCtiCallHistoryCore_() {
       return !existingCallIds[String(call.group_callid)];
     });
 
-    var companies = readCompanyRecords_(companySheet);
+    var phoneIndex = GlowCtiContent.buildPhoneIndex(readCompanyRecords_(companySheet));
     var recordedCount = 0;
     var skippedCount = 0;
     var callLogRows = [];
     var interactionRows = [];
     newCalls.forEach(function (call) {
-      var matchedCompany = GlowCtiContent.matchCompanyByPhone(companies, call.phone);
+      var matchedCompany = GlowCtiContent.matchCompanyByPhoneIndex(phoneIndex, call.phone);
       callLogRows.push(GlowCtiContent.buildCallLogRow("CTI-" + call.group_callid, call, matchedCompany));
 
       if (GlowCtiContent.shouldRecordInteractionLog(call, matchedCompany)) {
@@ -210,14 +215,31 @@ function readCampaignIds_() {
 }
 
 /**
- * 複数行を末尾へ追加する。シート全体に書式(チェックボックス等)が入っていて getLastRow() が実データより
- * 大きくなりうるため(readExistingGroupCallIds_ の注記)、書き込み位置は従来どおり appendRow に任せる。
+ * 複数行を、1列目(ID)が入っている最後の行の次へまとめて書き込む(1行ずつの appendRow は遅く、
+ * 30日分の取り込みで6分の上限を超えた)。書式だけの行は1列目が空なので、その上に書いてよい。
  */
 function appendRowsAtEnd_(sheet, rows) {
-  rows.forEach(function (row) { sheet.appendRow(row); });
+  if (!rows.length) return;
+  var maxRows = sheet.getMaxRows();
+  var ids = sheet.getRange(1, 1, maxRows, 1).getValues();
+  var last = 0;
+  for (var i = ids.length - 1; i >= 0; i--) {
+    if (String(ids[i][0]) !== "") { last = i + 1; break; }
+  }
+  var need = last + rows.length - maxRows;
+  if (need > 0) sheet.insertRowsAfter(maxRows, need);
+  sheet.getRange(last + 1, 1, rows.length, rows[0].length).setValues(rows);
+}
+
+/** "yyyy-MM-dd HH:mm:ss"(日本時間)を Date にする */
+function parseCtiDate_(text) {
+  var m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(String(text || ""));
+  if (!m) return new Date();
+  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] - 9, +m[5], +m[6]));
 }
 
 var CDR_BACKFILL_DAYS = 30;
+var CDR_CHUNK_DAYS = 5;
 
 /**
  * 発着信履歴ダウンロードAPI(CDR)でCSVを取る(ソフツー仕様書 V1.3。2026-10-27)。

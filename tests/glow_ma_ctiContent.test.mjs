@@ -190,3 +190,17 @@ test("parseCsv: 引用符の中のカンマ・改行・二重引用符を正し�
   assert.deepEqual(cti.parseCsv('a,"b,c","d\n""e"""\nx,y'), [["a", "b,c", 'd\n"e"'], ["x", "y"]]);
   assert.deepEqual(cti.parseCsv(""), []);
 });
+
+test("buildPhoneIndex/matchCompanyByPhoneIndex: matchCompanyByPhone と同じ結果(一意なら企業、複数ならnull)", () => {
+  const companies = [
+    { "企業ID": "C1", "電話番号": "098-911-1111", "携帯番号": "" },
+    { "企業ID": "C2", "電話番号": "098-922-2222", "携帯番号": "090-1111-2222" },
+    { "企業ID": "C3", "電話番号": "098-922-2222", "携帯番号": "" },
+  ];
+  const index = cti.buildPhoneIndex(companies);
+  for (const phone of ["0989111111", "098-922-2222", "09011112222", "0000", ""]) {
+    assert.deepEqual(cti.matchCompanyByPhoneIndex(index, phone), cti.matchCompanyByPhone(companies, phone), phone);
+  }
+  assert.equal(cti.matchCompanyByPhoneIndex(index, "0989111111")["企業ID"], "C1");
+  assert.equal(cti.matchCompanyByPhoneIndex(index, "098-922-2222"), null);
+});

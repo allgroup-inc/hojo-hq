@@ -77,6 +77,33 @@
   }
 
   /**
+   * 企業マスタを「正規化した電話番号 → 企業の一覧」の索引にする(2026-10-27 追加)。
+   * 通話1件ごとに3,000社の番号を正規化し直すと、30日分の取り込みが6分の上限を超えたため。
+   */
+  function buildPhoneIndex(companies) {
+    var normalizePhoneNumber = getGlowDedupe_().normalizePhoneNumber;
+    var index = {};
+    (companies || []).forEach(function (company) {
+      var seen = {};
+      ["電話番号", "携帯番号"].forEach(function (key) {
+        var n = company[key] ? normalizePhoneNumber(company[key]) : "";
+        if (!n || seen[n]) return;
+        seen[n] = true;
+        (index[n] = index[n] || []).push(company);
+      });
+    });
+    return index;
+  }
+
+  /** buildPhoneIndex の索引で突合する。結果は matchCompanyByPhone と同じ(複数企業ヒットは null) */
+  function matchCompanyByPhoneIndex(index, phone) {
+    var target = getGlowDedupe_().normalizePhoneNumber(phone);
+    if (!target) return null;
+    var hits = (index || {})[target] || [];
+    return hits.length === 1 ? hits[0] : null;
+  }
+
+  /**
    * 対応履歴ログへ自動記録してよい通話かどうかを判定する。
    * 一意マッチ かつ 通話ステータスが完了 かつ 取得対象の種別(内線以外)であることが条件。
    */
@@ -219,6 +246,8 @@
     mapCallTypeToInteractionType: mapCallTypeToInteractionType,
     flattenBlueBeanCalls: flattenBlueBeanCalls,
     matchCompanyByPhone: matchCompanyByPhone,
+    buildPhoneIndex: buildPhoneIndex,
+    matchCompanyByPhoneIndex: matchCompanyByPhoneIndex,
     shouldRecordInteractionLog: shouldRecordInteractionLog,
     buildCallLogRow: buildCallLogRow,
     buildInteractionLogRowForCall: buildInteractionLogRowForCall
