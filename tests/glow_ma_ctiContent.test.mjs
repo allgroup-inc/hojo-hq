@@ -157,3 +157,36 @@ test("buildInteractionLogRowForCall: 自動記録対象外(キャンセル)な�
   const call = Object.assign({}, COMPLETED_OUTBOUND_CALL, { call_status: "キャンセル" });
   assert.equal(cti.buildInteractionLogRowForCall("H-abc123", call, MATCHED_COMPANY), null);
 });
+
+test("parseCdrCsv: V10形式(Group_CallId・要約あり)を読み、発信は着信先を相手の番号にする。内線と見出しは除く", () => {
+  const csv = [
+    "Group_CallId,種類,発信元,着信先,外線番号,総時間,通話時間,状態,発着信時間,オペレータ,オプション,録音ファイル名,文字起こし,要約",
+    'G100,2,1001,0989111111,0980000000,120,95,SUCCESS,2026-10-26 10:00:00,福田,,rec1.wav,"もしもし、\nこんにちは","後継者の相談。来月再訪"',
+    "G101,0,1001,1002,,10,5,SUCCESS,2026-10-26 10:05:00,福田,,,,",
+    "G102,1,0989222222,1001,0980000000,30,0,CANCEL,2026-10-26 11:00:00,福田,,,,",
+  ].join("\r\n");
+  const calls = cti.parseCdrCsv(csv);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].group_callid, "G100");
+  assert.equal(calls[0].phone, "0989111111");
+  assert.equal(calls[0].call_status, "完了");
+  assert.equal(calls[0].operator_name, "福田");
+  assert.match(calls[0].note, /通話時間 95/);
+  assert.match(calls[0].note, /後継者の相談/);
+  assert.equal(calls[1].phone, "0989222222", "着信は発信元が相手");
+  assert.equal(calls[1].call_status, "キャンセル");
+});
+
+test("parseCdrCsv: V8形式(11列・IDなし)は日時と番号から重複しないIDを作る", () => {
+  const csv = "2,1001,098-911-1111,0980000000,60,40,SUCCESS,2026-10-26 09:00:00,福田,,rec.wav\n";
+  const calls = cti.parseCdrCsv(csv);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].group_callid, "CDR-20261026090000-0989111111");
+  assert.equal(calls[0].phone, "098-911-1111");
+  assert.equal(cti.shouldRecordInteractionLog(calls[0], { "企業ID": "C1" }), true);
+});
+
+test("parseCsv: 引用符の中のカンマ・改行・二重引用符を正しく扱う", () => {
+  assert.deepEqual(cti.parseCsv('a,"b,c","d\n""e"""\nx,y'), [["a", "b,c", 'd\n"e"'], ["x", "y"]]);
+  assert.deepEqual(cti.parseCsv(""), []);
+});
