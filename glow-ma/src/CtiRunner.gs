@@ -95,6 +95,8 @@ function syncCtiCallHistoryCore_() {
   }
   try {
     var properties = PropertiesService.getScriptProperties();
+    cleanupForeignCdrRowsOnce_(callLogSheet, logSheet);
+    restorePhoneLeadingZeroOnce_(callLogSheet);
     // 初回実行時はwatermark(前回同期完了時点)が無いため、直近24時間分から取得を開始する。
     var startDate = properties.getProperty("BLUEBEAN_LAST_SYNCED_AT") ||
       Utilities.formatDate(new Date(Date.now() - 24 * 60 * 60 * 1000), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
@@ -117,13 +119,15 @@ function syncCtiCallHistoryCore_() {
       var latestEnd = Date.now() - 15 * 60 * 1000;
       var chunkEnd = Math.min(parseCtiDate_(cdrStart).getTime() + CDR_CHUNK_DAYS * 24 * 60 * 60 * 1000, latestEnd);
       var cdrEnd = Utilities.formatDate(new Date(chunkEnd), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
-      calls = GlowCtiContent.parseCdrCsv(callBlueBeanCdr_(cdrStart, cdrEnd)).filter(function (call) {
+      // CDRには同じBlueBeanを使う他の組織の通話も入っている。GLOWのスタッフの通話だけを残す
+      var allCdrCalls = GlowCtiContent.parseCdrCsv(callBlueBeanCdr_(cdrStart, cdrEnd));
+      calls = GlowCtiContent.filterCallsByOperators(allCdrCalls, readCtiOperatorNames_()).filter(function (call) {
         return call.call_status !== "発着信中" && call.call_status !== "通話中";
       });
       usedCdr = true;
       startDate = cdrStart;
       endDate = cdrEnd;
-      sourceSummary = "全通話(CDR) " + calls.length + "件";
+      sourceSummary = "全通話(CDR) " + allCdrCalls.length + "件のうちGLOWスタッフ分 " + calls.length + "件";
     } catch (cdrError) {
       if (cdrError.statusCode === 401) throw cdrError;
       console.warn("BlueBeanのCDR取得に失敗したため、従来の顧客発着信履歴APIで取得します: " + cdrError);
@@ -154,7 +158,10 @@ function syncCtiCallHistoryCore_() {
     var interactionRows = [];
     newCalls.forEach(function (call) {
       var matchedCompany = GlowCtiContent.matchCompanyByPhoneIndex(phoneIndex, call.phone);
-      callLogRows.push(GlowCtiContent.buildCallLogRow("CTI-" + call.group_callid, call, matchedCompany));
+      var callLogRow = GlowCtiContent.buildCallLogRow("CTI-" + call.group_callid, call, matchedCompany);
+      // 「098…」が数値に変換されて先頭の0が消えないよう、文字列として書く
+      callLogRow[ctiPhoneColumnIndex_()] = asSheetText_(callLogRow[ctiPhoneColumnIndex_()]);
+      callLogRows.push(callLogRow);
 
       if (GlowCtiContent.shouldRecordInteractionLog(call, matchedCompany)) {
         var logId = "H-" + Utilities.getUuid();
@@ -236,6 +243,102 @@ function parseCtiDate_(text) {
   var m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(String(text || ""));
   if (!m) return new Date();
   return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] - 9, +m[5], +m[6]));
+}
+
+/**
+ * CDRの通話のうち台帳に入れてよいオペレーター(=GLOWのスタッフ)の氏名一覧。
+ * スタッフタブの有効な人の氏名に加え、スクリプト プロパティ BLUEBEAN_CDR_OPERATORS(「,」区切り)も足せる。
+ */
+function readCtiOperatorNames_() {
+  var names = [];
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(GlowSchema.STAFF_SHEET_NAME);
+  if (sheet && sheet.getLastRow() >= 2) {
+    var headers = GlowSchema.STAFF_HEADERS;
+    var nameI = headers.indexOf("氏名"), activeI = headers.indexOf("有効");
+    sheet.getRange(2, 1, sheet.getLastRow() - 1, headers.length).getValues().forEach(function (r) {
+      if (r[activeI] === true && r[nameI]) names.push(String(r[nameI]));
+    });
+  }
+  String(PropertiesService.getScriptProperties().getProperty("BLUEBEAN_CDR_OPERATORS") || "")
+    .split(/[,、]+/).forEach(function (n) { if (n.trim()) names.push(n.trim()); });
+  return names;
+}
+
+/**
+ * 1回限りの片付け(2026-10-27): CDRの最初の取り込みで、他の組織のオペレーターの通話(約1.7万件)と、
+ * それを電話番号で突合した対応履歴(54件)が台帳に入った。GLOWのスタッフ以外の分を取り除き、
+ * CDRの取得済み時点を消して、スタッフの分だけを取り込み直す。
+ */
+function cleanupForeignCdrRowsOnce_(callLogSheet, logSheet) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "CDR_FOREIGN_CLEANUP_20261027_DONE";
+  if (props.getProperty(flag)) return;
+  var allowed = readCtiOperatorNames_();
+  var keepCall = function (operator) {
+    return GlowCtiContent.filterCallsByOperators([{ operator_name: operator }], allowed).length === 1;
+  };
+  var ctiHeaders = GlowSchema.CTI_CALL_LOG_HEADERS;
+  var idI = ctiHeaders.indexOf("group_callid"), opI = ctiHeaders.indexOf("発信者(BlueBeanオペレーター名)");
+  var removedCalls = rewriteRows_(callLogSheet, ctiHeaders.length, function (row) {
+    return String(row[idI]).indexOf("CDR-") === 0 && !keepCall(row[opI]);
+  });
+  var logHeaders = GlowSchema.INTERACTION_LOG_HEADERS;
+  var staffI = logHeaders.indexOf("担当者"), memoI = logHeaders.indexOf("内容メモ");
+  var removedLogs = rewriteRows_(logSheet, logHeaders.length, function (row) {
+    if (row[staffI] !== "システム(CTI自動記録)") return false;
+    var m = /担当: ([^)）]*)/.exec(String(row[memoI] || ""));
+    return !m || !keepCall(m[1]);
+  });
+  props.deleteProperty("BLUEBEAN_CDR_SYNCED_AT");
+  props.setProperty(flag, String(Date.now()));
+  console.log("CDRの片付け: 他の組織の通話 " + removedCalls + "件・対応履歴 " + removedLogs + "件を取り除きました");
+}
+
+/** 見出し行の下を読み、shouldRemove が真の行を除いて書き直す。取り除いた件数を返す */
+function rewriteRows_(sheet, width, shouldRemove) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 0;
+  var values = sheet.getRange(2, 1, lastRow - 1, width).getValues();
+  var kept = values.filter(function (row) {
+    return row.join("") === "" ? false : !shouldRemove(row);
+  });
+  var removed = values.filter(function (row) { return row.join("") !== ""; }).length - kept.length;
+  if (removed === 0) return 0;
+  sheet.getRange(2, 1, lastRow - 1, width).clearContent();
+  if (kept.length) sheet.getRange(2, 1, kept.length, width).setValues(kept);
+  return removed;
+}
+
+/** 「電話番号」の列位置(GlowSchema はファイルの読み込み順に左右されないよう、呼ぶときに引く) */
+function ctiPhoneColumnIndex_() {
+  return GlowSchema.CTI_CALL_LOG_HEADERS.indexOf("電話番号");
+}
+
+/** 0で始まる番号を、スプレッドシートで数値に変換されないよう文字列にする */
+function asSheetText_(value) {
+  var v = String(value == null ? "" : value);
+  return /^0\d+$/.test(v) ? "'" + v : v;
+}
+
+/**
+ * 1回限り(2026-10-27): CDRから取り込んだ通話の電話番号が数値になり、先頭の0が消えていた(例 98…)。
+ * 9〜10桁の数値になっている番号の先頭に0を戻す(国内の番号は0で始まる10〜11桁)。
+ */
+function restorePhoneLeadingZeroOnce_(sheet) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "CTI_PHONE_ZERO_FIX_20261027_DONE";
+  if (props.getProperty(flag)) return;
+  var lastRow = sheet.getLastRow();
+  if (lastRow >= 2) {
+    var range = sheet.getRange(2, ctiPhoneColumnIndex_() + 1, lastRow - 1, 1);
+    var values = range.getValues().map(function (r) {
+      var v = r[0];
+      return [typeof v === "number" && /^\d{9,10}$/.test(String(v)) ? "'0" + v : v];
+    });
+    range.setValues(values);
+  }
+  props.setProperty(flag, String(Date.now()));
 }
 
 var CDR_BACKFILL_DAYS = 30;

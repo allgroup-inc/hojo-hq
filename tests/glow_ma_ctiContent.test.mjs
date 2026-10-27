@@ -204,3 +204,17 @@ test("buildPhoneIndex/matchCompanyByPhoneIndex: matchCompanyByPhone と同じ結
   assert.equal(cti.matchCompanyByPhoneIndex(index, "0989111111")["企業ID"], "C1");
   assert.equal(cti.matchCompanyByPhoneIndex(index, "098-922-2222"), null);
 });
+
+test("filterCallsByOperators: スタッフの氏名(空白は無視)と一致するオペレーターの通話だけ残す。許可が空なら何も残さない", () => {
+  const calls = [
+    { operator_name: "福田　貴史(glow01)" },
+    { operator_name: "山田　花子(ext001)" },
+    { operator_name: "福田貴史" },
+    { operator_name: "" },
+  ];
+  const kept = cti.filterCallsByOperators(calls, ["福田　貴史", "小柳 健"]);
+  assert.equal(kept.length, 2);
+  assert.ok(kept.every((c) => c.operator_name.startsWith("福田")));
+  assert.equal(cti.filterCallsByOperators(calls, []).length, 0);
+  assert.equal(cti.operatorPersonName("佐藤　一郎(ext004)"), "佐藤一郎");
+});

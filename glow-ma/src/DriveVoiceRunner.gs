@@ -220,7 +220,19 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
     }
     state = { url: url, offset: 0 };
     props.setProperty(stateKey, JSON.stringify(state));
+  } else {
+    // 続きから送る前に、Gemini側が実際に受け取った量を問い合わせる。前回の実行が送信直後に止まると、
+    // 手元の記録が遅れて「wrong offset」で失敗する(2026-10-27 福田さんの188MBの録音)
+    var received = queryGeminiUploadOffset_(state.url);
+    console.log("録音の送信を再開します(記録 " + mb_(state.offset) + "MB / Gemini側 " +
+      (received === null ? "不明" : mb_(received) + "MB") + " / " + mb_(size) + "MB)");
+    if (received === null) {
+      props.deleteProperty(stateKey);
+      return uploadDriveFileToGemini_(processId, driveId, size, mimeType);
+    }
+    state.offset = received;
   }
+  var realigned = 0;
 
   var token = ScriptApp.getOAuthToken();
   var began = Date.now();
@@ -253,9 +265,24 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
       muteHttpExceptions: true
     });
     if (put.getResponseCode() !== 200) {
+      // 送った位置のずれは、Gemini が待っている位置がエラー文に書いてあるので、そこから送り直す
+      var expected = GlowVoiceFileIntake.expectedUploadOffset(put.getContentText());
+      if (expected !== null && expected < size && expected !== chunk.start && realigned < 3) {
+        realigned++;
+        console.log("録音の送信位置を合わせ直しました(" + mb_(chunk.start) + "MB → " + mb_(expected) + "MB / " + mb_(size) + "MB)");
+        state.offset = expected;
+        props.setProperty(stateKey, JSON.stringify(state));
+        continue;
+      }
       var putError = new Error("Geminiへのアップロードに失敗しました(HTTP " + put.getResponseCode() + "): " +
       String(put.getContentText()).slice(0, 300));
-      putError.statusCode = put.getResponseCode();
+      if (expected !== null) {
+        // 合わせ直せない(既に全部届いている等)ときは、最初から送り直す
+        props.deleteProperty(stateKey);
+        putError.statusCode = 503;
+      } else {
+        putError.statusCode = put.getResponseCode();
+      }
       throw putError;
     }
     state.offset = chunk.end + 1;
@@ -265,6 +292,28 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
   props.deleteProperty(stateKey);
   if (!result || !result.uri) throw new Error("Geminiへのアップロード結果を読めませんでした");
   return waitGeminiFileActive_(result, apiKey);
+}
+
+function mb_(bytes) {
+  return Math.round(bytes / 104857.6) / 10;
+}
+
+/**
+ * 分割アップロードの途中で、Gemini側が受け取った量(バイト)を返す。
+ * 続けられない(期限切れ・完了済み・応答なし)ときは null(最初からやり直す)。
+ */
+function queryGeminiUploadOffset_(url) {
+  var res = UrlFetchApp.fetch(url, {
+    method: "post",
+    headers: { "X-Goog-Upload-Command": "query" },
+    muteHttpExceptions: true
+  });
+  if (res.getResponseCode() !== 200) return null;
+  var headers = res.getAllHeaders();
+  var status = String(headers["x-goog-upload-status"] || headers["X-Goog-Upload-Status"] || "");
+  var received = Number(headers["x-goog-upload-size-received"] || headers["X-Goog-Upload-Size-Received"]);
+  if (status !== "active" || !isFinite(received) || received < 0) return null;
+  return received;
 }
 
 /** 手元にある音声(LINEから受け取ったもの。上限50MB)を、Gemini のファイル置き場へ1回で送る */
@@ -397,6 +446,29 @@ function recoverBillingSweptVoiceLogsOnce_(ss) {
       "ステータス": "受信済み", "エラー内容": GlowVoiceFileIntake.BILLING_WAIT_NOTE
     });
     console.log("残高不足の待機中に取り消された録音を、待機に戻しました");
+  });
+  props.setProperty(flag, String(Date.now()));
+}
+
+/**
+ * 1回限りの復旧(2026-10-27 その2): 残高の補充後に処理を再開した福田さんの録音が、
+ * ①分割アップロード中に放置検知で取り消され ②送信位置のずれ(wrong offset)でエラーになった。
+ * 文字起こしまで進まなかった(処理の時刻の記録がない)行だけを、順番待ちへ戻す。
+ */
+function recoverResumedVoiceLogsOnce_(ss) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "VOICE_RESUME_RECOVERY_20261027_DONE";
+  if (props.getProperty(flag)) return;
+  var from = new Date(2026, 9, 26, 17, 0).getTime();
+  readVoiceLogRows_(ss).forEach(function (r) {
+    if (r["ステータス"] !== "エラー") return;
+    var note = String(r["エラー内容"] || "");
+    if (note !== VOICE_LOG_STALE_ERROR_MESSAGE && !/wrong offset/i.test(note)) return;
+    var at = parseVoiceLogReceivedAt_(r["受信日時"]);
+    if (!at || at.getTime() < from) return;
+    if (props.getProperty(VOICE_LOG_CLOCK_PREFIX + r["処理ID"])) return;
+    transitionVoiceLogStatus_(ss, r.sheetRow, ["エラー"], { "ステータス": "受信済み", "エラー内容": "" });
+    console.log("残高の補充後に止まった録音を、順番待ちへ戻しました");
   });
   props.setProperty(flag, String(Date.now()));
 }

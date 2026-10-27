@@ -64,6 +64,15 @@
   }
 
   /**
+   * Gemini の「Client uploaded to the wrong offset (送った位置 instead of 正しい位置)」から、
+   * 正しい位置(バイト)を取り出す。読めなければ null
+   */
+  function expectedUploadOffset(text) {
+    var m = /wrong offset \((\d+) instead of (\d+)\)/i.exec(String(text || ""));
+    return m ? Number(m[2]) : null;
+  }
+
+  /**
    * フォルダ内のファイルから、今回受け付けるものを選ぶ。
    * files: [{id, name, ownerEmail}]、staff: [{email, name, lineUserId}]、
    * knownMessageIds: 音声ログ処理状況にあるLINEメッセージID、busyLineUserIds: 処理中の担当者
@@ -126,6 +135,7 @@
     toDriveMessageId: toDriveMessageId,
     driveFileIdOf: driveFileIdOf,
     nextChunk: nextChunk,
+    expectedUploadOffset: expectedUploadOffset,
     planIntake: planIntake,
     fileNameHint: fileNameHint
   };

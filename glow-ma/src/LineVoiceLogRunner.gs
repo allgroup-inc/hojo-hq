@@ -228,8 +228,10 @@ var VOICE_LOG_IN_PROGRESS_STATUSES = [
 /** 途中で放置された音声ログを自動的に取り消すまでの時間(2時間)。 */
 var VOICE_LOG_STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000;
 var VOICE_LOG_STALE_ERROR_MESSAGE = "一定時間操作がなかったため自動的に取り消しました";
-// 文字起こしが終わった時刻(放置検知の起点)を、処理IDごとにスクリプト プロパティへ残す
+// 処理を確保した時刻・文字起こしが終わった時刻(放置検知の起点)を、処理IDごとにスクリプト プロパティへ残す
 var VOICE_LOG_CLOCK_PREFIX = "VOICE_LOG_CLOCK_";
+// 「処理中」のまま、これより長く進まなければ実行が途中で終わったとみなす(1回の実行は最長6分)
+var VOICE_LOG_PROCESSING_STUCK_MS = 15 * 60 * 1000;
 
 /**
  * 指定したLINEユーザーIDについて、まだ確定・破棄・エラーになっていない
@@ -324,10 +326,16 @@ function sweepStaleVoiceLogs_(ss) {
   var now = new Date().getTime();
   readVoiceLogRows_(ss).forEach(function (record) {
     if (VOICE_LOG_IN_PROGRESS_STATUSES.indexOf(record["ステータス"]) === -1) return;
-    // Geminiの残高不足で待機中の録音は、担当者の操作待ちではないので取り消さない(2026-10-27 福田さんの3件が取り消された)
-    if (record["エラー内容"] === GlowVoiceFileIntake.BILLING_WAIT_NOTE) return;
-    // 文字起こしが終わった時刻があれば、そこから数える(待機の後に処理された録音を、確認する間もなく取り消さない)
+    // 「受信済み」は担当者の操作待ちではなく、毎分の処理の順番待ち(再試行は最大10回で打ち切られる)。
+    // 受信から2時間で数えると、待機や分割アップロードの後に再開した録音を取り消してしまう(2026-10-27 福田さんの録音)
+    if (record["ステータス"] === "受信済み") return;
     var clock = Number(PropertiesService.getScriptProperties().getProperty(VOICE_LOG_CLOCK_PREFIX + record["処理ID"]) || 0);
+    // 「処理中」のまま止まった行(実行がサーバーエラー等で途中終了)は、取り消さず順番待ちへ戻す
+    if (record["ステータス"] === VOICE_LOG_STATUS_PROCESSING) {
+      requeueStuckVoiceLog_(ss, record, clock, now);
+      return;
+    }
+    // 文字起こしが終わった時刻があれば、そこから数える(待機の後に処理された録音を、確認する間もなく取り消さない)
     var receivedAt = clock ? new Date(clock) : parseVoiceLogReceivedAt_(record["受信日時"]);
     if (!receivedAt) {
       Logger.log("受信日時を解釈できないため放置検知の対象外としました(処理ID " + record["処理ID"] + ")。");
@@ -341,6 +349,25 @@ function sweepStaleVoiceLogs_(ss) {
       Logger.log("放置された音声ログを自動的に取り消しました(処理ID " + record["処理ID"] + ")。");
     }
   });
+}
+
+/**
+ * 確保(「処理中」へ変更)から一定時間たっても進まない行を「受信済み」へ戻す。
+ * 1回の実行は最長6分なので、それを超えて「処理中」なら、その実行は途中で終わっている。
+ * 戻した回数は一時的な障害と同じく数え、上限を超えたらエラーで確定する。
+ */
+function requeueStuckVoiceLog_(ss, record, clock, now) {
+  var claimedAt = clock || (parseVoiceLogReceivedAt_(record["受信日時"]) || new Date(now)).getTime();
+  if (now - claimedAt < VOICE_LOG_PROCESSING_STUCK_MS) return;
+  if (GlowLineVoiceLogContent.hasTransientRetryLeft(record["エラー内容"])) {
+    var requeued = transitionVoiceLogStatus_(ss, record.sheetRow, [VOICE_LOG_STATUS_PROCESSING], {
+      "ステータス": "受信済み",
+      "エラー内容": GlowLineVoiceLogContent.buildTransientRetryNote(record["エラー内容"], "処理が途中で止まったため再開します")
+    });
+    if (requeued) console.log("処理中のまま止まった音声ログを、順番待ちへ戻しました");
+    return;
+  }
+  markVoiceLogAsError_(ss, record.sheetRow, [VOICE_LOG_STATUS_PROCESSING], "処理が途中で止まる状態が続いたため、エラーとして止めました");
 }
 
 function appendVoiceLogRow_(ss, rowValues) {
@@ -504,6 +531,7 @@ function processQueuedVoiceLogs() {
   if (isGeminiBillingBlocked_()) return;
   try {
     recoverBillingSweptVoiceLogsOnce_(ss);
+    recoverResumedVoiceLogsOnce_(ss);
     requeueBillingHeldVoiceLogs_(ss);
   } catch (error) {
     console.error("支払いエラーで止まった音声ログを再開できませんでした: " + error);
@@ -524,6 +552,7 @@ function processQueuedVoiceLogs() {
       Logger.log("音声ログは既に別の実行が確保済みのためスキップしました(処理ID " + record["処理ID"] + ")。");
       return;
     }
+    PropertiesService.getScriptProperties().setProperty(VOICE_LOG_CLOCK_PREFIX + record["処理ID"], String(Date.now()));
 
     try {
       processOneVoiceLog_(ss, record);
