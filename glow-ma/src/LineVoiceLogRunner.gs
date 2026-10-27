@@ -228,6 +228,8 @@ var VOICE_LOG_IN_PROGRESS_STATUSES = [
 /** 途中で放置された音声ログを自動的に取り消すまでの時間(2時間)。 */
 var VOICE_LOG_STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000;
 var VOICE_LOG_STALE_ERROR_MESSAGE = "一定時間操作がなかったため自動的に取り消しました";
+// 文字起こしが終わった時刻(放置検知の起点)を、処理IDごとにスクリプト プロパティへ残す
+var VOICE_LOG_CLOCK_PREFIX = "VOICE_LOG_CLOCK_";
 
 /**
  * 指定したLINEユーザーIDについて、まだ確定・破棄・エラーになっていない
@@ -322,7 +324,11 @@ function sweepStaleVoiceLogs_(ss) {
   var now = new Date().getTime();
   readVoiceLogRows_(ss).forEach(function (record) {
     if (VOICE_LOG_IN_PROGRESS_STATUSES.indexOf(record["ステータス"]) === -1) return;
-    var receivedAt = parseVoiceLogReceivedAt_(record["受信日時"]);
+    // Geminiの残高不足で待機中の録音は、担当者の操作待ちではないので取り消さない(2026-10-27 福田さんの3件が取り消された)
+    if (record["エラー内容"] === GlowVoiceFileIntake.BILLING_WAIT_NOTE) return;
+    // 文字起こしが終わった時刻があれば、そこから数える(待機の後に処理された録音を、確認する間もなく取り消さない)
+    var clock = Number(PropertiesService.getScriptProperties().getProperty(VOICE_LOG_CLOCK_PREFIX + record["処理ID"]) || 0);
+    var receivedAt = clock ? new Date(clock) : parseVoiceLogReceivedAt_(record["受信日時"]);
     if (!receivedAt) {
       Logger.log("受信日時を解釈できないため放置検知の対象外としました(処理ID " + record["処理ID"] + ")。");
       return;
@@ -497,6 +503,7 @@ function processQueuedVoiceLogs() {
   // Geminiの支払いエラー(402)のあとは1時間待ってから再開する(DriveVoiceRunner.gs)。待つ間は録音を処理しない
   if (isGeminiBillingBlocked_()) return;
   try {
+    recoverBillingSweptVoiceLogsOnce_(ss);
     requeueBillingHeldVoiceLogs_(ss);
   } catch (error) {
     console.error("支払いエラーで止まった音声ログを再開できませんでした: " + error);
@@ -593,6 +600,7 @@ function processOneVoiceLog_(ss, record) {
     Logger.log("文字起こし結果の書き込み前に他の処理が状態を変更したため中断しました(処理ID " + record["処理ID"] + ")。");
     return;
   }
+  PropertiesService.getScriptProperties().setProperty(VOICE_LOG_CLOCK_PREFIX + record["処理ID"], String(Date.now()));
 
   var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
   var companies = companySheet ? readCompanyRecords_(companySheet) : [];

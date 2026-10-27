@@ -379,3 +379,25 @@ function requeueBillingHeldVoiceLogs_(ss) {
   });
 }
 
+/**
+ * 1回限りの復旧(2026-10-27): 10/26 17:14ごろ福田さんが送った録音は、残高不足で待機している間に、
+ * 放置検知(受信から2時間)で「取り消し」にされた。その時間帯に取り消された行を待機へ戻す。
+ */
+function recoverBillingSweptVoiceLogsOnce_(ss) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "VOICE_BILLING_RECOVERY_20261027_DONE";
+  if (props.getProperty(flag)) return;
+  var from = new Date(2026, 9, 26, 17, 0).getTime();
+  var to = new Date(2026, 9, 26, 19, 0).getTime();
+  readVoiceLogRows_(ss).forEach(function (r) {
+    if (r["ステータス"] !== "エラー" || r["エラー内容"] !== VOICE_LOG_STALE_ERROR_MESSAGE) return;
+    var at = parseVoiceLogReceivedAt_(r["受信日時"]);
+    if (!at || at.getTime() < from || at.getTime() >= to) return;
+    transitionVoiceLogStatus_(ss, r.sheetRow, ["エラー"], {
+      "ステータス": "受信済み", "エラー内容": GlowVoiceFileIntake.BILLING_WAIT_NOTE
+    });
+    console.log("残高不足の待機中に取り消された録音を、待機に戻しました");
+  });
+  props.setProperty(flag, String(Date.now()));
+}
+
