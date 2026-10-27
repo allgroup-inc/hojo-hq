@@ -96,6 +96,7 @@ function syncCtiCallHistoryCore_() {
   try {
     var properties = PropertiesService.getScriptProperties();
     cleanupForeignCdrRowsOnce_(callLogSheet, logSheet);
+    restorePhoneLeadingZeroOnce_(callLogSheet);
     // 初回実行時はwatermark(前回同期完了時点)が無いため、直近24時間分から取得を開始する。
     var startDate = properties.getProperty("BLUEBEAN_LAST_SYNCED_AT") ||
       Utilities.formatDate(new Date(Date.now() - 24 * 60 * 60 * 1000), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
@@ -157,7 +158,10 @@ function syncCtiCallHistoryCore_() {
     var interactionRows = [];
     newCalls.forEach(function (call) {
       var matchedCompany = GlowCtiContent.matchCompanyByPhoneIndex(phoneIndex, call.phone);
-      callLogRows.push(GlowCtiContent.buildCallLogRow("CTI-" + call.group_callid, call, matchedCompany));
+      var callLogRow = GlowCtiContent.buildCallLogRow("CTI-" + call.group_callid, call, matchedCompany);
+      // 「098…」が数値に変換されて先頭の0が消えないよう、文字列として書く
+      callLogRow[ctiPhoneColumnIndex_()] = asSheetText_(callLogRow[ctiPhoneColumnIndex_()]);
+      callLogRows.push(callLogRow);
 
       if (GlowCtiContent.shouldRecordInteractionLog(call, matchedCompany)) {
         var logId = "H-" + Utilities.getUuid();
@@ -304,6 +308,37 @@ function rewriteRows_(sheet, width, shouldRemove) {
   sheet.getRange(2, 1, lastRow - 1, width).clearContent();
   if (kept.length) sheet.getRange(2, 1, kept.length, width).setValues(kept);
   return removed;
+}
+
+/** 「電話番号」の列位置(GlowSchema はファイルの読み込み順に左右されないよう、呼ぶときに引く) */
+function ctiPhoneColumnIndex_() {
+  return GlowSchema.CTI_CALL_LOG_HEADERS.indexOf("電話番号");
+}
+
+/** 0で始まる番号を、スプレッドシートで数値に変換されないよう文字列にする */
+function asSheetText_(value) {
+  var v = String(value == null ? "" : value);
+  return /^0\d+$/.test(v) ? "'" + v : v;
+}
+
+/**
+ * 1回限り(2026-10-27): CDRから取り込んだ通話の電話番号が数値になり、先頭の0が消えていた(例 98…)。
+ * 9〜10桁の数値になっている番号の先頭に0を戻す(国内の番号は0で始まる10〜11桁)。
+ */
+function restorePhoneLeadingZeroOnce_(sheet) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "CTI_PHONE_ZERO_FIX_20261027_DONE";
+  if (props.getProperty(flag)) return;
+  var lastRow = sheet.getLastRow();
+  if (lastRow >= 2) {
+    var range = sheet.getRange(2, ctiPhoneColumnIndex_() + 1, lastRow - 1, 1);
+    var values = range.getValues().map(function (r) {
+      var v = r[0];
+      return [typeof v === "number" && /^\d{9,10}$/.test(String(v)) ? "'0" + v : v];
+    });
+    range.setValues(values);
+  }
+  props.setProperty(flag, String(Date.now()));
 }
 
 var CDR_BACKFILL_DAYS = 30;
