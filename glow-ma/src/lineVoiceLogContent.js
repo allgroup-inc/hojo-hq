@@ -258,6 +258,29 @@
     };
   }
 
+  var MAX_TYPED_NAME_LENGTH = 60;
+
+  /**
+   * 確認待ちの間に担当者がLINEで文字入力した会社名を、どう扱うか決める(2026-10-28 追加)。
+   * これまでは文字入力を無視しており、福田さんが会社名を入力して返しても受け付けられず、
+   * 確認待ちのまま2時間で取り消されていた。
+   * 戻り値: null(会社名として扱えない) / {kind: "final", company} / {kind: "select", candidates, name} / {kind: "new", name}
+   */
+  function planTypedCompanyName(companies, text) {
+    var name = String(text == null ? "" : text).replace(/\s+/g, " ").trim();
+    if (!name || name.length > MAX_TYPED_NAME_LENGTH) return null;
+    var candidates = matchCompanyCandidates(companies, name);
+    var exact = candidates.filter(function (c) { return c["会社名"] === name; });
+    if (exact.length === 1) return { kind: "final", company: exact[0], name: name };
+    if (candidates.length === 1) return { kind: "final", company: candidates[0], name: name };
+    if (candidates.length > 1) return { kind: "select", candidates: candidates, name: name };
+    return { kind: "new", name: name };
+  }
+
+  function buildTypedNameHelpMessage() {
+    return "会社名だけを送ってください(例: 株式会社◯◯)。表示されたボタンから選ぶこともできます。";
+  }
+
   function buildCompletionMessage(companyName) {
     return companyName + "の対応履歴として記録しました。";
   }
@@ -475,6 +498,8 @@
     buildNewCompanyConfirmPrompt: buildNewCompanyConfirmPrompt,
     buildFinalConfirmPrompt: buildFinalConfirmPrompt,
     buildCompletionMessage: buildCompletionMessage,
+    planTypedCompanyName: planTypedCompanyName,
+    buildTypedNameHelpMessage: buildTypedNameHelpMessage,
     buildDiscardMessage: buildDiscardMessage,
     buildProcessingErrorMessage: buildProcessingErrorMessage,
     MAX_TRANSIENT_RETRIES: MAX_TRANSIENT_RETRIES,

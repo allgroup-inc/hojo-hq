@@ -33,6 +33,7 @@ function importFukudaHistoricalData() {
 /** 毎分のトリガー(processQueuedVoiceLogs)から呼ぶ。取り込む行があるときだけ動く */
 function runHistoryImportIfPending_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+  restageYearlessHistoryOnce_(ss);
   var sheet = ss.getSheetByName(FUKUDA_STAGING_SHEET_NAME);
   if (!sheet || sheet.getLastRow() < 2) return null;
   try {
@@ -48,6 +49,25 @@ function runHistoryImportIfPending_() {
     notifyOpsFailure_("過去の手紙・架電記録の取り込み", String(error));
     return null;
   }
+}
+
+/**
+ * 1回限り(2026-10-28): 10/28 18:26 に貼り付けられた手紙100通分は、日付に年が無く(「9月18日」)、
+ * 100行すべてが「日付が読めない」で取り込めなかった。年なしの日付を読めるようにしたので、
+ * 取込済として残した表を、空の取り込みタブへ戻して取り込み直す。
+ */
+function restageYearlessHistoryOnce_(ss) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "HISTORY_RESTAGE_20261028_DONE";
+  if (props.getProperty(flag)) return;
+  var archive = ss.getSheetByName(FUKUDA_STAGING_SHEET_NAME + "_取込済_20261028_1826");
+  var staging = ss.getSheetByName(FUKUDA_STAGING_SHEET_NAME);
+  if (archive && staging && staging.getLastRow() < 2 && archive.getLastRow() >= 2) {
+    var values = archive.getDataRange().getValues();
+    staging.getRange(1, 1, values.length, values[0].length).setValues(values);
+    console.log("年なしの日付で取り込めなかった手紙の記録(" + (values.length - 1) + "行)を、取り込み直します");
+  }
+  props.setProperty(flag, String(Date.now()));
 }
 
 /** 取り込みタブが無ければ見出しつきで作る(自己点検から呼ぶ) */
