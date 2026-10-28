@@ -209,6 +209,15 @@
    * 見出し行があれば読み飛ばす。内線は除く。返す形は flattenBlueBeanCalls と同じ
    * {group_callid, call_type, phone, start_date, operator_name, call_status, note}。
    */
+  /**
+   * CDRの「その期間に通話が1件もない」応答か。BlueBeanはCSVの代わりに
+   * 「発着信履歴のデータが存在しません。」とだけ返す(2026-10-28: これを失敗と扱い、取得済み時点が進まなくなった)
+   */
+  function isCdrNoData(text) {
+    var head = String(text || "").trim().slice(0, 200);
+    return head.indexOf(",") === -1 && /発着信履歴のデータが存在しません/.test(head);
+  }
+
   function parseCdrCsv(text) {
     var calls = [];
     parseCsv(text).forEach(function (cols) {
@@ -266,6 +275,7 @@
     filterCallsByOperators: filterCallsByOperators,
     parseCsv: parseCsv,
     parseCdrCsv: parseCdrCsv,
+    isCdrNoData: isCdrNoData,
     mapCallTypeToInteractionType: mapCallTypeToInteractionType,
     flattenBlueBeanCalls: flattenBlueBeanCalls,
     matchCompanyByPhone: matchCompanyByPhone,
