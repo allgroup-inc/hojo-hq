@@ -92,6 +92,11 @@ function handleLineEvent_(event) {
       withUserFacingErrorReply_(event.replyToken, function () { handleAudioMessage_(event); });
       return;
     }
+    // 確認待ちの録音があるときの文字入力は、会社名の返事として受け付ける(2026-10-28 福田さんの使い方に合わせて追加)
+    if (event.message.type === "text") {
+      withUserFacingErrorReply_(event.replyToken, function () { handleTypedCompanyName_(event); });
+      return;
+    }
   }
   if (event.type === "postback") {
     withUserFacingErrorReply_(event.replyToken, function () { handleLinePostback_(event); });
@@ -839,6 +844,58 @@ function handleLinePostback_(event) {
     handleFinalConfirmPostback_(ss, replyToken, record, parsed.value);
     return;
   }
+}
+
+/** 会社名の文字入力を受け付けるステータス(会社の選択・新規登録の確認・最終確認のいずれかを待っている) */
+var VOICE_LOG_TYPED_NAME_STATUSES = ["企業選択待ち", "新規企業確認待ち", "最終確認待ち"];
+
+/**
+ * 確認待ちの録音がある担当者からの文字入力を、会社名の返事として扱う。
+ * 1社に決まれば最終確認、候補が複数なら選択ボタン、見つからなければ新規登録の確認を返す。
+ * 確認待ちの録音が無いときの文字入力は、これまでどおり何もしない。
+ */
+function handleTypedCompanyName_(event) {
+  var lineUserId = event.source && event.source.userId;
+  var replyToken = event.replyToken;
+  if (!lineUserId || !replyToken) return;
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var waiting = readVoiceLogRows_(ss).filter(function (r) {
+    return r["LINEユーザーID"] === lineUserId && VOICE_LOG_TYPED_NAME_STATUSES.indexOf(r["ステータス"]) !== -1;
+  });
+  if (!waiting.length) return;
+  var record = waiting[waiting.length - 1];
+
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+  var plan = GlowLineVoiceLogContent.planTypedCompanyName(companies, event.message.text);
+  if (!plan) {
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildTypedNameHelpMessage()]);
+    return;
+  }
+
+  var interactionType = GlowLineVoiceLogContent.normalizeInteractionType(record["種別候補"]);
+  var respondentType = GlowLineVoiceLogContent.normalizeRespondentType(record["対応相手候補"]);
+  var typedName = GlowLineVoiceLogContent.sanitizeSheetText(plan.name);
+  var updates;
+  var reply;
+  if (plan.kind === "final") {
+    updates = { "ステータス": "最終確認待ち", "企業ID": plan.company["企業ID"], "種別候補": interactionType, "対応相手候補": respondentType };
+    reply = GlowLineVoiceLogContent.buildFinalConfirmPrompt(
+      record["処理ID"], plan.company["会社名"], interactionType, respondentType, record["内容メモ"], record["次回アクション"]);
+  } else if (plan.kind === "select") {
+    updates = { "ステータス": "企業選択待ち", "会社名候補": typedName, "企業ID": "" };
+    reply = GlowLineVoiceLogContent.buildCompanySelectionPrompt(record["処理ID"], plan.candidates);
+  } else {
+    updates = { "ステータス": "新規企業確認待ち", "会社名候補": typedName, "企業ID": "" };
+    reply = GlowLineVoiceLogContent.buildNewCompanyConfirmPrompt(record["処理ID"], typedName);
+  }
+  if (!transitionVoiceLogStatus_(ss, record.sheetRow, VOICE_LOG_TYPED_NAME_STATUSES, updates)) {
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildAlreadyHandledMessage()]);
+    return;
+  }
+  // 担当者が返事をしたので、放置検知(2時間)はここから数え直す
+  PropertiesService.getScriptProperties().setProperty(VOICE_LOG_CLOCK_PREFIX + record["処理ID"], String(Date.now()));
+  lineReply_(replyToken, [reply]);
 }
 
 /**
