@@ -542,6 +542,7 @@ function processQueuedVoiceLogs() {
     recoverBillingSweptVoiceLogsOnce_(ss);
     recoverResumedVoiceLogsOnce_(ss);
     recoverUnconfirmedVoiceLogsOnce_(ss);
+    recoverUnconfirmedVoiceLogsOnce2_(ss);
     recoverUploadRaceVoiceLogsOnce_(ss);
     requeueBillingHeldVoiceLogs_(ss);
   } catch (error) {
