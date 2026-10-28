@@ -225,6 +225,9 @@ var VOICE_LOG_IN_PROGRESS_STATUSES = [
   "企業選択待ち", "新規企業確認待ち", "最終確認待ち"
 ];
 
+/** 文字起こしが終わり、担当者のLINEでの確認を待っているステータス。 */
+var VOICE_LOG_CONFIRM_STATUSES = ["文字起こし済み", "企業選択待ち", "新規企業確認待ち", "最終確認待ち"];
+
 /** 途中で放置された音声ログを自動的に取り消すまでの時間(2時間)。 */
 var VOICE_LOG_STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000;
 var VOICE_LOG_STALE_ERROR_MESSAGE = "一定時間操作がなかったため自動的に取り消しました";
@@ -532,13 +535,21 @@ function processQueuedVoiceLogs() {
   try {
     recoverBillingSweptVoiceLogsOnce_(ss);
     recoverResumedVoiceLogsOnce_(ss);
+    recoverUnconfirmedVoiceLogsOnce_(ss);
     requeueBillingHeldVoiceLogs_(ss);
   } catch (error) {
     console.error("支払いエラーで止まった音声ログを再開できませんでした: " + error);
   }
 
-  var pending = readVoiceLogRows_(ss).filter(function (record) { return record["ステータス"] === "受信済み"; });
+  var allRows = readVoiceLogRows_(ss);
+  var pending = allRows.filter(function (record) { return record["ステータス"] === "受信済み"; });
+  // 確認ボタンが混ざらないよう、担当者ごとに確認待ちは1件ずつにする(待機から戻った録音が同時に流れた。2026-10-27)
+  var awaitingConfirm = {};
+  allRows.forEach(function (record) {
+    if (VOICE_LOG_CONFIRM_STATUSES.indexOf(record["ステータス"]) !== -1) awaitingConfirm[record["LINEユーザーID"]] = true;
+  });
   pending.forEach(function (record) {
+    if (awaitingConfirm[record["LINEユーザーID"]]) return;
     var claimed;
     try {
       claimed = transitionVoiceLogStatus_(
@@ -556,6 +567,7 @@ function processQueuedVoiceLogs() {
 
     try {
       processOneVoiceLog_(ss, record);
+      awaitingConfirm[record["LINEユーザーID"]] = true;
     } catch (error) {
       Logger.log("音声ログの処理に失敗しました(処理ID " + record["処理ID"] + "): " + error);
       if (GlowVoiceFileIntake.isBillingError(error)) {
