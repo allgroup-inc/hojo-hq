@@ -388,6 +388,8 @@ function callBlueBeanCdr_(startDate, endDate) {
   });
   var text = response.getContentText("UTF-8");
   var trimmed = text.trim();
+  // 期間内に通話が1件もないときは、CSVの代わりに案内文が返る。0件として扱い、取得済み時点を進める
+  if (GlowCtiContent.isCdrNoData(trimmed)) return "";
   if (trimmed && trimmed.indexOf(",") === -1) {
     throw new Error("BlueBeanのCDRがCSVではない応答を返しました: " + trimmed.slice(0, 200));
   }

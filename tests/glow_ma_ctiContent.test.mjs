@@ -186,6 +186,15 @@ test("parseCdrCsv: V8形式(11列・IDなし)は日時と番号から重複し�
   assert.equal(cti.shouldRecordInteractionLog(calls[0], { "企業ID": "C1" }), true);
 });
 
+test("isCdrNoData: 「データが存在しません」の応答は0件として扱い、CSVやエラー文は対象外", () => {
+  assert.equal(cti.isCdrNoData("発着信履歴のデータが存在しません。"), true);
+  assert.equal(cti.isCdrNoData("\n発着信履歴のデータが存在しません。\n"), true);
+  assert.equal(cti.isCdrNoData("2,1001,098-911-1111,0980000000,60,40,SUCCESS,2026-10-26 09:00:00,福田,,rec.wav"), false);
+  assert.equal(cti.isCdrNoData("認証に失敗しました"), false);
+  assert.equal(cti.isCdrNoData(""), false);
+  assert.deepEqual(cti.parseCdrCsv(""), []);
+});
+
 test("parseCsv: 引用符の中のカンマ・改行・二重引用符を正しく扱う", () => {
   assert.deepEqual(cti.parseCsv('a,"b,c","d\n""e"""\nx,y'), [["a", "b,c", 'd\n"e"'], ["x", "y"]]);
   assert.deepEqual(cti.parseCsv(""), []);
