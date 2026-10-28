@@ -54,8 +54,12 @@
       .replace(/[０-９Ａ-Ｚａ-ｚ]/g, function (ch) { return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0); });
   }
 
-  /** 日付をYYYY-MM-DDにする。読めない値は空文字(取り込まない)。 */
-  function toDateString(value) {
+  /**
+   * 日付をYYYY-MM-DDにする。読めない値は空文字(取り込まない)。
+   * 年の無い「9月18日」「9/18」は、today(YYYY-MM-DD)を渡したときだけ読む。today以前で一番近い日付にする
+   * (2026-10-28: 福田さんの表は年なしで、100行すべてが「日付が読めない」で取り込めなかった)。
+   */
+  function toDateString(value, today) {
     if (value === undefined || value === null || value === "") return "";
     if (Object.prototype.toString.call(value) === "[object Date]") {
       if (isNaN(value.getTime())) return "";
@@ -64,7 +68,14 @@
     var text = String(value).trim()
       .replace(/[０-９]/g, function (ch) { return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0); });
     var m = text.match(/^(\d{4})[\/\-.年](\d{1,2})[\/\-.月](\d{1,2})日?/);
-    if (!m) return "";
+    if (!m) {
+      var md = text.match(/^(\d{1,2})[\/\-.月](\d{1,2})日?/);
+      var base = /^\d{4}-\d{2}-\d{2}$/.test(String(today || "")) ? String(today) : "";
+      if (!md || !base) return "";
+      var guessYear = +base.slice(0, 4);
+      if (pad2(+md[1]) + "-" + pad2(+md[2]) > base.slice(5)) guessYear -= 1;
+      m = [text, String(guessYear), md[1], md[2]];
+    }
     var y = +m[1], mo = +m[2], d = +m[3];
     if (mo < 1 || mo > 12 || d < 1 || d > 31) return "";
     return y + "-" + pad2(mo) + "-" + pad2(d);
@@ -133,8 +144,8 @@
       var name = String(cell(row, "会社名")).trim();
       var phone = phoneDigits(cell(row, "電話番号"));
       if (!name && !phone) return; // 空行
-      var letter = toDateString(cell(row, "手紙送付日"));
-      var call = toDateString(cell(row, "架電日"));
+      var letter = toDateString(cell(row, "手紙送付日"), options.today);
+      var call = toDateString(cell(row, "架電日"), options.today);
       var result = String(cell(row, "通話結果")).trim();
       var memo = String(cell(row, "備考")).trim();
       if (!letter && !call) {
