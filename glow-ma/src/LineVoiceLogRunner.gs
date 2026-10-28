@@ -92,6 +92,11 @@ function handleLineEvent_(event) {
       withUserFacingErrorReply_(event.replyToken, function () { handleAudioMessage_(event); });
       return;
     }
+    // 確認待ちの録音があるときの文字入力は、会社名の返事として受け付ける(2026-10-28 福田さんの使い方に合わせて追加)
+    if (event.message.type === "text") {
+      withUserFacingErrorReply_(event.replyToken, function () { handleTypedCompanyName_(event); });
+      return;
+    }
   }
   if (event.type === "postback") {
     withUserFacingErrorReply_(event.replyToken, function () { handleLinePostback_(event); });
@@ -225,8 +230,10 @@ var VOICE_LOG_IN_PROGRESS_STATUSES = [
   "企業選択待ち", "新規企業確認待ち", "最終確認待ち"
 ];
 
-/** 途中で放置された音声ログを自動的に取り消すまでの時間(2時間)。 */
-var VOICE_LOG_STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000;
+/** 文字起こしが終わり、担当者のLINEでの確認を待っているステータス。 */
+var VOICE_LOG_CONFIRM_STATUSES = ["文字起こし済み", "企業選択待ち", "新規企業確認待ち", "最終確認待ち"];
+
+// 途中で放置された音声ログを自動的に取り消す期限は、GlowVoiceFileIntake.confirmDeadlineMs(翌日の正午)で決める。
 var VOICE_LOG_STALE_ERROR_MESSAGE = "一定時間操作がなかったため自動的に取り消しました";
 // 処理を確保した時刻・文字起こしが終わった時刻(放置検知の起点)を、処理IDごとにスクリプト プロパティへ残す
 var VOICE_LOG_CLOCK_PREFIX = "VOICE_LOG_CLOCK_";
@@ -319,7 +326,7 @@ function parseVoiceLogReceivedAt_(value) {
  * LINEへの返信・プッシュ送信が失敗しても例外は投げない(ログのみ)ため、確認ボタンが
  * 担当者に届かないまま行が途中ステータスで残ることがある。その状態を放置すると
  * hasInFlightProcess_ が永久にその担当者の次の録音をブロックしてしまうので、
- * 受信から2時間以上経過した途中ステータスの行を「エラー」に倒して詰まりを解消する。
+ * 確認を送った日の翌日の正午を過ぎても確認されない行を「エラー」に倒して詰まりを解消する(2026-10-29 までは2時間)。
  * 既に反応しなかった担当者へ追加のLINE通知はしない(通知の連打を避けるため)。
  */
 function sweepStaleVoiceLogs_(ss) {
@@ -341,7 +348,8 @@ function sweepStaleVoiceLogs_(ss) {
       Logger.log("受信日時を解釈できないため放置検知の対象外としました(処理ID " + record["処理ID"] + ")。");
       return;
     }
-    if (now - receivedAt.getTime() < VOICE_LOG_STALE_THRESHOLD_MS) return;
+    // 確認ボタンは、送った日の翌日の正午まで待つ(2026-10-29 小柳さん決裁。それまでは2時間)
+    if (now < GlowVoiceFileIntake.confirmDeadlineMs(receivedAt.getTime())) return;
     var swept = markVoiceLogAsError_(
       ss, record.sheetRow, VOICE_LOG_IN_PROGRESS_STATUSES, VOICE_LOG_STALE_ERROR_MESSAGE
     );
@@ -488,6 +496,7 @@ function installVoiceLogProcessingTrigger() {
  * 確保(claim)を行い、確保できた実行だけが先へ進む。
  */
 function processQueuedVoiceLogs() {
+  VOICE_RUN_STARTED_MS = Date.now();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
   // 毎分動くこのトリガーに、6時間に1回の自己点検・修復を相乗りさせる(OpsStatus.gs)。
@@ -532,13 +541,25 @@ function processQueuedVoiceLogs() {
   try {
     recoverBillingSweptVoiceLogsOnce_(ss);
     recoverResumedVoiceLogsOnce_(ss);
+    recoverUnconfirmedVoiceLogsOnce_(ss);
+    recoverUnconfirmedVoiceLogsOnce2_(ss);
+    recoverUploadRaceVoiceLogsOnce_(ss);
     requeueBillingHeldVoiceLogs_(ss);
   } catch (error) {
     console.error("支払いエラーで止まった音声ログを再開できませんでした: " + error);
   }
 
-  var pending = readVoiceLogRows_(ss).filter(function (record) { return record["ステータス"] === "受信済み"; });
+  var allRows = readVoiceLogRows_(ss);
+  var pending = allRows.filter(function (record) { return record["ステータス"] === "受信済み"; });
+  // 確認ボタンが混ざらないよう、担当者ごとに確認待ちは1件ずつにする(待機から戻った録音が同時に流れた。2026-10-27)
+  var awaitingConfirm = {};
+  allRows.forEach(function (record) {
+    if (VOICE_LOG_CONFIRM_STATUSES.indexOf(record["ステータス"]) !== -1) awaitingConfirm[record["LINEユーザーID"]] = true;
+  });
   pending.forEach(function (record) {
+    if (awaitingConfirm[record["LINEユーザーID"]]) return;
+    // 実行の残り時間が少ないときは、新しい録音に手を付けず次の実行に回す(6分の上限で途中終了させない)
+    if (voiceRunElapsedMs_() > VOICE_TRANSCRIBE_START_LIMIT_MS) return;
     var claimed;
     try {
       claimed = transitionVoiceLogStatus_(
@@ -556,10 +577,16 @@ function processQueuedVoiceLogs() {
 
     try {
       processOneVoiceLog_(ss, record);
+      awaitingConfirm[record["LINEユーザーID"]] = true;
     } catch (error) {
       Logger.log("音声ログの処理に失敗しました(処理ID " + record["処理ID"] + "): " + error);
       if (GlowVoiceFileIntake.isBillingError(error)) {
         holdVoiceLogForBilling_(ss, record, error);
+        return;
+      }
+      // 送信の順番待ち・送信の途中など、待てば進むものは再試行の回数に数えず順番待ちへ戻す
+      if (error && error.waitOnly &&
+          transitionVoiceLogStatus_(ss, record.sheetRow, [VOICE_LOG_STATUS_PROCESSING], { "ステータス": "受信済み" })) {
         return;
       }
       var isTransient = GlowLineVoiceLogContent.isTransientProcessingError(error);
@@ -818,6 +845,58 @@ function handleLinePostback_(event) {
     handleFinalConfirmPostback_(ss, replyToken, record, parsed.value);
     return;
   }
+}
+
+/** 会社名の文字入力を受け付けるステータス(会社の選択・新規登録の確認・最終確認のいずれかを待っている) */
+var VOICE_LOG_TYPED_NAME_STATUSES = ["企業選択待ち", "新規企業確認待ち", "最終確認待ち"];
+
+/**
+ * 確認待ちの録音がある担当者からの文字入力を、会社名の返事として扱う。
+ * 1社に決まれば最終確認、候補が複数なら選択ボタン、見つからなければ新規登録の確認を返す。
+ * 確認待ちの録音が無いときの文字入力は、これまでどおり何もしない。
+ */
+function handleTypedCompanyName_(event) {
+  var lineUserId = event.source && event.source.userId;
+  var replyToken = event.replyToken;
+  if (!lineUserId || !replyToken) return;
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var waiting = readVoiceLogRows_(ss).filter(function (r) {
+    return r["LINEユーザーID"] === lineUserId && VOICE_LOG_TYPED_NAME_STATUSES.indexOf(r["ステータス"]) !== -1;
+  });
+  if (!waiting.length) return;
+  var record = waiting[waiting.length - 1];
+
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+  var plan = GlowLineVoiceLogContent.planTypedCompanyName(companies, event.message.text);
+  if (!plan) {
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildTypedNameHelpMessage()]);
+    return;
+  }
+
+  var interactionType = GlowLineVoiceLogContent.normalizeInteractionType(record["種別候補"]);
+  var respondentType = GlowLineVoiceLogContent.normalizeRespondentType(record["対応相手候補"]);
+  var typedName = GlowLineVoiceLogContent.sanitizeSheetText(plan.name);
+  var updates;
+  var reply;
+  if (plan.kind === "final") {
+    updates = { "ステータス": "最終確認待ち", "企業ID": plan.company["企業ID"], "種別候補": interactionType, "対応相手候補": respondentType };
+    reply = GlowLineVoiceLogContent.buildFinalConfirmPrompt(
+      record["処理ID"], plan.company["会社名"], interactionType, respondentType, record["内容メモ"], record["次回アクション"]);
+  } else if (plan.kind === "select") {
+    updates = { "ステータス": "企業選択待ち", "会社名候補": typedName, "企業ID": "" };
+    reply = GlowLineVoiceLogContent.buildCompanySelectionPrompt(record["処理ID"], plan.candidates);
+  } else {
+    updates = { "ステータス": "新規企業確認待ち", "会社名候補": typedName, "企業ID": "" };
+    reply = GlowLineVoiceLogContent.buildNewCompanyConfirmPrompt(record["処理ID"], typedName);
+  }
+  if (!transitionVoiceLogStatus_(ss, record.sheetRow, VOICE_LOG_TYPED_NAME_STATUSES, updates)) {
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildAlreadyHandledMessage()]);
+    return;
+  }
+  // 担当者が返事をしたので、放置検知の期限(翌日の正午)はここから数え直す
+  PropertiesService.getScriptProperties().setProperty(VOICE_LOG_CLOCK_PREFIX + record["処理ID"], String(Date.now()));
+  lineReply_(replyToken, [reply]);
 }
 
 /**

@@ -15,8 +15,15 @@
 var VOICE_DRIVE_FOLDER_NAME = "GLOW音声ログ受付";
 var VOICE_DRIVE_FOLDER_PROP = "VOICE_DRIVE_FOLDER_ID";
 var VOICE_UPLOAD_STATE_PREFIX = "VOICE_UPLOAD_";
-// 1回の実行(上限6分)のうち、分割アップロードに使ってよい時間。超えたら続きは次の実行へ
+// 1回の実行(上限6分)のうち、分割アップロードに使ってよい時間(実行の開始から数える)。超えたら続きは次の実行へ
 var VOICE_UPLOAD_TIME_BUDGET_MS = 4 * 60 * 1000;
+// 送り終えた時点でこれを過ぎていたら、文字起こし(1〜2分かかる)は次の実行に回す
+var VOICE_TRANSCRIBE_START_LIMIT_MS = 3 * 60 * 1000;
+// 送り終えた録音の場所(Gemini側の保存は約48時間)。この時間内なら送り直さずに使う
+var VOICE_UPLOADED_PREFIX = "VOICE_UPLOADED_";
+var VOICE_UPLOADED_KEEP_MS = 40 * 60 * 60 * 1000;
+// processQueuedVoiceLogs の開始時刻(実行ごとに設定する)
+var VOICE_RUN_STARTED_MS = 0;
 
 /** 受付フォルダを用意し、有効なスタッフを編集者に加える(自己点検から呼ぶ・冪等) */
 function ensureVoiceDriveFolder_() {
@@ -191,6 +198,40 @@ function prepareVoiceAudio_(record) {
  * (processQueuedVoiceLogs が「受信済み」へ戻して、続きから再開する)。
  */
 function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
+  var props = PropertiesService.getScriptProperties();
+  // 送り終えた録音は、Gemini側に約2日残る。実行の時間切れで文字起こしまで進めなかったときは、送り直さずに使う
+  var doneKey = VOICE_UPLOADED_PREFIX + processId;
+  var done = JSON.parse(props.getProperty(doneKey) || "null");
+  if (done && done.uri && Date.now() - done.at < VOICE_UPLOADED_KEEP_MS) return done;
+  // 大きな録音を2つの実行が同時に送ると、互いの送信位置を追い越して失敗する(2026-10-28)。送るのは1つずつ
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(2000)) throw voiceWaitError_("別の録音を送信中のため、順番を待ちます");
+  try {
+    var uploaded = uploadDriveFileToGeminiLocked_(processId, driveId, size, mimeType);
+    props.setProperty(doneKey, JSON.stringify({ uri: uploaded.uri, at: Date.now() }));
+    if (voiceRunElapsedMs_() > VOICE_TRANSCRIBE_START_LIMIT_MS) {
+      throw voiceWaitError_("録音の送信が終わりました。文字起こしは次の実行で行います");
+    }
+    return uploaded;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/** 実行の時間切れなど、待てば進む状態。再試行の回数に数えず、順番待ちへ戻す */
+function voiceWaitError_(message) {
+  var error = new Error(message);
+  error.statusCode = 503;
+  error.waitOnly = true;
+  return error;
+}
+
+/** この実行(processQueuedVoiceLogs)が始まってからの時間 */
+function voiceRunElapsedMs_() {
+  return VOICE_RUN_STARTED_MS ? Date.now() - VOICE_RUN_STARTED_MS : 0;
+}
+
+function uploadDriveFileToGeminiLocked_(processId, driveId, size, mimeType) {
   var apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY が未設定です。スクリプト プロパティで設定してください。");
   var props = PropertiesService.getScriptProperties();
@@ -228,7 +269,7 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
       (received === null ? "不明" : mb_(received) + "MB") + " / " + mb_(size) + "MB)");
     if (received === null) {
       props.deleteProperty(stateKey);
-      return uploadDriveFileToGemini_(processId, driveId, size, mimeType);
+      return uploadDriveFileToGeminiLocked_(processId, driveId, size, mimeType);
     }
     state.offset = received;
   }
@@ -239,11 +280,10 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
   var result = null;
   var chunk;
   while ((chunk = GlowVoiceFileIntake.nextChunk(state.offset, size))) {
-    if (Date.now() - began > VOICE_UPLOAD_TIME_BUDGET_MS) {
-      var pause = new Error("録音ファイルのアップロード途中です(" + Math.round(state.offset / 1048576) + "MB / " +
-        Math.round(size / 1048576) + "MB)。続きは次の実行で行います");
-      pause.statusCode = 503;
-      throw pause;
+    // 時間は実行の開始から数える(この前に他の処理で時間を使うと、6分の上限で途中終了していた)
+    if (Math.max(Date.now() - began, voiceRunElapsedMs_()) > VOICE_UPLOAD_TIME_BUDGET_MS) {
+      throw voiceWaitError_("録音ファイルのアップロード途中です(" + mb_(state.offset) + "MB / " +
+        mb_(size) + "MB)。続きは次の実行で行います");
     }
     var part = UrlFetchApp.fetch("https://www.googleapis.com/drive/v3/files/" + driveId + "?alt=media", {
       headers: { Authorization: "Bearer " + token, Range: "bytes=" + chunk.start + "-" + chunk.end },
@@ -276,8 +316,8 @@ function uploadDriveFileToGemini_(processId, driveId, size, mimeType) {
       }
       var putError = new Error("Geminiへのアップロードに失敗しました(HTTP " + put.getResponseCode() + "): " +
       String(put.getContentText()).slice(0, 300));
-      if (expected !== null) {
-        // 合わせ直せない(既に全部届いている等)ときは、最初から送り直す
+      if (expected !== null || /terminated|not active/i.test(put.getContentText()) || put.getResponseCode() === 404) {
+        // 合わせ直せない・送信の受け口が閉じた(既に全部届いた・期限切れ等)ときは、最初から送り直す
         props.deleteProperty(stateKey);
         putError.statusCode = 503;
       } else {
@@ -448,6 +488,73 @@ function recoverBillingSweptVoiceLogsOnce_(ss) {
     console.log("残高不足の待機中に取り消された録音を、待機に戻しました");
   });
   props.setProperty(flag, String(Date.now()));
+}
+
+/**
+ * 1回限りの復旧(2026-10-28 その2): 大きな録音の送信が、2つの実行の取り合いで
+ * 「wrong offset」「terminated」のエラーになった(10/28 17:43)。送信の記録を消して、順番待ちへ戻す。
+ */
+function recoverUploadRaceVoiceLogsOnce_(ss) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "VOICE_UPLOAD_RACE_RECOVERY_20261028_DONE";
+  if (props.getProperty(flag)) return;
+  var from = new Date(2026, 9, 26, 17, 0).getTime();
+  readVoiceLogRows_(ss).forEach(function (r) {
+    if (r["ステータス"] !== "エラー" || !/wrong offset|terminated/i.test(String(r["エラー内容"] || ""))) return;
+    var at = parseVoiceLogReceivedAt_(r["受信日時"]);
+    if (!at || at.getTime() < from) return;
+    if (transitionVoiceLogStatus_(ss, r.sheetRow, ["エラー"], { "ステータス": "受信済み", "エラー内容": "" })) {
+      props.deleteProperty(VOICE_UPLOAD_STATE_PREFIX + r["処理ID"]);
+      console.log("送信の取り合いでエラーになった録音を、順番待ちへ戻しました");
+    }
+  });
+  props.setProperty(flag, String(Date.now()));
+}
+
+/**
+ * 1回限りの復旧(2026-10-28): 残高の補充後に要約まで進んだ福田さんの録音が、確認ボタンが押されないまま
+ * 2時間の放置検知で取り消された(10/27 18:23・19:07)。録音は残っているので、順番待ちへ戻して
+ * 要約し直し、確認ボタンを1件ずつ送り直す。
+ */
+function recoverUnconfirmedVoiceLogsOnce_(ss) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "VOICE_CONFIRM_RECOVERY_20261028_DONE";
+  if (props.getProperty(flag)) return;
+  requeueUnconfirmedCancelled_(ss, props);
+  props.setProperty(flag, String(Date.now()));
+}
+
+/**
+ * 1回限りの復旧(2026-10-29): 文字での返事の受け付け(10/28 20時)と期限の延長(10/29 2時)の前に、
+ * 旧ルール(2時間)で取り消された録音(10/28 19:41・19:43)を、もう一度要約して確認を送り直す。
+ * 夜中にLINEが届かないよう、10/29 8時以降に動かす。
+ */
+function recoverUnconfirmedVoiceLogsOnce2_(ss) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "VOICE_CONFIRM_RECOVERY_20261029_DONE";
+  if (props.getProperty(flag)) return;
+  if (Date.now() < Date.parse("2026-10-29T08:00:00+09:00")) return;
+  requeueUnconfirmedCancelled_(ss, props);
+  props.setProperty(flag, String(Date.now()));
+}
+
+/** 10/26 17:00 以降に受信し、確認されないまま取り消された行を、要約し直すため順番待ちへ戻す */
+function requeueUnconfirmedCancelled_(ss, props) {
+  var from = new Date(2026, 9, 26, 17, 0).getTime();
+  readVoiceLogRows_(ss).forEach(function (r) {
+    if (r["ステータス"] !== "エラー" || r["エラー内容"] !== VOICE_LOG_STALE_ERROR_MESSAGE) return;
+    var at = parseVoiceLogReceivedAt_(r["受信日時"]);
+    if (!at || at.getTime() < from) return;
+    var moved = transitionVoiceLogStatus_(ss, r.sheetRow, ["エラー"], {
+      "ステータス": "受信済み", "エラー内容": "", "会社名候補": "", "企業ID": "", "種別候補": "",
+      "対応相手候補": "", "内容メモ": "", "次回アクション": "",
+      "後継者状況候補": "", "興味商品候補": "", "次回予定日候補": ""
+    });
+    if (moved) {
+      props.deleteProperty(VOICE_LOG_CLOCK_PREFIX + r["処理ID"]);
+      console.log("確認されないまま取り消された録音を、要約し直すため順番待ちへ戻しました");
+    }
+  });
 }
 
 /**

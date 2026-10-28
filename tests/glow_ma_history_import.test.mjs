@@ -101,3 +101,22 @@ test("対応履歴の種別は台帳の語彙(INTERACTION_TYPES)に含まれる"
 test("Date型の日付(シートから読んだ値)も扱える", () => {
   assert.equal(h.toDateString(new Date(2026, 8, 7)), "2026-09-07");
 });
+
+test("年の無い日付(9月18日・9/24)は、取り込み日以前で一番近い年として読む", () => {
+  assert.equal(h.toDateString("9月18日", "2026-10-28"), "2026-09-18");
+  assert.equal(h.toDateString("9/24", "2026-10-28"), "2026-09-24");
+  assert.equal(h.toDateString("12月20日", "2026-10-28"), "2025-12-20");
+  assert.equal(h.toDateString("９月１８日", "2026-10-28"), "2026-09-18");
+  assert.equal(h.toDateString("9月18日"), "", "基準日が無ければ年を推測しない");
+  assert.equal(h.toDateString("13月1日", "2026-10-28"), "");
+  assert.equal(h.toDateString("2026/09/10", "2026-10-28"), "2026-09-10");
+});
+
+test("年の無い日付の表(福田さんの手紙100通分の形)も、履歴として取り込める", () => {
+  const header = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考"];
+  const plan = h.planHistoryImport(header, [["株式会社テスト建設", "098-111-2222", "9月18日", "9月24日", "担当不在", "", "", "", ""]],
+    existing(), [], { today: "2026-10-28", nextSequence: 3213, staffName: "" });
+  assert.equal(plan.skipped.length, 0);
+  assert.deepEqual(plan.logs.map((l) => [l.日付, l.種別]), [["2026-09-18", "手紙送付"], ["2026-09-24", "電話"]]);
+  assert.ok(plan.logs[1].内容メモ.includes("担当不在"));
+});

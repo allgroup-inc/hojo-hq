@@ -457,3 +457,31 @@ test("buildTransientRetryExhaustedMessage: 録り直しを促す文面になっ�
   const message = lineVoiceLogContent.buildTransientRetryExhaustedMessage();
   assert.ok(message.includes("もう一度録音"));
 });
+
+test("planTypedCompanyName: 入力した会社名が1社に決まれば最終確認へ進む(完全一致を優先)", () => {
+  const companies = [
+    { "企業ID": "C000001", "会社名": "株式会社中島工業" },
+    { "企業ID": "C000002", "会社名": "中島工業" },
+    { "企業ID": "C000003", "会社名": "株式会社宮太組" }
+  ];
+  const exact = lineVoiceLogContent.planTypedCompanyName(companies, " 中島工業 ");
+  assert.equal(exact.kind, "final");
+  assert.equal(exact.company["企業ID"], "C000002");
+  const single = lineVoiceLogContent.planTypedCompanyName(companies, "宮太組");
+  assert.equal(single.kind, "final");
+  assert.equal(single.company["企業ID"], "C000003");
+});
+
+test("planTypedCompanyName: 候補が複数なら選択、見つからなければ新規登録の確認、空や長すぎる文は扱わない", () => {
+  const companies = [
+    { "企業ID": "C000001", "会社名": "沖縄建設" },
+    { "企業ID": "C000002", "会社名": "沖縄建設工業" }
+  ];
+  const many = lineVoiceLogContent.planTypedCompanyName(companies, "建設");
+  assert.equal(many.kind, "select");
+  assert.equal(many.candidates.length, 2);
+  const none = lineVoiceLogContent.planTypedCompanyName(companies, "株式会社テスト商事");
+  assert.deepEqual(none, { kind: "new", name: "株式会社テスト商事" });
+  assert.equal(lineVoiceLogContent.planTypedCompanyName(companies, "   "), null);
+  assert.equal(lineVoiceLogContent.planTypedCompanyName(companies, "あ".repeat(61)), null);
+});

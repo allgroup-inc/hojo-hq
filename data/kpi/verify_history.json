@@ -5131,5 +5131,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-10-28",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "令和７年度（補正予算）地域脱炭素実現に向けた具体的施策実装支援事業（四次公募）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDd3OMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "京都市企業立地促進制度補助金［お試し立地支援制度］",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFiMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度２次公募】国立公園等利用拠点滞在環境等上質化事業（国立公園等資源整備事業費補助金）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDczHMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【倉敷市】実証実験サポート事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY6KMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "【令和８年度】先進的な資源循環投資促進事業（第２回）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDapWMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
