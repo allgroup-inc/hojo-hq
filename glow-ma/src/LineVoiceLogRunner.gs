@@ -491,6 +491,7 @@ function installVoiceLogProcessingTrigger() {
  * 確保(claim)を行い、確保できた実行だけが先へ進む。
  */
 function processQueuedVoiceLogs() {
+  VOICE_RUN_STARTED_MS = Date.now();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
   // 毎分動くこのトリガーに、6時間に1回の自己点検・修復を相乗りさせる(OpsStatus.gs)。
@@ -550,6 +551,8 @@ function processQueuedVoiceLogs() {
   });
   pending.forEach(function (record) {
     if (awaitingConfirm[record["LINEユーザーID"]]) return;
+    // 実行の残り時間が少ないときは、新しい録音に手を付けず次の実行に回す(6分の上限で途中終了させない)
+    if (voiceRunElapsedMs_() > VOICE_TRANSCRIBE_START_LIMIT_MS) return;
     var claimed;
     try {
       claimed = transitionVoiceLogStatus_(
@@ -572,6 +575,11 @@ function processQueuedVoiceLogs() {
       Logger.log("音声ログの処理に失敗しました(処理ID " + record["処理ID"] + "): " + error);
       if (GlowVoiceFileIntake.isBillingError(error)) {
         holdVoiceLogForBilling_(ss, record, error);
+        return;
+      }
+      // 送信の順番待ち・送信の途中など、待てば進むものは再試行の回数に数えず順番待ちへ戻す
+      if (error && error.waitOnly &&
+          transitionVoiceLogStatus_(ss, record.sheetRow, [VOICE_LOG_STATUS_PROCESSING], { "ステータス": "受信済み" })) {
         return;
       }
       var isTransient = GlowLineVoiceLogContent.isTransientProcessingError(error);
