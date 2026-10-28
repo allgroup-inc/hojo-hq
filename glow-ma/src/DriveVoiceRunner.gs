@@ -491,6 +491,27 @@ function recoverBillingSweptVoiceLogsOnce_(ss) {
 }
 
 /**
+ * 1回限りの復旧(2026-10-28 その2): 大きな録音の送信が、2つの実行の取り合いで
+ * 「wrong offset」「terminated」のエラーになった(10/28 17:43)。送信の記録を消して、順番待ちへ戻す。
+ */
+function recoverUploadRaceVoiceLogsOnce_(ss) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "VOICE_UPLOAD_RACE_RECOVERY_20261028_DONE";
+  if (props.getProperty(flag)) return;
+  var from = new Date(2026, 9, 26, 17, 0).getTime();
+  readVoiceLogRows_(ss).forEach(function (r) {
+    if (r["ステータス"] !== "エラー" || !/wrong offset|terminated/i.test(String(r["エラー内容"] || ""))) return;
+    var at = parseVoiceLogReceivedAt_(r["受信日時"]);
+    if (!at || at.getTime() < from) return;
+    if (transitionVoiceLogStatus_(ss, r.sheetRow, ["エラー"], { "ステータス": "受信済み", "エラー内容": "" })) {
+      props.deleteProperty(VOICE_UPLOAD_STATE_PREFIX + r["処理ID"]);
+      console.log("送信の取り合いでエラーになった録音を、順番待ちへ戻しました");
+    }
+  });
+  props.setProperty(flag, String(Date.now()));
+}
+
+/**
  * 1回限りの復旧(2026-10-28): 残高の補充後に要約まで進んだ福田さんの録音が、確認ボタンが押されないまま
  * 2時間の放置検知で取り消された(10/27 18:23・19:07)。録音は残っているので、順番待ちへ戻して
  * 要約し直し、確認ボタンを1件ずつ送り直す。

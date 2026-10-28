@@ -537,6 +537,7 @@ function processQueuedVoiceLogs() {
     recoverBillingSweptVoiceLogsOnce_(ss);
     recoverResumedVoiceLogsOnce_(ss);
     recoverUnconfirmedVoiceLogsOnce_(ss);
+    recoverUploadRaceVoiceLogsOnce_(ss);
     requeueBillingHeldVoiceLogs_(ss);
   } catch (error) {
     console.error("支払いエラーで止まった音声ログを再開できませんでした: " + error);
