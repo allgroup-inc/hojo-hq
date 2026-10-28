@@ -123,7 +123,17 @@
 
   var BILLING_WAIT_NOTE = "AIの利用枠(残高)の不足で待機中。補充されしだい自動で再開します";
 
+  /**
+   * 確認ボタンを押してもらう期限: 確認を送った日(日本時間)の翌日の正午(2026-10-29 小柳さん決裁)。
+   * それまでは2時間で取り消していたが、外回り中・夕方に届くと押せないまま消えていた。
+   */
+  function confirmDeadlineMs(startMs) {
+    var jst = new Date(Number(startMs) + 9 * 60 * 60 * 1000);
+    return Date.UTC(jst.getUTCFullYear(), jst.getUTCMonth(), jst.getUTCDate() + 1, 3, 0, 0);
+  }
+
   var api = {
+    confirmDeadlineMs: confirmDeadlineMs,
     isBillingError: isBillingError,
     BILLING_WAIT_NOTE: BILLING_WAIT_NOTE,
     DONE_PREFIX: DONE_PREFIX,

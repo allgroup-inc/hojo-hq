@@ -233,8 +233,7 @@ var VOICE_LOG_IN_PROGRESS_STATUSES = [
 /** 文字起こしが終わり、担当者のLINEでの確認を待っているステータス。 */
 var VOICE_LOG_CONFIRM_STATUSES = ["文字起こし済み", "企業選択待ち", "新規企業確認待ち", "最終確認待ち"];
 
-/** 途中で放置された音声ログを自動的に取り消すまでの時間(2時間)。 */
-var VOICE_LOG_STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000;
+// 途中で放置された音声ログを自動的に取り消す期限は、GlowVoiceFileIntake.confirmDeadlineMs(翌日の正午)で決める。
 var VOICE_LOG_STALE_ERROR_MESSAGE = "一定時間操作がなかったため自動的に取り消しました";
 // 処理を確保した時刻・文字起こしが終わった時刻(放置検知の起点)を、処理IDごとにスクリプト プロパティへ残す
 var VOICE_LOG_CLOCK_PREFIX = "VOICE_LOG_CLOCK_";
@@ -327,7 +326,7 @@ function parseVoiceLogReceivedAt_(value) {
  * LINEへの返信・プッシュ送信が失敗しても例外は投げない(ログのみ)ため、確認ボタンが
  * 担当者に届かないまま行が途中ステータスで残ることがある。その状態を放置すると
  * hasInFlightProcess_ が永久にその担当者の次の録音をブロックしてしまうので、
- * 受信から2時間以上経過した途中ステータスの行を「エラー」に倒して詰まりを解消する。
+ * 確認を送った日の翌日の正午を過ぎても確認されない行を「エラー」に倒して詰まりを解消する(2026-10-29 までは2時間)。
  * 既に反応しなかった担当者へ追加のLINE通知はしない(通知の連打を避けるため)。
  */
 function sweepStaleVoiceLogs_(ss) {
@@ -349,7 +348,8 @@ function sweepStaleVoiceLogs_(ss) {
       Logger.log("受信日時を解釈できないため放置検知の対象外としました(処理ID " + record["処理ID"] + ")。");
       return;
     }
-    if (now - receivedAt.getTime() < VOICE_LOG_STALE_THRESHOLD_MS) return;
+    // 確認ボタンは、送った日の翌日の正午まで待つ(2026-10-29 小柳さん決裁。それまでは2時間)
+    if (now < GlowVoiceFileIntake.confirmDeadlineMs(receivedAt.getTime())) return;
     var swept = markVoiceLogAsError_(
       ss, record.sheetRow, VOICE_LOG_IN_PROGRESS_STATUSES, VOICE_LOG_STALE_ERROR_MESSAGE
     );
@@ -893,7 +893,7 @@ function handleTypedCompanyName_(event) {
     lineReply_(replyToken, [GlowLineVoiceLogContent.buildAlreadyHandledMessage()]);
     return;
   }
-  // 担当者が返事をしたので、放置検知(2時間)はここから数え直す
+  // 担当者が返事をしたので、放置検知の期限(翌日の正午)はここから数え直す
   PropertiesService.getScriptProperties().setProperty(VOICE_LOG_CLOCK_PREFIX + record["処理ID"], String(Date.now()));
   lineReply_(replyToken, [reply]);
 }
