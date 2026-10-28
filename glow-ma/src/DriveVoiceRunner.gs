@@ -520,6 +520,26 @@ function recoverUnconfirmedVoiceLogsOnce_(ss) {
   var props = PropertiesService.getScriptProperties();
   var flag = "VOICE_CONFIRM_RECOVERY_20261028_DONE";
   if (props.getProperty(flag)) return;
+  requeueUnconfirmedCancelled_(ss, props);
+  props.setProperty(flag, String(Date.now()));
+}
+
+/**
+ * 1回限りの復旧(2026-10-29): 文字での返事の受け付け(10/28 20時)と期限の延長(10/29 2時)の前に、
+ * 旧ルール(2時間)で取り消された録音(10/28 19:41・19:43)を、もう一度要約して確認を送り直す。
+ * 夜中にLINEが届かないよう、10/29 8時以降に動かす。
+ */
+function recoverUnconfirmedVoiceLogsOnce2_(ss) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "VOICE_CONFIRM_RECOVERY_20261029_DONE";
+  if (props.getProperty(flag)) return;
+  if (Date.now() < Date.parse("2026-10-29T08:00:00+09:00")) return;
+  requeueUnconfirmedCancelled_(ss, props);
+  props.setProperty(flag, String(Date.now()));
+}
+
+/** 10/26 17:00 以降に受信し、確認されないまま取り消された行を、要約し直すため順番待ちへ戻す */
+function requeueUnconfirmedCancelled_(ss, props) {
   var from = new Date(2026, 9, 26, 17, 0).getTime();
   readVoiceLogRows_(ss).forEach(function (r) {
     if (r["ステータス"] !== "エラー" || r["エラー内容"] !== VOICE_LOG_STALE_ERROR_MESSAGE) return;
@@ -535,7 +555,6 @@ function recoverUnconfirmedVoiceLogsOnce_(ss) {
       console.log("確認されないまま取り消された録音を、要約し直すため順番待ちへ戻しました");
     }
   });
-  props.setProperty(flag, String(Date.now()));
 }
 
 /**
