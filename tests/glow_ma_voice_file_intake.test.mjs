@@ -95,3 +95,11 @@ test("Geminiの支払いエラー(402)を見分ける(一時的な混雑・ほ�
   assert.ok(!v.isBillingError("HTTP 4021"));
   assert.ok(!v.isBillingError(null));
 });
+
+test("確認ボタンの期限は、確認を送った日(日本時間)の翌日の正午", () => {
+  const jst = (s) => Date.parse(s + "+09:00");
+  assert.equal(v.confirmDeadlineMs(jst("2026-10-28T17:41:00")), jst("2026-10-29T12:00:00"));
+  assert.equal(v.confirmDeadlineMs(jst("2026-10-28T08:00:00")), jst("2026-10-29T12:00:00"));
+  assert.equal(v.confirmDeadlineMs(jst("2026-10-29T00:30:00")), jst("2026-10-30T12:00:00"), "日本時間の日付で数える(UTCでは前日)");
+  assert.equal(v.confirmDeadlineMs(jst("2026-12-31T23:59:00")), jst("2027-01-01T12:00:00"));
+});
