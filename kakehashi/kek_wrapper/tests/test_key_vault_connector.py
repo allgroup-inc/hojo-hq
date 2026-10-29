@@ -26,6 +26,7 @@ from kakehashi.kek_wrapper import (
     KeyVaultError,
     KeyVersion,
 )
+from kakehashi.kek_wrapper.models.role import Role
 from kakehashi.kek_wrapper.core import key_vault_connector as kvc
 from kakehashi.kek_wrapper.core.key_vault_connector import (
     KEY_VAULT_SCOPE,
@@ -451,9 +452,9 @@ def test_close_and_context_manager():
 def test_logAccess_without_collector_uses_logger(caplog):
     connector = KeyVaultConnector(VAULT_URL)
     with caplog.at_level(logging.INFO, logger=kvc.__name__):
-        run(connector.logAccess("GET_SECRET", "SUCCESS"))
+        run(connector.logAccess("GET_SECRET", "SUCCESS", resource_id="test-vault", actor_role=Role.OPERATOR))
     assert "event_type=KEY_ACCESS" in caplog.text
-    assert "actor_role=system" in caplog.text
+    assert "actor_role=operator" in caplog.text
     assert "operation=GET" in caplog.text
     assert "status=SUCCESS" in caplog.text
 
@@ -481,7 +482,7 @@ def test_audit_sink_receives_task_1_3_signature():
     assert list(inspect.signature(FakeAudit.recordEvent).parameters)[1:] == expected
     assert list(inspect.signature(kvc.AuditSink.recordEvent).parameters)[1:] == expected
 
-    h = Harness(actor_role="operator")
+    h = Harness(actor_role=Role.OPERATOR)
     h.client.put("kakehashi-kek", b64(os.urandom(32)))
     run(h.connector.getSecret("kakehashi-kek"))
     assert h.audit.events[-1] == {
@@ -500,12 +501,30 @@ def test_audit_sink_receives_task_1_3_signature():
 def test_logAccess_rejects_unknown_vocabulary():
     h = Harness()
     with pytest.raises(ValueError, match="operation"):
-        run(h.connector.logAccess("DELETE_EVERYTHING", "SUCCESS"))
+        run(h.connector.logAccess("DELETE_EVERYTHING", "SUCCESS", resource_id="test-vault", actor_role=Role.OPERATOR))
     with pytest.raises(ValueError, match="status"):
-        run(h.connector.logAccess("GET_SECRET", "SKIPPED"))
+        run(h.connector.logAccess("GET_SECRET", "SKIPPED", resource_id="test-vault", actor_role=Role.OPERATOR))
     assert h.audit.events == []
     with pytest.raises(ValueError, match="actor_role"):
         KeyVaultConnector(VAULT_URL, actor_role=" ")
+
+
+def test_logAccess_with_valid_role_enum():
+    """Role enum型の値でlogAccessが正常に動作することを検証。"""
+    h = Harness()
+    for role in [Role.ADMIN, Role.OPERATOR, Role.AUDITOR, Role.GUEST]:
+        h.audit.events.clear()
+        run(h.connector.logAccess("GET_SECRET", "SUCCESS", resource_id="vault-1", actor_role=role))
+        assert len(h.audit.events) == 1
+        assert h.audit.events[0]["actor_role"] == role.value
+        assert h.audit.events[0]["operation"] == "GET"
+
+
+def test_logAccess_rejects_invalid_role_type():
+    """文字列型のロール値を拒否することを検証。"""
+    h = Harness()
+    with pytest.raises(ValueError, match="Role enum member"):
+        run(h.connector.logAccess("GET_SECRET", "SUCCESS", resource_id="vault-1", actor_role="admin"))
 
 
 def test_no_stale_key_after_emergency_rotation():
