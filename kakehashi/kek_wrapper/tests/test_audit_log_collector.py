@@ -1153,6 +1153,181 @@ def test_export_failure_cause_is_logged_before_recording(crypto, caplog):
     assert "HTTP_500" in caplog.text and "0 of 1 entries delivered" in caplog.text
 
 
+# ------------------------------------------------ Task 2.3 Schema validation tests
+
+
+def test_valid_audit_entry_passes_schema():
+    """Task 2.3: Valid audit entry passes JSON schema validation."""
+    import json
+    from pathlib import Path
+
+    import jsonschema
+
+    # Load canonical schema
+    schema_path = Path(__file__).parent.parent.parent / "schemas" / "audit_log_schema.json"
+    with open(schema_path) as f:
+        schema = json.load(f)
+
+    # Create valid entry matching all required fields
+    valid_entry = {
+        "event_id": "evt-20261109-abcd1234",
+        "timestamp": "2026-11-09T09:00:00Z",
+        "event_type": "KEY_ACCESS",
+        "actor": "user-123",
+        "actor_role": "OPERATOR",
+        "resource_id": "secret-vault-id",
+        "operation": "GET",
+        "status": "SUCCESS",
+        "result": {},
+        "context": {},
+        "signature": "a" * 64,
+    }
+
+    # Should not raise ValidationError
+    jsonschema.validate(valid_entry, schema)
+
+    # Verify all required fields are present
+    assert all(field in valid_entry for field in ["event_id", "timestamp", "event_type", "actor", "actor_role", "resource_id", "operation", "status", "signature"])
+
+
+def test_missing_signature_fails_schema():
+    """Task 2.3: Entry missing signature field fails validation."""
+    import json
+    from pathlib import Path
+
+    import jsonschema
+
+    schema_path = Path(__file__).parent.parent.parent / "schemas" / "audit_log_schema.json"
+    with open(schema_path) as f:
+        schema = json.load(f)
+
+    # Create entry without signature (required field)
+    entry_without_sig = {
+        "event_id": "evt-20261109-abcd1234",
+        "timestamp": "2026-11-09T09:00:00Z",
+        "event_type": "KEY_ACCESS",
+        "actor": "user-123",
+        "actor_role": "OPERATOR",
+        "resource_id": "secret-vault-id",
+        "operation": "GET",
+        "status": "SUCCESS",
+        "result": {},
+        "context": {},
+    }
+
+    # Should raise ValidationError about missing signature
+    with pytest.raises(jsonschema.ValidationError) as exc_info:
+        jsonschema.validate(entry_without_sig, schema)
+
+    assert "signature" in str(exc_info.value.message).lower()
+
+
+def test_invalid_event_type_fails_schema():
+    """Task 2.3: Invalid event_type fails enum validation."""
+    import json
+    from pathlib import Path
+
+    import jsonschema
+
+    schema_path = Path(__file__).parent.parent.parent / "schemas" / "audit_log_schema.json"
+    with open(schema_path) as f:
+        schema = json.load(f)
+
+    # Create entry with invalid event_type
+    entry_invalid_type = {
+        "event_id": "evt-20261109-abcd1234",
+        "timestamp": "2026-11-09T09:00:00Z",
+        "event_type": "INVALID_TYPE",
+        "actor": "user-123",
+        "actor_role": "OPERATOR",
+        "resource_id": "secret-vault-id",
+        "operation": "GET",
+        "status": "SUCCESS",
+        "result": {},
+        "context": {},
+        "signature": "a" * 64,
+    }
+
+    # Should fail validation
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(entry_invalid_type, schema)
+
+    # Verify error mentions event_type and valid options
+    with pytest.raises(jsonschema.ValidationError) as exc_info:
+        jsonschema.validate(entry_invalid_type, schema)
+    error_msg = str(exc_info.value.message).lower()
+    assert "event_type" in error_msg or "enum" in error_msg
+
+
+def test_signature_format_validation():
+    """Task 2.3: Signature must be 64-char hex string."""
+    import json
+    from pathlib import Path
+
+    import jsonschema
+
+    schema_path = Path(__file__).parent.parent.parent / "schemas" / "audit_log_schema.json"
+    with open(schema_path) as f:
+        schema = json.load(f)
+
+    base_entry = {
+        "event_id": "evt-20261109-abcd1234",
+        "timestamp": "2026-11-09T09:00:00Z",
+        "event_type": "KEY_ACCESS",
+        "actor": "user-123",
+        "actor_role": "OPERATOR",
+        "resource_id": "secret-vault-id",
+        "operation": "GET",
+        "status": "SUCCESS",
+        "result": {},
+        "context": {},
+    }
+
+    # Invalid: too short
+    entry_short_sig = dict(base_entry, signature="abc")
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(entry_short_sig, schema)
+
+    # Valid: 64-char hex
+    valid_sig = "a" * 64
+    entry_valid_sig = dict(base_entry, signature=valid_sig)
+    jsonschema.validate(entry_valid_sig, schema)  # Should not raise
+
+
+def test_timestamp_iso8601_format():
+    """Task 2.3: Timestamp must be ISO 8601 with Z suffix."""
+    import json
+    from pathlib import Path
+
+    import jsonschema
+
+    schema_path = Path(__file__).parent.parent.parent / "schemas" / "audit_log_schema.json"
+    with open(schema_path) as f:
+        schema = json.load(f)
+
+    base_entry = {
+        "event_id": "evt-20261109-abcd1234",
+        "event_type": "KEY_ACCESS",
+        "actor": "user-123",
+        "actor_role": "OPERATOR",
+        "resource_id": "secret-vault-id",
+        "operation": "GET",
+        "status": "SUCCESS",
+        "result": {},
+        "context": {},
+        "signature": "a" * 64,
+    }
+
+    # Valid: ISO 8601 with Z
+    entry_valid_ts = dict(base_entry, timestamp="2026-10-29T03:15:00Z")
+    jsonschema.validate(entry_valid_ts, schema)  # Should not raise
+
+    # Invalid: non-ISO 8601 format
+    entry_invalid_ts = dict(base_entry, timestamp="10/29/2026 03:15:00")
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(entry_invalid_ts, schema)
+
+
 # ------------------------------------- real azure-storage-blob SDK (pins F1/F2)
 
 

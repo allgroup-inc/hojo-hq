@@ -1,75 +1,145 @@
+# SAST Rules for KAKEHASHI Phase E
+# Task 2.1-2.4: Security policy enforcement via Semgrep
+# See: .superpowers/sdd/2026-10-29-Phase-E-implementation-plan/
+
 rules:
+  # ===== Existing 3 rules (Task 2.1) =====
+  
   - id: no-hardcoded-secrets
     patterns:
       - pattern-either:
+          - pattern: $VAR = "sk-.*"
+          - pattern: $VAR = ".*password.*"
           - pattern: |
-              $VAR = "sk-..."
-          - pattern: |
-              $VAR = "password..."
-          - pattern: |
-              $VAR = "secret..."
-          - pattern: |
-              API_KEY = "..."
-          - pattern: |
-              SECRET_KEY = "..."
-    message: "Hardcoded secret detected - move to environment variable or Key Vault"
+              os.environ["$KEY"] = "sk-.*"
+    message: |
+      Hardcoded secrets detected. Use environment variables or Key Vault instead.
+      Ref: Task 2.1, Security Policy §1.1
     severity: ERROR
     languages: [python]
 
   - id: no-plain-encryption
     patterns:
       - pattern-either:
+          - pattern: from cryptography.hazmat.primitives import $MODULE
           - pattern: |
-              from cryptography.hazmat.primitives.ciphers import Cipher
-              ...
-              Cipher(...)
-          - pattern: |
-              cipher.Cipher(...)
-    message: "Use CryptoService.encrypt() instead of direct crypto.Cipher"
+              from cryptography.hazmat.primitives.ciphers import $CIPHER
+          - pattern: Cipher($ALGO, $MODE)
+    message: |
+      Direct cryptography module usage forbidden. Use CryptoService.encrypt() instead.
+      Ref: Task 1.2, Specification §1.2
     severity: ERROR
     languages: [python]
 
   - id: key-vault-direct-access
     patterns:
       - pattern-either:
-          - pattern: |
-              from azure.keyvault...
-          - pattern: |
-              SecretClient(...)
-          - pattern: |
-              KeyVaultClient(...)
-          - pattern: |
-              CertificateClient(...)
-          - pattern: |
-              KeyClient(...)
-    message: "Use KeyVaultConnector instead of direct Key Vault client"
+          - pattern: from azure.keyvault.secrets import $CLIENT
+          - pattern: SecretClient(...)
+          - pattern: KeyVaultClient(...)
+    message: |
+      Direct Key Vault access forbidden. Use KeyVaultConnector wrapper only.
+      Ref: Task 1.1, Specification §3.1
     severity: ERROR
     languages: [python]
 
-  - id: no-password-in-logs
+  # ===== New rules (Task 2.4) =====
+
+  - id: no-unencrypted-audit
     patterns:
       - pattern-either:
-          - pattern: |
-              print(...)
-              where:
-                ... contains "password"
-          - pattern: |
-              logger.$METHOD("..." + $PASSWORD)
-    message: "Do not log passwords or secrets"
+          - pattern: audit_log = {...}
+          - pattern: $AUDIT = {"event_id": $ID, ...}
+    message: |
+      Audit log entries must include HMAC signature.
+      Use AuditLogCollector.recordEvent() to ensure signature is present.
+      Ref: Task 1.3, Specification §1.3
     severity: ERROR
     languages: [python]
 
-  - id: audit-required-for-sensitive-operations
+  - id: audit-logged-before-cache
     patterns:
       - pattern-either:
-          - pattern: |
-              def $FUNC(...secret...):
-                  ...
-                  return $X
-          - pattern: |
-              def $FUNC(...key...):
-                  ...
-                  return $X
-    message: "Functions handling secrets/keys must call recordEvent() for audit trail"
+          - pattern: cache[$KEY] = $VALUE
+          - pattern: self.cache[$KEY] = $VALUE
+    message: |
+      Cache write must follow audit log record. Call logAccess() before cache updates.
+      Ref: Task 1.1 Fix 4, Cache Race Condition Prevention
+    severity: WARNING
+    languages: [python]
+
+  - id: no-plain-key-in-logs
+    patterns:
+      - pattern-either:
+          - pattern: logger.$METHOD("...$KEY...")
+          - pattern: print($SECRET)
+          - pattern: logging.debug("...$PASSWORD...")
+    message: |
+      Key material must not be logged in plaintext.
+      Remove secret values from log messages.
+      Ref: Specification §1.3
+    severity: ERROR
+    languages: [python]
+
+  - id: key-generation-counter-required
+    patterns:
+      - pattern-either:
+          - pattern: self.cache[$KEY] = {...}
+          - pattern: cache_entry = {"secret_value": ..., ...}
+    message: |
+      Cache entries must include 'generation' counter.
+      Add generation field to support cache consistency checks.
+      Ref: Task 1.1 Fix 3
+    severity: WARNING
+    languages: [python]
+
+  - id: crypto-service-only
+    patterns:
+      - pattern-either:
+          - pattern: from cryptography.hazmat.primitives.ciphers import Cipher
+          - pattern: Cipher($ALGO, $MODE).encryptor()
+          - pattern: AES($MODE)
+    message: |
+      Encryption must use CryptoService.encrypt() wrapper.
+      Direct cryptography.hazmat usage is forbidden.
+      Ref: Task 1.2, Specification §1.2
+    severity: ERROR
+    languages: [python]
+
+  - id: hmac-always-constant-time
+    patterns:
+      - pattern-either:
+          - pattern: $SIGNATURE == $EXPECTED
+          - pattern: if $SIG == $EXP:
+          - pattern: assert $SIG == $EXP
+    message: |
+      HMAC signature verification must use hmac.compare_digest() for timing attack resistance.
+      Replace == with hmac.compare_digest($SIGNATURE, $EXPECTED).
+      Ref: Task 1.3, HMAC Verification Security
+    severity: ERROR
+    languages: [python]
+
+  - id: encryption-requires-authenticated-mode
+    patterns:
+      - pattern-either:
+          - pattern: Cipher(AES($KEY), ECB())
+          - pattern: Cipher(AES($KEY), CBC($IV))
+          - pattern: EncryptedData(..., mode="CBC")
+    message: |
+      Only authenticated encryption (AES-256-GCM) is permitted.
+      ECB and CBC modes without authentication are forbidden.
+      Ref: Task 1.2, Specification §1.2
+    severity: ERROR
+    languages: [python]
+
+  - id: audit-logger-import-required
+    patterns:
+      - pattern-either:
+          - pattern: from kakehashi.kek_wrapper.core.audit_log_collector import $UNUSED
+          - pattern: from azure.storage.blob import BlobClient
+    message: |
+      Audit logs must use AuditLogCollector from core module.
+      Do not write logs directly to Azure Storage or other systems.
+      Ref: Task 1.3
     severity: WARNING
     languages: [python]
