@@ -307,7 +307,7 @@ def test_key_rotation_scenario():
 
     async def scenario():
         # data encrypted under v1 records its key version
-        record = EncryptedData(ciphertext=b"\x00" * 16, key_version=v1, key_name="kakehashi-kek")
+        record = EncryptedData(ciphertext=b"\x00" * 16, iv=b"\x00" * 16, key_version=v1, timestamp=T0)
         assert await h.connector.getSecret("kakehashi-kek") == original
 
         # day 30: scheduled rotation is not due yet
@@ -466,12 +466,12 @@ def test_models():
     naive = KeyVersion("kakehashi-kek", "v1", created_on=datetime(2026, 1, 1))
     assert naive.age(datetime(2026, 1, 2, tzinfo=timezone.utc)) == timedelta(days=1)
     assert kv.to_dict()["created_at"] is None
-    with pytest.raises(ValueError):
-        EncryptedData(ciphertext=b"x", key_version="", key_name="kakehashi-kek")
-    with pytest.raises(ValueError):
-        EncryptedData(ciphertext=b"x", key_version="v1", key_name="")
-    record = EncryptedData(ciphertext=b"x", key_version="v1", key_name="kakehashi-kek")
-    assert record.algorithm == "AES-256-GCM"
+    # Task 1.2 locked EncryptedData to exactly these four fields
+    from dataclasses import fields
+
+    assert [f.name for f in fields(EncryptedData)] == ["ciphertext", "iv", "key_version", "timestamp"]
+    record = EncryptedData(ciphertext=b"x", iv=b"\x00" * 16, key_version=None, timestamp=T0)
+    assert record.key_version is None
 
 
 def test_audit_sink_receives_task_1_3_signature():

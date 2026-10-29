@@ -6,7 +6,7 @@ implementation can import them without pulling in network clients.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
@@ -62,24 +62,31 @@ class KeyVersion:
         }
 
 
+#: IV length used by CryptoService for AES-256-GCM (Task 1.2 brief: 16 bytes).
+GCM_IV_LENGTH = 16
+
+#: Length of the GCM authentication tag appended to ``EncryptedData.ciphertext``.
+GCM_TAG_LENGTH = 16
+
+
 @dataclass(frozen=True)
 class EncryptedData:
-    """An encrypted record together with what is needed to decrypt it.
+    """An AES-256-GCM encrypted record (Phase E, Task 1.2).
 
-    ``key_version`` is mandatory: decryption must select the exact key version
-    that encrypted the record, otherwise data written before a rotation becomes
+    The four fields are locked for Task 1.3 (no additions).
+
+    ``ciphertext`` holds the GCM ciphertext followed by the 16-byte
+    authentication tag (the layout produced by ``cryptography``'s ``AESGCM``),
+    so the tag travels with the record without a separate field.
+
+    ``key_version`` records which KEK version encrypted the record. It is
+    Optional per the Task 1.2 brief, but callers that use rotated keys should
+    always set it: decryption must select the exact key version that
+    encrypted the record, otherwise data written before a rotation becomes
     unreadable (Phase E plan, critical risk 1).
     """
 
     ciphertext: bytes
-    key_version: str
-    key_name: str
-    nonce: bytes = b""
-    algorithm: str = DEFAULT_ALGORITHM
-    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-
-    def __post_init__(self) -> None:
-        if not self.key_version:
-            raise ValueError("EncryptedData.key_version is required")
-        if not self.key_name:
-            raise ValueError("EncryptedData.key_name is required")
+    iv: bytes  # 16 bytes (128 bits) for GCM
+    key_version: Optional[str]  # which KEK version was used
+    timestamp: datetime  # when encrypted (for audit)

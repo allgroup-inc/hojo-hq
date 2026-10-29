@@ -2,6 +2,7 @@
 azure-identity>=1.27.0
 azure-keyvault-secrets>=4.12.0
 aiohttp>=3.9          # transport for the async (aio) Azure SDK clients
+cryptography>=41.0.0  # AES-256-GCM and HMAC-SHA256 (Task 1.2)
 
 # tests
 pytest>=8
