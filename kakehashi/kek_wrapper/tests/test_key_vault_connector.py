@@ -133,14 +133,25 @@ class FakeSecretClient:
 
 
 class FakeAudit:
+    """Audit sink with exactly the planned Task 1.3 ``recordEvent`` signature.
+
+    No defaults and no ``**kwargs``: a call that omits or renames a parameter
+    fails with TypeError, as it would against the real AuditLogCollector.
+    """
+
     def __init__(self) -> None:
         self.events: List[dict] = []
+        self.fail: Optional[Exception] = None
 
-    async def recordEvent(self, event_type, resource_id, status, error_code=None):
+    async def recordEvent(self, event_type, actor_role, resource_id, operation, status, error_code):
+        if self.fail is not None:
+            raise self.fail
         self.events.append(
             {
                 "event_type": event_type,
+                "actor_role": actor_role,
                 "resource_id": resource_id,
+                "operation": operation,
                 "status": status,
                 "error_code": error_code,
             }
@@ -193,7 +204,8 @@ def test_authenticate_with_managed_identity(monkeypatch):
     # session proven usable by requesting a Key Vault token
     assert cred.scopes == [KEY_VAULT_SCOPE]
     assert h.client_factory_args == [(VAULT_URL, cred)]
-    assert h.audit.events[-1]["event_type"] == "KEY_VAULT_AUTHENTICATE"
+    assert h.audit.events[-1]["event_type"] == "KEY_ACCESS"
+    assert h.audit.events[-1]["operation"] == "GET"
     assert h.audit.events[-1]["status"] == "SUCCESS"
 
     # idempotent: a second call does not open another session
@@ -331,8 +343,11 @@ def test_key_rotation_scenario():
         return rotated, emergency
 
     run(scenario())
-    statuses = [e["status"] for e in h.audit.events if e["event_type"] == "KEY_VAULT_ROTATE_KEY"]
-    assert statuses == ["SKIPPED", "SUCCESS", "SUCCESS"]
+    rotations = [
+        (e["operation"], e["status"]) for e in h.audit.events if e["event_type"] == "KEY_ROTATE"
+    ]
+    # day-30 check (GET, nothing written), day-90 rotation, emergency rotation
+    assert rotations == [("GET", "SUCCESS"), ("PUT", "SUCCESS"), ("PUT", "SUCCESS")]
 
 
 # ------------------------------------------------------- supporting tests
@@ -437,7 +452,9 @@ def test_logAccess_without_collector_uses_logger(caplog):
     connector = KeyVaultConnector(VAULT_URL)
     with caplog.at_level(logging.INFO, logger=kvc.__name__):
         run(connector.logAccess("GET_SECRET", "SUCCESS"))
-    assert "event_type=KEY_VAULT_GET_SECRET" in caplog.text
+    assert "event_type=KEY_ACCESS" in caplog.text
+    assert "actor_role=system" in caplog.text
+    assert "operation=GET" in caplog.text
     assert "status=SUCCESS" in caplog.text
 
 
@@ -454,6 +471,149 @@ def test_models():
         EncryptedData(ciphertext=b"x", key_version="v1", key_name="")
     record = EncryptedData(ciphertext=b"x", key_version="v1", key_name="kakehashi-kek")
     assert record.algorithm == "AES-256-GCM"
+
+
+def test_audit_sink_receives_task_1_3_signature():
+    """logAccess calls recordEvent exactly as the Task 1.3 collector defines it."""
+    import inspect
+
+    expected = ["event_type", "actor_role", "resource_id", "operation", "status", "error_code"]
+    assert list(inspect.signature(FakeAudit.recordEvent).parameters)[1:] == expected
+    assert list(inspect.signature(kvc.AuditSink.recordEvent).parameters)[1:] == expected
+
+    h = Harness(actor_role="operator")
+    h.client.put("kakehashi-kek", b64(os.urandom(32)))
+    run(h.connector.getSecret("kakehashi-kek"))
+    assert h.audit.events[-1] == {
+        "event_type": "KEY_ACCESS",
+        "actor_role": "operator",
+        "resource_id": VAULT_URL.rstrip("/") + "/secrets/kakehashi-kek/v1",
+        "operation": "GET",
+        "status": "SUCCESS",
+        "error_code": None,
+    }
+    # every record stays inside the spec section 1.4 vocabulary
+    assert {e["event_type"] for e in h.audit.events} <= {"KEY_ACCESS", "KEY_ROTATE"}
+    assert {e["status"] for e in h.audit.events} <= {"SUCCESS", "FAILURE", "DENIED"}
+
+
+def test_logAccess_rejects_unknown_vocabulary():
+    h = Harness()
+    with pytest.raises(ValueError, match="operation"):
+        run(h.connector.logAccess("DELETE_EVERYTHING", "SUCCESS"))
+    with pytest.raises(ValueError, match="status"):
+        run(h.connector.logAccess("GET_SECRET", "SKIPPED"))
+    assert h.audit.events == []
+    with pytest.raises(ValueError, match="actor_role"):
+        KeyVaultConnector(VAULT_URL, actor_role=" ")
+
+
+def test_no_stale_key_after_emergency_rotation():
+    """A "latest" fetch in flight during an emergency rotation is not re-cached."""
+    h = Harness()
+    compromised = os.urandom(32)
+    h.client.put("kakehashi-kek", b64(compromised))
+
+    async def scenario():
+        await h.connector.authenticate()
+        real_get = h.client.get_secret
+        fetched = asyncio.Event()
+        release = asyncio.Event()
+        held = []
+
+        async def slow_get(name, version=None):
+            result = await real_get(name, version)
+            if not held:  # hold only the first fetch, with the pre-rotation value
+                held.append(result)
+                fetched.set()
+                await release.wait()
+            return result
+
+        h.client.get_secret = slow_get
+        in_flight = asyncio.create_task(h.connector.getSecret("kakehashi-kek"))
+        await fetched.wait()
+
+        rotated = await h.connector.rotateKey(force_emergency=True)
+        release.set()
+
+        # the in-flight call returns its (pre-rotation) value to its own caller ...
+        assert await in_flight == compromised
+        # ... but every call after the rotation gets the new key
+        after = [await h.connector.getSecret("kakehashi-kek") for _ in range(3)]
+        return rotated, after
+
+    rotated, after = run(scenario())
+    assert all(value != compromised for value in after)
+    latest_version = run(h.connector.getSecretWithVersion("kakehashi-kek"))[1]
+    assert latest_version.version == rotated["key_version"]
+
+
+def test_invalidate_during_fetch_skips_cache_write():
+    h = Harness()
+    h.client.put("kakehashi-kek", b64(os.urandom(32)))
+
+    async def scenario():
+        await h.connector.authenticate()
+        real_get = h.client.get_secret
+
+        async def get_then_invalidate(name, version=None):
+            result = await real_get(name, version)
+            h.connector.invalidate_cache()  # global invalidation mid-fetch
+            return result
+
+        h.client.get_secret = get_then_invalidate
+        await h.connector.getSecret("kakehashi-kek")
+        h.client.get_secret = real_get
+
+    run(scenario())
+    assert h.connector._cache == {}
+
+
+def test_failed_audit_prevents_cache_write():
+    h = Harness()
+    key = os.urandom(32)
+    h.client.put("kakehashi-kek", b64(key))
+    run(h.connector.authenticate())
+
+    h.audit.fail = RuntimeError("audit collector down")
+    with pytest.raises(RuntimeError, match="audit collector down"):
+        run(h.connector.getSecret("kakehashi-kek"))
+    # nothing cached: the next call goes to Key Vault again and is audited
+    assert h.connector._cache == {}
+    h.audit.fail = None
+    fetches = len(h.client.get_calls)
+    assert run(h.connector.getSecret("kakehashi-kek")) == key
+    assert len(h.client.get_calls) == fetches + 1
+    assert h.audit.events[-1]["status"] == "SUCCESS"
+
+
+def test_credential_factory_failure_is_audited():
+    audit = FakeAudit()
+
+    def broken_factory(client_id):
+        raise RuntimeError("no managed identity endpoint")
+
+    connector = KeyVaultConnector(
+        VAULT_URL, audit_collector=audit, credential_factory=broken_factory
+    )
+    with pytest.raises(KeyVaultAuthenticationError, match="RuntimeError"):
+        run(connector.authenticate())
+    assert audit.events[-1]["status"] == "FAILURE"
+    assert audit.events[-1]["event_type"] == "KEY_ACCESS"
+
+
+def test_failed_audit_prevents_authentication():
+    h = Harness()
+    h.audit.fail = RuntimeError("audit collector down")
+    with pytest.raises(RuntimeError, match="audit collector down"):
+        run(h.connector.authenticate())
+    assert not h.connector.is_authenticated
+    assert h.credentials[0].closed and h.client.closed
+
+    h.audit.fail = None
+    run(h.connector.authenticate())
+    assert h.connector.is_authenticated
+    assert len(h.credentials) == 2
 
 
 @pytest.mark.skipif(

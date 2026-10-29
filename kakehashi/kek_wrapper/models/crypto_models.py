@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import Any, Dict, Optional
 
 #: Scheduled rotation interval required by the Phase E spec (section 1.6).
 DEFAULT_ROTATION_INTERVAL_DAYS = 90
@@ -52,7 +52,7 @@ class KeyVersion:
             return True
         return age >= timedelta(days=rotation_interval_days)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "secret_name": self.secret_name,
             "key_version": self.version,
