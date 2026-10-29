@@ -121,7 +121,10 @@ function syncCtiCallHistoryCore_() {
       var cdrEnd = Utilities.formatDate(new Date(chunkEnd), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
       // CDRには同じBlueBeanを使う他の組織の通話も入っている。GLOWのスタッフの通話だけを残す
       var allCdrCalls = GlowCtiContent.parseCdrCsv(callBlueBeanCdr_(cdrStart, cdrEnd));
-      calls = GlowCtiContent.filterCallsByOperators(allCdrCalls, readCtiOperatorNames_()).filter(function (call) {
+      // 2026-10-30 ソフツー回答: 他組織の通話が返るのは仕様。氏名に加え、覚えたオペレーターIDでも照合する
+      var operatorNames = readCtiOperatorNames_();
+      var operatorPins = learnCtiOperatorPins_(allCdrCalls, operatorNames);
+      calls = GlowCtiContent.filterCallsByOperators(allCdrCalls, operatorNames, operatorPins).filter(function (call) {
         return call.call_status !== "発着信中" && call.call_status !== "通話中";
       });
       usedCdr = true;
@@ -263,6 +266,30 @@ function readCtiOperatorNames_() {
   String(PropertiesService.getScriptProperties().getProperty("BLUEBEAN_CDR_OPERATORS") || "")
     .split(/[,、]+/).forEach(function (n) { if (n.trim()) names.push(n.trim()); });
   return names;
+}
+
+/**
+ * スタッフの氏名→BlueBeanのオペレーターIDの対応(スクリプト プロパティ BLUEBEAN_CDR_OPERATOR_IDS、JSON)を読み、
+ * まだ覚えていない人の分を今回の通話から覚えて保存する。担当者のIDが変わったときは、このプロパティの該当行を消す。
+ * 覚えた氏名で別のIDの通話が来たら(同姓同名の他組織の人など)、取り込まずに警告だけ残す。
+ */
+function learnCtiOperatorPins_(calls, operatorNames) {
+  var props = PropertiesService.getScriptProperties();
+  var pins = {};
+  try { pins = JSON.parse(props.getProperty("BLUEBEAN_CDR_OPERATOR_IDS") || "{}") || {}; } catch (e) { pins = {}; }
+  var learned = GlowCtiContent.learnOperatorIds(calls, operatorNames, pins);
+  var learnedKeys = Object.keys(learned);
+  if (learnedKeys.length) {
+    learnedKeys.forEach(function (key) { pins[key] = learned[key]; });
+    props.setProperty("BLUEBEAN_CDR_OPERATOR_IDS", JSON.stringify(pins));
+    console.log("BlueBeanのオペレーターIDを覚えました: " + learnedKeys.length + "人");
+  }
+  var nameOnly = GlowCtiContent.filterCallsByOperators(calls, operatorNames).length;
+  var pinned = GlowCtiContent.filterCallsByOperators(calls, operatorNames, pins).length;
+  if (nameOnly !== pinned) {
+    console.warn("スタッフと同じ氏名で、別のオペレーターIDの通話が " + (nameOnly - pinned) + "件ありました(取り込みません)");
+  }
+  return pins;
 }
 
 /**

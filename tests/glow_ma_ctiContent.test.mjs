@@ -227,3 +227,34 @@ test("filterCallsByOperators: スタッフの氏名(空白は無視)と一致す
   assert.equal(cti.filterCallsByOperators(calls, []).length, 0);
   assert.equal(cti.operatorPersonName("佐藤　一郎(ext004)"), "佐藤一郎");
 });
+
+test("operatorIdOf: 表示名の括弧からオペレーターIDを取り出す", () => {
+  assert.equal(cti.operatorIdOf("山田　花子(ext001)"), "ext001");
+  assert.equal(cti.operatorIdOf("山田 花子（ext001）"), "ext001");
+  assert.equal(cti.operatorIdOf("山田　花子"), "");
+  assert.equal(cti.operatorIdOf(""), "");
+});
+
+test("filterCallsByOperators: 覚えたIDがあれば、同姓同名でもIDが違う他組織の通話は除く", () => {
+  const calls = [
+    { operator_name: "山田　花子(ext001)" },
+    { operator_name: "山田　花子(zz999)" },
+    { operator_name: "佐藤　一郎(ext004)" }
+  ];
+  const noPin = cti.filterCallsByOperators(calls, ["山田　花子"]);
+  assert.equal(noPin.length, 2, "IDを覚える前は氏名だけで照合");
+  const pinned = cti.filterCallsByOperators(calls, ["山田　花子"], { "山田花子": "ext001" });
+  assert.deepEqual(pinned.map((c) => c.operator_name), ["山田　花子(ext001)"]);
+});
+
+test("learnOperatorIds: スタッフの氏名→IDを覚える。同じ氏名で別のIDが混ざるときは覚えない", () => {
+  const calls = [
+    { operator_name: "山田　花子(ext001)" },
+    { operator_name: "山田　花子(ext001)" },
+    { operator_name: "佐藤　一郎(ext004)" },
+    { operator_name: "佐藤　一郎(zz999)" },
+    { operator_name: "他組織　太郎(x1)" }
+  ];
+  assert.deepEqual(cti.learnOperatorIds(calls, ["山田　花子", "佐藤　一郎"], {}), { "山田花子": "ext001" });
+  assert.deepEqual(cti.learnOperatorIds(calls, ["山田　花子"], { "山田花子": "ext001" }), {}, "覚え済みは上書きしない");
+});
