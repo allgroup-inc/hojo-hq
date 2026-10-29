@@ -1,0 +1,66 @@
+name: Scheduled Key Rotation
+
+on:
+  schedule:
+    # Monthly at 03:00 UTC (12:00 JST in winter, 11:00 JST in summer)
+    - cron: '0 3 1 * *'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  rotation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r kakehashi/requirements.txt
+          pip install apscheduler
+
+      - name: Run key rotation
+        env:
+          AZURE_KEY_VAULT_URL: ${{ secrets.AZURE_KEY_VAULT_URL }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          COSMOS_DB_ENDPOINT: ${{ secrets.COSMOS_DB_ENDPOINT }}
+          COSMOS_DB_KEY: ${{ secrets.COSMOS_DB_KEY }}
+        run: |
+          python -m kakehashi.kek_wrapper.core.rotation_runner
+
+      - name: Run tests
+        run: |
+          pip install pytest pytest-asyncio pytest-cov
+          pytest kakehashi/kek_wrapper/tests/test_key_rotation*.py -v --cov=kakehashi.kek_wrapper.core --cov-report=term-missing
+
+      - name: Check test coverage
+        run: |
+          pytest kakehashi/kek_wrapper/tests/test_key_rotation*.py --cov=kakehashi.kek_wrapper.core --cov-fail-under=85
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "Key rotation completed successfully at $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          echo "::notice::Scheduled key rotation job succeeded"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Key rotation job failed. Check logs for details."

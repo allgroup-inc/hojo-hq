@@ -604,3 +604,22 @@ class KeyVaultConnector:
     def _resource(self, name: str, version: Optional[str]) -> str:
         base = f"{self.vault_url.rstrip('/')}/secrets/{name}"
         return f"{base}/{version}" if version else base
+
+    async def get_current_version(self) -> int:
+        """Get the current key version number as an integer.
+
+        Fetches the latest version from Key Vault and extracts the version
+        number from the version string (e.g., "kakehashi-kek/v1" -> 1).
+
+        Returns:
+            The version number as an int.
+
+        Raises:
+            KeyVaultError: if version format is invalid.
+        """
+        _, key_version = await self.getSecretWithVersion(self.kek_secret_name)
+        # Extract version number from string like "kakehashi-kek/v1"
+        match = re.search(r"/v(\d+)$", key_version.version)
+        if match:
+            return int(match.group(1))
+        raise KeyVaultError(f"Invalid key version format: {key_version.version}")
