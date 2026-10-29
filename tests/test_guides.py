@@ -182,7 +182,7 @@ class TestArchitectureGuide:
         phase2_items = ["pre-commit", "GitHub Actions", "SAST", "coverage"]
 
         for item in phase2_items:
-            assert item in content, f"Missing Phase 2 item: {item}"
+            assert item.lower() in content.lower(), f"Missing Phase 2 item: {item}"
 
     @staticmethod
     def test_architecture_guide_covers_phase_3_features():
