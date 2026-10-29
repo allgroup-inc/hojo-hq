@@ -115,9 +115,7 @@ class TestSecurityErrorTriggersAuditLog:
 
     def test_audit_failure_propagates(self, error_handler, mock_audit_collector):
         """If audit_collector.recordEvent raises AuditError, it must propagate."""
-        mock_audit_collector.recordEvent.side_effect = AuditError(
-            "cannot write audit entry"
-        )
+        mock_audit_collector.recordEvent.side_effect = AuditError("cannot write audit entry")
 
         with pytest.raises(AuditError, match="cannot write audit entry"):
             run(
@@ -241,6 +239,7 @@ class TestCascadingAlerts:
 
     def test_cascading_alerts_escalation_tracker(self, error_handler, mock_audit_collector):
         """Alert history must track consecutive failures for escalation."""
+
         # Build alert history by calling alertOnFailure directly
         async def simulate_cascading():
             await error_handler.alertOnFailure("HIGH", "Failure 1")
@@ -258,9 +257,7 @@ class TestCascadingAlerts:
 class TestAlertSeverityAndEscalation:
     """Test alert severity assignment and escalation rules."""
 
-    def test_critical_severity_for_rotation_forced(
-        self, error_handler, mock_audit_collector
-    ):
+    def test_critical_severity_for_rotation_forced(self, error_handler, mock_audit_collector):
         """ROTATION_FORCED must result in CRITICAL alert."""
         with patch.object(error_handler, "alertOnFailure") as mock_alert:
             run(
@@ -290,9 +287,7 @@ class TestAlertSeverityAndEscalation:
 class TestAlertOnFailure:
     """Test alertOnFailure method directly."""
 
-    def test_alert_on_failure_critical_sends_immediately(
-        self, error_handler, temp_alert_file
-    ):
+    def test_alert_on_failure_critical_sends_immediately(self, error_handler, temp_alert_file):
         """CRITICAL alert should call _send_alert_impl immediately."""
         with patch.object(error_handler, "_send_alert_impl") as mock_send:
             run(error_handler.alertOnFailure("CRITICAL", "Critical failure"))
@@ -306,9 +301,7 @@ class TestAlertOnFailure:
 
         mock_write.assert_called_once()
 
-    def test_alert_on_failure_high_sends_alert(
-        self, error_handler, temp_alert_file
-    ):
+    def test_alert_on_failure_high_sends_alert(self, error_handler, temp_alert_file):
         """HIGH alert should call _send_alert_impl."""
         with patch.object(error_handler, "_send_alert_impl") as mock_send:
             run(error_handler.alertOnFailure("HIGH", "High failure"))
@@ -329,9 +322,7 @@ class TestAlertOnFailure:
 class TestSlackFallback:
     """Test Slack integration and fallback to file."""
 
-    def test_slack_fallback_when_unavailable(
-        self, error_handler, temp_alert_file, monkeypatch
-    ):
+    def test_slack_fallback_when_unavailable(self, error_handler, temp_alert_file, monkeypatch):
         """If Slack unavailable, _write_to_file should be called."""
         # Set webhook URL so _send_slack is actually called
         error_handler._slack_webhook_url = "https://hooks.slack.com/services/test"
@@ -346,9 +337,7 @@ class TestSlackFallback:
         mock_slack.assert_called_once()
         mock_write.assert_called_once()
 
-    def test_write_to_file_without_slack_webhook(
-        self, error_handler, temp_alert_file, monkeypatch
-    ):
+    def test_write_to_file_without_slack_webhook(self, error_handler, temp_alert_file, monkeypatch):
         """If SLACK_WEBHOOK_URL not set, use file fallback."""
         error_handler._slack_webhook_url = None
         with patch.object(error_handler, "_write_to_file") as mock_write:
@@ -406,9 +395,7 @@ class TestRateLimiting:
         async def simulate():
             # Manually add old alerts outside RATE_LIMIT_WINDOW
             now = datetime.now(timezone.utc)
-            old_time = now - RATE_LIMIT_WINDOW - __import__(
-                "datetime"
-            ).timedelta(seconds=1)
+            old_time = now - RATE_LIMIT_WINDOW - __import__("datetime").timedelta(seconds=1)
             error_handler._alert_history = [
                 (old_time, "HIGH", "Old alert"),
             ]
@@ -421,8 +408,6 @@ class TestRateLimiting:
             assert error_handler._alert_history[0][2] == "New alert"
 
         run(simulate())
-
-
 
 
 class TestFileLogging:
@@ -512,9 +497,7 @@ class TestEmailAlerting:
 
         run(simulate())
 
-    def test_alert_email_failure_fallback_to_file(
-        self, error_handler, temp_alert_file
-    ):
+    def test_alert_email_failure_fallback_to_file(self, error_handler, temp_alert_file):
         """When both Slack and email fail, file fallback triggered."""
         error_handler._slack_webhook_url = "https://hooks.slack.com/test"
         error_handler._email_to = "alert@example.com"
@@ -534,9 +517,7 @@ class TestEmailAlerting:
 
         run(simulate())
 
-    def test_alert_both_services_missing_file_only(
-        self, error_handler, temp_alert_file
-    ):
+    def test_alert_both_services_missing_file_only(self, error_handler, temp_alert_file):
         """Without Slack or email, file logging is only option."""
         error_handler._slack_webhook_url = None
         error_handler._email_to = None
@@ -590,9 +571,7 @@ class TestEmailAlerting:
         async def simulate():
             error_handler._email_to = "alert@example.com"
 
-            with patch.object(
-                ErrorHandler, "_sync_send_email", return_value=True
-            ) as mock_sync:
+            with patch.object(ErrorHandler, "_sync_send_email", return_value=True) as mock_sync:
                 result = await error_handler._send_email("CRITICAL", "Test")
 
             assert result is True

@@ -143,6 +143,7 @@ def _is_append_position_conflict(exc: BaseException) -> bool:
     code = getattr(code, "value", code)
     return code == APPEND_POSITION_ERROR_CODE or getattr(exc, "status_code", None) == 412
 
+
 #: ``(url, body, headers) -> HTTP status``. Injected in tests; aiohttp by default.
 SiemSender = Callable[[str, bytes, Mapping[str, str]], Awaitable[int]]
 
@@ -456,7 +457,9 @@ class AuditLogCollector:
         if not isinstance(actor, str) or not actor:
             raise ValueError("actor must be a non-empty string")
         if not isinstance(system_role, Role):
-            raise ValueError(f"system_role must be a Role enum member, got {type(system_role).__name__}")
+            raise ValueError(
+                f"system_role must be a Role enum member, got {type(system_role).__name__}"
+            )
         if siem_batch_size < 1:
             raise ValueError("siem_batch_size must be positive")
         try:

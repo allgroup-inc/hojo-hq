@@ -433,7 +433,9 @@ def test_signature_datetime_normalised_to_utc_z(service):
 
     with_micros = datetime(2026, 11, 6, 9, 0, 0, 123456, tzinfo=timezone.utc)
     signature = service.signLogEntry({"timestamp": with_micros})
-    assert service.validateSignature({"timestamp": "2026-11-06T09:00:00.123456Z"}, signature) is True
+    assert (
+        service.validateSignature({"timestamp": "2026-11-06T09:00:00.123456Z"}, signature) is True
+    )
 
 
 def test_signature_rejects_naive_datetime(service):

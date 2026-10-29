@@ -83,7 +83,9 @@ class AuditLogEntry:
                 raise ValueError(f"{name} must be a non-empty string")
         if not isinstance(self.timestamp, datetime) or self.timestamp.utcoffset() is None:
             raise ValueError("timestamp must be a timezone-aware datetime")
-        object.__setattr__(self, "event_type", _enum_value(EventType, self.event_type, "event_type"))
+        object.__setattr__(
+            self, "event_type", _enum_value(EventType, self.event_type, "event_type")
+        )
         object.__setattr__(self, "actor_role", _enum_value(Role, self.actor_role, "actor_role"))
         object.__setattr__(self, "status", _enum_value(Status, self.status, "status"))
         for name in ("result", "context"):

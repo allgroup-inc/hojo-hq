@@ -26,7 +26,7 @@ class EventType(str, Enum):
     # (AUTHENTICATE / GET_SECRET -> KEY_ACCESS, ROTATE_KEY(_CHECK) -> KEY_ROTATE).
     KEY_ACCESS = "KEY_ACCESS"
     KEY_ROTATE = "KEY_ROTATE"
-    SECRET_DECRYPT = "SECRET_DECRYPT"
+    SECRET_DECRYPT = "SECRET_DECRYPT"  # nosec B105 - enum member, not a secret
     USER_LOGIN = "USER_LOGIN"
     DATA_EXPORT = "DATA_EXPORT"
     COMPLIANCE_CHECK = "COMPLIANCE_CHECK"
@@ -35,7 +35,7 @@ class EventType(str, Enum):
 
     # Finer-grained Key Vault events (Task 1.3 brief).
     KEY_VAULT_AUTH = "KEY_VAULT_AUTH"
-    KEY_VAULT_GET_SECRET = "KEY_VAULT_GET_SECRET"
+    KEY_VAULT_GET_SECRET = "KEY_VAULT_GET_SECRET"  # nosec B105 - enum member, not a secret
     KEY_VAULT_ROTATE = "KEY_VAULT_ROTATE"
 
     # CryptoService operations (Task 1.2).

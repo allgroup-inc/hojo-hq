@@ -26,9 +26,7 @@ async def mock_key_vault_client():
     client = AsyncMock()
     # Return value for get_secret: mock with 32-byte base64-encoded key
     secret_value = base64.b64encode(b"abcdefghijklmnopqrstuvwxyz012345").decode("ascii")
-    client.get_secret = AsyncMock(
-        return_value=MagicMock(value=secret_value)
-    )
+    client.get_secret = AsyncMock(return_value=MagicMock(value=secret_value))
     # Mock list_properties_of_secrets for key version enumeration
     client.list_properties_of_secrets = AsyncMock(return_value=[])
     return client

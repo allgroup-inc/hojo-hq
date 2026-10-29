@@ -31,7 +31,9 @@ __all__ = ["SecurityError", "AuditError", "ErrorHandler"]
 logger = logging.getLogger(__name__)
 
 #: Fallback alert file when Slack is unavailable.
-FALLBACK_ALERT_FILE = "/tmp/kakehashi_alerts.log"
+FALLBACK_ALERT_FILE = (
+    "/tmp/kakehashi_alerts.log"  # nosec B108 - fallback for alerts when Slack unavailable
+)
 
 #: Rate limiting: max alerts in 1 minute before consolidation.
 RATE_LIMIT_THRESHOLD = 5
@@ -141,8 +143,7 @@ class ErrorHandler:
             # Prune old alerts outside the 1-minute window
             cutoff = now - RATE_LIMIT_WINDOW
             self._alert_history = [
-                (ts, sev, msg) for ts, sev, msg in self._alert_history
-                if ts > cutoff
+                (ts, sev, msg) for ts, sev, msg in self._alert_history if ts > cutoff
             ]
 
             # Check rate limit: if 5+ alerts in the last minute, escalate
@@ -230,9 +231,7 @@ class ErrorHandler:
                 headers={"Content-Type": "application/json"},
             ) as resp:
                 if not 200 <= resp.status < 300:
-                    raise RuntimeError(
-                        f"Slack returned HTTP {resp.status}: {await resp.text()}"
-                    )
+                    raise RuntimeError(f"Slack returned HTTP {resp.status}: {await resp.text()}")
                 logger.info("Alert sent to Slack: %s", message)
 
     async def _send_email(self, severity: str, message: str) -> bool:

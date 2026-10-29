@@ -78,7 +78,7 @@ class FakeCredential:
         self.scopes.extend(scopes)
         if self.fail:
             raise RuntimeError("ManagedIdentityCredential authentication unavailable")
-        return SimpleNamespace(token="fake-token", expires_on=0)
+        return SimpleNamespace(token="fake-token", expires_on=0)  # nosec B106 - test mock
 
     async def close(self) -> None:
         self.closed = True
@@ -214,7 +214,6 @@ def test_authenticate_with_managed_identity(monkeypatch):
     assert len(h.credentials) == 1
 
 
-
 def test_default_factories_use_managed_identity_sdk():
     """Without injected factories the connector builds the real async SDK objects."""
     ManagedIdentityCredential = pytest.importorskip("azure.identity.aio").ManagedIdentityCredential
@@ -307,7 +306,9 @@ def test_key_rotation_scenario():
 
     async def scenario():
         # data encrypted under v1 records its key version
-        record = EncryptedData(ciphertext=b"\x00" * 16, iv=b"\x00" * 16, key_version=v1, timestamp=T0)
+        record = EncryptedData(
+            ciphertext=b"\x00" * 16, iv=b"\x00" * 16, key_version=v1, timestamp=T0
+        )
         assert await h.connector.getSecret("kakehashi-kek") == original
 
         # day 30: scheduled rotation is not due yet
@@ -373,7 +374,7 @@ def test_constructor_validation(monkeypatch):
     with pytest.raises(ValueError):
         KeyVaultConnector(VAULT_URL, cache_ttl_seconds=0)
     with pytest.raises(ValueError):
-        KeyVaultConnector(VAULT_URL, kek_secret_name="bad_name")
+        KeyVaultConnector(VAULT_URL, kek_secret_name="bad_name")  # nosec B106 - test data
     monkeypatch.setenv("AZURE_KEY_VAULT_URL", VAULT_URL)
     monkeypatch.delenv("AZURE_CLIENT_ID", raising=False)
     connector = KeyVaultConnector()
@@ -452,7 +453,11 @@ def test_close_and_context_manager():
 def test_logAccess_without_collector_uses_logger(caplog):
     connector = KeyVaultConnector(VAULT_URL)
     with caplog.at_level(logging.INFO, logger=kvc.__name__):
-        run(connector.logAccess("GET_SECRET", "SUCCESS", resource_id="test-vault", actor_role=Role.OPERATOR))
+        run(
+            connector.logAccess(
+                "GET_SECRET", "SUCCESS", resource_id="test-vault", actor_role=Role.OPERATOR
+            )
+        )
     assert "event_type=KEY_ACCESS" in caplog.text
     assert "actor_role=operator" in caplog.text
     assert "operation=GET" in caplog.text
@@ -469,7 +474,12 @@ def test_models():
     # Task 1.2 locked EncryptedData to exactly these four fields
     from dataclasses import fields
 
-    assert [f.name for f in fields(EncryptedData)] == ["ciphertext", "iv", "key_version", "timestamp"]
+    assert [f.name for f in fields(EncryptedData)] == [
+        "ciphertext",
+        "iv",
+        "key_version",
+        "timestamp",
+    ]
     record = EncryptedData(ciphertext=b"x", iv=b"\x00" * 16, key_version=None, timestamp=T0)
     assert record.key_version is None
 
@@ -501,9 +511,17 @@ def test_audit_sink_receives_task_1_3_signature():
 def test_logAccess_rejects_unknown_vocabulary():
     h = Harness()
     with pytest.raises(ValueError, match="operation"):
-        run(h.connector.logAccess("DELETE_EVERYTHING", "SUCCESS", resource_id="test-vault", actor_role=Role.OPERATOR))
+        run(
+            h.connector.logAccess(
+                "DELETE_EVERYTHING", "SUCCESS", resource_id="test-vault", actor_role=Role.OPERATOR
+            )
+        )
     with pytest.raises(ValueError, match="status"):
-        run(h.connector.logAccess("GET_SECRET", "SKIPPED", resource_id="test-vault", actor_role=Role.OPERATOR))
+        run(
+            h.connector.logAccess(
+                "GET_SECRET", "SKIPPED", resource_id="test-vault", actor_role=Role.OPERATOR
+            )
+        )
     assert h.audit.events == []
     with pytest.raises(ValueError, match="actor_role"):
         KeyVaultConnector(VAULT_URL, actor_role=" ")
@@ -524,7 +542,11 @@ def test_logAccess_rejects_invalid_role_type():
     """文字列型のロール値を拒否することを検証。"""
     h = Harness()
     with pytest.raises(ValueError, match="Role enum member"):
-        run(h.connector.logAccess("GET_SECRET", "SUCCESS", resource_id="vault-1", actor_role="admin"))
+        run(
+            h.connector.logAccess(
+                "GET_SECRET", "SUCCESS", resource_id="vault-1", actor_role="admin"
+            )
+        )
 
 
 def test_no_stale_key_after_emergency_rotation():

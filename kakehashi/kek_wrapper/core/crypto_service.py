@@ -59,7 +59,7 @@ MIN_HMAC_KEY_LENGTH = 32
 HMAC_SHA256_HEX_LENGTH = 64
 
 #: Key Vault secret holding the audit HMAC key (Task 1.3 brief).
-DEFAULT_HMAC_SECRET_NAME = "audit-hmac-key"
+DEFAULT_HMAC_SECRET_NAME = "audit-hmac-key"  # nosec B105 - config name, not a secret
 
 #: Field of a log entry that carries its own signature; excluded when signing.
 SIGNATURE_FIELD = "signature"
@@ -288,9 +288,7 @@ class CryptoService:
         if self._hmac_key is None:
             # a missing key is a configuration error, not a failed signature:
             # reporting it as "invalid" would hide the misconfiguration
-            raise RuntimeError(
-                "CryptoService has no HMAC key; pass hmac_key or use fromKeyVault()"
-            )
+            raise RuntimeError("CryptoService has no HMAC key; pass hmac_key or use fromKeyVault()")
         return self._hmac_key
 
     def signLogEntry(self, log_entry: Mapping[str, Any]) -> str:

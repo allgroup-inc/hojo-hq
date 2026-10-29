@@ -1,0 +1,7 @@
+general:
+  exclude_dirs:
+    - '/test'
+    - '/tests'
+    - '.venv'
+  skips:
+    - B101

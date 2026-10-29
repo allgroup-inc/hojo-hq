@@ -87,7 +87,7 @@ DEFAULT_CACHE_TTL_SECONDS = 300
 KEY_VAULT_SCOPE = "https://vault.azure.net/.default"
 
 #: Default name of the key-encryption-key secret rotated by ``rotateKey``.
-DEFAULT_KEK_SECRET_NAME = "kakehashi-kek"
+DEFAULT_KEK_SECRET_NAME = "kakehashi-kek"  # nosec B105 - vault secret name, not a secret
 
 #: AES-256 key length in bytes.
 KEY_LENGTH_BYTES = 32
@@ -119,7 +119,7 @@ RESOURCE_OP_PUT = "PUT"
 
 # Operations accepted by ``logAccess``.
 OP_AUTHENTICATE = "AUTHENTICATE"
-OP_GET_SECRET = "GET_SECRET"
+OP_GET_SECRET = "GET_SECRET"  # nosec B105 - operation name, not a secret
 OP_ROTATE_KEY = "ROTATE_KEY"
 OP_ROTATE_KEY_CHECK = "ROTATE_KEY_CHECK"  # scheduled rotation, key not yet due
 
@@ -456,7 +456,11 @@ class KeyVaultConnector:
                 )
         except Exception as exc:
             await self.logAccess(
-                OP_ROTATE_KEY, STATUS_FAILURE, resource_id=resource, actor_role=self.actor_role, error_code=type(exc).__name__
+                OP_ROTATE_KEY,
+                STATUS_FAILURE,
+                resource_id=resource,
+                actor_role=self.actor_role,
+                error_code=type(exc).__name__,
             )
             raise KeyVaultError(f"key rotation for {name!r} failed: {type(exc).__name__}") from exc
 
@@ -489,7 +493,10 @@ class KeyVaultConnector:
 
         new_version = self._key_version_from(name, new_secret, emergency=force_emergency)
         await self.logAccess(
-            OP_ROTATE_KEY, STATUS_SUCCESS, resource_id=self._resource(name, new_version.version), actor_role=self.actor_role
+            OP_ROTATE_KEY,
+            STATUS_SUCCESS,
+            resource_id=self._resource(name, new_version.version),
+            actor_role=self.actor_role,
         )
         result = new_version.to_dict()
         if result["created_at"] is None:

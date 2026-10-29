@@ -50,6 +50,4 @@ class Role(Enum):
             return cls(value)
         except ValueError:
             allowed = ", ".join(f'"{r.value}"' for r in cls)
-            raise ValueError(
-                f"invalid role {value!r}. allowed roles: {allowed}"
-            ) from None
+            raise ValueError(f"invalid role {value!r}. allowed roles: {allowed}") from None

@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+# Formatter
+black --check kakehashi/
+
+# Type checker
+mypy kakehashi/ --strict
+
+# Security checker
+bandit -r kakehashi/ -c .bandit --skip B101
+
+# Import sorter
+isort --check-only kakehashi/
+
+echo "✅ All pre-commit checks passed"

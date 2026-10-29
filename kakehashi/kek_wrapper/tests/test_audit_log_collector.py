@@ -43,7 +43,9 @@ from kakehashi.kek_wrapper.models.audit_event import FIELD_NAMES, parse_utc_time
 
 T0 = datetime(2026, 11, 9, 9, 0, tzinfo=timezone.utc)
 SIEM_URL = "https://mock-siem.example.com"
-SECRET_URL = "https://kakehashi-staging.vault.azure.net/secrets/kakehashi-kek/v1"
+SECRET_URL = (
+    "https://kakehashi-staging.vault.azure.net/secrets/kakehashi-kek/v1"  # nosec B105 - test URL
+)
 EVENT_ID_RE = re.compile(r"^evt-\d{8}-[0-9a-f]{32}$")
 
 #: Field list of the Task 1.3 brief, in the brief's order.
@@ -272,7 +274,9 @@ def test_export_to_siem_batch(collector, store, siem):
         assert sent == original
         assert sent["signature"] == original["signature"]
     assert all(call["headers"]["X-Audit-Batch-Id"] == result["batch_id"] for call in siem.calls)
-    assert all(ev["source"] == "kakehashi-phase-e" for c in siem.calls for ev in c["body"]["events"])
+    assert all(
+        ev["source"] == "kakehashi-phase-e" for c in siem.calls for ev in c["body"]["events"]
+    )
 
     # the export itself is audited
     last = store.entries()[-1]
@@ -362,7 +366,11 @@ def test_recordEvent_stores_normalized_result_and_context(collector, store, hmac
     )
     entry = store.entries()[0]
     assert entry["actor"] == "user_abc123"
-    assert entry["result"] == {"ciphertext_length": 48, "versions": ["v1", "v2"], "error_code": None}
+    assert entry["result"] == {
+        "ciphertext_length": 48,
+        "versions": ["v1", "v2"],
+        "error_code": None,
+    }
     assert entry["context"]["requested_at"] == "2026-11-09T09:00:00Z"
     # what was signed is what was stored
     assert entry["signature"] == reference_hmac(hmac_key, entry)
@@ -449,7 +457,10 @@ def test_fromKeyVault_pinned_version_and_name(store, hmac_key):
     connector = FakeConnector(value=hmac_key)
     run(
         AuditLogCollector.fromKeyVault(
-            connector, store, hmac_secret_name="audit-hmac-key-2", hmac_key_version="v7"
+            connector,
+            store,
+            hmac_secret_name="audit-hmac-key-2",
+            hmac_key_version="v7",  # nosec B106 - test data
         )
     )
     assert connector.calls == [("audit-hmac-key-2", "v7")]
@@ -474,7 +485,7 @@ def test_key_vault_connector_writes_through_collector(collector, store):
 
     class Credential:
         async def get_token(self, *scopes):
-            return SimpleNamespace(token="t", expires_on=0)
+            return SimpleNamespace(token="t", expires_on=0)  # nosec B106 - test mock
 
         async def close(self):
             pass
@@ -1038,8 +1049,13 @@ def test_azure_store_configuration():
         AzureAppendBlobAuditStore(FakeContainer(), prefix="/")
     with pytest.raises(ValueError, match="max_blocks"):
         AzureAppendBlobAuditStore(FakeContainer(), max_blocks=0)
-    store = AzureAppendBlobAuditStore(FakeContainer(), prefix="/kakehashi/audit/", writer_id="host 1/pid:2")
-    assert store.blob_name(date(2026, 11, 9), 3) == "kakehashi/audit/2026/11/09/host-1-pid-2-0003.jsonl"
+    store = AzureAppendBlobAuditStore(
+        FakeContainer(), prefix="/kakehashi/audit/", writer_id="host 1/pid:2"
+    )
+    assert (
+        store.blob_name(date(2026, 11, 9), 3)
+        == "kakehashi/audit/2026/11/09/host-1-pid-2-0003.jsonl"
+    )
     default = AzureAppendBlobAuditStore(FakeContainer())
     assert re.fullmatch(r"[0-9A-Za-z._-]+-\d+", default.writer_id)
     container = FakeContainer()
@@ -1067,7 +1083,9 @@ def test_collector_end_to_end_on_append_blob(crypto):
     async def main():
         await asyncio.gather(
             *(
-                collector.recordEvent(EventType.DATA_READ, Role.AUDITOR, f"r{i}", "GET", Status.SUCCESS)
+                collector.recordEvent(
+                    EventType.DATA_READ, Role.AUDITOR, f"r{i}", "GET", Status.SUCCESS
+                )
                 for i in range(20)
             )
         )
@@ -1090,9 +1108,13 @@ def test_read_day_filters_one_writer(crypto):
     """N1: one writer's log validates as a sequence; the mixed day log is not one."""
     container = FakeContainer()
     clock = StepClock()
-    a = AuditLogCollector(crypto, AzureAppendBlobAuditStore(container, writer_id="a"), utc_now=clock)
+    a = AuditLogCollector(
+        crypto, AzureAppendBlobAuditStore(container, writer_id="a"), utc_now=clock
+    )
     # writer "a-2" shares the "a-" prefix: the filter must not pick it up
-    b = AuditLogCollector(crypto, AzureAppendBlobAuditStore(container, writer_id="a-2"), utc_now=clock)
+    b = AuditLogCollector(
+        crypto, AzureAppendBlobAuditStore(container, writer_id="a-2"), utc_now=clock
+    )
     for i in range(3):
         record(b, resource_id=f"b{i}")
         record(a, resource_id=f"a{i}")
@@ -1220,7 +1242,7 @@ class FakeBlobService:
         blob = self.blobs.get(path)
 
         if request.method == "GET" and comp == "list":  # List Blobs
-            from xml.sax.saxutils import escape
+            from xml.sax.saxutils import escape  # nosec B406 - test mock only
 
             prefix = parse_qs(parts.query).get("prefix", [""])[0]
             container = path.rstrip("/")
@@ -1295,7 +1317,10 @@ class FakeBlobService:
                     chunk,
                 )
             return self._respond(
-                request, 200, {"Content-Length": str(len(data)), "x-ms-blob-type": blob["type"]}, data
+                request,
+                200,
+                {"Content-Length": str(len(data)), "x-ms-blob-type": blob["type"]},
+                data,
             )
         raise AssertionError(f"unexpected request {request.method} {path} comp={comp}")
 
@@ -1396,7 +1421,9 @@ def test_real_sdk_collector_end_to_end(blob_service, crypto):
     async def main():
         await asyncio.gather(
             *(
-                collector.recordEvent(EventType.KEY_ACCESS, Role.OPERATOR, f"r{i}", "GET", Status.SUCCESS)
+                collector.recordEvent(
+                    EventType.KEY_ACCESS, Role.OPERATOR, f"r{i}", "GET", Status.SUCCESS
+                )
                 for i in range(10)
             )
         )
