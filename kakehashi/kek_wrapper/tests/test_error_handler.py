@@ -483,3 +483,119 @@ class TestSendAlertImpl:
                 assert error_handler._write_to_file.called
 
         run(simulate())
+
+
+class TestEmailAlerting:
+    """Test email alerting support."""
+
+    def test_email_to_read_from_env(self, error_handler, monkeypatch):
+        """ALERT_EMAIL_TO should be read from environment variable."""
+        monkeypatch.setenv("ALERT_EMAIL_TO", "alert@example.com")
+        handler = ErrorHandler(error_handler._audit_collector)
+        assert handler._email_to == "alert@example.com"
+
+    def test_alert_send_email_on_slack_failure(self, error_handler, temp_alert_file):
+        """When Slack fails, email should be attempted."""
+        error_handler._slack_webhook_url = "https://hooks.slack.com/test"
+        error_handler._email_to = "alert@example.com"
+
+        async def simulate():
+            with patch.object(error_handler, "_send_slack") as mock_slack:
+                mock_slack.side_effect = RuntimeError("Slack connection failed")
+                with patch.object(error_handler, "_send_email") as mock_email:
+                    mock_email.return_value = True
+                    await error_handler._send_alert_impl("HIGH", "Test message")
+
+            # Should have attempted Slack, then email
+            mock_slack.assert_called_once()
+            mock_email.assert_called_once()
+
+        run(simulate())
+
+    def test_alert_email_failure_fallback_to_file(
+        self, error_handler, temp_alert_file
+    ):
+        """When both Slack and email fail, file fallback triggered."""
+        error_handler._slack_webhook_url = "https://hooks.slack.com/test"
+        error_handler._email_to = "alert@example.com"
+
+        async def simulate():
+            with patch.object(error_handler, "_send_slack") as mock_slack:
+                mock_slack.side_effect = RuntimeError("Slack failed")
+                with patch.object(error_handler, "_send_email") as mock_email:
+                    mock_email.return_value = False
+                    with patch.object(error_handler, "_write_to_file") as mock_file:
+                        await error_handler._send_alert_impl("HIGH", "Test")
+
+            # All three should be attempted
+            mock_slack.assert_called_once()
+            mock_email.assert_called_once()
+            mock_file.assert_called_once()
+
+        run(simulate())
+
+    def test_alert_both_services_missing_file_only(
+        self, error_handler, temp_alert_file
+    ):
+        """Without Slack or email, file logging is only option."""
+        error_handler._slack_webhook_url = None
+        error_handler._email_to = None
+
+        async def simulate():
+            with patch.object(error_handler, "_write_to_file") as mock_file:
+                await error_handler._send_alert_impl("HIGH", "Test message")
+
+            # Only file should be called
+            mock_file.assert_called_once()
+
+        run(simulate())
+
+    def test_sync_send_email_success(self, temp_alert_file, monkeypatch):
+        """_sync_send_email should return True on successful send."""
+        monkeypatch.setenv("ALERT_EMAIL_TO", "alert@example.com")
+        monkeypatch.setenv("SMTP_HOST", "localhost")
+        monkeypatch.setenv("SMTP_PORT", "25")
+
+        with patch("smtplib.SMTP") as mock_smtp:
+            # Mock successful SMTP send
+            mock_server = MagicMock()
+            mock_smtp.return_value.__enter__.return_value = mock_server
+
+            result = ErrorHandler._sync_send_email("CRITICAL", "Test message")
+
+            assert result is True
+            mock_server.sendmail.assert_called_once()
+
+    def test_sync_send_email_no_recipient(self):
+        """_sync_send_email returns False if ALERT_EMAIL_TO not set."""
+        with patch.dict(os.environ, {}, clear=True):
+            result = ErrorHandler._sync_send_email("HIGH", "Test")
+            assert result is False
+
+    def test_sync_send_email_smtp_failure(self, monkeypatch):
+        """_sync_send_email returns False on SMTP error."""
+        monkeypatch.setenv("ALERT_EMAIL_TO", "alert@example.com")
+
+        with patch("smtplib.SMTP") as mock_smtp:
+            # Mock SMTP failure
+            mock_smtp.side_effect = ConnectionError("SMTP connection refused")
+
+            result = ErrorHandler._sync_send_email("HIGH", "Test")
+
+            assert result is False
+
+    def test_send_email_async_wrapper(self, error_handler):
+        """_send_email should return result of sync email send."""
+
+        async def simulate():
+            error_handler._email_to = "alert@example.com"
+
+            with patch.object(
+                ErrorHandler, "_sync_send_email", return_value=True
+            ) as mock_sync:
+                result = await error_handler._send_email("CRITICAL", "Test")
+
+            assert result is True
+            mock_sync.assert_called_once()
+
+        run(simulate())

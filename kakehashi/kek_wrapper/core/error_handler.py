@@ -63,6 +63,7 @@ class ErrorHandler:
         self._alert_history: list[tuple[datetime, str, str]] = []  # (timestamp, severity, message)
         self._lock = asyncio.Lock()
         self._slack_webhook_url = os.getenv("SLACK_WEBHOOK_URL")
+        self._email_to = os.getenv("ALERT_EMAIL_TO")
 
     async def logSecurityEvent(self, error_type: str, context: dict) -> None:
         """Log a security event to audit trail and send alert.
@@ -168,22 +169,34 @@ class ErrorHandler:
                 await self._write_to_file(message)
 
     async def _send_alert_impl(self, severity: str, message: str) -> None:
-        """Send alert via Slack or fallback to file.
+        """Send alert via Slack, email, or fallback to file.
+
+        Tries Slack first (if URL set), then email (if recipient set), then file.
 
         Args:
             severity: "CRITICAL", "HIGH", or "MEDIUM".
             message: alert message.
         """
+        # Try Slack
         if self._slack_webhook_url:
             try:
                 await self._send_slack(severity, message)
+                return
             except Exception as exc:
-                logger.warning("Slack alert failed (%s); falling back to file: %s",
-                              type(exc).__name__, exc)
-                await self._write_to_file(message)
-        else:
-            logger.debug("SLACK_WEBHOOK_URL not set; using file fallback")
-            await self._write_to_file(message)
+                logger.warning("Slack alert failed (%s): %s", type(exc).__name__, exc)
+
+        # Try Email
+        if self._email_to:
+            try:
+                success = await self._send_email(severity, message)
+                if success:
+                    return
+            except Exception as exc:
+                logger.warning("Email alert failed (%s): %s", type(exc).__name__, exc)
+
+        # Fallback to file
+        logger.debug("All alert channels unavailable; using file fallback")
+        await self._write_to_file(message)
 
     async def _send_slack(self, severity: str, message: str) -> None:
         """Send alert to Slack via webhook.
@@ -221,6 +234,78 @@ class ErrorHandler:
                         f"Slack returned HTTP {resp.status}: {await resp.text()}"
                     )
                 logger.info("Alert sent to Slack: %s", message)
+
+    async def _send_email(self, severity: str, message: str) -> bool:
+        """Send alert via email (non-blocking).
+
+        Args:
+            severity: "CRITICAL", "HIGH", or "MEDIUM".
+            message: alert message.
+
+        Returns:
+            True if email was sent successfully, False otherwise.
+            Does not raise; logs errors and returns False so file fallback can proceed.
+        """
+        if not self._email_to:
+            return False
+
+        try:
+            loop = asyncio.get_event_loop()
+            success = await loop.run_in_executor(
+                None,
+                self._sync_send_email,
+                severity,
+                message,
+            )
+            if success:
+                logger.info("Alert sent to email: %s", self._email_to)
+            return success
+        except Exception as exc:
+            logger.error("Email send failed: %s", exc)
+            return False
+
+    @staticmethod
+    def _sync_send_email(severity: str, message: str) -> bool:
+        """Synchronous email send (called in executor).
+
+        Uses smtplib to send email via localhost or configured SMTP server.
+        Gracefully handles configuration errors and send failures.
+
+        Args:
+            severity: alert severity level.
+            message: alert message body.
+
+        Returns:
+            True if sent successfully, False otherwise.
+        """
+        try:
+            import smtplib
+            from email.mime.text import MIMEText
+
+            email_to = os.getenv("ALERT_EMAIL_TO")
+            if not email_to:
+                return False
+
+            # Build email
+            subject = f"[KAKEHASHI Alert] {severity} Security Event"
+            body = f"Severity: {severity}\n\nMessage:\n{message}\n\nSent: {datetime.now(timezone.utc).isoformat()}"
+            msg = MIMEText(body)
+            msg["Subject"] = subject
+            msg["From"] = "kakehashi-alerts@localhost"
+            msg["To"] = email_to
+
+            # Send via SMTP (localhost:25 by default, or env var SMTP_HOST:SMTP_PORT)
+            smtp_host = os.getenv("SMTP_HOST", "localhost")
+            smtp_port = int(os.getenv("SMTP_PORT", "25"))
+            timeout = 10
+
+            with smtplib.SMTP(smtp_host, smtp_port, timeout=timeout) as server:
+                server.sendmail("kakehashi-alerts@localhost", [email_to], msg.as_string())
+            return True
+
+        except Exception as exc:
+            logger.error("Failed to send email: %s", exc)
+            return False
 
     async def _write_to_file(self, message: str) -> None:
         """Write alert to fallback file (non-blocking).
