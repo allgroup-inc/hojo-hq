@@ -1,0 +1,31 @@
+name: Pre-Production Sanity Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  sanity_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -e kakehashi/ && pip install pytest-asyncio pytest-cov
+      - name: Run integration smoke tests
+        run: |
+          pytest kakehashi/tests/integration/ -v --tb=short -k "encrypt_decrypt or admin_full_access"
+      - name: Decision
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ GO: Pre-production sanity check passed"
+            exit 0
+          else
+            echo "❌ NO-GO: Pre-production sanity check failed"
+            exit 1
+          fi
