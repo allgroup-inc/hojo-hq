@@ -81,7 +81,7 @@ def _require_aes_key(key: Any) -> bytes:
         raise ValueError(
             f"AES-256-GCM requires a {AES_256_KEY_LENGTH}-byte key, got {len(key)} bytes"
         )
-    return key
+    return key  # type: ignore[no-any-return]
 
 
 def _optional_associated_data(value: Any) -> Optional[bytes]:
@@ -104,7 +104,7 @@ def _aes_gcm_seal(
     iv = _require_bytes(iv, "iv")
     if not iv:
         raise ValueError("iv must not be empty")
-    return AESGCM(key).encrypt(iv, _require_bytes(plaintext, "plaintext"), associated_data)
+    return AESGCM(key).encrypt(iv, _require_bytes(plaintext, "plaintext"), associated_data)  # type: ignore[no-any-return]
 
 
 def _aes_gcm_open(
@@ -119,7 +119,7 @@ def _aes_gcm_open(
     if len(sealed) < GCM_TAG_LENGTH:
         raise ValueError("ciphertext is shorter than the GCM authentication tag")
     try:
-        return AESGCM(key).decrypt(iv, sealed, associated_data)
+        return AESGCM(key).decrypt(iv, sealed, associated_data)  # type: ignore[no-any-return]
     except InvalidTag:
         raise ValueError(
             "AES-GCM authentication failed: wrong key, wrong IV or tampered ciphertext"
@@ -299,9 +299,9 @@ class CryptoService:
         """
         mac = crypto_hmac.HMAC(self._require_hmac_key(), hashes.SHA256())
         mac.update(canonicalize_log_entry(log_entry))
-        return mac.finalize().hex()
+        return mac.finalize().hex()  # type: ignore[no-any-return]
 
-    def validateSignature(self, log_entry: dict, signature: str) -> bool:
+    def validateSignature(self, log_entry: dict[str, Any], signature: str) -> bool:
         """Validate the HMAC-SHA256 signature on an audit log entry.
 
         Returns True only when ``signature`` is the hex HMAC-SHA256 of the

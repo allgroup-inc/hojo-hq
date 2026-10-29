@@ -26,12 +26,12 @@ from kakehashi.kek_wrapper import (
     KeyVaultError,
     KeyVersion,
 )
-from kakehashi.kek_wrapper.models.role import Role
 from kakehashi.kek_wrapper.core import key_vault_connector as kvc
 from kakehashi.kek_wrapper.core.key_vault_connector import (
     KEY_VAULT_SCOPE,
     ResourceNotFoundError,
 )
+from kakehashi.kek_wrapper.models.role import Role
 
 VAULT_URL = "https://kakehashi-staging.vault.azure.net/"
 T0 = datetime(2026, 11, 3, 9, 0, tzinfo=timezone.utc)

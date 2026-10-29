@@ -67,7 +67,7 @@ class ErrorHandler:
         self._slack_webhook_url = os.getenv("SLACK_WEBHOOK_URL")
         self._email_to = os.getenv("ALERT_EMAIL_TO")
 
-    async def logSecurityEvent(self, error_type: str, context: dict) -> None:
+    async def logSecurityEvent(self, error_type: str, context: dict[str, Any]) -> None:
         """Log a security event to audit trail and send alert.
 
         Args:
@@ -327,7 +327,7 @@ class ErrorHandler:
             logger.error("Failed to write alert to file: %s", exc)
 
     @staticmethod
-    def _sync_write_to_file(entry: dict) -> None:
+    def _sync_write_to_file(entry: dict[str, Any]) -> None:
         """Synchronous file write (called in executor).
 
         Args:

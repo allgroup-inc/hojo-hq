@@ -406,7 +406,7 @@ class KeyVaultConnector:
 
     # -------------------------------------------------------------- rotation
 
-    async def rotateKey(self, force_emergency: bool = False) -> dict:
+    async def rotateKey(self, force_emergency: bool = False) -> dict[str, Any]:
         """Create a new version of the KEK secret.
 
         Scheduled call (``force_emergency=False``): rotates only when the current

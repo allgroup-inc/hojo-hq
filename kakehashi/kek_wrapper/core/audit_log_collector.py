@@ -184,7 +184,7 @@ def _normalize_json_object(value: Optional[Mapping[str, Any]], name: str) -> Dic
     if not isinstance(value, Mapping):
         raise ValueError(f"{name} must be a dict, got {type(value).__name__}")
     try:
-        return json.loads(
+        return json.loads(  # type: ignore[no-any-return]
             json.dumps(dict(value), allow_nan=False, ensure_ascii=False, default=_json_default)
         )
     except (TypeError, ValueError) as exc:
@@ -424,7 +424,7 @@ async def _aiohttp_post(url: str, body: bytes, headers: Mapping[str, str]) -> in
     timeout = aiohttp.ClientTimeout(total=30)
     async with aiohttp.ClientSession(timeout=timeout) as session:
         async with session.post(url, data=body, headers=dict(headers)) as response:
-            return response.status
+            return response.status  # type: ignore[no-any-return]
 
 
 class AuditLogCollector:
@@ -549,7 +549,7 @@ class AuditLogCollector:
             timestamp=datetime.now(timezone.utc),
             event_type=event_type,
             actor=actor,
-            actor_role=actor_role,
+            actor_role=actor_role,  # type: ignore[arg-type]
             resource_id=resource_id,
             operation=operation,
             status=status,
@@ -562,7 +562,7 @@ class AuditLogCollector:
                 timestamp=timestamp,
                 event_type=event_type,
                 actor=actor,
-                actor_role=actor_role,
+                actor_role=actor_role,  # type: ignore[arg-type]
                 resource_id=resource_id,
                 operation=operation,
                 status=status,
@@ -641,7 +641,7 @@ class AuditLogCollector:
             EventType.AUDIT_VALIDATE, resource, OPERATION_VALIDATE, Status.FAILURE, reason
         )
 
-    async def validateLog(self, log_entry: dict) -> bool:
+    async def validateLog(self, log_entry: dict[str, Any]) -> bool:
         """Validate one stored entry: exact schema, canonical values, HMAC signature.
 
         Returns False for a missing/extra field, an out-of-vocabulary value, a
@@ -668,10 +668,10 @@ class AuditLogCollector:
         locked schema has no hash chain); append-only storage and WORM
         retention are what prevent deletion.
         """
-        seen: set = set()
+        seen: set[str] = set()
         previous: Optional[datetime] = None
         for entry in log_entries:
-            if not await self.validateLog(entry):
+            if not await self.validateLog(entry):  # type: ignore[arg-type]
                 return False
             timestamp = parse_utc_timestamp(entry["timestamp"])
             reason = None
@@ -721,7 +721,9 @@ class AuditLogCollector:
             "audit_log": dict(entry),  # unchanged content, signature included
         }
 
-    async def exportToSIEM(self, siem_endpoint: str, log_entries: List[dict]) -> dict:
+    async def exportToSIEM(
+        self, siem_endpoint: str, log_entries: List[dict[str, Any]]
+    ) -> dict[str, Any]:
         """Export a batch of audit entries to an external SIEM over HTTPS.
 
         Entries are sent unchanged (signature included), each wrapped in the
