@@ -353,6 +353,7 @@ class KeyVaultConnector:
                 OP_GET_SECRET,
                 STATUS_FAILURE,
                 resource_id=self._resource(secret_name, key_version),
+                actor_role=self.actor_role,
                 error_code=type(exc).__name__,
             )
             if isinstance(exc, KeyVaultError):
@@ -370,6 +371,7 @@ class KeyVaultConnector:
             OP_GET_SECRET,
             STATUS_SUCCESS,
             resource_id=self._resource(secret_name, version.version or key_version),
+            actor_role=self.actor_role,
         )
 
         # Skip the cache write if the secret was invalidated (e.g. by an
@@ -454,7 +456,7 @@ class KeyVaultConnector:
                 )
         except Exception as exc:
             await self.logAccess(
-                OP_ROTATE_KEY, STATUS_FAILURE, resource_id=resource, error_code=type(exc).__name__
+                OP_ROTATE_KEY, STATUS_FAILURE, resource_id=resource, actor_role=self.actor_role, error_code=type(exc).__name__
             )
             raise KeyVaultError(f"key rotation for {name!r} failed: {type(exc).__name__}") from exc
 
@@ -473,6 +475,7 @@ class KeyVaultConnector:
                 OP_ROTATE_KEY_CHECK,
                 STATUS_SUCCESS,
                 resource_id=self._resource(name, current.version),
+                actor_role=self.actor_role,
             )
             result = current.to_dict()
             result.update(previous_version=None, rotated=False, emergency=False)
@@ -486,7 +489,7 @@ class KeyVaultConnector:
 
         new_version = self._key_version_from(name, new_secret, emergency=force_emergency)
         await self.logAccess(
-            OP_ROTATE_KEY, STATUS_SUCCESS, resource_id=self._resource(name, new_version.version)
+            OP_ROTATE_KEY, STATUS_SUCCESS, resource_id=self._resource(name, new_version.version), actor_role=self.actor_role
         )
         result = new_version.to_dict()
         if result["created_at"] is None:
