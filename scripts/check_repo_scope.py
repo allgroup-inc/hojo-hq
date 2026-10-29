@@ -39,6 +39,10 @@ FORBIDDEN = [
     "underwriting_full",
     "お引受のめやす",
     "引受けの目安",
+    # 顧客の中央台帳(KM-顧客ID・契約/保全/営業情報・架電禁止マスタ)。
+    # 2026-10-29 公開ブランチ上で検知。docs/議事_20261029_顧客台帳システムの公開リポジトリ混入.md
+    "kakehashi/",
+    "KAKEHASHI",
 ]
 
 # 例外。移設したことを案内する文書など、名前に禁止語を含むが置いてよいもの。
@@ -93,6 +97,10 @@ def selftest():
         ("insurance-underwriting-tool.html", True),   # 2026-08-24 公開終了(代理店限定資料由来)
         ("docs/insurance/underwriting_full.json", True),
         ("【なないろ生命】お引受のめやす(2026.4)公開用 (6).pdf", True),
+        ("kakehashi/kek_wrapper/core/crypto_service.py", True),
+        ("docs/KAKEHASHI_仕様_v0.1_軸向けメモ.md", True),
+        ("docs/superpowers/specs/2026-10-29-Phase-E-KAKEHASHI-design.md", True),
+        ("docs/GLOW世界の架け橋_SNS自動投稿セットアップ.md", False),  # 同音の別物
         # 置いてよいもの
         ("docs/移設済み_アポ管理と営業指名_2026-08-22.md", False),
         ("site/index.html", False),
