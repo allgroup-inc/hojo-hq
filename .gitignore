@@ -14,6 +14,7 @@ playwright-report/
 Thumbs.db
 *.swp
 __pycache__/
+.coverage
 
 .claude/tools/.env
 .claude/settings.local.json
