@@ -39,8 +39,18 @@ PII(C3 修正・2026-09-30。議事: docs/議事_20261001_結果マガ購入者�
 
 認証・接続:
 - 環境変数: NOTE_API_TOKEN, GOOGLE_APPLICATION_CREDENTIALS, KEKKA_LINE_CHANNEL_ACCESS_TOKEN
-- GA4 プロパティ ID: 引数 or 環境変数 GA4_PROPERTY_ID
+- GA4 プロパティ ID: 引数 or 環境変数 GA4_KEKKA_PROPERTY_ID(結果マガ専用)
 - LINE チャネルID: 引数 or 環境変数 KEKKA_CHANNEL_ID、無ければ line_api.KEKKA_CHANNEL_ID
+
+GA4 の事業分離(2026-10-29 小柳さん決裁「結果マガはフクギイロのGA4を使用しない」):
+- 共有の GA4_PROPERTY_ID(もらいわすれ堂プロパティ)は結果マガの計測先として読まない。
+  旧実装はこれを読んでいたため、note のトークンが入った時点でフクギイロのサイト全体の
+  セッション・PVを「結果マガの数字」として公開ファイルへ書くところだった
+- 結果マガ専用の GA4_KEKKA_PROPERTY_ID が無ければ「計測未設定」として API を叩く前に止める。
+  0 件として記録しない(未設定はゼロの成果ではない)
+- 他事業のプロパティ(GA4_PROPERTY_ID / GA4_MIKATA_PROPERTY_ID / GA4_GLOW_PROPERTY_ID)と
+  同じ値が指定されたら止める。他事業の環境変数は、この照合のためだけに読む
+- プロパティIDの値はエラー文にもログにも出さない(どの変数と一致したかの名前だけを出す)
 
 リトライ: Tasks 1-3 の関数が既にリトライを実装しているため、ここでは行わない。
   エラーは上位へ(ワークフロー側で失敗 Issue を起票する)
@@ -79,9 +89,50 @@ _WEEK_INPUT_RE = re.compile(r"^([0-9]{4})-W([0-9]{1,2})$")
 # 公開ファイルへ書く note のフィールド(ホワイトリスト)。buyer_ids / buyer_profiles は含めない
 _PUBLIC_NOTE_FIELDS = ("week", "views_by_article", "total_likes", "total_sales_jpy")
 
+# 結果マガ専用の GA4 プロパティID(数字)。共有の GA4_PROPERTY_ID は読まない
+KEKKA_PROPERTY_ENV = "GA4_KEKKA_PROPERTY_ID"
+# 他事業の GA4 プロパティID。結果マガの計測先と一致しないことの照合にだけ使う
+OTHER_BUSINESS_PROPERTY_ENVS = (
+    "GA4_PROPERTY_ID",          # もらいわすれ堂(株式会社フクギイロ)
+    "GA4_MIKATA_PROPERTY_ID",   # 沖縄企業のミカタ
+    "GA4_GLOW_PROPERTY_ID",     # GLOW 全体(新設予定)
+)
+_PROPERTY_ID_RE = re.compile(r"^[0-9]{6,12}$")
+
 
 class CollectError(Exception):
     """集約処理の失敗(API側のエラー、入力不正、ファイルI/O)をまとめる。"""
+
+
+class GA4NotConfiguredError(CollectError):
+    """結果マガ専用の GA4 計測先が未設定(0 件の成果ではない)。"""
+
+
+def resolve_kekka_property_id(property_id: Optional[str] = None) -> str:
+    """結果マガの GA4 プロパティIDを決め、他事業のプロパティでないことを確かめる。
+
+    値そのものはエラー文に入れない(公開の Actions ログに出るため)。
+    """
+    pid = (property_id or os.environ.get(KEKKA_PROPERTY_ENV, "")).strip()
+    if not pid:
+        raise GA4NotConfiguredError(
+            f"結果マガの GA4 計測先が未設定です(引数 property_id または環境変数 {KEKKA_PROPERTY_ENV})。"
+            "計測未設定のため、この週は記録しません(0 件としては扱いません)"
+        )
+    if pid.upper().startswith("G-"):
+        raise CollectError(
+            "GA4 の測定ID(G- で始まる値)が指定されています。Data API にはプロパティID(数字)が必要です"
+        )
+    if not _PROPERTY_ID_RE.match(pid):
+        raise CollectError("GA4 プロパティIDの形式が正しくありません(数字のみ)")
+    for env_name in OTHER_BUSINESS_PROPERTY_ENVS:
+        other = os.environ.get(env_name, "").strip()
+        if other and other == pid:
+            raise CollectError(
+                f"結果マガの GA4 計測先が他事業のプロパティ({env_name})と同じです。"
+                "他事業の数字を結果マガとして記録しないため止めます"
+            )
+    return pid
 
 
 def _now_jst() -> dt.datetime:
@@ -193,22 +244,21 @@ def collect_and_save_weekly_metrics(
     Args:
         week: ISO週 'YYYY-Www'(例 '2026-W40')。None なら前週(default_week)
         api_token: note API トークン(None = 環境変数から)
-        property_id: GA4 プロパティID(None = 環境変数から)
+        property_id: 結果マガ専用の GA4 プロパティID(None = 環境変数 GA4_KEKKA_PROPERTY_ID)
         channel_id: LINE チャネルID(None = 環境変数 KEKKA_CHANNEL_ID → 定数)
 
     Returns:
         集約した週次データ dict(公開ファイルに書いたものと同じ。購入者IDは含まない)
 
     Raises:
-        CollectError: 入力不正、API取得失敗、ファイルI/O失敗
+        CollectError: 入力不正、API取得失敗、ファイルI/O失敗、他事業の GA4 を指定
+        GA4NotConfiguredError: 結果マガ専用の GA4 計測先が未設定(CollectError の一種)
     """
     week = normalize_week(week) if week is not None else default_week()
     logger.info("週次メトリクス集約開始: week=%s", week)
 
     # --- API を叩く前に、設定と既存ファイルを検証する(早く失敗させる) ---
-    pid = (property_id or os.environ.get("GA4_PROPERTY_ID", "")).strip()
-    if not pid:
-        raise CollectError("GA4 プロパティID がありません(引数 property_id または環境変数 GA4_PROPERTY_ID)")
+    pid = resolve_kekka_property_id(property_id)
     ch_id = (channel_id or os.environ.get("KEKKA_CHANNEL_ID", "")).strip() or KEKKA_CHANNEL_ID
     content = _load_metrics_file(WEEKLY_METRICS_FILE)
 
@@ -271,7 +321,8 @@ def main(argv: Optional[list[str]] = None) -> int:
         type=str,
     )
     parser.add_argument("--api-token", help="note API トークン(指定なしは環境変数 NOTE_API_TOKEN)", type=str)
-    parser.add_argument("--property-id", help="GA4 プロパティID(指定なしは環境変数 GA4_PROPERTY_ID)", type=str)
+    parser.add_argument("--property-id",
+                        help="結果マガ専用の GA4 プロパティID(指定なしは環境変数 GA4_KEKKA_PROPERTY_ID)", type=str)
     parser.add_argument("--channel-id", help="LINE チャネルID(指定なしは環境変数 KEKKA_CHANNEL_ID → 定数)", type=str)
     parser.add_argument("-v", "--verbose", action="store_true", help="詳細ログを出力")
     args = parser.parse_args(argv)
