@@ -42,12 +42,13 @@ jobs:
         env:
           NOTE_API_TOKEN: ${{ secrets.NOTE_API_TOKEN }}
           KEKKA_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
-          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          # 結果マガ専用の GA4。共有の GA4_PROPERTY_ID(もらいわすれ堂)は使わない(2026-10-29 決裁)
+          GA4_KEKKA_PROPERTY_ID: ${{ secrets.GA4_KEKKA_PROPERTY_ID }}
           GA4_SA_JSON: ${{ secrets.GA4_SA_JSON }}
           INPUT_WEEK: ${{ github.event.inputs.week }}
         run: |
           missing=0
-          for name in NOTE_API_TOKEN KEKKA_LINE_CHANNEL_ACCESS_TOKEN GA4_PROPERTY_ID GA4_SA_JSON; do
+          for name in NOTE_API_TOKEN KEKKA_LINE_CHANNEL_ACCESS_TOKEN GA4_KEKKA_PROPERTY_ID GA4_SA_JSON; do
             if [ -z "${!name}" ]; then
               echo "::error::Secret $name is not set"
               missing=1
@@ -85,7 +86,11 @@ jobs:
         env:
           NOTE_API_TOKEN: ${{ secrets.NOTE_API_TOKEN }}
           KEKKA_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
+          GA4_KEKKA_PROPERTY_ID: ${{ secrets.GA4_KEKKA_PROPERTY_ID }}
+          # 以下3つは計測先にしない。結果マガの計測先が他事業と同じでないかの照合にだけ使う
           GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GA4_MIKATA_PROPERTY_ID: ${{ secrets.GA4_MIKATA_PROPERTY_ID }}
+          GA4_GLOW_PROPERTY_ID: ${{ secrets.GA4_GLOW_PROPERTY_ID }}
           INPUT_WEEK: ${{ github.event.inputs.week }}
         run: |
           if [ -n "$INPUT_WEEK" ]; then

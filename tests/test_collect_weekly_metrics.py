@@ -6,6 +6,7 @@ scripts/collect_weekly_metrics.py のテスト(結果マガ売上自動化 Task 
 import datetime as dt
 import json
 import os
+import re
 import sys
 from contextlib import contextmanager
 from pathlib import Path
@@ -17,6 +18,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import collect_weekly_metrics  # noqa: E402
 from collect_weekly_metrics import (  # noqa: E402
     CollectError,
+    GA4NotConfiguredError,
     collect_and_save_weekly_metrics,
     default_week,
     normalize_week,
@@ -27,6 +29,14 @@ from line_api import LINEMetrics, LINEAPIError  # noqa: E402
 
 UTC = dt.timezone.utc
 BUYER_IDS = ["buyer_secret_u1", "buyer_secret_u2"]
+
+
+@pytest.fixture(autouse=True)
+def _isolate_ga4_env(monkeypatch):
+    """実行環境の GA4 設定に結果が左右されないよう、関係する変数を毎回空にする"""
+    for name in ("GA4_KEKKA_PROPERTY_ID", "GA4_PROPERTY_ID", "GA4_MIKATA_PROPERTY_ID",
+                 "GA4_GLOW_PROPERTY_ID", "NOTE_API_TOKEN"):
+        monkeypatch.delenv(name, raising=False)
 
 
 @pytest.fixture
@@ -186,14 +196,154 @@ def test_collect_and_save_weekly_metrics_error_on_line_api_failure(temp_metrics_
             _run()
 
 
-def test_missing_ga4_property_id_fails_before_api(temp_metrics_file, mock_metrics, monkeypatch):
-    """GA4_PROPERTY_ID が無ければ、どの API も叩く前に止まる"""
-    monkeypatch.delenv("GA4_PROPERTY_ID", raising=False)
+def test_missing_ga4_property_id_fails_before_api(temp_metrics_file, mock_metrics):
+    """GA4_KEKKA_PROPERTY_ID が無ければ、どの API も叩く前に止まる"""
     note, ga4, line = mock_metrics
     with _apis(temp_metrics_file, note, ga4, line) as (m_note, m_ga4, m_line):
-        with pytest.raises(CollectError, match="GA4 プロパティID"):
+        with pytest.raises(GA4NotConfiguredError, match="計測先が未設定"):
             _run(property_id=None)
     assert not m_note.called and not m_ga4.called and not m_line.called
+
+
+# --- GA4 の事業分離(2026-10-29 決裁: 結果マガはフクギイロのGA4を使用しない) ---------------
+# プロパティIDはすべて合成値(実在のプロパティではない)
+
+FUKUGIIRO_PID = "900000001"
+MIKATA_PID = "900000002"
+GLOW_PID = "900000003"
+KEKKA_PID = "900000004"
+
+
+def test_shared_ga4_property_id_alone_is_not_used(temp_metrics_file, mock_metrics, monkeypatch):
+    """共有の GA4_PROPERTY_ID(もらいわすれ堂)だけがある状態では、計測未設定として止まる。
+    note のトークンが入っても、フクギイロの数字を結果マガとして書かない"""
+    monkeypatch.setenv("NOTE_API_TOKEN", "synthetic_note_token")
+    monkeypatch.setenv("GA4_PROPERTY_ID", FUKUGIIRO_PID)
+    before = temp_metrics_file.read_bytes()
+    note, ga4, line = mock_metrics
+    with _apis(temp_metrics_file, note, ga4, line) as (m_note, m_ga4, m_line):
+        with pytest.raises(GA4NotConfiguredError):
+            _run(api_token=None, property_id=None)
+    assert not m_note.called and not m_ga4.called and not m_line.called
+    assert temp_metrics_file.read_bytes() == before  # 1バイトも書いていない
+
+
+@pytest.mark.parametrize("env_name,pid", [
+    ("GA4_PROPERTY_ID", FUKUGIIRO_PID),
+    ("GA4_MIKATA_PROPERTY_ID", MIKATA_PID),
+    ("GA4_GLOW_PROPERTY_ID", GLOW_PID),
+])
+@pytest.mark.parametrize("via", ["env", "arg"])
+def test_other_business_property_is_rejected(temp_metrics_file, mock_metrics, monkeypatch, env_name, pid, via):
+    """結果マガの計測先に他事業のプロパティを指定したら、API を叩く前に止まる。
+    エラー文には変数名だけを出し、値は出さない"""
+    monkeypatch.setenv(env_name, pid)
+    if via == "env":
+        monkeypatch.setenv("GA4_KEKKA_PROPERTY_ID", pid)
+        kw = {"property_id": None}
+    else:
+        kw = {"property_id": pid}
+    before = temp_metrics_file.read_bytes()
+    note, ga4, line = mock_metrics
+    with _apis(temp_metrics_file, note, ga4, line) as (m_note, m_ga4, m_line):
+        with pytest.raises(CollectError, match=env_name) as ei:
+            _run(**kw)
+    assert pid not in str(ei.value)
+    assert not isinstance(ei.value, GA4NotConfiguredError)
+    assert not m_note.called and not m_ga4.called and not m_line.called
+    assert temp_metrics_file.read_bytes() == before
+
+
+@pytest.mark.parametrize("bad,msg", [("G-ABCDEF1234", "測定ID"), ("12ab34", "形式"), ("123", "形式")])
+def test_malformed_property_id_is_rejected(temp_metrics_file, mock_metrics, bad, msg):
+    """測定ID(G-…)や数字でない値はプロパティIDとして使わない"""
+    note, ga4, line = mock_metrics
+    with _apis(temp_metrics_file, note, ga4, line) as (_, m_ga4, _l):
+        with pytest.raises(CollectError, match=msg) as ei:
+            _run(property_id=bad)
+    assert bad not in str(ei.value)
+    assert not m_ga4.called
+
+
+def test_kekka_property_is_used_when_distinct(temp_metrics_file, mock_metrics, monkeypatch):
+    """結果マガ専用のプロパティがあり他事業と違えば、その値だけで GA4 を引く"""
+    monkeypatch.setenv("GA4_PROPERTY_ID", FUKUGIIRO_PID)
+    monkeypatch.setenv("GA4_MIKATA_PROPERTY_ID", MIKATA_PID)
+    monkeypatch.setenv("GA4_KEKKA_PROPERTY_ID", KEKKA_PID)
+    note, ga4, line = mock_metrics
+    with _apis(temp_metrics_file, note, ga4, line) as (_, m_ga4, _l):
+        result = _run(property_id=None)
+    m_ga4.assert_called_once_with(KEKKA_PID, "2026-W40")
+    assert result["ga4"]["sessions"] == 250
+
+
+def test_cli_with_note_token_and_shared_id_writes_nothing_and_hides_ids(
+        temp_metrics_file, mock_metrics, monkeypatch, capsys, caplog):
+    """CLI(定期実行と同じ入口): note のトークン+共有IDだけの状態で失敗終了し、
+    ファイルを変えず、ログ・標準出力にプロパティIDの値を出さない"""
+    monkeypatch.setenv("NOTE_API_TOKEN", "synthetic_note_token")
+    monkeypatch.setenv("GA4_PROPERTY_ID", FUKUGIIRO_PID)
+    monkeypatch.setenv("GA4_MIKATA_PROPERTY_ID", MIKATA_PID)
+    before = temp_metrics_file.read_bytes()
+    note, ga4, line = mock_metrics
+    with _apis(temp_metrics_file, note, ga4, line) as (_, m_ga4, _l):
+        with caplog.at_level("DEBUG"):
+            rc = collect_weekly_metrics.main(["-w", "2026-W40"])
+    assert rc == 1
+    assert not m_ga4.called
+    assert temp_metrics_file.read_bytes() == before
+    out = capsys.readouterr()
+    shown = out.out + out.err + caplog.text
+    assert "計測先が未設定" in shown
+    for secret in (FUKUGIIRO_PID, MIKATA_PID, "synthetic_note_token"):
+        assert secret not in shown
+
+
+def test_cli_rejects_other_business_and_hides_ids(temp_metrics_file, mock_metrics, monkeypatch, capsys, caplog):
+    """CLI: 結果マガの計測先がもらいわすれ堂と同じなら失敗終了。値はどこにも出さない"""
+    monkeypatch.setenv("NOTE_API_TOKEN", "synthetic_note_token")
+    monkeypatch.setenv("GA4_PROPERTY_ID", FUKUGIIRO_PID)
+    monkeypatch.setenv("GA4_KEKKA_PROPERTY_ID", FUKUGIIRO_PID)
+    before = temp_metrics_file.read_bytes()
+    note, ga4, line = mock_metrics
+    with _apis(temp_metrics_file, note, ga4, line) as (_, m_ga4, _l):
+        with caplog.at_level("DEBUG"):
+            rc = collect_weekly_metrics.main(["-w", "2026-W40"])
+    assert rc == 1 and not m_ga4.called
+    assert temp_metrics_file.read_bytes() == before
+    out = capsys.readouterr()
+    shown = out.out + out.err + caplog.text
+    assert "GA4_PROPERTY_ID" in shown and FUKUGIIRO_PID not in shown
+
+
+# 共有IDを計測先として読む書き方(旧実装)を、ソースから機械的に見つける
+_SHARED_READ_RE = re.compile(r"""environ(?:\.get)?\s*[\(\[]\s*["']GA4_PROPERTY_ID["']""")
+
+
+def test_shared_read_pattern_selftest():
+    """検査の自己テスト: 旧実装の書き方は捕まえ、照合用の定数の列挙は捕まえない"""
+    assert _SHARED_READ_RE.search('pid = os.environ.get("GA4_PROPERTY_ID", "")')
+    assert _SHARED_READ_RE.search("pid = os.environ['GA4_PROPERTY_ID']")
+    assert not _SHARED_READ_RE.search('OTHER = (\n    "GA4_PROPERTY_ID",  # もらいわすれ堂\n)')
+    assert not _SHARED_READ_RE.search('os.environ.get("GA4_KEKKA_PROPERTY_ID", "")')
+
+
+@pytest.mark.parametrize("name", ["collect_weekly_metrics.py", "ga4_api.py"])
+def test_kekka_sources_do_not_read_shared_property_id(name):
+    """結果マガの集計コードが共有の GA4_PROPERTY_ID を直接読まない"""
+    src = (Path(__file__).resolve().parent.parent / "scripts" / name).read_text(encoding="utf-8")
+    assert not _SHARED_READ_RE.search(src)
+
+
+def test_workflow_requires_kekka_property_not_shared():
+    """定期実行は結果マガ専用のIDを必須にし、共有IDを必須(=計測先)にしない"""
+    wf = (Path(__file__).resolve().parent.parent / ".github" / "workflows"
+          / "kekka-weekly-collect.yml").read_text(encoding="utf-8")
+    required = re.search(r"for name in ([A-Z0-9_ ]+); do", wf)
+    assert required, "Secrets の必須チェックが見つかりません"
+    names = required.group(1).split()
+    assert "GA4_KEKKA_PROPERTY_ID" in names
+    assert "GA4_PROPERTY_ID" not in names
 
 
 # --- C1: 既定の週は前週 --------------------------------------------------------------
