@@ -485,3 +485,32 @@ test("planTypedCompanyName: 候補が複数なら選択、見つからなけれ�
   assert.equal(lineVoiceLogContent.planTypedCompanyName(companies, "   "), null);
   assert.equal(lineVoiceLogContent.planTypedCompanyName(companies, "あ".repeat(61)), null);
 });
+
+test("isUnknownCompanyName: 会社名が分からないことを表す名前を見分ける", () => {
+  for (const n of ["", "  ", "(不明)", "(社名不明)", "不明", "社名不明", "（不明）", "unknown"]) {
+    assert.equal(lineVoiceLogContent.isUnknownCompanyName(n), true, n);
+  }
+  for (const n of ["株式会社不明館", "不明商事", "株式会社中島工業"]) {
+    assert.equal(lineVoiceLogContent.isUnknownCompanyName(n), false, n);
+  }
+});
+
+test("matchCompanyCandidates: 「(社名不明)」の会社は候補に出さず、不明な名前では照合しない", () => {
+  const companies = [
+    { "企業ID": "C003213", "会社名": "(社名不明)" },
+    { "企業ID": "C003214", "会社名": "(社名不明)" },
+    { "企業ID": "C000001", "会社名": "株式会社中島工業" }
+  ];
+  assert.deepEqual(lineVoiceLogContent.matchCompanyCandidates(companies, "不明"), []);
+  assert.deepEqual(lineVoiceLogContent.matchCompanyCandidates(companies, "(不明)"), []);
+  const hit = lineVoiceLogContent.matchCompanyCandidates(companies, "中島工業");
+  assert.deepEqual(hit.map((c) => c["企業ID"]), ["C000001"]);
+});
+
+test("buildNewCompanyOrAskNamePrompt: 会社名が分からないときは新規登録せず、文字で送ってもらう", () => {
+  const ask = lineVoiceLogContent.buildNewCompanyOrAskNamePrompt("P-1", "(不明)");
+  assert.equal(typeof ask, "string");
+  assert.match(ask, /文字で送って/);
+  const confirm = lineVoiceLogContent.buildNewCompanyOrAskNamePrompt("P-1", "株式会社テスト商事");
+  assert.equal(confirm.options.length, 2);
+});
