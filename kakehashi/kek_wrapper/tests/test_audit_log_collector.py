@@ -19,6 +19,7 @@ from types import SimpleNamespace
 from typing import Any, Dict, List, Optional
 
 import pytest
+from azure.core.exceptions import HttpResponseError
 
 from kakehashi.kek_wrapper import (
     AuditError,
@@ -734,6 +735,20 @@ def test_collector_defaults_to_aiohttp_sender(crypto, store):
 # ------------------------------------------------------ Azure AppendBlob store
 
 
+def sdk_412() -> HttpResponseError:
+    """The exception azure-storage-blob 12.31 raises for a failed appendpos_condition.
+
+    Not ``ResourceModifiedError`` (see test_real_sdk_412_shape_is_recognized).
+    """
+    exc = HttpResponseError(
+        message="The append position condition specified was not met.\n"
+        "ErrorCode:AppendPositionConditionNotMet"
+    )
+    exc.error_code = "AppendPositionConditionNotMet"
+    exc.status_code = 412
+    return exc
+
+
 class FakeBlob:
     def __init__(self, blob_type: str = "AppendBlob") -> None:
         self.data = bytearray()
@@ -776,14 +791,22 @@ class FakeBlobClient:
             self.container.lost_response = False
             blob.data += data
             blob.blocks += 1
-            raise ResourceModifiedError("AppendPositionConditionNotMet")
+            raise sdk_412()
         if appendpos_condition is not None and appendpos_condition != len(blob.data):
-            raise ResourceModifiedError("AppendPositionConditionNotMet")
+            raise sdk_412()
         blob.data += data
         blob.blocks += 1
+        if self.container.cancel_after_land:
+            # e.g. asyncio.wait_for fired after the block landed
+            self.container.cancel_after_land = False
+            raise asyncio.CancelledError()
 
-    async def download_blob(self):
+    async def download_blob(self, offset=None, length=None):
+        if self.container.fail_download is not None:
+            raise self.container.fail_download
         data = bytes(self.container.blobs[self.name].data)
+        if offset is not None:
+            data = data[offset : offset + length]
 
         async def readall():
             return data
@@ -797,7 +820,9 @@ class FakeContainer:
         self.create_calls: List[tuple] = []
         self.fail_next: Optional[BaseException] = None
         self.fail_properties: Optional[BaseException] = None
+        self.fail_download: Optional[BaseException] = None
         self.lost_response = False
+        self.cancel_after_land = False
         self.closed = False
 
     def get_blob_client(self, name: str) -> FakeBlobClient:
@@ -895,19 +920,93 @@ def test_azure_store_detects_foreign_writer_then_recovers():
     container.blobs[name].data += b'{"foreign":true}\n'
     container.blobs[name].blocks += 1
 
-    with pytest.raises(AuditError, match="moved unexpectedly"):
+    with pytest.raises(AuditError, match="not at the expected offset"):
         append(store, {"n": 2})
     append(store, {"n": 3})  # reopened at the real end of the blob
     assert _blob_lines(container, name) == [{"n": 1}, {"foreign": True}, {"n": 3}]
 
 
-def test_azure_store_unknown_state_after_412():
+def test_azure_store_equal_length_foreign_block_is_not_mistaken_for_ours():
+    """F2: a length match after a 412 must not count as 'already landed'."""
     container = FakeContainer()
     store = AzureAppendBlobAuditStore(container, writer_id="w")
     append(store, {"n": 1})
-    container.fail_next = ResourceModifiedError("412")
+    name = "audit/2026/11/09/w-0000.jsonl"
+    foreign = b'{"x": 9}\n'
+    assert len(foreign) == len(json.dumps({"n": 2}).encode() + b"\n")
+    container.blobs[name].data += foreign
+    container.blobs[name].blocks += 1
+
+    with pytest.raises(AuditError, match="not at the expected offset"):
+        append(store, {"n": 2})
+    assert _blob_lines(container, name) == [{"n": 1}, {"x": 9}]
+
+
+def test_azure_store_cancel_after_land_then_equal_length_record_persists():
+    """F2 repro B: cancellation must not leave a stale offset that hides a lost write."""
+    container = FakeContainer()
+    store = AzureAppendBlobAuditStore(container, writer_id="w")
+    name = "audit/2026/11/09/w-0000.jsonl"
+    append(store, {"n": 1})
+
+    container.cancel_after_land = True
+    with pytest.raises(asyncio.CancelledError):
+        append(store, {"n": 2})  # the block landed, then the caller was cancelled
+
+    append(store, {"n": 3})  # same length as #2
+    assert _blob_lines(container, name) == [{"n": 1}, {"n": 2}, {"n": 3}]
+    append(store, {"n": 4})
+    assert _blob_lines(container, name)[-1] == {"n": 4}
+
+
+def test_azure_store_cancel_before_land_rereads_blob():
+    container = FakeContainer()
+    store = AzureAppendBlobAuditStore(container, writer_id="w")
+    append(store, {"n": 1})
+    container.fail_next = asyncio.CancelledError()
+    with pytest.raises(asyncio.CancelledError):
+        append(store, {"n": 2})
+    append(store, {"n": 3})
+    assert _blob_lines(container, "audit/2026/11/09/w-0000.jsonl") == [{"n": 1}, {"n": 3}]
+
+
+@pytest.mark.parametrize(
+    "exc",
+    [
+        ResourceModifiedError("412"),
+        sdk_412(),
+        type("Bare412", (Exception,), {"status_code": 412})(),
+    ],
+)
+def test_azure_store_unknown_state_after_412(exc):
+    container = FakeContainer()
+    store = AzureAppendBlobAuditStore(container, writer_id="w")
+    append(store, {"n": 1})
+    container.fail_next = exc
     container.fail_properties = ConnectionError("down")
     with pytest.raises(AuditError, match="state is unknown"):
+        append(store, {"n": 2})
+
+
+def test_azure_store_unreadable_range_after_412():
+    container = FakeContainer()
+    store = AzureAppendBlobAuditStore(container, writer_id="w")
+    append(store, {"n": 1})
+    container.lost_response = True
+    container.fail_download = TimeoutError("slow")
+    with pytest.raises(AuditError, match="state is unknown"):
+        append(store, {"n": 2})
+
+
+def test_other_http_errors_are_not_treated_as_append_conflicts():
+    container = FakeContainer()
+    store = AzureAppendBlobAuditStore(container, writer_id="w")
+    append(store, {"n": 1})
+    forbidden = HttpResponseError(message="AuthorizationPermissionMismatch")
+    forbidden.status_code = 403
+    forbidden.error_code = "AuthorizationPermissionMismatch"
+    container.fail_next = forbidden
+    with pytest.raises(AuditError, match="failed: HttpResponseError"):
         append(store, {"n": 2})
 
 
@@ -982,3 +1081,328 @@ def test_collector_end_to_end_on_append_blob(crypto):
 def test_in_memory_store_rejects_non_bytes():
     with pytest.raises(TypeError):
         run(InMemoryAuditLogStore().append("text", T0))
+
+
+# ------------------------------------------- non-blocking review notes N1-N3
+
+
+def test_read_day_filters_one_writer(crypto):
+    """N1: one writer's log validates as a sequence; the mixed day log is not one."""
+    container = FakeContainer()
+    clock = StepClock()
+    a = AuditLogCollector(crypto, AzureAppendBlobAuditStore(container, writer_id="a"), utc_now=clock)
+    # writer "a-2" shares the "a-" prefix: the filter must not pick it up
+    b = AuditLogCollector(crypto, AzureAppendBlobAuditStore(container, writer_id="a-2"), utc_now=clock)
+    for i in range(3):
+        record(b, resource_id=f"b{i}")
+        record(a, resource_id=f"a{i}")
+    reader = AzureAppendBlobAuditStore(container, writer_id="reader")
+
+    only_a = run(reader.read_day(date(2026, 11, 9), writer_id="a"))
+    assert [e["resource_id"] for e in only_a] == ["a0", "a1", "a2"]
+    assert run(a.validateLogSequence(only_a)) is True
+    assert len(run(reader.read_day(date(2026, 11, 9)))) == 6
+
+
+def test_validation_record_truncates_oversized_event_id(collector, store):
+    """N2: an attacker-sized event_id must not make the validation record unwritable."""
+    entry = _stored(collector, store)
+    forged = dict(entry, event_id="evt-" + "x" * 10_000)
+    assert run(collector.validateLog(forged)) is False
+    failure = store.entries()[-1]
+    assert failure["resource_id"] == forged["event_id"][:256] + "...(truncated)"
+
+
+def test_export_failure_cause_is_logged_before_recording(crypto, caplog):
+    """N3: the SIEM error survives even when its FAILURE record cannot be written."""
+
+    class FailOnExportRecord(InMemoryAuditLogStore):
+        async def append(self, record_bytes, timestamp):
+            if b'"AUDIT_EXPORT"' in record_bytes:
+                raise OSError("disk full")
+            await super().append(record_bytes, timestamp)
+
+    store = FailOnExportRecord()
+    collector = AuditLogCollector(crypto, store, siem_sender=RecordingSiem(statuses=[500]))
+    record(collector)
+    with caplog.at_level("ERROR", logger=alc.__name__):
+        with pytest.raises(AuditError, match="cannot write"):
+            run(collector.exportToSIEM(SIEM_URL, store.entries()))
+    assert "HTTP_500" in caplog.text and "0 of 1 entries delivered" in caplog.text
+
+
+# ------------------------------------- real azure-storage-blob SDK (pins F1/F2)
+
+
+def _xml_error(code: str) -> bytes:
+    return (
+        f'<?xml version="1.0" encoding="utf-8"?><Error><Code>{code}</Code>'
+        f"<Message>{code}</Message></Error>"
+    ).encode()
+
+
+class FakeBlobService:
+    """A minimal Blob service behind an azure-core async transport.
+
+    The real ``ContainerClient`` / ``BlobClient`` run unchanged on top of it,
+    so request headers, the SDK retry policy and the SDK's error mapping are
+    the real ones (the review's F1 slipped through a hand-written fake).
+    """
+
+    def __init__(self) -> None:
+        from azure.core.pipeline.transport import AsyncHttpTransport
+
+        self.blobs: Dict[str, Dict[str, Any]] = {}
+        self.requests: List[tuple] = []
+        self.drop_response_after_append = 0  # land the block, then drop the connection
+        self.cancel_after_append = 0  # land the block, then cancel the caller
+        service = self
+
+        class Transport(AsyncHttpTransport):
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *exc_info):
+                pass
+
+            async def open(self):
+                pass
+
+            async def close(self):
+                pass
+
+            async def send(self, request, **kwargs):
+                return service.handle(request)
+
+        self.transport = Transport()
+
+    def data(self, blob_name: str, container: str = "audit") -> bytes:
+        return bytes(self.blobs[f"/{container}/{blob_name}"]["data"])
+
+    def _respond(self, request, status: int, headers: Dict[str, str], body: bytes = b""):
+        import io
+        from email.utils import formatdate
+
+        import requests
+        from azure.core.pipeline.transport import AsyncioRequestsTransportResponse
+
+        response = requests.Response()
+        response.status_code = status
+        response.reason = "fake"
+        response.headers.update(
+            {
+                "Date": formatdate(usegmt=True),
+                "Last-Modified": formatdate(usegmt=True),
+                "ETag": '"0x1"',
+                "x-ms-version": "2025-01-05",
+                **headers,
+            }
+        )
+        response._content = body
+        response.raw = io.BytesIO(body)
+        response.request = request
+        return AsyncioRequestsTransportResponse(request, response)
+
+    def _error(self, request, code: str, status: int):
+        headers = {"x-ms-error-code": code, "Content-Type": "application/xml"}
+        return self._respond(request, status, headers, _xml_error(code))
+
+    def handle(self, request):
+        from urllib.parse import parse_qs, urlsplit
+
+        from azure.core.exceptions import ServiceResponseError
+
+        parts = urlsplit(request.url)
+        path = parts.path
+        comp = parse_qs(parts.query).get("comp", [None])[0]
+        headers = {k.lower(): v for k, v in request.headers.items()}
+        self.requests.append((request.method, path, comp, headers))
+        blob = self.blobs.get(path)
+
+        if request.method == "GET" and comp == "list":  # List Blobs
+            from xml.sax.saxutils import escape
+
+            prefix = parse_qs(parts.query).get("prefix", [""])[0]
+            container = path.rstrip("/")
+            items = "".join(
+                f"<Blob><Name>{escape(name[len(container) + 1:])}</Name><Properties>"
+                f"<Content-Length>{len(b['data'])}</Content-Length>"
+                f"<BlobType>{b['type']}</BlobType></Properties></Blob>"
+                for name, b in sorted(self.blobs.items())
+                if name.startswith(f"{container}/{prefix}")
+            )
+            body = (
+                '<?xml version="1.0" encoding="utf-8"?><EnumerationResults '
+                f'ServiceEndpoint="https://acct.blob.core.windows.net/" ContainerName="audit">'
+                f"<Prefix>{escape(prefix)}</Prefix><Blobs>{items}</Blobs><NextMarker />"
+                "</EnumerationResults>"
+            ).encode()
+            return self._respond(request, 200, {"Content-Type": "application/xml"}, body)
+        if request.method == "PUT" and comp is None:  # Put Blob (create append blob)
+            if blob is not None and headers.get("if-none-match") == "*":
+                return self._error(request, "BlobAlreadyExists", 409)
+            self.blobs[path] = {"data": bytearray(), "blocks": 0, "type": headers["x-ms-blob-type"]}
+            return self._respond(request, 201, {"Content-Length": "0"})
+        if blob is None:
+            return self._error(request, "BlobNotFound", 404)
+        if request.method == "HEAD":
+            return self._respond(
+                request,
+                200,
+                {
+                    "x-ms-blob-type": blob["type"],
+                    "Content-Length": str(len(blob["data"])),
+                    "x-ms-blob-committed-block-count": str(blob["blocks"]),
+                },
+            )
+        if request.method == "PUT" and comp == "appendblock":
+            body = request.body if isinstance(request.body, bytes) else b"".join(request.body)
+            position = headers.get("x-ms-blob-condition-appendpos")
+            if position is not None and int(position) != len(blob["data"]):
+                return self._error(request, "AppendPositionConditionNotMet", 412)
+            blob["data"] += body
+            blob["blocks"] += 1
+            if self.drop_response_after_append:
+                self.drop_response_after_append -= 1
+                raise ServiceResponseError("connection reset after the block landed")
+            if self.cancel_after_append:
+                self.cancel_after_append -= 1
+                raise asyncio.CancelledError()
+            return self._respond(
+                request,
+                201,
+                {
+                    "Content-Length": "0",
+                    "x-ms-blob-append-offset": str(len(blob["data"]) - len(body)),
+                    "x-ms-blob-committed-block-count": str(blob["blocks"]),
+                },
+            )
+        if request.method == "GET":
+            data = bytes(blob["data"])
+            byte_range = headers.get("x-ms-range") or headers.get("range")
+            if byte_range:
+                start, end = (int(v) for v in byte_range.split("=")[1].split("-"))
+                end = min(end, len(data) - 1)
+                chunk = data[start : end + 1]
+                return self._respond(
+                    request,
+                    206,
+                    {
+                        "Content-Length": str(len(chunk)),
+                        "Content-Range": f"bytes {start}-{end}/{len(data)}",
+                        "x-ms-blob-type": blob["type"],
+                    },
+                    chunk,
+                )
+            return self._respond(
+                request, 200, {"Content-Length": str(len(data)), "x-ms-blob-type": blob["type"]}, data
+            )
+        raise AssertionError(f"unexpected request {request.method} {path} comp={comp}")
+
+
+@pytest.fixture
+def blob_service():
+    pytest.importorskip("azure.storage.blob")
+    pytest.importorskip("requests")
+    return FakeBlobService()
+
+
+def _real_container(service: FakeBlobService):
+    from azure.storage.blob.aio import ContainerClient, LinearRetry
+
+    return ContainerClient(
+        "https://acct.blob.core.windows.net",
+        "audit",
+        transport=service.transport,
+        retry_policy=LinearRetry(backoff=0, random_jitter_range=0, retry_total=2),
+    )
+
+
+BLOB = "audit/2026/11/09/w-0000.jsonl"
+
+
+def test_real_sdk_412_shape_is_recognized(blob_service):
+    """Pins F1: the SDK's 412 is an HttpResponseError, and the store recognizes it."""
+
+    async def main():
+        client = _real_container(blob_service).get_blob_client("probe.jsonl")
+        await client.create_append_blob(match_condition=MatchConditions.IfMissing)
+        try:
+            await client.append_block(b"x", appendpos_condition=5)
+        except Exception as exc:  # noqa: BLE001 - the type is what is under test
+            return exc
+        raise AssertionError("append_block did not fail")
+
+    exc = run(main())
+    assert isinstance(exc, HttpResponseError)
+    assert not isinstance(exc, ResourceModifiedError)  # why the old handler never ran
+    assert getattr(exc.error_code, "value", exc.error_code) == "AppendPositionConditionNotMet"
+    assert alc._is_append_position_conflict(exc)
+
+
+def test_real_sdk_create_never_overwrites_existing_log(blob_service):
+    blob_service.blobs[f"/audit/{BLOB}"] = {
+        "data": bytearray(b'{"n":0}\n'),
+        "blocks": 1,
+        "type": "AppendBlob",
+    }
+    store = AzureAppendBlobAuditStore(_real_container(blob_service), writer_id="w")
+    append(store, {"n": 1})
+    create = [h for m, p, c, h in blob_service.requests if m == "PUT" and c is None]
+    assert create[0]["if-none-match"] == "*"
+    assert create[0]["x-ms-blob-type"] == "AppendBlob"
+    assert blob_service.data(BLOB) == b'{"n":0}\n{"n": 1}\n'
+
+
+def test_real_sdk_lost_response_retry_is_not_duplicated(blob_service):
+    """F1 end to end: the block lands, the SDK retries, gets 412, the store confirms bytes."""
+    store = AzureAppendBlobAuditStore(_real_container(blob_service), writer_id="w")
+    append(store, {"n": 1})
+    blob_service.drop_response_after_append = 1
+    append(store, {"n": 2})  # must succeed: the entry is in the blob exactly once
+    append(store, {"n": 3})
+
+    appends = [r for r in blob_service.requests if r[2] == "appendblock"]
+    assert len(appends) == 4  # n1, n2, the SDK's retry of n2, n3
+    assert blob_service.data(BLOB) == b'{"n": 1}\n{"n": 2}\n{"n": 3}\n'
+
+
+def test_real_sdk_equal_length_foreign_block_raises(blob_service):
+    store = AzureAppendBlobAuditStore(_real_container(blob_service), writer_id="w")
+    append(store, {"n": 1})
+    blob = blob_service.blobs[f"/audit/{BLOB}"]
+    blob["data"] += b'{"x": 9}\n'  # same length as {"n": 2}\n
+    blob["blocks"] += 1
+    with pytest.raises(AuditError, match="not at the expected offset"):
+        append(store, {"n": 2})
+    assert blob_service.data(BLOB) == b'{"n": 1}\n{"x": 9}\n'
+
+
+def test_real_sdk_cancel_after_land_then_equal_length_record(blob_service):
+    """F2 repro B through the real SDK: never a silent success for a lost entry."""
+    store = AzureAppendBlobAuditStore(_real_container(blob_service), writer_id="w")
+    append(store, {"n": 1})
+    blob_service.cancel_after_append = 1
+    with pytest.raises(asyncio.CancelledError):
+        append(store, {"n": 2})
+    append(store, {"n": 3})
+    assert blob_service.data(BLOB) == b'{"n": 1}\n{"n": 2}\n{"n": 3}\n'
+
+
+def test_real_sdk_collector_end_to_end(blob_service, crypto):
+    store = AzureAppendBlobAuditStore(_real_container(blob_service), writer_id="w")
+    collector = AuditLogCollector(crypto, store, utc_now=StepClock())
+
+    async def main():
+        await asyncio.gather(
+            *(
+                collector.recordEvent(EventType.KEY_ACCESS, Role.OPERATOR, f"r{i}", "GET", Status.SUCCESS)
+                for i in range(10)
+            )
+        )
+        return await store.read_day(date(2026, 11, 9), writer_id="w")
+
+    blob_service.drop_response_after_append = 1  # one lost response mid-run
+    entries = run(main())
+    assert [e["resource_id"] for e in entries] == [f"r{i}" for i in range(10)]
+    assert run(collector.validateLogSequence(entries)) is True

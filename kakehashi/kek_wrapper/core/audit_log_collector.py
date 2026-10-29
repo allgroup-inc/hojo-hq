@@ -29,8 +29,14 @@ Storage
     ``create_append_blob`` otherwise *overwrites* an existing blob: an
     existing log is reused, never truncated. Each append is sent with
     ``appendpos_condition`` so a retried request cannot land twice or
-    interleave. Container-level immutability (WORM) is an infrastructure
-    setting outside this module.
+    interleave. When the SDK's own retry of a block that already landed gets
+    the resulting 412 (``HttpResponseError``, ``AppendPositionConditionNotMet``),
+    the append counts as done only if the bytes stored at the expected offset
+    equal the entry; a length match is not enough. The cached append position
+    is dropped before every append and restored only on confirmed success, so
+    a cancelled or failed append can never leave a stale offset behind.
+    Container-level immutability (WORM) is an infrastructure setting outside
+    this module.
 
 Errors
     Any failure to sign or store an entry raises ``AuditError`` (consumed by
@@ -60,6 +66,7 @@ from typing import (
     Optional,
     Protocol,
     Sequence,
+    Tuple,
     Union,
 )
 from urllib.parse import urlsplit, urlunsplit
@@ -113,6 +120,28 @@ OPERATION_VALIDATE = "VALIDATE"
 OPERATION_EXPORT = "EXPORT"
 
 _WRITER_ID_RE = re.compile(r"[^0-9A-Za-z._-]")
+
+#: Storage error code of a failed ``appendpos_condition`` (HTTP 412).
+APPEND_POSITION_ERROR_CODE = "AppendPositionConditionNotMet"
+
+#: Longest ``event_id`` copied from a rejected entry into a validation record.
+MAX_REPORTED_EVENT_ID = 256
+
+
+def _is_append_position_conflict(exc: BaseException) -> bool:
+    """True for the 412 that a failed ``appendpos_condition`` produces.
+
+    azure-storage-blob 12.31 raises ``HttpResponseError`` with
+    ``error_code == AppendPositionConditionNotMet`` (a ``StorageErrorCode``
+    str-enum), not ``ResourceModifiedError``; both shapes and a bare 412 are
+    accepted. A misclassification is harmless: the caller then verifies the
+    stored bytes before treating the append as done.
+    """
+    if isinstance(exc, ResourceModifiedError):
+        return True
+    code = getattr(exc, "error_code", None)
+    code = getattr(code, "value", code)
+    return code == APPEND_POSITION_ERROR_CODE or getattr(exc, "status_code", None) == 412
 
 #: ``(url, body, headers) -> HTTP status``. Injected in tests; aiohttp by default.
 SiemSender = Callable[[str, bytes, Mapping[str, str]], Awaitable[int]]
@@ -302,43 +331,76 @@ class AzureAppendBlobAuditStore:
                     f"cannot open audit blob for {day.isoformat()}: {type(exc).__name__}"
                 ) from exc
             state = self._state
+            # Forget the cached append position until this append is
+            # confirmed. If the call fails or is cancelled (CancelledError is
+            # a BaseException), even after the block landed, the next append
+            # re-reads the real end of the blob instead of a stale offset.
+            self._state = None
             try:
                 await state.client.append_block(record, appendpos_condition=state.offset)
-            except ResourceModifiedError as exc:
-                # 412: the blob no longer ends at our offset. If an SDK retry
-                # re-sent a block that had already landed, the blob now ends
-                # exactly where this block ends; anything else means another
-                # writer touched the blob.
-                self._state = None
-                try:
-                    props = await state.client.get_blob_properties()
-                except Exception as inner:
-                    raise AuditError(
-                        f"append to {state.name} failed and its state is unknown: "
-                        f"{type(inner).__name__}"
-                    ) from exc
-                if int(props.size) != state.offset + len(record):
-                    raise AuditError(
-                        f"append position of {state.name} moved unexpectedly "
-                        "(another writer?); entry not recorded"
-                    ) from exc
-                state.offset = int(props.size)
-                state.blocks = props.append_blob_committed_block_count or state.blocks + 1
-                self._state = state
             except Exception as exc:
-                self._state = None
-                raise AuditError(f"append to {state.name} failed: {type(exc).__name__}") from exc
+                if not _is_append_position_conflict(exc):
+                    raise AuditError(
+                        f"append to {state.name} failed: {type(exc).__name__}"
+                    ) from exc
+                # 412: the blob no longer ends at our offset. The expected
+                # cause is an SDK retry of a block that had already landed.
+                state.offset, state.blocks = await self._confirm_landed(state, record, exc)
             else:
                 state.offset += len(record)
                 state.blocks += 1
             if state.blocks >= self._max_blocks:
-                self._state = None
                 self._segment = state.segment + 1
+            else:
+                self._state = state
 
-    async def read_day(self, day: date) -> List[Dict[str, Any]]:
-        """All entries stored for ``day`` (UTC), blob by blob in append order."""
+    @staticmethod
+    async def _confirm_landed(
+        state: _BlobState, record: bytes, cause: BaseException
+    ) -> Tuple[int, int]:
+        """After a 412, accept the append only if ``record`` is at ``state.offset``.
+
+        Compares the stored bytes, not the blob length: audit entries of the
+        same shape have the same length, so a length match proves nothing.
+        Returns the blob's real (size, committed block count). Raises
+        ``AuditError`` when the bytes differ or cannot be read.
+        """
+        end = state.offset + len(record)
+        try:
+            props = await state.client.get_blob_properties()
+            landed = b""
+            if int(props.size) >= end:
+                downloader = await state.client.download_blob(
+                    offset=state.offset, length=len(record)
+                )
+                landed = await downloader.readall()
+        except Exception as inner:
+            raise AuditError(
+                f"append to {state.name} hit an append-position conflict and its "
+                f"state is unknown: {type(inner).__name__}"
+            ) from cause
+        if landed != record:
+            raise AuditError(
+                f"append position of {state.name} moved and this entry is not at the "
+                "expected offset (another writer?); entry not recorded"
+            ) from cause
+        return int(props.size), props.append_blob_committed_block_count or 0
+
+    async def read_day(self, day: date, writer_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Entries stored for ``day`` (UTC), blob by blob in append order.
+
+        With ``writer_id`` only that writer's segments are read: the result is
+        one writer's log and can be checked with
+        ``AuditLogCollector.validateLogSequence``. Without it every writer's
+        blobs are concatenated; order holds only per writer, so that combined
+        list must not be fed to ``validateLogSequence`` (it would report
+        ``OUT_OF_ORDER`` across writers, a false positive).
+        """
         prefix = f"{self.prefix}/{day:%Y/%m/%d}/"
         names = sorted([b.name async for b in self._container.list_blobs(name_starts_with=prefix)])
+        if writer_id is not None:
+            wanted = _WRITER_ID_RE.sub("-", writer_id)
+            names = [n for n in names if n[len(prefix) :].rsplit("-", 1)[0] == wanted]
         entries: List[Dict[str, Any]] = []
         for name in names:
             downloader = await self._container.get_blob_client(name).download_blob()
@@ -568,6 +630,10 @@ class AuditLogCollector:
     async def _record_validation_failure(self, log_entry: Any, reason: str) -> None:
         event_id = log_entry.get("event_id") if isinstance(log_entry, Mapping) else None
         resource = event_id if isinstance(event_id, str) and event_id else "unidentified-entry"
+        if len(resource) > MAX_REPORTED_EVENT_ID:
+            # the entry is untrusted input; an oversized id must not make the
+            # validation record itself unwritable
+            resource = resource[:MAX_REPORTED_EVENT_ID] + "...(truncated)"
         await self._record_system_event(
             EventType.AUDIT_VALIDATE, resource, OPERATION_VALIDATE, Status.FAILURE, reason
         )
@@ -710,6 +776,14 @@ class AuditLogCollector:
                 exported += len(chunk)
         except Exception as exc:
             code = f"HTTP_{exc.status}" if isinstance(exc, _SiemHTTPError) else type(exc).__name__
+            # logged first so the cause survives even if the record below fails
+            logger.error(
+                "SIEM export of batch %s failed: %s (%d of %d entries delivered)",
+                batch_id,
+                code,
+                exported,
+                len(entries),
+            )
             await self._record_system_event(
                 EventType.AUDIT_EXPORT,
                 resource,
