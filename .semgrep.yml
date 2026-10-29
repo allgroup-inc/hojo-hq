@@ -1,0 +1,75 @@
+rules:
+  - id: no-hardcoded-secrets
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $VAR = "sk-..."
+          - pattern: |
+              $VAR = "password..."
+          - pattern: |
+              $VAR = "secret..."
+          - pattern: |
+              API_KEY = "..."
+          - pattern: |
+              SECRET_KEY = "..."
+    message: "Hardcoded secret detected - move to environment variable or Key Vault"
+    severity: ERROR
+    languages: [python]
+
+  - id: no-plain-encryption
+    patterns:
+      - pattern-either:
+          - pattern: |
+              from cryptography.hazmat.primitives.ciphers import Cipher
+              ...
+              Cipher(...)
+          - pattern: |
+              cipher.Cipher(...)
+    message: "Use CryptoService.encrypt() instead of direct crypto.Cipher"
+    severity: ERROR
+    languages: [python]
+
+  - id: key-vault-direct-access
+    patterns:
+      - pattern-either:
+          - pattern: |
+              from azure.keyvault...
+          - pattern: |
+              SecretClient(...)
+          - pattern: |
+              KeyVaultClient(...)
+          - pattern: |
+              CertificateClient(...)
+          - pattern: |
+              KeyClient(...)
+    message: "Use KeyVaultConnector instead of direct Key Vault client"
+    severity: ERROR
+    languages: [python]
+
+  - id: no-password-in-logs
+    patterns:
+      - pattern-either:
+          - pattern: |
+              print(...)
+              where:
+                ... contains "password"
+          - pattern: |
+              logger.$METHOD("..." + $PASSWORD)
+    message: "Do not log passwords or secrets"
+    severity: ERROR
+    languages: [python]
+
+  - id: audit-required-for-sensitive-operations
+    patterns:
+      - pattern-either:
+          - pattern: |
+              def $FUNC(...secret...):
+                  ...
+                  return $X
+          - pattern: |
+              def $FUNC(...key...):
+                  ...
+                  return $X
+    message: "Functions handling secrets/keys must call recordEvent() for audit trail"
+    severity: WARNING
+    languages: [python]

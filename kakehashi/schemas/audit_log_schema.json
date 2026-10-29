@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KAKEHASHI Audit Log Entry",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt-[0-9]{8}-[a-f0-9]{8}$",
+      "description": "Unique event identifier (evt-YYYYMMDD-hash)"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp in UTC (must end with Z)"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": ["KEY_ACCESS", "KEY_ROTATE", "SECURITY", "CRYPTO", "AUDIT"],
+      "description": "Type of event (from EventType enum)"
+    },
+    "actor": {
+      "type": "string",
+      "description": "User or service ID making request"
+    },
+    "actor_role": {
+      "type": "string",
+      "enum": ["SYSTEM", "OPERATOR", "AUDITOR", "GUEST"],
+      "description": "Role of actor (from Role enum)"
+    },
+    "resource_id": {
+      "type": "string",
+      "description": "Resource being accessed (secret name, key ID, etc.)"
+    },
+    "operation": {
+      "type": "string",
+      "enum": ["GET", "PUT", "ROTATE", "DELETE", "VERIFY"],
+      "description": "Operation performed"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["SUCCESS", "FAILURE", "DENIED"],
+      "description": "Outcome of operation"
+    },
+    "result": {
+      "type": "object",
+      "description": "Operation result (ciphertext length, key version, etc.)",
+      "additionalProperties": true
+    },
+    "context": {
+      "type": "object",
+      "description": "Extra context (IP, user agent, error details, etc.)",
+      "additionalProperties": true
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "HMAC-SHA256 signature (hex, 64 chars)"
+    }
+  },
+  "required": [
+    "event_id",
+    "timestamp",
+    "event_type",
+    "actor",
+    "actor_role",
+    "resource_id",
+    "operation",
+    "status",
+    "signature"
+  ],
+  "additionalProperties": false
+}
