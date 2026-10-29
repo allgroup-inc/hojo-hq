@@ -676,7 +676,7 @@ function processOneVoiceLog_(ss, record) {
     pushSpecs = [GlowLineVoiceLogContent.buildCompanySelectionPrompt(record["処理ID"], candidates)];
   } else {
     moved = transitionVoiceLogStatus_(ss, record.sheetRow, ["文字起こし済み"], { "ステータス": "新規企業確認待ち" });
-    pushSpecs = [GlowLineVoiceLogContent.buildNewCompanyConfirmPrompt(record["処理ID"], companyNameCandidate || "(不明)")];
+    pushSpecs = [GlowLineVoiceLogContent.buildNewCompanyOrAskNamePrompt(record["処理ID"], companyNameCandidate)];
   }
   if (!moved) {
     Logger.log("確認メッセージの送信前に他の処理が状態を変更したため中断しました(処理ID " + record["処理ID"] + ")。");
@@ -888,7 +888,7 @@ function handleTypedCompanyName_(event) {
     reply = GlowLineVoiceLogContent.buildCompanySelectionPrompt(record["処理ID"], plan.candidates);
   } else {
     updates = { "ステータス": "新規企業確認待ち", "会社名候補": typedName, "企業ID": "" };
-    reply = GlowLineVoiceLogContent.buildNewCompanyConfirmPrompt(record["処理ID"], typedName);
+    reply = GlowLineVoiceLogContent.buildNewCompanyOrAskNamePrompt(record["処理ID"], typedName);
   }
   if (!transitionVoiceLogStatus_(ss, record.sheetRow, VOICE_LOG_TYPED_NAME_STATUSES, updates)) {
     lineReply_(replyToken, [GlowLineVoiceLogContent.buildAlreadyHandledMessage()]);
@@ -912,7 +912,7 @@ function handleCompanySelectionPostback_(ss, replyToken, record, selectedValue) 
       lineReply_(replyToken, [GlowLineVoiceLogContent.buildAlreadyHandledMessage()]);
       return;
     }
-    lineReply_(replyToken, [GlowLineVoiceLogContent.buildNewCompanyConfirmPrompt(record["処理ID"], record["会社名候補"] || "(不明)")]);
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildNewCompanyOrAskNamePrompt(record["処理ID"], record["会社名候補"])]);
     return;
   }
 
@@ -956,6 +956,13 @@ function handleNewCompanyConfirmPostback_(ss, replyToken, record, answer) {
       return;
     }
     lineReply_(replyToken, [GlowLineVoiceLogContent.buildDiscardMessage()]);
+    return;
+  }
+
+  // 会社名が分からないまま「(社名不明)」の会社を作らない(2026-10-29。候補に同じ名前が並んでいた)。
+  // 確認待ちのまま、会社名を文字で送ってもらう
+  if (GlowLineVoiceLogContent.isUnknownCompanyName(record["会社名候補"])) {
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildAskCompanyNameMessage()]);
     return;
   }
 

@@ -10,8 +10,8 @@
 ## キャプション
 ⏳ 締切が目前の制度は、いま慌てて申請すると要件を満たせないことも。
 次の公募に備えて、国の電子申請(jGrants)で使う【GビズIDプライム】を用意しておきましょう。マイナンバーカードとスマホがあれば、オンライン申請なら24時間365日、速やかに発行されます（書類の郵送申請は審査に最大1か月）。
-例）IP360 海外展開支援（ローカライズ支援）（締切：2026-10-29（本日締切））
-参考: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXscMAH
+例）産業車両等の脱炭素化促進事業のうち、空港における脱炭素化促進事業① 空港における再エネ活用型GPU等導入支援（二酸化炭素排出抑制対策事業費等補助金）（締切：2026-10-30（本日締切））
+参考: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYzVMAX
 今回が難しくても、備えておけば次のチャンスをつかめます。
 制度のページを開くときは、プロフィールのリンクからどうぞ。この投稿の制度がまとまっています。
 制度一覧はこちら👇
@@ -21,7 +21,7 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 #沖縄補助金 #GビズID #中小企業支援 #沖縄経営者 #沖縄企業のミカタ
 
 ## 出典
-https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXscMAH
+https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYzVMAX
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
