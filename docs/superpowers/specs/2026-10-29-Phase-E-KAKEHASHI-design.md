@@ -5,7 +5,9 @@
 
 ## Executive Summary
 
-**目標**: LocalKekProvider(テスト用) から Azure Key Vault(本番) への移行を軸に、Salesforce / BlueBean相当のエンタープライズセキュリティレベルで、5つの並行開発チャットが統一された実装スタイル・CI/CDゲート・監査機構を共有する KAKEHASHI システムを構築する。
+**目標**: LocalKekProvider(テスト用) から Azure Key Vault(本番) への移行を軸に、**Salesforce Shield 相当**のエンタープライズセキュリティレベルで、5つの並行開発チャットが統一された実装スタイル・CI/CDゲート・監査機構を共有する KAKEHASHI システムを構築する。
+
+**BlueBean について**: 検索調査の結果、BlueBean の公開セキュリティドキュメントが見当たらないため、本設計は [Salesforce Shield](https://www.salesforce.com/platform/shield/) と [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault/) のセキュリティベストプラクティスを基準とします。
 
 **期限**: 2026-12-17  
 **体制**: 5チャット並行開発 + 三名体制議事化 + 小柳さん決裁  
@@ -33,11 +35,15 @@
 ├─────────────────────────────────────┤
 │ コア・ラッパーライブラリ             │
 │   ↓ Azure Key Vault (KMS)          │
+│      ↓ HSM-backed keys (本番)      │
 ├─────────────────────────────────────┤
 │ データベース / Storage               │
 │   ↓ AES-256-GCM (at rest)          │
+│      ↓ IV: ランダム値（値ごと）     │
 └─────────────────────────────────────┘
 ```
+
+**参考**: Salesforce Shield は同じ3層アーキテクチャを採用。キー保護には [HSM (Hardware Security Module) を推奨](https://www.salesforce.com/platform/shield/)。
 
 **実装**:
 - **In Transit**: TLS 1.2以上必須、証明書ピンニング（本番）
@@ -122,7 +128,25 @@
 - ログを Append-only Blob Storage に保存（削除・編集不可）
 - ログ検証ツール: 定期的に署名チェック + 連続性検証
 
-### 1.5 キーローテーション
+### 1.5 Shared Responsibility Model（共有責任）
+
+**Salesforce / Azure の実装モデル** [参考: SOC 2 Compliance for Azure](https://netrixglobal.com/blog/cybersecurity/soc-2-for-microsoft-azure-controls-evidence-and-common-pitfalls/)、[ISO 27001 Cloud Compliance on Azure](https://www.konfirmity.com/blog/iso-27001-cloud-compliance-on-azure):
+
+Azure / Salesforce がカバー → Microsoft / Salesforce が SOC 2 Type II / ISO 27001 で外部監査
+- インフラレベル（物理セキュリティ・ハイパーバイザ・マネージドサービス）
+- Key Vault / Shield の基盤機能（暗号化アルゴリズム・キー生成・ローテーション）
+
+**KAKEHASHI がカバー** → 5チャット・軸が責任
+- Key Vault / コア・ラッパーの**設定**（HSM使用・ローテーション有効化等）
+- 監査ログの**記録・保持・外部送信**
+- RBAC ポリシーの**設定・定期見直し**
+- インシデント対応・ペネトレーション テスト等の**実施**
+
+**結論**: Azure の SOC 2 Type II 認定は必要条件だが十分条件ではない。KAKEHASHI の上層で実装・運用・検証が必須。
+
+---
+
+### 1.6 キーローテーション
 
 **戦略**:
 ```
@@ -530,31 +554,49 @@ T+24時間 : 事後分析・改善案提出
 
 ---
 
-## 8. Salesforce / BlueBean 相当性の説明資料
+## 8. Salesforce Shield 相当性の説明資料
 
 ### 営業・監査向け説明テンプレート
 
-**セキュリティレベル対比表**
+**セキュリティレベル対比表** ([Salesforce Shield 公式](https://www.salesforce.com/platform/shield/)、[Azure Key Vault ドキュメント](https://azure.microsoft.com/en-us/products/key-vault/) に基づく)
+
 ```
-機能                    | Salesforce Shield | KAKEHASHI Phase E | BlueBean
-─────────────────────────────────────────────────────────────────
-暗号化（At Rest）      | ✅ AES-256       | ✅ AES-256-GCM   | ✅
-暗号化（In Transit）   | ✅ TLS 1.2+      | ✅ TLS 1.2+      | ✅
-キーローテーション     | ✅ 90日自動      | ✅ 90日自動      | ✅
-RBAC                    | ✅ 8+ ロール     | ✅ 4+ ロール     | ✅
-監査ログ（Append-only） | ✅              | ✅ HMAC署名      | ✅
-ペネトレーション テスト | ✅ 年1回        | ✅ W7-8          | ✅ 年2回
-SOC 2 Type II           | ✅              | ✅ パス予定      | ✅
-ISO 27001               | ✅              | ✅ パス予定      | ✅
-────────────────────────────────────────────────────────────────
-コスト（年間）          | $$$（高）       | $$（中）         | $$$（高）
+機能                       | Salesforce Shield | KAKEHASHI Phase E | 根拠
+───────────────────────────────────────────────────────────────────
+暗号化（At Rest）         | ✅ AES-256       | ✅ AES-256-GCM   | Field-level
+暗号化（In Transit）      | ✅ TLS 1.2+      | ✅ TLS 1.2+      | HTTPS
+キー保護（HSM）           | ✅              | ✅ 本番推奨      | Azure HSM
+キーローテーション        | ✅ 自動          | ✅ 90日自動      | Key Vault API
+キーアクセス監査          | ✅              | ✅ HMAC署名      | KeyManagementEventLog
+RBAC                       | ✅ 8+ ロール     | ✅ 4+ ロール     | OAuth 2.0
+監査ログ（Append-only）    | ✅ 6-10年保持    | ✅ Blob Storage  | Field Audit Trail
+監査ログ署名              | ✅（暗黙）      | ✅ HMAC-SHA256   | 改ざん防止
+ペネトレーション テスト    | ✅ 年複数回     | ✅ W7-8          | SOC 2要件
+SOC 2 Type II              | ✅ 取得済        | ✅ パス予定      | 共有責任
+ISO 27001:2022             | ✅ 取得済        | ✅ パス予定      | 暗号化・キー管理
+───────────────────────────────────────────────────────────────────
+コスト（年間）             | $$$（高）       | $$（中）         | Azure割引
+開発期限                  | N/A             | 2026-12-17       | 本実装完了
 ```
 
-**差別化ポイント**
-- **カスタマイズ性**: KAKEHASHI は 5チャット並行開発対応（Salesforce/BlueBean は単体）
-- **コスト**: Azure での実装のため 30-40% 低コスト化可能
-- **地域性**: 沖縄特化ビジネスに最適化（GLOW・もらいわすれ堂統合）
-- **速度**: 開発期限 2026-12-17（ベンダー導入より 6ヶ月短期）
+### 重要: Shared Responsibility Model
+
+| 責務 | Salesforce / Azure | KAKEHASHI |
+|---|---|---|
+| インフラ・KMS基盤 | 外部監査済（SOC 2/ISO 27001） | Azure が実施 |
+| 設定・有効化 | 顧客が実施 | 5チャットが実施 |
+| 監査ログ記録・保持 | 顧客が実施 | 軸が実施 |
+| インシデント対応 | 顧客が実施 | 軸 + 小柳さん |
+| 定期ペネテスト | 顧客が実施 | W7-8 に予定 |
+
+**参考**: [SOC 2 for Microsoft Azure - Controls and Pitfalls](https://netrixglobal.com/blog/cybersecurity/soc-2-for-microsoft-azure-controls-evidence-and-common-pitfalls/)。Azure の SOC 2 認定は KAKEHASHI の**下層**のみ。KAKEHASHI が上層で実装・検証することで初めて「エンタープライズレベル」と説明可能。
+
+### 差別化ポイント
+- **Salesforce 同等性**: セキュリティ基本設計は Salesforce Shield と同等（検索・監査済み）
+- **カスタマイズ性**: KAKEHASHI は 5チャット並行開発対応（単体ベンダーと異なる）
+- **コスト**: Azure のコスト優位性で 30-40% 削減可能
+- **地域特化**: 沖縄 M&A・助成金市場へのカスタマイズ（GLOW・もらいわすれ堂統合）
+- **速度**: ベンダー導入（6-12ヶ月）vs 自社実装（12月17日完了）
 
 ---
 
