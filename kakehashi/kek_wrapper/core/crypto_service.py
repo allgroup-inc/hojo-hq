@@ -10,6 +10,15 @@ Encryption
     checked by ``decrypt``. A failed check raises ``ValueError`` (spec section
     3.1): decryption never returns ``None`` or partial plaintext.
 
+    ``encrypt`` requires ``key_version=`` (keyword-only) so every record says
+    which KEK version encrypted it. Optional ``associated_data=`` is
+    authenticated but not stored; ``decrypt`` must be given the same bytes.
+
+    IV length: 16 bytes, kept per the 2026-10-29 Round 3 decision (Decision 3)
+    and to be confirmed before production data is written. NIST SP 800-38D
+    recommends 96-bit IVs; a 16-byte IV is valid GCM (the counter block is
+    derived through GHASH) and is covered by 128-bit-IV known-answer tests.
+
     Keys are passed per call (fetched by the caller through
     ``KeyVaultConnector.getSecret``) and must be exactly 32 bytes. This module
     holds no key material of its own.
@@ -73,6 +82,12 @@ def _require_aes_key(key: Any) -> bytes:
             f"AES-256-GCM requires a {AES_256_KEY_LENGTH}-byte key, got {len(key)} bytes"
         )
     return key
+
+
+def _optional_associated_data(value: Any) -> Optional[bytes]:
+    if value is None:
+        return None
+    return _require_bytes(value, "associated_data")
 
 
 def _aes_gcm_seal(
@@ -208,21 +223,37 @@ class CryptoService:
     # ---------------------------------------------------------- encryption
 
     async def encrypt(
-        self, plaintext: bytes, key: bytes, *, key_version: Optional[str] = None
+        self,
+        plaintext: bytes,
+        key: bytes,
+        *,
+        key_version: str,
+        associated_data: bytes | None = None,
     ) -> EncryptedData:
         """Encrypt plaintext with AES-256-GCM using a fresh random IV.
 
-        ``key_version`` (keyword-only, optional) is recorded on the result so
-        that ``decrypt`` can later be given the same KEK version.
+        Args:
+            key_version: required, keyword-only. The KEK version ``key`` belongs
+                to (as returned by ``KeyVaultConnector.getSecretWithVersion``).
+                It is recorded on the result so the record can be decrypted
+                with the same version after a rotation (spec section 1.6).
+                Must be a non-empty string; ``None`` and ``""`` raise ``ValueError``.
+            associated_data: optional, keyword-only. Bytes authenticated by
+                the GCM tag but not encrypted and **not stored** in
+                ``EncryptedData``. The caller must keep it (or be able to
+                rebuild it, e.g. from the record id and ``key_version``) and
+                pass the identical bytes to ``decrypt``. Use it to bind the
+                ciphertext to its context so a record cannot be swapped.
         """
-        if key_version is not None and (not isinstance(key_version, str) or not key_version):
-            # an empty or non-string version would be recorded and later fail
-            # to select the KEK that encrypted the record
-            raise ValueError("key_version must be a non-empty string or None")
+        if not isinstance(key_version, str) or not key_version:
+            # a missing, empty or non-string version would be recorded and
+            # later fail to select the KEK that encrypted the record
+            raise ValueError("key_version must be a non-empty string")
         key = _require_aes_key(key)
         plaintext = _require_bytes(plaintext, "plaintext")
+        aad = _optional_associated_data(associated_data)
         iv = secrets.token_bytes(GCM_IV_LENGTH)
-        sealed = _aes_gcm_seal(key, iv, plaintext)
+        sealed = _aes_gcm_seal(key, iv, plaintext, aad)
         return EncryptedData(
             ciphertext=sealed,
             iv=iv,
@@ -230,8 +261,17 @@ class CryptoService:
             timestamp=self._utc_now(),
         )
 
-    async def decrypt(self, encrypted_data: EncryptedData, key: bytes) -> bytes:
-        """Decrypt and validate the GCM tag. Raises ``ValueError`` if it is invalid."""
+    async def decrypt(
+        self,
+        encrypted_data: EncryptedData,
+        key: bytes,
+        associated_data: bytes | None = None,
+    ) -> bytes:
+        """Decrypt and validate the GCM tag. Raises ``ValueError`` if it is invalid.
+
+        ``associated_data`` must be the exact bytes given to ``encrypt``
+        (``None`` if none were given); any difference fails the tag check.
+        """
         if not isinstance(encrypted_data, EncryptedData):
             raise TypeError(
                 f"encrypted_data must be EncryptedData, got {type(encrypted_data).__name__}"
@@ -239,7 +279,8 @@ class CryptoService:
         iv = _require_bytes(encrypted_data.iv, "iv")
         if len(iv) != GCM_IV_LENGTH:
             raise ValueError(f"iv must be {GCM_IV_LENGTH} bytes, got {len(iv)} bytes")
-        return _aes_gcm_open(key, iv, encrypted_data.ciphertext)
+        aad = _optional_associated_data(associated_data)
+        return _aes_gcm_open(key, iv, encrypted_data.ciphertext, aad)
 
     # ---------------------------------------------------------- signatures
 

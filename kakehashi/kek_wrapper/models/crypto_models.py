@@ -79,11 +79,15 @@ class EncryptedData:
     authentication tag (the layout produced by ``cryptography``'s ``AESGCM``),
     so the tag travels with the record without a separate field.
 
-    ``key_version`` records which KEK version encrypted the record. It is
-    Optional per the Task 1.2 brief, but callers that use rotated keys should
-    always set it: decryption must select the exact key version that
-    encrypted the record, otherwise data written before a rotation becomes
-    unreadable (Phase E plan, critical risk 1).
+    ``key_version`` records which KEK version encrypted the record. The field
+    type stays ``Optional[str]`` (locked layout), but ``CryptoService.encrypt``
+    requires a non-empty ``key_version=`` (Round 3, Decision 1), so every
+    record it produces carries one: decryption must select the exact key
+    version that encrypted the record, otherwise data written before a
+    rotation becomes unreadable (Phase E plan, critical risk 1).
+
+    Associated data passed to ``encrypt`` is authenticated but deliberately
+    not stored here; the caller keeps or rebuilds it for ``decrypt``.
     """
 
     ciphertext: bytes

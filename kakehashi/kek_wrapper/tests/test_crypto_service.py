@@ -20,6 +20,7 @@ from kakehashi.kek_wrapper.core import crypto_service as cs
 from kakehashi.kek_wrapper.models.role import Role
 
 T0 = datetime(2026, 11, 6, 9, 0, tzinfo=timezone.utc)
+KV = "kakehashi-kek/v1"  # KEK version label used by the tests (not key material)
 
 
 def run(coro):
@@ -53,8 +54,8 @@ def reference_hmac(key: bytes, entry: dict) -> str:
 
 def test_encrypt_generates_random_iv(service, aes_key):
     plaintext = b"same plaintext"
-    first = run(service.encrypt(plaintext, aes_key))
-    second = run(service.encrypt(plaintext, aes_key))
+    first = run(service.encrypt(plaintext, aes_key, key_version=KV))
+    second = run(service.encrypt(plaintext, aes_key, key_version=KV))
 
     assert isinstance(first, EncryptedData) and isinstance(second, EncryptedData)
     assert len(first.iv) == 16 and len(second.iv) == 16
@@ -65,7 +66,7 @@ def test_encrypt_generates_random_iv(service, aes_key):
 
 
 def test_decrypt_recovers_plaintext(service, aes_key):
-    encrypted = run(service.encrypt(b"secret data", aes_key))
+    encrypted = run(service.encrypt(b"secret data", aes_key, key_version=KV))
     assert run(service.decrypt(encrypted, aes_key)) == b"secret data"
 
 
@@ -155,6 +156,68 @@ def test_aes_gcm_against_known_vectors():
             cs._aes_gcm_open(k, n, forged, a)
 
 
+# AES-256-GCM with a 128-bit IV, the IV length CryptoService uses (Round 3,
+# Decision 3). The McGrew-Viega cases above have no 128-bit-IV AES-256 case,
+# so these come from Project Wycheproof (C2SP/wycheproof,
+# testvectors_v1/aes_gcm_test.json, group keySize=256 ivSize=128 tagSize=128),
+# tcIds 240, 242, 245 (counter-wrap cases: the GHASH-derived J0 sits at or
+# near a 32-bit counter boundary) and 258 (pseudorandom). Public test
+# constants, not secrets.
+WYCHEPROOF_KEY_A = "00112233445566778899aabbccddeeff102132435465768798a9bacbdcedfe0f"
+WYCHEPROOF_128BIT_IV_VECTORS = [
+    # (tcId, key, iv, plaintext, ciphertext, tag)
+    (
+        240,
+        WYCHEPROOF_KEY_A,
+        "5c2ea9b695fcf6e264b96074d6bfa572",
+        "00" * 40,
+        "28e1c5232f4ee8161dbe4c036309e0b3254e9212bef0a93431ce5e5604c8f6a73c18a3183018b770",
+        "d5808a1bd11a01129bf3c6919aff2339",
+    ),
+    (
+        242,
+        WYCHEPROOF_KEY_A,
+        "ce20a7e870696a5e68533c465bad2ba1",
+        "00" * 40,
+        "4f4350565d91d9aa8c5f4048550492ad6d6fdabf66da5d1e2af7bfe1a8aadaa0baa3de38a41d9713",
+        "155da6441ec071ef2d8e6cffbacc1c7c",
+    ),
+    (
+        245,
+        WYCHEPROOF_KEY_A,
+        "ecd52120af240e9b4bf3b9d1eeb49434",
+        "00" * 40,
+        "36b3fbecd09178d04527fb37544f5579d20d60a41266f685c48098e1a52804ca387d90709d3268dd",
+        "033e0ef2953ebfd8425737c7d393f89a",
+    ),
+    (
+        258,
+        "4f84782bfbb64a973c3de3dcfa3430367fd68bc0b4c3b31e5d7c8141ba3e6a67",
+        "5d1bde6fa0994b33efd8f23f531248a7",
+        "78cb6650a1908a842101ea85804fed00cc56fbdafafba0ef4d1ca607dcae57b6",
+        "cb960201fa5ad41d41d1c2c8037c71d52b72e76b16b589d71b976627c9734c9d",
+        "8dfce16467c3a6ebb3e7242c9a551962",
+    ),
+]
+
+
+def test_aes_gcm_128bit_iv_known_vectors_through_service(service, monkeypatch):
+    """Run the 128-bit-IV vectors through CryptoService.encrypt/decrypt themselves."""
+    for tc_id, key, iv, pt, ct, tag in WYCHEPROOF_128BIT_IV_VECTORS:
+        k, n, p = bytes.fromhex(key), bytes.fromhex(iv), bytes.fromhex(pt)
+        assert len(n) == 16
+
+        # pin the IV only for this known-answer check; production draws it from secrets
+        monkeypatch.setattr(cs.secrets, "token_bytes", lambda size, _n=n: _n)
+        encrypted = run(service.encrypt(p, k, key_version=KV))
+        monkeypatch.undo()
+
+        assert encrypted.iv == n, tc_id
+        assert encrypted.ciphertext.hex() == ct + tag, tc_id
+        stored = EncryptedData(bytes.fromhex(ct + tag), n, KV, T0)
+        assert run(service.decrypt(stored, k)) == p, tc_id
+
+
 # ------------------------------------------------------------- encryption
 
 
@@ -164,36 +227,45 @@ def test_encrypt_records_key_version_and_timestamp(service, aes_key):
     assert encrypted.timestamp == T0
     assert len(encrypted.ciphertext) == 1 + 16  # ciphertext || tag
 
-    unversioned = run(service.encrypt(b"x", aes_key))
-    assert unversioned.key_version is None
+
+def test_encrypt_requires_key_version_keyword(service, aes_key):
+    import inspect
+
+    param = inspect.signature(CryptoService.encrypt).parameters["key_version"]
+    assert param.kind is inspect.Parameter.KEYWORD_ONLY
+    assert param.default is inspect.Parameter.empty
+    with pytest.raises(TypeError):
+        run(service.encrypt(b"x", aes_key))  # omitted
+    with pytest.raises(TypeError):
+        run(service.encrypt(b"x", aes_key, KV))  # positional is not accepted
 
 
-@pytest.mark.parametrize("bad_version", ["", 1, b"v1", object()])
+@pytest.mark.parametrize("bad_version", [None, "", 1, b"v1", object()])
 def test_encrypt_rejects_invalid_key_version(service, aes_key, bad_version):
     with pytest.raises(ValueError, match="key_version"):
         run(service.encrypt(b"x", aes_key, key_version=bad_version))
 
 
 def test_default_clock_is_utc_aware(aes_key):
-    encrypted = run(CryptoService().encrypt(b"x", aes_key))
+    encrypted = run(CryptoService().encrypt(b"x", aes_key, key_version=KV))
     assert encrypted.timestamp.tzinfo is not None
     assert encrypted.timestamp.utcoffset().total_seconds() == 0
 
 
 def test_encrypt_accepts_bytes_like(service, aes_key):
-    encrypted = run(service.encrypt(bytearray(b"abc"), memoryview(aes_key)))
+    encrypted = run(service.encrypt(bytearray(b"abc"), memoryview(aes_key), key_version=KV))
     assert run(service.decrypt(encrypted, bytearray(aes_key))) == b"abc"
 
 
 def test_encrypt_empty_plaintext(service, aes_key):
-    encrypted = run(service.encrypt(b"", aes_key))
+    encrypted = run(service.encrypt(b"", aes_key, key_version=KV))
     assert run(service.decrypt(encrypted, aes_key)) == b""
 
 
 @pytest.mark.parametrize("length", [0, 16, 24, 31, 33, 64])
 def test_rejects_wrong_key_length(service, length):
     with pytest.raises(ValueError, match="32-byte key"):
-        run(service.encrypt(b"x", b"\x00" * length))
+        run(service.encrypt(b"x", b"\x00" * length, key_version=KV))
     record = EncryptedData(b"\x00" * 16, b"\x00" * 16, None, T0)
     with pytest.raises(ValueError, match="32-byte key"):
         run(service.decrypt(record, b"\x00" * length))
@@ -202,16 +274,16 @@ def test_rejects_wrong_key_length(service, length):
 def test_key_error_never_contains_key_material(service):
     key = secrets.token_bytes(31)
     with pytest.raises(ValueError) as excinfo:
-        run(service.encrypt(b"x", key))
+        run(service.encrypt(b"x", key, key_version=KV))
     assert key.hex() not in str(excinfo.value)
     assert repr(key) not in str(excinfo.value)
 
 
 def test_rejects_non_bytes_inputs(service, aes_key):
     with pytest.raises(TypeError):
-        run(service.encrypt("text", aes_key))
+        run(service.encrypt("text", aes_key, key_version=KV))
     with pytest.raises(TypeError):
-        run(service.encrypt(b"x", "0" * 32))
+        run(service.encrypt(b"x", "0" * 32, key_version=KV))
     with pytest.raises(TypeError):
         run(service.decrypt({"ciphertext": b""}, aes_key))
 
@@ -220,7 +292,7 @@ def test_rejects_non_bytes_inputs(service, aes_key):
 
 
 def test_decrypt_fails_on_tampered_ciphertext(service, aes_key):
-    encrypted = run(service.encrypt(b"secret data", aes_key))
+    encrypted = run(service.encrypt(b"secret data", aes_key, key_version=KV))
     flipped = bytes([encrypted.ciphertext[0] ^ 0x80]) + encrypted.ciphertext[1:]
     tampered = EncryptedData(flipped, encrypted.iv, encrypted.key_version, encrypted.timestamp)
     with pytest.raises(ValueError, match="authentication failed"):
@@ -228,7 +300,7 @@ def test_decrypt_fails_on_tampered_ciphertext(service, aes_key):
 
 
 def test_decrypt_fails_on_wrong_key_or_iv(service, aes_key):
-    encrypted = run(service.encrypt(b"secret data", aes_key))
+    encrypted = run(service.encrypt(b"secret data", aes_key, key_version=KV))
     with pytest.raises(ValueError, match="authentication failed"):
         run(service.decrypt(encrypted, secrets.token_bytes(32)))
     other_iv = EncryptedData(
@@ -239,13 +311,66 @@ def test_decrypt_fails_on_wrong_key_or_iv(service, aes_key):
 
 
 def test_decrypt_rejects_malformed_record(service, aes_key):
-    encrypted = run(service.encrypt(b"secret data", aes_key))
+    encrypted = run(service.encrypt(b"secret data", aes_key, key_version=KV))
     short_iv = EncryptedData(encrypted.ciphertext, encrypted.iv[:12], None, T0)
     with pytest.raises(ValueError, match="iv must be 16 bytes"):
         run(service.decrypt(short_iv, aes_key))
     truncated = EncryptedData(encrypted.ciphertext[:15], encrypted.iv, None, T0)
     with pytest.raises(ValueError, match="shorter than the GCM authentication tag"):
         run(service.decrypt(truncated, aes_key))
+
+
+# --------------------------------------------------------- associated data
+
+
+def record_aad(record_id: str, key_version: str) -> bytes:
+    """Example caller-side AAD: rebuilt from the record's own identity, never stored."""
+    return f"kakehashi:record={record_id}:kek={key_version}".encode("utf-8")
+
+
+def test_associated_data_round_trip(service, aes_key):
+    aad = record_aad("cust-001", KV)
+    encrypted = run(service.encrypt(b"secret data", aes_key, key_version=KV, associated_data=aad))
+    # not stored: EncryptedData keeps its 4 fields and no AAD bytes
+    assert aad not in encrypted.ciphertext
+    assert run(service.decrypt(encrypted, aes_key, associated_data=aad)) == b"secret data"
+    assert run(service.decrypt(encrypted, aes_key, aad)) == b"secret data"  # positional ok
+    assert run(service.decrypt(encrypted, aes_key, bytearray(aad))) == b"secret data"
+
+
+def test_associated_data_mismatch_fails(service, aes_key):
+    encrypted = run(
+        service.encrypt(
+            b"secret data", aes_key, key_version=KV, associated_data=record_aad("cust-001", KV)
+        )
+    )
+    # record swapped to another row, KEK label altered, or AAD dropped
+    for wrong in (record_aad("cust-002", KV), record_aad("cust-001", "kakehashi-kek/v2"), None):
+        with pytest.raises(ValueError, match="authentication failed"):
+            run(service.decrypt(encrypted, aes_key, associated_data=wrong))
+
+
+def test_associated_data_required_on_decrypt_if_absent_on_encrypt(service, aes_key):
+    encrypted = run(service.encrypt(b"secret data", aes_key, key_version=KV))
+    with pytest.raises(ValueError, match="authentication failed"):
+        run(service.decrypt(encrypted, aes_key, associated_data=b"unexpected"))
+    assert run(service.decrypt(encrypted, aes_key, associated_data=None)) == b"secret data"
+
+
+def test_associated_data_must_be_bytes(service, aes_key):
+    with pytest.raises(TypeError, match="associated_data"):
+        run(service.encrypt(b"x", aes_key, key_version=KV, associated_data="cust-001"))
+    encrypted = run(service.encrypt(b"x", aes_key, key_version=KV))
+    with pytest.raises(TypeError, match="associated_data"):
+        run(service.decrypt(encrypted, aes_key, associated_data="cust-001"))
+
+
+def test_associated_data_is_keyword_only_on_encrypt():
+    import inspect
+
+    params = inspect.signature(CryptoService.encrypt).parameters
+    assert params["associated_data"].kind is inspect.Parameter.KEYWORD_ONLY
+    assert params["associated_data"].default is None
 
 
 def test_explicit_iv_primitives_are_private():
