@@ -9,7 +9,7 @@ Tests role-based access control for all 4 roles:
 
 import pytest
 
-from conftest import InvalidTokenError, KEKWrapper, PermissionError
+from kakehashi.kek_wrapper.core.audit_log_collector import AuditError
 from kakehashi.kek_wrapper.models.crypto_models import Role, RotationType
 
 

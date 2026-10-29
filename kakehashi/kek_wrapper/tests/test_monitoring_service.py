@@ -206,7 +206,7 @@ class TestHealthCheckService:
         health_check_service.crypto.encrypt = AsyncMock(return_value=b"ciphertext")
         health_check_service.crypto.decrypt = AsyncMock(return_value=b"health_check_message")
 
-        from kakehashi.kek_wrapper.models.enums import EventType, Role, Operation, Status
+        from kakehashi.kek_wrapper.models.enums import EventType, Status
         health_check_service.audit.recordEvent = AsyncMock()
 
         health_check_service.rbac.issue_tokens = AsyncMock(
@@ -239,7 +239,7 @@ class TestHealthCheckService:
             side_effect=Exception("Encryption failed")
         )
 
-        from kakehashi.kek_wrapper.models.enums import EventType, Role, Operation, Status
+        from kakehashi.kek_wrapper.models.enums import EventType, Status
         health_check_service.audit.recordEvent = AsyncMock()
 
         health_check_service.rbac.issue_tokens = AsyncMock(

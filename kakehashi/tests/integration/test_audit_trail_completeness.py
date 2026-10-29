@@ -11,7 +11,7 @@ import json
 
 import pytest
 
-from conftest import KEKWrapper, PermissionError
+from kakehashi.kek_wrapper.core.audit_log_collector import AuditError
 from kakehashi.kek_wrapper.models.crypto_models import Role
 
 

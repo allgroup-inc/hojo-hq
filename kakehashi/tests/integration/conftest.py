@@ -19,7 +19,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from kakehashi.kek_wrapper.models.crypto_models import EncryptedData, Role
+from kakehashi.kek_wrapper.models.crypto_models import EncryptedData
+from kakehashi.kek_wrapper.models.enums import Role
 
 
 class MockKeyVaultConnector:

@@ -8,12 +8,15 @@ Tests the complete encryption/decryption workflow including:
 - Error cascade effects
 """
 
+from __future__ import annotations
+
 import asyncio
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import pytest
 
-from conftest import AuditError, KEKWrapper
+from kakehashi.kek_wrapper.core.audit_log_collector import AuditError
 
 
 class TestE2EEncryptionFlow:

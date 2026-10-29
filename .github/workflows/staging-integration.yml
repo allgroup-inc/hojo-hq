@@ -1,0 +1,134 @@
+name: Staging Integration Tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -e kakehashi/
+          pip install pytest-asyncio pytest-cov
+
+      - name: Setup staging environment
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_KEY_VAULT_URL_STAGING: ${{ secrets.AZURE_KEY_VAULT_URL_STAGING }}
+          COSMOS_DB_ENDPOINT_STAGING: ${{ secrets.COSMOS_DB_ENDPOINT_STAGING }}
+        run: |
+          python kakehashi/tests/integration/staging_setup.py
+
+  integration_tests:
+    needs: setup
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -e kakehashi/
+          pip install pytest-asyncio pytest-cov
+
+      - name: Run integration tests
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_KEY_VAULT_URL_STAGING: ${{ secrets.AZURE_KEY_VAULT_URL_STAGING }}
+          COSMOS_DB_ENDPOINT_STAGING: ${{ secrets.COSMOS_DB_ENDPOINT_STAGING }}
+        run: |
+          pytest kakehashi/tests/integration/ \
+            -v \
+            --tb=short \
+            --cov=kakehashi.kek_wrapper \
+            --cov-report=term-missing \
+            --cov-fail-under=85 \
+            -m "not slow"
+
+      - name: Generate SLA report
+        if: always()
+        run: |
+          python kakehashi/tests/integration/generate_sla_report.py \
+            --output /tmp/sla_report.md
+
+      - name: Upload SLA report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sla-report
+          path: /tmp/sla_report.md
+          retention-days: 30
+
+  go_no_go_decision:
+    needs: integration_tests
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download SLA report
+        uses: actions/download-artifact@v4
+        with:
+          name: sla-report
+
+      - name: Check test results
+        run: |
+          if [ "${{ needs.integration_tests.result }}" == "success" ]; then
+            echo "✅ GO: All integration tests passed"
+            cat sla_report.md
+            exit 0
+          else
+            echo "❌ NO-GO: Integration tests failed"
+            cat sla_report.md
+            exit 1
+          fi
+
+  cleanup:
+    needs: [integration_tests, go_no_go_decision]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cleanup staging environment
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_KEY_VAULT_URL_STAGING: ${{ secrets.AZURE_KEY_VAULT_URL_STAGING }}
+          COSMOS_DB_ENDPOINT_STAGING: ${{ secrets.COSMOS_DB_ENDPOINT_STAGING }}
+        run: |
+          pip install -e kakehashi/
+          python -c "
+          import asyncio
+          from kakehashi.tests.integration.staging_setup import cleanup_staging_environment
+          asyncio.run(cleanup_staging_environment())
+          "

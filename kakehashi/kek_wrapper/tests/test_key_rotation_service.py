@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from kakehashi.kek_wrapper.core.key_rotation_service import KeyRotationService
-from kakehashi.kek_wrapper.models.enums import EventType, Operation, Status
+from kakehashi.kek_wrapper.models.enums import EventType, Status
 from kakehashi.kek_wrapper.models.rotation_models import (
     KeyVersionRecord,
     RotationType,
@@ -21,9 +21,7 @@ from kakehashi.kek_wrapper.models.role import Role
 
 
 @pytest.fixture
-async def mock_key_rotation_service(
-    mock_key_vault_client, mock_crypto_service, mock_audit_collector, mock_alert_service
-):
+def mock_key_rotation_service():
     """Create a KeyRotationService with mocked dependencies."""
     from kakehashi.kek_wrapper.core.key_vault_connector import KeyVaultConnector
     from kakehashi.kek_wrapper.core.crypto_service import CryptoService
@@ -41,11 +39,14 @@ async def mock_key_rotation_service(
     )
     connector.invalidate_cache = MagicMock()
 
-    # Use mocked crypto service from fixture
-    crypto = mock_crypto_service
+    # Create crypto service mock
+    crypto = AsyncMock()
+    crypto.encrypt = AsyncMock(return_value=b"encrypted_data")
+    crypto.decrypt = AsyncMock(return_value=b"decrypted_plaintext")
 
-    # Use mocked audit collector from fixture
-    audit = mock_audit_collector
+    # Create audit collector mock
+    audit = AsyncMock()
+    audit.recordEvent = AsyncMock(return_value="evt-12345")
 
     # Create error handler mock
     error_handler = AsyncMock(spec=ErrorHandler)

@@ -122,11 +122,14 @@ class AlertDispatcher:
             AlertSeverity.CRITICAL: "#8f0000",
         }
 
+        # Get severity value (AlertSeverity is str enum)
+        severity_str = alert.severity if isinstance(alert.severity, str) else alert.severity.value
+
         payload = {
             "attachments": [
                 {
                     "color": color_map.get(alert.severity, "#999999"),
-                    "title": f"{alert.severity.value}: {alert.title}",
+                    "title": f"{severity_str}: {alert.title}",
                     "text": alert.message,
                     "fields": [
                         {"title": "Rule ID", "value": alert.rule_id, "short": True},

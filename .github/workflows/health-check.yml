@@ -1,0 +1,38 @@
+name: Daily Health Check
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 06:00 UTC (= 15:00 JST)
+  workflow_dispatch:
+
+jobs:
+  health_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r kakehashi/requirements.txt 2>/dev/null || true
+          pip install pydantic aiohttp pytest pytest-asyncio azure-monitor-opentelemetry
+
+      - name: Run health check
+        env:
+          AZURE_KEY_VAULT_URL: ${{ secrets.AZURE_KEY_VAULT_URL }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          APPLICATION_INSIGHTS_KEY: ${{ secrets.APPLICATION_INSIGHTS_KEY }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_OPS }}
+        run: |
+          python -m pytest kakehashi/kek_wrapper/tests/test_monitoring_service.py -v
+
+      - name: Upload results to Application Insights
+        if: always()
+        run: |
+          echo "Health check completed at $(date)"

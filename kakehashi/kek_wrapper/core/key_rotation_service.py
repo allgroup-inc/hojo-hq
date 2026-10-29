@@ -13,7 +13,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, List, Optional
 
-from kakehashi.kek_wrapper.models.enums import EventType, Operation, Status
+from kakehashi.kek_wrapper.models.enums import EventType, Status
 from kakehashi.kek_wrapper.models.rotation_models import (
     KeyVersionRecord,
     RotationResult,
@@ -118,7 +118,7 @@ class KeyRotationService:
                     event_type=EventType.KEY_ROTATE,
                     actor_role=actor_role.value,
                     resource_id="user-key-rotation",
-                    operation=Operation.GET,
+                    operation="GET",
                     status=Status.SUCCESS,
                 )
                 result.audit_event_id = event_id
@@ -146,7 +146,7 @@ class KeyRotationService:
                     event_type=EventType.KEY_ROTATE,
                     actor_role=actor_role.value,
                     resource_id="user-key-rotation",
-                    operation=Operation.PUT,
+                    operation="PUT",
                     status=Status.SUCCESS,
                 )
                 logger.info("Rotation completion recorded")
@@ -172,7 +172,7 @@ class KeyRotationService:
                         event_type=EventType.KEY_ROTATE,
                         actor_role=actor_role.value,
                         resource_id="user-key-rotation",
-                        operation=Operation.PUT,
+                        operation="PUT",
                         status=Status.FAILURE,
                     )
                 except Exception as audit_error:

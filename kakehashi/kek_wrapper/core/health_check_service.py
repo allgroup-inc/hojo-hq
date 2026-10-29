@@ -119,13 +119,13 @@ class HealthCheckService:
         try:
             start = time.time()
             # Import enums for audit recording
-            from kakehashi.kek_wrapper.models.enums import EventType, Role, Operation, Status
+            from kakehashi.kek_wrapper.models.enums import EventType, Status
 
             await self.audit.recordEvent(
-                event_type=EventType.AUDIT,
-                actor_role=Role.SYSTEM,
+                event_type=EventType.COMPLIANCE_CHECK,
+                actor_role="SYSTEM",
                 resource_id="health-check",
-                operation=Operation.GET,
+                operation="GET",
                 status=Status.SUCCESS,
             )
             latency_ms = (time.time() - start) * 1000

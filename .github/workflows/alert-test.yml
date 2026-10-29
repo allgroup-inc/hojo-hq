@@ -1,0 +1,79 @@
+name: Alert Rule Self-Check
+
+on:
+  schedule:
+    - cron: '0 10 * * 1'  # Weekly Monday at 10:00 JST
+  workflow_dispatch:
+
+jobs:
+  alert_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pydantic aiohttp pytest pytest-asyncio
+
+      - name: Validate alert rules
+        run: |
+          python -m pytest kakehashi/kek_wrapper/tests/test_alert_dispatcher.py -v --tb=short
+
+      - name: Check alert configuration
+        run: |
+          python << 'EOF'
+          import sys
+          from kakehashi.kek_wrapper.models.monitoring_models import AlertRule, AlertSeverity
+
+          # Validate sample alert rules
+          rules = [
+              AlertRule(
+                  rule_id="kv_error_rate_high",
+                  name="kek_vault_error_rate",
+                  condition="metric(kek_vault_error_rate) > 0.05",
+                  severity=AlertSeverity.ERROR,
+                  threshold_value=5.0,
+                  window_minutes=5,
+                  enabled=True,
+                  channels=["slack-ops", "email-ops"]
+              ),
+              AlertRule(
+                  rule_id="crypto_latency_high",
+                  name="crypto_encrypt_latency_ms",
+                  condition="metric(crypto_encrypt_latency_ms) > 500",
+                  severity=AlertSeverity.WARNING,
+                  threshold_value=500.0,
+                  window_minutes=5,
+                  enabled=True,
+                  channels=["slack-ops"]
+              ),
+              AlertRule(
+                  rule_id="rbac_auth_failures",
+                  name="rbac_auth_failure_rate",
+                  condition="metric(rbac_auth_failure_rate) > 0.10",
+                  severity=AlertSeverity.CRITICAL,
+                  threshold_value=10.0,
+                  window_minutes=5,
+                  enabled=True,
+                  channels=["slack-security", "email-security"]
+              ),
+          ]
+
+          print("✓ Alert rules validated successfully")
+          for rule in rules:
+              print(f"  - {rule.rule_id}: {rule.name} (severity: {rule.severity.value})")
+
+          sys.exit(0)
+          EOF
+
+      - name: Report results
+        if: always()
+        run: |
+          echo "Alert test completed at $(date)"
