@@ -68,6 +68,7 @@ from datetime import datetime, timezone
 from typing import Any, Callable, Dict, Optional, Protocol, Tuple
 
 from ..models.crypto_models import DEFAULT_ROTATION_INTERVAL_DAYS, KeyVersion
+from ..models.role import Role
 
 try:  # azure-core ships with the Azure SDK; tests may run without it.
     from azure.core.exceptions import ResourceNotFoundError
@@ -99,8 +100,8 @@ ENV_CLIENT_ID = "AZURE_CLIENT_ID"
 # Key Vault object names: 1-127 characters, alphanumerics and dashes only.
 _SECRET_NAME_RE = re.compile(r"^[0-9A-Za-z-]{1,127}$")
 
-#: Actor role recorded on audit events when none is configured.
-DEFAULT_ACTOR_ROLE = "system"
+#: Actor role recorded on audit events when none is configured (system internal operations).
+DEFAULT_ACTOR_ROLE = Role.OPERATOR
 
 # Audit status vocabulary (spec section 1.4).
 STATUS_SUCCESS = "SUCCESS"
@@ -197,7 +198,7 @@ class KeyVaultConnector:
         cache_ttl_seconds: float = DEFAULT_CACHE_TTL_SECONDS,
         rotation_interval_days: int = DEFAULT_ROTATION_INTERVAL_DAYS,
         audit_collector: Optional[AuditSink] = None,
-        actor_role: str = DEFAULT_ACTOR_ROLE,
+        actor_role: Role = DEFAULT_ACTOR_ROLE,
         credential_factory: Optional[CredentialFactory] = None,
         client_factory: Optional[ClientFactory] = None,
         clock: Callable[[], float] = time.monotonic,
@@ -212,8 +213,10 @@ class KeyVaultConnector:
             raise ValueError("Key Vault URL must use https://")
         if cache_ttl_seconds <= 0:
             raise ValueError("cache_ttl_seconds must be positive")
-        if not isinstance(actor_role, str) or not actor_role.strip():
-            raise ValueError("actor_role must be a non-empty string")
+        if not isinstance(actor_role, Role):
+            raise ValueError(
+                f"actor_role must be a Role enum member, got {type(actor_role).__name__}"
+            )
         self._validate_name(kek_secret_name)
 
         self.vault_url = resolved_url
@@ -266,6 +269,7 @@ class KeyVaultConnector:
                     OP_AUTHENTICATE,
                     STATUS_FAILURE,
                     resource_id=self.vault_url,
+                    actor_role=self.actor_role,
                     error_code=type(exc).__name__,
                 )
                 raise KeyVaultAuthenticationError(
@@ -273,7 +277,12 @@ class KeyVaultConnector:
                     f"{type(exc).__name__}"
                 ) from exc
             try:
-                await self.logAccess(OP_AUTHENTICATE, STATUS_SUCCESS, resource_id=self.vault_url)
+                await self.logAccess(
+                    OP_AUTHENTICATE,
+                    STATUS_SUCCESS,
+                    resource_id=self.vault_url,
+                    actor_role=self.actor_role,
+                )
             except BaseException:
                 await self._close_quietly(client)
                 await self._close_quietly(credential)
@@ -496,7 +505,8 @@ class KeyVaultConnector:
         operation: str,
         status: str,
         *,
-        resource_id: Optional[str] = None,
+        resource_id: str,
+        actor_role: Role,
         error_code: Optional[str] = None,
     ) -> None:
         """Record a Key Vault access in the central audit log.
@@ -506,12 +516,18 @@ class KeyVaultConnector:
         resource operation (see "Audit vocabulary" in the module doc).
         ``status`` is ``SUCCESS``, ``FAILURE`` or ``DENIED``; anything else is
         rejected with ``ValueError``.
+        ``actor_role`` is a Role enum value indicating the privilege level of the actor.
+        ``resource_id`` is the Key Vault resource identifier being accessed.
 
         Delegates to the AuditLogCollector when one is attached (Task 1.3);
         until then it writes a structured line to the standard logger. Key
         material is never passed here. Errors from the collector propagate:
         an access that cannot be audited must not be silently accepted.
         """
+        if not isinstance(actor_role, Role):
+            raise ValueError(
+                f"actor_role must be a Role enum member, got {type(actor_role).__name__}"
+            )
         mapped = AUDIT_OPERATION_MAP.get(operation)
         if mapped is None:
             raise ValueError(
@@ -523,12 +539,11 @@ class KeyVaultConnector:
                 f"unknown audit status {status!r}; expected one of {sorted(AUDIT_STATUSES)}"
             )
         event_type, resource_operation = mapped
-        resource = resource_id or self.vault_url
         if self._audit is not None:
             await self._audit.recordEvent(
                 event_type=event_type,
-                actor_role=self.actor_role,
-                resource_id=resource,
+                actor_role=actor_role.value,
+                resource_id=resource_id,
                 operation=resource_operation,
                 status=status,
                 error_code=error_code,
@@ -538,8 +553,8 @@ class KeyVaultConnector:
             "audit event_type=%s actor_role=%s resource_id=%s operation=%s status=%s "
             "error_code=%s",
             event_type,
-            self.actor_role,
-            resource,
+            actor_role.value,
+            resource_id,
             resource_operation,
             status,
             error_code,
