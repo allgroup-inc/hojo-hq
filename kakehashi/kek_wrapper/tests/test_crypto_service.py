@@ -11,7 +11,7 @@ import hashlib
 import hmac
 import json
 import secrets
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -145,14 +145,14 @@ def test_aes_gcm_against_known_vectors():
     for name, key, iv, pt, aad, ct, tag in NIST_GCM_VECTORS:
         k, n, p = bytes.fromhex(key), bytes.fromhex(iv), bytes.fromhex(pt)
         a = bytes.fromhex(aad) or None
-        sealed = cs.aes_gcm_seal(k, n, p, a)
+        sealed = cs._aes_gcm_seal(k, n, p, a)
         assert sealed[:-16].hex() == ct, name
         assert sealed[-16:].hex() == tag, name
-        assert cs.aes_gcm_open(k, n, sealed, a) == p, name
+        assert cs._aes_gcm_open(k, n, sealed, a) == p, name
         # a single flipped tag bit must be rejected
         forged = sealed[:-1] + bytes([sealed[-1] ^ 0x01])
         with pytest.raises(ValueError):
-            cs.aes_gcm_open(k, n, forged, a)
+            cs._aes_gcm_open(k, n, forged, a)
 
 
 # ------------------------------------------------------------- encryption
@@ -166,6 +166,12 @@ def test_encrypt_records_key_version_and_timestamp(service, aes_key):
 
     unversioned = run(service.encrypt(b"x", aes_key))
     assert unversioned.key_version is None
+
+
+@pytest.mark.parametrize("bad_version", ["", 1, b"v1", object()])
+def test_encrypt_rejects_invalid_key_version(service, aes_key, bad_version):
+    with pytest.raises(ValueError, match="key_version"):
+        run(service.encrypt(b"x", aes_key, key_version=bad_version))
 
 
 def test_default_clock_is_utc_aware(aes_key):
@@ -242,11 +248,19 @@ def test_decrypt_rejects_malformed_record(service, aes_key):
         run(service.decrypt(truncated, aes_key))
 
 
+def test_explicit_iv_primitives_are_private():
+    import kakehashi.kek_wrapper as pkg
+
+    for name in ("aes_gcm_seal", "aes_gcm_open"):
+        assert not hasattr(cs, name)
+        assert not hasattr(pkg, name)
+
+
 def test_primitives_reject_empty_iv(aes_key):
     with pytest.raises(ValueError, match="iv must not be empty"):
-        cs.aes_gcm_seal(aes_key, b"", b"x")
+        cs._aes_gcm_seal(aes_key, b"", b"x")
     with pytest.raises(ValueError, match="iv must not be empty"):
-        cs.aes_gcm_open(aes_key, b"", b"\x00" * 16)
+        cs._aes_gcm_open(aes_key, b"", b"\x00" * 16)
 
 
 # ------------------------------------------------------------- signatures
@@ -274,11 +288,34 @@ def test_signature_is_key_order_independent(service):
     assert service.signLogEntry(a) == service.signLogEntry(b)
 
 
-def test_signature_handles_datetime_and_role(service):
+def test_signature_handles_datetime_and_role(service, hmac_key):
+    """Sign from a datetime object, validate the entry as Task 1.3 stores it (``...Z``)."""
     entry = {"event_id": "evt-1", "timestamp": T0, "actor_role": Role.ADMIN}
     signature = service.signLogEntry(entry)
-    as_stored = {"event_id": "evt-1", "timestamp": T0.isoformat(), "actor_role": "admin"}
+    as_stored = {"event_id": "evt-1", "timestamp": "2026-11-06T09:00:00Z", "actor_role": "admin"}
     assert service.validateSignature(as_stored, signature) is True
+    assert signature == reference_hmac(hmac_key, as_stored)
+
+
+def test_signature_datetime_normalised_to_utc_z(service):
+    jst = timezone(timedelta(hours=9))
+    same_instant = datetime(2026, 11, 6, 18, 0, tzinfo=jst)
+    signature = service.signLogEntry({"timestamp": same_instant})
+    assert service.validateSignature({"timestamp": "2026-11-06T09:00:00Z"}, signature) is True
+    # other textual forms of the same instant are different stored values
+    assert service.validateSignature({"timestamp": "2026-11-06T09:00:00+00:00"}, signature) is False
+    assert service.validateSignature({"timestamp": "2026-11-06T18:00:00+09:00"}, signature) is False
+
+    with_micros = datetime(2026, 11, 6, 9, 0, 0, 123456, tzinfo=timezone.utc)
+    signature = service.signLogEntry({"timestamp": with_micros})
+    assert service.validateSignature({"timestamp": "2026-11-06T09:00:00.123456Z"}, signature) is True
+
+
+def test_signature_rejects_naive_datetime(service):
+    naive = {"timestamp": datetime(2026, 11, 6, 9, 0)}
+    with pytest.raises(TypeError, match="naive datetime"):
+        service.signLogEntry(naive)
+    assert service.validateSignature(naive, "0" * 64) is False
 
 
 def test_signature_uppercase_hex_accepted(service):

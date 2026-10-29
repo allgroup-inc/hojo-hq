@@ -75,15 +75,15 @@ def _require_aes_key(key: Any) -> bytes:
     return key
 
 
-def aes_gcm_seal(
+def _aes_gcm_seal(
     key: bytes, iv: bytes, plaintext: bytes, associated_data: Optional[bytes] = None
 ) -> bytes:
     """AES-256-GCM encrypt with an explicit IV. Returns ``ciphertext || tag``.
 
-    Low-level primitive used by ``CryptoService.encrypt`` and by the NIST
-    known-answer tests. Callers other than CryptoService must never pass a
-    fixed or reused IV for real data: GCM loses confidentiality and integrity
-    when an IV repeats under the same key.
+    Private: only ``CryptoService.encrypt`` (which draws a fresh random IV)
+    and the NIST known-answer tests may call this. Do not import it elsewhere:
+    GCM loses confidentiality and integrity when an IV repeats under the same
+    key, and an explicit-IV entry point invites exactly that.
     """
     key = _require_aes_key(key)
     iv = _require_bytes(iv, "iv")
@@ -92,7 +92,7 @@ def aes_gcm_seal(
     return AESGCM(key).encrypt(iv, _require_bytes(plaintext, "plaintext"), associated_data)
 
 
-def aes_gcm_open(
+def _aes_gcm_open(
     key: bytes, iv: bytes, sealed: bytes, associated_data: Optional[bytes] = None
 ) -> bytes:
     """AES-256-GCM decrypt ``ciphertext || tag``. Raises ``ValueError`` on a bad tag."""
@@ -111,9 +111,19 @@ def aes_gcm_open(
         ) from None
 
 
+def _format_utc(value: datetime) -> str:
+    """Aware datetime -> ISO 8601 in UTC with a ``Z`` suffix (Task 1.3 storage form)."""
+    if value.tzinfo is None or value.utcoffset() is None:
+        # a naive datetime has no defined instant; signing it would make the
+        # signature depend on the signer's local time zone
+        raise TypeError("naive datetime cannot be signed; use a timezone-aware UTC datetime")
+    # astimezone(utc).isoformat() always ends in "+00:00"
+    return value.astimezone(timezone.utc).isoformat().removesuffix("+00:00") + "Z"
+
+
 def _json_default(value: Any) -> Any:
     if isinstance(value, datetime):
-        return value.isoformat()
+        return _format_utc(value)
     if isinstance(value, Enum):
         return value.value
     raise TypeError(f"{type(value).__name__} is not JSON serializable")
@@ -124,8 +134,16 @@ def canonicalize_log_entry(log_entry: Mapping[str, Any]) -> bytes:
 
     * the ``signature`` field is excluded (an entry may carry its own signature)
     * keys sorted, compact separators, UTF-8, no ASCII escaping
-    * ``datetime`` values as ISO 8601, ``Enum`` values (e.g. ``Role``) as ``.value``
+    * aware ``datetime`` values as ISO 8601 UTC with a ``Z`` suffix
+      (e.g. ``2026-11-06T09:00:00Z``); naive ``datetime`` rejected (``TypeError``)
+    * ``Enum`` values (e.g. ``Role``) as ``.value``
     * NaN / Infinity rejected
+
+    Sign exactly what you store: the signature covers this canonical form, so
+    a stored entry validates only if every value serializes to the same JSON
+    as at signing time. A ``datetime`` object signs the same as its stored
+    ``...Z`` string, but any other textual form (``+00:00``, ``+09:00``, a
+    different number of fractional digits) is a different value and fails.
 
     Raises ``TypeError`` / ``ValueError`` for entries that cannot be serialized.
     """
@@ -197,10 +215,14 @@ class CryptoService:
         ``key_version`` (keyword-only, optional) is recorded on the result so
         that ``decrypt`` can later be given the same KEK version.
         """
+        if key_version is not None and (not isinstance(key_version, str) or not key_version):
+            # an empty or non-string version would be recorded and later fail
+            # to select the KEK that encrypted the record
+            raise ValueError("key_version must be a non-empty string or None")
         key = _require_aes_key(key)
         plaintext = _require_bytes(plaintext, "plaintext")
         iv = secrets.token_bytes(GCM_IV_LENGTH)
-        sealed = aes_gcm_seal(key, iv, plaintext)
+        sealed = _aes_gcm_seal(key, iv, plaintext)
         return EncryptedData(
             ciphertext=sealed,
             iv=iv,
@@ -217,7 +239,7 @@ class CryptoService:
         iv = _require_bytes(encrypted_data.iv, "iv")
         if len(iv) != GCM_IV_LENGTH:
             raise ValueError(f"iv must be {GCM_IV_LENGTH} bytes, got {len(iv)} bytes")
-        return aes_gcm_open(key, iv, encrypted_data.ciphertext)
+        return _aes_gcm_open(key, iv, encrypted_data.ciphertext)
 
     # ---------------------------------------------------------- signatures
 
