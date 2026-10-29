@@ -22,10 +22,21 @@
    * spokenNameが空、または一致する企業が無い場合は空配列を返す(新規企業扱いの判定は
    * 呼び出し元がこの空配列を見て行う)。
    */
+  /**
+   * 会社名が分からないことを表す名前か(「(不明)」「(社名不明)」「不明」等)。
+   * 2026-10-29: 聞き取れなかった録音が「(社名不明)」の会社として登録され、以後の照合で
+   * 「不明」と部分一致して候補に何社も並んでいた。
+   */
+  function isUnknownCompanyName(name) {
+    var text = String(name == null ? "" : name).replace(/[\s　()（）「」]/g, "");
+    return !text || /^(社名|会社名)?(不明|なし|無し|わからない|分からない|unknown)$/i.test(text);
+  }
+
   function matchCompanyCandidates(companies, spokenName) {
     var trimmed = String(spokenName || "").trim();
-    if (!trimmed) return [];
+    if (!trimmed || isUnknownCompanyName(trimmed)) return [];
     var scored = (companies || [])
+      .filter(function (company) { return !isUnknownCompanyName(company["会社名"]); })
       .map(function (company) {
         var name = company["会社名"] || "";
         var score = 0;
@@ -218,6 +229,19 @@
   /**
    * 一致する企業が見つからなかった場合の、新規登録確認プロンプトを組み立てる。
    */
+  /**
+   * 会社が見つからなかったときの返事。会社名が分からないときは「(社名不明)」の会社を作らず、
+   * 会社名を文字で送ってもらう(確認待ちの文字入力は handleTypedCompanyName_ が受け付ける)。
+   */
+  function buildNewCompanyOrAskNamePrompt(processId, spokenName) {
+    if (isUnknownCompanyName(spokenName)) return buildAskCompanyNameMessage();
+    return buildNewCompanyConfirmPrompt(processId, spokenName);
+  }
+
+  function buildAskCompanyNameMessage() {
+    return "会社名が聞き取れませんでした。会社名をLINEで文字で送ってください(例: 株式会社◯◯)。";
+  }
+
   function buildNewCompanyConfirmPrompt(processId, spokenName) {
     return {
       text: "「" + spokenName + "」は企業マスタに見つかりませんでした。新規企業として登録しますか?",
@@ -496,6 +520,9 @@
     parsePostbackData: parsePostbackData,
     buildCompanySelectionPrompt: buildCompanySelectionPrompt,
     buildNewCompanyConfirmPrompt: buildNewCompanyConfirmPrompt,
+    buildNewCompanyOrAskNamePrompt: buildNewCompanyOrAskNamePrompt,
+    buildAskCompanyNameMessage: buildAskCompanyNameMessage,
+    isUnknownCompanyName: isUnknownCompanyName,
     buildFinalConfirmPrompt: buildFinalConfirmPrompt,
     buildCompletionMessage: buildCompletionMessage,
     planTypedCompanyName: planTypedCompanyName,
