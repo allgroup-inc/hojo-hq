@@ -44,7 +44,7 @@ function onOpen() {
     .addItem("発送日でCSV出力", "exportShippingCsvForDate")
     .addSeparator()
     .addItem("G1フェーズA試験を実行", "showPhaseATestDialog")
-    .addItem("福田データ：100件インポート", "importFukudaHistoricalData")
+    .addItem("過去記録の取り込みを今すぐ行う", "importFukudaHistoricalData")
     .addSeparator()
     .addItem("自動処理を復旧する(権限の再許可)", "restoreAutomation")
     .addToUi();
