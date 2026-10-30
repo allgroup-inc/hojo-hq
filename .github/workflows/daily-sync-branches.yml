@@ -1,0 +1,112 @@
+name: Daily Sync Feature Branches with Main
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # 6:00 UTC (15時 JST)
+    - cron: '0 12 * * *'  # 12:00 UTC (21時 JST) — 冗長性のため1日2回
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "Claude Automation"
+          git config user.email "noreply@anthropic.com"
+
+      - name: Sync feature branch with main
+        run: |
+          git fetch origin main
+
+          # クローデのブランチのみを同期対象にする
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+          if [[ "$BRANCH" == claude/* ]] || [[ "$BRANCH" == "okinawa-disposable-income-plan-axxs6v" ]]; then
+            echo "Syncing $BRANCH with main..."
+
+            # main との差分をチェック
+            COMMITS_BEHIND=$(git rev-list --count HEAD..origin/main)
+
+            if [ "$COMMITS_BEHIND" -gt 0 ]; then
+              echo "Branch is $COMMITS_BEHIND commits behind main. Syncing..."
+
+              # 全コンフリクトを main の版で上書き
+              git merge origin/main --no-edit -X theirs
+
+              # 生成ファイルの必須チェック（複数層の検証）
+              VALIDATION_FAILED=0
+
+              if [[ -d "site/fukugiiro" ]]; then
+                # 基盤ページの検証
+                for file in "site/fukugiiro/index.html" "site/fukugiiro/shindan/index.html"; do
+                  if [ ! -f "$file" ]; then
+                    echo "❌ ERROR: $file is missing after merge!"
+                    VALIDATION_FAILED=1
+                  elif [ ! -s "$file" ]; then
+                    echo "❌ ERROR: $file is empty!"
+                    VALIDATION_FAILED=1
+                  else
+                    SIZE=$(wc -c < "$file")
+                    echo "✅ $file exists (${SIZE} bytes)"
+                  fi
+                done
+
+                # カテゴリページの検証（各ディレクトリに最低1つのindex.htmlがあることを確認）
+                for category in area kit life; do
+                  if [ -d "site/fukugiiro/$category" ]; then
+                    COUNT=$(find site/fukugiiro/$category -name "index.html" | wc -l)
+                    if [ "$COUNT" -eq 0 ]; then
+                      echo "❌ ERROR: No index.html files in $category/"
+                      VALIDATION_FAILED=1
+                    else
+                      echo "✅ $category/ has $COUNT index.html files"
+                    fi
+                  fi
+                done
+
+                if [ "$VALIDATION_FAILED" -eq 1 ]; then
+                  echo "❌ Generated file validation FAILED"
+                  exit 1
+                fi
+              fi
+
+              # コミット・プッシュ
+              git commit --amend --no-edit
+              git push -u origin "$BRANCH"
+
+              echo "✅ Branch synced with main successfully"
+            else
+              echo "✅ Branch is already up to date with main"
+            fi
+          else
+            echo "Skipping: not a feature branch (current: $BRANCH)"
+          fi
+
+      - name: Notify Slack on failure
+        if: failure()
+        run: |
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          WORKFLOW_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+            -H 'Content-Type: application/json' \
+            -d "{
+              \"text\": \"🚨 Daily Sync Workflow Failed\",
+              \"blocks\": [
+                {
+                  \"type\": \"section\",
+                  \"text\": {
+                    \"type\": \"mrkdwn\",
+                    \"text\": \"*🚨 Daily Sync Workflow Failed*\n\n*Branch:* \`$BRANCH\`\n*Repository:* ${{ github.repository }}\n*Action:* <$WORKFLOW_URL|View Details>\"
+                  }
+                }
+              ]
+            }"
