@@ -24,7 +24,8 @@
     所在地: ["所在地", "住所"],
     代表者名: ["代表者名", "代表者", "代表"],
     業種: ["業種"],
-    備考: ["備考", "メモ", "内容"]
+    備考: ["備考", "メモ", "内容"],
+    メール送信日: ["メール送信日", "メール送付日", "メール日", "メール"]
   };
 
   var STAGE_ORDER = ["未接触", "アプローチ実施", "電話済み", "相談実施"];
@@ -117,7 +118,7 @@
    * 見出しの言い換えは標準の見出し(FIELDS)にそろえる。空行は除く。
    * 戻り値: [取込日時, 会社名, 電話番号, 手紙送付日, 架電日, 通話結果, 所在地, 代表者名, 業種, 備考] の配列
    */
-  var ARCHIVE_FIELDS = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考"];
+  var ARCHIVE_FIELDS = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考", "メール送信日"];
   function toArchiveRows(headerRow, rows, stamp) {
     var idx = headerIndex(headerRow);
     return (rows || []).map(function (row) {
@@ -129,6 +130,24 @@
     }).filter(function (r) {
       return r.slice(1).some(function (v) { return String(v).trim() !== ""; });
     });
+  }
+
+  /**
+   * 取り込みを行う時間帯(2026-10-30 福田さん: 入力の途中で取り込まれてしまうため、時刻を決めてほしい)。
+   * 毎日 8時と22時(日本時間)。nowMs の時点で最後に来た取り込み時刻を "YYYY-MM-DD HH" で返す。
+   * 呼び出し側は、前回の値と違うときだけ取り込む(=各時刻に1回)。
+   */
+  var IMPORT_HOURS = [8, 22];
+  function currentImportSlot(nowMs) {
+    var jst = new Date(Number(nowMs) + 9 * 60 * 60 * 1000);
+    var hour = jst.getUTCHours();
+    var slotHour = -1;
+    IMPORT_HOURS.forEach(function (h) { if (hour >= h) slotHour = h; });
+    if (slotHour === -1) {
+      jst = new Date(jst.getTime() - 24 * 60 * 60 * 1000);
+      slotHour = IMPORT_HOURS[IMPORT_HOURS.length - 1];
+    }
+    return jst.getUTCFullYear() + "-" + pad2(jst.getUTCMonth() + 1) + "-" + pad2(jst.getUTCDate()) + " " + pad2(slotHour);
   }
 
   function buildCompanyId(sequenceNumber) {
@@ -179,10 +198,11 @@
       if (!name && !phone) return; // 空行
       var letter = toDateString(cell(row, "手紙送付日"), options.today);
       var call = toDateString(cell(row, "架電日"), options.today);
+      var mail = toDateString(cell(row, "メール送信日"), options.today);
       var result = String(cell(row, "通話結果")).trim();
       var memo = String(cell(row, "備考")).trim();
-      if (!letter && !call) {
-        skipped.push({ line: lineNo, reason: "手紙送付日・架電日のどちらも読めません" });
+      if (!letter && !call && !mail) {
+        skipped.push({ line: lineNo, reason: "手紙送付日・架電日・メール送信日のどれも読めません" });
         return;
       }
 
@@ -216,7 +236,7 @@
       var callType = callTypeOf(result);
       record["現在ステージ"] = advanceStage(record["現在ステージ"],
         !call ? "アプローチ実施" : callType === "面談実施" ? "相談実施" : "電話済み");
-      record["最終接触日"] = laterDate(record["最終接触日"], laterDate(letter, call));
+      record["最終接触日"] = laterDate(record["最終接触日"], laterDate(laterDate(letter, call), mail));
       touched[record["企業ID"]] = record;
 
       function addLog(date, type, text) {
@@ -229,6 +249,7 @@
       // 備考は、入電・面談などの記録があればそちらへ(内容そのものなので)、無ければ手紙の記録へ付ける
       var memoOnCall = call && (!letter || callType !== "電話");
       if (letter) addLog(letter, "手紙送付", "過去の手紙送付記録(取り込み " + options.today + ")" + (memo && !memoOnCall ? " / " + memo : ""));
+      if (mail) addLog(mail, "メール送信", "メール送信の記録(取り込み " + options.today + ")" + (memo && !memoOnCall && !letter ? " / " + memo : ""));
       if (call) {
         addLog(call, callType, CALL_LOG_LABELS[callType] + "(取り込み " + options.today + ")" +
           (result && callType === "電話" ? " / 結果: " + result : "") + (memo && memoOnCall ? " / " + memo : ""));
@@ -260,6 +281,8 @@
     toDateString: toDateString,
     advanceStage: advanceStage,
     callTypeOf: callTypeOf,
+    IMPORT_HOURS: IMPORT_HOURS,
+    currentImportSlot: currentImportSlot,
     ARCHIVE_FIELDS: ARCHIVE_FIELDS,
     toArchiveRows: toArchiveRows,
     planHistoryImport: planHistoryImport

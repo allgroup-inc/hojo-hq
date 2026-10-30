@@ -7,9 +7,11 @@
  * 使い方(福田さん):
  * 1. 台帳の「福田_履歴インポート」タブを開く(無ければ自己点検で自動作成される)
  * 2. 1行目の見出しはそのまま、2行目以降に手元の表を貼り付ける
- *    必須: 会社名 か 電話番号 / 手紙送付日 か 架電日。任意: 通話結果・所在地・代表者名・業種・備考
+ *    必須: 会社名 か 電話番号 / 手紙送付日・架電日・メール送信日のどれか。任意: 通話結果・所在地・代表者名・業種・備考
  *    (見出しは「企業名」「TEL」「DM送付日」等の言い換えも受け付ける。historyImport.js の HEADER_ALIASES)
- * 2. 数分以内に自動で取り込まれ、結果が「福田_インポート結果」タブに出る。
+ * 2. 毎日 8時と22時(日本時間)に取り込まれ、結果が「福田_インポート結果」タブに出る(2026-10-30〜。
+ *    それまでは数分以内に取り込んでいたため、入力の途中で取り込まれた)。すぐ取り込みたいときはメニュー
+ *    「GLOW台帳 > 過去記録の取り込みを今すぐ行う」。
  *    取り込んだ行は「福田_履歴インポート_取込済」タブ(1枚)の末尾へ取込日時つきで移し、取り込みタブは空に戻す(二重取り込み防止)。
  *    2026-10-30 までは取り込むたびに「_取込済_日時」のタブが増えていた(福田さんの要望で1枚にまとめた)
  *
@@ -23,7 +25,9 @@
 var FUKUDA_STAGING_SHEET_NAME = "福田_履歴インポート";
 var FUKUDA_RESULT_SHEET_NAME = "福田_インポート結果";
 var FUKUDA_ARCHIVE_SHEET_NAME = "福田_履歴インポート_取込済";
-var FUKUDA_STAGING_HEADERS = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考"];
+// 列は末尾にだけ足す(福田さんは手元の表を貼るため、途中に入れると貼った列がずれる)。2026-10-30 メール送信日を追加
+var FUKUDA_STAGING_HEADERS = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考", "メール送信日"];
+var HISTORY_IMPORT_SLOT_PROP = "HISTORY_IMPORT_LAST_SLOT";
 var FUKUDA_RESULT_HEADERS = ["実行日時", "読んだ行数", "既存の会社に追加", "新規登録", "対応履歴の追加", "取り込めなかった行", "取り込めなかった理由(先頭5件)"];
 
 /** メニュー「福田データ：100件インポート」から手動で実行する入口 */
@@ -35,12 +39,14 @@ function importFukudaHistoricalData() {
   return result;
 }
 
-/** 毎分のトリガー(processQueuedVoiceLogs)から呼ぶ。取り込む行があるときだけ動く */
+/** 毎分のトリガー(processQueuedVoiceLogs)から呼ぶ。8時・22時の取り込み時刻に1回だけ、行があれば取り込む */
 function runHistoryImportIfPending_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   restageYearlessHistoryOnce_(ss);
   mergeOldArchiveSheetsOnce_(ss);
   var sheet = ss.getSheetByName(FUKUDA_STAGING_SHEET_NAME);
+  updateStagingHeadersIfEmpty_(sheet);
+  if (!historyImportSlotDue_()) return null;
   if (!sheet || sheet.getLastRow() < 2) return null;
   try {
     var result = runHistoryImport_();
@@ -74,6 +80,29 @@ function restageYearlessHistoryOnce_(ss) {
     console.log("年なしの日付で取り込めなかった手紙の記録(" + (values.length - 1) + "行)を、取り込み直します");
   }
   props.setProperty(flag, String(Date.now()));
+}
+
+/**
+ * 取り込み時刻(8時・22時)が来たかを見る。来ていれば、その時刻を使い済みにして true を返す。
+ * 行が無くても使い済みにする(時刻のあとに書き始めた行を、書いている途中で取り込まないため)。
+ * 初めて動いたときは今の時刻を使い済みにして、次の取り込み時刻から動かす。
+ */
+function historyImportSlotDue_() {
+  var props = PropertiesService.getScriptProperties();
+  var slot = GlowHistoryImport.currentImportSlot(Date.now());
+  var last = props.getProperty(HISTORY_IMPORT_SLOT_PROP);
+  if (last === slot) return false;
+  props.setProperty(HISTORY_IMPORT_SLOT_PROP, slot);
+  return !!last;
+}
+
+/** 取り込みタブが空(見出しだけ)で、見出しが古いときは今の見出しに直す(列を足したとき用) */
+function updateStagingHeadersIfEmpty_(sheet) {
+  if (!sheet || sheet.getLastRow() > 1) return;
+  var width = Math.max(sheet.getLastColumn(), 1);
+  var current = sheet.getRange(1, 1, 1, width).getValues()[0].map(String);
+  if (current.join("|") === FUKUDA_STAGING_HEADERS.join("|")) return;
+  sheet.getRange(1, 1, 1, FUKUDA_STAGING_HEADERS.length).setValues([FUKUDA_STAGING_HEADERS]).setFontWeight("bold");
 }
 
 /** 取り込みタブが無ければ見出しつきで作る(自己点検から呼ぶ) */
@@ -179,6 +208,11 @@ function appendArchiveRows_(ss, rows) {
     sheet.getRange(1, 1, 1, FUKUDA_STAGING_HEADERS.length + 1)
       .setValues([["取込日時"].concat(FUKUDA_STAGING_HEADERS)]).setFontWeight("bold");
     sheet.setFrozenRows(1);
+  }
+  // 列を足したとき(2026-10-30 メール送信日)は見出しも合わせる
+  var archiveHeaders = ["取込日時"].concat(FUKUDA_STAGING_HEADERS);
+  if (sheet.getLastColumn() < archiveHeaders.length) {
+    sheet.getRange(1, 1, 1, archiveHeaders.length).setValues([archiveHeaders]).setFontWeight("bold");
   }
   if (!rows.length) return;
   // 電話番号の先頭の0が消えないよう、文字列として書く

@@ -1276,7 +1276,7 @@
     "function classifyType(type){",
     "if (type === '電話' || type === '入電' || type === 'アポ獲得') return 'phone';",
     "if (type === '面談実施' || type === 'ゆんたく相談実施') return 'meeting';",
-    "if (type === '手紙送付' || type === 'ナーチャリング配信' || type === 'レターURLアクセス') return 'letter';",
+    "if (type === '手紙送付' || type === 'メール送信' || type === 'ナーチャリング配信' || type === 'レターURLアクセス') return 'letter';",
     "if (type && (String(type).indexOf('提案') === 0 || type === '成約' || type === 'NDA締結' || type === '意向表明受領' || type === 'DD開始')) return 'deal';",
     "return 'other';",
     "}",
