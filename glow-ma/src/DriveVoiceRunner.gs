@@ -538,6 +538,22 @@ function recoverUnconfirmedVoiceLogsOnce2_(ss) {
   props.setProperty(flag, String(Date.now()));
 }
 
+/**
+ * 1回限りの復旧(2026-10-30): 10/29 朝に送り直した録音の確認ボタンが、期限(10/30 正午)までに押されず
+ * 取り消された可能性がある(取り消しの記録が Cloud Logging に残っておらず確かめられなかった)。
+ * 取り消された行があれば、もう一度要約して確認を送り直す。昼間に届くよう 10/30 13時以降に動かす。
+ * 押されて記録済みの行は「エラー」ではないので触らない。
+ */
+function recoverUnconfirmedVoiceLogsOnce3_(ss) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "VOICE_CONFIRM_RECOVERY_20261030_DONE";
+  if (props.getProperty(flag)) return;
+  if (Date.now() < Date.parse("2026-10-30T13:00:00+09:00")) return;
+  requeueUnconfirmedCancelled_(ss, props);
+  props.setProperty(flag, String(Date.now()));
+  console.log("10/30 正午の期限で取り消された録音の送り直しを確認しました");
+}
+
 /** 10/26 17:00 以降に受信し、確認されないまま取り消された行を、要約し直すため順番待ちへ戻す */
 function requeueUnconfirmedCancelled_(ss, props) {
   var from = new Date(2026, 9, 26, 17, 0).getTime();
