@@ -26,6 +26,11 @@
 | /go/ymn-kit/ | フクギイロ山梨: 準備シートページ | https://line.me/R/ti/p/%40630pbjqq |
 | /go/ymn-life/ | フクギイロ山梨: ライフイベント別ページ | https://line.me/R/ti/p/%40630pbjqq |
 | /go/ymn-jukyu/ | フクギイロ山梨: 受給報告(受け取れました) | https://line.me/R/ti/p/%40630pbjqq |
+| /go/qr-mikata/ | 固定QR: 沖縄企業のミカタ(サイト) | https://allgroup-inc.github.io/hojo-hq/?utm_source=qr&utm_medium=print&utm_campaign=fixed_qr |
+| /go/qr-yuntaku/ | 固定QR: ゆんたく経営相談室 | https://allgroup-inc.github.io/yuntaku-lp/?utm_source=qr&utm_medium=print&utm_campaign=fixed_qr |
+| /go/qr-world/ | 固定QR: 世界の架け橋 | https://glow-okinawa.jp/?utm_source=qr&utm_medium=print&utm_campaign=fixed_qr |
+| /go/qr-ig/ | 固定QR: Instagram(沖縄企業のミカタ) | https://www.instagram.com/okinawa_mikata/ |
+| /go/qr-fb/ | 固定QR: Facebook(沖縄企業のミカタ) | https://www.facebook.com/p/%E6%B2%96%E7%B8%84%E4%BC%81%E6%A5%AD%E3%81%AE%E3%83%9F%E3%82%AB%E3%82%BF-61592241301048/ |
 | /go/glow-lp/ | GLOW: 世界へ推進LP | https://line.me/R/ti/p/%40042wvrgo |
 | /go/glow-ig/ | GLOW: Instagramプロフィール | https://line.me/R/ti/p/%40042wvrgo |
 | /go/glow-fb/ | GLOW: Facebookページ | https://line.me/R/ti/p/%40042wvrgo |
