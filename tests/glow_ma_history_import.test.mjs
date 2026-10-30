@@ -120,3 +120,32 @@ test("年の無い日付の表(福田さんの手紙100通分の形)も、履歴
   assert.deepEqual(plan.logs.map((l) => [l.日付, l.種別]), [["2026-09-18", "手紙送付"], ["2026-09-24", "電話"]]);
   assert.ok(plan.logs[1].内容メモ.includes("担当不在"));
 });
+
+test("通話結果が「入電」「面談」なら、対応履歴の種別を入電・面談実施にして、備考を内容として残す", () => {
+  const header = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考"];
+  const plan = h.planHistoryImport(header, [
+    ["株式会社テスト建設", "", "", "10/15", "入電", "", "", "", "土地の件で相談希望"],
+    ["株式会社みらい商事", "", "", "10/29", "面談", "", "", "", "後継者の件を聞いた。次は11月に決算書"]
+  ], existing(), [], { today: "2026-10-30", nextSequence: 3213, staffName: "" });
+  assert.deepEqual(plan.logs.map((l) => l.種別), ["入電", "面談実施"]);
+  assert.ok(plan.logs[0].内容メモ.includes("土地の件で相談希望"));
+  assert.ok(plan.logs[1].内容メモ.includes("次は11月に決算書"));
+  assert.equal(plan.newRecords[0].会社名, "株式会社みらい商事");
+  assert.equal(plan.newRecords[0].現在ステージ, "相談実施");
+  const schema = require("../glow-ma/src/schema.js");
+  plan.logs.forEach((l) => assert.ok(schema.INTERACTION_TYPES.includes(l.種別), l.種別));
+});
+
+test("見出しが「面談日」でも日付として読む", () => {
+  const plan = h.planHistoryImport(["会社名", "面談日", "通話結果", "備考"],
+    [["株式会社テスト建設", "2026-10-29", "訪問", "社長と面談"]], existing(), [], OPTS);
+  assert.equal(plan.logs.length, 1);
+  assert.equal(plan.logs[0].種別, "面談実施");
+});
+
+test("取込済の表は、標準の見出しの順にそろえ、空行を除いて1枚へまとめる形にする", () => {
+  const rows = h.toArchiveRows(["電話番号", "企業名", "架電日"], [["098-111-2222", "株式会社テスト建設", "10/1"], ["", "", ""]], "2026-10-30 09:35");
+  assert.equal(rows.length, 1);
+  assert.deepEqual(rows[0], ["2026-10-30 09:35", "株式会社テスト建設", "098-111-2222", "", "10/1", "", "", "", "", ""]);
+  assert.equal(h.ARCHIVE_FIELDS.length + 1, rows[0].length);
+});

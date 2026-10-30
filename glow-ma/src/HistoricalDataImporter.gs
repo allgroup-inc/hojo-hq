@@ -10,7 +10,11 @@
  *    必須: 会社名 か 電話番号 / 手紙送付日 か 架電日。任意: 通話結果・所在地・代表者名・業種・備考
  *    (見出しは「企業名」「TEL」「DM送付日」等の言い換えも受け付ける。historyImport.js の HEADER_ALIASES)
  * 2. 数分以内に自動で取り込まれ、結果が「福田_インポート結果」タブに出る。
- *    取り込んだ表は「福田_履歴インポート_取込済_日時」へ名前を変えて残し、空のタブを作り直す(二重取り込み防止)
+ *    取り込んだ行は「福田_履歴インポート_取込済」タブ(1枚)の末尾へ取込日時つきで移し、取り込みタブは空に戻す(二重取り込み防止)。
+ *    2026-10-30 までは取り込むたびに「_取込済_日時」のタブが増えていた(福田さんの要望で1枚にまとめた)
+ *
+ * 入電・録音できなかった面談も、このタブで残せる(2026-10-30〜)。架電日に日付、通話結果に「入電」「面談」、
+ * 備考に内容を書く。台帳に無い会社は新しく登録される。
  *
  * 既に台帳にある会社(電話番号→会社名で突き合わせ)は新規登録せず、既存の会社に履歴を付ける。
  * 同じ会社・同じ日・同じ種別の履歴は二重に書かない。
@@ -18,6 +22,7 @@
 
 var FUKUDA_STAGING_SHEET_NAME = "福田_履歴インポート";
 var FUKUDA_RESULT_SHEET_NAME = "福田_インポート結果";
+var FUKUDA_ARCHIVE_SHEET_NAME = "福田_履歴インポート_取込済";
 var FUKUDA_STAGING_HEADERS = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考"];
 var FUKUDA_RESULT_HEADERS = ["実行日時", "読んだ行数", "既存の会社に追加", "新規登録", "対応履歴の追加", "取り込めなかった行", "取り込めなかった理由(先頭5件)"];
 
@@ -34,6 +39,7 @@ function importFukudaHistoricalData() {
 function runHistoryImportIfPending_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   restageYearlessHistoryOnce_(ss);
+  mergeOldArchiveSheetsOnce_(ss);
   var sheet = ss.getSheetByName(FUKUDA_STAGING_SHEET_NAME);
   if (!sheet || sheet.getLastRow() < 2) return null;
   try {
@@ -156,9 +162,67 @@ function writeHistoryImportResult_(ss, result) {
   ]);
 }
 
-/** 取り込み済みの表を名前を変えて残し、空の取り込みタブを作り直す(二重取り込み防止) */
+/** 取り込み済みの行を取込済タブ(1枚)の末尾へ移し、取り込みタブを見出しだけに戻す(二重取り込み防止) */
 function archiveStagingSheet_(ss, staging) {
-  var stamp = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyyMMdd_HHmm");
-  staging.setName(FUKUDA_STAGING_SHEET_NAME + "_取込済_" + stamp);
-  ensureHistoryImportSheet_();
+  var values = staging.getDataRange().getValues();
+  var stamp = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm");
+  appendArchiveRows_(ss, GlowHistoryImport.toArchiveRows(values[0], values.slice(1), stamp));
+  staging.clearContents();
+  staging.getRange(1, 1, 1, FUKUDA_STAGING_HEADERS.length).setValues([FUKUDA_STAGING_HEADERS]).setFontWeight("bold");
+  staging.setFrozenRows(1);
+}
+
+function appendArchiveRows_(ss, rows) {
+  var sheet = ss.getSheetByName(FUKUDA_ARCHIVE_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(FUKUDA_ARCHIVE_SHEET_NAME);
+    sheet.getRange(1, 1, 1, FUKUDA_STAGING_HEADERS.length + 1)
+      .setValues([["取込日時"].concat(FUKUDA_STAGING_HEADERS)]).setFontWeight("bold");
+    sheet.setFrozenRows(1);
+  }
+  if (!rows.length) return;
+  // 電話番号の先頭の0が消えないよう、文字列として書く
+  sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, rows[0].length).setNumberFormat("@").setValues(rows);
+}
+
+/**
+ * 1回限り(2026-10-30): これまでに増えた「福田_履歴インポート_取込済_日時」のタブを、取込済タブ1枚へまとめて消す。
+ * 中身を写して行数が合ったタブだけを消す(合わなければ残して警告)。台帳は毎朝バックアップされている。
+ */
+function mergeOldArchiveSheetsOnce_(ss) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "HISTORY_ARCHIVE_MERGE_20261030_DONE";
+  if (props.getProperty(flag)) return;
+  var lock = LockService.getDocumentLock();
+  if (!lock.tryLock(30000)) return;
+  try {
+    if (props.getProperty(flag)) return;
+    mergeOldArchiveSheets_(ss);
+    props.setProperty(flag, String(Date.now()));
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function mergeOldArchiveSheets_(ss) {
+  var prefix = FUKUDA_STAGING_SHEET_NAME + "_取込済_";
+  var olds = ss.getSheets().filter(function (sh) {
+    return /^\d{8}_\d{4}$/.test(sh.getName().slice(prefix.length)) && sh.getName().indexOf(prefix) === 0;
+  }).sort(function (a, b) { return a.getName() < b.getName() ? -1 : 1; });
+  olds.forEach(function (sh) {
+    var m = /(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})$/.exec(sh.getName());
+    var stamp = m[1] + "-" + m[2] + "-" + m[3] + " " + m[4] + ":" + m[5];
+    var values = sh.getDataRange().getValues();
+    var rows = GlowHistoryImport.toArchiveRows(values[0], values.slice(1), stamp);
+    var before = ss.getSheetByName(FUKUDA_ARCHIVE_SHEET_NAME);
+    var countBefore = before ? before.getLastRow() : 1;
+    appendArchiveRows_(ss, rows);
+    var countAfter = ss.getSheetByName(FUKUDA_ARCHIVE_SHEET_NAME).getLastRow();
+    if (countAfter - countBefore === rows.length) {
+      ss.deleteSheet(sh);
+    } else {
+      console.warn("取込済タブ「" + sh.getName() + "」をまとめる途中で行数が合わなかったため、残しました");
+    }
+  });
+  console.log("取込済のタブ " + olds.length + "枚を「" + FUKUDA_ARCHIVE_SHEET_NAME + "」へまとめました");
 }
