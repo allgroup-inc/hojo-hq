@@ -45,6 +45,7 @@ function onOpen() {
     .addSeparator()
     .addItem("G1フェーズA試験を実行", "showPhaseATestDialog")
     .addItem("過去記録の取り込みを今すぐ行う", "importFukudaHistoricalData")
+    .addItem("BlueBeanのパスワードを更新する", "updateBlueBeanPassword")
     .addSeparator()
     .addItem("自動処理を復旧する(権限の再許可)", "restoreAutomation")
     .addToUi();

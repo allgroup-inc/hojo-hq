@@ -376,6 +376,39 @@ var CDR_CHUNK_DAYS = 5;
  * 入口のベーシック認証は従来のAPIと同じ。lang=en でUTF-8のCSVを受け取る。
  * CSVに見えない応答(エラー文など)は失敗として扱う。
  */
+/**
+ * メニュー「GLOW台帳 > BlueBeanのパスワードを更新する」(2026-10-31)。
+ * BlueBeanのパスワードを変えたら、変えた本人がその場でここに入れる(パスワードをメール・チャットで人に渡さない)。
+ * 入れた直後にBlueBeanへ接続して確かめ、つながらなければ元のパスワードに戻す。パスワードはログに出さない。
+ */
+function updateBlueBeanPassword() {
+  var ui = SpreadsheetApp.getUi();
+  var res = ui.prompt("BlueBeanのパスワードを更新",
+    "BlueBeanで変更した新しいパスワードを入力してください。\n(メール・チャットでは送らず、この画面にだけ入力してください)",
+    ui.ButtonSet.OK_CANCEL);
+  if (res.getSelectedButton() !== ui.Button.OK) return;
+  var next = String(res.getResponseText() || "").trim();
+  if (!next) {
+    ui.alert("パスワードが空のため、変更しませんでした。");
+    return;
+  }
+  var props = PropertiesService.getScriptProperties();
+  var prev = props.getProperty("BLUEBEAN_PASSWORD");
+  props.setProperty("BLUEBEAN_PASSWORD", next);
+  var fmt = function (ms) { return Utilities.formatDate(new Date(ms), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss"); };
+  try {
+    callBlueBeanCdr_(fmt(Date.now() - 60 * 60 * 1000), fmt(Date.now() - 15 * 60 * 1000));
+  } catch (error) {
+    if (prev) props.setProperty("BLUEBEAN_PASSWORD", prev); else props.deleteProperty("BLUEBEAN_PASSWORD");
+    console.warn("BlueBeanのパスワード更新: 接続を確かめられなかったため元に戻しました(ステータス " + (error.statusCode || "不明") + ")");
+    ui.alert("BlueBeanにつながりませんでした。パスワードは元のままです。\n" +
+      "BlueBeanで変更したパスワードと同じかを確かめて、もう一度お試しください。");
+    return;
+  }
+  console.log("BlueBeanのパスワードを更新しました(接続を確認済み)");
+  ui.alert("BlueBeanのパスワードを更新しました。接続も確認できました。");
+}
+
 function callBlueBeanCdr_(startDate, endDate) {
   var properties = PropertiesService.getScriptProperties();
   var domain = properties.getProperty("BLUEBEAN_DOMAIN");
