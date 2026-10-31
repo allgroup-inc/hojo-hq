@@ -173,3 +173,19 @@ test("取り込み時刻は毎日8時と22時(日本時間)。時刻をまたぐ
   assert.equal(h.currentImportSlot(jst("2026-10-31T00:30:00")), "2026-10-30 22");
   assert.equal(h.currentImportSlot(jst("2026-11-01T03:00:00")), "2026-10-31 22", "月またぎ");
 });
+
+test("「来店」「来社」も面談実施として残す", () => {
+  assert.equal(h.callTypeOf("来店"), "面談実施");
+  assert.equal(h.callTypeOf("来社"), "面談実施");
+  assert.equal(h.callTypeOf("担当不在"), "電話");
+});
+
+test("取り込みのあいだに書き換えられた行・書き足された行だけを残す(書いている途中の行を取込済へ移さない)", () => {
+  const planned = [["株式会社A", "", "", "", "来店", "", "", "", "メモ"], ["株式会社B", "", "", "10/1", "入電"]];
+  const current = [["株式会社A", "", "", "10/28", "来店", "", "", "", "メモ"], ["株式会社B", "", "", "10/1", "入電", ""], ["株式会社C", "", "", "10/2", "面談"], ["", "", ""]];
+  const kept = h.changedRows(planned, current);
+  assert.deepEqual(kept.map((r) => r[0]), ["株式会社A", "株式会社C"], "日付を書き足したA・新しいCを残し、変わらないBは移す(末尾の空欄の差は無視)");
+  assert.deepEqual(h.changedRows(planned, planned), []);
+  const d = new Date(2026, 9, 28);
+  assert.deepEqual(h.changedRows([["X", d]], [["X", new Date(d.getTime())]]), [], "同じ日付(Date)は変わっていない扱い");
+});
