@@ -327,6 +327,32 @@ def check_gas_bot():
         errors.append(f"[GASボット] 応答なし({type(e).__name__}) — 会話ボット・台帳が停止している疑い")
 
 
+def check_fixed_qr():
+    """印刷物の固定QR(2026-10-30〜。scripts/generate_go_qr.py)が配信されているか。
+    QR画像(PNG)と、QRが指す /go/ の中継ページ(計測イベント+転送先)を確かめる。
+    印刷して配ったQRが開けないと気づけないため、毎日見る。"""
+    sys.path.insert(0, os.path.dirname(__file__))
+    try:
+        from generate_go_qr import QR_CHANNELS  # noqa: PLC0415
+        from generate_go_pages import CHANNELS, DEFAULT_EVENT  # noqa: PLC0415
+    except SystemExit:
+        # generate_go_qr は qrcode が無いと終了するため、一覧だけをファイルから読む
+        import ast  # noqa: PLC0415
+        src = open(os.path.join(os.path.dirname(__file__), "generate_go_qr.py"), encoding="utf-8").read()
+        QR_CHANNELS = ast.literal_eval(src.split("QR_CHANNELS = ", 1)[1].split("\n}\n", 1)[0] + "\n}")
+        from generate_go_pages import CHANNELS, DEFAULT_EVENT  # noqa: PLC0415
+    for ch, label in QR_CHANNELS.items():
+        status, headers, body = fetch(f"{BASE}/assets/qr/{ch}.png", binary=True)
+        if status != 200 or not (body or b"")[:8] == b"\x89PNG\r\n\x1a\n":
+            errors.append(f"[固定QR] {label} のQR画像が取得できません (/assets/qr/{ch}.png) — status={status}")
+            continue
+        cfg = CHANNELS.get(ch, {})
+        page = check_page(f"/go/{ch}/", f"固定QR {label} の中継ページ",
+                          must_contain=[cfg.get("dest", ""), cfg.get("event", DEFAULT_EVENT)])
+        if page:
+            notes.append(f"[固定QR] {label}: 画像OK・中継ページOK")
+
+
 def main():
     ts = datetime.now(JST).strftime("%Y-%m-%d %H:%M JST")
     idx = check_page("/", "トップページ", must_contain=["<", "subsidies"])
@@ -336,6 +362,7 @@ def main():
     check_js_syntax(idx)
     check_data()
     check_fukugiiro()
+    check_fixed_qr()
     check_gas_bot()
 
     lines = [f"# hojo-hq 日次ヘルスチェック  {ts}", f"対象: {BASE}", ""]
