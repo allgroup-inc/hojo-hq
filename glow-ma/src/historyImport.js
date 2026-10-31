@@ -101,11 +101,11 @@
 
   /**
    * 通話結果の欄から、対応履歴の種別を決める(2026-10-30 福田さん: 入電や、録音できなかった面談もこのタブで残したい)。
-   * 「面談」「訪問」→ 面談実施 / 「入電」→ 入電 / 「アポ」→ アポ獲得 / それ以外 → 電話
+   * 「面談」「訪問」「来店」「来社」→ 面談実施 / 「入電」→ 入電 / 「アポ」→ アポ獲得 / それ以外 → 電話
    */
   function callTypeOf(result) {
     var text = String(result || "");
-    if (/面談|訪問/.test(text)) return "面談実施";
+    if (/面談|訪問|来店|来社/.test(text)) return "面談実施";
     if (/入電/.test(text)) return "入電";
     if (/アポ/.test(text)) return "アポ獲得";
     return "電話";
@@ -148,6 +148,25 @@
       slotHour = IMPORT_HOURS[IMPORT_HOURS.length - 1];
     }
     return jst.getUTCFullYear() + "-" + pad2(jst.getUTCMonth() + 1) + "-" + pad2(jst.getUTCDate()) + " " + pad2(slotHour);
+  }
+
+  /**
+   * 取り込みのあいだに書き換えられた行・書き足された行を返す(取り込みタブに残して次回に回す)。
+   * 2026-10-30 13:46: 福田さんが日付を書いている途中に取り込みが走り、日付の無い行として取り込めず、
+   * その直後に日付の入った行が取込済へ移されて台帳に載らなかった。読んだときと同じ行だけを取込済へ移す。
+   */
+  function changedRows(plannedRows, currentRows) {
+    function key(row) {
+      return JSON.stringify((row || []).map(function (v) {
+        if (Object.prototype.toString.call(v) === "[object Date]") return "D" + v.getTime();
+        return v === undefined || v === null ? "" : String(v);
+      }).join("\u0001").replace(/\u0001+$/, ""));
+    }
+    return (currentRows || []).filter(function (row, i) {
+      var empty = !(row || []).some(function (v) { return String(v === undefined || v === null ? "" : v).trim() !== ""; });
+      if (empty) return false;
+      return i >= (plannedRows || []).length || key(row) !== key(plannedRows[i]);
+    });
   }
 
   function buildCompanyId(sequenceNumber) {
@@ -285,6 +304,7 @@
     currentImportSlot: currentImportSlot,
     ARCHIVE_FIELDS: ARCHIVE_FIELDS,
     toArchiveRows: toArchiveRows,
+    changedRows: changedRows,
     planHistoryImport: planHistoryImport
   };
 

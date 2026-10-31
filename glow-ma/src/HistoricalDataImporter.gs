@@ -46,6 +46,7 @@ function runHistoryImportIfPending_() {
   mergeOldArchiveSheetsOnce_(ss);
   var sheet = ss.getSheetByName(FUKUDA_STAGING_SHEET_NAME);
   updateStagingHeadersIfEmpty_(sheet);
+  restageMissedRowsOnce_(ss);
   if (!historyImportSlotDue_()) return null;
   if (!sheet || sheet.getLastRow() < 2) return null;
   try {
@@ -148,7 +149,7 @@ function runHistoryImport_() {
 
     var result = { rowsRead: rows.length, summary: plan.summary, skipped: plan.skipped };
     writeHistoryImportResult_(ss, result);
-    archiveStagingSheet_(ss, staging);
+    archiveStagingSheet_(ss, staging, values);
     return result;
   } finally {
     lock.releaseLock();
@@ -191,14 +192,52 @@ function writeHistoryImportResult_(ss, result) {
   ]);
 }
 
-/** 取り込み済みの行を取込済タブ(1枚)の末尾へ移し、取り込みタブを見出しだけに戻す(二重取り込み防止) */
-function archiveStagingSheet_(ss, staging) {
-  var values = staging.getDataRange().getValues();
+/**
+ * 取り込んだ行(読んだときの values)を取込済タブ(1枚)の末尾へ移し、取り込みタブを見出しだけに戻す(二重取り込み防止)。
+ * 取り込みのあいだに書き換えられた行・書き足された行は、取り込みタブに残して次の取り込みに回す
+ * (2026-10-30 13:46 に、書いている途中の行が台帳に載らないまま取込済へ移された)。
+ */
+function archiveStagingSheet_(ss, staging, values) {
   var stamp = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm");
   appendArchiveRows_(ss, GlowHistoryImport.toArchiveRows(values[0], values.slice(1), stamp));
+  var current = staging.getDataRange().getValues();
+  var keep = GlowHistoryImport.toArchiveRows(current[0], GlowHistoryImport.changedRows(values.slice(1), current.slice(1)), "")
+    .map(function (r) { return r.slice(1); });
   staging.clearContents();
   staging.getRange(1, 1, 1, FUKUDA_STAGING_HEADERS.length).setValues([FUKUDA_STAGING_HEADERS]).setFontWeight("bold");
   staging.setFrozenRows(1);
+  if (keep.length) {
+    staging.getRange(2, 1, keep.length, keep[0].length).setValues(keep);
+    console.log("取り込み中に書き換えられた行 " + keep.length + "件を、取り込みタブに残しました(次の取り込みで取り込みます)");
+  }
+}
+
+/**
+ * 1回限り(2026-10-31): 10/30 13:46 に、書いている途中の行(来店の記録1件)が台帳に載らないまま取込済へ移された。
+ * 取込済タブのその回の行を取り込みタブへ戻し、次の取り込み時刻(8時・22時)に取り込む。
+ * 同じ会社・同じ日・同じ種別の対応履歴は二重に書かれないため、戻しても重複しない。
+ */
+function restageMissedRowsOnce_(ss) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "HISTORY_RESTAGE_20261030_1346_DONE";
+  if (props.getProperty(flag)) return;
+  var archive = ss.getSheetByName(FUKUDA_ARCHIVE_SHEET_NAME);
+  var staging = ss.getSheetByName(FUKUDA_STAGING_SHEET_NAME);
+  if (!archive || !staging || staging.getLastRow() > 1) return; // 取り込みタブに書きかけの行があるときは待つ
+  var values = archive.getDataRange().getValues();
+  var rows = values.slice(1).filter(function (r) {
+    var at = r[0] instanceof Date ? Utilities.formatDate(r[0], "Asia/Tokyo", "yyyy-MM-dd HH:mm") : String(r[0]);
+    return at === "2026-10-30 13:46";
+  }).map(function (r) {
+    var out = r.slice(1, 1 + FUKUDA_STAGING_HEADERS.length);
+    while (out.length < FUKUDA_STAGING_HEADERS.length) out.push("");
+    return out;
+  });
+  if (rows.length) {
+    staging.getRange(2, 1, rows.length, FUKUDA_STAGING_HEADERS.length).setValues(rows);
+    console.log("10/30 13:46 に台帳へ載らなかった行 " + rows.length + "件を、取り込みタブへ戻しました");
+  }
+  props.setProperty(flag, String(Date.now()));
 }
 
 function appendArchiveRows_(ss, rows) {
