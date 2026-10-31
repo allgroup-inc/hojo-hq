@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "note": "既存の一致の件数だけを記録する(値は書かない)。件数を増やす書き直しは議事が要る。",
+  "recorded_from": "f6e8245c",
+  "counts": {
+    ".claude/skills/last30days/scripts/lib/vendor/bird-search/lib/twitter-client-base.js": {
+      "R10": 1
+    },
+    "docs/LINE_Official_Account_招待メール送信手順_小柳さん用_2026-10-08.md": {
+      "R3": 7
+    },
+    "docs/Slack通知テンプレート_A1実装促進.md": {
+      "R3": 1
+    },
+    "docs/fukuda_automation_flow.md": {
+      "R3": 3
+    },
+    "docs/fukuda_deployment_checklist.md": {
+      "R1": 1
+    },
+    "docs/fukuda_glow-ma_setup_20261007.md": {
+      "R3": 4
+    },
+    "docs/fukuda_integration_status.md": {
+      "R1": 1,
+      "R3": 1
+    },
+    "docs/fukuda_mail_20261007_line_authority.txt": {
+      "R3": 5,
+      "R4": 1
+    },
+    "docs/fukuda_notification_2026-10-05.md": {
+      "R2": 1,
+      "R3": 13,
+      "R4": 3
+    },
+    "docs/fukuda_quality_check_20261006.md": {
+      "R3": 1,
+      "R4": 1
+    },
+    "docs/fukuda_response_log.md": {
+      "R3": 23,
+      "R4": 5
+    },
+    "docs/fukuda_体制変更_実施状況_20261007.md": {
+      "R3": 5
+    },
+    "docs/github-secrets-setup-guide.md": {
+      "R3": 1,
+      "R7": 1
+    },
+    "docs/glow-ma_日次レポート運営マニュアル.md": {
+      "R3": 2
+    },
+    "docs/superpowers/plans/2026-08-09-glow-ma-phase18a-admin-webapp.md": {
+      "R5": 3
+    },
+    "docs/superpowers/plans/2026-09-22-daily-report-automation.md": {
+      "R3": 4
+    },
+    "docs/superpowers/specs/2026-09-22-daily-report-automation.md": {
+      "R3": 3
+    },
+    "docs/福田さんセットアップ完了テスト_2026-10-08.md": {
+      "R3": 2
+    },
+    "docs/福田さんトラブルシューティング_ダッシュボード表示問題_2026-10-08.md": {
+      "R3": 2
+    },
+    "docs/福田さん対応_まとめ_2026-10-08.md": {
+      "R3": 3
+    },
+    "docs/福田データ自動インポートシステム.md": {
+      "R3": 2
+    },
+    "docs/通知実行ガイド_A1実装促進_送信用テキスト.md": {
+      "R3": 1
+    },
+    "docs/連携メモ/連携メモ_20260817_ゆんたく経営相談室.md": {
+      "R1": 1,
+      "R2": 1
+    },
+    "docs/連携メモ_20260824_事業構成&ゆんたく_現状報告.md": {
+      "R1": 1,
+      "R2": 1
+    },
+    "docs/連携メモ_20261007_福田さん体制追加_instagram.md": {
+      "R3": 3
+    },
+    "docs/🚀実行ガイド_今からやること.md": {
+      "R3": 1
+    },
+    "glow-ma/scripts/setup_import_and_trigger.gs": {
+      "R3": 2
+    },
+    "glow-ma/src/DailyReportAutomation.gs": {
+      "R3": 1
+    },
+    "glow-ma/src/LineVoiceLogRunner.gs": {
+      "R6": 1
+    },
+    "glow-ma/src/ReportSheetWriter.gs": {
+      "R3": 1
+    },
+    "scripts/monitor_fukuda_response.py": {
+      "R3": 2
+    },
+    "tests/glow_ma_adminAccess.test.mjs": {
+      "R5": 3
+    },
+    "tests/glow_ma_dedupe.test.mjs": {
+      "R5": 2
+    },
+    "tests/scripts/test_check_experience_privacy.py": {
+      "R7": 1,
+      "R9": 1
+    },
+    "tests/scripts/test_experience_log.py": {
+      "R7": 1
+    },
+    "tests/test_ga4_api.py": {
+      "R8": 1
+    }
+  }
+}
