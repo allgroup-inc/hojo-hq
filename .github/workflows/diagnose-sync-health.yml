@@ -82,41 +82,17 @@ jobs:
             const healthStatus = '${{ steps.file_check.outputs.health_status }}';
             const commitsBehind = '${{ steps.file_check.outputs.commits_behind }}';
             const branch = '${{ steps.file_check.outputs.branch }}';
-            const issuesFound = `${{ steps.file_check.outputs.issues_found }}`.replace(/\\n/g, '\n');
+            const issuesFound = '${{ steps.file_check.outputs.issues_found }}';
 
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `⚠️ [${healthStatus}] 診断ページの同期状態が不良です`,
-              body: `## Health Check Result: ${healthStatus}
-
-### Current Status
-- **Branch:** \`${branch}\`
-- **Commits Behind Main:** ${commitsBehind}
-- **Check Time:** ${new Date().toISOString()}
-
-### Issues Found
-${issuesFound}
-
-### Investigation Checklist
-- [ ] Check if daily sync workflow ran successfully today
-- [ ] Verify branch state: \`git log --oneline -5 origin/${branch}\`
-- [ ] Check for recent merges to main
-- [ ] Verify generated files are present: \`ls -lh site/fukugiiro/shindan/index.html\`
-- [ ] Run manual sync: \`gh workflow run daily-sync-branches.yml\`
-
-### Quick Fix
-If branch is behind main, manually trigger the sync workflow:
-\`\`\`bash
-gh workflow run daily-sync-branches.yml --ref ${branch}
-\`\`\`
-
-**This issue was auto-created by the health check workflow. Close it once files are restored.**
-              `,
+              title: 'Health Check Failed: ' + healthStatus + ' - ' + branch,
+              body: 'Health Status: ' + healthStatus + '\nBranch: ' + branch + '\nCommits Behind: ' + commitsBehind + '\n\nIssues:\n' + issuesFound + '\n\nCheck workflow logs and verify files exist in site/fukugiiro/.',
               labels: ['diagnosis-page', 'health-check', 'automated']
             });
 
-            console.log(`Created health check issue #${issue.data.number}`);
+            console.log('Created health check issue #' + issue.data.number);
 
       - name: Summary
         run: |
