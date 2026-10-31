@@ -23,17 +23,25 @@ jobs:
           git config user.email "noreply@anthropic.com"
 
       - name: Sync feature branch with main
+        id: sync_check
         run: |
           git fetch origin main
 
-          # クローデのブランチのみを同期対象にする
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          IS_FEATURE_BRANCH=false
 
-          if [[ "$BRANCH" == claude/* ]] || [[ "$BRANCH" == "okinawa-disposable-income-plan-axxs6v" ]]; then
+          # Claude feature branches detection (improved pattern matching)
+          if [[ "$BRANCH" =~ ^claude/ ]] || [[ "$BRANCH" == *"-axxs6v" ]]; then
+            IS_FEATURE_BRANCH=true
+          fi
+
+          if [ "$IS_FEATURE_BRANCH" = true ]; then
+            echo "branch=$BRANCH" >> $GITHUB_OUTPUT
             echo "Syncing $BRANCH with main..."
 
             # main との差分をチェック
             COMMITS_BEHIND=$(git rev-list --count HEAD..origin/main)
+            echo "commits_behind=$COMMITS_BEHIND" >> $GITHUB_OUTPUT
 
             if [ "$COMMITS_BEHIND" -gt 0 ]; then
               echo "Branch is $COMMITS_BEHIND commits behind main. Syncing..."
@@ -73,6 +81,7 @@ jobs:
                 done
 
                 if [ "$VALIDATION_FAILED" -eq 1 ]; then
+                  echo "validation_status=FAILED" >> $GITHUB_OUTPUT
                   echo "❌ Generated file validation FAILED"
                   exit 1
                 fi
@@ -82,31 +91,84 @@ jobs:
               git commit --amend --no-edit
               git push -u origin "$BRANCH"
 
+              echo "validation_status=SUCCESS" >> $GITHUB_OUTPUT
               echo "✅ Branch synced with main successfully"
             else
+              echo "commits_behind=0" >> $GITHUB_OUTPUT
+              echo "validation_status=ALREADY_SYNCED" >> $GITHUB_OUTPUT
               echo "✅ Branch is already up to date with main"
             fi
           else
+            echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+            echo "is_feature_branch=false" >> $GITHUB_OUTPUT
             echo "Skipping: not a feature branch (current: $BRANCH)"
           fi
 
-      - name: Notify Slack on failure
+      - name: Notify Slack on failure (if configured)
         if: failure()
+        continue-on-error: true
         run: |
-          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          BRANCH="${{ steps.sync_check.outputs.branch }}"
+          COMMITS_BEHIND="${{ steps.sync_check.outputs.commits_behind }}"
           WORKFLOW_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
-            -H 'Content-Type: application/json' \
-            -d "{
-              \"text\": \"🚨 Daily Sync Workflow Failed\",
-              \"blocks\": [
-                {
-                  \"type\": \"section\",
-                  \"text\": {
-                    \"type\": \"mrkdwn\",
-                    \"text\": \"*🚨 Daily Sync Workflow Failed*\n\n*Branch:* \`$BRANCH\`\n*Repository:* ${{ github.repository }}\n*Action:* <$WORKFLOW_URL|View Details>\"
+          if [ -z "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            echo "⚠️  SLACK_WEBHOOK_URL not configured - skipping Slack notification"
+            echo "Fallback: GitHub Issue will be created instead"
+          else
+            curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+              -H 'Content-Type: application/json' \
+              -d "{
+                \"text\": \"🚨 Daily Sync Workflow Failed\",
+                \"blocks\": [
+                  {
+                    \"type\": \"section\",
+                    \"text\": {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*🚨 Daily Sync Workflow Failed*\n\n*Branch:* \`$BRANCH\`\n*Commits Behind:* $COMMITS_BEHIND\n*Repository:* ${{ github.repository }}\n*Action:* <$WORKFLOW_URL|View Details>\"
+                    }
                   }
-                }
-              ]
-            }"
+                ]
+              }"
+          fi
+
+      - name: Create GitHub Issue as fallback (if Slack not configured)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = '${{ steps.sync_check.outputs.branch }}';
+            const commitsBehind = '${{ steps.sync_check.outputs.commits_behind }}';
+            const validationStatus = '${{ steps.sync_check.outputs.validation_status }}';
+            const workflowUrl = `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Daily Sync Failed: ${branch}`,
+              body: `## Daily Sync Workflow Failure
+
+**Branch:** \`${branch}\`
+**Commits Behind Main:** ${commitsBehind || 'unknown'}
+**Validation Status:** ${validationStatus || 'unknown'}
+
+### Details
+- **Workflow Run:** [View on GitHub](${workflowUrl})
+- **Time:** ${new Date().toISOString()}
+
+### Action Required
+1. Check the [workflow logs](${workflowUrl})
+2. Manually run the sync or investigate the branch state
+3. Verify generated files (\`site/fukugiiro/shindan/index.html\` etc.) are present
+
+### Prevention
+This issue was created as a fallback notification because:
+- SLACK_WEBHOOK_URL is not configured in GitHub Secrets, OR
+- Slack notification delivery failed
+
+To silence these issues, set up Slack integration using the guide in \`docs/Slack連携セットアップガイド.md\`
+              `,
+              labels: ['diagnosis-page', 'automated', 'sync-failure']
+            });
+
+            console.log(`Created issue #${issue.data.number}`)
