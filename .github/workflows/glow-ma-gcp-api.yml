@@ -133,6 +133,7 @@ jobs:
         if: inputs.health_hours != '0'
         env:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ secrets.GLOW_MA_SCRIPT_ID }}
           GCP_PROJECT: ${{ steps.project.outputs.number }}
           GREP_WORD: ${{ inputs.grep }}
           SAMPLE_FN: ${{ inputs.sample }}
