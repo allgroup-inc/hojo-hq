@@ -203,16 +203,90 @@ async def post_to_magazine(page, magazine_id: str, title: str, body: str) -> boo
     try:
         # マガジンのダッシュボードへ移動
         magazine_url = NOTE_MAGAZINE_URL_TEMPLATE.format(magazine_id)
-        await page.goto(magazine_url, wait_until="networkidle")
+        await page.goto(magazine_url, wait_until="networkidle", timeout=30000)
 
-        # 「新しい記事を作成」ボタンをクリック
-        await page.click('text=新しい記事を作成')
+        # ページが完全に読み込まれるまで待機（JavaScript の初期化完了待ち）
+        print("[info] ページ読み込み中...")
+        for i in range(10):  # 最大10秒待機
+            all_buttons = await page.query_selector_all('button')
+            buttons_with_text = []
+            for btn in all_buttons:
+                text = await btn.text_content()
+                if text and text.strip():
+                    buttons_with_text.append(text.strip())
 
-        # タイトル入力
-        title_field = await page.query_selector('input[placeholder*="タイトル"]')
-        if not title_field:
-            # フォールバック：最初の input を使用
-            title_field = await page.query_selector('input[type="text"]')
+            if len(buttons_with_text) > 0:
+                print(f"[ok] ダッシュボード読み込み完了（{len(buttons_with_text)}個のテキスト付きボタン検出）")
+                break
+
+            await asyncio.sleep(1)
+        else:
+            print("[warning] ダッシュボードの完全な読み込みを確認できません。続行します")
+
+        # 「新しい記事を作成」ボタンをクリック（複数セレクタ戦略）
+        create_button_selectors = [
+            'button:has-text("新しい記事を作成")',
+            'a:has-text("新しい記事を作成")',
+            '[class*="createButton"]',
+            '[class*="primary"]button',
+            'text=新しい記事を作成',
+        ]
+
+        create_button = None
+        for selector in create_button_selectors:
+            try:
+                create_button = await page.query_selector(selector)
+                if create_button:
+                    print(f"[ok] 作成ボタン見つけました: {selector}")
+                    break
+            except:
+                continue
+
+        if not create_button:
+            print("[error] 新しい記事を作成ボタンが見つかりません")
+            print("[debug] ページの全要素情報を出力します")
+
+            # 全ボタンの詳細情報
+            all_buttons = await page.query_selector_all('button')
+            print(f"[debug] ボタン数: {len(all_buttons)}")
+            for i, btn in enumerate(all_buttons[:15]):
+                text = await btn.text_content()
+                classes = await btn.get_attribute('class')
+                role = await btn.get_attribute('role')
+                print(f"[debug] button#{i}: text='{text}' class='{classes}' role='{role}'")
+
+            # リンク要素の確認
+            all_links = await page.query_selector_all('a[href*="new"], a[href*="create"], a[href*="post"]')
+            print(f"[debug] 関連リンク数: {len(all_links)}")
+            for i, link in enumerate(all_links[:5]):
+                text = await link.text_content()
+                href = await link.get_attribute('href')
+                print(f"[debug] link#{i}: text='{text}' href='{href}'")
+
+            return False
+
+        await create_button.click()
+        print("[ok] 作成ボタンをクリック")
+        await asyncio.sleep(2)  # ページ遷移待機
+
+        # タイトル入力（複数セレクタ戦略）
+        title_selectors = [
+            'input[placeholder*="タイトル"]',
+            'input[placeholder*="title"]',
+            'input[placeholder*="記事タイトル"]',
+            'input[type="text"]',
+        ]
+
+        title_field = None
+        for selector in title_selectors:
+            try:
+                await page.wait_for_selector(selector, timeout=2000)
+                title_field = await page.query_selector(selector)
+                if title_field:
+                    print(f"[ok] タイトルフィールド見つけました: {selector}")
+                    break
+            except:
+                continue
 
         if title_field:
             await title_field.fill(title)
@@ -227,8 +301,24 @@ async def post_to_magazine(page, magazine_id: str, title: str, body: str) -> boo
         # 下書き保存を待つ（自動保存の場合）
         await asyncio.sleep(2)
 
-        # 公開ボタンをクリック
-        publish_button = await page.query_selector('button:has-text("公開")')
+        # 公開ボタンをクリック（複数セレクタ戦略）
+        publish_selectors = [
+            'button:has-text("公開")',
+            'button:has-text("投稿")',
+            'button[class*="publish"]',
+            'button[class*="submit"]',
+        ]
+
+        publish_button = None
+        for selector in publish_selectors:
+            try:
+                publish_button = await page.query_selector(selector)
+                if publish_button:
+                    print(f"[ok] 公開ボタン見つけました: {selector}")
+                    break
+            except:
+                continue
+
         if publish_button:
             await publish_button.click()
             print("[ok] 公開ボタンをクリック")
@@ -247,6 +337,8 @@ async def post_to_magazine(page, magazine_id: str, title: str, body: str) -> boo
 
     except Exception as e:
         print(f"[error] note 投稿失敗: {e}")
+        import traceback
+        print(traceback.format_exc())
         return False
 
 

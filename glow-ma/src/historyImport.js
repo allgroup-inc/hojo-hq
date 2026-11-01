@@ -19,15 +19,16 @@
     会社名: ["会社名", "企業名", "法人名", "社名", "事業者名"],
     電話番号: ["電話番号", "電話", "TEL", "Tel", "tel", "代表電話"],
     手紙送付日: ["手紙送付日", "手紙発送日", "DM送付日", "DM発送日", "送付日", "発送日"],
-    架電日: ["架電日", "電話日", "コール日", "架電日時"],
+    架電日: ["架電日", "電話日", "コール日", "架電日時", "面談日", "対応日"],
     通話結果: ["通話結果", "架電結果", "結果", "コール結果"],
     所在地: ["所在地", "住所"],
     代表者名: ["代表者名", "代表者", "代表"],
     業種: ["業種"],
-    備考: ["備考", "メモ", "内容"]
+    備考: ["備考", "メモ", "内容"],
+    メール送信日: ["メール送信日", "メール送付日", "メール日", "メール"]
   };
 
-  var STAGE_ORDER = ["未接触", "アプローチ実施", "電話済み"];
+  var STAGE_ORDER = ["未接触", "アプローチ実施", "電話済み", "相談実施"];
   var LETTER_ROUTE = "②手紙DM";
 
   function headerIndex(headerRow) {
@@ -98,6 +99,76 @@
     return targetPos > curPos ? target : cur;
   }
 
+  /**
+   * 通話結果の欄から、対応履歴の種別を決める(2026-10-30 福田さん: 入電や、録音できなかった面談もこのタブで残したい)。
+   * 「面談」「訪問」「来店」「来社」→ 面談実施 / 「入電」→ 入電 / 「アポ」→ アポ獲得 / それ以外 → 電話
+   */
+  function callTypeOf(result) {
+    var text = String(result || "");
+    if (/面談|訪問|来店|来社/.test(text)) return "面談実施";
+    if (/入電/.test(text)) return "入電";
+    if (/アポ/.test(text)) return "アポ獲得";
+    return "電話";
+  }
+
+  var CALL_LOG_LABELS = { 電話: "過去の架電記録", 入電: "入電の記録", アポ獲得: "アポ獲得の記録", 面談実施: "面談の記録" };
+
+  /**
+   * 取り込んだ表を、取込済タブ(1枚にまとめる)へ足す形にする(2026-10-30 福田さん: 取込済タブが増え続ける)。
+   * 見出しの言い換えは標準の見出し(FIELDS)にそろえる。空行は除く。
+   * 戻り値: [取込日時, 会社名, 電話番号, 手紙送付日, 架電日, 通話結果, 所在地, 代表者名, 業種, 備考] の配列
+   */
+  var ARCHIVE_FIELDS = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考", "メール送信日"];
+  function toArchiveRows(headerRow, rows, stamp) {
+    var idx = headerIndex(headerRow);
+    return (rows || []).map(function (row) {
+      return [stamp].concat(ARCHIVE_FIELDS.map(function (f) {
+        var v = idx[f] === undefined ? "" : row[idx[f]];
+        if (Object.prototype.toString.call(v) === "[object Date]") return toDateString(v);
+        return v === undefined || v === null ? "" : v;
+      }));
+    }).filter(function (r) {
+      return r.slice(1).some(function (v) { return String(v).trim() !== ""; });
+    });
+  }
+
+  /**
+   * 取り込みを行う時間帯(2026-10-30 福田さん: 入力の途中で取り込まれてしまうため、時刻を決めてほしい)。
+   * 毎日 8時と22時(日本時間)。nowMs の時点で最後に来た取り込み時刻を "YYYY-MM-DD HH" で返す。
+   * 呼び出し側は、前回の値と違うときだけ取り込む(=各時刻に1回)。
+   */
+  var IMPORT_HOURS = [8, 22];
+  function currentImportSlot(nowMs) {
+    var jst = new Date(Number(nowMs) + 9 * 60 * 60 * 1000);
+    var hour = jst.getUTCHours();
+    var slotHour = -1;
+    IMPORT_HOURS.forEach(function (h) { if (hour >= h) slotHour = h; });
+    if (slotHour === -1) {
+      jst = new Date(jst.getTime() - 24 * 60 * 60 * 1000);
+      slotHour = IMPORT_HOURS[IMPORT_HOURS.length - 1];
+    }
+    return jst.getUTCFullYear() + "-" + pad2(jst.getUTCMonth() + 1) + "-" + pad2(jst.getUTCDate()) + " " + pad2(slotHour);
+  }
+
+  /**
+   * 取り込みのあいだに書き換えられた行・書き足された行を返す(取り込みタブに残して次回に回す)。
+   * 2026-10-30 13:46: 福田さんが日付を書いている途中に取り込みが走り、日付の無い行として取り込めず、
+   * その直後に日付の入った行が取込済へ移されて台帳に載らなかった。読んだときと同じ行だけを取込済へ移す。
+   */
+  function changedRows(plannedRows, currentRows) {
+    function key(row) {
+      return JSON.stringify((row || []).map(function (v) {
+        if (Object.prototype.toString.call(v) === "[object Date]") return "D" + v.getTime();
+        return v === undefined || v === null ? "" : String(v);
+      }).join("\u0001").replace(/\u0001+$/, ""));
+    }
+    return (currentRows || []).filter(function (row, i) {
+      var empty = !(row || []).some(function (v) { return String(v === undefined || v === null ? "" : v).trim() !== ""; });
+      if (empty) return false;
+      return i >= (plannedRows || []).length || key(row) !== key(plannedRows[i]);
+    });
+  }
+
   function buildCompanyId(sequenceNumber) {
     return "C" + String(sequenceNumber).padStart(6, "0");
   }
@@ -146,10 +217,11 @@
       if (!name && !phone) return; // 空行
       var letter = toDateString(cell(row, "手紙送付日"), options.today);
       var call = toDateString(cell(row, "架電日"), options.today);
+      var mail = toDateString(cell(row, "メール送信日"), options.today);
       var result = String(cell(row, "通話結果")).trim();
       var memo = String(cell(row, "備考")).trim();
-      if (!letter && !call) {
-        skipped.push({ line: lineNo, reason: "手紙送付日・架電日のどちらも読めません" });
+      if (!letter && !call && !mail) {
+        skipped.push({ line: lineNo, reason: "手紙送付日・架電日・メール送信日のどれも読めません" });
         return;
       }
 
@@ -180,8 +252,10 @@
         var routes = Array.isArray(record["流入ルート"]) ? record["流入ルート"] : [];
         if (routes.indexOf(LETTER_ROUTE) === -1) record["流入ルート"] = routes.concat([LETTER_ROUTE]);
       }
-      record["現在ステージ"] = advanceStage(record["現在ステージ"], call ? "電話済み" : "アプローチ実施");
-      record["最終接触日"] = laterDate(record["最終接触日"], laterDate(letter, call));
+      var callType = callTypeOf(result);
+      record["現在ステージ"] = advanceStage(record["現在ステージ"],
+        !call ? "アプローチ実施" : callType === "面談実施" ? "相談実施" : "電話済み");
+      record["最終接触日"] = laterDate(record["最終接触日"], laterDate(laterDate(letter, call), mail));
       touched[record["企業ID"]] = record;
 
       function addLog(date, type, text) {
@@ -191,8 +265,14 @@
         logs.push({ 企業ID: record["企業ID"], 日付: date, 担当者: options.staffName || "", 種別: type,
                     対応相手: "", 内容メモ: text, 次回アクション: "" });
       }
-      if (letter) addLog(letter, "手紙送付", "過去の手紙送付記録(取り込み " + options.today + ")" + (memo ? " / " + memo : ""));
-      if (call) addLog(call, "電話", "過去の架電記録(取り込み " + options.today + ")" + (result ? " / 結果: " + result : "") + (!letter && memo ? " / " + memo : ""));
+      // 備考は、入電・面談などの記録があればそちらへ(内容そのものなので)、無ければ手紙の記録へ付ける
+      var memoOnCall = call && (!letter || callType !== "電話");
+      if (letter) addLog(letter, "手紙送付", "過去の手紙送付記録(取り込み " + options.today + ")" + (memo && !memoOnCall ? " / " + memo : ""));
+      if (mail) addLog(mail, "メール送信", "メール送信の記録(取り込み " + options.today + ")" + (memo && !memoOnCall && !letter ? " / " + memo : ""));
+      if (call) {
+        addLog(call, callType, CALL_LOG_LABELS[callType] + "(取り込み " + options.today + ")" +
+          (result && callType === "電話" ? " / 結果: " + result : "") + (memo && memoOnCall ? " / " + memo : ""));
+      }
     });
 
     var newIds = {};
@@ -219,6 +299,12 @@
     headerIndex: headerIndex,
     toDateString: toDateString,
     advanceStage: advanceStage,
+    callTypeOf: callTypeOf,
+    IMPORT_HOURS: IMPORT_HOURS,
+    currentImportSlot: currentImportSlot,
+    ARCHIVE_FIELDS: ARCHIVE_FIELDS,
+    toArchiveRows: toArchiveRows,
+    changedRows: changedRows,
     planHistoryImport: planHistoryImport
   };
 

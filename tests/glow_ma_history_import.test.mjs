@@ -120,3 +120,72 @@ test("年の無い日付の表(福田さんの手紙100通分の形)も、履歴
   assert.deepEqual(plan.logs.map((l) => [l.日付, l.種別]), [["2026-09-18", "手紙送付"], ["2026-09-24", "電話"]]);
   assert.ok(plan.logs[1].内容メモ.includes("担当不在"));
 });
+
+test("通話結果が「入電」「面談」なら、対応履歴の種別を入電・面談実施にして、備考を内容として残す", () => {
+  const header = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考"];
+  const plan = h.planHistoryImport(header, [
+    ["株式会社テスト建設", "", "", "10/15", "入電", "", "", "", "土地の件で相談希望"],
+    ["株式会社みらい商事", "", "", "10/29", "面談", "", "", "", "後継者の件を聞いた。次は11月に決算書"]
+  ], existing(), [], { today: "2026-10-30", nextSequence: 3213, staffName: "" });
+  assert.deepEqual(plan.logs.map((l) => l.種別), ["入電", "面談実施"]);
+  assert.ok(plan.logs[0].内容メモ.includes("土地の件で相談希望"));
+  assert.ok(plan.logs[1].内容メモ.includes("次は11月に決算書"));
+  assert.equal(plan.newRecords[0].会社名, "株式会社みらい商事");
+  assert.equal(plan.newRecords[0].現在ステージ, "相談実施");
+  const schema = require("../glow-ma/src/schema.js");
+  plan.logs.forEach((l) => assert.ok(schema.INTERACTION_TYPES.includes(l.種別), l.種別));
+});
+
+test("見出しが「面談日」でも日付として読む", () => {
+  const plan = h.planHistoryImport(["会社名", "面談日", "通話結果", "備考"],
+    [["株式会社テスト建設", "2026-10-29", "訪問", "社長と面談"]], existing(), [], OPTS);
+  assert.equal(plan.logs.length, 1);
+  assert.equal(plan.logs[0].種別, "面談実施");
+});
+
+test("取込済の表は、標準の見出しの順にそろえ、空行を除いて1枚へまとめる形にする", () => {
+  const rows = h.toArchiveRows(["電話番号", "企業名", "架電日"], [["098-111-2222", "株式会社テスト建設", "10/1"], ["", "", ""]], "2026-10-30 09:35");
+  assert.equal(rows.length, 1);
+  assert.deepEqual(rows[0], ["2026-10-30 09:35", "株式会社テスト建設", "098-111-2222", "", "10/1", "", "", "", "", "", ""]);
+  assert.equal(h.ARCHIVE_FIELDS.length + 1, rows[0].length);
+});
+
+test("メール送信日の列があれば、対応履歴に「メール送信」として残す(手紙をやめてメールで案内するようになった)", () => {
+  const header = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考", "メール送信日"];
+  const plan = h.planHistoryImport(header, [
+    ["株式会社テスト建設", "", "", "", "", "", "", "", "補助金の案内", "10/28"],
+    ["株式会社テスト建設", "", "", "", "", "", "", "", "", "10/30"]
+  ], existing(), [], { today: "2026-10-30", nextSequence: 3213, staffName: "" });
+  assert.equal(plan.skipped.length, 0);
+  assert.deepEqual(plan.logs.map((l) => [l.日付, l.種別]), [["2026-10-28", "メール送信"], ["2026-10-30", "メール送信"]]);
+  assert.ok(plan.logs[0].内容メモ.includes("補助金の案内"));
+  const schema = require("../glow-ma/src/schema.js");
+  plan.logs.forEach((l) => assert.ok(schema.INTERACTION_TYPES.includes(l.種別), l.種別));
+  assert.equal(h.ARCHIVE_FIELDS[h.ARCHIVE_FIELDS.length - 1], "メール送信日", "列は末尾に足す");
+});
+
+test("取り込み時刻は毎日8時と22時(日本時間)。時刻をまたぐと値が変わる", () => {
+  const jst = (s) => Date.parse(s + "+09:00");
+  assert.equal(h.currentImportSlot(jst("2026-10-30T07:59:00")), "2026-10-29 22");
+  assert.equal(h.currentImportSlot(jst("2026-10-30T08:00:00")), "2026-10-30 08");
+  assert.equal(h.currentImportSlot(jst("2026-10-30T21:59:00")), "2026-10-30 08");
+  assert.equal(h.currentImportSlot(jst("2026-10-30T22:00:00")), "2026-10-30 22");
+  assert.equal(h.currentImportSlot(jst("2026-10-31T00:30:00")), "2026-10-30 22");
+  assert.equal(h.currentImportSlot(jst("2026-11-01T03:00:00")), "2026-10-31 22", "月またぎ");
+});
+
+test("「来店」「来社」も面談実施として残す", () => {
+  assert.equal(h.callTypeOf("来店"), "面談実施");
+  assert.equal(h.callTypeOf("来社"), "面談実施");
+  assert.equal(h.callTypeOf("担当不在"), "電話");
+});
+
+test("取り込みのあいだに書き換えられた行・書き足された行だけを残す(書いている途中の行を取込済へ移さない)", () => {
+  const planned = [["株式会社A", "", "", "", "来店", "", "", "", "メモ"], ["株式会社B", "", "", "10/1", "入電"]];
+  const current = [["株式会社A", "", "", "10/28", "来店", "", "", "", "メモ"], ["株式会社B", "", "", "10/1", "入電", ""], ["株式会社C", "", "", "10/2", "面談"], ["", "", ""]];
+  const kept = h.changedRows(planned, current);
+  assert.deepEqual(kept.map((r) => r[0]), ["株式会社A", "株式会社C"], "日付を書き足したA・新しいCを残し、変わらないBは移す(末尾の空欄の差は無視)");
+  assert.deepEqual(h.changedRows(planned, planned), []);
+  const d = new Date(2026, 9, 28);
+  assert.deepEqual(h.changedRows([["X", d]], [["X", new Date(d.getTime())]]), [], "同じ日付(Date)は変わっていない扱い");
+});

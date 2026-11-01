@@ -64,6 +64,36 @@ def list_entries(token, project, since):
             return entries
 
 
+def report_web_deployments(token, script_id):
+    """Web公開(デプロイ)の設定を読み取って出す(読み取りのみ。URL・デプロイID・スクリプトIDは出さない)。
+    2026-10-31: 管理画面は「アクセスしている人のメール」でスタッフか判定するため、実行ユーザーが「自分」だと
+    個人Gmail運用では持ち主以外のメールが空になり入れない(CLAUDE.md GAS Web App規律)。実際の設定を確かめる。"""
+    def get(path):
+        r = urllib.request.Request("https://script.googleapis.com/v1/projects/%s/%s" % (script_id, path),
+                                   headers={"Authorization": "Bearer " + token})
+        return json.load(urllib.request.urlopen(r, timeout=30))
+    print("## Web公開(デプロイ)の設定")
+    try:
+        deps = get("deployments?pageSize=50").get("deployments", [])
+        versions = get("versions?pageSize=50").get("versions", [])
+    except Exception as e:  # noqa: BLE001
+        code = getattr(e, "code", "")
+        print(f"::warning::デプロイの設定を読めませんでした({type(e).__name__} {code})")
+        return
+    latest = max((v.get("versionNumber", 0) for v in versions), default=0)
+    print(f"- 保存済みの版: 最新 {latest}")
+    for i, d in enumerate(deps, 1):
+        cfg = d.get("deploymentConfig", {}) or {}
+        ver = cfg.get("versionNumber", "HEAD(最新のコード)")
+        desc = safe_error(cfg.get("description", ""), 40) or "(説明なし)"
+        for ep in d.get("entryPoints", []) or []:
+            if ep.get("entryPointType") != "WEB_APP":
+                continue
+            wc = (ep.get("webApp", {}) or {}).get("entryPointConfig", {}) or {}
+            print(f"- デプロイ{i}: 説明={desc} / 版={ver} / 実行ユーザー={wc.get('executeAs', '?')} / "
+                  f"アクセス={wc.get('access', '?')} / 更新 {str(d.get('updateTime', ''))[:10]}")
+
+
 def safe_error(text, limit=None):
     t = re.sub(r"AKfyc\S*", "(デプロイID)", str(text))
     t = re.sub(r"[A-Za-z0-9_\-]{25,}", "(ID)", t)
@@ -81,6 +111,9 @@ def main():
     ap.add_argument("--sample", default="", help="この処理名の最新ログ3件の中身の形(重要度・項目名・本文の先頭)を表示する")
     args = ap.parse_args()
     token = access_token(os.environ["CLASPRC_JSON"])
+    script_id = re.sub(r"\s", "", os.environ.get("SCRIPT_ID", ""))
+    if script_id:
+        report_web_deployments(token, script_id)
     project = os.environ.get("GCP_PROJECT", "").strip()
     if not project:
         sys.exit("::error::Google Cloud のプロジェクト番号がありません(手動実行で gcp_project を1回指定すると、以後は覚えて使います)")

@@ -71,6 +71,20 @@ CHANNELS = {
     "ymn-kit":     {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 準備シートページ"},
     "ymn-life":    {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: ライフイベント別ページ"},
     "ymn-jukyu":   {"dest": "https://line.me/R/ti/p/%40630pbjqq", "label": "フクギイロ山梨: 受給報告(受け取れました)"},
+    # ── 印刷物の固定QRコード(2026-10-30 福田さんの確認事項④: チラシ・QRスタンド・企業説明で使う) ──
+    # QRはこの /go/ ページを指す(画像: site/assets/qr/<チャネル>.png、作り直し: scripts/generate_go_qr.py)。
+    # 転送先がLINEでないので event は qr_redirect(line_redirect にするとLINE登録数が水増しされる)。
+    # ミカタのLINEへのQRは既存の /go/card/(line_redirect, channel=card)を使う。
+    "qr-mikata":  {"dest": "https://allgroup-inc.github.io/hojo-hq/?utm_source=qr&utm_medium=print&utm_campaign=fixed_qr",
+                   "label": "固定QR: 沖縄企業のミカタ(サイト)", "event": "qr_redirect", "dest_name": "沖縄企業のミカタ"},
+    "qr-yuntaku": {"dest": "https://allgroup-inc.github.io/yuntaku-lp/?utm_source=qr&utm_medium=print&utm_campaign=fixed_qr",
+                   "label": "固定QR: ゆんたく経営相談室", "event": "qr_redirect", "dest_name": "ゆんたく経営相談室"},
+    "qr-world":   {"dest": "https://glow-okinawa.jp/?utm_source=qr&utm_medium=print&utm_campaign=fixed_qr",
+                   "label": "固定QR: 世界の架け橋", "event": "qr_redirect", "dest_name": "世界の架け橋"},
+    "qr-ig":      {"dest": "https://www.instagram.com/okinawa_mikata/",
+                   "label": "固定QR: Instagram(沖縄企業のミカタ)", "event": "qr_redirect", "dest_name": "Instagram"},
+    "qr-fb":      {"dest": "https://www.facebook.com/p/%E6%B2%96%E7%B8%84%E4%BC%81%E6%A5%AD%E3%81%AE%E3%83%9F%E3%82%AB%E3%82%BF-61592241301048/",
+                   "label": "固定QR: Facebook(沖縄企業のミカタ)", "event": "qr_redirect", "dest_name": "Facebook"},
     # ── 株式会社GLOW(@042wvrgo・2026-10-04開設) ──
     # ミカタのLINEとは別アカウント。line_redirect のまま数えるとミカタのKGI(LINE登録1,000社)に
     # 混ざるので、専用のイベント名にする。lin.ee の短縮URLが発行されたら dest を差し替えて再実行。
