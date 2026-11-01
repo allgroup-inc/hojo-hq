@@ -204,15 +204,59 @@ async def post_to_magazine(page, magazine_id: str, title: str, body: str) -> boo
         # マガジンのダッシュボードへ移動
         magazine_url = NOTE_MAGAZINE_URL_TEMPLATE.format(magazine_id)
         await page.goto(magazine_url, wait_until="networkidle")
+        await asyncio.sleep(2)  # ページ完全読み込み待機
 
-        # 「新しい記事を作成」ボタンをクリック
-        await page.click('text=新しい記事を作成')
+        # 「新しい記事を作成」ボタンをクリック（複数セレクタ戦略）
+        create_button_selectors = [
+            'text=新しい記事を作成',
+            'button:has-text("新しい記事を作成")',
+            'a:has-text("新しい記事を作成")',
+            '[class*="create"][class*="button"]',
+            'button[class*="primary"]',
+        ]
 
-        # タイトル入力
-        title_field = await page.query_selector('input[placeholder*="タイトル"]')
-        if not title_field:
-            # フォールバック：最初の input を使用
-            title_field = await page.query_selector('input[type="text"]')
+        create_button = None
+        for selector in create_button_selectors:
+            try:
+                await page.wait_for_selector(selector, timeout=3000)
+                create_button = await page.query_selector(selector)
+                if create_button:
+                    print(f"[ok] 作成ボタン見つけました: {selector}")
+                    break
+            except:
+                continue
+
+        if not create_button:
+            print("[error] 新しい記事を作成ボタンが見つかりません")
+            all_buttons = await page.query_selector_all('button')
+            print(f"[debug] ページ内のボタン数: {len(all_buttons)}")
+            for i, btn in enumerate(all_buttons[:10]):  # 最初の10個を表示
+                text = await btn.text_content()
+                print(f"[debug] button#{i}: {text}")
+            return False
+
+        await create_button.click()
+        print("[ok] 作成ボタンをクリック")
+        await asyncio.sleep(2)  # ページ遷移待機
+
+        # タイトル入力（複数セレクタ戦略）
+        title_selectors = [
+            'input[placeholder*="タイトル"]',
+            'input[placeholder*="title"]',
+            'input[placeholder*="記事タイトル"]',
+            'input[type="text"]',
+        ]
+
+        title_field = None
+        for selector in title_selectors:
+            try:
+                await page.wait_for_selector(selector, timeout=2000)
+                title_field = await page.query_selector(selector)
+                if title_field:
+                    print(f"[ok] タイトルフィールド見つけました: {selector}")
+                    break
+            except:
+                continue
 
         if title_field:
             await title_field.fill(title)
@@ -227,8 +271,24 @@ async def post_to_magazine(page, magazine_id: str, title: str, body: str) -> boo
         # 下書き保存を待つ（自動保存の場合）
         await asyncio.sleep(2)
 
-        # 公開ボタンをクリック
-        publish_button = await page.query_selector('button:has-text("公開")')
+        # 公開ボタンをクリック（複数セレクタ戦略）
+        publish_selectors = [
+            'button:has-text("公開")',
+            'button:has-text("投稿")',
+            'button[class*="publish"]',
+            'button[class*="submit"]',
+        ]
+
+        publish_button = None
+        for selector in publish_selectors:
+            try:
+                publish_button = await page.query_selector(selector)
+                if publish_button:
+                    print(f"[ok] 公開ボタン見つけました: {selector}")
+                    break
+            except:
+                continue
+
         if publish_button:
             await publish_button.click()
             print("[ok] 公開ボタンをクリック")
@@ -247,6 +307,8 @@ async def post_to_magazine(page, magazine_id: str, title: str, body: str) -> boo
 
     except Exception as e:
         print(f"[error] note 投稿失敗: {e}")
+        import traceback
+        print(traceback.format_exc())
         return False
 
 
