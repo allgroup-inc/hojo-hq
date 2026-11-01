@@ -1,0 +1,20 @@
+{
+ "_note": "2026-10-05 run 37316229690 のログ(66 クエリ x 3 回 = 198 回すべて HTTP 503)から再構成した status。failed_keywords は先頭 5 件のみ記載(実際は 66 件)。当時の fetch_jgrants.py は status を書いていない。",
+ "schema_version": 1,
+ "jgrants": {
+  "queries": 66,
+  "done": 66,
+  "failed": 66,
+  "retried": 0,
+  "kinds": {"HTTPError 503": 66},
+  "failed_keywords": ["補助金", "助成金", "支援", "給付", "奨励"],
+  "items": 0,
+  "incomplete": false
+ },
+ "local": {
+  "okinawa_pref_sangyo": {"label": "沖縄県(産業・公募補助金)", "ok": true, "listing_skipped": false, "listing_entries": 23, "detail_skipped": 0, "items": 8},
+  "okinawa_ric": {"label": "沖縄県産業振興公社", "ok": true, "listing_skipped": false, "listing_entries": 10, "detail_skipped": 0, "items": 10},
+  "naha_city": {"label": "那覇市(企業支援)", "ok": true, "listing_skipped": false, "listing_entries": 4, "detail_skipped": 0, "items": 0}
+ },
+ "local_incomplete": false
+}

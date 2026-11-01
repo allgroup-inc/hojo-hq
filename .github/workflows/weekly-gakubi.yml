@@ -13,6 +13,8 @@ on:
     branches: [main]
     paths:
       - "scripts/weekly_gakubi.py"
+      - "scripts/check_repo_scope.py"            # 禁止語の正本(FORBIDDEN_CONTENT)が変わったらガードを再検証(push 時は dry-run。Claude API を 1 回呼ぶ)
+      - "tests/scripts/test_weekly_gakubi.py"     # 同上(push 時は dry-run で Claude API を 1 回呼ぶ)
       - ".github/workflows/weekly-gakubi.yml"
   workflow_dispatch: {}
 
@@ -38,10 +40,16 @@ jobs:
           python-version: "3.12"
 
       - name: Install deps
-        run: pip install -q anthropic
+        run: pip install -q anthropic pytest
 
       - name: Self-test
         run: python scripts/weekly_gakubi.py --self-test
+
+      # 禁止語ガード(2026-10-12 PR-A / 決裁キュー #22): 生成の前に正例・負例のテストを毎回走らせる。
+      # 失敗したらこの job はここで止まり、生成・commit・push へ進まない(if 無し = success() 条件)。
+      # テストは失敗時にも禁止語そのものを出さず番号だけを表示する作り。--tb=short で出力を短く保つ。
+      - name: Guard tests (pytest)
+        run: python -m pytest tests/scripts/test_weekly_gakubi.py -q -p no:cacheprovider --tb=short
 
       - name: Generate weekly digest
         env:

@@ -15,6 +15,7 @@ status: adopted                            # adopted | rejected | deferred | sup
 review_by: 2027-04-04                      # 省略時は date+180日
 supersedes:                                # 置き換える決定の decision_id(任意)
 decided_by: 小柳
+visibility: public   # 任意。既定はリポジトリの公開性(private リポの議事は private)
 ---
 ```
 
@@ -29,6 +30,7 @@ decided_by: 小柳
 - `review_by`: 見直し期限(YYYY-MM-DD)。`date` より後の日付。省略すると `date` の180日後になる。期限を過ぎた決定は `expired` と表示される。
 - `supersedes`: この決定が置き換える過去の決定の `decision_id`。無ければ空欄のまま。
 - `decided_by`: 決裁者。
+- `visibility`: 任意。`public` / `private`(それ以外は `--check` で違反)。省略するとリポジトリの公開性に従う(private リポの議事は常に private)。`private` と書いた議事は、Wiki 検証器(V05)が公開 Wiki の根拠(`source_decision`)として認めない。
 
 ## 本文の見出し(既存の議事と同じ)
 

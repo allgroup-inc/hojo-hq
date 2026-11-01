@@ -157,3 +157,104 @@ test("buildInteractionLogRowForCall: 自動記録対象外(キャンセル)な�
   const call = Object.assign({}, COMPLETED_OUTBOUND_CALL, { call_status: "キャンセル" });
   assert.equal(cti.buildInteractionLogRowForCall("H-abc123", call, MATCHED_COMPANY), null);
 });
+
+test("parseCdrCsv: V10形式(Group_CallId・要約あり)を読み、発信は着信先を相手の番号にする。内線と見出しは除く", () => {
+  const csv = [
+    "Group_CallId,種類,発信元,着信先,外線番号,総時間,通話時間,状態,発着信時間,オペレータ,オプション,録音ファイル名,文字起こし,要約",
+    'G100,2,1001,0989111111,0980000000,120,95,SUCCESS,2026-10-26 10:00:00,福田,,rec1.wav,"もしもし、\nこんにちは","後継者の相談。来月再訪"',
+    "G101,0,1001,1002,,10,5,SUCCESS,2026-10-26 10:05:00,福田,,,,",
+    "G102,1,0989222222,1001,0980000000,30,0,CANCEL,2026-10-26 11:00:00,福田,,,,",
+  ].join("\r\n");
+  const calls = cti.parseCdrCsv(csv);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].group_callid, "G100");
+  assert.equal(calls[0].phone, "0989111111");
+  assert.equal(calls[0].call_status, "完了");
+  assert.equal(calls[0].operator_name, "福田");
+  assert.match(calls[0].note, /通話時間 95/);
+  assert.match(calls[0].note, /後継者の相談/);
+  assert.equal(calls[1].phone, "0989222222", "着信は発信元が相手");
+  assert.equal(calls[1].call_status, "キャンセル");
+});
+
+test("parseCdrCsv: V8形式(11列・IDなし)は日時と番号から重複しないIDを作る", () => {
+  const csv = "2,1001,098-911-1111,0980000000,60,40,SUCCESS,2026-10-26 09:00:00,福田,,rec.wav\n";
+  const calls = cti.parseCdrCsv(csv);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].group_callid, "CDR-20261026090000-0989111111");
+  assert.equal(calls[0].phone, "098-911-1111");
+  assert.equal(cti.shouldRecordInteractionLog(calls[0], { "企業ID": "C1" }), true);
+});
+
+test("isCdrNoData: 「データが存在しません」の応答は0件として扱い、CSVやエラー文は対象外", () => {
+  assert.equal(cti.isCdrNoData("発着信履歴のデータが存在しません。"), true);
+  assert.equal(cti.isCdrNoData("\n発着信履歴のデータが存在しません。\n"), true);
+  assert.equal(cti.isCdrNoData("2,1001,098-911-1111,0980000000,60,40,SUCCESS,2026-10-26 09:00:00,福田,,rec.wav"), false);
+  assert.equal(cti.isCdrNoData("認証に失敗しました"), false);
+  assert.equal(cti.isCdrNoData(""), false);
+  assert.deepEqual(cti.parseCdrCsv(""), []);
+});
+
+test("parseCsv: 引用符の中のカンマ・改行・二重引用符を正しく扱う", () => {
+  assert.deepEqual(cti.parseCsv('a,"b,c","d\n""e"""\nx,y'), [["a", "b,c", 'd\n"e"'], ["x", "y"]]);
+  assert.deepEqual(cti.parseCsv(""), []);
+});
+
+test("buildPhoneIndex/matchCompanyByPhoneIndex: matchCompanyByPhone と同じ結果(一意なら企業、複数ならnull)", () => {
+  const companies = [
+    { "企業ID": "C1", "電話番号": "098-911-1111", "携帯番号": "" },
+    { "企業ID": "C2", "電話番号": "098-922-2222", "携帯番号": "090-1111-2222" },
+    { "企業ID": "C3", "電話番号": "098-922-2222", "携帯番号": "" },
+  ];
+  const index = cti.buildPhoneIndex(companies);
+  for (const phone of ["0989111111", "098-922-2222", "09011112222", "0000", ""]) {
+    assert.deepEqual(cti.matchCompanyByPhoneIndex(index, phone), cti.matchCompanyByPhone(companies, phone), phone);
+  }
+  assert.equal(cti.matchCompanyByPhoneIndex(index, "0989111111")["企業ID"], "C1");
+  assert.equal(cti.matchCompanyByPhoneIndex(index, "098-922-2222"), null);
+});
+
+test("filterCallsByOperators: スタッフの氏名(空白は無視)と一致するオペレーターの通話だけ残す。許可が空なら何も残さない", () => {
+  const calls = [
+    { operator_name: "福田　貴史(glow01)" },
+    { operator_name: "山田　花子(ext001)" },
+    { operator_name: "福田貴史" },
+    { operator_name: "" },
+  ];
+  const kept = cti.filterCallsByOperators(calls, ["福田　貴史", "小柳 健"]);
+  assert.equal(kept.length, 2);
+  assert.ok(kept.every((c) => c.operator_name.startsWith("福田")));
+  assert.equal(cti.filterCallsByOperators(calls, []).length, 0);
+  assert.equal(cti.operatorPersonName("佐藤　一郎(ext004)"), "佐藤一郎");
+});
+
+test("operatorIdOf: 表示名の括弧からオペレーターIDを取り出す", () => {
+  assert.equal(cti.operatorIdOf("山田　花子(ext001)"), "ext001");
+  assert.equal(cti.operatorIdOf("山田 花子（ext001）"), "ext001");
+  assert.equal(cti.operatorIdOf("山田　花子"), "");
+  assert.equal(cti.operatorIdOf(""), "");
+});
+
+test("filterCallsByOperators: 覚えたIDがあれば、同姓同名でもIDが違う他組織の通話は除く", () => {
+  const calls = [
+    { operator_name: "山田　花子(ext001)" },
+    { operator_name: "山田　花子(zz999)" },
+    { operator_name: "佐藤　一郎(ext004)" }
+  ];
+  const noPin = cti.filterCallsByOperators(calls, ["山田　花子"]);
+  assert.equal(noPin.length, 2, "IDを覚える前は氏名だけで照合");
+  const pinned = cti.filterCallsByOperators(calls, ["山田　花子"], { "山田花子": "ext001" });
+  assert.deepEqual(pinned.map((c) => c.operator_name), ["山田　花子(ext001)"]);
+});
+
+test("learnOperatorIds: スタッフの氏名→IDを覚える。同じ氏名で別のIDが混ざるときは覚えない", () => {
+  const calls = [
+    { operator_name: "山田　花子(ext001)" },
+    { operator_name: "山田　花子(ext001)" },
+    { operator_name: "佐藤　一郎(ext004)" },
+    { operator_name: "佐藤　一郎(zz999)" },
+    { operator_name: "他組織　太郎(x1)" }
+  ];
+  assert.deepEqual(cti.learnOperatorIds(calls, ["山田　花子", "佐藤　一郎"], {}), { "山田花子": "ext001" });
+  assert.deepEqual(cti.learnOperatorIds(calls, ["山田　花子"], { "山田花子": "ext001" }), {}, "覚え済みは上書きしない");
+});

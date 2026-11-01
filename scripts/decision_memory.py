@@ -42,6 +42,10 @@ _WHY_WORDS = ("なぜ", "背景", "目的")
 _CHECK_WHY_WORDS = ("なぜ", "背景")
 _HEADING_RE = re.compile(r"^(#{1,6})\s")
 _UTAGAI_HEADING_RE = re.compile(r"^\s*#{1,6}\s*\**\s*ウタガイ")
+_BEKKAI_BULLET_RE = re.compile(r"^\s*[-*・]\s*\**ベッカイ")
+_BEKKAI_INLINE_RE = re.compile(r"ベッカイ(?:[(（][^)）]*[)）])?[*\s]*[:：]\s*(.*)$")
+_BULLET_MARK_RE = re.compile(r"^\s*[-*・]\s*")
+VALID_VISIBILITY = ("public", "private")
 
 
 # ---------------------------------------------------------------- 基本部品
@@ -235,7 +239,23 @@ def _utagai_text(lines: list[str]) -> str:
 
 
 def _bekkai_text(lines: list[str]) -> str:
-    return _collapse(" ".join(l for l in lines if "ベッカイ" in l), SECTION_MAX)
+    """別解(ベッカイ)の本文。本来の欄だけを拾い、本文中の言及(他の行に出る「ベッカイ案」等)は拾わない。
+
+    ① `##` / `###` 見出しが ベッカイ で始まれば、その節(同じか上位レベルの次の見出しまで)。
+    ② 見出しが無ければ、`- ベッカイ…` / `* ベッカイ…` / `・ベッカイ…` で始まる最初の行(コロンの後ろ)と、
+       それより深く字下げした継続行(`_utagai_continuation` と同じ規則。同じ深さの兄弟項目 = 裁定等は含めない)。
+    ③ どちらも無ければ空文字。SECTION_MAX で切る。
+    """
+    if _find_heading(lines, ("ベッカイ",)) is not None:
+        return _section(lines, ("ベッカイ",))
+    for i, line in enumerate(lines):
+        if not _BEKKAI_BULLET_RE.match(line):
+            continue
+        m = _BEKKAI_INLINE_RE.search(line)
+        head = m.group(1).strip() if m else _BULLET_MARK_RE.sub("", line, count=1).strip()
+        tail = _utagai_continuation(lines, i)
+        return _collapse(" ".join(x for x in (head, tail) if x), SECTION_MAX)
+    return ""
 
 
 def _title(fm: dict, lines: list[str], path: Path) -> str:
@@ -307,6 +327,7 @@ def parse_decision(path: Path, root: Path, today: dt.date | None = None) -> dict
         "review_status": review_status,
         "status": status,
         "scope": _s(fm.get("scope")),
+        "visibility": _s(fm.get("visibility")).strip(),
         "tags": tags,
         "why": _section(lines, _WHY_WORDS),
         "premises": _section(lines, ("前提",)),
@@ -363,6 +384,10 @@ def check_decision(path: Path, root: Path) -> list[str]:
     status = _s(fm.get("status")).strip()
     if status and status not in VALID_STATUS:
         errs.append(f"{name}: status が許容値ではありません: {status}(許容: {' | '.join(VALID_STATUS)})")
+
+    vis = _s(fm.get("visibility")).strip()
+    if vis and vis not in VALID_VISIBILITY:
+        errs.append(f"{name}: visibility が許容値ではありません: {vis}(許容: {' | '.join(VALID_VISIBILITY)}。省略可)")
 
     date = _parse_date(fm.get("date"))
     if _s(fm.get("date")).strip() and date is None:

@@ -60,7 +60,7 @@ test("対応履歴ログの種別(INTERACTION_TYPES)が設計書5.2節の15種+�
     "レターURLアクセス", "返信", "資料請求",
     "提案(M&A)", "提案(不動産)", "提案(法人保険)",
     "成約", "見送り", "ナーチャリング配信", "連絡不要受領",
-    "NDA締結", "意向表明受領", "DD開始", "関係メモ更新"
+    "NDA締結", "意向表明受領", "DD開始", "関係メモ更新", "メール送信"
   ];
   assert.deepEqual(schema.INTERACTION_TYPES, expected);
 });
@@ -141,12 +141,11 @@ test("紹介実績ログのタブ名・見出しが定義されている(紹介�
   ]);
 });
 
-test("企業マスタに事前選定ランク・事前選定スコア列が末尾に追加されている", () => {
-  assert.ok(schema.COMPANY_MASTER_HEADERS.includes("事前選定ランク"));
-  assert.ok(schema.COMPANY_MASTER_HEADERS.includes("事前選定スコア"));
+test("企業マスタの列は末尾に追加していく(既存列の位置を動かさない)", () => {
+  // 事前選定(2026-09)の後ろに、Phase 11(2026-10)のLINE/Instagram/QR列が続く
   assert.deepEqual(
-    schema.COMPANY_MASTER_HEADERS.slice(-2),
-    ["事前選定ランク", "事前選定スコア"]
+    schema.COMPANY_MASTER_HEADERS.slice(-5),
+    ["事前選定ランク", "事前選定スコア", "LINE User ID", "Instagramアカウント（@で始まる）", "QRコード URL"]
   );
 });
 

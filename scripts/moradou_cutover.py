@@ -25,9 +25,11 @@ moradou.jp の開通を実測し、開通していたら旧URL側の正規URLを
   python scripts/moradou_cutover.py --self-test   # 判定ロジックの自己テスト
 """
 import argparse
+import json
 import os
 import re
 import sys
+import tempfile
 import urllib.error
 import urllib.request
 
@@ -44,9 +46,10 @@ TIMEOUT = 20
 UA = "moradou-cutover/1.0 (+https://github.com/allgroup-inc/hojo-hq)"
 
 # 開通と認めるための条件。(名前, パス, 中身に必ず含まれるもの)
+# 山梨版は公開停止中(2026-10-15 所有者判断)のため、山梨版の条件は判定から外した。
+# 外したことで切替の判定が緩むため、切替そのものは承認ゲート(POLICY_FILE)で保留する。
 CHECKS = [
     ("トップが開く", "/", ["もらいわすれ堂", f'rel="canonical" href="{NEW_BASE}/"']),
-    ("山梨版が開く", "/yamanashi/", ["もらいわすれ堂"]),
     ("sitemapが新ドメイン", "/sitemap.xml", [f"<loc>{NEW_BASE}/"]),
 ]
 
@@ -102,10 +105,51 @@ def probe():
 # ②を忘れると「ほとんどのページは新ドメインを指しているのに、入口のトップだけ
 # 旧URLを指している」という、いちばん効くページだけ抜けた状態になる。
 # そのため**両系統やったあとで、旧URLを指すcanonicalが1つも無いことを確かめる**。
-SITE_TREES = [
-    ("site/fukugiiro", "https://allgroup-inc.github.io/hojo-hq/fukugiiro", NEW_BASE),
-    ("site/yamanashi", "https://allgroup-inc.github.io/hojo-hq/yamanashi", YAMANASHI_BASE),
+STOPPED_CONFIG = os.path.join(BASE, "scripts", "stopped_sites.json")
+POLICY_FILE = os.path.join(BASE, "scripts", "moradou_cutover_policy.json")
+
+# 公開を停止したサイト(scripts/stopped_sites.json の key)は、切替の対象から外す。
+_ALL_TREES = [
+    ("fukugiiro", "site/fukugiiro", "https://allgroup-inc.github.io/hojo-hq/fukugiiro", NEW_BASE),
+    ("yamanashi", "site/yamanashi", "https://allgroup-inc.github.io/hojo-hq/yamanashi", YAMANASHI_BASE),
 ]
+
+
+# 停止中のサイトは、設定ファイルが消えたり壊れたりしても停止のままにする(fail-closed)。
+# 設定を読めないときは「全部を対象にする」へ倒さず、例外で切替を止める。
+# 停止を解くには、この定数と設定ファイルの両方を変える(片方だけでは戻らない)。
+STOPPED_IN_CODE = frozenset({"yamanashi"})
+
+
+def stopped_keys(path=STOPPED_CONFIG):
+    """公開を停止しているサイトの key の集合(コード内の定数を必ず含む)。
+    設定が無い・壊れている・コードの停止を含まないときは RuntimeError で止める。"""
+    try:
+        with open(path, encoding="utf-8") as f:
+            cfg = json.load(f)
+    except (OSError, ValueError) as e:
+        raise RuntimeError(f"停止設定を読めません({path}: {e})。切替を中止します") from e
+    if cfg.get("version") != 1 or not isinstance(cfg.get("stopped"), list):
+        raise RuntimeError(f"停止設定の形式が想定外です({path})。切替を中止します")
+    keys = {s["key"] for s in cfg["stopped"] if isinstance(s, dict) and s.get("key")}
+    missing = STOPPED_IN_CODE - keys
+    if missing:
+        raise RuntimeError(f"停止設定にコードの停止が無い: {sorted(missing)}。切替を中止します")
+    return keys
+
+
+def _effective_stopped(stopped=None):
+    """呼び出し元が空を渡しても、コードの停止は必ず効かせる。"""
+    base = stopped_keys() if stopped is None else set(stopped)
+    return base | STOPPED_IN_CODE
+
+
+def active_trees(stopped=None):
+    stopped = _effective_stopped(stopped)
+    return [(rel, old, new) for key, rel, old, new in _ALL_TREES if key not in stopped]
+
+
+SITE_TREES = active_trees()
 _CANON = re.compile(r'(rel="canonical"\s+href=")([^"]*)(")')
 
 
@@ -120,11 +164,11 @@ def rewrite_canonical_html(text, old_base, new_base):
     return _CANON.sub(sub, text)
 
 
-def rewrite_canonicals():
+def rewrite_canonicals(trees=None, base=BASE):
     """全HTMLのcanonicalを新ドメインへ。生成物も含めて当てる(冪等)。"""
     n = 0
-    for rel_tree, old_base, new_base in SITE_TREES:
-        tree = os.path.join(BASE, rel_tree)
+    for rel_tree, old_base, new_base in (SITE_TREES if trees is None else trees):
+        tree = os.path.join(base, rel_tree)
         for root, dirs, files in os.walk(tree):
             for name in files:
                 if not name.endswith(".html"):
@@ -140,11 +184,11 @@ def rewrite_canonicals():
     return n
 
 
-def stale_canonicals():
+def stale_canonicals(trees=None, base=BASE):
     """旧URLを指したままの canonical を持つページを返す(切替後に0であるべき)。"""
     bad = []
-    for rel_tree, old_base, _new in SITE_TREES:
-        tree = os.path.join(BASE, rel_tree)
+    for rel_tree, old_base, _new in (SITE_TREES if trees is None else trees):
+        tree = os.path.join(base, rel_tree)
         for root, dirs, files in os.walk(tree):
             for name in files:
                 if not name.endswith(".html"):
@@ -154,15 +198,23 @@ def stale_canonicals():
                     body = f.read()
                 for m in _CANON.finditer(body):
                     if m.group(2).startswith(old_base):
-                        bad.append(os.path.relpath(fp, BASE))
+                        bad.append(os.path.relpath(fp, base))
                         break
     return sorted(bad)
 
 
-TARGETS = [
-    ("scripts/fg_seo.py", NEW_BASE),
-    ("scripts/fg_yamanashi.py", YAMANASHI_BASE),
+_ALL_TARGETS = [
+    ("fukugiiro", "scripts/fg_seo.py", NEW_BASE),
+    ("yamanashi", "scripts/fg_yamanashi.py", YAMANASHI_BASE),
 ]
+
+
+def active_targets(stopped=None):
+    stopped = _effective_stopped(stopped)
+    return [(rel, new) for key, rel, new in _ALL_TARGETS if key not in stopped]
+
+
+TARGETS = active_targets()
 _MOVED_LINE = re.compile(r"^MOVED_TO = .*$", re.M)
 
 
@@ -181,10 +233,10 @@ def current_moved_to(text):
     return m.group(0)
 
 
-def apply_cutover():
+def apply_cutover(targets=None, base=BASE):
     changed = []
-    for rel, value in TARGETS:
-        p = os.path.join(BASE, rel)
+    for rel, value in (TARGETS if targets is None else targets):
+        p = os.path.join(base, rel)
         with open(p, encoding="utf-8") as f:
             text = f.read()
         before = current_moved_to(text)
@@ -211,14 +263,32 @@ def main_check(verbose=True):
     return NOT_LIVE
 
 
-def main_apply():
+def policy(path=POLICY_FILE):
+    """切替の承認ゲート。hold が true、または承認者・承認日が空なら切り替えない。"""
+    try:
+        with open(path, encoding="utf-8") as f:
+            p = json.load(f)
+    except FileNotFoundError:
+        return False, "承認ファイルがない"
+    if p.get("hold", True):
+        return False, "hold=true(承認待ち)"
+    if not p.get("approved_by") or not p.get("approved_on"):
+        return False, "承認者・承認日が未記入"
+    return True, f"承認済み({p['approved_on']})"
+
+
+def main_apply(policy_path=POLICY_FILE, base=BASE, trees=None, targets=None):
+    ok, why = policy(policy_path)
+    if not ok:
+        print(f"[moradou_cutover] 切替は保留します: {why}(開通の確認も切替もしていません)")
+        return 0
     rc = main_check()
     if rc != 0:
         return rc
-    changed = apply_cutover()
-    n = rewrite_canonicals()
+    changed = apply_cutover(targets, base)
+    n = rewrite_canonicals(trees, base)
     print(f"[変更] 手書き・生成済みページの canonical: {n}ファイル")
-    stale = stale_canonicals()
+    stale = stale_canonicals(trees, base)
     if stale:
         print(f"::error::旧URLを指したままの canonical が {len(stale)} ページ残っています", file=sys.stderr)
         for f in stale[:20]:
@@ -245,18 +315,17 @@ def self_test():
             print(f"  NG {label}")
 
     good_top = f'<html><link rel="canonical" href="{NEW_BASE}/">もらいわすれ堂</html>'
-    good_ymn = "<html>もらいわすれ堂 山梨版</html>"
     good_map = f"<urlset><url><loc>{NEW_BASE}/kit/</loc></url></urlset>"
 
-    def res(top=good_top, ymn=good_ymn, smap=good_map, errs=(None, None, None)):
-        bodies = [top, ymn, smap]
+    def res(top=good_top, smap=good_map, errs=(None, None)):
+        bodies = [top, smap]
         return [(n, bodies[i], errs[i], needles)
                 for i, (n, _p, needles) in enumerate(CHECKS)]
 
     live, _ = judge(res())
     check("全部そろえば開通と判定する", live)
 
-    live, lines = judge(res(top=None, errs=("つながらない(NXDOMAIN)", None, None)))
+    live, lines = judge(res(top=None, errs=("つながらない(NXDOMAIN)", None)))
     check("トップが引けなければ開通としない", not live)
     check("通信失敗は『取得できない』と書く", "取得できない" in lines[0])
 
@@ -271,8 +340,9 @@ def self_test():
     live, _ = judge(res(top=half))
     check("canonicalが旧URLのままなら開通としない", not live)
 
-    live, _ = judge(res(ymn=None, errs=(None, "HTTP 404", None)))
-    check("山梨版が無ければ開通としない", not live)
+    check("山梨版の条件は判定に含まれない(停止中)", all("山梨" not in n for n, _p, _x in CHECKS))
+    live, _ = judge(res())
+    check("山梨版が無くても福岡版の条件がそろえば開通と判定する", live)
 
     live, _ = judge(res(smap="<urlset></urlset>"))
     check("sitemapが空なら開通としない", not live)
@@ -329,7 +399,20 @@ def self_test():
                         if _CANON.search(f.read()):
                             found += 1
     check(f"canonicalを持つページが実在する(見つかった数 {found})", found > 100)
-    check("切替前は旧URLを指している(=まだ切替えていない)", len(stale_canonicals()) == found)
+    # 実ツリーの切替状態は自己テストで見ない(切替の有無で結果が変わり、判定ロジックの試験にならない)。
+    # 旧URL判定と書き換えは合成ツリーで確かめる。
+    with tempfile.TemporaryDirectory() as tmp:
+        sd = os.path.join(tmp, "site", "fukugiiro")
+        os.makedirs(sd)
+        with open(os.path.join(sd, "old.html"), "w", encoding="utf-8") as f:
+            f.write(f'<link rel="canonical" href="{old_b}/x/">')
+        with open(os.path.join(sd, "new.html"), "w", encoding="utf-8") as f:
+            f.write(f'<link rel="canonical" href="{NEW_BASE}/y/">')
+        syn = [("site/fukugiiro", old_b, NEW_BASE)]
+        check("旧URLを指すページだけを検出する",
+              stale_canonicals(syn, tmp) == ["site/fukugiiro/old.html"])
+        rewrite_canonicals(syn, tmp)
+        check("書き換え後は旧URLを指すページが0", stale_canonicals(syn, tmp) == [])
 
     print(f"自己テスト: OK {ok} / NG {ng}")
     return 1 if ng else 0
@@ -340,9 +423,14 @@ def main():
     ap.add_argument("--check", action="store_true", help="開通したか見るだけ")
     ap.add_argument("--apply", action="store_true", help="開通していたら切り替える")
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument("--policy", action="store_true", help="切替の承認状態を出す(GitHub Actions 用)")
     a = ap.parse_args()
     if a.self_test:
         return self_test()
+    if a.policy:
+        ok, _why = policy()
+        print(f"approved={'true' if ok else 'false'}")
+        return 0
     if a.apply:
         return main_apply()
     if a.check:

@@ -241,3 +241,9 @@ Rollback手順(`docs/wikiskill/Rollback手順.md` §2)を、本番の `main` に
 | 安全な revert 手順がある | ✅ | `git revert -m 1` で `git diff --cached --stat origin/main` = 0 行。main 非接触で実演 |
 | Decision・議事へ記録できる | ✅ | `Rollback手順.md` §3(議事 + frontmatter テンプレート + 48時間以内の Decision Gate) |
 | 復旧を確認できる | ✅ | settings.json が origin/main と同一、`wikiskill-hook.sh` が消えた、Experience 履歴 4 commits が残った |
+
+## Release / Tag 作成完了(2026-10-06)
+- タグ `wikiskill-phase1-v1` → merge commit `244ead0dc20ee6482df63a5c7783a363f4d751a3`(PR #440)
+- GitHub Release「WikiSkill Phase 1 Memory Foundation」公開 2026-10-06 23:17 UTC(作成: 小柳さん)
+- これをもって Phase 1 を正式完了とする(`docs/wikiskill/Rollback手順.md` の `git rev-list -n1 wikiskill-phase1-v1` が有効化)
+- Phase 2 への持ち越し事項は Phase 2 設計書(`docs/superpowers/specs/2026-10-07-wikiskill-phase2-knowledge-wiki-design.md` §11)に移管(本記録には写さない)

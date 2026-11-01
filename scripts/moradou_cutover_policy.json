@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "hold": true,
+  "approved_by": null,
+  "approved_on": null,
+  "reason": "2026-10-15: 山梨版の公開停止に伴い、開通判定から山梨版の条件を外した。判定が緩むため、承認が記録されるまで正規URLの切替を保留する。承認するときは hold を false にし、承認者と承認日を記入する。"
+}

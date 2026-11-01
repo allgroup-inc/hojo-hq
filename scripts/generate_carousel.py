@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 hojo-hq SNS部(ヒロメさん) — 週1カルーセル生成(carousel-writerスキル準拠)
-「いま沖縄で募集中の補助金 Top5」を7枚構成(表紙+制度5+保存CTA)で生成する。
+「いま沖縄で募集中の補助金 Top5」を8枚構成(表紙+制度5+申請前チェック+保存・送るCTA)で生成する。
 金曜の自動投稿(post_social.py)がこの素材を使う。
 
 carousel-writerの原則:
@@ -12,11 +12,12 @@ carousel-writerの原則:
 誇大表現なし / 出典URLはキャプションに全件記載。
 
 出力:
-  posts/carousel/slide_01.png 〜 slide_07.png (1080x1350)
+  posts/carousel/slide_01.png 〜 slide_08.png (1080x1350)
   posts/carousel/caption.md (キャプション+ハッシュタグ+出典)
 決定論的出力(タイムスタンプ非埋込)。
 """
 import json
+import re
 import os
 import sys
 from datetime import datetime, timezone, timedelta
@@ -29,6 +30,8 @@ except Exception:
     pass
 
 import shipping_gate
+from generate_ig_hub import hub_guide
+from region_filter import other_region
 
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
@@ -38,7 +41,7 @@ OUT_DIR = os.path.join(BASE, "posts", "carousel")
 # 出荷ゲート(運用規程1-3)の通過日。**キャプション文面を書き換えたら必ず更新する。**
 # 2026-08-17: accuracy-check(締切・金額・出典URLはdata由来)/ deadline-alert(30日以上先のみ掲載)/
 #             humanizer(定型句なし)で確認。
-GATE_CHECKED = "2026-08-17"
+GATE_CHECKED = "2026-10-16"
 SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&utm_campaign=carousel"
 
 W, H = 1080, 1350  # IG推奨4:5(画面占有が最大)
@@ -142,15 +145,41 @@ def save(im, n):
     im.save(os.path.join(OUT_DIR, f"slide_{n:02d}.png"), "PNG")
 
 
-def cover(total_slides):
+def cover_hook(top5, today):
+    """表紙と1行目のフック。週番号で3型を回す(決定論的=プレビューと実投稿がずれない)。
+    曖昧なフックは伸びない・数字や対象を具体的に、という調査結果に沿い、
+    すべて実データの数字だけで作る(docs/SNS_バズ投稿調査_20261016.md)。"""
+    amounts = [it.get("max_amount") or 0 for it in top5]
+    days = [(parse_date(it["deadline"]) - today).days for it in top5]
+    kind = ["amount", "time", "before"][today.isocalendar()[1] % 3]
+    # 上限額の「合計」は1社が受け取れる額ではなく誇大に読めるため使わない。最大の1件だけを示す
+    if kind == "amount" and max(amounts) >= 10_000_000:
+        top = amount_short(max(amounts)).replace("上限 ", "")
+        return {"big": ["この5件のうち", "上限の最大は"], "num": top,
+                "sub": ["対象地域に沖縄も入る、", "いま募集中の補助金です。"],
+                "caption": f"いま募集中の補助金5件。いちばん大きいものは上限{top}です。どれも対象地域に沖縄が入ります🌺"}
+    if kind == "before":
+        return {"big": ["見積もりを取る前に、", "見ておきたい"], "num": "補助金5件",
+                "sub": ["締切まで1か月以上あるものだけ。", "発注の前に、まず確認を。"],
+                "caption": "見積もりを取る前に、見ておきたい補助金を5件まとめました。どれも締切まで1か月以上あります🌺"}
+    return {"big": ["締切まで、", "まだ"], "num": f"{min(days)}日以上",
+            "sub": ["いまから準備が間に合う、", "対象地域に沖縄も入る5件です。"],
+            "caption": f"締切まで、まだ{min(days)}日以上。今から準備が間に合う補助金だけ、5件選びました🌺"}
+
+
+def cover(total_slides, hook):
     im = canvas()
     d = ImageDraw.Draw(im)
     d.rectangle((PAD, 210, PAD + 10, 470), fill=GOLD)
-    d.text((PAD + 44, 216), "いま沖縄で", font=font(True, 92), fill=WHITE)
-    d.text((PAD + 44, 330), "募集中の補助金", font=font(True, 92), fill=WHITE)
-    d.text((PAD + 44, 452), "Top5", font=font(True, 150), fill=GOLD)
+    d.text((PAD + 44, 216), hook["big"][0], font=font(True, 84), fill=WHITE)
+    d.text((PAD + 44, 326), hook["big"][1], font=font(True, 84), fill=WHITE)
+    f_num = font(True, 150)
+    num = hook["num"]
+    while d.textlength(num, font=f_num) > W - PAD * 2 - 44 and f_num.size > 90:
+        f_num = font(True, f_num.size - 10)
+    d.text((PAD + 44, 448), num, font=f_num, fill=GOLD)
     y = 700
-    for line in ("締切まで30日以上。", "いまから準備が間に合うものだけ", "選びました。"):
+    for line in hook["sub"]:
         d.text((PAD, y), line, font=font(False, 52), fill=MUTED)
         y += 74
     d.text((PAD, 1010), "スワイプで5件 →", font=font(True, 56), fill=GOLD)
@@ -198,19 +227,46 @@ def seido_slide(n, total, rank, it, today):
     save(im, n)
 
 
+CHECKLIST = [
+    ("GビズIDプライムはある?", "国の電子申請(jGrants)で使います。発行に日数がかかることも。"),
+    ("発注・契約は、まだ?", "多くの補助金は、交付決定より前の発注が対象外です。"),
+    ("公募要領の「対象者」を読んだ?", "業種・従業員数・地域の条件があります。"),
+]
+
+
+def checklist_slide(n, total):
+    """保存されやすい「チェックリスト型」の1枚。内容は制度に依らない一般的な確認事項のみ。"""
+    im = canvas()
+    d = ImageDraw.Draw(im)
+    d.text((PAD, 180), "申請の前に", font=font(True, 64), fill=MUTED)
+    d.text((PAD, 260), "3つだけ確認", font=font(True, 96), fill=WHITE)
+    y = 450
+    f_t, f_s = font(True, 54), font(False, 40)
+    for title, sub in CHECKLIST:
+        d.rounded_rectangle((PAD, y + 6, PAD + 56, y + 62), radius=10, outline=GOLD, width=5)
+        d.line((PAD + 12, y + 34, PAD + 26, y + 50, PAD + 48, y + 16), fill=GOLD, width=7)
+        d.text((PAD + 84, y), title, font=f_t, fill=WHITE)
+        yy = y + 80
+        for ln in wrap(d, sub, f_s, W - PAD * 2 - 84):
+            d.text((PAD + 84, yy), ln, font=f_s, fill=MUTED)
+            yy += 56
+        y = yy + 46
+    footer(d, n, total)
+    save(im, n)
+
+
 def cta_slide(n, total):
     im = canvas()
     d = ImageDraw.Draw(im)
-    d.text((PAD, 240), "5件とも、", font=font(True, 76), fill=WHITE)
-    d.text((PAD, 340), "締切まで1か月以上。", font=font(True, 76), fill=WHITE)
-    d.text((PAD, 470), "いまから準備が間に合います。", font=font(False, 52), fill=MUTED)
-    d.rectangle((PAD, 640, W - PAD, 850), outline=GOLD, width=4)
-    d.text((PAD + 44, 676), "保存しておくと、", font=font(True, 54), fill=WHITE)
-    d.text((PAD + 44, 750), "締切前に見返せます。", font=font(True, 54), fill=WHITE)
-    y = 930
-    for line in ("うちの会社で使えるかは、30秒診断で。",
-                 "締切アラート(無料)はLINEで届きます。",
-                 "→ プロフィールのリンクから"):
+    d.text((PAD, 200), "あとで見返すなら", font=font(True, 70), fill=WHITE)
+    d.text((PAD, 296), "保存しておくと便利です", font=font(True, 70), fill=GOLD)
+    d.rectangle((PAD, 470, W - PAD, 700), outline=GOLD, width=4)
+    d.text((PAD + 44, 506), "経理担当・顧問の先生に", font=font(True, 54), fill=WHITE)
+    d.text((PAD + 44, 586), "送っておくと話が早いです", font=font(True, 54), fill=WHITE)
+    y = 800
+    for line in ("各制度の公募ページへは、",
+                 "プロフィールのリンクからタップで。",
+                 "締切のお知らせ(無料)もLINEで届きます。"):
         d.text((PAD, y), line, font=font(False, 46), fill=MUTED)
         y += 66
     footer(d, n, total)
@@ -225,6 +281,8 @@ def main():
     for it in data.get("items", []):
         d = parse_date(it.get("deadline"))
         if not d or it.get("status") != "募集中":
+            continue
+        if other_region(it):  # 他地域の自治体制度は表紙「沖縄」と食い違うため除く
             continue
         if (d - today).days >= 30:  # 締切3層ルール: SNSは30日以上のみ
             pool.append(it)
@@ -241,15 +299,21 @@ def main():
         return
 
     os.makedirs(OUT_DIR, exist_ok=True)
-    total = 7
-    cover(total)
+    total = 8
+    hook = cover_hook(top5, today)
+    cover(total, hook)
     for i, it in enumerate(top5, start=1):
         seido_slide(i + 1, total, i, it, today)
-    cta_slide(7, total)
+    checklist_slide(7, total)
+    cta_slide(8, total)
+    for fn in os.listdir(OUT_DIR):  # 枚数が減った場合の古いスライドを残さない
+        m = re.match(r"slide_(\d+)\.png$", fn)
+        if m and int(m.group(1)) > total:
+            os.remove(os.path.join(OUT_DIR, fn))
 
     # キャプション(hook-writer: 1行目=具体+時限。出典は全件)
     lines = [
-        "締切まで30日以上ある補助金だけ、5件選びました。今から準備が間に合います🌺",
+        hook["caption"],
         "",
     ]
     for i, it in enumerate(top5, start=1):
@@ -260,6 +324,9 @@ def main():
     lines += [
         "",
         "🔖 保存しておくと、締切前に見返せます。",
+        "経理担当や顧問の先生に送っておくと、相談が早く進みます。",
+        "7枚目に、申請前に確認したい3つをまとめました。",
+        hub_guide(0),
         f"うちの会社で使えるかは30秒診断で👇\n{SITE_URL}",
         "※要件・締切・金額は必ず原文の公募要領でご確認ください。",
         "",
@@ -273,7 +340,7 @@ def main():
                 + "\n".join(lines[-len(top5) - 1:]) + "\n\n"
                 + shipping_gate.render_stamp(
                     "scripts/generate_carousel.py(SNS部・ヒロメさん)", GATE_CHECKED))
-    print(f"[ok] カルーセル7枚+キャプションを posts/carousel/ に生成(基準日 {today})")
+    print(f"[ok] カルーセル8枚+キャプションを posts/carousel/ に生成(基準日 {today})")
     for it in top5:
         print("  -", it["name"][:40], it["deadline"])
 

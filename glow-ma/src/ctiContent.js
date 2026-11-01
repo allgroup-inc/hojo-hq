@@ -77,6 +77,33 @@
   }
 
   /**
+   * 企業マスタを「正規化した電話番号 → 企業の一覧」の索引にする(2026-10-27 追加)。
+   * 通話1件ごとに3,000社の番号を正規化し直すと、30日分の取り込みが6分の上限を超えたため。
+   */
+  function buildPhoneIndex(companies) {
+    var normalizePhoneNumber = getGlowDedupe_().normalizePhoneNumber;
+    var index = {};
+    (companies || []).forEach(function (company) {
+      var seen = {};
+      ["電話番号", "携帯番号"].forEach(function (key) {
+        var n = company[key] ? normalizePhoneNumber(company[key]) : "";
+        if (!n || seen[n]) return;
+        seen[n] = true;
+        (index[n] = index[n] || []).push(company);
+      });
+    });
+    return index;
+  }
+
+  /** buildPhoneIndex の索引で突合する。結果は matchCompanyByPhone と同じ(複数企業ヒットは null) */
+  function matchCompanyByPhoneIndex(index, phone) {
+    var target = getGlowDedupe_().normalizePhoneNumber(phone);
+    if (!target) return null;
+    var hits = (index || {})[target] || [];
+    return hits.length === 1 ? hits[0] : null;
+  }
+
+  /**
    * 対応履歴ログへ自動記録してよい通話かどうかを判定する。
    * 一意マッチ かつ 通話ステータスが完了 かつ 取得対象の種別(内線以外)であることが条件。
    */
@@ -125,10 +152,173 @@
     ];
   }
 
+  /** RFC4180 相当のCSVを2次元配列にする(引用符・改行入りの項目に対応。文字起こし・要約は改行を含みうる) */
+  function parseCsv(text) {
+    var rows = [], row = [], field = "", inQuotes = false;
+    var s = String(text || "").replace(/^\uFEFF/, "");
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charAt(i);
+      if (inQuotes) {
+        if (c === '"') {
+          if (s.charAt(i + 1) === '"') { field += '"'; i++; } else { inQuotes = false; }
+        } else {
+          field += c;
+        }
+      } else if (c === '"') {
+        inQuotes = true;
+      } else if (c === ",") {
+        row.push(field); field = "";
+      } else if (c === "\n" || c === "\r") {
+        if (c === "\r" && s.charAt(i + 1) === "\n") i++;
+        row.push(field); field = "";
+        if (row.length > 1 || row[0] !== "") rows.push(row);
+        row = [];
+      } else {
+        field += c;
+      }
+    }
+    if (field !== "" || row.length) { row.push(field); if (row.length > 1 || row[0] !== "") rows.push(row); }
+    return rows;
+  }
+
+  function cdrCallType_(value) {
+    var v = String(value || "").trim();
+    if (/^[0-3]$/.test(v)) return v;
+    if (/内線/.test(v)) return CALL_TYPE_INTERNAL;
+    if (/着信/.test(v)) return CALL_TYPE_INBOUND;
+    if (/PD/i.test(v)) return CALL_TYPE_OUTBOUND_PD;
+    if (/PV|発信/i.test(v)) return CALL_TYPE_OUTBOUND_PV;
+    return v;
+  }
+
+  function cdrCallStatus_(value) {
+    var v = String(value || "").trim();
+    if (/^SUCCESS$/i.test(v) || v === COMPLETED_CALL_STATUS) return COMPLETED_CALL_STATUS;
+    if (/^CANCEL$/i.test(v)) return "キャンセル";
+    if (/^DIALING$/i.test(v)) return "発着信中";
+    if (/^TALKING$/i.test(v)) return "通話中";
+    return v;
+  }
+
+  /**
+   * BlueBean「発着信履歴ダウンロードAPI(CDRダウンロードAPI)」のCSVを、通話の配列に変換する(2026-10-27 追加)。
+   * 顧客発着信履歴出力APIは顧客データに紐づく通話しか返さず、番号を貼り付けて発信した通話が取れなかった
+   * (ソフツー回答 2026-10-27)。CDRはすべての発着信を返す。
+   * - V10.19.0以降: Group_CallId,種類,発信元,着信先,外線番号,総時間,通話時間,状態,発着信時間,オペレータ,オプション,録音ファイル名,文字起こし,要約
+   * - V8.5.2以降 : 種類,発信元,着信先,外線番号,総時間,通話時間,状態,発着信時間,オペレータ,オプション,録音ファイル名
+   * 見出し行があれば読み飛ばす。内線は除く。返す形は flattenBlueBeanCalls と同じ
+   * {group_callid, call_type, phone, start_date, operator_name, call_status, note}。
+   */
+  /**
+   * CDRの「その期間に通話が1件もない」応答か。BlueBeanはCSVの代わりに
+   * 「発着信履歴のデータが存在しません。」とだけ返す(2026-10-28: これを失敗と扱い、取得済み時点が進まなくなった)
+   */
+  function isCdrNoData(text) {
+    var head = String(text || "").trim().slice(0, 200);
+    return head.indexOf(",") === -1 && /発着信履歴のデータが存在しません/.test(head);
+  }
+
+  function parseCdrCsv(text) {
+    var calls = [];
+    parseCsv(text).forEach(function (cols) {
+      var first = String(cols[0] || "").trim();
+      if (/Group_CallId|種類/i.test(first)) return;
+      var v10 = cols.length >= 14;
+      if (!v10 && cols.length < 9) return;
+      var o = v10 ? 1 : 0;
+      var callType = cdrCallType_(cols[o]);
+      if (callType === CALL_TYPE_INTERNAL) return;
+      var src = String(cols[o + 1] || "").trim();
+      var dst = String(cols[o + 2] || "").trim();
+      var startDate = String(cols[o + 7] || "").trim();
+      var phone = callType === CALL_TYPE_INBOUND ? src : dst;
+      var talkSeconds = String(cols[o + 5] || "").trim();
+      var summary = v10 ? String(cols[13] || "").trim() : "";
+      var note = (talkSeconds ? "通話時間 " + talkSeconds : "") +
+        (summary ? (talkSeconds ? " / " : "") + "要約: " + summary.replace(/\s+/g, " ").slice(0, 400) : "");
+      calls.push({
+        group_callid: v10 && first ? first : "CDR-" + startDate.replace(/\D/g, "") + "-" + phone.replace(/\D/g, ""),
+        call_type: callType,
+        phone: phone,
+        start_date: startDate,
+        operator_name: String(cols[o + 8] || "").trim(),
+        call_status: cdrCallStatus_(cols[o + 6]),
+        note: note
+      });
+    });
+    return calls;
+  }
+
+  /** "山田　花子(ext001)" のようなオペレーター表記から、空白を除いた氏名部分を取り出す */
+  function operatorPersonName(operator) {
+    return String(operator || "").replace(/[（(].*$/, "").replace(/[\s　]+/g, "");
+  }
+
+  /**
+   * CDR(全発着信)には、同じBlueBeanを使う他の組織のオペレーターの通話も含まれる(2026-10-27 判明・1日数千件)。
+   * GLOWのスタッフ(スタッフタブの氏名)の通話だけを残す。氏名は空白を無視して完全一致で照合する。
+   * allowedNames が空なら、何も残さない(取り違えを防ぐため、許可した人の通話だけを台帳に入れる)。
+   */
+  function filterCallsByOperators(calls, allowedNames, pinnedIds) {
+    var allowed = {};
+    (allowedNames || []).forEach(function (n) {
+      var key = operatorPersonName(n);
+      if (key) allowed[key] = true;
+    });
+    var pins = pinnedIds || {};
+    return (calls || []).filter(function (call) {
+      var key = operatorPersonName(call.operator_name);
+      if (!allowed[key]) return false;
+      // 氏名ごとに覚えたオペレーターIDがあれば、IDも一致したものだけ残す(同姓同名の他組織オペレーターを除く)
+      return !pins[key] || pins[key] === operatorIdOf(call.operator_name);
+    });
+  }
+
+  /** 「山田　花子(ext001)」のような表示から、括弧内のオペレーターID(ext001)を取り出す。無ければ空文字 */
+  function operatorIdOf(operator) {
+    var m = /[（(]\s*([^()（）\s]+)\s*[)）]\s*$/.exec(String(operator || ""));
+    return m ? m[1] : "";
+  }
+
+  /**
+   * まだIDを覚えていないスタッフについて、通話から氏名→オペレーターIDを覚える(2026-10-30 ソフツー回答:
+   * 他組織の通話も返るのは仕様。オペレーターIDで絞るよう案内あり)。
+   * 同じ氏名で別々のIDが同時に現れたときは、どれが本人か決められないので覚えない。
+   */
+  function learnOperatorIds(calls, allowedNames, pinnedIds) {
+    var allowed = {};
+    (allowedNames || []).forEach(function (n) {
+      var key = operatorPersonName(n);
+      if (key) allowed[key] = true;
+    });
+    var seen = {};
+    (calls || []).forEach(function (call) {
+      var key = operatorPersonName(call.operator_name);
+      var id = operatorIdOf(call.operator_name);
+      if (!allowed[key] || !id || (pinnedIds || {})[key]) return;
+      (seen[key] = seen[key] || {})[id] = true;
+    });
+    var learned = {};
+    Object.keys(seen).forEach(function (key) {
+      var ids = Object.keys(seen[key]);
+      if (ids.length === 1) learned[key] = ids[0];
+    });
+    return learned;
+  }
+
   var api = {
+    operatorPersonName: operatorPersonName,
+    filterCallsByOperators: filterCallsByOperators,
+    operatorIdOf: operatorIdOf,
+    learnOperatorIds: learnOperatorIds,
+    parseCsv: parseCsv,
+    parseCdrCsv: parseCdrCsv,
+    isCdrNoData: isCdrNoData,
     mapCallTypeToInteractionType: mapCallTypeToInteractionType,
     flattenBlueBeanCalls: flattenBlueBeanCalls,
     matchCompanyByPhone: matchCompanyByPhone,
+    buildPhoneIndex: buildPhoneIndex,
+    matchCompanyByPhoneIndex: matchCompanyByPhoneIndex,
     shouldRecordInteractionLog: shouldRecordInteractionLog,
     buildCallLogRow: buildCallLogRow,
     buildInteractionLogRowForCall: buildInteractionLogRowForCall

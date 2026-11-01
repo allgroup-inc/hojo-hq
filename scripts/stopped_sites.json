@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "comment": "公開を停止しているサイトの一覧。公開成果物(Pages)から外し、sitemap の該当URLを除き、残っていないことを検査する。停止の解除は、このファイルと関連する変更を戻す(revert)ことで行う。",
+  "stopped": [
+    {
+      "name": "もらいわすれ堂 山梨版",
+      "since": "2026-10-15",
+      "reason": "所有者判断による公開停止",
+      "site_prefixes": [
+        "yamanashi/"
+      ],
+      "data_prefixes": [
+        "data/yamanashi/"
+      ],
+      "url_markers": [
+        "/yamanashi/"
+      ],
+      "key": "yamanashi"
+    }
+  ],
+  "keep": [
+    "go/ymn-"
+  ]
+}

@@ -17,6 +17,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -55,10 +56,13 @@ NOTE_MAX = 1000
 SLOW_MS = 500  # hook 1回の実行時間がこれを超えたら _audit.log に `slow` を残す(画面警告なし)
 EXTERNAL = "<external>"
 _COMPONENT = "experience_log"
+_SHELL_SYNTAX = re.compile(r"[()$`;|&<>]")
 _ENV_ASSIGN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 _FILE_TOOLS = {"Edit", "Write", "MultiEdit"}
 _HEAD_RE = re.compile(r"^[0-9a-f]{7,40}$")
 _UNKNOWN = "<unknown>"
+_SKILL_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+_DURATION_MAX_MS = 24 * 3600 * 1000
 CURRENT_SESSION = "current_session"
 
 
@@ -97,6 +101,8 @@ def _visibility(slug: str) -> str:
 
 def sanitize_path(p: str, root: Path) -> str:
     """root 配下なら相対パス(posix)、それ以外は "<external>"。"""
+    if str(p).startswith("~"):  # ~ は展開されないまま root 配下の相対パスと誤認されるので外部扱い
+        return EXTERNAL
     try:
         base = Path(root).resolve()
         target = Path(p)
@@ -113,14 +119,15 @@ def _safe_id(session_id: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]", "_", str(session_id)) or "unknown"
 
 
-_TRACKED: set[str] = set()  # git 管理下と分かったパス(1プロセス内で使い回す。未追跡の結果は覚えない)
+_TRACKED: set[str] = set()  # git 管理下と分かったパス(1プロセス内で使い回す。未追跡・エラーの結果は覚えない)
+_GIT_ERROR_AUDITED: set[str] = set()  # git エラーを audit 済みの root(1プロセス1回だけ残す)
 
 
-def _is_tracked(root: Path, path: Path) -> bool:
-    """`git ls-files --error-unmatch <path>` が exit 0 なら True。git が使えなければ False(本体へ書く)。"""
+def _tracked_state(root: Path, path: Path) -> str:
+    """`git ls-files --error-unmatch <path>` の結果。exit 0 → "tracked" / exit 1 → "untracked" / それ以外・例外 → "error"。"""
     key = str(path)
     if key in _TRACKED:
-        return True
+        return "tracked"
     try:
         rel = Path(path).resolve().relative_to(Path(root).resolve()).as_posix()
         r = subprocess.run(
@@ -128,11 +135,16 @@ def _is_tracked(root: Path, path: Path) -> bool:
             capture_output=True, text=True, errors="replace", timeout=5,
         )
     except (OSError, subprocess.SubprocessError, ValueError):
-        return False
+        return "error"
     if r.returncode == 0:
         _TRACKED.add(key)
-        return True
-    return False
+        return "tracked"
+    return "untracked" if r.returncode == 1 else "error"
+
+
+def _is_tracked(root: Path, path: Path) -> bool:
+    """互換用。git 管理下なら True(untracked・error はどちらも False)。"""
+    return _tracked_state(root, path) == "tracked"
 
 
 def _base_file(root: Path, session_id: str, ts: datetime) -> Path:
@@ -143,14 +155,30 @@ def _base_file(root: Path, session_id: str, ts: datetime) -> Path:
 
 
 def session_file(root: Path, session_id: str, ts: datetime) -> Path:
-    """追記先。本体が git 管理下なら、同じフォルダの未追跡の最初の session-<sid>.part<N>.jsonl(N=1,2,…)。"""
+    """追記先。本体が git 管理下なら、同じフォルダの未追跡の最初の session-<sid>.part<N>.jsonl(N=1,2,…)。
+
+    git が失敗した(状態が "error")ときは、tracked かどうか分からないので本体へ追記せず、
+    ディスク上に存在しない最初の part へ書く(commit 済みの本体を汚さない側へ倒す)。1プロセス1回だけ audit。
+    """
     base = _base_file(root, session_id, ts)
-    if not _is_tracked(root, base):
+    state = _tracked_state(root, base)
+    if state == "untracked":
         return base
+    sid = _safe_id(session_id)
+    if state == "error":
+        if str(root) not in _GIT_ERROR_AUDITED:
+            _GIT_ERROR_AUDITED.add(str(root))
+            audit(root, _COMPONENT, "git ls-files failed; writing to part file")
+        n = 1
+        while True:
+            part = base.with_name(f"session-{sid}.part{n}.jsonl")
+            if not part.exists():
+                return part
+            n += 1
     n = 1
     while True:
-        part = base.with_name(f"session-{_safe_id(session_id)}.part{n}.jsonl")
-        if not _is_tracked(root, part):
+        part = base.with_name(f"session-{sid}.part{n}.jsonl")
+        if _tracked_state(root, part) != "tracked":  # untracked(または git が途中で失敗)ならここへ
             return part
         n += 1
 
@@ -225,6 +253,10 @@ def _program_of(command, root: Path | None = None) -> str:
         if _ENV_ASSIGN.match(tok):
             continue
         tok = tok.lstrip("(")
+        if tok.startswith("~") and not _SHELL_SYNTAX.search(tok):
+            # ~ 始まりのパス(ホーム配下=プロジェクト外)。`$(cat ~/x)` の断片のようなシェル構文を含むものは
+            # 下の名前検査で "<unknown>" になる(どちらもプログラム名は残らない)
+            return EXTERNAL
         if tok.startswith("/") and (root is None or sanitize_path(tok, root) == EXTERNAL):
             return EXTERNAL
         name = os.path.basename(tok)
@@ -237,6 +269,62 @@ def _tool_path(tin: dict, root: Path) -> str:
     if not isinstance(fp, str) or not fp.strip():
         return _UNKNOWN
     return sanitize_path(fp, root)
+
+
+def skill_content_key(data: bytes) -> str:
+    """SKILL.md の内容の識別子(sha256 の先頭12桁)。記録側と集計側が同じ関数で照合する。"""
+    return hashlib.sha256(data).hexdigest()[:12]
+
+
+_VERSION_LINE = re.compile(r"^version:\s*[\"']?([0-9A-Za-z._+-]{1,32})[\"']?\s*$")
+
+
+def skill_frontmatter_version(text: str) -> str | None:
+    """frontmatter(先頭の --- から次の ---)の version だけ読む。無ければ None。"""
+    lines = text.splitlines()[:40]
+    if not lines or lines[0].strip() != "---":
+        return None
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        m = _VERSION_LINE.match(line)
+        if m:
+            return m.group(1)
+    return None
+
+
+def skill_facts(raw_name, root: Path) -> dict:
+    """Skill について記録してよい事実だけ。名前はリポジトリの .claude/skills に実在するものだけ通す。
+
+    実在しない名前(プラグイン・削除済み・不正な文字)は "<external>" か "<unknown>" にする(名前を残さない)。
+    返す: {"skill": 名前|"<external>"|"<unknown>", "skill_key": 内容の識別子|None, "skill_version": 版|None}
+    """
+    none = {"skill_key": None, "skill_version": None}
+    if not isinstance(raw_name, str):
+        return {"skill": _UNKNOWN, **none}
+    name = raw_name.strip()[:100]
+    if not _SKILL_NAME_RE.match(name):
+        return {"skill": EXTERNAL if ":" in name else _UNKNOWN, **none}
+    base = Path(root) / ".claude" / "skills" / name
+    path = base / "SKILL.md"
+    try:
+        if not path.is_file() or not path.resolve().is_relative_to(Path(root).resolve()):
+            return {"skill": EXTERNAL, **none}
+        data = path.read_bytes()
+    except OSError:
+        return {"skill": EXTERNAL, **none}
+    return {"skill": name, "skill_key": skill_content_key(data),
+            "skill_version": skill_frontmatter_version(data.decode("utf-8", errors="replace"))}
+
+
+def _duration_ms(payload: dict) -> int | None:
+    """hook の duration_ms(仕様上は任意の数値)。整数で妥当な範囲のものだけ残す。"""
+    v = payload.get("duration_ms")
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return None
+    if not (0 <= v <= _DURATION_MAX_MS):
+        return None
+    return int(v)
 
 
 def build_tool_event(payload: dict, root: Path) -> Event | None:
@@ -253,10 +341,34 @@ def build_tool_event(payload: dict, root: Path) -> Event | None:
         ev.update({"tool": name, "path": _tool_path(tin, root)})
         return ev
     if name == "Skill":
+        # PostToolUse は成功した呼び出しで発火する(仕様)。tool_use_id・tool_response の中身は記録しない
         ev = _base(root, session_id_of(payload), "skill")
-        ev["skill"] = str(tin.get("skill", ""))[:100]
+        ev.update(skill_facts(tin.get("skill"), root))
+        dur = _duration_ms(payload)
+        if dur is not None:
+            ev["duration_ms"] = dur
         return ev
     return None
+
+
+def build_failure_event(payload: dict, root: Path) -> Event | None:
+    """PostToolUseFailure の Skill 失敗だけを記録する。error の本文は残さない(パス・秘密が混ざりうる)。
+
+    注意: Skill で PostToolUseFailure が発火するかは仕様書に記載が無く、未確認(実機確認が必要)。
+    """
+    if payload.get("tool_name") != "Skill":
+        return None
+    tin = payload.get("tool_input")
+    if not isinstance(tin, dict):
+        tin = {}
+    ev = _base(root, session_id_of(payload), "skill_failure")
+    ev.update(skill_facts(tin.get("skill"), root))
+    dur = _duration_ms(payload)
+    if dur is not None:
+        ev["duration_ms"] = dur
+    if isinstance(payload.get("is_interrupt"), bool):
+        ev["interrupted"] = payload["is_interrupt"]
+    return ev
 
 
 def _open_append(path: Path):
@@ -381,6 +493,14 @@ def _hook(event_name: str) -> int:
     elif event_name == "PostToolUse":
         try:
             ev = build_tool_event(payload, root)
+            if ev is not None:
+                append_event(root, ev)
+        except Exception as e:  # noqa: BLE001
+            fail("hook", e)
+    elif event_name == "PostToolUseFailure":
+        # 未登録(settings.json に無い)ので、現時点では実際には呼ばれない。登録は別途承認が要る
+        try:
+            ev = build_failure_event(payload, root)
             if ev is not None:
                 append_event(root, ev)
         except Exception as e:  # noqa: BLE001

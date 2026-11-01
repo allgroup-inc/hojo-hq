@@ -1,0 +1,179 @@
+name: line-bot-deploy
+
+# LINE会話ボット(沖縄企業のミカタ公式LINE・企業台帳)のコードを Apps Script へ反映する。
+# これまでは docs/GAS会話ボット_会社情報収集.md のコードを小柳さんがエディタへ貼り替えていたが、
+# glow-ma と同じ Googleログイン情報(CLASPRC_JSON)で自動反映する(2026-10-17 小柳さん承認)。
+#
+# 流れ: テスト → ライブのコードを読む → ライブにだけある関数があれば止める →
+#       反映(clasp push) → 新バージョン作成 → 本番デプロイ(LINEのWebhook先)を新バージョンへ更新 → 死活確認
+# 本番デプロイのIDは Secrets の GAS_LEDGER_ENDPOINT(…/macros/s/<ID>/exec)から取る。「新しいデプロイ」は作らない。
+#
+# 手動実行(workflow_dispatch)の入力:
+#   mode       … check=点検だけ(反映しない) / deploy=反映する
+#   forward_to … お客様メッセージの転送先(FORWARD_EMAILS)を設定するときだけ入れる。ログには伏せ字で出る
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "gas/line-bot/**"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "check=点検だけ / deploy=反映する"
+        required: true
+        default: check
+        type: choice
+        options: [check, deploy]
+      forward_to:
+        description: "転送先メール(FORWARD_EMAILS)。変えないときは空のまま"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: line-bot-deploy
+  cancel-in-progress: false
+
+env:
+  # ミカタ企業台帳の会話ボット(docs/GAS会話ボット_会社情報収集.md に記載済みのID)
+  BOT_SCRIPT_ID: 16VqJx4oSLFSd1kT_tT2WZBVkmJCTZhaQbqCp2a4TEd_Qr1eKQ8WDKpsj
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 転送先の入力を伏せ字にする
+        if: github.event_name == 'workflow_dispatch' && inputs.forward_to != ''
+        env:
+          FORWARD_TO: ${{ inputs.forward_to }}
+        run: echo "::add-mask::$FORWARD_TO"
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: テスト(同じ記入依頼が繰り返されないこと・転送)
+        run: node --test tests/line_bot.test.mjs
+
+      - name: 接続情報の確認
+        id: creds
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          ENDPOINT: ${{ secrets.GAS_LEDGER_ENDPOINT }}
+        run: |
+          if [ -z "$CLASPRC_JSON" ] || [ -z "$ENDPOINT" ]; then
+            echo "::warning::未接続: CLASPRC_JSON / GAS_LEDGER_ENDPOINT が未登録のため反映をスキップしました"
+            echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          dep=$(printf '%s' "$ENDPOINT" | sed -nE 's#.*/macros/s/([^/]+)/exec.*#\1#p')
+          if [ -z "$dep" ]; then
+            echo "::error::GAS_LEDGER_ENDPOINT から本番デプロイのIDを取り出せません"; exit 1
+          fi
+          echo "::add-mask::$dep"
+          echo "deployment=$dep" >> "$GITHUB_OUTPUT"
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - name: ライブのコードを読み、反映用フォルダを作る
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+        run: |
+          npm install -g @google/clasp@3.4.1
+          printf '%s' "$CLASPRC_JSON" > "$HOME/.clasprc.json"
+          chmod 600 "$HOME/.clasprc.json"
+          mkdir -p /tmp/live
+          printf '{"scriptId":"%s","rootDir":"."}' "$BOT_SCRIPT_ID" > /tmp/live/.clasp.json
+          if ! (cd /tmp/live && clasp pull >/tmp/pull.log 2>&1); then
+            echo "::error title=ライブの読み取りに失敗::$(grep -v -i -E 'token|secret' /tmp/pull.log | tail -5 | tr '\n' ' ' | cut -c1-600)"
+            exit 1
+          fi
+          echo "::notice::ライブのファイル: $(cd /tmp/live && ls | tr '\n' ' ')"
+          python3 scripts/line_bot_prepare_push.py /tmp/live /tmp/push
+
+      - name: Apps Script へ反映し、本番デプロイを新バージョンへ更新
+        id: push
+        if: steps.creds.outputs.ready == 'true' && (github.event_name == 'push' || inputs.mode == 'deploy')
+        env:
+          DEPLOYMENT_ID: ${{ steps.creds.outputs.deployment }}
+        run: |
+          cd /tmp/push
+          printf '{"scriptId":"%s","rootDir":"."}' "$BOT_SCRIPT_ID" > .clasp.json
+          set +e
+          out=$(clasp push --force 2>&1); code=$?
+          set -e
+          echo "$out" | grep -v -i -E "token|secret"
+          if [ $code -ne 0 ]; then
+            echo "::error title=clasp push failed::$(echo "$out" | grep -v -i -E 'token|secret' | tail -8 | tr '\n' ' ' | cut -c1-900)"
+            exit $code
+          fi
+          ver=$(clasp --json create-version "v1.8 自動反映 ${GITHUB_SHA::7}" | python3 -c 'import json,sys;print(json.load(sys.stdin)["versionNumber"])')
+          clasp update-deployment "$DEPLOYMENT_ID" -V "$ver" -d "v1.8 自動反映 ${GITHUB_SHA::7}" >/dev/null
+          echo "::notice::本番デプロイを バージョン$ver に更新しました"
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
+
+      - name: 転送先(FORWARD_EMAILS)を設定
+        if: steps.creds.outputs.ready == 'true' && github.event_name == 'workflow_dispatch' && inputs.forward_to != ''
+        env:
+          GAS_LEDGER_ENDPOINT: ${{ secrets.GAS_LEDGER_ENDPOINT }}
+          GAS_LEDGER_TOKEN: ${{ secrets.GAS_LEDGER_TOKEN }}
+          FORWARD_TO: ${{ inputs.forward_to }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, sys, urllib.request
+          payload = json.dumps({"diag": "setprop", "token": os.environ["GAS_LEDGER_TOKEN"],
+                                "key": "FORWARD_EMAILS", "value": os.environ["FORWARD_TO"].strip()}).encode("utf-8")
+          req = urllib.request.Request(os.environ["GAS_LEDGER_ENDPOINT"], data=payload, method="POST",
+                                       headers={"Content-Type": "application/json"})
+          body = urllib.request.urlopen(req, timeout=30).read().decode("utf-8")
+          if '"ok":true' not in body.replace(" ", ""):
+              sys.exit("転送先の設定に失敗しました: " + body[:200])
+          print("FORWARD_EMAILS を設定しました")
+          EOF
+
+      - name: 死活確認(本番デプロイが応答するか)
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          GAS_LEDGER_ENDPOINT: ${{ secrets.GAS_LEDGER_ENDPOINT }}
+          GAS_LEDGER_TOKEN: ${{ secrets.GAS_LEDGER_TOKEN }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, sys, urllib.request
+          payload = json.dumps({"diag": "linetoken", "token": os.environ["GAS_LEDGER_TOKEN"]}).encode("utf-8")
+          req = urllib.request.Request(os.environ["GAS_LEDGER_ENDPOINT"], data=payload, method="POST",
+                                       headers={"Content-Type": "application/json"})
+          res = json.loads(urllib.request.urlopen(req, timeout=30).read().decode("utf-8"))
+          print("ok:", res.get("ok"), "/ LINE API status:", res.get("status"))
+          if not res.get("ok") or res.get("status") != 200:
+              sys.exit("本番デプロイの応答が異常です")
+          EOF
+
+      - name: 後片付け
+        if: always()
+        run: rm -f "$HOME/.clasprc.json" /tmp/push/.clasp.json /tmp/live/.clasp.json
+
+      - name: LINE通知(反映完了)
+        if: steps.push.outputs.version != '' && success()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            ✅【ミカタLINE】会話ボットを更新しました(バージョン${{ steps.push.outputs.version }})
+            ・会社情報の書き方の揺れを読み取り、未回答の項目だけ聞き直します
+            ・転送先を設定済みなら、お客様のメッセージをメールへ転送します
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            ⚠️【ミカタLINE】会話ボットの反映に失敗しました(本番は前のバージョンのまま)
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

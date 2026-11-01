@@ -504,6 +504,13 @@ def main():
             skipped.append((seed["name"], "一時非公開(HIDDEN_AREAS)"))
             print(f"SKIP(hidden): {seed['name']}")
             continue
+        # 締切を過ぎた制度は載せない(終わった制度の案内を防ぐ。2026-10-17: 締切切れ1件で検証が止まり、
+        # 以後の収集が書き込まれなくなっていた)
+        dl = seed.get("deadline")
+        if dl and str(dl)[:10] < datetime.now(JST).strftime("%Y-%m-%d"):
+            skipped.append((seed["name"], f"締切終了({dl})"))
+            print(f"SKIP(ended): {seed['name']} {dl}")
+            continue
         url = seed["source_url"]
         if not robots_ok(url):
             skipped.append((seed["name"], "robots.txt不許可"))

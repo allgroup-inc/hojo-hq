@@ -22,10 +22,21 @@
    * spokenNameが空、または一致する企業が無い場合は空配列を返す(新規企業扱いの判定は
    * 呼び出し元がこの空配列を見て行う)。
    */
+  /**
+   * 会社名が分からないことを表す名前か(「(不明)」「(社名不明)」「不明」等)。
+   * 2026-10-29: 聞き取れなかった録音が「(社名不明)」の会社として登録され、以後の照合で
+   * 「不明」と部分一致して候補に何社も並んでいた。
+   */
+  function isUnknownCompanyName(name) {
+    var text = String(name == null ? "" : name).replace(/[\s　()（）「」]/g, "");
+    return !text || /^(社名|会社名)?(不明|なし|無し|わからない|分からない|unknown)$/i.test(text);
+  }
+
   function matchCompanyCandidates(companies, spokenName) {
     var trimmed = String(spokenName || "").trim();
-    if (!trimmed) return [];
+    if (!trimmed || isUnknownCompanyName(trimmed)) return [];
     var scored = (companies || [])
+      .filter(function (company) { return !isUnknownCompanyName(company["会社名"]); })
       .map(function (company) {
         var name = company["会社名"] || "";
         var score = 0;
@@ -218,6 +229,19 @@
   /**
    * 一致する企業が見つからなかった場合の、新規登録確認プロンプトを組み立てる。
    */
+  /**
+   * 会社が見つからなかったときの返事。会社名が分からないときは「(社名不明)」の会社を作らず、
+   * 会社名を文字で送ってもらう(確認待ちの文字入力は handleTypedCompanyName_ が受け付ける)。
+   */
+  function buildNewCompanyOrAskNamePrompt(processId, spokenName) {
+    if (isUnknownCompanyName(spokenName)) return buildAskCompanyNameMessage();
+    return buildNewCompanyConfirmPrompt(processId, spokenName);
+  }
+
+  function buildAskCompanyNameMessage() {
+    return "会社名が聞き取れませんでした。会社名をLINEで文字で送ってください(例: 株式会社◯◯)。";
+  }
+
   function buildNewCompanyConfirmPrompt(processId, spokenName) {
     return {
       text: "「" + spokenName + "」は企業マスタに見つかりませんでした。新規企業として登録しますか?",
@@ -256,6 +280,29 @@
         { label: "取り消す(録音し直す)", data: buildPostbackData(POSTBACK_ACTIONS.FINAL_CONFIRM, processId, DISCARD_VALUE) }
       ]
     };
+  }
+
+  var MAX_TYPED_NAME_LENGTH = 60;
+
+  /**
+   * 確認待ちの間に担当者がLINEで文字入力した会社名を、どう扱うか決める(2026-10-28 追加)。
+   * これまでは文字入力を無視しており、福田さんが会社名を入力して返しても受け付けられず、
+   * 確認待ちのまま2時間で取り消されていた。
+   * 戻り値: null(会社名として扱えない) / {kind: "final", company} / {kind: "select", candidates, name} / {kind: "new", name}
+   */
+  function planTypedCompanyName(companies, text) {
+    var name = String(text == null ? "" : text).replace(/\s+/g, " ").trim();
+    if (!name || name.length > MAX_TYPED_NAME_LENGTH) return null;
+    var candidates = matchCompanyCandidates(companies, name);
+    var exact = candidates.filter(function (c) { return c["会社名"] === name; });
+    if (exact.length === 1) return { kind: "final", company: exact[0], name: name };
+    if (candidates.length === 1) return { kind: "final", company: candidates[0], name: name };
+    if (candidates.length > 1) return { kind: "select", candidates: candidates, name: name };
+    return { kind: "new", name: name };
+  }
+
+  function buildTypedNameHelpMessage() {
+    return "会社名だけを送ってください(例: 株式会社◯◯)。表示されたボタンから選ぶこともできます。";
   }
 
   function buildCompletionMessage(companyName) {
@@ -422,7 +469,9 @@
 
     var contentMemo = String(source["内容メモ"] || "").trim();
     if (contentMemo) {
-      var digest = "【" + todayString + " " + (String(source["種別候補"] || "").trim() || "対応") + "(LINE音声)】" +
+      // ドライブの「GLOW音声ログ受付」から来た録音(DriveVoiceRunner.gs)は「録音」と書き分ける
+      var via = String(source["LINEメッセージID"] || "").indexOf("drive:") === 0 ? "録音" : "LINE音声";
+      var digest = "【" + todayString + " " + (String(source["種別候補"] || "").trim() || "対応") + "(" + via + ")】" +
         contentMemo + (nextAction ? " ▶次: " + nextAction : "");
       var existingMemo = String(target["関係メモ"] || "");
       var combined = existingMemo ? digest + "\n" + existingMemo : digest;
@@ -471,8 +520,13 @@
     parsePostbackData: parsePostbackData,
     buildCompanySelectionPrompt: buildCompanySelectionPrompt,
     buildNewCompanyConfirmPrompt: buildNewCompanyConfirmPrompt,
+    buildNewCompanyOrAskNamePrompt: buildNewCompanyOrAskNamePrompt,
+    buildAskCompanyNameMessage: buildAskCompanyNameMessage,
+    isUnknownCompanyName: isUnknownCompanyName,
     buildFinalConfirmPrompt: buildFinalConfirmPrompt,
     buildCompletionMessage: buildCompletionMessage,
+    planTypedCompanyName: planTypedCompanyName,
+    buildTypedNameHelpMessage: buildTypedNameHelpMessage,
     buildDiscardMessage: buildDiscardMessage,
     buildProcessingErrorMessage: buildProcessingErrorMessage,
     MAX_TRANSIENT_RETRIES: MAX_TRANSIENT_RETRIES,

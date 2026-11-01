@@ -60,8 +60,10 @@ function runDailyMaintenance() {
 
   if (failures.length === 0) {
     Logger.log("日次メンテナンスがすべて完了しました。");
+    recordOpsStatus_("日次メンテナンス", true, steps.length + "件すべて完了");
     return;
   }
+  recordOpsStatus_("日次メンテナンス", false, failures.join(" / "));
   notifyMaintenanceFailures_(failures, steps.length);
 }
 
@@ -72,11 +74,8 @@ function runDailyMaintenance() {
 function notifyMaintenanceFailures_(failures, totalStepCount) {
   var message = "【GLOW台帳】日次メンテナンスで " + failures.length + "/" + totalStepCount +
     " 件が失敗しました。\n" + failures.join("\n");
-  try {
-    postToSlack_(message);
-  } catch (error) {
-    Logger.log("日次メンテナンスの失敗通知をSlackへ送れませんでした: " + error);
-  }
+  // Slack未設定でも黙らないよう、メールへ代替する共通の通知を使う(OpsStatus.gs)
+  notifyOpsFailure_("日次メンテナンス", message);
 }
 
 /**

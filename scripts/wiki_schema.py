@@ -1,0 +1,630 @@
+#!/usr/bin/env python3
+"""WikiSkill Phase 2: Knowledge Wiki の共通 schema(stdlib のみ)。
+
+候補(docs/wiki/_candidates/)・正式 Wiki(docs/wiki/ 直下)・置き換え済み(docs/wiki/_archive/)の
+frontmatter の読み書き、ID・dedup_key の生成、normalize、同義語表、タイトル類似度、公開性の判定。
+検証(V01〜V15)は wiki_validate.py が行う。ここは「形」だけを持つ。
+
+frontmatter の書式(設計書 6.1):
+    1行1キー。値はスカラーか1行の JSON(配列・オブジェクト・文字列)。
+    `[` `{` `"` で始まる値は json.loads、数字だけの値は float、それ以外は文字列。
+    読めないものは WikiFormatError(黙って空扱いにしない)。
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import re
+import sys
+import unicodedata
+from datetime import date
+from pathlib import Path
+from typing import Iterable
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import experience_log  # noqa: E402
+from wikiskill_common import audit  # noqa: E402
+
+# ---------------------------------------------------------------- 置き場所
+
+WIKI_DIR = "docs/wiki"
+CANDIDATES_DIR = "docs/wiki/_candidates"
+ARCHIVE_DIR = "docs/wiki/_archive"
+SYNONYMS_PATH = "docs/wiki/_synonyms.txt"
+WIKI_OFF = ".claude/wiki.off"
+
+PLACES = {"official": WIKI_DIR, "candidates": CANDIDATES_DIR, "archive": ARCHIVE_DIR}
+
+# ---------------------------------------------------------------- キー・本文
+
+REQUIRED_KEYS = ("candidate_id", "title", "summary", "evidence", "confidence", "confidence_basis", "visibility",
+                 "repo", "created_at", "proposed_by", "contradictions", "related_wiki", "related_skills",
+                 "review_status", "dedup_key", "extract_run")
+APPROVED_KEYS = ("wiki_id", "approved_by", "approved_at", "review_by", "review")
+SOURCE_KEYS = ("source_experience", "source_decision", "source_failure")
+# 上の3組以外に書いてよいキー(設計書 6.2)。ここに無いキーは schema 違反(needs_review は派生状態なので書かない)
+OPTIONAL_KEYS = ("duplicate_of", "acknowledged_decisions", "rejected_reason", "supersedes", "superseded_by")
+KNOWN_KEYS = frozenset(REQUIRED_KEYS + APPROVED_KEYS + SOURCE_KEYS + OPTIONAL_KEYS)
+
+BODY_SECTIONS = ("## 知識", "## 根拠(Provenance)", "## 反証(ウタガイ)", "## 適用範囲と例外", "## 関連")
+
+STATUS_BY_PLACE = {"candidates": {"candidate", "conflict", "rejected"}, "official": {"approved"},
+                   "archive": {"superseded"}}
+ALL_STATUSES = frozenset().union(*STATUS_BY_PLACE.values())
+VISIBILITIES = ("public", "private")
+REVIEW_ROLES = ("スイシン", "ウタガイ", "ベッカイ")
+
+# ---------------------------------------------------------------- 上限・しきい値
+
+MAX_TITLE = 80
+MAX_SUMMARY = 200
+MAX_QUOTE = 200
+MIN_QUOTE = 8  # これより短い引用は「どこにでもある語」で根拠にならない
+MAX_REVIEW_DAYS = 183  # 見直し期限は承認から6か月以内(CLAUDE.md 三名体制 規則7)
+MAX_EVIDENCE = 10
+MAX_BODY = 4000
+MAX_KNOWLEDGE = 1500
+SHOWN_SUMMARY = 160
+DEFAULT_REVIEW_DAYS = 180
+DUPLICATE_RATIO = 0.6
+CONFLICT_MIN_UNITS = 2
+
+# 同義語表(設計書 V14): 各語 2〜30字・1グループ 8語以内・全体 200行以内
+SYN_WORD_MIN = 2
+SYN_WORD_MAX = 30
+SYN_GROUP_MAX = 8
+SYN_LINES_MAX = 200
+
+NEGATION_WORDS = ("禁止", "しない", "却下", "やめる", "不可")
+BOT_APPROVERS = frozenset({"claude", "hojo-hq-bot", "github-actions", "github-actions[bot]", "knowledge_extract",
+                           "rule-based"})
+EMPTY_WORDS = frozenset({"", "-", "なし", "無し", "tbd", "todo", "未記入"})
+
+CANDIDATE_ID_RE = re.compile(r"^K\d{8}-[a-z0-9][a-z0-9-]{0,39}-[0-9a-f]{4,6}$")
+WIKI_ID_RE = re.compile(r"^W\d{8}-[a-z0-9][a-z0-9-]{0,39}$")
+EXP_SOURCE_RE = re.compile(r"^session-([A-Za-z0-9._-]+)@(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)$")
+FK_RE = re.compile(r"^FK-\d{3}$")
+
+_KEY_RE = re.compile(r"^([A-Za-z][A-Za-z0-9_]*):(.*)$")  # `_` 始まりは内部キー(_path 等)なので書かせない
+_NUMBER_RE = re.compile(r"^-?\d+(?:\.\d+)?$")
+_SLUG_MAX = 40
+
+Wiki = dict  # frontmatter の全キー + _path / _place / _body / _sections / _section_order / _preamble / _text
+
+
+class WikiFormatError(ValueError):
+    """frontmatter・本文・置き場所を読めない(schema 違反として扱う)。"""
+
+
+# ---------------------------------------------------------------- frontmatter
+
+def _parse_value(raw: str):
+    v = raw.strip()
+    if v[:1] in ("[", "{", '"'):
+        try:
+            return json.loads(v)
+        except ValueError as e:
+            raise WikiFormatError(f"JSON として読めない値: {e}") from e
+    if _NUMBER_RE.match(v):
+        return float(v)
+    return v
+
+
+def parse_wiki_frontmatter(text: str) -> tuple[dict, str]:
+    """先頭の `---` 〜 `---` を読む。返り値は (frontmatter, 本文)。読めなければ WikiFormatError。"""
+    if not isinstance(text, str):
+        raise WikiFormatError("本文が文字列ではない")
+    lines = text.lstrip("﻿").split("\n")
+    if not lines or lines[0].rstrip("\r").strip() != "---":
+        raise WikiFormatError("先頭行が --- ではない(frontmatter が無い)")
+    end = None
+    for i in range(1, len(lines)):
+        if lines[i].rstrip("\r").strip() == "---":
+            end = i
+            break
+    if end is None:
+        raise WikiFormatError("frontmatter の閉じ --- が無い")
+    fm: dict = {}
+    for n, raw in enumerate(lines[1:end], start=2):
+        line = raw.rstrip("\r")
+        if not line.strip():
+            continue
+        m = _KEY_RE.match(line)
+        if not m:
+            raise WikiFormatError(f"{n}行目が `key: value` の形ではない")
+        key = m.group(1)
+        if key in fm:
+            raise WikiFormatError(f"キー {key} が2回ある")
+        fm[key] = _parse_value(m.group(2))
+    body = "\n".join(l.rstrip("\r") for l in lines[end + 1:]).lstrip("\n")
+    return fm, body
+
+
+def _needs_quote(s: str) -> bool:
+    return (s == "" or s != s.strip() or s[:1] in ("[", "{", '"') or bool(_NUMBER_RE.match(s))
+            or "\n" in s or "\r" in s)
+
+
+def _render_value(key: str, value) -> str:
+    if isinstance(value, bool) or value is None:
+        raise WikiFormatError(f"{key}: 真偽値・null はスカラーに書けない")
+    if isinstance(value, (list, dict)):
+        return json.dumps(value, ensure_ascii=False)
+    if isinstance(value, (int, float)):
+        return repr(float(value)) if isinstance(value, float) else str(value)
+    if isinstance(value, str):
+        return json.dumps(value, ensure_ascii=False) if _needs_quote(value) else value
+    raise WikiFormatError(f"{key}: 書けない型 {type(value).__name__}")
+
+
+def render_wiki(fm: dict, sections: dict[str, str]) -> str:
+    """frontmatter(REQUIRED_KEYS → SOURCE_KEYS → 任意キー)+ 本文(BODY_SECTIONS の順 → その他)。"""
+    keys = [k for k in REQUIRED_KEYS if k in fm] + [k for k in SOURCE_KEYS if k in fm]
+    keys += [k for k in fm if k not in keys and not str(k).startswith("_")]
+    out = ["---"]
+    for k in keys:
+        if not _KEY_RE.match(f"{k}:"):
+            raise WikiFormatError(f"キー名として書けない: {k!r}")
+        out.append(f"{k}: {_render_value(k, fm[k])}")
+    out.append("---")
+    heads = [h for h in BODY_SECTIONS if h in sections] + [h for h in sections if h not in BODY_SECTIONS]
+    for h in heads:
+        out.append("")
+        out.append(h)
+        content = str(sections[h]).strip("\n")
+        if content:
+            out.append(content)
+    return "\n".join(out) + "\n"
+
+
+def split_sections(body: str) -> tuple[str, dict[str, str], list[str]]:
+    """本文を `## ` 見出しで分ける。返り値は (最初の見出しより前, {見出し: 本文}, 見出しの出現順)。"""
+    pre: list[str] = []
+    sections: dict[str, list[str]] = {}
+    order: list[str] = []
+    current = None
+    for line in body.split("\n"):
+        if line.startswith("## "):
+            current = line.rstrip()
+            order.append(current)
+            sections.setdefault(current, [])
+            continue
+        (pre if current is None else sections[current]).append(line)
+    return "\n".join(pre).strip(), {k: "\n".join(v).strip() for k, v in sections.items()}, order
+
+
+# ---------------------------------------------------------------- ファイル
+
+def _place_of(path: Path, root: Path) -> str:
+    rel = path.resolve().parent.relative_to(Path(root).resolve()).as_posix()
+    for place, d in PLACES.items():
+        if rel == d:
+            return place
+    raise WikiFormatError(f"Wiki の置き場所ではない: {rel}")
+
+
+def _rel(path: Path, root: Path) -> str:
+    try:
+        return Path(path).resolve().relative_to(Path(root).resolve()).as_posix()
+    except ValueError:
+        return str(path)
+
+
+def load_wiki_file(path: Path, root: Path) -> Wiki:
+    """1ファイルを Wiki(dict)にする。読めなければ WikiFormatError / OSError。"""
+    path = Path(path)
+    if path.is_symlink():
+        raise WikiFormatError("シンボリックリンクは置けない")
+    text = path.read_text(encoding="utf-8")
+    fm, body = parse_wiki_frontmatter(text)
+    pre, sections, order = split_sections(body)
+    w: Wiki = dict(fm)
+    w.update({"_path": _rel(path, root), "_place": _place_of(path, root), "_body": body, "_sections": sections,
+              "_section_order": order, "_preamble": pre, "_text": text})
+    return w
+
+
+def iter_wiki(root: Path, place: str) -> list[Wiki]:
+    """official = docs/wiki/*.md(直下・`_` 始まりを除く)、candidates / archive = 各ディレクトリ直下の *.md。
+
+    読めないファイルは {"_path", "_place", "_error"} として返す(飛ばさない)。
+    """
+    if place not in PLACES:
+        raise ValueError(f"unknown place: {place}")
+    d = Path(root) / PLACES[place]
+    if not d.is_dir():
+        return []
+    out: list[Wiki] = []
+    for p in sorted(d.glob("*.md")):
+        if place == "official" and p.name.startswith("_"):
+            continue
+        if not (p.is_file() or p.is_symlink()):
+            continue
+        try:
+            out.append(load_wiki_file(p, root))
+        except (OSError, UnicodeDecodeError, ValueError) as e:
+            out.append({"_path": _rel(p, root), "_place": place, "_error": f"{type(e).__name__}: {e}"})
+    return out
+
+
+# ---------------------------------------------------------------- 正規化・ID
+
+def strip_invisible(text: str) -> str:
+    """NFKC → casefold → 書式文字(Cf: ゼロ幅・ソフトハイフン等)と空白類(Z*)だけを除去。
+
+    禁止語の照合用。記号(`-` `_` `/` 等)は残すので、許された語と禁止語を同一視しない。
+    """
+    s = unicodedata.normalize("NFKC", str(text)).casefold()
+    return "".join(ch for ch in s if ch != "\u00ad" and not unicodedata.category(ch).startswith(("Cf", "Z")))
+
+
+def normalize(text: str) -> str:
+    """NFKC → 小文字 → 文字(L*)と数字(N*)以外(空白・記号・制御文字)を除去。"""
+    s = unicodedata.normalize("NFKC", str(text)).lower()
+    return "".join(ch for ch in s if unicodedata.category(ch)[0] in ("L", "N"))
+
+
+def slugify(text: str, fallback: str) -> str:
+    """ASCII の英小文字・数字とハイフンだけ、40字まで。空なら fallback(同じ規則で整える)。"""
+    def clean(s: str) -> str:
+        s = unicodedata.normalize("NFKC", str(s)).lower()
+        s = re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+        return s[:_SLUG_MAX].strip("-")
+    return clean(text) or clean(fallback) or "x"
+
+
+def dedup_key(title: str, source_ids: list[str]) -> str:
+    return hashlib.sha1((normalize(title) + "|" + ",".join(sorted(source_ids))).encode("utf-8")).hexdigest()
+
+
+def make_candidate_id(day: date, slug: str, key: str, taken: set[str]) -> str:
+    """K{YYYYMMDD}-{slug}-{key[:4]}。衝突したら key[:5]、key[:6]。それでも衝突なら ValueError。"""
+    slug = slugify(slug, "k")
+    for n in (4, 5, 6):
+        cid = f"K{day:%Y%m%d}-{slug}-{key[:n]}"
+        if cid not in taken:
+            return cid
+    raise ValueError(f"candidate_id が衝突する: K{day:%Y%m%d}-{slug}-{key[:6]}")
+
+
+def all_source_ids(w: Wiki) -> list[str]:
+    """source_experience → source_decision → source_failure の順の id(リスト以外・文字列以外は無視)。"""
+    out: list[str] = []
+    for k in SOURCE_KEYS:
+        v = w.get(k)
+        if isinstance(v, list):
+            out.extend(x for x in v if isinstance(x, str))
+    return out
+
+
+# ---------------------------------------------------------------- 公開性
+
+def repo_visibility(root: Path) -> str:
+    """hojo-hq(PUBLIC_REMOTES)なら public、それ以外(unknown を含む)は private。"""
+    return "public" if experience_log.repo_slug(Path(root)) in experience_log.PUBLIC_REMOTES else "private"
+
+
+def decision_visibility(d: dict, root: Path, repo_vis: str | None = None) -> str:
+    """Decision の公開性。private リポなら常に private。議事の任意キー visibility(Task 6)が
+    public / private 以外なら private(fail-closed)。キーが無ければリポジトリの公開性。"""
+    repo_vis = repo_vis or repo_visibility(root)
+    if repo_vis != "public":
+        return "private"
+    v = d.get("visibility") if isinstance(d, dict) else None
+    if v is None or (isinstance(v, str) and not v.strip()):
+        return repo_vis
+    return v.strip() if isinstance(v, str) and v.strip() in VISIBILITIES else "private"
+
+
+# ---------------------------------------------------------------- 同義語表
+
+def parse_synonyms(text: str) -> tuple[list[frozenset[str]], list[str]]:
+    """1行1グループ(`,` 区切り・`#` 以降はコメント)。返り値は (グループ, 捨てた行の理由)。
+
+    捨てる行: 2語未満 / 語が2〜30字でない / 9語以上 / 前の行のグループに出た語を含む / 200行を超えた分。
+    """
+    groups: list[frozenset[str]] = []
+    reasons: list[str] = []
+    seen: set[str] = set()
+    count = 0
+    for n, raw in enumerate(str(text).split("\n"), start=1):
+        line = unicodedata.normalize("NFKC", raw.split("#", 1)[0]).strip()
+        if not line:
+            continue
+        count += 1
+        if count > SYN_LINES_MAX:
+            reasons.append(f"{n}行目: 同義語表は {SYN_LINES_MAX} 行まで")
+            continue
+        words = [normalize(w) for w in line.split(",")]
+        if any(not w for w in words):
+            reasons.append(f"{n}行目: 空の語がある(`,` の前後を確認)")
+            continue
+        uniq = list(dict.fromkeys(words))
+        if len(uniq) < 2:
+            reasons.append(f"{n}行目: 2語以上が必要")
+            continue
+        if len(uniq) > SYN_GROUP_MAX:
+            reasons.append(f"{n}行目: 1グループ {SYN_GROUP_MAX} 語まで")
+            continue
+        bad = [w for w in uniq if not SYN_WORD_MIN <= len(w) <= SYN_WORD_MAX]
+        if bad:
+            reasons.append(f"{n}行目: 各語は {SYN_WORD_MIN}〜{SYN_WORD_MAX} 字")
+            continue
+        dup = [w for w in uniq if w in seen]
+        if dup:
+            reasons.append(f"{n}行目: 前の行と同じ語がある({dup[0]})")
+            continue
+        seen.update(uniq)
+        groups.append(frozenset(uniq))
+    return groups, reasons
+
+
+def load_synonyms(root: Path) -> list[frozenset[str]]:
+    """docs/wiki/_synonyms.txt を読む(無ければ空)。V14 違反の行は捨てて audit に残す。"""
+    path = Path(root) / SYNONYMS_PATH
+    if not path.is_file():
+        return []
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as e:
+        audit(root, "wiki", f"synonyms unreadable: {type(e).__name__}")
+        return []
+    groups, reasons = parse_synonyms(text)
+    for r in reasons:
+        audit(root, "wiki", f"synonyms line dropped: {r}")
+    return groups
+
+
+# ---------------------------------------------------------------- 類似度(V10)
+
+def title_units(text: str) -> set[str]:
+    """ASCII 英数の連なりは1語、それ以外の文字・数字の連なりは2文字ずつ(1文字だけならその1文字)。"""
+    s = unicodedata.normalize("NFKC", str(text)).lower()
+    units: set[str] = set()
+    runs: list[tuple[str, str]] = []
+    for ch in s:
+        if ch.isascii() and ch.isalnum():
+            kind = "a"
+        elif unicodedata.category(ch)[0] in ("L", "N"):
+            kind = "j"
+        else:
+            kind = ""
+        if kind and runs and runs[-1][0] == kind:
+            runs[-1] = (kind, runs[-1][1] + ch)
+        elif kind:
+            runs.append((kind, ch))
+        else:
+            runs.append(("", ""))
+    for kind, run in runs:
+        if not run:
+            continue
+        if kind == "a" or len(run) == 1:
+            units.add(run)
+        else:
+            units.update(run[i:i + 2] for i in range(len(run) - 1))
+    return units
+
+
+def title_similarity(a: str, b: str) -> float:
+    """a の語(title_units)のうち b にもある割合。a が空なら 0.0。"""
+    ua, ub = title_units(a), title_units(b)
+    if not ua:
+        return 0.0
+    return len(ua & ub) / len(ua)
+
+
+# ---------------------------------------------------------------- 矛盾(V11〜V13・設計書 7.4)
+
+_DECISION_FEATS: dict[tuple[str, str], tuple[tuple[str, ...], frozenset[str]]] = {}
+
+
+def conflict_text(w_or_draft: dict) -> str:
+    """矛盾の照合に使う候補側の文: title + summary + 「## 知識」(ファイルの Wiki は _sections、下書きは sections)。"""
+    secs = w_or_draft.get("_sections")
+    if not isinstance(secs, dict):
+        secs = w_or_draft.get("sections")
+    knowledge = secs.get("## 知識", "") if isinstance(secs, dict) else ""
+    return " ".join(str(x or "") for x in (w_or_draft.get("title"), w_or_draft.get("summary"), knowledge))
+
+
+# 照合範囲(議事 D20261007-wikiskill-conflict-scope): Decision 側は否定語を含む文だけ・コード断片は除く。
+_CODE_SPAN_RE = re.compile(r"`[^`\n]*`")
+# 丸数字はブロック単位で書く(①〜⑳ U+2460–2473 / ㉑〜㉟ U+3251–325F / ㊱〜㊿ U+32B1–32BF。かなを含めない)
+_CIRCLED_DIGITS = "\u2460-\u2473\u3251-\u325f\u32b1-\u32bf"
+# 文の区切り: 句点・改行・箇条書きの頭(行頭か空白の直後の `- ` `* ` `・` 丸数字 `1. ` `1) `)。
+# 議事の裁定は decision_memory が改行を空白に畳むため、箇条書きの頭は「空白の直後」でも区切る。
+_SENTENCE_SPLIT_RE = re.compile(rf"。|\n|(?:^|(?<=\s))(?:[-*](?=\s)|・|[{_CIRCLED_DIGITS}]|\d{{1,3}}[.)](?=\s))")
+
+# 否定文の先頭がこれらなら直前の1文も照合に含める(指示語で前の文の禁止の中身を受けている)
+DEMONSTRATIVES = ("この", "その", "これ", "それ", "上記", "前記")
+# 指示語の判定の前に除く先頭: 空白・箇条書きの印・開き括弧と開きかぎ(「(この運用は禁止)」「「この運用は禁止」」)
+_BULLET_HEAD_RE = re.compile(r"^[\s\-*・「(（\[【]+")
+
+
+def negation_sentences(text: str) -> list[str]:
+    """text からコード断片(`…`)を除き、文に分けて、否定語(NEGATION_WORDS)を含む文を返す(各文は NFKC・文書順)。
+
+    否定語を含む文が指示語(DEMONSTRATIVES。先頭の空白・箇条書きの印・開き括弧を除いて判定)で始まるときは、直前の1文も
+    返す(「…手順は使わない。この手順は採用しない」の禁止の中身は前の文にある)。遡るのは1文だけ。
+    コード断片の中の否定語は数えない(パス・コマンドは Decision の文ではない)。返す文は前後の空白を除いたもの。
+    文に分けてから NFKC にする(NFKC は丸数字を数字に変えるため、先に畳むと箇条書きの頭が消える)。
+    """
+    s = _CODE_SPAN_RE.sub(" ", str(text or ""))
+    parts = [p for p in (unicodedata.normalize("NFKC", x).strip() for x in _SENTENCE_SPLIT_RE.split(s)) if p]
+    keep: set[int] = set()
+    for i, part in enumerate(parts):
+        if any(w in part for w in NEGATION_WORDS):
+            keep.add(i)
+            if i > 0 and _BULLET_HEAD_RE.sub("", part).startswith(DEMONSTRATIVES):
+                keep.add(i - 1)
+    return [parts[i] for i in sorted(keep)]
+
+
+def _decision_feats(d: dict, mb) -> tuple[tuple[str, ...], frozenset[str]]:
+    """Decision 側(title + outcome)の否定語と features。同じ (title, outcome) は1プロセスに1回だけ計算する。
+
+    否定語(自己出典の判定に使う)は title + outcome 全体から、features は否定語を含む文(+ その文が この/その 等で
+    始まる場合は直前の1文。negation_sentences。コード断片を除く)だけから作る。
+    """
+    key = (str(d.get("title") or ""), str(d.get("outcome") or ""))
+    hit = _DECISION_FEATS.get(key)
+    if hit is None:
+        text = key[0] + "\n" + key[1]
+        folded = unicodedata.normalize("NFKC", text)
+        feats: set[str] = set()
+        for sentence in negation_sentences(text):
+            feats |= mb.features(sentence)
+        hit = (tuple(w for w in NEGATION_WORDS if w in folded), frozenset(feats))
+        _DECISION_FEATS[key] = hit
+    return hit
+
+
+def _is_test_decision(d: dict) -> bool:
+    return any(str(t).strip().lower() == "test" for t in d.get("tags") or [])
+
+
+def _conflict_groups(text: str, synonyms, mb) -> list[tuple]:
+    """text の語(query_groups)から、Bootstrap が検索語にしない定型語(STOP_TERMS。_ENGLISH_COMMON は
+    query_units が既に落とす)を除く。同義語の束の中の定型語も除き、空になった束は捨てる。"""
+    stop = {w.lower() for w in mb.STOP_TERMS} | set(mb._ENGLISH_COMMON)
+    out = []
+    for g in mb.query_groups([str(text)], synonyms):
+        kept = tuple(u for u in g if len(u[1]) >= 2 and u[1].lower() not in stop)
+        if kept:
+            out.append(kept)
+    return out
+
+
+def decision_conflicts(text: str, decisions: list[dict], synonyms: list[frozenset[str]] | None = None,
+                       after: str | None = None, *, until: str | None = None,
+                       self_sources: Iterable[str] = ()) -> list[dict]:
+    """text と矛盾しうる adopted Decision: [{"decision": id, "units": [語…], "negations": [否定語…]}]。
+
+    対象: status == adopted・tags に test を含まない・(after 指定時)date > after・(until 指定時)date ≤ until
+    (date が読めない Decision は until では残す = 止めすぎる側、after では外す)。
+    判定: Decision の title + outcome に NEGATION_WORDS のどれかがあり、text の語(memory_bootstrap.query_groups。
+    同義語の同じ行は1語。STOP_TERMS は数えない)が Decision 側の features(否定語を含む文 + 指示語で始まる否定文の
+    直前の1文・コード断片を除く。negation_sentences)に CONFLICT_MIN_UNITS 以上当たる。
+    self_sources(候補自身の source_decision)の Decision は、その否定語がすべて text にもある(否定を引き継いで
+    言い直している)ときだけ除く。否定語を落とした言い直しは矛盾として残す。例外は呼び元で「矛盾あり」。
+    """
+    import memory_bootstrap as mb  # 循環 import を避ける(memory_bootstrap は wiki_schema を読む)
+
+    groups = _conflict_groups(text, synonyms, mb)
+    own = {s for s in self_sources if isinstance(s, str)}
+    folded_text = unicodedata.normalize("NFKC", str(text))
+    out: list[dict] = []
+    for d in decisions:
+        if d.get("status") != "adopted" or _is_test_decision(d):
+            continue
+        day = d.get("date")
+        day = day if isinstance(day, str) and day else None
+        if after is not None and (day is None or not day > after):
+            continue
+        if until is not None and day is not None and day > until:
+            continue
+        negations, feats = _decision_feats(d, mb)
+        if not negations:
+            continue
+        if d.get("id") in own and all(w in folded_text for w in negations):
+            continue  # 出典の Decision の否定をそのまま引き継いでいる(同じ向き)
+        units = [g[0][1] for g in groups if mb._group_matches(g, feats)]
+        if len(units) >= CONFLICT_MIN_UNITS:
+            out.append({"decision": d.get("id"), "units": units, "negations": list(negations)})
+    return out
+
+
+def acknowledged_ids(w: dict) -> set[str]:
+    """acknowledged_decisions のうち decision と reason がどちらも空でないものの id。"""
+    out: set[str] = set()
+    for a in w.get("acknowledged_decisions") or []:
+        if isinstance(a, dict) and isinstance(a.get("decision"), str) and a["decision"].strip() \
+                and isinstance(a.get("reason"), str) and a["reason"].strip():
+            out.add(a["decision"].strip())
+    return out
+
+
+def needs_review(w: Wiki, decisions: list[dict], synonyms: list[frozenset[str]] | None = None) -> list[str]:
+    """approved の Wiki と、approved_at より新しい adopted Decision の矛盾(acknowledged の id を除く)。
+
+    approved_at が YYYY-MM-DD でなければ ValueError(呼び元で「矛盾あり」= 注入しない)。
+    """
+    aa = _valid_approved_at(w)
+    return _unacknowledged(w, decisions, synonyms, after=aa)
+
+
+def _valid_approved_at(w: Wiki) -> str:
+    aa = w.get("approved_at")
+    if not (isinstance(aa, str) and re.match(r"^\d{4}-\d{2}-\d{2}$", aa)):
+        raise ValueError("approved_at が YYYY-MM-DD ではない")
+    return aa
+
+
+def _unacknowledged(w: Wiki, decisions: list[dict], synonyms, after: str | None) -> list[str]:
+    acked = acknowledged_ids(w)
+    found = decision_conflicts(conflict_text(w), decisions, synonyms, after=after, self_sources=source_decisions(w))
+    return [i for i in dict.fromkeys(c["decision"] for c in found) if i not in acked]
+
+
+def source_decisions(w: dict) -> list[str]:
+    v = w.get("source_decision")
+    return [x for x in v if isinstance(x, str)] if isinstance(v, list) else []
+
+
+def injection_blockers(w: Wiki, decisions: list[dict], synonyms: list[frozenset[str]] | None = None) -> list[str]:
+    """Bootstrap 用(多重の守り): 日付を問わず全 adopted Decision と照合し、acknowledged でない矛盾の id。
+
+    承認前の Decision との矛盾は本来 V12 が止めるが、検証を通らずに入ったページでも注入しない。
+    approved_at が YYYY-MM-DD でなければ ValueError(注入しない)。
+    """
+    _valid_approved_at(w)
+    return _unacknowledged(w, decisions, synonyms, after=None)
+
+
+def is_bot_approver(name) -> bool:
+    """承認者として認めない名前(bot・自動処理)。NFKC → 前後空白除去 → 小文字で比べる。
+
+    BOT_APPROVERS のどれか / `[bot]` で終わる / github-actions で始まる / claude・knowledge_extract を含む。
+    """
+    if not isinstance(name, str):
+        return True
+    n = unicodedata.normalize("NFKC", name).strip().lower()
+    return (n in BOT_APPROVERS or n.endswith("[bot]") or n.startswith("github-actions") or "claude" in n
+            or "knowledge_extract" in n)
+
+
+def is_empty_word(v) -> bool:
+    """文字列でない・空・空語(EMPTY_WORDS。「なし」「TBD」など)なら True。"""
+    if not isinstance(v, str):
+        return True
+    return unicodedata.normalize("NFKC", v).strip().lower() in EMPTY_WORDS or normalize(v) in EMPTY_WORDS
+
+
+def injectable_reasons(w: dict, repo_slug: str) -> list[str]:
+    """Bootstrap が注入してよい approved ページかの安い確認(承認の必須項目の一部)。空なら OK。
+
+    検証器(V09 等)を通らずに docs/wiki/ に入ったページでも、人の承認の形が無ければ注入しない(多重の守り)。
+    """
+    reasons: list[str] = []
+    ab = w.get("approved_by")
+    if not (isinstance(ab, str) and ab.strip()) or is_bot_approver(ab):
+        reasons.append("approved_by")
+    rv = w.get("review")
+    if not isinstance(rv, dict) or not isinstance(rv.get("ウタガイ"), str) or is_empty_word(rv.get("ウタガイ")):
+        reasons.append("review.ウタガイ")
+    wid = w.get("wiki_id")
+    stem = Path(str(w.get("_path") or "")).stem
+    if not (isinstance(wid, str) and WIKI_ID_RE.match(wid) and wid == stem):
+        reasons.append("wiki_id")
+    if not (isinstance(repo_slug, str) and repo_slug and repo_slug != "unknown" and w.get("repo") == repo_slug):
+        reasons.append("repo")
+    if not any(isinstance(w.get(k), list) and any(isinstance(x, str) and x.strip() for x in w[k])
+               for k in SOURCE_KEYS):
+        reasons.append("sources")
+    return reasons
+
+
+def _clear_conflict_cache() -> None:
+    _DECISION_FEATS.clear()

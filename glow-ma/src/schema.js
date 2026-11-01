@@ -15,7 +15,8 @@
     "最終接触日", "次回アクション予定日", "次回アクション内容",
     "担当者", "登録日", "備考",
     "電話番号", "連絡不要", "後継者状況", "関係メモ", "窓口担当者名", "携帯番号",
-    "事前選定ランク", "事前選定スコア"
+    "事前選定ランク", "事前選定スコア",
+    "LINE User ID", "Instagramアカウント（@で始まる）", "QRコード URL"
   ];
 
   var INTERACTION_LOG_SHEET_NAME = "対応履歴ログ";
@@ -28,7 +29,9 @@
     "レターURLアクセス", "返信", "資料請求",
     "提案(M&A)", "提案(不動産)", "提案(法人保険)",
     "成約", "見送り", "ナーチャリング配信", "連絡不要受領",
-    "NDA締結", "意向表明受領", "DD開始", "関係メモ更新"
+    "NDA締結", "意向表明受領", "DD開始", "関係メモ更新",
+    // 2026-10-30: 手紙(DM)をやめてメールで案内するようになった(福田さん)。過去記録の取り込みで使う
+    "メール送信"
   ];
 
   var RESPONDENT_TYPES = ["オーナー社長本人", "経理・総務等の窓口担当", "未接触"];
@@ -119,6 +122,24 @@
     "最終確認待ち", "確定", "破棄", "エラー"
   ];
 
+  var LINE_INQUIRY_SHEET_NAME = "LINE問い合わせ履歴";
+  var LINE_INQUIRY_HEADERS = [
+    "日付", "企業ID", "LINE User ID", "メッセージ内容", "文字起こし（自動）",
+    "対応済み", "対応日時", "対応者", "メモ"
+  ];
+
+  var INSTAGRAM_METRICS_SHEET_NAME = "Instagramメトリクス";
+  var INSTAGRAM_METRICS_HEADERS = [
+    "企業ID", "取得日", "フォロワー数", "エンゲージメント率(%)",
+    "リーチ数(前30日)", "インプレッション数(前30日)", "更新時刻"
+  ];
+
+  var VISIT_APPOINTMENT_SHEET_NAME = "訪問・アポ実績";
+  var VISIT_APPOINTMENT_HEADERS = [
+    "企業ID", "種別(訪問/アポ)", "実施日", "担当者", "内容",
+    "次回予定日", "連絡結果(応対/留守/断り)", "メモ"
+  ];
+
   var api = {
     COMPANY_MASTER_SHEET_NAME: COMPANY_MASTER_SHEET_NAME,
     COMPANY_MASTER_HEADERS: COMPANY_MASTER_HEADERS,
@@ -154,7 +175,13 @@
     LINE_VOICE_LOG_HEADERS: LINE_VOICE_LOG_HEADERS,
     LINE_VOICE_LOG_STATUSES: LINE_VOICE_LOG_STATUSES,
     CTI_CALL_LOG_SHEET_NAME: CTI_CALL_LOG_SHEET_NAME,
-    CTI_CALL_LOG_HEADERS: CTI_CALL_LOG_HEADERS
+    CTI_CALL_LOG_HEADERS: CTI_CALL_LOG_HEADERS,
+    LINE_INQUIRY_SHEET_NAME: LINE_INQUIRY_SHEET_NAME,
+    LINE_INQUIRY_HEADERS: LINE_INQUIRY_HEADERS,
+    INSTAGRAM_METRICS_SHEET_NAME: INSTAGRAM_METRICS_SHEET_NAME,
+    INSTAGRAM_METRICS_HEADERS: INSTAGRAM_METRICS_HEADERS,
+    VISIT_APPOINTMENT_SHEET_NAME: VISIT_APPOINTMENT_SHEET_NAME,
+    VISIT_APPOINTMENT_HEADERS: VISIT_APPOINTMENT_HEADERS
   };
 
   if (typeof module !== "undefined" && module.exports) {

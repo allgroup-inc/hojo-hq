@@ -1,6 +1,11 @@
 /**
  * GLOW企業リレーション台帳: BlueBean CTI通話履歴の取得・企業マスタ突合・対応履歴ログ自動記録
  *
+ * 2026-10-27 から、通話の取得は「発着信履歴ダウンロードAPI(CDR)」が主(callBlueBeanCdr_)。
+ * 番号を貼り付けて発信した通話(顧客データに紐づかない通話)は、下の顧客発着信履歴出力APIでは取れないため
+ * (ソフツー回答)。CDRが使えない版のときだけ、従来のAPIへ切り替える。従来のAPIの campaign_id には
+ * 作業グループ(ACD)ではなく「業務ID」を指定する(顧客情報管理 > 発信リスト一覧 > 業務リンク > 業務照会の「ID」)。
+ *
  * BlueBean(ソフツー)の「顧客発着信履歴出力API」(pull型。webhookは存在しない)を時間主導
  * トリガーで定期ポーリングし、通話履歴を「CTI通話履歴」タブへ記録する。電話番号が企業マスタと
  * 一意にマッチし、かつ通話ステータスが「完了」の場合のみ、対応履歴ログへも自動記録する
@@ -15,8 +20,10 @@
  *      共用で開始。共用のままパスワードが変更されると連携が無言で止まるため、失敗時は
  *      「業務ID」欄のエラー(E002/E003)をまず確認すること。Slack通知でも検知できる)
  *    - BLUEBEAN_PASSWORD: 上記のパスワード(受け渡しはメール・チャット禁止。口頭かLINEで)
- *    - BLUEBEAN_CAMPAIGN_ID: BlueBeanの作業グループID(ACD番号)。法人開拓専用の作業グループを
- *      1つ作り、その番号を設定する(実際の番号も公開リポジトリには書かない)
+ *    - BLUEBEAN_CAMPAIGN_ID: BlueBeanの作業グループID。**カンマ区切りで複数指定できる**
+ *      (2026-10-16: 接続時に設定した作業グループと、福田さんが実際に架電している作業グループが
+ *      別だったため、取得が0件のまま誰も気づかなかった。現場が使う作業グループをすべて並べる。
+ *      実際の番号は公開リポジトリには書かない)
  * 2. ensureLedgerTabs を実行し、「CTI通話履歴」タブを作成する
  * 3. installCtiSyncTrigger を1度だけ実行し、1時間おきの同期トリガーを登録する
  *    (BlueBeanの架電はキャンペーン単位でまとまって行われるため、LINE音声ログ(1分間隔)ほど
@@ -30,7 +37,44 @@
  * 止まり続けることを防ぐための仕組みで、新しいプロパティの追加は不要(未設定の場合は
  * Slack通知だけスキップされ、実行ログへの記録は従来どおり行われる)。
  */
+/**
+ * トリガーから呼ばれる入口。結果を「稼働状況」タブへ記録し、失敗は通知する(OpsStatus.gs)。
+ * 0件でも「成功・0件」と残るので、「動いているのに取れていない」も台帳から見える。
+ */
+/** 同期を試みた時刻(成否を問わない)。毎分の処理から1時間おきに呼ぶ判定に使う */
+var CTI_SYNC_LAST_ATTEMPT_PROP = "CTI_SYNC_LAST_ATTEMPT_MS";
+// 1時間おきの専用トリガーが主。毎分の処理からは、専用トリガーが90分以上動いていないときだけ同期する
+// (両方が同時に動いて「他の処理がCTI通話履歴を操作中」になるのを避ける)
+var CTI_SYNC_INTERVAL_MS = 90 * 60 * 1000;
+
+/**
+ * 毎分の音声ログ処理(processQueuedVoiceLogs)に相乗りして、前回の試行から1時間たっていれば同期する。
+ * 2026-10-24 9時以降、1時間おきのトリガーが毎回「承認が必要です」で止まり、同期が1件も走っていなかった
+ * (毎分のトリガーは正常に動いている)。トリガーの状態に左右されないよう、こちらでも同期する。
+ */
+function runCtiSyncIfDue_() {
+  var props = PropertiesService.getScriptProperties();
+  if (!props.getProperty("BLUEBEAN_DOMAIN")) return;
+  var last = Number(props.getProperty(CTI_SYNC_LAST_ATTEMPT_PROP) || 0);
+  if (Date.now() - last < CTI_SYNC_INTERVAL_MS) return;
+  syncCtiCallHistory();
+}
+
 function syncCtiCallHistory() {
+  PropertiesService.getScriptProperties().setProperty(CTI_SYNC_LAST_ATTEMPT_PROP, String(Date.now()));
+  try {
+    var summary = syncCtiCallHistoryCore_();
+    recordOpsStatus_("BlueBean架電履歴の同期", true, summary);
+  } catch (error) {
+    recordOpsStatus_("BlueBean架電履歴の同期", false, String(error));
+    notifyOpsFailure_("BlueBean架電履歴の同期",
+      "認証情報(BLUEBEAN_USERNAME/PASSWORD)の変更や、作業グループID(BLUEBEAN_CAMPAIGN_ID)の誤りがないか確認してください。\n" +
+      "エラー: " + error);
+    throw error;
+  }
+}
+
+function syncCtiCallHistoryCore_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var callLogSheet = ss.getSheetByName(GlowSchema.CTI_CALL_LOG_SHEET_NAME);
   if (!callLogSheet) {
@@ -51,59 +95,97 @@ function syncCtiCallHistory() {
   }
   try {
     var properties = PropertiesService.getScriptProperties();
+    cleanupForeignCdrRowsOnce_(callLogSheet, logSheet);
+    restorePhoneLeadingZeroOnce_(callLogSheet);
     // 初回実行時はwatermark(前回同期完了時点)が無いため、直近24時間分から取得を開始する。
     var startDate = properties.getProperty("BLUEBEAN_LAST_SYNCED_AT") ||
       Utilities.formatDate(new Date(Date.now() - 24 * 60 * 60 * 1000), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
     var endDate = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
 
-    var apiResponse;
+    // BLUEBEAN_USERNAME/PASSWORDは人間の管理者アカウントと共用のため、パスワード変更等で
+    // 無言のまま止まりうる(docs/議事_20260819_BlueBean CTI連携.md参照)。失敗は呼び出し元の
+    // syncCtiCallHistory が稼働状況タブへの記録と通知(Slack未設定ならメール)を行う。
+    // 2026-10-27: 番号を貼り付けて発信した通話は「顧客発着信履歴出力API」では取れない(ソフツー回答)。
+    // すべての発着信を返す「発着信履歴ダウンロードAPI(CDR)」を主に使い、使えない版のときだけ従来のAPIへ切り替える。
+    // CDRの取得済み時点は別に持つ(初回は直近30日をさかのぼって取り込む。取得済みの通話は通話IDで重複を除く)
+    var calls = [];
+    var sourceSummary = "";
+    var usedCdr = false;
+    var cdrStart = properties.getProperty("BLUEBEAN_CDR_SYNCED_AT") ||
+      Utilities.formatDate(new Date(Date.now() - CDR_BACKFILL_DAYS * 24 * 60 * 60 * 1000), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
     try {
-      apiResponse = callBlueBeanApi_(startDate, endDate);
-      if (apiResponse.result !== "OK") {
-        throw new Error("BlueBean APIがエラーを返しました: " + JSON.stringify(apiResponse));
-      }
-    } catch (error) {
-      // BLUEBEAN_USERNAME/PASSWORDは人間の管理者アカウントと共用のため、パスワード変更等で
-      // 無言のまま止まりうる(docs/議事_20260819_BlueBean CTI連携.md参照)。実行ログだけに
-      // 頼らず、Slackにも通知して気づけるようにする(resilient-agent-design原則: 無言の失敗を作らない)。
-      postToSlackWithRetry_(
-        "⚠️ BlueBean CTI通話履歴の同期に失敗しました。認証情報(BLUEBEAN_USERNAME/PASSWORD)が" +
-        "変更されていないか確認してください。エラー: " + error
-      );
-      throw error;
+      // 通話中・発信中の通話を途中の状態で記録しないよう、終わりは15分前までにする。
+      // 1回に取るのは最大5日分(30日分を1度に取ると6分の上限を超えた。2026-10-27)。残りは次の実行で続きから取る
+      var latestEnd = Date.now() - 15 * 60 * 1000;
+      var chunkEnd = Math.min(parseCtiDate_(cdrStart).getTime() + CDR_CHUNK_DAYS * 24 * 60 * 60 * 1000, latestEnd);
+      var cdrEnd = Utilities.formatDate(new Date(chunkEnd), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss");
+      // CDRには同じBlueBeanを使う他の組織の通話も入っている。GLOWのスタッフの通話だけを残す
+      var allCdrCalls = GlowCtiContent.parseCdrCsv(callBlueBeanCdr_(cdrStart, cdrEnd));
+      // 2026-10-30 ソフツー回答: 他組織の通話が返るのは仕様。氏名に加え、覚えたオペレーターIDでも照合する
+      var operatorNames = readCtiOperatorNames_();
+      var operatorPins = learnCtiOperatorPins_(allCdrCalls, operatorNames);
+      calls = GlowCtiContent.filterCallsByOperators(allCdrCalls, operatorNames, operatorPins).filter(function (call) {
+        return call.call_status !== "発着信中" && call.call_status !== "通話中";
+      });
+      usedCdr = true;
+      startDate = cdrStart;
+      endDate = cdrEnd;
+      sourceSummary = "全通話(CDR) " + allCdrCalls.length + "件のうちGLOWスタッフ分 " + calls.length + "件";
+    } catch (cdrError) {
+      if (cdrError.statusCode === 401) throw cdrError;
+      console.warn("BlueBeanのCDR取得に失敗したため、従来の顧客発着信履歴APIで取得します: " + cdrError);
+      var campaignIds = readCampaignIds_();
+      var perCampaign = [];
+      campaignIds.forEach(function (campaignId, index) {
+        var apiResponse = callBlueBeanApi_(startDate, endDate, campaignId);
+        if (apiResponse.result !== "OK") {
+          throw new Error("BlueBean APIがエラーを返しました(作業グループ" + (index + 1) + "件目): " +
+            JSON.stringify(apiResponse));
+        }
+        var got = GlowCtiContent.flattenBlueBeanCalls(apiResponse);
+        perCampaign.push("グループ" + (index + 1) + "(ID " + campaignId + "): " + got.length + "件");
+        calls = calls.concat(got);
+      });
+      sourceSummary = "作業グループ" + campaignIds.length + "件(" + perCampaign.join("、") + ")";
     }
-    var calls = GlowCtiContent.flattenBlueBeanCalls(apiResponse);
 
     var existingCallIds = readExistingGroupCallIds_(callLogSheet);
     var newCalls = calls.filter(function (call) {
       return !existingCallIds[String(call.group_callid)];
     });
 
-    var companies = readCompanyRecords_(companySheet);
+    var phoneIndex = GlowCtiContent.buildPhoneIndex(readCompanyRecords_(companySheet));
     var recordedCount = 0;
     var skippedCount = 0;
+    var callLogRows = [];
+    var interactionRows = [];
     newCalls.forEach(function (call) {
-      var matchedCompany = GlowCtiContent.matchCompanyByPhone(companies, call.phone);
+      var matchedCompany = GlowCtiContent.matchCompanyByPhoneIndex(phoneIndex, call.phone);
       var callLogRow = GlowCtiContent.buildCallLogRow("CTI-" + call.group_callid, call, matchedCompany);
-      callLogSheet.appendRow(callLogRow);
+      // 「098…」が数値に変換されて先頭の0が消えないよう、文字列として書く
+      callLogRow[ctiPhoneColumnIndex_()] = asSheetText_(callLogRow[ctiPhoneColumnIndex_()]);
+      callLogRows.push(callLogRow);
 
       if (GlowCtiContent.shouldRecordInteractionLog(call, matchedCompany)) {
         var logId = "H-" + Utilities.getUuid();
-        var interactionRow = GlowCtiContent.buildInteractionLogRowForCall(logId, call, matchedCompany);
-        logSheet.appendRow(interactionRow);
+        interactionRows.push(GlowCtiContent.buildInteractionLogRowForCall(logId, call, matchedCompany));
         recordedCount++;
       } else {
         skippedCount++;
       }
     });
+    appendRowsAtEnd_(callLogSheet, callLogRows);
+    appendRowsAtEnd_(logSheet, interactionRows);
 
-    properties.setProperty("BLUEBEAN_LAST_SYNCED_AT", endDate);
+    properties.setProperty(usedCdr ? "BLUEBEAN_CDR_SYNCED_AT" : "BLUEBEAN_LAST_SYNCED_AT", endDate);
     Logger.log(
       "CTI通話履歴の同期完了(" + startDate + " 〜 " + endDate + "): " +
       "新規取得 " + newCalls.length + "件(うち対応履歴ログへ自動記録 " + recordedCount +
       "件、未記録(未マッチ・複数企業ヒット・キャンセル等) " + skippedCount + "件)。" +
       "取得済みのためスキップ " + (calls.length - newCalls.length) + "件。"
     );
+    return startDate + "〜" + endDate + " / " + sourceSummary +
+      " / 新規 " + newCalls.length + "件(対応履歴へ記録 " + recordedCount + "件)";
   } finally {
     lock.releaseLock();
   }
@@ -127,9 +209,259 @@ function readExistingGroupCallIds_(sheet) {
   return ids;
 }
 
-function callBlueBeanApi_(startDate, endDate) {
+/** BLUEBEAN_CAMPAIGN_ID をカンマ区切りで読み、空要素・重複を除いた配列を返す。 */
+function readCampaignIds_() {
+  var raw = PropertiesService.getScriptProperties().getProperty("BLUEBEAN_CAMPAIGN_ID") || "";
+  var seen = {};
+  var ids = raw.split(/[,，、\s]+/).filter(function (id) {
+    if (!id || seen[id]) return false;
+    seen[id] = true;
+    return true;
+  });
+  if (ids.length === 0) {
+    throw new Error("BLUEBEAN_CAMPAIGN_ID が未設定です。スクリプト プロパティで設定してください。");
+  }
+  return ids;
+}
+
+/**
+ * 複数行を、1列目(ID)が入っている最後の行の次へまとめて書き込む(1行ずつの appendRow は遅く、
+ * 30日分の取り込みで6分の上限を超えた)。書式だけの行は1列目が空なので、その上に書いてよい。
+ */
+function appendRowsAtEnd_(sheet, rows) {
+  if (!rows.length) return;
+  var maxRows = sheet.getMaxRows();
+  var ids = sheet.getRange(1, 1, maxRows, 1).getValues();
+  var last = 0;
+  for (var i = ids.length - 1; i >= 0; i--) {
+    if (String(ids[i][0]) !== "") { last = i + 1; break; }
+  }
+  var need = last + rows.length - maxRows;
+  if (need > 0) sheet.insertRowsAfter(maxRows, need);
+  sheet.getRange(last + 1, 1, rows.length, rows[0].length).setValues(rows);
+}
+
+/** "yyyy-MM-dd HH:mm:ss"(日本時間)を Date にする */
+function parseCtiDate_(text) {
+  var m = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/.exec(String(text || ""));
+  if (!m) return new Date();
+  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] - 9, +m[5], +m[6]));
+}
+
+/**
+ * CDRの通話のうち台帳に入れてよいオペレーター(=GLOWのスタッフ)の氏名一覧。
+ * スタッフタブの有効な人の氏名に加え、スクリプト プロパティ BLUEBEAN_CDR_OPERATORS(「,」区切り)も足せる。
+ */
+function readCtiOperatorNames_() {
+  var names = [];
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(GlowSchema.STAFF_SHEET_NAME);
+  if (sheet && sheet.getLastRow() >= 2) {
+    var headers = GlowSchema.STAFF_HEADERS;
+    var nameI = headers.indexOf("氏名"), activeI = headers.indexOf("有効");
+    sheet.getRange(2, 1, sheet.getLastRow() - 1, headers.length).getValues().forEach(function (r) {
+      if (r[activeI] === true && r[nameI]) names.push(String(r[nameI]));
+    });
+  }
+  String(PropertiesService.getScriptProperties().getProperty("BLUEBEAN_CDR_OPERATORS") || "")
+    .split(/[,、]+/).forEach(function (n) { if (n.trim()) names.push(n.trim()); });
+  return names;
+}
+
+/**
+ * スタッフの氏名→BlueBeanのオペレーターIDの対応(スクリプト プロパティ BLUEBEAN_CDR_OPERATOR_IDS、JSON)を読み、
+ * まだ覚えていない人の分を今回の通話から覚えて保存する。担当者のIDが変わったときは、このプロパティの該当行を消す。
+ * 覚えた氏名で別のIDの通話が来たら(同姓同名の他組織の人など)、取り込まずに警告だけ残す。
+ */
+function learnCtiOperatorPins_(calls, operatorNames) {
+  var props = PropertiesService.getScriptProperties();
+  var pins = {};
+  try { pins = JSON.parse(props.getProperty("BLUEBEAN_CDR_OPERATOR_IDS") || "{}") || {}; } catch (e) { pins = {}; }
+  var learned = GlowCtiContent.learnOperatorIds(calls, operatorNames, pins);
+  var learnedKeys = Object.keys(learned);
+  if (learnedKeys.length) {
+    learnedKeys.forEach(function (key) { pins[key] = learned[key]; });
+    props.setProperty("BLUEBEAN_CDR_OPERATOR_IDS", JSON.stringify(pins));
+    console.log("BlueBeanのオペレーターIDを覚えました: " + learnedKeys.length + "人");
+  }
+  var nameOnly = GlowCtiContent.filterCallsByOperators(calls, operatorNames).length;
+  var pinned = GlowCtiContent.filterCallsByOperators(calls, operatorNames, pins).length;
+  if (nameOnly !== pinned) {
+    console.warn("スタッフと同じ氏名で、別のオペレーターIDの通話が " + (nameOnly - pinned) + "件ありました(取り込みません)");
+  }
+  return pins;
+}
+
+/**
+ * 1回限りの片付け(2026-10-27): CDRの最初の取り込みで、他の組織のオペレーターの通話(約1.7万件)と、
+ * それを電話番号で突合した対応履歴(54件)が台帳に入った。GLOWのスタッフ以外の分を取り除き、
+ * CDRの取得済み時点を消して、スタッフの分だけを取り込み直す。
+ */
+function cleanupForeignCdrRowsOnce_(callLogSheet, logSheet) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "CDR_FOREIGN_CLEANUP_20261027_DONE";
+  if (props.getProperty(flag)) return;
+  var allowed = readCtiOperatorNames_();
+  var keepCall = function (operator) {
+    return GlowCtiContent.filterCallsByOperators([{ operator_name: operator }], allowed).length === 1;
+  };
+  var ctiHeaders = GlowSchema.CTI_CALL_LOG_HEADERS;
+  var idI = ctiHeaders.indexOf("group_callid"), opI = ctiHeaders.indexOf("発信者(BlueBeanオペレーター名)");
+  var removedCalls = rewriteRows_(callLogSheet, ctiHeaders.length, function (row) {
+    return String(row[idI]).indexOf("CDR-") === 0 && !keepCall(row[opI]);
+  });
+  var logHeaders = GlowSchema.INTERACTION_LOG_HEADERS;
+  var staffI = logHeaders.indexOf("担当者"), memoI = logHeaders.indexOf("内容メモ");
+  var removedLogs = rewriteRows_(logSheet, logHeaders.length, function (row) {
+    if (row[staffI] !== "システム(CTI自動記録)") return false;
+    var m = /担当: ([^)）]*)/.exec(String(row[memoI] || ""));
+    return !m || !keepCall(m[1]);
+  });
+  props.deleteProperty("BLUEBEAN_CDR_SYNCED_AT");
+  props.setProperty(flag, String(Date.now()));
+  console.log("CDRの片付け: 他の組織の通話 " + removedCalls + "件・対応履歴 " + removedLogs + "件を取り除きました");
+}
+
+/** 見出し行の下を読み、shouldRemove が真の行を除いて書き直す。取り除いた件数を返す */
+function rewriteRows_(sheet, width, shouldRemove) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 0;
+  var values = sheet.getRange(2, 1, lastRow - 1, width).getValues();
+  var kept = values.filter(function (row) {
+    return row.join("") === "" ? false : !shouldRemove(row);
+  });
+  var removed = values.filter(function (row) { return row.join("") !== ""; }).length - kept.length;
+  if (removed === 0) return 0;
+  sheet.getRange(2, 1, lastRow - 1, width).clearContent();
+  if (kept.length) sheet.getRange(2, 1, kept.length, width).setValues(kept);
+  return removed;
+}
+
+/** 「電話番号」の列位置(GlowSchema はファイルの読み込み順に左右されないよう、呼ぶときに引く) */
+function ctiPhoneColumnIndex_() {
+  return GlowSchema.CTI_CALL_LOG_HEADERS.indexOf("電話番号");
+}
+
+/** 0で始まる番号を、スプレッドシートで数値に変換されないよう文字列にする */
+function asSheetText_(value) {
+  var v = String(value == null ? "" : value);
+  return /^0\d+$/.test(v) ? "'" + v : v;
+}
+
+/**
+ * 1回限り(2026-10-27): CDRから取り込んだ通話の電話番号が数値になり、先頭の0が消えていた(例 98…)。
+ * 9〜10桁の数値になっている番号の先頭に0を戻す(国内の番号は0で始まる10〜11桁)。
+ */
+function restorePhoneLeadingZeroOnce_(sheet) {
+  var props = PropertiesService.getScriptProperties();
+  var flag = "CTI_PHONE_ZERO_FIX_20261027_DONE";
+  if (props.getProperty(flag)) return;
+  var lastRow = sheet.getLastRow();
+  if (lastRow >= 2) {
+    var range = sheet.getRange(2, ctiPhoneColumnIndex_() + 1, lastRow - 1, 1);
+    var values = range.getValues().map(function (r) {
+      var v = r[0];
+      return [typeof v === "number" && /^\d{9,10}$/.test(String(v)) ? "'0" + v : v];
+    });
+    range.setValues(values);
+  }
+  props.setProperty(flag, String(Date.now()));
+}
+
+var CDR_BACKFILL_DAYS = 30;
+var CDR_CHUNK_DAYS = 5;
+
+/**
+ * 発着信履歴ダウンロードAPI(CDR)でCSVを取る(ソフツー仕様書 V1.3。2026-10-27)。
+ * 入口のベーシック認証は従来のAPIと同じ。lang=en でUTF-8のCSVを受け取る。
+ * CSVに見えない応答(エラー文など)は失敗として扱う。
+ */
+/**
+ * メニュー「GLOW台帳 > BlueBeanのパスワードを更新する」(2026-10-31)。
+ * BlueBeanのパスワードを変えたら、変えた本人がその場でここに入れる(パスワードをメール・チャットで人に渡さない)。
+ * 入れた直後にBlueBeanへ接続して確かめ、つながらなければ元のパスワードに戻す。パスワードはログに出さない。
+ */
+function updateBlueBeanPassword() {
+  var ui = SpreadsheetApp.getUi();
+  var res = ui.prompt("BlueBeanのパスワードを更新",
+    "BlueBeanで変更した新しいパスワードを入力してください。\n(メール・チャットでは送らず、この画面にだけ入力してください)",
+    ui.ButtonSet.OK_CANCEL);
+  if (res.getSelectedButton() !== ui.Button.OK) return;
+  var next = String(res.getResponseText() || "").trim();
+  if (!next) {
+    ui.alert("パスワードが空のため、変更しませんでした。");
+    return;
+  }
+  var props = PropertiesService.getScriptProperties();
+  var prev = props.getProperty("BLUEBEAN_PASSWORD");
+  props.setProperty("BLUEBEAN_PASSWORD", next);
+  var fmt = function (ms) { return Utilities.formatDate(new Date(ms), "Asia/Tokyo", "yyyy-MM-dd HH:mm:ss"); };
+  try {
+    callBlueBeanCdr_(fmt(Date.now() - 60 * 60 * 1000), fmt(Date.now() - 15 * 60 * 1000));
+  } catch (error) {
+    if (prev) props.setProperty("BLUEBEAN_PASSWORD", prev); else props.deleteProperty("BLUEBEAN_PASSWORD");
+    console.warn("BlueBeanのパスワード更新: 接続を確かめられなかったため元に戻しました(ステータス " + (error.statusCode || "不明") + ")");
+    ui.alert("BlueBeanにつながりませんでした。パスワードは元のままです。\n" +
+      "BlueBeanで変更したパスワードと同じかを確かめて、もう一度お試しください。");
+    return;
+  }
+  console.log("BlueBeanのパスワードを更新しました(接続を確認済み)");
+  ui.alert("BlueBeanのパスワードを更新しました。接続も確認できました。");
+}
+
+function callBlueBeanCdr_(startDate, endDate) {
+  var properties = PropertiesService.getScriptProperties();
+  var domain = properties.getProperty("BLUEBEAN_DOMAIN");
+  var username = properties.getProperty("BLUEBEAN_USERNAME");
+  var password = properties.getProperty("BLUEBEAN_PASSWORD");
+  if (!domain || !username || !password) {
+    throw new Error("BLUEBEAN_DOMAIN / BLUEBEAN_USERNAME / BLUEBEAN_PASSWORD が未設定です。スクリプト プロパティで設定してください。");
+  }
+  var headers = {};
+  var basicUser = properties.getProperty("BLUEBEAN_BASIC_USER");
+  var basicPassword = properties.getProperty("BLUEBEAN_BASIC_PASSWORD");
+  if (basicUser && basicPassword) {
+    headers.Authorization = "Basic " + Utilities.base64Encode(basicUser + ":" + basicPassword, Utilities.Charset.UTF_8);
+  }
+  var response = GlowResilience.withRetry(function () {
+    var res = UrlFetchApp.fetch("https://" + domain + "/quick/actions/api.php?action=download_cdr", {
+      method: "post",
+      headers: headers,
+      payload: { username: username, password: password, start_date: startDate, end_date: endDate, lang: "en" },
+      muteHttpExceptions: true
+    });
+    var code = res.getResponseCode();
+    if (code < 200 || code >= 300) {
+      var httpError = new Error("BlueBeanのCDR取得に失敗しました(ステータスコード " + code + "): " +
+        res.getContentText().slice(0, 200));
+      httpError.statusCode = code;
+      throw httpError;
+    }
+    return res;
+  }, {
+    maxAttempts: 3,
+    backoffMs: [2000, 10000],
+    sleepFn: Utilities.sleep,
+    isRetryable: function (error) {
+      return !error.statusCode || GlowResilience.isRetryableHttpStatus(error.statusCode);
+    }
+  });
+  var text = response.getContentText("UTF-8");
+  var trimmed = text.trim();
+  // 期間内に通話が1件もないときは、CSVの代わりに案内文が返る。0件として扱い、取得済み時点を進める
+  if (GlowCtiContent.isCdrNoData(trimmed)) return "";
+  if (trimmed && trimmed.indexOf(",") === -1) {
+    throw new Error("BlueBeanのCDRがCSVではない応答を返しました: " + trimmed.slice(0, 200));
+  }
+  if (/^\s*[\[{]/.test(trimmed) || /<html/i.test(trimmed.slice(0, 200))) {
+    throw new Error("BlueBeanのCDRがCSVではない応答を返しました: " + trimmed.slice(0, 200));
+  }
+  return text;
+}
+
+function callBlueBeanApi_(startDate, endDate, campaignId) {
   return GlowResilience.withRetry(
-    function () { return callBlueBeanApiOnce_(startDate, endDate); },
+    function () { return callBlueBeanApiOnce_(startDate, endDate, campaignId); },
     {
       maxAttempts: 3,
       backoffMs: [2000, 10000],
@@ -144,21 +476,31 @@ function callBlueBeanApi_(startDate, endDate) {
   );
 }
 
-function callBlueBeanApiOnce_(startDate, endDate) {
+function callBlueBeanApiOnce_(startDate, endDate, campaignId) {
   var properties = PropertiesService.getScriptProperties();
   var domain = properties.getProperty("BLUEBEAN_DOMAIN");
   var username = properties.getProperty("BLUEBEAN_USERNAME");
   var password = properties.getProperty("BLUEBEAN_PASSWORD");
-  var campaignId = properties.getProperty("BLUEBEAN_CAMPAIGN_ID");
   if (!domain || !username || !password || !campaignId) {
     throw new Error(
       "BLUEBEAN_DOMAIN / BLUEBEAN_USERNAME / BLUEBEAN_PASSWORD / BLUEBEAN_CAMPAIGN_ID が" +
       "未設定です。スクリプト プロパティで設定してください。"
     );
   }
+  // 2026-10 から BlueBean のサーバー入口に「1回目のログイン」(ベーシック認証)が追加された
+  // (福田さん 2026-10-26: 毎日の初回ログインで2重ログインを求められる)。これが無いと、
+  // APIの手前で 401「Authentication required!」が返る。入口のID/パスワードはスクリプトプロパティ
+  // BLUEBEAN_BASIC_USER / BLUEBEAN_BASIC_PASSWORD に置く(未設定なら従来どおり送らない)
+  var headers = {};
+  var basicUser = properties.getProperty("BLUEBEAN_BASIC_USER");
+  var basicPassword = properties.getProperty("BLUEBEAN_BASIC_PASSWORD");
+  if (basicUser && basicPassword) {
+    headers.Authorization = "Basic " + Utilities.base64Encode(basicUser + ":" + basicPassword, Utilities.Charset.UTF_8);
+  }
   var response = UrlFetchApp.fetch("https://" + domain + "/quick/api/export_customer_call_history.php", {
     method: "post",
     contentType: "application/json",
+    headers: headers,
     payload: JSON.stringify({
       username: username,
       password: password,
@@ -170,8 +512,16 @@ function callBlueBeanApiOnce_(startDate, endDate) {
   });
   var responseCode = response.getResponseCode();
   if (responseCode < 200 || responseCode >= 300) {
+    var body = response.getContentText();
+    var hint = "";
+    if (responseCode === 401 && /Authentication required/i.test(body)) {
+      hint = basicUser
+        ? "BlueBeanの入口のログイン(1回目)が通りません。BLUEBEAN_BASIC_USER / BLUEBEAN_BASIC_PASSWORD が最新か確認してください"
+        : "BlueBeanの入口のログイン(1回目)が必要です。スクリプトプロパティ BLUEBEAN_BASIC_USER / BLUEBEAN_BASIC_PASSWORD を設定してください";
+    }
     var error = new Error(
-      "BlueBean APIの呼び出しに失敗しました(ステータスコード " + responseCode + "): " + response.getContentText()
+      "BlueBean APIの呼び出しに失敗しました(ステータスコード " + responseCode + ")" +
+      (hint ? ": " + hint : ": " + body.slice(0, 300))
     );
     error.statusCode = responseCode;
     throw error;

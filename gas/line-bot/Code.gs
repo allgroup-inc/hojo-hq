@@ -1,0 +1,592 @@
+/**
+ * ミカタ企業台帳 受信エンドポイント(統合版 v1.8)
+ * ① 診断ページ(LIFF)からのPOST → 台帳に1行追記
+ * ② LINE Webhook(会話ボット) → 会社名/代表者名/所在地を聞き取り、確認の上で台帳に追記
+ * ③ サイトのフォーム一括送信(【会社情報登録】+3行)も解析して台帳に自動記録
+ * ④ 通常メッセージへの受付返信もボットが担当(Default一律応答はOFFにする)
+ * ⑤ diag: 技術部の遠隔診断用(SHARED_TOKEN必須)
+ * ⑥ 相談一次受付(v1.4): 「相談」を含むメッセージ → 受付返信+管理者へ即時通知+台帳記録
+ *    (2026-08-04 小柳さん決裁: ボット一次対応 → 小柳さん確認 → 嶺井さんへつなぐ → 訪問)
+ * ⑦ 進め方2択(v1.5): 受付後にクイックリプライ「折返しでOK/急ぎ」→ 緊急度を台帳記録・
+ *    急ぎは🔥通知。専門家相談は表記ゆれ(【】なし・文中)でも反応しGASが一元返信
+ *    (管理画面のキーワード応答はオフにする)
+ * ⑧ v1.6(テスター2人目FB): 相談は分類選択の導線。会社情報登録に業態・電話番号を追加。
+ * ⑨ v1.7(2026-08-31 福田さん依頼): (a)相談・登録のメール同時通知(NOTIFY_EMAILS/
+ *    EXPERT_NOTIFY_EMAILS) (b)経営相談カテゴリ4択→サブ4択の二段選択+専門家相談の分類4択
+ *    (c)会社情報登録テンプレの拡張解析(担当者名・電話番号・メールアドレス)
+ * ⑩ v1.8(2026-10-17 福田さん依頼): (a)テンプレの読み取りを柔軟に(「代表者：」「社名 ◯◯」・
+ *    次の行への記入・見出しなしの返信も読む。読み取りは Template.gs)。読めなかった項目だけを
+ *    1つずつ聞き直し、同じ記入依頼を繰り返さない (b)お客様のメッセージをすべて
+ *    FORWARD_EMAILS の宛先へ転送(送信日時・LINE User ID・本文。自動返信は従来どおり)
+ */
+const SHEET_NAME = '台帳';
+const HEADERS = [
+  '受信日時', 'LINEユーザーID', 'LINE表示名',
+  '会社名', '代表者名', '所在地',
+  '市町村', '業種', '従業員数', '経営テーマ', '10年後',
+  'マッチ件数', '承継シグナル', '融資シグナル', '経路',
+];
+const CONV_TTL_SEC = 1800;
+const INFO_ASK = {
+  company: '「会社名」だけ教えてください(例: 株式会社◯◯)',
+  ceo: '「代表者名」だけ教えてください(例: 山田 太郎)',
+};
+const RECEIPT_MSG =
+  'メッセージを受け取りました🌺\n' +
+  '内容を確認のうえ、担当より1営業日以内にご連絡いたします。\n\n' +
+  '補助金や経営のことで聞きたいことがあれば、「相談」と一言送ってください。無料で、売り込みもしません。';
+const CONSULT_MSG =
+  'ご相談を受け付けました🌺\n' +
+  'どんなご相談か、近いものを下のボタンから選んでください。\n' +
+  '(そのまま文章で送っていただいてもOKです)\n\n' +
+  '※相談は無料です。申請の代行はできませんが、準備の進め方のご案内や、合う専門家のご紹介までお手伝いします。';
+// 相談の分類4択(v1.7: 福田さん依頼❹で経営相談のカテゴリに刷新。選択は台帳に貯まる)
+const CONSULT_CATS = [
+  ['新規事業・事業承継について', '新規事業・事業承継について'],
+  ['人材・組織について', '人材・組織について'],
+  ['資金・経営改善について', '資金・経営改善について'],
+  ['助成金について', '助成金について'],
+];
+// カテゴリ選択後のサブ4択(v1.7)。手打ちの長文にならず、選ぶだけで相談内容が絞れる
+const CONSULT_SUBCATS = {
+  '新規事業・事業承継について': [
+    ['新規事業を始めたい', '新規事業を始めたい'],
+    ['事業承継・引き継ぎについて', '事業承継・引き継ぎについて'],
+    ['M&A(会社・事業の売買)について', 'M&A(会社・事業の売買)について'],
+    ['後継者について相談したい', '後継者について相談したい'],
+  ],
+  '人材・組織について': [
+    ['採用について', '採用について'],
+    ['人材育成・定着について', '人材育成・定着について'],
+    ['労務・働き方について', '労務・働き方について'],
+    ['組織づくりについて', '組織づくりについて'],
+  ],
+  '資金・経営改善について': [
+    ['資金繰りについて', '資金繰りについて'],
+    ['融資・資金調達について', '融資・資金調達について'],
+    ['売上・利益を改善したい', '売上・利益を改善したい'],
+    ['経営計画について相談したい', '経営計画について相談したい'],
+  ],
+  '助成金について': [
+    ['使える補助金・助成金を知りたい', '使える補助金・助成金を知りたい'],
+    ['申請のやり方を知りたい', '申請のやり方を知りたい'],
+    ['採択後の手続きについて', '採択後の手続きについて'],
+    ['その他の補助金のこと', 'その他の補助金のこと'],
+  ],
+};
+// 専門家相談の分類4択(v1.7: 専門家相談もクリック選択型で回答できるようにする)
+const EXPERT_CATS = [
+  ['補助金の申請サポートについて', '補助金の申請サポートについて'],
+  ['事業承継・M&Aについて', '事業承継・M&Aについて'],
+  ['税務・会計について', '税務・会計について'],
+  ['その他の専門相談', 'その他の専門相談'],
+];
+// 進め方2択(v1.5): [ボタンの表示, 送信されるテキスト]。選択は台帳に記録され緊急度データになる
+const CONSULT_CHOICES = [
+  ['担当からの折返しでOK', '折返し希望'],
+  ['急ぎで話を聞きたい', '急ぎで相談したい'],
+];
+// 業態の選択肢(v1.6・サイトの診断と同じ区分)
+const BIZ_CHOICES = [
+  ['飲食・宿泊', '飲食・宿泊'], ['小売・卸売', '小売・卸売'],
+  ['建設', '建設'], ['製造', '製造'],
+  ['情報通信・IT', '情報通信・IT'], ['医療・福祉', '医療・福祉'],
+  ['サービス', 'サービス'], ['その他', 'その他'],
+];
+
+function doPost(e) {
+  let body;
+  try {
+    body = JSON.parse(e.postData.contents);
+  } catch (_) {
+    return json_({ ok: false, error: 'bad json' });
+  }
+  if (body.diag === 'linetoken') return diagLineToken_(body);
+  if (body.diag === 'setprop') return diagSetProp_(body);
+  if (Array.isArray(body.events)) return handleLineWebhook_(body);
+  return handleLedgerPost_(body);
+}
+
+/* 技術部の遠隔設定用(SHARED_TOKEN必須)。ADMIN_USER_ID等をチャットに出さずに登録する */
+function diagSetProp_(body) {
+  const props = PropertiesService.getScriptProperties();
+  if (body.token !== props.getProperty('SHARED_TOKEN')) {
+    return json_({ ok: false, error: 'unauthorized' });
+  }
+  if (!body.key || body.key === 'SHARED_TOKEN') {
+    return json_({ ok: false, error: 'bad key' });
+  }
+  props.setProperty(String(body.key), String(body.value || ''));
+  return json_({ ok: true, key: String(body.key) });
+}
+
+/* ---------- 診断用(技術部が遠隔で叩く。healthcheckの死活監視にも使用) ---------- */
+function diagLineToken_(body) {
+  const props = PropertiesService.getScriptProperties();
+  if (body.token !== props.getProperty('SHARED_TOKEN')) {
+    return json_({ ok: false, error: 'unauthorized' });
+  }
+  const t = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN') || '';
+  const res = UrlFetchApp.fetch('https://api.line.me/v2/bot/info', {
+    headers: { Authorization: 'Bearer ' + t },
+    muteHttpExceptions: true,
+  });
+  return json_({ ok: true, tokenLen: t.length, status: res.getResponseCode(), info: res.getContentText() });
+}
+
+/* ---------- ① 診断POST ---------- */
+function handleLedgerPost_(body) {
+  const props = PropertiesService.getScriptProperties();
+  const expected = props.getProperty('SHARED_TOKEN');
+  if (!expected || body.token !== expected) {
+    return json_({ ok: false, error: 'unauthorized' });
+  }
+  const a = body.answers || {};
+  const themes = Array.isArray(a.themes) ? a.themes : [];
+  const shokei = themes.includes('shokei') ||
+    ['hikitsugi', 'joto'].includes(a.future) ? '●' : '';
+  const yushi = themes.includes('shikin') ? '●' : '';
+  getSheet_().appendRow([
+    new Date(), String(body.userId || ''), String(body.displayName || ''),
+    String(body.company || ''), String(body.ceo || ''), String(body.address || ''),
+    String(a.area || ''), String(a.biz || ''), String(a.emp || ''),
+    themes.join(','), String(a.future || ''),
+    Number(body.matchedCount || 0), shokei, yushi,
+    String(body.source || 'diagnosis'),
+  ]);
+  return json_({ ok: true });
+}
+
+/* ---------- ② LINE会話ボット ---------- */
+function handleLineWebhook_(body) {
+  (body.events || []).forEach(function (ev) {
+    try {
+      if (ev.type === 'message' && ev.message && ev.message.type === 'text') {
+        forwardMessage_(ev.source.userId, ev.message.text, ev.timestamp);
+        routeMessage_(ev.source.userId, ev.message.text, ev.replyToken);
+      }
+    } catch (err) { /* 1件の失敗で全体を落とさない */ }
+  });
+  return json_({ ok: true });
+}
+
+function routeMessage_(userId, text, replyToken) {
+  if (!userId) return;
+  const cache = CacheService.getScriptCache();
+  const key = 'conv_' + userId;
+  const raw = cache.get(key);
+  const full = String(text || '');
+  const t = full.trim();
+
+  // 会話トリガー(トリガー語のみの送信)は下で扱うため、ここでは除く
+  const isTrigger = /^【?会社情報登録】?$/.test(t);
+
+  // ③ サイトのフォーム一括送信・リッチメニューのテンプレ送信(【会社情報登録】+項目行)
+  //    v1.8: 書き方の揺れを許し、見出しなしで「会社名：◯◯」等を返信された場合も登録として受ける
+  if (!isTrigger) {
+    const info = parseCompanyInfo_(full);
+    const looksLikeInfo = info.hasHeader || ((info.company || info.ceo) && info.labeled >= 1);
+    if (looksLikeInfo) {
+      handleCompanyInfo_(userId, info, replyToken, cache, key, raw ? JSON.parse(raw) : {});
+      return;
+    }
+  }
+
+  // 会話トリガー(トリガー語のみの送信)
+  if (isTrigger) {
+    cache.put(key, JSON.stringify({ step: 'company' }), CONV_TTL_SEC);
+    reply_(replyToken,
+      'ありがとうございます!3つだけ教えてください😊\n\n' +
+      '① まず「会社名」をお願いします(例: 株式会社◯◯)\n\n' +
+      '※途中でやめる場合は「やめる」と送ってください');
+    return;
+  }
+
+  if (raw) {
+    if (t === 'やめる' || t === 'キャンセル') {
+      cache.remove(key);
+      reply_(replyToken, '中断しました。また登録する時は【会社情報登録】と送ってください🌺');
+      return;
+    }
+    const st = JSON.parse(raw);
+    // v1.8: テンプレから来た登録は、足りない項目だけ聞いて記録する(業態・電話は聞き直さない)
+    if (st.fromTemplate && (st.step === 'company' || st.step === 'ceo')) {
+      st[st.step] = stripInfoLabel_(t);
+      continueCompanyInfo_(userId, st, replyToken, cache, key);
+      return;
+    }
+    if (st.step === 'company') {
+      st.company = stripInfoLabel_(t); st.step = 'ceo';
+      cache.put(key, JSON.stringify(st), CONV_TTL_SEC);
+      reply_(replyToken, '② 次に「代表者名」をお願いします');
+    } else if (st.step === 'ceo') {
+      st.ceo = stripInfoLabel_(t); st.step = 'city';
+      cache.put(key, JSON.stringify(st), CONV_TTL_SEC);
+      reply_(replyToken, '③ 最後に「所在地の市町村」をお願いします(例: 那覇市)');
+    } else if (st.step === 'city') {
+      // v1.6: 業態をボタン選択(テスターFB: 選択式で時間短縮+データ化)
+      st.city = stripInfoLabel_(t); st.step = 'biz';
+      cache.put(key, JSON.stringify(st), CONV_TTL_SEC);
+      reply_(replyToken, '④ 業態を下から選んでください(近いものでOKです)', BIZ_CHOICES);
+    } else if (st.step === 'biz') {
+      st.biz = t; st.step = 'tel';
+      cache.put(key, JSON.stringify(st), CONV_TTL_SEC);
+      reply_(replyToken,
+        '⑤ お電話番号をお願いします(任意です。入力したくない場合は「スキップ」を押してください)',
+        [['スキップ', 'スキップ']]);
+    } else if (st.step === 'tel') {
+      // v1.3: すぐ記録せず、内容を復唱して確認を取る(雑談等の誤記録防止)
+      st.tel = (t === 'スキップ') ? '' : t;
+      st.step = 'confirm';
+      cache.put(key, JSON.stringify(st), CONV_TTL_SEC);
+      reply_(replyToken,
+        '内容の確認です😊\n\n' +
+        '会社名：' + st.company + '\n' +
+        '代表者名：' + st.ceo + '\n' +
+        '所在地：' + st.city + '\n' +
+        '業態：' + (st.biz || '未選択') + '\n' +
+        '電話：' + (st.tel || '(未記入)') + '\n\n' +
+        'この内容でよろしければ「はい」、\n直す場合は「やり直す」と送ってください');
+    } else if (st.step === 'confirm') {
+      if (t === 'はい' || t === 'ハイ' || t === 'OK' || t === 'ok') {
+        cache.remove(key);
+        const profile = getProfile_(userId);
+        getSheet_().appendRow([
+          new Date(), userId, profile.displayName || '',
+          st.company || '', st.ceo || '', st.city || '',
+          st.city || '', st.biz || '', '', '', '', 0, '', '', 'line-chat',
+          st.tel ? 'TEL: ' + st.tel : '',
+        ]);
+        reply_(replyToken,
+          '登録ありがとうございます!✅\n' +
+          st.company + ' 様の情報を承りました。\n\n' +
+          '貴社が使える可能性のある制度が出たら、締切の約1か月前からLINEでお知らせします🌺\n' +
+          '専門家に相談したい時は【専門家相談】と送ってください。');
+      } else if (t === 'やり直す' || t === 'やりなおす' || t === 'やり直し') {
+        cache.put(key, JSON.stringify({ step: 'company' }), CONV_TTL_SEC);
+        reply_(replyToken, 'では最初からどうぞ😊\n\n① まず「会社名」をお願いします');
+      } else {
+        reply_(replyToken, '「はい」または「やり直す」でお答えください😊\n(登録をやめる場合は「やめる」)');
+      }
+    }
+    return;
+  }
+
+  // ⑧ 相談の分類4択の受信(v1.7): カテゴリを記録→サブ4択へ(手打ちの長文を防ぐ二段選択)
+  if (CONSULT_CATS.some(function (c) { return c[1] === t; })) {
+    logConsultCategory_(userId, t);
+    cache.put('subcat_' + userId, t, CONV_TTL_SEC);
+    reply_(replyToken,
+      '「' + t + '」ですね、ありがとうございます。\n' +
+      'どのようなご相談ですか?下から選んでください👇',
+      CONSULT_SUBCATS[t] || CONSULT_CHOICES);
+    return;
+  }
+
+  // ⑧' サブ分類の受信(v1.7): 「カテゴリ > サブ分類」で台帳に記録→進め方2択へ
+  const allSubcats = Object.keys(CONSULT_SUBCATS).reduce(function (acc, cat) {
+    return acc.concat(CONSULT_SUBCATS[cat].map(function (s) { return s[1]; }));
+  }, []);
+  if (allSubcats.indexOf(t) !== -1) {
+    const parent = cache.get('subcat_' + userId) || '';
+    cache.remove('subcat_' + userId);
+    logConsultCategory_(userId, (parent ? parent + ' > ' : '') + t);
+    reply_(replyToken,
+      '「' + t + '」ですね、承知しました。\n進め方を下から選んでください👇',
+      CONSULT_CHOICES);
+    return;
+  }
+
+  // ⑨ 専門家相談の分類4択の受信(v1.7): 分類を記録→進め方2択へ。専門家へもメール共有
+  if (EXPERT_CATS.some(function (c) { return c[1] === t; })) {
+    logConsultCategory_(userId, '専門家相談 > ' + t);
+    notifyEmail_('【ミカタ】専門家相談の分類: ' + t,
+      'お名前(LINE表示名): ' + (getProfile_(userId).displayName || '') + '\n分類: ' + t, true);
+    reply_(replyToken,
+      '「' + t + '」ですね、承知しました。\n進め方を下から選んでください👇',
+      CONSULT_CHOICES);
+    return;
+  }
+
+  // ⑦ 進め方2択の受信(v1.5): 緊急度を台帳に記録。急ぎは🔥で優先通知
+  if (t === '折返し希望') {
+    logConsultChoice_(userId, '折返し希望');
+    // v1.7.1(福田さんFB): 連絡手段がLINEに限られないよう、連絡先のヒアリングを追加。
+    // 送られた連絡先は相談モード(6時間)の転送でメール・管理者LINEに届く
+    reply_(replyToken,
+      '承知しました。1営業日以内に、担当からご連絡します🌺\n\n' +
+      'お電話でのご連絡をご希望の場合は、電話番号とつながりやすい時間帯をこのまま送ってください。\n' +
+      '(このままLINEでのやり取りをご希望の場合は、そのままで大丈夫です)');
+    return;
+  }
+  if (t === '急ぎで相談したい') {
+    logConsultChoice_(userId, '急ぎ');
+    reply_(replyToken,
+      'お急ぎとのこと、承知しました。担当からできるだけ早くご連絡します。\n' +
+      'つながりやすい電話番号か、ご都合のよい時間帯をこのまま送っていただけるとスムーズです。');
+    return;
+  }
+
+  // 専門家相談(v1.5: 【】なし・文中でも反応。返信もGASが担当=管理画面のキーワード応答はオフ)
+  if (/専門家相談|事業承継相談|引き継ぎのご相談/.test(t)) {
+    recordConsult_(userId, t, replyToken, '専門家相談');
+    return;
+  }
+
+  // ⑥ 相談一次受付(v1.4): 「相談」を含むメッセージは相談として受け付ける
+  if (/相談/.test(t)) {
+    recordConsult_(userId, t, replyToken);
+    return;
+  }
+
+  // ⑥' 相談モード中(受付から6時間)の続きのメッセージも、そのまま小柳さんへ転送する
+  if (cache.get('consult_' + userId)) {
+    notifyAdmin_('📞【相談の続き】\nお名前: ' + (getProfile_(userId).displayName || '') + '\n内容: ' + t);
+    notifyEmail_('【ミカタ】相談の続き',
+      'お名前(LINE表示名): ' + (getProfile_(userId).displayName || '') + '\n内容: ' + t, false);
+    reply_(replyToken, '承りました。担当からの返信をお待ちください🌺');
+    return;
+  }
+
+  // ④ 通常メッセージ: 受付返信(Default一律応答の代役)。
+  reply_(replyToken, RECEIPT_MSG);
+}
+
+/* ③ v1.8 テンプレ・項目つきの返信を受けたとき: 読めた分を保持し、足りない項目だけ聞く */
+function handleCompanyInfo_(userId, info, replyToken, cache, key, prev) {
+  // 会話の途中で項目つきの返信が来た場合は、それまでに聞けた内容を引き継ぐ
+  const st = { fromTemplate: true };
+  ['company', 'ceo', 'city', 'contact', 'tel', 'mail'].forEach(function (f) {
+    st[f] = info[f] || prev[f] || '';
+  });
+  // 何も読めなかった(空のテンプレ)ときは、記入のお願いを1回だけ出し、2回目からは1問ずつ聞く
+  const nothing = !st.company && !st.ceo && !st.contact && !st.tel && !st.mail && !st.city;
+  if (nothing && info.rest.length === 0) {
+    if (!cache.get('tplask_' + userId)) {
+      cache.put('tplask_' + userId, '1', CONV_TTL_SEC);
+      reply_(replyToken,
+        'テンプレートをお送りいただきありがとうございます😊\n' +
+        '「会社名：」「代表者名：」の後ろにご記入のうえ、もう一度送信してください。\n' +
+        '(1つずつ答える形がよければ、会社名だけをそのまま送ってください)');
+      cache.put(key, JSON.stringify({ fromTemplate: true, step: 'company' }), CONV_TTL_SEC);
+      return;
+    }
+  }
+  // 項目名なしで書かれた行(例: 1行目に社名、2行目に代表者名)は、内容を確認してから記録する
+  if (!st.company && !st.ceo && info.rest.length >= 2) {
+    cache.put(key, JSON.stringify({
+      step: 'confirm', company: info.rest[0], ceo: info.rest[1], city: st.city,
+      biz: '', tel: st.tel,
+    }), CONV_TTL_SEC);
+    reply_(replyToken,
+      'ありがとうございます😊 次の内容で登録してよろしいですか?\n\n' +
+      '会社名：' + info.rest[0] + '\n代表者名：' + info.rest[1] + '\n\n' +
+      'よろしければ「はい」、直す場合は「やり直す」と送ってください');
+    return;
+  }
+  if (!st.company && !st.ceo && info.rest.length === 1) st.company = info.rest[0];
+  continueCompanyInfo_(userId, st, replyToken, cache, key);
+}
+
+function continueCompanyInfo_(userId, st, replyToken, cache, key) {
+  const missing = missingInfoFields_(st);
+  if (missing.length) {
+    st.step = missing[0];
+    cache.put(key, JSON.stringify(st), CONV_TTL_SEC);
+    const got = [st.company ? '会社名：' + st.company : '', st.ceo ? '代表者名：' + st.ceo : '']
+      .filter(String).join('\n');
+    reply_(replyToken,
+      (got ? 'ありがとうございます😊 次の内容は承りました。\n' + got + '\n\n' : 'ありがとうございます😊\n') +
+      (missing.length === 1 ? 'あと1つだけ、' : 'まず、') + INFO_ASK[missing[0]] + '\n\n※途中でやめる場合は「やめる」と送ってください');
+    return;
+  }
+  cache.remove(key);
+  cache.remove('tplask_' + userId);
+  saveCompanyInfo_(userId, st);
+  reply_(replyToken,
+    '登録ありがとうございます!✅\n' +
+    st.company + ' 様の情報を承りました。\n\n' +
+    '貴社が使える可能性のある制度が出たら、締切の約1か月前からLINEでお知らせします🌺\n' +
+    '専門家に相談したい時は【専門家相談】と送ってください。');
+}
+
+/* テンプレ経由の登録を台帳へ記録(経路line-form)+メール通知 */
+function saveCompanyInfo_(userId, st) {
+  const extras = [
+    st.contact ? '担当: ' + st.contact : '',
+    st.tel ? 'TEL: ' + st.tel : '',
+    st.mail ? 'MAIL: ' + st.mail : '',
+  ].filter(String).join(' / ');
+  const profile = getProfile_(userId);
+  getSheet_().appendRow([
+    new Date(), userId, profile.displayName || '',
+    st.company, st.ceo, st.city || '',
+    st.city || '', '', '', '', '', 0, '', '', 'line-form', extras,
+  ]);
+  notifyEmail_('【ミカタ】会社情報登録: ' + st.company,
+    '会社名: ' + st.company + '\n代表者名: ' + st.ceo + '\n所在地: ' + (st.city || '') +
+    (extras ? '\n' + extras : '') + '\nLINE表示名: ' + (profile.displayName || ''), false);
+}
+
+/* v1.8(福田さん依頼): お客様から届いたメッセージを、そのままメールで転送する。
+ * 宛先はスクリプトプロパティ FORWARD_EMAILS(カンマ区切り)。未設定なら何もしない。
+ * お客様への自動返信は変えない(転送に失敗しても返信は止めない) */
+function forwardMessage_(userId, text, timestamp) {
+  try {
+    const to = String(PropertiesService.getScriptProperties().getProperty('FORWARD_EMAILS') || '').trim();
+    if (!to || !userId) return;
+    const when = Utilities.formatDate(timestamp ? new Date(timestamp) : new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm');
+    const name = getProfile_(userId).displayName || '';
+    MailApp.sendEmail({
+      to: to,
+      subject: '【ミカタLINE】お客様からのメッセージ' + (name ? '(' + name + ' 様)' : ''),
+      body: '送信日時：' + when + '\n' +
+        '送信者：' + userId + (name ? '(LINE表示名: ' + name + ')' : '') + '\n' +
+        'メッセージ：\n' + String(text || '') + '\n\n' +
+        '※返信はLINE公式アカウントのチャットから行ってください(このメールへの返信はお客様に届きません)',
+      noReply: true,
+    });
+  } catch (err) {
+    console.error('メッセージ転送に失敗しました: ' + err);
+  }
+}
+
+/* ⑥ 相談の一次受付: 受付返信(2択ボタン付き)+小柳さんへ即時通知+台帳に経路line-consultで記録 */
+function recordConsult_(userId, text, replyToken, kind) {
+  const profile = getProfile_(userId);
+  const name = profile.displayName || '(表示名なし)';
+  // 相談モード(6時間): この間の続きのメッセージも管理者へ転送する
+  CacheService.getScriptCache().put('consult_' + userId, '1', 21600);
+  // 台帳16列目(P列)に相談メッセージ本文を残す(相談件数のKPI集計にも使う)
+  getSheet_().appendRow([
+    new Date(), userId, name,
+    '', '', '', '', '', '', '', '', 0, '', '', 'line-consult', text,
+  ]);
+  // v1.7: 専門家相談は専門家向けの分類4択、それ以外は経営相談のカテゴリ4択
+  if (replyToken) reply_(replyToken, CONSULT_MSG, kind === '専門家相談' ? EXPERT_CATS : CONSULT_CATS);
+  notifyAdmin_(
+    '📞【' + (kind || '相談') + 'の一次受付】\n' +
+    'お名前: ' + name + '\n' +
+    '内容: ' + text + '\n\n' +
+    '台帳に記録済み(経路line-consult)。\n' +
+    '返信はLINE公式アカウントアプリのチャットから。対応後、必要なら嶺井さんへおつなぎください。');
+  // v1.7(福田さん依頼❶): 指定メールアドレスへも同時通知。専門家相談は掲載専門家にも共有
+  notifyEmail_('【ミカタ】' + (kind || '相談') + 'の一次受付',
+    'お名前(LINE表示名): ' + name + '\n内容: ' + text +
+    '\n\n※返信はLINE公式アカウントのチャットから行ってください(このメールへの返信は本人に届きません)',
+    kind === '専門家相談');
+}
+
+/* ⑧ 相談の分類の記録(v1.6): 台帳P列「分類: ◯◯」。通知は出さない(受付・緊急度と重複させない) */
+function logConsultCategory_(userId, cat) {
+  const profile = getProfile_(userId);
+  const name = profile.displayName || '(表示名なし)';
+  CacheService.getScriptCache().put('consult_' + userId, '1', 21600);
+  getSheet_().appendRow([
+    new Date(), userId, name,
+    '', '', '', '', '', '', '', '', 0, '', '', 'line-consult', '分類: ' + cat,
+  ]);
+}
+
+/* ⑦ 進め方2択の記録: 緊急度を台帳へ(P列「選択: ◯◯」)。急ぎは🔥で優先通知 */
+function logConsultChoice_(userId, choice) {
+  const profile = getProfile_(userId);
+  const name = profile.displayName || '(表示名なし)';
+  CacheService.getScriptCache().put('consult_' + userId, '1', 21600);
+  getSheet_().appendRow([
+    new Date(), userId, name,
+    '', '', '', '', '', '', '', '', 0, '', '', 'line-consult', '選択: ' + choice,
+  ]);
+  notifyAdmin_(
+    (choice === '急ぎ'
+      ? '🔥【相談・お急ぎ】優先対応をお願いします\n'
+      : '⏱【相談・折返し希望】1営業日以内の折返しで大丈夫です\n') +
+    'お名前: ' + name);
+  notifyEmail_(
+    choice === '急ぎ' ? '🔥【ミカタ】相談・お急ぎ(優先対応)' : '【ミカタ】相談・折返し希望',
+    'お名前(LINE表示名): ' + name + '\n進め方: ' + choice, false);
+}
+
+/* v1.7(福田さん依頼❶): 指定メールアドレスへの通知。
+ * スクリプトプロパティで宛先を管理する(コード変更なしで宛先を変えられる):
+ *   NOTIFY_EMAILS        … 運営側の宛先(カンマ区切り。福田さんのOutlook等)
+ *   EXPERT_NOTIFY_EMAILS … 掲載専門家の宛先(カンマ区切り。専門家相談のときだけ同時共有)
+ * どちらも未設定なら静かにスキップ(メール不達でLINE返信を止めない) */
+function notifyEmail_(subject, body, includeExperts) {
+  try {
+    const props = PropertiesService.getScriptProperties();
+    let to = String(props.getProperty('NOTIFY_EMAILS') || '').trim();
+    if (includeExperts) {
+      const experts = String(props.getProperty('EXPERT_NOTIFY_EMAILS') || '').trim();
+      if (experts) to = to ? to + ',' + experts : experts;
+    }
+    if (!to) return;
+    MailApp.sendEmail({ to: to, subject: subject, body: body, noReply: true });
+  } catch (err) {
+    console.error('メール通知に失敗しました: ' + err);
+  }
+}
+
+/* 管理者(小柳さん)のLINEへプッシュ通知。ADMIN_USER_ID未設定時は静かにスキップ */
+function notifyAdmin_(text) {
+  const props = PropertiesService.getScriptProperties();
+  const token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+  const admin = props.getProperty('ADMIN_USER_ID');
+  if (!token || !admin) return;
+  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + token },
+    payload: JSON.stringify({ to: admin, messages: [{ type: 'text', text: text }] }),
+    muteHttpExceptions: true,
+  });
+}
+
+function reply_(replyToken, text, quick) {
+  const token = PropertiesService.getScriptProperties()
+    .getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+  if (!token || !replyToken) return;
+  const msg = { type: 'text', text: text };
+  // v1.5: クイックリプライ(返信欄の上に出る選択ボタン)。quick=[[表示, 送信テキスト], ...]
+  if (quick && quick.length) {
+    msg.quickReply = { items: quick.map(function (q) {
+      return { type: 'action', action: { type: 'message', label: q[0], text: q[1] } };
+    }) };
+  }
+  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + token },
+    payload: JSON.stringify({ replyToken: replyToken, messages: [msg] }),
+    muteHttpExceptions: true,
+  });
+}
+
+function getProfile_(userId) {
+  try {
+    const token = PropertiesService.getScriptProperties()
+      .getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+    const res = UrlFetchApp.fetch('https://api.line.me/v2/bot/profile/' + userId, {
+      headers: { Authorization: 'Bearer ' + token },
+      muteHttpExceptions: true,
+    });
+    return JSON.parse(res.getContentText());
+  } catch (_) { return {}; }
+}
+
+/* ---------- 共通 ---------- */
+function getSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_NAME);
+    sheet.appendRow(HEADERS);
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function json_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}

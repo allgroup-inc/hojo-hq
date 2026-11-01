@@ -66,6 +66,13 @@ def section_site_ga4():
                          + " / ".join(f"{ch} {e}回" for ch, e, _ in br))
         else:
             lines.append("・LINE登録ボタンのタップ: 0回")
+        # 印刷物の固定QR(サイト・SNSへ転送する分)。LINEへのQR(card)は上のLINE欄に入る
+        qr = ga4_client.channel_breakdown(token, go_prop, "7daysAgo", "today", "qr_redirect")
+        if qr:
+            lines.append("・固定QRの読み取り(LINE以外): "
+                         + " / ".join(f"{ch} {e}回" for ch, e, _ in qr))
+        elif qr is not None:
+            lines.append("・固定QRの読み取り(LINE以外): 0回")
     else:
         lines.append("・LINE登録タップ内訳: 未接続(GA4_PROPERTY_ID未設定)")
     return "\n".join(lines)

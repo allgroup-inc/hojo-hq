@@ -1,0 +1,5 @@
+{"ts": "2026-10-13T11:51:08Z", "session_id": "49a3f596-a2af-5b85-881f-1a56aeb81a02", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "git"}
+{"ts": "2026-10-13T11:51:11Z", "session_id": "49a3f596-a2af-5b85-881f-1a56aeb81a02", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "git"}
+{"ts": "2026-10-13T11:54:44Z", "session_id": "49a3f596-a2af-5b85-881f-1a56aeb81a02", "event": "session_end", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "commits": [], "tools": {"Bash": 11}, "skills": [], "duration_s": 0, "reason": "other"}
+{"ts": "2026-10-13T12:04:26Z", "session_id": "49a3f596-a2af-5b85-881f-1a56aeb81a02", "event": "session_start", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "source": "resume", "head": "0ac01eb70ab04dc1360eddd19664e6a4080012aa"}
+{"ts": "2026-10-13T12:04:50Z", "session_id": "49a3f596-a2af-5b85-881f-1a56aeb81a02", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "main", "tool": "Bash", "program": "git"}

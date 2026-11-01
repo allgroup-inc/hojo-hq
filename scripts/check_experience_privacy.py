@@ -14,6 +14,20 @@
   - 本文が check_repo_scope.FORBIDDEN_CONTENT に触れる(禁止語リストは二重管理しない)
   - program が `^[A-Za-z0-9._+-]{1,32}$` の形でない・鍵の断片らしい(<unknown> と <external> は許可)
   - 未知の event 名 / JSON オブジェクトでない行 / JSON として読めない行
+  - skill_failure(Skill の失敗)は、記録してよい項目以外(error 本文など)と、秘密情報の形を含む値を止める
+
+ignore と追跡状態(決裁 #26 S2 PR-D・2026-10-08):
+  - 記録パス(.claude/experience/<月>/*.jsonl)が .gitignore で除外されていたら止める。
+    2026-10-08 に別セッションの直接 push(802a00cbf)が `.claude/experience/` を ignore に足し、
+    記録が Git に残らず、この検査も空振りで緑になった(PR #450 で修復)。CODEOWNERS は承認を求めるだけで
+    壊す変更そのものは止めないので、ここで機械的に止める。
+  - ローカル限定のもの(_local/ と _audit.log)は ignore 必須。ignore されていない・既に追跡されている、のどちらも止める。
+  - 判定は git 自身(`git check-ignore --no-index`)に任せる(.gitignore の文字列検査では別の書き方をすり抜ける)。
+    利用者ごとの global excludes は見ない(core.excludesFile を空にする)= コミットされた .gitignore だけを検査する。
+  - 追跡済みの記録ファイル全件(ローカル限定を除く)も ignore されていないことを検査する(S2 PR-D3・2026-10-09)。
+    探り用パス 1 つの代表検査では、月(.claude/experience/2026-10/)や part(*.part1.jsonl)を狙った除外を見逃すため。
+    判定は `-v` 無しの `check-ignore --stdin -z`(出力 = ignore されたパスそのもの)で行い、`-v` は違反の理由を
+    添えるためだけに使う(`-v` は否定パターン `!` で再包含されただけのパスも出力し、終了コードも 0 になる。実測)。
 
 使い方:
     python3 scripts/check_experience_privacy.py            # git 管理下の Experience を検査(cwd が対象リポ)
@@ -38,15 +52,44 @@ MAX_FIELD = 500
 MAX_NOTE = 1000
 
 EXPERIENCE_DIR = ".claude/experience"
-VALID_EVENTS = {"session_start", "session_resume", "tool", "skill", "note", "session_end"}
+VALID_EVENTS = {"session_start", "session_resume", "tool", "skill", "skill_failure", "note", "session_end"}
 PLACEHOLDERS = {"<external>", "<unknown>"}
 _DRIVE = re.compile(r"^[A-Za-z]:")
+
+# skill_failure(PostToolUseFailure の Skill 失敗)は、記録側 experience_log.build_failure_event が書く項目だけを通す。
+# error 本文などの自由記述は記録しない設計なので、ここでは項目を限定し、残った文字列に秘密情報の形がないかを検査する。
+# 既存のイベント(skill・tool など)には適用しない(既存の扱いを変えないため)。
+SKILL_FAILURE_FIELDS = frozenset({
+    "ts", "session_id", "event", "repo", "visibility", "branch",
+    "skill", "skill_key", "skill_version", "duration_ms", "interrupted",
+})
+# 違反の理由には、一致した値そのものを出さない(CI のログに秘密を残さないため)。規則名だけを出す。
+_SKILL_FAILURE_SECRET_RULES = {
+    "鍵の接頭辞": re.compile(
+        r"\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}"
+        r"|xox[abprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{30,})"),
+    "資格情報の代入": re.compile(r"(?i)\b(?:api[_-]?key|secret|token|password|passwd)\s*[:=]\s*\S{6,}"),
+    "bearer トークン": re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._\-]{16,}"),
+    "秘密鍵": re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+    "メールアドレス": re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"),
+    "URL 内の資格情報": re.compile(r"https?://[^\s/@]+:[^\s/@]+@"),
+    "40 文字以上の連続トークン": re.compile(r"[A-Za-z0-9_\-]{40,}"),
+}
+
+# ignore と追跡状態の検査対象(パスは存在しなくてよい。git check-ignore はパターンだけで判定する)
+RECORD_PROBE = f"{EXPERIENCE_DIR}/2026-01/session-probe.jsonl"   # 記録パス: ignore されてはいけない
+MUST_IGNORE = (                                                    # ローカル限定: ignore 必須・追跡禁止
+    f"{EXPERIENCE_DIR}/_local/probe",
+    f"{EXPERIENCE_DIR}/_audit.log",
+)
 
 HINT = """
 Experience 記録は【公開リポジトリにそのまま載る】ものです。公開して問題のある内容は残せません。
   - 記録してよいのは hojo-hq の、プロジェクト内の相対パスとプログラム名など、機械が観測した事実だけ
   - 他リポ・private の記録 / 絶対パス / 長い本文 / 禁止語を含む行は、コミットから外してください
   - 該当ファイルを直す(または git rm する)か、記録自体を止めるなら .claude/memory.off を置いてください
+  - .gitignore の違反: 記録パス(.claude/experience/<月>/*.jsonl)は除外しない / _local/ と _audit.log は除外する。
+    記録自体を止めたいときは .gitignore ではなく .claude/memory.off を使ってください
 
   詳細: docs/wikiskill/README.md
 """
@@ -125,6 +168,16 @@ def check_record(rec, path: str) -> list[str]:
         if len(value) > limit:
             problems.append(f"{key} の文字列が {limit} 文字を超えています({len(value)} 文字)")
 
+    if event == "skill_failure":
+        extra = sorted(str(k)[:40] for k in rec if k not in SKILL_FAILURE_FIELDS)
+        if extra:
+            problems.append(f"skill_failure に許可されていない項目があります: {extra[:5]}")
+        for key, value in strings:
+            for rule, pat in _SKILL_FAILURE_SECRET_RULES.items():
+                if pat.search(value):
+                    problems.append(f"skill_failure の {key} に秘密情報らしい値があります({rule})")
+                    break
+
     word = find_content_violations(path, json.dumps(rec, ensure_ascii=False))
     if word:
         problems.append(f"本文の禁止語: {word}")
@@ -146,16 +199,68 @@ def _is_target(rel: str) -> bool:
     return "_local" not in parts and parts[-1] != "_audit.log"
 
 
+# 記録ファイル名 .claude/experience/<月>/session-<識別子>[.partN].jsonl の形。
+# 識別子は Claude Code の session_id(小文字の UUID)か、session_id が無いときの unknown-<UTC時刻>
+# (記録側 wikiskill_common.session_id_of)。part は記録側 experience_log.session_file が N=1,2,… で付ける。
+_UUID = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+_RECORD_NAME = re.compile(rf"^session-(?:{_UUID}|unknown-\d{{8}}T\d{{6}}Z)(?:\.part[1-9]\d*)?\.jsonl$")
+_MONTH_DIR = re.compile(r"^\d{4}-(?:0[1-9]|1[0-2])$")
+
+
+def record_name_problem(rel: str) -> str | None:
+    """記録ファイルの相対パスが命名規則に合うかを返す(合えば None、違えば理由)。
+
+    理由には名前そのものを入れない(秘密らしい値を CI のログに残さないため)。
+    """
+    parts = rel.split("/")
+    if len(parts) != 4 or parts[0] != ".claude" or parts[1] != "experience":
+        return "置き場所が .claude/experience/<月>/ の形ではありません"
+    if not _MONTH_DIR.match(parts[2]):
+        return "月のフォルダ名が YYYY-MM(01〜12 月)の形ではありません"
+    name = parts[3]
+    if _RECORD_NAME.match(name):
+        return None
+    if any(pat.search(name) for pat in _SKILL_FAILURE_SECRET_RULES.values()):
+        return "ファイル名に秘密情報らしい識別子を含みます"
+    if ".." in name or "/" in name or "\\" in name:
+        return "ファイル名にパス区切りや .. を含みます"
+    if any(not (c.isalnum() and c.isascii()) and c not in "._-" for c in name):
+        return "ファイル名に使えない文字を含みます"
+    return "ファイル名が session-<UUID> でも unknown-<時刻> でもありません"
+
+
+def _label(rel: str) -> str:
+    """違反の表示用の名前。形式に合う記録はそのままの名前、合わない記録は名前を伏せて長さだけ出す。"""
+    if record_name_problem(rel) is None:
+        return rel
+    return f"<不正な記録パス: 長さ {len(rel)}>"
+
+
+def _local_label(rel: str) -> str:
+    """ローカル限定ファイルの表示用の名前。安全な文字だけ・秘密の形でないものだけ表示する(session_id が入りうるため)。"""
+    safe = len(rel) <= 120 and re.fullmatch(r"[A-Za-z0-9._/\-]+", rel) is not None
+    if safe and not any(pat.search(rel) for pat in _SKILL_FAILURE_SECRET_RULES.values()):
+        return rel
+    return f"<ローカル限定の記録パス: 長さ {len(rel)}>"
+
+
 def scan(root: Path) -> list[tuple[str, str]]:
-    """git 管理下の Experience JSONL を全行検査し、(パス, 理由) を違反ごとに返す。"""
+    """git 管理下の Experience JSONL を全行検査し、(パス, 理由) を違反ごとに返す。
+
+    ファイル名の命名規則も検査する(合わなければ名前を伏せて表示)。名前が合わなくても内容の検査は続けて行う。
+    """
     root = Path(root)
     hits: list[tuple[str, str]] = []
     for rel in _tracked_experience(root):
         if not _is_target(rel):
             continue
+        label = _label(rel)
+        name_problem = record_name_problem(rel)
+        if name_problem:
+            hits.append((label, f"ファイル名の形式: {name_problem}"))
         text = read_text(str(root / rel))
         if text is None:
-            hits.append((rel, "テキストとして読めません(バイナリ/読込失敗)"))
+            hits.append((label, "テキストとして読めません(バイナリ/読込失敗)"))
             continue
         # "\n" だけで分ける(str.splitlines は U+2028/U+2029/\x85 でも割れ、raw で出力される note を誤検知する)
         for lineno, line in enumerate(text.split("\n"), start=1):
@@ -166,18 +271,122 @@ def scan(root: Path) -> list[tuple[str, str]]:
                 rec = json.loads(line)
                 problems = check_record(rec, rel)
             except RecursionError:
-                hits.append((rel, f"{lineno}行目: JSON の入れ子が深すぎます"))
+                hits.append((label, f"{lineno}行目: JSON の入れ子が深すぎます"))
                 continue
             except ValueError:
-                hits.append((rel, f"{lineno}行目: JSON として読めません"))
+                hits.append((label, f"{lineno}行目: JSON として読めません"))
                 continue
             for problem in problems:
-                hits.append((rel, f"{lineno}行目: {problem}"))
+                hits.append((label, f"{lineno}行目: {problem}"))
     return hits
 
 
 def _count_targets(root: Path) -> int:
     return sum(1 for rel in _tracked_experience(root) if _is_target(rel))
+
+
+def _is_local_only(rel: str) -> bool:
+    """_local/ 配下と _audit.log は Git に載せないローカル限定(記録側 experience_log.py の約束)。"""
+    parts = rel.split("/")
+    return "_local" in parts or parts[-1] == "_audit.log"
+
+
+def _is_ignored(root: Path, rel: str) -> bool | None:
+    """git 自身の判定で rel が ignore されるか。True/False、git が答えられなければ None(fail-closed 用)。
+
+    --no-index: 追跡済みでもパターンで判定する(追跡されている _audit.log を「ignore されている」と誤らない)。
+    core.excludesFile を空にして、利用者ごとの global excludes ではなくコミットされた .gitignore だけを見る。
+    """
+    r = subprocess.run(
+        ["git", "-c", "core.excludesFile=/dev/null", "check-ignore", "-q", "--no-index", "--", rel],
+        cwd=str(root), capture_output=True, text=True,
+    )
+    if r.returncode == 0:
+        return True
+    if r.returncode == 1:
+        return False
+    return None
+
+
+_GIT_NO_GLOBAL = ["git", "-c", "core.excludesFile=/dev/null"]
+
+
+def _ignored_among(root: Path, rels: list[str]) -> dict[str, str] | None:
+    """rels のうち ignore されるものを {パス: 理由の補足} で返す。判定できなければ None(fail-closed 用)。
+
+    1 段目(判定): `check-ignore -z --no-index --stdin`(-v 無し)。出力は ignore されるパスだけで、
+                  終了コード 0 = 1 件以上 / 1 = 0 件(空入力も 1)。否定パターンで再包含されたパスは出ない。
+    2 段目(理由): 違反があったときだけ `-v` で「どの .gitignore の何行目のパターンか」を取る。
+                  `-v` は再包含されただけのパスも `!` 付きで出力し終了コードも 0 になるため、判定には使わない。
+                  `!` で始まるパターンの行は理由にも採らない(万一出ても無視する)。
+    パスは NUL 区切り(-z)で渡す・受け取る(日本語・空白・改行を含むパスを壊さない)。
+    """
+    if not rels:
+        return {}
+    payload = "".join(r + "\0" for r in rels)
+    r = subprocess.run(
+        [*_GIT_NO_GLOBAL, "check-ignore", "-z", "--no-index", "--stdin"],
+        cwd=str(root), input=payload, capture_output=True, text=True,
+    )
+    if r.returncode == 1:
+        return {}
+    if r.returncode != 0:
+        return None
+    ignored = {p: "" for p in r.stdout.split("\0") if p}
+    if not ignored:
+        return None  # 終了コード 0 なのに出力が無い = 想定外。検査できたことにしない
+    v = subprocess.run(
+        [*_GIT_NO_GLOBAL, "check-ignore", "-z", "-v", "--no-index", "--stdin"],
+        cwd=str(root), input="".join(p + "\0" for p in ignored), capture_output=True, text=True,
+    )
+    if v.returncode == 0:
+        fields = v.stdout.split("\0")
+        for i in range(0, len(fields) - 3, 4):
+            source, lineno, pattern, path = fields[i:i + 4]
+            if path in ignored and pattern and not pattern.startswith("!"):
+                ignored[path] = f"{source}:{lineno} `{pattern[:80]}`"
+    return ignored
+
+
+def check_tracking(root: Path) -> list[tuple[str, str]]:
+    """ignore と追跡状態の違反を (パス, 理由) で返す(空なら正常)。
+
+    - 記録パスが ignore されている → 記録が Git に残らず、公開可否の検査が空振りで緑になる
+    - ローカル限定のパスが ignore されていない → 一時マーカー・監査ログがコミットされ得る
+    - ローカル限定のファイルが既に追跡されている → ignore だけでは外れない(git rm --cached が要る)
+    - 追跡済みの記録ファイル(ローカル限定を除く全件)が ignore されている → 月・part を狙った除外
+    - git が判定できない → 検査できなかったことを「違反なし」にしない
+    """
+    root = Path(root)
+    hits: list[tuple[str, str]] = []
+    ig = _is_ignored(root, RECORD_PROBE)
+    if ig is None:
+        hits.append((RECORD_PROBE, "git check-ignore で判定できません(検査不能)"))
+    elif ig:
+        hits.append((RECORD_PROBE, ".gitignore が Experience の記録パスを除外しています"
+                                   "(記録が Git に残らず、公開可否の検査も素通りします。2026-10-08 の再発)"))
+    for rel in MUST_IGNORE:
+        ig = _is_ignored(root, rel)
+        if ig is None:
+            hits.append((rel, "git check-ignore で判定できません(検査不能)"))
+        elif not ig:
+            hits.append((rel, "ローカル限定のパスが ignore されていません(一時マーカー・監査ログがコミットされ得ます)"))
+    tracked = _tracked_experience(root)
+    for rel in tracked:
+        if _is_local_only(rel):
+            hits.append((_local_label(rel), "ローカル限定のファイルが Git に追跡されています(git rm --cached で外してください)"))
+    records = [rel for rel in tracked if not _is_local_only(rel)]
+    ignored = _ignored_among(root, records)
+    if ignored is None:
+        hits.append((f"{EXPERIENCE_DIR}/(追跡済み {len(records)} 件)", "git check-ignore で判定できません(検査不能)"))
+    else:
+        for rel in records:  # 追跡順(= ls-files の順)で安定して出す
+            if rel in ignored:
+                why = ignored[rel]
+                hits.append((_label(rel), "追跡済みの記録が .gitignore で除外されています"
+                                  + (f"({why})" if why else "")
+                                  + "。月や part を狙った除外は、記録の更新が Git に残らなくなります"))
+    return hits
 
 
 def selftest() -> int:
@@ -194,6 +403,13 @@ def selftest() -> int:
         "tools": {"Edit": 1}, "skills": ["brainstorming"],
         "commits": [{"sha": "abc1234", "subject": "feat: x"}],
         "files_changed": ["docs/a.md"],
+    }
+    # 記録側(experience_log.build_failure_event)が書く形そのもの
+    skill_failure_ok = {
+        "ts": "2026-10-06T00:00:00Z", "session_id": "S", "event": "skill_failure",
+        "repo": PUBLIC_REPO, "visibility": "public", "branch": "main",
+        "skill": "demo-skill", "skill_key": "0123456789ab", "skill_version": "1.0.0",
+        "duration_ms": 40, "interrupted": False,
     }
     # (名前, レコード, 違反として止まるべきか)
     cases = [
@@ -221,6 +437,13 @@ def selftest() -> int:
         ("名前に..を含むだけのファイル", {**ok, "path": "docs/a..b.md"}, False),
         ("通常のprogram", {**ok, "tool": "Bash", "program": "python3"}, False),
         ("<external>のprogram", {**ok, "tool": "Bash", "program": "<external>"}, False),
+        # skill_failure(D1): 通すべき正常な記録 / 止めるべき項目・秘密
+        ("skill_failure 正常", skill_failure_ok, False),
+        ("skill_failure 未知の項目(error 本文)", {**skill_failure_ok, "error": "本文"}, True),
+        ("skill_failure の絶対パス", {**skill_failure_ok, "path": "/home/x/y"}, True),
+        ("skill_failure の鍵らしい値", {**skill_failure_ok, "branch": "ghp_" + "a" * 20}, True),
+        ("skill_failure の資格情報の代入", {**skill_failure_ok, "session_id": "password=hunter2hunter2"}, True),
+        ("未知の event(skill_failure に似た名前)", {**skill_failure_ok, "event": "skill_failures"}, True),
     ]
     failed = []
     for name, rec, should_hit in cases:
@@ -256,14 +479,14 @@ def main(argv: list[str]) -> int:
         return 2
     root = _repo_root()
     try:
-        hits = scan(root)
+        hits = scan(root) + check_tracking(root)
         count = _count_targets(root)
     except (OSError, subprocess.SubprocessError) as e:
         # 検査できなかったことを「違反なし」にしない(fail-closed)
         print(f"Experience記録を検査できませんでした: {type(e).__name__}: {e}", file=sys.stderr)
         return 1
     if not hits:
-        print(f"OK: Experience記録 {count}件・違反なし")
+        print(f"OK: Experience記録 {count}件・違反なし(ignore・追跡状態 OK)")
         return 0
     print("公開できない Experience 記録があります:\n", file=sys.stderr)
     for path, reason in hits:
