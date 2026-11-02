@@ -1,0 +1,2 @@
+{"ts": "2026-11-02T05:34:51Z", "session_id": "8d9b3700-5a71-559b-baa0-092a18514ce3", "event": "session_start", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/admin-system-isdoeg", "source": "resume", "head": "67e8468d9ed4b689d9eca4b4d14648e34599b620"}
+{"ts": "2026-11-02T05:35:15Z", "session_id": "8d9b3700-5a71-559b-baa0-092a18514ce3", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/admin-system-isdoeg", "tool": "Bash", "program": "git"}
