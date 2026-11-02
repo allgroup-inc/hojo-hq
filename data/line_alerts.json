@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-02 06:38",
+ "generated_at": "2026-11-02 12:59",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 11,
- "count": 27,
+ "count": 28,
  "items": [
   {
    "id": "a0WJ200000CDXkJMAX",
@@ -115,6 +115,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDe82MAD",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WfQ000003tEv3UAE",
+   "name": "「２０２６年度　ＮＥＤＯ先導研究プログラムにおける成果把握・要因分析調査」の公募",
+   "deadline": "2026-11-25",
+   "days_left": 23,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003tEv3UAE",
    "tag": "nationwide"
   },
   {
