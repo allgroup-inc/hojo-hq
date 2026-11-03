@@ -40,10 +40,6 @@ META_PUBLISH_SECRETS = ("FB_PAGE_ACCESS_TOKEN", "GLOW_FB_PAGE_TOKEN")
 # (ファイル名, ジョブ名, 規則) → 理由。ジョブ名 "*" はファイル全体
 KNOWN_EXCEPTIONS = {
     ("glow-sns-post.yml", "post", "W4"): "世界の架け橋。承認の仕組みは M3 で入れる(鍵は未登録・定期実行の一時停止は決裁待ち)",
-    ("weekly-report.yml", "report", "W4"): "投稿用の鍵で数字を読んでいる。読み取り専用の鍵へ分ける(M4)",
-    ("weekly-report.yml", "report", "W7"): "同上。鍵を分ければ解消",
-    ("funnel-deep-dive.yml", "report", "W4"): "投稿用の鍵で数字を読んでいる。読み取り専用の鍵へ分ける(M4)",
-    ("funnel-deep-dive.yml", "report", "W7"): "同上。鍵を分ければ解消",
     ("social-post.yml", "post", "W7"): "二重投稿防止の記録をコミットするため。承認後のジョブに限る。記録用ジョブの分離は別途",
     ("post-resort-kingdom.yml", "post", "W4"): "2026-10-16 に手動で無効化済み。ファイルの削除は別承認",
     ("fukuda-data-import.yml", "validate-and-import", "W2"): "Instagram とは別件(2026-11-03 検出)。env 経由で渡す形へ直す(別承認)",

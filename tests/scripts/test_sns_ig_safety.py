@@ -470,3 +470,102 @@ def test_hygiene_check_catches_old_ig_feed(tmp_path):
     import check_workflow_secret_hygiene as h
     rules = {f[0] for f in h.check_text("ig-feed.yml", old.stdout)}
     assert {"W1", "W3", "W4", "W5"} <= rules
+
+
+# ---------------------------------------------------------------- 数字を読むだけの鍵(週次レポート・分析)
+
+def _debug_opener(payload=None, exc=None):
+    seen = []
+
+    def opener(req, timeout=None):
+        seen.append(req)
+        if exc:
+            raise exc
+        return io.BytesIO(json.dumps({"data": payload}).encode())
+    return opener, seen
+
+
+@pytest.fixture(autouse=True)
+def _clear_insights_cache():
+    sns_safety._INSIGHTS_CACHE.clear()
+    yield
+    sns_safety._INSIGHTS_CACHE.clear()
+
+
+def test_insights_token_missing_never_falls_back_to_publish_key():
+    tok, why = sns_safety.insights_token(env={"FB_PAGE_ACCESS_TOKEN": FAKE_TOKEN})
+    assert tok == "" and "未接続" in why
+
+
+def test_insights_token_read_only_ok():
+    op, seen = _debug_opener({"is_valid": True, "scopes": ["instagram_basic", "pages_read_engagement"]})
+    tok, why = sns_safety.insights_token(env={"META_INSIGHTS_TOKEN": FAKE_TOKEN}, opener=op)
+    assert tok == FAKE_TOKEN and why == "ok"
+    assert seen[0].get_header("Authorization") == f"Bearer {FAKE_TOKEN}"
+
+
+@pytest.mark.parametrize("payload,needle", [
+    ({"is_valid": True, "scopes": ["instagram_basic", "instagram_content_publish"]}, "投稿・管理の権限"),
+    ({"is_valid": True, "scopes": ["pages_manage_posts"]}, "投稿・管理の権限"),
+    ({"is_valid": False, "scopes": ["instagram_basic"]}, "無効"),
+])
+def test_insights_token_refuses(payload, needle):
+    op, _ = _debug_opener(payload)
+    tok, why = sns_safety.insights_token(env={"META_INSIGHTS_TOKEN": FAKE_TOKEN}, opener=op)
+    assert tok == "" and needle in why and FAKE_TOKEN not in why
+
+
+def test_insights_token_unverifiable_refuses_safely():
+    op, _ = _debug_opener(exc=_http_error({"error": {"message": f"x {FAKE_TOKEN}", "code": 190}}))
+    tok, why = sns_safety.insights_token(env={"META_INSIGHTS_TOKEN": FAKE_TOKEN}, opener=op)
+    assert tok == "" and "確認できない" in why and FAKE_TOKEN not in why
+
+
+def test_weekly_report_uses_header_not_url(monkeypatch):
+    import weekly_report as wr
+    monkeypatch.setenv("IG_USER_ID", "222")
+    monkeypatch.setenv("FB_PAGE_ID", "111")
+    monkeypatch.setenv("META_INSIGHTS_TOKEN", FAKE_TOKEN)
+    monkeypatch.setattr(sns_safety, "insights_token", lambda: (FAKE_TOKEN, "ok"))
+    calls = []
+
+    def fake_get(url, headers=None):
+        calls.append((url, headers))
+        return {"followers_count": 1, "media_count": 2, "fan_count": 3, "data": []}
+    monkeypatch.setattr(wr, "get", fake_get)
+    assert "フォロワー 1人" in wr.section_instagram()
+    assert "フォロワー 1人" in wr.section_facebook()
+    assert calls and all(FAKE_TOKEN not in u for u, _ in calls)
+    assert all(h == {"Authorization": f"Bearer {FAKE_TOKEN}"} for _, h in calls)
+
+
+def test_weekly_report_refused_token_shows_reason(monkeypatch):
+    import weekly_report as wr
+    monkeypatch.setenv("IG_USER_ID", "222")
+    monkeypatch.setattr(sns_safety, "insights_token", lambda: ("", "未接続(読むだけの鍵が未登録)"))
+    monkeypatch.setattr(wr, "get", lambda *a, **k: pytest.fail("鍵が無いのに Meta を呼んだ"))
+    assert "未接続" in wr.section_instagram()
+
+
+def test_funnel_uses_header_not_url(monkeypatch):
+    import funnel_deep_dive as fd
+    monkeypatch.setenv("IG_USER_ID", "222")
+    monkeypatch.setattr(sns_safety, "insights_token", lambda: (FAKE_TOKEN, "ok"))
+    calls = []
+
+    def fake_get(url, headers=None):
+        calls.append((url, headers))
+        if "/media?" in url:
+            return {"data": [{"id": "m1", "caption": "c", "timestamp": "2026-11-01T00:00:00+0000"}]}
+        if "/insights" in url:
+            return {"data": [{"name": "reach", "values": [{"value": 5}]}]}
+        return {"followers_count": 1, "media_count": 2}
+    monkeypatch.setattr(fd, "get", fake_get)
+    fd.ig_block()
+    assert len(calls) >= 3 and all(FAKE_TOKEN not in u for u, _ in calls)
+
+
+@pytest.mark.parametrize("name", ["weekly-report.yml", "funnel-deep-dive.yml"])
+def test_report_workflows_have_no_publish_key(name):
+    wf, text = _wf(name)
+    assert "FB_PAGE_ACCESS_TOKEN" not in json.dumps(wf) and "META_INSIGHTS_TOKEN" in text

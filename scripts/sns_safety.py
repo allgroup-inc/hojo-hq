@@ -95,6 +95,61 @@ def meta_post(path, params, graph="https://graph.facebook.com/v21.0", opener=Non
         raise SafetyError(f"Meta API の呼び出しに失敗しました({meta_error_summary(e)})") from None
 
 
+# ---------------------------------------------------------------- 数字を読むだけの鍵
+
+# 週次レポート・分析は Meta から数字を読むだけ。投稿できる鍵を使わず、読むだけの権限で
+# 作った鍵(META_INSIGHTS_TOKEN)を使う(2026-11-03 設計)。使う前に権限を Meta に問い合わせ、
+# 投稿・管理の権限が付いていたら使わない。確かめられないときも使わない(フェイルクローズ)。
+INSIGHTS_ENV = "META_INSIGHTS_TOKEN"
+FORBIDDEN_SCOPES = frozenset({
+    "instagram_content_publish", "pages_manage_posts", "pages_manage_engagement",
+    "pages_manage_metadata", "instagram_manage_comments", "instagram_manage_messages",
+    "pages_messaging", "publish_video", "business_management",
+})
+_INSIGHTS_CACHE = {}
+
+
+def auth_headers(token):
+    """鍵は URL ではなく通信の付属情報(Authorization)で渡す。"""
+    return {"Authorization": f"Bearer {token}"}
+
+
+def check_read_only_scopes(scopes):
+    """権限の一覧から、投稿・管理の権限を含むかを調べ、含むものの一覧を返す(空なら読むだけ)。"""
+    return sorted(set(scopes or []) & FORBIDDEN_SCOPES)
+
+
+def insights_token(env=None, opener=None, graph="https://graph.facebook.com/v21.0"):
+    """数字を読むだけの鍵を返す。(token, 理由) の組。token が空なら使えない(理由を表示する)。
+
+    投稿用の鍵(FB_PAGE_ACCESS_TOKEN)へは決して切り替えない。"""
+    env = os.environ if env is None else env
+    token = (env.get(INSIGHTS_ENV) or "").strip()
+    if not token:
+        return "", "未接続(読むだけの鍵が未登録)"
+    if token in _INSIGHTS_CACHE:
+        return _INSIGHTS_CACHE[token]
+    import urllib.parse
+    url = f"{graph}/debug_token?" + urllib.parse.urlencode({"input_token": token})
+    req = urllib.request.Request(url, headers=auth_headers(token))
+    open_fn = opener or urllib.request.urlopen
+    try:
+        with open_fn(req, timeout=30) as r:
+            data = (json.loads(r.read().decode("utf-8")) or {}).get("data") or {}
+    except Exception as e:  # noqa: BLE001
+        result = ("", f"鍵の権限を確認できないため使いません({meta_error_summary(e)})")
+        _INSIGHTS_CACHE[token] = result
+        return result
+    if data.get("is_valid") is not True:
+        result = ("", "鍵が無効です(期限切れ・取り消し済みの可能性)")
+    else:
+        bad = check_read_only_scopes(data.get("scopes"))
+        result = ("", "鍵に投稿・管理の権限が付いているため使いません: " + ", ".join(bad)) if bad \
+            else (token, "ok")
+    _INSIGHTS_CACHE[token] = result
+    return result
+
+
 # ---------------------------------------------------------------- 指紋と固定URL
 
 def sha256_bytes(b):
