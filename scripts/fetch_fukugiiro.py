@@ -31,6 +31,9 @@ JST = timezone(timedelta(hours=9))
 UA = "hojo-hq-bot/1.0 (+https://allgroup-inc.github.io/hojo-hq; contact: bot@en-life.co.jp)"
 BASE = os.path.join(os.path.dirname(__file__), "..")
 OUT = os.path.join(BASE, "data", "fukugiiro", "seido.json")
+# moradou.jp の診断ページが読む公開用コピー(/seido.json)。moradou 側の組み立ては hojo-hq の
+# site/ と scripts/ しか取得しないため、data/ だけを更新すると診断が古いデータのまま止まる
+PUBLISH_OUT = os.path.join(BASE, "site", "fukugiiro", "seido.json")
 
 # シード: 承認済みドメインの主要制度(URLは2026-07-22に検索で特定。到達性は毎回実行時に再確認)
 SEEDS = [
@@ -567,9 +570,10 @@ def main():
         print("検証エラーのため書き込みを中止")
         sys.exit(1)
 
-    with open(OUT, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=1)
-        f.write("\n")
+    for path in (OUT, PUBLISH_OUT):
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=1)
+            f.write("\n")
     print(f"書き込み完了: {len(items)}件 / スキップ {len(skipped)}件 {skipped if skipped else ''}")
     # シードの半数以上が到達不可なら異常(サイト構造変化・ネットワーク断の疑い)
     if len(items) < len(SEEDS) / 2:

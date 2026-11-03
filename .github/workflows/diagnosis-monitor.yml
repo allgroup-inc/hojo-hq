@@ -1,0 +1,166 @@
+name: diagnosis-monitor
+
+# もらいわすれ堂の診断ページ(moradou.jp/shindan/)を15分ごとに実ブラウザで検査する。
+# 議事: docs/議事_20261103_診断ページ15分監視.md / 検査本体: scripts/diagnosis_monitor.mjs
+#
+# 通知(Issue を状態の正本にする。LINEは状態が変わったときだけ送る):
+#   初めて異常 → Issue起票+LINE / 同じ症状が続く → 何もしない / 症状が変わった → 追記+LINE
+#   4時間以上続く → 追記+LINE(1回だけ) / 正常に戻った → 追記してクローズ+LINE
+# 監視そのものの停止は diagnosis-monitor-watchdog.yml が見る。
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+  # 検査本体・診断ページを変えたら、ローカル配信で自己テストする(本番には触れない)
+  pull_request:
+    paths:
+      - "scripts/diagnosis_monitor.mjs"
+      - "tests/diagnosis_monitor.test.mjs"
+      - ".github/workflows/diagnosis-monitor.yml"
+      - "site/fukugiiro/shindan/**"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/diagnosis_monitor.mjs"
+      - "tests/diagnosis_monitor.test.mjs"
+      - ".github/workflows/diagnosis-monitor.yml"
+      - "site/fukugiiro/shindan/**"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: diagnosis-monitor-${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'live' || github.ref }}
+  cancel-in-progress: false
+
+env:
+  PLAYWRIGHT_VERSION: "1.56.1"
+
+jobs:
+  selftest:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Playwright
+        run: |
+          npm init -y > /dev/null
+          npm i --no-save "playwright@${PLAYWRIGHT_VERSION}"
+          npx playwright install --with-deps chromium
+      - name: 自己テスト(正常系が通り、異常系がそれぞれ固有の理由で落ちること)
+        run: node --test tests/diagnosis_monitor.test.mjs
+
+  monitor:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts
+            .github
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Playwright
+        run: |
+          npm init -y > /dev/null
+          npm i --no-save "playwright@${PLAYWRIGHT_VERSION}"
+          npx playwright install --with-deps chromium
+
+      - name: Check diagnosis page
+        env:
+          DIAG_URL: "https://moradou.jp/shindan/"
+        run: node scripts/diagnosis_monitor.mjs
+
+      - name: Update incident issue
+        id: state
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          label=diagnosis-monitor
+          gh label create "$label" --color B60205 \
+            --description "もらいわすれ堂 診断ページの15分監視" 2>/dev/null || true
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          now=$(date -u +%s)
+
+          if [ -f diagnosis_monitor_result.json ]; then
+            ok=$(jq -r '.ok' diagnosis_monitor_result.json)
+            sig=$(jq -r '.signature' diagnosis_monitor_result.json)
+          else
+            # 検査を始める前に落ちた(Playwright導入失敗など)。診断ページの状態は不明
+            ok=false
+            sig=MONITOR_SETUP
+            echo "監視の準備で失敗し、診断ページを検査できませんでした。Actionsログを確認してください。" > diagnosis_monitor_report.txt
+          fi
+
+          issue=$(gh issue list --state open --label "$label" --limit 1 --json number --jq '.[0].number // empty')
+          notify=""
+
+          if [ "$ok" = "true" ]; then
+            if [ -n "$issue" ]; then
+              created=$(gh issue view "$issue" --json createdAt --jq .createdAt)
+              mins=$(( (now - $(date -u -d "$created" +%s)) / 60 ))
+              gh issue comment "$issue" --body "✅ 復旧: 診断ページが正常に戻りました(障害の継続 約${mins}分)。自動クローズします。 ${run_url}"
+              gh issue close "$issue"
+              notify=$(printf '✅【もらいわすれ堂】診断ページが復旧しました\n障害の継続: 約%s分\n%s/%s/issues/%s' "$mins" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$issue")
+            fi
+          else
+            {
+              echo "<!-- sig: ${sig} -->"
+              echo "- 実行: ${run_url}"
+              echo ""
+              echo '```'
+              cat diagnosis_monitor_report.txt
+              echo '```'
+            } > body.md
+            summary=$(grep -m1 '^ERROR' diagnosis_monitor_report.txt | cut -c1-120 || true)
+            if [ -z "$issue" ]; then
+              { echo "自動検知: もらいわすれ堂の診断ページで、利用者が制度を検索できない可能性があります。"; echo ""; cat body.md; } > first.md
+              url=$(gh issue create --label "$label" --title "🚨 診断ページ異常: ${sig}" --body-file first.md)
+              notify=$(printf '🚨【もらいわすれ堂】診断ページ異常\n%s\n%s' "${summary:-$sig}" "$url")
+            else
+              prev=$(gh issue view "$issue" --json body,comments \
+                --jq '[.body] + [.comments[].body] | map(capture("<!-- sig: (?<s>[^ ]*) -->").s? // empty) | last // ""')
+              created=$(gh issue view "$issue" --json createdAt --jq .createdAt)
+              mins=$(( (now - $(date -u -d "$created" +%s)) / 60 ))
+              escalated=$(gh issue view "$issue" --json comments --jq '[.comments[].body | select(contains("<!-- escalated -->"))] | length')
+              if [ "$sig" != "$prev" ]; then
+                { echo "⚠️ 症状が変わりました(${prev} → ${sig})"; echo ""; cat body.md; } > change.md
+                gh issue comment "$issue" --body-file change.md
+                notify=$(printf '⚠️【もらいわすれ堂】診断ページの症状が変わりました\n%s\n%s/%s/issues/%s' "${summary:-$sig}" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$issue")
+              elif [ "$mins" -ge 240 ] && [ "$escalated" = "0" ]; then
+                { echo "<!-- escalated -->"; echo "⏰ 異常が4時間以上つづいています(約${mins}分)。"; echo ""; cat body.md; } > esc.md
+                gh issue comment "$issue" --body-file esc.md
+                notify=$(printf '⏰【もらいわすれ堂】診断ページの異常が4時間以上つづいています\n%s\n%s/%s/issues/%s' "${summary:-$sig}" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$issue")
+              else
+                echo "同じ症状(${sig})が継続中。Issue #${issue} への追記・通知はしません"
+              fi
+            fi
+          fi
+
+          {
+            echo "notify<<__NOTIFY__"
+            echo "$notify"
+            echo "__NOTIFY__"
+          } >> "$GITHUB_OUTPUT"
+
+      # Secrets(LINE_CHANNEL_ACCESS_TOKEN / LINE_ADMIN_USER_ID)未設定の間は自動でスキップされる
+      - name: LINE通知(小柳さんへ)
+        if: always() && steps.state.outputs.notify != ''
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: ${{ steps.state.outputs.notify }}

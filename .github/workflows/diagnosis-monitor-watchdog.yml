@@ -1,0 +1,98 @@
+name: diagnosis-monitor-watchdog
+
+# 監視の監視: diagnosis-monitor.yml(15分ごと)が止まっていないかを2時間ごとに確かめる。
+# 止まり方: ワークフローの無効化(手動/60日無活動) / スケジュールが起動しない / 起動しても毎回準備で落ちる。
+# 議事: docs/議事_20261103_診断ページ15分監視.md
+
+on:
+  schedule:
+    - cron: "7 */2 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+concurrency:
+  group: diagnosis-monitor-watchdog
+  cancel-in-progress: false
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github
+
+      - name: Check monitor is alive
+        id: w
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WF: diagnosis-monitor.yml
+          # 15分間隔でもGitHub側の混雑で起動が遅れ・間引かれることがあるため、90分空いたら停止とみなす
+          MAX_GAP_MIN: "90"
+        run: |
+          set -euo pipefail
+          label=diagnosis-monitor-watchdog
+          gh label create "$label" --color D93F0B \
+            --description "診断ページ15分監視そのものの停止" 2>/dev/null || true
+          now=$(date -u +%s)
+          problem=""
+
+          wf=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/${WF}")
+          state=$(echo "$wf" | jq -r .state)
+          wf_created=$(echo "$wf" | jq -r .created_at)
+          if [ "$state" != "active" ]; then
+            problem="監視ワークフローが無効になっています(state=${state})。Actions画面から有効化してください。"
+          else
+            last=$(gh run list --workflow "$WF" --event schedule --limit 1 --json createdAt --jq '.[0].createdAt // empty')
+            if [ -z "$last" ]; then
+              age=$(( (now - $(date -u -d "$wf_created" +%s)) / 60 ))
+              [ "$age" -gt "$MAX_GAP_MIN" ] && problem="監視ワークフローが一度もスケジュール起動していません(登録から約${age}分)。"
+            else
+              gap=$(( (now - $(date -u -d "$last" +%s)) / 60 ))
+              [ "$gap" -gt "$MAX_GAP_MIN" ] && problem="監視が約${gap}分起動していません(最終起動 ${last})。"
+            fi
+            if [ -z "$problem" ]; then
+              # 起動はしているが検査まで届いていない(準備段階の失敗・キャンセルが続く)
+              bad=$(gh run list --workflow "$WF" --event schedule --status completed --limit 6 --json conclusion \
+                --jq '[.[] | select(.conclusion != "success" and .conclusion != "failure")] | length')
+              total=$(gh run list --workflow "$WF" --event schedule --status completed --limit 6 --json conclusion --jq 'length')
+              [ "$total" -ge 6 ] && [ "$bad" = "$total" ] && problem="監視は起動していますが、直近6回すべてが検査前に中断しています(cancelled/startup_failure等)。"
+            fi
+          fi
+
+          issue=$(gh issue list --state open --label "$label" --limit 1 --json number --jq '.[0].number // empty')
+          notify=""
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          if [ -n "$problem" ]; then
+            echo "::error::${problem}"
+            if [ -z "$issue" ]; then
+              url=$(gh issue create --label "$label" --title "⚠️ 診断ページの監視が止まっています" \
+                --body "${problem}"$'\n\n'"この間、診断ページの障害は検知されません。- 実行: ${run_url}")
+              notify=$(printf '⚠️【もらいわすれ堂】診断ページの監視が止まっています\n%s\n%s' "$problem" "$url")
+            fi
+          elif [ -n "$issue" ]; then
+            gh issue comment "$issue" --body "✅ 監視が再び動いていることを確認しました。自動クローズします。 ${run_url}"
+            gh issue close "$issue"
+            notify=$(printf '✅【もらいわすれ堂】診断ページの監視が再開しました\n%s/%s/issues/%s' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$issue")
+          else
+            echo "監視は正常に動いています"
+          fi
+          {
+            echo "notify<<__NOTIFY__"
+            echo "$notify"
+            echo "__NOTIFY__"
+          } >> "$GITHUB_OUTPUT"
+          [ -z "$problem" ]
+
+      - name: LINE通知(小柳さんへ)
+        if: always() && steps.w.outputs.notify != ''
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: ${{ steps.w.outputs.notify }}
