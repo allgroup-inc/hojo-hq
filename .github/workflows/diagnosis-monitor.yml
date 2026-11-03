@@ -1,38 +1,43 @@
 name: diagnosis-monitor
 
 # もらいわすれ堂の診断ページ(moradou.jp/shindan/)を実ブラウザで検査する。
-# 議事: docs/議事_20261103_診断ページ15分監視.md / 検査: scripts/diagnosis_monitor.mjs / 通知: scripts/diagnosis_notify.py
+# 議事: docs/議事_20261103_診断ページ15分監視.md / 検査: scripts/diagnosis_monitor.mjs / 障害Issue: scripts/diagnosis_notify.py
 #
 # 15分間隔は設定値であり、障害を検知するまでの時間は保証しない。GitHub のスケジュール起動は遅れ・間引きがある
 # (2026-11-03 実測: 4時間おきの moradou-cutover が1日約3回・最大約12時間空いた)。実際の間隔は停止検知の要約に残る。
 #
-# 通知: 診断ページの障害は diagnosis-monitor、監視システムの故障(この間ページの状態は不明)は
-# diagnosis-monitor-system のIssueに分ける。LINEは状態が変わったときだけ、24時間3通・30日15通まで。
-# LINEの残りが50通以下・残りを読めないときは送らず、Issueに残して次回に送り直す。
+# このワークフローは LINE を送らない。障害Issue(診断ページの障害は diagnosis-monitor、監視システムの故障は
+# diagnosis-monitor-system)に送信要求を書き、送るのは diagnosis-line-sender.yml(ただ1つの送信担当)。
 
 on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch: {}
-  # 検査本体・通知制御・診断ページを変えたら、ローカル配信と偽のGitHubで自己テストする(本番には触れない)
+  # 検査本体・通知制御・公開用データの判定・診断ページを変えたら、ローカル配信と偽のGitHub/LINEで自己テストする
   pull_request:
     paths:
       - "scripts/diagnosis_monitor.mjs"
       - "scripts/diagnosis_notify.py"
+      - "scripts/fetch_fukugiiro.py"
       - "tests/diagnosis_monitor.test.mjs"
       - "tests/test_diagnosis_notify.py"
+      - "tests/test_fetch_publish.py"
       - ".github/workflows/diagnosis-monitor.yml"
       - ".github/workflows/diagnosis-monitor-watchdog.yml"
+      - ".github/workflows/diagnosis-line-sender.yml"
       - "site/fukugiiro/shindan/**"
   push:
     branches: [main]
     paths:
       - "scripts/diagnosis_monitor.mjs"
       - "scripts/diagnosis_notify.py"
+      - "scripts/fetch_fukugiiro.py"
       - "tests/diagnosis_monitor.test.mjs"
       - "tests/test_diagnosis_notify.py"
+      - "tests/test_fetch_publish.py"
       - ".github/workflows/diagnosis-monitor.yml"
       - ".github/workflows/diagnosis-monitor-watchdog.yml"
+      - ".github/workflows/diagnosis-line-sender.yml"
       - "site/fukugiiro/shindan/**"
 
 permissions:
@@ -54,8 +59,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-      - name: 通知制御の単体テスト(通数の上限・LINEの応答異常・同時実行・Issue操作の失敗)
+      - name: 通知制御の単体テスト(送信担当の排他・通数の上限・LINEの応答異常・再送・確認モード)
         run: python3 -m unittest tests/test_diagnosis_notify.py
+      - name: 公開用制度データの更新保留の単体テスト(取得失敗・欠落・必須制度・正当な終了)
+        run: python3 -m unittest tests/test_fetch_publish.py
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -96,6 +103,7 @@ jobs:
           DIAG_URL: "https://moradou.jp/shindan/"
         run: node scripts/diagnosis_monitor.mjs
 
+      # 障害Issueの更新と送信要求の書き込みは同じ1回の書き込み(LINEは送信担当が送る)
       - name: Update incident issue
         id: state
         if: always()
@@ -103,41 +111,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/diagnosis_notify.py incident
 
-      - name: LINE送信の可否(通数の上限・LINEの残り)
-        id: gate
-        if: always() && steps.state.outputs.message != '' && steps.state.outputs.issue != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-          LINE_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          LINE_TO_SET: ${{ secrets.LINE_ADMIN_USER_ID != '' }}
-        run: python3 scripts/diagnosis_notify.py gate --issue "${{ steps.state.outputs.issue }}"
-
-      # 既存の通知部品をそのまま使う(顧客向け配信の処理には触れない)。止まったままにならないよう2分で打ち切る
-      - name: LINE通知(小柳さんへ)
-        id: line
-        if: always() && steps.gate.outputs.allowed == 'true'
-        continue-on-error: true
-        timeout-minutes: 2
-        uses: ./.github/actions/line-notify
-        with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
-          message: ${{ steps.state.outputs.message }}
-
-      - name: LINE送信の結果を記録(失敗は次回の再送対象)
-        if: always() && steps.gate.outputs.allowed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/diagnosis_notify.py record --issue "${{ steps.state.outputs.issue }}" --outcome "${{ steps.line.outcome == 'success' && 'success' || 'failure' }}"
-
-      - name: LINE送信の失敗を赤で残す
-        if: always() && steps.line.outcome == 'failure'
-        run: |
-          echo "::error::LINE通知の送信に失敗しました(Issueに記録済み・次回に送り直します)"
-          exit 1
-
   # checkout・Python・GitHub API の失敗で障害Issueの更新まで届かなかったときの予備。
-  # リポジトリのファイルを使わず、ランナーに入っている gh だけで監視システムの故障をIssueに残す(LINEは送らない)。
+  # リポジトリのファイルを使わず、ランナーに入っている gh だけで監視システムの故障をIssueに残す(送信要求は書かない)。
   fallback:
     needs: monitor
     if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && needs.monitor.outputs.handled != 'true'

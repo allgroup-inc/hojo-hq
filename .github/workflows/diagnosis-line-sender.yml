@@ -1,0 +1,58 @@
+name: diagnosis-line-sender
+
+# 診断ページ監視の LINE 通知を送る、ただ1つの送信担当(判定は scripts/diagnosis_notify.py sender)。
+# 15分監視・停止検知が障害Issueに書いた送信要求(<!-- line-want -->)を順に処理する。
+#
+# 排他と上限: 送信記録(bot/diagnosis-line-state ブランチの diagnosis-line/state.json)を Contents API の
+# sha 一致を条件に書き換え、上限(24時間3通・30日15通)の判定と送信の予約を同じ1回の書き換えで行う。
+# 競合した・書いた内容を読み直せないときは送らない。下の concurrency は補助で、これに頼らない。
+# 二重送信の防止: 要求IDを LINE の再試行キー(X-Line-Retry-Key)として渡す。
+# LINE の送信枠(残り50通以下・読めない・形式が想定外)を確かめてから送る。顧客向け配信の処理には触れない。
+#
+# 確認モード: Actions 画面から mode=check で手動実行すると、送らず・記録も書き換えずに
+# 送信枠・今月の使用量・監視からの送信数・送信待ちを Summary に出す。
+# 議事: docs/議事_20261103_診断ページ15分監視.md
+
+on:
+  workflow_run:
+    workflows: [diagnosis-monitor, diagnosis-monitor-watchdog]
+    types: [completed]
+  schedule:
+    - cron: "23,53 * * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "check=送らずに送信枠と送信記録を確認する(LINE確認モード) / send=送信待ちを処理する"
+        type: choice
+        options: [check, send]
+        default: check
+
+permissions:
+  contents: write   # 送信記録ファイル(bot/diagnosis-line-state ブランチ)の比較交換による更新にだけ使う
+  issues: write
+
+concurrency:
+  group: diagnosis-line-sender
+  cancel-in-progress: false
+
+jobs:
+  send:
+    # PR の自己テストなど、本番の監視以外の実行では動かさない
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.event == 'schedule' ||
+      github.event.workflow_run.event == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+
+      - name: LINE送信担当
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINE_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_TO: ${{ secrets.LINE_ADMIN_USER_ID }}
+          MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'send' }}
+        run: python3 scripts/diagnosis_notify.py sender --mode "$MODE"

@@ -1,10 +1,13 @@
 name: diagnosis-monitor-watchdog
 
-# 監視の監視: diagnosis-monitor.yml が動いているかを2時間ごとに確かめる(判定は scripts/diagnosis_notify.py watchdog)。
-# 見る止まり方: ワークフローの無効化(手動/60日無活動)/ 6時間以上の起動途絶 / 一度も起動しない /
-# 起動しても直近4回とも検査まで届かない(Playwright導入・checkoutの失敗、中断)/ 直近4回とも障害Issueの更新に失敗。
-# このワークフローもスケジュール起動のため、遅れ・間引きがあり、検知までの時間は保証しない。
-# 結果は監視システムの故障として diagnosis-monitor-system のIssueに残る(診断ページの障害とは分ける)。
+# 監視の監視: 2時間ごとに確かめる(判定は scripts/diagnosis_notify.py watchdog)。
+# 見る止まり方: 監視ワークフローの無効化(手動/60日無活動)/ 6時間以上の起動途絶 / 一度も起動しない /
+# 起動しても直近4回とも検査まで届かない(Playwright導入・checkoutの失敗、中断)/ 直近4回とも障害Issueの更新に失敗 /
+# LINEの送信要求が6時間以上処理されない(送信担当の停滞。上限・送信枠による保留は除く)。
+# あわせて、収集が残した公開用制度データの判定(data/fukugiiro/publish_status.json)を読み、
+# 更新の保留・必須制度の欠けを diagnosis-data-hold のIssueに残す(ジョブは赤にしない)。
+# このワークフローもスケジュール起動のため遅れ・間引きがあり、検知までの時間は保証しない。
+# LINE は送らない(送信要求を書くだけ。送るのは diagnosis-line-sender.yml)。
 # 議事: docs/議事_20261103_診断ページ15分監視.md
 
 on:
@@ -28,9 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          sparse-checkout: |
-            scripts
-            .github
+          sparse-checkout: scripts
 
       - name: Check monitor is alive
         id: w
@@ -38,34 +39,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/diagnosis_notify.py watchdog --workflow diagnosis-monitor.yml
 
-      - name: LINE送信の可否(通数の上限・LINEの残り。15分監視と同じ枠を使う)
-        id: gate
-        if: always() && steps.w.outputs.message != '' && steps.w.outputs.issue != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-          LINE_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          LINE_TO_SET: ${{ secrets.LINE_ADMIN_USER_ID != '' }}
-        run: python3 scripts/diagnosis_notify.py gate --issue "${{ steps.w.outputs.issue }}"
-
-      - name: LINE通知(小柳さんへ)
-        id: line
-        if: always() && steps.gate.outputs.allowed == 'true'
-        continue-on-error: true
-        timeout-minutes: 2
-        uses: ./.github/actions/line-notify
-        with:
-          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
-          message: ${{ steps.w.outputs.message }}
-
-      - name: LINE送信の結果を記録(失敗は次回の再送対象)
-        if: always() && steps.gate.outputs.allowed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/diagnosis_notify.py record --issue "${{ steps.w.outputs.issue }}" --outcome "${{ steps.line.outcome == 'success' && 'success' || 'failure' }}"
-
       - name: 監視の停止・故障を赤で残す
-        if: always() && (steps.w.outputs.problem != '' || steps.line.outcome == 'failure')
+        if: steps.w.outputs.problem != ''
         run: |
-          echo "::error::監視の停止・故障、またはLINE送信の失敗があります(${{ steps.w.outputs.problem }})"
+          echo "::error::監視の停止・故障を検知しました(${{ steps.w.outputs.problem }})"
           exit 1
