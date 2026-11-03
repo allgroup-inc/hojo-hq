@@ -235,7 +235,7 @@ def build_shindan():
     from fg_yamanashi import MUNI_SLUG as Y_MUNI_SLUG
     slug_js = json.dumps(Y_MUNI_SLUG, ensure_ascii=False)
     s = re.sub(r'var MUNI_SLUG = \{.*?\};', f'var MUNI_SLUG = {slug_js};', s, count=1, flags=re.S)
-    s = must_replace(s, 'fetch("../../data/fukugiiro/seido.json")', 'fetch("../../data/yamanashi/seido.json")', "fetch")
+    s = must_replace(s, 'fetch("../seido.json")', 'fetch("../../data/yamanashi/seido.json")', "fetch")
     # Instagram行の削除(山梨は未開設)
     s = re.sub(r'<p style="margin-top:20px;text-align:center"><a class="iglink"[^\n]*</p>\n', '', s, count=1)
     # LINE準備中対応: 既定URLへのフォールバックをやめ、URLが無ければブロック自体を出さない
