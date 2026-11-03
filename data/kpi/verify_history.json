@@ -5505,5 +5505,72 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-11-03",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 3,
+   "joined": 3
+  },
+  "items": [
+   {
+    "name": "沖縄県産業振興基金伴走支援事業",
+    "url": "https://okinawa-ric.jp/service/post-48.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": [],
+    "amount_in_source": "30百万円"
+   },
+   {
+    "name": "電気料金高騰に対する支援",
+    "url": "https://www.pref.okinawa.lg.jp/shigoto/keizai/1009879/1010143/1010146.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "中小企業生産性革命推進事業_事業承継・M&A補助金(16次公募)_専門家活用枠(買い手支援類型-100億企業特例)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003N1RWUA0",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "［第十一回］事業再構築補助金（交付申請等）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0W5h00000UbU66EAF",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "事業承継推進事業",
+    "url": "https://okinawa-ric.jp/service/post-3.html",
+    "method": "ai",
+    "judges": [
+     "Claude",
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": [],
+    "amount_in_source": "100万円/件"
+   }
+  ]
  }
 ]
