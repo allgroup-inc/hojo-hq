@@ -32,8 +32,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           WF: diagnosis-monitor.yml
-          # 15分間隔でもGitHub側の混雑で起動が遅れ・間引かれることがあるため、90分空いたら停止とみなす
-          MAX_GAP_MIN: "90"
+          # このリポジトリのスケジュール起動は大きく遅れ・間引かれる(2026-11-03 実測: 4時間おきの
+          # moradou-cutover が1日約3回・最大12時間空き)。誤報を避け、6時間空いたら停止とみなす
+          MAX_GAP_MIN: "360"
         run: |
           set -euo pipefail
           label=diagnosis-monitor-watchdog
@@ -58,12 +59,20 @@ jobs:
             fi
             if [ -z "$problem" ]; then
               # 起動はしているが検査まで届いていない(準備段階の失敗・キャンセルが続く)
-              bad=$(gh run list --workflow "$WF" --event schedule --status completed --limit 6 --json conclusion \
-                --jq '[.[] | select(.conclusion != "success" and .conclusion != "failure")] | length')
-              total=$(gh run list --workflow "$WF" --event schedule --status completed --limit 6 --json conclusion --jq 'length')
-              [ "$total" -ge 6 ] && [ "$bad" = "$total" ] && problem="監視は起動していますが、直近6回すべてが検査前に中断しています(cancelled/startup_failure等)。"
+              done_runs=$(gh run list --workflow "$WF" --event schedule --status completed --limit 12 --json conclusion)
+              total=$(echo "$done_runs" | jq 'length')
+              bad=$(echo "$done_runs" | jq '[.[] | select(.conclusion != "success" and .conclusion != "failure")] | length')
+              [ "$total" -ge 12 ] && [ "$bad" = "$total" ] && problem="監視は起動していますが、直近12回すべてが検査前に中断しています(cancelled/startup_failure等)。"
             fi
           fi
+
+          # 実際の起動間隔を残す(15分間隔の設定に対して、GitHub側でどれだけ遅れ・間引かれているか)
+          gh run list --workflow "$WF" --event schedule --limit 100 --json createdAt \
+            | jq -r --argjson since "$((now - 86400))" '
+                [.[].createdAt | fromdateiso8601 | select(. >= $since)] | sort as $t
+                | ([range(1; $t | length) | ($t[.] - $t[. - 1])] | max // 0) as $gap
+                | "直近24時間の起動: \($t | length)回(予定96回)/ 最大間隔: \($gap / 60 | floor)分"' \
+            | tee -a "$GITHUB_STEP_SUMMARY"
 
           issue=$(gh issue list --state open --label "$label" --limit 1 --json number --jq '.[0].number // empty')
           notify=""

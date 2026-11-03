@@ -87,12 +87,16 @@ jobs:
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
+          # LINE公式アカウントの無料枠(月200通)は顧客向けの締切アラートと共用。異常と復旧を
+          # 繰り返す(フラッピング)ときに枠を食い尽くさないよう、この監視からは24時間で6通まで
+          LINE_DAILY_CAP: "6"
         run: |
           set -euo pipefail
           label=diagnosis-monitor
           gh label create "$label" --color B60205 \
             --description "もらいわすれ堂 診断ページの15分監視" 2>/dev/null || true
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          issues_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/issues"
           now=$(date -u +%s)
 
           if [ -f diagnosis_monitor_result.json ]; then
@@ -105,62 +109,97 @@ jobs:
             echo "監視の準備で失敗し、診断ページを検査できませんでした。Actionsログを確認してください。" > diagnosis_monitor_report.txt
           fi
 
+          # 直近24時間に送った通数(Issue本文・コメントの <!-- notified: 秒 --> を数える)
+          sent=$(gh issue list --label "$label" --state all --limit 30 --json body,comments \
+            | jq --argjson since "$((now - 86400))" \
+              '[.[] | (.body, .comments[].body) | scan("<!-- notified: ([0-9]+) -->") | .[0] | tonumber | select(. >= $since)] | length')
+          if [ "$sent" -lt "$LINE_DAILY_CAP" ]; then
+            mark="<!-- notified: ${now} -->"
+          else
+            mark="📵 LINE通知は24時間で${LINE_DAILY_CAP}通の上限に達したため、この変化はLINEで送っていません(Issueのみ)。"
+          fi
+          can_notify() { [ "$sent" -lt "$LINE_DAILY_CAP" ]; }
+
           issue=$(gh issue list --state open --label "$label" --limit 1 --json number --jq '.[0].number // empty')
           notify=""
+          summary=$(grep -m1 '^ERROR' diagnosis_monitor_report.txt | cut -c1-120 || true)
 
           if [ "$ok" = "true" ]; then
             if [ -n "$issue" ]; then
               created=$(gh issue view "$issue" --json createdAt --jq .createdAt)
               mins=$(( (now - $(date -u -d "$created" +%s)) / 60 ))
-              gh issue comment "$issue" --body "✅ 復旧: 診断ページが正常に戻りました(障害の継続 約${mins}分)。自動クローズします。 ${run_url}"
+              printf '%s\n✅ 復旧: 診断ページが正常に戻りました(障害の継続 約%s分)。自動クローズします。 %s\n' "$mark" "$mins" "$run_url" > recover.md
+              gh issue comment "$issue" --body-file recover.md
               gh issue close "$issue"
-              notify=$(printf '✅【もらいわすれ堂】診断ページが復旧しました\n障害の継続: 約%s分\n%s/%s/issues/%s' "$mins" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$issue")
+              can_notify && notify=$(printf '✅【もらいわすれ堂】診断ページが復旧しました\n障害の継続: 約%s分\n%s/%s' "$mins" "$issues_url" "$issue")
             fi
           else
             {
               echo "<!-- sig: ${sig} -->"
+              echo "$mark"
               echo "- 実行: ${run_url}"
               echo ""
               echo '```'
               cat diagnosis_monitor_report.txt
               echo '```'
             } > body.md
-            summary=$(grep -m1 '^ERROR' diagnosis_monitor_report.txt | cut -c1-120 || true)
             if [ -z "$issue" ]; then
               { echo "自動検知: もらいわすれ堂の診断ページで、利用者が制度を検索できない可能性があります。"; echo ""; cat body.md; } > first.md
               url=$(gh issue create --label "$label" --title "🚨 診断ページ異常: ${sig}" --body-file first.md)
-              notify=$(printf '🚨【もらいわすれ堂】診断ページ異常\n%s\n%s' "${summary:-$sig}" "$url")
+              issue="${url##*/}"
+              can_notify && notify=$(printf '🚨【もらいわすれ堂】診断ページ異常\n%s\n%s' "${summary:-$sig}" "$url")
             else
-              prev=$(gh issue view "$issue" --json body,comments \
-                --jq '[.body] + [.comments[].body] | map(capture("<!-- sig: (?<s>[^ ]*) -->").s? // empty) | last // ""')
-              created=$(gh issue view "$issue" --json createdAt --jq .createdAt)
-              mins=$(( (now - $(date -u -d "$created" +%s)) / 60 ))
-              escalated=$(gh issue view "$issue" --json comments --jq '[.comments[].body | select(contains("<!-- escalated -->"))] | length')
+              thread=$(gh issue view "$issue" --json body,comments,createdAt)
+              prev=$(echo "$thread" | jq -r '[.body] + [.comments[].body] | map(capture("<!-- sig: (?<s>[^ ]*) -->").s? // empty) | last // ""')
+              last_notice=$(echo "$thread" | jq -r '[.body] + [.comments[].body] | map(capture("<!-- (?<m>notified|notify-failed)").m? // empty) | last // ""')
+              escalated=$(echo "$thread" | jq '[.comments[].body | select(contains("<!-- escalated -->"))] | length')
+              mins=$(( (now - $(date -u -d "$(echo "$thread" | jq -r .createdAt)" +%s)) / 60 ))
               if [ "$sig" != "$prev" ]; then
                 { echo "⚠️ 症状が変わりました(${prev} → ${sig})"; echo ""; cat body.md; } > change.md
                 gh issue comment "$issue" --body-file change.md
-                notify=$(printf '⚠️【もらいわすれ堂】診断ページの症状が変わりました\n%s\n%s/%s/issues/%s' "${summary:-$sig}" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$issue")
+                can_notify && notify=$(printf '⚠️【もらいわすれ堂】診断ページの症状が変わりました\n%s\n%s/%s' "${summary:-$sig}" "$issues_url" "$issue")
               elif [ "$mins" -ge 240 ] && [ "$escalated" = "0" ]; then
                 { echo "<!-- escalated -->"; echo "⏰ 異常が4時間以上つづいています(約${mins}分)。"; echo ""; cat body.md; } > esc.md
                 gh issue comment "$issue" --body-file esc.md
-                notify=$(printf '⏰【もらいわすれ堂】診断ページの異常が4時間以上つづいています\n%s\n%s/%s/issues/%s' "${summary:-$sig}" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$issue")
+                can_notify && notify=$(printf '⏰【もらいわすれ堂】診断ページの異常が4時間以上つづいています\n%s\n%s/%s' "${summary:-$sig}" "$issues_url" "$issue")
+              elif [ "$last_notice" = "notify-failed" ] && can_notify; then
+                # 前回のLINE送信が失敗したまま。届いていない可能性があるので一度だけ送り直す
+                printf '%s\n🔁 前回のLINE通知が失敗していたため再送します。 %s\n' "$mark" "$run_url" > resend.md
+                gh issue comment "$issue" --body-file resend.md
+                notify=$(printf '🔁【もらいわすれ堂】(再送)診断ページの異常がつづいています\n%s\n%s/%s' "${summary:-$sig}" "$issues_url" "$issue")
               else
                 echo "同じ症状(${sig})が継続中。Issue #${issue} への追記・通知はしません"
               fi
             fi
           fi
 
+          echo "issue=${issue}" >> "$GITHUB_OUTPUT"
           {
             echo "notify<<__NOTIFY__"
             echo "$notify"
             echo "__NOTIFY__"
           } >> "$GITHUB_OUTPUT"
 
-      # Secrets(LINE_CHANNEL_ACCESS_TOKEN / LINE_ADMIN_USER_ID)未設定の間は自動でスキップされる
+      # Secrets(LINE_CHANNEL_ACCESS_TOKEN / LINE_ADMIN_USER_ID)未設定の間は自動でスキップされる。
+      # 送信に失敗しても後続の記録まで進める(失敗を記録しないと、次回「同じ症状」として再送されない)
       - name: LINE通知(小柳さんへ)
+        id: line
         if: always() && steps.state.outputs.notify != ''
+        continue-on-error: true
         uses: ./.github/actions/line-notify
         with:
           channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
           message: ${{ steps.state.outputs.notify }}
+
+      - name: LINE送信の失敗を記録
+        if: always() && steps.line.outcome == 'failure' && steps.state.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.state.outputs.issue }}
+        run: |
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          gh issue comment "$ISSUE" --body "<!-- notify-failed -->
+          ⚠️ LINE通知の送信に失敗しました(通数の上限・トークン失効など)。異常が続いていれば次回の監視で再送します。 ${run_url}"
+          echo "::error::LINE通知の送信に失敗しました"
+          exit 1
