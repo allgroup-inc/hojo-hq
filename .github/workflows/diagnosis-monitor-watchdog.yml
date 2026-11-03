@@ -1,7 +1,10 @@
 name: diagnosis-monitor-watchdog
 
-# 監視の監視: diagnosis-monitor.yml(15分ごと)が止まっていないかを2時間ごとに確かめる。
-# 止まり方: ワークフローの無効化(手動/60日無活動) / スケジュールが起動しない / 起動しても毎回準備で落ちる。
+# 監視の監視: diagnosis-monitor.yml が動いているかを2時間ごとに確かめる(判定は scripts/diagnosis_notify.py watchdog)。
+# 見る止まり方: ワークフローの無効化(手動/60日無活動)/ 6時間以上の起動途絶 / 一度も起動しない /
+# 起動しても直近4回とも検査まで届かない(Playwright導入・checkoutの失敗、中断)/ 直近4回とも障害Issueの更新に失敗。
+# このワークフローもスケジュール起動のため、遅れ・間引きがあり、検知までの時間は保証しない。
+# 結果は監視システムの故障として diagnosis-monitor-system のIssueに残る(診断ページの障害とは分ける)。
 # 議事: docs/議事_20261103_診断ページ15分監視.md
 
 on:
@@ -21,87 +24,48 @@ concurrency:
 jobs:
   watchdog:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v7
         with:
-          sparse-checkout: .github
+          sparse-checkout: |
+            scripts
+            .github
 
       - name: Check monitor is alive
         id: w
         env:
           GH_TOKEN: ${{ github.token }}
-          WF: diagnosis-monitor.yml
-          # このリポジトリのスケジュール起動は大きく遅れ・間引かれる(2026-11-03 実測: 4時間おきの
-          # moradou-cutover が1日約3回・最大12時間空き)。誤報を避け、6時間空いたら停止とみなす
-          MAX_GAP_MIN: "360"
-        run: |
-          set -euo pipefail
-          label=diagnosis-monitor-watchdog
-          gh label create "$label" --color D93F0B \
-            --description "診断ページ15分監視そのものの停止" 2>/dev/null || true
-          now=$(date -u +%s)
-          problem=""
+        run: python3 scripts/diagnosis_notify.py watchdog --workflow diagnosis-monitor.yml
 
-          wf=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/${WF}")
-          state=$(echo "$wf" | jq -r .state)
-          wf_created=$(echo "$wf" | jq -r .created_at)
-          if [ "$state" != "active" ]; then
-            problem="監視ワークフローが無効になっています(state=${state})。Actions画面から有効化してください。"
-          else
-            last=$(gh run list --workflow "$WF" --event schedule --limit 1 --json createdAt --jq '.[0].createdAt // empty')
-            if [ -z "$last" ]; then
-              age=$(( (now - $(date -u -d "$wf_created" +%s)) / 60 ))
-              [ "$age" -gt "$MAX_GAP_MIN" ] && problem="監視ワークフローが一度もスケジュール起動していません(登録から約${age}分)。"
-            else
-              gap=$(( (now - $(date -u -d "$last" +%s)) / 60 ))
-              [ "$gap" -gt "$MAX_GAP_MIN" ] && problem="監視が約${gap}分起動していません(最終起動 ${last})。"
-            fi
-            if [ -z "$problem" ]; then
-              # 起動はしているが検査まで届いていない(準備段階の失敗・キャンセルが続く)
-              done_runs=$(gh run list --workflow "$WF" --event schedule --status completed --limit 12 --json conclusion)
-              total=$(echo "$done_runs" | jq 'length')
-              bad=$(echo "$done_runs" | jq '[.[] | select(.conclusion != "success" and .conclusion != "failure")] | length')
-              [ "$total" -ge 12 ] && [ "$bad" = "$total" ] && problem="監視は起動していますが、直近12回すべてが検査前に中断しています(cancelled/startup_failure等)。"
-            fi
-          fi
-
-          # 実際の起動間隔を残す(15分間隔の設定に対して、GitHub側でどれだけ遅れ・間引かれているか)
-          gh run list --workflow "$WF" --event schedule --limit 100 --json createdAt \
-            | jq -r --argjson since "$((now - 86400))" '
-                [.[].createdAt | fromdateiso8601 | select(. >= $since)] | sort as $t
-                | ([range(1; $t | length) | ($t[.] - $t[. - 1])] | max // 0) as $gap
-                | "直近24時間の起動: \($t | length)回(予定96回)/ 最大間隔: \($gap / 60 | floor)分"' \
-            | tee -a "$GITHUB_STEP_SUMMARY"
-
-          issue=$(gh issue list --state open --label "$label" --limit 1 --json number --jq '.[0].number // empty')
-          notify=""
-          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          if [ -n "$problem" ]; then
-            echo "::error::${problem}"
-            if [ -z "$issue" ]; then
-              url=$(gh issue create --label "$label" --title "⚠️ 診断ページの監視が止まっています" \
-                --body "${problem}"$'\n\n'"この間、診断ページの障害は検知されません。- 実行: ${run_url}")
-              notify=$(printf '⚠️【もらいわすれ堂】診断ページの監視が止まっています\n%s\n%s' "$problem" "$url")
-            fi
-          elif [ -n "$issue" ]; then
-            gh issue comment "$issue" --body "✅ 監視が再び動いていることを確認しました。自動クローズします。 ${run_url}"
-            gh issue close "$issue"
-            notify=$(printf '✅【もらいわすれ堂】診断ページの監視が再開しました\n%s/%s/issues/%s' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$issue")
-          else
-            echo "監視は正常に動いています"
-          fi
-          {
-            echo "notify<<__NOTIFY__"
-            echo "$notify"
-            echo "__NOTIFY__"
-          } >> "$GITHUB_OUTPUT"
-          [ -z "$problem" ]
+      - name: LINE送信の可否(通数の上限・LINEの残り。15分監視と同じ枠を使う)
+        id: gate
+        if: always() && steps.w.outputs.message != '' && steps.w.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINE_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_TO_SET: ${{ secrets.LINE_ADMIN_USER_ID != '' }}
+        run: python3 scripts/diagnosis_notify.py gate --issue "${{ steps.w.outputs.issue }}"
 
       - name: LINE通知(小柳さんへ)
-        if: always() && steps.w.outputs.notify != ''
+        id: line
+        if: always() && steps.gate.outputs.allowed == 'true'
+        continue-on-error: true
+        timeout-minutes: 2
         uses: ./.github/actions/line-notify
         with:
           channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
-          message: ${{ steps.w.outputs.notify }}
+          message: ${{ steps.w.outputs.message }}
+
+      - name: LINE送信の結果を記録(失敗は次回の再送対象)
+        if: always() && steps.gate.outputs.allowed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/diagnosis_notify.py record --issue "${{ steps.w.outputs.issue }}" --outcome "${{ steps.line.outcome == 'success' && 'success' || 'failure' }}"
+
+      - name: 監視の停止・故障を赤で残す
+        if: always() && (steps.w.outputs.problem != '' || steps.line.outcome == 'failure')
+        run: |
+          echo "::error::監視の停止・故障、またはLINE送信の失敗があります(${{ steps.w.outputs.problem }})"
+          exit 1

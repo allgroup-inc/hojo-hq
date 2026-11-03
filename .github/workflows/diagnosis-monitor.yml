@@ -1,30 +1,38 @@
 name: diagnosis-monitor
 
-# もらいわすれ堂の診断ページ(moradou.jp/shindan/)を15分ごとに実ブラウザで検査する。
-# 議事: docs/議事_20261103_診断ページ15分監視.md / 検査本体: scripts/diagnosis_monitor.mjs
+# もらいわすれ堂の診断ページ(moradou.jp/shindan/)を実ブラウザで検査する。
+# 議事: docs/議事_20261103_診断ページ15分監視.md / 検査: scripts/diagnosis_monitor.mjs / 通知: scripts/diagnosis_notify.py
 #
-# 通知(Issue を状態の正本にする。LINEは状態が変わったときだけ送る):
-#   初めて異常 → Issue起票+LINE / 同じ症状が続く → 何もしない / 症状が変わった → 追記+LINE
-#   4時間以上続く → 追記+LINE(1回だけ) / 正常に戻った → 追記してクローズ+LINE
-# 監視そのものの停止は diagnosis-monitor-watchdog.yml が見る。
+# 15分間隔は設定値であり、障害を検知するまでの時間は保証しない。GitHub のスケジュール起動は遅れ・間引きがある
+# (2026-11-03 実測: 4時間おきの moradou-cutover が1日約3回・最大約12時間空いた)。実際の間隔は停止検知の要約に残る。
+#
+# 通知: 診断ページの障害は diagnosis-monitor、監視システムの故障(この間ページの状態は不明)は
+# diagnosis-monitor-system のIssueに分ける。LINEは状態が変わったときだけ、24時間3通・30日15通まで。
+# LINEの残りが50通以下・残りを読めないときは送らず、Issueに残して次回に送り直す。
 
 on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch: {}
-  # 検査本体・診断ページを変えたら、ローカル配信で自己テストする(本番には触れない)
+  # 検査本体・通知制御・診断ページを変えたら、ローカル配信と偽のGitHubで自己テストする(本番には触れない)
   pull_request:
     paths:
       - "scripts/diagnosis_monitor.mjs"
+      - "scripts/diagnosis_notify.py"
       - "tests/diagnosis_monitor.test.mjs"
+      - "tests/test_diagnosis_notify.py"
       - ".github/workflows/diagnosis-monitor.yml"
+      - ".github/workflows/diagnosis-monitor-watchdog.yml"
       - "site/fukugiiro/shindan/**"
   push:
     branches: [main]
     paths:
       - "scripts/diagnosis_monitor.mjs"
+      - "scripts/diagnosis_notify.py"
       - "tests/diagnosis_monitor.test.mjs"
+      - "tests/test_diagnosis_notify.py"
       - ".github/workflows/diagnosis-monitor.yml"
+      - ".github/workflows/diagnosis-monitor-watchdog.yml"
       - "site/fukugiiro/shindan/**"
 
 permissions:
@@ -41,10 +49,13 @@ env:
 jobs:
   selftest:
     if: github.event_name == 'pull_request' || github.event_name == 'push'
-    runs-on: ubuntu-latest
+    # Playwright 1.56 は ubuntu-latest(Ubuntu 26.04)の chromium に対応していない(2026-11-03 PR #566 のCIで確認)
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+      - name: 通知制御の単体テスト(通数の上限・LINEの応答異常・同時実行・Issue操作の失敗)
+        run: python3 -m unittest tests/test_diagnosis_notify.py
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -53,13 +64,15 @@ jobs:
           npm init -y > /dev/null
           npm i --no-save "playwright@${PLAYWRIGHT_VERSION}"
           npx playwright install --with-deps chromium
-      - name: 自己テスト(正常系が通り、異常系がそれぞれ固有の理由で落ちること)
+      - name: 検査の自己テスト(正常系が通り、異常系がそれぞれ固有の理由で落ちること)
         run: node --test tests/diagnosis_monitor.test.mjs
 
   monitor:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      handled: ${{ steps.state.outputs.handled }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -77,6 +90,7 @@ jobs:
           npm i --no-save "playwright@${PLAYWRIGHT_VERSION}"
           npx playwright install --with-deps chromium
 
+      # 次の2つのステップ名は停止検知(diagnosis_notify.py の CHECK_STEP / INCIDENT_STEP)が参照する。変えるときは両方を直す
       - name: Check diagnosis page
         env:
           DIAG_URL: "https://moradou.jp/shindan/"
@@ -87,119 +101,73 @@ jobs:
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
-          # LINE公式アカウントの無料枠(月200通)は顧客向けの締切アラートと共用。異常と復旧を
-          # 繰り返す(フラッピング)ときに枠を食い尽くさないよう、この監視からは24時間で6通まで
-          LINE_DAILY_CAP: "6"
-        run: |
-          set -euo pipefail
-          label=diagnosis-monitor
-          gh label create "$label" --color B60205 \
-            --description "もらいわすれ堂 診断ページの15分監視" 2>/dev/null || true
-          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          issues_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/issues"
-          now=$(date -u +%s)
+        run: python3 scripts/diagnosis_notify.py incident
 
-          if [ -f diagnosis_monitor_result.json ]; then
-            ok=$(jq -r '.ok' diagnosis_monitor_result.json)
-            sig=$(jq -r '.signature' diagnosis_monitor_result.json)
-          else
-            # 検査を始める前に落ちた(Playwright導入失敗など)。診断ページの状態は不明
-            ok=false
-            sig=MONITOR_SETUP
-            echo "監視の準備で失敗し、診断ページを検査できませんでした。Actionsログを確認してください。" > diagnosis_monitor_report.txt
-          fi
+      - name: LINE送信の可否(通数の上限・LINEの残り)
+        id: gate
+        if: always() && steps.state.outputs.message != '' && steps.state.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINE_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_TO_SET: ${{ secrets.LINE_ADMIN_USER_ID != '' }}
+        run: python3 scripts/diagnosis_notify.py gate --issue "${{ steps.state.outputs.issue }}"
 
-          # 直近24時間に送った通数(Issue本文・コメントの <!-- notified: 秒 --> を数える)
-          sent=$(gh issue list --label "$label" --state all --limit 30 --json body,comments \
-            | jq --argjson since "$((now - 86400))" \
-              '[.[] | (.body, .comments[].body) | scan("<!-- notified: ([0-9]+) -->") | .[0] | tonumber | select(. >= $since)] | length')
-          if [ "$sent" -lt "$LINE_DAILY_CAP" ]; then
-            mark="<!-- notified: ${now} -->"
-          else
-            mark="📵 LINE通知は24時間で${LINE_DAILY_CAP}通の上限に達したため、この変化はLINEで送っていません(Issueのみ)。"
-          fi
-          can_notify() { [ "$sent" -lt "$LINE_DAILY_CAP" ]; }
-
-          issue=$(gh issue list --state open --label "$label" --limit 1 --json number --jq '.[0].number // empty')
-          notify=""
-          summary=$(grep -m1 '^ERROR' diagnosis_monitor_report.txt | cut -c1-120 || true)
-
-          if [ "$ok" = "true" ]; then
-            if [ -n "$issue" ]; then
-              created=$(gh issue view "$issue" --json createdAt --jq .createdAt)
-              mins=$(( (now - $(date -u -d "$created" +%s)) / 60 ))
-              printf '%s\n✅ 復旧: 診断ページが正常に戻りました(障害の継続 約%s分)。自動クローズします。 %s\n' "$mark" "$mins" "$run_url" > recover.md
-              gh issue comment "$issue" --body-file recover.md
-              gh issue close "$issue"
-              can_notify && notify=$(printf '✅【もらいわすれ堂】診断ページが復旧しました\n障害の継続: 約%s分\n%s/%s' "$mins" "$issues_url" "$issue")
-            fi
-          else
-            {
-              echo "<!-- sig: ${sig} -->"
-              echo "$mark"
-              echo "- 実行: ${run_url}"
-              echo ""
-              echo '```'
-              cat diagnosis_monitor_report.txt
-              echo '```'
-            } > body.md
-            if [ -z "$issue" ]; then
-              { echo "自動検知: もらいわすれ堂の診断ページで、利用者が制度を検索できない可能性があります。"; echo ""; cat body.md; } > first.md
-              url=$(gh issue create --label "$label" --title "🚨 診断ページ異常: ${sig}" --body-file first.md)
-              issue="${url##*/}"
-              can_notify && notify=$(printf '🚨【もらいわすれ堂】診断ページ異常\n%s\n%s' "${summary:-$sig}" "$url")
-            else
-              thread=$(gh issue view "$issue" --json body,comments,createdAt)
-              prev=$(echo "$thread" | jq -r '[.body] + [.comments[].body] | map(capture("<!-- sig: (?<s>[^ ]*) -->").s? // empty) | last // ""')
-              last_notice=$(echo "$thread" | jq -r '[.body] + [.comments[].body] | map(capture("<!-- (?<m>notified|notify-failed)").m? // empty) | last // ""')
-              escalated=$(echo "$thread" | jq '[.comments[].body | select(contains("<!-- escalated -->"))] | length')
-              mins=$(( (now - $(date -u -d "$(echo "$thread" | jq -r .createdAt)" +%s)) / 60 ))
-              if [ "$sig" != "$prev" ]; then
-                { echo "⚠️ 症状が変わりました(${prev} → ${sig})"; echo ""; cat body.md; } > change.md
-                gh issue comment "$issue" --body-file change.md
-                can_notify && notify=$(printf '⚠️【もらいわすれ堂】診断ページの症状が変わりました\n%s\n%s/%s' "${summary:-$sig}" "$issues_url" "$issue")
-              elif [ "$mins" -ge 240 ] && [ "$escalated" = "0" ]; then
-                { echo "<!-- escalated -->"; echo "⏰ 異常が4時間以上つづいています(約${mins}分)。"; echo ""; cat body.md; } > esc.md
-                gh issue comment "$issue" --body-file esc.md
-                can_notify && notify=$(printf '⏰【もらいわすれ堂】診断ページの異常が4時間以上つづいています\n%s\n%s/%s' "${summary:-$sig}" "$issues_url" "$issue")
-              elif [ "$last_notice" = "notify-failed" ] && can_notify; then
-                # 前回のLINE送信が失敗したまま。届いていない可能性があるので一度だけ送り直す
-                printf '%s\n🔁 前回のLINE通知が失敗していたため再送します。 %s\n' "$mark" "$run_url" > resend.md
-                gh issue comment "$issue" --body-file resend.md
-                notify=$(printf '🔁【もらいわすれ堂】(再送)診断ページの異常がつづいています\n%s\n%s/%s' "${summary:-$sig}" "$issues_url" "$issue")
-              else
-                echo "同じ症状(${sig})が継続中。Issue #${issue} への追記・通知はしません"
-              fi
-            fi
-          fi
-
-          echo "issue=${issue}" >> "$GITHUB_OUTPUT"
-          {
-            echo "notify<<__NOTIFY__"
-            echo "$notify"
-            echo "__NOTIFY__"
-          } >> "$GITHUB_OUTPUT"
-
-      # Secrets(LINE_CHANNEL_ACCESS_TOKEN / LINE_ADMIN_USER_ID)未設定の間は自動でスキップされる。
-      # 送信に失敗しても後続の記録まで進める(失敗を記録しないと、次回「同じ症状」として再送されない)
+      # 既存の通知部品をそのまま使う(顧客向け配信の処理には触れない)。止まったままにならないよう2分で打ち切る
       - name: LINE通知(小柳さんへ)
         id: line
-        if: always() && steps.state.outputs.notify != ''
+        if: always() && steps.gate.outputs.allowed == 'true'
         continue-on-error: true
+        timeout-minutes: 2
         uses: ./.github/actions/line-notify
         with:
           channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
-          message: ${{ steps.state.outputs.notify }}
+          message: ${{ steps.state.outputs.message }}
 
-      - name: LINE送信の失敗を記録
-        if: always() && steps.line.outcome == 'failure' && steps.state.outputs.issue != ''
+      - name: LINE送信の結果を記録(失敗は次回の再送対象)
+        if: always() && steps.gate.outputs.allowed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          ISSUE: ${{ steps.state.outputs.issue }}
+        run: python3 scripts/diagnosis_notify.py record --issue "${{ steps.state.outputs.issue }}" --outcome "${{ steps.line.outcome == 'success' && 'success' || 'failure' }}"
+
+      - name: LINE送信の失敗を赤で残す
+        if: always() && steps.line.outcome == 'failure'
         run: |
-          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          gh issue comment "$ISSUE" --body "<!-- notify-failed -->
-          ⚠️ LINE通知の送信に失敗しました(通数の上限・トークン失効など)。異常が続いていれば次回の監視で再送します。 ${run_url}"
-          echo "::error::LINE通知の送信に失敗しました"
+          echo "::error::LINE通知の送信に失敗しました(Issueに記録済み・次回に送り直します)"
           exit 1
+
+  # checkout・Python・GitHub API の失敗で障害Issueの更新まで届かなかったときの予備。
+  # リポジトリのファイルを使わず、ランナーに入っている gh だけで監視システムの故障をIssueに残す(LINEは送らない)。
+  fallback:
+    needs: monitor
+    if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && needs.monitor.outputs.handled != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: 監視システムの故障をIssueに残す
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          MONITOR_RESULT: ${{ needs.monitor.result }}
+        run: |
+          set -euo pipefail
+          label=diagnosis-monitor-system
+          gh label create "$label" --color D93F0B --description "診断ページの監視システムの故障(ページの状態は不明)" 2>/dev/null || true
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          sig=MONITOR_JOB_FAILED
+          text="監視ジョブが障害Issueの更新まで届かずに終わりました(結果: ${MONITOR_RESULT})。checkout・Python・GitHub APIの失敗などが考えられます。この間、診断ページの状態は分かりません。 ${run_url}"
+          n=$(gh issue list --label "$label" --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -z "$n" ]; then
+            gh issue create --label "$label" --title "⚠️ 診断ページの監視が動いていません: ${sig}" \
+              --body "<!-- sig: ${sig} -->"$'\n'"自動検知: ${text}"
+          else
+            last=$(gh issue view "$n" --json body,comments \
+              --jq '[.body] + [.comments[].body] | map(capture("<!-- sig: (?<s>\\S+) -->").s? // empty) | last // ""')
+            if [ "$last" != "$sig" ]; then
+              gh issue comment "$n" --body "<!-- sig: ${sig} -->"$'\n'"${text}"
+            else
+              echo "同じ故障が継続中。Issue #${n} への追記はしません"
+            fi
+          fi
