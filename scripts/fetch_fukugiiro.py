@@ -34,6 +34,12 @@ OUT = os.path.join(BASE, "data", "fukugiiro", "seido.json")
 # moradou.jp の診断ページが読む公開用コピー(/seido.json)。moradou 側の組み立ては hojo-hq の
 # site/ と scripts/ しか取得しないため、data/ だけを更新すると診断が古いデータのまま止まる
 PUBLISH_OUT = os.path.join(BASE, "site", "fukugiiro", "seido.json")
+# 公開用の更新を保留したかどうかの記録(停止検知が読んで運営側へ知らせる)。data/ 側の処理には使わない
+PUBLISH_STATUS = os.path.join(BASE, "data", "fukugiiro", "publish_status.json")
+# 必須制度: 国の制度(沖縄のどの世帯にも関係する)。1件でも理由なく消えたら公開用の更新を保留する
+REQUIRED_PREFIX = "fk-kuni-"
+# 理由なく消えてよい件数の上限(これを超えたら保留)。議事_20261103_診断ページ15分監視.md
+MAX_UNEXPLAINED_LOSS = 2
 
 # シード: 承認済みドメインの主要制度(URLは2026-07-22に検索で特定。到達性は毎回実行時に再確認)
 SEEDS = [
@@ -470,6 +476,10 @@ except Exception as _e:  # モジュールが無くても既存シードで動�
 # 管理は fg_seo.HIDDEN_MUNIS の1箇所(市独自制度・市町村ページ・一覧・診断すべてに効く)。
 from fg_seo import HIDDEN_MUNIS as HIDDEN_AREAS
 
+# 廃止・終了した制度の根拠。シードから外すときは id をキーに日付・理由・出典を残す
+# (残さずに外すと「理由なく消えた」扱いになり、公開用の更新が保留される)
+RETIRED = {}
+
 _robots_cache = {}
 
 
@@ -499,12 +509,49 @@ def reachable(url):
         return False
 
 
+def decide_publish(prev_items, new_items, failed, legit, required_ids, checked_at):
+    """公開用 seido.json(moradou.jp の診断ページが読む)を更新してよいかを決め、その記録を返す。
+    前回の公開データと制度IDで比べ、欠けたデータで正常な公開データを上書きしない。
+    prev_items=None は前回の公開データが無い(読めない)場合。"""
+    new_ids = {i["id"] for i in new_items}
+    prev_ids = None if prev_items is None else {i["id"] for i in prev_items}
+    reasons, unexplained, failed_prev, explained = [], [], [], {}
+    if prev_ids is not None:
+        lost = prev_ids - new_ids
+        explained = {i: legit[i] for i in sorted(lost) if i in legit}
+        unexplained = sorted(lost - set(explained))
+        failed_prev = sorted(i for i in failed if i in prev_ids)
+        required_lost = [i for i in unexplained if i.startswith(REQUIRED_PREFIX)]
+        if failed_prev:
+            reasons.append(f"前回の公開データに載っている制度の取得に失敗しました({len(failed_prev)}件)")
+        if len(unexplained) > MAX_UNEXPLAINED_LOSS:
+            reasons.append(f"正当な理由なく{len(unexplained)}件が消えました(上限{MAX_UNEXPLAINED_LOSS}件)")
+        if required_lost:
+            reasons.append(f"必須制度(国の制度)が理由なく消えました({len(required_lost)}件)")
+    publish = not reasons
+    public_ids = new_ids if publish or prev_ids is None else prev_ids
+    return {
+        "checked_at": checked_at,
+        "publish": publish,
+        "reasons": reasons,
+        "previous_count": None if prev_ids is None else len(prev_ids),
+        "new_count": len(new_ids),
+        "failed": [{"id": k, "reason": v, "in_previous_public": prev_ids is not None and k in prev_ids} for k, v in sorted(failed.items())],
+        "unexplained_lost": unexplained,
+        "legit_removed": [{"id": k, "evidence": v} for k, v in explained.items()],
+        # 公開されている(またはこれから公開する)データに無い必須制度。保留でなくても運営側へ知らせる
+        "required_missing": sorted(i for i in required_ids if i not in public_ids and i not in legit),
+    }
+
+
 def main():
     now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
     items, skipped = [], []
+    failed, legit = {}, {k: f"廃止記録({v.get('date', '日付なし')}: {v.get('reason', '')} / {v.get('source', '')})" for k, v in RETIRED.items()}
     for seed in SEEDS:
         if seed.get("area") in HIDDEN_AREAS:
             skipped.append((seed["name"], "一時非公開(HIDDEN_AREAS)"))
+            legit[seed["id"]] = f"一時非公開(HIDDEN_AREAS: {seed.get('area')})"
             print(f"SKIP(hidden): {seed['name']}")
             continue
         # 締切を過ぎた制度は載せない(終わった制度の案内を防ぐ。2026-10-17: 締切切れ1件で検証が止まり、
@@ -512,11 +559,13 @@ def main():
         dl = seed.get("deadline")
         if dl and str(dl)[:10] < datetime.now(JST).strftime("%Y-%m-%d"):
             skipped.append((seed["name"], f"締切終了({dl})"))
+            legit[seed["id"]] = f"締切終了(deadline {dl})"
             print(f"SKIP(ended): {seed['name']} {dl}")
             continue
         url = seed["source_url"]
         if not robots_ok(url):
             skipped.append((seed["name"], "robots.txt不許可"))
+            failed[seed["id"]] = "robots.txt不許可"
             print(f"SKIP(robots): {seed['name']}")
             continue
         # 手動照合済み(assume_reachable)は、bot遮断する自治体サイト等のため到達性チェックを省く
@@ -524,6 +573,7 @@ def main():
         time.sleep(1.5)
         if not ok:
             skipped.append((seed["name"], "URL到達不可"))
+            failed[seed["id"]] = "URL到達不可"
             print(f"SKIP(unreachable): {seed['name']} {url}")
             continue
         item = dict(seed)
@@ -570,11 +620,29 @@ def main():
         print("検証エラーのため書き込みを中止")
         sys.exit(1)
 
-    for path in (OUT, PUBLISH_OUT):
+    try:
+        with open(PUBLISH_OUT, encoding="utf-8") as f:
+            prev_public = json.load(f).get("items")
+        if not isinstance(prev_public, list):
+            prev_public = None
+    except Exception:
+        prev_public = None
+    required_ids = {s["id"] for s in SEEDS if s["id"].startswith(REQUIRED_PREFIX)}
+    status = decide_publish(prev_public, items, failed, legit, required_ids, now)
+
+    # data/ は従来どおり毎回書く(市町村別ページ等が読む)。公開用は保留条件に当たらないときだけ書く
+    for path in [OUT] + ([PUBLISH_OUT] if status["publish"] else []):
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=1)
             f.write("\n")
+    with open(PUBLISH_STATUS, "w", encoding="utf-8") as f:
+        json.dump(status, f, ensure_ascii=False, indent=1)
+        f.write("\n")
     print(f"書き込み完了: {len(items)}件 / スキップ {len(skipped)}件 {skipped if skipped else ''}")
+    if not status["publish"]:
+        print(f"::warning::公開用 seido.json の更新を保留しました(前回の公開データを残します): {' / '.join(status['reasons'])}")
+    if status["required_missing"]:
+        print(f"::warning::必須制度が公開データにありません: {', '.join(status['required_missing'])}")
     # シードの半数以上が到達不可なら異常(サイト構造変化・ネットワーク断の疑い)
     if len(items) < len(SEEDS) / 2:
         print("[ERROR] シードの過半が取得不可 — 要調査")
