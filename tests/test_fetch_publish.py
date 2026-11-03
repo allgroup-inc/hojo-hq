@@ -7,6 +7,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import urllib.error
+from unittest import mock
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
@@ -91,7 +93,7 @@ f.time.sleep = lambda s: None
 f.robots_ok = lambda u: True
 down = {list(unreachable)!r}
 down_urls = {down_urls!r}
-f.reachable = lambda u: not ({all_down} or urllib.parse.urlparse(u).netloc in down or u in down_urls)
+f.reachable = lambda u: (False, "HTTP 503") if ({all_down} or urllib.parse.urlparse(u).netloc in down or u in down_urls) else (True, "HTTP 200")
 ids = {{'end': {end_id!r}, 'drop': {drop_id!r}, 'retire': {retire_id!r}}}
 if ids['end']:
     for s in f.SEEDS:
@@ -137,11 +139,13 @@ f.main()
         self.assertKept(prev, pub)
 
     def test_production_like_jidofuyoteate_failure_still_publishes_and_reports(self):
-        # 本番と同じく児童扶養手当だけが取れず(10/14以降の収集で毎回)、前回の公開データにも無い
+        # 本番と同じく児童扶養手当だけが取れず(9/24の出典差し替え後、10/1以降の収集で毎回)、前回の公開データにも無い
         r, prev, pub, status, _ = self.run_fetch(prev_exclude=["fk-kuni-jidofuyoteate"], unreachable_ids=["fk-kuni-jidofuyoteate"])
         self.assertTrue(status["publish"], status["reasons"])  # 公開データは減らないので更新は止めない
         self.assertEqual(status["required_missing"], ["fk-kuni-jidofuyoteate"])  # 必須制度の欠けとして知らせる
         self.assertIn("::warning::必須制度が公開データにありません: fk-kuni-jidofuyoteate", r.stdout)
+        self.assertEqual(status["failed"], [{"id": "fk-kuni-jidofuyoteate", "reason": "URL到達不可(HTTP 503)", "in_previous_public": False}])
+        self.assertIn("::warning::前回の公開データに無い制度の取得に失敗しました(公開用の更新は続けます): fk-kuni-jidofuyoteate(URL到達不可(HTTP 503))", r.stdout)
         # 同じ制度が前回の公開データに載っていたら、取得失敗で保留する(件数は1件でも)
         r, prev, pub, status, _ = self.run_fetch(unreachable_ids=["fk-kuni-jidofuyoteate"])
         self.assertFalse(status["publish"])
@@ -173,6 +177,28 @@ f.main()
         r, prev, pub, status, _ = self.run_fetch(retire_id=target)
         self.assertTrue(status["publish"], status)
         self.assertIn("廃止記録(2026-11-01: 制度終了 / https://example.go.jp/notice)", [x["evidence"] for x in status["legit_removed"]])
+
+
+class Reachable(unittest.TestCase):
+    """到達性の確認は HTTP ステータスまで残す(403=遮断と404=消滅を見分ける)。本文・URLは理由に入れない。"""
+
+    def test_status_is_recorded(self):
+        class Res:
+            status = 200
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+        cases = [
+            (Res(), (True, "HTTP 200")),
+            (urllib.error.HTTPError("https://x/secret?q=1", 403, "Forbidden", {}, None), (False, "HTTP 403")),
+            (urllib.error.HTTPError("https://x/", 404, "Not Found", {}, None), (False, "HTTP 404")),
+            (urllib.error.URLError(TimeoutError("timed out")), (False, "URLError(TimeoutError)")),
+            (ConnectionResetError("reset"), (False, "ConnectionResetError")),
+        ]
+        for effect, want in cases:
+            with self.subTest(want=want):
+                kw = {"return_value": effect} if isinstance(effect, Res) else {"side_effect": effect}
+                with mock.patch("urllib.request.urlopen", **kw):
+                    self.assertEqual(ff.reachable("https://example.go.jp/a"), want)
 
 
 if __name__ == "__main__":

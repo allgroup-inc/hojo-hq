@@ -19,6 +19,7 @@ import json
 import os
 import sys
 import time
+import urllib.error
 import urllib.request
 import urllib.robotparser
 from datetime import datetime, timezone, timedelta
@@ -501,12 +502,18 @@ def robots_ok(url):
 
 
 def reachable(url):
+    """(到達できたか, 理由)。理由は HTTP ステータスか例外の種類だけ(403=遮断と404=消滅を見分けるため。
+    本文・URL・認証情報は含めない)。"""
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     try:
         with urllib.request.urlopen(req, timeout=25) as res:
-            return res.status == 200
-    except Exception:
-        return False
+            return res.status == 200, f"HTTP {res.status}"
+    except urllib.error.HTTPError as e:
+        return False, f"HTTP {e.code}"
+    except urllib.error.URLError as e:
+        return False, f"URLError({type(e.reason).__name__})"
+    except Exception as e:
+        return False, type(e).__name__
 
 
 def decide_publish(prev_items, new_items, failed, legit, required_ids, checked_at):
@@ -569,12 +576,12 @@ def main():
             print(f"SKIP(robots): {seed['name']}")
             continue
         # 手動照合済み(assume_reachable)は、bot遮断する自治体サイト等のため到達性チェックを省く
-        ok = True if seed.get("assume_reachable") else reachable(url)
+        ok, detail = (True, "") if seed.get("assume_reachable") else reachable(url)
         time.sleep(1.5)
         if not ok:
-            skipped.append((seed["name"], "URL到達不可"))
-            failed[seed["id"]] = "URL到達不可"
-            print(f"SKIP(unreachable): {seed['name']} {url}")
+            skipped.append((seed["name"], f"URL到達不可({detail})"))
+            failed[seed["id"]] = f"URL到達不可({detail})"
+            print(f"SKIP(unreachable): {seed['name']} {url} {detail}")
             continue
         item = dict(seed)
         item.update({
@@ -643,6 +650,10 @@ def main():
         print(f"::warning::公開用 seido.json の更新を保留しました(前回の公開データを残します): {' / '.join(status['reasons'])}")
     if status["required_missing"]:
         print(f"::warning::必須制度が公開データにありません: {', '.join(status['required_missing'])}")
+    new_failed = [f"{x['id']}({x['reason']})" for x in status["failed"] if not x["in_previous_public"]]
+    if new_failed:
+        # 前回の公開データに無い制度の取得失敗は、公開用の更新を止めない(他の正常な制度の更新を妨げない)。警告として残す
+        print(f"::warning::前回の公開データに無い制度の取得に失敗しました(公開用の更新は続けます): {', '.join(new_failed[:20])}")
     # シードの半数以上が到達不可なら異常(サイト構造変化・ネットワーク断の疑い)
     if len(items) < len(SEEDS) / 2:
         print("[ERROR] シードの過半が取得不可 — 要調査")
