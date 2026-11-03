@@ -27,6 +27,7 @@ except Exception:
     pass
 
 import shipping_gate
+from sns_safety import issuer_label
 from generate_ig_hub import hub_guide
 from region_filter import other_region
 
@@ -337,14 +338,17 @@ def main():
         if area and len(area) <= 20:
             rows.append(f"対象地域　{area}")
         if len(rows) < 3:
-            rows.append(f"実施主体　{it2.get('issuer') or '要確認'}")
+            # 実施主体の欄に事業名が入っているデータがあるため、組織名の形でなければ「要確認」
+            # (2026-11-03 安全対策 M2。2026-11-02 の投稿で事業名が実施主体として出ていた)
+            rows.append(f"実施主体　{issuer_label(it2.get('issuer'))}")
         return rows[:3]
 
     def sub_line(it2):
         """number型以外のサブ行: 金額があれば金額、なければ実施主体(「要確認」を画像に出さない)"""
         if it2.get("max_amount"):
             return amount_text(it2["max_amount"])
-        return f"実施主体：{it2.get('issuer') or '原文参照'}"
+        lab = issuer_label(it2.get("issuer"))
+        return f"実施主体：{lab if lab != '要確認' else '原文参照'}"
 
     hook_count = {}
     for i, (it, hook) in enumerate(picked, start=1):
@@ -362,7 +366,7 @@ def main():
             f"【募集中】{it['name']}\n"
             f"🗓 {deadline_line(it, today)}\n"
             f"💰 {amount_text(it.get('max_amount'))}\n"
-            f"🏝 実施主体：{it.get('issuer') or '要確認'}\n"
+            f"🏝 実施主体：{issuer_label(it.get('issuer'))}\n"
             f"{body_line}"
             f"{SEND_CTA}\n"
             f"{hub_guide(i)}\n"
