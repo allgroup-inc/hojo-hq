@@ -4,7 +4,10 @@
 サブコマンド:
   incident  15分監視の結果から障害Issueを更新し、知らせる必要があれば送信要求を書く(diagnosis-monitor.yml)
   watchdog  監視の停止・送信担当の停滞・公開用制度データの保留を調べ、Issueと送信要求を書く(diagnosis-monitor-watchdog.yml)
-  sender    送信要求を順に処理してLINEを送る、ただ1つの送信担当(diagnosis-line-sender.yml)。--mode check は確認モード
+  sender-reserve / sender-push / sender-record
+            ただ1つの送信担当(diagnosis-line-sender.yml)。予約・送信・記録を別々のジョブで行い、書き込みの権限と
+            LINE のトークンを同じジョブに置かない。重要度の高い順(診断ページの障害 → 監視システムの故障 → 制度データの注意)
+  sender    予約・送信・記録を続けて行う(手元の確認用)。--mode check は確認モード(送らない・書き換えない)
 
 障害は3種類に分ける(混ぜると、監視が壊れただけで「診断ページ異常」と通知してしまう):
   診断ページの障害   diagnosis-monitor
@@ -15,7 +18,8 @@
 片方だけ残ることがない。送信担当は送信記録(bot/diagnosis-line-state ブランチの state.json)を、Contents API の
 sha 一致を条件に書き換える(比較交換)。上限の判定と送信の予約を同じ書き換えで行い、競合した・書いた内容を
 読み直せないときは送らない。LINE には要求IDを再試行キー(X-Line-Retry-Key)として渡すので、送った直後に
-落ちて送り直しても二重には届かない。監視からのLINEは24時間3通・30日15通まで。
+落ちて送り直しても二重には届かない。監視からのLINEは24時間3通・30日15通まで。制度データの注意は、
+最後の1通を診断ページの障害のために残す。
 """
 import argparse
 import base64
@@ -52,13 +56,15 @@ MAX_GAP_MIN = int(os.environ.get("MAX_GAP_MIN", "360"))
 PREP_FAIL_RUNS = int(os.environ.get("PREP_FAIL_RUNS", "4"))
 REQUEST_TTL_H = 24 * 7  # 上限・送信枠で遅れても失わない。古すぎる知らせだけは取りやめる(記録は残す)
 RETRY_KEY_TTL_H = 23    # LINE の再試行キーの有効期間(24時間)より前に打ち切る
-MAX_SENDS_PER_RUN = 3
 STUCK_H = 6
 BRAND = "【もらいわすれ堂】"
 
 WANT_RE = re.compile(r"<!-- line-want id:([0-9a-f-]{36}) -->\n<!-- line-text\n(.*?)\n-->", re.S)
 RESULT_RE = re.compile(r"<!-- line-result id:([0-9a-f-]{36}) state:(\w+)(?: reason=(.*?))? -->")
 COUNTED = ("sending", "sent", "unknown")  # LINEの通数を使った(かもしれない)送信
+# 解消してIssueを閉じたコメントの印。これより前の送信要求は、まだ送れていなければ取り下げる
+# (解消した後に「異常」だけが遅れて届くのを防ぐ。同じコメントの復旧の知らせは送る)
+RESOLVED = "<!-- resolved -->"
 
 
 class GitHubError(Exception):
@@ -314,7 +320,7 @@ def raise_issue(gh, label, sig, reason, run_url):
 def resolve_issues(gh, label, run_url, why):
     """解消を確かめたら閉じる。誰かにLINEで知らせていた場合だけ、解消も知らせる。"""
     for iss in gh.issues(label, "open"):
-        body = f"✅ {why}。自動クローズします。 {run_url}"
+        body = f"{RESOLVED}\n✅ {why}。自動クローズします。 {run_url}"
         if was_delivered(thread_texts(gh, iss)):
             body += "\n\n" + want_block(KINDS[label]["recover"])[1]
         gh.comment(iss["number"], body)
@@ -348,7 +354,7 @@ def cmd_incident(gh, args, now):
             iss = opened[0]
             mins = int((now - parse_ts(iss["created_at"])).total_seconds() // 60)
             rid, wb = want_block(f"✅{BRAND}診断ページが復旧しました\n障害の継続: 約{mins}分")
-            gh.comment(iss["number"], f"✅ 復旧: 診断ページが正常に戻りました(障害の継続 約{mins}分)。自動クローズします。 {args.run_url}\n\n{wb}")
+            gh.comment(iss["number"], f"{RESOLVED}\n✅ 復旧: 診断ページが正常に戻りました(障害の継続 約{mins}分)。自動クローズします。 {args.run_url}\n\n{wb}")
             gh.close(iss["number"])
             return iss["number"], rid
         return None, None
@@ -375,6 +381,21 @@ def cmd_incident(gh, args, now):
 
 
 # ---------- 送信担当 ----------
+#
+# 送信担当は3つのジョブに分かれる(diagnosis-line-sender.yml)。書き込みの権限と LINE のトークンを同じジョブに置かない。
+#   予約 sender-reserve: 送信要求を選び、上限を判定して送信記録に予約を書く(contents: write・LINEのトークンなし)
+#   送信 sender-push:    予約を読み直して一致を確かめ、送信枠を確かめて LINE へ送る(contents: read・LINEのトークンあり)
+#   記録 sender-record:  送信の結果を送信記録と障害Issueに残す(contents: write・LINEのトークンなし)
+# ジョブの間で受け渡すのは要求ID・結果の種類・短い理由(HTTPコードなど)だけ。通知の文面は送信記録の予約から読む。
+# 送信や記録の途中で落ちても予約が残り、次の起動が同じ要求IDを再試行キーとして送り直す(二重には届かない)。
+# 1回の起動で送るのは1通まで。
+
+# 重要度の高い順。診断ページの障害を最優先にし、制度データの注意は最後の1通を診断ページの障害のために残す
+PRIORITY = {PAGE: 0, SYSTEM: 1, DATA: 2}
+KEEP_FOR_URGENT = {DATA: 1}
+OUTCOMES = ("delivered", "retry", "rejected", "held", "skip")
+RID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+
 
 def collect_requests(gh, now):
     """送信要求(line-want)と、その処理結果(line-result)を障害Issueから集める。"""
@@ -385,11 +406,13 @@ def collect_requests(gh, now):
                 continue
             entries = [(iss["created_at"], iss.get("body") or "")]
             entries += [(c["created_at"], c.get("body") or "") for c in gh.comments(iss["number"])]
-            for at, text in entries:
+            last_resolved = max((i for i, (_, t) in enumerate(entries) if RESOLVED in t), default=-1)
+            for idx, (at, text) in enumerate(entries):
                 for m in WANT_RE.finditer(text):
                     if m.group(1) not in seen:
                         seen.add(m.group(1))
-                        reqs.append({"id": m.group(1), "issue": iss["number"], "at": at, "text": m.group(2)})
+                        reqs.append({"id": m.group(1), "issue": iss["number"], "label": label, "at": at, "text": m.group(2),
+                                     "resolved_before_sent": idx < last_resolved})
                 for m in RESULT_RE.finditer(text):
                     results.setdefault(m.group(1), []).append((m.group(2), (m.group(3) or "").strip()))
     return sorted(reqs, key=lambda r: (r["at"], r["id"])), results
@@ -436,12 +459,15 @@ def cas(gh, st, sha, apply, now, message):
     return new, new_sha
 
 
-def cap_check(st, now, exclude):
+def cap_check(st, now, exclude, keep=0):
+    """24時間3通・30日15通の上限。keep は重要度の高い通知のために残しておく通数。"""
     for hours, cap, label in ((24, CAP_24H, "24時間で"), (24 * 30, CAP_30D, "30日で")):
         n = sum(1 for e in st["log"] if e["id"] != exclude and e["status"] in COUNTED
                 and now - parse_ts(e["at"]) <= timedelta(hours=hours))
         if n >= cap:
             return False, f"監視からのLINEは{label}{cap}通まで(上限に達しました)"
+        if keep and n >= cap - keep:
+            return False, f"監視からのLINEは{label}{cap}通まで。最後の{keep}通は診断ページの障害のために残しています"
     return True, ""
 
 
@@ -450,7 +476,7 @@ RESULT_TEXT = {
     "held": "📵 LINE通知を保留しています: {r}。条件が整いしだい送ります。",
     "failed": "⚠️ LINE送信が完了しませんでした({r})。次回に同じ再試行キーで送り直します(二重には届きません)。",
     "rejected": "⚠️ LINEが通知を受け付けませんでした({r})。この通知は送り直しません。",
-    "superseded": "↪️ 同じIssueに新しい通知があるため、この通知は取り下げました。",
+    "superseded": "↪️ この通知は取り下げました({r})。",
     "expired": "⌛ 長く送れなかったため、この通知は取りやめました({r})。",
     "unknown": "❓ 送信の結果を確かめられないまま再試行の期限が近づいたため、二重送信を避けて取りやめました。届いていない可能性があります。",
 }
@@ -468,17 +494,20 @@ def note_result(gh, req, state, reason, results):
         print(f"::warning::処理結果の記録に失敗しました: {e}")
 
 
-def cmd_sender(gh, line, repo, now, run_id):
+def sender_reserve(gh, now, run_id, configured):
+    """送信要求を1件選び、上限を判定して予約を書く。送るものがあれば {'rid', 'issue'} を返す(LINEには触れない)。"""
     reqs, results = collect_requests(gh, now)
     st, sha = load_state(gh, create=True)
     pending = [r for r in reqs if r["id"] not in st["done"]]
 
-    # 同じIssueでは最新の要求だけを送る。古い要求と、24時間送れなかった要求は取りやめる
+    # 同じIssueでは最新の要求だけを送る。古い要求と、長く送れなかった要求は取りやめる
     newest = {r["issue"]: r["id"] for r in pending}
     changes = []
     for r in pending:
         if newest[r["issue"]] != r["id"]:
             changes.append((r, "superseded", "同じIssueに新しい通知"))
+        elif r.get("resolved_before_sent") and r["id"] != (st.get("inflight") or {}).get("id"):
+            changes.append((r, "superseded", "送る前に解消した"))
         elif now - parse_ts(r["at"]) > timedelta(hours=REQUEST_TTL_H) and r["id"] not in st["attempts"]:
             changes.append((r, "expired", f"要求から{REQUEST_TTL_H}時間"))
     if changes:
@@ -492,24 +521,23 @@ def cmd_sender(gh, line, repo, now, run_id):
             st, sha = cas(gh, st, sha, close_out, now, "診断監視のLINE: 取り下げ・期限切れを記録")
         except Conflict:
             print("::warning::送信記録を別の処理が先に書き換えました。安全側で、この回は送りません")
-            return 0
+            return None
         for r, state, reason in changes:
             note_result(gh, r, state, reason, results)
     pending = [r for r in pending if r["id"] not in st["done"]]
     if not pending:
         print("送信待ちの要求はありません")
-        return 0
-    if not line.configured:
+        return None
+    if not configured:
         for r in pending:
             note_result(gh, r, "held", "LINEのSecretsが未設定", results)
-        return 0
+        return None
 
+    # 送信か記録の途中で止まった予約があれば、まずそれを同じ再試行キーで送り直す(通数は予約のときに数え済み)。
+    # それ以外は重要度の高い順(診断ページの障害 → 監視システムの故障 → 制度データの注意)、同じ重要度なら古い順
     inflight = (st.get("inflight") or {}).get("id")
-    pending.sort(key=lambda r: (r["id"] != inflight, r["at"]))
-    sent = 0
+    pending.sort(key=lambda r: (r["id"] != inflight, PRIORITY[r["label"]], r["at"]))
     for r in pending:
-        if sent >= MAX_SENDS_PER_RUN:
-            break
         att = st["attempts"].get(r["id"])
         if att and now - parse_ts(att["first_at"]) > timedelta(hours=RETRY_KEY_TTL_H):
             def give_up(s, rid=r["id"]):
@@ -520,70 +548,117 @@ def cmd_sender(gh, line, repo, now, run_id):
                 if (s.get("inflight") or {}).get("id") == rid:
                     s["inflight"] = None
                 return s
-            st, sha = cas(gh, st, sha, give_up, now, "診断監視のLINE: 結果不明で打ち切り")
+            try:
+                st, sha = cas(gh, st, sha, give_up, now, "診断監視のLINE: 結果不明で打ち切り")
+            except Conflict:
+                print("::warning::送信記録を別の処理が先に書き換えました。安全側で、この回は送りません")
+                return None
             note_result(gh, r, "unknown", "", results)
             continue
-        ok, reason = cap_check(st, now, exclude=r["id"])
+        if r["id"] == inflight:
+            print(f"途中で止まった予約(#{r['issue']})を同じ再試行キーで送り直します")
+            return {"rid": r["id"], "issue": r["issue"]}
+        ok, reason = cap_check(st, now, exclude=r["id"], keep=KEEP_FOR_URGENT.get(r["label"], 0))
         if not ok:
+            # 先頭(いちばん重要な要求)が送れないなら、後ろの要求も送れない
             note_result(gh, r, "held", reason, results)
-            break
-        try:
-            quota, consumption = line.quota()
-        except LineError as e:
-            note_result(gh, r, "held", f"LINEの送信枠を取得できません({e})", results)
-            break
-        ok, reason = evaluate_quota(quota, consumption, LINE_RESERVE)
-        if not ok:
-            note_result(gh, r, "held", reason, results)
-            break
+            return None
 
         def reserve(s, r=r):
-            s["inflight"] = {"id": r["id"], "at": iso(now), "run": str(run_id)}
+            fresh = r["id"] not in s["attempts"]
+            s["inflight"] = {"id": r["id"], "issue": r["issue"], "label": r["label"], "text": r["text"],
+                             "requested_at": r["at"], "at": iso(now), "run": str(run_id), "fresh": fresh}
             s["attempts"].setdefault(r["id"], {"first_at": iso(now), "count": 0})["count"] += 1
             if not any(e["id"] == r["id"] for e in s["log"]):
                 s["log"].append({"id": r["id"], "issue": r["issue"], "at": iso(now), "status": "sending"})
             return s
         try:
-            reserved, reserved_sha = cas(gh, st, sha, reserve, now, f"診断監視のLINE: #{r['issue']} の送信を予約")
+            _, reserved_sha = cas(gh, st, sha, reserve, now, f"診断監視のLINE: #{r['issue']} の送信を予約")
         except Conflict:
             print("::warning::送信記録を別の処理が先に書き換えました。安全側で、この回は送りません")
-            return 0
-        # 書いた内容をGitHubから読み直せることを確かめてから送る(整合性を確認できなければ送らない)
+            return None
+        # 書いた内容をGitHubから読み直せることを確かめる(確かめられなければ送らない。予約は次回に送り直す)
         check, check_sha = load_state(gh, create=False)
         if check_sha != reserved_sha or (check.get("inflight") or {}).get("id") != r["id"]:
             print("::warning::予約した送信記録を読み直せませんでした。安全側で、この回は送りません(次回に送り直します)")
-            return 0
-        st, sha = check, check_sha
+            return None
+        return {"rid": r["id"], "issue": r["issue"]}
+    return None
 
-        late_h = int((now - parse_ts(r["at"])).total_seconds() // 3600)
-        late = f"\n(約{late_h}時間前に検知。通数の上限などで遅れて届いています)" if late_h >= 1 else ""
-        outcome, detail = line.push(f"{r['text']}{late}\n{issue_url(repo, r['issue'])}", r["id"])
 
-        def finish(s, r=r, outcome=outcome):
-            for e in s["log"]:
-                if e["id"] == r["id"]:
-                    e["status"] = {"delivered": "sent", "retry": "unknown", "rejected": "rejected"}[outcome]
-            if outcome == "delivered":
-                s["done"][r["id"]] = {"state": "sent", "at": iso(now)}
-            elif outcome == "rejected":
-                s["done"][r["id"]] = {"state": "rejected", "at": iso(now)}
-            if (s.get("inflight") or {}).get("id") == r["id"]:
+def sender_push(gh, line, repo, now, rid):
+    """予約を読み直して送る。('delivered'|'retry'|'rejected'|'held'|'skip', 理由)。送信記録には書かない。"""
+    if not line.configured:
+        return "held", "LINEのSecretsが未設定"
+    st, _ = load_state(gh, create=False)
+    inf = st.get("inflight") or {}
+    if inf.get("id") != rid or not inf.get("text"):
+        return "skip", "予約が見つかりません(別の送信担当が処理した)"
+    try:
+        quota, consumption = line.quota()
+    except LineError as e:
+        return "held", f"LINEの送信枠を取得できません({e})"
+    ok, reason = evaluate_quota(quota, consumption, LINE_RESERVE)
+    if not ok:
+        return "held", reason
+    late_h = int((now - parse_ts(inf.get("requested_at") or inf["at"])).total_seconds() // 3600)
+    late = f"\n(約{late_h}時間前に検知。通数の上限などで遅れて届いています)" if late_h >= 1 else ""
+    return line.push(f"{inf['text']}{late}\n{issue_url(repo, inf['issue'])}", rid)
+
+
+def sender_record(gh, now, rid, outcome, detail):
+    """送信の結果を送信記録と障害Issueに残す。結果が無い(送信ジョブが途中で止まった)ときは予約を残す。"""
+    if outcome not in OUTCOMES:
+        print("::warning::送信の結果が分かりません(送信ジョブが途中で止まった可能性)。予約を残し、次回に同じ再試行キーで送り直します")
+        return
+    if outcome == "skip":
+        print(f"送りませんでした: {detail}")
+        return
+
+    def apply(s):
+        inf = s.get("inflight") or {}
+        mine = inf.get("id") == rid
+        if outcome == "held":
+            # 送っていないので、通数に数えない。初めての予約だった場合は、予約ごと取り消す
+            if mine:
+                if inf.get("fresh"):
+                    s["log"] = [e for e in s["log"] if not (e["id"] == rid and e["status"] == "sending")]
+                    s["attempts"].pop(rid, None)
                 s["inflight"] = None
             return s
-        for attempt in range(3):
-            try:
-                st, sha = cas(gh, st, sha, finish, now, f"診断監視のLINE: #{r['issue']} の送信結果を記録")
-                break
-            except Conflict:
-                st, sha = load_state(gh, create=False)
-        else:
-            # 結果を残せなかった。予約が残るので、次回は同じ再試行キーで送り直す(届いていれば LINE が 409 を返す)
-            raise GitHubError("送信結果を記録できませんでした")
-        state = {"delivered": "sent", "retry": "failed", "rejected": "rejected"}[outcome]
-        note_result(gh, r, state, detail, results)
-        if outcome != "delivered":
+        for e in s["log"]:
+            if e["id"] == rid:
+                e["status"] = {"delivered": "sent", "retry": "unknown", "rejected": "rejected"}[outcome]
+        if outcome == "delivered":
+            s["done"][rid] = {"state": "sent", "at": iso(now)}
+        elif outcome == "rejected":
+            s["done"][rid] = {"state": "rejected", "at": iso(now)}
+        if mine:
+            s["inflight"] = None
+        return s
+    st, sha = load_state(gh, create=False)
+    for _ in range(3):
+        try:
+            cas(gh, st, sha, apply, now, f"診断監視のLINE: 送信結果を記録({outcome})")
             break
-        sent += 1
+        except Conflict:
+            st, sha = load_state(gh, create=False)
+    else:
+        # 結果を残せなかった。予約が残るので、次回は同じ再試行キーで送り直す(届いていれば LINE が 409 を返す)
+        raise GitHubError("送信結果を記録できませんでした")
+    reqs, results = collect_requests(gh, now)
+    req = next((r for r in reqs if r["id"] == rid), None)
+    if req:
+        note_result(gh, req, {"delivered": "sent", "retry": "failed", "rejected": "rejected", "held": "held"}[outcome], detail, results)
+
+
+def cmd_sender(gh, line, repo, now, run_id):
+    """予約 → 送信 → 記録を1つの処理で続けて行う(手元の確認・テスト用。本番はジョブを分ける)。"""
+    res = sender_reserve(gh, now, run_id, line.configured)
+    if not res:
+        return 0
+    outcome, detail = sender_push(gh, line, repo, now, res["rid"])
+    sender_record(gh, now, res["rid"], outcome, detail)
     return 0
 
 
@@ -609,12 +684,13 @@ def cmd_check(gh, line, now):
         for hours, cap, label in ((24, CAP_24H, "24時間"), (24 * 30, CAP_30D, "30日")):
             n = sum(1 for e in st["log"] if e["status"] in COUNTED and now - parse_ts(e["at"]) <= timedelta(hours=hours))
             lines.append(f"- 監視からの送信: 直近{label} {n}/{cap}通")
-        pending = [r for r in reqs if r["id"] not in st["done"]]
-        lines.append(f"- 送信待ち: {len(pending)}件" + ("(送信記録はまだありません)" if sha is None else ""))
+        pending = sorted((r for r in reqs if r["id"] not in st["done"]), key=lambda r: (PRIORITY[r["label"]], r["at"]))
+        lines.append(f"- 送信待ち: {len(pending)}件(送る順)" + ("(送信記録はまだありません)" if sha is None else ""))
         for r in pending[:10]:
             last = results.get(r["id"], [("", "")])[-1]
             age = int((now - parse_ts(r["at"])).total_seconds() // 60)
-            lines.append(f"  - #{r['issue']} 約{age}分前 {r['text'].splitlines()[0][:40]} / 最後の結果: {last[0] or 'なし'} {last[1]}")
+            kind = {PAGE: "診断ページの障害", SYSTEM: "監視システムの故障", DATA: "制度データの注意"}[r["label"]]
+            lines.append(f"  - #{r['issue']}({kind})約{age}分前 {r['text'].splitlines()[0][:40]} / 最後の結果: {last[0] or 'なし'} {last[1]}")
     except GitHubError as e:
         lines.append(f"- 送信記録・送信待ち: 読み取れません({e})")
     text = "\n".join(lines)
@@ -696,20 +772,64 @@ def check_publish_status(gh, run_url):
         hold, missing = not s["publish"], list(s.get("required_missing") or [])
     except Exception:
         return ""
+    data_notice(gh, hold, missing, s, run_url)
     if not hold and not missing:
-        resolve_issues(gh, DATA, run_url, "公開用の制度データは更新されており、必須制度の欠けもありません")
         return ""
-    parts = []
-    if hold:
-        parts.append("公開用データの更新を保留しています(前回の公開データを表示中): " + " / ".join(s.get("reasons") or []))
-    if missing:
-        parts.append(f"必須制度(国の制度)が公開データにありません: {', '.join(missing[:10])}")
-    sig = ("HOLD" if hold else "PUBLISHED") + "|" + ",".join(missing)
-    raise_issue(gh, DATA, sig, "。".join(parts) + f"(収集 {s.get('checked_at', '')})", run_url)
     return "DATA_HOLD" if hold else "REQUIRED_MISSING"
 
 
+def _parse_data_sig(sig):
+    """'HOLD|id1,id2' → (保留中か, 欠けている必須制度の組)。"""
+    state, _, ids = (sig or "").partition("|")
+    return state == "HOLD", frozenset(i for i in ids.split(",") if i)
+
+
+def data_notice(gh, hold, missing, status, run_url):
+    """制度データの注意。LINE を送るのは、欠けている必須制度の組み合わせが変わったときと、保留が始まったときだけ。
+    保留の解除は Issue に書くだけで LINE は送らない(保留と公開が入れ替わるたびに通数を使い、診断ページの障害の通知を遅らせないため)。"""
+    ids = frozenset(missing)
+    sig = ("HOLD" if hold else "PUBLISHED") + "|" + ",".join(sorted(ids))
+    opened = gh.issues(DATA, "open")
+    prev_hold, prev_ids = _parse_data_sig(last_sig(thread_texts(gh, opened[0]))) if opened else (False, frozenset())
+    k = KINDS[DATA]
+    if not hold and not ids:
+        if opened:
+            why = "公開用の制度データは更新されており、必須制度の欠けもありません"
+            # 欠けていた必須制度が戻ったときだけ、LINEで知らせていた相手に解消を知らせる(保留の解除だけなら Issue のみ)
+            for iss in opened:
+                body = f"<!-- sig: {sig} -->\n{RESOLVED}\n✅ {why}。自動クローズします。 {run_url}"
+                if prev_ids and was_delivered(thread_texts(gh, iss)):
+                    body += "\n\n" + want_block(k["recover"])[1]
+                gh.comment(iss["number"], body)
+                gh.close(iss["number"])
+        return
+    parts = []
+    if hold:
+        parts.append("公開用データの更新を保留しています(前回の公開データを表示中): " + " / ".join(status.get("reasons") or []))
+    if ids:
+        parts.append(f"必須制度(国の制度)が公開データにありません: {', '.join(sorted(ids)[:10])}")
+    reason = "。".join(parts) + f"(収集 {status.get('checked_at', '')})"
+    if not opened:
+        rid, wb = want_block(f"{k['first']}\n{reason}")
+        gh.create_issue(f"{k['title']}: {sig[:60]}", f"<!-- sig: {sig} -->\n{k['intro']}\n\n- 内容: {reason}\n- 実行: {run_url}\n\n{wb}\n", DATA)
+        return
+    if (hold, ids) == (prev_hold, prev_ids):
+        return
+    n = opened[0]["number"]
+    if ids != prev_ids or (hold and not prev_hold):
+        rid, wb = want_block(f"{k['change']}\n{reason}")
+        gh.comment(n, f"<!-- sig: {sig} -->\n⚠️ 内容が変わりました: {reason}\n- 実行: {run_url}\n\n{wb}")
+    else:
+        # 欠けている必須制度は同じで、保留だけが解除された
+        gh.comment(n, f"<!-- sig: {sig} -->\nℹ️ 公開用データの更新の保留が解除されました(LINEは送りません)。{reason}\n- 実行: {run_url}")
+
+
 # ---------- 入出力 ----------
+
+def safe_detail(text):
+    """ジョブ間で渡す短い理由。改行・制御文字・記号を落とす(出力の書式を壊さない。トークン等はもともと含まない)。"""
+    return re.sub(r"[^\w ()()\-:./=、。・]", "", text or "")[:120]
+
 
 def write_output(**kv):
     path = os.environ.get("GITHUB_OUTPUT")
@@ -741,16 +861,25 @@ def main(argv=None, gh=None, line=None, now=None):
     a.add_argument("--report", default="diagnosis_monitor_report.txt")
     w = sub.add_parser("watchdog")
     w.add_argument("--workflow", default="diagnosis-monitor.yml")
-    s = sub.add_parser("sender")
+    s = sub.add_parser("sender", help="予約・送信・記録を続けて行う(手元の確認用)。--mode check は確認モード")
     s.add_argument("--mode", choices=["send", "check"], default="send")
-    for sp in (a, w, s):
+    sr = sub.add_parser("sender-reserve", help="予約ジョブ(LINEのトークンを使わない)")
+    sp_ = sub.add_parser("sender-push", help="送信ジョブ(送信記録を書き換えない)")
+    sp_.add_argument("--rid", required=True)
+    rc = sub.add_parser("sender-record", help="記録ジョブ(LINEのトークンを使わない)")
+    rc.add_argument("--rid", required=True)
+    rc.add_argument("--outcome", default="")
+    rc.add_argument("--detail", default="")
+    for sp in (a, w, s, sr, sp_, rc):
         sp.add_argument("--run-url", default=run_url)
         sp.add_argument("--run-id", default=os.environ.get("GITHUB_RUN_ID", "0"))
     args = p.parse_args(argv)
     repo = os.environ.get("GITHUB_REPOSITORY", "")
     gh = gh or GitHub(repo)
     now = now or datetime.now(timezone.utc)
-    line = line or Line(os.environ.get("LINE_TOKEN"), os.environ.get("LINE_TO"))
+    if getattr(args, "rid", None) is not None and not RID_RE.match(args.rid):
+        print("::error::要求IDの形式が想定外です(送らない)")
+        return 1
 
     if args.cmd == "incident":
         target, rid = cmd_incident(gh, args, now)
@@ -758,9 +887,21 @@ def main(argv=None, gh=None, line=None, now=None):
     elif args.cmd == "watchdog":
         problem, data_notice = cmd_watchdog(gh, repo, args, now)
         write_output(problem=problem, data=data_notice)
-    elif args.mode == "check":
-        return cmd_check(gh, line, now)
+    elif args.cmd == "sender-reserve":
+        # 予約ジョブには LINE のトークンを渡さない。Secrets が設定済みかどうかだけを真偽値で受け取る
+        res = sender_reserve(gh, now, args.run_id, os.environ.get("LINE_CONFIGURED") == "true")
+        write_output(rid=(res or {}).get("rid", ""))
+    elif args.cmd == "sender-push":
+        line = line or Line(os.environ.get("LINE_TOKEN"), os.environ.get("LINE_TO"))
+        outcome, detail = sender_push(gh, line, repo, now, args.rid)
+        print(f"送信の結果: {outcome} {detail}")
+        write_output(outcome=outcome, detail=safe_detail(detail))
+    elif args.cmd == "sender-record":
+        sender_record(gh, now, args.rid, args.outcome, safe_detail(args.detail))
     else:
+        line = line or Line(os.environ.get("LINE_TOKEN"), os.environ.get("LINE_TO"))
+        if args.mode == "check":
+            return cmd_check(gh, line, now)
         return cmd_sender(gh, line, repo, now, args.run_id)
     return 0
 

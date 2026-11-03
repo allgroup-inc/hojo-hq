@@ -59,7 +59,9 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-      - name: 通知制御の単体テスト(送信担当の排他・通数の上限・LINEの応答異常・再送・確認モード)
+        with:
+          persist-credentials: false
+      - name: 通知制御の単体テスト(送信担当の排他・3ジョブの分離・優先順位・通数の上限・LINEの応答異常・再送・確認モード)
         run: python3 -m unittest tests/test_diagnosis_notify.py
       - name: 公開用制度データの更新保留の単体テスト(取得失敗・欠落・必須制度・正当な終了)
         run: python3 -m unittest tests/test_fetch_publish.py
@@ -83,6 +85,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          persist-credentials: false
           sparse-checkout: |
             scripts
             .github

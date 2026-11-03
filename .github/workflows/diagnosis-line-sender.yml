@@ -1,16 +1,25 @@
 name: diagnosis-line-sender
 
-# 診断ページ監視の LINE 通知を送る、ただ1つの送信担当(判定は scripts/diagnosis_notify.py sender)。
-# 15分監視・停止検知が障害Issueに書いた送信要求(<!-- line-want -->)を順に処理する。
+# 診断ページ監視の LINE 通知を送る、ただ1つの送信担当(判定は scripts/diagnosis_notify.py)。
+# 15分監視・停止検知が障害Issueに書いた送信要求(<!-- line-want -->)を、重要度の高い順
+# (診断ページの障害 → 監視システムの故障 → 制度データの注意)に1回の起動で1通まで処理する。
+#
+# 権限の分離: 書き込みの権限と LINE のトークンを同じジョブに置かない。
+#   reserve(予約): contents: write・issues: write。LINE のトークンなし(Secrets が設定済みかの真偽値だけ受け取る)
+#   push(送信):    contents: read のみ。LINE のトークンあり。送信記録・Issue は書き換えない
+#   record(記録):  contents: write・issues: write。LINE のトークンなし
+# ジョブの間で渡すのは要求ID・結果の種類・短い理由(HTTPコードなど)だけ。文面は送信記録の予約から読む。
+# checkout はトークンを .git に残さない(persist-credentials: false)。
 #
 # 排他と上限: 送信記録(bot/diagnosis-line-state ブランチの diagnosis-line/state.json)を Contents API の
 # sha 一致を条件に書き換え、上限(24時間3通・30日15通)の判定と送信の予約を同じ1回の書き換えで行う。
-# 競合した・書いた内容を読み直せないときは送らない。下の concurrency は補助で、これに頼らない。
-# 二重送信の防止: 要求IDを LINE の再試行キー(X-Line-Retry-Key)として渡す。
+# 制度データの注意は最後の1通を診断ページの障害のために残す。下の concurrency は補助で、これに頼らない。
+# 二重送信の防止: 要求IDを LINE の再試行キー(X-Line-Retry-Key)として渡す。送信・記録の途中で止まっても
+# 予約が残り、次の起動が同じキーで送り直す(届いていれば LINE が受付済みとして返すので二重には届かない)。
 # LINE の送信枠(残り50通以下・読めない・形式が想定外)を確かめてから送る。顧客向け配信の処理には触れない。
 #
 # 確認モード: Actions 画面から mode=check で手動実行すると、送らず・記録も書き換えずに
-# 送信枠・今月の使用量・監視からの送信数・送信待ちを Summary に出す。
+# 送信枠・今月の使用量・監視からの送信数・送信待ちを Summary に出す(check ジョブ。読み取りの権限のみ)。
 # 議事: docs/議事_20261103_診断ページ15分監視.md
 
 on:
@@ -27,32 +36,100 @@ on:
         options: [check, send]
         default: check
 
-permissions:
-  contents: write   # 送信記録ファイル(bot/diagnosis-line-state ブランチ)の比較交換による更新にだけ使う
-  issues: write
+permissions: {}
 
 concurrency:
   group: diagnosis-line-sender
   cancel-in-progress: false
 
 jobs:
-  send:
-    # PR の自己テストなど、本番の監視以外の実行では動かさない
+  reserve:
+    # PR の自己テストなど、本番の監視以外の実行では動かさない。確認モードでも動かさない
     if: >-
-      github.event_name != 'workflow_run' ||
-      github.event.workflow_run.event == 'schedule' ||
-      github.event.workflow_run.event == 'workflow_dispatch'
+      (github.event_name != 'workflow_run' ||
+       github.event.workflow_run.event == 'schedule' ||
+       github.event.workflow_run.event == 'workflow_dispatch') &&
+      !(github.event_name == 'workflow_dispatch' && inputs.mode == 'check')
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 5
+    permissions:
+      contents: write   # 送信記録ファイル(bot/diagnosis-line-state ブランチ)の比較交換による更新にだけ使う
+      issues: write
+    outputs:
+      rid: ${{ steps.r.outputs.rid }}
     steps:
       - uses: actions/checkout@v7
         with:
           sparse-checkout: scripts
+          persist-credentials: false
+      - name: 送信の予約(LINEのトークンなし)
+        id: r
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINE_CONFIGURED: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN != '' && secrets.LINE_ADMIN_USER_ID != '' }}
+        run: python3 scripts/diagnosis_notify.py sender-reserve
 
-      - name: LINE送信担当
+  push:
+    needs: reserve
+    if: needs.reserve.outputs.rid != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read    # 予約の読み直しだけ。送信記録・Issue は書き換えない
+    outputs:
+      outcome: ${{ steps.p.outputs.outcome }}
+      detail: ${{ steps.p.outputs.detail }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: LINEへ送信(送信記録は読むだけ)
+        id: p
         env:
           GH_TOKEN: ${{ github.token }}
           LINE_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           LINE_TO: ${{ secrets.LINE_ADMIN_USER_ID }}
-          MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'send' }}
-        run: python3 scripts/diagnosis_notify.py sender --mode "$MODE"
+          RID: ${{ needs.reserve.outputs.rid }}
+        run: python3 scripts/diagnosis_notify.py sender-push --rid "$RID"
+
+  record:
+    needs: [reserve, push]
+    # 送信ジョブが失敗・中断しても動く。結果が無ければ予約を残し、次の起動が同じ再試行キーで送り直す
+    if: always() && needs.reserve.outputs.rid != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write   # 送信記録ファイルの比較交換による更新にだけ使う
+      issues: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: 送信結果の記録(LINEのトークンなし)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RID: ${{ needs.reserve.outputs.rid }}
+          OUTCOME: ${{ needs.push.outputs.outcome }}
+          DETAIL: ${{ needs.push.outputs.detail }}
+        run: python3 scripts/diagnosis_notify.py sender-record --rid "$RID" --outcome "$OUTCOME" --detail "$DETAIL"
+
+  check:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'check'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: LINE確認モード(送らない・記録を書き換えない)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINE_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_TO: ${{ secrets.LINE_ADMIN_USER_ID }}
+        run: python3 scripts/diagnosis_notify.py sender --mode check

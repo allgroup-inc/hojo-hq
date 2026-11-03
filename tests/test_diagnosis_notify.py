@@ -6,6 +6,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -277,9 +278,12 @@ class Sender(Base):
     def test_cap_24h_then_released(self):
         issues = [self.system_alert()[0] for _ in range(4)]
         self.send()
+        self.assertEqual(len(self.line.delivered), 1)  # 1回の起動で送るのは1通
+        self.send()
+        self.send()
         self.assertEqual(len(self.line.delivered), 3)
         unsent = [n for n in issues if not self.results_of(n)]
-        self.assertEqual(len(unsent), 1)  # 1回の実行で送るのは最大3通
+        self.assertEqual(len(unsent), 1)
         for _ in range(2):
             self.gh.tick()
             self.send()
@@ -486,6 +490,293 @@ class Sender(Base):
         with self.assertRaises(dn.GitHubError):
             self.send()
         self.assertEqual(len(self.line.delivered), 1)
+
+
+def alert(gh, label, text="テスト通知"):
+    rid, wb = dn.want_block(f"{text} {len(gh.items) + 1}")
+    n = gh.create_issue(f"テスト {len(gh.items) + 1}", "テスト\n\n" + wb, label)["number"]
+    return n, rid
+
+
+class Priority(Base):
+    """重要度の高い通知(診断ページの障害)が、送信待ち・再送中・上限到達のときにも先に送られること。"""
+
+    def keys(self):
+        return [k for k, _ in self.line.delivered]
+
+    def test_order_page_then_system_then_data(self):
+        _, d = alert(self.gh, dn.DATA)
+        self.gh.tick(1)
+        _, s = alert(self.gh, dn.SYSTEM)
+        self.gh.tick(1)
+        _, p = alert(self.gh, dn.PAGE)
+        for _ in range(3):
+            self.send()
+        self.assertEqual(self.keys()[:2], [p, s])  # 古い順ではなく重要度の順
+        self.assertNotIn(d, self.keys())           # 制度データの注意は最後の1通を使わない
+
+    def test_data_keeps_last_slot_for_page(self):
+        for _ in range(2):
+            alert(self.gh, dn.SYSTEM)
+            self.send()
+        dn_, d = alert(self.gh, dn.DATA)
+        self.send()
+        self.assertEqual(len(self.line.delivered), 2)
+        self.assertIn("最後の1通は診断ページの障害のために残しています", self.gh._issue(dn_)["comments"][-1]["body"])
+        _, p = alert(self.gh, dn.PAGE)
+        self.send()
+        self.assertEqual(self.keys()[-1], p)        # 3通目は診断ページの障害に使われる
+        self.send()
+        self.assertEqual(len(self.line.delivered), 3)  # 上限は3通のまま
+        self.gh.tick(24 * 60 + 1)
+        self.send()
+        self.assertEqual(self.keys()[-1], d)        # 枠が空けば遅れて届く(失わない)
+
+    def test_page_overtakes_data_retry(self):
+        dn_, d = alert(self.gh, dn.DATA)
+        self.line.plan = ["5xx"]
+        self.send()                                 # 制度データの注意が送信失敗(再送待ち)
+        self.assertEqual(self.results_of(dn_), ["failed"])
+        _, p = alert(self.gh, dn.PAGE)
+        self.gh.tick()
+        self.send()
+        self.assertEqual(self.keys(), [p])          # 再送待ちより診断ページの障害が先
+        self.gh.tick()
+        self.send()
+        self.assertEqual(self.keys(), [p, d])       # 再送は同じ再試行キー。予約のときに数え済みなので2通のまま
+        self.assertEqual(len([e for e in self.gh.state()["log"] if e["status"] in dn.COUNTED]), 2)
+        _, p2 = alert(self.gh, dn.PAGE)
+        self.send()
+        self.assertEqual(self.keys()[-1], p2)       # 残しておいた最後の1通は診断ページの障害が使う
+
+    def test_after_cap_release_page_goes_first(self):
+        for _ in range(3):
+            alert(self.gh, dn.SYSTEM)
+            self.send()
+        alert(self.gh, dn.SYSTEM, "古いシステム通知")
+        self.gh.tick(60)
+        _, p = alert(self.gh, dn.PAGE)
+        self.send()
+        self.assertEqual(len(self.line.delivered), 3)  # 上限
+        self.gh.tick(24 * 60)
+        self.send()
+        self.assertEqual(self.keys()[-1], p)
+
+    def test_undelivered_alert_is_withdrawn_after_resolution(self):
+        s, rid = self.run_check(missing=True)
+        self.line.configured = False
+        self.send()
+        self.gh.tick()
+        self.run_check(ok=True)                      # 送れないうちに解消(LINEでは誰にも知らせていない)
+        self.line.configured = True
+        self.send()
+        self.assertEqual(self.line.delivered, [])    # 解消後に「動いていません」だけが遅れて届かない
+        self.assertEqual(self.gh.state()["done"][rid]["state"], "superseded")
+
+
+class SplitJobs(Base):
+    """本番は 予約(書き込み・トークンなし)→ 送信(読み取りのみ・トークンあり)→ 記録(書き込み・トークンなし)の3ジョブ。"""
+
+    def reserve(self):
+        return dn.sender_reserve(self.gh, self.gh.now, "1", True)
+
+    def puts(self):
+        return self.gh.sha_seq
+
+    def test_push_job_never_writes(self):
+        n, rid = alert(self.gh, dn.PAGE)
+        res = self.reserve()
+        self.assertEqual(res["rid"], rid)
+        before = (self.puts(), json.dumps(self.gh.items, ensure_ascii=False))
+        outcome, _ = dn.sender_push(self.gh, self.line, "o/r", self.gh.now, rid)
+        self.assertEqual(outcome, "delivered")
+        self.assertEqual((self.puts(), json.dumps(self.gh.items, ensure_ascii=False)), before)  # 送信記録もIssueも書かない
+        dn.sender_record(self.gh, self.gh.now, rid, outcome, "")
+        self.assertEqual(self.gh.state()["done"][rid]["state"], "sent")
+        self.assertEqual(self.results_of(n), ["sent"])
+
+    def test_reserve_job_does_not_touch_line(self):
+        alert(self.gh, dn.PAGE)
+        line = mock.Mock()
+        out = io.StringIO()
+        with mock.patch.object(dn, "Line", side_effect=AssertionError("予約ジョブでLINEを使った")), \
+                mock.patch.dict(os.environ, {"LINE_CONFIGURED": "true", "LINE_TOKEN": "", "LINE_TO": ""}), \
+                contextlib.redirect_stdout(out):
+            self.assertEqual(dn.main(["sender-reserve"], gh=self.gh, line=line, now=self.gh.now), 0)
+        self.assertIn(f"rid={self.gh.state()['inflight']['id']}", out.getvalue())
+        line.assert_not_called()
+        self.assertFalse(line.method_calls)
+
+    def test_push_job_lost_then_resent_once(self):
+        n, rid = alert(self.gh, dn.PAGE)
+        self.reserve()
+        dn.sender_record(self.gh, self.gh.now, rid, "", "")   # 送信ジョブが落ちて結果が来ない
+        self.assertEqual(self.gh.state()["inflight"]["id"], rid)
+        self.gh.tick()
+        self.send()
+        self.assertEqual([k for k, _ in self.line.delivered], [rid])
+
+    def test_crash_after_accept_in_push_job(self):
+        n, rid = alert(self.gh, dn.PAGE)
+        self.reserve()
+        self.line.plan = ["crash_after_accept"]
+        with self.assertRaises(RuntimeError):
+            dn.sender_push(self.gh, self.line, "o/r", self.gh.now, rid)
+        dn.sender_record(self.gh, self.gh.now, rid, "", "")    # 記録ジョブは結果なしで何もしない
+        self.gh.tick()
+        self.send()                                             # 同じ再試行キーで送り直す
+        self.assertEqual(len(self.line.delivered), 1)
+        self.assertEqual(self.gh.state()["done"][rid]["state"], "sent")
+
+    def test_record_job_failure_then_resent_once(self):
+        n, rid = alert(self.gh, dn.PAGE)
+        self.reserve()
+        outcome, _ = dn.sender_push(self.gh, self.line, "o/r", self.gh.now, rid)
+        self.gh.fail = {"put_file"}
+        with self.assertRaises(dn.GitHubError):
+            dn.sender_record(self.gh, self.gh.now, rid, outcome, "")
+        self.gh.fail = set()
+        self.gh.tick()
+        self.send()
+        self.assertEqual(len(self.line.delivered), 1)          # LINE 側で重複が弾かれる
+        self.assertEqual(self.gh.state()["done"][rid]["state"], "sent")
+        self.assertEqual(self.results_of(n), ["sent"])
+
+    def test_quota_hold_in_push_releases_reservation(self):
+        n, rid = alert(self.gh, dn.PAGE)
+        self.reserve()
+        self.line.quota_error = "HTTP 500"
+        outcome, detail = dn.sender_push(self.gh, self.line, "o/r", self.gh.now, rid)
+        self.assertEqual(outcome, "held")
+        dn.sender_record(self.gh, self.gh.now, rid, outcome, detail)
+        st = self.gh.state()
+        self.assertIsNone(st["inflight"])
+        self.assertEqual([e for e in st["log"] if e["id"] == rid], [])  # 送っていないので数えない
+        self.assertNotIn(rid, st["attempts"])
+        self.assertEqual(self.results_of(n), ["held"])
+
+    def test_two_runs_resume_same_reservation_without_duplicate(self):
+        n, rid = alert(self.gh, dn.PAGE)
+        self.reserve()
+        a = dn.sender_reserve(self.gh, self.gh.now, "2", True)   # 別の起動も同じ予約を拾う
+        self.assertEqual(a["rid"], rid)
+        o1, _ = dn.sender_push(self.gh, self.line, "o/r", self.gh.now, rid)
+        o2, _ = dn.sender_push(self.gh, self.line, "o/r", self.gh.now, rid)
+        dn.sender_record(self.gh, self.gh.now, rid, o1, "")
+        dn.sender_record(self.gh, self.gh.now, rid, o2, "")
+        self.assertEqual(len(self.line.delivered), 1)
+        self.assertEqual(self.results_of(n).count("sent"), 2)
+        self.assertEqual(len([e for e in self.gh.state()["log"] if e["id"] == rid]), 1)  # 通数は1通として数える
+
+    def test_push_skips_when_reservation_is_not_ours(self):
+        alert(self.gh, dn.PAGE)
+        self.reserve()
+        other = "00000000-0000-4000-8000-000000000000"
+        self.assertEqual(dn.sender_push(self.gh, self.line, "o/r", self.gh.now, other)[0], "skip")
+        self.assertEqual(self.line.delivered, [])
+
+    def test_cli_rejects_malformed_ids_and_sanitizes(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertEqual(dn.main(["sender-push", "--rid", "x;rm -rf /"], gh=self.gh, line=self.line, now=self.gh.now), 1)
+        self.assertEqual(self.line.delivered, [])
+        self.assertEqual(dn.safe_detail("HTTP 500\n::error::x\r"), "HTTP 500::error::x")  # 改行を落とし、出力の書式を壊さない
+
+
+class SenderWorkflowPermissions(unittest.TestCase):
+    """diagnosis-line-sender.yml: 書き込みの権限と LINE のトークンが同じジョブに無いこと(文字列で確かめる)。"""
+
+    def jobs(self):
+        path = os.path.join(os.path.dirname(__file__), "..", ".github", "workflows", "diagnosis-line-sender.yml")
+        text = open(path, encoding="utf-8").read()
+        body = text.split("\njobs:\n", 1)[1]
+        parts = re.split(r"\n  (\w+):\n", "\n" + body)
+        return text, dict(zip(parts[1::2], parts[2::2]))
+
+    def test_split_permissions(self):
+        text, jobs = self.jobs()
+        self.assertIn("\npermissions: {}\n", text)
+        self.assertEqual(set(jobs), {"reserve", "push", "record", "check"})
+        for name, block in jobs.items():
+            with self.subTest(job=name):
+                writes = "contents: write" in block
+                token = "LINE_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}" in block
+                self.assertFalse(writes and token)
+                self.assertNotIn("LINE_ADMIN_USER_ID }}\n", block if writes else "")
+                self.assertIn("persist-credentials: false", block)
+        self.assertIn("contents: write", jobs["reserve"])
+        self.assertIn("contents: write", jobs["record"])
+        self.assertIn("LINE_TOKEN:", jobs["push"])
+        self.assertNotIn("write", jobs["push"].split("steps:")[0])
+        self.assertNotIn("write", jobs["check"].split("steps:")[0])
+        # 予約ジョブは Secrets の値ではなく「設定済みか」の真偽値だけを受け取る
+        self.assertIn("LINE_CONFIGURED: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN != ''", jobs["reserve"])
+        self.assertNotIn("LINE_TOKEN", jobs["reserve"])
+        self.assertNotIn("LINE_TOKEN", jobs["record"])
+        self.assertIn("always()", jobs["record"])
+
+
+class DataNotice(Base):
+    """制度データの注意: 欠けの組み合わせが変わったとき・保留が始まったときだけ LINE。保留の解除は Issue だけ。"""
+
+    def status(self, hold, missing, i=0):
+        st = {"checked_at": f"run{i}", "publish": not hold, "reasons": ["前回の公開データに載っている制度の取得に失敗しました(1件)"] if hold else [],
+              "required_missing": missing}
+        self.gh.files[("main", dn.PUBLISH_STATUS_PATH)] = {"text": json.dumps(st), "sha": f"m{i}"}
+        dn.check_publish_status(self.gh, "https://run/w")
+        self.send()
+        self.gh.tick(120)
+
+    def data_texts(self):
+        return [t for k, t in self.line.delivered]
+
+    def test_same_missing_notifies_once(self):
+        for i in range(12):
+            self.status(False, ["fk-kuni-jidofuyoteate"], i)
+        self.assertEqual(len(self.line.delivered), 1)
+        self.assertEqual(len([i for i in self.gh.items if dn.DATA in i["labels"]]), 1)
+
+    def test_hold_start_notifies_release_is_issue_only(self):
+        J = ["fk-kuni-jidofuyoteate"]
+        self.status(False, J, 0)
+        self.status(True, J, 1)    # 保留が始まった → LINE
+        self.status(False, J, 2)   # 保留の解除 → Issue だけ
+        self.assertEqual(len(self.line.delivered), 2)
+        iss = self.gh.open_with(dn.DATA)[0]
+        self.assertIn("保留が解除されました(LINEは送りません)", iss["comments"][-1]["body"])
+        self.assertNotIn("line-want", iss["comments"][-1]["body"])
+
+    def test_alternating_hold_is_bounded_and_keeps_slot(self):
+        J = ["fk-kuni-jidofuyoteate"]
+        for i in range(12):
+            self.status(i % 2 == 1, J, i)
+        # 保留が始まるたびに知らせるが、制度データの注意は24時間に2通まで(最後の1通は診断ページの障害用)
+        day = [e for e in self.gh.state()["log"] if e["status"] in dn.COUNTED and self.gh.now - dn.parse_ts(e["at"]) <= timedelta(hours=24)]
+        self.assertLessEqual(len(day), 2)
+        _, p = alert(self.gh, dn.PAGE)
+        self.send()
+        self.assertEqual(self.line.delivered[-1][0], p)
+
+    def test_combination_change_notifies(self):
+        self.status(False, ["fk-kuni-a"], 0)
+        self.status(False, ["fk-kuni-a", "fk-kuni-b"], 1)
+        self.status(False, ["fk-kuni-a", "fk-kuni-b"], 2)
+        self.assertEqual(len(self.line.delivered), 2)
+
+    def test_hold_only_release_closes_without_line(self):
+        self.status(True, [], 0)
+        self.status(False, [], 1)
+        self.assertEqual(len(self.line.delivered), 1)        # 保留の開始だけ
+        self.assertEqual(self.gh.open_with(dn.DATA), [])
+        closed = [i for i in self.gh.items if dn.DATA in i["labels"]][0]
+        self.assertIn("自動クローズ", closed["comments"][-1]["body"])
+        self.assertNotIn("line-want", closed["comments"][-1]["body"])
+
+    def test_missing_resolved_tells_recovery(self):
+        self.status(False, ["fk-kuni-jidofuyoteate"], 0)
+        self.status(False, [], 1)
+        self.assertEqual(len(self.line.delivered), 2)
+        self.assertIn("解消しました", self.line.delivered[-1][1])
 
 
 class CheckMode(Base):
