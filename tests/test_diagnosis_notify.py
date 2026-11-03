@@ -598,12 +598,13 @@ class SplitJobs(Base):
     def test_reserve_job_does_not_touch_line(self):
         alert(self.gh, dn.PAGE)
         line = mock.Mock()
-        out = io.StringIO()
+        out = os.path.join(self.tmp, "github_output")
+        open(out, "w").close()
+        # CI では GITHUB_OUTPUT が設定されているので、テスト用のファイルに差し替えて読む
         with mock.patch.object(dn, "Line", side_effect=AssertionError("予約ジョブでLINEを使った")), \
-                mock.patch.dict(os.environ, {"LINE_CONFIGURED": "true", "LINE_TOKEN": "", "LINE_TO": ""}), \
-                contextlib.redirect_stdout(out):
+                mock.patch.dict(os.environ, {"LINE_CONFIGURED": "true", "LINE_TOKEN": "", "LINE_TO": "", "GITHUB_OUTPUT": out}):
             self.assertEqual(dn.main(["sender-reserve"], gh=self.gh, line=line, now=self.gh.now), 0)
-        self.assertIn(f"rid={self.gh.state()['inflight']['id']}", out.getvalue())
+        self.assertIn(f"rid={self.gh.state()['inflight']['id']}", open(out, encoding="utf-8").read())
         line.assert_not_called()
         self.assertFalse(line.method_calls)
 
