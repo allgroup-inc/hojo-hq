@@ -30,7 +30,7 @@ from fg_combine import apply_default_combine  # noqa: E402 併給注意の自動
 JST = timezone(timedelta(hours=9))
 UA = "hojo-hq-bot/1.0 (+https://allgroup-inc.github.io/hojo-hq; contact: bot@en-life.co.jp)"
 BASE = os.path.join(os.path.dirname(__file__), "..")
-OUT = os.path.join(BASE, "data", "fukugiiro", "seido.json")
+OUT = os.path.join(BASE, "site", "fukugiiro", "seido.json")
 
 # シード: 承認済みドメインの主要制度(URLは2026-07-22に検索で特定。到達性は毎回実行時に再確認)
 SEEDS = [
@@ -571,6 +571,14 @@ def main():
         json.dump(data, f, ensure_ascii=False, indent=1)
         f.write("\n")
     print(f"書き込み完了: {len(items)}件 / スキップ {len(skipped)}件 {skipped if skipped else ''}")
+
+    # 後方互換性: 既存スクリプト(generate_area_pages.py等)が data/fukugiiro/seido.json を参照し続けるため、
+    # site/ への書き込み後に data/ へもコピーする(2026-11-02修正)
+    import shutil
+    compat_path = os.path.join(BASE, "data", "fukugiiro", "seido.json")
+    shutil.copy(OUT, compat_path)
+    print(f"後方互換性確保: {compat_path} へコピー")
+
     # シードの半数以上が到達不可なら異常(サイト構造変化・ネットワーク断の疑い)
     if len(items) < len(SEEDS) / 2:
         print("[ERROR] シードの過半が取得不可 — 要調査")
