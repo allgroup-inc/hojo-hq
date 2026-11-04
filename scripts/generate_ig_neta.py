@@ -195,6 +195,8 @@ def candidates(seido, used_ids, used_urls):
             continue
         if s.get("id") in used_ids or (s.get("source_url") or "") in used_urls:
             continue
+        if s.get("source_unavailable"):
+            continue  # 公式ページが無い(404/410)と確かめた出典は、投稿の出典にできない(fg_source_status.py)
         if not (s.get("name") and s.get("source_url")):
             continue
         out.append(s)
