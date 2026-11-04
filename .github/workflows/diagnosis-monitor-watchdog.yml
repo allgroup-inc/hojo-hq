@@ -1,0 +1,47 @@
+name: diagnosis-monitor-watchdog
+
+# 監視の監視: 2時間ごとに確かめる(判定は scripts/diagnosis_notify.py watchdog)。
+# 見る止まり方: 監視ワークフローの無効化(手動/60日無活動)/ 6時間以上の起動途絶 / 一度も起動しない /
+# 起動しても直近4回とも検査まで届かない(Playwright導入・checkoutの失敗、中断)/ 直近4回とも障害Issueの更新に失敗 /
+# LINEの送信要求が6時間以上処理されない(送信担当の停滞。上限・送信枠による保留は除く)。
+# あわせて、収集が残した公開用制度データの判定(data/fukugiiro/publish_status.json)を読み、
+# 更新の保留・必須制度の欠けを diagnosis-data-hold のIssueに残す(ジョブは赤にしない)。
+# このワークフローもスケジュール起動のため遅れ・間引きがあり、検知までの時間は保証しない。
+# LINE は送らない(送信要求を書くだけ。送るのは diagnosis-line-sender.yml)。
+# 議事: docs/議事_20261103_診断ページ15分監視.md
+
+on:
+  schedule:
+    - cron: "7 */2 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+
+concurrency:
+  group: diagnosis-monitor-watchdog
+  cancel-in-progress: false
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+          persist-credentials: false
+
+      - name: Check monitor is alive
+        id: w
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/diagnosis_notify.py watchdog --workflow diagnosis-monitor.yml
+
+      - name: 監視の停止・故障を赤で残す
+        if: steps.w.outputs.problem != ''
+        run: |
+          echo "::error::監視の停止・故障を検知しました(${{ steps.w.outputs.problem }})"
+          exit 1
