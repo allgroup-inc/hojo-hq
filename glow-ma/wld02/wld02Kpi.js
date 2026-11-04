@@ -12,7 +12,8 @@
  * - AIや取り込みが付けた「面談実施」は、確認されるまで数えない(確認待ちとして別に数える)
  * - 集計開始日 2026-10-04。同じ会社は、企業ID対応表で統合後のIDにそろえてから1社と数える
  * - 流入経路④が後で外れても、確認済みの相談は累計に残す(要確認として別に数える)
- * - 掲載契約は、解除・取消があっても累計に残す。今も有効な数は別に数える
+ * - 掲載契約は、解除・取消があっても累計に残す。今も有効な数は別に数える。「誤登録」は外す
+ * - 2026-10-04 より前に成立した掲載契約は「参考実績」として別の列に数え、正式な累計には足さない(11/4 確定)
  * - 「現在ステージ」は使わない
  * - 週は月曜始まり。同じ週の行は上書きする(再実行で二重に数えない)
  * - 読めない記録が1つでもあれば、その週は「取得不能」とし、0件として書かない
@@ -29,8 +30,8 @@
   var MEETING_FORMATS = ["対面", "オンライン"];
   var VERDICT_CONFIRMED = "確認済み";
 
-  // 2026-11-04 v0: 掲載契約の状態。「誤登録」は v0 の設計書に無い状態で、基本ルール
-  // 「誤登録・重複は理由と訂正履歴を残して修正できる」を満たすために足した(v1 のレビューで確認する)。
+  // 掲載契約の状態。「誤登録」は基本ルール「誤登録・重複は理由と訂正履歴を残して修正できる」のために
+  // 足した状態(2026-11-04 小柳さん確定: 誤登録は累計から外し、取消は累計に残す)。
   var CONTRACT_ACTIVE = "有効";
   var CONTRACT_MISTAKE = "誤登録";
 
@@ -40,7 +41,7 @@
   var WEEKLY_FIELDS = [
     "週の開始日", "集計日時", "状態",
     "相談企業数_累計", "相談企業数_週内の新規",
-    "掲載契約企業数_累計", "掲載契約企業数_有効",
+    "掲載契約企業数_累計", "掲載契約企業数_有効", "掲載契約企業数_参考_10月4日より前",
     "確認待ちの面談数", "流入経路の要確認数", "実行ID"
   ];
 
@@ -216,12 +217,13 @@
       if (first[id] >= weekStart && first[id] < weekEnd) newInWeek++;
     });
 
-    var everSigned = {}, activeNow = {};
+    var everSigned = {}, activeNow = {}, beforeStart = {};
     var contracts = contractStates(sources.contracts, resolver);
     Object.keys(contracts).forEach(function (cid) {
       var c = contracts[cid];
       if (!c.companyId || !c.signedOn || c.state === CONTRACT_MISTAKE) return;
-      if (c.signedOn < KPI_START_DATE || c.signedOn >= weekEnd) return;
+      if (c.signedOn >= weekEnd) return;
+      if (c.signedOn < KPI_START_DATE) { beforeStart[c.companyId] = true; return; }
       everSigned[c.companyId] = true;
       if (c.state === CONTRACT_ACTIVE) activeNow[c.companyId] = true;
     });
@@ -241,6 +243,7 @@
     row.相談企業数_週内の新規 = newInWeek;
     row.掲載契約企業数_累計 = Object.keys(everSigned).length;
     row.掲載契約企業数_有効 = Object.keys(activeNow).length;
+    row.掲載契約企業数_参考_10月4日より前 = Object.keys(beforeStart).filter(function (id) { return !everSigned[id]; }).length;
     row.確認待ちの面談数 = pendingMeetingIds(sources.history, sources.confirmations).length;
     row.流入経路の要確認数 = routeCheck;
     return { row: row, problems: resolver.problems.slice() };
