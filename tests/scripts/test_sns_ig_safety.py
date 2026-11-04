@@ -365,7 +365,8 @@ def manual(tmp_path, monkeypatch):
     monkeypatch.setenv("GITHUB_SHA", FAKE_SHA)
     monkeypatch.setenv("IG_USER_ID", "222")
     monkeypatch.setenv("FB_PAGE_ACCESS_TOKEN", FAKE_TOKEN)
-    monkeypatch.setenv("SNS_DEST_FP_MIKATA", sns_safety.destination_fingerprint("222"))
+    monkeypatch.setenv("FB_PAGE_ID", "111")
+    monkeypatch.setenv("SNS_DEST_FP_MIKATA", sns_safety.destination_fingerprint("111", "222"))
     calls = []
 
     def fake_meta_post(path, params, **kw):
@@ -592,3 +593,48 @@ def test_funnel_uses_header_not_url(monkeypatch):
 def test_report_workflows_have_no_publish_key(name):
     wf, text = _wf(name)
     assert "FB_PAGE_ACCESS_TOKEN" not in json.dumps(wf) and "META_INSIGHTS_TOKEN" in text
+
+
+# ---------------------------------------------------------------- 投稿先の指紋は1つで定期・手動の両方に効く
+
+
+def _mikata_env(fp, page="111", ig="222"):
+    return {"SNS_DEST_FP_MIKATA": fp, "FB_PAGE_ID": page, "IG_USER_ID": ig}
+
+
+def test_one_fingerprint_works_for_both_posting_paths(monkeypatch):
+    """登録する指紋1つで、定期投稿(post_social)と手動投稿(ig_manual_post)の両方が通ること。"""
+    import ig_manual_post as im
+    import post_social as ps
+    fp = sns_safety.destination_fingerprint("111", "222")
+    for k, v in _mikata_env(fp).items():
+        monkeypatch.setenv(k, v)
+    sns_safety.check_mikata_destination()          # 両方の処理が呼ぶ照合
+    for mod in (im, ps):
+        src = open(mod.__file__, encoding="utf-8").read()
+        assert "check_mikata_destination()" in src, mod.__name__
+        assert "check_destination(" not in src.replace("check_mikata_destination(", ""), mod.__name__
+
+
+@pytest.mark.parametrize("env,needle", [
+    (_mikata_env(""), "未設定"),
+    (_mikata_env(sns_safety.destination_fingerprint("111", "222"), page=""), "番号が未設定"),
+    (_mikata_env(sns_safety.destination_fingerprint("111", "222"), ig="999"), "一致しません"),
+    (_mikata_env(sns_safety.destination_fingerprint("222")), "一致しません"),   # 以前の手動投稿の作り方
+])
+def test_mikata_destination_blocks(env, needle):
+    with pytest.raises(SafetyError, match=needle):
+        sns_safety.check_mikata_destination(env)
+
+
+def test_fingerprint_cli_matches_library():
+    r = subprocess.run([sys.executable, os.path.join(SCRIPTS, "sns_safety.py"), "--fingerprint", "111", "222"],
+                       capture_output=True, text=True)
+    assert r.returncode == 0 and r.stdout.strip() == sns_safety.destination_fingerprint("111", "222")
+
+
+@pytest.mark.parametrize("name", ["ig-feed.yml", "ig-story.yml"])
+def test_manual_post_job_gets_page_id(name):
+    wf, _ = _wf(name)
+    blob = json.dumps(wf["jobs"]["post"])
+    assert "secrets.FB_PAGE_ID" in blob and "SNS_DEST_FP_MIKATA" in blob
