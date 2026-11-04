@@ -354,7 +354,8 @@ function sweepStaleVoiceLogs_(ss) {
       ss, record.sheetRow, VOICE_LOG_IN_PROGRESS_STATUSES, VOICE_LOG_STALE_ERROR_MESSAGE
     );
     if (swept) {
-      Logger.log("放置された音声ログを自動的に取り消しました(処理ID " + record["処理ID"] + ")。");
+      // 点検(glow-ma-gcp-api)で見えるよう console に出す(Logger は Cloud Logging に残らず、10/30 に取り消しの有無を確かめられなかった)
+      console.log("確認期限を過ぎた録音を取り消しました(「" + record["ステータス"] + "」のまま・処理ID " + record["処理ID"] + ")");
     }
   });
 }
@@ -543,6 +544,7 @@ function processQueuedVoiceLogs() {
     recoverResumedVoiceLogsOnce_(ss);
     recoverUnconfirmedVoiceLogsOnce_(ss);
     recoverUnconfirmedVoiceLogsOnce2_(ss);
+    recoverUnconfirmedVoiceLogsOnce3_(ss);
     recoverUploadRaceVoiceLogsOnce_(ss);
     requeueBillingHeldVoiceLogs_(ss);
   } catch (error) {

@@ -259,20 +259,58 @@
    * GLOWのスタッフ(スタッフタブの氏名)の通話だけを残す。氏名は空白を無視して完全一致で照合する。
    * allowedNames が空なら、何も残さない(取り違えを防ぐため、許可した人の通話だけを台帳に入れる)。
    */
-  function filterCallsByOperators(calls, allowedNames) {
+  function filterCallsByOperators(calls, allowedNames, pinnedIds) {
     var allowed = {};
     (allowedNames || []).forEach(function (n) {
       var key = operatorPersonName(n);
       if (key) allowed[key] = true;
     });
+    var pins = pinnedIds || {};
     return (calls || []).filter(function (call) {
-      return !!allowed[operatorPersonName(call.operator_name)];
+      var key = operatorPersonName(call.operator_name);
+      if (!allowed[key]) return false;
+      // 氏名ごとに覚えたオペレーターIDがあれば、IDも一致したものだけ残す(同姓同名の他組織オペレーターを除く)
+      return !pins[key] || pins[key] === operatorIdOf(call.operator_name);
     });
+  }
+
+  /** 「山田　花子(ext001)」のような表示から、括弧内のオペレーターID(ext001)を取り出す。無ければ空文字 */
+  function operatorIdOf(operator) {
+    var m = /[（(]\s*([^()（）\s]+)\s*[)）]\s*$/.exec(String(operator || ""));
+    return m ? m[1] : "";
+  }
+
+  /**
+   * まだIDを覚えていないスタッフについて、通話から氏名→オペレーターIDを覚える(2026-10-30 ソフツー回答:
+   * 他組織の通話も返るのは仕様。オペレーターIDで絞るよう案内あり)。
+   * 同じ氏名で別々のIDが同時に現れたときは、どれが本人か決められないので覚えない。
+   */
+  function learnOperatorIds(calls, allowedNames, pinnedIds) {
+    var allowed = {};
+    (allowedNames || []).forEach(function (n) {
+      var key = operatorPersonName(n);
+      if (key) allowed[key] = true;
+    });
+    var seen = {};
+    (calls || []).forEach(function (call) {
+      var key = operatorPersonName(call.operator_name);
+      var id = operatorIdOf(call.operator_name);
+      if (!allowed[key] || !id || (pinnedIds || {})[key]) return;
+      (seen[key] = seen[key] || {})[id] = true;
+    });
+    var learned = {};
+    Object.keys(seen).forEach(function (key) {
+      var ids = Object.keys(seen[key]);
+      if (ids.length === 1) learned[key] = ids[0];
+    });
+    return learned;
   }
 
   var api = {
     operatorPersonName: operatorPersonName,
     filterCallsByOperators: filterCallsByOperators,
+    operatorIdOf: operatorIdOf,
+    learnOperatorIds: learnOperatorIds,
     parseCsv: parseCsv,
     parseCdrCsv: parseCdrCsv,
     isCdrNoData: isCdrNoData,
