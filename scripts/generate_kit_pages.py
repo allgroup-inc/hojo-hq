@@ -25,6 +25,7 @@ import urllib.parse
 sys.path.insert(0, os.path.dirname(__file__))
 from fg_seo import HIDDEN_MUNIS, MUNI_SLUG, breadcrumb_jsonld, canonical_tag, faq_jsonld, ogp_tags
 import fg_madoguchi  # 窓口情報(役場住所・電話・開庁時間)2026-09-02
+import fg_source_status as fgsrc  # 公式ページが無い(404/410)出典のリンクだけを止める
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 DATA = os.path.join(BASE, "data", "fukugiiro", "seido.json")
@@ -136,9 +137,11 @@ def kit_jsonld(it):
         "provider": {"@type": "GovernmentOrganization", "name": it.get("issuer", "")},
         "areaServed": {"@type": "AdministrativeArea", "name": it.get("area", "全国")},
         "audience": {"@type": "Audience", "audienceType": it.get("target_household", "")},
-        "url": it.get("source_url", ""),
-        "serviceUrl": it.get("source_url", ""),
+        "url": fgsrc.jsonld_url(it),
+        "serviceUrl": fgsrc.jsonld_url(it),
     }
+    if not fgsrc.jsonld_url(it):  # 公式ページを確認中の制度は、開けないURLを構造化データに載せない
+        data.pop("url"), data.pop("serviceUrl")
     return ('<script type="application/ld+json">\n'
             + json.dumps(data, ensure_ascii=False, indent=1)
             + "\n</script>")
@@ -291,6 +294,9 @@ def kit_page(it, updated):
     if not verified and it.get("status") == "要確認":
         warn = ('<div class="box" style="border-color:#E0B54A;background:#FFF8E6"><span class="note">'
                 'この制度は内容の最終確認中です。金額・締切・対象はお出かけ前に必ず公式ページと窓口でご確認ください。</span></div>')
+    if fgsrc.unavailable(it):
+        warn += ('<div class="box" style="border-color:#E0B54A;background:#FFF8E6"><span class="note">'
+                 f'<strong>{fgsrc.LABEL}</strong>: {fgsrc.NOTE}</span></div>')
 
     # 聞きに行く場所と時間(市町村・県の制度のみ。2026-09-02 小柳さん発案)
     # 役場(本庁)単位の情報。担当課が別庁舎の場合があるため非断定の注意文を必ず添える。
@@ -339,6 +345,14 @@ def kit_page(it, updated):
                         f'{esc(cmb["note"])}</p></div>')
 
     src = esc(it["source_url"])
+    # 公式ページが無い(404/410)と確かめた出典は、リンクの代わりに「公式ページを確認中」を出す(fg_source_status.py)
+    official_btn = fgsrc.link(it, "公式ページで最新を確認",
+                              attrs="rel=\"noopener\" onclick=\"if(window.fgTrack)fgTrack('kit_official')\"")
+    if fgsrc.unavailable(it):
+        phone_src = "公式ページを確認中のため、電話番号はお住まいの市町村の代表番号などでご確認ください"
+    else:
+        phone_src = f'電話番号は公式ページに載っています → <a href="{src}" rel="noopener">公式ページで電話番号を確認</a>'
+    footer_src = fgsrc.link(it, "公式ページ")
     # この制度専用の「情報の訂正」メール導線(件名・本文に制度名を自動で差し込む)
     _sub = urllib.parse.quote(f"[情報の訂正] {it['name']}")
     _bd = urllib.parse.quote(
@@ -368,7 +382,7 @@ def kit_page(it, updated):
 
 <div class="btns">
   <button class="primary" onclick="if(window.fgTrack)fgTrack('kit_print');window.print()">印刷する</button>
-  <a href="{src}" rel="noopener" onclick="if(window.fgTrack)fgTrack('kit_official')">公式ページで最新を確認</a>
+  {official_btn}
 </div>
 
 <div class="smartbox screen-only">
@@ -416,7 +430,7 @@ def kit_page(it, updated):
   <div class="say">① 受付の<b>時間</b>と、行く<b>場所(窓口)</b>を教えてください</div>
   <div class="say">② <b>私の場合</b>、何を持っていけばいいですか？</div>
   <div class="say">③ <b>申請書</b>はそちらにありますか？ <b>いつまで</b>に出せばいいですか？</div>
-  <p class="note" style="margin-top:10px">電話番号は公式ページに載っています → <a href="{src}" rel="noopener">公式ページで電話番号を確認</a></p>
+  <p class="note" style="margin-top:10px">{phone_src}</p>
   <p class="note" style="margin-top:6px">聞いた電話番号・受付時間のメモ:</p>
   <textarea class="memo" data-m="0" rows="1" placeholder="例) 〇〇課 098-000-0000 / 平日8:30-17:15"></textarea>
 </div>
@@ -470,7 +484,7 @@ def kit_page(it, updated):
   この制度の情報が「古い」「違う」と気づいたら、教えてください。確認して24時間以内の修正を目指します。<br>
   <a href="{report_link}" onclick="if(window.fgTrack)fgTrack('teisei_mail')" style="display:inline-block;margin-top:8px;color:var(--fg-primary);font-weight:700">この制度の情報の間違いを知らせる</a>
 </div>
-<div class="disclaimer">このシートは公式情報に基づく「準備のご案内」です。持ち物は一般的な例で、市町村により異なります。受給できるかどうかの最終判断は各窓口で行われます。<br>申請書の作成代行・代筆は行っていません(ご本人が記入します)。<br>専門家のサポートが必要な場合は、提携の専門家(社会保険労務士・行政書士など)をご紹介します。<br>最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)/ 出典: <a href="{src}" rel="noopener">公式ページ</a></div>
+<div class="disclaimer">このシートは公式情報に基づく「準備のご案内」です。持ち物は一般的な例で、市町村により異なります。受給できるかどうかの最終判断は各窓口で行われます。<br>申請書の作成代行・代筆は行っていません(ご本人が記入します)。<br>専門家のサポートが必要な場合は、提携の専門家(社会保険労務士・行政書士など)をご紹介します。<br>最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)/ 出典: {footer_src}</div>
 <p style="margin-top:16px" class="no-print footlinks">{area_link}<a href="../index.html">申請準備シート一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../teisei/">情報の訂正</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
 <p class="no-print" style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
 """

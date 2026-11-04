@@ -61,7 +61,9 @@ jobs:
           git config user.email "bot@en-life.co.jp"
           # 生成物はaddリストに入れる。addし忘れると直後の git checkout/clean で生成物が消え、
           # ビルドステップが無駄になる(2026-08-17 life追加漏れと同型)。山梨版は生成を停止したため対象外。
-          git add data/fukugiiro/seido.json data/fukugiiro/kensho_summary.json docs/フクギイロ_突合レポート.md site/fukugiiro/area site/fukugiiro/kit site/fukugiiro/life data/yamanashi site/sitemap.xml site/robots.txt
+          # site/fukugiiro/seido.json は moradou.jp の診断ページが読む公開用コピー(fetch_fukugiiro.py が欠けていないときだけ書く)。
+          # publish_status.json はその判定の記録(保留の理由・取得失敗・必須制度の欠け)。
+          git add data/fukugiiro/seido.json site/fukugiiro/seido.json data/fukugiiro/publish_status.json data/fukugiiro/kensho_summary.json docs/フクギイロ_突合レポート.md site/fukugiiro/area site/fukugiiro/kit site/fukugiiro/life data/yamanashi site/sitemap.xml site/robots.txt
           # 山梨版突合レポート(2026-09-27 新設。生成ステップとaddリストは必ず対で更新)
           [ -f "docs/山梨版_突合レポート.md" ] && git add "docs/山梨版_突合レポート.md" || true
           git diff --cached --quiet || git commit -m "auto: fukugiiro seido update $(date '+%Y-%m-%d %H:%M')"

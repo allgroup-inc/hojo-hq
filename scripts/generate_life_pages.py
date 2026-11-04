@@ -17,6 +17,7 @@ from datetime import timezone, timedelta
 
 sys.path.insert(0, os.path.dirname(__file__))
 from fg_seo import HIDDEN_MUNIS, breadcrumb_jsonld, canonical_tag, faq_jsonld, ogp_tags
+import fg_source_status as fgsrc  # 公式ページが無い(404/410)出典のリンクだけを止める
 
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
@@ -86,13 +87,13 @@ def life_jsonld(heading, items):
     for pos, it in enumerate(items, 1):
         elements.append({
             "@type": "ListItem", "position": pos,
-            "item": {
+            "item": fgsrc.without_empty_url({
                 "@type": "GovernmentService",
                 "name": it.get("name", ""),
                 "provider": {"@type": "GovernmentOrganization", "name": it.get("issuer", "")},
                 "areaServed": {"@type": "AdministrativeArea", "name": it.get("area", "全国")},
-                "url": it.get("source_url", ""),
-            },
+                "url": fgsrc.jsonld_url(it),  # 公式ページを確認中なら空(without_empty_url で外す)
+            }),
         })
     data = {
         "@context": "https://schema.org", "@type": "CollectionPage",
@@ -234,6 +235,7 @@ def life_page(slug, events, heading, kw, items, updated):
         f'<p class="note">国の制度{len(national)}件・沖縄県{len(pref)}件・市町村{len(local)}件から、'
         f'{esc(heading)}のご家庭にかかわるものをまとめています。お住まいの市町村や世帯の状況によって'
         '対象は変わるため、3分診断でしぼり込むのが近道です。</p>',
+        *filter(None, [fgsrc.note_html(national + pref)]),  # 止めている制度があるときだけ説明を1回出す
     ]
     if verified_n:
         body.append(
@@ -264,7 +266,7 @@ def life_page(slug, events, heading, kw, items, updated):
                 # 窓口行は載せない(準備シート側に地図・電話つきの窓口情報あり。
                 # 2026-09-08 掲載97件でサイズ予算超過したため一覧は対象+リンクに絞る)
                 f'<p style="display:flex;gap:16px;flex-wrap:wrap;margin:0">'
-                f'<a href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する</a>'
+                f'{fgsrc.link(it, "公式ページで確認する")}'
                 f'<a href="../../kit/{esc(it["id"])}/">申請準備シート</a></p>'
                 "</div>"
             )

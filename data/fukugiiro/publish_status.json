@@ -1,0 +1,19 @@
+{
+ "checked_at": "2026-11-04 12:26",
+ "publish": true,
+ "reasons": [],
+ "previous_count": 258,
+ "new_count": 258,
+ "failed": [
+  {
+   "id": "fk-kuni-jidofuyoteate",
+   "reason": "URL到達不可(HTTP 404)",
+   "in_previous_public": false
+  }
+ ],
+ "unexplained_lost": [],
+ "legit_removed": [],
+ "required_missing": [
+  "fk-kuni-jidofuyoteate"
+ ]
+}

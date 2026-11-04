@@ -625,8 +625,16 @@ footer .fwrap p{margin-bottom:6px}
         var p = document.createElement("p");
         p.textContent = (it.issuer||"") + " / " + (it.amount_note||"");
         p.className = "note";
-        var a = document.createElement("a");
-        a.href = it.source_url; a.rel = "noopener"; a.textContent = "公式ページで確認";
+        // 公式ページが無い(404/410)と確かめた出典は、リンクの代わりに「公式ページを確認中」を出す(scripts/fg_source_status.py)
+        var a;
+        if(it.source_unavailable){
+          a = document.createElement("span"); a.className = "src-pending"; a.style.color = "#7a5b00"; a.style.fontWeight = "700";
+          a.textContent = "公式ページを確認中";
+          a.title = "公式ページが移動などで開けないため、リンクを一時的にお休みしています。この表示は、制度が終わったという意味ではありません。内容や申請は窓口でご確認ください。";
+        } else {
+          a = document.createElement("a");
+          a.href = it.source_url; a.rel = "noopener"; a.textContent = "公式ページで確認";
+        }
         d.appendChild(h); d.appendChild(p);
         if(it.verified === true){
           var ok = document.createElement("span"); ok.className="status ok"; ok.textContent="✓ 公式と照合済み";

@@ -1,29 +1,29 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-02",
+  "updated_at": "2026-11-04",
   "period": "7d",
   "source": "ga4-data-api",
   "stages": [
     {
       "key": "shindan_start",
       "label": "診断開始",
-      "count": 11,
+      "count": 13,
       "cvr_from_prev": null,
       "drop_rate": null
     },
     {
       "key": "shindan_step_q2",
       "label": "Q2到達",
-      "count": 6,
-      "cvr_from_prev": 0.5454545454545454,
-      "drop_rate": 0.4545454545454546
+      "count": 5,
+      "cvr_from_prev": 0.38461538461538464,
+      "drop_rate": 0.6153846153846154
     },
     {
       "key": "shindan_step_q3",
       "label": "Q3到達",
       "count": 4,
-      "cvr_from_prev": 0.6666666666666666,
-      "drop_rate": 0.33333333333333337
+      "cvr_from_prev": 0.8,
+      "drop_rate": 0.19999999999999996
     },
     {
       "key": "shindan_step_q4",
@@ -42,16 +42,16 @@
     {
       "key": "shindan_complete",
       "label": "診断完了(1件以上)",
-      "count": 3,
-      "cvr_from_prev": 0.6,
-      "drop_rate": 0.4
+      "count": 5,
+      "cvr_from_prev": 1.0,
+      "drop_rate": 0.0
     },
     {
       "key": "line_add_click",
       "label": "LINE誘導クリック",
-      "count": 1,
-      "cvr_from_prev": 0.3333333333333333,
-      "drop_rate": 0.6666666666666667
+      "count": 2,
+      "cvr_from_prev": 0.4,
+      "drop_rate": 0.6
     }
   ],
   "engagement": {
@@ -68,13 +68,13 @@
     "shindan_redirect": 0
   },
   "key_rates": {
-    "finish_rate": 0.2727272727272727,
-    "line_cvr": 0.3333333333333333,
+    "finish_rate": 0.38461538461538464,
+    "line_cvr": 0.4,
     "zero_rate": 0.0
   },
   "worst_drop": {
-    "stage": "line_add_click",
-    "label": "診断完了(1件以上)→LINE誘導クリック",
-    "drop_rate": 0.6666666666666667
+    "stage": "shindan_step_q2",
+    "label": "診断開始→Q2到達",
+    "drop_rate": 0.6153846153846154
   }
 }
