@@ -461,15 +461,38 @@ def test_hygiene_check_selftest_and_repo():
     assert r.returncode == 0, r.stdout
 
 
-def test_hygiene_check_catches_old_ig_feed(tmp_path):
-    """修正前の ig-feed(set -x・承認なし・access_token を引数に)を検査が止めること。"""
-    old = subprocess.run(["git", "-C", ROOT, "show", "origin/main:.github/workflows/ig-feed.yml"],
-                         capture_output=True, text=True)
-    if old.returncode != 0 or "set -x" not in old.stdout:
-        pytest.skip("修正前の版が手元に無い")
+# 修正前の手動投稿(ig-feed)と同じ形の架空のワークフロー。
+# main を読みに行かないので、PR のマージ前でも後でも必ず実行される(飛ばしにならない)。
+OLD_STYLE_IG_FEED = """
+name: ig-feed
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        required: true
+permissions:
+  contents: read
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: フィード投稿
+        env:
+          TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          IG_USER: ${{ secrets.IG_USER_ID }}
+        run: |
+          set -e
+          set -x
+          create=$(curl -sS -X POST "https://graph.facebook.com/v21.0/${IG_USER}/media" \\
+            -d "access_token=${TOKEN}")
+"""
+
+
+def test_hygiene_check_catches_old_ig_feed():
+    """修正前の ig-feed の形(set -x・承認なし・access_token を引数に)を検査が止めること。"""
     import check_workflow_secret_hygiene as h
-    rules = {f[0] for f in h.check_text("ig-feed.yml", old.stdout)}
-    assert {"W1", "W3", "W4", "W5"} <= rules
+    rules = {f[0] for f in h.check_text("ig-feed.yml", OLD_STYLE_IG_FEED)}
+    assert {"W1", "W3", "W4", "W5"} <= rules, rules
 
 
 # ---------------------------------------------------------------- 数字を読むだけの鍵(週次レポート・分析)
