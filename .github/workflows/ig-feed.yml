@@ -1,7 +1,12 @@
 name: ig-feed
 
 # ミカタ公式Instagramへ「フィード投稿(単枚画像)」を行うユーティリティ(手動実行専用)。
-# 使用は小柳さんの承認がある素材・文面のみ。月水金の自動投稿(social-post)とは別系統。
+# 2026-11-03 GLOW Instagram 安全対策(M8・M1)で、承認を必ず通る形に作り直した:
+#   1) preview: 承認対象(画像の指紋・コミットに固定した画像URL・本文・期限)を作り、LINEへ送る。
+#      このジョブには Meta の鍵を渡さない(LINE の鍵だけ)
+#   2) post: GitHub の承認(environment: sns-approval)が下りた時だけ動く。
+#      同じコミットで承認対象を作り直して照らし合わせ、画像を固定URLから取り直して確かめてから投稿する
+# 鍵を含む処理では set -x を使わない(scripts/check_workflow_secret_hygiene.py が検査する)。
 
 on:
   workflow_dispatch:
@@ -21,36 +26,95 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  post:
+  preview:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      digest: ${{ steps.pkg.outputs.pkg_digest }}
+      created: ${{ steps.pkg.outputs.pkg_created }}
+      image: ${{ steps.pkg.outputs.image }}
     steps:
-      - name: フィード投稿
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 本文をファイルにする
         env:
-          TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
-          IG_USER: ${{ secrets.IG_USER_ID }}
-          IMG_PATH: ${{ inputs.image }}
           CAPTION: ${{ inputs.caption }}
+        run: printf '%s' "$CAPTION" > "$RUNNER_TEMP/caption.txt"
+
+      - name: 承認対象を作る(投稿はしない)
+        id: pkg
+        env:
+          IMG_PATH: ${{ inputs.image }}
         run: |
-          set -e
-          set -x
-          if [ -z "$TOKEN" ] || [ -z "$IG_USER" ]; then
-            echo "::error::FB_PAGE_ACCESS_TOKEN / IG_USER_ID が未設定です"; exit 1
-          fi
-          URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/main/${IMG_PATH}"
-          code=$(curl -sS --retry 2 -o /dev/null -w "%{http_code}" "$URL")
-          if [ "$code" != "200" ]; then
-            echo "::error::画像が取得できません(HTTP $code): $URL"; exit 1
-          fi
-          create=$(curl -sS --retry 2 -X POST "https://graph.facebook.com/v21.0/${IG_USER}/media" \
-            --data-urlencode "image_url=${URL}" \
-            --data-urlencode "caption=${CAPTION}" \
-            -d "access_token=${TOKEN}")
-          cid=$(echo "$create" | python3 -c "import sys,json;print(json.load(sys.stdin).get('id',''))")
-          if [ -z "$cid" ]; then echo "::error::コンテナ作成に失敗: $create"; exit 1; fi
-          sleep 5
-          pub=$(curl -sS --retry 2 -X POST "https://graph.facebook.com/v21.0/${IG_USER}/media_publish" \
-            -d "creation_id=${cid}" -d "access_token=${TOKEN}")
-          mid=$(echo "$pub" | python3 -c "import sys,json;print(json.load(sys.stdin).get('id',''))")
-          if [ -z "$mid" ]; then echo "::error::公開に失敗: $pub"; exit 1; fi
-          echo "フィード投稿完了 media_id=${mid}"
+          python scripts/ig_manual_post.py --kind feed --image "$IMG_PATH" --caption-file "$RUNNER_TEMP/caption.txt" --preview \
+            --preview-file "$RUNNER_TEMP/preview.txt" >> "$GITHUB_OUTPUT"
+          cat "$RUNNER_TEMP/preview.txt"
+          {
+            d="EOF_$(python3 -c 'import secrets;print(secrets.token_hex(16))')"
+            echo "text<<$d"
+            cat "$RUNNER_TEMP/preview.txt"
+            echo "$d"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: LINEで見本を送る(小柳さんへ)
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            🖼【ミカタ】手動のフィード投稿(単枚画像)の確認
+            ${{ steps.pkg.outputs.text }}
+            画像: ${{ steps.pkg.outputs.image }}
+            投稿してよければ、次の画面で承認してください:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            見送るなら何もしなくてOK。投稿されません。
+
+  post:
+    needs: preview
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # 承認(Required reviewers)が下りるまでここで待機する。Meta の鍵はこのジョブにだけ渡す
+    environment: sns-approval
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 本文をファイルにする
+        env:
+          CAPTION: ${{ inputs.caption }}
+        run: printf '%s' "$CAPTION" > "$RUNNER_TEMP/caption.txt"
+
+      - name: 照らし合わせてから投稿
+        env:
+          IMG_PATH: ${{ inputs.image }}
+          DIGEST: ${{ needs.preview.outputs.digest }}
+          CREATED: ${{ needs.preview.outputs.created }}
+          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          SNS_DEST_FP_MIKATA: ${{ vars.SNS_DEST_FP_MIKATA }}
+        run: |
+          python scripts/ig_manual_post.py --kind feed --image "$IMG_PATH" --caption-file "$RUNNER_TEMP/caption.txt" --post \
+            --approved-digest "$DIGEST" --approved-created "$CREATED"
+
+      - name: LINE通知(失敗時)
+        if: failure()
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            🚨【ミカタ】手動のフィード投稿(単枚画像)が止まりました(投稿していません)
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

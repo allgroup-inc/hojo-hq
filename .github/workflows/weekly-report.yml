@@ -52,7 +52,8 @@ jobs:
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           LINE_ADMIN_USER_ID: ${{ secrets.LINE_ADMIN_USER_ID }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
-          FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          # 数字を読むだけの鍵(投稿の権限なし)。投稿用の鍵 FB_PAGE_ACCESS_TOKEN は渡さない(2026-11-03)
+          META_INSIGHTS_TOKEN: ${{ secrets.META_INSIGHTS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
         # pushイベント(コード編集時)はdry-run=LINE送信なし・repo記録のみ。
         # 実弾のLINE配信は schedule(月曜8時) と workflow_dispatch(手動) のみ。
