@@ -15,6 +15,9 @@ on:
   # 10/16〜26 に自動処理が承認切れで止まっていたのを10日間誰も気づけなかった反省(失敗台帳 FK-007)。
   schedule:
     - cron: "23 23 * * *"   # 毎日 8:23(日本時間)。日次メンテナンス(7時台)の後
+  # 注意(2026-11-04): 定期実行では inputs が空になり、`inputs.health_hours != '0'` は偽になる(空と '0' はどちらも数値0として比べられる)。
+  # そのため 10/26 の追加以降、毎朝の点検は中身を一度も実行せず「成功」になっていた。点検の各ステップは
+  # `github.event_name == 'schedule' ||` を付けて、定期実行でも必ず動かす。
   workflow_dispatch:
     inputs:
       gcp_project:
@@ -89,17 +92,17 @@ jobs:
           exit $status
 
       - uses: actions/checkout@v7
-        if: inputs.health_hours != '0'
+        if: github.event_name == 'schedule' || inputs.health_hours != '0'
 
       - uses: actions/setup-python@v7
-        if: inputs.health_hours != '0'
+        if: github.event_name == 'schedule' || inputs.health_hours != '0'
         with:
           python-version: "3.12"
 
       # プロジェクト番号は公開リポジトリに書かない。手動実行で1回指定された番号を Actions のキャッシュに覚えておき、
       # 毎日の自動点検(番号の入力が無い)ではそれを使う
       - name: 覚えているプロジェクト番号を取り出す
-        if: inputs.health_hours != '0'
+        if: github.event_name == 'schedule' || inputs.health_hours != '0'
         uses: actions/cache/restore@v4
         with:
           path: .glow_ma_gcp_project
@@ -107,7 +110,7 @@ jobs:
           restore-keys: glow-ma-gcp-project-
 
       - name: プロジェクト番号を決める
-        if: inputs.health_hours != '0'
+        if: github.event_name == 'schedule' || inputs.health_hours != '0'
         id: project
         env:
           GIVEN: ${{ inputs.gcp_project }}
@@ -123,14 +126,14 @@ jobs:
           echo "number=$num" >> "$GITHUB_OUTPUT"
 
       - name: プロジェクト番号を覚えておく
-        if: inputs.health_hours != '0' && steps.project.outputs.save == 'true'
+        if: (github.event_name == 'schedule' || inputs.health_hours != '0') && steps.project.outputs.save == 'true'
         uses: actions/cache/save@v4
         with:
           path: .glow_ma_gcp_project
           key: glow-ma-gcp-project-${{ github.run_id }}
 
       - name: 実行記録の点検(各処理が動いているか)
-        if: inputs.health_hours != '0'
+        if: github.event_name == 'schedule' || inputs.health_hours != '0'
         env:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
           SCRIPT_ID: ${{ secrets.GLOW_MA_SCRIPT_ID }}
