@@ -516,6 +516,22 @@ def reachable(url):
         return False, type(e).__name__
 
 
+DEAD_CODES = ("HTTP 404", "HTTP 410")
+
+
+def shared_dead_sources(seeds, failed):
+    """到達性の確認を省いている(assume_reachable)シードのうち、別のシードが同じURLで 404/410(ページが無い)を
+    受けたものを返す。確認を省いているため、出典のページが消えても気づけない(2026-11-04: 児童扶養手当の出典が
+    404 になった同じURLを、ひとり親家庭支援が確認なしで載せ続けていた)。公開の判定は変えず、記録と警告だけ出す。"""
+    by_id = {s["id"]: s for s in seeds}
+    dead = {}
+    for sid, reason in sorted(failed.items()):
+        if sid in by_id and any(c in reason for c in DEAD_CODES):
+            dead.setdefault(by_id[sid]["source_url"], f"{sid}: {reason}")
+    return [{"id": s["id"], "url": s["source_url"], "evidence": dead[s["source_url"]]}
+            for s in seeds if s.get("assume_reachable") and s["source_url"] in dead]
+
+
 def decide_publish(prev_items, new_items, failed, legit, required_ids, checked_at):
     """公開用 seido.json(moradou.jp の診断ページが読む)を更新してよいかを決め、その記録を返す。
     前回の公開データと制度IDで比べ、欠けたデータで正常な公開データを上書きしない。
@@ -636,6 +652,7 @@ def main():
         prev_public = None
     required_ids = {s["id"] for s in SEEDS if s["id"].startswith(REQUIRED_PREFIX)}
     status = decide_publish(prev_public, items, failed, legit, required_ids, now)
+    status["source_dead_shared"] = shared_dead_sources(SEEDS, failed)
 
     # data/ は従来どおり毎回書く(市町村別ページ等が読む)。公開用は保留条件に当たらないときだけ書く
     for path in [OUT] + ([PUBLISH_OUT] if status["publish"] else []):
@@ -650,6 +667,9 @@ def main():
         print(f"::warning::公開用 seido.json の更新を保留しました(前回の公開データを残します): {' / '.join(status['reasons'])}")
     if status["required_missing"]:
         print(f"::warning::必須制度が公開データにありません: {', '.join(status['required_missing'])}")
+    if status["source_dead_shared"]:
+        print("::warning::出典のページが無い(404/410)可能性があります(到達性の確認を省いているため未検知): "
+              + ", ".join(f"{x['id']}({x['evidence']})" for x in status["source_dead_shared"][:20]))
     new_failed = [f"{x['id']}({x['reason']})" for x in status["failed"] if not x["in_previous_public"]]
     if new_failed:
         # 前回の公開データに無い制度の取得失敗は、公開用の更新を止めない(他の正常な制度の更新を妨げない)。警告として残す
