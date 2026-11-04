@@ -22,6 +22,8 @@ on:
       - "tests/diagnosis_monitor.test.mjs"
       - "tests/test_diagnosis_notify.py"
       - "tests/test_fetch_publish.py"
+      - "scripts/diagnosis_heartbeat.py"
+      - "tests/test_diagnosis_heartbeat.py"
       - ".github/workflows/diagnosis-monitor.yml"
       - ".github/workflows/diagnosis-monitor-watchdog.yml"
       - ".github/workflows/diagnosis-line-sender.yml"
@@ -35,6 +37,8 @@ on:
       - "tests/diagnosis_monitor.test.mjs"
       - "tests/test_diagnosis_notify.py"
       - "tests/test_fetch_publish.py"
+      - "scripts/diagnosis_heartbeat.py"
+      - "tests/test_diagnosis_heartbeat.py"
       - ".github/workflows/diagnosis-monitor.yml"
       - ".github/workflows/diagnosis-monitor-watchdog.yml"
       - ".github/workflows/diagnosis-line-sender.yml"
@@ -65,6 +69,8 @@ jobs:
         run: python3 -m unittest tests/test_diagnosis_notify.py
       - name: 公開用制度データの更新保留の単体テスト(取得失敗・欠落・必須制度・正当な終了)
         run: python3 -m unittest tests/test_fetch_publish.py
+      - name: 外部監視(ハートビート)の単体テスト(成功・失敗の判定・URLを表示しない・未設定なら送らない)
+        run: python3 -m unittest tests/test_diagnosis_heartbeat.py
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -114,6 +120,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/diagnosis_notify.py incident
 
+      # 外部監視(A案): 監視が動いていることを外部サービス(healthchecks.io など)へ知らせる。ハートビートが一定時間
+      # 届かなければ外部サービスが運営へ知らせるので、GitHub Actions のスケジュール起動が止まっても気づける。
+      # 通知先URLは Secret(DIAG_HEARTBEAT_URL)。URLそのものが鍵なので表示しない。未設定なら何もしない。
+      # 送れなくてもジョブは赤にしない。設計: docs/診断ページの外部監視_設計.md
+      - name: 外部監視へ生存を知らせる
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          HEARTBEAT_URL: ${{ secrets.DIAG_HEARTBEAT_URL }}
+          HANDLED: ${{ steps.state.outputs.handled }}
+        run: python3 scripts/diagnosis_heartbeat.py
+
   # checkout・Python・GitHub API の失敗で障害Issueの更新まで届かなかったときの予備。
   # リポジトリのファイルを使わず、ランナーに入っている gh だけで監視システムの故障をIssueに残す(送信要求は書かない)。
   fallback:
@@ -148,4 +167,21 @@ jobs:
             else
               echo "同じ故障が継続中。Issue #${n} への追記はしません"
             fi
+          fi
+
+      # 外部監視(A案)へ監視の故障を知らせる(checkout なしで動く)。URLは表示しない。未設定なら何もしない
+      - name: 外部監視へ監視の故障を知らせる
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          HEARTBEAT_URL: ${{ secrets.DIAG_HEARTBEAT_URL }}
+        run: |
+          if [ -z "${HEARTBEAT_URL}" ]; then echo "外部監視の通知先(DIAG_HEARTBEAT_URL)が未設定のため送りません"; exit 0; fi
+          case "${HEARTBEAT_URL}" in https://*) ;; *) echo "::warning::外部監視の通知先の形式が想定外のため送りません"; exit 0;; esac
+          if curl -fsS -m 10 --retry 2 -o /dev/null -A "moradou-diagnosis-heartbeat/1.0" \
+               --data "MONITOR_JOB_FAILED: 監視ジョブが障害Issueの更新まで届きませんでした" "${HEARTBEAT_URL%/}/fail" 2>/dev/null; then
+            echo "外部監視へ送りました: 監視の故障(失敗)"
+          else
+            echo "::warning::外部監視へ送れませんでした(外部サービス側が、届かないことで気づきます)"
           fi
