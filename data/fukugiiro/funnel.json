@@ -1,43 +1,43 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-26",
+  "updated_at": "2026-11-02",
   "period": "7d",
   "source": "ga4-data-api",
   "stages": [
     {
       "key": "shindan_start",
       "label": "診断開始",
-      "count": 13,
+      "count": 11,
       "cvr_from_prev": null,
       "drop_rate": null
     },
     {
       "key": "shindan_step_q2",
       "label": "Q2到達",
-      "count": 7,
-      "cvr_from_prev": 0.5384615384615384,
-      "drop_rate": 0.46153846153846156
+      "count": 6,
+      "cvr_from_prev": 0.5454545454545454,
+      "drop_rate": 0.4545454545454546
     },
     {
       "key": "shindan_step_q3",
       "label": "Q3到達",
-      "count": 5,
-      "cvr_from_prev": 0.7142857142857143,
-      "drop_rate": 0.2857142857142857
+      "count": 4,
+      "cvr_from_prev": 0.6666666666666666,
+      "drop_rate": 0.33333333333333337
     },
     {
       "key": "shindan_step_q4",
       "label": "Q4到達",
-      "count": 7,
-      "cvr_from_prev": 1.4,
-      "drop_rate": -0.3999999999999999
+      "count": 5,
+      "cvr_from_prev": 1.25,
+      "drop_rate": -0.25
     },
     {
       "key": "shindan_step_q5",
       "label": "Q5到達",
       "count": 5,
-      "cvr_from_prev": 0.7142857142857143,
-      "drop_rate": 0.2857142857142857
+      "cvr_from_prev": 1.0,
+      "drop_rate": 0.0
     },
     {
       "key": "shindan_complete",
@@ -49,9 +49,9 @@
     {
       "key": "line_add_click",
       "label": "LINE誘導クリック",
-      "count": 0,
-      "cvr_from_prev": 0.0,
-      "drop_rate": 1.0
+      "count": 1,
+      "cvr_from_prev": 0.3333333333333333,
+      "drop_rate": 0.6666666666666667
     }
   ],
   "engagement": {
@@ -64,17 +64,17 @@
     "jukyu_report_link_kit": 0,
     "jukyu_report_link_area": 0,
     "jukyu_report_link_life": 0,
-    "shindan_cta_click": 9,
+    "shindan_cta_click": 11,
     "shindan_redirect": 0
   },
   "key_rates": {
-    "finish_rate": 0.23076923076923078,
-    "line_cvr": 0.0,
+    "finish_rate": 0.2727272727272727,
+    "line_cvr": 0.3333333333333333,
     "zero_rate": 0.0
   },
   "worst_drop": {
     "stage": "line_add_click",
     "label": "診断完了(1件以上)→LINE誘導クリック",
-    "drop_rate": 1.0
+    "drop_rate": 0.6666666666666667
   }
 }

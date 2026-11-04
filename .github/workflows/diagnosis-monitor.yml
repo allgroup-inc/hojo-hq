@@ -1,0 +1,151 @@
+name: diagnosis-monitor
+
+# もらいわすれ堂の診断ページ(moradou.jp/shindan/)を実ブラウザで検査する。
+# 議事: docs/議事_20261103_診断ページ15分監視.md / 検査: scripts/diagnosis_monitor.mjs / 障害Issue: scripts/diagnosis_notify.py
+#
+# 15分間隔は設定値であり、障害を検知するまでの時間は保証しない。GitHub のスケジュール起動は遅れ・間引きがある
+# (2026-11-03 実測: 4時間おきの moradou-cutover が1日約3回・最大約12時間空いた)。実際の間隔は停止検知の要約に残る。
+#
+# このワークフローは LINE を送らない。障害Issue(診断ページの障害は diagnosis-monitor、監視システムの故障は
+# diagnosis-monitor-system)に送信要求を書き、送るのは diagnosis-line-sender.yml(ただ1つの送信担当)。
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+  # 検査本体・通知制御・公開用データの判定・診断ページを変えたら、ローカル配信と偽のGitHub/LINEで自己テストする
+  pull_request:
+    paths:
+      - "scripts/diagnosis_monitor.mjs"
+      - "scripts/diagnosis_notify.py"
+      - "scripts/fetch_fukugiiro.py"
+      - "tests/diagnosis_monitor.test.mjs"
+      - "tests/test_diagnosis_notify.py"
+      - "tests/test_fetch_publish.py"
+      - ".github/workflows/diagnosis-monitor.yml"
+      - ".github/workflows/diagnosis-monitor-watchdog.yml"
+      - ".github/workflows/diagnosis-line-sender.yml"
+      - "site/fukugiiro/shindan/**"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/diagnosis_monitor.mjs"
+      - "scripts/diagnosis_notify.py"
+      - "scripts/fetch_fukugiiro.py"
+      - "tests/diagnosis_monitor.test.mjs"
+      - "tests/test_diagnosis_notify.py"
+      - "tests/test_fetch_publish.py"
+      - ".github/workflows/diagnosis-monitor.yml"
+      - ".github/workflows/diagnosis-monitor-watchdog.yml"
+      - ".github/workflows/diagnosis-line-sender.yml"
+      - "site/fukugiiro/shindan/**"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: diagnosis-monitor-${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'live' || github.ref }}
+  cancel-in-progress: false
+
+env:
+  PLAYWRIGHT_VERSION: "1.56.1"
+
+jobs:
+  selftest:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    # Playwright 1.56 は ubuntu-latest(Ubuntu 26.04)の chromium に対応していない(2026-11-03 PR #566 のCIで確認)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: 通知制御の単体テスト(送信担当の排他・3ジョブの分離・優先順位・通数の上限・LINEの応答異常・再送・確認モード)
+        run: python3 -m unittest tests/test_diagnosis_notify.py
+      - name: 公開用制度データの更新保留の単体テスト(取得失敗・欠落・必須制度・正当な終了)
+        run: python3 -m unittest tests/test_fetch_publish.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Playwright
+        run: |
+          npm init -y > /dev/null
+          npm i --no-save "playwright@${PLAYWRIGHT_VERSION}"
+          npx playwright install --with-deps chromium
+      - name: 検査の自己テスト(正常系が通り、異常系がそれぞれ固有の理由で落ちること)
+        run: node --test tests/diagnosis_monitor.test.mjs
+
+  monitor:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      handled: ${{ steps.state.outputs.handled }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            scripts
+            .github
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Playwright
+        run: |
+          npm init -y > /dev/null
+          npm i --no-save "playwright@${PLAYWRIGHT_VERSION}"
+          npx playwright install --with-deps chromium
+
+      # 次の2つのステップ名は停止検知(diagnosis_notify.py の CHECK_STEP / INCIDENT_STEP)が参照する。変えるときは両方を直す
+      - name: Check diagnosis page
+        env:
+          DIAG_URL: "https://moradou.jp/shindan/"
+        run: node scripts/diagnosis_monitor.mjs
+
+      # 障害Issueの更新と送信要求の書き込みは同じ1回の書き込み(LINEは送信担当が送る)
+      - name: Update incident issue
+        id: state
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/diagnosis_notify.py incident
+
+  # checkout・Python・GitHub API の失敗で障害Issueの更新まで届かなかったときの予備。
+  # リポジトリのファイルを使わず、ランナーに入っている gh だけで監視システムの故障をIssueに残す(送信要求は書かない)。
+  fallback:
+    needs: monitor
+    if: always() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && needs.monitor.outputs.handled != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: 監視システムの故障をIssueに残す
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          MONITOR_RESULT: ${{ needs.monitor.result }}
+        run: |
+          set -euo pipefail
+          label=diagnosis-monitor-system
+          gh label create "$label" --color D93F0B --description "診断ページの監視システムの故障(ページの状態は不明)" 2>/dev/null || true
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          sig=MONITOR_JOB_FAILED
+          text="監視ジョブが障害Issueの更新まで届かずに終わりました(結果: ${MONITOR_RESULT})。checkout・Python・GitHub APIの失敗などが考えられます。この間、診断ページの状態は分かりません。 ${run_url}"
+          n=$(gh issue list --label "$label" --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -z "$n" ]; then
+            gh issue create --label "$label" --title "⚠️ 診断ページの監視が動いていません: ${sig}" \
+              --body "<!-- sig: ${sig} -->"$'\n'"自動検知: ${text}"
+          else
+            last=$(gh issue view "$n" --json body,comments \
+              --jq '[.body] + [.comments[].body] | map(capture("<!-- sig: (?<s>\\S+) -->").s? // empty) | last // ""')
+            if [ "$last" != "$sig" ]; then
+              gh issue comment "$n" --body "<!-- sig: ${sig} -->"$'\n'"${text}"
+            else
+              echo "同じ故障が継続中。Issue #${n} への追記はしません"
+            fi
+          fi
