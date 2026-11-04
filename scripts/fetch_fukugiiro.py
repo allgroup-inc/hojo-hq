@@ -476,6 +476,8 @@ except Exception as _e:  # モジュールが無くても既存シードで動�
 # 一時非公開エリア(2026-08-18 小柳さん指示・議事_20260818_沖縄市うるま市一時非公開.md)。
 # 管理は fg_seo.HIDDEN_MUNIS の1箇所(市独自制度・市町村ページ・一覧・診断すべてに効く)。
 from fg_seo import HIDDEN_MUNIS as HIDDEN_AREAS
+# 公式ページが無い(404/410)と確かめた出典のリンクだけを止める(制度は削除しない)。fg_source_status.py
+from fg_source_status import dead_sources, mark_unavailable
 
 # 廃止・終了した制度の根拠。シードから外すときは id をキーに日付・理由・出典を残す
 # (残さずに外すと「理由なく消えた」扱いになり、公開用の更新が保留される)
@@ -554,6 +556,7 @@ def decide_publish(prev_items, new_items, failed, legit, required_ids, checked_a
 def main():
     now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
     items, skipped = [], []
+    checked_ok = set()  # この回の収集で実際に開けた(HTTP 200)出典URL
     failed, legit = {}, {k: f"廃止記録({v.get('date', '日付なし')}: {v.get('reason', '')} / {v.get('source', '')})" for k, v in RETIRED.items()}
     for seed in SEEDS:
         if seed.get("area") in HIDDEN_AREAS:
@@ -583,6 +586,8 @@ def main():
             failed[seed["id"]] = f"URL到達不可({detail})"
             print(f"SKIP(unreachable): {seed['name']} {url} {detail}")
             continue
+        if not seed.get("assume_reachable"):
+            checked_ok.add(url)
         item = dict(seed)
         item.update({
             # 金額・締切は原則「要確認」だが、一次ソース照合済みで確定した制度は seed 側に持たせる
@@ -616,6 +621,11 @@ def main():
             item["verified_at"] = old.get("verified_at")
             item["verified_by"] = old.get("verified_by")
             item["status"] = old.get("status", "検証済み")
+
+    # 出典が無い(404/410)と確かめた制度は、掲載を続けたまま出典リンクだけを止める印を付ける
+    pending = mark_unavailable(items, dead_sources(SEEDS, failed, checked_ok, now))
+    if pending:
+        print(f"::warning::公式ページを確認中として出典リンクを止めた制度(掲載は続ける): {', '.join(pending[:20])}")
 
     data = {"updated_at": now, "count": len(items), "items": items}
     errors, warns = validate(data)

@@ -29,8 +29,13 @@ jobs:
       stem: ${{ steps.pick.outputs.stem }}
       image: ${{ steps.pick.outputs.image }}
       caption_head: ${{ steps.pick.outputs.caption_head }}
+      digest: ${{ steps.pick.outputs.pkg_digest }}
+      created: ${{ steps.pick.outputs.pkg_created }}
+      seido: ${{ steps.pick.outputs.seido }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@v7
         with:
@@ -38,7 +43,16 @@ jobs:
 
       - name: 本日の投稿素材を選定
         id: pick
-        run: python scripts/post_social.py --preview >> "$GITHUB_OUTPUT"
+        # 承認対象(本文・画像の指紋・コミットに固定した画像URL・期限)を作り、その指紋を出す
+        # (2026-11-03 安全対策 M1)。制度情報の確認(M2)が済んでいなければ seido=ng になる
+        run: |
+          python scripts/post_social.py --preview --preview-file "$RUNNER_TEMP/preview.txt" >> "$GITHUB_OUTPUT"
+          {
+            d="EOF_$(python3 -c 'import secrets;print(secrets.token_hex(16))')"
+            echo "detail<<$d"
+            cat "$RUNNER_TEMP/preview.txt"
+            echo "$d"
+          } >> "$GITHUB_OUTPUT"
 
       # humanizer自動検査(2026-08-17 小柳さん決裁・決裁キュー14.c)。
       # 報告のみで投稿は止めない: 結果を下のプレビューLINEに1行添えて、判断は承認者に委ねる。
@@ -56,6 +70,7 @@ jobs:
           STEM: ${{ steps.pick.outputs.stem }}
           HEAD: ${{ steps.pick.outputs.caption_head }}
           HCHECK: ${{ steps.hcheck.outputs.hcheck }}
+          DETAIL: ${{ steps.pick.outputs.detail }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           MSG="🖼【ミカタ】本日のSNS投稿デザイン確認
@@ -63,6 +78,9 @@ jobs:
           ☝️上の画像が本日の投稿です
           文頭: ${HEAD}
           ${HCHECK}
+
+          ━━━ 承認する中身(これと違うものは投稿されません) ━━━
+          ${DETAIL}
 
           ━━━ 投稿してOKなら ━━━
           ①下のリンクを開く
@@ -84,6 +102,7 @@ jobs:
 
   post:
     needs: preview
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     # 小柳さんの承認(Required reviewers)が下りるまでここで待機する
     environment: sns-approval
@@ -109,10 +128,16 @@ jobs:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          SNS_DEST_FP_MIKATA: ${{ vars.SNS_DEST_FP_MIKATA }}
+          STEM: ${{ needs.preview.outputs.stem }}
+          DIGEST: ${{ needs.preview.outputs.digest }}
+          CREATED: ${{ needs.preview.outputs.created }}
+        # --approved-digest / --approved-created で「承認した中身」を固定する。投稿の直前に
+        # 作り直して照らし合わせ、画像は固定URLから取り直して指紋を確かめる(2026-11-03 M1)。
         # --stem で「プレビューで承認された素材」を名指しする。渡さないと投稿側が
         # 再選定してしまい、承認から日付をまたいだ場合に別の投稿が出る
         # (2026-08-14金 カルーセル承認 → 08-15土 通常投稿。監査2026-W34 §4)。
-        run: python scripts/post_social.py --stem "${{ needs.preview.outputs.stem }}"
+        run: python scripts/post_social.py --stem "$STEM" --approved-digest "$DIGEST" --approved-created "$CREATED"
 
       # 二重投稿防止のstate(data/social_post_state.json)は投稿の成否に関わらず
       # 必ずコミットする(片方だけ成功→job再実行でもう片方が二重投稿されるのを防ぐため)。

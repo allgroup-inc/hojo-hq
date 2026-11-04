@@ -34,6 +34,13 @@ on:
       - "data/fukugiiro/ig_neta.json"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
+      # 公式ページが無い(404/410)出典のリンクだけを止める表示(fg_source_status.py)とその出力先
+      - "scripts/fg_source_status.py"
+      - "scripts/generate_kit_pages.py"
+      - "scripts/generate_life_pages.py"
+      - "scripts/generate_area_pages.py"
+      - "tests/test_source_status.py"
+      - "tests/source_unavailable.test.mjs"
   pull_request:
     paths:
       - "data/fukugiiro/**"
@@ -67,6 +74,13 @@ on:
       - "data/fukugiiro/ig_neta.json"
       - "docs/**"
       - ".github/workflows/fukugiiro-fetch.yml"
+      # 公式ページが無い(404/410)出典のリンクだけを止める表示(fg_source_status.py)とその出力先
+      - "scripts/fg_source_status.py"
+      - "scripts/generate_kit_pages.py"
+      - "scripts/generate_life_pages.py"
+      - "scripts/generate_area_pages.py"
+      - "tests/test_source_status.py"
+      - "tests/source_unavailable.test.mjs"
   workflow_dispatch: {}
 
 # 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
@@ -146,3 +160,28 @@ jobs:
 
       - name: 診断ロジック トラジェクトリeval(ミチビキ/ケンショウ ゲート)
         run: node --test tests/shindan.test.mjs
+
+  # 公式ページが無い(404/410)出典のリンクだけを止める表示を、生成ページと実ブラウザで確かめる。
+  # Playwright 1.56 は ubuntu-latest(Ubuntu 26.04)の chromium に対応していないため 24.04 で動かす(PR #566 と同じ)
+  source-link-selftest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: 出典リンクの一時停止(制度は削除しない・URLは書き換えない・確認できたURLだけ止める)
+        run: python -m unittest tests/test_source_status.py
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Install Playwright
+        run: |
+          npm init -y > /dev/null
+          npm i --no-save "playwright@1.56.1"
+          npx playwright install --with-deps chromium
+      - name: 診断ページ・トップの表示を実ブラウザで確かめる
+        run: node --test tests/source_unavailable.test.mjs
