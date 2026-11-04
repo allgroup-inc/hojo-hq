@@ -5,24 +5,20 @@
    "id": "05a11131-b194-4ba8-acba-eb15d44487b6",
    "issue": 578,
    "at": "2026-11-04T08:58:11Z",
-   "status": "sending"
+   "status": "sent"
   }
  ],
- "done": {},
+ "done": {
+  "05a11131-b194-4ba8-acba-eb15d44487b6": {
+   "state": "sent",
+   "at": "2026-11-04T08:58:34Z"
+  }
+ },
  "attempts": {
   "05a11131-b194-4ba8-acba-eb15d44487b6": {
    "first_at": "2026-11-04T08:58:11Z",
    "count": 1
   }
  },
- "inflight": {
-  "id": "05a11131-b194-4ba8-acba-eb15d44487b6",
-  "issue": 578,
-  "label": "diagnosis-data-hold",
-  "text": "⚠️【もらいわすれ堂】診断ページの制度データに注意が必要です\n必須制度(国の制度)が公開データにありません: fk-kuni-jidofuyoteate(収集 2026-11-04 12:26)",
-  "requested_at": "2026-11-04T08:57:59Z",
-  "at": "2026-11-04T08:58:11Z",
-  "run": "41803579726",
-  "fresh": true
- }
+ "inflight": null
 }
