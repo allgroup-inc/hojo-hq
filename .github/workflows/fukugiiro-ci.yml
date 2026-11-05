@@ -38,6 +38,7 @@ on:
       - "scripts/fg_source_status.py"
       - "scripts/generate_kit_pages.py"
       - "scripts/generate_life_pages.py"
+      - "tests/top_page_layouts.test.mjs"
       - "scripts/generate_area_pages.py"
       - "tests/test_source_status.py"
       - "tests/source_unavailable.test.mjs"
@@ -78,6 +79,7 @@ on:
       - "scripts/fg_source_status.py"
       - "scripts/generate_kit_pages.py"
       - "scripts/generate_life_pages.py"
+      - "tests/top_page_layouts.test.mjs"
       - "scripts/generate_area_pages.py"
       - "tests/test_source_status.py"
       - "tests/source_unavailable.test.mjs"
@@ -185,3 +187,6 @@ jobs:
           npx playwright install --with-deps chromium
       - name: 診断ページ・トップの表示を実ブラウザで確かめる
         run: node --test tests/source_unavailable.test.mjs
+      # moradou.jp と旧URLの2つの配信構成で、トップと診断ページが制度データを読めるか(2026-11-02・11-05 の再発防止)
+      - name: 配信構成どおりに組み立てて、トップ・診断ページの読み込みを実ブラウザで確かめる
+        run: node --test tests/top_page_layouts.test.mjs
