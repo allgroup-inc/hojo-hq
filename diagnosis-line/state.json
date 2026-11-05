@@ -6,6 +6,12 @@
    "issue": 578,
    "at": "2026-11-04T08:58:11Z",
    "status": "sent"
+  },
+  {
+   "id": "ab7207cc-f69c-4d92-ad55-d2872f5b2b38",
+   "issue": 589,
+   "at": "2026-11-05T16:24:13Z",
+   "status": "sending"
   }
  ],
  "done": {
@@ -18,7 +24,20 @@
   "05a11131-b194-4ba8-acba-eb15d44487b6": {
    "first_at": "2026-11-04T08:58:11Z",
    "count": 1
+  },
+  "ab7207cc-f69c-4d92-ad55-d2872f5b2b38": {
+   "first_at": "2026-11-05T16:24:13Z",
+   "count": 1
   }
  },
- "inflight": null
+ "inflight": {
+  "id": "ab7207cc-f69c-4d92-ad55-d2872f5b2b38",
+  "issue": 589,
+  "label": "diagnosis-monitor-system",
+  "text": "⚠️【もらいわすれ堂】診断ページの監視が動いていません(ページの状態は不明)\n監視が約474分起動していません(最終起動 2026-11-05T08:29:08Z)",
+  "requested_at": "2026-11-05T16:23:59Z",
+  "at": "2026-11-05T16:24:13Z",
+  "run": "42064044076",
+  "fresh": true
+ }
 }
