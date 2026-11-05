@@ -92,6 +92,14 @@ function handleLineEvent_(event) {
       withUserFacingErrorReply_(event.replyToken, function () { handleAudioMessage_(event); });
       return;
     }
+    // 録音として受け付けられないファイル・動画は、黙って捨てずに理由を返す(2026-11-05 福田さん: 分けた録音を送っても無反応)。
+    // ファイル名には会社名が入ることがあるため、記録には拡張子だけを残す
+    if (event.message.type === "file" || event.message.type === "video") {
+      var ext = event.message.fileName ? String(event.message.fileName).split(".").pop().toLowerCase() : "(なし)";
+      console.log("LINEで録音として受け付けられないファイルが届きました(種類 " + event.message.type + "・拡張子 " + ext + ")");
+      if (event.replyToken) lineReply_(event.replyToken, [GlowLineVoiceLogContent.buildUnsupportedFileMessage(event.message.fileName)]);
+      return;
+    }
     // 確認待ちの録音があるときの文字入力は、会社名の返事として受け付ける(2026-10-28 福田さんの使い方に合わせて追加)
     if (event.message.type === "text") {
       withUserFacingErrorReply_(event.replyToken, function () { handleTypedCompanyName_(event); });
@@ -109,10 +117,8 @@ function handleLineEvent_(event) {
  * ファイルメッセージが音声ファイルかどうかを判定する(Android対応)。
  */
 function isAudioFile_(message) {
-  if (!message.fileName) return false;
-  var audioExtensions = ["m4a", "mp3", "wav", "ogg", "aac"];
-  var ext = (message.fileName.split(".").pop() || "").toLowerCase();
-  return audioExtensions.indexOf(ext) !== -1;
+  // 受け付ける拡張子は lineVoiceLogContent.js(ドライブの受付フォルダと同じ一覧)にまとめた
+  return GlowLineVoiceLogContent.isAudioFileName(message.fileName);
 }
 
 /**
@@ -847,6 +853,61 @@ function handleLinePostback_(event) {
     handleFinalConfirmPostback_(ss, replyToken, record, parsed.value);
     return;
   }
+  if (parsed.action === GlowLineVoiceLogContent.POSTBACK_ACTIONS.SET_ROUTE) {
+    handleRoutePostback_(ss, replyToken, record, parsed.value);
+    return;
+  }
+}
+
+/**
+ * 2026-11-05 WLD-02 ③B: 録音を確定した後に出す「流入経路」のボタンが押されたとき。
+ * 会社の流入経路を選んだものに置き換え、変えた前後を対応履歴ログ(種別「関係メモ更新」)に残す。
+ * 確定した録音の会社だけを対象にする(確定前の録音や、別の会社は変えない)。
+ */
+function handleRoutePostback_(ss, replyToken, record, value) {
+  if (record["ステータス"] !== "確定" || !record["企業ID"]) {
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildAlreadyHandledMessage()]);
+    return;
+  }
+  var companySheet = ss.getSheetByName(GlowSchema.COMPANY_MASTER_SHEET_NAME);
+  var logSheet = ss.getSheetByName(GlowSchema.INTERACTION_LOG_SHEET_NAME);
+  var companies = companySheet ? readCompanyRecords_(companySheet) : [];
+  var company = companies.filter(function (c) { return c["企業ID"] === record["企業ID"]; })[0];
+  var plan = company ? GlowLineVoiceLogContent.planRouteChange(company["流入ルート"], value) : null;
+  if (!plan || !logSheet) {
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildProcessingErrorMessage()]);
+    return;
+  }
+  if (!plan.changed) {
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildRouteUnchangedMessage(plan.after)]);
+    return;
+  }
+  try {
+    applyCompanyUpdatesFromVoiceLog_(companySheet, record["企業ID"], { "流入ルート": plan.after.join("、") });
+  } catch (error) {
+    Logger.log("流入経路の変更に失敗しました(処理ID " + record["処理ID"] + "): " + error);
+    lineReply_(replyToken, [GlowLineVoiceLogContent.buildProcessingErrorMessage()]);
+    return;
+  }
+  var staffName = resolveStaffNameByLineUserId_(ss, record["LINEユーザーID"]) || "";
+  var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  var logRow = GlowLineVoiceLogContent.buildInteractionLogRow(
+    "H-" + Utilities.getUuid(), record["企業ID"], todayString, staffName,
+    "関係メモ更新", "未接触", GlowLineVoiceLogContent.buildRouteChangeMemo(plan.before, plan.after), ""
+  );
+  var lock = LockService.getDocumentLock();
+  if (lock.tryLock(30000)) {
+    try {
+      logSheet.getRange(logSheet.getLastRow() + 1, 1, 1, GlowSchema.INTERACTION_LOG_HEADERS.length).setValues([logRow]);
+    } catch (error) {
+      Logger.log("流入経路の変更を対応履歴ログに残せませんでした(処理ID " + record["処理ID"] + "): " + error);
+    } finally {
+      lock.releaseLock();
+    }
+  } else {
+    Logger.log("流入経路の変更を対応履歴ログに残せませんでした(ロックを取れず・処理ID " + record["処理ID"] + ")");
+  }
+  lineReply_(replyToken, [GlowLineVoiceLogContent.buildRouteChangedMessage(plan.after)]);
 }
 
 /** 会社名の文字入力を受け付けるステータス(会社の選択・新規登録の確認・最終確認のいずれかを待っている) */
@@ -1119,6 +1180,8 @@ function handleFinalConfirmPostback_(ss, replyToken, record, answer) {
     } catch (error) {
       Logger.log("企業マスタへの見込み反映に失敗しました(処理ID " + record["処理ID"] + "): " + error);
     }
+    // 2026-11-05 WLD-02 ③B: 流入経路を確かめてもらう(ボタンは最後のメッセージにだけ出るため、最後に置く)
+    replySpecs.push(GlowLineVoiceLogContent.buildRoutePrompt(record["処理ID"], company["流入ルート"]));
   }
   lineReply_(replyToken, replySpecs);
 }
