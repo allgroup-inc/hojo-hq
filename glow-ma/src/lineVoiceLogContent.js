@@ -165,8 +165,63 @@
   var POSTBACK_ACTIONS = {
     SELECT_COMPANY: "selectCompany",
     NEW_COMPANY_CONFIRM: "newCompanyConfirm",
-    FINAL_CONFIRM: "finalConfirm"
+    FINAL_CONFIRM: "finalConfirm",
+    SET_ROUTE: "setRoute"
   };
+
+  // 2026-11-05 WLD-02 ③B: 録音を確定した後に、会社の流入経路を確認する人が選び直せるようにする。
+  // 「未確認にする」は経路を空に戻す(わからないときに、誤った経路を残さない)
+  var ROUTE_CHOICES = [
+    { value: "1", route: "①紹介", label: "①紹介" },
+    { value: "2", route: "②手紙DM", label: "②手紙DM" },
+    { value: "3", route: "③ミカタ経由", label: "③ミカタ経由" },
+    { value: "4", route: "④世界の架け橋(Alibaba)", label: "④世界の架け橋" },
+    { value: "0", route: "", label: "未確認にする" }
+  ];
+
+  function routesOf(raw) {
+    if (Array.isArray(raw)) return raw.filter(function (r) { return String(r || "").trim(); });
+    var text = String(raw === null || raw === undefined ? "" : raw).trim();
+    return text ? text.split("、").map(function (r) { return r.trim(); }).filter(Boolean) : [];
+  }
+
+  function routeLabel(routes) {
+    return routes.length ? routes.join("・") : "未確認";
+  }
+
+  function buildRoutePrompt(processId, currentRoutes) {
+    var routes = routesOf(currentRoutes);
+    return {
+      text: "この会社の流入経路(どこから来た会社か): " + routeLabel(routes) + "\n" +
+        "違っていれば、下から選んでください。合っていれば、そのままで大丈夫です。",
+      options: ROUTE_CHOICES.map(function (choice) {
+        return { label: choice.label, data: buildPostbackData(POSTBACK_ACTIONS.SET_ROUTE, processId, choice.value) };
+      })
+    };
+  }
+
+  /* 選ばれた経路で、会社の流入経路をどう変えるか。選んだ経路に置き換える(選び直し=訂正のため)。
+   * 戻り値: null(読めない選択) / { changed, before: [...], after: [...] } */
+  function planRouteChange(currentRoutes, value) {
+    var choice = ROUTE_CHOICES.filter(function (c) { return c.value === String(value); })[0];
+    if (!choice) return null;
+    var before = routesOf(currentRoutes);
+    var after = choice.route ? [choice.route] : [];
+    var changed = before.length !== after.length || before.some(function (r, i) { return r !== after[i]; });
+    return { changed: changed, before: before, after: after };
+  }
+
+  function buildRouteChangeMemo(before, after) {
+    return "流入経路を「" + routeLabel(before) + "」から「" + routeLabel(after) + "」に変更(録音の確認で)";
+  }
+
+  function buildRouteChangedMessage(after) {
+    return "流入経路を「" + routeLabel(after) + "」にしました。";
+  }
+
+  function buildRouteUnchangedMessage(after) {
+    return "流入経路は「" + routeLabel(after) + "」のままです。";
+  }
 
   var NOT_FOUND_VALUE = "NOT_FOUND";
   var YES_VALUE = "YES";
@@ -552,6 +607,12 @@
     buildTypedNameHelpMessage: buildTypedNameHelpMessage,
     buildDiscardMessage: buildDiscardMessage,
     buildProcessingErrorMessage: buildProcessingErrorMessage,
+    ROUTE_CHOICES: ROUTE_CHOICES,
+    buildRoutePrompt: buildRoutePrompt,
+    planRouteChange: planRouteChange,
+    buildRouteChangeMemo: buildRouteChangeMemo,
+    buildRouteChangedMessage: buildRouteChangedMessage,
+    buildRouteUnchangedMessage: buildRouteUnchangedMessage,
     AUDIO_FILE_EXTENSIONS: AUDIO_FILE_EXTENSIONS,
     isAudioFileName: isAudioFileName,
     buildUnsupportedFileMessage: buildUnsupportedFileMessage,

@@ -146,7 +146,7 @@ test("見出しが「面談日」でも日付として読む", () => {
 test("取込済の表は、標準の見出しの順にそろえ、空行を除いて1枚へまとめる形にする", () => {
   const rows = h.toArchiveRows(["電話番号", "企業名", "架電日"], [["098-111-2222", "株式会社テスト建設", "10/1"], ["", "", ""]], "2026-10-30 09:35");
   assert.equal(rows.length, 1);
-  assert.deepEqual(rows[0], ["2026-10-30 09:35", "株式会社テスト建設", "098-111-2222", "", "10/1", "", "", "", "", "", ""]);
+  assert.deepEqual(rows[0], ["2026-10-30 09:35", "株式会社テスト建設", "098-111-2222", "", "10/1", "", "", "", "", "", "", ""]);
   assert.equal(h.ARCHIVE_FIELDS.length + 1, rows[0].length);
 });
 
@@ -161,7 +161,8 @@ test("メール送信日の列があれば、対応履歴に「メール送信�
   assert.ok(plan.logs[0].内容メモ.includes("補助金の案内"));
   const schema = require("../glow-ma/src/schema.js");
   plan.logs.forEach((l) => assert.ok(schema.INTERACTION_TYPES.includes(l.種別), l.種別));
-  assert.equal(h.ARCHIVE_FIELDS[h.ARCHIVE_FIELDS.length - 1], "メール送信日", "列は末尾に足す");
+  // 列は末尾に足す(2026-11-05 に流入ルートをメール送信日の後ろへ足した)
+  assert.deepEqual(h.ARCHIVE_FIELDS.slice(-2), ["メール送信日", "流入ルート"], "列は末尾に足す");
 });
 
 test("取り込み時刻は毎日8時と22時(日本時間)。時刻をまたぐと値が変わる", () => {
@@ -188,4 +189,69 @@ test("取り込みのあいだに書き換えられた行・書き足された�
   assert.deepEqual(h.changedRows(planned, planned), []);
   const d = new Date(2026, 9, 28);
   assert.deepEqual(h.changedRows([["X", d]], [["X", new Date(d.getTime())]]), [], "同じ日付(Date)は変わっていない扱い");
+});
+
+// ---- 2026-11-05 WLD-02: 流入経路(③A・④) ----
+const ROUTE_HEADER = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "備考", "流入ルート"];
+
+test("流入経路の書き方を読む(丸数字・言葉・未確認)", () => {
+  assert.deepEqual(h.normalizeRoute("④"), { route: "④世界の架け橋(Alibaba)", known: true });
+  assert.deepEqual(h.normalizeRoute("世界の架け橋"), { route: "④世界の架け橋(Alibaba)", known: true });
+  assert.deepEqual(h.normalizeRoute("アリババ"), { route: "④世界の架け橋(Alibaba)", known: true });
+  assert.deepEqual(h.normalizeRoute("①紹介"), { route: "①紹介", known: true });
+  assert.deepEqual(h.normalizeRoute("手紙"), { route: "②手紙DM", known: true });
+  assert.deepEqual(h.normalizeRoute("ミカタ"), { route: "③ミカタ経由", known: true });
+  assert.deepEqual(h.normalizeRoute(""), { route: "", known: true });
+  assert.deepEqual(h.normalizeRoute("未確認"), { route: "", known: true });
+  assert.deepEqual(h.normalizeRoute("展示会"), { route: "", known: false });
+});
+
+test("面談・入電だけの新しい会社は、②手紙DMを付けず未確認(空)で登録する", () => {
+  const plan = h.planHistoryImport(ROUTE_HEADER, [
+    ["株式会社めんだん", "098-555-0001", "", "2026-11-04", "面談", "", ""],
+    ["株式会社にゅうでん", "098-555-0002", "", "2026-11-04", "入電", "", ""],
+  ], existing(), [], OPTS);
+  assert.deepEqual(plan.newRecords.map((r) => r.流入ルート), [[], []]);
+});
+
+test("手紙を送った新しい会社は、これまでどおり②手紙DM", () => {
+  const plan = h.planHistoryImport(ROUTE_HEADER, [["株式会社てがみ", "098-555-0003", "2026-11-01", "", "", "", ""]], existing(), [], OPTS);
+  assert.deepEqual(plan.newRecords[0].流入ルート, ["②手紙DM"]);
+});
+
+test("流入ルートの列に④と書けば、新しい会社に④を付ける(手紙もあれば両方)", () => {
+  const plan = h.planHistoryImport(ROUTE_HEADER, [
+    ["株式会社せかい", "098-555-0004", "", "2026-11-04", "面談", "", "④世界の架け橋"],
+    ["株式会社りょうほう", "098-555-0005", "2026-11-01", "", "", "", "④"],
+  ], existing(), [], OPTS);
+  assert.deepEqual(plan.newRecords[0].流入ルート, ["④世界の架け橋(Alibaba)"]);
+  assert.deepEqual(plan.newRecords[1].流入ルート, ["②手紙DM", "④世界の架け橋(Alibaba)"]);
+});
+
+test("既にある会社には経路を足すだけで、付いている経路は消さない", () => {
+  const recs = existing();
+  h.planHistoryImport(ROUTE_HEADER, [["有限会社うみかぜ", "", "", "2026-11-04", "面談", "", "④"]], recs, [], OPTS);
+  assert.deepEqual(recs[1].流入ルート, ["①紹介", "④世界の架け橋(Alibaba)"]);
+});
+
+test("面談・入電だけの行では、既にある会社に②手紙DMを足さない", () => {
+  const recs = existing();
+  h.planHistoryImport(ROUTE_HEADER, [["株式会社テスト建設", "098-111-2222", "", "2026-11-04", "入電", "", ""]], recs, [], OPTS);
+  assert.deepEqual(recs[0].流入ルート, []);
+});
+
+test("読めない流入ルートは、未確認のまま取り込んで知らせる(行は捨てない)", () => {
+  const plan = h.planHistoryImport(ROUTE_HEADER, [["株式会社てんじかい", "098-555-0006", "", "2026-11-04", "面談", "", "展示会"]], existing(), [], OPTS);
+  assert.equal(plan.newRecords.length, 1);
+  assert.deepEqual(plan.newRecords[0].流入ルート, []);
+  assert.equal(plan.skipped.length, 0);
+  assert.equal(plan.warnings.length, 1);
+  assert.ok(plan.warnings[0].reason.includes("未確認"));
+  assert.equal(plan.summary.routeUnreadable, 1);
+});
+
+test("流入ルートの列が無い取り込みタブ(これまでの形)でも、そのまま動く", () => {
+  const plan = h.planHistoryImport(HEADER, [["株式会社あたらし", "098-999-0000", "2026-09-01", "", "", ""]], existing(), [], OPTS);
+  assert.deepEqual(plan.newRecords[0].流入ルート, ["②手紙DM"]);
+  assert.deepEqual(plan.warnings, []);
 });
