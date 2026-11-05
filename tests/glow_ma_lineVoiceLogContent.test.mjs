@@ -514,3 +514,21 @@ test("buildNewCompanyOrAskNamePrompt: 会社名が分からないときは新規
   const confirm = lineVoiceLogContent.buildNewCompanyOrAskNamePrompt("P-1", "株式会社テスト商事");
   assert.equal(confirm.options.length, 2);
 });
+
+test("LINEで録音として受け付ける拡張子(大文字も可)", () => {
+  for (const name of ["a.m4a", "b.MP3", "c.wav", "d.ogg", "e.aac", "訪問_その1.M4A"]) {
+    assert.equal(lineVoiceLogContent.isAudioFileName(name), true, name);
+  }
+  for (const name of ["a.mp4", "f.flac", "b.pdf", "c.jpg", "noext", "", undefined, "d.m4a.zip"]) {
+    assert.equal(lineVoiceLogContent.isAudioFileName(name), false, String(name));
+  }
+});
+
+test("受け付けられないファイルには、理由と送り方を返す(ファイル名そのものは返さない)", () => {
+  const msg = lineVoiceLogContent.buildUnsupportedFileMessage("株式会社テスト_その2.mp4");
+  assert.ok(msg.includes("(.mp4)"));
+  assert.ok(msg.includes("m4a"));
+  assert.ok(msg.includes("受付フォルダ"));
+  assert.ok(!msg.includes("株式会社テスト"));
+  assert.ok(lineVoiceLogContent.buildUnsupportedFileMessage(undefined).startsWith("このファイルは"));
+});

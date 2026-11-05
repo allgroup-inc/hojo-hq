@@ -92,6 +92,14 @@ function handleLineEvent_(event) {
       withUserFacingErrorReply_(event.replyToken, function () { handleAudioMessage_(event); });
       return;
     }
+    // 録音として受け付けられないファイル・動画は、黙って捨てずに理由を返す(2026-11-05 福田さん: 分けた録音を送っても無反応)。
+    // ファイル名には会社名が入ることがあるため、記録には拡張子だけを残す
+    if (event.message.type === "file" || event.message.type === "video") {
+      var ext = event.message.fileName ? String(event.message.fileName).split(".").pop().toLowerCase() : "(なし)";
+      console.log("LINEで録音として受け付けられないファイルが届きました(種類 " + event.message.type + "・拡張子 " + ext + ")");
+      if (event.replyToken) lineReply_(event.replyToken, [GlowLineVoiceLogContent.buildUnsupportedFileMessage(event.message.fileName)]);
+      return;
+    }
     // 確認待ちの録音があるときの文字入力は、会社名の返事として受け付ける(2026-10-28 福田さんの使い方に合わせて追加)
     if (event.message.type === "text") {
       withUserFacingErrorReply_(event.replyToken, function () { handleTypedCompanyName_(event); });
@@ -109,10 +117,8 @@ function handleLineEvent_(event) {
  * ファイルメッセージが音声ファイルかどうかを判定する(Android対応)。
  */
 function isAudioFile_(message) {
-  if (!message.fileName) return false;
-  var audioExtensions = ["m4a", "mp3", "wav", "ogg", "aac"];
-  var ext = (message.fileName.split(".").pop() || "").toLowerCase();
-  return audioExtensions.indexOf(ext) !== -1;
+  // 受け付ける拡張子は lineVoiceLogContent.js(ドライブの受付フォルダと同じ一覧)にまとめた
+  return GlowLineVoiceLogContent.isAudioFileName(message.fileName);
 }
 
 /**
