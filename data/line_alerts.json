@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-05 08:08",
+ "generated_at": "2026-11-05 13:48",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 11,
- "count": 28,
+ "count": 29,
  "items": [
   {
    "id": "a0WJ200000CDdjfMAD",
@@ -95,6 +95,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 1000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYbNMAX",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WfQ000003tibNUAQ",
+   "name": "「再生可能エネルギー技術の多様化に関する動向調査」の公募",
+   "deadline": "2026-11-25",
+   "days_left": 20,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003tibNUAQ",
    "tag": "nationwide"
   },
   {
