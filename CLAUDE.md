@@ -89,6 +89,14 @@ CVはLINE登録の1点のみ(締切アラートが登録特典)。
 - Skill の自動更新はしない(Skill の検証・Gate は Phase 3 以降・別承認)
 - Baseline Debt: `python3 scripts/baseline_debt.py --compare` が SAME/IMPROVED であること(新しい赤を増やさない)。詳細は docs/wikiskill/README.md
 
+## WikiSkill停止中の手動引き継ぎ(2026-11-05 追加)
+`HOJO_MEMORY_OFF=1` または `.claude/memory.off` で WikiSkill を止めている間は、新しいチャットに過去の決定・失敗が**自動では届かない**。そのため作業前に次を自分で確認する。
+1. `docs/全体マップ.md` — どのチャット・文書・場所に何があるか(入口)
+2. `docs/失敗台帳.md` — 同じ失敗を繰り返さないため
+3. 必要に応じて `python3 scripts/memory_bootstrap.py query "<作業の語>"` — 関連する議事・失敗台帳・再発防止メモを読み取り専用で検索(記録は書かない)
+
+`docs/引き継ぎ台帳.md` は2026-07-29で更新停止。最新は上の現行文書と本書(CLAUDE.md)で確認する。WikiSkill の再開は小柳さんの承認を得てから行う。
+
 ## マルチAI連携(2026-08-06 小柳さん決裁)
 - 原文照合(verify-sources)は Claude に加え **Gemini でも独立照合するダブルチェック方式**。どちらか一方が矛盾を検知したら NG(要確認)扱い(Secrets: GEMINI_API_KEY。未設定時は従来のClaude単独照合)
 - 他AIの出力も誤り得る。最終根拠は常に原文URL(絶対ルール1)。**AI同士の一致は断定の必要条件であって十分条件ではない**
