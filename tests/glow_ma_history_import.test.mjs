@@ -255,3 +255,20 @@ test("流入ルートの列が無い取り込みタブ(これまでの形)でも
   assert.deepEqual(plan.newRecords[0].流入ルート, ["②手紙DM"]);
   assert.deepEqual(plan.warnings, []);
 });
+
+test("メール送信だけの行は、新しい会社を未確認(空)で登録する(11/5 小柳さん確定)", () => {
+  const header = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "備考", "メール送信日", "流入ルート"];
+  const plan = h.planHistoryImport(header, [["株式会社めーる", "098-555-0007", "", "", "", "", "2026-11-04", ""]], existing(), [], OPTS);
+  assert.deepEqual(plan.newRecords[0].流入ルート, []);
+  assert.deepEqual(plan.logs.map((l) => l.種別), ["メール送信"]);
+});
+
+test("メール送信だけの行・未確認と書いた行では、既にある会社の正しい経路を変えない", () => {
+  const recs = existing();
+  const header = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "備考", "メール送信日", "流入ルート"];
+  h.planHistoryImport(header, [
+    ["有限会社うみかぜ", "", "", "", "", "", "2026-11-04", ""],
+    ["有限会社うみかぜ", "", "", "", "", "", "2026-11-05", "未確認"],
+  ], recs, [], OPTS);
+  assert.deepEqual(recs[1].流入ルート, ["①紹介"]);
+});
