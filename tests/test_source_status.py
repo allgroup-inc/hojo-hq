@@ -107,6 +107,10 @@ class Pages(unittest.TestCase):
         with open(os.path.join(ROOT, "data", "fukugiiro", "seido.json"), encoding="utf-8") as f:
             cls.db = json.load(f)
         cls.items = [i for i in cls.db["items"] if i.get("area") not in kit.HIDDEN_MUNIS]
+        # 実データには収集の結果として印が付く(2026-11-04〜 ひとり親家庭支援)。
+        # 「印の無い制度」の比較が実データの状態に左右されないよう、印を外したものを基準にする
+        for it in cls.items:
+            it.pop("source_unavailable", None)
         cls.marked = copy.deepcopy(cls.items)
         fgsrc.mark_unavailable(cls.marked, fgsrc.dead_sources([], {}))
 
