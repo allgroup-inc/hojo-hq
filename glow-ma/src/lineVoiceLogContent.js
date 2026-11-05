@@ -313,6 +313,29 @@
     return "取り消しました。もう一度録音してください。";
   }
 
+  // LINEで録音として受け付ける音声ファイルの拡張子(元は LineVoiceLogRunner.gs の isAudioFile_ にあった一覧)。
+  // flac・aiff はドライブの受付フォルダでは受け付けるが、LINE側は音声の種類(MIME)を直す処理が無いため足していない
+  var AUDIO_FILE_EXTENSIONS = ["m4a", "mp3", "wav", "ogg", "aac"];
+
+  function fileExtensionOf(fileName) {
+    var name = String(fileName || "");
+    var dot = name.lastIndexOf(".");
+    return dot >= 0 ? name.slice(dot + 1).toLowerCase() : "";
+  }
+
+  function isAudioFileName(fileName) {
+    return AUDIO_FILE_EXTENSIONS.indexOf(fileExtensionOf(fileName)) !== -1;
+  }
+
+  // 録音として受け付けられないファイル・動画が届いたときの返事(2026-11-05: 分けた録音を送っても無反応だった件)。
+  // 何も返さないと、届いたのか・止まっているのかが送った人にわからない
+  function buildUnsupportedFileMessage(fileName) {
+    var ext = fileExtensionOf(fileName);
+    return (ext ? "このファイル(." + ext + ")" : "このファイル") + "は、録音として受け付けられませんでした。\n" +
+      "録音は m4a・mp3・wav などの音声ファイルで送ってください。\n" +
+      "長い録音や、分けた録音は、Googleドライブの「録音の受付フォルダ」に入れても受け付けます。";
+  }
+
   function buildProcessingErrorMessage() {
     return "うまく処理できませんでした。もう一度録音してください。";
   }
@@ -529,6 +552,9 @@
     buildTypedNameHelpMessage: buildTypedNameHelpMessage,
     buildDiscardMessage: buildDiscardMessage,
     buildProcessingErrorMessage: buildProcessingErrorMessage,
+    AUDIO_FILE_EXTENSIONS: AUDIO_FILE_EXTENSIONS,
+    isAudioFileName: isAudioFileName,
+    buildUnsupportedFileMessage: buildUnsupportedFileMessage,
     MAX_TRANSIENT_RETRIES: MAX_TRANSIENT_RETRIES,
     isTransientProcessingError: isTransientProcessingError,
     parseTransientRetryCount: parseTransientRetryCount,
