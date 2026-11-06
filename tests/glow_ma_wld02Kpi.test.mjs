@@ -342,5 +342,151 @@ test("新しい列は週次KPIの末尾に足し、これまでの列の並び�
     "掲載契約企業数_累計", "掲載契約企業数_有効", "掲載契約企業数_参考_10月4日より前",
     "確認待ちの面談数", "流入経路の要確認数",
   ]);
-  assert.equal(k.WEEKLY_FIELDS.length, 18);
+  assert.equal(k.WEEKLY_FIELDS.length, 20);
+});
+
+// ---- 2026-11-06 PR #590 レビュー対応: 割合の母集団・取消の扱い・日付と契約の順序(すべて合成データ) ----
+
+test("割合は同じ会社の集まりで数える: 問い合わせ企業のうち相談した会社/相談企業のうち契約した会社(100%を超えない)", () => {
+  const inq = Array.from({ length: 12 }, (_, i) => "C9200" + String(i + 10)); // ④で問い合わせのある12社
+  const other = Array.from({ length: 13 }, (_, i) => "C9300" + String(i + 10)); // ①紹介など、問い合わせの記録が無い13社
+  const companies = inq.map((id) => ({ 企業ID: id, 流入ルート: WORLD }))
+    .concat(other.map((id) => ({ 企業ID: id, 流入ルート: "①紹介" })));
+  const history = inq.map((id, i) => ({ 履歴ID: "H" + i, 企業ID: id, 日付: "2026-10-20", 種別: "入電" }));
+  // 相談は 問い合わせ企業から2社 + それ以外から13社 = 15社(正式KPIは全ルートで15社のまま)
+  const confirmations = inq.slice(0, 2).concat(other).map((id) => confirm({ 企業ID: id, 面談日: "2026-10-25" }));
+  // 契約は 相談した会社から3社 + 相談していない会社から5社
+  const signed = other.slice(0, 3).concat(inq.slice(5, 10));
+  const contracts = signed.map((id, i) => ({ 契約ID: "P" + i, 企業ID: id, 契約成立日: "2026-10-28", 状態: "有効" }));
+  const { row } = run(sources({ companies, history, confirmations, contracts }));
+  assert.equal(row.相談企業数_累計, 15);
+  assert.equal(row.問い合わせ企業数_累計, 12);
+  assert.equal(row.問い合わせ企業のうち相談企業数, 2);
+  assert.equal(row.問い合わせから相談の割合, 16.7); // 2/12(以前の数え方なら 15/12 = 125%)
+  assert.equal(row.掲載契約企業数_累計, 8);
+  assert.equal(row.相談企業のうち掲載契約企業数, 3);
+  assert.equal(row.相談から掲載契約の割合, 20); // 3/15(以前の数え方なら 8/15)
+});
+
+test("割合は、どんな組み合わせでも0〜100%に収まり、分子は分母を超えない(合成データ200通り)", () => {
+  let seed = 20261106;
+  const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+  for (let t = 0; t < 200; t++) {
+    const ids = Array.from({ length: 30 }, (_, i) => "C94" + String(1000 + i));
+    const companies = ids.map((id) => ({ 企業ID: id, 流入ルート: rnd() < 0.5 ? WORLD : "①紹介" }));
+    const history = ids.filter(() => rnd() < 0.6).map((id, i) => ({ 履歴ID: "H" + i, 企業ID: id, 日付: "2026-10-1" + Math.floor(rnd() * 10), 種別: "入電" }));
+    const confirmations = ids.filter(() => rnd() < 0.5).map((id) => confirm({ 企業ID: id, 面談日: "2026-10-2" + Math.floor(rnd() * 10) }));
+    const contracts = ids.filter(() => rnd() < 0.4).map((id, i) => ({ 契約ID: "P" + i, 企業ID: id, 契約成立日: "2026-10-2" + Math.floor(rnd() * 10), 状態: "有効" }));
+    const { row } = run(sources({ companies, history, confirmations, contracts }));
+    assert.ok(row.問い合わせ企業のうち相談企業数 <= row.問い合わせ企業数_累計);
+    assert.ok(row.相談企業のうち掲載契約企業数 <= row.相談企業数_累計);
+    assert.ok(row.相談企業のうち掲載契約企業数 <= row.掲載契約企業数_累計);
+    for (const r of [row.問い合わせから相談の割合, row.相談から掲載契約の割合]) {
+      assert.ok(r === "—" || (r >= 0 && r <= 100), String(r));
+    }
+  }
+});
+
+test("取消: 新しい判定を取り消しても、古い判定は生き返らない(その面談は確認待ちに戻る)", () => {
+  const history = [
+    { 履歴ID: "H1", 企業ID: "C900001", 日付: "2026-11-03", 種別: "面談実施" },
+    { 履歴ID: "H2", 企業ID: "C900002", 日付: "2026-11-03", 種別: "面談実施" },
+  ];
+  const confirmations = [
+    // H1: 確認済み → 対象外(取消) → 確認済みには戻さない
+    confirm({ 確認ID: "K1", 企業ID: "C900001", 元の履歴ID: "H1", 判定: "確認済み", 確認日時: "2026-11-03 10:00" }),
+    confirm({ 確認ID: "K2", 企業ID: "C900001", 元の履歴ID: "H1", 判定: "対象外", 確認日時: "2026-11-04 10:00", 取消: "取消" }),
+    // H2: 対象外 → 確認済み(取消) → 対象外にも戻さない
+    confirm({ 確認ID: "K3", 企業ID: "C900002", 元の履歴ID: "H2", 判定: "対象外", 確認日時: "2026-11-03 10:00" }),
+    confirm({ 確認ID: "K4", 企業ID: "C900002", 元の履歴ID: "H2", 判定: "確認済み", 確認日時: "2026-11-04 10:00", 取消: true }),
+  ];
+  const { row } = run(sources({ confirmations, history }));
+  assert.equal(row.相談企業数_累計, 0);
+  assert.equal(row.確認待ちの面談数, 2);
+  assert.equal(k.effectiveConfirmations(confirmations).length, 0);
+});
+
+test("取消のあとに確認し直した行があれば、その新しい判定を正とする(古い行の取消は影響しない)", () => {
+  const history = [{ 履歴ID: "H1", 企業ID: "C900001", 日付: "2026-11-03", 種別: "面談実施" }];
+  const confirmations = [
+    confirm({ 確認ID: "K1", 元の履歴ID: "H1", 判定: "対象外", 確認日時: "2026-11-03 10:00" }),
+    confirm({ 確認ID: "K2", 元の履歴ID: "H1", 判定: "確認済み", 確認日時: "2026-11-04 10:00", 取消: true }),
+    confirm({ 確認ID: "K3", 元の履歴ID: "H1", 判定: "確認済み", 確認日時: "2026-11-05 09:00" }),
+  ];
+  const { row } = run(sources({ confirmations, history }));
+  assert.equal(row.相談企業数_累計, 1);
+  assert.equal(row.確認待ちの面談数, 0);
+});
+
+test("取消: 行の並び順ではなく確認日時で新しさを決める(日時が Date でも、書き方が違っても)", () => {
+  const history = [{ 履歴ID: "H1", 企業ID: "C900001", 日付: "2026-11-03", 種別: "面談実施" }];
+  // 後ろに置いた行のほうが古い。日本時間 11/4 9:05 = UTC 11/4 0:05
+  const rows = [
+    confirm({ 確認ID: "K2", 元の履歴ID: "H1", 判定: "確認済み", 確認日時: new Date("2026-11-04T00:05:00Z"), 取消: true }),
+    confirm({ 確認ID: "K1", 元の履歴ID: "H1", 判定: "確認済み", 確認日時: "2026/11/4 9:00" }),
+  ];
+  const { row, problems } = run(sources({ confirmations: rows, history }));
+  assert.equal(row.相談企業数_累計, 0); // 新しい K2 が取消 → 確認待ち
+  assert.equal(row.確認待ちの面談数, 1);
+  assert.equal(problems.length, 0);
+  assert.equal(k.toStamp("2026/11/4 9:00"), "2026-11-04 09:00:00");
+  assert.equal(k.toStamp(new Date("2026-11-04T00:05:00Z")), "2026-11-04 09:05:00");
+  assert.equal(k.toStamp("あとで"), "");
+});
+
+test("確認日時が読めない行が同じ面談に混ざったら、並び順で決めたことを問題として返す", () => {
+  const rows = [
+    confirm({ 確認ID: "K1", 元の履歴ID: "H1", 判定: "対象外", 確認日時: "2026-11-03 10:00" }),
+    confirm({ 確認ID: "K2", 元の履歴ID: "H1", 判定: "確認済み", 確認日時: "" }),
+  ];
+  const { problems } = run(sources({ confirmations: rows }));
+  assert.ok(problems.some((p) => /確認日時が読めない/.test(p) && p.includes("H1")));
+});
+
+test("日付の境界: 集計の開始日(10/4)・週の終わり(次の月曜は含まない)・日本時間の0時", () => {
+  const companies = ["C900001", "C900002", "C900003", "C900004"].map((id) => ({ 企業ID: id, 流入ルート: WORLD }));
+  const history = [
+    { 履歴ID: "H1", 企業ID: "C900001", 日付: "2026-10-03", 種別: "入電" },                       // 開始日の前日 → 数えない
+    { 履歴ID: "H2", 企業ID: "C900002", 日付: "2026-10-04", 種別: "入電" },                       // 開始日 → 数える
+    { 履歴ID: "H3", 企業ID: "C900003", 日付: new Date("2026-11-08T14:59:00Z"), 種別: "返信" },  // 日 23:59 JST → この週
+    { 履歴ID: "H4", 企業ID: "C900004", 日付: new Date("2026-11-08T15:00:00Z"), 種別: "返信" },  // 月 0:00 JST → 次の週
+  ];
+  const { row } = run(sources({ companies, history }));
+  assert.equal(row.問い合わせ企業数_累計, 2); // C900002, C900003
+  assert.equal(row.問い合わせ企業数_週内の新規, 1); // C900003
+  const next = run(sources({ companies, history }), "2026-11-09").row;
+  assert.equal(next.問い合わせ企業数_累計, 3);
+  assert.equal(next.問い合わせ企業数_週内の新規, 1); // C900004
+});
+
+test("目標日の前後: 目標日(4/4・日)を含む週が最後。その週の集計で残り週数は0", () => {
+  assert.deepEqual(k.goalPace(90, "2027-03-29"), { remaining: 10, weeks: 1, perWeek: 10 }); // 3/22の週
+  assert.deepEqual(k.goalPace(90, "2027-04-05"), { remaining: 10, weeks: 0, perWeek: "—" }); // 3/29の週(4/4を含む)
+  assert.deepEqual(k.goalPace(100, "2027-04-05"), { remaining: 0, weeks: 0, perWeek: 0 });
+});
+
+test("契約の順序: 同じ日に2回状態が変わったら後の行。日時がDateでも日本時間の日付で並べる", () => {
+  const contracts = [
+    { 契約ID: "P1", 企業ID: "C900001", 契約成立日: "2026-10-10", 状態: "有効", 状態が変わった日: "2026-10-10" },
+    { 契約ID: "P1", 企業ID: "C900001", 契約成立日: "2026-10-10", 状態: "解除", 状態が変わった日: "2026-10-20" },
+    { 契約ID: "P1", 企業ID: "C900001", 契約成立日: "2026-10-10", 状態: "有効", 状態が変わった日: "2026-10-20" }, // 同じ日の後の行
+    { 契約ID: "P2", 企業ID: "C900002", 契約成立日: "2026-10-12", 状態: "有効", 状態が変わった日: "2026-10-12" },
+    // 日本時間 10/21 0:30(UTC 10/20 15:30)の解除は、10/20の有効より後
+    { 契約ID: "P2", 企業ID: "C900002", 契約成立日: "2026-10-12", 状態: "解除", 状態が変わった日: new Date("2026-10-20T15:30:00Z") },
+    { 契約ID: "P2", 企業ID: "C900002", 契約成立日: "2026-10-12", 状態: "有効", 状態が変わった日: "2026-10-20" }, // 後の行だが古い日
+  ];
+  const { row, problems } = run(sources({ contracts }));
+  assert.equal(row.掲載契約企業数_累計, 2);
+  assert.equal(row.掲載契約企業数_有効, 1); // C900001 だけ
+  assert.equal(problems.length, 0);
+});
+
+test("契約の順序: 状態を変えた行に「状態が変わった日」が無ければ、問題として返す", () => {
+  const contracts = [
+    { 契約ID: "P1", 企業ID: "C900001", 契約成立日: "2026-10-10", 状態: "有効" }, // 最初の行は無くてよい(成立日で並べる)
+    { 契約ID: "P1", 企業ID: "C900001", 契約成立日: "2026-10-10", 状態: "解除" },
+  ];
+  const { row, problems } = run(sources({ contracts }));
+  assert.equal(row.掲載契約企業数_有効, 0); // 同じ日なら後の行
+  assert.ok(problems.some((p) => /P1/.test(p) && /状態が変わった日/.test(p)));
 });

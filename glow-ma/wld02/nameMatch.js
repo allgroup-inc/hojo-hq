@@ -113,9 +113,12 @@
   }
 
   /* 新しく入る会社(LINE・LPの問い合わせなど)を、既にある会社へ自動で結び付けてよいかを決める(§9-7)。
-   * 自動で結び付けるのは、法人番号が正しい形で、台帳にその法人番号の会社がちょうど1社あり、
-   * 会社名・電話番号に食い違いが無いときだけ。それ以外は自動では結び付けず、確認担当に回す。
-   * incoming: {法人番号, 会社名, 電話番号}、companies: 企業マスタの行
+   * 自動で結び付けるのは、次がすべてそろうときだけ。それ以外は自動では結び付けず、確認担当に回す。
+   *   1. 入ってきた法人番号が正しい形(13桁・検査用の数字が合う)
+   *   2. 台帳に、正しい形でその法人番号を持つ会社がちょうど1社ある(台帳側の番号も同じ確かめ方をする)
+   *   3. 会社名か電話番号の少なくとも1つが、台帳のその会社と一致する(2026-11-06: 法人番号だけでは結び付けない)
+   *   4. 会社名・電話番号に食い違いが無い(両方にあって違えば食い違い)
+   * incoming: {法人番号, 会社名, 電話番号, 携帯番号}、companies: 企業マスタの行
    * 戻り値: { auto: true, companyId } / { auto: false, reason, candidates: [企業ID...] } */
   function decideAutoLink(incoming, companies) {
     var list = companies || [];
@@ -126,7 +129,8 @@
       .map(function (p) { return p.ids[0] === "__incoming__" ? p.ids[1] : p.ids[0]; });
     if (!check.ok) return { auto: false, reason: check.reason, candidates: candidates };
     var same = list.filter(function (c) {
-      return String(toHalfWidth(String(c["法人番号"] || ""))).replace(/[\s-]/g, "") === check.value;
+      var own = validateCorporateNumber(c["法人番号"]);
+      return own.ok && own.value === check.value;
     });
     if (same.length === 0) return { auto: false, reason: "台帳に同じ法人番号の会社が無い", candidates: candidates };
     if (same.length > 1) return { auto: false, reason: "台帳に同じ法人番号の会社が複数ある", candidates: same.map(function (c) { return String(c["企業ID"]); }) };
@@ -136,10 +140,47 @@
     if (nameA && nameB && nameA !== nameB) return { auto: false, reason: "会社名が台帳と食い違う", candidates: [hitId] };
     var phonesA = [normalizePhone(inc["電話番号"]), normalizePhone(inc["携帯番号"])].filter(Boolean);
     var phonesB = [normalizePhone(hit["電話番号"]), normalizePhone(hit["携帯番号"])].filter(Boolean);
-    if (phonesA.length && phonesB.length && !phonesA.some(function (p) { return phonesB.indexOf(p) >= 0; })) {
+    var phoneMatch = phonesA.some(function (p) { return phonesB.indexOf(p) >= 0; });
+    if (phonesA.length && phonesB.length && !phoneMatch) {
       return { auto: false, reason: "電話番号が台帳と食い違う", candidates: [hitId] };
     }
+    var nameMatch = !!(nameA && nameB && nameA === nameB);
+    if (!nameMatch && !phoneMatch) {
+      return { auto: false, reason: "法人番号のほかに台帳と一致する会社名・電話番号が無い", candidates: [hitId] };
+    }
     return { auto: true, companyId: hitId };
+  }
+
+  /* 台帳(企業マスタ)側の法人番号を確かめる(2026-11-06)。台帳は書き換えない。
+   * 戻り値: { invalid: [{企業ID, reason}], duplicates: [[企業ID...]], counts: {...} }
+   *  - 空欄は「未入力」として数えるだけで、正しくないものには入れない
+   *  - 正しい形の番号が2社以上で同じなら、重複として組を出す(同じ会社の二重登録か、入力の誤り)
+   * 番号そのものは返さない(件数と企業IDだけ) */
+  function auditCorporateNumbers(companies) {
+    var invalid = [], byNumber = {};
+    var counts = { 確かめた会社: 0, 正しい形: 0, 未入力: 0, 正しくない: 0, 重複の組: 0 };
+    (companies || []).forEach(function (c) {
+      var id = String(c["企業ID"] || "").trim();
+      if (!id) return;
+      counts.確かめた会社++;
+      var r = validateCorporateNumber(c["法人番号"]);
+      if (r.ok) {
+        counts.正しい形++;
+        (byNumber[r.value] = byNumber[r.value] || []).push(id);
+      } else if (r.reason === "法人番号が空") {
+        counts.未入力++;
+      } else {
+        counts.正しくない++;
+        invalid.push({ 企業ID: id, reason: r.reason });
+      }
+    });
+    var duplicates = Object.keys(byNumber)
+      .map(function (k) { return byNumber[k].filter(function (id, i, arr) { return arr.indexOf(id) === i; }).sort(); })
+      .filter(function (ids) { return ids.length > 1; })
+      .sort(function (a, b) { return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0; });
+    counts.重複の組 = duplicates.length;
+    invalid.sort(function (a, b) { return a.企業ID < b.企業ID ? -1 : a.企業ID > b.企業ID ? 1 : 0; });
+    return { invalid: invalid, duplicates: duplicates, counts: counts };
   }
 
   /* 対応履歴ログなどが指している企業IDのうち、企業マスタに無いもの(消えた・統合された可能性) */
@@ -160,6 +201,7 @@
     findCandidatePairs: findCandidatePairs,
     validateCorporateNumber: validateCorporateNumber,
     decideAutoLink: decideAutoLink,
+    auditCorporateNumbers: auditCorporateNumbers,
     orphanIds: orphanIds
   };
 
