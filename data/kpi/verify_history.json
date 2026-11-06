@@ -5637,5 +5637,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-11-06",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【中部監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuXMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "廃止石油坑井封鎖事業費補助金（令和8年度：関東東北産業保安監督部）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSKMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和７年度補正）【九州監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDY9BMAX",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【中国監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYuhMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "いわき市診療所開設・承継支援補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXK4MAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
