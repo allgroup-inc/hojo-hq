@@ -30,21 +30,23 @@ function processQueuedVoiceLogs() {
   });
 }
 
-/** 生存信号を送る時期なら送る。どんな失敗も台帳の処理へ持ち込まない。 */
+/**
+ * 生存信号を送る時期なら送る。どんな失敗も台帳の処理へ持ち込まない。
+ *
+ * 毎分のトリガーは前の実行が終わる前に次が始まることがあるため、同じ信号を2つの実行が送らないよう、
+ * 「送る番を取る」(状態を ok:false で先に書く)ところだけをロックで囲む。
+ * - ロックは UserLock を使う。台帳の書き込み(DocumentLock)や録音の送信(ScriptLock)とは別のロックなので、
+ *   信号のために台帳の処理を待たせない。取れなければ待たずに諦め、次の実行に回す
+ * - 通信はロックの外で行う(通信が遅くても他の実行を止めない)
+ * - 番を取ったあと通信の途中で実行が打ち切られても、状態は ok:false のままなので、10分後に送り直す
+ */
 function sendHeartbeatIfDue_(run) {
   try {
     var props = PropertiesService.getScriptProperties();
     var url = GlowHeartbeat.normalizePingUrl(props.getProperty(HEARTBEAT_URL_PROPERTY));
     if (!url) return;
     var now = Date.now();
-    var decision = GlowHeartbeat.decidePing({
-      nowMs: now,
-      state: GlowHeartbeat.parseState(props.getProperty(HEARTBEAT_STATE_PROPERTY)),
-      completed: run.completed,
-      stepErrors: run.stepErrors,
-      elapsedMs: run.elapsedMs
-    });
-    if (!decision.send) return;
+    if (!claimHeartbeatTurn_(props, now, run)) return;
 
     var ok = false;
     var detail = "";
@@ -61,6 +63,26 @@ function sendHeartbeatIfDue_(run) {
     recordOpsStatus_(HEARTBEAT_OPS_NAME, ok, ok ? "送信済み" : "送信できず(" + detail + ")。10分後に送り直します");
   } catch (error) {
     console.warn("生存信号の処理に失敗しました: " + GlowHeartbeat.describeError(error));
+  }
+}
+
+/** 送る時期かを決め、送るならロックの中で番を取る。送ってよければ true。 */
+function claimHeartbeatTurn_(props, now, run) {
+  var lock = LockService.getUserLock();
+  if (!lock.tryLock(100)) return false;
+  try {
+    var decision = GlowHeartbeat.decidePing({
+      nowMs: now,
+      state: GlowHeartbeat.parseState(props.getProperty(HEARTBEAT_STATE_PROPERTY)),
+      completed: run.completed,
+      stepErrors: run.stepErrors,
+      elapsedMs: run.elapsedMs
+    });
+    if (!decision.send) return false;
+    props.setProperty(HEARTBEAT_STATE_PROPERTY, GlowHeartbeat.serializeState({ at: now, ok: false }));
+    return true;
+  } finally {
+    lock.releaseLock();
   }
 }
 
