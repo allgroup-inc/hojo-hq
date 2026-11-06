@@ -187,6 +187,17 @@ def check_destination(expected_fp, *ids):
         raise SafetyError("投稿先が承認時の想定と一致しません")
 
 
+MIKATA_DEST_ENV = "SNS_DEST_FP_MIKATA"
+
+
+def check_mikata_destination(env=None):
+    """ミカタの投稿先を確かめる。定期投稿・手動投稿のどちらも、同じ材料
+    (Facebook ページの番号 + Instagram の番号)で指紋を作って SNS_DEST_FP_MIKATA と照らし合わせる。
+    材料を処理ごとに変えると、1つの登録値で両方を満たせなくなる(2026-11-04 に検出)。"""
+    env = os.environ if env is None else env
+    check_destination(env.get(MIKATA_DEST_ENV, ""), env.get("FB_PAGE_ID", ""), env.get("IG_USER_ID", ""))
+
+
 # ---------------------------------------------------------------- 承認対象(M1)
 
 def build_package(*, account, kind, caption, images, sha, base_dir, created_at=None,
@@ -372,4 +383,10 @@ def _selftest():
 
 
 if __name__ == "__main__":
-    _selftest()
+    import sys as _sys
+    if len(_sys.argv) == 4 and _sys.argv[1] == "--fingerprint":
+        # 登録用の指紋を作る: python3 scripts/sns_safety.py --fingerprint <FacebookページID> <InstagramのID>
+        # 番号は Meta の画面で確かめた正しい値を使う(GitHub に登録済みの値から作ると照合の意味がない)
+        print(destination_fingerprint(_sys.argv[2], _sys.argv[3]))
+    else:
+        _selftest()

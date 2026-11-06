@@ -91,6 +91,7 @@ jobs:
           DIGEST: ${{ needs.preview.outputs.digest }}
           CREATED: ${{ needs.preview.outputs.created }}
           FB_PAGE_ACCESS_TOKEN: ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           SNS_DEST_FP_MIKATA: ${{ vars.SNS_DEST_FP_MIKATA }}
         run: |
