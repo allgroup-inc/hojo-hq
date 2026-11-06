@@ -71,9 +71,10 @@ test("実行の残り時間が少ないときは送らず、次の実行に回�
 });
 
 test("記録した状態は読み戻せ、壊れた値は「記録なし」として扱う", () => {
-  const s = h.serializeState({ at: NOW, ok: true });
-  assert.deepEqual(h.parseState(s), { at: NOW, ok: true });
-  assert.deepEqual(h.parseState(h.serializeState({ at: NOW, ok: false })), { at: NOW, ok: false });
+  const s = h.serializeState({ at: NOW, ok: true, id: "a1" });
+  assert.deepEqual(h.parseState(s), { at: NOW, ok: true, id: "a1" });
+  assert.deepEqual(h.parseState(h.serializeState({ at: NOW, ok: false })), { at: NOW, ok: false, id: "" });
+  assert.deepEqual(h.parseState('{"at":5,"ok":true}'), { at: 5, ok: true, id: "" }); // 識別子の無い前の形
   assert.equal(h.parseState(""), null);
   assert.equal(h.parseState(null), null);
   assert.equal(h.parseState("{壊れた"), null);
@@ -92,4 +93,11 @@ test("ログに出すエラー文から、送り先のURLを消す(URLを知る�
   assert.match(msg, /DNS error/);
   assert.equal(h.describeError(null), "不明なエラー");
   assert.ok(h.describeError("x".repeat(500)).length <= 200);
+});
+
+test("結果を書いてよいのは、今の状態が自分の送信(同じ識別子)のときだけ", () => {
+  assert.equal(h.isSameAttempt({ at: NOW, ok: false, id: "a1" }, "a1"), true);
+  assert.equal(h.isSameAttempt({ at: NOW, ok: false, id: "a2" }, "a1"), false); // 新しい送信が番を取った
+  assert.equal(h.isSameAttempt({ at: NOW, ok: false, id: "" }, ""), false);     // 識別子が空どうしは同じとみなさない
+  assert.equal(h.isSameAttempt(null, "a1"), false);
 });

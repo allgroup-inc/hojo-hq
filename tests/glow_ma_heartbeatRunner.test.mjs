@@ -11,7 +11,17 @@ const URL_ = globalThis.URL;
 
 function makeContext({ pingUrl = URL, state = null, core, fetch, elapsedMs = 20000, lockFree = true } = {}) {
   const props = { HEALTHCHECKS_PING_URL: pingUrl, HEALTHCHECKS_LAST_PING: state };
-  const calls = { fetch: [], ops: [], logs: [] };
+  const calls = { fetch: [], ops: [], logs: [], uuid: 0 };
+  function makeLock(name) {
+    return {
+      tryLock: () => {
+        if (!lockFree || ctx.__locks[name]) return false;
+        ctx.__locks[name] = true;
+        return true;
+      },
+      releaseLock: () => { ctx.__locks[name] = false; },
+    };
+  }
   const ctx = {
     console: {
       warn: (m) => calls.logs.push(String(m)),
@@ -32,19 +42,15 @@ function makeContext({ pingUrl = URL, state = null, core, fetch, elapsedMs = 200
         return { getResponseCode: () => 200 };
       },
     },
+    // ScriptLock はスクリプト全体で1つ。UserLock は実行している人ごとに別(__user で切り替える)。
+    // UserLock に頼ると、持ち主の違うトリガーどうしが排他されないことをテストで見分けられるようにする
     LockService: {
-      getUserLock: () => {
-        calls.lock = (calls.lock || 0) + 1;
-        return {
-          tryLock: () => {
-            if (!lockFree || ctx.__locked) return false;
-            ctx.__locked = true;
-            return true;
-          },
-          releaseLock: () => { ctx.__locked = false; },
-        };
-      },
+      getScriptLock: () => makeLock("script"),
+      getUserLock: () => makeLock("user:" + ctx.__user),
     },
+    Utilities: { getUuid: () => "attempt-" + (++calls.uuid) },
+    __user: "owner",
+    __locks: {},
     recordOpsStatus_: (name, ok, detail) => calls.ops.push({ name, ok, detail }),
     processQueuedVoiceLogsCore_: () => { if (core) core(ctx); },
     voiceRunElapsedMs_: () => elapsedMs,
@@ -54,6 +60,7 @@ function makeContext({ pingUrl = URL, state = null, core, fetch, elapsedMs = 200
   vm.createContext(ctx);
   vm.runInContext(src("../glow-ma/src/heartbeatPing.js"), ctx);
   vm.runInContext(src("../glow-ma/src/HeartbeatRunner.gs"), ctx);
+  ctx.__fetchCount = () => calls.fetch.length;
   return { ctx, props, calls };
 }
 
@@ -177,7 +184,7 @@ test("番を取るロックが取れなければ、待たずに諦めて次の�
 
 test("ロックの仕組みそのものが例外を出しても、台帳の処理を止めない", () => {
   const { ctx, calls } = makeContext();
-  ctx.LockService = { getUserLock: () => { throw new Error("ロックを取れません"); } };
+  ctx.LockService = { getScriptLock: () => { throw new Error("ロックを取れません"); }, getUserLock: () => { throw new Error("ロックを取れません"); } };
   assert.doesNotThrow(() => ctx.processQueuedVoiceLogs());
   assert.equal(calls.fetch.length, 0);
 });
@@ -185,11 +192,11 @@ test("ロックの仕組みそのものが例外を出しても、台帳の処�
 test("通信の後はロックを放している(通信中に他の実行を止めない)", () => {
   let lockedDuringFetch = null;
   const { ctx } = makeContext({
-    fetch: () => { lockedDuringFetch = ctx.__locked; return { getResponseCode: () => 200 }; },
+    fetch: () => { lockedDuringFetch = Object.values(ctx.__locks).some(Boolean); return { getResponseCode: () => 200 }; },
   });
   ctx.processQueuedVoiceLogs();
   assert.equal(lockedDuringFetch, false);
-  assert.equal(ctx.__locked, false);
+  assert.equal(Object.values(ctx.__locks).some(Boolean), false);
 });
 
 test("送れなかった10分後に送り直し、成功したら次は60分後", () => {
@@ -214,4 +221,124 @@ test("4分を過ぎた実行は送らず、次の普通の実行で送る", () =
   ctx.voiceRunElapsedMs_ = () => 15000;
   ctx.processQueuedVoiceLogs();
   assert.equal(calls.fetch.length, 1);
+});
+
+// ---- 2026-11-06 レビュー対応: 古い送信結果の上書き・持ち主の違う実行どうしの排他 ----
+
+function clock(ctx, start) {
+  const c = { t: start };
+  vm.runInContext("Date", ctx).now = () => c.t;
+  return c;
+}
+const T0 = Date.UTC(2026, 10, 6, 3, 0, 0);
+const MIN = 60 * 1000;
+const stateOf = (props) => JSON.parse(props.HEALTHCHECKS_LAST_PING);
+
+test("送信が長引いて次の送信が先に終わっても、古い送信の失敗で新しい成功を上書きしない", () => {
+  let first = true;
+  let c;
+  const { ctx, props, calls } = makeContext({
+    fetch: () => {
+      if (first) {
+        first = false;
+        // 1つ目の通信が戻る前に11分たち、2つ目の実行が番を取って成功した
+        c.t = T0 + 11 * MIN;
+        ctx.processQueuedVoiceLogs();
+        return { getResponseCode: () => 500 }; // 1つ目は遅れて失敗で戻る
+      }
+      return { getResponseCode: () => 200 };
+    },
+  });
+  c = clock(ctx, T0);
+  ctx.processQueuedVoiceLogs();
+  assert.equal(calls.fetch.length, 2);
+  const st = stateOf(props);
+  assert.equal(st.ok, true);            // 新しい成功が残る
+  assert.equal(st.at, T0 + 11 * MIN);   // 新しい送信の時刻
+  assert.equal(st.id, "attempt-2");
+  assert.equal(calls.ops.length, 1);    // 稼働状況タブにも、新しい結果だけを書く
+  assert.equal(calls.ops[0].ok, true);
+});
+
+test("古い送信が遅れて成功で戻っても、新しい送信の失敗を消さない(10分後の送り直しが止まらない)", () => {
+  let first = true;
+  let c;
+  const { ctx, props } = makeContext({
+    fetch: () => {
+      if (first) {
+        first = false;
+        c.t = T0 + 11 * MIN;
+        ctx.processQueuedVoiceLogs(); // 2つ目は失敗
+        return { getResponseCode: () => 200 }; // 1つ目は遅れて成功
+      }
+      return { getResponseCode: () => 500 };
+    },
+  });
+  c = clock(ctx, T0);
+  ctx.processQueuedVoiceLogs();
+  const st = stateOf(props);
+  assert.equal(st.ok, false);
+  assert.equal(st.at, T0 + 11 * MIN);
+  assert.equal(st.id, "attempt-2");
+  // 古い成功(T0)で上書きされていれば、次は T0+60分まで送らないが、正しくは 2つ目+10分で送り直す
+  c.t = T0 + 21 * MIN;
+  const before = calls_count(ctx);
+  ctx.processQueuedVoiceLogs();
+  assert.equal(calls_count(ctx), before + 1);
+});
+function calls_count(ctx) { return ctx.__fetchCount(); }
+
+test("持ち主の違うトリガー(別の人)の実行が番取りの最中に割り込んでも、送るのは1回だけ", () => {
+  let interrupted = false;
+  const { ctx, props, calls } = makeContext();
+  // 番取りで状態を読んだ直後に、別の人の実行が割り込んだとみなす
+  const real = ctx.PropertiesService.getScriptProperties;
+  ctx.PropertiesService = {
+    getScriptProperties: () => {
+      const p = real();
+      return {
+        getProperty: (k) => {
+          const v = p.getProperty(k);
+          if (k === "HEALTHCHECKS_LAST_PING" && !interrupted) {
+            interrupted = true;
+            const me = ctx.__user;
+            ctx.__user = "other-editor";
+            ctx.processQueuedVoiceLogs();
+            ctx.__user = me;
+          }
+          return v;
+        },
+        setProperty: p.setProperty,
+      };
+    },
+  };
+  ctx.processQueuedVoiceLogs();
+  assert.equal(calls.fetch.length, 1);
+  assert.equal(stateOf(props).ok, true);
+});
+
+test("結果を書くときにロックが取れなければ書かず、失敗扱いのまま10分後に送り直す", () => {
+  let c;
+  const { ctx, props, calls } = makeContext({
+    fetch: () => {
+      if (calls.fetch.length === 1) ctx.__locks.script = true; // 1回目の通信中に、録音の送信が ScriptLock を取った
+      return { getResponseCode: () => 200 };
+    },
+  });
+  c = clock(ctx, T0);
+  assert.doesNotThrow(() => ctx.processQueuedVoiceLogs());
+  assert.equal(stateOf(props).ok, false);
+  assert.equal(calls.ops.length, 0);
+  ctx.__locks.script = false;
+  c.t = T0 + 10 * MIN;
+  ctx.processQueuedVoiceLogs();
+  assert.equal(calls.fetch.length, 2);
+  assert.equal(stateOf(props).ok, true);
+});
+
+test("識別子が無い古い形の状態(前の版で書いたもの)も読め、時期が来れば送って新しい形で書き直す", () => {
+  const { ctx, props, calls } = makeContext({ state: JSON.stringify({ at: 0, ok: true }) });
+  ctx.processQueuedVoiceLogs();
+  assert.equal(calls.fetch.length, 1);
+  assert.ok(stateOf(props).id);
 });

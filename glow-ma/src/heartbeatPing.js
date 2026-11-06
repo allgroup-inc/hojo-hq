@@ -50,19 +50,26 @@
     return { send: true, reason: "" };
   }
 
+  /* 状態: { at: 送る番を取った時刻(ms), ok: 送れたか, id: 送信ごとの識別子 }。壊れた値は「記録なし」(null) */
   function parseState(raw) {
     if (!raw) return null;
     try {
       var o = JSON.parse(String(raw));
       if (!o || typeof o.at !== "number" || !isFinite(o.at) || o.at < 0) return null;
-      return { at: o.at, ok: o.ok === true };
+      return { at: o.at, ok: o.ok === true, id: typeof o.id === "string" ? o.id : "" };
     } catch (e) {
       return null;
     }
   }
 
   function serializeState(state) {
-    return JSON.stringify({ at: state.at, ok: state.ok === true });
+    return JSON.stringify({ at: state.at, ok: state.ok === true, id: String(state.id || "") });
+  }
+
+  /* 送信の結果を書いてよいか: 今の状態が、自分が番を取ったときのまま(同じ識別子)のときだけ。
+   * 自分より新しい送信が番を取っていたら書かない(古い結果で新しい状態を上書きしない) */
+  function isSameAttempt(state, id) {
+    return !!(state && id && state.id === id);
   }
 
   function isPingSuccess(statusCode) {
@@ -83,6 +90,7 @@
     decidePing: decidePing,
     parseState: parseState,
     serializeState: serializeState,
+    isSameAttempt: isSameAttempt,
     isPingSuccess: isPingSuccess,
     describeError: describeError
   };
