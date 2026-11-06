@@ -25,7 +25,9 @@ function fixture() {
   // 鮮度の検査で落ちないよう、更新時刻を今にする
   d.updated_at = stamp;
   for (const it of d.items) {
+    // 実データに付いている印(収集の結果)は外し、このテストで選んだ制度だけに付ける
     if (marked.has(it.id)) it.source_unavailable = { since: "2026-11-04 10:21", reason: "公式ページが見つかりません(HTTP 404)" };
+    else delete it.source_unavailable;
   }
   return JSON.stringify(d);
 }
