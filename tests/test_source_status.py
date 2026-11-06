@@ -106,13 +106,23 @@ class Pages(unittest.TestCase):
     def setUpClass(cls):
         with open(os.path.join(ROOT, "data", "fukugiiro", "seido.json"), encoding="utf-8") as f:
             cls.db = json.load(f)
-        cls.items = [i for i in cls.db["items"] if i.get("area") not in kit.HIDDEN_MUNIS]
-        # 実データには収集の結果として印が付く(2026-11-04〜 ひとり親家庭支援)。
-        # 「印の無い制度」の比較が実データの状態に左右されないよう、印を外したものを基準にする
-        for it in cls.items:
-            it.pop("source_unavailable", None)
+        # 本番の seido.json は毎日の収集で更新され、2026-11-04 からは「公式ページを確認中」の印
+        # (source_unavailable)が本番データにも入っている。本番データをそのまま「印の無い制度」として
+        # 使うと前提が崩れるため、テスト専用の複製を2つ作る(本番データ・ファイルは書き換えない)。
+        #   items  = 印をすべて外した複製(②警告が無い場合)
+        #   marked = items に、この仕組みで印を付け直した複製(①警告がある場合)
+        cls.items = [copy.deepcopy(i) for i in cls.db["items"] if i.get("area") not in kit.HIDDEN_MUNIS]
+        for i in cls.items:
+            i.pop("source_unavailable", None)
         cls.marked = copy.deepcopy(cls.items)
         fgsrc.mark_unavailable(cls.marked, fgsrc.dead_sources([], {}))
+
+    def test_fixtures_cover_both_cases(self):
+        """前提の自己点検: ②印の無い複製には印が1件も無く、①印を付けた複製では対象の制度だけに印がある。"""
+        self.assertFalse([i["id"] for i in self.items if fgsrc.unavailable(i)])
+        self.assertTrue(fgsrc.unavailable(self.one(self.marked, "fk-ken-hitorioya-sodan")))
+        self.assertFalse(fgsrc.unavailable(self.one(self.marked, "fk-ken-kouto-shokugyo-kunren")))
+        self.assertEqual(self.one(self.items, "fk-ken-hitorioya-sodan")["source_url"], DEAD)  # URLは変えていない
 
     def one(self, items, i):
         return next(x for x in items if x["id"] == i)
