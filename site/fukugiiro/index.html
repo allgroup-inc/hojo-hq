@@ -603,7 +603,10 @@ footer .fwrap p{margin-bottom:6px}
       document.getElementById("resume-link").style.display = "block";
     }
   } catch(e){}
-  fetch("../data/fukugiiro/seido.json").then(function(r){return r.json()}).then(function(db){
+  // 公開用の制度データは、このページと同じフォルダの seido.json(旧URL: /hojo-hq/fukugiiro/seido.json、
+  // moradou.jp: /seido.json)。../data/ は moradou.jp に配信されず404になる(2026-11-05 検知・診断ページ11/2と同型)。
+  // 再発防止: tests/top_page_layouts.test.mjs が両方の配信構成で実ブラウザ確認する。
+  fetch("seido.json").then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(function(db){
     var items = db.items || [];
     var total = db.count || items.length;
     var ver = items.filter(function(it){return it.verified === true}).length;
@@ -650,6 +653,8 @@ footer .fwrap p{margin-bottom:6px}
   }).catch(function(){ /* データ取得失敗時は静的表示のまま(診断・本文は影響なし) */ });
   // 受給報告カウンター: 検証済み10世帯以上たまってから表示(2026-08-10 小柳さん決裁)。
   // それまでは非表示のまま台帳(data/fukugiiro/jukyu_reports.json)に蓄積する。
+  // ※ 台帳は moradou.jp には配信していない(旧URLのみ)。0世帯の間は表示が変わらないが、
+  //   moradou.jp で表示するには、集計値の配信方法を別途決める(docs/調査_20261105_トップページの制度データ読み込み.md)。
   fetch("../data/fukugiiro/jukyu_reports.json").then(function(r){return r.json()}).then(function(d){
     var n = d && d.summary && d.summary.household_count;
     if(typeof n === "number" && n >= 10){
