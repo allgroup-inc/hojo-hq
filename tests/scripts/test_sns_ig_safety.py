@@ -638,3 +638,103 @@ def test_manual_post_job_gets_page_id(name):
     wf, _ = _wf(name)
     blob = json.dumps(wf["jobs"]["post"])
     assert "secrets.FB_PAGE_ID" in blob and "SNS_DEST_FP_MIKATA" in blob
+
+
+# ---------------------------------------------------------------- 実際の呼び出しの流れで、1つの指紋が3つの投稿経路すべてに効くこと
+# 定期投稿(post_social.main)・手動フィード・手動ストーリーズ(ig_manual_post.main)を、
+# 同じ環境変数(FB_PAGE_ID / IG_USER_ID / SNS_DEST_FP_MIKATA)のまま順に通す。Meta への通信は偽物。
+
+PATHS = ("social", "feed", "story")
+_ORIG_VERIFY = sns_safety.verify_before_publish   # 読み込み時点の本物(他のテストの差し替えを引き継がない)
+
+
+@pytest.fixture
+def all_paths(social, monkeypatch):
+    """social fixture(定期投稿の準備・環境変数・偽の Meta)に、手動投稿の準備を足す。"""
+    import ig_manual_post as im
+    ps, root, social_calls = social
+    img = root / "posts" / "manual.png"
+    img.write_bytes(b"\x89PNG synthetic manual")
+    cap = root / "cap.txt"
+    cap.write_text("手動投稿の本文", encoding="utf-8")
+    monkeypatch.setattr(im, "BASE", str(root))
+    monkeypatch.setattr(im.time, "sleep", lambda s: None)
+    manual_calls = []
+
+    def fake_meta_post(path, params, **kw):
+        manual_calls.append(path)
+        return {"id": "c1"}
+    monkeypatch.setattr(sns_safety, "meta_post", fake_meta_post)
+    return ps, im, root, img, cap, social_calls, manual_calls
+
+
+def _run_path(path, ps, im, root, img, cap, monkeypatch, capsys):
+    """1つの投稿経路を「見本 → 承認後の投稿」の順で、本物の main() から動かす。戻り値: 投稿まで進んだか。"""
+    if path == "social":
+        out = _preview(ps, monkeypatch, capsys)
+        _IMG[0] = (root / "posts" / "images" / "01_seido.png").read_bytes()
+        try:
+            _post(ps, monkeypatch, out["stem"], out["pkg_digest"], out["pkg_created"])
+            return True
+        except SystemExit:
+            return False
+    extra = ["--caption-file", str(cap)] if path == "feed" else []
+    assert im.main(["--kind", path, "--image", "posts/manual.png", "--preview", *extra]) == 0
+    out = dict(l.split("=", 1) for l in capsys.readouterr().out.splitlines() if "=" in l)
+    monkeypatch.setattr(sns_safety, "verify_before_publish",
+                        lambda p, d, **kw: _ORIG_VERIFY(p, d, fetch=lambda u: img.read_bytes()))
+    return im.main(["--kind", path, "--image", "posts/manual.png", *extra, "--post",
+                    "--approved-digest", out["pkg_digest"], "--approved-created", out["pkg_created"]]) == 0
+
+
+def test_one_fp_passes_all_three_real_paths(all_paths, monkeypatch, capsys):
+    ps, im, root, img, cap, social_calls, manual_calls = all_paths
+    fp = sns_safety.destination_fingerprint("111", "222")
+    monkeypatch.setenv("SNS_DEST_FP_MIKATA", fp)      # 3経路とも同じ1つの値
+    results = {p: _run_path(p, ps, im, root, img, cap, monkeypatch, capsys) for p in PATHS}
+    assert results == {"social": True, "feed": True, "story": True}, results
+    assert social_calls == ["/111/photos", "/222/media", "/222/media_publish"]
+    assert manual_calls == ["/222/media", "/222/media_publish"] * 2   # フィード・ストーリーズ
+
+
+@pytest.mark.parametrize("case", ["id_mismatch", "fp_unset", "old_format_fp", "page_id_missing"])
+@pytest.mark.parametrize("path", PATHS)
+def test_bad_destination_stops_before_publish(all_paths, monkeypatch, capsys, case, path):
+    """投稿先が合わないときは、本物の main() の流れで、Meta を1回も呼ばずに止まること。"""
+    ps, im, root, img, cap, social_calls, manual_calls = all_paths
+    good = sns_safety.destination_fingerprint("111", "222")
+    if case == "id_mismatch":
+        monkeypatch.setenv("SNS_DEST_FP_MIKATA", good)
+        monkeypatch.setenv("IG_USER_ID", "999")                     # 別のアカウントにすり替わった
+    elif case == "fp_unset":
+        monkeypatch.setenv("SNS_DEST_FP_MIKATA", "")
+    elif case == "old_format_fp":
+        monkeypatch.setenv("SNS_DEST_FP_MIKATA", sns_safety.destination_fingerprint("222"))  # 以前の手動投稿の作り方
+    elif case == "page_id_missing":
+        monkeypatch.setenv("SNS_DEST_FP_MIKATA", good)
+        monkeypatch.setenv("FB_PAGE_ID", "")
+    assert _run_path(path, ps, im, root, img, cap, monkeypatch, capsys) is False
+    assert social_calls == [] and manual_calls == []
+
+
+@pytest.mark.parametrize("name,script", [
+    ("social-post.yml", "post_social.py"),
+    ("ig-feed.yml", "ig_manual_post.py"),
+    ("ig-story.yml", "ig_manual_post.py"),
+])
+def test_workflow_passes_ids_to_the_posting_step(name, script):
+    """承認付きの投稿ジョブの「投稿スクリプトを動かす手順」に、照合に使う3つが正しい出どころから渡ること。"""
+    wf, _ = _wf(name)
+    job = wf["jobs"]["post"]
+    assert job.get("environment") == "sns-approval"
+    assert job.get("if") == "github.ref == 'refs/heads/main'"
+    steps = [s for s in job["steps"] if script in (s.get("run") or "") and "--preview" not in s.get("run", "")]
+    assert len(steps) == 1, steps
+    env = steps[0].get("env") or {}
+    assert env.get("FB_PAGE_ID") == "${{ secrets.FB_PAGE_ID }}"
+    assert env.get("IG_USER_ID") == "${{ secrets.IG_USER_ID }}"
+    assert env.get("SNS_DEST_FP_MIKATA") == "${{ vars.SNS_DEST_FP_MIKATA }}"
+    # 見本のジョブには投稿用の鍵も番号も渡さない
+    for jn, j in wf["jobs"].items():
+        if jn != "post":
+            assert "FB_PAGE_ACCESS_TOKEN" not in json.dumps(j), jn
