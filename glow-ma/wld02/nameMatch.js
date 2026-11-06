@@ -92,6 +92,56 @@
     return { pairs: pairs, counts: counts };
   }
 
+  /* 法人番号(13桁)を確かめる(2026-11-06 §9-7)。
+   * 先頭の1桁は検査用の数字で、残り12桁から決まる(国税庁の定め):
+   *   検査用の数字 = 9 − (Σ 12桁の各数字 × 重み) を 9 で割った余り
+   *   重みは、12桁を右の桁から数えて奇数番目が1、偶数番目が2
+   * 戻り値: { ok, value(13桁の数字) , reason } */
+  function validateCorporateNumber(raw) {
+    var text = toHalfWidth(String(raw === null || raw === undefined ? "" : raw)).replace(/[\s-]/g, "");
+    if (!text) return { ok: false, value: "", reason: "法人番号が空" };
+    if (!/^[0-9]{13}$/.test(text)) return { ok: false, value: "", reason: "法人番号が13桁の数字でない" };
+    var base = text.slice(1);
+    var sum = 0;
+    for (var n = 1; n <= 12; n++) {
+      var digit = Number(base.charAt(12 - n));
+      sum += digit * (n % 2 === 1 ? 1 : 2);
+    }
+    var expected = 9 - (sum % 9);
+    if (Number(text.charAt(0)) !== expected) return { ok: false, value: "", reason: "法人番号の検査用の数字が合わない" };
+    return { ok: true, value: text, reason: "" };
+  }
+
+  /* 新しく入る会社(LINE・LPの問い合わせなど)を、既にある会社へ自動で結び付けてよいかを決める(§9-7)。
+   * 自動で結び付けるのは、法人番号が正しい形で、台帳にその法人番号の会社がちょうど1社あり、
+   * 会社名・電話番号に食い違いが無いときだけ。それ以外は自動では結び付けず、確認担当に回す。
+   * incoming: {法人番号, 会社名, 電話番号}、companies: 企業マスタの行
+   * 戻り値: { auto: true, companyId } / { auto: false, reason, candidates: [企業ID...] } */
+  function decideAutoLink(incoming, companies) {
+    var list = companies || [];
+    var inc = incoming || {};
+    var check = validateCorporateNumber(inc["法人番号"]);
+    var candidates = findCandidatePairs([{ 企業ID: "__incoming__", 会社名: inc["会社名"], 電話番号: inc["電話番号"], 携帯番号: inc["携帯番号"], 法人番号: inc["法人番号"] }].concat(list))
+      .pairs.filter(function (p) { return p.ids.indexOf("__incoming__") >= 0; })
+      .map(function (p) { return p.ids[0] === "__incoming__" ? p.ids[1] : p.ids[0]; });
+    if (!check.ok) return { auto: false, reason: check.reason, candidates: candidates };
+    var same = list.filter(function (c) {
+      return String(toHalfWidth(String(c["法人番号"] || ""))).replace(/[\s-]/g, "") === check.value;
+    });
+    if (same.length === 0) return { auto: false, reason: "台帳に同じ法人番号の会社が無い", candidates: candidates };
+    if (same.length > 1) return { auto: false, reason: "台帳に同じ法人番号の会社が複数ある", candidates: same.map(function (c) { return String(c["企業ID"]); }) };
+    var hit = same[0];
+    var hitId = String(hit["企業ID"]);
+    var nameA = normalizeCompanyName(inc["会社名"]), nameB = normalizeCompanyName(hit["会社名"]);
+    if (nameA && nameB && nameA !== nameB) return { auto: false, reason: "会社名が台帳と食い違う", candidates: [hitId] };
+    var phonesA = [normalizePhone(inc["電話番号"]), normalizePhone(inc["携帯番号"])].filter(Boolean);
+    var phonesB = [normalizePhone(hit["電話番号"]), normalizePhone(hit["携帯番号"])].filter(Boolean);
+    if (phonesA.length && phonesB.length && !phonesA.some(function (p) { return phonesB.indexOf(p) >= 0; })) {
+      return { auto: false, reason: "電話番号が台帳と食い違う", candidates: [hitId] };
+    }
+    return { auto: true, companyId: hitId };
+  }
+
   /* 対応履歴ログなどが指している企業IDのうち、企業マスタに無いもの(消えた・統合された可能性) */
   function orphanIds(referencedIds, companies) {
     var known = {};
@@ -108,6 +158,8 @@
     normalizeCompanyName: normalizeCompanyName,
     normalizePhone: normalizePhone,
     findCandidatePairs: findCandidatePairs,
+    validateCorporateNumber: validateCorporateNumber,
+    decideAutoLink: decideAutoLink,
     orphanIds: orphanIds
   };
 

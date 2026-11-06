@@ -61,3 +61,74 @@ test("3社が同じなら3組を出す", () => {
 test("企業マスタに無い企業IDを、指している記録から見つける", () => {
   assert.deepEqual(m.orphanIds(["C900001", "C900009", "", "C900009"], [{ 企業ID: "C900001" }]), ["C900009"]);
 });
+
+// ---- 2026-11-06 §9-7: 法人番号の確かめ方と、自動で結び付けてよいかの判定(すべて合成データ) ----
+// 12桁から検査用の数字を計算して、合成の法人番号を作る(実在の会社の番号は使わない)
+function corpNo(base12) {
+  let sum = 0;
+  for (let n = 1; n <= 12; n++) sum += Number(base12[12 - n]) * (n % 2 === 1 ? 1 : 2);
+  return String(9 - (sum % 9)) + base12;
+}
+const NO_A = corpNo("990000000011");
+const NO_B = corpNo("990000000022");
+const wrongCheck = (no) => String((Number(no[0]) % 9) + 1) + no.slice(1); // 検査用の数字だけを変える
+
+test("法人番号: 13桁・検査用の数字が合うものだけを正しいとする(全角・ハイフンも読む)", () => {
+  assert.deepEqual(m.validateCorporateNumber(NO_A), { ok: true, value: NO_A, reason: "" });
+  assert.equal(m.validateCorporateNumber(wrongCheck(NO_A)).ok, false);
+  assert.match(m.validateCorporateNumber(wrongCheck(NO_A)).reason, /検査用の数字/);
+  assert.match(m.validateCorporateNumber("123456789012").reason, /13桁/);
+  assert.match(m.validateCorporateNumber("12345678901234").reason, /13桁/);
+  assert.match(m.validateCorporateNumber("").reason, /空/);
+  const wide = NO_A.replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0));
+  assert.equal(m.validateCorporateNumber(wide).ok, true);
+  assert.equal(m.validateCorporateNumber(NO_A.slice(0, 1) + "-" + NO_A.slice(1)).ok, true);
+});
+
+const MASTER = [
+  { 企業ID: "C900001", 会社名: "株式会社うみかぜ物産", 電話番号: "098-111-0001", 法人番号: NO_A },
+  { 企業ID: "C900002", 会社名: "株式会社そらいろ", 電話番号: "098-111-0002", 法人番号: "" },
+];
+
+test("自動で結び付けてよいのは、法人番号が正しく・台帳に1社だけ・会社名と電話に食い違いが無いときだけ", () => {
+  assert.deepEqual(m.decideAutoLink({ 法人番号: NO_A, 会社名: "(株)うみかぜ物産", 電話番号: "0981110001" }, MASTER),
+    { auto: true, companyId: "C900001" });
+  // 会社名・電話が無くても、法人番号だけで結び付けてよい
+  assert.deepEqual(m.decideAutoLink({ 法人番号: NO_A }, MASTER), { auto: true, companyId: "C900001" });
+});
+
+test("電話番号・会社名が一致しても、法人番号が無ければ自動で結び付けない(候補として確認担当へ)", () => {
+  const r = m.decideAutoLink({ 法人番号: "", 会社名: "株式会社そらいろ", 電話番号: "098-111-0002" }, MASTER);
+  assert.equal(r.auto, false);
+  assert.match(r.reason, /空/);
+  assert.deepEqual(r.candidates, ["C900002"]);
+});
+
+test("法人番号の検査用の数字が合わないときは、自動で結び付けない", () => {
+  const r = m.decideAutoLink({ 法人番号: wrongCheck(NO_A), 会社名: "株式会社うみかぜ物産" }, MASTER);
+  assert.equal(r.auto, false);
+  assert.match(r.reason, /検査用の数字/);
+  assert.deepEqual(r.candidates, ["C900001"]); // 会社名が同じなので候補には出る
+});
+
+test("台帳に同じ法人番号の会社が無い・複数ある・台帳の番号が正しくないときは、自動で結び付けない", () => {
+  assert.match(m.decideAutoLink({ 法人番号: NO_B }, MASTER).reason, /無い/);
+  const dup = MASTER.concat([{ 企業ID: "C900003", 会社名: "うみかぜ物産", 法人番号: NO_A }]);
+  const r = m.decideAutoLink({ 法人番号: NO_A }, dup);
+  assert.equal(r.auto, false);
+  assert.match(r.reason, /複数/);
+  assert.deepEqual(r.candidates.sort(), ["C900001", "C900003"]);
+  const bad = wrongCheck(NO_B);
+  const r2 = m.decideAutoLink({ 法人番号: bad }, [{ 企業ID: "C900009", 会社名: "x", 法人番号: bad }]);
+  assert.equal(r2.auto, false); // 入ってきた番号が正しくない時点で止まる
+});
+
+test("法人番号が一致しても、会社名か電話番号が台帳と食い違えば、自動で結び付けない", () => {
+  const r1 = m.decideAutoLink({ 法人番号: NO_A, 会社名: "株式会社まったく別" }, MASTER);
+  assert.equal(r1.auto, false);
+  assert.match(r1.reason, /会社名/);
+  assert.deepEqual(r1.candidates, ["C900001"]);
+  const r2 = m.decideAutoLink({ 法人番号: NO_A, 電話番号: "098-999-9999" }, MASTER);
+  assert.equal(r2.auto, false);
+  assert.match(r2.reason, /電話番号/);
+});

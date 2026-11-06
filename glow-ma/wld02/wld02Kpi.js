@@ -42,8 +42,18 @@
     "週の開始日", "集計日時", "状態",
     "相談企業数_累計", "相談企業数_週内の新規",
     "掲載契約企業数_累計", "掲載契約企業数_有効", "掲載契約企業数_参考_10月4日より前",
-    "確認待ちの面談数", "流入経路の要確認数", "実行ID"
+    "確認待ちの面談数", "流入経路の要確認数", "実行ID",
+    // 2026-11-06 §9-3: 参考の数字(正式KPIは上の相談企業数・掲載契約企業数)。列は末尾に足す
+    "問い合わせ企業数_累計", "問い合わせ企業数_週内の新規",
+    "問い合わせから相談の割合", "相談から掲載契約の割合",
+    "目標までの残り社数", "目標日までの残り週数", "必要な週あたりの相談数"
   ];
+
+  // 問い合わせに数える対応履歴の種別(§9-2。電話・LINEだけの問い合わせも、ここでは数える。正式KPIの相談とは別)
+  var INQUIRY_TYPES = ["入電", "返信", "資料請求", "面談実施"];
+  // 割合は母数が少ないと大きく揺れるため、この数より少なければ出さない(§9-3)
+  var RATIO_MIN_BASE = 10;
+  var NO_VALUE = "—";
 
   function str(v) {
     return v === null || v === undefined ? "" : String(v).trim();
@@ -57,7 +67,10 @@
   function toDate(v) {
     if (v instanceof Date) {
       if (isNaN(v.getTime())) return "";
-      return v.getFullYear() + "-" + pad2(v.getMonth() + 1) + "-" + pad2(v.getDate());
+      // 日本時間の日付にそろえる(2026-11-06: 動く場所の時刻設定に左右されないようにする。
+      // GASは日本時間、テストや他の環境はUTCのことがあり、0時前後の面談が別の週に入るのを防ぐ)
+      var jst = new Date(v.getTime() + 9 * 60 * 60 * 1000);
+      return jst.getUTCFullYear() + "-" + pad2(jst.getUTCMonth() + 1) + "-" + pad2(jst.getUTCDate());
     }
     var m = /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/.exec(str(v));
     if (!m) return "";
@@ -138,10 +151,27 @@
       toDate(row.面談日) >= KPI_START_DATE;
   }
 
+  /* 面談確認記録のうち、今有効な行だけを返す(2026-11-06)。
+   * 同じ面談(元の履歴ID)を確かめ直したときは、取消でない行のうち最も新しい判定(確認日時、同じなら後の行)を正とする。
+   * 「対象外」→「確認済み」にも、「確認済み」→「対象外」にも、行を足すだけで判定をやり直せる。
+   * 元の履歴IDが空の行(台帳に無い面談を直接記録したもの)は、1行ずつ別の面談として扱う */
+  function effectiveConfirmations(confirmRows) {
+    var latest = {}, direct = [];
+    (confirmRows || []).forEach(function (row, i) {
+      if (isCancelled(row)) return;
+      var hid = str(row.元の履歴ID);
+      if (!hid) { direct.push(row); return; }
+      var at = str(row.確認日時);
+      var cur = latest[hid];
+      if (!cur || at > cur.at || (at === cur.at && i > cur.i)) latest[hid] = { row: row, at: at, i: i };
+    });
+    return direct.concat(Object.keys(latest).map(function (k) { return latest[k].row; }));
+  }
+
   // 相談企業(統合後の企業ID → 最初の確認済み面談日)
   function consultationFirstDates(confirmRows, resolver) {
     var first = {};
-    (confirmRows || []).forEach(function (row) {
+    effectiveConfirmations(confirmRows).forEach(function (row) {
       if (!countsAsConsultation(row)) return;
       var id = resolver.resolve(row.企業ID);
       if (!id) return;
@@ -152,9 +182,18 @@
   }
 
   // 掲載契約記録(状態が変わるたびに行を足す)。契約IDごとに最後の行が今の状態。
+  // 状態を変えるたびに行を足す(§2-2)。今の状態は「状態が変わった日」(無ければ契約成立日)が最も新しい行で決める。
+  // 同じ日なら、後の行を新しいとみなす(2026-11-06: 行の並び順だけで決めていたのを直した)
   function contractStates(contractRows, resolver) {
     var byContract = {};
-    (contractRows || []).forEach(function (row, i) {
+    var ordered = (contractRows || []).map(function (row, i) {
+      return { row: row, i: i, on: toDate(row.状態が変わった日) || toDate(row.契約成立日) || "" };
+    }).sort(function (a, b) {
+      if (a.on !== b.on) return a.on < b.on ? -1 : 1;
+      return a.i - b.i;
+    });
+    ordered.forEach(function (item) {
+      var row = item.row, i = item.i;
       var cid = str(row.契約ID);
       if (!cid) return;
       var prev = byContract[cid];
@@ -246,7 +285,56 @@
     row.掲載契約企業数_参考_10月4日より前 = Object.keys(beforeStart).filter(function (id) { return !everSigned[id]; }).length;
     row.確認待ちの面談数 = pendingMeetingIds(sources.history, sources.confirmations).length;
     row.流入経路の要確認数 = routeCheck;
+
+    // §9-3 参考の数字(問い合わせ・割合・目標までの残り)
+    var inquiries = inquiryFirstDates(sources.history, routeOf, resolver);
+    var inquiryTotal = 0, inquiryNew = 0;
+    Object.keys(inquiries).forEach(function (id) {
+      if (inquiries[id] < weekEnd) inquiryTotal++;
+      if (inquiries[id] >= weekStart && inquiries[id] < weekEnd) inquiryNew++;
+    });
+    row.問い合わせ企業数_累計 = inquiryTotal;
+    row.問い合わせ企業数_週内の新規 = inquiryNew;
+    row.問い合わせから相談の割合 = ratio(total, inquiryTotal);
+    row.相談から掲載契約の割合 = ratio(row.掲載契約企業数_累計, total);
+    var pace = goalPace(total, weekEnd);
+    row.目標までの残り社数 = pace.remaining;
+    row.目標日までの残り週数 = pace.weeks;
+    row.必要な週あたりの相談数 = pace.perWeek;
     return { row: row, problems: resolver.problems.slice() };
+  }
+
+  /* 問い合わせ企業(統合後の企業ID → 最初の問い合わせの日)。
+   * 流入ルート④が付いた会社(統合前のIDに付いていても統合後へまとめる)のうち、
+   * 対応履歴ログに入電・返信・資料請求・面談実施のどれかがある会社。集計開始日(10/4)より前の記録は数えない */
+  function inquiryFirstDates(historyRows, routeOf, resolver) {
+    var first = {};
+    (historyRows || []).forEach(function (h) {
+      if (INQUIRY_TYPES.indexOf(str(h.種別)) < 0) return;
+      var id = resolver.resolve(h.企業ID);
+      var d = toDate(h.日付);
+      if (!id || !d || d < KPI_START_DATE) return;
+      if (!hasWorldRoute(routeOf[id] || [])) return;
+      if (!first[id] || d < first[id]) first[id] = d;
+    });
+    return first;
+  }
+
+  // 割合(%・小数1桁)。母数が RATIO_MIN_BASE より少なければ出さない
+  function ratio(numerator, denominator) {
+    if (!(denominator >= RATIO_MIN_BASE)) return NO_VALUE;
+    return Math.round((numerator / denominator) * 1000) / 10;
+  }
+
+  /* 100社の目標までの残り。週の終わり(次の月曜)から目標日(2027-04-04)までを週で数え(端数は1週)、
+   * 残りの社数をその週数で割って、1週あたりに必要な相談の数(切り上げ)を出す。
+   * 目標に届いていれば残り0・必要0。目標日を過ぎていれば週数0・必要は「—」 */
+  function goalPace(total, weekEnd) {
+    var remaining = Math.max(KPI_TARGET_COMPANIES - total, 0);
+    var days = (Date.parse(KPI_TARGET_DATE + "T00:00:00Z") - Date.parse(weekEnd + "T00:00:00Z")) / 86400000 + 1;
+    var weeks = days > 0 ? Math.ceil(days / 7) : 0;
+    var perWeek = remaining === 0 ? 0 : (weeks > 0 ? Math.ceil(remaining / weeks) : NO_VALUE);
+    return { remaining: remaining, weeks: weeks, perWeek: perWeek };
   }
 
   /* 週次KPIタブへの書き込み計画。同じ週の行があれば上書き、無ければ足す。
@@ -278,7 +366,12 @@
     countsAsConsultation: countsAsConsultation,
     pendingMeetingIds: pendingMeetingIds,
     buildWeeklyRow: buildWeeklyRow,
-    planWeeklyUpsert: planWeeklyUpsert
+    planWeeklyUpsert: planWeeklyUpsert,
+    INQUIRY_TYPES: INQUIRY_TYPES,
+    RATIO_MIN_BASE: RATIO_MIN_BASE,
+    effectiveConfirmations: effectiveConfirmations,
+    ratio: ratio,
+    goalPace: goalPace
   };
 
   if (typeof module !== "undefined" && module.exports) {
