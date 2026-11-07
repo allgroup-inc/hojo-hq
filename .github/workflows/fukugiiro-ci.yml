@@ -38,6 +38,11 @@ on:
       - "scripts/fg_source_status.py"
       - "scripts/generate_kit_pages.py"
       - "scripts/generate_life_pages.py"
+      - "scripts/record_moradou_line.py"
+      - "scripts/notify_haruka.py"
+      - "scripts/weekly_report_fukugiiro.py"
+      - "tests/test_moradou_line.py"
+      - ".github/workflows/fukugiiro-weekly-report.yml"
       - "tests/top_page_layouts.test.mjs"
       - "scripts/generate_area_pages.py"
       - "tests/test_source_status.py"
@@ -79,6 +84,11 @@ on:
       - "scripts/fg_source_status.py"
       - "scripts/generate_kit_pages.py"
       - "scripts/generate_life_pages.py"
+      - "scripts/record_moradou_line.py"
+      - "scripts/notify_haruka.py"
+      - "scripts/weekly_report_fukugiiro.py"
+      - "tests/test_moradou_line.py"
+      - ".github/workflows/fukugiiro-weekly-report.yml"
       - "tests/top_page_layouts.test.mjs"
       - "scripts/generate_area_pages.py"
       - "tests/test_source_status.py"
@@ -155,6 +165,13 @@ jobs:
           python scripts/audit_ig_history.py --self-test
           python scripts/record_ig_post.py --self-test
           python scripts/quote_source.py --self-test
+
+      # もらいわすれ堂のLINE友だち数の記録(読み取り専用)と、遥さんへのLINE通知の承認制
+      # (定期実行から送らない・承認コードが一致したときだけ送る)を確かめる(2026-11-07)
+      - name: LINE友だち数の記録と、遥さんへの通知の承認制
+        run: |
+          pip install -q pyyaml
+          python -m unittest tests/test_moradou_line.py
 
       - uses: actions/setup-node@v6
         with:
