@@ -44,6 +44,8 @@ function runDailyMaintenance() {
     { name: "お断り(連絡不要)の反映", run: syncDoNotContactFlags },
     { name: "スコア・ランクの再計算", run: recalculateAllScores },
     { name: "ダッシュボードの更新", run: updateDashboard },
+    // 2026-11-07 改善③: 3で確定したスコアを使って「今日の連絡先」タブを作り直す(台帳の記録は書き換えない)
+    { name: "今日の連絡先の更新", run: updateTodayList },
     { name: "掘り起こしアラートの送信", run: runDailyAlerts }
   ];
 
