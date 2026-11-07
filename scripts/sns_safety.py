@@ -98,13 +98,13 @@ def meta_post(path, params, graph="https://graph.facebook.com/v21.0", opener=Non
 # ---------------------------------------------------------------- 数字を読むだけの鍵
 
 # 週次レポート・分析は Meta から数字を読むだけ。投稿できる鍵を使わず、読むだけの権限で
-# 作った鍵(META_INSIGHTS_TOKEN)を使う(2026-11-03 設計)。使う前に権限を Meta に問い合わせ、
+# 作った鍵(META_INSIGHTS_TOKEN)を使う(2026-11-03 設計)。使う前に権限を Meta に問い合わせ(/me/permissions)、
 # 投稿・管理の権限が付いていたら使わない。確かめられないときも使わない(フェイルクローズ)。
 INSIGHTS_ENV = "META_INSIGHTS_TOKEN"
 FORBIDDEN_SCOPES = frozenset({
     "instagram_content_publish", "pages_manage_posts", "pages_manage_engagement",
     "pages_manage_metadata", "instagram_manage_comments", "instagram_manage_messages",
-    "pages_messaging", "publish_video", "business_management",
+    "pages_messaging", "publish_video", "business_management", "ads_management",
 })
 _INSIGHTS_CACHE = {}
 
@@ -112,6 +112,49 @@ _INSIGHTS_CACHE = {}
 def auth_headers(token):
     """鍵は URL ではなく通信の付属情報(Authorization)で渡す。"""
     return {"Authorization": f"Bearer {token}"}
+
+
+# 数字を読むのに必要な権限(2026-11-07 定義。すべて付いていないと使わない)。
+# 実際に呼んでいる API と、Meta の公式資料(Facebook ログインの場合)の対応:
+#   Instagram アカウントの followers_count・media_count、/media の一覧
+#       → instagram_basic・pages_read_engagement
+#   投稿ごとのインサイト(reach・views) → instagram_manage_insights(+ 上の2つ)
+#   Facebook ページの fan_count・followers_count → pages_read_engagement
+REQUIRED_READ_SCOPES = frozenset({"instagram_basic", "instagram_manage_insights", "pages_read_engagement"})
+# 付いていてもよい読み取りの権限(必須ではない):
+#   pages_show_list … 古い版の資料ではインスタグラムの読み取りに必要とされている
+#   ads_read        … ビジネスマネージャ経由でページの役割を持つ場合に、インサイトで追加で求められることがある(読み取りのみ)
+#   public_profile  … 個人・システム利用者の鍵に自動で付く基本の権限
+OPTIONAL_READ_SCOPES = frozenset({"pages_show_list", "ads_read", "public_profile"})
+ALLOWED_READ_SCOPES = REQUIRED_READ_SCOPES | OPTIONAL_READ_SCOPES
+KNOWN_PERMISSION_STATUSES = frozenset({"granted", "declined", "expired"})
+
+
+def evaluate_read_scopes(rows):
+    """/me/permissions の data(一覧)を調べる。問題が無ければ None、あれば止める理由(文字列)。
+
+    許可リスト方式: 付いている(granted)権限が ALLOWED_READ_SCOPES の外にあれば、
+    投稿・管理の権限でも、知らない権限でも止める。必要な権限が1つでも欠けていても止める。
+    返事の形が想定と違うときも止める(確かめられないものは使わない)。"""
+    if not isinstance(rows, list) or not rows:
+        return "鍵の権限の一覧が空のため使いません(確かめられない)"
+    granted = set()
+    for x in rows:
+        if not isinstance(x, dict) or not isinstance(x.get("permission"), str) \
+                or x.get("status") not in KNOWN_PERMISSION_STATUSES:
+            return "鍵の権限の一覧の形が想定と違うため使いません(確かめられない)"
+        if x["status"] == "granted":
+            granted.add(x["permission"])
+    bad = sorted(granted & FORBIDDEN_SCOPES)
+    if bad:
+        return "鍵に投稿・管理の権限が付いているため使いません: " + ", ".join(bad)
+    unknown = sorted(granted - ALLOWED_READ_SCOPES)
+    if unknown:
+        return "鍵に想定外の権限が付いているため使いません: " + ", ".join(unknown)
+    missing = sorted(REQUIRED_READ_SCOPES - granted)
+    if missing:
+        return "数字を読むのに必要な権限が足りないため使いません: " + ", ".join(missing)
+    return None
 
 
 def check_read_only_scopes(scopes):
@@ -129,23 +172,20 @@ def insights_token(env=None, opener=None, graph="https://graph.facebook.com/v21.
         return "", "未接続(読むだけの鍵が未登録)"
     if token in _INSIGHTS_CACHE:
         return _INSIGHTS_CACHE[token]
-    import urllib.parse
-    url = f"{graph}/debug_token?" + urllib.parse.urlencode({"input_token": token})
-    req = urllib.request.Request(url, headers=auth_headers(token))
+    # 権限は鍵の持ち主が自分で見られる /me/permissions で確かめる(2026-11-07 変更)。
+    # 以前の debug_token はアプリの開発者かアプリ用の鍵でないと呼べず、最小限の権限の
+    # システムユーザーの鍵では Meta に断られた(HTTP 400 / code 100)。この方法なら鍵を URL に載せない。
+    req = urllib.request.Request(f"{graph}/me/permissions", headers=auth_headers(token))
     open_fn = opener or urllib.request.urlopen
     try:
         with open_fn(req, timeout=30) as r:
-            data = (json.loads(r.read().decode("utf-8")) or {}).get("data") or {}
+            rows = (json.loads(r.read().decode("utf-8")) or {}).get("data")
     except Exception as e:  # noqa: BLE001
         result = ("", f"鍵の権限を確認できないため使いません({meta_error_summary(e)})")
         _INSIGHTS_CACHE[token] = result
         return result
-    if data.get("is_valid") is not True:
-        result = ("", "鍵が無効です(期限切れ・取り消し済みの可能性)")
-    else:
-        bad = check_read_only_scopes(data.get("scopes"))
-        result = ("", "鍵に投稿・管理の権限が付いているため使いません: " + ", ".join(bad)) if bad \
-            else (token, "ok")
+    why = evaluate_read_scopes(rows)
+    result = ("", why) if why else (token, "ok")
     _INSIGHTS_CACHE[token] = result
     return result
 

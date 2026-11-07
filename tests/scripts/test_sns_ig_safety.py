@@ -498,15 +498,21 @@ def test_hygiene_check_catches_old_ig_feed():
 
 # ---------------------------------------------------------------- 数字を読むだけの鍵(週次レポート・分析)
 
-def _debug_opener(payload=None, exc=None):
+def _perm_opener(perms=None, exc=None, raw=None):
+    """偽の Meta: /me/permissions の返事を返す。perms は {権限名: "granted"/"declined"}。"""
     seen = []
 
     def opener(req, timeout=None):
         seen.append(req)
         if exc:
             raise exc
-        return io.BytesIO(json.dumps({"data": payload}).encode())
+        body = raw if raw is not None else {"data": [{"permission": k, "status": v} for k, v in (perms or {}).items()]}
+        return io.BytesIO(json.dumps(body).encode())
     return opener, seen
+
+
+READ_PERMS = {"instagram_basic": "granted", "instagram_manage_insights": "granted",
+              "pages_read_engagement": "granted", "pages_show_list": "granted"}
 
 
 @pytest.fixture(autouse=True)
@@ -522,27 +528,95 @@ def test_insights_token_missing_never_falls_back_to_publish_key():
 
 
 def test_insights_token_read_only_ok():
-    op, seen = _debug_opener({"is_valid": True, "scopes": ["instagram_basic", "pages_read_engagement"]})
+    op, seen = _perm_opener(READ_PERMS)
     tok, why = sns_safety.insights_token(env={"META_INSIGHTS_TOKEN": FAKE_TOKEN}, opener=op)
     assert tok == FAKE_TOKEN and why == "ok"
-    assert seen[0].get_header("Authorization") == f"Bearer {FAKE_TOKEN}"
+    req = seen[0]
+    assert req.full_url.endswith("/me/permissions")              # debug_token は使わない
+    assert FAKE_TOKEN not in req.full_url                         # 鍵は URL に載せない
+    assert req.get_header("Authorization") == f"Bearer {FAKE_TOKEN}"
 
 
-@pytest.mark.parametrize("payload,needle", [
-    ({"is_valid": True, "scopes": ["instagram_basic", "instagram_content_publish"]}, "投稿・管理の権限"),
-    ({"is_valid": True, "scopes": ["pages_manage_posts"]}, "投稿・管理の権限"),
-    ({"is_valid": False, "scopes": ["instagram_basic"]}, "無効"),
-])
-def test_insights_token_refuses(payload, needle):
-    op, _ = _debug_opener(payload)
+def test_insights_token_declined_publish_is_not_counted():
+    """一度断った(declined)投稿の権限は、付いていない扱い。"""
+    op, _ = _perm_opener({**READ_PERMS, "instagram_content_publish": "declined"})
     tok, why = sns_safety.insights_token(env={"META_INSIGHTS_TOKEN": FAKE_TOKEN}, opener=op)
-    assert tok == "" and needle in why and FAKE_TOKEN not in why
+    assert tok == FAKE_TOKEN and why == "ok"
+
+
+def _check(perms=None, raw=None):
+    op, _ = _perm_opener(perms, raw=raw)
+    return sns_safety.insights_token(env={"META_INSIGHTS_TOKEN": FAKE_TOKEN}, opener=op)
+
+
+REQUIRED_ONLY = {"instagram_basic": "granted", "instagram_manage_insights": "granted",
+                 "pages_read_engagement": "granted"}
+
+
+# --- 正常: 必要な3つがそろい、ほかは「付いていてもよい読み取りの権限」だけ
+@pytest.mark.parametrize("perms", [
+    REQUIRED_ONLY,
+    READ_PERMS,                                                     # + pages_show_list
+    {**READ_PERMS, "ads_read": "granted", "public_profile": "granted"},
+    {**REQUIRED_ONLY, "pages_manage_posts": "declined", "business_management": "expired"},  # 付いていない扱い
+])
+def test_scope_ok(perms):
+    tok, why = _check(perms)
+    assert tok == FAKE_TOKEN and why == "ok", why
+
+
+# --- 不足: 必要な権限が1つでも欠けたら止める(断った・期限切れも欠けた扱い)
+@pytest.mark.parametrize("missing", sorted(sns_safety.REQUIRED_READ_SCOPES))
+@pytest.mark.parametrize("how", ["absent", "declined", "expired"])
+def test_scope_missing_required_stops(missing, how):
+    perms = dict(READ_PERMS)
+    if how == "absent":
+        perms.pop(missing)
+    else:
+        perms[missing] = how
+    tok, why = _check(perms)
+    assert tok == "" and "足りない" in why and missing in why and FAKE_TOKEN not in why
+
+
+# --- 禁止: 投稿・管理の権限が付いていたら止める
+@pytest.mark.parametrize("bad", ["instagram_content_publish", "pages_manage_posts", "business_management",
+                                 "ads_management", "pages_messaging", "instagram_manage_comments"])
+def test_scope_forbidden_stops(bad):
+    tok, why = _check({**READ_PERMS, bad: "granted"})
+    assert tok == "" and "投稿・管理の権限" in why and bad in why
+
+
+# --- 未知: 許可リストに無い権限が付いていたら、読み取りに見えても止める
+@pytest.mark.parametrize("unknown", ["read_insights", "email", "pages_read_user_content",
+                                     "instagram_business_basic", "some_new_permission"])
+def test_scope_unknown_stops(unknown):
+    tok, why = _check({**READ_PERMS, unknown: "granted"})
+    assert tok == "" and "想定外の権限" in why and unknown in why
+
+
+# --- 予期しない返事の形: 確かめられないので止める
+@pytest.mark.parametrize("raw", [
+    {"data": []},                                                   # 空
+    {"no_data": True},                                              # data が無い
+    {"data": "instagram_basic"},                                    # 一覧でない
+    {"data": [["instagram_basic", "granted"]]},                     # 要素が辞書でない
+    {"data": [{"permission": 1, "status": "granted"}]},             # 名前が文字列でない
+    {"data": [{"permission": "instagram_basic"}]},                  # status が無い
+    {"data": [{"permission": "instagram_basic", "status": "GRANTED"}]},  # 知らない status
+    [{"permission": "instagram_basic", "status": "granted"}],       # 全体が辞書でない
+])
+def test_scope_malformed_response_stops(raw):
+    tok, why = _check(raw=raw)
+    assert tok == ""
+    assert ("確かめられない" in why) or ("確認できない" in why), why
+    assert FAKE_TOKEN not in why
 
 
 def test_insights_token_unverifiable_refuses_safely():
-    op, _ = _debug_opener(exc=_http_error({"error": {"message": f"x {FAKE_TOKEN}", "code": 190}}))
+    op, _ = _perm_opener(exc=_http_error({"error": {"message": f"x {FAKE_TOKEN}", "code": 100,
+                                                    "type": "OAuthException"}}))
     tok, why = sns_safety.insights_token(env={"META_INSIGHTS_TOKEN": FAKE_TOKEN}, opener=op)
-    assert tok == "" and "確認できない" in why and FAKE_TOKEN not in why
+    assert tok == "" and "確認できない" in why and "code=100" in why and FAKE_TOKEN not in why
 
 
 def test_weekly_report_uses_header_not_url(monkeypatch):
