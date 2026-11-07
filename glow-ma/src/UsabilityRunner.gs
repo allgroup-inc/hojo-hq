@@ -12,7 +12,7 @@ var TODAY_LIST_SIZE_PROPERTY = "TODAY_LIST_SIZE";
 var TAB_TIDY_DONE_PROPERTY = "TAB_TIDY_V1_DONE";
 
 /** セルに書く文字の先頭が = + - @ のときは数式と読まれないよう ' を付ける */
-function asSheetText_(value) {
+function todayListCellText_(value) {
   if (value === null || value === undefined) return "";
   if (typeof value === "number") return value;
   var text = String(value);
@@ -37,7 +37,7 @@ function updateTodayList() {
   var sheet = ss.getSheetByName(GlowTodayList.TODAY_LIST_SHEET_NAME) || ss.insertSheet(GlowTodayList.TODAY_LIST_SHEET_NAME);
   sheet.clearContents();
   var values = [headers].concat(list.map(function (e) {
-    return headers.map(function (h) { return asSheetText_(e[h]); });
+    return headers.map(function (h) { return todayListCellText_(e[h]); });
   }));
   // 電話番号の先頭の0が消えないよう、文字として書く
   sheet.getRange(1, 1, values.length, headers.length).setNumberFormat("@").setValues(values);
