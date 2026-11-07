@@ -98,7 +98,7 @@ def meta_post(path, params, graph="https://graph.facebook.com/v21.0", opener=Non
 # ---------------------------------------------------------------- 数字を読むだけの鍵
 
 # 週次レポート・分析は Meta から数字を読むだけ。投稿できる鍵を使わず、読むだけの権限で
-# 作った鍵(META_INSIGHTS_TOKEN)を使う(2026-11-03 設計)。使う前に権限を Meta に問い合わせ、
+# 作った鍵(META_INSIGHTS_TOKEN)を使う(2026-11-03 設計)。使う前に権限を Meta に問い合わせ(/me/permissions)、
 # 投稿・管理の権限が付いていたら使わない。確かめられないときも使わない(フェイルクローズ)。
 INSIGHTS_ENV = "META_INSIGHTS_TOKEN"
 FORBIDDEN_SCOPES = frozenset({
@@ -129,23 +129,30 @@ def insights_token(env=None, opener=None, graph="https://graph.facebook.com/v21.
         return "", "未接続(読むだけの鍵が未登録)"
     if token in _INSIGHTS_CACHE:
         return _INSIGHTS_CACHE[token]
-    import urllib.parse
-    url = f"{graph}/debug_token?" + urllib.parse.urlencode({"input_token": token})
-    req = urllib.request.Request(url, headers=auth_headers(token))
+    # 権限は鍵の持ち主が自分で見られる /me/permissions で確かめる(2026-11-07 変更)。
+    # 以前の debug_token はアプリの開発者かアプリ用の鍵でないと呼べず、最小限の権限の
+    # システムユーザーの鍵では Meta に断られた(HTTP 400 / code 100)。この方法なら鍵を URL に載せない。
+    req = urllib.request.Request(f"{graph}/me/permissions", headers=auth_headers(token))
     open_fn = opener or urllib.request.urlopen
     try:
         with open_fn(req, timeout=30) as r:
-            data = (json.loads(r.read().decode("utf-8")) or {}).get("data") or {}
+            rows = (json.loads(r.read().decode("utf-8")) or {}).get("data")
     except Exception as e:  # noqa: BLE001
         result = ("", f"鍵の権限を確認できないため使いません({meta_error_summary(e)})")
         _INSIGHTS_CACHE[token] = result
         return result
-    if data.get("is_valid") is not True:
-        result = ("", "鍵が無効です(期限切れ・取り消し済みの可能性)")
+    if not isinstance(rows, list) or not rows:
+        result = ("", "鍵の権限の一覧が空のため使いません(確かめられない)")
     else:
-        bad = check_read_only_scopes(data.get("scopes"))
-        result = ("", "鍵に投稿・管理の権限が付いているため使いません: " + ", ".join(bad)) if bad \
-            else (token, "ok")
+        granted = [str(x.get("permission", "")) for x in rows
+                   if isinstance(x, dict) and x.get("status") == "granted"]
+        bad = check_read_only_scopes(granted)
+        if bad:
+            result = ("", "鍵に投稿・管理の権限が付いているため使いません: " + ", ".join(bad))
+        elif not granted:
+            result = ("", "鍵に有効な権限が1つもないため使いません")
+        else:
+            result = (token, "ok")
     _INSIGHTS_CACHE[token] = result
     return result
 
