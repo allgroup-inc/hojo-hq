@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const m = require("../glow-ma/wld02/nameMatch.js");
+const m = require("../glow-ma/src/nameMatch.js");
 
 test("会社名は法人の種類・略号・空白・全角をそろえる", () => {
   assert.equal(m.normalizeCompanyName("株式会社 テスト物産"), "テスト物産");

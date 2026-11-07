@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const k = require("../glow-ma/wld02/wld02Kpi.js");
+const k = require("../glow-ma/src/wld02Kpi.js");
 
 const W = "世界の架け橋";
 const WEEK = "2026-11-02"; // 月曜
