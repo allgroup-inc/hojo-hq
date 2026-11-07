@@ -1,0 +1,4 @@
+{"ts": "2026-11-07T06:06:02Z", "session_id": "231f8613-ac8a-580b-9ce3-6dfd62ca2cdc", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/glow-ma-guide-today-list", "tool": "Bash", "program": "git"}
+{"ts": "2026-11-07T06:06:15Z", "session_id": "231f8613-ac8a-580b-9ce3-6dfd62ca2cdc", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/glow-ma-guide-today-list", "tool": "Bash", "program": "python3"}
+{"ts": "2026-11-07T06:06:23Z", "session_id": "231f8613-ac8a-580b-9ce3-6dfd62ca2cdc", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/glow-ma-guide-today-list", "tool": "Bash", "program": "git"}
+{"ts": "2026-11-07T06:07:56Z", "session_id": "231f8613-ac8a-580b-9ce3-6dfd62ca2cdc", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/glow-ma-guide-today-list", "tool": "Bash", "program": "until"}
