@@ -71,7 +71,7 @@ class Pipeline(unittest.TestCase):
     """収集処理(main)をそのまま、複製した作業場所で動かす。"""
 
     def run_fetch(self, prev_extra=(), unreachable=(), all_down=False, end_id=None, drop_id=None, retire_id=None,
-                  prev_exclude=(), unreachable_ids=()):
+                  prev_exclude=(), unreachable_ids=(), down_code="HTTP 503", seed_patch=None):
         w = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, w)
         shutil.copytree(os.path.join(ROOT, "scripts"), os.path.join(w, "scripts"))
@@ -93,8 +93,10 @@ f.time.sleep = lambda s: None
 f.robots_ok = lambda u: True
 down = {list(unreachable)!r}
 down_urls = {down_urls!r}
-f.reachable = lambda u: (False, "HTTP 503") if ({all_down} or urllib.parse.urlparse(u).netloc in down or u in down_urls) else (True, "HTTP 200")
+f.reachable = lambda u: (False, {down_code!r}) if ({all_down} or urllib.parse.urlparse(u).netloc in down or u in down_urls) else (True, "HTTP 200")
 ids = {{'end': {end_id!r}, 'drop': {drop_id!r}, 'retire': {retire_id!r}}}
+for s in f.SEEDS:
+    s.update({(seed_patch or {})!r}.get(s['id'], {{}}))
 if ids['end']:
     for s in f.SEEDS:
         if s['id'] == ids['end']: s['deadline'] = '2026-01-01'; s['deadline_type'] = '期限あり'
@@ -177,6 +179,44 @@ f.main()
         r, prev, pub, status, _ = self.run_fetch(retire_id=target)
         self.assertTrue(status["publish"], status)
         self.assertIn("廃止記録(2026-11-01: 制度終了 / https://example.go.jp/notice)", [x["evidence"] for x in status["legit_removed"]])
+
+    # ---- 出典URLの修正が収集・公開に与える影響(合成データ。URL は架空のもの) ----
+
+    def test_dead_url_shared_with_unchecked_seed_is_reported(self):
+        # 児童扶養手当の出典が 404。同じURLを到達性の確認なしで載せている制度を記録と警告に出す(公開の判定は変えない)
+        r, prev, pub, status, _ = self.run_fetch(prev_exclude=["fk-kuni-jidofuyoteate"], unreachable_ids=["fk-kuni-jidofuyoteate"],
+                                                 down_code="HTTP 404")
+        self.assertTrue(status["publish"])
+        shared = {x["id"]: x for x in status["source_dead_shared"]}
+        self.assertIn("fk-ken-hitorioya-sodan", shared)
+        self.assertEqual(shared["fk-ken-hitorioya-sodan"]["evidence"], "fk-kuni-jidofuyoteate: URL到達不可(HTTP 404)")
+        self.assertIn("fk-ken-hitorioya-sodan", {i["id"] for i in pub["items"]})  # 載せ続ける(外すのは原文の確認後)
+        self.assertIn("::warning::出典のページが無い(404/410)可能性があります", r.stdout)
+        # 一時的な障害(503)では出さない
+        r, prev, pub, status, _ = self.run_fetch(prev_exclude=["fk-kuni-jidofuyoteate"], unreachable_ids=["fk-kuni-jidofuyoteate"])
+        self.assertEqual(status["source_dead_shared"], [])
+
+    def test_fixed_url_brings_required_program_back(self):
+        # 出典を取得できるページに直すと、児童扶養手当は新しく載る制度として戻り、公開は止まらない
+        new_url = "https://example.lg.jp/kosodate/jidofuyoteate.html"
+        r, prev, pub, status, _ = self.run_fetch(prev_exclude=["fk-kuni-jidofuyoteate"],
+                                                 seed_patch={"fk-kuni-jidofuyoteate": {"source_url": new_url}})
+        self.assertTrue(status["publish"], status["reasons"])
+        self.assertEqual(status["required_missing"], [])
+        item = next(i for i in pub["items"] if i["id"] == "fk-kuni-jidofuyoteate")
+        self.assertEqual(item["source_url"], new_url)
+        self.assertEqual(item["issuer"], "こども家庭庁")  # 制度IDと発行元は変えない
+
+    def test_turning_on_check_for_published_seed_with_dead_url_holds(self):
+        # 公開中の制度の到達性の確認を有効にし、そのURLが取れなければ、前回公開分の取得失敗として公開を保留する
+        # (出典を直さずに assume_reachable だけ外すと、公開用データの更新が止まる)
+        url = next(s["source_url"] for s in ff.SEEDS if s["id"] == "fk-ken-hitorioya-sodan")
+        r, prev, pub, status, _ = self.run_fetch(unreachable_ids=["fk-ken-hitorioya-sodan"], down_code="HTTP 404",
+                                                 seed_patch={"fk-ken-hitorioya-sodan": {"assume_reachable": False}})
+        self.assertFalse(status["publish"])
+        self.assertKept(prev, pub)
+        self.assertIn("fk-ken-hitorioya-sodan", [x["id"] for x in status["failed"] if x["in_previous_public"]])
+        self.assertTrue(url)
 
 
 class Reachable(unittest.TestCase):
