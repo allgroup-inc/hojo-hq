@@ -61,7 +61,8 @@ def publish(args, pkg, caption, opener=None, sleep=time.sleep):
     ig_user = os.environ.get("IG_USER_ID", "")
     if not (token and ig_user):
         raise SafetyError("投稿用の設定(FB_PAGE_ACCESS_TOKEN / IG_USER_ID)が揃っていません")
-    sns_safety.check_destination(os.environ.get("SNS_DEST_FP_MIKATA", ""), ig_user)
+    # 定期投稿と同じ材料(ページ番号 + Instagram の番号)で照合する
+    sns_safety.check_mikata_destination()
     url = pkg["images"][0]["url"]
     params = {"image_url": url, "access_token": token}
     if args.kind == "story":

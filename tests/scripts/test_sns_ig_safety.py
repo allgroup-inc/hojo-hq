@@ -365,7 +365,8 @@ def manual(tmp_path, monkeypatch):
     monkeypatch.setenv("GITHUB_SHA", FAKE_SHA)
     monkeypatch.setenv("IG_USER_ID", "222")
     monkeypatch.setenv("FB_PAGE_ACCESS_TOKEN", FAKE_TOKEN)
-    monkeypatch.setenv("SNS_DEST_FP_MIKATA", sns_safety.destination_fingerprint("222"))
+    monkeypatch.setenv("FB_PAGE_ID", "111")
+    monkeypatch.setenv("SNS_DEST_FP_MIKATA", sns_safety.destination_fingerprint("111", "222"))
     calls = []
 
     def fake_meta_post(path, params, **kw):
@@ -497,15 +498,21 @@ def test_hygiene_check_catches_old_ig_feed():
 
 # ---------------------------------------------------------------- 数字を読むだけの鍵(週次レポート・分析)
 
-def _debug_opener(payload=None, exc=None):
+def _perm_opener(perms=None, exc=None, raw=None):
+    """偽の Meta: /me/permissions の返事を返す。perms は {権限名: "granted"/"declined"}。"""
     seen = []
 
     def opener(req, timeout=None):
         seen.append(req)
         if exc:
             raise exc
-        return io.BytesIO(json.dumps({"data": payload}).encode())
+        body = raw if raw is not None else {"data": [{"permission": k, "status": v} for k, v in (perms or {}).items()]}
+        return io.BytesIO(json.dumps(body).encode())
     return opener, seen
+
+
+READ_PERMS = {"instagram_basic": "granted", "instagram_manage_insights": "granted",
+              "pages_read_engagement": "granted", "pages_show_list": "granted"}
 
 
 @pytest.fixture(autouse=True)
@@ -521,27 +528,95 @@ def test_insights_token_missing_never_falls_back_to_publish_key():
 
 
 def test_insights_token_read_only_ok():
-    op, seen = _debug_opener({"is_valid": True, "scopes": ["instagram_basic", "pages_read_engagement"]})
+    op, seen = _perm_opener(READ_PERMS)
     tok, why = sns_safety.insights_token(env={"META_INSIGHTS_TOKEN": FAKE_TOKEN}, opener=op)
     assert tok == FAKE_TOKEN and why == "ok"
-    assert seen[0].get_header("Authorization") == f"Bearer {FAKE_TOKEN}"
+    req = seen[0]
+    assert req.full_url.endswith("/me/permissions")              # debug_token は使わない
+    assert FAKE_TOKEN not in req.full_url                         # 鍵は URL に載せない
+    assert req.get_header("Authorization") == f"Bearer {FAKE_TOKEN}"
 
 
-@pytest.mark.parametrize("payload,needle", [
-    ({"is_valid": True, "scopes": ["instagram_basic", "instagram_content_publish"]}, "投稿・管理の権限"),
-    ({"is_valid": True, "scopes": ["pages_manage_posts"]}, "投稿・管理の権限"),
-    ({"is_valid": False, "scopes": ["instagram_basic"]}, "無効"),
-])
-def test_insights_token_refuses(payload, needle):
-    op, _ = _debug_opener(payload)
+def test_insights_token_declined_publish_is_not_counted():
+    """一度断った(declined)投稿の権限は、付いていない扱い。"""
+    op, _ = _perm_opener({**READ_PERMS, "instagram_content_publish": "declined"})
     tok, why = sns_safety.insights_token(env={"META_INSIGHTS_TOKEN": FAKE_TOKEN}, opener=op)
-    assert tok == "" and needle in why and FAKE_TOKEN not in why
+    assert tok == FAKE_TOKEN and why == "ok"
+
+
+def _check(perms=None, raw=None):
+    op, _ = _perm_opener(perms, raw=raw)
+    return sns_safety.insights_token(env={"META_INSIGHTS_TOKEN": FAKE_TOKEN}, opener=op)
+
+
+REQUIRED_ONLY = {"instagram_basic": "granted", "instagram_manage_insights": "granted",
+                 "pages_read_engagement": "granted"}
+
+
+# --- 正常: 必要な3つがそろい、ほかは「付いていてもよい読み取りの権限」だけ
+@pytest.mark.parametrize("perms", [
+    REQUIRED_ONLY,
+    READ_PERMS,                                                     # + pages_show_list
+    {**READ_PERMS, "ads_read": "granted", "public_profile": "granted"},
+    {**REQUIRED_ONLY, "pages_manage_posts": "declined", "business_management": "expired"},  # 付いていない扱い
+])
+def test_scope_ok(perms):
+    tok, why = _check(perms)
+    assert tok == FAKE_TOKEN and why == "ok", why
+
+
+# --- 不足: 必要な権限が1つでも欠けたら止める(断った・期限切れも欠けた扱い)
+@pytest.mark.parametrize("missing", sorted(sns_safety.REQUIRED_READ_SCOPES))
+@pytest.mark.parametrize("how", ["absent", "declined", "expired"])
+def test_scope_missing_required_stops(missing, how):
+    perms = dict(READ_PERMS)
+    if how == "absent":
+        perms.pop(missing)
+    else:
+        perms[missing] = how
+    tok, why = _check(perms)
+    assert tok == "" and "足りない" in why and missing in why and FAKE_TOKEN not in why
+
+
+# --- 禁止: 投稿・管理の権限が付いていたら止める
+@pytest.mark.parametrize("bad", ["instagram_content_publish", "pages_manage_posts", "business_management",
+                                 "ads_management", "pages_messaging", "instagram_manage_comments"])
+def test_scope_forbidden_stops(bad):
+    tok, why = _check({**READ_PERMS, bad: "granted"})
+    assert tok == "" and "投稿・管理の権限" in why and bad in why
+
+
+# --- 未知: 許可リストに無い権限が付いていたら、読み取りに見えても止める
+@pytest.mark.parametrize("unknown", ["read_insights", "email", "pages_read_user_content",
+                                     "instagram_business_basic", "some_new_permission"])
+def test_scope_unknown_stops(unknown):
+    tok, why = _check({**READ_PERMS, unknown: "granted"})
+    assert tok == "" and "想定外の権限" in why and unknown in why
+
+
+# --- 予期しない返事の形: 確かめられないので止める
+@pytest.mark.parametrize("raw", [
+    {"data": []},                                                   # 空
+    {"no_data": True},                                              # data が無い
+    {"data": "instagram_basic"},                                    # 一覧でない
+    {"data": [["instagram_basic", "granted"]]},                     # 要素が辞書でない
+    {"data": [{"permission": 1, "status": "granted"}]},             # 名前が文字列でない
+    {"data": [{"permission": "instagram_basic"}]},                  # status が無い
+    {"data": [{"permission": "instagram_basic", "status": "GRANTED"}]},  # 知らない status
+    [{"permission": "instagram_basic", "status": "granted"}],       # 全体が辞書でない
+])
+def test_scope_malformed_response_stops(raw):
+    tok, why = _check(raw=raw)
+    assert tok == ""
+    assert ("確かめられない" in why) or ("確認できない" in why), why
+    assert FAKE_TOKEN not in why
 
 
 def test_insights_token_unverifiable_refuses_safely():
-    op, _ = _debug_opener(exc=_http_error({"error": {"message": f"x {FAKE_TOKEN}", "code": 190}}))
+    op, _ = _perm_opener(exc=_http_error({"error": {"message": f"x {FAKE_TOKEN}", "code": 100,
+                                                    "type": "OAuthException"}}))
     tok, why = sns_safety.insights_token(env={"META_INSIGHTS_TOKEN": FAKE_TOKEN}, opener=op)
-    assert tok == "" and "確認できない" in why and FAKE_TOKEN not in why
+    assert tok == "" and "確認できない" in why and "code=100" in why and FAKE_TOKEN not in why
 
 
 def test_weekly_report_uses_header_not_url(monkeypatch):
@@ -592,3 +667,148 @@ def test_funnel_uses_header_not_url(monkeypatch):
 def test_report_workflows_have_no_publish_key(name):
     wf, text = _wf(name)
     assert "FB_PAGE_ACCESS_TOKEN" not in json.dumps(wf) and "META_INSIGHTS_TOKEN" in text
+
+
+# ---------------------------------------------------------------- 投稿先の指紋は1つで定期・手動の両方に効く
+
+
+def _mikata_env(fp, page="111", ig="222"):
+    return {"SNS_DEST_FP_MIKATA": fp, "FB_PAGE_ID": page, "IG_USER_ID": ig}
+
+
+def test_one_fingerprint_works_for_both_posting_paths(monkeypatch):
+    """登録する指紋1つで、定期投稿(post_social)と手動投稿(ig_manual_post)の両方が通ること。"""
+    import ig_manual_post as im
+    import post_social as ps
+    fp = sns_safety.destination_fingerprint("111", "222")
+    for k, v in _mikata_env(fp).items():
+        monkeypatch.setenv(k, v)
+    sns_safety.check_mikata_destination()          # 両方の処理が呼ぶ照合
+    for mod in (im, ps):
+        src = open(mod.__file__, encoding="utf-8").read()
+        assert "check_mikata_destination()" in src, mod.__name__
+        assert "check_destination(" not in src.replace("check_mikata_destination(", ""), mod.__name__
+
+
+@pytest.mark.parametrize("env,needle", [
+    (_mikata_env(""), "未設定"),
+    (_mikata_env(sns_safety.destination_fingerprint("111", "222"), page=""), "番号が未設定"),
+    (_mikata_env(sns_safety.destination_fingerprint("111", "222"), ig="999"), "一致しません"),
+    (_mikata_env(sns_safety.destination_fingerprint("222")), "一致しません"),   # 以前の手動投稿の作り方
+])
+def test_mikata_destination_blocks(env, needle):
+    with pytest.raises(SafetyError, match=needle):
+        sns_safety.check_mikata_destination(env)
+
+
+def test_fingerprint_cli_matches_library():
+    r = subprocess.run([sys.executable, os.path.join(SCRIPTS, "sns_safety.py"), "--fingerprint", "111", "222"],
+                       capture_output=True, text=True)
+    assert r.returncode == 0 and r.stdout.strip() == sns_safety.destination_fingerprint("111", "222")
+
+
+@pytest.mark.parametrize("name", ["ig-feed.yml", "ig-story.yml"])
+def test_manual_post_job_gets_page_id(name):
+    wf, _ = _wf(name)
+    blob = json.dumps(wf["jobs"]["post"])
+    assert "secrets.FB_PAGE_ID" in blob and "SNS_DEST_FP_MIKATA" in blob
+
+
+# ---------------------------------------------------------------- 実際の呼び出しの流れで、1つの指紋が3つの投稿経路すべてに効くこと
+# 定期投稿(post_social.main)・手動フィード・手動ストーリーズ(ig_manual_post.main)を、
+# 同じ環境変数(FB_PAGE_ID / IG_USER_ID / SNS_DEST_FP_MIKATA)のまま順に通す。Meta への通信は偽物。
+
+PATHS = ("social", "feed", "story")
+_ORIG_VERIFY = sns_safety.verify_before_publish   # 読み込み時点の本物(他のテストの差し替えを引き継がない)
+
+
+@pytest.fixture
+def all_paths(social, monkeypatch):
+    """social fixture(定期投稿の準備・環境変数・偽の Meta)に、手動投稿の準備を足す。"""
+    import ig_manual_post as im
+    ps, root, social_calls = social
+    img = root / "posts" / "manual.png"
+    img.write_bytes(b"\x89PNG synthetic manual")
+    cap = root / "cap.txt"
+    cap.write_text("手動投稿の本文", encoding="utf-8")
+    monkeypatch.setattr(im, "BASE", str(root))
+    monkeypatch.setattr(im.time, "sleep", lambda s: None)
+    manual_calls = []
+
+    def fake_meta_post(path, params, **kw):
+        manual_calls.append(path)
+        return {"id": "c1"}
+    monkeypatch.setattr(sns_safety, "meta_post", fake_meta_post)
+    return ps, im, root, img, cap, social_calls, manual_calls
+
+
+def _run_path(path, ps, im, root, img, cap, monkeypatch, capsys):
+    """1つの投稿経路を「見本 → 承認後の投稿」の順で、本物の main() から動かす。戻り値: 投稿まで進んだか。"""
+    if path == "social":
+        out = _preview(ps, monkeypatch, capsys)
+        _IMG[0] = (root / "posts" / "images" / "01_seido.png").read_bytes()
+        try:
+            _post(ps, monkeypatch, out["stem"], out["pkg_digest"], out["pkg_created"])
+            return True
+        except SystemExit:
+            return False
+    extra = ["--caption-file", str(cap)] if path == "feed" else []
+    assert im.main(["--kind", path, "--image", "posts/manual.png", "--preview", *extra]) == 0
+    out = dict(l.split("=", 1) for l in capsys.readouterr().out.splitlines() if "=" in l)
+    monkeypatch.setattr(sns_safety, "verify_before_publish",
+                        lambda p, d, **kw: _ORIG_VERIFY(p, d, fetch=lambda u: img.read_bytes()))
+    return im.main(["--kind", path, "--image", "posts/manual.png", *extra, "--post",
+                    "--approved-digest", out["pkg_digest"], "--approved-created", out["pkg_created"]]) == 0
+
+
+def test_one_fp_passes_all_three_real_paths(all_paths, monkeypatch, capsys):
+    ps, im, root, img, cap, social_calls, manual_calls = all_paths
+    fp = sns_safety.destination_fingerprint("111", "222")
+    monkeypatch.setenv("SNS_DEST_FP_MIKATA", fp)      # 3経路とも同じ1つの値
+    results = {p: _run_path(p, ps, im, root, img, cap, monkeypatch, capsys) for p in PATHS}
+    assert results == {"social": True, "feed": True, "story": True}, results
+    assert social_calls == ["/111/photos", "/222/media", "/222/media_publish"]
+    assert manual_calls == ["/222/media", "/222/media_publish"] * 2   # フィード・ストーリーズ
+
+
+@pytest.mark.parametrize("case", ["id_mismatch", "fp_unset", "old_format_fp", "page_id_missing"])
+@pytest.mark.parametrize("path", PATHS)
+def test_bad_destination_stops_before_publish(all_paths, monkeypatch, capsys, case, path):
+    """投稿先が合わないときは、本物の main() の流れで、Meta を1回も呼ばずに止まること。"""
+    ps, im, root, img, cap, social_calls, manual_calls = all_paths
+    good = sns_safety.destination_fingerprint("111", "222")
+    if case == "id_mismatch":
+        monkeypatch.setenv("SNS_DEST_FP_MIKATA", good)
+        monkeypatch.setenv("IG_USER_ID", "999")                     # 別のアカウントにすり替わった
+    elif case == "fp_unset":
+        monkeypatch.setenv("SNS_DEST_FP_MIKATA", "")
+    elif case == "old_format_fp":
+        monkeypatch.setenv("SNS_DEST_FP_MIKATA", sns_safety.destination_fingerprint("222"))  # 以前の手動投稿の作り方
+    elif case == "page_id_missing":
+        monkeypatch.setenv("SNS_DEST_FP_MIKATA", good)
+        monkeypatch.setenv("FB_PAGE_ID", "")
+    assert _run_path(path, ps, im, root, img, cap, monkeypatch, capsys) is False
+    assert social_calls == [] and manual_calls == []
+
+
+@pytest.mark.parametrize("name,script", [
+    ("social-post.yml", "post_social.py"),
+    ("ig-feed.yml", "ig_manual_post.py"),
+    ("ig-story.yml", "ig_manual_post.py"),
+])
+def test_workflow_passes_ids_to_the_posting_step(name, script):
+    """承認付きの投稿ジョブの「投稿スクリプトを動かす手順」に、照合に使う3つが正しい出どころから渡ること。"""
+    wf, _ = _wf(name)
+    job = wf["jobs"]["post"]
+    assert job.get("environment") == "sns-approval"
+    assert job.get("if") == "github.ref == 'refs/heads/main'"
+    steps = [s for s in job["steps"] if script in (s.get("run") or "") and "--preview" not in s.get("run", "")]
+    assert len(steps) == 1, steps
+    env = steps[0].get("env") or {}
+    assert env.get("FB_PAGE_ID") == "${{ secrets.FB_PAGE_ID }}"
+    assert env.get("IG_USER_ID") == "${{ secrets.IG_USER_ID }}"
+    assert env.get("SNS_DEST_FP_MIKATA") == "${{ vars.SNS_DEST_FP_MIKATA }}"
+    # 見本のジョブには投稿用の鍵も番号も渡さない
+    for jn, j in wf["jobs"].items():
+        if jn != "post":
+            assert "FB_PAGE_ACCESS_TOKEN" not in json.dumps(j), jn

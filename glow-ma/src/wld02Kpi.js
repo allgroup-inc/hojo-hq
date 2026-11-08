@@ -1,11 +1,10 @@
-/* 世界の架け橋 WLD-02 相談企業KPIの集計ロジック(2026-11-04 開発・テスト段階)
+/* 世界の架け橋 WLD-02 相談企業KPIの集計ロジック(2026-11-04 開発、2026-11-07 本番へ)
  *
  * 台帳を触らない計算だけの関数。Node(module.exports)とGAS(global.GlowWld02Kpi)の両方で動くUMD形式。
  * テスト: tests/glow_ma_wld02Kpi.test.mjs
  *
- * 置き場所について: glow-ma/src/ ではなく glow-ma/wld02/ に置いている。src/ に入れると main への
- * マージで台帳のスクリプトへ自動反映されるため。本番台帳への反映(4つのタブの作成)と自動実行の登録は、
- * それぞれ別に承認を得てから src/ へ移す(設計書 v0 §6 の段階4・5)。
+ * 置き場所について: 2026-11-07 小柳さん承認(改善⑦)で glow-ma/wld02/ から glow-ma/src/ へ移した
+ * (設計書 v0 §6 の段階4・5)。タブの作成と毎週の集計は Wld02Runner.gs が行う。
  *
  * 決まりごと(2026-11-02 WLD-02 決裁・2026-11-04 承認の推奨):
  * - 相談 = 確認担当が「確認済み」とした、実際の対面・オンライン面談だけ。電話・LINEのみは数えない
@@ -42,8 +41,19 @@
     "週の開始日", "集計日時", "状態",
     "相談企業数_累計", "相談企業数_週内の新規",
     "掲載契約企業数_累計", "掲載契約企業数_有効", "掲載契約企業数_参考_10月4日より前",
-    "確認待ちの面談数", "流入経路の要確認数", "実行ID"
+    "確認待ちの面談数", "流入経路の要確認数", "実行ID",
+    // 2026-11-06 §9-3: 参考の数字(正式KPIは上の相談企業数・掲載契約企業数)。列は末尾に足す
+    "問い合わせ企業数_累計", "問い合わせ企業数_週内の新規",
+    "問い合わせ企業のうち相談企業数", "相談企業のうち掲載契約企業数",
+    "問い合わせから相談の割合", "相談から掲載契約の割合",
+    "目標までの残り社数", "目標日までの残り週数", "必要な週あたりの相談数"
   ];
+
+  // 問い合わせに数える対応履歴の種別(§9-2。電話・LINEだけの問い合わせも、ここでは数える。正式KPIの相談とは別)
+  var INQUIRY_TYPES = ["入電", "返信", "資料請求", "面談実施"];
+  // 割合は母数が少ないと大きく揺れるため、この数より少なければ出さない(§9-3)
+  var RATIO_MIN_BASE = 10;
+  var NO_VALUE = "—";
 
   function str(v) {
     return v === null || v === undefined ? "" : String(v).trim();
@@ -57,7 +67,10 @@
   function toDate(v) {
     if (v instanceof Date) {
       if (isNaN(v.getTime())) return "";
-      return v.getFullYear() + "-" + pad2(v.getMonth() + 1) + "-" + pad2(v.getDate());
+      // 日本時間の日付にそろえる(2026-11-06: 動く場所の時刻設定に左右されないようにする。
+      // GASは日本時間、テストや他の環境はUTCのことがあり、0時前後の面談が別の週に入るのを防ぐ)
+      var jst = new Date(v.getTime() + 9 * 60 * 60 * 1000);
+      return jst.getUTCFullYear() + "-" + pad2(jst.getUTCMonth() + 1) + "-" + pad2(jst.getUTCDate());
     }
     var m = /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/.exec(str(v));
     if (!m) return "";
@@ -138,10 +151,50 @@
       toDate(row.面談日) >= KPI_START_DATE;
   }
 
+  /* 確認日時を並べ替えできる形("YYYY-MM-DD HH:MM:SS"、日本時間)にする。読めなければ "" */
+  function toStamp(v) {
+    if (v instanceof Date) {
+      if (isNaN(v.getTime())) return "";
+      var jst = new Date(v.getTime() + 9 * 60 * 60 * 1000);
+      return jst.getUTCFullYear() + "-" + pad2(jst.getUTCMonth() + 1) + "-" + pad2(jst.getUTCDate()) + " " +
+        pad2(jst.getUTCHours()) + ":" + pad2(jst.getUTCMinutes()) + ":" + pad2(jst.getUTCSeconds());
+    }
+    var m = /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(str(v));
+    if (!m || !toDate(m[1] + "-" + m[2] + "-" + m[3])) return "";
+    return toDate(m[1] + "-" + m[2] + "-" + m[3]) + " " + pad2(Number(m[4] || 0)) + ":" + (m[5] || "00") + ":" + (m[6] || "00");
+  }
+
+  /* 面談確認記録のうち、今有効な行だけを返す(2026-11-06)。
+   * 同じ面談(元の履歴ID)の行は、確認日時(同じなら後の行)が最も新しい1行だけを見る。
+   * - その行が取消なら、その面談は「判定なし」(確認待ち)に戻る。それより古い判定は生き返らせない
+   *   (新しい判定を取り消した人は、古い判定に戻すとは言っていないため。戻したいときは判定の行を足す)
+   * - 「対象外」→「確認済み」にも、「確認済み」→「対象外」にも、行を足すだけで判定をやり直せる
+   * 元の履歴IDが空の行(台帳に無い面談を直接記録したもの)は、1行ずつ別の面談として扱い、取消の行は外す。
+   * problems を渡すと、確認日時が読めない行が同じ面談に混ざっているときに知らせる(並び順で決めたため) */
+  function effectiveConfirmations(confirmRows, problems) {
+    var latest = {}, direct = [], unreadable = {};
+    (confirmRows || []).forEach(function (row, i) {
+      var hid = str(row.元の履歴ID);
+      if (!hid) { if (!isCancelled(row)) direct.push(row); return; }
+      var at = toStamp(row.確認日時);
+      var cur = latest[hid];
+      if (cur && (!at || !cur.at)) unreadable[hid] = true;
+      if (!cur || at > cur.at || (at === cur.at && i > cur.i)) latest[hid] = { row: row, at: at, i: i };
+    });
+    if (problems) {
+      Object.keys(unreadable).sort().forEach(function (hid) {
+        problems.push("面談確認記録: 同じ面談(元の履歴ID " + hid + ")に確認日時が読めない行があり、行の並び順で判定を決めました");
+      });
+    }
+    return direct.concat(Object.keys(latest)
+      .filter(function (k) { return !isCancelled(latest[k].row); })
+      .map(function (k) { return latest[k].row; }));
+  }
+
   // 相談企業(統合後の企業ID → 最初の確認済み面談日)
-  function consultationFirstDates(confirmRows, resolver) {
+  function consultationFirstDates(confirmRows, resolver, problems) {
     var first = {};
-    (confirmRows || []).forEach(function (row) {
+    effectiveConfirmations(confirmRows, problems).forEach(function (row) {
       if (!countsAsConsultation(row)) return;
       var id = resolver.resolve(row.企業ID);
       if (!id) return;
@@ -152,9 +205,27 @@
   }
 
   // 掲載契約記録(状態が変わるたびに行を足す)。契約IDごとに最後の行が今の状態。
-  function contractStates(contractRows, resolver) {
-    var byContract = {};
+  // 状態を変えるたびに行を足す(§2-2)。今の状態は「状態が変わった日」(無ければ契約成立日)が最も新しい行で決める。
+  // 同じ日なら、後の行を新しいとみなす(2026-11-06: 行の並び順だけで決めていたのを直した)
+  function contractStates(contractRows, resolver, problems) {
+    var byContract = {}, firstRowOf = {};
     (contractRows || []).forEach(function (row, i) {
+      var cid = str(row.契約ID);
+      if (!cid) return;
+      if (!(cid in firstRowOf)) { firstRowOf[cid] = i; return; }
+      // 2行目以降(状態を変えた行)に「状態が変わった日」が無いと、契約成立日の順に並んでしまう
+      if (problems && !toDate(row.状態が変わった日)) {
+        problems.push("掲載契約記録: 契約ID " + cid + " の状態を変えた行に「状態が変わった日」がありません");
+      }
+    });
+    var ordered = (contractRows || []).map(function (row, i) {
+      return { row: row, i: i, on: toDate(row.状態が変わった日) || toDate(row.契約成立日) || "" };
+    }).sort(function (a, b) {
+      if (a.on !== b.on) return a.on < b.on ? -1 : 1;
+      return a.i - b.i;
+    });
+    ordered.forEach(function (item) {
+      var row = item.row, i = item.i;
       var cid = str(row.契約ID);
       if (!cid) return;
       var prev = byContract[cid];
@@ -170,11 +241,12 @@
 
   // 対応履歴ログの「面談実施」のうち、まだ確認されていないもの(過去分も含む)。
   // 確認記録が取り消された履歴は、もう一度確認待ちに戻る。
+  // 判定の有無は、正式KPIと同じ effectiveConfirmations で決める(最新の判定が取消なら確認待ち)。
   function pendingMeetingIds(historyRows, confirmRows) {
     var judged = {};
-    (confirmRows || []).forEach(function (row) {
+    effectiveConfirmations(confirmRows).forEach(function (row) {
       var hid = str(row.元の履歴ID);
-      if (hid && !isCancelled(row) && str(row.判定)) judged[hid] = true;
+      if (hid && str(row.判定)) judged[hid] = true;
     });
     var pending = [];
     (historyRows || []).forEach(function (row) {
@@ -209,8 +281,9 @@
 
     var resolver = buildIdResolver(sources.idMap);
     var weekEnd = addDays(weekStart, 7); // この日を含まない
+    var dataProblems = [];
 
-    var first = consultationFirstDates(sources.confirmations, resolver);
+    var first = consultationFirstDates(sources.confirmations, resolver, dataProblems);
     var total = 0, newInWeek = 0;
     Object.keys(first).forEach(function (id) {
       if (first[id] < weekEnd) total++;
@@ -218,7 +291,7 @@
     });
 
     var everSigned = {}, activeNow = {}, beforeStart = {};
-    var contracts = contractStates(sources.contracts, resolver);
+    var contracts = contractStates(sources.contracts, resolver, dataProblems);
     Object.keys(contracts).forEach(function (cid) {
       var c = contracts[cid];
       if (!c.companyId || !c.signedOn || c.state === CONTRACT_MISTAKE) return;
@@ -246,7 +319,66 @@
     row.掲載契約企業数_参考_10月4日より前 = Object.keys(beforeStart).filter(function (id) { return !everSigned[id]; }).length;
     row.確認待ちの面談数 = pendingMeetingIds(sources.history, sources.confirmations).length;
     row.流入経路の要確認数 = routeCheck;
-    return { row: row, problems: resolver.problems.slice() };
+
+    // §9-3 参考の数字(問い合わせ・割合・目標までの残り)
+    var inquiries = inquiryFirstDates(sources.history, routeOf, resolver);
+    var inquiryTotal = 0, inquiryNew = 0;
+    Object.keys(inquiries).forEach(function (id) {
+      if (inquiries[id] < weekEnd) inquiryTotal++;
+      if (inquiries[id] >= weekStart && inquiries[id] < weekEnd) inquiryNew++;
+    });
+    row.問い合わせ企業数_累計 = inquiryTotal;
+    row.問い合わせ企業数_週内の新規 = inquiryNew;
+    // 割合は、分母の会社の中から分子を数える(同じ会社の集まり・同じ集計基準。100%を超えない)。
+    // 正式KPIの相談企業数_累計(全ルート)はそのまま。ここは「問い合わせ企業のうち相談まで進んだ会社」だけを数える
+    var inquiredConsulted = Object.keys(inquiries).filter(function (id) {
+      return inquiries[id] < weekEnd && first[id] && first[id] < weekEnd;
+    }).length;
+    var consultedSigned = Object.keys(first).filter(function (id) {
+      return first[id] < weekEnd && everSigned[id];
+    }).length;
+    row.問い合わせ企業のうち相談企業数 = inquiredConsulted;
+    row.相談企業のうち掲載契約企業数 = consultedSigned;
+    row.問い合わせから相談の割合 = ratio(inquiredConsulted, inquiryTotal);
+    row.相談から掲載契約の割合 = ratio(consultedSigned, total);
+    var pace = goalPace(total, weekEnd);
+    row.目標までの残り社数 = pace.remaining;
+    row.目標日までの残り週数 = pace.weeks;
+    row.必要な週あたりの相談数 = pace.perWeek;
+    return { row: row, problems: resolver.problems.concat(dataProblems) };
+  }
+
+  /* 問い合わせ企業(統合後の企業ID → 最初の問い合わせの日)。
+   * 流入ルート④が付いた会社(統合前のIDに付いていても統合後へまとめる)のうち、
+   * 対応履歴ログに入電・返信・資料請求・面談実施のどれかがある会社。集計開始日(10/4)より前の記録は数えない */
+  function inquiryFirstDates(historyRows, routeOf, resolver) {
+    var first = {};
+    (historyRows || []).forEach(function (h) {
+      if (INQUIRY_TYPES.indexOf(str(h.種別)) < 0) return;
+      var id = resolver.resolve(h.企業ID);
+      var d = toDate(h.日付);
+      if (!id || !d || d < KPI_START_DATE) return;
+      if (!hasWorldRoute(routeOf[id] || [])) return;
+      if (!first[id] || d < first[id]) first[id] = d;
+    });
+    return first;
+  }
+
+  // 割合(%・小数1桁)。母数が RATIO_MIN_BASE より少なければ出さない
+  function ratio(numerator, denominator) {
+    if (!(denominator >= RATIO_MIN_BASE)) return NO_VALUE;
+    return Math.round((numerator / denominator) * 1000) / 10;
+  }
+
+  /* 100社の目標までの残り。週の終わり(次の月曜)から目標日(2027-04-04)までを週で数え(端数は1週)、
+   * 残りの社数をその週数で割って、1週あたりに必要な相談の数(切り上げ)を出す。
+   * 目標に届いていれば残り0・必要0。目標日を過ぎていれば週数0・必要は「—」 */
+  function goalPace(total, weekEnd) {
+    var remaining = Math.max(KPI_TARGET_COMPANIES - total, 0);
+    var days = (Date.parse(KPI_TARGET_DATE + "T00:00:00Z") - Date.parse(weekEnd + "T00:00:00Z")) / 86400000 + 1;
+    var weeks = days > 0 ? Math.ceil(days / 7) : 0;
+    var perWeek = remaining === 0 ? 0 : (weeks > 0 ? Math.ceil(remaining / weeks) : NO_VALUE);
+    return { remaining: remaining, weeks: weeks, perWeek: perWeek };
   }
 
   /* 週次KPIタブへの書き込み計画。同じ週の行があれば上書き、無ければ足す。
@@ -278,7 +410,13 @@
     countsAsConsultation: countsAsConsultation,
     pendingMeetingIds: pendingMeetingIds,
     buildWeeklyRow: buildWeeklyRow,
-    planWeeklyUpsert: planWeeklyUpsert
+    planWeeklyUpsert: planWeeklyUpsert,
+    INQUIRY_TYPES: INQUIRY_TYPES,
+    RATIO_MIN_BASE: RATIO_MIN_BASE,
+    effectiveConfirmations: effectiveConfirmations,
+    toStamp: toStamp,
+    ratio: ratio,
+    goalPace: goalPace
   };
 
   if (typeof module !== "undefined" && module.exports) {

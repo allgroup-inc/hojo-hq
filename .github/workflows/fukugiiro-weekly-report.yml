@@ -57,6 +57,14 @@ jobs:
           if [ -n "$GA4_PROPERTY_ID" ] && [ -n "$GA4_SA_JSON" ]; then pip install -q google-auth requests; fi
           python scripts/fetch_ga4_traffic.py
 
+      # もらいわすれ堂のLINE友だち数(読み取り専用。集計APIだけを呼び、送信はしない)。
+      # トークン未登録でも失敗にせず「未接続」と記録する(2026-11-07 小柳さん承認)
+      - name: もらいわすれ堂のLINE友だち数を記録(読み取りのみ)
+        continue-on-error: true
+        env:
+          FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN }}
+        run: python scripts/record_moradou_line.py
+
       - name: 週次レポート生成(統括ユイさん)
         run: python scripts/weekly_report_fukugiiro.py
 
@@ -73,6 +81,10 @@ jobs:
         # 2026-09-24: ig_neta.json は生成元が無い手置きファイルで、9月8日の内容が
         # 16日間そのままだった。未照合の締切が使い回され遥さんの指摘で発覚したため、
         # 毎週ここで作り直す。裏づけの検査に落ちたら止める(古い案は残る)。
+        # main への push(このファイルや週次レポートの修正の統合)では作り直さない。
+        # 統合のたびに今週の投稿案・ボード・公開ページのサムネイルが入れ替わるのを防ぐ
+        # (2026-11-04 に PR の統合で投稿案が作り直された実例あり)。定時と手動実行では従来どおり
+        if: github.event_name != 'push'
         continue-on-error: true
         run: |
           python scripts/generate_ig_neta.py
@@ -89,6 +101,7 @@ jobs:
           git add reports/fukugiiro
           [ -f data/fukugiiro/funnel.json ] && git add data/fukugiiro/funnel.json || true
           [ -f data/kpi/site_traffic.json ] && git add data/kpi/site_traffic.json || true
+          [ -f data/kpi/moradou_line_followers.json ] && git add data/kpi/moradou_line_followers.json || true
           [ -f site/staff/haruka/index.html ] && git add site/staff/haruka || true
           # 生成ステップとaddリストは必ず対で更新する(CLAUDE.md 再発防止メモ)
           [ -f data/fukugiiro/ig_neta.json ] && git add data/fukugiiro/ig_neta.json || true
@@ -100,11 +113,9 @@ jobs:
             echo "push retry $i"; sleep 5
           done
 
-      - name: 遥さんへLINE通知(投稿案が届いた合図)
-        # もらいわすれ堂OAの直送Secretsがある場合のみ送信。ミカタOAは使わない
-        # (2026-08-11 小柳さん指摘: フクギイロとGLOWは別会社・別ブランドのため)。
+      - name: 遥さんへのLINE通知の文面(表示のみ・送信しない)
+        # 定期実行からは送らない(2026-11-07 小柳さん承認・3段階ルール「外部送信は事前承認」)。
+        # トークンも宛先IDも渡さないので、この手順からは送信できない。文面と承認コードを表示するだけ。
+        # 送る場合は、宛先・内容を明示した個別の承認を受けてから、別の手順で行う。ミカタOAは使わない。
         continue-on-error: true
-        env:
-          FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN }}
-          HARUKA_LINE_USER_ID: ${{ secrets.HARUKA_LINE_USER_ID }}
         run: python scripts/notify_haruka.py

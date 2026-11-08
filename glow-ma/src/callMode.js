@@ -70,6 +70,13 @@
 
   var RANK_ORDER_ = { A: 0, B: 1, C: 2, D: 3 };
 
+  /** 並べ替え用のスコア。空・数字でないものは一番低く扱う */
+  function scoreOf_(value) {
+    var text = String(value === null || value === undefined ? "" : value).trim();
+    var n = Number(text);
+    return text === "" || isNaN(n) ? -1e9 : n;
+  }
+
   /**
    * 架電リストを組み立てる。
    * 除外: 連絡不要 / 電話番号なし / 本日すでに接触済み(同日の重複架電防止)。
@@ -102,6 +109,8 @@
           "次回アクション予定日": nextDate,
           "次回アクション内容": company["次回アクション内容"] || "",
           "最終接触日": normalizeDate_(company["最終接触日"]),
+          "事前選定スコア": company["事前選定スコア"] === undefined ? "" : company["事前選定スコア"],
+          "総合スコア": company["総合スコア"] === undefined ? "" : company["総合スコア"],
           bucket: bucket
         };
       });
@@ -112,8 +121,12 @@
       if (a.bucket !== b.bucket) return a.bucket - b.bucket;
       var da = a["次回アクション予定日"];
       var db = b["次回アクション予定日"];
-      if (da === db) return 0;
-      return da < db ? -1 : 1;
+      if (da !== db) return da < db ? -1 : 1;
+      // 同じ並び(同じランク・予定日なし等)の中は、事前選定スコア → 総合スコアの高い順(2026-11-07 改善③。
+      // それまでは台帳の行の順のままで、Bランク1,700社超の中の順番に意味が無かった)
+      var pa = scoreOf_(a["事前選定スコア"]), pb = scoreOf_(b["事前選定スコア"]);
+      if (pa !== pb) return pb - pa;
+      return scoreOf_(b["総合スコア"]) - scoreOf_(a["総合スコア"]);
     });
     return entries;
   }

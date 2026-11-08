@@ -321,7 +321,7 @@ def main():
     if not (page_id and token and ig_user):
         raise SystemExit("[ng] 投稿用の設定(FB_PAGE_ID / FB_PAGE_ACCESS_TOKEN / IG_USER_ID)が揃っていません")
     try:
-        sns_safety.check_destination(os.environ.get("SNS_DEST_FP_MIKATA", ""), page_id, ig_user)
+        sns_safety.check_mikata_destination()
     except SafetyError as e:
         raise SystemExit(f"[ng] 投稿先の照合で止めました: {e}")
 

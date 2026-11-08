@@ -95,7 +95,9 @@ function getCompanyDetail(companyId) {
   var interactionsByCompany = logSheet ? readInteractionsByCompanyId_(logSheet) : {};
   var history = GlowAdminAccess.sortInteractionsByDateDesc(interactionsByCompany[companyId] || []);
 
-  return { company: GlowAdminAccess.normalizeCompanyDetailDates(company), history: history };
+  // 2026-11-07 改善⑤: 電話の前に経緯が分かる1行の要約(外部のAIには送らない。companyDigest.js)
+  var digest = GlowCompanyDigest.buildCompanyDigest(history, Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd"));
+  return { company: GlowAdminAccess.normalizeCompanyDetailDates(company), history: history, digest: digest };
 }
 
 /**

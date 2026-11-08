@@ -502,7 +502,12 @@ function installVoiceLogProcessingTrigger() {
  * 重複させないよう、処理の直前に transitionVoiceLogStatus_ で「受信済み → 処理中」の
  * 確保(claim)を行い、確保できた実行だけが先へ進む。
  */
-function processQueuedVoiceLogs() {
+// この実行で、台帳の処理(自己点検・取り込み・録音の受け付け・取り消し・再開)が失敗した数。
+// 0のまま最後まで終わったときだけ生存信号を送る(HeartbeatRunner.gs。BlueBean同期は外部の都合で止まるため数えない)
+var VOICE_RUN_STEP_ERRORS = 0;
+
+// 入口の processQueuedVoiceLogs は HeartbeatRunner.gs にある(本体を呼んだあと生存信号を送る)
+function processQueuedVoiceLogsCore_() {
   VOICE_RUN_STARTED_MS = Date.now();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -511,6 +516,7 @@ function processQueuedVoiceLogs() {
   try {
     runSelfHealIfDue_();
   } catch (error) {
+    VOICE_RUN_STEP_ERRORS++;
     Logger.log("自己点検・修復の呼び出しに失敗しました: " + error);
   }
 
@@ -519,6 +525,7 @@ function processQueuedVoiceLogs() {
   try {
     runHistoryImportIfPending_();
   } catch (error) {
+    VOICE_RUN_STEP_ERRORS++;
     Logger.log("過去記録の取り込みの呼び出しに失敗しました: " + error);
   }
 
@@ -534,12 +541,14 @@ function processQueuedVoiceLogs() {
     enqueueDriveVoiceFiles_(ss);
   } catch (error) {
     // console.error は Cloud Logging に残る(Logger.log は残らず、失敗が外から見えなかった)
+    VOICE_RUN_STEP_ERRORS++;
     console.error("録音ファイルの受け付けに失敗しました: " + error);
   }
 
   try {
     sweepStaleVoiceLogs_(ss);
   } catch (error) {
+    VOICE_RUN_STEP_ERRORS++;
     Logger.log("放置された音声ログの自動取り消しに失敗しました: " + error);
   }
 
@@ -554,6 +563,7 @@ function processQueuedVoiceLogs() {
     recoverUploadRaceVoiceLogsOnce_(ss);
     requeueBillingHeldVoiceLogs_(ss);
   } catch (error) {
+    VOICE_RUN_STEP_ERRORS++;
     console.error("支払いエラーで止まった音声ログを再開できませんでした: " + error);
   }
 

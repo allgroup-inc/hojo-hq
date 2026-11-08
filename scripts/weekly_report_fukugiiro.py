@@ -247,7 +247,13 @@ def north_star_section(jukyu):
     except Exception:
         pass
     v2 = f"{jukyu.get('households', 0)}世帯(検証済みのみ)"
-    v4 = "計測経路なし(LINE公式のトークン共有待ち。data/kpi/line_followers.json はミカタ用で別物)"
+    # ❹ もらいわすれ堂のLINE友だち数(record_moradou_line.py。ミカタの line_followers.json とは別物)
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import record_moradou_line
+        v4 = record_moradou_line.summary(os.path.join(KPI_DIR, "moradou_line_followers.json"))
+    except Exception:
+        v4 = "未接続(記録の読み込みに失敗)"
     return f"""### 北極星4本の現在地 × 必要ペース
 
 | 北極星 | 現在地 | 12ヶ月目標 | 必要ペース(週) |
