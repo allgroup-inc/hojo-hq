@@ -1,21 +1,22 @@
 {
- "updated_at": "2026-11-04",
- "week": "2026-W45",
+ "updated_at": "2026-11-09",
+ "week": "2026-W46",
  "note": "照合済み(verified=True)かつ締切の無い制度だけから scripts/generate_ig_neta.py が生成。日付・金額は本文に書かない。",
  "items": [
   {
    "no": 1,
-   "seido_id": "fk-chatan-kodomo-iryo",
-   "title": "「北谷町 こども医療費助成」、手続きをしないと始まりません",
-   "caption": "子育て中のご家庭に、知らないままの方が多い制度です。「北谷町 こども医療費助成」。北谷町に住み健康保険に加入している18歳(高校生世代)までのお子さんがいる世帯が対象となる可能性があります(令和4年10月〜拡大)。申し込みの窓口は北谷町 健康相談センターの窓口。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
-   "hashtags": "#もらいわすれ堂 #北谷町 #子育て #医療費 #北谷町こども医療費助成",
-   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-08-06 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-chatan-kodomo-iryo",
-   "source_url": "https://www.chatan.jp/kosodate/kosodate/teate_support/kodomoiryogenbutsu.html",
-   "image_hint": "子育てのやさしいイラスト+「北谷町 こども医療費助成」"
+   "seido_id": "fk-ginowan-kodomo-iryo",
+   "title": "「宜野湾市 こども医療費助成」、手続きをしないと始まりません",
+   "caption": "子育て中のご家庭に、知らないままの方が多い制度です。「宜野湾市 こども医療費助成」。宜野湾市に住み健康保険に加入している18歳(高校生年代)までのお子さんがいる世帯が対象となる可能性があります(令和7年10月〜拡大)。申し込みの窓口は宜野湾市 こども企画課(こども医療費助成担当)窓口またはオンライン申請。金額や細かい条件は年度で変わることがあるので、このページでご確認ください。「うちは対象かな?」と思ったら、まず公式ページを見てみてください。",
+   "hashtags": "#もらいわすれ堂 #宜野湾市 #子育て #医療費 #宜野湾市こども医療費助成",
+   "caution": "金額・期限・対象条件は本文に書かない(照合日 2026-08-06 時点の記録に基づく案のため)。「対象になることがあります」の言い方を崩さない。制度ID fk-ginowan-kodomo-iryo",
+   "source_url": "https://www.city.ginowan.lg.jp/soshiki/kodomo/3/4/9333.html",
+   "image_hint": "子育てのやさしいイラスト+「宜野湾市 こども医療費助」"
   }
  ],
  "used_ids": [
   "fk-chatan-kodomo-iryo",
+  "fk-ginowan-kodomo-iryo",
   "fk-ginoza-kyushoku",
   "fk-ken-boshi-fushi-iryohi",
   "fk-ken-boshi-fushi-kafu-shikin",
