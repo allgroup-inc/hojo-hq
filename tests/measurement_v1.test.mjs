@@ -172,6 +172,68 @@ test("診断: 結果の公式ページへの移動を result_official_click(制�
   await ctx.close();
 });
 
+// 読み込み中に送られる計測も記録できるよう、ページの読み込み前から計測の入口を固定する
+async function newCapturedPage() {
+  const { ctx, origin } = await newCtx();
+  await ctx.addInitScript(() => {
+    window.__ev = [];
+    Object.defineProperty(window, "fgTrack", {
+      configurable: true,
+      get() { return (n, p) => window.__ev.push([n, p || {}]); },
+      set() {}, // 共通部品による差し替え(自動操縦のブラウザでは止める作り)を無視する
+    });
+  });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(String(e)));
+  return { ctx, origin, page, errors };
+}
+
+test("診断: URL(?resume=1)から前回の結果を開いた人も resumed=true で数える", async () => {
+  const { ctx, origin, page, errors } = await newCapturedPage();
+  await page.goto(`${origin}/shindan/`, { waitUntil: "networkidle" });
+  await runDiagnosis(page);
+  await page.goto(`${origin}/shindan/?resume=1`, { waitUntil: "networkidle" });
+  await page.locator("#app h2", { hasText: "制度:" }).waitFor();
+  const ev = await events(page);
+  assert.ok(ev.some(([n]) => n === "shindan_resume"), "開き直しの計測が送られる");
+  const done = ev.find(([n]) => n === "shindan_complete");
+  assert.ok(done, "結果の表示が送られる");
+  assert.equal(done[1].resumed, true, "URLから開いた人も resumed=true");
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
+test("診断: 途中の段(Q2到達など)に resumed を付け、途中から再開した人を分けられる", async () => {
+  const { ctx, origin, page, errors } = await newCapturedPage();
+  await page.goto(`${origin}/shindan/`, { waitUntil: "networkidle" });
+  await page.locator("#muni").waitFor();
+  await page.selectOption("#muni", "那覇市"); // 市町村を選ぶと Q2 へ進む
+  await page.getByRole("button", { name: "お子さん 2人", exact: true }).first().waitFor();
+  let ev = await events(page);
+  assert.deepEqual(ev.find(([n]) => n === "shindan_start")[1], { resumed: false }, "ページを開いた数は今までどおり");
+  assert.deepEqual(ev.find(([n]) => n === "shindan_step_q2")[1], { resumed: false }, "最初から答えた人は resumed=false");
+
+  // 同じ端末で開き直し、「つづきから」で再開する
+  await page.goto(`${origin}/shindan/`, { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: /つづきから/ }).click();
+  await page.getByRole("button", { name: "お子さん 2人", exact: true }).first().waitFor();
+  ev = await events(page);
+  const q2 = ev.filter(([n]) => n === "shindan_step_q2");
+  assert.equal(q2.length, 1);
+  assert.equal(q2[0][1].resumed, true, "途中から再開した人は resumed=true(前の質問を今回は通っていない)");
+
+  // 「最初からやり直す」を選んだ人は、再開扱いにしない
+  await page.goto(`${origin}/shindan/`, { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "最初からやり直す" }).click();
+  await page.selectOption("#muni", "那覇市");
+  await page.getByRole("button", { name: "お子さん 2人", exact: true }).first().waitFor();
+  ev = await events(page);
+  assert.equal(ev.find(([n]) => n === "shindan_step_q2")[1].resumed, false, "最初からやり直した人は resumed=false");
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
 test("申請準備シート: 2つ目・4つ目のステップで相談できた・申請できたを1回だけ送る", async () => {
   const id = fs.readdirSync(path.join(tree, "kit")).find((d) => d.startsWith("fk-"));
   const { ctx, origin } = await newCtx();

@@ -123,7 +123,8 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
   function trackStep(name){
     if (tracked[name]) return;
     tracked[name] = true;
-    if (window.fgTrack) window.fgTrack(name);
+    // resumed: 途中から再開した人(前の質問を今回は通っていない)。段の数を見るときに分けられるようにする
+    if (window.fgTrack) window.fgTrack(name, {resumed: !!state.resumed});
   }
   function loadSaved(){
     try { return JSON.parse(localStorage.getItem("fg_shindan_answers") || "null"); } catch(e){ return null; }
@@ -490,6 +491,7 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
       state.childAges = _sv.childAges || [];
       state.lifeEvents = _sv.lifeEvents || [];
       state.step = 5;
+      state.resumed = true; // URL(?resume=1)から前回の結果を開いた人も「開き直し」として数える
       if (window.fgTrack) window.fgTrack("shindan_resume");
     }
   }
