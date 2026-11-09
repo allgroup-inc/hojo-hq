@@ -3,14 +3,14 @@
 
 1. 【令和８年度】INPIT外国出願補助金（中間手続補助）
 　締切 2026-12-14・残り35日 / 上限 50万円
-2. 小規模事業者持続化補助金＜創業型＞ 第４回受付締切
+2. GX地域共創補助金2026
+　締切 2026-12-14・残り35日 / 上限 250億円
+3. 小規模事業者持続化補助金＜創業型＞ 第４回受付締切
 　締切 2026-12-15・残り36日 / 上限 200万円
-3. 【令和８年度】二酸化炭素排出抑制対策事業費等補助金（低炭素型建材活用新築ZEB支援事業）（三次公募）
+4. 【令和８年度】二酸化炭素排出抑制対策事業費等補助金（低炭素型建材活用新築ZEB支援事業）（三次公募）
 　締切 2026-12-15・残り36日 / 上限 5億円
-4. INPIT事業再編計画支援事業補助金（令和８年度）
+5. INPIT事業再編計画支援事業補助金（令和８年度）
 　締切 2026-12-18・残り39日 / 上限 650万円
-5. 【令和８年度】ＰＣＢ汚染変圧器高効率化補助金
-　締切 2026-12-18・残り39日 / 上限 100万円
 
 🔖 保存しておくと、締切前に見返せます。
 経理担当や顧問の先生に送っておくと、相談が早く進みます。
@@ -25,10 +25,10 @@ https://allgroup-inc.github.io/hojo-hq/?utm_source=instagram&utm_medium=social&u
 
 ## 出典
 - 【令和８年度】INPIT外国出願補助金（中間手続補助）: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXmVMAX
+- GX地域共創補助金2026: https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003dVevUAE
 - 小規模事業者持続化補助金＜創業型＞ 第４回受付締切: https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003kEuHUAU
 - 【令和８年度】二酸化炭素排出抑制対策事業費等補助金（低炭素型建材活用新築ZEB支援事業）（三次公募）: https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003lu8IUAQ
 - INPIT事業再編計画支援事業補助金（令和８年度）: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYBxMAP
-- 【令和８年度】ＰＣＢ汚染変圧器高効率化補助金: https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYC7MAP
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
