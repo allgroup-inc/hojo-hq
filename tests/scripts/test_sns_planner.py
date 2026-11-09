@@ -84,6 +84,35 @@ def test_screen_rejects_unrelated(name):
     assert not ok and "関係が薄い" in reason
 
 
+def test_screen_shares_flags_with_ig_pipeline():
+    # 2026-09-28 の仕組みと同じ印で外す(照合の不一致・ig_exclude)
+    it = item(1)
+    it["verified"] = {"claude_verified": False}
+    ok, reason = P.screen(it, TODAY)
+    assert not ok and "照合" in reason
+    it2 = item(2)
+    it2["ig_exclude"] = True
+    assert not P.screen(it2, TODAY)[0]
+    it3 = item(3)
+    it3["verified"] = {"claude_verified": True, "gemini_verified": True}
+    assert P.screen(it3, TODAY) == (True, None)        # 照合が通っていれば残す(正例)
+
+
+def test_plan_skips_recent_ids_from_ig_history(tmp_path):
+    hist = tmp_path / "h.json"
+    hist.write_text(json.dumps([{"seido_id": "t2", "posted_at": str(TODAY - timedelta(days=7))},
+                                {"seido_id": "t4", "posted_at": str(TODAY - timedelta(days=60))}]))
+    recent = P.load_recent_ids(str(hist), today=TODAY)
+    assert recent == {"t2"}                           # 5週間より前の記録は外さない
+    r = P.plan(_items(), _texts(), TODAY, 13, recent_ids=recent)
+    assert all(x["id"] != "t2" for p in r["posts"] for x in p.get("programs", []))
+    assert any(it["id"] == "t2" and "直近5週間" in why for it, why in r["rejected"])
+    bad = tmp_path / "bad.json"
+    bad.write_text("{壊れている")
+    with pytest.raises(ValueError):
+        P.load_recent_ids(str(bad), today=TODAY)
+
+
 def test_screen_rejects_large_company():
     ok, reason = P.screen(item(1, employees="901名以上"), TODAY)
     assert not ok and "大企業" in reason

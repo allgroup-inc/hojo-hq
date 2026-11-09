@@ -57,7 +57,8 @@ def main(argv=None):
     start = date.fromisoformat(a.start) if a.start else _next_monday(date.today())
     items = json.load(open(os.path.join(BASE, "data", "subsidies.json"), encoding="utf-8"))["items"]
     ever = json.load(open(os.path.join(BASE, "data", "sns_evergreen.json"), encoding="utf-8"))["items"]
-    result = P.plan(items, ever, start, a.count, allow_drafts=True)
+    recent = P.load_recent_ids(today=start)
+    result = P.plan(items, ever, start, a.count, allow_drafts=True, recent_ids=recent)
 
     from PIL import Image
     rows, thumbs, layout_ng = [], [], []

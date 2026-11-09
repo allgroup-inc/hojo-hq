@@ -22,8 +22,15 @@
 同じ型を2回続けない。同じ制度・同じ文章は28日間出さない。
 B・C の文章は「確認済み」だけを使う(見本のときだけ allow_drafts=True で下書きも使う)。
 """
+import os
 import re
+import sys
 from datetime import date, timedelta
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# 2026-09-28 の IG 投稿案の仕組みと、除外の印・投稿の記録を共有する(同じデータを読むスクリプトは
+# 除外のフラグを共有する: CLAUDE.md 再発防止メモ 2026-09-20)。写さずに、あちらの関数をそのまま使う。
+import generate_ig_posts_mikata as _IG  # noqa: E402
 
 MIN_DAYS_LEFT = 30          # 締切3層ルール: SNS は残り30日以上だけ
 REPEAT_GAP_DAYS = 28        # 同じ制度・同じ文章を出さない日数
@@ -123,6 +130,10 @@ def screen(item, today):
     left = (dl - today).days
     if left < MIN_DAYS_LEFT:
         return False, f"締切まで{MIN_DAYS_LEFT}日未満(残り{left}日)"
+    if item.get("ig_exclude"):
+        return False, "IG投稿から外す印(ig_exclude)が付いている"
+    if _IG._verified_ng(item):
+        return False, "原文の照合で不一致・矛盾が出ている"
     why = _outside_okinawa(item)
     if why:
         return False, why
@@ -254,15 +265,32 @@ def _pick_text(evergreen, kind, day, history, allow_drafts):
     return None
 
 
-def plan(items, evergreen, start, count=13, history=None, allow_drafts=False):
+def load_recent_ids(path=None, today=None):
+    """2026-09-28 の仕組みの投稿の記録(data/ig_posts_history.json)から、直近5週間に投稿した制度ID。
+
+    ファイルが無ければ空。壊れていれば ValueError(黙って重複投稿を許さない。あちらと同じ扱い)。
+    """
+    return _IG.load_historical_post_ids(path or _IG.DEFAULT_HISTORY, today=today)
+
+
+def plan(items, evergreen, start, count=13, history=None, allow_drafts=False, recent_ids=None):
     """count 回分の投稿予定を作る。
 
     戻り値: {"posts": [...], "rejected": [(item, 理由)], "skipped": [(日付, 理由)]}
     posts の1件: {"date", "type", "programs"(制度の一覧) または "text"(文章の台帳の1件)}
     history: {"p:<制度の鍵(program_key)>" or "t:<文章id>": 最後に出した日}。渡したものは書き換えない。
+    recent_ids: 直近5週間に投稿した制度ID(load_recent_ids の戻り値)。これらは候補から外す。
     """
     history = dict(history or {})
-    cands, rejected = screen_all(items, start)
+    recent_ids = set(recent_ids or ())
+    cands, rejected = [], []
+    for it in items:
+        if str(it.get("id")) in recent_ids:
+            rejected.append((it, "直近5週間に投稿済み(ig_posts_history.json)"))
+        else:
+            cands.append(it)
+    cands, more = screen_all(cands, start)
+    rejected += more
     posts, skipped, prev, fridays = [], [], None, 0
     for day in post_dates(start, count):
         want = desired_type(day, fridays)
