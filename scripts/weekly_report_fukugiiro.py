@@ -144,7 +144,10 @@ def render_funnel_section(funnel):
         f"報告ページへ {_report_links(eng)}(内訳 top{eng.get('jukyu_report_link_top',0)}"
         f"/診断{eng.get('jukyu_report_link_shindan',0)}/シート{eng.get('jukyu_report_link_kit',0)}"
         f"/市町村{eng.get('jukyu_report_link_area',0)}/ライフ{eng.get('jukyu_report_link_life',0)}) / "
-        f"報告の送信 {eng.get('jukyu_report_click',0)} / 0件 {eng.get('shindan_zero',0)}"
+        f"報告の送信 {eng.get('jukyu_report_click',0)} / 0件 {eng.get('shindan_zero',0)}\n\n"
+        f"公式ページへ: 診断の結果から {eng.get('result_official_click',0)} / 申請準備シートから {eng.get('kit_official',0)} / "
+        f"窓口に相談できた {eng.get('jukyu_step_soudan',0)} / 申請できた {eng.get('jukyu_step_shinsei',0)}"
+        "(相談・申請は本人の申告。受給報告とは別に見る)"
     )
 
 

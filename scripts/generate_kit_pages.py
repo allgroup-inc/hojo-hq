@@ -168,6 +168,7 @@ def page(title, desc, body, depth=2, head_extra="", canon_path=None):
 <style>{STYLE}</style>
 </head>
 <body>
+<script>window.FG_VERSIONS = {{support_v: 1}};</script>
 <script src="{rel}analytics-config.js"></script>
 <script src="{rel}assets/fg-analytics.js"></script>
 {HEADER}
@@ -217,6 +218,18 @@ function fkCopySay(btn){
   var stepProg = document.getElementById("stepprog");
   var stepFill = document.getElementById("stepfill");
   var trackedCheck = false, trackedStep = false;
+  // 補助指標(相談できた・申請できた)。同じ端末・同じ制度では1回だけ送る。外しても取り消しは送らない。
+  // 送るのは制度IDと版の印だけ(メモ・チェックの中身は送らない)
+  var SENT_KEY = "fk_kit_sent___ID__", sentNow = {};
+  function sendStepOnce(ev){
+    if (sentNow[ev]) return;
+    var s = {};
+    try { s = JSON.parse(localStorage.getItem(SENT_KEY)) || {}; } catch(e){}
+    if (s[ev]) return;
+    sentNow[ev] = 1; s[ev] = 1;
+    try { localStorage.setItem(SENT_KEY, JSON.stringify(s)); } catch(e){}
+    if (window.fgTrack) fgTrack(ev, {seido: "__ID__"});
+  }
   function save(){
     var data = {c: [], m: {}, s: []};
     boxes.forEach(function(b, i){ if (b.checked) data.c.push(i); });
@@ -245,6 +258,8 @@ function fkCopySay(btn){
     b.addEventListener("change", function(){
       save(); updSteps();
       if (!trackedStep && window.fgTrack) { trackedStep = true; fgTrack("kit_step"); }
+      var ev = b.getAttribute("data-ev");
+      if (ev && b.checked) sendStepOnce(ev);
     });
   });
   memos.forEach(function(t, i){
@@ -415,9 +430,9 @@ def kit_page(it, updated):
 <div class="box">
   <ol class="track">
     <li><label><input type="checkbox"><span class="n"></span><span>公式ページで「対象」と<span style="white-space:nowrap">「締切」</span>を見る</span></label></li>
-    <li><label><input type="checkbox"><span class="n"></span><span>窓口に電話して「私の場合の持ち物」を聞く(下に台本があります)</span></label></li>
+    <li><label><input type="checkbox" data-ev="jukyu_step_soudan"><span class="n"></span><span>窓口に電話して「私の場合の持ち物」を聞く(下に台本があります)</span></label></li>
     <li><label><input type="checkbox"><span class="n"></span><span>持ち物をそろえる(全部なくても大丈夫)</span></label></li>
-    <li><label><input type="checkbox"><span class="n"></span><span>窓口で申請する(会話はこのとおりでOK)</span></label></li>
+    <li><label><input type="checkbox" data-ev="jukyu_step_shinsei"><span class="n"></span><span>窓口で申請する(会話はこのとおりでOK)</span></label></li>
     <li><label><input type="checkbox"><span class="n"></span><span>結果と受け取りを確認する(受け取れたらLINEで報告)</span></label></li>
   </ol>
 </div>
