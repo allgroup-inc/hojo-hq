@@ -44,6 +44,7 @@ on:
       - "tests/test_moradou_line.py"
       - ".github/workflows/fukugiiro-weekly-report.yml"
       - "tests/top_page_layouts.test.mjs"
+      - "tests/measurement_v1.test.mjs"
       - "scripts/generate_area_pages.py"
       - "tests/test_source_status.py"
       - "tests/source_unavailable.test.mjs"
@@ -90,6 +91,7 @@ on:
       - "tests/test_moradou_line.py"
       - ".github/workflows/fukugiiro-weekly-report.yml"
       - "tests/top_page_layouts.test.mjs"
+      - "tests/measurement_v1.test.mjs"
       - "scripts/generate_area_pages.py"
       - "tests/test_source_status.py"
       - "tests/source_unavailable.test.mjs"
@@ -207,3 +209,6 @@ jobs:
       # moradou.jp と旧URLの2つの配信構成で、トップと診断ページが制度データを読めるか(2026-11-02・11-05 の再発防止)
       - name: 配信構成どおりに組み立てて、トップ・診断ページの読み込みを実ブラウザで確かめる
         run: node --test tests/top_page_layouts.test.mjs
+      # 診断改善の第1段階: 版の印・公式ページへの移動・相談/申請の補助指標が、見た目を変えずに送られるか(2026-11-09)
+      - name: 計測(版の印・補助指標)を実ブラウザで確かめる
+        run: node --test tests/measurement_v1.test.mjs

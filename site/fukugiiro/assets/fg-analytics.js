@@ -21,6 +21,29 @@
   }
   window.fgTrack = function (name, props) { queue.push([name, props]); };
 
+  /* 画面の版の印(2026-11-09 小柳さん承認・診断改善の第1段階)。
+   * 各ページが window.FG_VERSIONS = {top_v|ui_v|support_v: 数} を持ち、すべての計測に自動で添える。
+   * 既存の計測の名前と意味は変えない。トップを通った人は、同じタブの間 top_v を他のページの計測にも添える
+   * (入口の変化を、診断などの数字から切り分けるため)。送るのは版の数字だけ(個人を見分ける情報は送らない)。 */
+  function versions() {
+    var src = window.FG_VERSIONS || {}, v = {}, k;
+    for (k in src) { if (Object.prototype.hasOwnProperty.call(src, k)) v[k] = src[k]; }
+    try {
+      if (src.top_v != null) window.sessionStorage.setItem("fg_top_v", String(src.top_v));
+      else {
+        var t = window.sessionStorage.getItem("fg_top_v");
+        if (t && /^[0-9]+$/.test(t)) v.top_v = Number(t);
+      }
+    } catch (e) {}
+    return v;
+  }
+  function withVersions(props) {
+    var out = {}, k, v = versions();
+    if (props) { for (k in props) { if (Object.prototype.hasOwnProperty.call(props, k)) out[k] = props[k]; } }
+    for (k in v) out[k] = v[k];
+    return out;
+  }
+
   function flush() {
     for (var i = 0; i < queue.length; i++) window.fgTrack(queue[i][0], queue[i][1]);
     queue = [];
@@ -42,7 +65,7 @@
     /* beacon送信でページ遷移をまたいでも計測が残る。IPは仕様上そのまま保存されない(GA4既定) */
     window.gtag("config", cfg.measurementId, { transport_type: "beacon" });
     window.fgTrack = function (name, props) {
-      try { window.gtag("event", name, props || {}); } catch (e) {}
+      try { window.gtag("event", name, withVersions(props)); } catch (e) {}
     };
     flush();
   } else if (cfg.provider === "plausible") {
@@ -56,7 +79,7 @@
     };
     window.plausible("pageview");
     window.fgTrack = function (name, props) {
-      try { window.plausible(name, props ? { props: props } : undefined); } catch (e) {}
+      try { window.plausible(name, { props: withVersions(props) }); } catch (e) {}
     };
     flush();
   } else {

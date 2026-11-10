@@ -52,7 +52,11 @@ ENGAGEMENT_KEYS = ["kit_click", "seido_done_mark", "jukyu_report_click", "shinda
                    "shindan_cta_click",
                    # Instagramプロフィール(/go/fg-ig/)から診断ページへの転送。
                    # LINEではないので line_redirect とは別名で数える
-                   "shindan_redirect"]
+                   "shindan_redirect",
+                   # ④公式ページへの移動(診断の結果から/申請準備シートから)。別の名前で数え、合算しない
+                   "result_official_click", "kit_official",
+                   # 補助指標(本人の申告): 窓口に相談できた・申請できた。受給報告の代わりにしない
+                   "jukyu_step_soudan", "jukyu_step_shinsei"]
 
 
 def build_funnel(counts):
