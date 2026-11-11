@@ -24,6 +24,9 @@ import urllib.request
 import urllib.robotparser
 from datetime import datetime, timezone, timedelta
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import listing_review  # noqa: E402  人が承認したものだけ外す(2026-11-11 段階A)
+
 JST = timezone(timedelta(hours=9))
 OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "subsidies.json")
 
@@ -179,7 +182,7 @@ def decide_tag(base_tag: str, name: str) -> str:
     return base_tag
 
 
-def crawl_source(src: dict, robots_cache: dict, fetch_state: dict = None) -> list:
+def crawl_source(src: dict, robots_cache: dict, fetch_state: dict = None, exclusions=None) -> list:
     """1 ソースを巡回して items を返す。fetch_state(dict)を渡すと取得状況を書き込む:
     ok(一覧が取得できたか)/ listing_skipped(robots 不許可)/ listing_entries / detail_skipped / items。
     robots 不許可・一覧失敗はどちらも「そのソースの前回掲載分が失われる」ので guard が止める(判断事項 E/G1)。
@@ -187,7 +190,9 @@ def crawl_source(src: dict, robots_cache: dict, fetch_state: dict = None) -> lis
     items = []
     st = fetch_state if fetch_state is not None else {}
     st.update({"label": src["label"], "ok": False, "listing_skipped": False,
-               "listing_entries": 0, "detail_skipped": 0, "items": 0})
+               "listing_entries": 0, "detail_skipped": 0, "items": 0,
+               "excluded": [], "review_candidates": []})
+    exclusions = exclusions or []
     listing_url = src["listing"]
     if not robots_ok(listing_url, robots_cache):
         print(f"[skip] robots disallow: {listing_url}", file=sys.stderr)
@@ -237,6 +242,15 @@ def crawl_source(src: dict, robots_cache: dict, fetch_state: dict = None) -> lis
         if any(sig in name for sig in CLOSED_NAME_SIGNALS):
             continue
 
+        # 段階A: 承認済みの一覧と URL・名前・取得先がすべて一致したものだけ外す。
+        # 候補だが承認されていないものは外さず、review_candidate を付けて掲載する(listing_review.py)
+        decision, why = listing_review.decide(name, url, src["label"], exclusions)
+        if decision == listing_review.DECISION_EXCLUDE:
+            st["excluded"].append({"name": name, "source_url": url, "reason": why})
+            continue
+        if decision == listing_review.DECISION_REVIEW:
+            st["review_candidates"].append({"name": name, "source_url": url, "reason": why})
+
         deadline = "要確認"
         status = "要確認"
         if fetch_detail:
@@ -282,6 +296,8 @@ def crawl_source(src: dict, robots_cache: dict, fetch_state: dict = None) -> lis
             "fetched_at": datetime.now(JST).strftime("%Y-%m-%d %H:%M"),
             "status": status,
         })
+        if decision == listing_review.DECISION_REVIEW:
+            items[-1]["review_candidate"] = why
 
     print(f"[info] {src['label']}: 採用 {len(items)} 件", file=sys.stderr)
     st["items"] = len(items)
@@ -327,15 +343,31 @@ def main() -> None:
     local_status: dict = {}
     incomplete = True
     try:
+        # 一覧が壊れていれば例外で止める(status は incomplete のまま書かれ、guard が公開を止める)
+        exclusions = listing_review.load_exclusions()
         for src in SOURCES:
             st: dict = {}
             local_status[src["key"]] = st
-            for it in crawl_source(src, robots_cache, st):
+            for it in crawl_source(src, robots_cache, st, exclusions):
                 if it["source_url"] in existing_urls or it["id"] in existing_ids:
                     continue
                 existing_urls.add(it["source_url"])
                 existing_ids.add(it["id"])
                 added.append(it)
+
+        # 想定外の除外が起きていないか(承認済みの件数より多く外していたら止める)
+        excluded = [e for v in local_status.values() for e in v.get("excluded", [])]
+        if len(excluded) > len(exclusions):
+            raise listing_review.ListingReviewError(
+                f"承認済み {len(exclusions)} 件より多い {len(excluded)} 件を外そうとしました。取り込みを止めます")
+        for key, v in local_status.items():
+            print(f"[review] {v.get('label')}: 一覧 {v.get('listing_entries')} 件 / 採用 {v.get('items')} 件 / "
+                  f"除外 {len(v.get('excluded', []))} 件 / 要確認の候補 {len(v.get('review_candidates', []))} 件",
+                  file=sys.stderr)
+            for e in v.get("excluded", []):
+                print(f"[review]   除外: {e['name'][:50]} — {e['reason']}", file=sys.stderr)
+            for e in v.get("review_candidates", []):
+                print(f"[review]   要確認(掲載は続ける): {e['name'][:50]} — {e['reason']}", file=sys.stderr)
 
         merged = existing + added
         merged.sort(key=lambda x: (x.get("deadline") or "9999"))
