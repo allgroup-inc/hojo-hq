@@ -59,7 +59,7 @@
    "id": "949a704d-09b1-48a3-ac21-3862e1c6bee9",
    "issue": 611,
    "at": "2026-11-11T09:39:16Z",
-   "status": "sending"
+   "status": "sent"
   }
  ],
  "done": {
@@ -98,6 +98,10 @@
   "627a0dec-b9c2-4ed5-99fe-c56af554f089": {
    "state": "sent",
    "at": "2026-11-11T09:14:39Z"
+  },
+  "949a704d-09b1-48a3-ac21-3862e1c6bee9": {
+   "state": "sent",
+   "at": "2026-11-11T14:48:45Z"
   }
  },
  "attempts": {
@@ -142,14 +146,5 @@
    "count": 1
   }
  },
- "inflight": {
-  "id": "949a704d-09b1-48a3-ac21-3862e1c6bee9",
-  "issue": 611,
-  "label": "diagnosis-monitor-system",
-  "text": "✅【もらいわすれ堂】診断ページの監視が再開しました",
-  "requested_at": "2026-11-11T09:38:59Z",
-  "at": "2026-11-11T09:39:16Z",
-  "run": "42996974692",
-  "fresh": true
- }
+ "inflight": null
 }
