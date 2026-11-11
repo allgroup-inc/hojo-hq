@@ -113,7 +113,13 @@ function importCompaniesFromStaging() {
     var backupName = "企業マスタ_backup_" + todayString + "_" + Utilities.formatDate(new Date(), "Asia/Tokyo", "HHmmss");
     companySheet.copyTo(ss).setName(backupName);
 
-    writeCompanyRecords_(companySheet, finalRecords);
+    // 名寄せで統合して消える既存の企業IDだけを、消してよいものとして名指しする(それ以外が抜けたら書き込みを止める)
+    var finalIdSet = {};
+    finalRecords.forEach(function (record) { finalIdSet[record["企業ID"]] = true; });
+    var absorbedExistingIds = existingRecords
+      .map(function (record) { return record["企業ID"]; })
+      .filter(function (id) { return !finalIdSet[id]; });
+    writeCompanyRecords_(companySheet, finalRecords, { allowRemovedIds: absorbedExistingIds });
     Logger.log(
       "インポート完了: 新規読込 " + newRecords.length + "件 / 名寄せ統合 " +
       mergeResult.absorbedCount + "件 / 最終件数 " + finalRecords.length + "件"
@@ -170,13 +176,35 @@ function readCompanyRecords_(sheet) {
   return records;
 }
 
-function writeCompanyRecords_(sheet, records) {
+/**
+ * 企業マスタの2行目以降を records の内容に書き直す。
+ *
+ * 2026-11-11 失敗台帳 FK-010: 以前は「全部消してから全社分を一度に書く」作りで、書く途中に Google 側の
+ * エラー(Service Spreadsheets failed)が起きると、書けなかった会社がまるごと消えた(企業マスタの約6割)。
+ * 今は次の順に書く(判定は companyWriteGuard.js の GlowCompanyWriteGuard)。
+ *   1. 書く前に、今の企業ID列と照らし合わせる。会社が抜ける・並びが変わる・重複する書き込みは、何も書かずに止める
+ *   2. 先に消さず、上の行から CHUNK_ROWS 行ずつ上書きする(一時的なエラーはその場で数回やり直す)。
+ *      途中で止まっても、まだ書いていない行には元のデータが残る
+ *   3. 書いた範囲の企業ID列を読み直して照らし合わせる。合っていたら、余った行だけを消す
+ *   4. 最後にもう一度、企業ID列全体を照らし合わせる
+ * どこかで止まったときは、稼働状況タブに「企業マスタの書き込み」の失敗を残して通知し、例外を投げる
+ * (呼び出し側の処理もそこで止まる)。
+ *
+ * @param {Object} [options] { allowRemovedIds: 消してよい企業ID(名寄せで統合した分など。呼び出し側が名指しする) }
+ */
+function writeCompanyRecords_(sheet, records, options) {
+  var guard = GlowCompanyWriteGuard;
   var headers = GlowSchema.COMPANY_MASTER_HEADERS;
-  var lastRow = sheet.getLastRow();
-  if (lastRow > 1) {
-    sheet.getRange(2, 1, lastRow - 1, headers.length).clearContent();
+  var idCol = headers.indexOf("企業ID") + 1;
+  var oldIdsRaw = readCompanyIdColumn_(sheet, idCol);
+  var newIds = records.map(function (record) { return record["企業ID"]; });
+
+  var plan = guard.planCompanyWrite(oldIdsRaw, newIds, options);
+  if (!plan.ok) {
+    failCompanyWrite_("書き込む前の確認で止めました(企業マスタは変更していません): " + plan.reason);
   }
   if (records.length === 0) return;
+
   var rows = records.map(function (record) {
     return headers.map(function (header) {
       var value = record[header];
@@ -184,5 +212,76 @@ function writeCompanyRecords_(sheet, records) {
       return value === undefined || value === null ? "" : value;
     });
   });
-  sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+
+  var written = 0;
+  try {
+    guard.chunkRanges(rows.length, guard.CHUNK_ROWS).forEach(function (range) {
+      var chunk = rows.slice(range.offset, range.offset + range.count);
+      setValuesWithRetry_(sheet.getRange(2 + range.offset, 1, range.count, headers.length), chunk, guard.MAX_ATTEMPTS);
+      written = range.offset + range.count;
+    });
+  } catch (error) {
+    failCompanyWrite_(
+      "書き込みの途中で止まりました(" + written + "/" + rows.length + "社まで書きました。" +
+      "まだ書いていない行には元のデータが残っています): " + error
+    );
+  }
+
+  flushSpreadsheet_();
+  var writtenCheck = guard.verifyWrittenIds(newIds, readCompanyIdColumn_(sheet, idCol).slice(0, rows.length));
+  if (!writtenCheck.ok) {
+    failCompanyWrite_("書いた後の照合で違いが見つかりました(余った行は消していません): " + writtenCheck.reason);
+  }
+
+  var lastRow = sheet.getLastRow();
+  if (lastRow > rows.length + 1) {
+    sheet.getRange(rows.length + 2, 1, lastRow - rows.length - 1, headers.length).clearContent();
+    flushSpreadsheet_();
+  }
+  var finalCheck = guard.verifyWrittenIds(newIds, readCompanyIdColumn_(sheet, idCol));
+  if (!finalCheck.ok) {
+    failCompanyWrite_("最後の照合で違いが見つかりました: " + finalCheck.reason);
+  }
+  recordOpsStatus_("企業マスタの書き込み", true,
+    rows.length + "社(書き込み後に企業IDを照合済み" +
+    (plan.addedIds.length ? "・追加 " + plan.addedIds.length + "社" : "") +
+    (plan.removedIds.length ? "・統合などで外した " + plan.removedIds.length + "社" : "") + ")");
+}
+
+/** 企業マスタの企業ID列(2行目から最後の行まで)を、空欄も含めて返す */
+function readCompanyIdColumn_(sheet, idCol) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  return sheet.getRange(2, idCol, lastRow - 1, 1).getValues().map(function (row) { return row[0]; });
+}
+
+/** 一時的なエラーで失敗したら、少し待ってやり直す(同じ範囲に同じ値を書くので、やり直しても結果は同じ) */
+function setValuesWithRetry_(range, values, maxAttempts) {
+  var lastError = null;
+  for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      range.setValues(values);
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt < maxAttempts) Utilities.sleep(2000 * attempt);
+    }
+  }
+  throw lastError;
+}
+
+function flushSpreadsheet_() {
+  if (typeof SpreadsheetApp.flush === "function") SpreadsheetApp.flush();
+}
+
+/** 企業マスタの書き込みを止めたことを稼働状況タブに残し、通知してから例外を投げる */
+function failCompanyWrite_(message) {
+  try {
+    recordOpsStatus_("企業マスタの書き込み", false, message);
+    notifyOpsFailure_("企業マスタの書き込み", message +
+      "\n\n今朝のバックアップ(GLOW企業リレーション台帳_バックアップ_日付)と企業マスタの件数を比べてください。");
+  } catch (notifyError) {
+    Logger.log("企業マスタの書き込みの失敗を記録・通知できませんでした: " + notifyError);
+  }
+  throw new Error("企業マスタの書き込みを止めました。" + message);
 }

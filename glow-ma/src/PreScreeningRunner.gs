@@ -119,9 +119,9 @@ function applyPreScreeningScores() {
     var matchResult = GlowPreScreeningImport.matchPreScreeningRows(stagingRows, companyRecords);
     var updatedRecords = GlowPreScreeningImport.applyMatchesToCompanyRecords(companyRecords, matchResult.matches);
 
-    // writeCompanyRecords_は企業マスタの2行目以降をclearContent()してから一括再書き込みする
-    // 破壊的処理のため、importCompaniesFromStagingと同じくバックアップシートを先に作る
-    // (最終レビュー2026-08-11 I1)。
+    // writeCompanyRecords_は企業マスタの2行目以降を丸ごと書き直す処理のため、
+    // importCompaniesFromStagingと同じくバックアップシートを先に作る(最終レビュー2026-08-11 I1)。
+    // 2026-11-11(FK-010)から、書き直しは先に消さずに上書きし、書いた後に企業IDを照合する形に変わった。
     var todayString = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
     var backupName = "企業マスタ_backup_事前選定_" + todayString + "_" +
       Utilities.formatDate(new Date(), "Asia/Tokyo", "HHmmss");
