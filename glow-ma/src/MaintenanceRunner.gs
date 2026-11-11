@@ -52,13 +52,21 @@ function runDailyMaintenance() {
   ];
 
   var failures = [];
+  var stoppedBy = "";
   steps.forEach(function (step) {
+    if (stoppedBy) {
+      // 2026-11-11 FK-010: 企業マスタの書き込みを止めたら、企業マスタを読む・書く後の手順も動かさない
+      // (欠けた・混ざった企業マスタでスコア・今日の連絡先・アラートを作らないため)
+      failures.push(step.name + ": 「" + stoppedBy + "」で企業マスタの書き込みを止めたため、実行しませんでした");
+      return;
+    }
     try {
       step.run();
       Logger.log("日次メンテナンス: 「" + step.name + "」が完了しました。");
     } catch (error) {
       Logger.log("日次メンテナンス: 「" + step.name + "」が失敗しました: " + error);
       failures.push(step.name + ": " + error);
+      if (isCompanyWriteStop_(error)) stoppedBy = step.name;
     }
   });
 
@@ -69,6 +77,11 @@ function runDailyMaintenance() {
   }
   recordOpsStatus_("日次メンテナンス", false, failures.join(" / "));
   notifyMaintenanceFailures_(failures, steps.length);
+}
+
+/** writeCompanyRecords_(ImportRunner.gs)が企業マスタの書き込みを止めたときの例外か */
+function isCompanyWriteStop_(error) {
+  return String(error && error.message ? error.message : error).indexOf("企業マスタの書き込みを止めました") !== -1;
 }
 
 /**

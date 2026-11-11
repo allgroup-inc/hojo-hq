@@ -53,13 +53,13 @@
    * @param {Array} oldIdsRaw 今の企業マスタの企業ID列(2行目から最後の行まで。空欄を含んでよい)
    * @param {Array} newIds 書き込む企業IDの並び
    * @param {Object} [options] { allowRemovedIds: 消してよい企業ID(名寄せで統合した分など) }
-   * @return {Object} { ok, reason, removedIds, addedIds, oldCount, newCount }
+   * @return {Object} { ok, reason, removedIds, addedIds, oldCount, newCount, shifted }
    */
   function planCompanyWrite(oldIdsRaw, newIds, options) {
     options = options || {};
     var oldIds = (oldIdsRaw || []).map(idOf).filter(function (id) { return id !== ""; });
     var next = (newIds || []).map(idOf);
-    var result = { ok: false, reason: "", removedIds: [], addedIds: [], oldCount: oldIds.length, newCount: next.length };
+    var result = { ok: false, reason: "", removedIds: [], addedIds: [], oldCount: oldIds.length, newCount: next.length, shifted: false };
 
     var blankCount = next.filter(function (id) { return id === ""; }).length;
     if (blankCount > 0) {
@@ -118,8 +118,84 @@
       }
     }
 
+    // 行がずれるか(会社を外す・途中の空行を詰める)。ずれると、1行の書き込みが列の途中で止まったときに
+    // 1行の中に別の会社の値が混ざりうるため、書いた後に全列を照らし合わせる(呼び出し側)
+    var rawPos = {};
+    (oldIdsRaw || []).forEach(function (raw, index) {
+      var id = idOf(raw);
+      if (id !== "" && rawPos[id] === undefined) rawPos[id] = index;
+    });
+    result.shifted = next.some(function (id, index) {
+      return rawPos[id] !== undefined && rawPos[id] !== index;
+    });
+
     result.ok = true;
     return result;
+  }
+
+  // 書いた値と読み直した値を比べるための形にそろえる(シートが日付・数値・真偽値に変える癖を吸収する)
+  function comparable(value) {
+    if (value === null || value === undefined) return "";
+    if (Object.prototype.toString.call(value) === "[object Date]") {
+      var jst = new Date(value.getTime() + 9 * 3600 * 1000).toISOString();
+      var time = jst.slice(11, 19);
+      return time === "00:00:00" ? jst.slice(0, 10) : jst.slice(0, 10) + " " + time;
+    }
+    if (typeof value === "boolean") return value ? "true" : "false";
+    var s = String(value).trim();
+    if (/^(true|false)$/i.test(s)) return s.toLowerCase();
+    if (/^-?\d+(\.\d+)?$/.test(s) && !/^0\d/.test(s)) return String(Number(s));
+    return s;
+  }
+
+  function sameCell(written, read) {
+    return comparable(written) === comparable(read);
+  }
+
+  /**
+   * 書いた行と読み直した行を、全列で照らし合わせる。違う行の行番号・企業ID・列名だけを返す(値は返さない)。
+   * @param {Array} expectedRows 書いた行(2次元配列)
+   * @param {Array} actualRows 読み直した行(2次元配列。同じ範囲)
+   * @param {Array} headers 列名
+   * @param {number} firstRowNumber expectedRows[0] がシートの何行目か
+   * @return {Object} { ok, reason, mismatched: [{ row, id, columns }], count }
+   */
+  function compareRows(expectedRows, actualRows, headers, firstRowNumber) {
+    var idIndex = headers.indexOf("企業ID");
+    var mismatched = [];
+    (expectedRows || []).forEach(function (expected, i) {
+      var actual = (actualRows || [])[i] || [];
+      var columns = [];
+      headers.forEach(function (header, j) {
+        if (!sameCell(expected[j], actual[j])) columns.push(header);
+      });
+      if (columns.length) {
+        mismatched.push({ row: firstRowNumber + i, id: idOf(expected[idIndex]), columns: columns });
+      }
+    });
+    var result = { ok: mismatched.length === 0, reason: "", mismatched: mismatched, count: mismatched.length };
+    if (!result.ok) {
+      result.reason = "書いた内容と違う行が " + mismatched.length + "行あります(" +
+        mismatched.slice(0, SAMPLE_LIMIT).map(function (m) {
+          return m.row + "行目 " + m.id + ": " + m.columns.slice(0, 3).join("・") + (m.columns.length > 3 ? " ほか" : "");
+        }).join(" / ") + (mismatched.length > SAMPLE_LIMIT ? " ほか" : "") + ")";
+    }
+    return result;
+  }
+
+  /**
+   * 書き込みの途中で止まった後、書こうとした範囲を2つに分けて数える。
+   * mixed: 企業IDは書いたとおりなのに、ほかの列が違う行(1行の中に別の会社の値が混ざった行)
+   * notWritten: 企業IDが書いたとおりでない行(まだ書けていない行。行がずれる書き込みでは、ずれたまま残る)
+   */
+  function countMixedRows(expectedRows, actualRows, headers) {
+    var idIndex = headers.indexOf("企業ID");
+    var counts = { mixed: 0, notWritten: 0 };
+    compareRows(expectedRows, actualRows, headers, 2).mismatched.forEach(function (m) {
+      if (m.columns.indexOf(headers[idIndex]) !== -1) counts.notWritten++;
+      else counts.mixed++;
+    });
+    return counts;
   }
 
   /**
@@ -179,6 +255,9 @@
     MAX_ATTEMPTS: MAX_ATTEMPTS,
     planCompanyWrite: planCompanyWrite,
     verifyWrittenIds: verifyWrittenIds,
+    compareRows: compareRows,
+    countMixedRows: countMixedRows,
+    sameCell: sameCell,
     chunkRanges: chunkRanges
   };
 

@@ -119,7 +119,7 @@ function importCompaniesFromStaging() {
     var absorbedExistingIds = existingRecords
       .map(function (record) { return record["企業ID"]; })
       .filter(function (id) { return !finalIdSet[id]; });
-    writeCompanyRecords_(companySheet, finalRecords, { allowRemovedIds: absorbedExistingIds });
+    writeCompanyRecords_(companySheet, finalRecords, { allowRemovedIds: absorbedExistingIds, backupSheetName: backupName });
     Logger.log(
       "インポート完了: 新規読込 " + newRecords.length + "件 / 名寄せ統合 " +
       mergeResult.absorbedCount + "件 / 最終件数 " + finalRecords.length + "件"
@@ -213,24 +213,40 @@ function writeCompanyRecords_(sheet, records, options) {
     });
   });
 
+  var recovery = companyWriteRecoveryHint_(options);
   var written = 0;
+  var attemptedEnd = 0;
   try {
     guard.chunkRanges(rows.length, guard.CHUNK_ROWS).forEach(function (range) {
+      attemptedEnd = range.offset + range.count;
       var chunk = rows.slice(range.offset, range.offset + range.count);
       setValuesWithRetry_(sheet.getRange(2 + range.offset, 1, range.count, headers.length), chunk, guard.MAX_ATTEMPTS);
       written = range.offset + range.count;
     });
   } catch (error) {
-    failCompanyWrite_(
-      "書き込みの途中で止まりました(" + written + "/" + rows.length + "社まで書きました。" +
-      "まだ書いていない行には元のデータが残っています): " + error
-    );
+    var detail = "書き込みの途中で止まりました(" + written + "/" + rows.length + "社まで書きました。";
+    if (plan.shifted) {
+      // 行がずれる書き込みでは、止まった所の前後で1行の中に別の会社の値が混ざりうる。混ざった行を数えて知らせる
+      var counts = countMixedCompanyRows_(sheet, rows.slice(0, attemptedEnd), headers);
+      detail += "行がずれる書き込みのため、止まった所までに、1行の中に別の会社の値が混ざった行が " + counts.mixed +
+        "行、まだ書けていない行が " + counts.notWritten + "行あります。" + recovery + ")";
+    } else {
+      detail += "会社の行の位置は変わらないため、まだ書いていない行には元のデータが残っています)";
+    }
+    failCompanyWrite_(detail + ": " + error);
   }
 
   flushSpreadsheet_();
   var writtenCheck = guard.verifyWrittenIds(newIds, readCompanyIdColumn_(sheet, idCol).slice(0, rows.length));
   if (!writtenCheck.ok) {
-    failCompanyWrite_("書いた後の照合で違いが見つかりました(余った行は消していません): " + writtenCheck.reason);
+    failCompanyWrite_("書いた後の照合で違いが見つかりました(余った行は消していません。" + recovery + "): " + writtenCheck.reason);
+  }
+  if (plan.shifted) {
+    // 行がずれる書き込み(名寄せの統合など)だけは、企業IDだけでなく全列を読み直して照らし合わせる
+    var rowCheck = guard.compareRows(rows, sheet.getRange(2, 1, rows.length, headers.length).getValues(), headers, 2);
+    if (!rowCheck.ok) {
+      failCompanyWrite_("書いた後の全列の照合で違いが見つかりました(余った行は消していません。" + recovery + "): " + rowCheck.reason);
+    }
   }
 
   var lastRow = sheet.getLastRow();
@@ -243,9 +259,27 @@ function writeCompanyRecords_(sheet, records, options) {
     failCompanyWrite_("最後の照合で違いが見つかりました: " + finalCheck.reason);
   }
   recordOpsStatus_("企業マスタの書き込み", true,
-    rows.length + "社(書き込み後に企業IDを照合済み" +
+    rows.length + "社(書き込み後に企業ID" + (plan.shifted ? "と全列" : "") + "を照合済み" +
     (plan.addedIds.length ? "・追加 " + plan.addedIds.length + "社" : "") +
     (plan.removedIds.length ? "・統合などで外した " + plan.removedIds.length + "社" : "") + ")");
+}
+
+/** 止まったときの戻し方の案内(書く前にバックアップのタブを作った呼び出しは、そのタブ名を渡す) */
+function companyWriteRecoveryHint_(options) {
+  var tab = options && options.backupSheetName;
+  return tab
+    ? "戻すときは、書く前に作ったバックアップのタブ「" + tab + "」の内容を企業マスタへ貼り戻してください"
+    : "戻すときは、その日の朝のバックアップ(GLOW企業リレーション台帳_バックアップ_日付)の企業マスタを使ってください";
+}
+
+/** 書き込みの途中で止まった後、書こうとした範囲で「1行の中に別の会社の値が混ざった行」と「まだ書けていない行」を数える */
+function countMixedCompanyRows_(sheet, rows, headers) {
+  try {
+    var actual = sheet.getRange(2, 1, rows.length, headers.length).getValues();
+    return GlowCompanyWriteGuard.countMixedRows(rows, actual, headers);
+  } catch (error) {
+    return { mixed: "(数えられませんでした)", notWritten: "(数えられませんでした)" };
+  }
 }
 
 /** 企業マスタの企業ID列(2行目から最後の行まで)を、空欄も含めて返す */

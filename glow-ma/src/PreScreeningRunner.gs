@@ -127,7 +127,7 @@ function applyPreScreeningScores() {
       Utilities.formatDate(new Date(), "Asia/Tokyo", "HHmmss");
     companySheet.copyTo(ss).setName(backupName);
 
-    writeCompanyRecords_(companySheet, updatedRecords);
+    writeCompanyRecords_(companySheet, updatedRecords, { backupSheetName: backupName });
 
     Logger.log(
       "事前選定スコア取り込み完了: 一致 " + matchResult.matches.length + "件 / " +

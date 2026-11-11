@@ -100,3 +100,43 @@ test("分割: 1,201行を500行ずつに分ける", () => {
   ]);
   assert.deepEqual(G.chunkRanges(0, 500), []);
 });
+
+test("行がずれるか: 並びも位置も同じ・末尾に足すだけならずれない。途中を外す・途中の空行を詰めるとずれる", () => {
+  assert.equal(G.planCompanyWrite(ids(5), ids(5)).shifted, false);
+  assert.equal(G.planCompanyWrite(ids(3), ids(5)).shifted, false);
+  const removed = G.planCompanyWrite(ids(5), ids(5).filter((id) => id !== "C900002"), { allowRemovedIds: ["C900002"] });
+  assert.equal(removed.ok, true);
+  assert.equal(removed.shifted, true);
+  assert.equal(G.planCompanyWrite(["C900001", "", "C900002"], ["C900001", "C900002"]).shifted, true);
+  const lastRemoved = G.planCompanyWrite(ids(5), ids(4), { allowRemovedIds: ["C900005"] });
+  assert.equal(lastRemoved.shifted, false, "最後の会社を外すだけなら、ほかの会社の位置は変わらない");
+});
+
+const H = ["企業ID", "会社名", "電話番号", "最終接触日", "総合スコア", "連絡不要"];
+
+test("全列の照合: 同じなら通す。シートが日付・数値・真偽値に変えても同じとみなす", () => {
+  const written = [["C900001", "架空建設", "098-000-0000", "2026-10-01", 12, false]];
+  const read = [["C900001", "架空建設", "098-000-0000", new Date("2026-10-01T00:00:00+09:00"), "12", "FALSE"]];
+  assert.equal(G.compareRows(written, read, H, 2).ok, true);
+});
+
+test("全列の照合: 1行の中に別の会社の値が混ざった行を、行番号・企業ID・列名で示す(値は出さない)", () => {
+  const written = [["C900001", "架空建設", "098-000-0001", "", 1, false], ["C900002", "架空工業", "098-000-0002", "", 2, false]];
+  const read = [["C900001", "架空建設", "098-000-0001", "", 1, false], ["C900002", "架空建設", "098-000-0001", "", 2, false]];
+  const r = G.compareRows(written, read, H, 2);
+  assert.equal(r.ok, false);
+  assert.deepEqual(r.mismatched, [{ row: 3, id: "C900002", columns: ["会社名", "電話番号"] }]);
+  assert.match(r.reason, /違う行が 1行あります\(3行目 C900002: 会社名・電話番号\)/);
+  assert.doesNotMatch(r.reason, /架空/);
+});
+
+test("全列の照合: 先頭が0の番号は数値として扱わない(0980 と 980 は別)", () => {
+  assert.equal(G.sameCell("0980", 980), false);
+  assert.equal(G.sameCell(0, "0"), true);
+});
+
+test("途中で止まった後の数え方: 混ざった行(IDは正しい)と、まだ書けていない行(IDが違う)を分ける", () => {
+  const written = [["C900001", "架空A", "1", "", 0, false], ["C900003", "架空C", "3", "", 0, false], ["C900004", "架空D", "4", "", 0, false]];
+  const read = [["C900001", "架空A", "1", "", 0, false], ["C900003", "架空B", "2", "", 0, false], ["C900003", "架空C", "3", "", 0, false]];
+  assert.deepEqual(G.countMixedRows(written, read, H), { mixed: 1, notWritten: 1 });
+});
