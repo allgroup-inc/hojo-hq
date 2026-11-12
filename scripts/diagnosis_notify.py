@@ -20,6 +20,13 @@ sha 一致を条件に書き換える(比較交換)。上限の判定と送信�
 読み直せないときは送らない。LINE には要求IDを再試行キー(X-Line-Retry-Key)として渡すので、送った直後に
 落ちて送り直しても二重には届かない。監視からのLINEは24時間3通・30日15通まで。制度データの注意は、
 最後の1通を診断ページの障害のために残す。
+
+通知先の整理(2026-11-12。議事: docs/議事_20261112_診断監視の通知先整理.md):
+  LINE の送信要求は、既定では書かない(DIAG_LINE_REQUESTS=on のときだけ書く)。送信担当(diagnosis-line-sender)は
+  停止中で、要求を書き続けると再開したときにまとめて送られるため。障害は今までどおり Issue に残し、
+  Issue を担当者(リポジトリの変数 DIAG_ALERT_ASSIGNEE)に割り当てて、GitHub の通知メールで知らせる。
+  起票が先・割り当てが後。通知先が未設定・割り当てに失敗しても、障害の記録(Issue)は必ず残す。
+  停止検知は、LINE の送信要求を書かない間は「送信担当の停滞」ではなく「通知先が使えるか」を確かめる。
 """
 import argparse
 import base64
@@ -37,11 +44,17 @@ from datetime import datetime, timedelta, timezone
 PAGE = "diagnosis-monitor"
 SYSTEM = "diagnosis-monitor-system"
 DATA = "diagnosis-data-hold"
+NOTIFY = "diagnosis-notify-route"
 LABELS = {
     PAGE: ("B60205", "もらいわすれ堂 診断ページの障害(15分監視)"),
     SYSTEM: ("D93F0B", "診断ページの監視システムの故障(ページの状態は不明)"),
     DATA: ("FBCA04", "診断ページの公開用制度データの更新保留・必須制度の欠け"),
+    NOTIFY: ("5319E7", "診断ページの監視の通知先(担当者の割り当て)が使えない"),
 }
+ALERT_LABELS = (PAGE, SYSTEM, DATA, NOTIFY)
+# LINE の送信要求を書くか。既定は書かない(送信担当を止めている間に要求がたまり、再開時にまとめて送られるのを防ぐ)
+LINE_REQUESTS = os.environ.get("DIAG_LINE_REQUESTS", "off") == "on"
+ASSIGNED_NOTE = "<!-- notify-route: unassigned -->"
 STATE_BRANCH = "bot/diagnosis-line-state"
 STATE_PATH = "diagnosis-line/state.json"
 PUBLISH_STATUS_PATH = "data/fukugiiro/publish_status.json"
@@ -138,6 +151,19 @@ class GitHub:
 
     def comment(self, number, body):
         return self._api("POST", f"repos/{self.repo}/issues/{number}/comments", {"body": body})
+
+    def assign(self, number, login):
+        """担当者を割り当て、実際に割り当たったかを返す(割り当てできないアカウントは、GitHub がエラーにせず無視する)。"""
+        out = self._api("POST", f"repos/{self.repo}/issues/{number}/assignees", {"assignees": [login]}) or {}
+        return any((a.get("login") or "").lower() == login.lower() for a in out.get("assignees") or [])
+
+    def is_assignable(self, login):
+        """このリポジトリのIssueに割り当てられるアカウントか(204=はい / 404=いいえ)。"""
+        try:
+            self._api("GET", f"repos/{self.repo}/assignees/{login}")
+            return True
+        except NotFound:
+            return False
 
     def close(self, number):
         self._api("PATCH", f"repos/{self.repo}/issues/{number}", {"state": "closed", "state_reason": "completed"})
@@ -262,6 +288,9 @@ def evaluate_quota(quota, consumption, reserve):
 # ---------- 障害Issue ----------
 
 def want_block(message):
+    """LINE の送信要求の印。LINE_REQUESTS が無効なら何も書かない((None, ""))。"""
+    if not LINE_REQUESTS:
+        return None, ""
     rid = str(uuid.uuid4())
     text = message.replace("-->", "->").strip()
     return rid, f"<!-- line-want id:{rid} -->\n<!-- line-text\n{text}\n-->"
@@ -287,6 +316,42 @@ def issue_url(repo, number):
     return f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/issues/{number}"
 
 
+def alert_assignee():
+    """通知を受け取る担当者の GitHub アカウント(リポジトリの変数 DIAG_ALERT_ASSIGNEE)。英数字とハイフン以外は無効。"""
+    login = (os.environ.get("DIAG_ALERT_ASSIGNEE") or "").strip().lstrip("@")
+    return login if re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})", login) else ""
+
+
+def assign_alert(gh, number):
+    """障害Issueを担当者に割り当てる(GitHub の通知メールで知らせるため)。失敗しても例外を出さない。
+    割り当てられなかったときは、その旨をIssueに1回だけ書き残す(記録そのものは起票の時点で残っている)。"""
+    login = alert_assignee()
+    if not login:
+        note = "通知先(リポジトリの変数 DIAG_ALERT_ASSIGNEE)が未設定のため、担当者を割り当てていません"
+    else:
+        try:
+            if gh.assign(number, login):
+                return True
+            note = "担当者の割り当てが反映されませんでした(このリポジトリに割り当てできないアカウントの可能性)"
+        except Exception as e:  # 割り当ての失敗で記録の処理を止めない
+            note = f"担当者の割り当てに失敗しました({type(e).__name__}: {str(e)[:80]})"
+    note += "。このIssueは通知メールで知らされていない可能性があります"
+    print(f"::warning::#{number}: {note}")
+    try:
+        if not any(ASSIGNED_NOTE in t for t in thread_texts(gh, {"number": number, "body": ""})):
+            gh.comment(number, f"{ASSIGNED_NOTE}\n⚠️ {note}")
+    except Exception as e:
+        print(f"::warning::#{number}: 割り当てできなかったことをIssueに書けませんでした({type(e).__name__})")
+    return False
+
+
+def open_issue(gh, title, body, label):
+    """障害Issueを起票してから、担当者に割り当てる。起票が先なので、割り当てに失敗しても記録は残る。"""
+    number = gh.create_issue(title, body, label)["number"]
+    assign_alert(gh, number)
+    return number
+
+
 KINDS = {
     SYSTEM: {"title": "⚠️ 診断ページの監視が動いていません",
              "intro": "自動検知: 診断ページの**監視が動いていません**。この間、診断ページの状態は分かりません(診断ページの障害とは限りません)。",
@@ -298,6 +363,11 @@ KINDS = {
            "first": f"⚠️{BRAND}診断ページの制度データに注意が必要です",
            "change": f"⚠️{BRAND}診断ページの制度データの注意の内容が変わりました",
            "recover": f"✅{BRAND}診断ページの制度データの注意が解消しました"},
+    NOTIFY: {"title": "⚠️ 診断ページの監視の通知先が使えません",
+             "intro": "自動検知: 診断ページの監視の**通知先が使えません**。障害はIssueに残りますが、担当者に通知メールが届かない可能性があります。",
+             "first": f"⚠️{BRAND}診断ページの監視の通知先が使えません",
+             "change": f"⚠️{BRAND}診断ページの監視の通知先の問題が変わりました",
+             "recover": f"✅{BRAND}診断ページの監視の通知先が使えるようになりました"},
 }
 
 
@@ -308,7 +378,7 @@ def raise_issue(gh, label, sig, reason, run_url):
     if not opened:
         rid, wb = want_block(f"{k['first']}\n{reason}")
         body = f"<!-- sig: {sig} -->\n{k['intro']}\n\n- 内容: {reason}\n- 実行: {run_url}\n\n{wb}\n"
-        return gh.create_issue(f"{k['title']}: {sig[:60]}", body, label)["number"], rid
+        return open_issue(gh, f"{k['title']}: {sig[:60]}", body, label), rid
     iss = opened[0]
     if last_sig(thread_texts(gh, iss)) != sig:
         rid, wb = want_block(f"{k['change']}\n{reason}")
@@ -322,7 +392,8 @@ def resolve_issues(gh, label, run_url, why):
     for iss in gh.issues(label, "open"):
         body = f"{RESOLVED}\n✅ {why}。自動クローズします。 {run_url}"
         if was_delivered(thread_texts(gh, iss)):
-            body += "\n\n" + want_block(KINDS[label]["recover"])[1]
+            wb = want_block(KINDS[label]["recover"])[1]
+            body += "\n\n" + wb if wb else ""
         gh.comment(iss["number"], body)
         gh.close(iss["number"])
 
@@ -362,9 +433,9 @@ def cmd_incident(gh, args, now):
     body = f"<!-- sig: {sig} -->\n- 実行: {args.run_url}\n\n```\n{report.rstrip()}\n```\n"
     if not opened:
         rid, wb = want_block(f"🚨{BRAND}診断ページ異常\n{summary}")
-        iss = gh.create_issue(f"🚨 診断ページ異常: {sig}",
-                              "自動検知: もらいわすれ堂の診断ページで、利用者が制度を検索できない可能性があります。\n\n" + body + "\n" + wb, PAGE)
-        return iss["number"], rid
+        n = open_issue(gh, f"🚨 診断ページ異常: {sig}",
+                       "自動検知: もらいわすれ堂の診断ページで、利用者が制度を検索できない可能性があります。\n\n" + body + "\n" + wb, PAGE)
+        return n, rid
     iss = opened[0]
     texts = thread_texts(gh, iss)
     prev = last_sig(texts)
@@ -727,8 +798,9 @@ def cmd_watchdog(gh, repo, args, now):
             problem = ("PREP_FAILING", f"監視は起動していますが、直近{len(done)}回とも診断ページの検査まで進めていません(準備段階の失敗・中断)")
         elif len(done) >= PREP_FAIL_RUNS and all(incident_failed):
             problem = ("ISSUE_UPDATE_FAILING", f"直近{len(done)}回とも障害Issueの更新に失敗しています(通知が届かない可能性)")
-    if not problem:
+    if not problem and LINE_REQUESTS:
         # 送信担当が止まっていないか: 保留ではない送信待ちが長く残っていれば止まっている
+        # (LINE の送信要求を書かない間は見ない。通知先は下の check_notify_route が見る)
         try:
             reqs, results = collect_requests(gh, now)
             st, _ = load_state(gh, create=False)
@@ -751,11 +823,48 @@ def cmd_watchdog(gh, repo, args, now):
     if problem:
         print(f"::error::{problem[1]}")
         raise_issue(gh, SYSTEM, problem[0], problem[1], args.run_url)
-        return problem[0], data_notice
-    # 閉じるのは、最新の回で検査まで届いたと確かめられたときだけ(準備失敗が続き始めた段階で閉じると、起票と通知を繰り返す)
-    if checked and checked[0]:
+    elif checked and checked[0]:
+        # 閉じるのは、最新の回で検査まで届いたと確かめられたときだけ(準備失敗が続き始めた段階で閉じると、起票と通知を繰り返す)
         resolve_issues(gh, SYSTEM, args.run_url, "監視が動いていることを確認しました")
-    return "", data_notice
+    # 通知先は、監視の停止とは別に毎回確かめる(監視が止まっていても、知らせる先が無ければ誰も気づけないため)
+    route = check_notify_route(gh, args.run_url)
+    return (problem[0] if problem else ""), data_notice, route
+
+
+def check_notify_route(gh, run_url):
+    """通知先(障害Issueの担当者)が使えるかを確かめる。使えなければ通知先のIssueに残し、問題の種類を返す。
+    確かめること: 担当者が設定されている / このリポジトリで割り当てられるアカウント / 開いている障害Issueに担当者がいる。
+    GitHub の通知メールが実際に届くか(受け取る側の通知設定)は、ここでは確かめられない(手順書の受信テストで確かめる)。"""
+    login = alert_assignee()
+    problem = None
+    if not login:
+        problem = ("NOTIFY_ROUTE_MISSING", "通知先(リポジトリの変数 DIAG_ALERT_ASSIGNEE)が未設定です。障害はIssueに残りますが、誰にも通知メールが届きません")
+    else:
+        try:
+            ok = gh.is_assignable(login)
+        except GitHubError as e:
+            print(f"::warning::通知先のアカウントを確かめられませんでした({e})。断定しないため、この回は判定しません")
+            write_summary("- 通知先: 確かめられませんでした(GitHub API の失敗)")
+            return ""
+        if not ok:
+            problem = ("NOTIFY_ASSIGNEE_INVALID", "通知先(DIAG_ALERT_ASSIGNEE)のアカウントが、このリポジトリのIssueに割り当てられません")
+    if problem:
+        print(f"::error::{problem[1]}")
+        write_summary(f"- 通知先: 使えません({problem[0]})")
+        raise_issue(gh, NOTIFY, problem[0], problem[1], run_url)
+        return problem[0]
+    # 割り当て漏れの修復(この変更より前に開いたIssue・一時的な失敗で割り当たらなかったIssue)
+    missed = 0
+    for label in ALERT_LABELS:
+        for iss in gh.issues(label, "open"):
+            if not iss.get("assignees") and label != NOTIFY:
+                missed += 0 if assign_alert(gh, iss["number"]) else 1
+    resolve_issues(gh, NOTIFY, run_url, "通知先の担当者に割り当てられることを確認しました")
+    write_summary("- 通知先: 担当者に割り当てできます" + (f"(割り当てられなかった障害Issue {missed}件)" if missed else "")
+                  + "。通知メールが実際に届くか(受け取る側の通知設定)は、ここでは確かめられません")
+    if missed:
+        return "NOTIFY_ASSIGN_FAILED"
+    return ""
 
 
 def check_publish_status(gh, run_url):
@@ -799,7 +908,8 @@ def data_notice(gh, hold, missing, status, run_url):
             for iss in opened:
                 body = f"<!-- sig: {sig} -->\n{RESOLVED}\n✅ {why}。自動クローズします。 {run_url}"
                 if prev_ids and was_delivered(thread_texts(gh, iss)):
-                    body += "\n\n" + want_block(k["recover"])[1]
+                    wb = want_block(k["recover"])[1]
+                    body += "\n\n" + wb if wb else ""
                 gh.comment(iss["number"], body)
                 gh.close(iss["number"])
         return
@@ -811,7 +921,7 @@ def data_notice(gh, hold, missing, status, run_url):
     reason = "。".join(parts) + f"(収集 {status.get('checked_at', '')})"
     if not opened:
         rid, wb = want_block(f"{k['first']}\n{reason}")
-        gh.create_issue(f"{k['title']}: {sig[:60]}", f"<!-- sig: {sig} -->\n{k['intro']}\n\n- 内容: {reason}\n- 実行: {run_url}\n\n{wb}\n", DATA)
+        open_issue(gh, f"{k['title']}: {sig[:60]}", f"<!-- sig: {sig} -->\n{k['intro']}\n\n- 内容: {reason}\n- 実行: {run_url}\n\n{wb}\n", DATA)
         return
     if (hold, ids) == (prev_hold, prev_ids):
         return
@@ -885,8 +995,8 @@ def main(argv=None, gh=None, line=None, now=None):
         target, rid = cmd_incident(gh, args, now)
         write_output(issue=target or "", request=rid or "", handled="true")
     elif args.cmd == "watchdog":
-        problem, data_notice = cmd_watchdog(gh, repo, args, now)
-        write_output(problem=problem, data=data_notice)
+        problem, data_notice, route = cmd_watchdog(gh, repo, args, now)
+        write_output(problem=problem, data=data_notice, route=route)
     elif args.cmd == "sender-reserve":
         # 予約ジョブには LINE のトークンを渡さない。Secrets が設定済みかどうかだけを真偽値で受け取る
         res = sender_reserve(gh, now, args.run_id, os.environ.get("LINE_CONFIGURED") == "true")

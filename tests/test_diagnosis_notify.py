@@ -36,6 +36,7 @@ class FakeGH:
         self.wf = {"state": "active", "created_at": dn.iso(T0 - timedelta(days=10))}
         self.run_list, self.job_map = [], {}
         self.sha_seq = 0
+        self.assignable = {"alert-owner"}   # 割り当てできるアカウント(本物の GitHub は、できないアカウントを黙って無視する)
 
     def tick(self, minutes=15):
         self.now += timedelta(minutes=minutes)
@@ -62,7 +63,7 @@ class FakeGH:
     def create_issue(self, title, body, label):
         self._chk("create_issue")
         n = len(self.items) + 1
-        self.items.append({"number": n, "title": title, "body": body, "labels": [label], "state": "open",
+        self.items.append({"number": n, "title": title, "body": body, "labels": [label], "state": "open", "assignees": [],
                            "created_at": dn.iso(self.now), "updated_at": dn.iso(self.now), "closed_at": None, "comments": []})
         return {"number": n}
 
@@ -74,6 +75,17 @@ class FakeGH:
         iss["comments"].append(c)
         iss["updated_at"] = dn.iso(self.now)
         return c
+
+    def assign(self, number, login):
+        self._chk("assign")
+        iss = self._issue(number)
+        if login in self.assignable and login not in [a["login"] for a in iss["assignees"]]:
+            iss["assignees"].append({"login": login})
+        return login in [a["login"] for a in iss["assignees"]]   # 本物の GitHub.assign と同じく「割り当たったか」を返す
+
+    def is_assignable(self, login):
+        self._chk("is_assignable")
+        return login in self.assignable
 
     def close(self, number):
         self._chk("close")
@@ -176,7 +188,15 @@ class FakeLine:
 
 
 class Base(unittest.TestCase):
+    # 既存の試験は、LINE の送信要求を書く設定(DIAG_LINE_REQUESTS=on)での動きを確かめる(案③で再び使う場合に備えて残す)
+    LINE_ON = True
+    ASSIGNEE = "alert-owner"
+
     def setUp(self):
+        for p in (mock.patch.object(dn, "LINE_REQUESTS", self.LINE_ON),
+                  mock.patch.dict(os.environ, {"DIAG_ALERT_ASSIGNEE": self.ASSIGNEE})):
+            p.start()
+            self.addCleanup(p.stop)
         self.gh = FakeGH()
         self.line = FakeLine()
         self.tmp = tempfile.mkdtemp()
@@ -841,7 +861,7 @@ class RealLineClient(unittest.TestCase):
                 line.quota()
 
 
-class Watchdog(Base):
+class WatchdogHelpers:
     def wd(self):
         return dn.cmd_watchdog(self.gh, "o/r", argparse.Namespace(workflow="diagnosis-monitor.yml", run_url="https://run/9"), self.gh.now)
 
@@ -855,6 +875,8 @@ class Watchdog(Base):
     def healthy(self):
         self.runs([(5, "success", "success"), (20, "success", "success"), (35, "success", "success"), (50, "success", "success")])
 
+
+class Watchdog(WatchdogHelpers, Base):
     def test_stop_conditions(self):
         self.healthy()
         self.assertEqual(self.wd()[0], "")
@@ -888,7 +910,7 @@ class Watchdog(Base):
         self.healthy()
         status = {"checked_at": "2026-11-04 06:00", "publish": True, "reasons": [], "required_missing": ["fk-kuni-jidofuyoteate"]}
         self.gh.files[("main", dn.PUBLISH_STATUS_PATH)] = {"text": json.dumps(status), "sha": "m1"}
-        problem, data = self.wd()
+        problem, data, _ = self.wd()
         self.assertEqual((problem, data), ("", "REQUIRED_MISSING"))
         d = self.gh.open_with(dn.DATA)[0]
         self.assertIn("fk-kuni-jidofuyoteate", d["body"])
@@ -901,7 +923,7 @@ class Watchdog(Base):
         self.assertIn("line-want", d["comments"][-1]["body"])
         status.update(publish=True, reasons=[], required_missing=[])
         self.gh.files[("main", dn.PUBLISH_STATUS_PATH)]["text"] = json.dumps(status)
-        self.assertEqual(self.wd(), ("", ""))
+        self.assertEqual(self.wd()[:2], ("", ""))
         self.assertEqual(self.gh.open_with(dn.DATA), [])
 
     def test_system_issue_closes_only_after_latest_run_checked(self):
@@ -912,6 +934,158 @@ class Watchdog(Base):
         self.healthy()
         self.wd()
         self.assertEqual(self.gh._issue(s)["state"], "closed")
+
+
+class NotifyRoute(WatchdogHelpers, Base):
+    """2026-11-12 の既定(LINE の送信要求を書かない・障害Issueを担当者に割り当てる)。合成データだけで試す。"""
+    LINE_ON = False
+    ASSIGNEE = "alert-owner"
+
+    def all_bodies(self):
+        return "\n".join([i["body"] for i in self.gh.items] + [c["body"] for i in self.gh.items for c in i["comments"]])
+
+    def test_no_line_requests_are_written_but_issues_are(self):
+        n, rid = self.page_alert("SEIDO_HTTP_404")
+        self.assertIsNone(rid)
+        self.gh.tick()
+        self.run_check(ok=False, sig="BROWSER_FLOW")          # 症状の変化
+        self.gh.tick(240)
+        self.run_check(ok=False, sig="BROWSER_FLOW")          # 4時間以上の継続
+        self.gh.tick()
+        self.run_check(missing=True)                          # 監視システムの故障
+        self.gh.tick()
+        self.run_check(ok=True)                               # 復旧
+        status = {"checked_at": "2026-11-04 06:00", "publish": False, "reasons": ["テスト"], "required_missing": ["fk-kuni-jidoteate"]}
+        self.gh.files[("main", dn.PUBLISH_STATUS_PATH)] = {"text": json.dumps(status), "sha": "m1"}
+        self.healthy()
+        self.wd()                                             # 制度データの注意
+        self.assertNotIn("line-want", self.all_bodies())
+        labels = {l for i in self.gh.items for l in i["labels"]}
+        self.assertEqual(labels, {dn.PAGE, dn.SYSTEM, dn.DATA})
+        self.assertIn("約", self.gh._issue(n)["comments"][-1]["body"])  # 復旧の記録は残る
+        self.assertEqual(self.gh.state(), None)               # 送信記録にも触れない
+        # 送信担当を再開しても、送るものは無い(再開時にまとめて送られない)
+        self.assertIsNone(dn.sender_reserve(self.gh, self.gh.now, "1", True))
+        self.assertEqual(self.line.delivered, [])
+
+    def test_every_alert_issue_is_assigned(self):
+        self.page_alert()
+        self.run_check(missing=True)
+        self.healthy()
+        status = {"checked_at": "x", "publish": True, "reasons": [], "required_missing": ["fk-kuni-jidoteate"]}
+        self.gh.files[("main", dn.PUBLISH_STATUS_PATH)] = {"text": json.dumps(status), "sha": "m1"}
+        self.assertEqual(self.wd()[2], "")
+        self.assertEqual(len(self.gh.items), 3)
+        for i in self.gh.items:
+            self.assertEqual(i["assignees"], [{"login": "alert-owner"}], i["title"])
+            self.assertNotIn(dn.ASSIGNED_NOTE, json.dumps(i, ensure_ascii=False))
+
+    def test_unset_route_keeps_record_and_raises_route_issue(self):
+        with mock.patch.dict(os.environ, {"DIAG_ALERT_ASSIGNEE": ""}):
+            n, _ = self.page_alert()
+            iss = self.gh._issue(n)
+            self.assertEqual(iss["state"], "open")                         # 記録は残る
+            self.assertIn(dn.ASSIGNED_NOTE, iss["comments"][0]["body"])    # 未設定であることも残る
+            self.healthy()
+            problem, _, route = self.wd()
+        self.assertEqual((problem, route), ("", "NOTIFY_ROUTE_MISSING"))
+        self.assertEqual(len(self.gh.open_with(dn.NOTIFY)), 1)
+        self.healthy()
+        with mock.patch.dict(os.environ, {"DIAG_ALERT_ASSIGNEE": ""}):
+            self.wd()
+        self.assertEqual(len(self.gh.open_with(dn.NOTIFY)), 1)            # 同じ問題なら増やさない
+        self.assertEqual(sum(dn.ASSIGNED_NOTE in c["body"] for c in iss["comments"]), 1)  # 注記も1回だけ
+        # 通知先を設定すると、通知先のIssueが閉じ、割り当て漏れの障害Issueも割り当て直される
+        self.healthy()
+        self.assertEqual(self.wd()[2], "")
+        self.assertEqual(self.gh.open_with(dn.NOTIFY), [])
+        self.assertEqual(iss["assignees"], [{"login": "alert-owner"}])
+        self.assertNotIn("line-want", self.all_bodies())
+
+    def test_unassignable_account_is_reported(self):
+        self.gh.assignable = set()
+        n, _ = self.page_alert()
+        self.assertEqual(self.gh._issue(n)["state"], "open")
+        self.assertIn("割り当てが反映されませんでした", self.gh._issue(n)["comments"][0]["body"])
+        self.healthy()
+        self.assertEqual(self.wd()[2], "NOTIFY_ASSIGNEE_INVALID")
+        self.assertEqual(len(self.gh.open_with(dn.NOTIFY)), 1)
+
+    def test_invalid_login_text_is_treated_as_unset(self):
+        for bad in ("a b", "x;rm", "-start", "a" * 40, ""):
+            with mock.patch.dict(os.environ, {"DIAG_ALERT_ASSIGNEE": bad}):
+                self.assertEqual(dn.alert_assignee(), "", bad)
+        with mock.patch.dict(os.environ, {"DIAG_ALERT_ASSIGNEE": " @alert-owner "}):
+            self.assertEqual(dn.alert_assignee(), "alert-owner")
+
+    def test_assign_failure_never_loses_the_record(self):
+        self.gh.fail = {"assign"}
+        n, _ = self.page_alert()
+        self.assertEqual(self.gh._issue(n)["state"], "open")
+        self.assertIn("割り当てに失敗しました", self.gh._issue(n)["comments"][0]["body"])
+        self.gh.fail = {"assign", "comment"}                   # 注記も書けない最悪の場合でも、起票は止めない
+        s, _ = self.run_check(missing=True)
+        self.assertEqual(self.gh._issue(s)["state"], "open")
+        self.gh.fail = {"is_assignable"}                       # 通知先を確かめられない回は、断定しない
+        self.healthy()
+        self.assertEqual(self.wd()[2], "")
+        self.assertEqual(self.gh.open_with(dn.NOTIFY), [])
+        self.gh.fail = {"assign"}                              # 修復でも割り当てられなければ、赤で残す
+        self.healthy()
+        self.assertEqual(self.wd()[2], "NOTIFY_ASSIGN_FAILED")
+
+    def test_sender_stall_is_not_checked_without_line_requests(self):
+        rid, wb = None, "<!-- line-want id:00000000-0000-4000-8000-000000000000 -->\n<!-- line-text\n古い要求\n-->"
+        self.gh.create_issue("古い要求", "テスト\n\n" + wb, dn.SYSTEM)
+        self.gh.tick(7 * 60)
+        self.healthy()
+        self.assertEqual(self.wd()[0], "")
+
+    def test_monitor_issues_still_open_and_close_as_before(self):
+        n, _ = self.page_alert("PAGE_HTTP_500")
+        self.gh.tick()
+        self.assertEqual(self.run_check(ok=False, sig="PAGE_HTTP_500")[0], n)
+        self.assertEqual(len(self.gh._issue(n)["comments"]), 0)  # 同じ症状は書き足さない
+        self.gh.tick()
+        self.run_check(ok=True)
+        self.assertEqual(self.gh._issue(n)["state"], "closed")
+        self.healthy()
+        self.gh.wf["state"] = "disabled_manually"
+        self.assertEqual(self.wd()[0], "WORKFLOW_DISABLED")
+        self.assertEqual(len(self.gh.open_with(dn.SYSTEM)), 1)
+
+
+class RealGitHubAssign(unittest.TestCase):
+    """GitHub.assign は応答の担当者一覧で判定する(割り当てできないアカウントを GitHub は黙って無視するため)。"""
+
+    def test_assign_reads_response(self):
+        gh = dn.GitHub("o/r")
+        with mock.patch.object(gh, "_api", return_value={"assignees": [{"login": "Alert-Owner"}]}):
+            self.assertTrue(gh.assign(1, "alert-owner"))
+        with mock.patch.object(gh, "_api", return_value={"assignees": []}):
+            self.assertFalse(gh.assign(1, "alert-owner"))
+        with mock.patch.object(gh, "_api", side_effect=dn.NotFound("x")):
+            self.assertFalse(gh.is_assignable("alert-owner"))
+        with mock.patch.object(gh, "_api", return_value=None):
+            self.assertTrue(gh.is_assignable("alert-owner"))
+
+
+class MonitorWorkflowRoute(unittest.TestCase):
+    """ワークフローが担当者の変数を渡し、予備ジョブも起票の後で割り当てること(起票を割り当ての失敗で止めない)。"""
+
+    def read(self, name):
+        with open(os.path.join(os.path.dirname(__file__), "..", ".github", "workflows", name), encoding="utf-8") as f:
+            return f.read()
+
+    def test_assignee_is_passed_and_fallback_creates_first(self):
+        mon, wd = self.read("diagnosis-monitor.yml"), self.read("diagnosis-monitor-watchdog.yml")
+        self.assertIn("DIAG_ALERT_ASSIGNEE: ${{ vars.DIAG_ALERT_ASSIGNEE }}", mon)
+        self.assertIn("DIAG_ALERT_ASSIGNEE: ${{ vars.DIAG_ALERT_ASSIGNEE }}", wd)
+        self.assertNotIn("DIAG_LINE_REQUESTS", mon + wd)        # 既定(書かない)のまま
+        create, assign = mon.index("gh issue create"), mon.index("--add-assignee")
+        self.assertLess(create, assign)
+        self.assertNotIn("--assignee", mon[create:assign])      # 起票そのものには担当者を付けない
+        self.assertIn("steps.w.outputs.route", wd)
 
 
 class Secrets(Base):
