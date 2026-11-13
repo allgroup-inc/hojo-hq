@@ -4,6 +4,7 @@
 サブコマンド:
   incident  15分監視の結果から障害Issueを更新し、知らせる必要があれば送信要求を書く(diagnosis-monitor.yml)
   watchdog  監視の停止・送信担当の停滞・公開用制度データの保留を調べ、Issueと送信要求を書く(diagnosis-monitor-watchdog.yml)
+  route-test 通知の受信テスト。テスト用のIssueをボットが起票して担当者に割り当て、すぐ閉じる(手動実行のときだけ)
   sender-reserve / sender-push / sender-record
             ただ1つの送信担当(diagnosis-line-sender.yml)。予約・送信・記録を別々のジョブで行い、書き込みの権限と
             LINE のトークンを同じジョブに置かない。重要度の高い順(診断ページの障害 → 監視システムの故障 → 制度データの注意)
@@ -50,7 +51,9 @@ LABELS = {
     SYSTEM: ("D93F0B", "診断ページの監視システムの故障(ページの状態は不明)"),
     DATA: ("FBCA04", "診断ページの公開用制度データの更新保留・必須制度の欠け"),
     NOTIFY: ("5319E7", "診断ページの監視の通知先(担当者の割り当て)が使えない"),
+    "diagnosis-notify-test": ("C5DEF5", "診断ページの監視の通知の受信テスト(障害ではない)"),
 }
+ROUTE_TEST = "diagnosis-notify-test"  # 障害のラベル(ALERT_LABELS)とは分ける。停止検知・送信担当は読まない
 ALERT_LABELS = (PAGE, SYSTEM, DATA, NOTIFY)
 # LINE の送信要求を書くか。既定は書かない(送信担当を止めている間に要求がたまり、再開時にまとめて送られるのを防ぐ)
 LINE_REQUESTS = os.environ.get("DIAG_LINE_REQUESTS", "off") == "on"
@@ -934,6 +937,50 @@ def data_notice(gh, hold, missing, status, run_url):
         gh.comment(n, f"<!-- sig: {sig} -->\nℹ️ 公開用データの更新の保留が解除されました(LINEは送りません)。{reason}\n- 実行: {run_url}")
 
 
+# ---------- 通知の受信テスト ----------
+
+def cmd_route_test(gh, run_url):
+    """通知の受信テスト。本番と同じく、ボット(GitHub Actions)がIssueを起票して担当者に割り当てる。
+    自分で作ったIssueを自分に割り当てても GitHub は通知メールを送らないため、受信の確認はこの手順で行う。
+    テスト用のIssueは障害のラベルを使わず、割り当ての後すぐに閉じる。LINE の送信要求は書かない。
+    戻り値: (終了コード, Issue番号または None)"""
+    login = alert_assignee()
+    if not login:
+        print("::error::通知先(リポジトリの変数 DIAG_ALERT_ASSIGNEE)が未設定です。受信テストのIssueは作りません")
+        write_summary("- 受信テスト: 通知先が未設定のため、実行していません")
+        return 1, None
+    try:
+        ok = gh.is_assignable(login)
+    except GitHubError as e:
+        print(f"::error::通知先のアカウントを確かめられませんでした({e})。受信テストのIssueは作りません")
+        write_summary("- 受信テスト: 通知先を確かめられなかったため、実行していません")
+        return 1, None
+    if not ok:
+        print("::error::通知先のアカウントが、このリポジトリのIssueに割り当てられません。受信テストのIssueは作りません")
+        write_summary("- 受信テスト: 通知先のアカウントに割り当てできないため、実行していません")
+        return 1, None
+    body = ("🧪 **通知の受信テスト**です(障害ではありません)。\n\n"
+            "診断ページの監視は、障害のIssueを担当者に割り当てて GitHub の通知メールで知らせます。"
+            "このIssueは、その通知メールが担当者に届くかを確かめるためのものです。\n\n"
+            "- 確かめること: 「assigned you」の通知メールが届いたか(迷惑メールのフォルダも含めて)\n"
+            f"- 実行: {run_url}\n"
+            "- このIssueは、割り当ての直後に自動で閉じます(閉じたことの通知が届くこともあります)")
+    number = gh.create_issue("🧪 診断ページの監視: 通知の受信テスト", body, ROUTE_TEST)["number"]
+    assigned = assign_alert(gh, number)
+    try:
+        gh.comment(number, "✅ 割り当てまで終わりました。テスト用のIssueなので自動で閉じます。" if assigned
+                   else "⚠️ 割り当てできなかったため、通知メールは届きません。テスト用のIssueなので自動で閉じます。")
+        gh.close(number)
+    except GitHubError as e:
+        print(f"::warning::テスト用のIssue #{number} を閉じられませんでした({e})。手で閉じてください")
+    if not assigned:
+        write_summary(f"- 受信テスト: Issue #{number} を作りましたが、担当者に割り当てできませんでした")
+        return 1, number
+    write_summary(f"- 受信テスト: Issue #{number} を作り、担当者に割り当てました。通知メールが届いたかを受け取る側で確かめてください"
+                  "(届いたかどうかは、ここでは確かめられません)")
+    return 0, number
+
+
 # ---------- 入出力 ----------
 
 def safe_detail(text):
@@ -971,6 +1018,7 @@ def main(argv=None, gh=None, line=None, now=None):
     a.add_argument("--report", default="diagnosis_monitor_report.txt")
     w = sub.add_parser("watchdog")
     w.add_argument("--workflow", default="diagnosis-monitor.yml")
+    rt = sub.add_parser("route-test", help="通知の受信テスト(テスト用のIssueを起票して担当者に割り当て、すぐ閉じる)")
     s = sub.add_parser("sender", help="予約・送信・記録を続けて行う(手元の確認用)。--mode check は確認モード")
     s.add_argument("--mode", choices=["send", "check"], default="send")
     sr = sub.add_parser("sender-reserve", help="予約ジョブ(LINEのトークンを使わない)")
@@ -980,7 +1028,7 @@ def main(argv=None, gh=None, line=None, now=None):
     rc.add_argument("--rid", required=True)
     rc.add_argument("--outcome", default="")
     rc.add_argument("--detail", default="")
-    for sp in (a, w, s, sr, sp_, rc):
+    for sp in (a, w, rt, s, sr, sp_, rc):
         sp.add_argument("--run-url", default=run_url)
         sp.add_argument("--run-id", default=os.environ.get("GITHUB_RUN_ID", "0"))
     args = p.parse_args(argv)
@@ -997,6 +1045,10 @@ def main(argv=None, gh=None, line=None, now=None):
     elif args.cmd == "watchdog":
         problem, data_notice, route = cmd_watchdog(gh, repo, args, now)
         write_output(problem=problem, data=data_notice, route=route)
+    elif args.cmd == "route-test":
+        code, number = cmd_route_test(gh, args.run_url)
+        write_output(issue=number or "")
+        return code
     elif args.cmd == "sender-reserve":
         # 予約ジョブには LINE のトークンを渡さない。Secrets が設定済みかどうかだけを真偽値で受け取る
         res = sender_reserve(gh, now, args.run_id, os.environ.get("LINE_CONFIGURED") == "true")

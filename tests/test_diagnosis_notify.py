@@ -1055,6 +1055,65 @@ class NotifyRoute(WatchdogHelpers, Base):
         self.assertEqual(len(self.gh.open_with(dn.SYSTEM)), 1)
 
 
+class RouteTest(Base):
+    """通知の受信テスト(手動実行)。合成データのみ。障害のラベル・LINE の送信要求・送信記録には触れない。"""
+    LINE_ON = False
+
+    def test_creates_assigns_and_closes_a_test_issue(self):
+        code, n = dn.cmd_route_test(self.gh, "https://run/7")
+        self.assertEqual(code, 0)
+        iss = self.gh._issue(n)
+        self.assertEqual(iss["labels"], [dn.ROUTE_TEST])
+        self.assertNotIn(dn.ROUTE_TEST, dn.ALERT_LABELS)
+        self.assertEqual(iss["assignees"], [{"login": "alert-owner"}])
+        self.assertEqual(iss["state"], "closed")
+        self.assertIn("障害ではありません", iss["body"])
+        self.assertNotIn("line-want", json.dumps(iss, ensure_ascii=False))
+        self.assertEqual(self.gh.state(), None)
+        for label in dn.ALERT_LABELS:                       # 障害のIssueは増えない
+            self.assertEqual(self.gh.issues(label, "all"), [])
+
+    def test_unset_or_unassignable_creates_nothing(self):
+        with mock.patch.dict(os.environ, {"DIAG_ALERT_ASSIGNEE": ""}):
+            self.assertEqual(dn.cmd_route_test(self.gh, "https://run/7"), (1, None))
+        self.gh.assignable = set()
+        self.assertEqual(dn.cmd_route_test(self.gh, "https://run/7"), (1, None))
+        self.gh.fail = {"is_assignable"}
+        self.assertEqual(dn.cmd_route_test(self.gh, "https://run/7"), (1, None))
+        self.assertEqual(self.gh.items, [])
+
+    def test_assign_failure_is_reported_and_issue_still_closed(self):
+        self.gh.fail = {"assign"}
+        code, n = dn.cmd_route_test(self.gh, "https://run/7")
+        self.assertEqual(code, 1)
+        iss = self.gh._issue(n)
+        self.assertEqual(iss["state"], "closed")
+        self.assertTrue(any("割り当てできなかった" in c["body"] for c in iss["comments"]))
+
+    def test_close_failure_does_not_hide_the_result(self):
+        self.gh.fail = {"close"}
+        code, n = dn.cmd_route_test(self.gh, "https://run/7")
+        self.assertEqual((code, self.gh._issue(n)["state"]), (0, "open"))
+
+    def test_watchdog_ignores_test_issues(self):
+        dn.cmd_route_test(self.gh, "https://run/7")
+        self.gh.fail = {"close"}
+        dn.cmd_route_test(self.gh, "https://run/8")         # 閉じられずに残ったテスト用Issue
+        self.gh.fail = set()
+        self.gh.run_list = [{"id": 0, "created_at": dn.iso(self.gh.now - timedelta(minutes=5)), "status": "completed"}]
+        self.gh.job_map = {0: [{"name": "monitor", "steps": [{"name": dn.CHECK_STEP, "conclusion": "success"},
+                                                             {"name": dn.INCIDENT_STEP, "conclusion": "success"}]}]}
+        problem, _, route = dn.cmd_watchdog(self.gh, "o/r", argparse.Namespace(workflow="diagnosis-monitor.yml", run_url="https://run/9"), self.gh.now)
+        self.assertEqual((problem, route), ("", ""))
+        self.assertEqual(len(self.gh.items), 2)             # 停止検知はテスト用Issueに触れない
+
+    def test_cli_exit_code(self):
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(dn.main(["route-test"], gh=self.gh), 0)
+            with mock.patch.dict(os.environ, {"DIAG_ALERT_ASSIGNEE": ""}):
+                self.assertEqual(dn.main(["route-test"], gh=self.gh), 1)
+
+
 class RealGitHubAssign(unittest.TestCase):
     """GitHub.assign は応答の担当者一覧で判定する(割り当てできないアカウントを GitHub は黙って無視するため)。"""
 
@@ -1086,6 +1145,17 @@ class MonitorWorkflowRoute(unittest.TestCase):
         self.assertLess(create, assign)
         self.assertNotIn("--assignee", mon[create:assign])      # 起票そのものには担当者を付けない
         self.assertIn("steps.w.outputs.route", wd)
+
+    def test_route_test_runs_only_on_manual_dispatch(self):
+        import yaml
+        wd = yaml.safe_load(self.read("diagnosis-monitor-watchdog.yml"))
+        on = wd.get("on") or wd.get(True)
+        self.assertEqual(on["workflow_dispatch"]["inputs"]["mode"]["default"], "check")
+        jobs = wd["jobs"]
+        self.assertIn("inputs.mode != 'route-test'", jobs["watchdog"]["if"])
+        self.assertEqual(jobs["route-test"]["if"], "github.event_name == 'workflow_dispatch' && inputs.mode == 'route-test'")
+        self.assertEqual(jobs["route-test"]["permissions"], {"contents": "read", "issues": "write"})
+        self.assertIn("route-test", jobs["route-test"]["steps"][-1]["run"])
 
 
 class Secrets(Base):
