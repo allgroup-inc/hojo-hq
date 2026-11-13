@@ -3,7 +3,11 @@ name: diagnosis-monitor-watchdog
 # 監視の監視: 2時間ごとに確かめる(判定は scripts/diagnosis_notify.py watchdog)。
 # 見る止まり方: 監視ワークフローの無効化(手動/60日無活動)/ 6時間以上の起動途絶 / 一度も起動しない /
 # 起動しても直近4回とも検査まで届かない(Playwright導入・checkoutの失敗、中断)/ 直近4回とも障害Issueの更新に失敗 /
-# LINEの送信要求が6時間以上処理されない(送信担当の停滞。上限・送信枠による保留は除く)。
+# LINEの送信要求が6時間以上処理されない(送信担当の停滞。LINE の送信要求を書く設定のときだけ)。
+# あわせて、通知先(障害Issueの担当者 DIAG_ALERT_ASSIGNEE)が使えるかを毎回確かめ、使えなければ
+# diagnosis-notify-route のIssueに残してジョブを赤にする(2026-11-12。議事: docs/議事_20261112_診断監視の通知先整理.md)。
+# 受信テスト: Actions 画面から mode=route-test で手動実行すると、停止検知はせず、テスト用のIssueをボットが起票して
+# 担当者に割り当て、すぐ閉じる(自分で作ったIssueを自分に割り当てても通知メールは届かないため)。
 # あわせて、収集が残した公開用制度データの判定(data/fukugiiro/publish_status.json)を読み、
 # 更新の保留・必須制度の欠けを diagnosis-data-hold のIssueに残す(ジョブは赤にしない)。
 # このワークフローもスケジュール起動のため遅れ・間引きがあり、検知までの時間は保証しない。
@@ -13,7 +17,13 @@ name: diagnosis-monitor-watchdog
 on:
   schedule:
     - cron: "7 */2 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "check=停止検知を手動で実行する / route-test=通知の受信テスト(テスト用のIssueを担当者に割り当ててすぐ閉じる)"
+        type: choice
+        options: [check, route-test]
+        default: check
 
 permissions:
   actions: read
@@ -26,6 +36,7 @@ concurrency:
 
 jobs:
   watchdog:
+    if: github.event_name != 'workflow_dispatch' || inputs.mode != 'route-test'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -38,10 +49,32 @@ jobs:
         id: w
         env:
           GH_TOKEN: ${{ github.token }}
+          DIAG_ALERT_ASSIGNEE: ${{ vars.DIAG_ALERT_ASSIGNEE }}
         run: python3 scripts/diagnosis_notify.py watchdog --workflow diagnosis-monitor.yml
 
-      - name: 監視の停止・故障を赤で残す
-        if: steps.w.outputs.problem != ''
+      - name: 監視の停止・故障・通知先の問題を赤で残す
+        if: steps.w.outputs.problem != '' || steps.w.outputs.route != ''
+        env:
+          PROBLEM: ${{ steps.w.outputs.problem }}
+          ROUTE: ${{ steps.w.outputs.route }}
         run: |
-          echo "::error::監視の停止・故障を検知しました(${{ steps.w.outputs.problem }})"
+          echo "::error::監視の停止・故障・通知先の問題を検知しました(監視: ${PROBLEM:-なし} / 通知先: ${ROUTE:-なし})"
           exit 1
+
+  route-test:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'route-test'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write   # テスト用のIssueの起票・割り当て・クローズだけに使う
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts
+          persist-credentials: false
+      - name: 通知の受信テスト(テスト用のIssueを担当者に割り当ててすぐ閉じる)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DIAG_ALERT_ASSIGNEE: ${{ vars.DIAG_ALERT_ASSIGNEE }}
+        run: python3 scripts/diagnosis_notify.py route-test
