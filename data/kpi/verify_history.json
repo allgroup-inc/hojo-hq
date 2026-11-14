@@ -5885,5 +5885,67 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-11-14",
+  "sample": 5,
+  "ng": 0,
+  "gemini": {
+   "enabled": true,
+   "eligible": 0,
+   "joined": 0
+  },
+  "items": [
+   {
+    "name": "【経済産業省】ものづくり・商業・サービス生産性向上促進補助金（23次締切）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdtMMAT",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和8年度　資源循環分野の脱炭素化促進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXyuMAH",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和8年度SDS電子化補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDderMAD",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "京都市企業立地促進制度補助金［市内初進出支援制度］",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDXFfMAP",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "廃止石油坑井封鎖事業費補助金（令和8年度：関東東北産業保安監督部）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYSKMA5",
+    "method": "jgrants",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   }
+  ]
  }
 ]
