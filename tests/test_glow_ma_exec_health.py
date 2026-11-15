@@ -97,9 +97,31 @@ class MaintenanceProblems(unittest.TestCase):
         self.assertNotIn("C900001", p)
 
     def test_old_failure_is_not_reported(self):
-        # 期間(6時間)より前の失敗では知らせない(同じ失敗で1日中知らせ続けない)
+        # 期間より前の失敗では知らせない(同じ失敗で何日も知らせ続けない)
         self.assertEqual(h.maintenance_problems([entry(400, FAIL_SCORE)], NOW, 360), [])
         self.assertEqual(len(h.maintenance_problems([entry(350, FAIL_SCORE)], NOW, 360)), 1)
+
+    def test_failure_is_caught_even_when_the_scheduled_check_is_hours_late(self):
+        # 実績: 定期の点検は4〜11時間あくことがある。7:32 の失敗の次の点検が10時間40分後でも拾う
+        entries = [entry(640, FAIL_SCORE), entry(100, BEAT)]
+        default_minutes = h.ALERT_MAINTENANCE_MINUTES
+        problems = h.all_alert_problems(entries, NOW, 8, 60, default_minutes)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("日次メンテナンス", problems[0])
+        self.assertEqual(h.all_alert_problems([entry(900, FAIL_SCORE), entry(100, BEAT)], NOW, 8, 60, default_minutes), [])
+
+    def test_wider_fetch_does_not_relax_heartbeat_check(self):
+        # 実行記録を14時間ぶん取っても、稼働記録の有無は直近8時間だけで見る(10時間前の稼働記録では通さない)
+        problems = h.all_alert_problems([entry(600, BEAT)], NOW, 8, 60, 840)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("稼働記録", problems[0])
+        self.assertEqual(h.all_alert_problems([entry(400, BEAT)], NOW, 8, 60, 840), [])
+
+    def test_fetch_hours(self):
+        self.assertEqual(h.fetch_hours(8, True, 840), 14)
+        self.assertEqual(h.fetch_hours(8, True, 850), 15)
+        self.assertEqual(h.fetch_hours(48, True, 840), 48)
+        self.assertEqual(h.fetch_hours(8, False, 840), 8, "手動の点検は、指定した時間のまま")
 
     def test_failure_followed_by_successful_rerun_is_not_reported(self):
         entries = [entry(120, FAIL_SCORE), entry(20, OK_ALL)]

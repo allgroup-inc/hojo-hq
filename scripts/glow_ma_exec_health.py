@@ -132,6 +132,9 @@ MAINTENANCE_STEPS = (
     "台帳のバックアップ", "お断り(連絡不要)の反映", "スコア・ランクの再計算", "ダッシュボードの更新",
     "今日の連絡先の更新", "世界の架け橋の週次KPI", "掘り起こしアラートの送信",
 )
+# 日次メンテナンスの失敗を数える期間(分)。点検は3時間ごとの予定だが、GitHub の定期実行は実際には
+# 4〜11時間あくことがある(2026-11-05〜15 の実績)。あいだが最長でも拾える長さ(14時間)にする
+ALERT_MAINTENANCE_MINUTES = 840
 MAINTENANCE_FAILED = re.compile(r"日次メンテナンス: 「([^」]+)」が失敗しました")
 MAINTENANCE_ALL_OK = "日次メンテナンスがすべて完了しました"
 COMPANY_WRITE_STOPPED = "企業マスタの書き込みを止めました"
@@ -173,14 +176,26 @@ def maintenance_problems(entries, now, recent_minutes):
     if not steps:
         return []
     hours = max(recent_minutes // 60, 1)
+    # 同じ失敗は、期間のあいだ点検のたびに知らせる(直るか、次の日次メンテナンスが成功するまでの念押し)
     return [f"直近{hours}時間の日次メンテナンスで {len(steps)} 件の手順が失敗しました(" + "・".join(steps) + ")。"
             + "".join(p + "。" for p in phases)
             + "台帳の「稼働状況」タブを確かめ、システム担当のチャットへ知らせてください"]
 
 
 def all_alert_problems(entries, now, hours, recent_minutes, maintenance_minutes):
-    """自動点検(--alert)で知らせる問題のすべて: 承認切れ・稼働記録なし・日次メンテナンスの失敗。"""
-    return alert_problems(entries, now, hours, recent_minutes) + maintenance_problems(entries, now, maintenance_minutes)
+    """自動点検(--alert)で知らせる問題のすべて: 承認切れ・稼働記録なし・日次メンテナンスの失敗。
+
+    entries は日次メンテナンスの期間(maintenance_minutes)まで含めて渡してよい。
+    稼働記録の有無は、これまでどおり直近 hours 時間の記録だけで判定する(期間を広げても判定を甘くしない)。
+    """
+    since = (now - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    within_hours = [e for e in entries if e.get("timestamp", "") >= since]
+    return alert_problems(within_hours, now, hours, recent_minutes) + maintenance_problems(entries, now, maintenance_minutes)
+
+
+def fetch_hours(hours, alert, maintenance_minutes):
+    """実行記録を何時間ぶん取るか。自動点検のときは、日次メンテナンスの期間まで広げる。"""
+    return max(hours, -(-maintenance_minutes // 60)) if alert else hours
 
 
 def write_alert_output(problems, path):
@@ -199,8 +214,8 @@ def main():
                     help="定期の自動点検用。承認切れ・稼働の記録なし・日次メンテナンスの失敗を見つけたら終了コード1で失敗する(LINEで通知が届く)")
     ap.add_argument("--alert-recent-minutes", type=int, default=60,
                     help="--alert で承認切れを数える期間(分)。復旧後に古いエラーで通知が続かないよう短くする")
-    ap.add_argument("--alert-maintenance-minutes", type=int, default=360,
-                    help="--alert で日次メンテナンスの失敗を数える期間(分)。点検は3時間ごとなので、1回抜けても拾える長さにする")
+    ap.add_argument("--alert-maintenance-minutes", type=int, default=ALERT_MAINTENANCE_MINUTES,
+                    help="--alert で日次メンテナンスの失敗を数える期間(分)")
     ap.add_argument("--sample", default="", help="この処理名の最新ログ3件の中身の形(重要度・項目名・本文の先頭)を表示する")
     args = ap.parse_args()
     token = access_token(os.environ["CLASPRC_JSON"])
@@ -210,7 +225,8 @@ def main():
     project = os.environ.get("GCP_PROJECT", "").strip()
     if not project:
         sys.exit("::error::Google Cloud のプロジェクト番号がありません(手動実行で gcp_project を1回指定すると、以後は覚えて使います)")
-    since = (datetime.now(timezone.utc) - timedelta(hours=args.hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    shown_hours = fetch_hours(args.hours, args.alert, args.alert_maintenance_minutes)
+    since = (datetime.now(timezone.utc) - timedelta(hours=shown_hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
     entries = list_entries(token, project, since)
 
     stats = collections.defaultdict(lambda: {"count": 0, "errors": 0, "last": "", "msgs": collections.Counter()})
@@ -272,7 +288,7 @@ def main():
             keys = sorted((e.get("jsonPayload") or {}).keys())
             print(f"[見本 {args.sample}] {e.get('timestamp', '')[:19]} {e.get('severity', '')} "
                   f"logName末尾={e.get('logName', '').rsplit('/', 1)[-1]} 項目={keys} 本文={safe_error(body)}")
-    print(f"## 直近{args.hours}時間の実行記録(ログ {len(entries)} 件)")
+    print(f"## 直近{shown_hours}時間の実行記録(ログ {len(entries)} 件)")
     if not entries:
         print("::warning::実行記録が1件もありません(トリガーが止まっている可能性)")
     for fn, s in sorted(stats.items(), key=lambda kv: kv[1]["last"], reverse=True):
