@@ -126,14 +126,81 @@ def alert_problems(entries, now, hours, recent_minutes):
     return problems
 
 
+# 日次メンテナンス(glow-ma/src/MaintenanceRunner.gs)の手順名。知らせに出すのはこの決まった名前だけ
+# (ログの本文には企業IDや行番号が入りうるため、公開の Actions ログと LINE には出さない)
+MAINTENANCE_STEPS = (
+    "台帳のバックアップ", "お断り(連絡不要)の反映", "スコア・ランクの再計算", "ダッシュボードの更新",
+    "今日の連絡先の更新", "世界の架け橋の週次KPI", "掘り起こしアラートの送信",
+)
+MAINTENANCE_FAILED = re.compile(r"日次メンテナンス: 「([^」]+)」が失敗しました")
+MAINTENANCE_ALL_OK = "日次メンテナンスがすべて完了しました"
+COMPANY_WRITE_STOPPED = "企業マスタの書き込みを止めました"
+
+
+def company_write_phase(text):
+    """企業マスタの書き込みを止めた記録が、どの段階で止めたものか(決まった文だけを返す)。"""
+    if COMPANY_WRITE_STOPPED not in text:
+        return ""
+    if "企業マスタは変更していません" in text:
+        return "企業マスタの書き込みを、書く前の確認で止めました(企業マスタは変更されていません)"
+    if "書き込みの途中で止まりました" in text:
+        return "企業マスタの書き込みが途中で止まりました(途中まで書き換わっている可能性があります)"
+    return "企業マスタを書いた後の照合で止めました(書いた内容の確認が要ります)"
+
+
+def maintenance_problems(entries, now, recent_minutes):
+    """直近 recent_minutes 分の日次メンテナンスの失敗(空なら問題なし)。2026-11-15 追加。
+
+    11/11 の企業マスタの欠落(失敗台帳 FK-010)は、失敗の通知がメール1通だけで、定期点検まで気づけなかった。
+    3時間ごとの自動点検で日次メンテナンスの失敗を見つけ、LINE でも知らせる。
+    失敗のあとに「すべて完了」の記録があれば(やり直して直った)、知らせない。
+    """
+    since = (now - timedelta(minutes=recent_minutes)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    recent = [e for e in entries if e.get("timestamp", "") >= since]
+    last_ok = max((e.get("timestamp", "") for e in recent if MAINTENANCE_ALL_OK in entry_text(e)), default="")
+    steps, phases = [], []
+    for e in sorted(recent, key=lambda e: e.get("timestamp", "")):
+        text = entry_text(e)
+        m = MAINTENANCE_FAILED.search(text)
+        if not m or e.get("timestamp", "") <= last_ok:
+            continue
+        name = m.group(1) if m.group(1) in MAINTENANCE_STEPS else "その他の手順"
+        if name not in steps:
+            steps.append(name)
+        phase = company_write_phase(text)
+        if phase and phase not in phases:
+            phases.append(phase)
+    if not steps:
+        return []
+    hours = max(recent_minutes // 60, 1)
+    return [f"直近{hours}時間の日次メンテナンスで {len(steps)} 件の手順が失敗しました(" + "・".join(steps) + ")。"
+            + "".join(p + "。" for p in phases)
+            + "台帳の「稼働状況」タブを確かめ、システム担当のチャットへ知らせてください"]
+
+
+def all_alert_problems(entries, now, hours, recent_minutes, maintenance_minutes):
+    """自動点検(--alert)で知らせる問題のすべて: 承認切れ・稼働記録なし・日次メンテナンスの失敗。"""
+    return alert_problems(entries, now, hours, recent_minutes) + maintenance_problems(entries, now, maintenance_minutes)
+
+
+def write_alert_output(problems, path):
+    """見つけた問題を、後のステップ(LINE通知)へ渡す。出すのは決まった文だけ(ログの本文は入れない)。"""
+    if not path:
+        return
+    with open(path, "a", encoding="utf-8") as f:
+        f.write("problems<<GLOW_MA_ALERT_END\n" + "\n".join("・" + p for p in problems) + "\nGLOW_MA_ALERT_END\n")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=int, default=48)
     ap.add_argument("--grep", default="", help="この語を含むログ(INFO含む)の先頭だけを最大5件表示する")
     ap.add_argument("--alert", action="store_true",
-                    help="毎日の自動点検用。承認切れ・稼働の記録なしを見つけたら終了コード1で失敗する(GitHubから通知が届く)")
+                    help="定期の自動点検用。承認切れ・稼働の記録なし・日次メンテナンスの失敗を見つけたら終了コード1で失敗する(LINEで通知が届く)")
     ap.add_argument("--alert-recent-minutes", type=int, default=60,
                     help="--alert で承認切れを数える期間(分)。復旧後に古いエラーで通知が続かないよう短くする")
+    ap.add_argument("--alert-maintenance-minutes", type=int, default=360,
+                    help="--alert で日次メンテナンスの失敗を数える期間(分)。点検は3時間ごとなので、1回抜けても拾える長さにする")
     ap.add_argument("--sample", default="", help="この処理名の最新ログ3件の中身の形(重要度・項目名・本文の先頭)を表示する")
     args = ap.parse_args()
     token = access_token(os.environ["CLASPRC_JSON"])
@@ -216,12 +283,14 @@ def main():
         for msg, n in s["msgs"].most_common(3):
             print(f"    エラー例({n}件): {msg}")
     if args.alert:
-        problems = alert_problems(entries, datetime.now(timezone.utc), args.hours, args.alert_recent_minutes)
+        now = datetime.now(timezone.utc)
+        problems = all_alert_problems(entries, now, args.hours, args.alert_recent_minutes, args.alert_maintenance_minutes)
+        write_alert_output(problems, os.environ.get("GITHUB_OUTPUT", ""))
         for p in problems:
             print(f"::error title=glow-ma の自動処理に問題があります::{p}")
         if problems:
             sys.exit(1)
-        print("自動点検: 問題なし(承認切れなし・稼働記録あり)")
+        print("自動点検: 問題なし(承認切れなし・稼働記録あり・日次メンテナンスの失敗なし)")
 
 
 if __name__ == "__main__":
