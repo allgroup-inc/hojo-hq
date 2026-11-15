@@ -54,8 +54,17 @@ function runDailyMaintenance() {
   ];
 
   var failures = [];
+  var skipped = [];  // 緊急停止スイッチで見送った手順
   var stop = null;  // 企業マスタの書き込みを止めたとき: { by: 手順名, dataChanged }
+  // 緊急停止スイッチ(CompanyWritePauseRunner.gs): 停止中は、企業マスタを書き直す手順を試さずに見送る。
+  // 失敗としては数えない(人が決めて止めている)。バックアップと読むだけの手順は続ける
+  var pause = readCompanyWritePause_();
   steps.forEach(function (step) {
+    if (pause.paused && step.master === "write") {
+      skipped.push(step.name);
+      Logger.log("日次メンテナンス: 「" + step.name + "」は、企業マスタの書き込みが停止中のため見送りました。");
+      return;
+    }
     if (stop && stopsStep_(stop, step)) {
       failures.push(step.name + ": 「" + stop.by + "」で企業マスタの書き込みを止めたため、実行しませんでした" +
         (stop.dataChanged ? "(企業マスタが途中まで書き換わっている可能性があるため)" : "(企業マスタは変わっていないが、同じ理由で書き込みが止まるため)"));
@@ -72,13 +81,37 @@ function runDailyMaintenance() {
     }
   });
 
-  if (failures.length === 0) {
+  if (skipped.length > 0) remindCompanyWritePaused_(pause, skipped);
+  if (failures.length === 0 && skipped.length === 0) {
     Logger.log("日次メンテナンスがすべて完了しました。");
     recordOpsStatus_("日次メンテナンス", true, steps.length + "件すべて完了");
     return;
   }
-  recordOpsStatus_("日次メンテナンス", false, failures.join(" / "));
+  var skippedNote = skipped.length === 0 ? "" :
+    "見送り " + skipped.length + "件(" + skipped.join("・") + "): 企業マスタの書き込みが停止中";
+  if (failures.length === 0) {
+    Logger.log("日次メンテナンス: 企業マスタの書き込みが停止中のため、" + skipped.length + "件を見送りました。ほかは完了しました。");
+    recordOpsStatus_("日次メンテナンス", "停止中",
+      (steps.length - skipped.length) + "件完了 / " + skippedNote);
+    return;
+  }
+  recordOpsStatus_("日次メンテナンス", false, failures.concat(skippedNote ? [skippedNote] : []).join(" / "));
   notifyMaintenanceFailures_(failures, steps.length);
+}
+
+/**
+ * 停止中であることを、毎朝1回、稼働状況タブとお知らせで伝える(止めたまま忘れないように)。
+ * 自動では再開しない。お断り(連絡不要)の反映も止まっているため、日数を添える。
+ */
+function remindCompanyWritePaused_(pause, skipped) {
+  var days = GlowCompanyWritePause.pausedDays(pause, Date.now());
+  var detail = GlowCompanyWritePause.describeState(pause) + (days >= 0 ? " / 停止から " + days + "日" : "");
+  recordOpsStatus_(GlowCompanyWritePause.OPS_NAME, "停止中", detail);
+  notifyOpsNotice_("【GLOW台帳】企業マスタの書き込みは停止中です",
+    detail + "\n今朝の日次メンテナンスで見送った手順: " + skipped.join("・") +
+    "\nお断り(連絡不要)の反映も止まっています。長く止めると、断った会社が連絡先の一覧に戻るおそれがあります。" +
+    "\n再開は、代表者の承認の後、台帳のメニュー「GLOW台帳 → 企業マスタの書き込みを再開する」から。",
+    "企業マスタの書き込み停止中");
 }
 
 /**

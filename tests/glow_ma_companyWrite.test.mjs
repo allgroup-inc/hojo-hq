@@ -72,11 +72,13 @@ function makeContext(sheets) {
     },
     recordOpsStatus_: (name, ok, detail) => ops.push({ name, ok, detail }),
     notifyOpsFailure_: (name, message) => notices.push({ name, message }),
+    // 緊急停止スイッチ(停止していない状態。停止中の試験は glow_ma_companyWritePause.test.mjs)
+    PropertiesService: { getScriptProperties: () => ({ getProperty: () => null }) },
   };
   ctx.globalThis = ctx;
   vm.createContext(ctx);
-  for (const f of ["schema.js", "scoring.js", "dedupe.js", "companyWriteGuard.js"]) vm.runInContext(src("../glow-ma/src/" + f), ctx);
-  for (const f of ["ImportRunner.gs", "ScoringRunner.gs", "DncRunner.gs"]) vm.runInContext(src("../glow-ma/src/" + f), ctx);
+  for (const f of ["schema.js", "scoring.js", "dedupe.js", "companyWriteGuard.js", "companyWritePause.js"]) vm.runInContext(src("../glow-ma/src/" + f), ctx);
+  for (const f of ["ImportRunner.gs", "ScoringRunner.gs", "DncRunner.gs", "CompanyWritePauseRunner.gs"]) vm.runInContext(src("../glow-ma/src/" + f), ctx);
   return { ctx, ops, notices, sleeps };
 }
 
@@ -314,6 +316,7 @@ function runMaintenance(failing) {
     updateDashboard: step("dashboard"), updateTodayList: step("today"), runWld02WeeklyIfDue_: step("wld02"), runDailyAlerts: step("alerts"),
     recordOpsStatus_: (name, ok, detail) => ops.push({ name, ok, detail }),
     notifyOpsFailure_: (name, message) => notices.push({ name, message }),
+    readCompanyWritePause_: () => ({ paused: false }),
   };
   vm.createContext(ctx);
   vm.runInContext(src("../glow-ma/src/MaintenanceRunner.gs"), ctx);
