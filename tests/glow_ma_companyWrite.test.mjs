@@ -11,7 +11,8 @@ const src = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
 // "partial" を返すと前半だけ書いてから失敗する(Sheets の大きな書き込みが途中まで反映されて止まる形)
 function fakeSheet(name, rows, { failWhen = () => null } = {}) {
   const s = {
-    name, rows: rows.map((r) => r.slice()), writes: 0, clears: 0,
+    name, rows: rows.map((r) => r.slice()), writes: 0, clears: 0, reads: 0,
+    formulas: {},  // "行,列"(1始まり) → 数式。数式のセルを置いた台帳をまねる
     getName: () => name,
     getLastRow: () => {
       for (let i = s.rows.length - 1; i >= 0; i--) {
@@ -20,11 +21,13 @@ function fakeSheet(name, rows, { failWhen = () => null } = {}) {
       return 0;
     },
     getRange: (row, col, nRows, nCols) => ({
-      getValues: () => Array.from({ length: nRows }, (_, i) =>
+      getFormulas: () => { s.reads++; return Array.from({ length: nRows }, (_, i) =>
+        Array.from({ length: nCols }, (_, j) => s.formulas[(row + i) + "," + (col + j)] || "")); },
+      getValues: () => (s.reads++, Array.from({ length: nRows }, (_, i) =>
         Array.from({ length: nCols }, (_, j) => {
           const v = (s.rows[row - 1 + i] || [])[col - 1 + j];
           return v === undefined ? "" : v;
-        })),
+        }))),
       setValues: (vals) => {
         s.writes++;
         const mode = failWhen(row, nRows, s.writes);
@@ -462,24 +465,22 @@ test("やり直しの待ち時間には上限がある(合計20秒まで)。上�
   assert.ok(total >= 12000, "上限までは、やり直している");
 });
 
-test("行がずれる書き込み: 桁区切り・%・数式・日付の書き方の違いでは止めない。先頭の0が消えたら止める", () => {
+test("行がずれる書き込み: 桁区切り・%・日付の書き方の違いでは止めない。先頭の0が消えたら止める", () => {
   const { ctx, master } = setup(12);
   const headers = ctx.GlowSchema.COMPANY_MASTER_HEADERS;
   const col = (h) => headers.indexOf(h);
   const records = withoutSecond(ctx, master);
   records[2]["規模"] = "1,200";
   records[3]["規模"] = "12%";
-  records[4]["備考"] = "=1+1";
   records[5]["登録日"] = "2026/10/1";
   records[6]["電話番号"] = "0980123456";
   const realGetRange = master.getRange;
-  // シートの癖をまねる: 桁区切り・%は数値に、数式は計算結果に、日付は Date に、先頭0の番号は数値に変わる
+  // シートの癖をまねる: 桁区切り・%は数値に、日付は Date に、先頭0の番号は数値に変わる
   master.getRange = (row, c0, n, c) => {
     const r = realGetRange(row, c0, n, c);
     return { ...r, setValues: (vals) => r.setValues(vals.map((v) => v.map((x) => {
       if (x === "1,200") return 1200;
       if (x === "12%") return 0.12;
-      if (x === "=1+1") return 2;
       if (x === "2026/10/1") return new Date("2026-10-01T00:00:00+09:00");
       if (x === "0980123456") return 980123456;
       return x;
@@ -489,4 +490,163 @@ test("行がずれる書き込み: 桁区切り・%・数式・日付の書き�
   assert.ok(err, "先頭の0が消えた電話番号で止まる");
   assert.match(err.message, /書いた内容と違う行が 1行あります\(\d+行目 C900008: 電話番号\)/);
   assert.equal(col("電話番号") >= 0, true);
+});
+
+// --- 2026-11-15 最終安全審査: 数式 ---
+test("企業マスタに数式のセルがあれば、書き直すと数式が消えるため、書く前に止める(1セルも変えない)", () => {
+  const { ctx, master, notices } = setup(20);
+  const scoreCol = ctx.GlowSchema.COMPANY_MASTER_HEADERS.indexOf("総合スコア") + 1;
+  master.formulas["8," + scoreCol] = "=M8+N8";
+  const before = master.rows.map((r) => r.slice());
+  const err = (() => { try { ctx.recalculateAllScores(); } catch (e) { return e; } })();
+  assert.deepEqual({ ...err.companyWrite }, { phase: "precheck", dataChanged: false });
+  assert.match(err.message, /数式が入っているセルが 1か所あります\(8行目の総合スコア\)/);
+  assert.deepEqual(master.rows, before);
+  assert.equal(master.writes, 0);
+  assert.equal(notices.length, 1);
+});
+
+test("数式の有無を確かめられなければ(読み取りの失敗)、書かずに止める", () => {
+  const { ctx, master } = setup(5);
+  const real = master.getRange;
+  master.getRange = (...a) => ({ ...real(...a), getFormulas: () => { throw new Error("Service Spreadsheets failed"); } });
+  const err = (() => { try { ctx.recalculateAllScores(); } catch (e) { return e; } })();
+  assert.equal(err.companyWrite.phase, "precheck");
+  assert.match(err.message, /数式の有無を確かめられませんでした/);
+  assert.equal(master.writes, 0);
+});
+
+test("「=」で始まる文字を書こうとしたら、数式として入って元の文字が消えるため、書く前に止める", () => {
+  const { ctx, master } = setup(10);
+  const records = ctx.readCompanyRecords_(master);
+  records[3]["備考"] = "=要確認";
+  const before = master.rows.map((r) => r.slice());
+  const err = (() => { try { ctx.writeCompanyRecords_(master, records); } catch (e) { return e; } })();
+  assert.deepEqual({ ...err.companyWrite }, { phase: "precheck", dataChanged: false });
+  assert.match(err.message, /「=」で始まる文字が 1か所あります\(5行目の備考\)/);
+  assert.doesNotMatch(err.message, /要確認/, "値は通知に出さない");
+  assert.deepEqual(master.rows, before);
+});
+
+// --- 2026-11-15 最終安全審査: 本番と同じ規模(約3千社 × 33列)の合成データ ---
+// 既定は3,300社(本番の社数は公開リポジトリに書かない)。GLOW_SCALE_ROWS で社数を変えて試せる
+// 列の型は本番の企業マスタに合わせる(登録日・最終接触日は日付、スコアは数値、連絡不要は真偽値、
+// 電話番号は先頭が0の文字。値はすべて架空)
+const SCALE = Number(process.env.GLOW_SCALE_ROWS || 3300);
+function fullMasterRows(ctx, n) {
+  const H = ctx.GlowSchema.COMPANY_MASTER_HEADERS;
+  const rows = [H.slice()];
+  for (let i = 1; i <= n; i++) {
+    const v = {
+      "企業ID": "C9" + String(i).padStart(5, "0"), "会社名": "架空商事" + i, "業種": ["建設業", "福祉", "飲食"][i % 3],
+      "代表者名": "架空 代表" + i, "所在地": "架空市" + (i % 41), "流入ルート": i % 5 ? "②手紙DM" : "①紹介",
+      "現在ステージ": "未接触", "提案商品": i % 7 ? "" : "法人保険", "初期スコア": i % 30, "反応スコア": i % 4,
+      "総合スコア": 0, "ランク": "", "最終接触日": i % 30 ? "" : new Date(2026, 9, 1 + (i % 28)),
+      "次回アクション予定日": i === 77 ? new Date(2026, 10, 20) : "", "担当者": i % 2 ? "架空担当A" : "",
+      "登録日": i % 800 ? new Date(2026, 7, 1 + (i % 28)) : "", "備考": i % 9 ? "" : "架空の備考" + i,
+      "電話番号": i % 15 ? "098-" + String(100 + (i % 900)) + "-" + String(i).padStart(4, "0") : "",
+      "連絡不要": i % 400 === 0, "事前選定ランク": i % 3 ? "B" : "", "事前選定スコア": i % 3 ? i % 50 : "",
+    };
+    rows.push(H.map((h) => (h in v ? v[h] : "")));
+  }
+  return rows;
+}
+function scaleSetup(opts = {}) {
+  const sheets = [];
+  const env = makeContext(sheets);
+  const master = fakeSheet("企業マスタ", fullMasterRows(env.ctx, SCALE), opts);
+  sheets.push(master, fakeSheet("対応履歴ログ", [env.ctx.GlowSchema.INTERACTION_LOG_HEADERS.slice()]));
+  return { ...env, master, before: master.rows.map((r) => r.slice()) };
+}
+const H_OF = (ctx) => ctx.GlowSchema.COMPANY_MASTER_HEADERS;
+const SCORE_COLS = ["初期スコア", "反応スコア", "総合スコア", "ランク"];
+// スコア再計算で変わってよい列以外が、1セルも変わっていないこと
+function assertUntouchedExceptScores(ctx, before, after, label) {
+  const H = H_OF(ctx);
+  const keep = H.map((h, j) => (SCORE_COLS.includes(h) ? -1 : j)).filter((j) => j >= 0);
+  for (let r = 1; r <= SCALE; r++) {
+    for (const j of keep) {
+      const a = before[r][j], b = after[r][j];
+      const same = a instanceof Date ? b instanceof Date && a.getTime() === b.getTime() : a === b;
+      if (!same) assert.fail(label + ": " + (r + 1) + "行目の" + H[j] + "が変わった");
+    }
+  }
+}
+const lostIds = (before, master, except = []) => {
+  const now = new Set(idsOf(master));
+  return before.slice(1).map((r) => r[0]).filter((id) => !now.has(id) && !except.includes(id));
+};
+
+test("約3千社×33列 通常のスコア再計算: 全社が残り、スコア以外の30列は1セルも変わらない。読み書きの回数を数える", (t) => {
+  const { ctx, master, before, ops, sleeps } = scaleSetup();
+  ctx.recalculateAllScores();
+  assert.deepEqual(lostIds(before, master), []);
+  assert.equal(idsOf(master).length, SCALE);
+  assertUntouchedExceptScores(ctx, before, master.rows, "通常");
+  assert.equal(master.writes, 7, "500行ずつ7回に分けて書く");
+  assert.ok(master.reads <= 6, "読み取りは6回まで: " + master.reads);
+  assert.equal(master.clears, 0, "余った行が無ければ消さない");
+  assert.deepEqual(sleeps, []);
+  assert.equal(ops.find((o) => o.name === "企業マスタの書き込み").ok, true);
+  t.diagnostic("通常: 書き込み " + master.writes + "回 / 読み取り " + master.reads + "回 / 待ち 0秒");
+});
+
+test("約3千社×33列 書き込みの途中(4かたまり目)で失敗し続ける: 会社は1社も消えず、書いていない行は元のまま", (t) => {
+  const { ctx, master, before, notices, sleeps } = scaleSetup({ failWhen: (row) => (row >= 1502 ? "throw" : null) });
+  const err = (() => { try { ctx.recalculateAllScores(); } catch (e) { return e; } })();
+  assert.deepEqual({ ...err.companyWrite }, { phase: "write", dataChanged: true });
+  assert.deepEqual(lostIds(before, master), []);
+  assert.equal(idsOf(master).length, SCALE);
+  assertUntouchedExceptScores(ctx, before, master.rows, "途中失敗");
+  assert.deepEqual(master.rows.slice(1501), before.slice(1501), "書いていない1501行目以降は、スコアも含めて元のまま");
+  assert.equal(master.clears, 0);
+  assert.equal(notices.length, 1);
+  t.diagnostic("途中失敗: 待ち合計 " + sleeps.reduce((a, b) => a + b, 0) / 1000 + "秒");
+});
+
+test("約3千社×33列 1回の書き込みが前半だけ反映されて失敗する: 会社は消えず、行は混ざらない", () => {
+  const { ctx, master, before } = scaleSetup({ failWhen: (row) => (row === 1502 ? "partial" : null) });
+  const err = (() => { try { ctx.recalculateAllScores(); } catch (e) { return e; } })();
+  assert.equal(err.companyWrite.phase, "write");
+  assert.deepEqual(lostIds(before, master), []);
+  assertUntouchedExceptScores(ctx, before, master.rows, "部分書き込み");
+});
+
+test("約3千社×33列 どのかたまりも1回だけ一時的に失敗する: やり直して最後まで書き、待ちは合計14秒(上限20秒以内)", (t) => {
+  const seen = {};
+  const { ctx, master, before, sleeps } = scaleSetup({ failWhen: (row) => (seen[row] ? null : ((seen[row] = 1), "throw")) });
+  ctx.recalculateAllScores();
+  assert.deepEqual(lostIds(before, master), []);
+  assertUntouchedExceptScores(ctx, before, master.rows, "やり直し");
+  assert.deepEqual(sleeps, Array(7).fill(2000));
+  t.diagnostic("やり直し: 書き込み " + master.writes + "回 / 待ち合計 " + sleeps.reduce((a, b) => a + b, 0) / 1000 + "秒");
+});
+
+test("約3千社×33列 一時的な失敗が続いて待ちの上限に達したら、それ以上待たずに止める(会社は消えない)", () => {
+  const tries = {};
+  const { ctx, master, before, sleeps } = scaleSetup({ failWhen: (row) => ((tries[row] = (tries[row] || 0) + 1) <= 2 ? "throw" : null) });
+  const err = (() => { try { ctx.recalculateAllScores(); } catch (e) { return e; } })();
+  assert.equal(err.companyWrite.phase, "write");
+  assert.ok(sleeps.reduce((a, b) => a + b, 0) <= 20000);
+  assert.deepEqual(lostIds(before, master), []);
+  assertUntouchedExceptScores(ctx, before, master.rows, "上限");
+});
+
+test("約3千社×33列 名寄せの統合(行がずれる)が1行の途中で止まる: 統合した会社のほかは1社も消えず、混ざった行を数えて止める", () => {
+  const { ctx, master, before } = scaleSetup({ failWhen: (row) => (row === 1002 ? "cellpartial" : null) });
+  const records = ctx.readCompanyRecords_(master).filter((r) => r["企業ID"] !== "C900100");
+  const err = (() => { try { ctx.writeCompanyRecords_(master, records, { allowRemovedIds: ["C900100"], backupSheetName: BACKUP }); } catch (e) { return e; } })();
+  assert.deepEqual({ ...err.companyWrite }, { phase: "write", dataChanged: true });
+  assert.match(err.message, /別の会社の値が混ざった行が 1行/);
+  assert.match(err.message, new RegExp(BACKUP));
+  assert.deepEqual(lostIds(before, master, ["C900100"]), [], "止まった時点でも、どの会社の行も台帳のどこかに残っている");
+});
+
+test("約3千社×33列 名寄せの統合が最後まで書けたら、全33列を照合して通る(日付・数値・真偽値・先頭0の電話番号で誤って止めない)", () => {
+  const { ctx, master, before } = scaleSetup();
+  const records = ctx.readCompanyRecords_(master).filter((r) => r["企業ID"] !== "C900100");
+  ctx.writeCompanyRecords_(master, records, { allowRemovedIds: ["C900100"], backupSheetName: BACKUP });
+  assert.equal(idsOf(master).length, SCALE - 1);
+  assert.deepEqual(lostIds(before, master, ["C900100"]), []);
+  assert.equal(master.rows[SCALE].every((v) => v === ""), true, "ずれて余った最後の行は消える");
 });

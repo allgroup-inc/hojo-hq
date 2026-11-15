@@ -191,3 +191,14 @@ test("書いた範囲より下の行: 空・外してよい会社は通す。書
   assert.equal(hand.ok, false);
   assert.match(hand.reason, /4行目/);
 });
+
+test("数式のセルと「=」で始まる値を、行番号・列名で見つける(値は出さない)", () => {
+  const cells = G.findFormulaCells([["", "=A1"], ["", ""], ["=B2*2", ""]], ["企業ID", "総合スコア"], 2);
+  assert.deepEqual(cells, [{ row: 2, column: "総合スコア" }, { row: 4, column: "企業ID" }]);
+  assert.deepEqual(G.findFormulaCells([["", ""]], ["a", "b"], 2), []);
+  const like = G.findFormulaLikeValues([["C900001", "=要確認"], ["C900002", "要確認=あり"], ["C900003", 0]], ["企業ID", "備考"], 2);
+  assert.deepEqual(like, [{ row: 2, column: "備考" }]);
+  assert.equal(G.describeCells(like), "2行目の備考");
+  const many = Array.from({ length: 7 }, (_, i) => ({ row: i + 2, column: "備考" }));
+  assert.match(G.describeCells(many), /ほか2か所$/);
+});

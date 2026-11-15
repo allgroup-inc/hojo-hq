@@ -216,6 +216,18 @@ function writeCompanyRecords_(sheet, records, options) {
       "行あります(" + idlessRows.slice(0, 5).join("・") + "行目" + (idlessRows.length > 5 ? " ほか" : "") +
       ")。消さないように止めました。企業IDを付けるか、要らない行なら人が消してください");
   }
+  // 数式のセルは、値で書き戻すと数式が消えるため、書く前に止める(2026-11-15 最終安全審査。本番の企業マスタは数式0か所)
+  var formulaCells;
+  try {
+    formulaCells = before.length ? guard.findFormulaCells(sheet.getRange(2, 1, before.length, headers.length).getFormulas(), headers, 2) : [];
+  } catch (error) {
+    failCompanyWrite_("precheck", false, "書く前に企業マスタの数式の有無を確かめられませんでした(企業マスタは変更していません): " + error);
+  }
+  if (formulaCells.length > 0) {
+    failCompanyWrite_("precheck", false,
+      "書く前の確認で止めました(企業マスタは変更していません): 数式が入っているセルが " + formulaCells.length + "か所あります(" +
+      guard.describeCells(formulaCells) + ")。書き直すと数式が消えるため止めました。数式を値に直すか、企業マスタの外へ移してください");
+  }
   var plan = guard.planCompanyWrite(before.map(function (row) { return row[idIndex]; }), newIds, options);
   if (!plan.ok) {
     failCompanyWrite_("precheck", false, "書く前の確認で止めました(企業マスタは変更していません): " + plan.reason);
@@ -229,6 +241,14 @@ function writeCompanyRecords_(sheet, records, options) {
       return value === undefined || value === null ? "" : value;
     });
   });
+
+  // 「=」で始まる文字は、書くと数式として入って元の文字が失われるため、書く前に止める
+  var formulaLike = guard.findFormulaLikeValues(rows, headers, 2);
+  if (formulaLike.length > 0) {
+    failCompanyWrite_("precheck", false,
+      "書く前の確認で止めました(企業マスタは変更していません): 「=」で始まる文字が " + formulaLike.length + "か所あります(" +
+      guard.describeCells(formulaLike) + ")。そのまま書くと数式として入り、元の文字が失われるため止めました。先頭の「=」を外してください");
+  }
 
   // 2. 書き込み
   var written = 0;

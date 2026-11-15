@@ -202,6 +202,41 @@
   }
 
   /**
+   * 数式が入っているセル(行番号・列名)。企業マスタは値で読んで値で書き戻すため、数式のセルがあると
+   * 書き直したときに数式が消えて、その時点の値に置き換わる。書く前に見つけて止めるために使う。
+   * formulas は Range.getFormulas() の結果(数式の無いセルは "")。
+   */
+  function findFormulaCells(formulas, headers, firstRowNumber) {
+    var found = [];
+    (formulas || []).forEach(function (row, i) {
+      (row || []).forEach(function (f, j) {
+        if (typeof f === "string" && f !== "") found.push({ row: firstRowNumber + i, column: headers[j] || ("列" + (j + 1)) });
+      });
+    });
+    return found;
+  }
+
+  /**
+   * 書き込む値のうち「=」で始まる文字(行番号・列名)。シートへ値を書くと、「=」で始まる文字は数式として
+   * 入ってしまい、元の文字が失われる(例: 備考の「=要確認」がエラーの数式になる)。書く前に見つけて止める。
+   */
+  function findFormulaLikeValues(rows, headers, firstRowNumber) {
+    var found = [];
+    (rows || []).forEach(function (row, i) {
+      (row || []).forEach(function (v, j) {
+        if (typeof v === "string" && v.charAt(0) === "=") found.push({ row: firstRowNumber + i, column: headers[j] || ("列" + (j + 1)) });
+      });
+    });
+    return found;
+  }
+
+  /** 見つけたセルの一覧を、短い文にする(値は出さない) */
+  function describeCells(cells) {
+    return cells.slice(0, 5).map(function (c) { return c.row + "行目の" + c.column; }).join("・") +
+      (cells.length > 5 ? " ほか" + (cells.length - 5) + "か所" : "");
+  }
+
+  /**
    * 書いた範囲より下に残った行を、消してよいかを判定する。消してよいのは、空の行と、
    * 書いた会社・外してよいと名指しされた会社の、ずれて残った古い行だけ。
    */
@@ -330,6 +365,9 @@
     isTransientError: isTransientError,
     retryWaitMs: retryWaitMs,
     findIdlessDataRows: findIdlessDataRows,
+    findFormulaCells: findFormulaCells,
+    findFormulaLikeValues: findFormulaLikeValues,
+    describeCells: describeCells,
     checkTrailingRows: checkTrailingRows,
     planCompanyWrite: planCompanyWrite,
     verifyWrittenIds: verifyWrittenIds,
