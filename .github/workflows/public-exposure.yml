@@ -1,0 +1,38 @@
+name: public-exposure
+
+# 公開情報検査(警告モード)。個人の連絡先・内部の入口URL・認証情報の形をした文字列が
+# 公開リポジトリに増えていないかを見る。値は表示しない(規則の番号・ファイル名・行番号のみ)。
+# 議事: docs/議事/議事_20261029_公開情報検査_警告モード追加.md
+#
+# - 警告モード: 新規の一致があっても失敗にしない(注記で知らせる)。止めるモード(--strict)への切替は議事が要る。
+# - 検査そのものが成り立たないとき(検査0件・BASELINE破損)は失敗にする(黙って通さない)。
+# - pull_request_target は使わない。秘密の値(secrets)も使わない。権限は読み取りのみ。
+# - Python 標準ライブラリだけで動く(外部の部品を取り込まない)。
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-exposure-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: public-exposure-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: 検査ロジックの自己点検
+        run: python3 -I scripts/check_public_exposure.py --selftest
+
+      - name: 公開情報の検査(警告モード)
+        run: python3 -I scripts/check_public_exposure.py
