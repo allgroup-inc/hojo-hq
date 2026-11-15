@@ -140,3 +140,54 @@ test("途中で止まった後の数え方: 混ざった行(IDは正しい)と�
   const read = [["C900001", "架空A", "1", "", 0, false], ["C900003", "架空B", "2", "", 0, false], ["C900003", "架空C", "3", "", 0, false]];
   assert.deepEqual(G.countMixedRows(written, read, H), { mixed: 1, notWritten: 1 });
 });
+
+// --- 2026-11-15 独立レビューの指摘への対応 ---
+test("全列の照合: 桁区切り・%・数式・日付の書き方の違いは同じとみなし、先頭の0の有無は別とみなす", () => {
+  assert.equal(G.sameCell("1,200", 1200), true);
+  assert.equal(G.sameCell("12%", 0.12), true);
+  assert.equal(G.sameCell("=1+1", 2), true, "数式は書いた式と読んだ値を比べられないので照合しない");
+  assert.equal(G.sameCell("2026/10/1", new Date("2026-10-01T00:00:00+09:00")), true);
+  assert.equal(G.sameCell("2026-10-01", "2026/10/1"), true);
+  assert.equal(G.sameCell("0980", 980), false);
+  assert.equal(G.sameCell("0980", "0980"), true);
+  assert.equal(G.sameCell("12", 13), false);
+  assert.equal(G.sameCell("架空建設", "架空工業"), false);
+});
+
+test("一時的なエラーかどうか: Google側の混雑・タイムアウトだけを一時的とみなす", () => {
+  for (const m of ["Exception: Service Spreadsheets failed while accessing document", "サーバー エラーが発生しました", "Exceeded rate limit: 429", "Request timed out", "Backend Error 503"]) {
+    assert.equal(G.isTransientError(new Error(m)), true, m);
+  }
+  for (const m of ["保護されている範囲を編集しようとしています", "The coordinates of the range are outside the dimensions of the sheet.", "You do not have permission to access the requested document."]) {
+    assert.equal(G.isTransientError(new Error(m)), false, m);
+  }
+  assert.equal(G.isTransientError(null), false);
+});
+
+test("やり直しの待ち時間: 一時的なエラーだけ・3回まで・合計20秒まで", () => {
+  const transient = new Error("Service Spreadsheets failed");
+  const state = { waitedMs: 0 };
+  assert.equal(G.retryWaitMs(transient, 1, state), 2000);
+  assert.equal(G.retryWaitMs(transient, 2, state), 4000);
+  assert.equal(G.retryWaitMs(transient, 3, state), -1, "3回目で失敗したら、もうやり直さない");
+  assert.equal(G.retryWaitMs(new Error("保護されている範囲"), 1, { waitedMs: 0 }), -1);
+  assert.equal(G.retryWaitMs(transient, 2, { waitedMs: 17000 }), -1, "合計が20秒を超えるならやり直さない");
+  assert.equal(G.retryWaitMs(transient, 1, { waitedMs: 18000 }), 2000, "ちょうど20秒まではよい");
+});
+
+test("企業IDが空なのに値が入っている行を見つける。空の行・未チェックのボックスだけの行は数えない", () => {
+  const rows = [["C900001", "架空A", false], ["", "", false], ["", "架空の手入力", false], ["", "", true], ["", null, ""]];
+  assert.deepEqual(G.findIdlessDataRows(rows, 0, 2), [4, 5]);
+});
+
+test("書いた範囲より下の行: 空・外してよい会社は通す。書いていない会社・ID空欄の手入力は止める", () => {
+  const written = ["C900001", "C900003"];
+  assert.equal(G.checkTrailingRows([["", ""], ["C900002", "架空B"]], 0, written, ["C900002"], 4).ok, true);
+  assert.equal(G.checkTrailingRows([["C900003", "架空C"]], 0, written, [], 4).ok, true, "前の位置に残った、書いたばかりの会社は消してよい");
+  const unknown = G.checkTrailingRows([["", ""], ["C999999", "架空Z"]], 0, written, ["C900002"], 4);
+  assert.equal(unknown.ok, false);
+  assert.match(unknown.reason, /C999999/);
+  const hand = G.checkTrailingRows([["", "架空の手入力"]], 0, written, [], 4);
+  assert.equal(hand.ok, false);
+  assert.match(hand.reason, /4行目/);
+});

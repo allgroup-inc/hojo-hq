@@ -160,7 +160,7 @@ test("お断り(連絡不要)の反映も同じ書き込みを使い、途中で
 test("書く前の確認: 会社が抜けている書き込みは、何も書かずに止める", () => {
   const { ctx, master, before, notices } = setup(10);
   const records = ctx.readCompanyRecords_(master).slice(0, 7);
-  assert.throws(() => ctx.writeCompanyRecords_(master, records), /書き込む前の確認で止めました\(企業マスタは変更していません\): 今の企業マスタにある 3社/);
+  assert.throws(() => ctx.writeCompanyRecords_(master, records), /書く前の確認で止めました\(企業マスタは変更していません\): 今の企業マスタにある 3社/);
   assert.deepEqual(master.rows, before);
   assert.equal(master.writes, 0);
   assert.equal(notices.length, 1);
@@ -289,14 +289,21 @@ test("事前選定の取り込みも、書く前に作るバックアップの�
   assert.match(src("../glow-ma/src/ImportRunner.gs"), /allowRemovedIds: absorbedExistingIds, backupSheetName: backupName/);
 });
 
-// --- 日次メンテナンス: 企業マスタの書き込みを止めたら、後の手順も止める ---
+// --- 日次メンテナンス: 企業マスタの書き込みを止めたら、影響を受ける手順だけ止める(2026-11-15 エラー種別で判断) ---
+function companyWriteError(phase, dataChanged) {
+  const e = new Error("どんな文言でもよい(文言では判断しない)");
+  e.companyWrite = { phase, dataChanged };
+  return e;
+}
+
 function runMaintenance(failing) {
   const called = [];
   const ops = [];
   const notices = [];
   const step = (name) => () => {
     called.push(name);
-    if (failing[name]) throw new Error(failing[name]);
+    const f = failing[name];
+    if (f) throw typeof f === "string" ? new Error(f) : f;
   };
   const ctx = {
     Logger: { log() {} },
@@ -311,16 +318,175 @@ function runMaintenance(failing) {
   return { called, ops, notices };
 }
 
-test("日次メンテナンス: お断りの反映で企業マスタの書き込みを止めたら、再計算・今日の連絡先・アラートは動かさない", () => {
-  const { called, ops, notices } = runMaintenance({ dnc: "企業マスタの書き込みを止めました。書き込みの途中で止まりました" });
+test("日次メンテナンス: 書き込みの途中で止まったら(企業マスタが変わった可能性)、企業マスタを読む・書く後の手順をすべて止める", () => {
+  const { called, ops, notices } = runMaintenance({ dnc: companyWriteError("write", true) });
   assert.deepEqual(called, ["backup", "dnc"]);
   const status = ops.find((o) => o.name === "日次メンテナンス");
   assert.equal(status.ok, false);
-  assert.match(status.detail, /掘り起こしアラートの送信: 「お断り\(連絡不要\)の反映」で企業マスタの書き込みを止めたため、実行しませんでした/);
+  assert.match(status.detail, /掘り起こしアラートの送信: 「お断り\(連絡不要\)の反映」で企業マスタの書き込みを止めたため、実行しませんでした\(企業マスタが途中まで書き換わっている可能性/);
   assert.equal(notices.length, 1);
+});
+
+test("日次メンテナンス: 書いた後の照合で止まったときも、後の手順をすべて止める", () => {
+  const { called } = runMaintenance({ score: companyWriteError("verify", true) });
+  assert.deepEqual(called, ["backup", "dnc", "score"]);
+});
+
+test("日次メンテナンス: 書く前の確認で止めた(企業マスタは変わっていない)ときは、書き直す手順だけ止め、読むだけの手順は続ける", () => {
+  const { called, ops } = runMaintenance({ dnc: companyWriteError("precheck", false) });
+  assert.deepEqual(called, ["backup", "dnc", "dashboard", "today", "wld02", "alerts"]);
+  assert.match(ops.find((o) => o.name === "日次メンテナンス").detail, /スコア・ランクの再計算: .*実行しませんでした\(企業マスタは変わっていないが/);
+});
+
+test("日次メンテナンス: 文言が「企業マスタの書き込みを止めました」でも、エラー種別が無ければ止めない(文言では判断しない)", () => {
+  const { called } = runMaintenance({ dnc: "企業マスタの書き込みを止めました。書き込みの途中で止まりました" });
+  assert.deepEqual(called, ["backup", "dnc", "score", "dashboard", "today", "wld02", "alerts"]);
 });
 
 test("日次メンテナンス: 企業マスタと関係ない失敗(ダッシュボード)では、これまでどおり後の手順も動かす", () => {
   const { called } = runMaintenance({ dashboard: "Exception: なにかの失敗" });
   assert.deepEqual(called, ["backup", "dnc", "score", "dashboard", "today", "wld02", "alerts"]);
+});
+
+test("日次メンテナンス: どの手順にも、企業マスタを書く・読む・使わないの区分が付いている", () => {
+  const text = src("../glow-ma/src/MaintenanceRunner.gs");
+  const steps = text.match(/\{ name: "[^"]+", run: [A-Za-z0-9_]+(, master: "(write|read|none)")? \}/g) || [];
+  assert.equal(steps.length, 7);
+  assert.ok(steps.every((s) => /master: "(write|read|none)"/.test(s)), steps.join("\n"));
+});
+
+// --- 2026-11-15 独立レビューの指摘への対応(構造化エラー・照合中の失敗・ID空欄の行・一時エラーだけのやり直し) ---
+const phaseOf = (fn) => { try { fn(); } catch (e) { return e.companyWrite; } return null; };
+
+test("エラーには phase と dataChanged が付く: 書く前の確認は precheck・変更なし", () => {
+  const { ctx, master } = setup(10);
+  const info = phaseOf(() => ctx.writeCompanyRecords_(master, ctx.readCompanyRecords_(master).slice(0, 7)));
+  assert.deepEqual({ ...info }, { phase: "precheck", dataChanged: false });
+});
+
+test("書き込みの途中で止まったら write・変更あり", () => {
+  const { ctx, master } = setup(1200, { failWhen: (row) => (row >= 502 ? "throw" : null) });
+  assert.deepEqual({ ...phaseOf(() => ctx.recalculateAllScores()) }, { phase: "write", dataChanged: true });
+});
+
+test("書いた後の読み直しが失敗しても、必ず verify として記録・通知して止める(余った行は消さない)", () => {
+  const { ctx, master, ops, notices } = setup(30);
+  const realGetRange = master.getRange;
+  let wrote = false;
+  master.getRange = (row, col, n, c) => {
+    const r = realGetRange(row, col, n, c);
+    return {
+      ...r,
+      setValues: (vals) => { wrote = true; return r.setValues(vals); },
+      getValues: () => { if (wrote) throw new Error("Exception: Service Spreadsheets failed while accessing document"); return r.getValues(); },
+    };
+  };
+  const err = (() => { try { ctx.recalculateAllScores(); } catch (e) { return e; } })();
+  assert.deepEqual({ ...err.companyWrite }, { phase: "verify", dataChanged: true });
+  assert.match(err.message, /書いた後の照合の途中で、企業マスタの読み書きに失敗しました/);
+  assert.equal(ops.find((o) => o.name === "企業マスタの書き込み").ok, false);
+  assert.equal(notices.length, 1);
+  assert.equal(master.clears, 0);
+});
+
+test("企業IDが空なのに値が入っている行(人の手入力)があれば、消さずに書く前に止める(途中の行も末尾の行も)", () => {
+  for (const where of ["middle", "end"]) {
+    const { ctx, master } = setup(20);
+    const headers = ctx.GlowSchema.COMPANY_MASTER_HEADERS;
+    const handRow = headers.map(() => "");
+    handRow[headers.indexOf("会社名")] = "架空の手入力会社";
+    if (where === "middle") master.rows.splice(6, 0, handRow); else master.rows.push(handRow);
+    const before = master.rows.map((r) => r.slice());
+    const err = (() => { try { ctx.recalculateAllScores(); } catch (e) { return e; } })();
+    assert.ok(err, where);
+    assert.deepEqual({ ...err.companyWrite }, { phase: "precheck", dataChanged: false });
+    assert.match(err.message, /企業IDが空なのに値が入っている行が 1行あります\((7|22)行目\)。消さないように止めました/);
+    assert.deepEqual(master.rows, before, "企業マスタは1セルも変わっていない");
+  }
+});
+
+test("未チェックのチェックボックス(false)だけの行は、手入力の行とみなさない", () => {
+  const { ctx, master } = setup(5);
+  const headers = ctx.GlowSchema.COMPANY_MASTER_HEADERS;
+  const boxRow = headers.map(() => "");
+  boxRow[headers.indexOf("連絡不要")] = false;
+  master.rows.push(boxRow);
+  ctx.recalculateAllScores();
+  assert.equal(idsOf(master).length, 5);
+});
+
+test("書いている間に下へ別の会社の行が足されたら、その行を消さずに止める", () => {
+  const { ctx, master, notices } = setup(10);
+  const headers = ctx.GlowSchema.COMPANY_MASTER_HEADERS;
+  const realGetRange = master.getRange;
+  master.getRange = (row, col, n, c) => {
+    const r = realGetRange(row, col, n, c);
+    return { ...r, setValues: (vals) => {
+      r.setValues(vals);
+      const extra = headers.map(() => "");
+      extra[0] = "C999999";
+      master.rows.push(extra);
+    } };
+  };
+  const err = (() => { try { ctx.recalculateAllScores(); } catch (e) { return e; } })();
+  assert.equal(err.companyWrite.phase, "verify");
+  assert.match(err.message, /書いた範囲より下に、消してはいけない行が残っています.*書いていない会社の行が残っています\(C999999\)/);
+  assert.ok(idsOf(master).includes("C999999"), "足された会社は消えていない");
+  assert.equal(notices.length, 1, "通知は1回だけ(止めた理由を包み直して二重に通知しない)");
+  assert.doesNotMatch(err.message, /照合の途中で/);
+});
+
+test("やり直すのは一時的なエラーだけ: 権限・範囲の誤りはすぐに止める(待たない)", () => {
+  const sheets = [];
+  const env = makeContext(sheets);
+  const master = fakeSheet("企業マスタ", masterRows(env.ctx, 600));
+  sheets.push(master, fakeSheet("対応履歴ログ", [env.ctx.GlowSchema.INTERACTION_LOG_HEADERS.slice()]));
+  const realGetRange = master.getRange;
+  master.getRange = (row, col, n, c) => {
+    const r = realGetRange(row, col, n, c);
+    return { ...r, setValues: (vals) => { if (row === 502) throw new Error("Exception: 保護されている範囲を編集しようとしています"); return r.setValues(vals); } };
+  };
+  const err = (() => { try { env.ctx.recalculateAllScores(); } catch (e) { return e; } })();
+  assert.equal(err.companyWrite.phase, "write");
+  assert.deepEqual(env.sleeps, [], "やり直さず、待たない");
+});
+
+test("やり直しの待ち時間には上限がある(合計20秒まで)。上限を超えるならやり直さずに止める", () => {
+  // どのかたまりも、2回目までは一時的なエラーになる(1かたまりにつき 2秒+4秒 待つ)
+  const tries = {};
+  const { ctx, sleeps } = setup(3000, { failWhen: (row) => { tries[row] = (tries[row] || 0) + 1; return tries[row] <= 2 ? "throw" : null; } });
+  const err = (() => { try { ctx.recalculateAllScores(); } catch (e) { return e; } })();
+  assert.equal(err.companyWrite.phase, "write");
+  const total = sleeps.reduce((a, b) => a + b, 0);
+  assert.ok(total <= 20000, "待った合計 " + total);
+  assert.ok(total >= 12000, "上限までは、やり直している");
+});
+
+test("行がずれる書き込み: 桁区切り・%・数式・日付の書き方の違いでは止めない。先頭の0が消えたら止める", () => {
+  const { ctx, master } = setup(12);
+  const headers = ctx.GlowSchema.COMPANY_MASTER_HEADERS;
+  const col = (h) => headers.indexOf(h);
+  const records = withoutSecond(ctx, master);
+  records[2]["規模"] = "1,200";
+  records[3]["規模"] = "12%";
+  records[4]["備考"] = "=1+1";
+  records[5]["登録日"] = "2026/10/1";
+  records[6]["電話番号"] = "0980123456";
+  const realGetRange = master.getRange;
+  // シートの癖をまねる: 桁区切り・%は数値に、数式は計算結果に、日付は Date に、先頭0の番号は数値に変わる
+  master.getRange = (row, c0, n, c) => {
+    const r = realGetRange(row, c0, n, c);
+    return { ...r, setValues: (vals) => r.setValues(vals.map((v) => v.map((x) => {
+      if (x === "1,200") return 1200;
+      if (x === "12%") return 0.12;
+      if (x === "=1+1") return 2;
+      if (x === "2026/10/1") return new Date("2026-10-01T00:00:00+09:00");
+      if (x === "0980123456") return 980123456;
+      return x;
+    }))) };
+  };
+  const err = (() => { try { ctx.writeCompanyRecords_(master, records, { allowRemovedIds: ["C900002"], backupSheetName: BACKUP }); } catch (e) { return e; } })();
+  assert.ok(err, "先頭の0が消えた電話番号で止まる");
+  assert.match(err.message, /書いた内容と違う行が 1行あります\(\d+行目 C900008: 電話番号\)/);
+  assert.equal(col("電話番号") >= 0, true);
 });

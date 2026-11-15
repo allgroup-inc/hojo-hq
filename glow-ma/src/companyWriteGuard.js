@@ -21,6 +21,8 @@
 
   var CHUNK_ROWS = 500;        // 一度に書く行数(大きな一括書き込みを避け、失敗の影響を小さくする)
   var MAX_ATTEMPTS = 3;        // 1回の書き込みが一時的なエラーで失敗したときの試行回数
+  var RETRY_WAIT_MS = 2000;    // やり直す前に待つ時間(2回目は2倍)
+  var RETRY_BUDGET_MS = 20000; // 1回の書き直し全体で、やり直しのために待ってよい時間の合計(ロックを長く持たない)
   var SAMPLE_LIMIT = 5;        // 理由の文に載せる企業IDの数(長くしない)
 
   function idOf(value) {
@@ -133,7 +135,12 @@
     return result;
   }
 
-  // 書いた値と読み直した値を比べるための形にそろえる(シートが日付・数値・真偽値に変える癖を吸収する)
+  var SKIP = {};  // 比べられない(書いた値が数式で、シートは計算結果を返す)
+
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+
+  // 書いた値と読み直した値を比べるための形にそろえる(シートが日付・数値・真偽値・桁区切り・%に変える癖を吸収する)。
+  // 先頭が0の番号(電話番号など)は文字のまま比べる: シートが数値に変えて0が消えたら、それは本当に壊れている
   function comparable(value) {
     if (value === null || value === undefined) return "";
     if (Object.prototype.toString.call(value) === "[object Date]") {
@@ -142,14 +149,80 @@
       return time === "00:00:00" ? jst.slice(0, 10) : jst.slice(0, 10) + " " + time;
     }
     if (typeof value === "boolean") return value ? "true" : "false";
+    if (typeof value === "number") return String(value);
     var s = String(value).trim();
+    if (s.charAt(0) === "=") return SKIP;
     if (/^(true|false)$/i.test(s)) return s.toLowerCase();
-    if (/^-?\d+(\.\d+)?$/.test(s) && !/^0\d/.test(s)) return String(Number(s));
+    var date = /^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/.exec(s);
+    if (date) return date[1] + "-" + pad2(Number(date[2])) + "-" + pad2(Number(date[3]));
+    if (/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) return String(Number(s.replace(/,/g, "")));
+    var percent = /^(-?\d+(?:\.\d+)?)%$/.exec(s);
+    if (percent) return String(Number(percent[1]) / 100);
+    if (/^-?\d+(\.\d+)?$/.test(s) && !/^-?0\d/.test(s)) return String(Number(s));
     return s;
   }
 
   function sameCell(written, read) {
-    return comparable(written) === comparable(read);
+    var a = comparable(written);
+    if (a === SKIP) return true;
+    return a === comparable(read);
+  }
+
+  /** 書き込みのやり直しで直る見込みのあるエラーか(Google 側の一時的な失敗・混雑)。権限・範囲の誤りなどはやり直さない */
+  function isTransientError(error) {
+    var message = String(error && error.message ? error.message : error);
+    return /Service Spreadsheets failed|server error|サーバー ?エラー|INTERNAL|timed out|timeout|タイムアウト|Rate Limit|too many|429|503|backend error|しばらくしてから/i.test(message);
+  }
+
+  /**
+   * やり直す前に待つ時間を決める。やり直さないときは -1。
+   * @param {Object} state { waitedMs: これまでに待った合計 }
+   */
+  function retryWaitMs(error, attempt, state) {
+    if (!isTransientError(error)) return -1;
+    if (attempt >= MAX_ATTEMPTS) return -1;
+    var wait = RETRY_WAIT_MS * attempt;
+    if ((state.waitedMs || 0) + wait > RETRY_BUDGET_MS) return -1;
+    return wait;
+  }
+
+  // 実際に値が入っているセルか(未チェックのチェックボックスは false が返るので、空として扱う)
+  function hasContent(cell) {
+    return cell !== "" && cell !== null && cell !== undefined && cell !== false;
+  }
+
+  /** 企業IDが空なのに、ほかの列に値が入っている行の行番号(人が手で入力した行など。消したり上書きしたりしない) */
+  function findIdlessDataRows(rows, idIndex, firstRowNumber) {
+    var found = [];
+    (rows || []).forEach(function (row, i) {
+      if (idOf(row[idIndex]) !== "") return;
+      if (row.some(hasContent)) found.push(firstRowNumber + i);
+    });
+    return found;
+  }
+
+  /**
+   * 書いた範囲より下に残った行を、消してよいかを判定する。消してよいのは、空の行と、
+   * 書いた会社・外してよいと名指しされた会社の、ずれて残った古い行だけ。
+   */
+  function checkTrailingRows(tailRows, idIndex, writtenIds, allowedRemovedIds, firstRowNumber) {
+    var keep = toSet((writtenIds || []).map(idOf).concat((allowedRemovedIds || []).map(idOf)));
+    var unknown = [];
+    var idless = [];
+    var contentRows = 0;
+    (tailRows || []).forEach(function (row, i) {
+      var id = idOf(row[idIndex]);
+      if (id === "") {
+        if (row.some(hasContent)) idless.push(firstRowNumber + i);
+        return;
+      }
+      contentRows++;
+      if (!keep[id]) unknown.push(id);
+    });
+    var problems = [];
+    if (unknown.length) problems.push("書いていない会社の行が残っています(" + sample(unknown) + ")");
+    if (idless.length) problems.push("企業IDが空で値が入っている行が " + idless.length + "行あります(" + sample(idless.map(String)) + "行目)");
+    return { ok: problems.length === 0, reason: problems.join(" / "), contentRows: contentRows };
   }
 
   /**
@@ -253,6 +326,11 @@
   var api = {
     CHUNK_ROWS: CHUNK_ROWS,
     MAX_ATTEMPTS: MAX_ATTEMPTS,
+    RETRY_BUDGET_MS: RETRY_BUDGET_MS,
+    isTransientError: isTransientError,
+    retryWaitMs: retryWaitMs,
+    findIdlessDataRows: findIdlessDataRows,
+    checkTrailingRows: checkTrailingRows,
     planCompanyWrite: planCompanyWrite,
     verifyWrittenIds: verifyWrittenIds,
     compareRows: compareRows,

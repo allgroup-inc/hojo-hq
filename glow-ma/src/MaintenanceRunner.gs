@@ -40,24 +40,25 @@ var DAILY_MAINTENANCE_HOUR = 7;
  */
 function runDailyMaintenance() {
   var steps = [
-    { name: "台帳のバックアップ", run: backupLedger },
-    { name: "お断り(連絡不要)の反映", run: syncDoNotContactFlags },
-    { name: "スコア・ランクの再計算", run: recalculateAllScores },
-    { name: "ダッシュボードの更新", run: updateDashboard },
+    // master: その手順が企業マスタを "write"(書き直す)・"read"(読むだけ)・"none"(使わない)のどれか。
+    // 企業マスタの書き込みを止めたときに、どの手順まで止めるかをこれで決める(下の stopsStep_)
+    { name: "台帳のバックアップ", run: backupLedger, master: "none" },
+    { name: "お断り(連絡不要)の反映", run: syncDoNotContactFlags, master: "write" },
+    { name: "スコア・ランクの再計算", run: recalculateAllScores, master: "write" },
+    { name: "ダッシュボードの更新", run: updateDashboard, master: "read" },
     // 2026-11-07 改善③: 3で確定したスコアを使って「今日の連絡先」タブを作り直す(台帳の記録は書き換えない)
-    { name: "今日の連絡先の更新", run: updateTodayList },
+    { name: "今日の連絡先の更新", run: updateTodayList, master: "read" },
     // 2026-11-07 改善⑦: 世界の架け橋の週次KPI(前の週がまだなら集計)と法人番号の点検(Wld02Runner.gs)
-    { name: "世界の架け橋の週次KPI", run: runWld02WeeklyIfDue_ },
-    { name: "掘り起こしアラートの送信", run: runDailyAlerts }
+    { name: "世界の架け橋の週次KPI", run: runWld02WeeklyIfDue_, master: "read" },
+    { name: "掘り起こしアラートの送信", run: runDailyAlerts, master: "read" }
   ];
 
   var failures = [];
-  var stoppedBy = "";
+  var stop = null;  // 企業マスタの書き込みを止めたとき: { by: 手順名, dataChanged }
   steps.forEach(function (step) {
-    if (stoppedBy) {
-      // 2026-11-11 FK-010: 企業マスタの書き込みを止めたら、企業マスタを読む・書く後の手順も動かさない
-      // (欠けた・混ざった企業マスタでスコア・今日の連絡先・アラートを作らないため)
-      failures.push(step.name + ": 「" + stoppedBy + "」で企業マスタの書き込みを止めたため、実行しませんでした");
+    if (stop && stopsStep_(stop, step)) {
+      failures.push(step.name + ": 「" + stop.by + "」で企業マスタの書き込みを止めたため、実行しませんでした" +
+        (stop.dataChanged ? "(企業マスタが途中まで書き換わっている可能性があるため)" : "(企業マスタは変わっていないが、同じ理由で書き込みが止まるため)"));
       return;
     }
     try {
@@ -66,7 +67,8 @@ function runDailyMaintenance() {
     } catch (error) {
       Logger.log("日次メンテナンス: 「" + step.name + "」が失敗しました: " + error);
       failures.push(step.name + ": " + error);
-      if (isCompanyWriteStop_(error)) stoppedBy = step.name;
+      var companyWrite = companyWriteStopOf_(error);
+      if (companyWrite && !stop) stop = { by: step.name, dataChanged: companyWrite.dataChanged };
     }
   });
 
@@ -79,9 +81,26 @@ function runDailyMaintenance() {
   notifyMaintenanceFailures_(failures, steps.length);
 }
 
-/** writeCompanyRecords_(ImportRunner.gs)が企業マスタの書き込みを止めたときの例外か */
-function isCompanyWriteStop_(error) {
-  return String(error && error.message ? error.message : error).indexOf("企業マスタの書き込みを止めました") !== -1;
+/**
+ * writeCompanyRecords_(ImportRunner.gs)が企業マスタの書き込みを止めたときの例外なら、その中身
+ * ({ phase, dataChanged })を返す。エラーの文言ではなく、例外に付いた companyWrite で判断する。
+ */
+function companyWriteStopOf_(error) {
+  var info = error && error.companyWrite;
+  return info && typeof info === "object" ? info : null;
+}
+
+/**
+ * 企業マスタの書き込みを止めたあと、この手順を止めるか。
+ * - 書き込みが途中まで走った(dataChanged): 企業マスタを読む手順・書く手順をすべて止める(欠けた・混ざった企業マスタで
+ *   スコア・今日の連絡先・アラートを作らない)。企業マスタを使わない手順だけ続ける
+ * - 書く前の確認で止めた(企業マスタは変わっていない): 企業マスタを書き直す手順だけ止める(同じ理由でまた止まる)。
+ *   読むだけの手順(ダッシュボード・今日の連絡先・アラートなど)は続ける
+ */
+function stopsStep_(stop, step) {
+  if (step.master === "none") return false;
+  if (stop.dataChanged) return true;
+  return step.master === "write";
 }
 
 /**

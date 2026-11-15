@@ -182,26 +182,43 @@ function readCompanyRecords_(sheet) {
  * 2026-11-11 失敗台帳 FK-010: 以前は「全部消してから全社分を一度に書く」作りで、書く途中に Google 側の
  * エラー(Service Spreadsheets failed)が起きると、書けなかった会社がまるごと消えた(企業マスタの約6割)。
  * 今は次の順に書く(判定は companyWriteGuard.js の GlowCompanyWriteGuard)。
- *   1. 書く前に、今の企業ID列と照らし合わせる。会社が抜ける・並びが変わる・重複する書き込みは、何も書かずに止める
- *   2. 先に消さず、上の行から CHUNK_ROWS 行ずつ上書きする(一時的なエラーはその場で数回やり直す)。
- *      途中で止まっても、まだ書いていない行には元のデータが残る
- *   3. 書いた範囲の企業ID列を読み直して照らし合わせる。合っていたら、余った行だけを消す
- *   4. 最後にもう一度、企業ID列全体を照らし合わせる
- * どこかで止まったときは、稼働状況タブに「企業マスタの書き込み」の失敗を残して通知し、例外を投げる
- * (呼び出し側の処理もそこで止まる)。
+ *   1. 書く前の確認(phase: "precheck"): 今の企業マスタと照らし合わせる。会社が抜ける・並びが変わる・重複する・
+ *      0社になる書き込みと、企業IDが空なのに値が入っている行(人が手で入力した行)がある場合は、何も書かずに止める
+ *   2. 書き込み(phase: "write"): 先に消さず、上の行から CHUNK_ROWS 行ずつ上書きする。一時的なエラーだけを、
+ *      回数と待ち時間の合計を決めてやり直す。途中で止まっても、まだ書いていない行には元のデータが残る
+ *   3. 書いた後の照合(phase: "verify"): 企業ID列を読み直して照らし合わせる。行がずれる書き込みは全列を照らし合わせる。
+ *      下に残った行は、空の行か、書いた会社・外してよい会社の古い行だけのときに消す。最後にもう一度、企業ID列全体を照らし合わせる
+ * どこかで止まったときは、稼働状況タブに「企業マスタの書き込み」の失敗を残して通知し、companyWrite
+ * ({ phase, dataChanged })を持つ例外を投げる。呼び出し側はこれを見て、後の処理を止めるかを決める(MaintenanceRunner.gs)。
  *
- * @param {Object} [options] { allowRemovedIds: 消してよい企業ID(名寄せで統合した分など。呼び出し側が名指しする) }
+ * @param {Object} [options] { allowRemovedIds: 消してよい企業ID(名寄せで統合した分など。呼び出し側が名指しする),
+ *                             backupSheetName: 書く前に作ったバックアップのタブ名(止めたときの戻し方の案内に使う) }
  */
 function writeCompanyRecords_(sheet, records, options) {
   var guard = GlowCompanyWriteGuard;
   var headers = GlowSchema.COMPANY_MASTER_HEADERS;
-  var idCol = headers.indexOf("企業ID") + 1;
-  var oldIdsRaw = readCompanyIdColumn_(sheet, idCol);
+  var idIndex = headers.indexOf("企業ID");
+  var allowedRemoved = (options && options.allowRemovedIds) || [];
+  var recovery = companyWriteRecoveryHint_(options);
   var newIds = records.map(function (record) { return record["企業ID"]; });
 
-  var plan = guard.planCompanyWrite(oldIdsRaw, newIds, options);
+  // 1. 書く前の確認(ここで止まったときは、企業マスタは変わっていない)
+  var before;
+  try {
+    before = readCompanyMasterRows_(sheet, headers.length);
+  } catch (error) {
+    failCompanyWrite_("precheck", false, "書く前に企業マスタを読めませんでした(企業マスタは変更していません): " + error);
+  }
+  var idlessRows = guard.findIdlessDataRows(before, idIndex, 2);
+  if (idlessRows.length > 0) {
+    failCompanyWrite_("precheck", false,
+      "書く前の確認で止めました(企業マスタは変更していません): 企業IDが空なのに値が入っている行が " + idlessRows.length +
+      "行あります(" + idlessRows.slice(0, 5).join("・") + "行目" + (idlessRows.length > 5 ? " ほか" : "") +
+      ")。消さないように止めました。企業IDを付けるか、要らない行なら人が消してください");
+  }
+  var plan = guard.planCompanyWrite(before.map(function (row) { return row[idIndex]; }), newIds, options);
   if (!plan.ok) {
-    failCompanyWrite_("書き込む前の確認で止めました(企業マスタは変更していません): " + plan.reason);
+    failCompanyWrite_("precheck", false, "書く前の確認で止めました(企業マスタは変更していません): " + plan.reason);
   }
   if (records.length === 0) return;
 
@@ -213,14 +230,15 @@ function writeCompanyRecords_(sheet, records, options) {
     });
   });
 
-  var recovery = companyWriteRecoveryHint_(options);
+  // 2. 書き込み
   var written = 0;
   var attemptedEnd = 0;
+  var retryState = { waitedMs: 0 };
   try {
     guard.chunkRanges(rows.length, guard.CHUNK_ROWS).forEach(function (range) {
       attemptedEnd = range.offset + range.count;
       var chunk = rows.slice(range.offset, range.offset + range.count);
-      setValuesWithRetry_(sheet.getRange(2 + range.offset, 1, range.count, headers.length), chunk, guard.MAX_ATTEMPTS);
+      setValuesWithRetry_(sheet.getRange(2 + range.offset, 1, range.count, headers.length), chunk, retryState);
       written = range.offset + range.count;
     });
   } catch (error) {
@@ -233,30 +251,41 @@ function writeCompanyRecords_(sheet, records, options) {
     } else {
       detail += "会社の行の位置は変わらないため、まだ書いていない行には元のデータが残っています)";
     }
-    failCompanyWrite_(detail + ": " + error);
+    failCompanyWrite_("write", written > 0 || attemptedEnd > 0, detail + ": " + error);
   }
 
-  flushSpreadsheet_();
-  var writtenCheck = guard.verifyWrittenIds(newIds, readCompanyIdColumn_(sheet, idCol).slice(0, rows.length));
-  if (!writtenCheck.ok) {
-    failCompanyWrite_("書いた後の照合で違いが見つかりました(余った行は消していません。" + recovery + "): " + writtenCheck.reason);
-  }
-  if (plan.shifted) {
-    // 行がずれる書き込み(名寄せの統合など)だけは、企業IDだけでなく全列を読み直して照らし合わせる
-    var rowCheck = guard.compareRows(rows, sheet.getRange(2, 1, rows.length, headers.length).getValues(), headers, 2);
-    if (!rowCheck.ok) {
-      failCompanyWrite_("書いた後の全列の照合で違いが見つかりました(余った行は消していません。" + recovery + "): " + rowCheck.reason);
-    }
-  }
-
-  var lastRow = sheet.getLastRow();
-  if (lastRow > rows.length + 1) {
-    sheet.getRange(rows.length + 2, 1, lastRow - rows.length - 1, headers.length).clearContent();
+  // 3. 書いた後の照合(読み直しが失敗しても、必ず失敗として記録・通知して止める)
+  try {
     flushSpreadsheet_();
-  }
-  var finalCheck = guard.verifyWrittenIds(newIds, readCompanyIdColumn_(sheet, idCol));
-  if (!finalCheck.ok) {
-    failCompanyWrite_("最後の照合で違いが見つかりました: " + finalCheck.reason);
+    var after = readCompanyMasterRows_(sheet, headers.length);
+    var writtenIds = after.slice(0, rows.length).map(function (row) { return row[idIndex]; });
+    var writtenCheck = guard.verifyWrittenIds(newIds, writtenIds);
+    if (!writtenCheck.ok) {
+      failCompanyWrite_("verify", true, "書いた後の照合で違いが見つかりました(余った行は消していません。" + recovery + "): " + writtenCheck.reason);
+    }
+    if (plan.shifted) {
+      // 行がずれる書き込み(名寄せの統合など)だけは、企業IDだけでなく全列を照らし合わせる
+      var rowCheck = guard.compareRows(rows, after.slice(0, rows.length), headers, 2);
+      if (!rowCheck.ok) {
+        failCompanyWrite_("verify", true, "書いた後の全列の照合で違いが見つかりました(余った行は消していません。" + recovery + "): " + rowCheck.reason);
+      }
+    }
+    var tail = after.slice(rows.length);
+    var tailCheck = guard.checkTrailingRows(tail, idIndex, newIds, allowedRemoved, rows.length + 2);
+    if (!tailCheck.ok) {
+      failCompanyWrite_("verify", true, "書いた範囲より下に、消してはいけない行が残っています(余った行は消していません。" + recovery + "): " + tailCheck.reason);
+    }
+    if (tail.length > 0) {
+      sheet.getRange(rows.length + 2, 1, tail.length, headers.length).clearContent();
+      flushSpreadsheet_();
+    }
+    var finalCheck = guard.verifyWrittenIds(newIds, readCompanyIdColumn_(sheet, idIndex + 1));
+    if (!finalCheck.ok) {
+      failCompanyWrite_("verify", true, "最後の照合で違いが見つかりました(" + recovery + "): " + finalCheck.reason);
+    }
+  } catch (error) {
+    if (error && error.companyWrite) throw error;
+    failCompanyWrite_("verify", true, "書いた後の照合の途中で、企業マスタの読み書きに失敗しました(" + recovery + "): " + error);
   }
   recordOpsStatus_("企業マスタの書き込み", true,
     rows.length + "社(書き込み後に企業ID" + (plan.shifted ? "と全列" : "") + "を照合済み" +
@@ -282,6 +311,13 @@ function countMixedCompanyRows_(sheet, rows, headers) {
   }
 }
 
+/** 企業マスタの2行目から最後の行までを、全列そのまま返す */
+function readCompanyMasterRows_(sheet, columnCount) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  return sheet.getRange(2, 1, lastRow - 1, columnCount).getValues();
+}
+
 /** 企業マスタの企業ID列(2行目から最後の行まで)を、空欄も含めて返す */
 function readCompanyIdColumn_(sheet, idCol) {
   var lastRow = sheet.getLastRow();
@@ -289,27 +325,35 @@ function readCompanyIdColumn_(sheet, idCol) {
   return sheet.getRange(2, idCol, lastRow - 1, 1).getValues().map(function (row) { return row[0]; });
 }
 
-/** 一時的なエラーで失敗したら、少し待ってやり直す(同じ範囲に同じ値を書くので、やり直しても結果は同じ) */
-function setValuesWithRetry_(range, values, maxAttempts) {
-  var lastError = null;
-  for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+/**
+ * 一時的なエラー(Google 側の失敗・混雑)のときだけ、少し待ってやり直す。権限・範囲の誤りなどはすぐに投げる。
+ * 待ち時間の合計は retryState.waitedMs に足していき、上限(RETRY_BUDGET_MS)を超えるならやり直さない。
+ * 同じ範囲に同じ値を書くので、やり直しても結果は同じ。
+ */
+function setValuesWithRetry_(range, values, retryState) {
+  for (var attempt = 1; ; attempt++) {
     try {
       range.setValues(values);
       return;
     } catch (error) {
-      lastError = error;
-      if (attempt < maxAttempts) Utilities.sleep(2000 * attempt);
+      var wait = GlowCompanyWriteGuard.retryWaitMs(error, attempt, retryState);
+      if (wait < 0) throw error;
+      Utilities.sleep(wait);
+      retryState.waitedMs = (retryState.waitedMs || 0) + wait;
     }
   }
-  throw lastError;
 }
 
 function flushSpreadsheet_() {
   if (typeof SpreadsheetApp.flush === "function") SpreadsheetApp.flush();
 }
 
-/** 企業マスタの書き込みを止めたことを稼働状況タブに残し、通知してから例外を投げる */
-function failCompanyWrite_(message) {
+/**
+ * 企業マスタの書き込みを止めたことを稼働状況タブに残し、通知してから例外を投げる。
+ * 例外には companyWrite = { phase: "precheck" | "write" | "verify", dataChanged } を付ける
+ * (呼び出し側はエラーの文言ではなく、これを見て後の処理を止めるかを決める)。
+ */
+function failCompanyWrite_(phase, dataChanged, message) {
   try {
     recordOpsStatus_("企業マスタの書き込み", false, message);
     notifyOpsFailure_("企業マスタの書き込み", message +
@@ -317,5 +361,7 @@ function failCompanyWrite_(message) {
   } catch (notifyError) {
     Logger.log("企業マスタの書き込みの失敗を記録・通知できませんでした: " + notifyError);
   }
-  throw new Error("企業マスタの書き込みを止めました。" + message);
+  var error = new Error("企業マスタの書き込みを止めました。" + message);
+  error.companyWrite = { phase: phase, dataChanged: !!dataChanged };
+  throw error;
 }
