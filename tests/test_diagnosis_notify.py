@@ -1114,6 +1114,45 @@ class RouteTest(Base):
                 self.assertEqual(dn.main(["route-test"], gh=self.gh), 1)
 
 
+class BrandedTitles(WatchdogHelpers, Base):
+    """Issueのタイトルに事業名を付ける(通知メールの件名で もらいわすれ堂 と分かるように)。特定・更新・クローズは変えない。"""
+    LINE_ON = False
+
+    def test_every_kind_of_issue_title_names_the_service(self):
+        self.page_alert("SEIDO_HTTP_404")                      # 診断ページの障害
+        self.run_check(missing=True)                           # 監視システムの故障
+        status = {"checked_at": "x", "publish": False, "reasons": ["テスト"], "required_missing": []}
+        self.gh.files[("main", dn.PUBLISH_STATUS_PATH)] = {"text": json.dumps(status), "sha": "m1"}
+        self.healthy()
+        with mock.patch.dict(os.environ, {"DIAG_ALERT_ASSIGNEE": ""}):
+            self.wd()                                          # 制度データの注意 + 通知先の問題
+        dn.cmd_route_test(self.gh, "https://run/7")            # 受信テスト
+        labels = {i["labels"][0] for i in self.gh.items}
+        self.assertEqual(labels, {dn.PAGE, dn.SYSTEM, dn.DATA, dn.NOTIFY, dn.ROUTE_TEST})
+        for i in self.gh.items:
+            self.assertRegex(i["title"], r"^(🚨|⚠️|🧪)【もらいわすれ堂】診断ページ", i["title"])
+            self.assertNotIn("ミカタ", i["title"])
+
+    def test_old_titles_are_still_found_updated_and_closed(self):
+        # タイトルを変える前に開いたIssue(事業名なし)も、ラベルと印で同じように扱う
+        old = self.gh.create_issue("🚨 診断ページ異常: PAGE_HTTP_500",
+                                   "<!-- sig: PAGE_HTTP_500 -->\n旧タイトルのIssue", dn.PAGE)["number"]
+        sys_old = self.gh.create_issue("⚠️ 診断ページの監視が動いていません: MONITOR_SETUP",
+                                       "<!-- sig: MONITOR_SETUP -->\n旧タイトル", dn.SYSTEM)["number"]
+        n, _ = self.run_check(ok=False, sig="PAGE_HTTP_500")
+        self.assertEqual(n, old)                               # 同じ症状は新しく起票しない
+        self.assertEqual(len(self.gh.items), 2)
+        self.gh.tick()
+        self.run_check(ok=False, sig="BROWSER_FLOW")           # 症状の変化は旧Issueに追記
+        self.assertIn("症状が変わりました", self.gh._issue(old)["comments"][-1]["body"])
+        self.gh.tick()
+        self.run_check(ok=True)                                # 復旧で旧Issueを閉じる
+        self.assertEqual(self.gh._issue(old)["state"], "closed")
+        self.assertEqual(self.gh._issue(sys_old)["state"], "closed")
+        self.assertEqual(len(self.gh.items), 2)
+        self.assertEqual(self.gh._issue(old)["title"], "🚨 診断ページ異常: PAGE_HTTP_500")  # 既存のタイトルは書き換えない
+
+
 class RealGitHubAssign(unittest.TestCase):
     """GitHub.assign は応答の担当者一覧で判定する(割り当てできないアカウントを GitHub は黙って無視するため)。"""
 
@@ -1145,6 +1184,7 @@ class MonitorWorkflowRoute(unittest.TestCase):
         self.assertLess(create, assign)
         self.assertNotIn("--assignee", mon[create:assign])      # 起票そのものには担当者を付けない
         self.assertIn("steps.w.outputs.route", wd)
+        self.assertIn('--title "⚠️【もらいわすれ堂】診断ページの監視が動いていません: ${sig}"', mon)  # 予備ジョブの起票にも事業名
 
     def test_route_test_runs_only_on_manual_dispatch(self):
         import yaml

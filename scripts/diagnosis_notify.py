@@ -355,18 +355,21 @@ def open_issue(gh, title, body, label):
     return number
 
 
+# Issueのタイトルには必ず事業名(BRAND)を付ける。通知メールの件名はタイトルから作られ、hojo-hq は
+# 沖縄企業のミカタ(株式会社GLOW)と共用のため、件名だけで もらいわすれ堂 の知らせと分かるようにする(2026-11-15)。
+# Issueの特定・更新・クローズはラベルと <!-- sig --> の印で行い、タイトルは使わない。
 KINDS = {
-    SYSTEM: {"title": "⚠️ 診断ページの監視が動いていません",
+    SYSTEM: {"title": f"⚠️{BRAND}診断ページの監視が動いていません",
              "intro": "自動検知: 診断ページの**監視が動いていません**。この間、診断ページの状態は分かりません(診断ページの障害とは限りません)。",
              "first": f"⚠️{BRAND}診断ページの監視が動いていません(ページの状態は不明)",
              "change": f"⚠️{BRAND}診断ページの監視の不調が続いています(内容が変わりました)",
              "recover": f"✅{BRAND}診断ページの監視が再開しました"},
-    DATA: {"title": "⚠️ 診断ページの制度データに注意が必要です",
+    DATA: {"title": f"⚠️{BRAND}診断ページの制度データに注意が必要です",
            "intro": "自動検知: 診断ページが読む公開用の制度データ(site/fukugiiro/seido.json)に注意が必要です。",
            "first": f"⚠️{BRAND}診断ページの制度データに注意が必要です",
            "change": f"⚠️{BRAND}診断ページの制度データの注意の内容が変わりました",
            "recover": f"✅{BRAND}診断ページの制度データの注意が解消しました"},
-    NOTIFY: {"title": "⚠️ 診断ページの監視の通知先が使えません",
+    NOTIFY: {"title": f"⚠️{BRAND}診断ページの監視の通知先が使えません",
              "intro": "自動検知: 診断ページの監視の**通知先が使えません**。障害はIssueに残りますが、担当者に通知メールが届かない可能性があります。",
              "first": f"⚠️{BRAND}診断ページの監視の通知先が使えません",
              "change": f"⚠️{BRAND}診断ページの監視の通知先の問題が変わりました",
@@ -436,7 +439,7 @@ def cmd_incident(gh, args, now):
     body = f"<!-- sig: {sig} -->\n- 実行: {args.run_url}\n\n```\n{report.rstrip()}\n```\n"
     if not opened:
         rid, wb = want_block(f"🚨{BRAND}診断ページ異常\n{summary}")
-        n = open_issue(gh, f"🚨 診断ページ異常: {sig}",
+        n = open_issue(gh, f"🚨{BRAND}診断ページ異常: {sig}",
                        "自動検知: もらいわすれ堂の診断ページで、利用者が制度を検索できない可能性があります。\n\n" + body + "\n" + wb, PAGE)
         return n, rid
     iss = opened[0]
@@ -965,7 +968,7 @@ def cmd_route_test(gh, run_url):
             "- 確かめること: 「assigned you」の通知メールが届いたか(迷惑メールのフォルダも含めて)\n"
             f"- 実行: {run_url}\n"
             "- このIssueは、割り当ての直後に自動で閉じます(閉じたことの通知が届くこともあります)")
-    number = gh.create_issue("🧪 診断ページの監視: 通知の受信テスト", body, ROUTE_TEST)["number"]
+    number = gh.create_issue(f"🧪{BRAND}診断ページの監視: 通知の受信テスト", body, ROUTE_TEST)["number"]
     assigned = assign_alert(gh, number)
     try:
         gh.comment(number, "✅ 割り当てまで終わりました。テスト用のIssueなので自動で閉じます。" if assigned

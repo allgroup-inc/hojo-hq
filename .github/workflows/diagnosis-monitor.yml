@@ -162,7 +162,7 @@ jobs:
           n=$(gh issue list --label "$label" --state open --limit 1 --json number --jq '.[0].number // empty')
           if [ -z "$n" ]; then
             # 起票が先・割り当てが後(割り当てに失敗しても記録は残す)
-            url=$(gh issue create --label "$label" --title "⚠️ 診断ページの監視が動いていません: ${sig}" \
+            url=$(gh issue create --label "$label" --title "⚠️【もらいわすれ堂】診断ページの監視が動いていません: ${sig}" \
               --body "<!-- sig: ${sig} -->"$'\n'"自動検知: ${text}")
             echo "$url"
             if [ -z "${ASSIGNEE}" ]; then
