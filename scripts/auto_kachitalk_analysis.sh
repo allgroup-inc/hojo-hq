@@ -10,6 +10,7 @@ MONITOR_DIR="/tmp"
 EXPORT_PATTERN="kachitalk_logs_full_export*.csv"
 ANALYSIS_SCRIPT="/home/user/hojo-hq/enlife/scripts/kachitalk_full_correlation_analysis.py"
 SITE_INTEGRATION_SCRIPT="/tmp/kachitalk_site_integration.py"
+CHATGPT_ENHANCEMENT_SCRIPT="/home/user/hojo-hq/enlife/scripts/chatgpt_analysis_enhancement.py"
 OUTPUT_DIR="/tmp"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
@@ -141,7 +142,27 @@ else
 fi
 echo ""
 
-# 8. Google Sheets 統合の準備
+# 8. ChatGPT連携による継続的改善 ✨NEW
+echo ""
+echo "🤖 ChatGPT連携分析"
+
+if [ ! -z "$OPENAI_API_KEY" ]; then
+  echo "   ChatGPTによる高度な分析と改善提案を生成中..."
+  CHATGPT_REPORT="/tmp/chatgpt_enhancement_${TIMESTAMP}.json"
+
+  python3 "$CHATGPT_ENHANCEMENT_SCRIPT" \
+    --analysis-json "$OUTPUT_JSON" \
+    --output-json "$CHATGPT_REPORT" \
+    && echo "   ✅ ChatGPT分析完了: $CHATGPT_REPORT" \
+    || echo "   ⚠️  ChatGPT分析スキップ（API キー確認）"
+else
+  echo "   ℹ️  環境変数 OPENAI_API_KEY が未設定のため、スキップ"
+  echo "   ChatGPT連携を有効にする:"
+  echo "   export OPENAI_API_KEY='<your-api-key>'"
+fi
+echo ""
+
+# 9. Google Sheets 統合の準備
 echo ""
 echo "📲 Google Sheets 統合準備"
 echo "   glow-ma システムへの自動インポートは、以下で実行:"
@@ -155,8 +176,9 @@ echo "   1. ✅ CSV 自動ダウンロード (認証キー使用)"
 echo "   2. ✅ データ検証・エンコーディング変換"
 echo "   3. ✅ Python 分析エンジン実行"
 echo "   4. ✅ 分析結果を保管・統計生成"
-echo "   5. ✅ KachiTalk サイト連携（下地チェックリスト結果送信）✨NEW"
-echo "   6. 📲 Google Sheets 統合準備（手動実行）"
+echo "   5. ✅ KachiTalk サイト連携（下地チェックリスト結果送信）"
+echo "   6. ✅ ChatGPT連携による継続的改善 ✨NEW"
+echo "   7. 📲 Google Sheets 統合準備（手動実行）"
 echo ""
 
 echo "📁 出力ファイル:"
