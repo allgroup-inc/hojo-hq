@@ -157,5 +157,89 @@ class MaintenanceProblems(unittest.TestCase):
         h.write_alert_output(problems, "")  # 出力先が無ければ何もしない
 
 
+# --- 2026-11-16 日次メンテナンスの打ち切り(時間切れ・異常終了・終わっていない実行)を見つける ---
+TIMEOUT = "起動時間の最大値を超えました"
+STARTED = "日次メンテナンスを開始しました。"
+ENDED = "日次メンテナンスを終了しました。"
+CUT_OFF = "日次メンテナンスが途中で打ち切られました(開始 2026-11-16 07:32。6分の上限、または異常終了)。「スコア・ランクの再計算」の途中でした(2/7件が完了)。"
+
+
+def fn_entry(minutes_ago, text, fn="runDailyMaintenance", severity="ERROR"):
+    e = entry(minutes_ago, text)
+    e["severity"] = severity
+    e["resource"] = {"labels": {"function_name": fn}}
+    return e
+
+
+class MaintenanceCutOff(unittest.TestCase):
+    def test_normal_day_has_no_problem(self):
+        entries = [entry(40, STARTED), entry(39, OK_ALL), entry(39, ENDED)]
+        self.assertEqual(h.maintenance_cutoff_problems(entries, NOW, 840), [])
+        self.assertEqual(h.maintenance_cutoff_problems([], NOW, 840), [])
+
+    def test_the_morning_of_1116_is_reported(self):
+        # 今の本番の記録の形: 「すべて完了」の約1分半後に、runDailyMaintenance の時間切れ。開始・終了の記録は無い
+        entries = [entry(22, OK_ALL), fn_entry(20, TIMEOUT)]
+        problems = h.maintenance_cutoff_problems(entries, NOW, 840)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("時間切れ(6分の上限)の記録 1件", problems[0])
+        self.assertIn("「7件すべて完了」の記録はあります", problems[0])
+        self.assertIn("稼働状況", problems[0])
+        # 失敗の記録(が失敗しました)が無いので、これまでの判定だけでは見つからなかった
+        self.assertEqual(h.maintenance_problems(entries, NOW, 840), [])
+        self.assertEqual(len(h.all_alert_problems(entries + [entry(100, BEAT)], NOW, 8, 60, 840)), 1)
+
+    def test_english_timeout_text_and_other_errors(self):
+        p = h.maintenance_cutoff_problems([fn_entry(20, "Exceeded maximum execution time")], NOW, 840)[0]
+        self.assertIn("時間切れ(6分の上限)の記録 1件", p)
+        self.assertIn("「7件すべて完了」の記録はありません", p)
+        other = h.maintenance_cutoff_problems([fn_entry(20, "TypeError: x is not a function C900001")], NOW, 840)[0]
+        self.assertIn("異常終了の記録 1件", other)
+        self.assertNotIn("TypeError", other)
+        self.assertNotIn("C900001", other)
+
+    def test_errors_of_other_functions_and_non_errors_are_ignored(self):
+        entries = [fn_entry(20, TIMEOUT, fn="processQueuedVoiceLogs"), fn_entry(20, TIMEOUT, severity="INFO")]
+        self.assertEqual(h.maintenance_cutoff_problems(entries, NOW, 840), [])
+
+    def test_cut_off_reported_by_the_ledger(self):
+        # 台帳の毎分の処理が見つけて残した記録(別の関数の名前で残る)。本文は出さない
+        p = h.maintenance_cutoff_problems([fn_entry(15, CUT_OFF, fn="processQueuedVoiceLogs")], NOW, 840)[0]
+        self.assertIn("台帳が見つけた打ち切りの記録 1件", p)
+        self.assertNotIn("スコア・ランクの再計算", p)
+
+    def test_started_but_not_finished(self):
+        # 始まって10分たっても終わりの記録が無い → 打ち切り。10分たっていなければ、まだ動いているかもしれない
+        self.assertEqual(h.maintenance_cutoff_problems([entry(9, STARTED)], NOW, 840), [])
+        p = h.maintenance_cutoff_problems([entry(11, STARTED)], NOW, 840)[0]
+        self.assertIn("始まったまま終わっていない実行 1件", p)
+        # 2日分: 前の日は終わっていて、今日は終わっていない
+        entries = [entry(700, STARTED), entry(699, ENDED), entry(30, STARTED)]
+        self.assertIn("終わっていない実行 1件", h.maintenance_cutoff_problems(entries, NOW, 840)[0])
+        # 前の日が終わっておらず、今日は終わった → 前の日の分を知らせる(今日の終わりで帳消しにしない)
+        entries = [entry(700, STARTED), entry(30, STARTED), entry(29, ENDED)]
+        self.assertIn("終わっていない実行 1件", h.maintenance_cutoff_problems(entries, NOW, 840)[0])
+
+    def test_all_signs_of_one_cut_off_make_one_message(self):
+        entries = [entry(30, STARTED), fn_entry(24, TIMEOUT), fn_entry(21, CUT_OFF, fn="processQueuedVoiceLogs")]
+        problems = h.maintenance_cutoff_problems(entries, NOW, 840)
+        self.assertEqual(len(problems), 1)
+        for sign in ("時間切れ(6分の上限)の記録 1件", "台帳が見つけた打ち切りの記録 1件", "始まったまま終わっていない実行 1件"):
+            self.assertIn(sign, problems[0])
+
+    def test_old_cut_off_is_not_reported(self):
+        self.assertEqual(h.maintenance_cutoff_problems([fn_entry(900, TIMEOUT)], NOW, 840), [])
+
+    def test_marker_texts_match_the_ledger_code(self):
+        # 台帳のコード(PR #612)が残す記録の文言と、この点検が探す文言が同じであること
+        path = os.path.join(ROOT, "glow-ma", "src", "MaintenanceRunner.gs")
+        src = open(path, encoding="utf-8").read()
+        if h.MAINTENANCE_STARTED not in src:
+            self.skipTest("このブランチの台帳のコードには、開始・終了の記録がまだ無い(PR #612 で入る)")
+        self.assertIn(h.MAINTENANCE_ENDED, src)
+        budget = open(os.path.join(ROOT, "glow-ma", "src", "executionBudget.js"), encoding="utf-8").read()
+        self.assertIn(h.MAINTENANCE_CUT_OFF, budget)
+
+
 if __name__ == "__main__":
     unittest.main()

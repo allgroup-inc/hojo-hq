@@ -185,15 +185,72 @@ def maintenance_problems(entries, now, recent_minutes):
             + "台帳の「稼働状況」タブを確かめ、システム担当のチャットへ知らせてください"]
 
 
+MAINTENANCE_FUNCTION = "runDailyMaintenance"
+ERROR_SEVERITIES = ("ERROR", "CRITICAL", "ALERT", "EMERGENCY")
+TIMEOUT_TEXTS = ("起動時間の最大値を超えました", "Exceeded maximum execution time")
+MAINTENANCE_STARTED = "日次メンテナンスを開始しました"
+MAINTENANCE_ENDED = "日次メンテナンスを終了しました"
+MAINTENANCE_CUT_OFF = "日次メンテナンスが途中で打ち切られました"
+# 始まってからこの分数たっても終わりの記録が無ければ、打ち切られたとみなす(実行の上限は6分)
+UNFINISHED_AFTER_MINUTES = 10
+
+
+def maintenance_cutoff_problems(entries, now, recent_minutes):
+    """直近 recent_minutes 分に、日次メンテナンスが途中で打ち切られた形跡(空なら問題なし)。2026-11-16 追加。
+
+    11/16 の朝、日次メンテナンスが7つの手順の後、最後の記録の途中に実行の上限(6分)で打ち切られた。
+    打ち切られた実行は「が失敗しました」の記録を残せないため、maintenance_problems では見つからない。
+    台帳とは別のこの点検が、次の3つのどれかで見つける:
+      1. runDailyMaintenance のエラーの記録(時間切れ「起動時間の最大値を超えました」など)
+      2. 台帳の毎分の処理が残す「途中で打ち切られました」の記録
+      3. 「開始しました」のあと、10分たっても「終了しました」が無い
+    やり直して完了していても知らせる(打ち切りそのものが、人が確かめるべき出来事のため)。
+    """
+    since = (now - timedelta(minutes=recent_minutes)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    recent = sorted((e for e in entries if e.get("timestamp", "") >= since), key=lambda e: e.get("timestamp", ""))
+    errors = [e for e in recent
+              if e.get("resource", {}).get("labels", {}).get("function_name") == MAINTENANCE_FUNCTION
+              and e.get("severity") in ERROR_SEVERITIES]
+    timeouts = [e for e in errors if any(t in entry_text(e) for t in TIMEOUT_TEXTS)]
+    reported = [e for e in recent if MAINTENANCE_CUT_OFF in entry_text(e)]
+    starts = [e.get("timestamp", "") for e in recent if MAINTENANCE_STARTED in entry_text(e)]
+    ends = [e.get("timestamp", "") for e in recent if MAINTENANCE_ENDED in entry_text(e)]
+    overdue = (now - timedelta(minutes=UNFINISHED_AFTER_MINUTES)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    unfinished = []
+    for i, started in enumerate(starts):
+        next_start = starts[i + 1] if i + 1 < len(starts) else "9999"
+        if started <= overdue and not any(started < ended <= next_start for ended in ends):
+            unfinished.append(started)
+    if not errors and not reported and not unfinished:
+        return []
+    signs = []
+    if timeouts:
+        signs.append(f"時間切れ(6分の上限)の記録 {len(timeouts)}件")
+    if len(errors) > len(timeouts):
+        signs.append(f"異常終了の記録 {len(errors) - len(timeouts)}件")
+    if reported:
+        signs.append(f"台帳が見つけた打ち切りの記録 {len(reported)}件")
+    if unfinished:
+        signs.append(f"始まったまま終わっていない実行 {len(unfinished)}件")
+    all_ok = any(MAINTENANCE_ALL_OK in entry_text(e) for e in recent)
+    hours = max(recent_minutes // 60, 1)
+    return [f"直近{hours}時間に、日次メンテナンスが途中で打ち切られました(" + "・".join(signs) + ")。"
+            + ("同じ期間に「7件すべて完了」の記録はあります(最後の記録の途中で打ち切られた可能性)。" if all_ok
+               else "同じ期間に「7件すべて完了」の記録はありません(終わっていない手順があります)。")
+            + "台帳の「稼働状況」タブと企業マスタの件数を確かめ、システム担当のチャットへ知らせてください"]
+
+
 def all_alert_problems(entries, now, hours, recent_minutes, maintenance_minutes):
-    """自動点検(--alert)で知らせる問題のすべて: 承認切れ・稼働記録なし・日次メンテナンスの失敗。
+    """自動点検(--alert)で知らせる問題のすべて: 承認切れ・稼働記録なし・日次メンテナンスの失敗・打ち切り。
 
     entries は日次メンテナンスの期間(maintenance_minutes)まで含めて渡してよい。
     稼働記録の有無は、これまでどおり直近 hours 時間の記録だけで判定する(期間を広げても判定を甘くしない)。
     """
     since = (now - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
     within_hours = [e for e in entries if e.get("timestamp", "") >= since]
-    return alert_problems(within_hours, now, hours, recent_minutes) + maintenance_problems(entries, now, maintenance_minutes)
+    return (alert_problems(within_hours, now, hours, recent_minutes)
+            + maintenance_problems(entries, now, maintenance_minutes)
+            + maintenance_cutoff_problems(entries, now, maintenance_minutes))
 
 
 def fetch_hours(hours, alert, maintenance_minutes):
@@ -309,6 +366,15 @@ def main():
             print(f"::error title={fn} が承認切れで止まっています::{s['auth']}回。台帳の持ち主がApps Scriptエディタで関数を1回実行し、権限を許可し直してください")
         for msg, n in s["msgs"].most_common(3):
             print(f"    エラー例({n}件): {msg}")
+    if not args.alert:
+        # 手動の点検では、知らせはしないが、定期の点検なら何を知らせるかを見せる(日次メンテナンスの失敗・打ち切り)
+        now = datetime.now(timezone.utc)
+        preview = (maintenance_problems(entries, now, args.hours * 60)
+                   + maintenance_cutoff_problems(entries, now, args.hours * 60))
+        for p in preview:
+            print(f"[定期の点検なら知らせる内容] {p}")
+        if not preview:
+            print("[定期の点検なら知らせる内容] 日次メンテナンスの失敗・打ち切りはありません")
     if args.alert:
         now = datetime.now(timezone.utc)
         problems = all_alert_problems(entries, now, args.hours, args.alert_recent_minutes, args.alert_maintenance_minutes)
@@ -317,7 +383,7 @@ def main():
             print(f"::error title=glow-ma の自動処理に問題があります::{p}")
         if problems:
             sys.exit(1)
-        print("自動点検: 問題なし(承認切れなし・稼働記録あり・日次メンテナンスの失敗なし)")
+        print("自動点検: 問題なし(承認切れなし・稼働記録あり・日次メンテナンスの失敗・打ち切りなし)")
 
 
 if __name__ == "__main__":
