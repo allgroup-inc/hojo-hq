@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-16 13:26",
+ "generated_at": "2026-11-16 23:35",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 7,
- "count": 26,
+ "count": 27,
  "items": [
   {
    "id": "a0WfQ000003tibNUAQ",
@@ -35,6 +35,26 @@
    "tier": "まもなく締切(7〜14日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003tEv3UAE",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDYDCMA5",
+   "name": "【農林水産省】中山間地域所得確保推進事業",
+   "deadline": "2026-11-25",
+   "days_left": 9,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 5000000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDCMA5",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WfQ000003CYIjUAO",
+   "name": "「ポスト5G情報通信システム基盤強化研究開発事業（社会課題解決に向けた量子コンピュータ次世代機開発・実証の加速）」（g12-2：部素材）の追加公募",
+   "deadline": "2026-11-26",
+   "days_left": 10,
+   "tier": "まもなく締切(7〜14日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003CYIjUAO",
    "tag": "nationwide"
   },
   {
@@ -175,16 +195,6 @@
    "tier": "まもなく締切(7〜14日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZ1GMAX",
-   "tag": "nationwide"
-  },
-  {
-   "id": "a0WJ200000CDYDCMA5",
-   "name": "【農林水産省】中山間地域所得確保推進事業",
-   "deadline": "2026-12-01",
-   "days_left": 15,
-   "tier": "準備をはじめる(15〜29日)",
-   "max_amount": 5000000,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYDCMA5",
    "tag": "nationwide"
   },
   {
