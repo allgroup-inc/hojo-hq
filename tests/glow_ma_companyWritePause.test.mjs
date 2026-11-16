@@ -143,7 +143,7 @@ function setup({ companies = 30, actor = OWNER, props = {}, propsThrow = false, 
     toast: (message, title) => toasts.push({ message, title }),
   };
   const ctx = {
-    console: { log() {}, warn() {} },
+    console: { log() {}, warn() {}, error() {} },
     Logger: { log: (m) => logs.push(String(m)) },
     Utilities: { sleep() {}, formatDate: (_d, _tz, f) => (f === "yyyy-MM-dd" ? state.today : state.now) },
     LockService: { getDocumentLock: () => ({ tryLock: () => true, releaseLock() {} }) },
@@ -161,9 +161,11 @@ function setup({ companies = 30, actor = OWNER, props = {}, propsThrow = false, 
   };
   ctx.globalThis = ctx;
   vm.createContext(ctx);
-  for (const f of ["schema.js", "scoring.js", "dedupe.js", "companyWriteGuard.js", "companyWritePause.js"]) vm.runInContext(src(f), ctx);
-  for (const f of ["OpsStatus.gs", "ImportRunner.gs", "ScoringRunner.gs", "DncRunner.gs", "PreScreeningRunner.gs", "PhaseATestRunner.gs",
+  for (const f of ["schema.js", "scoring.js", "dedupe.js", "companyWriteGuard.js", "companyWritePause.js", "executionBudget.js"]) vm.runInContext(src(f), ctx);
+  for (const f of ["ExecutionClock.gs", "OpsStatus.gs", "ImportRunner.gs", "ScoringRunner.gs", "DncRunner.gs", "PreScreeningRunner.gs", "PhaseATestRunner.gs",
     "HistoricalDataImporter.gs", "MaintenanceRunner.gs", "ShareRunner.gs", "CompanyWritePauseRunner.gs"]) vm.runInContext(src(f), ctx);
+  // この実行が始まってからの時間。試験では「今」(Date.now)を動かすので、経過時間は別に固定する(時間の歯止めは glow_ma_companyWrite.test.mjs で試す)
+  ctx.executionElapsedMs_ = () => 0;
   const H = ctx.GlowSchema.COMPANY_MASTER_HEADERS;
   const rows = [H.slice()];
   for (let i = 1; i <= companies; i++) {
@@ -319,6 +321,67 @@ test("止めていない日の日次メンテナンスは、これまでどお�
   assert.deepEqual(called, ["backup", "dnc", "score", "dashboard", "today", "wld02", "alerts"]);
   assert.equal(opsOf("日次メンテナンス")[2], "成功");
   assert.equal(mails.length, 0);
+});
+
+// ---- 停止スイッチ × 時間の歯止め(PR #612 の 11/16 対策)の組み合わせ ----
+const RUNNING = "DAILY_MAINTENANCE_RUNNING";
+
+test("停止中の日次メンテナンスも、開始・終了を実行記録に残し、「実行中」の印を最後に消す(打ち切りと取り違えない)", () => {
+  const { ctx, store, logs, mails } = stopped();
+  const seen = [];
+  const called = maintenanceSpies(ctx);
+  ctx.updateDashboard = () => { called.push("dashboard"); seen.push(ctx.GlowExecutionBudget.parseRunning(store[RUNNING])); };
+  ctx.runDailyMaintenance();
+  assert.equal(seen[0].step, "ダッシュボードの更新", "動いている間は、今の手順が印に残る");
+  assert.equal(seen[0].done, 1, "見送った2件は、完了の数に入れない");
+  assert.equal(RUNNING in store, false, "最後まで来たら印を消す");
+  assert.equal(logs.filter((l) => l === "日次メンテナンスを開始しました。").length, 1);
+  assert.equal(logs.filter((l) => l === "日次メンテナンスを終了しました。").length, 1);
+  assert.equal(mails.filter((m) => /途中で打ち切られました/.test(m.body)).length, 0);
+  // 毎分の処理が後から見ても、打ち切りとは知らせない
+  assert.equal(ctx.checkDailyMaintenanceStale_(), false);
+});
+
+test("日次メンテナンスは、停止の状態を読む前に「実行中」の印を付ける(状態の読み取りで固まって打ち切られても、後で見つかる)", () => {
+  const { ctx, store } = stopped();
+  maintenanceSpies(ctx);
+  const real = ctx.readCompanyWritePause_;
+  const seen = [];
+  ctx.readCompanyWritePause_ = () => { seen.push(ctx.GlowExecutionBudget.parseRunning(store[RUNNING])); return real(); };
+  ctx.runDailyMaintenance();
+  assert.equal(seen.length, 1);
+  assert.ok(seen[0], "印がすでに付いている");
+  assert.equal(seen[0].step, "");
+  assert.equal(seen[0].done, 0);
+  assert.ok(seen[0].startedAtMs > 0);
+});
+
+test("停止中 × 時間切れが近い: 書く手順は見送り(失敗に数えない)、読む手順は「始めなかった」失敗として記録する。印は消える", () => {
+  const { ctx, store, opsOf, logs } = stopped();
+  const called = maintenanceSpies(ctx);
+  ctx.executionElapsedMs_ = () => 280 * 1000;
+  ctx.runDailyMaintenance();
+  assert.deepEqual(called, [], "どの手順も始めない");
+  const row = opsOf("日次メンテナンス");
+  assert.equal(row[2], "失敗");
+  assert.match(row[3], /台帳のバックアップ: この実行は始まってから 280秒たっており、上限\(6分\)が近いため、始めませんでした/);
+  assert.match(row[3], /見送り 2件\(お断り\(連絡不要\)の反映・スコア・ランクの再計算\): 企業マスタの書き込みが停止中/);
+  assert.doesNotMatch(row[3], /お断り\(連絡不要\)の反映: この実行は/, "停止中の手順は、時間切れの失敗に数えない");
+  assert.equal(RUNNING in store, false);
+  assert.equal(logs.filter((l) => l === "日次メンテナンスを終了しました。").length, 1);
+});
+
+test("停止中でも、前の回が打ち切られたままなら、次の回の最初に見つけて知らせる(停止の見送りに埋もれない)", () => {
+  const { ctx, store, mails, opsOf } = stopped();
+  maintenanceSpies(ctx);
+  store[RUNNING] = ctx.GlowExecutionBudget.buildRunning(Date.now() - 24 * 60 * 60 * 1000, "2026-11-16 07:32", "スコア・ランクの再計算", "write", 2);
+  const before = mails.length;
+  ctx.runDailyMaintenance();
+  const found = mails.slice(before).filter((m) => /途中で打ち切られました\(開始 2026-11-16 07:32/.test(m.body));
+  assert.equal(found.length, 1);
+  assert.match(found[0].body, /「スコア・ランクの再計算」の途中でした\(2\/7件が完了\)/);
+  assert.equal(opsOf("日次メンテナンス")[2], "停止中", "今回の結果は、今回の結果として残る");
+  assert.equal(RUNNING in store, false);
 });
 
 test("再開: 台帳の持ち主でなければ断る(停止のまま)。断ったことも履歴に残る", () => {
