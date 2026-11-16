@@ -1,7 +1,7 @@
 {
   "note": "サイトのアクセス総量(Plausible集計・Cookieなし)。KGI❶=もらいわすれ堂 月1万人。domain=ドメイン全体(企業のミカタ+もらいわすれ堂)、moradou=もらいわすれ堂ページのみ。",
   "kgi_target_monthly_users": 10000,
-  "last_checked": "2026-11-09 12:19",
+  "last_checked": "2026-11-16 12:28",
   "last_status": "ok(ga4)",
   "history": [
     {
@@ -500,6 +500,23 @@
         "bounce_rate": 89,
         "visit_duration": 4
       }
+    },
+    {
+      "date": "2026-11-16",
+      "period": "7d",
+      "source": "ga4",
+      "domain": {
+        "visitors": 38,
+        "pageviews": 57,
+        "bounce_rate": 75,
+        "visit_duration": 48
+      },
+      "moradou": {
+        "visitors": 34,
+        "pageviews": 39,
+        "bounce_rate": 85,
+        "visit_duration": 48
+      }
     }
   ],
   "all_time": {
@@ -511,10 +528,10 @@
   },
   "all_time_ga4": {
     "since_measured": "GA4計測開始日以降のみ",
-    "as_of": "2026-11-09",
-    "domain_visitors": 554,
-    "moradou_visitors": 431,
-    "moradou_pageviews": 609
+    "as_of": "2026-11-16",
+    "domain_visitors": 591,
+    "moradou_visitors": 465,
+    "moradou_pageviews": 648
   },
   "monthly": {
     "2026-09": {
@@ -572,22 +589,22 @@
       "quality_note": null
     },
     "2026-11": {
-      "period": "2026-11-01..2026-11-09",
+      "period": "2026-11-01..2026-11-16",
       "confirmed": false,
-      "as_of": "2026-11-09",
+      "as_of": "2026-11-16",
       "domain": {
-        "visitors": 60,
-        "pageviews": 84,
-        "bounce_rate": 81,
-        "visit_duration": 6
+        "visitors": 97,
+        "pageviews": 135,
+        "bounce_rate": 80,
+        "visit_duration": 21
       },
       "moradou": {
-        "visitors": 55,
-        "pageviews": 61,
-        "bounce_rate": 88,
-        "visit_duration": 4
+        "visitors": 89,
+        "pageviews": 100,
+        "bounce_rate": 87,
+        "visit_duration": 20
       },
-      "quality_note": "直帰率が高い(直帰88% / 滞在4秒)。実訪問は表示より少ない可能性"
+      "quality_note": "直帰率が高い(直帰87% / 滞在20秒)。実訪問は表示より少ない可能性"
     }
   }
 }
