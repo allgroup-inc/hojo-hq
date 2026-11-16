@@ -31,7 +31,9 @@ from test_wikiskill_memory_e2e import (  # noqa: E402,F401 — fixture は名前
 
 TODAY = date.today().isoformat()
 APPROVER = "小柳(テスト)"
-APPROVED_AT = "2026-10-20"
+# 承認日は固定しない。候補の created_at は抽出を実行した日になるため、固定の日付だと日付が進むと
+# 「承認日が作成日より前」(V09)で落ちる(2026-10-20 固定で 2026-10-21 以降に発生)。
+# promote() は既定で候補の作成日(created_at の日付部分)を承認日にする。期待値は approved_on() で読む。
 LESSON = "学び: 生成物を作り直す前に origin/main を取り込むと、新しいデータを消さずに済む"
 APPROVED_TITLE = LESSON  # R2 の候補の title は「学び: <本文>」
 # 段1の検索語(ブランチ・commit 件名)に Wiki の語(生成物・データ)を載せる。Phase 1 E2E の COMMIT_SUBJECT と同じ考え方
@@ -138,12 +140,34 @@ def _write_fm(path, fm, body):
     path.write_text("\n".join(lines) + "\n" + body, encoding="utf-8")
 
 
-def promote(world, cid, utagai, approved_by=APPROVER, approved_at=APPROVED_AT):
+def _slug(cid):
+    return cid.split("-", 1)[1].rsplit("-", 1)[0]
+
+
+def _created_on(world, cid):
+    """候補の作成日(YYYY-MM-DD)。候補のまま、または既に docs/wiki/ へ移したファイルから読む。"""
+    src = world / "docs/wiki/_candidates" / f"{cid}.md"
+    if not src.exists():
+        moved = sorted((world / "docs/wiki").glob(f"W*-{_slug(cid)}.md"))
+        assert len(moved) == 1, moved
+        src = moved[0]
+    return load(src)["created_at"][:10]
+
+
+def approved_on(dst):
+    """昇格した Wiki の承認日(YYYY-MM-DD)。期待値の文字列はこれから作る。"""
+    return load(dst)["approved_at"]
+
+
+def promote(world, cid, utagai, approved_by=APPROVER, approved_at=None):
     """人の承認の模擬: frontmatter を編集し、commit 済みの候補を `git mv` で docs/wiki/<wiki_id>.md へ。
 
     2回目(1回目が検証で止まった後の直し)は、既に移した docs/wiki/<wiki_id>.md を編集し直す。
+    approved_at を省くと候補の作成日を承認日にする(承認日を作成日より前にしない = V09)。
     """
-    slug = cid.split("-", 1)[1].rsplit("-", 1)[0]
+    if approved_at is None:
+        approved_at = _created_on(world, cid)
+    slug = _slug(cid)
     wiki_id = f"W{approved_at.replace('-', '')}-{slug}"
     src = world / "docs/wiki/_candidates" / f"{cid}.md"
     dst = world / "docs/wiki" / f"{wiki_id}.md"
@@ -276,7 +300,9 @@ def test_forward_session_a_to_wiki_to_session_b(world):
     promote(world, cid, utagai="")
     r = validate(world)
     assert r.returncode == 1 and "V09" in r.stdout and "ウタガイ" in r.stdout, r.stdout     # F4
-    promote(world, cid, utagai="データが少ないうちは例外が多い", approved_by=APPROVER, approved_at=APPROVED_AT)
+    dst = promote(world, cid, utagai="データが少ないうちは例外が多い", approved_by=APPROVER)
+    aa = approved_on(dst)
+    assert aa == cand["created_at"][:10]                                                      # 承認日は作成日(遡らせない)
     r = validate(world)
     assert r.returncode == 0, r.stdout + r.stderr                                             # F5
     git(world, "add", "-A")
@@ -288,8 +314,8 @@ def test_forward_session_a_to_wiki_to_session_b(world):
     assert ctx.index("[再発防止]") < ctx.index("[Wiki]") < ctx.index("[Skill]")                  # F6
     wiki = section(ctx, "[Wiki]")
     assert wiki.startswith(f"- [Wiki] {APPROVED_TITLE} — ")                                    # 何を知っているか
-    assert "根拠: Exp 1・Decision 0・FK 0" in ctx and "承認: 小柳(テスト) 2026-10-20" in ctx and "→ docs/wiki/" in ctx  # F7
-    assert f"→ docs/wiki/W20261020-{cid.split('-', 1)[1].rsplit('-', 1)[0]}.md" in wiki
+    assert "根拠: Exp 1・Decision 0・FK 0" in ctx and f"承認: {APPROVER} {aa}" in ctx and "→ docs/wiki/" in ctx  # F7
+    assert f"→ docs/wiki/W{aa.replace('-', '')}-{_slug(cid)}.md" in wiki
     print("\n=== Session B STAGE1 additionalContext ===\n" + ctx)
 
 
@@ -348,16 +374,17 @@ def test_wiki_off_partial_stop_keeps_other_kinds(world):
 
 
 def test_needs_review_after_new_decision_stops_injection(world):
-    seed_approved(world)
+    aa = approved_on(seed_approved(world))
     assert APPROVED_TITLE in context(hook(world, "SessionStart", sid="D0", source="startup"))  # 対照: 決定の前は出る
-    did = commit_decision(world, date="2026-11-01", outcome=OPPOSITE, title="生成物の取り込み手順", slug="e2e-opposite")
+    after = (date.fromisoformat(aa) + timedelta(days=1)).isoformat()                           # 承認より後の決定(V13)
+    did = commit_decision(world, date=after, outcome=OPPOSITE, title="生成物の取り込み手順", slug="e2e-opposite")
     r = validate(world)
     assert r.returncode == 0 and "needs_review" in r.stdout and did in r.stdout, r.stdout + r.stderr  # 警告のみ
     ctx = context(hook(world, "SessionStart", sid="D", source="startup"))
     assert APPROVED_TITLE not in ctx                                                           # R5
     assert "生成物の取り込み手順" in ctx                                                       # 新しい Decision は出る
     audit = (world / ".claude/experience/_audit.log").read_text(encoding="utf-8")
-    assert "needs_review W20261020-" in audit and did in audit
+    assert f"needs_review W{aa.replace('-', '')}-" in audit and did in audit
 
 
 def test_private_world_extracts_nothing_public(world_private):

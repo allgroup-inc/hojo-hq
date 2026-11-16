@@ -95,7 +95,9 @@ function runSelfHeal() {
     { name: "BlueBean同期トリガー", run: ensureCtiSyncTrigger_ },
     { name: "日次メンテナンストリガー", run: ensureDailyMaintenanceTrigger_ },
     { name: "過去記録の取り込みタブ", run: function () { return ensureHistoryImportSheet_() ? "作成" : "あり"; } },
-    { name: "録音ファイルの受付フォルダ", run: ensureVoiceDriveFolder_ }
+    { name: "録音ファイルの受付フォルダ", run: ensureVoiceDriveFolder_ },
+    // 2026-11-07 改善⑥: 空の「シート数字」・古いバックアップを1回だけ非表示にする(消さない。UsabilityRunner.gs)
+    { name: "使っていないタブ", run: tidyUnusedTabsOnce_ }
   ];
   checks.forEach(function (check) {
     try {

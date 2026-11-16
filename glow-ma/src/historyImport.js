@@ -25,8 +25,30 @@
     代表者名: ["代表者名", "代表者", "代表"],
     業種: ["業種"],
     備考: ["備考", "メモ", "内容"],
-    メール送信日: ["メール送信日", "メール送付日", "メール日", "メール"]
+    メール送信日: ["メール送信日", "メール送付日", "メール日", "メール"],
+    // 2026-11-05 WLD-02: 確認する人が流入経路を書けるようにする(空なら「未確認」)
+    流入ルート: ["流入ルート", "流入経路", "経路", "きっかけ"]
   };
+
+  // 流入経路の書き方の言い換え(先頭の丸数字か、言葉で判断する)。「未確認」「不明」・空欄は経路を付けない
+  var INFLOW_ROUTES = ["①紹介", "②手紙DM", "③ミカタ経由", "④世界の架け橋(Alibaba)"];
+  var ROUTE_PATTERNS = [
+    { route: INFLOW_ROUTES[0], re: /^(①|1$|紹介)/ },
+    { route: INFLOW_ROUTES[1], re: /^(②|2$)|手紙|ＤＭ|dm/i },
+    { route: INFLOW_ROUTES[2], re: /^(③|3$)|ミカタ/ },
+    { route: INFLOW_ROUTES[3], re: /^(④|4$)|架け橋|懸け橋|世界|アリババ|alibaba/i }
+  ];
+
+  /* 取り込みタブに書かれた流入経路を読む。
+   * 戻り値: { route: "④世界の架け橋(Alibaba)" 等 / ""(未確認), known: 読めたか(空欄・「未確認」も読めた扱い) } */
+  function normalizeRoute(raw) {
+    var text = String(raw === null || raw === undefined ? "" : raw).replace(/\s+/g, "").trim();
+    if (!text || /^(未確認|不明|わからない|分からない|-|ー)$/.test(text)) return { route: "", known: true };
+    for (var i = 0; i < ROUTE_PATTERNS.length; i++) {
+      if (ROUTE_PATTERNS[i].re.test(text)) return { route: ROUTE_PATTERNS[i].route, known: true };
+    }
+    return { route: "", known: false };
+  }
 
   var STAGE_ORDER = ["未接触", "アプローチ実施", "電話済み", "相談実施"];
   var LETTER_ROUTE = "②手紙DM";
@@ -118,7 +140,7 @@
    * 見出しの言い換えは標準の見出し(FIELDS)にそろえる。空行は除く。
    * 戻り値: [取込日時, 会社名, 電話番号, 手紙送付日, 架電日, 通話結果, 所在地, 代表者名, 業種, 備考] の配列
    */
-  var ARCHIVE_FIELDS = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考", "メール送信日"];
+  var ARCHIVE_FIELDS = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考", "メール送信日", "流入ルート"];
   function toArchiveRows(headerRow, rows, stamp) {
     var idx = headerIndex(headerRow);
     return (rows || []).map(function (row) {
@@ -200,7 +222,7 @@
 
     var seq = options.nextSequence;
     var touched = {};
-    var newRecords = [], logs = [], skipped = [];
+    var newRecords = [], logs = [], skipped = [], warnings = [];
     var matchedCount = 0;
 
     function cell(row, field) {
@@ -220,6 +242,8 @@
       var mail = toDateString(cell(row, "メール送信日"), options.today);
       var result = String(cell(row, "通話結果")).trim();
       var memo = String(cell(row, "備考")).trim();
+      var routeText = String(cell(row, "流入ルート")).trim();
+      var routeRead = normalizeRoute(routeText);
       if (!letter && !call && !mail) {
         skipped.push({ line: lineNo, reason: "手紙送付日・架電日・メール送信日のどれも読めません" });
         return;
@@ -237,7 +261,9 @@
           企業ID: buildCompanyId(seq++),
           法人番号: "", 会社名: name, 業種: String(cell(row, "業種")), 規模: "",
           代表者名: String(cell(row, "代表者名")), 代表者年齢: "", 所在地: String(cell(row, "所在地")),
-          流入ルート: [LETTER_ROUTE], 起点担当者_紹介元: "", 現在ステージ: "未接触", 提案商品: [],
+          // 2026-11-05 WLD-02: これまでは面談・入電・メールだけの行でも「②手紙DM」を付けていた。
+          // 経路がわからない会社は空(未確認)で登録し、手紙を送った行・経路を書いた行だけ経路を付ける
+          流入ルート: [], 起点担当者_紹介元: "", 現在ステージ: "未接触", 提案商品: [],
           初期スコア: "", 反応スコア: "", 総合スコア: "", ランク: "",
           最終接触日: "", 次回アクション予定日: "", 次回アクション内容: "",
           担当者: options.staffName || "", 登録日: options.today, 備考: "過去の手紙・架電記録から登録",
@@ -248,9 +274,15 @@
         byName[normalizeName(name)] = record;
       }
 
-      if (letter) {
+      // 経路は足すだけで、既に付いている経路は消さない(直すときは録音の確認ボタンか、台帳で直接)
+      function addRoute(route) {
         var routes = Array.isArray(record["流入ルート"]) ? record["流入ルート"] : [];
-        if (routes.indexOf(LETTER_ROUTE) === -1) record["流入ルート"] = routes.concat([LETTER_ROUTE]);
+        if (route && routes.indexOf(route) === -1) record["流入ルート"] = routes.concat([route]);
+      }
+      if (letter) addRoute(LETTER_ROUTE);
+      addRoute(routeRead.route);
+      if (!routeRead.known) {
+        warnings.push({ line: lineNo, reason: "流入ルート「" + routeText.slice(0, 20) + "」が読めないため、未確認のまま取り込みました" });
       }
       var callType = callTypeOf(result);
       record["現在ステージ"] = advanceStage(record["現在ステージ"],
@@ -285,17 +317,21 @@
       newRecords: newRecords,
       logs: logs,
       skipped: skipped,
+      warnings: warnings,
       summary: {
         matched: matchedCount,
         added: newRecords.length,
         logs: logs.length,
-        skipped: skipped.length
+        skipped: skipped.length,
+        routeUnreadable: warnings.length
       }
     };
   }
 
   var api = {
     HEADER_ALIASES: HEADER_ALIASES,
+    INFLOW_ROUTES: INFLOW_ROUTES,
+    normalizeRoute: normalizeRoute,
     headerIndex: headerIndex,
     toDateString: toDateString,
     advanceStage: advanceStage,

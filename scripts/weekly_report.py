@@ -9,7 +9,7 @@ hojo-hq — 週次レポート(小柳さんのLINEへ毎週月曜8:00 JSTに配�
 
 必要なSecrets(すべて登録済み):
   PLAUSIBLE_API_KEY / LINE_CHANNEL_ACCESS_TOKEN / LINE_ADMIN_USER_ID
-  FB_PAGE_ID / FB_PAGE_ACCESS_TOKEN / IG_USER_ID
+  FB_PAGE_ID / META_INSIGHTS_TOKEN(数字を読むだけの鍵。投稿用の鍵は使わない) / IG_USER_ID
 """
 import json
 import os
@@ -169,17 +169,26 @@ def section_line():
         return f"💬 LINE公式: 取得不可({type(e).__name__})"
 
 
+def _insights():
+    """数字を読むだけの鍵(META_INSIGHTS_TOKEN)。投稿用の鍵は使わない(2026-11-03 設計)。"""
+    import sns_safety
+    token, why = sns_safety.insights_token()
+    return token, why, (sns_safety.auth_headers(token) if token else {})
+
+
 def section_instagram():
     ig = os.environ.get("IG_USER_ID", "")
-    token = os.environ.get("FB_PAGE_ACCESS_TOKEN", "")
-    if not (ig and token):
+    if not ig:
         return "📷 Instagram: 未接続"
+    token, why, auth = _insights()
+    if not token:
+        return f"📷 Instagram: {why}"
     try:
-        prof = get(f"{GRAPH}/{ig}?fields=followers_count,media_count&access_token={token}")
+        prof = get(f"{GRAPH}/{ig}?fields=followers_count,media_count", headers=auth)
         lines = [f"📷 Instagram: フォロワー {prof.get('followers_count', '?')}人"
                  f" / 投稿 {prof.get('media_count', '?')}件"]
         media = get(f"{GRAPH}/{ig}/media?fields=timestamp,like_count,comments_count"
-                    f"&limit=15&access_token={token}").get("data", [])
+                    f"&limit=15", headers=auth).get("data", [])
         since = datetime.now(timezone.utc) - timedelta(days=7)
         likes = comments = posts = 0
         for m in media:
@@ -196,11 +205,13 @@ def section_instagram():
 
 def section_facebook():
     page = os.environ.get("FB_PAGE_ID", "")
-    token = os.environ.get("FB_PAGE_ACCESS_TOKEN", "")
-    if not (page and token):
+    if not page:
         return "📘 Facebook: 未接続"
+    token, why, auth = _insights()
+    if not token:
+        return f"📘 Facebook: {why}"
     try:
-        prof = get(f"{GRAPH}/{page}?fields=fan_count,followers_count&access_token={token}")
+        prof = get(f"{GRAPH}/{page}?fields=fan_count,followers_count", headers=auth)
         return (f"📘 Facebookページ: フォロワー {prof.get('followers_count', '?')}人"
                 f"(いいね {prof.get('fan_count', '?')})")
     except Exception as e:  # noqa: BLE001

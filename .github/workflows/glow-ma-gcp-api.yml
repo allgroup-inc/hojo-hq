@@ -14,7 +14,9 @@ on:
   # 毎日の自動点検(2026-10-26 追加): 承認切れ・稼働記録なしを見つけたら失敗させ、GitHubの失敗通知で気づけるようにする。
   # 10/16〜26 に自動処理が承認切れで止まっていたのを10日間誰も気づけなかった反省(失敗台帳 FK-007)。
   schedule:
-    - cron: "23 23 * * *"   # 毎日 8:23(日本時間)。日次メンテナンス(7時台)の後
+    # 2026-11-05: 1日1回 → 3時間ごと(日本時間 8:23 を含む)。GitHubの定期実行は3〜4時間遅れることがあり、
+    # 1日1回では止まってから気づくまで丸1日かかる。問題があればLINEで小柳さんへ知らせる(下の「LINE通知」)
+    - cron: "23 */3 * * *"
   # 注意(2026-11-04): 定期実行では inputs が空になり、`inputs.health_hours != '0'` は偽になる(空と '0' はどちらも数値0として比べられる)。
   # そのため 10/26 の追加以降、毎朝の点検は中身を一度も実行せず「成功」になっていた。点検の各ステップは
   # `github.event_name == 'schedule' ||` を付けて、定期実行でも必ず動かす。
@@ -143,3 +145,15 @@ jobs:
           HOURS: ${{ inputs.health_hours || '8' }}
           ALERT: ${{ github.event_name == 'schedule' && '--alert' || '' }}
         run: python3 scripts/glow_ma_exec_health.py --hours "$HOURS" --grep "$GREP_WORD" --sample "$SAMPLE_FN" $ALERT
+
+      # 2026-11-05: 定期の点検で問題を見つけたら、LINEで知らせる(GitHubの失敗表示だけでは誰も気づけない。失敗台帳 FK-008)
+      - name: LINE通知(自動点検で問題を見つけたとき)
+        if: failure() && github.event_name == 'schedule'
+        uses: ./.github/actions/line-notify
+        with:
+          channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
+          message: |
+            ⚠️【GLOW台帳】自動処理が止まっているおそれがあります
+            多いのは承認切れです。台帳のメニュー「GLOW台帳 → 自動処理を復旧する(権限の再許可)」を、台帳の持ち主のアカウントで押してください。
+            詳細: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

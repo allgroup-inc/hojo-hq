@@ -44,6 +44,10 @@ function runDailyMaintenance() {
     { name: "お断り(連絡不要)の反映", run: syncDoNotContactFlags },
     { name: "スコア・ランクの再計算", run: recalculateAllScores },
     { name: "ダッシュボードの更新", run: updateDashboard },
+    // 2026-11-07 改善③: 3で確定したスコアを使って「今日の連絡先」タブを作り直す(台帳の記録は書き換えない)
+    { name: "今日の連絡先の更新", run: updateTodayList },
+    // 2026-11-07 改善⑦: 世界の架け橋の週次KPI(前の週がまだなら集計)と法人番号の点検(Wld02Runner.gs)
+    { name: "世界の架け橋の週次KPI", run: runWld02WeeklyIfDue_ },
     { name: "掘り起こしアラートの送信", run: runDailyAlerts }
   ];
 

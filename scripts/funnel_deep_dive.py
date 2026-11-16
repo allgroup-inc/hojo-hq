@@ -242,19 +242,24 @@ def line_block():
 
 
 def ig_block():
-    token = os.environ.get("FB_PAGE_ACCESS_TOKEN", "")
+    # 数字を読むだけの鍵(META_INSIGHTS_TOKEN)。投稿用の鍵は使わない(2026-11-03 設計)
+    import sns_safety
     ig = os.environ.get("IG_USER_ID", "")
-    if not (token and ig):
+    if not ig:
         return "- Instagram: 未接続"
+    token, why = sns_safety.insights_token()
+    if not token:
+        return f"- Instagram: {why}"
+    auth = sns_safety.auth_headers(token)
     L = []
     try:
-        acc = get(f"{GRAPH}/{ig}?fields=followers_count,media_count&access_token={token}")
+        acc = get(f"{GRAPH}/{ig}?fields=followers_count,media_count", headers=auth)
         L.append(f"- フォロワー **{acc.get('followers_count', '?')}人** / 投稿 {acc.get('media_count', '?')}件")
     except Exception as e:
         L.append(f"- アカウント集計: 取得不可({type(e).__name__})")
     try:
         media = get(f"{GRAPH}/{ig}/media?fields=id,caption,timestamp,media_type,"
-                    f"like_count,comments_count&limit=15&access_token={token}")["data"]
+                    f"like_count,comments_count&limit=15", headers=auth)["data"]
         L.append("")
         L.append("| 投稿(冒頭) | 種類 | 日付 | リーチ | 表示回数 | いいね/コメント |")
         L.append("|---|---|---|---|---|---|")
@@ -263,14 +268,14 @@ def ig_block():
             date = (m.get("timestamp") or "")[:10]
             reach = views = "-"
             try:
-                ins = get(f"{GRAPH}/{m['id']}/insights?metric=reach&access_token={token}")["data"]
+                ins = get(f"{GRAPH}/{m['id']}/insights?metric=reach", headers=auth)["data"]
                 for d in ins:
                     if d["name"] == "reach":
                         reach = d["values"][0]["value"]
             except Exception:
                 pass
             try:
-                ins2 = get(f"{GRAPH}/{m['id']}/insights?metric=views&access_token={token}")["data"]
+                ins2 = get(f"{GRAPH}/{m['id']}/insights?metric=views", headers=auth)["data"]
                 for d in ins2:
                     if d["name"] == "views":
                         views = d["values"][0]["value"]

@@ -26,7 +26,8 @@ var FUKUDA_STAGING_SHEET_NAME = "福田_履歴インポート";
 var FUKUDA_RESULT_SHEET_NAME = "福田_インポート結果";
 var FUKUDA_ARCHIVE_SHEET_NAME = "福田_履歴インポート_取込済";
 // 列は末尾にだけ足す(福田さんは手元の表を貼るため、途中に入れると貼った列がずれる)。2026-10-30 メール送信日を追加
-var FUKUDA_STAGING_HEADERS = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考", "メール送信日"];
+// 2026-11-05 WLD-02: 右端に「流入ルート」を足した(空なら未確認。④世界の架け橋 等を確認した人が書く)
+var FUKUDA_STAGING_HEADERS = ["会社名", "電話番号", "手紙送付日", "架電日", "通話結果", "所在地", "代表者名", "業種", "備考", "メール送信日", "流入ルート"];
 var HISTORY_IMPORT_SLOT_PROP = "HISTORY_IMPORT_LAST_SLOT";
 var FUKUDA_RESULT_HEADERS = ["実行日時", "読んだ行数", "既存の会社に追加", "新規登録", "対応履歴の追加", "取り込めなかった行", "取り込めなかった理由(先頭5件)"];
 
@@ -147,7 +148,8 @@ function runHistoryImport_() {
     }
     appendHistoryLogs_(logSheet, plan.logs);
 
-    var result = { rowsRead: rows.length, summary: plan.summary, skipped: plan.skipped };
+    // 流入ルートが読めなかった行は取り込んだうえで、理由の欄に並べて知らせる(取り込めなかった行の後ろ)
+    var result = { rowsRead: rows.length, summary: plan.summary, skipped: plan.skipped.concat(plan.warnings || []) };
     writeHistoryImportResult_(ss, result);
     archiveStagingSheet_(ss, staging, values);
     return result;

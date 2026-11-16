@@ -102,12 +102,38 @@ def safe_error(text, limit=None):
     return re.sub(r"\s+", " ", t)[:limit or SAFE_ERROR_LEN]
 
 
+def entry_text(e):
+    return e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or ""
+
+
+def alert_problems(entries, now, hours, recent_minutes):
+    """自動点検で知らせる問題の一覧(空なら問題なし)。
+
+    承認切れは「直近 recent_minutes 分」だけを数える(2026-11-05)。点検を3時間ごとにしたため、
+    復旧した後も、点検の期間(hours)に残った古いエラーで通知が続かないようにする。
+    稼働記録(6時間に1回)は hours 全体で探す。
+    """
+    recent_since = (now - timedelta(minutes=recent_minutes)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    auth = sum(1 for e in entries
+               if e.get("timestamp", "") >= recent_since
+               and ("Authorization is required" in entry_text(e) or "承認が必要" in entry_text(e)))
+    problems = []
+    if auth:
+        problems.append(f"直近{recent_minutes}分に、承認切れで止まった実行が {auth} 回あります"
+                        "(台帳のメニュー「GLOW台帳 → 自動処理を復旧する」を押してください)")
+    if not any("録音ファイルの受付フォルダ: 稼働中" in entry_text(e) for e in entries):
+        problems.append(f"直近{hours}時間に、毎分の処理が動いた記録(6時間ごとの稼働記録)がありません")
+    return problems
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=int, default=48)
     ap.add_argument("--grep", default="", help="この語を含むログ(INFO含む)の先頭だけを最大5件表示する")
     ap.add_argument("--alert", action="store_true",
                     help="毎日の自動点検用。承認切れ・稼働の記録なしを見つけたら終了コード1で失敗する(GitHubから通知が届く)")
+    ap.add_argument("--alert-recent-minutes", type=int, default=60,
+                    help="--alert で承認切れを数える期間(分)。復旧後に古いエラーで通知が続かないよう短くする")
     ap.add_argument("--sample", default="", help="この処理名の最新ログ3件の中身の形(重要度・項目名・本文の先頭)を表示する")
     args = ap.parse_args()
     token = access_token(os.environ["CLASPRC_JSON"])
@@ -190,14 +216,7 @@ def main():
         for msg, n in s["msgs"].most_common(3):
             print(f"    エラー例({n}件): {msg}")
     if args.alert:
-        problems = []
-        auth = sum(st.get("auth", 0) for st in stats.values())
-        if auth:
-            problems.append(f"承認切れで止まった実行が {auth} 回あります(台帳のメニュー「GLOW台帳 → 自動処理を復旧する」を押してください)")
-        beat = any("録音ファイルの受付フォルダ: 稼働中" in (e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or "")
-                   for e in entries)
-        if not beat:
-            problems.append(f"直近{args.hours}時間に、毎分の処理が動いた記録(6時間ごとの稼働記録)がありません")
+        problems = alert_problems(entries, datetime.now(timezone.utc), args.hours, args.alert_recent_minutes)
         for p in problems:
             print(f"::error title=glow-ma の自動処理に問題があります::{p}")
         if problems:

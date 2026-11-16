@@ -514,3 +514,55 @@ test("buildNewCompanyOrAskNamePrompt: 会社名が分からないときは新規
   const confirm = lineVoiceLogContent.buildNewCompanyOrAskNamePrompt("P-1", "株式会社テスト商事");
   assert.equal(confirm.options.length, 2);
 });
+
+test("LINEで録音として受け付ける拡張子(大文字も可)", () => {
+  for (const name of ["a.m4a", "b.MP3", "c.wav", "d.ogg", "e.aac", "訪問_その1.M4A"]) {
+    assert.equal(lineVoiceLogContent.isAudioFileName(name), true, name);
+  }
+  for (const name of ["a.mp4", "f.flac", "b.pdf", "c.jpg", "noext", "", undefined, "d.m4a.zip"]) {
+    assert.equal(lineVoiceLogContent.isAudioFileName(name), false, String(name));
+  }
+});
+
+test("受け付けられないファイルには、理由と送り方を返す(ファイル名そのものは返さない)", () => {
+  const msg = lineVoiceLogContent.buildUnsupportedFileMessage("株式会社テスト_その2.mp4");
+  assert.ok(msg.includes("(.mp4)"));
+  assert.ok(msg.includes("m4a"));
+  assert.ok(msg.includes("受付フォルダ"));
+  assert.ok(!msg.includes("株式会社テスト"));
+  assert.ok(lineVoiceLogContent.buildUnsupportedFileMessage(undefined).startsWith("このファイルは"));
+});
+
+// ---- 2026-11-05 WLD-02 ③B: 録音の確認のあとに流入経路を選び直す ----
+test("流入経路のボタンは、今の経路を見せて①〜④と「未確認にする」を出す", () => {
+  const p = lineVoiceLogContent.buildRoutePrompt("P-1", ["②手紙DM"]);
+  assert.ok(p.text.includes("②手紙DM"));
+  assert.deepEqual(p.options.map((o) => o.label), ["①紹介", "②手紙DM", "③ミカタ経由", "④世界の架け橋", "未確認にする"]);
+  p.options.forEach((o) => {
+    assert.ok(o.label.length <= 20);
+    const parsed = lineVoiceLogContent.parsePostbackData(o.data);
+    assert.equal(parsed.action, "setRoute");
+    assert.equal(parsed.processId, "P-1");
+  });
+  assert.ok(lineVoiceLogContent.buildRoutePrompt("P-2", []).text.includes("未確認"));
+  assert.ok(lineVoiceLogContent.buildRoutePrompt("P-3", "").text.includes("未確認"));
+});
+
+test("選んだ経路に置き換える(選び直し=訂正)。同じなら変えない", () => {
+  assert.deepEqual(lineVoiceLogContent.planRouteChange(["②手紙DM"], "4"),
+    { changed: true, before: ["②手紙DM"], after: ["④世界の架け橋(Alibaba)"] });
+  assert.deepEqual(lineVoiceLogContent.planRouteChange("①紹介、②手紙DM", "1"),
+    { changed: true, before: ["①紹介", "②手紙DM"], after: ["①紹介"] });
+  assert.equal(lineVoiceLogContent.planRouteChange(["④世界の架け橋(Alibaba)"], "4").changed, false);
+  assert.deepEqual(lineVoiceLogContent.planRouteChange(["②手紙DM"], "0"), { changed: true, before: ["②手紙DM"], after: [] });
+  assert.equal(lineVoiceLogContent.planRouteChange([], "0").changed, false);
+  assert.equal(lineVoiceLogContent.planRouteChange([], "9"), null);
+});
+
+test("流入経路を変えたときは、前と後を対応履歴に残す文にする", () => {
+  const memo = lineVoiceLogContent.buildRouteChangeMemo(["②手紙DM"], ["④世界の架け橋(Alibaba)"]);
+  assert.equal(memo, "流入経路を「②手紙DM」から「④世界の架け橋(Alibaba)」に変更(録音の確認で)");
+  assert.ok(lineVoiceLogContent.buildRouteChangeMemo([], ["①紹介"]).includes("「未確認」から"));
+  assert.ok(lineVoiceLogContent.buildRouteChangedMessage([]).includes("未確認"));
+  assert.ok(schema.INTERACTION_TYPES.includes("関係メモ更新"));
+});

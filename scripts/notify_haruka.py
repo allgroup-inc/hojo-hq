@@ -4,13 +4,20 @@
 遥さんへ「今週のIG投稿案」をLINEでプッシュ通知する(2026-08-11 小柳さん指示)。
 
 送り先(常に終了0):
-- 遥さん直送: FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN + HARUKA_LINE_USER_ID(もらいわすれ堂OAのみ)
-- Secrets未設定の間は本文をログ表示するだけ(ボードURLは常に有効)
+- **既定は「文面の生成・表示だけ」。自動では送らない**(2026-11-07 小柳さん承認・3段階ルール
+  docs/議事/議事_20261106_自動ルーティンの3段階ルール.md「外部送信は事前承認」)
+- 送るのは、宛先(遥さん)・内容を確認した個別の承認があるときだけ。承認は、表示した文面の
+  承認コード(宛先と本文から計算する)を NOTIFY_HARUKA_APPROVAL に渡すことで行う。文面が
+  1文字でも変われば承認コードも変わるので、別の内容・別の回には使い回せない
+- 送るときに要るもの: FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN + HARUKA_LINE_USER_ID(もらいわすれ堂OAのみ)
+  + NOTIFY_HARUKA_APPROVAL(承認コード)。どれかが欠ければ送らない
+- トークン・宛先IDの値はログに出さない
 
 **ミカタ(企業のミカタ/GLOW)のLINE OAは使わない**(2026-08-11 小柳さん指摘で撤去。
 フクギイロとGLOWは別会社・別ブランドのため、もらいわすれ堂の連絡をミカタOAに流さない)。
 内部連絡用のプッシュであり、県民向け配信ではない(CV単一ルールの対象外)。
 """
+import hashlib
 import json
 import os
 import sys
@@ -76,17 +83,35 @@ def push(token, to, text):
         return res.status
 
 
-def main():
+RECIPIENT = "haruka"  # 宛先の名前(承認コードに含める。宛先IDの値は含めない)
+
+
+def approval_code(text, recipient=RECIPIENT):
+    """宛先と本文から承認コードを作る。内容か宛先が変われば別のコードになる。"""
+    return hashlib.sha256(f"{recipient}\n{text}".encode("utf-8")).hexdigest()[:16]
+
+
+def main(env=None, sender=None):
+    env = os.environ if env is None else env
+    sender = sender or push
     text = build_text()
-    fg_token = os.environ.get("FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN", "")
-    haruka = os.environ.get("HARUKA_LINE_USER_ID", "")
+    code = approval_code(text)
+    fg_token = env.get("FUKUGIIRO_LINE_CHANNEL_ACCESS_TOKEN", "")
+    haruka = env.get("HARUKA_LINE_USER_ID", "")
+    approval = env.get("NOTIFY_HARUKA_APPROVAL", "").strip()
+    if approval != code:
+        reason = "承認なし" if not approval else "承認コードが今回の文面と一致しない"
+        print(f"[info] {reason}のため送信しません(文面の表示のみ・ミカタOAは使わない)。")
+        print(f"[info] 宛先: 遥さん(もらいわすれ堂OA) / 承認コード: {code}")
+        print("[info] 送る場合は、宛先と下の内容を確認のうえ、この承認コードで個別に承認してください。")
+        print(text)
+        return 0
+    if not (fg_token and haruka):
+        print("[info] 承認はあるが、もらいわすれ堂OAのSecretsが未設定のため送信しません。ボード: " + BOARD_URL)
+        return 0
     try:
-        if fg_token and haruka:
-            push(fg_token, haruka, text)
-            print("[ok] 遥さんへ直送しました(もらいわすれ堂OA)")
-        else:
-            print("[info] もらいわすれ堂OAのSecrets未設定のため表示のみ(ミカタOAは使わない)。ボード: " + BOARD_URL)
-            print(text)
+        sender(fg_token, haruka, text)
+        print("[ok] 承認に基づき、遥さんへ送りました(もらいわすれ堂OA)")
     except Exception as e:
         # 通知失敗でも週次レポ本体は止めない(ボードは生成済み・URLで見られる)
         print(f"[warn] LINE送信失敗(継続): {type(e).__name__}")

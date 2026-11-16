@@ -1,7 +1,7 @@
 {
   "note": "サイトのアクセス総量(Plausible集計・Cookieなし)。KGI❶=もらいわすれ堂 月1万人。domain=ドメイン全体(企業のミカタ+もらいわすれ堂)、moradou=もらいわすれ堂ページのみ。",
   "kgi_target_monthly_users": 10000,
-  "last_checked": "2026-11-02 11:59",
+  "last_checked": "2026-11-16 12:28",
   "last_status": "ok(ga4)",
   "history": [
     {
@@ -449,6 +449,74 @@
         "bounce_rate": 36,
         "visit_duration": 189
       }
+    },
+    {
+      "date": "2026-11-04",
+      "period": "7d",
+      "source": "ga4",
+      "domain": {
+        "visitors": 16,
+        "pageviews": 46,
+        "bounce_rate": 40,
+        "visit_duration": 93
+      },
+      "moradou": {
+        "visitors": 11,
+        "pageviews": 28,
+        "bounce_rate": 40,
+        "visit_duration": 142
+      }
+    },
+    {
+      "date": "2026-11-07",
+      "period": "7d",
+      "source": "ga4",
+      "domain": {
+        "visitors": 54,
+        "pageviews": 80,
+        "bounce_rate": 76,
+        "visit_duration": 33
+      },
+      "moradou": {
+        "visitors": 51,
+        "pageviews": 63,
+        "bounce_rate": 83,
+        "visit_duration": 36
+      }
+    },
+    {
+      "date": "2026-11-09",
+      "period": "7d",
+      "source": "ga4",
+      "domain": {
+        "visitors": 58,
+        "pageviews": 82,
+        "bounce_rate": 82,
+        "visit_duration": 6
+      },
+      "moradou": {
+        "visitors": 53,
+        "pageviews": 59,
+        "bounce_rate": 89,
+        "visit_duration": 4
+      }
+    },
+    {
+      "date": "2026-11-16",
+      "period": "7d",
+      "source": "ga4",
+      "domain": {
+        "visitors": 38,
+        "pageviews": 57,
+        "bounce_rate": 75,
+        "visit_duration": 48
+      },
+      "moradou": {
+        "visitors": 34,
+        "pageviews": 39,
+        "bounce_rate": 85,
+        "visit_duration": 48
+      }
     }
   ],
   "all_time": {
@@ -460,10 +528,10 @@
   },
   "all_time_ga4": {
     "since_measured": "GA4計測開始日以降のみ",
-    "as_of": "2026-11-02",
-    "domain_visitors": 500,
-    "moradou_visitors": 380,
-    "moradou_pageviews": 552
+    "as_of": "2026-11-16",
+    "domain_visitors": 591,
+    "moradou_visitors": 465,
+    "moradou_pageviews": 648
   },
   "monthly": {
     "2026-09": {
@@ -521,22 +589,22 @@
       "quality_note": null
     },
     "2026-11": {
-      "period": "2026-11-01..2026-11-02",
+      "period": "2026-11-01..2026-11-16",
       "confirmed": false,
-      "as_of": "2026-11-02",
+      "as_of": "2026-11-16",
       "domain": {
-        "visitors": 4,
-        "pageviews": 7,
-        "bounce_rate": 25,
-        "visit_duration": 31
+        "visitors": 97,
+        "pageviews": 135,
+        "bounce_rate": 80,
+        "visit_duration": 21
       },
       "moradou": {
-        "visitors": 3,
-        "pageviews": 4,
-        "bounce_rate": 33,
-        "visit_duration": 22
+        "visitors": 89,
+        "pageviews": 100,
+        "bounce_rate": 87,
+        "visit_duration": 20
       },
-      "quality_note": null
+      "quality_note": "直帰率が高い(直帰87% / 滞在20秒)。実訪問は表示より少ない可能性"
     }
   }
 }

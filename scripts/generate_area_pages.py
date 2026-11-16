@@ -18,6 +18,7 @@ from datetime import datetime, timezone, timedelta
 
 sys.path.insert(0, os.path.dirname(__file__))
 from fg_seo import HIDDEN_MUNIS, MUNI_SLUG, VISIBLE_MUNIS, breadcrumb_jsonld, canonical_tag, ogp_tags
+import fg_source_status as fgsrc  # 公式ページが無い(404/410)出典のリンクだけを止める
 
 JST = timezone(timedelta(hours=9))
 BASE = os.path.join(os.path.dirname(__file__), "..")
@@ -75,13 +76,13 @@ def area_jsonld(muni, groups):
         for it in group:
             elements.append({
                 "@type": "ListItem", "position": pos,
-                "item": {
+                "item": fgsrc.without_empty_url({
                     "@type": "GovernmentService",
                     "name": it.get("name", ""),
                     "provider": {"@type": "GovernmentOrganization", "name": it.get("issuer", "")},
                     "areaServed": {"@type": "AdministrativeArea", "name": it.get("area", "全国")},
-                    "url": it.get("source_url", ""),
-                },
+                    "url": fgsrc.jsonld_url(it),  # 公式ページを確認中なら空(without_empty_url で外す)
+                }),
             })
             pos += 1
     data = {
@@ -162,6 +163,7 @@ def muni_page(muni, items, updated):
     body = [
         f"<h1>{esc(muni)}にお住まいの方が使える可能性のある給付金・手当</h1>",
         f'<p class="note">{intro}ぜんぶ読まなくて大丈夫 — あなたの世帯にあてはまるものは3分診断でしぼり込めます。</p>',
+        *filter(None, [fgsrc.note_html(shown)]),  # 止めている制度があるときだけ説明を1回出す
     ]
     if verified_n:
         body.append(
@@ -193,7 +195,7 @@ def muni_page(muni, items, updated):
                 f'<p class="note">{esc(it["target_household"])}</p>'
                 f'<p class="note">窓口: {esc(it["how_to_apply"])}</p>'
                 f'<p style="display:flex;gap:16px;flex-wrap:wrap;margin:0">'
-                f'<a href="{esc(it["source_url"])}" rel="noopener">公式ページで確認する</a>'
+                f'{fgsrc.link(it, "公式ページで確認する")}'
                 f'<a href="../../kit/{esc(it["id"])}/">申請準備シート</a></p>'
                 "</div>"
             )

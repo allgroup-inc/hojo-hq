@@ -409,13 +409,19 @@ select{width:100%;padding:13px;font-size:1rem;border:2px solid var(--fg-line);bo
         mg.appendChild(h("span", {style:"user-select:all;-webkit-user-select:all;display:block;margin:2px 0", text:"「" + it.name + "について教えてください。対象か不安なのですが大丈夫ですか?」"}));
         mg.appendChild(h("span", {class:"note", style:"display:block;margin-top:2px;color:#0f5138", text:"対象かどうかは窓口が判断します。自信がなくて大丈夫です。"}));
         card.appendChild(mg);
-        card.appendChild(h("a", {href: it.source_url, rel:"noopener", class:"cardlink", text:"公式ページで確認する"}));
+        // 公式ページが無い(404/410)と確かめた出典は、リンクの代わりに「公式ページを確認中」を出す(scripts/fg_source_status.py)
+        if (it.source_unavailable) {
+          card.appendChild(h("span", {class:"src-pending", style:"color:#7a5b00;font-weight:700", text:"公式ページを確認中"}));
+          card.appendChild(h("p", {class:"note src-pending-note", style:"color:#7a5b00", text:"公式ページが移動などで開けないため、リンクを一時的にお休みしています。この表示は、制度が終わったという意味ではありません。内容や申請は窓口でご確認ください。"}));
+        } else {
+          card.appendChild(h("a", {href: it.source_url, rel:"noopener", class:"cardlink", text:"公式ページで確認する"}));
+        }
         card.appendChild(h("span", {class:"linksep", text:" ・ "}));
         var kitLink = h("a", {href:"../kit/" + it.id + "/", class:"cardlink", text:"申請準備シート(持ち物リストつき)"});
         kitLink.addEventListener("click", function(){ if (window.fgTrack) window.fgTrack("kit_click"); });
         card.appendChild(kitLink);
         card.appendChild(h("p", {class:"note", style:"margin-top:6px", text:"準備の目安がそろったら、お住まいの窓口へ。最終的な受給の可否は窓口で確認されます。"}));
-        if (it.status === "要確認") card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
+        if (it.status === "要確認" && !it.source_unavailable) card.appendChild(h("p", {class:"note", text:"※ この制度は現在、内容の最終確認中です。必ず公式ページでご確認ください。"}));
         var mk = h("button", {class:"markbtn" + (isMarked ? " marked" : ""),
           text: isMarked ? "✓ 申請・受給ずみ(もう一度タップで取り消し)" : "申請した・受け取ったら、タップして記録"});
         // 受給報告の導線: 「受け取った」瞬間に、その制度の報告をLINEへ促す(⑤の回収)

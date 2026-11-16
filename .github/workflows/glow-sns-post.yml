@@ -16,8 +16,12 @@ on:
         type: choice
         options: [status, dry-run, post]
 
+# 最小権限(2026-11-03 GLOW Instagram 安全対策): 全体は読み取りのみ。
+# Meta の鍵を使うジョブ(post)はリポジトリへ書き込めない。記録のコミットは、
+# Meta の鍵を持たない別ジョブ(record)だけが書き込み権限を持って行う。
+# (定期実行の時刻・投稿の仕方は変えていない。承認の仕組みは M3 で別途扱う)
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: glow-sns-post
@@ -27,8 +31,12 @@ jobs:
   post:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@v7
         with:
@@ -51,18 +59,16 @@ jobs:
             *)       python scripts/glow_sns_post.py ;;
           esac
 
-      # どこまで出したかの記録は、成否に関わらず残す(片方だけ成功した場合の二重投稿を防ぐ)
-      - name: 投稿の記録をコミット
+      # どこまで出したかの記録は、成否に関わらず残す(片方だけ成功した場合の二重投稿を防ぐ)。
+      # コミットは鍵を持たない record ジョブが行う
+      - name: 投稿の記録を受け渡す
         if: always() && (github.event.inputs.mode || 'post') == 'post'
-        run: |
-          git config user.name "hojo-hq-bot"
-          git config user.email "bot@en-life.co.jp"
-          git add data/glow_sns_state.json 2>/dev/null || true
-          git diff --cached --quiet || git commit -m "auto: GLOW SNS投稿の記録 $(date '+%Y-%m-%d')"
-          for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
-            echo "push retry $i"; sleep 5
-          done
+        uses: actions/upload-artifact@v4
+        with:
+          name: glow-sns-state
+          path: data/glow_sns_state.json
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: LINE通知(投稿完了)
         if: success() && steps.run.outputs.connected == 'yes'
@@ -84,3 +90,33 @@ jobs:
           message: |
             🚨【世界の架け橋】SNS自動投稿が失敗しました(次の回に自動でやり直します)
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  record:
+    needs: post
+    if: always() && (github.event.inputs.mode || 'post') == 'post'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: 投稿の記録を受け取る
+        id: dl
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: glow-sns-state
+          path: data
+
+      - name: 投稿の記録をコミット
+        if: steps.dl.outcome == 'success'
+        run: |
+          git config user.name "hojo-hq-bot"
+          git config user.email "bot@en-life.co.jp"
+          git add data/glow_sns_state.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "auto: GLOW SNS投稿の記録 $(date '+%Y-%m-%d')"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "push retry $i"; sleep 5
+          done
