@@ -9,6 +9,7 @@ DOWNLOAD_SCRIPT="/home/user/hojo-hq/enlife/scripts/download_kachitalk_csv.py"
 MONITOR_DIR="/tmp"
 EXPORT_PATTERN="kachitalk_logs_full_export*.csv"
 ANALYSIS_SCRIPT="/home/user/hojo-hq/enlife/scripts/kachitalk_full_correlation_analysis.py"
+SITE_INTEGRATION_SCRIPT="/tmp/kachitalk_site_integration.py"
 OUTPUT_DIR="/tmp"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
@@ -124,7 +125,23 @@ except Exception as e:
     print(f"⚠️  サマリー生成失敗: {e}")
 EOF
 
-# 7. Google Sheets 統合の準備
+# 7. KachiTalk サイト連携（下地チェックリスト検証結果送信）✨NEW
+echo ""
+echo "🌐 KachiTalk admin サイトへの連携"
+
+if [ ! -z "$KACHITALK_API_KEY" ]; then
+  echo "   下地チェックリスト検証結果を送信中..."
+  python3 "$SITE_INTEGRATION_SCRIPT" \
+    --analysis-json "$OUTPUT_JSON" \
+    --api-key "$KACHITALK_API_KEY" \
+    || echo "   ⚠️  サイト連携失敗（手動確認が必要）"
+else
+  echo "   ℹ️  環境変数 KACHITALK_API_KEY が未設定のため、スキップ"
+  echo "   手動送信: python3 $SITE_INTEGRATION_SCRIPT --analysis-json $OUTPUT_JSON --api-key <KEY>"
+fi
+echo ""
+
+# 8. Google Sheets 統合の準備
 echo ""
 echo "📲 Google Sheets 統合準備"
 echo "   glow-ma システムへの自動インポートは、以下で実行:"
@@ -132,12 +149,14 @@ echo "   → Apps Script: analyzeKachiTalkCorrelation()"
 echo "   → 分析結果ファイル: $OUTPUT_JSON"
 echo ""
 
-# 8. 自動化完了通知
+# 9. 自動化完了通知
 echo "🔄 自動化パイプライン完了:"
 echo "   1. ✅ CSV 自動ダウンロード (認証キー使用)"
 echo "   2. ✅ データ検証・エンコーディング変換"
 echo "   3. ✅ Python 分析エンジン実行"
 echo "   4. ✅ 分析結果を保管・統計生成"
+echo "   5. ✅ KachiTalk サイト連携（下地チェックリスト結果送信）✨NEW"
+echo "   6. 📲 Google Sheets 統合準備（手動実行）"
 echo ""
 
 echo "📁 出力ファイル:"
