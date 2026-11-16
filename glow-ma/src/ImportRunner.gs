@@ -250,28 +250,68 @@ function writeCompanyRecords_(sheet, records, options) {
       guard.describeCells(formulaLike) + ")。そのまま書くと数式として入り、元の文字が失われるため止めました。先頭の「=」を外してください");
   }
 
+  // 時間の歯止め(executionBudget.js): この実行(上限6分)の残り時間が足りないときは、書き込みを始めない。
+  // 上限で打ち切られると、記録も通知も動かないため(2026-11-16 の日次メンテナンスの時間切れ)
+  var budget = GlowExecutionBudget;
+  var elapsedAtStart = executionElapsedMs_();
+  if (!budget.canStartWrite(elapsedAtStart, plan.shifted)) {
+    failCompanyWrite_("precheck", false,
+      "書く前の確認で止めました(企業マスタは変更していません): この実行は始まってから " + budget.seconds(elapsedAtStart) +
+      "秒たっており、書き終える時間が足りないおそれがあるため、書き込みを始めませんでした。次の回に書きます");
+  }
+
   // 2. 書き込み
-  var written = 0;
+  //    行がずれない書き込みでは、今の内容と同じかたまり(500行)は書かない(変わっていない日は1回も書かない。
+  //    書く量を減らすほど、遅い日でも時間切れに届きにくく、途中で止まる機会も減る)
+  var written = 0;          // ここまでの行は、書いたか・書く必要が無かった
   var attemptedEnd = 0;
+  var touched = false;      // 企業マスタに1回でも書こうとしたか
+  var writtenChunks = 0;
+  var skippedChunks = 0;
+  var slowestChunkMs = 0;
   var retryState = { waitedMs: 0 };
+  var timeStop = null;      // 時間切れが近いために自分で止めたとき、その説明
   try {
     guard.chunkRanges(rows.length, guard.CHUNK_ROWS).forEach(function (range) {
-      attemptedEnd = range.offset + range.count;
+      if (timeStop) return;
       var chunk = rows.slice(range.offset, range.offset + range.count);
+      if (!plan.shifted &&
+          guard.compareRows(chunk, before.slice(range.offset, range.offset + range.count), headers, 2 + range.offset).ok) {
+        skippedChunks++;
+        written = range.offset + range.count;
+        return;
+      }
+      var elapsed = executionElapsedMs_();
+      if (!budget.canStartChunk(elapsed, slowestChunkMs)) {
+        timeStop = "この実行は始まってから " + budget.seconds(elapsed) + "秒たっており、上限(6分)で打ち切られる前に、区切りで止めました";
+        return;
+      }
+      attemptedEnd = range.offset + range.count;
+      touched = true;
       setValuesWithRetry_(sheet.getRange(2 + range.offset, 1, range.count, headers.length), chunk, retryState);
+      slowestChunkMs = Math.max(slowestChunkMs, executionElapsedMs_() - elapsed);
+      writtenChunks++;
       written = range.offset + range.count;
     });
+    if (timeStop) throw new Error(timeStop);
   } catch (error) {
-    var detail = "書き込みの途中で止まりました(" + written + "/" + rows.length + "社まで書きました。";
+    var detail = "書き込みの途中で止まりました(" + written + "/" + rows.length + "社まで済みました。";
     if (plan.shifted) {
       // 行がずれる書き込みでは、止まった所の前後で1行の中に別の会社の値が混ざりうる。混ざった行を数えて知らせる
-      var counts = countMixedCompanyRows_(sheet, rows.slice(0, attemptedEnd), headers);
+      var counts = countMixedCompanyRows_(sheet, rows.slice(0, Math.max(attemptedEnd, written)), headers);
       detail += "行がずれる書き込みのため、止まった所までに、1行の中に別の会社の値が混ざった行が " + counts.mixed +
         "行、まだ書けていない行が " + counts.notWritten + "行あります。" + recovery + ")";
     } else {
-      detail += "会社の行の位置は変わらないため、まだ書いていない行には元のデータが残っています)";
+      detail += "会社の行の位置は変わらないため、まだ書いていない行には元のデータが残っています。会社は消えていません。残りは次の回に書きます)";
     }
-    failCompanyWrite_("write", written > 0 || attemptedEnd > 0, detail + ": " + error);
+    failCompanyWrite_("write", touched, detail + ": " + error);
+  }
+
+  // 何も変わっておらず、下に片付ける行も無ければ、ここで終わる(企業マスタには1回も書いていない)
+  if (writtenChunks === 0 && before.length <= rows.length) {
+    recordOpsStatus_("企業マスタの書き込み", true,
+      rows.length + "社(今の内容と同じため、書き込みはしていません)");
+    return;
   }
 
   // 3. 書いた後の照合(読み直しが失敗しても、必ず失敗として記録・通知して止める)
@@ -309,6 +349,7 @@ function writeCompanyRecords_(sheet, records, options) {
   }
   recordOpsStatus_("企業マスタの書き込み", true,
     rows.length + "社(書き込み後に企業ID" + (plan.shifted ? "と全列" : "") + "を照合済み" +
+    (skippedChunks ? "・変わっていない " + skippedChunks + "かたまりは書かず、" + writtenChunks + "かたまりを書いた" : "") +
     (plan.addedIds.length ? "・追加 " + plan.addedIds.length + "社" : "") +
     (plan.removedIds.length ? "・統合などで外した " + plan.removedIds.length + "社" : "") + ")");
 }
