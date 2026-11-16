@@ -30,7 +30,8 @@ function recordOpsStatus_(processName, ok, detail) {
     var row = [
       processName,
       Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm"),
-      ok ? "成功" : "失敗",
+      // ok は真偽値(成功/失敗)。文字を渡すと、その言葉をそのまま出す(例: 「停止中」)
+      typeof ok === "string" ? ok : (ok ? "成功" : "失敗"),
       String(detail || "").slice(0, 500)
     ];
     var lastRow = sheet.getLastRow();
@@ -71,6 +72,32 @@ function notifyOpsFailure_(processName, message) {
     props.setProperty(key, today);
   } catch (error) {
     Logger.log("失敗通知を送れませんでした(" + processName + "): " + error);
+  }
+}
+
+/**
+ * 失敗ではないお知らせ(企業マスタの書き込みを止めた・再開した・停止中のお知らせ)を人に届ける。
+ * 宛先は台帳の持ち主(メニューから担当者が操作しても、代表者に届くように)。分からなければ実行している人。
+ * dedupeKey を渡すと、同じお知らせは1日1通に抑える(渡さなければ毎回送る)。
+ */
+function notifyOpsNotice_(subject, message, dedupeKey) {
+  var props = PropertiesService.getScriptProperties();
+  var today = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd");
+  var key = dedupeKey ? "OPS_NOTIFIED_" + dedupeKey : "";
+  if (key && props.getProperty(key) === today) return;
+  var text = subject + "\n" + message + "\n\n台帳の「" + OPS_STATUS_SHEET_NAME + "」タブに最新の状態があります。";
+  try {
+    if (props.getProperty("SLACK_WEBHOOK_URL")) {
+      postToSlack_(text);
+    } else {
+      var owner = SpreadsheetApp.getActiveSpreadsheet().getOwner();
+      var to = (owner && owner.getEmail()) || Session.getEffectiveUser().getEmail();
+      if (!to) throw new Error("通知先メールアドレスを取得できません");
+      MailApp.sendEmail(to, subject, text);
+    }
+    if (key) props.setProperty(key, today);
+  } catch (error) {
+    Logger.log("お知らせを送れませんでした(" + subject + "): " + error);
   }
 }
 

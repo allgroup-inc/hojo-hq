@@ -48,6 +48,8 @@ function importCompaniesFromStaging() {
     );
   }
   try {
+    // 停止中は、バックアップのタブを作る前に止める(台帳に何も足さない)
+    assertCompanyWriteNotPaused_();
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var staging = ss.getSheetByName(STAGING_SHEET_NAME);
     if (!staging) {
@@ -195,6 +197,8 @@ function readCompanyRecords_(sheet) {
  *                             backupSheetName: 書く前に作ったバックアップのタブ名(止めたときの戻し方の案内に使う) }
  */
 function writeCompanyRecords_(sheet, records, options) {
+  // 0. 緊急停止スイッチ(CompanyWritePauseRunner.gs)。停止中は何も読まず・書かずに止める
+  assertCompanyWriteNotPaused_();
   var guard = GlowCompanyWriteGuard;
   var headers = GlowSchema.COMPANY_MASTER_HEADERS;
   var idIndex = headers.indexOf("企業ID");

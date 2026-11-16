@@ -50,6 +50,13 @@ function runHistoryImportIfPending_() {
   restageMissedRowsOnce_(ss);
   if (!historyImportSlotDue_()) return null;
   if (!sheet || sheet.getLastRow() < 2) return null;
+  // 緊急停止スイッチ: 停止中は取り込みを試さない(貼られた行はそのまま残り、再開の後の取り込み時刻に入る)
+  var pause = readCompanyWritePause_();
+  if (pause.paused) {
+    recordOpsStatus_("過去の手紙・架電記録の取り込み", "停止中",
+      "企業マスタの書き込みが停止中のため、取り込みを見送りました(貼られた行は残っています)");
+    return null;
+  }
   try {
     var result = runHistoryImport_();
     if (result) {
