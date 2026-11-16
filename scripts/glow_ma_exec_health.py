@@ -135,6 +135,9 @@ MAINTENANCE_STEPS = (
 # 日次メンテナンスの失敗を数える期間(分)。点検は3時間ごとの予定だが、GitHub の定期実行は実際には
 # 4〜11時間あくことがある(2026-11-05〜15 の実績)。あいだが最長でも拾える長さ(14時間)にする
 ALERT_MAINTENANCE_MINUTES = 840
+# --grep で見つけた記録を何行まで出すか。日次メンテナンスの1回ぶん(7手順+開始・終了)が入る数にする。
+# 時刻は秒まで出す(2026-11-16: 7:32 の日次メンテナンスが6分の上限で打ち切られ、どの手順が長かったかを調べるため)
+GREP_SHOW_LINES = 16
 MAINTENANCE_FAILED = re.compile(r"日次メンテナンス: 「([^」]+)」が失敗しました")
 MAINTENANCE_ALL_OK = "日次メンテナンスがすべて完了しました"
 COMPANY_WRITE_STOPPED = "企業マスタの書き込みを止めました"
@@ -252,11 +255,11 @@ def main():
         shown = 0
         for e in entries:
             text = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or ""
-            if args.grep in text and shown < 5:
+            if args.grep in text and shown < GREP_SHOW_LINES:
                 fn = e.get("resource", {}).get("labels", {}).get("function_name", "(不明)")
                 ts = e.get("timestamp", "")[:19]
                 when = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST) if ts else None
-                print(f"[{args.grep}] {when:%m-%d %H:%M} {fn} {e.get('severity', '')}: {safe_error(text, 400)}" if when
+                print(f"[{args.grep}] {when:%m-%d %H:%M:%S} {fn} {e.get('severity', '')}: {safe_error(text, 400)}" if when
                       else f"[{args.grep}] {fn}: {safe_error(text)}")
                 shown += 1
         hits = [e for e in entries if args.grep in (e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or "")]
@@ -288,6 +291,14 @@ def main():
             keys = sorted((e.get("jsonPayload") or {}).keys())
             print(f"[見本 {args.sample}] {e.get('timestamp', '')[:19]} {e.get('severity', '')} "
                   f"logName末尾={e.get('logName', '').rsplit('/', 1)[-1]} 項目={keys} 本文={safe_error(body)}")
+    # 時間切れ・異常終了の時刻(秒まで)。本文は決まった先頭だけ(safe_error)
+    for e in sorted(entries, key=lambda e: e.get("timestamp", ""), reverse=True):
+        if e.get("severity") in ("ERROR", "CRITICAL", "ALERT", "EMERGENCY"):
+            fn = e.get("resource", {}).get("labels", {}).get("function_name", "(不明)")
+            if fn == "runDailyMaintenance":
+                ts = e.get("timestamp", "")[:19]
+                when = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST)
+                print(f"[runDailyMaintenance の異常終了] {when:%m-%d %H:%M:%S}: {safe_error(entry_text(e) or '(詳細なし)')}")
     print(f"## 直近{shown_hours}時間の実行記録(ログ {len(entries)} 件)")
     if not entries:
         print("::warning::実行記録が1件もありません(トリガーが止まっている可能性)")
