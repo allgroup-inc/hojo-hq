@@ -64,6 +64,38 @@ SALES_PROCESS_KEYWORDS = {
     ]
 }
 
+# 下地の営業チェックリスト（7項目）
+SHIMOJI_CHECKLIST = {
+    '①推奨理由説明': [
+        '推奨', '理由をお伝え', 'なぜこの保険', 'この保険が適切', 'おすすめする理由',
+        'こちらの保障が必要', 'お役に立つ', 'ぴったり', 'この内容が最適'
+    ],
+    '②書面交付・口頭説明': [
+        'ご契約のしおり', 'しおり', '約款', '書面', '契約書', '口頭説明',
+        'ご説明', 'お約束', 'ご確認', '内容確認'
+    ],
+    '③公的保険情報提供': [
+        '公的保険', '社会保障', '公的制度', '健康保険', '公的', '国民健康保険',
+        '会社の保険', '健康診断', '給付', '保障内容の確認'
+    ],
+    '④検討時間確保': [
+        '検討', '考えておく', 'じっくり', 'お考えいただく', 'ご検討',
+        '考えていただく', 'ご確認', 'お時間', '次回', 'またの機会'
+    ],
+    '⑤高齢者募集ルール遵守': [
+        '年齢', '高齢', 'シニア', '70代', '80代', '90代', 'ご高齢', 'ご年齢',
+        '定年', '退職'
+    ],
+    '⑥適合性確認': [
+        '適合', 'お手伝い', 'お力になれる', '最適', 'ご状況に合わせた', 'ニーズ',
+        'ご要望', 'ぴったり', 'マッチ', 'こちらが最適'
+    ],
+    '⑦意向相違確認': [
+        '最初', '当初', '予定', '変わった', '追加', '変更', '当初とは',
+        'さらに', '今回', '新たに', '別のご希望'
+    ]
+}
+
 class KachiTalkFullAnalyzer:
     def __init__(self):
         self.logs = []
@@ -143,6 +175,21 @@ class KachiTalkFullAnalyzer:
         else:
             return '保留'
 
+    def analyze_shimoji_checklist(self, transcript: str, notes: str) -> Tuple[Dict[str, bool], float]:
+        """Analyze 下地's 7-item compliance checklist from transcript and notes"""
+        combined_text = f"{transcript} {notes}"
+        items_executed = {}
+
+        for item_id, keywords in SHIMOJI_CHECKLIST.items():
+            found = any(kw in combined_text for kw in keywords)
+            items_executed[item_id] = found
+
+        # Calculate compliance score (0-100)
+        count = sum(1 for v in items_executed.values() if v)
+        score = (count / 7) * 100
+
+        return items_executed, score
+
     def correlate_with_sales_metrics(self):
         """Main analysis function: correlate call quality with sales performance"""
         print("\n" + "="*100)
@@ -180,6 +227,11 @@ class KachiTalkFullAnalyzer:
         process_steps_by_outcome = defaultdict(lambda: defaultdict(int))
         process_completeness_by_outcome = {'成約': [], '失注': [], '保留': []}
 
+        # Shimoji checklist metrics
+        shimoji_scores = []
+        shimoji_items_by_outcome = defaultdict(lambda: defaultdict(int))
+        shimoji_checklist_data = []
+
         # Analyze each call
         for i, log in enumerate(logs, 1):
             date = log.get('date', '')
@@ -193,11 +245,22 @@ class KachiTalkFullAnalyzer:
             completeness = self.calculate_process_completeness(steps)
             outcome = self.analyze_outcome(notes)
 
+            # Analyze Shimoji checklist
+            shimoji_items, shimoji_score = self.analyze_shimoji_checklist(transcript, notes)
+
             # Collect metrics
             process_scores.append(completeness)
             outcomes[outcome] += 1
             call_durations.append(duration)
             process_completeness_by_outcome[outcome].append(completeness)
+            shimoji_scores.append(shimoji_score)
+            shimoji_checklist_data.append({
+                'date': date,
+                'customer': customer,
+                'items': shimoji_items,
+                'score': shimoji_score,
+                'outcome': outcome
+            })
 
             # Record steps by outcome
             for step_id, executed in steps.items():
@@ -244,6 +307,23 @@ class KachiTalkFullAnalyzer:
             rate = (step_count / len(logs) * 100) if len(logs) > 0 else 0
             print(f"  {step_id}: {rate:.0f}%（{step_count}件）")
 
+        # Shimoji compliance checklist
+        print(f"\n【下地チェックリスト実施率（コンプライアンス検証）】")
+        shimoji_item_totals = defaultdict(int)
+        for data in shimoji_checklist_data:
+            for item_id, executed in data['items'].items():
+                if executed:
+                    shimoji_item_totals[item_id] += 1
+
+        for item_id in sorted(SHIMOJI_CHECKLIST.keys()):
+            item_count = shimoji_item_totals.get(item_id, 0)
+            rate = (item_count / len(logs) * 100) if len(logs) > 0 else 0
+            print(f"  {item_id}: {rate:.0f}%（{item_count}件）")
+
+        if shimoji_scores:
+            avg_shimoji_score = mean(shimoji_scores)
+            print(f"\n  平均チェックリスト実行スコア: {avg_shimoji_score:.1f}点")
+
         # Sales style classification
         print(f"\n【営業スタイル判定】")
         style_markers = []
@@ -289,7 +369,15 @@ class KachiTalkFullAnalyzer:
             'contract_count': outcomes['成約'],
             'process_scores': process_scores,
             'style_markers': style_markers,
-            'outcomes': outcomes
+            'outcomes': outcomes,
+            'shimoji_checklist': {
+                'avg_score': mean(shimoji_scores) if shimoji_scores else 0,
+                'item_execution_rates': {
+                    item_id: (shimoji_item_totals.get(item_id, 0) / len(logs) * 100) if len(logs) > 0 else 0
+                    for item_id in SHIMOJI_CHECKLIST.keys()
+                },
+                'detailed_logs': shimoji_checklist_data
+            }
         }
 
         print("-" * 100)
