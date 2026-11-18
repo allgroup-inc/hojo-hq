@@ -102,13 +102,19 @@ class MaintenanceProblems(unittest.TestCase):
         self.assertEqual(len(h.maintenance_problems([entry(350, FAIL_SCORE)], NOW, 360)), 1)
 
     def test_failure_is_caught_even_when_the_scheduled_check_is_hours_late(self):
-        # 実績: 定期の点検は4〜11時間あくことがある。7:32 の失敗の次の点検が10時間40分後でも拾う
-        entries = [entry(640, FAIL_SCORE), entry(100, BEAT)]
+        # 実績: 定期の点検は4〜13時間あくことがある(最長は 11/16 の約12時間53分)。7:32 の失敗の次の点検が15時間後でも拾う
+        entries = [entry(900, FAIL_SCORE), entry(100, BEAT)]
         default_minutes = h.ALERT_MAINTENANCE_MINUTES
         problems = h.all_alert_problems(entries, NOW, 8, 60, default_minutes)
         self.assertEqual(len(problems), 1)
         self.assertIn("日次メンテナンス", problems[0])
-        self.assertEqual(h.all_alert_problems([entry(900, FAIL_SCORE), entry(100, BEAT)], NOW, 8, 60, default_minutes), [])
+        # 打ち切り(時間切れ)も、同じ期間で拾う
+        cut = h.all_alert_problems([fn_entry(900, TIMEOUT), entry(100, BEAT)], NOW, 8, 60, default_minutes)
+        self.assertEqual(len(cut), 1)
+        self.assertIn("途中で打ち切られました", cut[0])
+        # 21時間より前のものは、もう知らせない(いつまでも念押ししない)
+        self.assertEqual(h.all_alert_problems([entry(1260, FAIL_SCORE), entry(100, BEAT)], NOW, 8, 60, default_minutes), [])
+        self.assertEqual(h.all_alert_problems([fn_entry(1260, TIMEOUT), entry(100, BEAT)], NOW, 8, 60, default_minutes), [])
 
     def test_wider_fetch_does_not_relax_heartbeat_check(self):
         # 実行記録を14時間ぶん取っても、稼働記録の有無は直近8時間だけで見る(10時間前の稼働記録では通さない)
