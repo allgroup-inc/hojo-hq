@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-18 09:25",
+ "generated_at": "2026-11-18 23:59",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 6,
- "count": 29,
+ "count": 31,
  "items": [
   {
    "id": "a0WfQ000003tibNUAQ",
@@ -198,6 +198,16 @@
    "tag": "nationwide"
   },
   {
+   "id": "a0WfQ0000042PWHUA2",
+   "name": "「自動車用内燃機関技術のグローバル動向調査」の公募",
+   "deadline": "2026-12-03",
+   "days_left": 15,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ0000042PWHUA2",
+   "tag": "nationwide"
+  },
+  {
    "id": "a0WJ200000CDbyjMAD",
    "name": "令和８年度ゼロエミッション船等の導入支援事業",
    "deadline": "2026-12-03",
@@ -205,6 +215,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbyjMAD",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WfQ0000049aA1UAI",
+   "name": "「次世代バイオものづくり製造基盤技術に関する調査」の公募",
+   "deadline": "2026-12-04",
+   "days_left": 16,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 0,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ0000049aA1UAI",
    "tag": "nationwide"
   },
   {
