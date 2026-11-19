@@ -3,7 +3,7 @@
 ## キャプション
 世界で通用した話
 
-愛媛県新居浜市(人口約12万人)のお茶屋さん・香月園は、Alibaba.comに出店してから2年2か月で、50数か国と取引するようになりました。
+愛媛県新居浜市(人口約12万人)のお茶屋さん・香月園は、Alibaba.comで売り始めてから2年2か月で、50数か国と取引するようになりました。
 
 地方の会社でも、世界と取引できる時代です。
 
@@ -18,5 +18,5 @@ https://allgroup-inc.github.io/hojo-hq/go/glow-fb/
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-11-17
+- checked: 2026-11-20
 - by: Claude(glow_sns_build・提案資料の照合済み数字のみ使用)

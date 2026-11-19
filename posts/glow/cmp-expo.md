@@ -19,5 +19,5 @@ https://allgroup-inc.github.io/hojo-hq/go/glow-fb/
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-11-17
+- checked: 2026-11-20
 - by: Claude(glow_sns_build・提案資料の照合済み数字のみ使用)
