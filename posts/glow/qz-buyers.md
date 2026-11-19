@@ -11,7 +11,7 @@ A. 50万 / B. 500万 / C. 5,000万以上
 .
 正解は C. 5,000万以上 です。
 
-世界中の会社やお店が、ここで「次に仕入れる商品」を探しています。沖縄の商品も、その目にとまる場所に並べられます。
+世界中の会社やお店が、ここで「次に仕入れる商品」を探しています。沖縄の商品も、その目にとまる場所で販売できます。
 
 出典: Alibaba.com 公式(About Alibaba.com)
 
@@ -24,5 +24,5 @@ https://allgroup-inc.github.io/hojo-hq/go/glow-fb/
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-11-04
+- checked: 2026-11-20
 - by: Claude(glow_sns_build・提案資料の照合済み数字のみ使用)

@@ -1,11 +1,11 @@
 # GLOW SNS投稿: cmp-pay
 
 ## キャプション
-比べてみた: 知らない相手と直接 vs Alibaba.comの仕組み
+比べてみた: 知らない相手と直接 vs 世界の架け橋
 
 知らない国の、知らない相手に商品を送るのは怖いもの。「送ったのに入金されない」という心配があります。
 
-Alibaba.comには、買い手の代金をいったん預かってから支払う仕組みがあります。
+世界の架け橋では、海外バイヤーからの代金はGLOWが受け取り、手数料を差し引いてお支払いします。知らない相手とのお金のやり取りを、あなたが直接することはありません。
 
 ▶ くわしく(世界の架け橋のサイト)
 https://glow-okinawa.jp/?utm_source=facebook&utm_medium=social&utm_campaign=glow_sns
@@ -16,5 +16,5 @@ https://allgroup-inc.github.io/hojo-hq/go/glow-fb/
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-10-06
+- checked: 2026-11-17
 - by: Claude(glow_sns_build・提案資料の照合済み数字のみ使用)
