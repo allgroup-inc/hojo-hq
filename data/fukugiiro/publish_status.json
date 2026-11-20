@@ -1,27 +1,17 @@
 {
- "checked_at": "2026-11-20 10:57",
- "publish": false,
- "reasons": [
-  "前回の公開データに載っている制度の取得に失敗しました(1件)",
-  "必須制度(国の制度)が理由なく消えました(1件)"
- ],
+ "checked_at": "2026-11-21 02:26",
+ "publish": true,
+ "reasons": [],
  "previous_count": 258,
- "new_count": 257,
+ "new_count": 258,
  "failed": [
   {
    "id": "fk-kuni-jidofuyoteate",
    "reason": "URL到達不可(HTTP 404)",
    "in_previous_public": false
-  },
-  {
-   "id": "fk-kuni-kogaku-kaigo-service",
-   "reason": "URL到達不可(HTTP 503)",
-   "in_previous_public": true
   }
  ],
- "unexplained_lost": [
-  "fk-kuni-kogaku-kaigo-service"
- ],
+ "unexplained_lost": [],
  "legit_removed": [],
  "required_missing": [
   "fk-kuni-jidofuyoteate"
