@@ -1,18 +1,13 @@
 {
- "checked_at": "2026-11-20 02:51",
+ "checked_at": "2026-11-20 10:57",
  "publish": false,
  "reasons": [
-  "前回の公開データに載っている制度の取得に失敗しました(2件)",
-  "必須制度(国の制度)が理由なく消えました(2件)"
+  "前回の公開データに載っている制度の取得に失敗しました(1件)",
+  "必須制度(国の制度)が理由なく消えました(1件)"
  ],
  "previous_count": 258,
- "new_count": 256,
+ "new_count": 257,
  "failed": [
-  {
-   "id": "fk-kuni-iryohi-kojo",
-   "reason": "URL到達不可(HTTP 503)",
-   "in_previous_public": true
-  },
   {
    "id": "fk-kuni-jidofuyoteate",
    "reason": "URL到達不可(HTTP 404)",
@@ -25,7 +20,6 @@
   }
  ],
  "unexplained_lost": [
-  "fk-kuni-iryohi-kojo",
   "fk-kuni-kogaku-kaigo-service"
  ],
  "legit_removed": [],
