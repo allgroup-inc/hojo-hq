@@ -511,6 +511,15 @@ function processQueuedVoiceLogsCore_() {
   VOICE_RUN_STARTED_MS = Date.now();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
+  // 打ち切られた日次メンテナンス(上限6分・異常終了)が無いかを見る(MaintenanceRunner.gs)。
+  // 打ち切られた実行は記録も通知も残せないため、毎分動くこの処理が後から見つけて知らせる(設定を1つ読むだけ)
+  try {
+    checkDailyMaintenanceStale_();
+  } catch (error) {
+    VOICE_RUN_STEP_ERRORS++;
+    console.error("日次メンテナンスの打ち切りの確認に失敗しました: " + error);
+  }
+
   // 毎分動くこのトリガーに、6時間に1回の自己点検・修復を相乗りさせる(OpsStatus.gs)。
   // 人がエディタで修復用の関数を押さなくても、反映後に自動でダッシュボード等が直る。
   try {
