@@ -49,6 +49,10 @@
       })
       .filter(function (entry) { return entry.score > 0; })
       .sort(function (a, b) { return b.score - a.score; });
+    // 完全一致が1社だけなら、その1社に絞る(担当者が候補から選ぶ手数を省く)。
+    // 最後の確認(「この内容で記録する」)には会社名が出るので、誤りはそこで止められる。
+    var exact = scored.filter(function (entry) { return entry.score === 2; });
+    if (exact.length === 1) scored = exact;
     return scored.slice(0, MAX_COMPANY_CANDIDATES).map(function (entry) {
       return { "企業ID": entry.company["企業ID"], "会社名": entry.company["会社名"] };
     });
