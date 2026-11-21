@@ -209,7 +209,36 @@ function resolveStaffNameByLineUserId_(ss, lineUserId) {
  * 各オブジェクトにはスプレッドシート上の実際の行番号(1始まり)をsheetRowとして含める
  * (Task 6・7の更新処理で使う)。
  */
+/**
+ * 毎分の処理(processQueuedVoiceLogsCore_)の1回の実行の中だけ、音声ログ処理状況タブの読み取り結果を使い回す。
+ * 1回の実行で同じタブを全件読み直していたため(時間の大半がシートの読み取りだった)。
+ * 使い回すのは実行の中だけで、LINEの押下など実行の外の読み取りは、これまでどおり毎回シートを読む。
+ * タブへの書き込み(transitionVoiceLogStatus_ / appendVoiceLogRow_)が成功したら、その時点で使い回しを捨てる。
+ * 別の実行(LINEの押下など)が同じ行を書き換えた場合は、読み取りが古いことがありうるが、
+ * 状態を変える書き込みは期待するステータスを再確認してから行うため、古い読み取りで二重に進むことはない。
+ */
+var VOICE_RUN_ROW_CACHE = null;
+
+function beginVoiceRunRowCache_() {
+  VOICE_RUN_ROW_CACHE = { rows: null };
+}
+
+function endVoiceRunRowCache_() {
+  VOICE_RUN_ROW_CACHE = null;
+}
+
+function invalidateVoiceRunRowCache_() {
+  if (VOICE_RUN_ROW_CACHE) VOICE_RUN_ROW_CACHE.rows = null;
+}
+
 function readVoiceLogRows_(ss) {
+  if (VOICE_RUN_ROW_CACHE && VOICE_RUN_ROW_CACHE.rows) return VOICE_RUN_ROW_CACHE.rows;
+  var rows = readVoiceLogRowsFromSheet_(ss);
+  if (VOICE_RUN_ROW_CACHE) VOICE_RUN_ROW_CACHE.rows = rows;
+  return rows;
+}
+
+function readVoiceLogRowsFromSheet_(ss) {
   var sheet = ss.getSheetByName(GlowSchema.LINE_VOICE_LOG_SHEET_NAME);
   if (!sheet) return [];
   var lastRow = sheet.getLastRow();
@@ -286,6 +315,7 @@ function transitionVoiceLogStatus_(ss, sheetRow, expectedStatuses, updates) {
       if (colIndex === -1) return;
       sheet.getRange(sheetRow, colIndex + 1).setValue(updates[key]);
     });
+    invalidateVoiceRunRowCache_();
     return true;
   } finally {
     lock.releaseLock();
@@ -397,6 +427,7 @@ function appendVoiceLogRow_(ss, rowValues) {
   try {
     var nextRow = sheet.getLastRow() + 1;
     sheet.getRange(nextRow, 1, 1, GlowSchema.LINE_VOICE_LOG_HEADERS.length).setValues([rowValues]);
+    invalidateVoiceRunRowCache_();
   } finally {
     lock.releaseLock();
   }
@@ -508,6 +539,15 @@ var VOICE_RUN_STEP_ERRORS = 0;
 
 // 入口の processQueuedVoiceLogs は HeartbeatRunner.gs にある(本体を呼んだあと生存信号を送る)
 function processQueuedVoiceLogsCore_() {
+  beginVoiceRunRowCache_();
+  try {
+    processQueuedVoiceLogsBody_();
+  } finally {
+    endVoiceRunRowCache_();
+  }
+}
+
+function processQueuedVoiceLogsBody_() {
   VOICE_RUN_STARTED_MS = Date.now();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
