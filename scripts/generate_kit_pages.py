@@ -121,16 +121,18 @@ details.fold ol.conbini li{margin:6px 0}
   .memo{min-height:56px;resize:none}}
 """
 
-HEADER = '''<header class="siteheader">
+HEADER = '''<header class="siteheader sh2">
   <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂</a>
+  <a class="hcta" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
+  <details class="hmenu"><summary aria-label="メニューをひらく"><span aria-hidden="true">☰</span></summary>
   <nav>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
     <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
-  </nav>
-</header>'''
+  </nav></details>
+</header><script>(function(){var d=document.querySelector(".sh2 .hmenu");if(!d||!window.matchMedia)return;var m=window.matchMedia("(min-width:760px)");function f(){if(m.matches)d.open=true;}f();if(m.addEventListener)m.addEventListener("change",f);})();</script>'''
 
 
 def esc(s):
@@ -177,6 +179,7 @@ def page(title, desc, body, depth=2, head_extra="", canon_path=None):
 {head_extra}
 <link rel="stylesheet" href="{rel}assets/fg-base.css">
 <style>{STYLE}</style>
+<link rel="stylesheet" href="{rel}assets/fg-refine.css">
 </head>
 <body>
 <script src="{rel}analytics-config.js"></script>
@@ -546,9 +549,9 @@ def index_page(items, updated):
             continue
         lis = "\n".join(line(it) for it in group)
         sections.append(
-            f"<h2 style='font-size:1.1rem;margin-top:20px'>{label}({len(group)}件)</h2>"
+            f"<section class='kitgroup'><h2 style='font-size:1.1rem;margin-top:20px'>{label}({len(group)}件)</h2>"
             f"<p class='note'>{note}</p>"
-            f"<div class='box'><ul class='kul'>{lis}</ul></div>"
+            f"<div class='box'><ul class='kul'>{lis}</ul></div></section>"
         )
     sections_html = "\n".join(sections)
     body = f"""
@@ -556,7 +559,30 @@ def index_page(items, updated):
 <h1>申請準備シート一覧</h1>
 <p class="note">制度ごとに「どこに・何を持って・何と言えば申請できるか」をまとめた申請準備シートを用意しています。まず電話で聞く3つ・持ち物チェック・窓口での会話・受け取りの確認まで。<strong>スマホで開いたまま窓口で使えます</strong>(印刷して持っていくのもOK。プリンターがない方向けにコンビニ印刷の手順も各シートにあります)。どれが自分に合うかわからないときは、3分診断からどうぞ。</p>
 <a class="no-print" href="../shindan/" style="display:block;max-width:420px;margin:16px auto;padding:14px 24px;background:var(--fg-primary);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700">3分でもらい忘れ診断をはじめる</a>
+<label for="kitsearch" class="note">制度名・市町村名でさがす</label>
+<input id="kitsearch" class="kitsearch" type="search" placeholder="例: 児童手当、浦添、出産" autocomplete="off">
+<p class="note kitsearch-none" id="kitsearch-none">見つかりませんでした。言葉を短くするか、<a href="../shindan/">3分診断</a>をお試しください。</p>
 {sections_html}
+<script>
+// 一覧の絞り込み(この端末の中だけで動く。入力した言葉は送信も保存もしない)
+(function(){{
+  var box = document.getElementById("kitsearch"), none = document.getElementById("kitsearch-none");
+  if (!box) return;
+  var groups = Array.prototype.slice.call(document.querySelectorAll(".kitgroup"));
+  box.addEventListener("input", function(){{
+    var q = box.value.trim(), hit = 0;
+    groups.forEach(function(g){{
+      var n = 0;
+      Array.prototype.forEach.call(g.querySelectorAll(".kul li"), function(li){{
+        var ok = !q || li.textContent.indexOf(q) >= 0;
+        li.style.display = ok ? "" : "none"; if (ok) n++;
+      }});
+      g.style.display = n ? "" : "none"; hit += n;
+    }});
+    none.style.display = hit ? "none" : "block";
+  }});
+}})();
+</script>
 <p class="note" style="margin-top:18px;text-align:center">もう受け取れた制度はありますか? <a href="../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit',{{pos:'index'}})">受け取れたことを教えてください(匿名・任意)</a><br>制度名とおおよその金額だけで大丈夫です。お名前や口座番号はうかがいません。</p>
 <div class="disclaimer">最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
 <p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップ</a></p>
