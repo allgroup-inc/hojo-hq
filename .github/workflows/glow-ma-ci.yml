@@ -5,10 +5,14 @@ on:
     paths:
       - "glow-ma/**"
       - "tests/glow_ma_*.test.mjs"
+      - "scripts/glow_ma_exec_health.py"
+      - "tests/test_glow_ma_exec_health.py"
   pull_request:
     paths:
       - "glow-ma/**"
       - "tests/glow_ma_*.test.mjs"
+      - "scripts/glow_ma_exec_health.py"
+      - "tests/test_glow_ma_exec_health.py"
   workflow_dispatch: {}
 
 # 同時実行禁止(2026-08-07 CI総点検): 並走によるrebase衝突・重複送信の予防。後続は待機。
@@ -28,3 +32,7 @@ jobs:
 
       - name: GLOW M&A台帳 ロジック単体テスト
         run: node --test tests/glow_ma_*.test.mjs
+
+      # 2026-11-15: 自動点検の判定(承認切れ・日次メンテナンスの失敗)のテスト。これまでCIで走っていなかった
+      - name: 自動点検(実行記録の点検)の判定テスト
+        run: python3 -m unittest tests/test_glow_ma_exec_health.py
