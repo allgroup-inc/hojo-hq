@@ -215,7 +215,12 @@ def swap_ogp(s):
                      "https://allgroup-inc.github.io/hojo-hq/yamanashi/assets/ogp.jpg")
 
 def swap_header(s, depth=1):
-    return re.sub(r'<header class="siteheader">.*?</header>', header(depth), s, count=1, flags=re.S)
+    # 沖縄版の帯は2026-11-21から1段の帯(class="siteheader sh2"+メニューを開くための小さなスクリプト)と
+    # 仕上げのCSS(fg-refine.css)になった。山梨版は見た目を変えないため、帯はこれまでどおり山梨版のものに
+    # 置き換え、沖縄版だけの仕上げCSSとスクリプトは持ち込まない(fg-refine.css は山梨版の assets に無い)
+    s = re.sub(r'<link rel="stylesheet" href="(?:\.\./)*assets/fg-refine\.css">\n?', "", s)
+    return re.sub(r'<header class="siteheader[^"]*">.*?</header>(?:<script>\(function\(\)\{var d=document\.querySelector\("\.sh2 \.hmenu"\).*?</script>)?',
+                  lambda m: header(depth), s, count=1, flags=re.S)
 
 def build_shindan():
     s = open(os.path.join(SRC,"shindan","index.html"),encoding="utf-8").read()

@@ -126,14 +126,157 @@ def alert_problems(entries, now, hours, recent_minutes):
     return problems
 
 
+# 日次メンテナンス(glow-ma/src/MaintenanceRunner.gs)の手順名。知らせに出すのはこの決まった名前だけ
+# (ログの本文には企業IDや行番号が入りうるため、公開の Actions ログと LINE には出さない)
+MAINTENANCE_STEPS = (
+    "台帳のバックアップ", "お断り(連絡不要)の反映", "スコア・ランクの再計算", "ダッシュボードの更新",
+    "今日の連絡先の更新", "世界の架け橋の週次KPI", "掘り起こしアラートの送信",
+)
+# 日次メンテナンスの失敗を数える期間(分)。点検は3時間ごとの予定だが、GitHub の定期実行は実際には
+# 4〜13時間あくことがある(2026-11-05〜18 の実績。最長は 11/16 の約12時間53分)。あいだが最長でも拾える長さ(20時間)にする。
+# 14時間だった 11/15〜11/17 は、実績の最長に対して余裕が約1時間しかなかった
+ALERT_MAINTENANCE_MINUTES = 1200
+# --grep で見つけた記録を何行まで出すか。日次メンテナンスの1回ぶん(7手順+開始・終了)が入る数にする。
+# 時刻は秒まで出す(2026-11-16: 7:32 の日次メンテナンスが6分の上限で打ち切られ、どの手順が長かったかを調べるため)
+GREP_SHOW_LINES = 16
+MAINTENANCE_FAILED = re.compile(r"日次メンテナンス: 「([^」]+)」が失敗しました")
+MAINTENANCE_ALL_OK = "日次メンテナンスがすべて完了しました"
+COMPANY_WRITE_STOPPED = "企業マスタの書き込みを止めました"
+
+
+def company_write_phase(text):
+    """企業マスタの書き込みを止めた記録が、どの段階で止めたものか(決まった文だけを返す)。"""
+    if COMPANY_WRITE_STOPPED not in text:
+        return ""
+    if "企業マスタは変更していません" in text:
+        return "企業マスタの書き込みを、書く前の確認で止めました(企業マスタは変更されていません)"
+    if "書き込みの途中で止まりました" in text:
+        return "企業マスタの書き込みが途中で止まりました(途中まで書き換わっている可能性があります)"
+    return "企業マスタを書いた後の照合で止めました(書いた内容の確認が要ります)"
+
+
+def maintenance_problems(entries, now, recent_minutes):
+    """直近 recent_minutes 分の日次メンテナンスの失敗(空なら問題なし)。2026-11-15 追加。
+
+    11/11 の企業マスタの欠落(失敗台帳 FK-010)は、失敗の通知がメール1通だけで、定期点検まで気づけなかった。
+    3時間ごとの自動点検で日次メンテナンスの失敗を見つけ、LINE でも知らせる。
+    失敗のあとに「すべて完了」の記録があれば(やり直して直った)、知らせない。
+    """
+    since = (now - timedelta(minutes=recent_minutes)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    recent = [e for e in entries if e.get("timestamp", "") >= since]
+    last_ok = max((e.get("timestamp", "") for e in recent if MAINTENANCE_ALL_OK in entry_text(e)), default="")
+    steps, phases = [], []
+    for e in sorted(recent, key=lambda e: e.get("timestamp", "")):
+        text = entry_text(e)
+        m = MAINTENANCE_FAILED.search(text)
+        if not m or e.get("timestamp", "") <= last_ok:
+            continue
+        name = m.group(1) if m.group(1) in MAINTENANCE_STEPS else "その他の手順"
+        if name not in steps:
+            steps.append(name)
+        phase = company_write_phase(text)
+        if phase and phase not in phases:
+            phases.append(phase)
+    if not steps:
+        return []
+    hours = max(recent_minutes // 60, 1)
+    # 同じ失敗は、期間のあいだ点検のたびに知らせる(直るか、次の日次メンテナンスが成功するまでの念押し)
+    return [f"直近{hours}時間の日次メンテナンスで {len(steps)} 件の手順が失敗しました(" + "・".join(steps) + ")。"
+            + "".join(p + "。" for p in phases)
+            + "台帳の「稼働状況」タブを確かめ、システム担当のチャットへ知らせてください"]
+
+
+MAINTENANCE_FUNCTION = "runDailyMaintenance"
+ERROR_SEVERITIES = ("ERROR", "CRITICAL", "ALERT", "EMERGENCY")
+TIMEOUT_TEXTS = ("起動時間の最大値を超えました", "Exceeded maximum execution time")
+MAINTENANCE_STARTED = "日次メンテナンスを開始しました"
+MAINTENANCE_ENDED = "日次メンテナンスを終了しました"
+MAINTENANCE_CUT_OFF = "日次メンテナンスが途中で打ち切られました"
+# 始まってからこの分数たっても終わりの記録が無ければ、打ち切られたとみなす(実行の上限は6分)
+UNFINISHED_AFTER_MINUTES = 10
+
+
+def maintenance_cutoff_problems(entries, now, recent_minutes):
+    """直近 recent_minutes 分に、日次メンテナンスが途中で打ち切られた形跡(空なら問題なし)。2026-11-16 追加。
+
+    11/16 の朝、日次メンテナンスが7つの手順の後、最後の記録の途中に実行の上限(6分)で打ち切られた。
+    打ち切られた実行は「が失敗しました」の記録を残せないため、maintenance_problems では見つからない。
+    台帳とは別のこの点検が、次の3つのどれかで見つける:
+      1. runDailyMaintenance のエラーの記録(時間切れ「起動時間の最大値を超えました」など)
+      2. 台帳の毎分の処理が残す「途中で打ち切られました」の記録
+      3. 「開始しました」のあと、10分たっても「終了しました」が無い
+    やり直して完了していても知らせる(打ち切りそのものが、人が確かめるべき出来事のため)。
+    """
+    since = (now - timedelta(minutes=recent_minutes)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    recent = sorted((e for e in entries if e.get("timestamp", "") >= since), key=lambda e: e.get("timestamp", ""))
+    errors = [e for e in recent
+              if e.get("resource", {}).get("labels", {}).get("function_name") == MAINTENANCE_FUNCTION
+              and e.get("severity") in ERROR_SEVERITIES]
+    timeouts = [e for e in errors if any(t in entry_text(e) for t in TIMEOUT_TEXTS)]
+    reported = [e for e in recent if MAINTENANCE_CUT_OFF in entry_text(e)]
+    starts = [e.get("timestamp", "") for e in recent if MAINTENANCE_STARTED in entry_text(e)]
+    ends = [e.get("timestamp", "") for e in recent if MAINTENANCE_ENDED in entry_text(e)]
+    overdue = (now - timedelta(minutes=UNFINISHED_AFTER_MINUTES)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    unfinished = []
+    for i, started in enumerate(starts):
+        next_start = starts[i + 1] if i + 1 < len(starts) else "9999"
+        if started <= overdue and not any(started < ended <= next_start for ended in ends):
+            unfinished.append(started)
+    if not errors and not reported and not unfinished:
+        return []
+    signs = []
+    if timeouts:
+        signs.append(f"時間切れ(6分の上限)の記録 {len(timeouts)}件")
+    if len(errors) > len(timeouts):
+        signs.append(f"異常終了の記録 {len(errors) - len(timeouts)}件")
+    if reported:
+        signs.append(f"台帳が見つけた打ち切りの記録 {len(reported)}件")
+    if unfinished:
+        signs.append(f"始まったまま終わっていない実行 {len(unfinished)}件")
+    all_ok = any(MAINTENANCE_ALL_OK in entry_text(e) for e in recent)
+    hours = max(recent_minutes // 60, 1)
+    return [f"直近{hours}時間に、日次メンテナンスが途中で打ち切られました(" + "・".join(signs) + ")。"
+            + ("同じ期間に「7件すべて完了」の記録はあります(最後の記録の途中で打ち切られた可能性)。" if all_ok
+               else "同じ期間に「7件すべて完了」の記録はありません(終わっていない手順があります)。")
+            + "台帳の「稼働状況」タブと企業マスタの件数を確かめ、システム担当のチャットへ知らせてください"]
+
+
+def all_alert_problems(entries, now, hours, recent_minutes, maintenance_minutes):
+    """自動点検(--alert)で知らせる問題のすべて: 承認切れ・稼働記録なし・日次メンテナンスの失敗・打ち切り。
+
+    entries は日次メンテナンスの期間(maintenance_minutes)まで含めて渡してよい。
+    稼働記録の有無は、これまでどおり直近 hours 時間の記録だけで判定する(期間を広げても判定を甘くしない)。
+    """
+    since = (now - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    within_hours = [e for e in entries if e.get("timestamp", "") >= since]
+    return (alert_problems(within_hours, now, hours, recent_minutes)
+            + maintenance_problems(entries, now, maintenance_minutes)
+            + maintenance_cutoff_problems(entries, now, maintenance_minutes))
+
+
+def fetch_hours(hours, alert, maintenance_minutes):
+    """実行記録を何時間ぶん取るか。自動点検のときは、日次メンテナンスの期間まで広げる。"""
+    return max(hours, -(-maintenance_minutes // 60)) if alert else hours
+
+
+def write_alert_output(problems, path):
+    """見つけた問題を、後のステップ(LINE通知)へ渡す。出すのは決まった文だけ(ログの本文は入れない)。"""
+    if not path:
+        return
+    with open(path, "a", encoding="utf-8") as f:
+        f.write("problems<<GLOW_MA_ALERT_END\n" + "\n".join("・" + p for p in problems) + "\nGLOW_MA_ALERT_END\n")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=int, default=48)
     ap.add_argument("--grep", default="", help="この語を含むログ(INFO含む)の先頭だけを最大5件表示する")
     ap.add_argument("--alert", action="store_true",
-                    help="毎日の自動点検用。承認切れ・稼働の記録なしを見つけたら終了コード1で失敗する(GitHubから通知が届く)")
+                    help="定期の自動点検用。承認切れ・稼働の記録なし・日次メンテナンスの失敗を見つけたら終了コード1で失敗する(LINEで通知が届く)")
     ap.add_argument("--alert-recent-minutes", type=int, default=60,
                     help="--alert で承認切れを数える期間(分)。復旧後に古いエラーで通知が続かないよう短くする")
+    ap.add_argument("--alert-maintenance-minutes", type=int, default=ALERT_MAINTENANCE_MINUTES,
+                    help="--alert で日次メンテナンスの失敗を数える期間(分)")
     ap.add_argument("--sample", default="", help="この処理名の最新ログ3件の中身の形(重要度・項目名・本文の先頭)を表示する")
     args = ap.parse_args()
     token = access_token(os.environ["CLASPRC_JSON"])
@@ -143,7 +286,8 @@ def main():
     project = os.environ.get("GCP_PROJECT", "").strip()
     if not project:
         sys.exit("::error::Google Cloud のプロジェクト番号がありません(手動実行で gcp_project を1回指定すると、以後は覚えて使います)")
-    since = (datetime.now(timezone.utc) - timedelta(hours=args.hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    shown_hours = fetch_hours(args.hours, args.alert, args.alert_maintenance_minutes)
+    since = (datetime.now(timezone.utc) - timedelta(hours=shown_hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
     entries = list_entries(token, project, since)
 
     stats = collections.defaultdict(lambda: {"count": 0, "errors": 0, "last": "", "msgs": collections.Counter()})
@@ -169,11 +313,11 @@ def main():
         shown = 0
         for e in entries:
             text = e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or ""
-            if args.grep in text and shown < 5:
+            if args.grep in text and shown < GREP_SHOW_LINES:
                 fn = e.get("resource", {}).get("labels", {}).get("function_name", "(不明)")
                 ts = e.get("timestamp", "")[:19]
                 when = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST) if ts else None
-                print(f"[{args.grep}] {when:%m-%d %H:%M} {fn} {e.get('severity', '')}: {safe_error(text, 400)}" if when
+                print(f"[{args.grep}] {when:%m-%d %H:%M:%S} {fn} {e.get('severity', '')}: {safe_error(text, 400)}" if when
                       else f"[{args.grep}] {fn}: {safe_error(text)}")
                 shown += 1
         hits = [e for e in entries if args.grep in (e.get("textPayload") or (e.get("jsonPayload") or {}).get("message") or "")]
@@ -205,7 +349,15 @@ def main():
             keys = sorted((e.get("jsonPayload") or {}).keys())
             print(f"[見本 {args.sample}] {e.get('timestamp', '')[:19]} {e.get('severity', '')} "
                   f"logName末尾={e.get('logName', '').rsplit('/', 1)[-1]} 項目={keys} 本文={safe_error(body)}")
-    print(f"## 直近{args.hours}時間の実行記録(ログ {len(entries)} 件)")
+    # 時間切れ・異常終了の時刻(秒まで)。本文は決まった先頭だけ(safe_error)
+    for e in sorted(entries, key=lambda e: e.get("timestamp", ""), reverse=True):
+        if e.get("severity") in ("ERROR", "CRITICAL", "ALERT", "EMERGENCY"):
+            fn = e.get("resource", {}).get("labels", {}).get("function_name", "(不明)")
+            if fn == "runDailyMaintenance":
+                ts = e.get("timestamp", "")[:19]
+                when = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).astimezone(JST)
+                print(f"[runDailyMaintenance の異常終了] {when:%m-%d %H:%M:%S}: {safe_error(entry_text(e) or '(詳細なし)')}")
+    print(f"## 直近{shown_hours}時間の実行記録(ログ {len(entries)} 件)")
     if not entries:
         print("::warning::実行記録が1件もありません(トリガーが止まっている可能性)")
     for fn, s in sorted(stats.items(), key=lambda kv: kv[1]["last"], reverse=True):
@@ -215,13 +367,24 @@ def main():
             print(f"::error title={fn} が承認切れで止まっています::{s['auth']}回。台帳の持ち主がApps Scriptエディタで関数を1回実行し、権限を許可し直してください")
         for msg, n in s["msgs"].most_common(3):
             print(f"    エラー例({n}件): {msg}")
+    if not args.alert:
+        # 手動の点検では、知らせはしないが、定期の点検なら何を知らせるかを見せる(日次メンテナンスの失敗・打ち切り)
+        now = datetime.now(timezone.utc)
+        preview = (maintenance_problems(entries, now, args.hours * 60)
+                   + maintenance_cutoff_problems(entries, now, args.hours * 60))
+        for p in preview:
+            print(f"[定期の点検なら知らせる内容] {p}")
+        if not preview:
+            print("[定期の点検なら知らせる内容] 日次メンテナンスの失敗・打ち切りはありません")
     if args.alert:
-        problems = alert_problems(entries, datetime.now(timezone.utc), args.hours, args.alert_recent_minutes)
+        now = datetime.now(timezone.utc)
+        problems = all_alert_problems(entries, now, args.hours, args.alert_recent_minutes, args.alert_maintenance_minutes)
+        write_alert_output(problems, os.environ.get("GITHUB_OUTPUT", ""))
         for p in problems:
             print(f"::error title=glow-ma の自動処理に問題があります::{p}")
         if problems:
             sys.exit(1)
-        print("自動点検: 問題なし(承認切れなし・稼働記録あり)")
+        print("自動点検: 問題なし(承認切れなし・稼働記録あり・日次メンテナンスの失敗・打ち切りなし)")
 
 
 if __name__ == "__main__":

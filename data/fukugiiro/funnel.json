@@ -1,80 +1,80 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-09",
+  "updated_at": "2026-11-16",
   "period": "7d",
   "source": "ga4-data-api",
   "stages": [
     {
       "key": "shindan_start",
       "label": "診断開始",
-      "count": 15,
+      "count": 7,
       "cvr_from_prev": null,
       "drop_rate": null
     },
     {
       "key": "shindan_step_q2",
       "label": "Q2到達",
-      "count": 2,
-      "cvr_from_prev": 0.13333333333333333,
-      "drop_rate": 0.8666666666666667
+      "count": 1,
+      "cvr_from_prev": 0.14285714285714285,
+      "drop_rate": 0.8571428571428572
     },
     {
       "key": "shindan_step_q3",
       "label": "Q3到達",
-      "count": 2,
+      "count": 1,
       "cvr_from_prev": 1.0,
       "drop_rate": 0.0
     },
     {
       "key": "shindan_step_q4",
       "label": "Q4到達",
-      "count": 2,
+      "count": 1,
       "cvr_from_prev": 1.0,
       "drop_rate": 0.0
     },
     {
       "key": "shindan_step_q5",
       "label": "Q5到達",
-      "count": 2,
+      "count": 1,
       "cvr_from_prev": 1.0,
       "drop_rate": 0.0
     },
     {
       "key": "shindan_complete",
       "label": "診断完了(1件以上)",
-      "count": 4,
-      "cvr_from_prev": 2.0,
-      "drop_rate": -1.0
+      "count": 1,
+      "cvr_from_prev": 1.0,
+      "drop_rate": 0.0
     },
     {
       "key": "line_add_click",
       "label": "LINE誘導クリック",
-      "count": 2,
-      "cvr_from_prev": 0.5,
-      "drop_rate": 0.5
+      "count": 0,
+      "cvr_from_prev": 0.0,
+      "drop_rate": 1.0
     }
   ],
   "engagement": {
-    "kit_click": 0,
+    "kit_click": 1,
     "seido_done_mark": 0,
     "jukyu_report_click": 0,
     "shindan_zero": 0,
-    "jukyu_report_link_top": 0,
+    "jukyu_report_link_top": 1,
     "jukyu_report_link_shindan": 0,
     "jukyu_report_link_kit": 0,
     "jukyu_report_link_area": 0,
     "jukyu_report_link_life": 0,
-    "shindan_cta_click": 6,
+    "shindan_cta_click": 1,
     "shindan_redirect": 0
   },
   "key_rates": {
-    "finish_rate": 0.26666666666666666,
-    "line_cvr": 0.5,
+    "finish_rate": 0.14285714285714285,
+    "line_cvr": 0.0,
     "zero_rate": 0.0
   },
   "worst_drop": {
-    "stage": "shindan_step_q2",
-    "label": "診断開始→Q2到達",
-    "drop_rate": 0.8666666666666667
+    "stage": "line_add_click",
+    "label": "診断完了(1件以上)→LINE誘導クリック",
+    "drop_rate": 1.0
   }
 }

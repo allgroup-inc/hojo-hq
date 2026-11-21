@@ -46,6 +46,9 @@ on:
       - "tests/top_page_layouts.test.mjs"
       - "scripts/generate_area_pages.py"
       - "tests/test_source_status.py"
+      - "tests/test_kit_readability.py"
+      - "tests/test_site_refine.py"
+      - "site/fukugiiro/assets/fg-refine.css"
       - "tests/source_unavailable.test.mjs"
   pull_request:
     paths:
@@ -92,6 +95,9 @@ on:
       - "tests/top_page_layouts.test.mjs"
       - "scripts/generate_area_pages.py"
       - "tests/test_source_status.py"
+      - "tests/test_kit_readability.py"
+      - "tests/test_site_refine.py"
+      - "site/fukugiiro/assets/fg-refine.css"
       - "tests/source_unavailable.test.mjs"
   workflow_dispatch: {}
 
@@ -194,6 +200,12 @@ jobs:
           python-version: "3.12"
       - name: 出典リンクの一時停止(制度は削除しない・URLは書き換えない・確認できたURLだけ止める)
         run: python -m unittest tests/test_source_status.py
+      # 申請準備シートの見やすさ(2026-11-21 組み直し)。制度の文・保存の順番・計測・印刷を変えていないか
+      - name: 申請準備シートの組み直し(制度の文は変えない・チェックとメモの保存先はずらさない)
+        run: python -m unittest tests/test_kit_readability.py
+      # サイトデザイン洗練(第1弾・2026-11-21)。上の帯のリンクと計測・カードのリンク先・41市町村・絞り込みの端末内動作
+      - name: サイトデザインの仕上げ(リンクと計測は変えない・新しい色は足さない)
+        run: python -m unittest tests/test_site_refine.py
       - uses: actions/setup-node@v6
         with:
           node-version: "22"

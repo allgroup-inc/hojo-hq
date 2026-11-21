@@ -135,6 +135,7 @@ jobs:
           key: glow-ma-gcp-project-${{ github.run_id }}
 
       - name: 実行記録の点検(各処理が動いているか)
+        id: health
         if: github.event_name == 'schedule' || inputs.health_hours != '0'
         env:
           CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
@@ -154,6 +155,6 @@ jobs:
           channel-access-token: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
           to-user-id: ${{ secrets.LINE_ADMIN_USER_ID }}
           message: |
-            ⚠️【GLOW台帳】自動処理が止まっているおそれがあります
-            多いのは承認切れです。台帳のメニュー「GLOW台帳 → 自動処理を復旧する(権限の再許可)」を、台帳の持ち主のアカウントで押してください。
+            ⚠️【GLOW台帳】自動点検で問題を見つけました
+            ${{ steps.health.outputs.problems || '・点検そのものが失敗しました(承認切れ・接続の失敗など)。台帳のメニュー「GLOW台帳 → 自動処理を復旧する(権限の再許可)」を、台帳の持ち主のアカウントで押してください' }}
             詳細: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
