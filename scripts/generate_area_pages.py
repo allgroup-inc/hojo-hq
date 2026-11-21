@@ -49,16 +49,18 @@ ul.areas a{display:inline-block;padding:8px 4px}
 @media(min-width:900px){.wrap{max-width:900px}.cardgrid{grid-template-columns:1fr 1fr}ul.areas{columns:3}}
 """
 
-HEADER = '''<header class="siteheader">
+HEADER = '''<header class="siteheader sh2">
   <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂</a>
+  <a class="hcta" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
+  <details class="hmenu"><summary aria-label="メニューをひらく"><span aria-hidden="true">☰</span></summary>
   <nav>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-area/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
     <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
-  </nav>
-</header>'''
+  </nav></details>
+</header><script>(function(){var d=document.querySelector(".sh2 .hmenu");if(!d||!window.matchMedia)return;var m=window.matchMedia("(min-width:760px)");function f(){if(m.matches)d.open=true;}f();if(m.addEventListener)m.addEventListener("change",f);})();</script>'''
 
 
 def esc(s):
@@ -119,6 +121,7 @@ def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
 {head_extra}
 <link rel="stylesheet" href="{rel}assets/fg-base.css">
 <style>{STYLE}</style>
+<link rel="stylesheet" href="{rel}assets/fg-refine.css">
 </head>
 <body>
 <script src="{rel}analytics-config.js"></script>
@@ -194,9 +197,9 @@ def muni_page(muni, items, updated):
                 f"<h2>{esc(it['name'])}{badge}</h2>"
                 f'<p class="note">{esc(it["target_household"])}</p>'
                 f'<p class="note">窓口: {esc(it["how_to_apply"])}</p>'
-                f'<p style="display:flex;gap:16px;flex-wrap:wrap;margin:0">'
+                f'<p class="acts">'
                 f'{fgsrc.link(it, "公式ページで確認する")}'
-                f'<a href="../../kit/{esc(it["id"])}/">申請準備シート</a></p>'
+                f'<a class="kitlink" href="../../kit/{esc(it["id"])}/">申請準備シート</a></p>'
                 "</div>"
             )
         body.append('</div>')
@@ -243,14 +246,19 @@ def muni_page(muni, items, updated):
 
 
 def index_page(updated):
-    lis = "\n".join(
-        f'<li><a href="{slug}/">{esc(name)}</a></li>' for name, slug in VISIBLE_MUNIS
-    )
+    # 41市町村を1列の文字リンクで並べると探しにくいため、「市」と「町・村」に分けてボタンで並べる
+    # (2026-11-21 サイトデザイン洗練)。圏域の分け方は資料によって違うため使わない
+    def tiles(rows):
+        return "\n".join(f'<li><a href="{slug}/">{esc(name)}</a></li>' for name, slug in rows)
+    cities = [(n, s) for n, s in VISIBLE_MUNIS if n.endswith("市")]
+    towns = [(n, s) for n, s in VISIBLE_MUNIS if not n.endswith("市")]
+    lis = (f'<p class="areagroup">市({len(cities)})</p><ul class="areas tiles">{tiles(cities)}</ul>'
+           f'<p class="areagroup">町・村({len(towns)})</p><ul class="areas tiles">{tiles(towns)}</ul>')
     body = (
         "<h1>市町村別 給付金・手当まとめ</h1>"
         '<p class="note">お住まいの市町村を選んでください。'
         '状況から探したい方は<a href="../life/">ライフイベント別まとめ</a>もどうぞ。</p>'
-        f'<ul class="areas">{lis}</ul>'
+        f'{lis}'
         '<a class="btn" href="../shindan/">3分でもらい忘れ診断をはじめる</a>'
     )
     return page(
