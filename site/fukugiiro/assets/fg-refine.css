@@ -1,0 +1,64 @@
+/* もらいわすれ堂 見た目の仕上げ(2026-11-21 サイトデザイン洗練・第1弾)
+   読み込むページ: 沖縄版の下層ページ(診断・市町村・ライフイベント・申請準備シート・受け取り報告・訂正・プライバシー)。
+   fg-base.css と各ページの <style> の「後」に読み込み、同じ強さの指定はこちらが勝つ。
+   fg-base.css は山梨版にもコピーされるため、沖縄版だけの仕上げはこのファイルに分けた(山梨版の見た目は変えない)。
+   色はブランドの変数(fg-base.css の :root)をそのまま使い、新しい色は足さない。
+   性能規律(CLAUDE.md): word-break:auto-phrase・text-wrap:balance などは見出し(h1〜h3)以外に使わない。 */
+
+/* ---- 文字: 明朝はページの大見出し(h1)だけ。小見出し・カード名・印は読みやすいゴシック ---- */
+body{font-size:16px;line-height:1.8}
+h1{font-size:1.32rem;line-height:1.55;letter-spacing:.02em}
+.wrap h2,.wrap h3{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-weight:700;letter-spacing:.01em}
+.wrap>h2,.wrap>section>h2{font-size:1rem!important;margin:30px 0 10px!important;display:flex;align-items:center;gap:8px;border-left:none!important;padding-left:0!important}
+.wrap>h2::before,.wrap>section>h2::before{content:"";flex:none;width:4px;height:1.1em;border-radius:2px;background:var(--fg-accent)}
+.note{font-size:.88rem;line-height:1.75}
+.status{font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif;font-size:.7rem;font-weight:700;padding:1px 8px;vertical-align:2px;letter-spacing:0;white-space:nowrap}
+
+/* ---- 上の帯: 1段(ロゴ・3分診断・メニュー)。PCでは全項目を横に並べる ---- */
+.siteheader.sh2{flex-wrap:nowrap;padding:10px 16px;gap:8px}
+.sh2 .hlogo{flex:1;min-width:0;font-size:1.02rem}
+.sh2 .hcta{flex:none;display:inline-block;background:var(--fg-primary);color:#fff;border-radius:999px;padding:7px 14px;min-height:36px;font-size:.82rem;font-weight:700;text-decoration:none;line-height:22px}
+.sh2 .hmenu{position:static;flex:none}
+.sh2 .hmenu>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid var(--fg-line);border-radius:10px;background:var(--fg-card);color:var(--fg-ink);font-size:1.15rem}
+.sh2 .hmenu>summary::-webkit-details-marker{display:none}
+.sh2 .hmenu[open]>summary{background:var(--fg-line)}
+.sh2 .hmenu nav{position:absolute;left:0;right:0;top:100%;display:flex;flex-direction:column;align-items:stretch;gap:0;background:var(--fg-card);border-bottom:1px solid var(--fg-line);box-shadow:0 8px 20px rgba(59,50,43,.08);padding:6px 16px 10px}
+.sh2 .hmenu nav a{display:flex;align-items:center;min-height:48px;font-size:.98rem;padding:12px 4px;border-bottom:1px solid var(--fg-line);border-radius:0;color:var(--fg-ink)}
+.sh2 .hmenu nav a:last-child{border-bottom:none}
+.sh2 .hmenu nav a.ignav{justify-content:flex-start;gap:8px;min-height:44px}
+.sh2 .hmenu nav a.ignav::after{content:"Instagram";font-size:.98rem}
+@media(min-width:760px){
+  .sh2 .hcta{display:none}
+  .sh2 .hmenu>summary{display:none}
+  .sh2 .hmenu nav{position:static;flex-direction:row;align-items:center;gap:4px;background:none;border:none;box-shadow:none;padding:0}
+  .sh2 .hmenu nav a{font-size:.85rem;padding:6px 10px;border:none;border-radius:8px}
+  .sh2 .hmenu nav a:first-child{background:var(--fg-primary);color:#fff;font-weight:700;border-radius:999px;padding:6px 14px}
+  .sh2 .hmenu nav a.ignav::after{content:none}
+}
+
+/* ---- 共通の部品 ---- */
+.wrap{padding-top:22px}
+.btn{padding:15px 22px;font-size:1rem;margin:16px auto}
+.trust{font-size:.86rem;border-radius:10px}
+.card{padding:14px 16px;border-radius:14px;margin:10px 0}
+.card h2{font-size:1rem;line-height:1.5;margin-bottom:6px}
+.card .note{font-size:.86rem;margin:2px 0}
+/* 制度カードの「公式ページ」「申請準備シート」は押せるボタンに見せる */
+.card .acts{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.card .acts a{flex:1 1 9em;display:block;text-align:center;font-size:.86rem;font-weight:700;text-decoration:none;padding:10px 6px;min-height:44px;border-radius:10px;border:1px solid var(--fg-line);background:#fff;color:var(--fg-ink)}
+.card .acts a.kitlink{background:var(--fg-primary);border-color:var(--fg-primary);color:#fff}
+.card .acts .src-pending{flex:1 1 9em;display:block;text-align:center;font-size:.86rem;padding:10px 6px}
+
+/* 市町村の一覧(圏域ごとのボタン) */
+.areagroup{font-size:.8rem;font-weight:700;color:var(--fg-muted);margin:18px 0 6px;letter-spacing:.05em}
+ul.areas.tiles{columns:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 6px}
+ul.areas.tiles li{margin:0}
+ul.areas.tiles a{display:block;text-align:center;padding:12px 4px;min-height:44px;background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;text-decoration:none;color:var(--fg-ink);font-size:.95rem}
+@media(min-width:760px){ul.areas.tiles{grid-template-columns:repeat(5,1fr)}}
+
+/* 申請準備シート一覧の検索 */
+.kitsearch{display:block;width:100%;font:inherit;font-size:1rem;padding:12px 14px;min-height:48px;border:1px solid var(--fg-line);border-radius:12px;background:#fff;color:var(--fg-ink);margin:12px 0 4px}
+.kitsearch:focus{outline:2px solid var(--fg-accent);outline-offset:1px}
+.kitsearch-none{display:none;margin:10px 0}
+
+@media print{.sh2{display:none!important}}

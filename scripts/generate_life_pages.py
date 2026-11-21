@@ -65,16 +65,18 @@ ul.lifelist a{display:block;padding:10px 2px;border-bottom:1px dashed var(--fg-l
 @media(min-width:900px){.wrap{max-width:900px}.cardgrid{grid-template-columns:1fr 1fr}ul.seidolist{columns:2;column-gap:28px}}
 """
 
-HEADER = '''<header class="siteheader">
+HEADER = '''<header class="siteheader sh2">
   <a class="hlogo" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/"><img src="https://allgroup-inc.github.io/hojo-hq/fukugiiro/assets/icon.svg" alt="" width="30" height="30">もらいわすれ堂</a>
+  <a class="hcta" href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
+  <details class="hmenu"><summary aria-label="メニューをひらく"><span aria-hidden="true">☰</span></summary>
   <nav>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/">3分診断</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/area/">市町村</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/fukugiiro/kit/">準備シート</a>
     <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-life/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINE登録</a>
     <a class="ignav" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" aria-label="Instagram(新しいタブで開きます)" onclick="if(window.fgTrack)fgTrack('ig_click',{pos:'header'})"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor" stroke="none"/></svg></a>
-  </nav>
-</header>'''
+  </nav></details>
+</header><script>(function(){var d=document.querySelector(".sh2 .hmenu");if(!d||!window.matchMedia)return;var m=window.matchMedia("(min-width:760px)");function f(){if(m.matches)d.open=true;}f();if(m.addEventListener)m.addEventListener("change",f);})();</script>'''
 
 
 def esc(s):
@@ -127,6 +129,7 @@ def page(title, desc, body, updated, depth=2, head_extra="", canon_path=None):
 {head_extra}
 <link rel="stylesheet" href="{rel}assets/fg-base.css">
 <style>{STYLE}</style>
+<link rel="stylesheet" href="{rel}assets/fg-refine.css">
 </head>
 <body>
 <script src="{rel}analytics-config.js"></script>
@@ -265,9 +268,9 @@ def life_page(slug, events, heading, kw, items, updated):
                 f'<p class="note">{esc(it["target_household"])}</p>'
                 # 窓口行は載せない(準備シート側に地図・電話つきの窓口情報あり。
                 # 2026-09-08 掲載97件でサイズ予算超過したため一覧は対象+リンクに絞る)
-                f'<p style="display:flex;gap:16px;flex-wrap:wrap;margin:0">'
+                f'<p class="acts">'
                 f'{fgsrc.link(it, "公式ページで確認する")}'
-                f'<a href="../../kit/{esc(it["id"])}/">申請準備シート</a></p>'
+                f'<a class="kitlink" href="../../kit/{esc(it["id"])}/">申請準備シート</a></p>'
                 "</div>"
             )
         body.append('</div>')
