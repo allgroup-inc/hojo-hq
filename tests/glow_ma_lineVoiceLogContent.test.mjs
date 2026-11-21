@@ -6,14 +6,32 @@ const require = createRequire(import.meta.url);
 const lineVoiceLogContent = require("../glow-ma/src/lineVoiceLogContent.js");
 const schema = require("../glow-ma/src/schema.js");
 
-test("matchCompanyCandidates: 完全一致は部分一致より先頭に来る", () => {
+test("matchCompanyCandidates: 完全一致が1社だけなら、部分一致は出さずその1社に絞る(候補の選択を省く)", () => {
   const companies = [
     { "企業ID": "C000001", "会社名": "沖縄建設" },
     { "企業ID": "C000002", "会社名": "沖縄建設工業" }
   ];
   const result = lineVoiceLogContent.matchCompanyCandidates(companies, "沖縄建設");
+  assert.deepEqual(result.map((c) => c["企業ID"]), ["C000001"]);
+});
+
+test("matchCompanyCandidates: 完全一致が2社以上あるときは、候補の選択に残す(どちらか分からないため)", () => {
+  const companies = [
+    { "企業ID": "C000001", "会社名": "沖縄建設" },
+    { "企業ID": "C000002", "会社名": "沖縄建設" },
+    { "企業ID": "C000003", "会社名": "沖縄建設工業" }
+  ];
+  const result = lineVoiceLogContent.matchCompanyCandidates(companies, "沖縄建設");
+  assert.deepEqual(result.map((c) => c["企業ID"]), ["C000001", "C000002", "C000003"]);
+});
+
+test("matchCompanyCandidates: 完全一致が無いときは、部分一致の候補を出す(選択に残す)", () => {
+  const companies = [
+    { "企業ID": "C000001", "会社名": "沖縄建設工業" },
+    { "企業ID": "C000002", "会社名": "沖縄建設販売" }
+  ];
+  const result = lineVoiceLogContent.matchCompanyCandidates(companies, "沖縄建設");
   assert.equal(result.length, 2);
-  assert.equal(result[0]["企業ID"], "C000001");
 });
 
 test("matchCompanyCandidates: 一致する企業が無ければ空配列", () => {
