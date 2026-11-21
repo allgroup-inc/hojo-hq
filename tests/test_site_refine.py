@@ -119,6 +119,26 @@ class SiteRefine(unittest.TestCase):
             base = f.read()
         self.assertNotIn(".sh2", base)
 
+    def test_yamanashi_build_drops_okinawa_only_header_and_css(self):
+        # 山梨版は沖縄版の手書きページから作る(scripts/yamanashi/build_yamanashi.py)。
+        # 1段の帯・メニューのスクリプト・fg-refine.css を山梨版へ持ち込まない(見た目を変えない・無いファイルを読まない)
+        sys.path.insert(0, os.path.join(BASE, "scripts", "yamanashi"))
+        import build_yamanashi as ymn
+        for name in STATIC:
+            with self.subTest(page=name):
+                out = ymn.swap_header(self.pages[name])
+                self.assertNotIn("sh2", out)
+                self.assertNotIn("fg-refine.css", out)
+                self.assertNotIn(".hmenu", out)
+                self.assertIn("山梨版", out[:out.index("</header>")])
+        # 沖縄版の帯の中の診断リンク(3分診断ボタン+メニュー)は、山梨版では帯ごと消える。
+        # 残るのは本文側だけ(build_yamanashi.py が箇所数を数えて山梨版のURLへ置き換える)
+        url = "https://allgroup-inc.github.io/hojo-hq/fukugiiro/shindan/"
+        raw = self.pages["shindan"]
+        in_header = re.search(r'<header class="siteheader sh2">[\s\S]*?</header>', raw).group(0).count(url)
+        self.assertEqual(in_header, 2)
+        self.assertEqual(ymn.swap_header(raw).count(url), raw.count(url) - in_header)
+
 
 if __name__ == "__main__":
     unittest.main()
