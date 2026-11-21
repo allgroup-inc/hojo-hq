@@ -34,6 +34,8 @@ function applyPreScreeningScores() {
     );
   }
   try {
+    // 停止中は、バックアップのタブを作る前に止める(台帳に何も足さない)
+    assertCompanyWriteNotPaused_();
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var stagingSheet = ss.getSheetByName(GlowSchema.PRE_SCREENING_STAGING_SHEET_NAME);
     if (!stagingSheet) {

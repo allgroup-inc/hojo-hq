@@ -65,6 +65,8 @@ function showPhaseATestDialog() {
 }
 
 function runPhaseATest() {
+  // 停止中は、試験データを入れる前に止める(入れた後で止まると、試験データが残る)
+  assertCompanyWriteNotPaused_();
   var report = [];
   report.push("===== G1フェーズA試験 開始 =====");
 
