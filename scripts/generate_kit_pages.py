@@ -6,7 +6,9 @@ data/fukugiiro/seido.json から、制度ごとに「申請を最後までやり
 site/fukugiiro/kit/<id>/index.html に生成する。fetch後に毎回再生成。
 
 設計(2026-08-06 三名体制の裁定):
-- 画面=5ステップ工程表で伴走(今どこ/次の一歩が見える)。印刷=電話台本+持ち物+窓口ひとことの1枚に圧縮。
+- 画面=一番上に要点(対象・金額・窓口)、その下に「やることは4つ」をたたんで並べる(2026-11-21 利用者の声
+  「詰まりすぎ・文字が多すぎ」で組み直し。以前の5ステップ工程表は①〜④と同じ内容の繰り返しだったため外した)。
+  印刷=要点+電話台本+持ち物+窓口ひとこと+メモの1枚(たたんだ項目は印刷の直前に開く)。
 - 「どこに・何を持って・何と言えば」を、まず電話1本で確定できる台本を最上位に置く(ムダ足をなくす最大レバー)。
 - 電話番号・締切・受け取りの時期は断定せず「窓口で"聞くこと"」として設計(正確性最優先)。
 - 申請後の「受け取れたか確認」まで導線を伸ばす(受給報告=次の県民の役に立つ)。
@@ -60,52 +62,61 @@ h1,h2,h3{font-family:"Shippori Mincho","Hiragino Mincho ProN",serif;font-weight:
 h1{font-size:1.35rem;margin-bottom:4px;line-height:1.5}
 h2{font-size:1.05rem;margin:24px 0 8px;border-left:6px solid var(--fg-accent);padding-left:.5em}
 .box{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:16px 18px;margin:10px 0;box-shadow:var(--fg-shadow)}
-.goal{background:linear-gradient(180deg,#FDF5E6 0%,var(--fg-card) 100%);border:1px solid var(--fg-accent);border-radius:12px;padding:16px 18px;margin:12px 0}
-.goal p{margin:6px 0}
-/* 5ステップ工程表(画面のみ・伴走) */
-.track{list-style:none;counter-reset:st}
-.track li{position:relative;padding:12px 0 12px 46px;border-bottom:1px dashed var(--fg-line);counter-increment:st}
-.track .n::before{content:counter(st)}
-.track li:last-child{border-bottom:none}
-.track label{display:flex;align-items:flex-start;gap:10px;cursor:pointer}
-.track input[type=checkbox]{width:24px;height:24px;min-width:24px;margin-top:3px;accent-color:var(--fg-deep)}
-.track .n{position:absolute;left:6px;top:14px;width:28px;height:28px;background:var(--fg-accent);border-radius:50%;text-align:center;line-height:28px;font-weight:800;font-size:.9rem}
-.track input:checked ~ .n{background:var(--fg-deep);color:#fff}
-.track input:checked + span{color:var(--fg-muted);text-decoration:line-through}
-.stepbar{height:8px;background:var(--fg-line);border-radius:99px;overflow:hidden;margin:4px 0 2px}
-.stepbar>i{display:block;height:100%;width:0;background:var(--fg-deep);transition:width .3s}
-.phone{background:#EAF5F0;border:1px solid #B7E0CF;border-radius:12px;padding:16px 18px;margin:10px 0}
-.phone .say{background:#fff;border-radius:8px;padding:10px 12px;margin:8px 0;font-size:1rem}
-.phone .say b{color:var(--fg-deep)}
-.items h3{font-size:.95rem;margin:12px 0 4px;color:var(--fg-ink)}
+/* 一番上の要点(対象・金額・窓口)。2026-11-21 利用者の声「詰まりすぎ・文字が多すぎ」で組み直し */
+.kicker{font-size:.85rem;color:var(--fg-muted);margin:0}
+.sum{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:16px;padding:2px 16px;margin:12px 0;box-shadow:var(--fg-shadow)}
+.sum>div{display:grid;grid-template-columns:3.6em 1fr;gap:10px;padding:11px 0;border-bottom:1px solid var(--fg-line);line-height:1.7}
+.sum>div:last-child{border-bottom:none}
+.sum dt{font-size:.82rem;font-weight:700;color:var(--fg-muted);padding-top:3px}
+.sum dd{margin:0;font-size:.97rem}
+.calls{display:flex;gap:8px;margin:10px 0 4px}
+.calls a{flex:1;display:block;padding:12px 8px;min-height:44px;border-radius:12px;text-align:center;font-weight:700;text-decoration:none;font-size:.95rem}
+.calls .call{background:var(--fg-deep);color:#fff}
+.calls .mapbtn{background:#fff;border:1px solid var(--fg-line);color:var(--fg-ink)}
+.caution{font-size:.9rem;line-height:1.7;border-radius:10px;padding:10px 12px;margin:8px 0;border:1px solid}
+.caution .chip{display:inline-block;font-weight:800;color:#fff;border-radius:4px;padding:0 7px;margin-right:6px;font-size:.8rem}
+/* たたんで開ける項目(やること・役場の場所・コンビニ印刷) */
+details.fold{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:14px;margin:8px 0;padding:0 16px}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px 0;min-height:44px;font-weight:700}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::after{content:"";margin-left:auto;width:8px;height:8px;min-width:8px;border-right:2px solid var(--fg-muted);border-bottom:2px solid var(--fg-muted);transform:rotate(45deg);transition:transform .2s}
+details.fold[open]>summary::after{transform:rotate(-135deg)}
+details.fold[open]>summary{border-bottom:1px dashed var(--fg-line)}
+details.fold .in{padding:10px 0 14px;font-size:.95rem;line-height:1.75}
+details.fold.small>summary{font-size:.92rem;font-weight:600}
+.no{width:28px;height:28px;min-width:28px;border-radius:50%;background:var(--fg-accent);display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800}
+.cnt{font-size:.8rem;color:var(--fg-muted);font-weight:500;margin-left:auto}
+.say{background:#EAF5F0;border-radius:10px;padding:10px 12px;margin:4px 0 8px;color:#0F5138}
+.say b,.say strong{color:var(--fg-deep)}
+ol.q{padding-left:1.4em;margin:4px 0 6px}
+.items h3{font-size:.9rem;margin:12px 0 2px;color:var(--fg-ink)}
 ul.check{list-style:none}
 ul.check li{border-bottom:1px dashed var(--fg-line)}
-ul.check label{display:flex;align-items:flex-start;gap:12px;padding:9px 0;cursor:pointer}
+ul.check label{display:flex;align-items:flex-start;gap:12px;padding:7px 0;cursor:pointer}
 ul.check input[type=checkbox]{width:22px;height:22px;min-width:22px;margin-top:5px;accent-color:var(--fg-primary)}
 ul.check input:checked + span{color:var(--fg-muted);text-decoration:line-through}
-.madoguchi{font-size:.95rem;background:#EAF5F0;border-radius:8px;padding:12px 14px;color:#0F5138}
-.ask{list-style:none;margin-top:6px}
-.ask li{background:#fff;border-radius:8px;padding:8px 12px;margin:6px 0;color:#0F5138}
+.ask{list-style:none;margin-top:4px}
+.ask li{background:#F4F7F1;border-radius:8px;padding:7px 12px;margin:5px 0}
+.mlabel{font-size:.85rem;color:var(--fg-muted);margin-top:8px}
 .memo{width:100%;border:none;border-bottom:2px solid var(--fg-line);background:transparent;font:inherit;font-size:1rem;min-height:44px;resize:vertical;padding:6px 2px}  /* 16px未満はiPhoneで画面が勝手に拡大するため(点検2026-09-03) */
 .memo:focus{outline:none;border-bottom-color:var(--fg-primary)}
 .prog{font-weight:700;color:var(--fg-deep)}
-.after{background:#F7F3EA;border:1px solid var(--fg-line);border-radius:12px;padding:16px 18px;margin:12px 0}
+.end{margin:22px 0 8px}
+.end .note{text-align:center;margin:4px 0 14px}
+.linebtn.sub{background:#fff;color:var(--fg-primary);border:2px solid var(--fg-primary);box-shadow:none}
+.fine{font-size:.82rem;color:var(--fg-muted);margin-top:26px;line-height:1.7}
 .btns{display:flex;gap:10px;margin:18px 0}
 .btns button,.btns a{flex:1;display:block;padding:13px;min-height:44px;border-radius:10px;border:2px solid var(--fg-primary);background:#fff;color:var(--fg-primary);font-size:.95rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
 .btns .primary{background:var(--fg-primary);color:#fff}
 .linebtn{display:block;max-width:440px;margin:8px auto 0;padding:14px 22px;min-height:44px;background:var(--fg-cta);color:#fff;text-align:center;text-decoration:none;border-radius:999px;font-weight:700;box-shadow:var(--fg-shadow)}
-.smartbox{background:#EAF5F0;border:1px solid #B7E0CF;border-radius:12px;padding:14px 16px;margin:10px 0;color:#0F5138}
-.smartbox strong{color:#0F5138}
 .copybtn{display:inline-block;padding:10px 16px;min-height:44px;border-radius:10px;border:2px solid var(--fg-deep);background:#fff;color:var(--fg-deep);font:inherit;font-size:.92rem;font-weight:700;cursor:pointer}
 .copybtn.copied{background:var(--fg-deep);color:#fff}
-details.conbini{background:var(--fg-card);border:1px solid var(--fg-line);border-radius:12px;padding:0;margin:10px 0}
-details.conbini summary{cursor:pointer;padding:13px 16px;font-weight:700;color:var(--fg-ink);list-style-position:inside}
-details.conbini .inner{padding:0 16px 14px;border-top:1px dashed var(--fg-line)}
-details.conbini ol{margin:10px 0 6px;padding-left:1.4em}
-details.conbini li{margin:8px 0}
+details.fold ol.conbini{margin:6px 0;padding-left:1.4em}
+details.fold ol.conbini li{margin:6px 0}
 @media(min-width:900px){.wrap{max-width:820px}}
-/* 印刷=電話台本+持ち物+窓口ひとこと+メモの1枚に圧縮。工程表・申請後・LINEは画面のみ。 */
-@media print{.btns,.no-print,.screen-only,.siteheader{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.box,.phone{break-inside:avoid}
+/* 印刷=要点+電話台本+持ち物+窓口ひとこと+メモの1枚。たたんだ項目は印刷の直前に開く(KIT_JSのbeforeprint)。 */
+@media print{.btns,.no-print,.screen-only,.siteheader,.cnt{display:none!important}body{background:#fff;font-size:14px}.wrap{padding:0}.sum,details.fold{break-inside:avoid;box-shadow:none}
+  details.fold>summary::after{display:none}
   a[href^="http"]::after{content:" (" attr(href) ")";font-size:.8em;word-break:break-all}
   .memo{min-height:56px;resize:none}}
 """
@@ -211,47 +222,47 @@ function fkCopySay(btn){
   var saved = {c:[], m:{}, s:[]};
   try { var o = JSON.parse(localStorage.getItem(KEY)); if(o){ saved.c=o.c||[]; saved.m=o.m||{}; saved.s=o.s||[]; } } catch(e){}
   var boxes = Array.prototype.slice.call(document.querySelectorAll("ul.check input[type=checkbox]"));
-  var steps = Array.prototype.slice.call(document.querySelectorAll("ol.track input[type=checkbox]"));
   var memos = Array.prototype.slice.call(document.querySelectorAll("textarea.memo"));
   var prog = document.getElementById("prog");
-  var stepProg = document.getElementById("stepprog");
-  var stepFill = document.getElementById("stepfill");
-  var trackedCheck = false, trackedStep = false;
+  var trackedCheck = false;
   function save(){
-    var data = {c: [], m: {}, s: []};
+    // s は以前の5ステップ工程表の記録。表は無くなったが、戻したときのために消さずに持ち越す
+    var data = {c: [], m: {}, s: saved.s};
     boxes.forEach(function(b, i){ if (b.checked) data.c.push(i); });
-    steps.forEach(function(b, i){ if (b.checked) data.s.push(i); });
     memos.forEach(function(t, i){ if (t.value) data.m[i] = t.value.slice(0, 500); });
     try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e){}
   }
   function updItems(){
     var n = boxes.filter(function(b){ return b.checked; }).length;
-    if (prog) prog.textContent = "そろったもの: " + n + " / " + boxes.length + (n === boxes.length && n > 0 ? " — 準備かんりょう!" : "");
+    if (prog) prog.textContent = n + " / " + boxes.length + (n === boxes.length && n > 0 ? " そろった ✓" : "");
   }
-  function updSteps(){
-    var n = steps.filter(function(b){ return b.checked; }).length;
-    if (stepProg) stepProg.textContent = n + " / " + steps.length + (n === steps.length && n > 0 ? " ステップ完了 — おつかれさまでした!" : " ステップ完了");
-    if (stepFill) stepFill.style.width = (steps.length ? Math.round(n/steps.length*100) : 0) + "%";
+  function openParent(el){
+    var d = el.closest ? el.closest("details") : null;
+    if (d) d.open = true;
   }
   boxes.forEach(function(b, i){
-    if (saved.c.indexOf(i) >= 0) b.checked = true;
+    if (saved.c.indexOf(i) >= 0) { b.checked = true; openParent(b); }
     b.addEventListener("change", function(){
       save(); updItems();
       if (!trackedCheck && window.fgTrack) { trackedCheck = true; fgTrack("kit_check"); }
     });
   });
-  steps.forEach(function(b, i){
-    if (saved.s.indexOf(i) >= 0) b.checked = true;
-    b.addEventListener("change", function(){
-      save(); updSteps();
-      if (!trackedStep && window.fgTrack) { trackedStep = true; fgTrack("kit_step"); }
-    });
-  });
   memos.forEach(function(t, i){
-    if (saved.m[i]) t.value = saved.m[i];
+    if (saved.m[i]) { t.value = saved.m[i]; openParent(t); }
     t.addEventListener("input", save);
   });
-  updItems(); updSteps();
+  updItems();
+  // 印刷するときは、たたんだ項目もすべて開く(閉じたままだと持ち物やメモ欄が紙に出ない)。印刷後は元に戻す
+  window.addEventListener("beforeprint", function(){
+    Array.prototype.forEach.call(document.querySelectorAll("details"), function(d){
+      if (!d.open) { d.setAttribute("data-print-open", "1"); d.open = true; }
+    });
+  });
+  window.addEventListener("afterprint", function(){
+    Array.prototype.forEach.call(document.querySelectorAll("details[data-print-open]"), function(d){
+      d.open = false; d.removeAttribute("data-print-open");
+    });
+  });
 })();
 </script>
 """
@@ -266,6 +277,8 @@ def kit_page(it, updated):
     else:
         badge = ""
     name = esc(it["name"])
+    # 照合の印は見出しの上に小さく出す(パンくずの「申請準備シート」と二重にしない)
+    kicker = f'<p class="kicker">{badge.strip()}</p>\n' if badge else ""
 
     # 持ち物: 「ほぼ必ず要るもの」と「あなたの場合、要るかもしれないもの」に2層化
     event_items = []
@@ -292,11 +305,11 @@ def kit_page(it, updated):
     # 要確認バナー
     warn = ""
     if not verified and it.get("status") == "要確認":
-        warn = ('<div class="box" style="border-color:#E0B54A;background:#FFF8E6"><span class="note">'
-                'この制度は内容の最終確認中です。金額・締切・対象はお出かけ前に必ず公式ページと窓口でご確認ください。</span></div>')
+        warn = ('<div class="caution" style="border-color:#E0B54A;background:#FFF8E6">'
+                'この制度は内容の最終確認中です。金額・締切・対象はお出かけ前に必ず公式ページと窓口でご確認ください。</div>')
     if fgsrc.unavailable(it):
-        warn += ('<div class="box" style="border-color:#E0B54A;background:#FFF8E6"><span class="note">'
-                 f'<strong>{fgsrc.LABEL}</strong>: {fgsrc.NOTE}</span></div>')
+        warn += ('<div class="caution" style="border-color:#E0B54A;background:#FFF8E6">'
+                 f'<strong>{fgsrc.LABEL}</strong>: {fgsrc.NOTE}</div>')
 
     # 聞きに行く場所と時間(市町村・県の制度のみ。2026-09-02 小柳さん発案)
     # 役場(本庁)単位の情報。担当課が別庁舎の場合があるため非断定の注意文を必ず添える。
@@ -314,35 +327,34 @@ def kit_page(it, updated):
             if mg.get("hours_note"):
                 hours_html += f'<span class="note">({esc(mg["hours_note"])})</span>'
         madoguchi_html = (
-            '<div class="box place" style="background:#F4F7F1;border-color:#CFE0C6">'
-            f'<p><strong>📍 聞きに行く場所と時間</strong></p>'
-            f'<p style="margin-top:6px">{esc(mg["hall"])}<br><span class="note">{esc(mg["address"])}</span></p>'
-            f'<p style="margin-top:8px" class="screen-only"><a href="{map_url}" target="_blank" rel="noopener" '
-            'style="display:inline-block;padding:9px 16px;border:2px solid var(--fg-deep);border-radius:999px;'
-            'color:var(--fg-deep);font-weight:700;text-decoration:none" '
-            'onclick="if(window.fgTrack)fgTrack(\'kit_map\')">地図アプリでひらく</a></p>'
-            f'<p style="margin-top:8px">☎ <a href="tel:{tel_digits}" onclick="if(window.fgTrack)fgTrack(\'kit_tel\')">{esc(mg["tel"])}</a>(代表)'
+            '<div class="calls screen-only">'
+            f'<a class="call" href="tel:{tel_digits}" onclick="if(window.fgTrack)fgTrack(\'kit_tel\')">☎ 役場(代表)に電話</a>'
+            f'<a class="mapbtn" href="{map_url}" target="_blank" rel="noopener" '
+            'onclick="if(window.fgTrack)fgTrack(\'kit_map\')">📍 地図でひらく</a></div>'
+            '<details class="fold small place"><summary>役場の場所・電話・開庁時間</summary><div class="in">'
+            f'<p>{esc(mg["hall"])}<br><span class="note">{esc(mg["address"])}</span></p>'
+            f'<p style="margin-top:6px">☎ <a href="tel:{tel_digits}" onclick="if(window.fgTrack)fgTrack(\'kit_tel\')">{esc(mg["tel"])}</a>(代表)'
             '<br><span class="note">「この制度について聞きたいです」と伝えれば、担当の課につないでもらえます</span></p>'
-            f'<p style="margin-top:8px">🕐 開庁時間の目安: {hours_html}'
+            f'<p style="margin-top:6px">🕐 開庁時間の目安: {hours_html}'
             '<br><span class="note">祝日・年末年始はお休みです。担当課が別の建物の場合もあるため、'
             '遠くから行くときは先にお電話で確認すると安心です。</span></p>'
-            '</div>')
+            '</div></details>')
 
     # 併給・重複の注意(あれば)
     combine_html = ""
     cmb = it.get("combine") or {}
     if cmb.get("note"):
         ctype = cmb.get("type", "exclusive")
-        clabel = {"exclusive": "どちらか一方", "adjust": "併用に条件あり",
-                  "stackable": "一緒に受けられる"}.get(ctype, "併用に注意")
+        # 「どちらか一方」だけでは何と何のことか分からない(2026-11-21 利用者の声)ため、ほかの制度との関係だと分かる言い方にする
+        clabel = {"exclusive": "ほかの制度と併用できない場合あり", "adjust": "ほかの制度との併用に条件あり",
+                  "stackable": "ほかの制度と一緒に受けられる"}.get(ctype, "ほかの制度との併用に注意")
         colors = {"exclusive": ("#FBEEE6", "#E8C4AE", "#B9502F"),
                   "adjust": ("#FFF6DB", "#EAD59A", "#7a5b00"),
                   "stackable": ("#E7F4EC", "#B7E0CF", "#0F5138")}
         bg, bd, lc = colors.get(ctype, colors["exclusive"])
-        combine_html = (f'<div class="box" style="background:{bg};border-color:{bd}"><p>'
-                        f'<span style="display:inline-block;font-weight:800;color:#fff;background:{lc};'
-                        f'border-radius:4px;padding:1px 8px;margin-right:6px;font-size:.85rem">{clabel}</span>'
-                        f'{esc(cmb["note"])}</p></div>')
+        combine_html = (f'<div class="caution" style="background:{bg};border-color:{bd}">'
+                        f'<span class="chip" style="background:{lc}">{clabel}</span>'
+                        f'{esc(cmb["note"])}</div>')
 
     src = esc(it["source_url"])
     # 公式ページが無い(404/410)と確かめた出典は、リンクの代わりに「公式ページを確認中」を出す(fg_source_status.py)
@@ -368,35 +380,87 @@ def kit_page(it, updated):
         area_link = '<a href="../../area/">お住まいの市町村の給付金・手当</a> ・ '
     body = f"""
 <p class="note no-print"><a href="../../index.html">もらいわすれ堂</a> › 申請準備シート</p>
-<h1>{name} 申請準備シート{badge}</h1>
-<p class="note">「どこに・何を持って・何と言えばいいか」を、この<span style="white-space:nowrap">1枚</span>にまとめました。<br>書くのはご本人ですが、迷わないところまでは、ぜんぶここで終わらせましょう。</p>
+{kicker}<h1>{name}</h1>
 {warn}
-
-<div class="goal">
-  <p><strong>受け取れるかもしれない方</strong><br>{esc(it['target_household'])}</p>
-  <p><strong>金額の目安</strong><br>{esc(it['amount_note'])}</p>
-  <p><strong>行き先(窓口)</strong><br>{esc(it['how_to_apply'])}</p>
-</div>
+<dl class="sum">
+  <div><dt>対象</dt><dd>{esc(it['target_household'])}</dd></div>
+  <div><dt>金額</dt><dd>{esc(it['amount_note'])}</dd></div>
+  <div><dt>窓口</dt><dd>{esc(it['how_to_apply'])}</dd></div>
+</dl>
 {madoguchi_html}
 {combine_html}
+<div class="btns">{official_btn}</div>
 
+<section class="todo">
+<h2>やることは4つ</h2>
+<details class="fold task" open>
+  <summary><span class="no">1</span>電話で3つ聞く</summary>
+  <div class="in">
+  <div class="say">「<b>{name}</b>の申請をしたいのですが、3つ教えてください」</div>
+  <ol class="q">
+    <li>受付の<b>時間</b>と、行く<b>場所(窓口)</b></li>
+    <li><b>私の場合</b>、何を持っていけばいいか</li>
+    <li><b>申請書</b>はあるか・<b>いつまで</b>に出せばいいか</li>
+  </ol>
+  <p class="note">対象になるか自信がなくても、そのまま聞いて大丈夫です。{phone_src}</p>
+  <p class="mlabel">聞いた電話番号・受付時間のメモ:</p>
+  <textarea class="memo" data-m="0" rows="1" placeholder="例) 〇〇課 098-000-0000 / 平日8:30-17:15"></textarea>
+  </div>
+</details>
+<details class="fold task">
+  <summary><span class="no">2</span>持ち物をそろえる<span class="cnt" id="prog"></span></summary>
+  <div class="in">
+  <p class="note">よくある例です。市町村やご家庭の状況で変わるので、細かい違いは電話か窓口で確認すれば大丈夫です。</p>
+  <div class="items"><h3>ほぼ必ず要るもの</h3>
+  <ul class="check">
+{chr(10).join(core_html)}
+  </ul></div>
+  {event_block}
+  </div>
+</details>
+<details class="fold task">
+  <summary><span class="no">3</span>窓口でこう言う</summary>
+  <div class="in">
+  <div class="say" id="mado-say">「<strong>{name}</strong>について教えてください。対象になるか確認したいです」</div>
+  <p class="note">これだけ言えば、職員の方が案内してくれます。言葉で伝えにくいときは、この画面を見せても大丈夫です。</p>
+  <p class="screen-only" style="margin-top:6px"><button class="copybtn" onclick="fkCopySay(this)">このひとことをコピーする</button></p>
+  <p style="margin-top:10px">あわせて聞いておくこと:</p>
+  <ul class="ask">
+    <li>締切はいつまでですか？</li>
+    <li>申請書はこの場で書けますか？ 書き方も教えてください</li>
+    <li>受け取れるのは、いつ頃ですか？</li>
+  </ul>
+  </div>
+</details>
+<details class="fold task">
+  <summary><span class="no">4</span>聞いたことをメモする</summary>
+  <div class="in">
+  <p class="mlabel">締切(いつまで):</p><textarea class="memo" data-m="1" rows="1"></textarea>
+  <p class="mlabel">足りなかった書類・次にやること:</p><textarea class="memo" data-m="2" rows="1"></textarea>
+  <p class="mlabel">受け取りは、いつ頃・どう届く:</p><textarea class="memo" data-m="3" rows="1"></textarea>
+  </div>
+</details>
+<p class="note screen-only">チェックとメモはこの端末にだけ残ります。</p>
+</section>
+
+<section class="end screen-only">
+  <a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">締切をLINEで受け取る</a>
+  <p class="note">締切の約1か月前から・無料・名前の入力は不要</p>
+  <a class="linebtn sub" href="../../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit')">受け取れたことを報告する(匿名・無料)</a>
+  <p class="note">次の県民の「もらい忘れ」を防ぐ力になります</p>
+</section>
+
+<section class="no-print">
+<h2>持っていく</h2>
+<p class="note">スマホで開いたままでも、窓口で使えます。</p>
 <div class="btns">
   <button class="primary" onclick="if(window.fgTrack)fgTrack('kit_print');window.print()">印刷する</button>
-  {official_btn}
+  <button class="copybtn" id="copy-sheet" onclick="fkCopySheet(this)">コピーして残す</button>
 </div>
-
-<div class="smartbox screen-only">
-  <p><strong>印刷できなくても、大丈夫です。</strong><br>
-  このページをスマホで開いたまま、あなたのメモ代わりに窓口で使えます。チェックとメモはこの端末に残ります。</p>
-  <p style="margin-top:10px"><button class="copybtn" id="copy-sheet" onclick="fkCopySheet(this)">このシートをコピーして手元に残す</button></p>
-  <p class="note" style="color:#0F5138;margin-top:8px">コピーしたら、LINEのメモやトークに貼りつけておくと、電波の弱い窓口でもすぐ開けます。
-  <a href="https://allgroup-inc.github.io/hojo-hq/go/fg-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')" style="color:#0F5138;font-weight:700">もらいわすれ堂のLINE</a>に貼っていただければ、そのまま締切のお知らせも受け取れます(無料)。</p>
-</div>
-
-<details class="conbini no-print screen-only" ontoggle="if(this.open&&window.fgTrack)fgTrack('kit_conbini')">
-  <summary>プリンターがないとき — コンビニで印刷するかんたん手順</summary>
-  <div class="inner">
-    <ol>
+<details class="fold small" ontoggle="if(this.open&&window.fgTrack)fgTrack('kit_conbini')">
+  <summary>プリンターがないとき(コンビニで印刷)</summary>
+  <div class="in">
+    <ol class="conbini">
       <li>上の「印刷する」を押して、プリンターのかわりに<strong>「PDFとして保存」</strong>を選びます(iPhoneは共有ボタン→「プリント」からでも保存できます)</li>
       <li><strong>セブンイレブン</strong>なら「かんたんnetprint」アプリ(会員登録なしで使えます)、<strong>ファミリーマート・ローソン</strong>なら「ネットワークプリント」アプリに、そのPDFを登録します</li>
       <li>表示された<strong>受付番号</strong>を、お店のコピー機(マルチコピー機)に入力して印刷します。A4白黒で1枚20円前後が目安です(機種や時期で変わることがあります)</li>
@@ -404,86 +468,12 @@ def kit_page(it, updated):
     <p class="note">くわしい手順・料金は各サービスの公式ページでご確認ください:
     <a href="https://www.printing.ne.jp/" rel="noopener" target="_blank">netprint(セブンイレブン)</a> ・
     <a href="https://networkprint.ne.jp/" rel="noopener" target="_blank">ネットワークプリント(ファミマ・ローソン)</a></p>
+    <p class="note">コピーした内容は、LINEのメモやトークに貼りつけておくと、電波の弱い窓口でもすぐ開けます。</p>
   </div>
 </details>
-
-<section class="screen-only">
-<h2>申請までの5ステップ</h2>
-<p class="note">チェックすると、この端末に残ります。次に開いたとき「どこまで進んだか」がわかります。</p>
-<div class="stepbar"><i id="stepfill"></i></div>
-<p class="note"><span class="prog" id="stepprog"></span></p>
-<div class="box">
-  <ol class="track">
-    <li><label><input type="checkbox"><span class="n"></span><span>公式ページで「対象」と<span style="white-space:nowrap">「締切」</span>を見る</span></label></li>
-    <li><label><input type="checkbox"><span class="n"></span><span>窓口に電話して「私の場合の持ち物」を聞く(下に台本があります)</span></label></li>
-    <li><label><input type="checkbox"><span class="n"></span><span>持ち物をそろえる(全部なくても大丈夫)</span></label></li>
-    <li><label><input type="checkbox"><span class="n"></span><span>窓口で申請する(会話はこのとおりでOK)</span></label></li>
-    <li><label><input type="checkbox"><span class="n"></span><span>結果と受け取りを確認する(受け取れたらLINEで報告)</span></label></li>
-  </ol>
-</div>
 </section>
 
-<h2>① まず電話(ムダ足をなくす近道)</h2>
-<div class="phone">
-  <p class="note">行く前にこの3つを聞いておくと、持ち物不足でのやり直しがなくなります。対象になるか自信がなくても、そのまま聞いて大丈夫です。</p>
-  <div class="say">「<b>{name}</b>の申請をしたいのですが、3つ教えてください」</div>
-  <div class="say">① 受付の<b>時間</b>と、行く<b>場所(窓口)</b>を教えてください</div>
-  <div class="say">② <b>私の場合</b>、何を持っていけばいいですか？</div>
-  <div class="say">③ <b>申請書</b>はそちらにありますか？ <b>いつまで</b>に出せばいいですか？</div>
-  <p class="note" style="margin-top:10px">{phone_src}</p>
-  <p class="note" style="margin-top:6px">聞いた電話番号・受付時間のメモ:</p>
-  <textarea class="memo" data-m="0" rows="1" placeholder="例) 〇〇課 098-000-0000 / 平日8:30-17:15"></textarea>
-</div>
-
-<h2>② 持ち物チェックリスト</h2>
-<p class="note">市町村やご家庭の状況で変わります。「例」としてそろえて、細かい違いは①の電話か窓口で確認すれば大丈夫です。チェックはこの端末にだけ保存されます。</p>
-<div class="box">
-  <p class="note screen-only"><span class="prog" id="prog"></span></p>
-  <div class="items"><h3>ほぼ必ず要るもの</h3>
-  <ul class="check">
-{chr(10).join(core_html)}
-  </ul></div>
-  {event_block}
-</div>
-
-<h2>③ 窓口での会話(このとおりでOK)</h2>
-<div class="madoguchi">
-  <p>まず、こう言います:</p>
-  <p style="margin:6px 0;font-size:1.02rem" id="mado-say">「<strong>{name}</strong>について教えてください。対象になるか確認したいです」</p>
-  <p class="note" style="color:#0F5138">これだけ言えば、あとは職員の方が案内してくれます。言葉で伝えにくいときは、この画面をそのまま見せても大丈夫です。</p>
-  <p class="screen-only" style="margin-top:8px"><button class="copybtn" onclick="fkCopySay(this)">このひとことをコピーする</button></p>
-  <p style="margin-top:10px">そして、こちらからこの3つを聞いておきます:</p>
-  <ul class="ask">
-    <li>締切はいつまでですか？</li>
-    <li>申請書はこの場で書けますか？ 書き方も教えてください</li>
-    <li>受け取れるのは、いつ頃ですか？</li>
-  </ul>
-</div>
-
-<h2>④ 窓口で聞いたことメモ</h2>
-<div class="box">
-  <p class="note">締切(いつまで):</p><textarea class="memo" data-m="1" rows="1"></textarea>
-  <p class="note" style="margin-top:10px">足りなかった書類・次にやること:</p><textarea class="memo" data-m="2" rows="1"></textarea>
-  <p class="note" style="margin-top:10px">受け取りは、いつ頃・どう届く:</p><textarea class="memo" data-m="3" rows="1"></textarea>
-</div>
-
-<section class="screen-only">
-<h2>申請したあと(受け取りまで見届ける)</h2>
-<div class="after">
-  <p>申請してからが本番です。受け取れるまで、いっしょに見届けましょう。</p>
-  <p class="note" style="margin-top:6px">・結果の通知や受け取りの時期は、④のメモで管理できます。<br>・「受け取れた」まで確認できたら、下から教えてください。次の県民の「もらい忘れ」を防ぐ力になります。</p>
-  <a class="linebtn" style="background:var(--fg-primary)" href="../../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit')">受け取れたことを報告する(匿名・無料)</a>
-</div>
-<div class="after" style="background:#EAF7EE;border-color:#B7E4C7;text-align:center;color:#0F5138">
-  締切や新しい制度は、LINEでそっとお知らせします(締切の約1か月前から・無料・名前の入力は不要)
-  <a class="linebtn" href="https://allgroup-inc.github.io/hojo-hq/go/fg-kit/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('line_add_click')">LINEで受け取る</a>
-</div>
-</section>
-
-<div class="after screen-only" style="text-align:center">
-  この制度の情報が「古い」「違う」と気づいたら、教えてください。確認して24時間以内の修正を目指します。<br>
-  <a href="{report_link}" onclick="if(window.fgTrack)fgTrack('teisei_mail')" style="display:inline-block;margin-top:8px;color:var(--fg-primary);font-weight:700">この制度の情報の間違いを知らせる</a>
-</div>
+<p class="fine screen-only">この制度の情報が「古い」「違う」と気づいたら、<a href="{report_link}" onclick="if(window.fgTrack)fgTrack('teisei_mail')">この制度の情報の間違いを知らせる</a>(24時間以内の修正を目指します)。</p>
 <div class="disclaimer">このシートは公式情報に基づく「準備のご案内」です。持ち物は一般的な例で、市町村により異なります。受給できるかどうかの最終判断は各窓口で行われます。<br>申請書の作成代行・代筆は行っていません(ご本人が記入します)。<br>専門家のサポートが必要な場合は、提携の専門家(社会保険労務士・行政書士など)をご紹介します。<br>最終更新: {esc(updated)} / もらいわすれ堂(運営: 株式会社フクギイロ)/ 出典: {footer_src}</div>
 <p style="margin-top:16px" class="no-print footlinks">{area_link}<a href="../index.html">申請準備シート一覧へ</a> ・ <a href="../../shindan/">3分診断</a> ・ <a href="../../teisei/">情報の訂正</a> ・ <a href="../../index.html">もらいわすれ堂 トップ</a></p>
 <p class="no-print" style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
