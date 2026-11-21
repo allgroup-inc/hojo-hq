@@ -211,7 +211,7 @@ function resolveStaffNameByLineUserId_(ss, lineUserId) {
  */
 /**
  * 毎分の処理(processQueuedVoiceLogsCore_)の1回の実行の中だけ、音声ログ処理状況タブの読み取り結果を使い回す。
- * 1回の実行で同じタブを8回ほど全件読み直していたため(時間の大半がシートの読み取りだった)。
+ * 1回の実行で同じタブを全件読み直していたため(時間の大半がシートの読み取りだった)。
  * 使い回すのは実行の中だけで、LINEの押下など実行の外の読み取りは、これまでどおり毎回シートを読む。
  * タブへの書き込み(transitionVoiceLogStatus_ / appendVoiceLogRow_)が成功したら、その時点で使い回しを捨てる。
  * 別の実行(LINEの押下など)が同じ行を書き換えた場合は、読み取りが古いことがありうるが、
@@ -550,6 +550,15 @@ function processQueuedVoiceLogsCore_() {
 function processQueuedVoiceLogsBody_() {
   VOICE_RUN_STARTED_MS = Date.now();
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // 打ち切られた日次メンテナンス(上限6分・異常終了)が無いかを見る(MaintenanceRunner.gs)。
+  // 打ち切られた実行は記録も通知も残せないため、毎分動くこの処理が後から見つけて知らせる(設定を1つ読むだけ)
+  try {
+    checkDailyMaintenanceStale_();
+  } catch (error) {
+    VOICE_RUN_STEP_ERRORS++;
+    console.error("日次メンテナンスの打ち切りの確認に失敗しました: " + error);
+  }
 
   // 毎分動くこのトリガーに、6時間に1回の自己点検・修復を相乗りさせる(OpsStatus.gs)。
   // 人がエディタで修復用の関数を押さなくても、反映後に自動でダッシュボード等が直る。

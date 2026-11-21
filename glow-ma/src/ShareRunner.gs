@@ -48,7 +48,12 @@ function onOpen() {
     .addItem("BlueBeanのパスワードを更新する", "updateBlueBeanPassword")
     .addSeparator()
     .addItem("自動処理を復旧する(権限の再許可)", "restoreAutomation")
+    .addSeparator()
+    .addItem("企業マスタの書き込みを止める(緊急停止)", "stopCompanyWrites")
+    .addItem("企業マスタの書き込みを再開する(代表者のみ)", "resumeCompanyWrites")
+    .addItem("企業マスタの書き込みの状態・履歴を見る", "showCompanyWritePauseStatus")
     .addToUi();
+  showCompanyWritePauseToast_();
 }
 
 function showShareDialog() {

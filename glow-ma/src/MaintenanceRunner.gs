@@ -40,35 +40,166 @@ var DAILY_MAINTENANCE_HOUR = 7;
  */
 function runDailyMaintenance() {
   var steps = [
-    { name: "台帳のバックアップ", run: backupLedger },
-    { name: "お断り(連絡不要)の反映", run: syncDoNotContactFlags },
-    { name: "スコア・ランクの再計算", run: recalculateAllScores },
-    { name: "ダッシュボードの更新", run: updateDashboard },
+    // master: その手順が企業マスタを "write"(書き直す)・"read"(読むだけ)・"none"(使わない)のどれか。
+    // 企業マスタの書き込みを止めたときに、どの手順まで止めるかをこれで決める(下の stopsStep_)
+    { name: "台帳のバックアップ", run: backupLedger, master: "none" },
+    { name: "お断り(連絡不要)の反映", run: syncDoNotContactFlags, master: "write" },
+    { name: "スコア・ランクの再計算", run: recalculateAllScores, master: "write" },
+    { name: "ダッシュボードの更新", run: updateDashboard, master: "read" },
     // 2026-11-07 改善③: 3で確定したスコアを使って「今日の連絡先」タブを作り直す(台帳の記録は書き換えない)
-    { name: "今日の連絡先の更新", run: updateTodayList },
+    { name: "今日の連絡先の更新", run: updateTodayList, master: "read" },
     // 2026-11-07 改善⑦: 世界の架け橋の週次KPI(前の週がまだなら集計)と法人番号の点検(Wld02Runner.gs)
-    { name: "世界の架け橋の週次KPI", run: runWld02WeeklyIfDue_ },
-    { name: "掘り起こしアラートの送信", run: runDailyAlerts }
+    { name: "世界の架け橋の週次KPI", run: runWld02WeeklyIfDue_, master: "read" },
+    { name: "掘り起こしアラートの送信", run: runDailyAlerts, master: "read" }
   ];
 
   var failures = [];
+  var skipped = [];  // 緊急停止スイッチで見送った手順
+  var stop = null;  // 企業マスタの書き込みを止めたとき: { by: 手順名, dataChanged }
+  // 「実行中」の印(下の markDailyMaintenanceRunning_)。上限(6分)で打ち切られると、この関数の最後の記録・通知は動かない。
+  // 印を残しておけば、後の別の実行(毎分の処理)が checkDailyMaintenanceStale_ で見つけて知らせる
+  var startedAtMs = Date.now();
+  var startedAtText = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy-MM-dd HH:mm");
+  var doneCount = 0;
+  checkDailyMaintenanceStale_();  // 前の回の印が残っていたら(打ち切られたまま誰も見つけていない)、先に知らせる
+  markDailyMaintenanceRunning_(startedAtMs, startedAtText, "", "", 0);
+  Logger.log("日次メンテナンスを開始しました。");
+  // 緊急停止スイッチ(CompanyWritePauseRunner.gs): 停止中は、企業マスタを書き直す手順を試さずに見送る。
+  // 失敗としては数えない(人が決めて止めている)。バックアップと読むだけの手順は続ける
+  var pause = readCompanyWritePause_();
   steps.forEach(function (step) {
+    if (pause.paused && step.master === "write") {
+      skipped.push(step.name);
+      Logger.log("日次メンテナンス: 「" + step.name + "」は、企業マスタの書き込みが停止中のため見送りました。");
+      return;
+    }
+    // 時間の歯止め(executionBudget.js): 残り時間が少なければ、次の手順を始めない(最後の記録・通知の時間を残す)
+    var elapsed = executionElapsedMs_();
+    if (!GlowExecutionBudget.canStartStep(elapsed)) {
+      Logger.log("日次メンテナンス: 「" + step.name + "」は、時間切れが近いため始めませんでした。");
+      failures.push(step.name + ": この実行は始まってから " + GlowExecutionBudget.seconds(elapsed) +
+        "秒たっており、上限(6分)が近いため、始めませんでした(次の日次メンテナンスで動きます)");
+      return;
+    }
+    if (stop && stopsStep_(stop, step)) {
+      failures.push(step.name + ": 「" + stop.by + "」で企業マスタの書き込みを止めたため、実行しませんでした" +
+        (stop.dataChanged ? "(企業マスタが途中まで書き換わっている可能性があるため)" : "(企業マスタは変わっていないが、同じ理由で書き込みが止まるため)"));
+      return;
+    }
+    markDailyMaintenanceRunning_(startedAtMs, startedAtText, step.name, step.master, doneCount);
     try {
       step.run();
+      doneCount++;
       Logger.log("日次メンテナンス: 「" + step.name + "」が完了しました。");
     } catch (error) {
       Logger.log("日次メンテナンス: 「" + step.name + "」が失敗しました: " + error);
       failures.push(step.name + ": " + error);
+      var companyWrite = companyWriteStopOf_(error);
+      if (companyWrite && !stop) stop = { by: step.name, dataChanged: companyWrite.dataChanged };
     }
   });
 
-  if (failures.length === 0) {
+  // ここから先は「最後の記録」。手順の名前を空にして、どこで打ち切られたかが分かるようにする
+  markDailyMaintenanceRunning_(startedAtMs, startedAtText, "", "", doneCount);
+  if (skipped.length > 0) remindCompanyWritePaused_(pause, skipped);
+  var skippedNote = skipped.length === 0 ? "" :
+    "見送り " + skipped.length + "件(" + skipped.join("・") + "): 企業マスタの書き込みが停止中";
+  if (failures.length === 0 && skipped.length === 0) {
     Logger.log("日次メンテナンスがすべて完了しました。");
     recordOpsStatus_("日次メンテナンス", true, steps.length + "件すべて完了");
-    return;
+  } else if (failures.length === 0) {
+    Logger.log("日次メンテナンス: 企業マスタの書き込みが停止中のため、" + skipped.length + "件を見送りました。ほかは完了しました。");
+    recordOpsStatus_("日次メンテナンス", "停止中",
+      (steps.length - skipped.length) + "件完了 / " + skippedNote);
+  } else {
+    recordOpsStatus_("日次メンテナンス", false, failures.concat(skippedNote ? [skippedNote] : []).join(" / "));
+    notifyMaintenanceFailures_(failures, steps.length);
   }
-  recordOpsStatus_("日次メンテナンス", false, failures.join(" / "));
-  notifyMaintenanceFailures_(failures, steps.length);
+  // 最後まで来たら、印を消す(上限で打ち切られた・思わぬ例外で抜けたときは、印が残る)
+  clearDailyMaintenanceRunning_();
+  Logger.log("日次メンテナンスを終了しました。");
+}
+
+/** 「実行中」の印(スクリプトプロパティ)の名前 */
+var DAILY_MAINTENANCE_RUNNING_PROPERTY = "DAILY_MAINTENANCE_RUNNING";
+
+/** 「実行中」の印を付ける・書き換える。印を付けられなくても、日次メンテナンスは続ける */
+function markDailyMaintenanceRunning_(startedAtMs, startedAtText, stepName, master, doneCount) {
+  try {
+    PropertiesService.getScriptProperties().setProperty(DAILY_MAINTENANCE_RUNNING_PROPERTY,
+      GlowExecutionBudget.buildRunning(startedAtMs, startedAtText, stepName, master, doneCount));
+  } catch (error) {
+    Logger.log("日次メンテナンス: 実行中の印を付けられませんでした: " + error);
+  }
+}
+
+function clearDailyMaintenanceRunning_() {
+  try {
+    PropertiesService.getScriptProperties().deleteProperty(DAILY_MAINTENANCE_RUNNING_PROPERTY);
+  } catch (error) {
+    Logger.log("日次メンテナンス: 実行中の印を消せませんでした: " + error);
+  }
+}
+
+/**
+ * 打ち切られた日次メンテナンスを見つけて知らせる(毎分の処理 processQueuedVoiceLogs と、次の日次メンテナンスの最初に呼ぶ)。
+ * 「実行中」の印が8分より古ければ、上限(6分)や異常終了で打ち切られたとみなし、稼働状況タブに失敗として残して通知する。
+ * 打ち切られた実行そのものは何も残せないので、別の実行が後から見つける。
+ * @return {boolean} 打ち切りを見つけて知らせたら true
+ */
+function checkDailyMaintenanceStale_() {
+  var props, running;
+  try {
+    props = PropertiesService.getScriptProperties();
+    running = GlowExecutionBudget.parseRunning(props.getProperty(DAILY_MAINTENANCE_RUNNING_PROPERTY));
+  } catch (error) {
+    return false;
+  }
+  if (!GlowExecutionBudget.isStale(running, Date.now())) return false;
+  // 先に印を消す(知らせる処理が遅くても、次の分にもう一度知らせないように)
+  props.deleteProperty(DAILY_MAINTENANCE_RUNNING_PROPERTY);
+  var message = GlowExecutionBudget.describeStale(running, 7);
+  console.error(message);
+  recordOpsStatus_("日次メンテナンス", false, message);
+  notifyOpsFailure_("日次メンテナンス", message);
+  return true;
+}
+
+/**
+ * 停止中であることを、毎朝1回、稼働状況タブとお知らせで伝える(止めたまま忘れないように)。
+ * 自動では再開しない。お断り(連絡不要)の反映も止まっているため、日数を添える。
+ */
+function remindCompanyWritePaused_(pause, skipped) {
+  var days = GlowCompanyWritePause.pausedDays(pause, Date.now());
+  var detail = GlowCompanyWritePause.describeState(pause) + (days >= 0 ? " / 停止から " + days + "日" : "");
+  recordOpsStatus_(GlowCompanyWritePause.OPS_NAME, "停止中", detail);
+  notifyOpsNotice_("【GLOW台帳】企業マスタの書き込みは停止中です",
+    detail + "\n今朝の日次メンテナンスで見送った手順: " + skipped.join("・") +
+    "\nお断り(連絡不要)の反映も止まっています。長く止めると、断った会社が連絡先の一覧に戻るおそれがあります。" +
+    "\n再開は、代表者の承認の後、台帳のメニュー「GLOW台帳 → 企業マスタの書き込みを再開する」から。",
+    "企業マスタの書き込み停止中");
+}
+
+/**
+ * writeCompanyRecords_(ImportRunner.gs)が企業マスタの書き込みを止めたときの例外なら、その中身
+ * ({ phase, dataChanged })を返す。エラーの文言ではなく、例外に付いた companyWrite で判断する。
+ */
+function companyWriteStopOf_(error) {
+  var info = error && error.companyWrite;
+  return info && typeof info === "object" ? info : null;
+}
+
+/**
+ * 企業マスタの書き込みを止めたあと、この手順を止めるか。
+ * - 書き込みが途中まで走った(dataChanged): 企業マスタを読む手順・書く手順をすべて止める(欠けた・混ざった企業マスタで
+ *   スコア・今日の連絡先・アラートを作らない)。企業マスタを使わない手順だけ続ける
+ * - 書く前の確認で止めた(企業マスタは変わっていない): 企業マスタを書き直す手順だけ止める(同じ理由でまた止まる)。
+ *   読むだけの手順(ダッシュボード・今日の連絡先・アラートなど)は続ける
+ */
+function stopsStep_(stop, step) {
+  if (step.master === "none") return false;
+  if (stop.dataChanged) return true;
+  return step.master === "write";
 }
 
 /**
