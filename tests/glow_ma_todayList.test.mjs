@@ -153,3 +153,24 @@ test("タブの整理: QR生成結果に行があれば残す。見えるタブ�
   assert.deepEqual(tidy.planHide([{ name: "シート1", hidden: false }]), []);
   assert.deepEqual(tidy.planHide([]), []);
 });
+
+test("予定日が今日でも、今日すでに連絡済みの会社は出さない(同日の重複架電を防ぐ)", () => {
+  const companies = [co("C9000201", { 次回アクション予定日: TODAY })];
+  const logs = { C9000201: [{ 日付: TODAY, 種別: "電話", 担当者: "たかし", 対応相手: "社長" }] };
+  assert.deepEqual(t.buildTodayList(companies, logs, TODAY).map((e) => e.企業ID), []);
+});
+
+test("予定日が来ていて、前の日に連絡した会社は、これまでどおり出す(人が決めた予定を優先)", () => {
+  const companies = [co("C9000202", { 次回アクション予定日: TODAY })];
+  const logs = { C9000202: [{ 日付: "2026-11-06", 種別: "電話", 担当者: "たかし", 対応相手: "社長" }] };
+  assert.deepEqual(t.buildTodayList(companies, logs, TODAY).map((e) => e.区分), ["予定日"]);
+});
+
+test("予定日が過ぎていても、今日連絡した会社は出さない(連絡不要の会社は、これまでどおり出さない)", () => {
+  const companies = [
+    co("C9000203", { 次回アクション予定日: "2026-11-05" }),
+    co("C9000204", { 次回アクション予定日: TODAY, 連絡不要: true }),
+  ];
+  const logs = { C9000203: [{ 日付: TODAY, 種別: "電話", 担当者: "たかし", 対応相手: "社長" }] };
+  assert.deepEqual(t.buildTodayList(companies, logs, TODAY).map((e) => e.企業ID), []);
+});

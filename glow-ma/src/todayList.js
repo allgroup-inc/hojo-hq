@@ -80,6 +80,9 @@
       var sinceContact = touch.lastContact ? daysBetween(touch.lastContact, todayString) : null;
       var entry = { c: c, history: history, touch: touch, due: due };
 
+      // 同じ日に連絡済みの会社は、予定日が来ていても出さない(同日の重複架電を防ぐ)。
+      // 前の日に連絡した会社は、予定日を優先して出す(人が決めた予定を最優先する)
+      if (due && due <= todayString && sinceContact === 0) return;
       if (due && due <= todayString) {
         entry.reason = due === todayString ? "今日が予定日" : "予定日を" + daysBetween(due, todayString) + "日過ぎた";
         entry.key = [due];
