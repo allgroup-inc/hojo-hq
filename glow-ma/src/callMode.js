@@ -208,14 +208,14 @@
       return { ok: false, reason: "doNotContact", errors: ["連絡不要の会社のため、記録できません"] };
     }
     if (company["現在ステージ"] === "成約" && options.confirmWon !== true) {
-      return { ok: false, reason: "won", errors: ["成約済みの会社です。内容を確かめたうえで、もう一度送ってください"] };
+      return { ok: false, reason: "won", errors: ["成約済みの会社です。架電の前に、台帳の内容を確かめてください"] };
     }
     var today = todayHistory || [];
     if (today.length > 0 && options.confirmDuplicate !== true) {
       var who = String(today[0]["担当者"] || "").trim() || "担当者不明";
       return {
         ok: false, reason: "duplicateToday",
-        errors: ["今日すでに記録があります(担当: " + who + ")。二件目の記録は、内容を確かめたうえで、もう一度送ってください"]
+        errors: ["今日すでに記録があります(担当: " + who + ")。同じ会社への二件目の架電は、台帳の対応履歴を確かめたうえで、担当者(代表者)が確認して記録してください"]
       };
     }
     return { ok: true, reason: "", errors: [] };

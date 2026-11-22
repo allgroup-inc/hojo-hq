@@ -70,4 +70,17 @@ test("記録の処理は、ロックの中で確認してから書き込む(静�
   assert.ok(lockAt !== -1 && guardAt !== -1 && writeAt !== -1, "ロック・確認・書き込みが揃っている");
   assert.ok(lockAt < guardAt && guardAt < writeAt, "ロック → 確認 → 書き込みの順");
   assert.match(body, /guardFailed/, "確認に失敗したら記録を止める");
+  // 確認の結果を見てから止める(確認を外したら、この試験が落ちる)
+  const stopAt = body.indexOf("if (!guardResult.ok)");
+  assert.ok(stopAt !== -1 && stopAt < writeAt, "確認の結果が不合格なら、書き込みより前に止める");
+  const helperStart = src.indexOf("function readTodayInteractionsFor_(");
+  const helperBody = src.slice(helperStart, src.indexOf("\n}\n", helperStart));
+  assert.match(helperBody, /関係メモ更新/, "関係メモの更新は、同日の架電として数えない(履歴の読み取りで除く)");
+  assert.match(helperBody, /replace\(/, "文字列の日付(2026/11/22)も同じ形にそろえてから比べる");
+});
+
+test("関係メモの更新は、同じ日の架電記録として数えない(判定の入力に入れない)", () => {
+  // 記録の判定は、架電の対応履歴だけを受け取る。関係メモ更新は呼び出し側で除く(AdminRunner.gs の readTodayInteractionsFor_)
+  const r = m.checkCallRecordAllowed(COMPANY, [], {});
+  assert.equal(r.ok, true);
 });

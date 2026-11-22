@@ -558,9 +558,11 @@ function readTodayInteractionsFor_(logSheet, companyId, todayString) {
   var values = logSheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
   return values.filter(function (row) {
     if (String(row[idIndex]).trim() !== companyId) return false;
+    // 関係メモの更新は、架電ではない(同日の架電記録を妨げないよう数えない)
+    if (String(row[headers.indexOf("種別")] || "") === "関係メモ更新") return false;
     var day = row[dateIndex] instanceof Date
       ? Utilities.formatDate(row[dateIndex], "Asia/Tokyo", "yyyy-MM-dd")
-      : String(row[dateIndex]).slice(0, 10);
+      : String(row[dateIndex]).trim().replace(/\//g, "-").slice(0, 10);
     return day === todayString;
   }).map(function (row) {
     return { "担当者": row[staffIndex] };
