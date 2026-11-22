@@ -39,6 +39,8 @@ DATA_PATH = os.path.join(BASE, "data", "subsidies.json")
 SNAPSHOT_PATH = os.path.join(BASE, "data", "note_snapshot.json")
 SPONSORS_PATH = os.path.join(BASE, "data", "note_sponsors.json")
 OUT_DIR = os.path.join(BASE, "posts", "note")
+# 外部AI（Anthropic API）を呼ばない指定。CLIの --offline か環境変数 HOJO_NOTE_OFFLINE=1
+OFFLINE = "--offline" in sys.argv or os.environ.get("HOJO_NOTE_OFFLINE") == "1"
 
 SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=note&utm_medium=article&utm_campaign=teiten"
 
@@ -119,7 +121,8 @@ def ai_column(stats: dict) -> str:
         "制度は毎週、生まれては締め切られていきます。"
         "「知らなかった」で終わらせないために、来週もここで定点観測を続けます。(AI編集長)"
     )
-    if not os.environ.get("ANTHROPIC_API_KEY"):
+    # --offline（または HOJO_NOTE_OFFLINE=1）のときは外部AIを一切呼ばず定型文を使う
+    if OFFLINE or not os.environ.get("ANTHROPIC_API_KEY"):
         return fallback
     try:
         import anthropic
@@ -349,9 +352,24 @@ def build_article(data, snapshot, today):
     return stem, "\n".join(L), current, gone, stats
 
 
+def _argval(name):
+    """--name VALUE / --name=VALUE の値を返す(無ければ None)。"""
+    for i, a in enumerate(sys.argv):
+        if a == name and i + 1 < len(sys.argv):
+            return sys.argv[i + 1]
+        if a.startswith(name + "="):
+            return a.split("=", 1)[1]
+    return None
+
+
 def main():
+    global OUT_DIR
     dry_run = "--dry-run" in sys.argv
     preview = "--preview" in sys.argv
+    # --out-dir を指定したときは、その中にだけ書く(スナップショット・図鑑データは更新しない)
+    out_dir_arg = _argval("--out-dir")
+    if out_dir_arg:
+        OUT_DIR = out_dir_arg
     today = datetime.now(JST).date()
 
     data = load_json(DATA_PATH)
@@ -392,6 +410,11 @@ def main():
     out_path = os.path.join(OUT_DIR, f"{stem}.md")
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(xpack + article)
+
+    if out_dir_arg:
+        # 出力先を指定した試験・確認では、記録ファイル(スナップショット・図鑑データ)は触らない
+        print(f"[ok] {out_path} を生成しました(掲載{len(current)}件・記録ファイルは未更新)")
+        return
 
     # 次回の差分検出用スナップショット(消滅コーナーで使う項目だけ保持)
     snap = {
