@@ -262,7 +262,8 @@ def test_stdout_has_no_buyer_ids(temp_metrics_file, mock_metrics, capsys):
 
 def test_main_returns_1_on_failure(temp_metrics_file):
     with _apis(temp_metrics_file, note_exc=NoteAPIError("x")):
-        assert collect_weekly_metrics.main(["-w", "2026-W40", "--property-id", "1"]) == 1
+        # トークンがあるときの note の失敗は全体の失敗(トークン未登録は別の扱い: 下の EXIT_PARTIAL)
+        assert collect_weekly_metrics.main(["-w", "2026-W40", "--property-id", "1", "--api-token", "t"]) == 1
 
 
 # --- I3: ファイル検証が先・書き込みはアトミック ---------------------------------------------
@@ -343,3 +344,37 @@ def test_channel_id_falls_back_to_kekka_constant(temp_metrics_file, mock_metrics
     with _apis(temp_metrics_file, note, ga4, line) as (_, _, m_line):
         _run(channel_id=None)
     assert m_line.call_args.args[0] == "2011004310"
+
+
+# --- note のトークン未登録(2026-11-24 追加)-----------------------------------------
+
+def test_missing_note_token_records_others_and_marks_note(temp_metrics_file, mock_metrics, monkeypatch):
+    """トークンが無ければ note を呼ばず「要確認」と記録し、GA4・LINE は記録する。数字は入れない"""
+    monkeypatch.delenv("NOTE_API_TOKEN", raising=False)
+    _, ga4, line = mock_metrics
+    with _apis(temp_metrics_file, ga4=ga4, line=line) as (m_note, _, _):
+        result = _run(api_token="")
+    m_note.assert_not_called()
+    saved = next(w for w in _saved(temp_metrics_file)["weeks"] if w["week"] == "2026-W40")
+    assert saved["note"] == collect_weekly_metrics.NOTE_UNAVAILABLE
+    assert "total_sales_jpy" not in saved["note"] and "views_by_article" not in saved["note"]
+    assert saved["ga4"]["sessions"] == 250 and saved["line"]["registered_count"] == 200
+    assert collect_weekly_metrics.summarize(result)["note"] == collect_weekly_metrics.NOTE_UNAVAILABLE
+
+
+def test_main_returns_partial_when_note_token_missing(temp_metrics_file, mock_metrics, monkeypatch):
+    monkeypatch.delenv("NOTE_API_TOKEN", raising=False)
+    monkeypatch.setenv("GA4_PROPERTY_ID", "123456")
+    _, ga4, line = mock_metrics
+    with _apis(temp_metrics_file, ga4=ga4, line=line):
+        rc = collect_weekly_metrics.main(["-w", "2026-W40"])
+    assert rc == collect_weekly_metrics.EXIT_PARTIAL
+    assert any(w["week"] == "2026-W40" for w in _saved(temp_metrics_file)["weeks"])
+
+
+def test_note_failure_with_token_still_fails(temp_metrics_file, mock_metrics):
+    """トークンがあるのに失敗したら(認証切れ等)、これまでどおり全体を失敗にする"""
+    _, ga4, line = mock_metrics
+    with _apis(temp_metrics_file, ga4=ga4, line=line, note_exc=NoteAPIError("401")):
+        with pytest.raises(CollectError):
+            _run(api_token="token")
