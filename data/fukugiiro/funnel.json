@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-16",
+  "updated_at": "2026-11-23",
   "period": "7d",
   "source": "ga4-data-api",
   "stages": [
     {
       "key": "shindan_start",
       "label": "診断開始",
-      "count": 7,
+      "count": 1,
       "cvr_from_prev": null,
       "drop_rate": null
     },
@@ -15,8 +15,8 @@
       "key": "shindan_step_q2",
       "label": "Q2到達",
       "count": 1,
-      "cvr_from_prev": 0.14285714285714285,
-      "drop_rate": 0.8571428571428572
+      "cvr_from_prev": 1.0,
+      "drop_rate": 0.0
     },
     {
       "key": "shindan_step_q3",
@@ -59,7 +59,7 @@
     "seido_done_mark": 0,
     "jukyu_report_click": 0,
     "shindan_zero": 0,
-    "jukyu_report_link_top": 1,
+    "jukyu_report_link_top": 0,
     "jukyu_report_link_shindan": 0,
     "jukyu_report_link_kit": 0,
     "jukyu_report_link_area": 0,
@@ -68,7 +68,7 @@
     "shindan_redirect": 0
   },
   "key_rates": {
-    "finish_rate": 0.14285714285714285,
+    "finish_rate": 1.0,
     "line_cvr": 0.0,
     "zero_rate": 0.0
   },
