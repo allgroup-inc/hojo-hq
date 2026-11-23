@@ -31,6 +31,7 @@ hojo-hq — 出荷ゲートの通過記録と検査(運用規程1-3の実装)
   python scripts/shipping_gate.py --check posts/launch/01_launch.md
   python scripts/shipping_gate.py --check-group sns  # 配信経路ごとに検査(CI用・sns/line)
   python scripts/shipping_gate.py --check-all        # 対外文面をまとめて検査
+  python scripts/shipping_gate.py --expiring         # 期限が近い・切れた通過記録を一覧(Issue起票用)
   python scripts/shipping_gate.py --self-test
 """
 import glob
@@ -232,6 +233,49 @@ def check_all(base=BASE, today=None, group=None):
     return 0
 
 
+# ---------------------------------------------------------------- 期限の一覧(Issue起票用)
+# 2026-11-24: 期限14日前の警告は CI のログに1行出るだけで、CI は緑のまま誰にも届かなかった。
+# 2026-11-15 に LINE締切アラートの記録が90日を超えて出荷が止まり、制度収集の run が9日間赤のままだった。
+# 警告の段階で人に届くよう、週1回この一覧を Issue にする(.github/workflows/shipping-gate-expiry.yml)。
+
+def expiring(base=BASE, today=None):
+    """期限が近い(WARN_AGE_DAYS 超)か切れた(MAX_AGE_DAYS 超)通過記録の一覧。
+    同じ生成器の文面が複数ファイルにあっても、(生成器, 記録日)ごとに1行にまとめる。"""
+    today = today or datetime.now(JST).date()
+    rows = {}
+    for p in collect_targets(base):
+        try:
+            with open(p, encoding="utf-8") as f:
+                st = parse_stamp(f.read())
+        except OSError:
+            continue
+        if not st or st["checked"] is None:
+            continue
+        age = (today - st["checked"]).days
+        if age <= WARN_AGE_DAYS:
+            continue
+        key = (st.get("by") or "(記入なし)", st["checked"])
+        r = rows.setdefault(key, {"by": key[0], "checked": st["checked"], "age": age,
+                                  "days_left": MAX_AGE_DAYS - age, "files": []})
+        r["files"].append(os.path.relpath(p, base))
+    return sorted(rows.values(), key=lambda r: r["days_left"])
+
+
+def render_expiring(rows):
+    if not rows:
+        return ""
+    out = ["出荷ゲートの通過記録に、期限が近い・切れたものがあります。",
+           f"記録から{MAX_AGE_DAYS}日を超えると、その文面は出荷が止まります(CI が赤になります)。",
+           "", "| 生成器 | 記録日 | 経過 | 残り | 対象 |", "|---|---|---|---|---|"]
+    for r in rows:
+        left = f"{r['days_left']}日" if r["days_left"] >= 0 else f"**{-r['days_left']}日超過(出荷停止中)**"
+        files = "<br>".join(r["files"][:5]) + (f"<br>ほか{len(r['files']) - 5}件" if len(r["files"]) > 5 else "")
+        out.append(f"| {r['by']} | {r['checked']} | {r['age']}日 | {left} | {files} |")
+    out += ["", "対応: 生成器の文面を3スキル(accuracy-check / deadline-alert / humanizer)で見直し、"
+            "生成器の `GATE_CHECKED`(記録日)を更新する。確かめられない数字は書かない。"]
+    return "\n".join(out)
+
+
 # ---------------------------------------------------------------- 自己テスト
 
 _OK_DOC = """# 投稿1
@@ -324,6 +368,27 @@ def self_test():
     check("group.all_is_union", set(collect_targets()) == set(sns_t) | set(line_t) | set(glow_t))
     check("group.sns_found", len(sns_t) >= 1, f"got {len(sns_t)}")
 
+    # 9) 期限の一覧(警告の段階で拾う・期限内は拾わない・切れたものも拾う)
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        os.makedirs(os.path.join(tmp, "posts", "line"))
+        os.makedirs(os.path.join(tmp, "posts", "launch"))
+        def put(rel, d, by):
+            with open(os.path.join(tmp, rel), "w", encoding="utf-8") as f:
+                f.write(render_stamp(by, d))
+        put("posts/line/a.md", "2026-08-17", "gen_line.py")
+        put("posts/launch/01.md", "2026-10-16", "gen_sns.py")
+        put("posts/launch/02.md", "2026-10-16", "gen_sns.py")
+        rows = expiring(tmp, today=date(2026, 11, 8))     # line=83日(警告) / sns=23日(期限内)
+        check("expiring.warn_only", [r["by"] for r in rows] == ["gen_line.py"], f"got {rows}")
+        check("expiring.days_left", rows and rows[0]["days_left"] == 7, f"got {rows}")
+        rows = expiring(tmp, today=date(2027, 1, 5))       # line=141日(切れ) / sns=81日(警告)
+        check("expiring.expired_first", [r["by"] for r in rows] == ["gen_line.py", "gen_sns.py"], f"got {rows}")
+        check("expiring.grouped", len(rows) == 2 and len(rows[1]["files"]) == 2, f"got {rows}")
+        md = render_expiring(rows)
+        check("expiring.render", "出荷停止中" in md and "gen_sns.py" in md and "GATE_CHECKED" in md)
+        check("expiring.none_is_empty", render_expiring(expiring(tmp, today=date(2026, 10, 20))) == "")
+
     if failed:
         print(f"自己テスト失敗: {failed} 件")
         return 1
@@ -336,6 +401,11 @@ def main():
         return self_test()
     if "--check-all" in sys.argv:
         return check_all()
+    if "--expiring" in sys.argv:
+        md = render_expiring(expiring())
+        if md:
+            print(md)
+        return 0
     if "--check-group" in sys.argv:
         i = sys.argv.index("--check-group")
         name = sys.argv[i + 1] if i + 1 < len(sys.argv) else ""

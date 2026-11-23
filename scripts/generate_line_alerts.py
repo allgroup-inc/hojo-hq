@@ -39,7 +39,12 @@ DATA_PATH = os.path.join(BASE_DIR, "..", "data", "subsidies.json")
 # 2026-08-17: accuracy-check(締切・金額・出典URLはdata由来/「必ず原文でご確認ください」を明記)/
 #             deadline-alert(3層ルール: 30日以上=SNSのみ・7〜29日=LINE・7日未満=予告切替)/
 #             humanizer(急かす表現・過剰な絵文字なし)で確認。
-GATE_CHECKED = "2026-08-17"
+# 2026-11-24: 90日の期限切れ(11/15)で出荷が止まったため再点検。3層の境界(7〜29日)・残り日数の表記・
+#             予告側のgBizID案内・禁止表現なしは変わらず合格。直したのは2点(accuracy-check):
+#             ①見出し「補助金」→「公募」(jGrantsの対象には国の調査委託の公募も入り、補助金と言い切れない)
+#             ②gBizIDの発行日数(「速やかに」「最大1か月」)は今回公式ページで確かめられなかったため数字を外し、
+#               「郵送は日数がかかる・公式サイトで確認」にとどめた(確かめていない数字は書かない)
+GATE_CHECKED = "2026-11-24"
 OUT_MD = os.path.join(BASE_DIR, "..", "posts", "line", "alerts_latest.md")
 OUT_JSON = os.path.join(BASE_DIR, "..", "data", "line_alerts.json")
 SITE_URL = "https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert"
@@ -108,7 +113,7 @@ def main():
         "```",
     ]
     if hits:
-        body = ["📣【締切が近づいている補助金】", "早めの準備で、間に合わせましょう。"]
+        body = ["📣【締切が近づいている公募】", "早めの準備で、間に合わせましょう。"]
         for lo, hi, emoji, label, cap in TIERS:
             tier = [it for it in hits if lo <= it["_days"] <= hi]
             if not tier:
@@ -126,7 +131,7 @@ def main():
                 body.append(f"　…ほか{len(tier)-cap}件は一覧へ")
         body += [
             "",
-            "💡 電子申請には gBizIDプライム が必要な制度が多いです。オンライン申請(マイナンバーカード)なら速やかに、書類の郵送申請は審査に最大1か月かかります。",
+            "💡 電子申請には gBizIDプライム が必要な制度が多いです。郵送で申請すると発行まで日数がかかるので、早めの準備がおすすめです(申請方法はgBizIDの公式サイトでご確認ください)。",
             "",
             "準備が間に合うか不安なときは、このLINEに「相談」と一言どうぞ。無料で、担当が状況に合わせてご案内します。",
             "※要件・締切は必ず原文でご確認ください。",
@@ -141,7 +146,7 @@ def main():
         lines += [
             f"⏳ 締切目前の公募が{len(soon_closed)}件あります。",
             "いまから書類を整えるのは大変なので、無理は禁物。",
-            "次の公募に備えて【gBizIDプライム】を先に用意しておきましょう(オンライン申請なら速やかに発行、郵送は最大1か月)。",
+            "次の公募に備えて【gBizIDプライム】を先に用意しておきましょう(郵送の申請は発行まで日数がかかります。申請方法はgBizIDの公式サイトでご確認ください)。",
             f"制度一覧 → {SITE_URL}",
         ]
     else:

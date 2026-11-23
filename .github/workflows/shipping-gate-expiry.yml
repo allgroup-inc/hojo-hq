@@ -1,0 +1,59 @@
+# 出荷ゲートの通過記録の期限を、警告の段階で人に届ける(2026-11-24 新設)。
+#
+# 2026-11-15、LINE締切アラートの通過記録(2026-08-17)が90日を超えて出荷が止まり、
+# 制度収集(update-subsidies)の run が毎回赤になった。期限14日前の警告は CI のログに
+# 1行出るだけで、CI は緑のまま誰にも届いていなかった。
+# 週1回、期限が近い・切れた記録を1つの Issue にまとめる(同じ Issue に追記し、増やさない)。
+# 期限内に戻れば Issue を閉じる。文面の点検そのものは人が行う(このジョブは知らせるだけ)。
+name: shipping-gate-expiry
+
+on:
+  schedule:
+    - cron: "17 23 * * 0"   # 月曜 08:17 JST(正時は GitHub の混雑で遅れやすいので外す)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: shipping-gate-expiry
+  cancel-in-progress: false
+
+jobs:
+  expiry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 期限が近い・切れた通過記録を一覧にする
+        run: |
+          python scripts/shipping_gate.py --self-test
+          python scripts/shipping_gate.py --expiring > expiring.md
+          cat expiring.md
+
+      - name: Issue に知らせる(無ければ作る・あれば追記・期限内に戻れば閉じる)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: "出荷ゲートの点検期限(対外文面の再点検が必要)"
+        run: |
+          num=$(gh issue list --state open --search "in:title \"$TITLE\"" --json number,title \
+                --jq "map(select(.title == env.TITLE)) | .[0].number // empty")
+          if [ -s expiring.md ]; then
+            if [ -n "$num" ]; then
+              gh issue comment "$num" --body-file expiring.md
+            else
+              gh issue create --title "$TITLE" --body-file expiring.md
+            fi
+          elif [ -n "$num" ]; then
+            gh issue close "$num" --comment "期限が近い・切れた通過記録はなくなりました($(TZ=Asia/Tokyo date '+%Y-%m-%d') 時点)。"
+          else
+            echo "期限が近い記録はありません"
+          fi
