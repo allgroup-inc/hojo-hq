@@ -28,6 +28,14 @@ import os
 import re
 import sys
 
+# 日付は日本時間で決める。週次の定時は日曜の夜(UTC)に動かすため、
+# 実行環境の日付(UTC)だと前の週の週番号になる(2026-11-23 定時の4時間遅れを受けて前倒し)
+JST = dt.timezone(dt.timedelta(hours=9))
+
+
+def today_jst(now=None):
+    return (now or dt.datetime.now(dt.timezone.utc)).astimezone(JST).date()
+
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
@@ -161,7 +169,7 @@ def build_caption(s):
         label = "相談先は" if is_window(s) else "申し込みの窓口は"
         parts.append(_sentence(f"{label}{how.rstrip('。')}"))
     parts.append("金額や細かい条件は年度で変わることがあるので、"
-                 "このページでご確認ください。")
+                 "公式ページでご確認ください。")
     parts.append(CLOSER)
     return "".join(parts)
 
@@ -356,6 +364,12 @@ def self_test():
     check("ハッシュタグにブランドが入る", "#もらいわすれ堂" in hashtags(seido["items"][0]))
     check("注意書きに制度IDを残す", "p1" in build_caution(seido["items"][0]))
     check("週番号が入る", d["week"] == "2026-W39")
+    # 日曜 19:23 UTC(= 月曜 04:23 JST)の定時でも、月曜の週番号になる
+    sun_utc = dt.datetime(2026, 11, 22, 19, 23, tzinfo=dt.timezone.utc)
+    check("日付は日本時間で決める", today_jst(sun_utc) == dt.date(2026, 11, 23)
+          and build(seido, set(), set(), today_jst(sun_utc))["week"] == "2026-W48")
+    check("キャプションは「このページ」と書かない(インスタの投稿には指す先が無い)",
+          "このページ" not in cap and "公式ページでご確認ください" in cap)
 
     # 候補が足りないときは無理に埋めない
     few = build({"items": [prog(1, "子育て")]}, set(), set(), today)
@@ -380,7 +394,7 @@ def main():
         with open(NETA, encoding="utf-8") as f:
             prev = json.load(f)
 
-    d = build(seido, previous_ids(prev), previous_urls(prev), dt.date.today())
+    d = build(seido, previous_ids(prev), previous_urls(prev), today_jst())
     if len(d["items"]) < N_ITEMS:
         print(f"::warning::候補が足りず {len(d['items'])}案しか作れませんでした"
               f"(照合済み・締切なしの制度を増やしてください)")

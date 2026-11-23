@@ -25,7 +25,7 @@ import sys
 import urllib.parse
 import urllib.request
 import urllib.error
-from datetime import date
+from datetime import datetime, timedelta, timezone
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 OUT = os.path.join(BASE, "data", "fukugiiro", "funnel.json")
@@ -230,7 +230,7 @@ def main():
             print(f"[warn] channel内訳の取得失敗(継続): {type(e).__name__}")
 
     fn = build_funnel(counts)
-    out = {"schema_version": 1, "updated_at": date.today().isoformat(),
+    out = {"schema_version": 1, "updated_at": datetime.now(timezone(timedelta(hours=9))).date().isoformat(),
            "period": period, "source": source}
     if line_detail:
         out["line_detail"] = line_detail
