@@ -14,6 +14,15 @@ on:
     # JST 10:30(= UTC 01:30)。ヘルスチェック(10:00 JST)の後に計測。
     - cron: "30 1 * * *"
   workflow_dispatch: {}
+  # トップLPを変えるPRでは、統合前に手元のファイルを計測する(2026-11-24 追加)。
+  # 2026-10-03 に見やすさ(Accessibility)が 0.92 へ下がったまま、毎日の本番計測で
+  # 51日間 Issue に追記され続けた(文字色のコントラスト不足・地域選択の名前なし)。
+  # 下がる変更は PR の段階で止める
+  pull_request:
+    paths:
+      - "site/index.html"
+      - ".github/lighthouserc.pr.json"
+      - ".github/workflows/lighthouse.yml"
 
 permissions:
   contents: read
@@ -24,7 +33,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # PR: 手元の site/index.html を計測。CI 機の性能で揺れる Performance は見ず、
+  # 揺れない見やすさ・SEO・Best Practices だけを本番と同じ基準(0.95)で止める
+  pr-audit:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: 手元のサイトを配信
+        run: |
+          nohup python3 -m http.server 8931 --directory site > /tmp/httpd.log 2>&1 &
+          sleep 2
+          curl -fsS -o /dev/null http://127.0.0.1:8931/index.html
+      - name: Run Lighthouse(PRのトップLP・3回計測)
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            http://127.0.0.1:8931/index.html
+          runs: 3
+          configPath: .github/lighthouserc.pr.json
+
   audit:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
