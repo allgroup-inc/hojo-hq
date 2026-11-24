@@ -21,6 +21,7 @@ LINE配信用の下書きを生成する。update.yml で毎日自動実行。
 """
 import json
 import os
+import re
 import sys
 from datetime import datetime, timezone, timedelta
 
@@ -58,6 +59,32 @@ TIERS = [
 ]
 
 
+# LINEで扱う公募の範囲(2026-11-24 小柳さん決裁: docs/議事_20261124_LINE締切アラートの対象.md)。
+# 沖縄県・県内市町村・事業承継の制度はすべて扱う。全国の公募のうち、沖縄の中小企業が
+# そのまま申し込みにくいもの(調査・委託・研究開発、大企業向け、超大型)は LINE では扱わない。
+# サイトの制度一覧からは消さない(LINEで知らせないだけ)。
+# 迷うものは外さない(外すのは確かに中小企業向けでないものだけ)。独立レビュー(2026-11-24)を受け、
+# 従業員要件での除外はやめた(jGrants の「901名以上」は規模の区分で、中小企業が対象外とは限らない)。
+SCOPE_ALWAYS_TAGS = {"okinawa", "shokei"}
+SCOPE_RESEARCH = re.compile(r"調査|委託|研究開発|技術開発|実証")
+SCOPE_SME = re.compile(r"中小企業|小規模|中小")   # 中小企業向けの研究開発支援(Go-Tech 等)は外さない
+SCOPE_MAX_AMOUNT = 1_000_000_000       # 上限が10億円を超えるものは、地域の中小企業向けとは言いにくい
+
+
+def scope_reason(it):
+    """LINEで扱わない理由。扱うなら None。"""
+    if it.get("tag") in SCOPE_ALWAYS_TAGS:
+        return None
+    text = f"{it.get('name') or ''} {it.get('issuer') or ''}"
+    if SCOPE_SME.search(text):
+        return None
+    if SCOPE_RESEARCH.search(text):
+        return "調査・委託・研究開発"
+    if (it.get("max_amount") or 0) > SCOPE_MAX_AMOUNT:
+        return "上限10億円超"
+    return None
+
+
 def parse_date(s):
     try:
         return datetime.strptime(s, "%Y-%m-%d").date()
@@ -83,6 +110,7 @@ def main():
 
     hits = []
     soon_closed = []  # 7日未満: 予告切替対象(配信では急かさない)
+    out_of_scope = {}  # LINEで扱わない公募(理由 → 件数)。サイトの一覧には残る
     for it in data.get("items", []):
         d = parse_date(it.get("deadline"))
         if not d:
@@ -90,6 +118,11 @@ def main():
         days = (d - today).days
         if it.get("status") != "募集中":
             continue
+        if 0 <= days <= ALERT_MAX:
+            why = scope_reason(it)
+            if why:
+                out_of_scope[why] = out_of_scope.get(why, 0) + 1
+                continue
         if ALERT_MIN <= days <= ALERT_MAX:
             hits.append({**it, "_days": days})
         elif 0 <= days < ALERT_MIN:
@@ -105,6 +138,9 @@ def main():
         f"- 生成日: {today}(毎日自動更新)",
         f"- LINEアラート対象(残り{ALERT_MIN}〜{ALERT_MAX}日): {len(hits)}件",
         f"- 7日未満(予告切替・配信で急かさない): {len(soon_closed)}件 → 末尾の予告文を使用",
+        "- LINEで扱わない公募(サイトの一覧には掲載): "
+        + (" / ".join(f"{k} {v}件" for k, v in sorted(out_of_scope.items())) or "なし")
+        + "(docs/議事_20261124_LINE締切アラートの対象.md)",
         "- 使い方: 下の本文をそのまま LINE Official Account Manager のメッセージ配信へ。",
         "",
         "---",
@@ -210,5 +246,38 @@ def main():
     print(f"[ok] LINE対象(残り{ALERT_MIN}-{ALERT_MAX}日): {len(hits)}件 {by_tier} / 予告切替(7日未満): {len(soon_closed)}件")
 
 
+def self_test():
+    ok = bad = 0
+
+    def check(label, cond):
+        nonlocal ok, bad
+        if cond:
+            ok += 1
+        else:
+            bad += 1
+            print(f"  NG {label}")
+
+    def it(name, tag="nationwide", issuer="", employees="従業員数の制約なし", amount=0):
+        return {"name": name, "tag": tag, "issuer": issuer, "employees": employees, "max_amount": amount}
+
+    check("小規模事業者持続化補助金は扱う",
+          scope_reason(it("小規模事業者持続化補助金＜創業型＞", employees="20名以下", amount=2_000_000)) is None)
+    check("特許動向調査は扱わない", scope_reason(it("「ナトリウムイオン電池に関する技術（特許）動向調査」の公募")) == "調査・委託・研究開発")
+    check("研究開発事業(事業名側)は扱わない",
+          scope_reason(it("記録レス介護モデルの公募", issuer="ポスト５Ｇ情報通信システム基盤強化研究開発事業")) == "調査・委託・研究開発")
+    check("従業員の区分(901名以上)では外さない", scope_reason(it("事業再編計画支援", employees="901名以上")) is None)
+    check("上限250億円は扱わない", scope_reason(it("GX地域共創補助金2026", amount=25_000_000_000)) == "上限10億円超")
+    check("上限ちょうど10億円は扱う", scope_reason(it("業務用建築物の脱炭素改修加速化事業", amount=1_000_000_000)) is None)
+    check("上限5億円は扱う", scope_reason(it("ZEB支援事業", amount=500_000_000)) is None)
+    check("中小企業向けの研究開発支援は扱う",
+          scope_reason(it("成長型中小企業等研究開発支援事業(Go-Tech事業)")) is None)
+    check("沖縄の制度は、調査の語があっても扱う", scope_reason(it("沖縄県 市場調査支援事業", tag="okinawa")) is None)
+    check("事業承継の制度は扱う", scope_reason(it("事業承継・引継ぎ補助金", tag="shokei", amount=8_000_000)) is None)
+    print(f"自己テスト: OK {ok} / NG {bad}")
+    return 1 if bad else 0
+
+
 if __name__ == "__main__":
+    if "--self-test" in sys.argv:
+        sys.exit(self_test())
     main()

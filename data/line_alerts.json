@@ -1,32 +1,12 @@
 {
- "generated_at": "2026-11-24 08:06",
+ "generated_at": "2026-11-24 09:22",
  "alert_window": [
   7,
   29
  ],
- "soon_closed_count": 18,
- "count": 18,
+ "soon_closed_count": 14,
+ "count": 11,
  "items": [
-  {
-   "id": "a0WfQ0000047V4oUAE",
-   "name": "「ナトリウムイオン電池に関する技術（特許）動向調査」の公募",
-   "deadline": "2026-12-03",
-   "days_left": 9,
-   "tier": "まもなく締切(7〜14日)",
-   "max_amount": 0,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ0000047V4oUAE",
-   "tag": "nationwide"
-  },
-  {
-   "id": "a0WfQ0000042PWHUA2",
-   "name": "「自動車用内燃機関技術のグローバル動向調査」の公募",
-   "deadline": "2026-12-03",
-   "days_left": 9,
-   "tier": "まもなく締切(7〜14日)",
-   "max_amount": 0,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ0000042PWHUA2",
-   "tag": "nationwide"
-  },
   {
    "id": "a0WJ200000CDbyjMAD",
    "name": "令和８年度ゼロエミッション船等の導入支援事業",
@@ -35,16 +15,6 @@
    "tier": "まもなく締切(7〜14日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDbyjMAD",
-   "tag": "nationwide"
-  },
-  {
-   "id": "a0WfQ0000049aA1UAI",
-   "name": "「次世代バイオものづくり製造基盤技術に関する調査」の公募",
-   "deadline": "2026-12-04",
-   "days_left": 10,
-   "tier": "まもなく締切(7〜14日)",
-   "max_amount": 0,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ0000049aA1UAI",
    "tag": "nationwide"
   },
   {
@@ -65,26 +35,6 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003znYLUAY",
-   "tag": "nationwide"
-  },
-  {
-   "id": "a0WfQ0000049swXUAQ",
-   "name": "令和７年度補正「次世代革新炉の開発・建設に向けた技術開発・サプライチェーン構築支援事業補助金」【三次公募】",
-   "deadline": "2026-12-11",
-   "days_left": 17,
-   "tier": "準備をはじめる(15〜29日)",
-   "max_amount": 2700000000,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ0000049swXUAQ",
-   "tag": "nationwide"
-  },
-  {
-   "id": "a0WfQ000003dVevUAE",
-   "name": "GX地域共創補助金2026",
-   "deadline": "2026-12-14",
-   "days_left": 20,
-   "tier": "準備をはじめる(15〜29日)",
-   "max_amount": 25000000000,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003dVevUAE",
    "tag": "nationwide"
   },
   {
@@ -118,16 +68,6 @@
    "tag": "nationwide"
   },
   {
-   "id": "a0WfQ000003qLZhUAM",
-   "name": "「ポスト５Ｇ情報通信システム基盤強化研究開発事業／記録レス介護実現のための介護特化モデル等に関する研究開発（委託）」の公募",
-   "deadline": "2026-12-16",
-   "days_left": 22,
-   "tier": "準備をはじめる(15〜29日)",
-   "max_amount": 0,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003qLZhUAM",
-   "tag": "nationwide"
-  },
-  {
    "id": "a0WfQ000003pvCDUAY",
    "name": "令和８年度２次公募 情報処理・サービス・製造産業事業費補助金 （重要鉱物に係るサプライチェーン強靱化事業）",
    "deadline": "2026-12-16",
@@ -155,16 +95,6 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 1000000,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYC7MAP",
-   "tag": "nationwide"
-  },
-  {
-   "id": "a0WfQ0000043Od4UAE",
-   "name": "「ポスト5G情報通信システム基盤強化研究開発事業（社会課題解決に向けた量子コンピュータ次世代機開発・実証の加速）」（b-2：人材育成）の追加公募",
-   "deadline": "2026-12-22",
-   "days_left": 28,
-   "tier": "準備をはじめる(15〜29日)",
-   "max_amount": 0,
-   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ0000043Od4UAE",
    "tag": "nationwide"
   },
   {

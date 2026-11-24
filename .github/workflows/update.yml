@@ -257,4 +257,5 @@ jobs:
       - name: LINE配信下書きの出荷ゲート検査
         run: |
           python scripts/shipping_gate.py --self-test
+          python scripts/generate_line_alerts.py --self-test   # LINEで扱う公募の範囲(議事_20261124)
           python scripts/shipping_gate.py --check-group line
