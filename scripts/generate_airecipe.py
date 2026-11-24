@@ -133,6 +133,9 @@ def parse_json_loose(text):
     return json.loads(m.group(0))
 
 
+VERIFY_MAX_TOKENS = 6000
+
+
 def call_claude(client, system, user, max_tokens):
     kwargs = dict(
         model=MODEL,
@@ -164,7 +167,10 @@ def generate_recipe(client, topic, feedback=None):
 def run_verification(client, recipe, topic):
     """生成されたプロンプトを、読者がやるのと同じ形で実際に実行する(=検証)。"""
     user = recipe["prompt_text"] + "\n\n---\n\n" + topic["sample_input"]
-    out = call_claude(client, system="", user=user, max_tokens=2000)
+    # 2026-09-15〜11-03、表や手順を出すプロンプトの出力が2000トークンで切れ、
+    # stop_reason=max_tokens で毎回止まっていた。実行ログは記事に原文のまま載せるため、
+    # 途中で切れた出力は使わない(止めるのは変えない)。上限だけ、実際の出力が収まる大きさにする
+    out = call_claude(client, system="", user=user, max_tokens=VERIFY_MAX_TOKENS)
     if len(out) < 80:
         raise RuntimeError(f"検証出力が短すぎる({len(out)}字)")
     return out

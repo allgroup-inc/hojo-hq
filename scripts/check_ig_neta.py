@@ -330,7 +330,7 @@ def main():
     if a.self_test:
         return self_test()
     neta, seido = load(NETA), load(SEIDO)
-    today = dt.date.today()
+    today = dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).date()  # 日本時間の日付
     ng, warn = audit(neta, seido, today)
     unknown = []
     if a.online:

@@ -47,7 +47,11 @@ jobs:
           INPUT_WEEK: ${{ github.event.inputs.week }}
         run: |
           missing=0
-          for name in NOTE_API_TOKEN KEKKA_LINE_CHANNEL_ACCESS_TOKEN GA4_PROPERTY_ID GA4_SA_JSON; do
+          # note のトークンだけは、未登録でも GA4・LINE を集める(note は「要確認」で記録し、最後に失敗にする)
+          if [ -z "$NOTE_API_TOKEN" ]; then
+            echo "::warning::Secret NOTE_API_TOKEN is not set(note は要確認として記録します)"
+          fi
+          for name in KEKKA_LINE_CHANNEL_ACCESS_TOKEN GA4_PROPERTY_ID GA4_SA_JSON; do
             if [ -z "${!name}" ]; then
               echo "::error::Secret $name is not set"
               missing=1
@@ -82,23 +86,29 @@ jobs:
           echo "GOOGLE_APPLICATION_CREDENTIALS=$key" >> "$GITHUB_ENV"
 
       - name: Collect weekly metrics
+        id: collect
         env:
           NOTE_API_TOKEN: ${{ secrets.NOTE_API_TOKEN }}
           KEKKA_LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.KEKKA_LINE_CHANNEL_ACCESS_TOKEN }}
           GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
           INPUT_WEEK: ${{ github.event.inputs.week }}
         run: |
+          rc=0
           if [ -n "$INPUT_WEEK" ]; then
-            python scripts/collect_weekly_metrics.py -w "$INPUT_WEEK"
+            python scripts/collect_weekly_metrics.py -w "$INPUT_WEEK" || rc=$?
           else
-            python scripts/collect_weekly_metrics.py
+            python scripts/collect_weekly_metrics.py || rc=$?
           fi
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          # 3 = 記録はしたが note が未取得。保存(下の Commit)を先に済ませ、最後に失敗にする
+          [ "$rc" -eq 0 ] || [ "$rc" -eq 3 ]
 
       - name: Cleanup GA4 credentials
         if: always()
         run: rm -f "$RUNNER_TEMP/ga4_key.json"
 
       - name: Commit and push
+        id: commit
         env:
           REF_NAME: ${{ github.ref_name }}
         run: |
@@ -120,6 +130,12 @@ jobs:
           echo "::error::push に3回失敗しました"
           exit 1
 
+      - name: note が未取得なら失敗にする(GA4・LINE は記録済み)
+        if: steps.collect.outputs.rc == '3'
+        run: |
+          echo "::error::NOTE_API_TOKEN が未登録のため、note の実績は「要確認」で記録しました。トークンを登録して、この週を workflow_dispatch で再実行してください"
+          exit 1
+
       # 失敗時: Issue を起票する(同名の Open Issue があれば追記)。本文は実行URLのみ(数値・PII は載せない)
       - name: Open issue on failure
         if: failure()
@@ -127,11 +143,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           INPUT_WEEK: ${{ github.event.inputs.week }}
+          RC: ${{ steps.collect.outputs.rc }}
+          COMMIT: ${{ steps.commit.outcome }}
         run: |
           title="結果マガ週次メトリクス集約(kekka-weekly-collect)失敗"
+          # 「記録済み」と書くのは、一部未取得(3)で、しかも保存(push)が成功したときだけ
+          if [ "$RC" = "3" ] && [ "$COMMIT" = "success" ]; then
+            saved="GA4・LINE は data/kekka_weekly_metrics.json に記録済みです。note は NOTE_API_TOKEN 未登録のため「要確認」で記録しています。トークンを登録して workflow_dispatch で週を指定し再実行してください。"
+          else
+            saved="この週のデータは data/kekka_weekly_metrics.json に書かれていません。原因を直して workflow_dispatch で週を指定し再実行してください。"
+          fi
           body="週次メトリクスの集約に失敗しました。対象週: ${INPUT_WEEK:-前週(既定)}
           実行ログ: $RUN_URL
-          この週のデータは data/kekka_weekly_metrics.json に書かれていません。原因を直して workflow_dispatch で週を指定し再実行してください。"
+          $saved"
           existing=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number')
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "$body"
