@@ -63,11 +63,12 @@ TIERS = [
 # 沖縄県・県内市町村・事業承継の制度はすべて扱う。全国の公募のうち、沖縄の中小企業が
 # そのまま申し込みにくいもの(調査・委託・研究開発、大企業向け、超大型)は LINE では扱わない。
 # サイトの制度一覧からは消さない(LINEで知らせないだけ)。
+# 迷うものは外さない(外すのは確かに中小企業向けでないものだけ)。独立レビュー(2026-11-24)を受け、
+# 従業員要件での除外はやめた(jGrants の「901名以上」は規模の区分で、中小企業が対象外とは限らない)。
 SCOPE_ALWAYS_TAGS = {"okinawa", "shokei"}
 SCOPE_RESEARCH = re.compile(r"調査|委託|研究開発|技術開発|実証")
-SCOPE_LARGE_EMPLOYEES = re.compile(r"(\d+)\s*名以上")
-SCOPE_LARGE_EMPLOYEES_MIN = 301        # 「301名以上」など、中小企業を対象にしない従業員要件
-SCOPE_MAX_AMOUNT = 1_000_000_000       # 上限10億円以上は、地域の中小企業向けとは言いにくい
+SCOPE_SME = re.compile(r"中小企業|小規模|中小")   # 中小企業向けの研究開発支援(Go-Tech 等)は外さない
+SCOPE_MAX_AMOUNT = 1_000_000_000       # 上限が10億円を超えるものは、地域の中小企業向けとは言いにくい
 
 
 def scope_reason(it):
@@ -75,13 +76,12 @@ def scope_reason(it):
     if it.get("tag") in SCOPE_ALWAYS_TAGS:
         return None
     text = f"{it.get('name') or ''} {it.get('issuer') or ''}"
+    if SCOPE_SME.search(text):
+        return None
     if SCOPE_RESEARCH.search(text):
         return "調査・委託・研究開発"
-    m = SCOPE_LARGE_EMPLOYEES.search(it.get("employees") or "")
-    if m and int(m.group(1)) >= SCOPE_LARGE_EMPLOYEES_MIN:
-        return "大企業向け"
-    if (it.get("max_amount") or 0) >= SCOPE_MAX_AMOUNT:
-        return "上限10億円以上"
+    if (it.get("max_amount") or 0) > SCOPE_MAX_AMOUNT:
+        return "上限10億円超"
     return None
 
 
@@ -265,11 +265,12 @@ def self_test():
     check("特許動向調査は扱わない", scope_reason(it("「ナトリウムイオン電池に関する技術（特許）動向調査」の公募")) == "調査・委託・研究開発")
     check("研究開発事業(事業名側)は扱わない",
           scope_reason(it("記録レス介護モデルの公募", issuer="ポスト５Ｇ情報通信システム基盤強化研究開発事業")) == "調査・委託・研究開発")
-    check("901名以上は扱わない", scope_reason(it("事業再編計画支援", employees="901名以上")) == "大企業向け")
-    check("300名以下は扱う", scope_reason(it("外国出願補助金", employees="300名以下", amount=500_000)) is None)
-    check("21名以上(中小企業も入る要件)は扱う", scope_reason(it("雇用環境整備補助金", employees="21名以上")) is None)
-    check("上限250億円は扱わない", scope_reason(it("GX地域共創補助金2026", amount=25_000_000_000)) == "上限10億円以上")
+    check("従業員の区分(901名以上)では外さない", scope_reason(it("事業再編計画支援", employees="901名以上")) is None)
+    check("上限250億円は扱わない", scope_reason(it("GX地域共創補助金2026", amount=25_000_000_000)) == "上限10億円超")
+    check("上限ちょうど10億円は扱う", scope_reason(it("業務用建築物の脱炭素改修加速化事業", amount=1_000_000_000)) is None)
     check("上限5億円は扱う", scope_reason(it("ZEB支援事業", amount=500_000_000)) is None)
+    check("中小企業向けの研究開発支援は扱う",
+          scope_reason(it("成長型中小企業等研究開発支援事業(Go-Tech事業)")) is None)
     check("沖縄の制度は、調査の語があっても扱う", scope_reason(it("沖縄県 市場調査支援事業", tag="okinawa")) is None)
     check("事業承継の制度は扱う", scope_reason(it("事業承継・引継ぎ補助金", tag="shokei", amount=8_000_000)) is None)
     print(f"自己テスト: OK {ok} / NG {bad}")

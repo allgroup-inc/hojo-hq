@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-24 09:15",
+ "generated_at": "2026-11-24 09:22",
  "alert_window": [
   7,
   29
  ],
  "soon_closed_count": 14,
- "count": 10,
+ "count": 11,
  "items": [
   {
    "id": "a0WJ200000CDbyjMAD",
@@ -75,6 +75,16 @@
    "tier": "準備をはじめる(15〜29日)",
    "max_amount": 0,
    "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003pvCDUAY",
+   "tag": "nationwide"
+  },
+  {
+   "id": "a0WJ200000CDYBxMAP",
+   "name": "INPIT事業再編計画支援事業補助金（令和８年度）",
+   "deadline": "2026-12-18",
+   "days_left": 24,
+   "tier": "準備をはじめる(15〜29日)",
+   "max_amount": 6500000,
+   "source_url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYBxMAP",
    "tag": "nationwide"
   },
   {
