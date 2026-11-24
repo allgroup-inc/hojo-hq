@@ -149,6 +149,13 @@ def _write_atomic(path: Path, content: dict) -> None:
         raise
 
 
+NOTE_UNAVAILABLE = {"status": "要確認", "reason": "NOTE_API_TOKEN 未登録のため取得していません"}
+
+
+def note_unavailable(aggregated: dict) -> bool:
+    return (aggregated.get("note") or {}).get("status") == "要確認"
+
+
 def _public_note(note_dict: dict) -> dict:
     """note の公開用 dict。ホワイトリストのフィールドと購入者のユニーク人数だけにする。"""
     public = {k: note_dict[k] for k in _PUBLIC_NOTE_FIELDS if k in note_dict}
@@ -161,16 +168,17 @@ def summarize(aggregated: dict) -> dict:
     note = aggregated.get("note", {})
     ga4 = aggregated.get("ga4", {})
     line = aggregated.get("line", {})
+    note_summary = (dict(note) if note_unavailable(aggregated) else {
+        "articles": len(note.get("views_by_article") or {}),
+        "total_views": sum((note.get("views_by_article") or {}).values()),
+        "total_likes": note.get("total_likes"),
+        "total_sales_jpy": note.get("total_sales_jpy"),
+        "buyer_count": note.get("buyer_count"),
+    })
     return {
         "week": aggregated.get("week"),
         "collected_at": aggregated.get("collected_at"),
-        "note": {
-            "articles": len(note.get("views_by_article") or {}),
-            "total_views": sum((note.get("views_by_article") or {}).values()),
-            "total_likes": note.get("total_likes"),
-            "total_sales_jpy": note.get("total_sales_jpy"),
-            "buyer_count": note.get("buyer_count"),
-        },
+        "note": note_summary,
         "ga4": {"sessions": ga4.get("sessions"), "pageviews": ga4.get("pageviews")},
         "line": {
             "registered_count": line.get("registered_count"),
@@ -213,11 +221,21 @@ def collect_and_save_weekly_metrics(
     content = _load_metrics_file(WEEKLY_METRICS_FILE)
 
     # --- Tasks 1-3 からデータを取得 ---
-    try:
-        note_metrics = fetch_note_metrics(api_token or "", week)
-    except NoteAPIError as e:
-        raise CollectError(f"note API 失敗: {e}") from e
-    logger.info("note: articles=%d sales_jpy=%s", len(note_metrics.views_by_article), note_metrics.total_sales_jpy)
+    # note のトークンが未登録のときは、note だけ「要確認」と記録して GA4・LINE は集める
+    # (2026-10-12 から7週、トークン未登録で GA4・LINE の実績まで1件も残らなかった)。
+    # 数字は入れない(0 と書くと「売上0円」と読めてしまう。絶対ルール1)。
+    # トークンがあるのに失敗した場合(認証切れ・通信)は、これまでどおり全体を失敗にする
+    token = (api_token or os.environ.get("NOTE_API_TOKEN", "")).strip()
+    if token:
+        try:
+            note_metrics = fetch_note_metrics(token, week)
+        except NoteAPIError as e:
+            raise CollectError(f"note API 失敗: {e}") from e
+        logger.info("note: articles=%d sales_jpy=%s", len(note_metrics.views_by_article), note_metrics.total_sales_jpy)
+        note_public = _public_note(note_metrics.to_dict())
+    else:
+        logger.warning("note: NOTE_API_TOKEN が未登録のため取得しません(要確認として記録)")
+        note_public = dict(NOTE_UNAVAILABLE)
 
     try:
         ga4_metrics = fetch_ga4_metrics(pid, week)
@@ -238,7 +256,7 @@ def collect_and_save_weekly_metrics(
     aggregated = {
         "week": week,
         "collected_at": _now_jst().isoformat(timespec="seconds"),
-        "note": _public_note(note_metrics.to_dict()),
+        "note": note_public,
         "ga4": ga4_metrics.to_dict(),
         "line": line_metrics.to_dict(),
         "line_source": line_source,
@@ -261,6 +279,9 @@ def collect_and_save_weekly_metrics(
 
     logger.info("集約完了: %s に week=%s を記録", WEEKLY_METRICS_FILE, week)
     return aggregated
+
+
+EXIT_PARTIAL = 3   # 記録はしたが一部(note)が未取得
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -294,6 +315,10 @@ def main(argv: Optional[list[str]] = None) -> int:
         return 1
     # 公開の Actions ログに出るため、集計サマリだけを出す
     print(json.dumps(summarize(result), ensure_ascii=False, indent=2))
+    if note_unavailable(result):
+        # 書き込みは済んでいる。ワークフローはこの終了コードを見て、保存のあとで失敗にする
+        logger.warning("一部未取得: note は要確認(GA4・LINE は記録済み)")
+        return EXIT_PARTIAL
     return 0
 
 
