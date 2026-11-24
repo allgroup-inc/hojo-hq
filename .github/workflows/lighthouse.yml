@@ -29,7 +29,8 @@ permissions:
   issues: write
 
 concurrency:
-  group: lighthouse
+  # PR の計測と毎日の本番計測を別の列にする(同じ列だと、待っている側が後から来た実行に取り消される)
+  group: lighthouse-${{ github.event_name == 'pull_request' && github.ref || 'prod' }}
   cancel-in-progress: false
 
 jobs:

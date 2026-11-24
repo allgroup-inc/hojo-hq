@@ -31,7 +31,11 @@ jobs:
     outputs:
       run: ${{ steps.g.outputs.run }}
     steps:
+      # 定時の起動時点の commit ではなく、いまの main を見る(本番の定時が遅れて予備の定時が
+      # 後ろで待っていた場合も、本番が作った今週分を見て二重に作らない)
       - uses: actions/checkout@v7
+        with:
+          ref: main
       - id: g
         run: python scripts/fukugiiro_weekly_done.py --gate "${{ github.event_name }}" >> "$GITHUB_OUTPUT"
 
@@ -93,6 +97,7 @@ jobs:
           curl -fsSL -o ~/.fonts/ShipporiMincho-SemiBold.ttf https://raw.githubusercontent.com/google/fonts/main/ofl/shipporimincho/ShipporiMincho-SemiBold.ttf || true
 
       - name: 遥さんボード生成(今週のIG投稿案・完成画像つき)
+        id: ig
         # 照合済みの制度から今週の5案を作り直す → 画像5枚 → site/staff/haruka/
         # 2026-09-24: ig_neta.json は生成元が無い手置きファイルで、9月8日の内容が
         # 16日間そのままだった。未照合の締切が使い回され遥さんの指摘で発覚したため、
@@ -110,6 +115,19 @@ jobs:
           # LPのIG投稿プレビュー(軽量サムネ)を今週の投稿画像から再生成(2026-08-26 IG導線強化)
           python scripts/generate_ig_thumbs.py || true
 
+      # generate_ig_neta.py は検査の前に ig_neta.json を今週分で書き出す。検査やボード生成で
+      # 落ちたまま commit すると、検査に落ちた案が「今週分」として残り、完成確認も通ってしまう
+      # (2026-11-24 独立レビューで検出)。落ちたら先週の案・ボード・画像に戻す(古い案は残る)。
+      # 今週分ができていないので、下の完成確認が失敗にし、予備の定時が作り直す
+      - name: IG投稿案の手順が落ちたら、先週の案に戻す
+        if: steps.ig.outcome == 'failure'
+        run: |
+          echo "::warning::IG投稿案の手順が失敗したため、ig_neta.json・ボード・投稿画像を先週の状態に戻します"
+          for p in data/fukugiiro/ig_neta.json site/staff/haruka site/fukugiiro/assets/ig; do
+            git checkout -- "$p" 2>/dev/null || true
+          done
+          git clean -fdq -- site/staff/haruka site/fukugiiro/assets/ig || true
+
       - name: Commit report
         run: |
           git config user.name "hojo-hq-bot"
@@ -124,10 +142,13 @@ jobs:
           [ -d site/fukugiiro/assets/ig ] && git add site/fukugiiro/assets/ig || true
           git diff --cached --quiet || git commit -m "auto: もらいわすれ堂 週次レポート $(TZ=Asia/Tokyo date '+%Y-%m-%d')"
           # 実行中に他のpushが入っても落ちないようrebaseしてからpush(最大3回)
+          pushed=0
           for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
+            if git pull --rebase origin main && git push; then pushed=1; break; fi
             echo "push retry $i"; sleep 5
           done
+          # 3回とも失敗したら、成功に見せない(main に届いていない)
+          if [ "$pushed" != 1 ]; then echo "::error::週次レポートの push に3回失敗しました"; exit 1; fi
 
       # IG投稿案の手順は continue-on-error のため、失敗しても run 全体は成功に見えていた。
       # 今週分ができていなければここで失敗にして、GitHub の失敗通知で気づけるようにする
