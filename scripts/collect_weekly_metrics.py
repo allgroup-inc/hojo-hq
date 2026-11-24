@@ -262,6 +262,15 @@ def collect_and_save_weekly_metrics(
         "line_source": line_source,
     }
 
+    # トークンなしで過去の週を再実行したとき、すでに記録してある note の実績を「要確認」で
+    # 上書きしない(2026-11-24 独立レビューで検出)。GA4・LINE だけを新しくする
+    if note_unavailable(aggregated):
+        prev = next((e for e in content["weeks"] if e.get("week") == week), None)
+        prev_note = (prev or {}).get("note")
+        if isinstance(prev_note, dict) and prev_note and prev_note.get("status") != "要確認":
+            logger.info("note: 既存の実績を残します(week=%s)", week)
+            aggregated["note"] = prev_note
+
     # --- 追記(同じ週は置き換え)して昇順に並べ、アトミックに書く ---
     weeks = [e for e in content["weeks"] if e.get("week") != week]
     if len(weeks) != len(content["weeks"]):

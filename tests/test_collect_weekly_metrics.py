@@ -378,3 +378,15 @@ def test_note_failure_with_token_still_fails(temp_metrics_file, mock_metrics):
     with _apis(temp_metrics_file, ga4=ga4, line=line, note_exc=NoteAPIError("401")):
         with pytest.raises(CollectError):
             _run(api_token="token")
+
+
+def test_rerun_without_token_keeps_existing_note(temp_metrics_file, mock_metrics, monkeypatch):
+    """トークンなしで記録済みの週を再実行しても、既存の note 実績を消さない(GA4・LINE は更新)"""
+    monkeypatch.delenv("NOTE_API_TOKEN", raising=False)
+    _, ga4, line = mock_metrics
+    with _apis(temp_metrics_file, ga4=ga4, line=line):
+        result = _run(week="2026-W39", api_token="")
+    saved = next(w for w in _saved(temp_metrics_file)["weeks"] if w["week"] == "2026-W39")
+    assert saved["note"] == {"total_sales_jpy": 1000}
+    assert saved["ga4"]["sessions"] == 250
+    assert not collect_weekly_metrics.note_unavailable(result)

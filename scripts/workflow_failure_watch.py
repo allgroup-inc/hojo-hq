@@ -25,8 +25,10 @@ MIN_STREAK 回以上続いている、または2回以上の失敗が MIN_DAYS �
 """
 import argparse
 import datetime as dt
+import glob
 import json
 import os
+import re
 import sys
 import urllib.request
 
@@ -36,6 +38,24 @@ MIN_STREAK = 3
 MIN_DAYS = 2
 PER_WORKFLOW = 30
 JST = dt.timezone(dt.timedelta(hours=9))
+
+
+# いま定時実行の設定(schedule)があるワークフローだけを見る。定時を止めた処理
+# (2026-10-25 に止めた Fukuda・note マガジン等)は、止める前の失敗が残っていても載せない
+SCHEDULE_LINE = re.compile(r"^\s+schedule:\s*(#.*)?$", re.M)
+
+
+def scheduled_paths(base="."):
+    out = set()
+    for p in glob.glob(os.path.join(base, ".github", "workflows", "*.y*ml")):
+        try:
+            with open(p, encoding="utf-8") as f:
+                text = f.read()
+        except OSError:
+            continue
+        if SCHEDULE_LINE.search(text):
+            out.add(os.path.relpath(p, base).replace(os.sep, "/"))
+    return out
 
 
 def _ts(s):
@@ -60,19 +80,33 @@ def fetch_runs(repo, token, opener=urllib.request.urlopen):
         got = _get(f"{api}/workflows/{wf['id']}/runs?branch=main&event=schedule"
                    f"&status=completed&per_page={PER_WORKFLOW}", token, opener)
         for r in got.get("workflow_runs", []):
-            r.setdefault("name", wf.get("name"))
+            # 分け方・絞り込みに使う項目は、実行の側ではなくワークフロー一覧の値に揃える
+            r["name"] = wf.get("name") or r.get("name")
+            r["workflow_id"] = wf["id"]
+            r["path"] = wf.get("path") or r.get("path")
             runs.append(r)
     return runs
 
 
-def summarize(runs, now=None):
-    """ワークフローごとに、新しい順で連続している失敗を数える。"""
+def summarize(runs, now=None, only_paths=None):
+    """ワークフローごとに、新しい順で連続している失敗を数える。
+    同じ名前のワークフロー(別ファイル)が混ざらないよう、ファイル(workflow_id / path)ごとに分ける。
+    only_paths を渡すと、そのファイルだけを見る(いま定時の設定があるもの)。"""
     now = now or dt.datetime.now(dt.timezone.utc)
     by = {}
     for r in runs:
-        by.setdefault(r["name"], []).append(r)
+        if only_paths is not None and r.get("path") not in only_paths:
+            continue
+        key = r.get("workflow_id") or r.get("path") or r.get("name")
+        by.setdefault(key, []).append(r)
+    names = {}
+    for rs in by.values():
+        names.setdefault(rs[0].get("name"), set()).add(rs[0].get("path"))
     out = []
-    for name, rs in by.items():
+    for rs in by.values():
+        name = rs[0].get("name")
+        if len(names.get(name, ())) > 1:          # 同じ名前が2つ以上 → ファイル名を添える
+            name = f"{name}({os.path.basename(rs[0].get('path') or '')})"
         rs.sort(key=lambda r: r["created_at"], reverse=True)
         streak = []
         last_ok = None
@@ -176,6 +210,17 @@ def self_test():
     check("週1回の2回連続(14日)は日数で載る", "weekly-broken" in names)
     check("直近が成功なら載らない", "recovered" not in names)
     check("1回だけの失敗は日数がたっても載らない", "weekly-once" not in names)
+
+    # 同じ名前の別ファイル: 片方の成功で、もう片方の失敗を隠さない
+    twin = [dict(run("Post X", d, "failure"), workflow_id=1, path=".github/workflows/a.yml") for d in (21, 22, 23)]
+    twin += [dict(run("Post X", d, "success", 1), workflow_id=2, path=".github/workflows/b.yml") for d in (21, 22, 23)]
+    tw = summarize(twin, now)
+    check("同じ名前の別ファイルを混ぜない", len(tw) == 1 and tw[0]["streak"] == 3 and "a.yml" in tw[0]["name"])
+    # 定時を止めたファイルは載せない
+    only = summarize(twin, now, only_paths={".github/workflows/b.yml"})
+    check("定時の設定が無いファイルは載せない", only == [])
+    check("schedule の行を見つける", bool(SCHEDULE_LINE.search("on:\n  schedule:\n    - cron: x\n")))
+    check("コメントにした schedule は見ない", not SCHEDULE_LINE.search("on:\n  # schedule:\n  workflow_dispatch: {}\n"))
     cm = next((r for r in rows if r["name"] == "cancel-mixed"), None)
     check("取り消しは飛ばして失敗を数える", cm is not None and cm["streak"] == 3)
     db = next(r for r in rows if r["name"] == "daily-broken")
@@ -206,14 +251,17 @@ def self_test():
     def opener(req, timeout=None):
         calls.append(req.full_url)
         if "/workflows?" in req.full_url:
-            return Resp({"workflows": [{"id": 1, "name": "a", "state": "active"},
+            return Resp({"workflows": [{"id": 1, "name": "a", "state": "active", "path": ".github/workflows/a.yml"},
                                        {"id": 2, "name": "b", "state": "disabled_manually"},
-                                       {"id": 3, "name": "c", "state": "active"}]})
-        return Resp({"workflow_runs": [{"created_at": "2026-11-23T00:00:00Z", "conclusion": "failure"}]})
+                                       {"id": 3, "name": "c", "state": "active", "path": ".github/workflows/c.yml"}]})
+        return Resp({"workflow_runs": [{"created_at": "2026-11-23T00:00:00Z", "conclusion": "failure",
+                                        "path": ".github/workflows/x.yml@refs/heads/main"}]})
     got = fetch_runs("o/r", "t", opener=opener)
     check("止めてあるワークフローは見ない", len(calls) == 3 and not any("/workflows/2/" in c for c in calls))
     check("main の定時実行だけを取る", all("branch=main&event=schedule" in c for c in calls[1:]))
     check("ワークフロー名を付ける", [r["name"] for r in got] == ["a", "c"])
+    check("パスはワークフロー一覧の値に揃える", [r["path"] for r in got] == [".github/workflows/a.yml", ".github/workflows/c.yml"]
+          and [r["workflow_id"] for r in got] == [1, 3])
 
     print(f"自己テスト: OK {ok} / NG {bad}")
     return 1 if bad else 0
@@ -240,7 +288,7 @@ def main():
     if not repo or not token:
         print("GITHUB_REPOSITORY と GH_TOKEN が必要です", file=sys.stderr)
         return 2
-    md = render(summarize(fetch_runs(repo, token)))
+    md = render(summarize(fetch_runs(repo, token), only_paths=scheduled_paths()))
     if md:
         print(md)
     return 0

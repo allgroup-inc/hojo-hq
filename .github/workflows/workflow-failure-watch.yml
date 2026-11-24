@@ -34,7 +34,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          sparse-checkout: scripts
+          sparse-checkout: |
+            scripts
+            .github/workflows
           persist-credentials: false
 
       - uses: actions/setup-python@v7
