@@ -80,7 +80,10 @@ def fetch_runs(repo, token, opener=urllib.request.urlopen):
         got = _get(f"{api}/workflows/{wf['id']}/runs?branch=main&event=schedule"
                    f"&status=completed&per_page={PER_WORKFLOW}", token, opener)
         for r in got.get("workflow_runs", []):
-            r.setdefault("name", wf.get("name"))
+            # 分け方・絞り込みに使う項目は、実行の側ではなくワークフロー一覧の値に揃える
+            r["name"] = wf.get("name") or r.get("name")
+            r["workflow_id"] = wf["id"]
+            r["path"] = wf.get("path") or r.get("path")
             runs.append(r)
     return runs
 
@@ -248,14 +251,17 @@ def self_test():
     def opener(req, timeout=None):
         calls.append(req.full_url)
         if "/workflows?" in req.full_url:
-            return Resp({"workflows": [{"id": 1, "name": "a", "state": "active"},
+            return Resp({"workflows": [{"id": 1, "name": "a", "state": "active", "path": ".github/workflows/a.yml"},
                                        {"id": 2, "name": "b", "state": "disabled_manually"},
-                                       {"id": 3, "name": "c", "state": "active"}]})
-        return Resp({"workflow_runs": [{"created_at": "2026-11-23T00:00:00Z", "conclusion": "failure"}]})
+                                       {"id": 3, "name": "c", "state": "active", "path": ".github/workflows/c.yml"}]})
+        return Resp({"workflow_runs": [{"created_at": "2026-11-23T00:00:00Z", "conclusion": "failure",
+                                        "path": ".github/workflows/x.yml@refs/heads/main"}]})
     got = fetch_runs("o/r", "t", opener=opener)
     check("止めてあるワークフローは見ない", len(calls) == 3 and not any("/workflows/2/" in c for c in calls))
     check("main の定時実行だけを取る", all("branch=main&event=schedule" in c for c in calls[1:]))
     check("ワークフロー名を付ける", [r["name"] for r in got] == ["a", "c"])
+    check("パスはワークフロー一覧の値に揃える", [r["path"] for r in got] == [".github/workflows/a.yml", ".github/workflows/c.yml"]
+          and [r["workflow_id"] for r in got] == [1, 3])
 
     print(f"自己テスト: OK {ok} / NG {bad}")
     return 1 if bad else 0
