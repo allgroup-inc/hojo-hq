@@ -102,5 +102,46 @@ class KitReadability(unittest.TestCase):
                 self.assertNotIn(">どちらか一方<", b)
 
 
+
+class KitIndexComeBack(unittest.TestCase):
+    """一覧の「前回の続きから」「いま受付中」(2026-11-25 常に使ってもらえる工夫)"""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(DATA, encoding="utf-8") as f:
+            db = json.load(f)
+        items = [i for i in db["items"] if i.get("area") not in kit.HIDDEN_MUNIS]
+        extra = [
+            {"id": "t-soon", "name": "締切が近い制度", "area": "沖縄県", "deadline_type": "期限あり", "deadline": "2026-12-18"},
+            {"id": "t-far", "name": "何年も先の制度", "area": "沖縄県", "deadline_type": "期限あり", "deadline": "2031-03-31"},
+            {"id": "t-past", "name": "終わった制度", "area": "沖縄県", "deadline_type": "期限あり", "deadline": "2026-11-01"},
+        ]
+        cls.html = kit.index_page(items + extra, "2026-11-25 09:00")
+
+    def test_open_now_lists_only_upcoming_deadlines_with_year(self):
+        sec = re.search(r'<section class="kitopen">([\s\S]*?)</section>', self.html).group(1)
+        self.assertIn("締切が近い制度", sec)
+        self.assertIn("2026年12月18日", sec)
+        self.assertNotIn("何年も先の制度", sec)
+        self.assertNotIn("終わった制度", sec)
+        self.assertIn("最新は公式ページでご確認ください", sec)
+
+    def test_resume_only_reads_this_device(self):
+        self.assertIn('<section class="kitresume" id="kit-resume" hidden>', self.html)
+        js = re.search(r"<script>\n// 前回の続き[\s\S]*?</script>", self.html).group(0)
+        for ng in ("setItem", "removeItem", "fetch(", "XMLHttpRequest", "sendBeacon"):
+            self.assertNotIn(ng, js)
+        self.assertIn('fgTrack("kit_resume_click")', js)   # 専用のイベント名(既存の名前を流用しない)
+        self.assertIn('indexOf("fk_kit_")', js)             # 準備シートの保存キーと同じ接頭辞
+        self.assertIn('var KEY = "fk_kit_', kit.KIT_JS.replace("__ID__", ""))
+
+    def test_unreadable_updated_date_still_builds(self):
+        html = kit.index_page([{"id": "a", "name": "制度A", "area": "全国"}], "")
+        self.assertIn("制度A", html)
+
+    def test_size_budget(self):
+        self.assertLess(len(self.html.encode("utf-8")), 96 * 1024)
+
+
 if __name__ == "__main__":
     unittest.main()
