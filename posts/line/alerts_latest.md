@@ -33,7 +33,7 @@
 　https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003lu8IUAQ
 　…ほか7件は一覧へ
 
-💡 電子申請には gBizIDプライム が必要な制度が多いです。郵送で申請すると発行まで日数がかかるので、早めの準備がおすすめです(申請方法はgBizIDの公式サイトでご確認ください)。
+💡 電子申請には gBizIDプライム が必要な制度が多いです。法人代表者のオンライン申請なら24時間365日速やかに、書類での申請は審査に最大1か月かかります(gBizID公式サイトより)。
 
 準備が間に合うか不安なときは、このLINEに「相談」と一言どうぞ。無料で、担当が状況に合わせてご案内します。
 ※要件・締切は必ず原文でご確認ください。
@@ -44,11 +44,11 @@
 ```
 ⏳ 締切目前の公募が14件あります。
 いまから書類を整えるのは大変なので、無理は禁物。
-次の公募に備えて【gBizIDプライム】を先に用意しておきましょう(郵送の申請は発行まで日数がかかります。申請方法はgBizIDの公式サイトでご確認ください)。
+次の公募に備えて【gBizIDプライム】を先に用意しておきましょう(法人代表者のオンライン申請なら速やかに、書類での申請は審査に最大1か月。gBizID公式サイトより)。
 制度一覧 → https://allgroup-inc.github.io/hojo-hq/?utm_source=line&utm_medium=message&utm_campaign=deadline_alert
 ```
 
 ## 出荷ゲート
 - gates: accuracy-check, deadline-alert, humanizer
-- checked: 2026-11-24
+- checked: 2026-11-25
 - by: scripts/generate_line_alerts.py(LINE部・ツナグさん)

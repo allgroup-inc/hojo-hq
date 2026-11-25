@@ -18,6 +18,7 @@ site/fukugiiro/kit/<id>/index.html に生成する。fetch後に毎回再生成�
 - 持ち物は「よくある例」として提示し、断定しない。窓口での最終確認を全ページで案内
 - 公式様式PDFの再配布はしない(版ズレ防止)。必ず公式ページへのリンクで案内
 """
+import datetime
 import json
 import os
 import shutil
@@ -522,6 +523,51 @@ def kit_page(it, updated):
                 canon_path=f"kit/{it['id']}/")
 
 
+RESUME_JS = r"""<script>
+// 前回の続き(この端末に残っている準備シートの記録を読むだけ。書き換え・送信はしない)
+(function(){
+  var sec = document.getElementById("kit-resume"), ul = document.getElementById("kit-resume-list");
+  if (!sec || !ul) return;
+  var rows = [];
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (!k || k.indexOf("fk_kit_") !== 0) continue;
+      var id = k.slice(7), o = JSON.parse(localStorage.getItem(k) || "null");
+      if (!o) continue;
+      var n = (o.c || []).length, memo = Object.keys(o.m || {}).length > 0;
+      if (!n && !memo) continue;
+      var a = document.querySelector('.kitgroup a[href="' + id.replace(/[^\w-]/g, "") + '/"]');
+      if (!a) continue;
+      rows.push({href: a.getAttribute("href"), name: a.firstChild ? a.firstChild.textContent : a.textContent, n: n, memo: memo});
+    }
+  } catch (e) { return; }
+  if (!rows.length) return;
+  rows.slice(0, 5).forEach(function(r){
+    var li = document.createElement("li"), link = document.createElement("a");
+    link.href = r.href; link.textContent = r.name;
+    link.addEventListener("click", function(){ if (window.fgTrack) fgTrack("kit_resume_click"); });
+    var info = document.createElement("span"); info.className = "note";
+    info.textContent = " 持ち物チェック " + r.n + "件" + (r.memo ? "・メモあり" : "");
+    li.appendChild(link); li.appendChild(info); ul.appendChild(li);
+  });
+  sec.hidden = false;
+})();
+</script>"""
+
+
+OPEN_NOW_DAYS = 90
+
+
+def _md(d):
+    """2026-12-18 → 2026年12月18日(年を省くと、来年の締切か何年も先かが分からない)"""
+    try:
+        y, m, dd = str(d)[:10].split("-")
+        return f"{int(y)}年{int(m)}月{int(dd)}日"
+    except ValueError:
+        return str(d)
+
+
 def index_page(items, updated):
     # 260件超の一覧で行ごとのインラインstyleを繰り返すとサイズ予算(96KB)を超えるため、
     # 共通スタイルは下のbody内<style>に1回だけ書く(2026-09-11 fetch #254のサイズ超過対応)
@@ -554,6 +600,24 @@ def index_page(items, updated):
             f"<div class='box'><ul class='kul'>{lis}</ul></div></section>"
         )
     sections_html = "\n".join(sections)
+
+    # いま受け付けている(締切のある)制度を一覧の上に出す。締切を過ぎた制度は収集の段階で外れる
+    # (2026-11-25「常に使ってもらえる工夫」: 季節の締切がある制度を、来た人がまず目にする場所へ)
+    # 何年も先の期限(例: 2031年まで続く減税)は「いま」の話ではないので、90日以内に締切があるものだけにする
+    today = updated[:10]
+    horizon = (datetime.date.fromisoformat(today) + datetime.timedelta(days=OPEN_NOW_DAYS)).isoformat()
+    open_now = sorted([it for it in items if it.get("deadline_type") == "期限あり"
+                       and today <= str(it.get("deadline") or "")[:10] <= horizon],
+                      key=lambda it: str(it.get("deadline")))[:5]
+    if open_now:
+        lis = "".join(
+            f'<li><a href="{esc(it["id"])}/">{esc(it["name"])}</a>'
+            f'<span class="note"> 締切 {esc(_md(it["deadline"]))}(最新は公式ページでご確認ください)</span></li>'
+            for it in open_now)
+        open_html = (f'<section class="kitopen"><h2 style="font-size:1.05rem;margin-top:18px">いま受付中・締切がある制度</h2>'
+                     f'<div class="box"><ul class="kul">{lis}</ul></div></section>')
+    else:
+        open_html = ""
     body = f"""
 <style>.kul{{list-style:none}}.kul .status{{display:inline}}.kul li{{border-bottom:1px dashed var(--fg-line)}}.kul a{{display:inline-block;padding:9px 0;line-height:1.55}}.kul .status{{font-size:.72rem;padding:1px 7px}}.kul .ok{{font-size:inherit}}</style>
 <h1>申請準備シート一覧</h1>
@@ -562,6 +626,10 @@ def index_page(items, updated):
 <label for="kitsearch" class="note">制度名・市町村名でさがす</label>
 <input id="kitsearch" class="kitsearch" type="search" placeholder="例: 児童手当、浦添、出産" autocomplete="off">
 <p class="note kitsearch-none" id="kitsearch-none">見つかりませんでした。言葉を短くするか、<a href="../shindan/">3分診断</a>をお試しください。</p>
+<section class="kitresume" id="kit-resume" hidden><h2 style="font-size:1.05rem;margin-top:18px">前回の続きから</h2>
+<p class="note">この端末で途中まで進めた準備シートです(記録はこの端末の中だけにあります)。</p>
+<div class="box"><ul class="kul" id="kit-resume-list"></ul></div></section>
+{open_html}
 {sections_html}
 <script>
 // 一覧の絞り込み(この端末の中だけで動く。入力した言葉は送信も保存もしない)
@@ -583,6 +651,7 @@ def index_page(items, updated):
   }});
 }})();
 </script>
+{RESUME_JS}
 <p class="note" style="margin-top:18px;text-align:center">もう受け取れた制度はありますか? <a href="../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit',{{pos:'index'}})">受け取れたことを教えてください(匿名・任意)</a><br>制度名とおおよその金額だけで大丈夫です。お名前や口座番号はうかがいません。</p>
 <div class="disclaimer">最終更新: {esc(updated)}(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
 <p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップ</a></p>
