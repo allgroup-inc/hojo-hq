@@ -200,6 +200,34 @@ class AssumedSourcesAreStillChecked(unittest.TestCase):
         self.assertIn("b", stop)
         self.assertNotIn("c", stop)
 
+    def test_dead_source_is_carried_until_it_opens_again(self):
+        cur = self.ff.carry_assumed_dead({}, {"u1": "URL到達不可(HTTP 404)"}, set(), {"u1", "u2"}, "11-25 06:00")
+        self.assertEqual(cur["u1"]["since"], "11-25 06:00")
+        nxt = self.ff.carry_assumed_dead(cur, {}, {"u2"}, {"u1", "u2"}, "11-25 18:00")   # 次の回は別の組を点検
+        self.assertEqual(nxt, cur)                                                         # 止めたまま(最初の日時のまま)
+        self.assertEqual(self.ff.carry_assumed_dead(nxt, {}, {"u1"}, {"u1", "u2"}, "12-02 06:00"), {})   # 開けたら外す
+        self.assertEqual(self.ff.carry_assumed_dead(nxt, {}, set(), {"u2"}, "12-02 06:00"), {})        # シードのURLが変われば外す
+
+    def test_two_runs_keep_the_link_stopped(self):
+        # 1回目の点検で 404 → リンクを止める。2回目はその出典を点検しない組でも、止めたままにする(2026-11-25 独立レビュー)
+        import test_fetch_publish as tfp
+        sid = next(s["id"] for s in self.ff.SEEDS if s.get("assume_reachable") and s.get("area") not in self.ff.HIDDEN_AREAS)
+        case = tfp.Pipeline("run_fetch")
+        try:
+            r1, _, pub1, st1, _ = case.run_fetch(gone_ids=[sid], batch_ids=[sid])
+            r2, _, pub2, st2, _ = case.run_fetch(gone_ids=[sid], batch_ids=[], prev_status=st1)
+            r3, _, pub3, st3, _ = case.run_fetch(batch_ids=[sid], prev_status=st2)        # 直ったら戻る
+        finally:
+            case.doCleanups()
+        for r in (r1, r2, r3):
+            self.assertEqual(r.returncode, 0, r.stdout[-400:] + r.stderr[-400:])
+        by = lambda pub: {i["id"]: i for i in pub["items"]}
+        self.assertIn("source_unavailable", by(pub1)[sid])           # 制度は残し、リンクだけ止める
+        self.assertIn("source_unavailable", by(pub2)[sid])
+        self.assertNotIn("source_unavailable", by(pub3)[sid])
+        self.assertTrue(st1["publish"] and st2["publish"] and st3["publish"])
+        self.assertEqual(st3["assumed_dead"], {})
+
     def test_fixed_sources_no_longer_point_at_the_dead_page(self):
         by_id = {s["id"]: s for s in self.ff.SEEDS}
         for sid in ("fk-kuni-jidofuyoteate", "fk-ken-hitorioya-sodan", "fk-ken-kouto-shokugyo-kunren"):

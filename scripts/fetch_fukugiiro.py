@@ -557,6 +557,16 @@ def check_assumed(urls, check=None, pause=1.5):
     return ok_urls, dead
 
 
+def carry_assumed_dead(prev, found, checked_ok, seed_urls, now):
+    """消えたと確かめた出典を、次の回へ持ち越す。{URL: {since, reason}}。
+    点検は1週間に1回しか回ってこないため、その回だけで忘れると半日でリンクが戻ってしまう
+    (2026-11-25 独立レビューで検出)。あとの点検で開けた(HTTP 200)URLと、シードから消えたURLは外す。"""
+    out = {u: dict(v) for u, v in (prev or {}).items() if u in seed_urls and u not in checked_ok}
+    for u, reason in found.items():
+        out.setdefault(u, {"since": now, "reason": reason})
+    return dict(sorted(out.items()))
+
+
 def decide_publish(prev_items, new_items, failed, legit, required_ids, checked_at):
     """公開用 seido.json(moradou.jp の診断ページが読む)を更新してよいかを決め、その記録を返す。
     前回の公開データと制度IDで比べ、欠けたデータで正常な公開データを上書きしない。
@@ -664,12 +674,20 @@ def main():
     # 確認を省いている出典も、順番に開いて消えたページ(404/410)だけを見分ける(掲載は止めず、リンクだけ止める)
     assumed = [s["source_url"] for s in SEEDS if s.get("assume_reachable") and robots_ok(s["source_url"])]
     batch = rotation_batch(assumed, datetime.now(JST))
-    assumed_ok, assumed_dead = check_assumed(batch)
+    assumed_ok, assumed_found = check_assumed(batch)
     checked_ok |= assumed_ok
-    dead_by_id = {s["id"]: assumed_dead[s["source_url"]] for s in SEEDS if s["source_url"] in assumed_dead}
+    try:
+        with open(PUBLISH_STATUS, encoding="utf-8") as f:
+            prev_assumed = json.load(f).get("assumed_dead") or {}
+    except Exception:
+        prev_assumed = {}
+    assumed_dead = carry_assumed_dead(prev_assumed, assumed_found, checked_ok,
+                                      {s["source_url"] for s in SEEDS}, now)
+    dead_by_id = {s["id"]: assumed_dead[s["source_url"]]["reason"] for s in SEEDS if s["source_url"] in assumed_dead}
     if assumed_dead:
         print(f"::warning::確認を省いている出典のうち、ページが消えていたもの(リンクを止めます): {', '.join(sorted(dead_by_id))}")
-    print(f"[info] 確認を省いている出典の点検: {len(batch)}件(開けた {len(assumed_ok)} / 消えていた {len(assumed_dead)})")
+    print(f"[info] 確認を省いている出典の点検: {len(batch)}件(開けた {len(assumed_ok)} / 消えていた {len(assumed_found)}"
+          f" / 持ち越しを含めて止めている {len(assumed_dead)})")
 
     # 出典が無い(404/410)と確かめた制度は、掲載を続けたまま出典リンクだけを止める印を付ける
     pending = mark_unavailable(items, dead_sources(SEEDS, {**failed, **dead_by_id}, checked_ok, now))
@@ -695,6 +713,7 @@ def main():
         prev_public = None
     required_ids = {s["id"] for s in SEEDS if s["id"].startswith(REQUIRED_PREFIX)}
     status = decide_publish(prev_public, items, failed, legit, required_ids, now)
+    status["assumed_dead"] = assumed_dead   # 次の回へ持ち越す(publish_status.json はワークフローが commit する)
 
     # data/ は従来どおり毎回書く(市町村別ページ等が読む)。公開用は保留条件に当たらないときだけ書く
     for path in [OUT] + ([PUBLISH_OUT] if status["publish"] else []):
