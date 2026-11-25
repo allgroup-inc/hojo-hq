@@ -135,6 +135,10 @@ class KitIndexComeBack(unittest.TestCase):
         self.assertIn('indexOf("fk_kit_")', js)             # 準備シートの保存キーと同じ接頭辞
         self.assertIn('var KEY = "fk_kit_', kit.KIT_JS.replace("__ID__", ""))
 
+    def test_unreadable_updated_date_still_builds(self):
+        html = kit.index_page([{"id": "a", "name": "制度A", "area": "全国"}], "")
+        self.assertIn("制度A", html)
+
     def test_size_budget(self):
         self.assertLess(len(self.html.encode("utf-8")), 96 * 1024)
 

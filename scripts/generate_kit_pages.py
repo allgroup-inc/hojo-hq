@@ -533,7 +533,8 @@ RESUME_JS = r"""<script>
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
       if (!k || k.indexOf("fk_kit_") !== 0) continue;
-      var id = k.slice(7), o = JSON.parse(localStorage.getItem(k) || "null");
+      var id = k.slice(7), o = null;
+      try { o = JSON.parse(localStorage.getItem(k) || "null"); } catch (e2) { continue; }  // 壊れた記録は1件だけ飛ばす
       if (!o) continue;
       var n = (o.c || []).length, memo = Object.keys(o.m || {}).length > 0;
       if (!n && !memo) continue;
@@ -604,8 +605,12 @@ def index_page(items, updated):
     # いま受け付けている(締切のある)制度を一覧の上に出す。締切を過ぎた制度は収集の段階で外れる
     # (2026-11-25「常に使ってもらえる工夫」: 季節の締切がある制度を、来た人がまず目にする場所へ)
     # 何年も先の期限(例: 2031年まで続く減税)は「いま」の話ではないので、90日以内に締切があるものだけにする
-    today = updated[:10]
-    horizon = (datetime.date.fromisoformat(today) + datetime.timedelta(days=OPEN_NOW_DAYS)).isoformat()
+    try:
+        base = datetime.date.fromisoformat(str(updated)[:10])
+    except ValueError:      # 更新日が読めなくても一覧そのものは作る(この欄だけ今日で数える)
+        base = datetime.date.today()
+    today = base.isoformat()
+    horizon = (base + datetime.timedelta(days=OPEN_NOW_DAYS)).isoformat()
     open_now = sorted([it for it in items if it.get("deadline_type") == "期限あり"
                        and today <= str(it.get("deadline") or "")[:10] <= horizon],
                       key=lambda it: str(it.get("deadline")))[:5]

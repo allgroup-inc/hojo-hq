@@ -390,7 +390,7 @@ SEEDS = [
         "amount_note": "返還不要。給付額は世帯の所得区分・学校種別により異なります(要確認)",
         "deadline": "2026-12-18", "deadline_type": "期限あり",
         "source_url": "https://www.pref.okinawa.jp/kyoiku/gakko/1023180/1018620/1041753.html",
-        "match_tokens": ["私立", "奨学給付金", "高校"],
+        "match_tokens": ["私立", "奨学のための給付金", "高等学校"],   # 公式ページの表記に合わせる
     },
     {
         "id": "fk-ken-kenei-jutaku",
