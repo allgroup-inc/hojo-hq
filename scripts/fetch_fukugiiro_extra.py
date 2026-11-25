@@ -1820,8 +1820,9 @@ EXTRA_SEEDS += [
  'issuer': '沖縄県',
  'area': '沖縄県',
  'target_household': '母子家庭・父子家庭などひとり親家庭の世帯が対象となる可能性があります(就業支援・生活支援・経済的支援・養育費相談の総合窓口)',
- 'how_to_apply': '沖縄県の各福祉事務所・ひとり親家庭支援の担当窓口',
- 'source_url': 'https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1008243/index.html',
+ 'how_to_apply': '沖縄県 ひとり親家庭支援の担当窓口(こども未来部 女性力・ダイバーシティ推進課)・各事業の窓口',
+ # 2026-11-25: 旧出典(1008243/index.html)は 404。県の「ひとり親家庭支援」は 1036501 へ移っていた(2026-11-25 取得して確認)
+ 'source_url': 'https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/index.html',
  'deadline_type': '常時',
  'assume_reachable': True},
  {'id': 'fk-nago-horitsu-sodan',
@@ -2592,7 +2593,8 @@ EXTRA_SEEDS += [
  'area': '沖縄県',
  'target_household': '県内の町村部にお住まいのひとり親家庭の親で、看護・保育等の資格取得のため養成機関で6か月以上修業する方が対象となる可能性があります(市部在住の方は各市の窓口)',
  'how_to_apply': '沖縄県の担当窓口への相談(町村部在住者向け。市部在住の方は各市の担当窓口へ)',
- 'source_url': 'https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1008243/1026858.html',
+ # 2026-11-25: 旧出典(1008243/1026858.html)は 404。移転先 1036526/1036508.html の記載と一致を確認(町村部在住・6月以上・看護師/保育士等)
+ 'source_url': 'https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1036501/1036526/1036508.html',
  'deadline_type': '常時',
  'assume_reachable': True,
  'amount_note': '訓練期間中の給付金と修了支援給付金の案内がありますが、金額・課税状況による違いは要確認'},
