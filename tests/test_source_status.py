@@ -77,26 +77,24 @@ class Decide(unittest.TestCase):
 class Pipeline(unittest.TestCase):
     """収集処理(main)を、複製した作業場所でネットワークなしに動かす(test_fetch_publish の仕組みを使う)。"""
 
-    def test_collection_marks_and_keeps_publishing(self):
+    def test_collection_publishes_fixed_sources(self):
+        # 2026-11-25: 出典を直したので、児童扶養手当(必須)・ひとり親家庭支援は、印なしで公開される。
+        # 404 の出典のリンクを止める仕組み自体は、上の Marking と下の AssumedSourcesAreStillChecked で確かめる
         import test_fetch_publish as tfp
         case = tfp.Pipeline("run_fetch")
         try:
-            # 本番と同じく、児童扶養手当(同じURL)は取れない。収集の記録(CONFIRMED_DEAD)から、ひとり親家庭支援のリンクを止める
-            r, prev, pub, status, data = case.run_fetch(prev_exclude=["fk-kuni-jidofuyoteate"],
-                                                        unreachable_ids=["fk-kuni-jidofuyoteate"])
-            # この回の収集でそのURLが開けたなら止めない(記録より、いまの結果を優先する)
-            r2, _, pub2, _, _ = case.run_fetch()
+            r, prev, pub, status, data = case.run_fetch()
         finally:
             case.doCleanups()
-        self.assertNotIn("source_unavailable", next(i for i in pub2["items"] if i["id"] == "fk-ken-hitorioya-sodan"))
         self.assertEqual(r.returncode, 0, r.stdout[-500:] + r.stderr[-500:])
         self.assertTrue(status["publish"], status["reasons"])          # 公開更新の安全装置はそのまま
-        self.assertEqual({i["id"] for i in pub["items"]}, {i["id"] for i in data["items"]})
+        self.assertNotIn("fk-kuni-jidofuyoteate", status["required_missing"])
         by = {i["id"]: i for i in pub["items"]}
-        self.assertIn("source_unavailable", by["fk-ken-hitorioya-sodan"])
-        self.assertEqual(by["fk-ken-hitorioya-sodan"]["source_url"], DEAD)
-        self.assertNotIn("source_unavailable", by["fk-ken-kouto-shokugyo-kunren"])
-        self.assertIn("::warning::公式ページを確認中として出典リンクを止めた制度(掲載は続ける): fk-ken-hitorioya-sodan", r.stdout)
+        for sid in ("fk-kuni-jidofuyoteate", "fk-ken-hitorioya-sodan", "fk-ken-kouto-shokugyo-kunren"):
+            self.assertIn(sid, by)
+            self.assertNotIn("source_unavailable", by[sid], sid)
+            self.assertNotEqual(by[sid]["source_url"], DEAD)
+        self.assertIn("[info] 確認を省いている出典の点検:", r.stdout)
 
 
 class Pages(unittest.TestCase):
@@ -169,6 +167,71 @@ class Pages(unittest.TestCase):
         self.assertEqual([x["id"] for x in ok], ["a"])
         s["source_unavailable"] = {"reason": "公式ページが見つかりません(HTTP 404)"}
         self.assertEqual(neta.candidates({"items": [s]}, set(), set()), [])
+
+
+
+class AssumedSourcesAreStillChecked(unittest.TestCase):
+    """確認を省いている出典(assume_reachable)も、順番に開いて 404/410 だけを見分ける(2026-11-25)。外部へは接続しない"""
+
+    def setUp(self):
+        import datetime as dt
+        import fetch_fukugiiro as ff
+        self.ff, self.dt = ff, dt
+
+    def test_every_url_is_checked_within_a_week_and_batches_are_small(self):
+        urls = [f"https://example.lg.jp/{i}.html" for i in range(207)]
+        seen = set()
+        start = self.dt.datetime(2026, 11, 25, 6, 0)
+        for half_day in range(14):
+            now = start + self.dt.timedelta(hours=12 * half_day)
+            batch = self.ff.rotation_batch(urls, now)
+            self.assertLessEqual(len(batch), self.ff.ROTATE_PER_RUN)
+            self.assertEqual(batch, self.ff.rotation_batch(urls, now))     # 同じ回は同じ組
+            seen |= set(batch)
+        self.assertEqual(seen, set(urls))                                   # 7日(14回)で一回り
+
+    def test_only_404_and_410_count_as_gone(self):
+        answers = {"a": (True, "HTTP 200"), "b": (False, "HTTP 404"), "c": (False, "HTTP 403"),
+                   "d": (False, "URLError(timeout)"), "e": (False, "HTTP 410"), "f": (False, "HTTP 503")}
+        ok, dead = self.ff.check_assumed(list(answers), check=lambda u: answers[u], pause=0)
+        self.assertEqual(ok, {"a"})
+        self.assertEqual(set(dead), {"b", "e"})                             # 遮断(403)・一時的な失敗は止めない
+        stop = fgsrc.dead_sources([seed("x", "b"), seed("y", "c")], {"x": dead["b"]}, ok, "2026-11-25 06:00")
+        self.assertIn("b", stop)
+        self.assertNotIn("c", stop)
+
+    def test_dead_source_is_carried_until_it_opens_again(self):
+        cur = self.ff.carry_assumed_dead({}, {"u1": "URL到達不可(HTTP 404)"}, set(), {"u1", "u2"}, "11-25 06:00")
+        self.assertEqual(cur["u1"]["since"], "11-25 06:00")
+        nxt = self.ff.carry_assumed_dead(cur, {}, {"u2"}, {"u1", "u2"}, "11-25 18:00")   # 次の回は別の組を点検
+        self.assertEqual(nxt, cur)                                                         # 止めたまま(最初の日時のまま)
+        self.assertEqual(self.ff.carry_assumed_dead(nxt, {}, {"u1"}, {"u1", "u2"}, "12-02 06:00"), {})   # 開けたら外す
+        self.assertEqual(self.ff.carry_assumed_dead(nxt, {}, set(), {"u2"}, "12-02 06:00"), {})        # シードのURLが変われば外す
+
+    def test_two_runs_keep_the_link_stopped(self):
+        # 1回目の点検で 404 → リンクを止める。2回目はその出典を点検しない組でも、止めたままにする(2026-11-25 独立レビュー)
+        import test_fetch_publish as tfp
+        sid = next(s["id"] for s in self.ff.SEEDS if s.get("assume_reachable") and s.get("area") not in self.ff.HIDDEN_AREAS)
+        case = tfp.Pipeline("run_fetch")
+        try:
+            r1, _, pub1, st1, _ = case.run_fetch(gone_ids=[sid], batch_ids=[sid])
+            r2, _, pub2, st2, _ = case.run_fetch(gone_ids=[sid], batch_ids=[], prev_status=st1)
+            r3, _, pub3, st3, _ = case.run_fetch(batch_ids=[sid], prev_status=st2)        # 直ったら戻る
+        finally:
+            case.doCleanups()
+        for r in (r1, r2, r3):
+            self.assertEqual(r.returncode, 0, r.stdout[-400:] + r.stderr[-400:])
+        by = lambda pub: {i["id"]: i for i in pub["items"]}
+        self.assertIn("source_unavailable", by(pub1)[sid])           # 制度は残し、リンクだけ止める
+        self.assertIn("source_unavailable", by(pub2)[sid])
+        self.assertNotIn("source_unavailable", by(pub3)[sid])
+        self.assertTrue(st1["publish"] and st2["publish"] and st3["publish"])
+        self.assertEqual(st3["assumed_dead"], {})
+
+    def test_fixed_sources_no_longer_point_at_the_dead_page(self):
+        by_id = {s["id"]: s for s in self.ff.SEEDS}
+        for sid in ("fk-kuni-jidofuyoteate", "fk-ken-hitorioya-sodan", "fk-ken-kouto-shokugyo-kunren"):
+            self.assertNotIn("1008243", by_id[sid]["source_url"], sid)
 
 
 if __name__ == "__main__":

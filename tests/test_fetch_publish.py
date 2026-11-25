@@ -71,7 +71,7 @@ class Pipeline(unittest.TestCase):
     """収集処理(main)をそのまま、複製した作業場所で動かす。"""
 
     def run_fetch(self, prev_extra=(), unreachable=(), all_down=False, end_id=None, drop_id=None, retire_id=None,
-                  prev_exclude=(), unreachable_ids=()):
+                  prev_exclude=(), unreachable_ids=(), gone_ids=(), batch_ids=None, prev_status=None):
         w = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, w)
         shutil.copytree(os.path.join(ROOT, "scripts"), os.path.join(w, "scripts"))
@@ -82,6 +82,11 @@ class Pipeline(unittest.TestCase):
         seeds = [s["id"] for s in ff.SEEDS if s.get("area") not in ff.HIDDEN_AREAS and s["id"] not in prev_exclude]
         prev = {"updated_at": "2026-11-03 04:00", "count": 0, "items": [{"id": i} for i in seeds] + [{"id": i} for i in prev_extra]}
         down_urls = [s["source_url"] for s in ff.SEEDS if s["id"] in unreachable_ids]
+        gone_urls = [s["source_url"] for s in ff.SEEDS if s["id"] in gone_ids]          # 404 を返す出典
+        batch_urls = None if batch_ids is None else [s["source_url"] for s in ff.SEEDS if s["id"] in batch_ids]
+        if prev_status is not None:
+            with open(os.path.join(w, "data", "fukugiiro", "publish_status.json"), "w") as fh:
+                json.dump(prev_status, fh)
         prev["count"] = len(prev["items"])
         with open(os.path.join(w, "site", "fukugiiro", "seido.json"), "w") as fh:
             json.dump(prev, fh)
@@ -93,7 +98,11 @@ f.time.sleep = lambda s: None
 f.robots_ok = lambda u: True
 down = {list(unreachable)!r}
 down_urls = {down_urls!r}
-f.reachable = lambda u: (False, "HTTP 503") if ({all_down} or urllib.parse.urlparse(u).netloc in down or u in down_urls) else (True, "HTTP 200")
+gone_urls = {gone_urls!r}
+f.reachable = lambda u: (False, "HTTP 404") if u in gone_urls else ((False, "HTTP 503") if ({all_down} or urllib.parse.urlparse(u).netloc in down or u in down_urls) else (True, "HTTP 200"))
+batch_urls = {batch_urls!r}
+if batch_urls is not None:
+    f.rotation_batch = lambda urls, now, per_run=15: [u for u in urls if u in batch_urls]
 ids = {{'end': {end_id!r}, 'drop': {drop_id!r}, 'retire': {retire_id!r}}}
 if ids['end']:
     for s in f.SEEDS:

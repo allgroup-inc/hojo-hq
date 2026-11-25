@@ -111,7 +111,12 @@ details.fold ol.conbini li{margin:6px 0}
 <label for="kitsearch" class="note">制度名・市町村名でさがす</label>
 <input id="kitsearch" class="kitsearch" type="search" placeholder="例: 児童手当、浦添、出産" autocomplete="off">
 <p class="note kitsearch-none" id="kitsearch-none">見つかりませんでした。言葉を短くするか、<a href="../shindan/">3分診断</a>をお試しください。</p>
-<section class='kitgroup'><h2 style='font-size:1.1rem;margin-top:20px'>全国の制度(51件)</h2><p class='note'>お住まいがどこでも対象になる可能性があります</p><div class='box'><ul class='kul'><li><a href="fk-kuni-jidoteate/">児童手当&nbsp;<span class="status ok" title="公式と照合済み">✓</span></a></li>
+<section class="kitresume" id="kit-resume" hidden><h2 style="font-size:1.05rem;margin-top:18px">前回の続きから</h2>
+<p class="note">この端末で途中まで進めた準備シートです(記録はこの端末の中だけにあります)。</p>
+<div class="box"><ul class="kul" id="kit-resume-list"></ul></div></section>
+<section class="kitopen"><h2 style="font-size:1.05rem;margin-top:18px">いま受付中・締切がある制度</h2><div class="box"><ul class="kul"><li><a href="fk-ken-shigaku-kyufukin-shitoritsu/">沖縄県 私立奨学給付金</a><span class="note"> 締切 2026年12月18日(最新は公式ページでご確認ください)</span></li></ul></div></section>
+<section class='kitgroup'><h2 style='font-size:1.1rem;margin-top:20px'>全国の制度(52件)</h2><p class='note'>お住まいがどこでも対象になる可能性があります</p><div class='box'><ul class='kul'><li><a href="fk-kuni-jidoteate/">児童手当&nbsp;<span class="status ok" title="公式と照合済み">✓</span></a></li>
+<li><a href="fk-kuni-jidofuyoteate/">児童扶養手当&nbsp;<span class="status">要確認</span></a></li>
 <li><a href="fk-kuni-shussan-ichijikin/">出産育児一時金&nbsp;<span class="status ok" title="公式と照合済み">✓</span></a></li>
 <li><a href="fk-kuni-ikuji-kyufu/">育児休業給付(雇用保険)&nbsp;<span class="status ok" title="公式と照合済み">✓</span></a></li>
 <li><a href="fk-kuni-jukyo-kakuho/">住居確保給付金&nbsp;<span class="status ok" title="公式と照合済み">✓</span></a></li>
@@ -162,8 +167,9 @@ details.fold ol.conbini li{margin:6px 0}
 <li><a href="fk-kuni-hosougu/">補装具費支給制度&nbsp;<span class="status">要確認</span></a></li>
 <li><a href="fk-kuni-nichijo-yougu/">日常生活用具給付等事業&nbsp;<span class="status">要確認</span></a></li>
 <li><a href="fk-kuni-nenkin-shien-kyufukin/">年金生活者支援給付金(老齢・障害・遺族)&nbsp;<span class="status">要確認</span></a></li></ul></div></section>
-<section class='kitgroup'><h2 style='font-size:1.1rem;margin-top:20px'>沖縄県の制度(17件)</h2><p class='note'>沖縄県にお住まいの方向けです</p><div class='box'><ul class='kul'><li><a href="fk-ken-boshi-fushi-kafu-shikin/">母子父子寡婦福祉資金貸付金&nbsp;<span class="status ok" title="公式と照合済み">✓</span></a></li>
+<section class='kitgroup'><h2 style='font-size:1.1rem;margin-top:20px'>沖縄県の制度(18件)</h2><p class='note'>沖縄県にお住まいの方向けです</p><div class='box'><ul class='kul'><li><a href="fk-ken-boshi-fushi-kafu-shikin/">母子父子寡婦福祉資金貸付金&nbsp;<span class="status ok" title="公式と照合済み">✓</span></a></li>
 <li><a href="fk-ken-hitorioya-jutaku-shikin/">沖縄県ひとり親家庭住宅支援資金貸付&nbsp;<span class="status ok" title="公式と照合済み">✓</span></a></li>
+<li><a href="fk-ken-shigaku-kyufukin-shitoritsu/">沖縄県 私立奨学給付金&nbsp;<span class="status">要確認</span></a></li>
 <li><a href="fk-ken-kenei-jutaku/">沖縄県営住宅&nbsp;<span class="status ok" title="公式と照合済み">✓</span></a></li>
 <li><a href="fk-ken-senshiniryo-funin/">沖縄県 先進医療不妊治療費助成事業&nbsp;<span class="status ok" title="公式と照合済み">✓</span></a></li>
 <li><a href="fk-ken-fuiku-kensa/">沖縄県 不育症検査費用助成事業&nbsp;<span class="status ok" title="公式と照合済み">✓</span></a></li>
@@ -389,8 +395,40 @@ details.fold ol.conbini li{margin:6px 0}
   });
 })();
 </script>
+<script>
+// 前回の続き(この端末に残っている準備シートの記録を読むだけ。書き換え・送信はしない)
+(function(){
+  var sec = document.getElementById("kit-resume"), ul = document.getElementById("kit-resume-list");
+  if (!sec || !ul) return;
+  var rows = [];
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (!k || k.indexOf("fk_kit_") !== 0) continue;
+      var id = k.slice(7), o = null;
+      try { o = JSON.parse(localStorage.getItem(k) || "null"); } catch (e2) { continue; }  // 壊れた記録は1件だけ飛ばす
+      if (!o) continue;
+      var n = (o.c || []).length, memo = Object.keys(o.m || {}).length > 0;
+      if (!n && !memo) continue;
+      var a = document.querySelector('.kitgroup a[href="' + id.replace(/[^\w-]/g, "") + '/"]');
+      if (!a) continue;
+      rows.push({href: a.getAttribute("href"), name: a.firstChild ? a.firstChild.textContent : a.textContent, n: n, memo: memo});
+    }
+  } catch (e) { return; }
+  if (!rows.length) return;
+  rows.slice(0, 5).forEach(function(r){
+    var li = document.createElement("li"), link = document.createElement("a");
+    link.href = r.href; link.textContent = r.name;
+    link.addEventListener("click", function(){ if (window.fgTrack) fgTrack("kit_resume_click"); });
+    var info = document.createElement("span"); info.className = "note";
+    info.textContent = " 持ち物チェック " + r.n + "件" + (r.memo ? "・メモあり" : "");
+    li.appendChild(link); li.appendChild(info); ul.appendChild(li);
+  });
+  sec.hidden = false;
+})();
+</script>
 <p class="note" style="margin-top:18px;text-align:center">もう受け取れた制度はありますか? <a href="../houkoku/" onclick="if(window.fgTrack)fgTrack('jukyu_report_link_kit',{pos:'index'})">受け取れたことを教えてください(匿名・任意)</a><br>制度名とおおよその金額だけで大丈夫です。お名前や口座番号はうかがいません。</p>
-<div class="disclaimer">最終更新: 2026-11-25 04:49(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
+<div class="disclaimer">最終更新: 2026-11-26 03:55(毎日自動更新)/ もらいわすれ堂(運営: 株式会社フクギイロ)</div>
 <p style="margin-top:16px" class="footlinks"><a href="../index.html">もらいわすれ堂 トップ</a></p>
 <p style="margin-top:4px"><a class="iglink" href="https://www.instagram.com/moradou.okinawa/" target="_blank" rel="noopener" onclick="if(window.fgTrack)fgTrack('ig_click')">Instagramで最新情報を見る ›</a></p>
 

@@ -60,7 +60,9 @@ SEEDS = [
         "issuer": "こども家庭庁", "area": "全国",
         "target_household": "ひとり親家庭などでお子さんを育てている世帯が対象となる可能性があります",
         "how_to_apply": "お住まいの市区町村の窓口",
-        "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1008243/index.html",
+        # 2026-11-25: 旧出典(沖縄県 1008243/index.html)は 2026-11-04 から 404 で、必須の制度なのに公開できていなかった。
+        # 国の制度なので、所管のこども家庭庁「児童扶養手当について」を出典にする(2026-11-25 取得して確認)
+        "source_url": "https://www.cfa.go.jp/policies/hitori-oya/fuyou-teate/",
     },
     {
         "id": "fk-kuni-shussan-ichijikin",
@@ -125,11 +127,13 @@ SEEDS = [
         "name": "高等学校等就学支援金",
         "category": "教育", "life_events": ["入園・入学"],
         "issuer": "文部科学省", "area": "全国",
-        "target_household": "高校等に通うお子さんがいる世帯が対象となる可能性があります(令和8年度から所得制限が撤廃され、世帯収入にかかわらず授業料が実質無償となる案内が出ています。学校種別・支給額の詳細は公式ページでご確認ください)",
+        "target_household": "高校等に通うお子さんがいる世帯が対象となる可能性があります(令和8年4月の制度改正で所得制限が撤廃され、多くの生徒が授業料の支援を受けられるようになったと案内されています。学校種別・支給額の詳細は公式ページでご確認ください)",
         "how_to_apply": "在学する学校を通じた申請(オンライン申請 e-Shien)",
-        "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1342674.htm",
-        # mext.go.jp がbotを弾くため reachable() が通らず、制度ごとサイトから欠落していた
-        # (2026-09-20 検知)。公式URLの現存は WebSearch で確認済み(タイトル「高等学校等就学支援金制度：文部科学省」)
+        # 2026-11-24: 旧URL(1342674.htm)は新制度への切り替えで 404 になり、国立国会図書館の保存版へ移されていた。
+        # assume_reachable のため到達性の確認が省かれ、開けない出典のまま公開されていた。
+        # いまの案内は「高校生等への修学支援」ページの「高等学校等就学支援金・新制度」の節(2026-11-24 取得して照合)
+        "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/index.htm#mushoukaLink1",
+        # mext.go.jp がbotを弾くため reachable() が通らず、制度ごとサイトから欠落していた(2026-09-20 検知)
         "assume_reachable": True,
     },
     {
@@ -137,10 +141,10 @@ SEEDS = [
         "name": "高校生等奨学給付金",
         "category": "教育", "life_events": ["入園・入学", "低所得・生活苦"],
         "issuer": "文部科学省(窓口は都道府県)", "area": "全国",
-        "target_household": "住民税非課税世帯等で高校生等のお子さんがいる世帯が対象となる可能性があります",
-        "how_to_apply": "お住まいの都道府県への申請(学校経由の場合あり)",
-        "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/1344089.htm",
-        # 同上。公式URLの現存は WebSearch で確認済み(タイトル「高校生等奨学給付金」)
+        "target_household": "高校生等のお子さんがいる世帯で、所得などの要件にあてはまる場合に対象となる可能性があります(教科書費・教材費など、授業料以外の教育費を支援する返還不要の給付金です。要件は都道府県ごとに異なります)",
+        "how_to_apply": "お住まいの都道府県または学校へ申込み(手続きや開始時期は都道府県ごとに異なります)",
+        # 2026-11-24: 旧URL(1344089.htm)は 404(国立国会図書館の保存版へ移動)。いまの案内は同ページの「高校生等奨学給付金」の節
+        "source_url": "https://www.mext.go.jp/a_menu/shotou/mushouka/index.htm#mushoukaLink2",
         "assume_reachable": True,
     },
     {
@@ -379,14 +383,16 @@ SEEDS = [
         "name": "沖縄県 私立奨学給付金",
         "category": "教育", "life_events": ["入園・入学", "低所得・生活苦"],
         "issuer": "沖縄県", "area": "沖縄県",
-        "target_household": "沖縄県内の私立高等学校等に在学し、住民税非課税世帯等に該当するお子さんがいる世帯が対象となる可能性があります",
-        "how_to_apply": "在学する学校を通じた申請",
-        "amount_note": "返還不要。給付額は学校種別・在学状況により異なります(要確認)",
-        "deadline": "2026-10-30", "deadline_type": "期限あり",
-        "source_url": "https://www.pref.okinawa.jp/kyoiku/edu/1008819/1008843/1008848.html",
-        "verified": True, "verified_at": "2026-09-24",
-        "verified_by": "Haruka(沖縄県公式ページ確認)",
-        "match_tokens": ["私立", "奨学給付金", "高校"],
+        # 2026-11-24: 7月1日基準日の回(締切 10/30)が終わり、サイトから外れていた。出典も県立高校のページ(1008848)の
+        # ままだった(2026-10-05 に私立は別ページと指摘を受けていた)。いま受け付けている「11月1日基準日」の回に合わせる。
+        # この回は秋入学などの生徒が対象で、7月1日基準日の申請忘れの救済には使えない(公式ページに明記)。
+        # 締切後は自動で外れる。令和9年度の7月1日基準日の回は、公式ページが出たら出典と締切を差し替える
+        "target_household": "沖縄県内に住所がある保護者等で、秋入学などで私立高等学校等に在学するお子さんがいる世帯が対象となる可能性があります(11月1日基準日の回。令和8年度から住民税非課税世帯に加え、年収目安490万円未満の世帯まで拡充と案内されています。7月1日基準日の申請を忘れた場合の申請はできません)",
+        "how_to_apply": "原則として電子申請(やむを得ない場合は紙申請。担当: 沖縄県 総務部 総務私学課)",
+        "amount_note": "返還不要。給付額は世帯の所得区分・学校種別により異なります(要確認)",
+        "deadline": "2026-12-18", "deadline_type": "期限あり",
+        "source_url": "https://www.pref.okinawa.jp/kyoiku/gakko/1023180/1018620/1041753.html",
+        "match_tokens": ["私立", "奨学のための給付金", "高等学校"],   # 公式ページの表記に合わせる
     },
     {
         "id": "fk-ken-kenei-jutaku",
@@ -518,6 +524,49 @@ def reachable(url):
         return False, type(e).__name__
 
 
+# 到達性の確認を省いている出典(assume_reachable)も、消えたページ(404/410)だけは見分ける。
+# 2026-11-24、文部科学省の2件が新制度への切り替えで 404 になっていたのに、確認を省いていたため
+# 2か月近く開けない出典のまま公開されていた。1回の収集で ROTATE_PER_RUN 件ずつ順番に開き、
+# 約1週間で一回りする(自治体サイトへの負荷を抑える)。403・タイムアウトなどは「遮断・一時的」として何もしない。
+ROTATE_PER_RUN = 15
+DEAD_DETAILS = ("HTTP 404", "HTTP 410")
+
+
+def rotation_batch(urls, now, per_run=ROTATE_PER_RUN):
+    """この回に開く出典URL。日付と午前/午後で回し、同じ回は何度実行しても同じ組になる。"""
+    urls = sorted(set(urls))
+    if not urls:
+        return []
+    buckets = max(1, -(-len(urls) // per_run))
+    slot = (now.toordinal() * 2 + (1 if now.hour >= 12 else 0)) % buckets
+    return [u for i, u in enumerate(urls) if i % buckets == slot]
+
+
+def check_assumed(urls, check=None, pause=1.5):
+    """(開けたURL, {消えたURL: 理由})。消えた(404/410)以外の失敗は数えない。"""
+    check = check or reachable
+    ok_urls, dead = set(), {}
+    for u in urls:
+        ok, detail = check(u)
+        if ok:
+            ok_urls.add(u)
+        elif detail in DEAD_DETAILS:
+            dead[u] = f"URL到達不可({detail})"
+        if pause:
+            time.sleep(pause)
+    return ok_urls, dead
+
+
+def carry_assumed_dead(prev, found, checked_ok, seed_urls, now):
+    """消えたと確かめた出典を、次の回へ持ち越す。{URL: {since, reason}}。
+    点検は1週間に1回しか回ってこないため、その回だけで忘れると半日でリンクが戻ってしまう
+    (2026-11-25 独立レビューで検出)。あとの点検で開けた(HTTP 200)URLと、シードから消えたURLは外す。"""
+    out = {u: dict(v) for u, v in (prev or {}).items() if u in seed_urls and u not in checked_ok}
+    for u, reason in found.items():
+        out.setdefault(u, {"since": now, "reason": reason})
+    return dict(sorted(out.items()))
+
+
 def decide_publish(prev_items, new_items, failed, legit, required_ids, checked_at):
     """公開用 seido.json(moradou.jp の診断ページが読む)を更新してよいかを決め、その記録を返す。
     前回の公開データと制度IDで比べ、欠けたデータで正常な公開データを上書きしない。
@@ -622,8 +671,26 @@ def main():
             item["verified_by"] = old.get("verified_by")
             item["status"] = old.get("status", "検証済み")
 
+    # 確認を省いている出典も、順番に開いて消えたページ(404/410)だけを見分ける(掲載は止めず、リンクだけ止める)
+    assumed = [s["source_url"] for s in SEEDS if s.get("assume_reachable") and robots_ok(s["source_url"])]
+    batch = rotation_batch(assumed, datetime.now(JST))
+    assumed_ok, assumed_found = check_assumed(batch)
+    checked_ok |= assumed_ok
+    try:
+        with open(PUBLISH_STATUS, encoding="utf-8") as f:
+            prev_assumed = json.load(f).get("assumed_dead") or {}
+    except Exception:
+        prev_assumed = {}
+    assumed_dead = carry_assumed_dead(prev_assumed, assumed_found, checked_ok,
+                                      {s["source_url"] for s in SEEDS}, now)
+    dead_by_id = {s["id"]: assumed_dead[s["source_url"]]["reason"] for s in SEEDS if s["source_url"] in assumed_dead}
+    if assumed_dead:
+        print(f"::warning::確認を省いている出典のうち、ページが消えていたもの(リンクを止めます): {', '.join(sorted(dead_by_id))}")
+    print(f"[info] 確認を省いている出典の点検: {len(batch)}件(開けた {len(assumed_ok)} / 消えていた {len(assumed_found)}"
+          f" / 持ち越しを含めて止めている {len(assumed_dead)})")
+
     # 出典が無い(404/410)と確かめた制度は、掲載を続けたまま出典リンクだけを止める印を付ける
-    pending = mark_unavailable(items, dead_sources(SEEDS, failed, checked_ok, now))
+    pending = mark_unavailable(items, dead_sources(SEEDS, {**failed, **dead_by_id}, checked_ok, now))
     if pending:
         print(f"::warning::公式ページを確認中として出典リンクを止めた制度(掲載は続ける): {', '.join(pending[:20])}")
 
@@ -646,6 +713,7 @@ def main():
         prev_public = None
     required_ids = {s["id"] for s in SEEDS if s["id"].startswith(REQUIRED_PREFIX)}
     status = decide_publish(prev_public, items, failed, legit, required_ids, now)
+    status["assumed_dead"] = assumed_dead   # 次の回へ持ち越す(publish_status.json はワークフローが commit する)
 
     # data/ は従来どおり毎回書く(市町村別ページ等が読む)。公開用は保留条件に当たらないときだけ書く
     for path in [OUT] + ([PUBLISH_OUT] if status["publish"] else []):

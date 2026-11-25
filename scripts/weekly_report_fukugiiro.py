@@ -79,6 +79,7 @@ _MANUAL_FUNNEL = """## 2. ファネル(Plausibleで確認 → 数値を記入)
 | 印刷 | kit_print / print_click | |
 | 共有 | share_click | |
 | 再訪(つづき) | shindan_resume | |
+| 再訪(準備シートの続き) | kit_resume_click | |
 | 受給ずみマーク | seido_done_mark | |
 
 *転換率(完了÷開始、シート÷完了)を毎週ここに残すと、離脱段が一目でわかります。*"""

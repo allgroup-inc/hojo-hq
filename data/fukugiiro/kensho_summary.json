@@ -1,9 +1,9 @@
 {
-  "updated_at": "2026-11-25 04:59",
-  "total": 258,
+  "updated_at": "2026-11-26 04:04",
+  "total": 260,
   "ng": 0,
   "unreachable": 0,
-  "skipped_known_block": 32,
+  "skipped_known_block": 28,
   "skipped_robots": 0,
   "verified_but_unconfirmed": 5,
   "verified_but_unreachable": 0,

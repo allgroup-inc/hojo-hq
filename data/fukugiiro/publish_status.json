@@ -1,19 +1,37 @@
 {
- "checked_at": "2026-11-25 04:49",
+ "checked_at": "2026-11-26 03:55",
  "publish": true,
  "reasons": [],
- "previous_count": 258,
- "new_count": 258,
- "failed": [
-  {
-   "id": "fk-kuni-jidofuyoteate",
-   "reason": "URL到達不可(HTTP 404)",
-   "in_previous_public": false
-  }
- ],
+ "previous_count": 260,
+ "new_count": 260,
+ "failed": [],
  "unexplained_lost": [],
  "legit_removed": [],
- "required_missing": [
-  "fk-kuni-jidofuyoteate"
- ]
+ "required_missing": [],
+ "assumed_dead": {
+  "https://www.town.kumejima.okinawa.jp/docs/birth_grant/": {
+   "since": "2026-11-25 18:11",
+   "reason": "URL到達不可(HTTP 404)"
+  },
+  "https://www.town.kumejima.okinawa.jp/docs/childmedical_expenses/": {
+   "since": "2026-11-26 03:55",
+   "reason": "URL到達不可(HTTP 404)"
+  },
+  "https://www.town.yonabaru.okinawa.jp/soshiki/12/6941.html": {
+   "since": "2026-11-25 18:11",
+   "reason": "URL到達不可(HTTP 404)"
+  },
+  "https://www.town.yonabaru.okinawa.jp/soshiki/16/8978.html": {
+   "since": "2026-11-26 03:55",
+   "reason": "URL到達不可(HTTP 404)"
+  },
+  "https://www.vill.higashi.okinawa.jp/soshikikarasagasu/kyoikuiinkai/gyomuannai/2/1277.html": {
+   "since": "2026-11-26 03:55",
+   "reason": "URL到達不可(HTTP 404)"
+  },
+  "https://www.vill.yomitan.okinawa.jp/soshiki/kodomomirai/gyomu/jidofukushi/hitorioyashien/1286.html": {
+   "since": "2026-11-26 03:55",
+   "reason": "URL到達不可(HTTP 404)"
+  }
+ }
 }
