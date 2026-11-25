@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-25 18:11",
+ "updated_at": "2026-11-26 03:55",
  "count": 260,
  "items": [
   {
@@ -22,7 +22,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-jidofuyoteate",
@@ -45,7 +45,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "公的年金(遺族年金・障害年金など)を受け取れる場合は、手当額が調整される(全部または一部が支給されない)場合があります。窓口でご確認ください(要確認)"
@@ -71,7 +71,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-ikuji-kyufu",
@@ -95,7 +95,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-jukyo-kakuho",
@@ -119,7 +119,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(住宅扶助)を受けている場合は対象外となる場合があります。窓口でご確認ください(要確認)"
@@ -145,7 +145,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-shugaku-shien",
@@ -167,7 +167,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -197,7 +197,7 @@
    "verified_by": "kensho(突合レポート○・match_tokens修正後)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-shugakushienkin-koko",
@@ -220,7 +220,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-shogaku-kyufukin-koko",
@@ -244,7 +244,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-kyushokusha-shien",
@@ -268,7 +268,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-seikatsu-konkyu",
@@ -294,7 +294,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-kyoiku-kunren",
@@ -316,7 +316,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-22",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-hoiku-mushoka",
@@ -342,7 +342,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-tokubetsu-jifute",
@@ -368,7 +368,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "公的年金(遺族年金・障害年金など)を受け取れる場合は、手当額が調整される(全部または一部が支給されない)場合があります。窓口でご確認ください(要確認)"
@@ -398,7 +398,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-tokubetsu-shogaisha",
@@ -423,7 +423,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-jiritsushien-iryo",
@@ -449,7 +449,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -478,7 +478,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-kaigokyugyo-kyufu",
@@ -504,7 +504,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省・ハローワークウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-rousai",
@@ -529,7 +529,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-miharai-chingin",
@@ -555,7 +555,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-seikatsu-hogo",
@@ -580,7 +580,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-nenkin-kyufukin",
@@ -605,7 +605,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-saigai-choui",
@@ -630,7 +630,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-shugaku-enjo",
@@ -656,7 +656,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "就学援助(給食費の援助)を受けている場合や他の給食費助成との重複時の取り扱いは、窓口でご確認ください(要確認)"
@@ -687,7 +687,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 文部科学省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-safetynet-jutaku",
@@ -713,7 +713,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 国土交通省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-kosodate-green",
@@ -739,7 +739,7 @@
    "verified_by": "kensho(突合レポート○)+小柳さん進行承認 2026-07-23",
    "status": "検証済み",
    "notes": "出典: 国土交通省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-boshi-fushi-kafu-shikin",
@@ -766,7 +766,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-hitorioya-jutaku-shikin",
@@ -793,7 +793,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-shigaku-kyufukin-shitoritsu",
@@ -821,7 +821,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-kenei-jutaku",
@@ -847,7 +847,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-senshiniryo-funin",
@@ -873,7 +873,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-fuiku-kensa",
@@ -899,7 +899,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-kodomo-iryohi",
@@ -925,7 +925,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -957,7 +957,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -988,7 +988,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -1018,7 +1018,7 @@
    "verified_by": "小柳(公式ページ照合)",
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-naha-kodomo-iryo",
@@ -1042,7 +1042,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -1071,7 +1071,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(教育扶助)を受けている場合は援助の費目が調整される場合があります。給食費無償化を実施している市町村では給食費分の取り扱いもあわせて窓口でご確認ください(要確認)"
@@ -1099,7 +1099,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "利用回数・自己負担は市町村ごとに異なり、転入・里帰り時は利用先の市町村での手続きが必要な場合があります。窓口でご確認ください(要確認)"
@@ -1127,7 +1127,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -1156,7 +1156,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(教育扶助)を受けている場合は援助の費目が調整される場合があります。給食費無償化を実施している市町村では給食費分の取り扱いもあわせて窓口でご確認ください(要確認)"
@@ -1184,7 +1184,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "利用回数・自己負担は市町村ごとに異なり、転入・里帰り時は利用先の市町村での手続きが必要な場合があります。窓口でご確認ください(要確認)"
@@ -1212,7 +1212,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -1241,7 +1241,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(教育扶助)を受けている場合は援助の費目が調整される場合があります。給食費無償化を実施している市町村では給食費分の取り扱いもあわせて窓口でご確認ください(要確認)"
@@ -1274,7 +1274,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-uruma-sango-care",
@@ -1298,7 +1298,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "利用回数・自己負担は市町村ごとに異なり、転入・里帰り時は利用先の市町村での手続きが必要な場合があります。窓口でご確認ください(要確認)"
@@ -1326,7 +1326,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -1355,7 +1355,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(教育扶助)を受けている場合は援助の費目が調整される場合があります。給食費無償化を実施している市町村では給食費分の取り扱いもあわせて窓口でご確認ください(要確認)"
@@ -1387,7 +1387,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-urasoe-sango-care",
@@ -1411,7 +1411,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "利用回数・自己負担は市町村ごとに異なり、転入・里帰り時は利用先の市町村での手続きが必要な場合があります。窓口でご確認ください(要確認)"
@@ -1444,7 +1444,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ginowan-kyushoku",
@@ -1469,7 +1469,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "就学援助(給食費の援助)を受けている場合や他の給食費助成との重複時の取り扱いは、窓口でご確認ください(要確認)"
@@ -1502,7 +1502,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-tomigusuku-kodomo-iryo-2",
@@ -1531,7 +1531,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-haebaru-kodomo-iryo",
@@ -1560,7 +1560,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 南風原町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-haebaru-shogai-iryo",
@@ -1589,7 +1589,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 南風原町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-miyakojima-kodomo-iryo",
@@ -1618,7 +1618,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宮古島市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-miyakojima-sango-care",
@@ -1642,7 +1642,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宮古島市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "利用回数・自己負担は市町村ごとに異なり、転入・里帰り時は利用先の市町村での手続きが必要な場合があります。窓口でご確認ください(要確認)"
@@ -1675,7 +1675,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ishigaki-shugaku-enjo",
@@ -1700,7 +1700,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(教育扶助)を受けている場合は援助の費目が調整される場合があります。給食費無償化を実施している市町村では給食費分の取り扱いもあわせて窓口でご確認ください(要確認)"
@@ -1729,7 +1729,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-nago-kodomo-iryo",
@@ -1758,7 +1758,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 名護市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-nago-famisapo",
@@ -1783,7 +1783,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 名護市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-shussan-ouen",
@@ -1807,7 +1807,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "国の出産・子育て応援給付金(妊婦のための支援給付)に基づく支給のため、転入前の市町村などで既に受け取った分と重ねては受けられない場合があります。窓口でご確認ください(要確認)"
@@ -1842,7 +1842,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 内閣府ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-hello-training",
@@ -1870,7 +1870,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-josei-sodan",
@@ -1893,7 +1893,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-kokuho-genmen",
@@ -1921,7 +1921,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -1948,7 +1948,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-kashitsuke",
@@ -1972,7 +1972,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-kokunen-menjo",
@@ -1996,7 +1996,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 日本年金機構ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-boshi-jiritsu-kyufu",
@@ -2024,7 +2024,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: こども家庭庁ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "求職者支援制度(職業訓練受講給付金)や雇用保険の教育訓練給付との併給には条件がある場合があります。窓口でご確認ください(要確認)"
@@ -2053,7 +2053,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-itoman-kodomo-iryo",
@@ -2081,7 +2081,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-itoman-shugaku-enjo",
@@ -2106,7 +2106,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(教育扶助)を受けている場合は援助の費目が調整される場合があります。給食費無償化を実施している市町村では給食費分の取り扱いもあわせて窓口でご確認ください(要確認)"
@@ -2134,7 +2134,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 南城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -2162,7 +2162,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 南城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "利用回数・自己負担は市町村ごとに異なり、転入・里帰り時は利用先の市町村での手続きが必要な場合があります。窓口でご確認ください(要確認)"
@@ -2190,7 +2190,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 八重瀬町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -2222,7 +2222,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 八重瀬町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-yaese-shugaku-enjo",
@@ -2247,7 +2247,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 八重瀬町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(教育扶助)を受けている場合は援助の費目が調整される場合があります。給食費無償化を実施している市町村では給食費分の取り扱いもあわせて窓口でご確認ください(要確認)"
@@ -2275,7 +2275,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 西原町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -2308,7 +2308,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 西原町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-yonabaru-kodomo-iryo",
@@ -2332,7 +2332,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 与那原町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -2360,13 +2360,13 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 与那原町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "利用回数・自己負担は市町村ごとに異なり、転入・里帰り時は利用先の市町村での手続きが必要な場合があります。窓口でご確認ください(要確認)"
    },
    "source_unavailable": {
-    "since": "2026-11-25 18:11",
+    "since": "2026-11-26 03:55",
     "reason": "公式ページが見つかりません(HTTP 404)"
    }
   },
@@ -2396,7 +2396,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 読谷村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-yomitan-kyushoku",
@@ -2421,7 +2421,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 読谷村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "就学援助(給食費の援助)を受けている場合や他の給食費助成との重複時の取り扱いは、窓口でご確認ください(要確認)"
@@ -2454,7 +2454,11 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 読谷村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55",
+   "source_unavailable": {
+    "since": "2026-11-26 03:55",
+    "reason": "公式ページが見つかりません(HTTP 404)"
+   }
   },
   {
    "id": "fk-chatan-kodomo-iryo",
@@ -2482,7 +2486,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 北谷町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-chatan-boshi-iryo",
@@ -2511,7 +2515,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 北谷町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kadena-kodomo-iryo",
@@ -2539,7 +2543,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 嘉手納町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kadena-kyushoku",
@@ -2564,7 +2568,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 嘉手納町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "就学援助(給食費の援助)を受けている場合や他の給食費助成との重複時の取り扱いは、窓口でご確認ください(要確認)"
@@ -2596,7 +2600,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 北中城村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kitanakagusuku-kyushoku",
@@ -2625,7 +2629,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 北中城村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kitanakagusuku-shugaku-enjo",
@@ -2650,7 +2654,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 北中城村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(教育扶助)を受けている場合は援助の費目が調整される場合があります。給食費無償化を実施している市町村では給食費分の取り扱いもあわせて窓口でご確認ください(要確認)"
@@ -2678,7 +2682,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 中城村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -2711,7 +2715,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 中城村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kunigami-kodomo-iryo",
@@ -2739,7 +2743,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 国頭村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-higashi-kodomo-iryo",
@@ -2763,7 +2767,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 東村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -2791,7 +2795,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 大宜味村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "利用回数・自己負担は市町村ごとに異なり、転入・里帰り時は利用先の市町村での手続きが必要な場合があります。窓口でご確認ください(要確認)"
@@ -2823,7 +2827,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 大宜味村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-nakijin-kodomo-iryo",
@@ -2847,7 +2851,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 今帰仁村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -2879,7 +2883,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 今帰仁村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-motobu-kodomo-iryo",
@@ -2903,7 +2907,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 本部町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -2931,7 +2935,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 本部町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "利用回数・自己負担は市町村ごとに異なり、転入・里帰り時は利用先の市町村での手続きが必要な場合があります。窓口でご確認ください(要確認)"
@@ -2963,7 +2967,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 恩納村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-onna-shugaku-enjo",
@@ -2991,7 +2995,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 恩納村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kumejima-kodomo-iryo",
@@ -3015,10 +3019,14 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 久米島町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
+   },
+   "source_unavailable": {
+    "since": "2026-11-26 03:55",
+    "reason": "公式ページが見つかりません(HTTP 404)"
    }
   },
   {
@@ -3046,9 +3054,9 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 久米島町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "source_unavailable": {
-    "since": "2026-11-25 18:11",
+    "since": "2026-11-26 03:55",
     "reason": "公式ページが見つかりません(HTTP 404)"
    }
   },
@@ -3078,7 +3086,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 竹富町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-taketomi-kodomo-iryo",
@@ -3102,7 +3110,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 竹富町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -3133,7 +3141,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 与那国町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ie-kodomo-iryo",
@@ -3157,7 +3165,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 伊江村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -3185,7 +3193,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 金武町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -3213,7 +3221,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宜野座村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "就学援助(給食費の援助)を受けている場合や他の給食費助成との重複時の取り扱いは、窓口でご確認ください(要確認)"
@@ -3241,7 +3249,7 @@
    "deadline": null,
    "status": "検証済み",
    "notes": "出典: 宜野座村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -3268,7 +3276,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 南大東村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-minamidaito-kodomo-iryo",
@@ -3296,7 +3304,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 南大東村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kitadaito-shussan-iwai",
@@ -3319,7 +3327,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 北大東村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kitadaito-tosen-hojo",
@@ -3343,7 +3351,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 北大東村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kitadaito-kodomo-iryo",
@@ -3371,7 +3379,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 北大東村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kitadaito-ninpu-tokohi",
@@ -3394,7 +3402,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 北大東村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-iheya-kodomo-iryo",
@@ -3422,7 +3430,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊平屋村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-iheya-tsuinhi-shien",
@@ -3446,7 +3454,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊平屋村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-iheya-kokosei-kotsuhi",
@@ -3470,7 +3478,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊平屋村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -3502,7 +3510,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊是名村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-izena-shussan-iwai",
@@ -3525,7 +3533,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊是名村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-izena-tsuinhi-shien",
@@ -3549,7 +3557,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊是名村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-tarama-shussei-iwai",
@@ -3572,7 +3580,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 多良間村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-tarama-jutaku-shorei",
@@ -3595,7 +3603,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 多良間村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-tarama-kodomo-iryo",
@@ -3623,7 +3631,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 多良間村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-tokashiki-nyuyoji-iryo",
@@ -3651,7 +3659,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡嘉敷村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-tokashiki-sango-care",
@@ -3675,7 +3683,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡嘉敷村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "利用回数・自己負担は市町村ごとに異なり、転入・里帰り時は利用先の市町村での手続きが必要な場合があります。窓口でご確認ください(要確認)"
@@ -3708,7 +3716,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡嘉敷村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-zamami-shussan-josei",
@@ -3731,7 +3739,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 座間味村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-zamami-kodomo-iryo",
@@ -3759,7 +3767,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 座間味村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-zamami-hoikuryo-keigen",
@@ -3783,7 +3791,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 座間味村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -3811,7 +3819,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 座間味村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-aguni-tsuinhi-josei",
@@ -3835,7 +3843,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 粟国村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-aguni-kokosei-shugaku",
@@ -3859,7 +3867,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 粟国村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-aguni-boshi-iryo",
@@ -3888,7 +3896,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 粟国村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-shobyo-teate",
@@ -3914,7 +3922,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-shussan-teate",
@@ -3940,7 +3948,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-maisoryo",
@@ -3962,7 +3970,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-kogaku-kaigo-service",
@@ -3989,7 +3997,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 市区町村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-kogaku-iryo-kaigo-gassan",
@@ -4019,7 +4027,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 各医療保険者ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-kaigo-jutaku-kaishu",
@@ -4044,7 +4052,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 市区町村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-shoni-mansei",
@@ -4070,7 +4078,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 都道府県・指定都市・中核市等ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -4104,7 +4112,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 全国健康保険協会ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-iryohi-kojo",
@@ -4130,7 +4138,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 国ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-koki-korei-hokenryo-keigen",
@@ -4160,7 +4168,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 都道府県の後期高齢者医療広域連合・市区町村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kunigami-nyugaku-iwaikin",
@@ -4184,7 +4192,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 国頭村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-higashi-kyushoku-josei",
@@ -4212,7 +4220,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 東村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55",
+   "source_unavailable": {
+    "since": "2026-11-26 03:55",
+    "reason": "公式ページが見つかりません(HTTP 404)"
+   }
   },
   {
    "id": "fk-higashi-shussan-iwaikin",
@@ -4235,7 +4247,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 東村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-higashi-influenza-josei",
@@ -4259,7 +4271,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 東村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ie-kosodate-shienkin",
@@ -4283,7 +4295,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊江村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kin-shugaku-enjo",
@@ -4308,7 +4320,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 金武町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(教育扶助)を受けている場合は援助の費目が調整される場合があります。給食費無償化を実施している市町村では給食費分の取り扱いもあわせて窓口でご確認ください(要確認)"
@@ -4340,7 +4352,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 与那国町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-yonaguni-haken-hojo",
@@ -4363,7 +4375,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 与那国町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-yonaguni-rito-kokosei-hogosha",
@@ -4391,7 +4403,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 与那国町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kunigami-shussan-iwaikin",
@@ -4414,7 +4426,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 国頭村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kunigami-kekkon-iwaikin",
@@ -4437,7 +4449,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 国頭村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-iejima-gakushi-taiyo",
@@ -4460,7 +4472,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 伊江村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kin-boshi-fushi-iryohi",
@@ -4489,7 +4501,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 金武町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-tonaki-kodomo-iryo",
@@ -4513,7 +4525,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡名喜村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -4540,7 +4552,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡名喜村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-tonaki-ninpu-senpaku",
@@ -4563,7 +4575,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 渡名喜村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-naha-kokuho-genmen",
@@ -4593,7 +4605,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-okinawashi-hoikuryo",
@@ -4618,7 +4630,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -4646,7 +4658,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-nago-horitsu-sodan",
@@ -4669,7 +4681,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 名護市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-naha-shimin-sodan",
@@ -4692,7 +4704,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-nhk-menjo",
@@ -4720,7 +4732,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: NHKウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-hosougu",
@@ -4743,7 +4755,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kuni-nichijo-yougu",
@@ -4771,7 +4783,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 厚生労働省ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-naha-hochouki",
@@ -4796,7 +4808,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "身体障害者手帳をお持ちの方は、障害者総合支援法の補装具費支給が優先となりこの助成の対象外となる場合があります。窓口でご確認ください(要確認)"
@@ -4825,7 +4837,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "身体障害者手帳をお持ちの方は、障害者総合支援法の補装具費支給が優先となりこの助成の対象外となる場合があります。窓口でご確認ください(要確認)"
@@ -4854,7 +4866,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "身体障害者手帳をお持ちの方は、障害者総合支援法の補装具費支給が優先となりこの助成の対象外となる場合があります。窓口でご確認ください(要確認)"
@@ -4883,7 +4895,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 西原町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "身体障害者手帳をお持ちの方は、障害者総合支援法の補装具費支給が優先となりこの助成の対象外となる場合があります。窓口でご確認ください(要確認)"
@@ -4911,7 +4923,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "介護保険サービスの利用状況(利用していないこと等)が要件となる場合があります。窓口でご確認ください(要確認)"
@@ -4939,7 +4951,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-okinawashi-reform",
@@ -4962,7 +4974,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-uruma-jokaso",
@@ -4985,7 +4997,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-itoman-gesuido",
@@ -5008,7 +5020,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-miyakojima-gesuido",
@@ -5031,7 +5043,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宮古島市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-goodjob-center",
@@ -5056,7 +5068,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-career-center",
@@ -5080,7 +5092,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-shokuno-kunren",
@@ -5111,7 +5123,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-hitorioya-ginou",
@@ -5136,7 +5148,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-hitorioya-challenge",
@@ -5162,7 +5174,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-uruma-jukenryo",
@@ -5185,7 +5197,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-uruma-kaigo-iroukin",
@@ -5209,7 +5221,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "介護保険サービスの利用状況(利用していないこと等)が要件となる場合があります。窓口でご確認ください(要確認)"
@@ -5237,7 +5249,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "介護保険サービスの利用状況(利用していないこと等)が要件となる場合があります。窓口でご確認ください(要確認)"
@@ -5265,7 +5277,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宮古島市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "介護保険サービスの利用状況(利用していないこと等)が要件となる場合があります。窓口でご確認ください(要確認)"
@@ -5293,7 +5305,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "介護保険サービスの利用状況(利用していないこと等)が要件となる場合があります。窓口でご確認ください(要確認)"
@@ -5321,7 +5333,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "介護保険サービスの利用状況(利用していないこと等)が要件となる場合があります。窓口でご確認ください(要確認)"
@@ -5352,7 +5364,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ginowan-saigai-mimai",
@@ -5375,7 +5387,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "stackable",
     "note": "国の災害弔慰金・被災者生活再建支援金とは別の制度で、一緒に受けられる場合があります。併用の可否は窓口でご確認ください(要確認)"
@@ -5402,7 +5414,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "stackable",
     "note": "国の災害弔慰金・被災者生活再建支援金とは別の制度で、一緒に受けられる場合があります。併用の可否は窓口でご確認ください(要確認)"
@@ -5429,7 +5441,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 北谷町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "stackable",
     "note": "国の災害弔慰金・被災者生活再建支援金とは別の制度で、一緒に受けられる場合があります。併用の可否は窓口でご確認ください(要確認)"
@@ -5458,7 +5470,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 日本年金機構ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-okinawashi-block-bei",
@@ -5482,7 +5494,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-haebaru-shugaku-enjo",
@@ -5507,7 +5519,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 南風原町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(教育扶助)を受けている場合は援助の費目が調整される場合があります。給食費無償化を実施している市町村では給食費分の取り扱いもあわせて窓口でご確認ください(要確認)"
@@ -5535,7 +5547,11 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 与那原町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55",
+   "source_unavailable": {
+    "since": "2026-11-26 03:55",
+    "reason": "公式ページが見つかりません(HTTP 404)"
+   }
   },
   {
    "id": "fk-yonabaru-gakushu-tanmatsu",
@@ -5560,7 +5576,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 与那原町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-kadena-hochoki",
@@ -5584,7 +5600,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 嘉手納町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "身体障害者手帳をお持ちの方は、障害者総合支援法の補装具費支給が優先となりこの助成の対象外となる場合があります。窓口でご確認ください(要確認)"
@@ -5612,7 +5628,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 中城村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "国の出産・子育て応援給付金(妊婦のための支援給付)に基づく支給のため、転入前の市町村などで既に受け取った分と重ねては受けられない場合があります。窓口でご確認ください(要確認)"
@@ -5639,7 +5655,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 中城村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-nanjo-shussan-ouen",
@@ -5663,7 +5679,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 南城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "国の出産・子育て応援給付金(妊婦のための支援給付)に基づく支給のため、転入前の市町村などで既に受け取った分と重ねては受けられない場合があります。窓口でご確認ください(要確認)"
@@ -5692,7 +5708,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 本部町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "生活保護(教育扶助)を受けている場合は援助の費目が調整される場合があります。給食費無償化を実施している市町村では給食費分の取り扱いもあわせて窓口でご確認ください(要確認)"
@@ -5720,7 +5736,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 今帰仁村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "国の出産・子育て応援給付金(妊婦のための支援給付)に基づく支給のため、転入前の市町村などで既に受け取った分と重ねては受けられない場合があります。窓口でご確認ください(要確認)"
@@ -5748,7 +5764,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 恩納村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "国の出産・子育て応援給付金(妊婦のための支援給付)に基づく支給のため、転入前の市町村などで既に受け取った分と重ねては受けられない場合があります。窓口でご確認ください(要確認)"
@@ -5776,7 +5792,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 久米島町ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-okinawashi-kokuho-genmen",
@@ -5801,7 +5817,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -5830,7 +5846,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -5858,7 +5874,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -5887,7 +5903,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -5916,7 +5932,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -5943,7 +5959,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -5971,7 +5987,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-naha-kouto-shokugyo-kunren",
@@ -5996,7 +6012,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "求職者支援制度(職業訓練受講給付金)や雇用保険の教育訓練給付との併給には条件がある場合があります。窓口でご確認ください(要確認)"
@@ -6028,7 +6044,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-naha-judo-iryo",
@@ -6052,7 +6068,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6080,7 +6096,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6108,7 +6124,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6136,7 +6152,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6164,7 +6180,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6192,7 +6208,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "身体障害者手帳をお持ちの方は、障害者総合支援法の補装具費支給が優先となりこの助成の対象外となる場合があります。窓口でご確認ください(要確認)"
@@ -6220,7 +6236,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "身体障害者手帳をお持ちの方は、障害者総合支援法の補装具費支給が優先となりこの助成の対象外となる場合があります。窓口でご確認ください(要確認)"
@@ -6248,7 +6264,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 大宜味村ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-urasoe-taishin-genzei",
@@ -6271,7 +6287,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-okinawashi-kaigo-hokenryo-genmen",
@@ -6296,7 +6312,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -6324,7 +6340,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -6352,7 +6368,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-urasoe-jiritsu-sodan",
@@ -6376,7 +6392,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ken-kouto-shokugyo-kunren",
@@ -6401,7 +6417,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄県ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "求職者支援制度(職業訓練受講給付金)や雇用保険の教育訓練給付との併給には条件がある場合があります。窓口でご確認ください(要確認)"
@@ -6430,7 +6446,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -6459,7 +6475,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "複数の減免・軽減制度に同時に該当する場合、適用の順序や重複の可否が定められている場合があります。窓口でご確認ください(要確認)"
@@ -6487,7 +6503,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-uruma-jiritsu-sodan",
@@ -6511,7 +6527,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: うるま市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-tomigusuku-jiritsu-sodan",
@@ -6535,7 +6551,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-nago-jiritsu-sodan",
@@ -6559,7 +6575,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 名護市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-miyakojima-jiritsu-sodan",
@@ -6583,7 +6599,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宮古島市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-ishigaki-jiritsu-sodan",
@@ -6607,7 +6623,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-nanjo-jiritsu-sodan",
@@ -6631,7 +6647,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 南城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-nanjo-kaigo-yohin",
@@ -6655,7 +6671,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 南城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "介護保険サービスの利用状況(利用していないこと等)が要件となる場合があります。窓口でご確認ください(要確認)"
@@ -6683,7 +6699,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "介護保険サービスの利用状況(利用していないこと等)が要件となる場合があります。窓口でご確認ください(要確認)"
@@ -6710,7 +6726,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   },
   {
    "id": "fk-naha-boshi-iryo",
@@ -6734,7 +6750,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 那覇市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6762,7 +6778,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 沖縄市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6790,7 +6806,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 浦添市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6818,7 +6834,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 宜野湾市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6846,7 +6862,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6874,7 +6890,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 豊見城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6902,7 +6918,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 名護市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6930,7 +6946,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 石垣市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6958,7 +6974,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 南城市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11",
+   "fetched_at": "2026-11-26 03:55",
    "combine": {
     "type": "adjust",
     "note": "同じ医療費を複数の助成で二重には受けられません。こども医療費・ひとり親家庭等医療費・重度障がい者医療費など対象が重なる場合の優先順位は、窓口でご確認ください(要確認)"
@@ -6986,7 +7002,7 @@
    "verified_by": null,
    "status": "要確認",
    "notes": "出典: 糸満市ウェブサイト",
-   "fetched_at": "2026-11-25 18:11"
+   "fetched_at": "2026-11-26 03:55"
   }
  ]
 }
