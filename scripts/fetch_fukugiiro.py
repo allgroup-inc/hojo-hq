@@ -60,7 +60,9 @@ SEEDS = [
         "issuer": "こども家庭庁", "area": "全国",
         "target_household": "ひとり親家庭などでお子さんを育てている世帯が対象となる可能性があります",
         "how_to_apply": "お住まいの市区町村の窓口",
-        "source_url": "https://www.pref.okinawa.lg.jp/kyoiku/kosodate/1008226/1008243/index.html",
+        # 2026-11-25: 旧出典(沖縄県 1008243/index.html)は 2026-11-04 から 404 で、必須の制度なのに公開できていなかった。
+        # 国の制度なので、所管のこども家庭庁「児童扶養手当について」を出典にする(2026-11-25 取得して確認)
+        "source_url": "https://www.cfa.go.jp/policies/hitori-oya/fuyou-teate/",
     },
     {
         "id": "fk-kuni-shussan-ichijikin",
@@ -522,6 +524,49 @@ def reachable(url):
         return False, type(e).__name__
 
 
+# 到達性の確認を省いている出典(assume_reachable)も、消えたページ(404/410)だけは見分ける。
+# 2026-11-24、文部科学省の2件が新制度への切り替えで 404 になっていたのに、確認を省いていたため
+# 2か月近く開けない出典のまま公開されていた。1回の収集で ROTATE_PER_RUN 件ずつ順番に開き、
+# 約1週間で一回りする(自治体サイトへの負荷を抑える)。403・タイムアウトなどは「遮断・一時的」として何もしない。
+ROTATE_PER_RUN = 15
+DEAD_DETAILS = ("HTTP 404", "HTTP 410")
+
+
+def rotation_batch(urls, now, per_run=ROTATE_PER_RUN):
+    """この回に開く出典URL。日付と午前/午後で回し、同じ回は何度実行しても同じ組になる。"""
+    urls = sorted(set(urls))
+    if not urls:
+        return []
+    buckets = max(1, -(-len(urls) // per_run))
+    slot = (now.toordinal() * 2 + (1 if now.hour >= 12 else 0)) % buckets
+    return [u for i, u in enumerate(urls) if i % buckets == slot]
+
+
+def check_assumed(urls, check=None, pause=1.5):
+    """(開けたURL, {消えたURL: 理由})。消えた(404/410)以外の失敗は数えない。"""
+    check = check or reachable
+    ok_urls, dead = set(), {}
+    for u in urls:
+        ok, detail = check(u)
+        if ok:
+            ok_urls.add(u)
+        elif detail in DEAD_DETAILS:
+            dead[u] = f"URL到達不可({detail})"
+        if pause:
+            time.sleep(pause)
+    return ok_urls, dead
+
+
+def carry_assumed_dead(prev, found, checked_ok, seed_urls, now):
+    """消えたと確かめた出典を、次の回へ持ち越す。{URL: {since, reason}}。
+    点検は1週間に1回しか回ってこないため、その回だけで忘れると半日でリンクが戻ってしまう
+    (2026-11-25 独立レビューで検出)。あとの点検で開けた(HTTP 200)URLと、シードから消えたURLは外す。"""
+    out = {u: dict(v) for u, v in (prev or {}).items() if u in seed_urls and u not in checked_ok}
+    for u, reason in found.items():
+        out.setdefault(u, {"since": now, "reason": reason})
+    return dict(sorted(out.items()))
+
+
 def decide_publish(prev_items, new_items, failed, legit, required_ids, checked_at):
     """公開用 seido.json(moradou.jp の診断ページが読む)を更新してよいかを決め、その記録を返す。
     前回の公開データと制度IDで比べ、欠けたデータで正常な公開データを上書きしない。
@@ -626,8 +671,26 @@ def main():
             item["verified_by"] = old.get("verified_by")
             item["status"] = old.get("status", "検証済み")
 
+    # 確認を省いている出典も、順番に開いて消えたページ(404/410)だけを見分ける(掲載は止めず、リンクだけ止める)
+    assumed = [s["source_url"] for s in SEEDS if s.get("assume_reachable") and robots_ok(s["source_url"])]
+    batch = rotation_batch(assumed, datetime.now(JST))
+    assumed_ok, assumed_found = check_assumed(batch)
+    checked_ok |= assumed_ok
+    try:
+        with open(PUBLISH_STATUS, encoding="utf-8") as f:
+            prev_assumed = json.load(f).get("assumed_dead") or {}
+    except Exception:
+        prev_assumed = {}
+    assumed_dead = carry_assumed_dead(prev_assumed, assumed_found, checked_ok,
+                                      {s["source_url"] for s in SEEDS}, now)
+    dead_by_id = {s["id"]: assumed_dead[s["source_url"]]["reason"] for s in SEEDS if s["source_url"] in assumed_dead}
+    if assumed_dead:
+        print(f"::warning::確認を省いている出典のうち、ページが消えていたもの(リンクを止めます): {', '.join(sorted(dead_by_id))}")
+    print(f"[info] 確認を省いている出典の点検: {len(batch)}件(開けた {len(assumed_ok)} / 消えていた {len(assumed_found)}"
+          f" / 持ち越しを含めて止めている {len(assumed_dead)})")
+
     # 出典が無い(404/410)と確かめた制度は、掲載を続けたまま出典リンクだけを止める印を付ける
-    pending = mark_unavailable(items, dead_sources(SEEDS, failed, checked_ok, now))
+    pending = mark_unavailable(items, dead_sources(SEEDS, {**failed, **dead_by_id}, checked_ok, now))
     if pending:
         print(f"::warning::公式ページを確認中として出典リンクを止めた制度(掲載は続ける): {', '.join(pending[:20])}")
 
@@ -650,6 +713,7 @@ def main():
         prev_public = None
     required_ids = {s["id"] for s in SEEDS if s["id"].startswith(REQUIRED_PREFIX)}
     status = decide_publish(prev_public, items, failed, legit, required_ids, now)
+    status["assumed_dead"] = assumed_dead   # 次の回へ持ち越す(publish_status.json はワークフローが commit する)
 
     # data/ は従来どおり毎回書く(市町村別ページ等が読む)。公開用は保留条件に当たらないときだけ書く
     for path in [OUT] + ([PUBLISH_OUT] if status["publish"] else []):
