@@ -190,12 +190,44 @@
     return { ok: false, errors: ["未知の架電結果です: " + outcome] };
   }
 
+  /**
+   * 架電結果を対応履歴に記録してよいかを、記録の直前(ロックの中)で確かめる(2026-11-23 P1)。
+   * 一覧は開いたときの内容なので古いことがある。記録の時点の台帳の内容で判定し直す。
+   * - company: 記録の時点で台帳から読んだ会社(見つからなければ null = 一覧が古い)
+   * - todayHistory: 同じ会社の、今日の対応履歴(担当者つき)
+   * - opts.confirmDuplicate: 同日の二件目を、内容を確かめたうえで記録するとき true
+   * - opts.confirmWon: 成約済みの会社へ、内容を確かめたうえで記録するとき true
+   * 連絡不要の会社は、確認があっても記録しない。
+   */
+  function checkCallRecordAllowed(company, todayHistory, opts) {
+    var options = opts || {};
+    if (!company) {
+      return { ok: false, reason: "stale", errors: ["この会社は台帳に見つかりません。一覧を更新してから、もう一度記録してください"] };
+    }
+    if (company["連絡不要"] === true) {
+      return { ok: false, reason: "doNotContact", errors: ["連絡不要の会社のため、記録できません"] };
+    }
+    if (company["現在ステージ"] === "成約" && options.confirmWon !== true) {
+      return { ok: false, reason: "won", errors: ["成約済みの会社です。架電の前に、台帳の内容を確かめてください"] };
+    }
+    var today = todayHistory || [];
+    if (today.length > 0 && options.confirmDuplicate !== true) {
+      var who = String(today[0]["担当者"] || "").trim() || "担当者不明";
+      return {
+        ok: false, reason: "duplicateToday",
+        errors: ["今日すでに記録があります(担当: " + who + ")。同じ会社への二件目の架電は、台帳の対応履歴を確かめたうえで、担当者(代表者)が確認して記録してください"]
+      };
+    }
+    return { ok: true, reason: "", errors: [] };
+  }
+
   var api = {
     CALL_RULES: CALL_RULES,
     addBusinessDays: addBusinessDays,
     addMonths: addMonths,
     buildCallQueue: buildCallQueue,
-    resolveCallOutcome: resolveCallOutcome
+    resolveCallOutcome: resolveCallOutcome,
+    checkCallRecordAllowed: checkCallRecordAllowed
   };
 
   if (typeof module !== "undefined" && module.exports) {

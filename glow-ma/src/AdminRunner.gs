@@ -507,6 +507,26 @@ function recordCallOutcome(companyId, outcome, extra) {
     throw new Error("他の処理がデータを操作中のため、記録を中断しました。しばらく待ってから再実行してください。");
   }
   try {
+    // 記録の直前に、台帳の今の内容で確かめる(一覧は開いたときの内容で古いことがあるため)。
+    // ロックの中で読むので、同時に記録した別の担当者の行も見える(同時架電の二重記録を防ぐ)。
+    // 履歴や企業マスタを読めなかったときは、記録を止める(確かめられないまま書かない)
+    var guardResult;
+    try {
+      var companyRecord = readCompanyRecords_(companySheet).filter(function (c) {
+        return c["企業ID"] === quick.companyId;
+      })[0] || null;
+      var todayHistory = readTodayInteractionsFor_(logSheet, quick.companyId, todayString);
+      guardResult = GlowCallMode.checkCallRecordAllowed(companyRecord, todayHistory, {
+        confirmDuplicate: !!(extra && extra.confirmDuplicate),
+        confirmWon: !!(extra && extra.confirmWon)
+      });
+    } catch (guardError) {
+      console.error("架電記録の確認に失敗したため、記録を止めました: " + guardError);
+      return { ok: false, reason: "guardFailed", errors: ["台帳の内容を確かめられなかったため、記録を止めました。しばらく待ってから、もう一度送ってください"] };
+    }
+    if (!guardResult.ok) {
+      return { ok: false, reason: guardResult.reason, errors: guardResult.errors };
+    }
     logSheet.getRange(logSheet.getLastRow() + 1, 1, 1, headers.length).setValues([row]);
     var rowIndex = findCompanyRowIndex_(companySheet, quick.companyId);
     if (rowIndex !== -1) {
@@ -519,6 +539,34 @@ function recordCallOutcome(companyId, outcome, extra) {
     lock.releaseLock();
   }
   return { ok: true, record: record, nextDate: nextAction.date, nextNote: nextAction.note };
+}
+
+/**
+ * 指定した会社の、今日の対応履歴を返す(担当者つき)。記録の直前の確認(recordCallOutcome)で使う。
+ * 日付は文字列でも日付型でも比べられるようにする。
+ */
+function readTodayInteractionsFor_(logSheet, companyId, todayString) {
+  var headers = GlowSchema.INTERACTION_LOG_HEADERS;
+  var lastRow = logSheet.getLastRow();
+  if (lastRow < 2) return [];
+  var idIndex = headers.indexOf("企業ID");
+  var dateIndex = headers.indexOf("日付");
+  var staffIndex = headers.indexOf("担当者");
+  if (idIndex === -1 || dateIndex === -1 || staffIndex === -1) {
+    throw new Error("対応履歴ログの見出しが見つかりません(企業ID・日付・担当者)");
+  }
+  var values = logSheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+  return values.filter(function (row) {
+    if (String(row[idIndex]).trim() !== companyId) return false;
+    // 関係メモの更新は、架電ではない(同日の架電記録を妨げないよう数えない)
+    if (String(row[headers.indexOf("種別")] || "") === "関係メモ更新") return false;
+    var day = row[dateIndex] instanceof Date
+      ? Utilities.formatDate(row[dateIndex], "Asia/Tokyo", "yyyy-MM-dd")
+      : String(row[dateIndex]).trim().replace(/\//g, "-").slice(0, 10);
+    return day === todayString;
+  }).map(function (row) {
+    return { "担当者": row[staffIndex] };
+  });
 }
 
 /**
