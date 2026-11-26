@@ -765,14 +765,14 @@ EXTRA_SEEDS = [{'id': 'fk-naha-kodomo-iryo',
   'area': '読谷村',
   'target_household': '読谷村にお住まいのひとり親家庭(母子・父子家庭)などの方が対象となる可能性があります。',
   'how_to_apply': '読谷村役場 こども未来課(児童福祉担当)の窓口',
-  'source_url': 'https://www.vill.yomitan.okinawa.jp/soshiki/kodomomirai/gyomu/jidofukushi/hitorioyashien/1286.html',
+  # 2026-11-26: 旧出典(…/hitorioyashien/1286.html)は 404(収集の点検 2026-11-26 03:55)。村の「1.経済的支援」ページ(6665.html)に
+  # 「医療費（健康保険適用分）の一部を助成…所得制限や資格要件等があります」の記載(検索結果で確認・本文は未取得)。
+  # 出典が変わり、新しいページの本文を人が照合していないため、照合済みの印は外す(2026-08-06 の照合は旧ページ)
+  'source_url': 'https://www.vill.yomitan.okinawa.jp/soshiki/kodomomirai/gyomu/jidofukushi/hitorioyashien/6665.html',
   'deadline_type': '要確認',
   'assume_reachable': True,
   'combine': {'type': 'adjust', 'note': '他の医療費助成との併給調整がある場合があります(要確認/窓口でご確認ください)。'},
-  'verified': True,
-  'amount_note': 'ひとり親家庭等の児童(18歳年度末まで)の医療費(保険診療分)を助成。公費医療受給者・第三者行為分は対象外(要確認)',
-  'verified_at': '2026-08-06',
-  'verified_by': 'kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06'},
+  'amount_note': 'ひとり親家庭等の医療費(健康保険適用分)の一部が助成される場合があります。所得制限や資格要件があります(要確認)'},
  {'id': 'fk-chatan-kodomo-iryo',
   'name': '北谷町 こども医療費助成',
   'category': '医療・健康',
@@ -2206,7 +2206,9 @@ EXTRA_SEEDS += [
  'area': '与那原町',
  'target_household': '町外の学校へ路線バスで通学する与那原町内の高校生等がいる世帯が対象となる可能性があります(定期券区間の要件あり)',
  'how_to_apply': '与那原町教育委員会 学校教育課',
- 'source_url': 'https://www.town.yonabaru.okinawa.jp/soshiki/16/8978.html',
+ # 2026-11-26: 旧出典(soshiki/16/8978.html)は 404(収集の点検 2026-11-26 03:55)。同じ番号のページが site/kosodate/8978.html へ移っていた
+ # (検索結果のタイトル「与那原町高校生等学び応援通学支援事業」・本文の要旨が掲載と一致。本文は未取得)
+ 'source_url': 'https://www.town.yonabaru.okinawa.jp/site/kosodate/8978.html',
  'deadline_type': '年度内',
  'assume_reachable': True,
  'amount_note': 'バス通学定期券購入額の半額補助(100円未満切り捨て)と案内されています(上限等の詳細は要確認)'},
