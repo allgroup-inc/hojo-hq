@@ -718,14 +718,15 @@ EXTRA_SEEDS = [{'id': 'fk-naha-kodomo-iryo',
   'life_events': ['妊娠・出産', '子育て'],
   'issuer': '与那原町',
   'area': '与那原町',
-  'target_household': '与那原町に住所があり、産後1年未満で、家族等の育児協力を得にくい・心身に不調がある等のお母さんと赤ちゃんが対象となる可能性があります',
-  'how_to_apply': '与那原町役場 子育て支援課(母子保健の担当窓口)',
-  'source_url': 'https://www.town.yonabaru.okinawa.jp/soshiki/12/6941.html',
+  # 2026-11-26: 旧出典(soshiki/12/6941.html)は 404。町の子育てポータル site/kosodate/6941.html へ移っていた(更新日 2026-04-01)。
+  # 公式の記載に合わせて対象・窓口を直した(窓口は子育て支援課 → 健康保険課。HP・公式LINEからも申請可)。
+  # 内容が変わったため照合済みの印は外す(2026-08-06 の照合は旧ページ)
+  'target_household': '与那原町に住所がある、産後1年未満のお母さんと赤ちゃんで、産後ケアを必要とする方が対象となる可能性があります',
+  'how_to_apply': '与那原町役場 健康保険課の窓口(町のホームページ・公式LINEからも申請できます)',
+  'source_url': 'https://www.town.yonabaru.okinawa.jp/site/kosodate/6941.html',
+  'amount_note': '契約している産科医療機関・助産所などの利用にかかる費用の一部を町が負担します。施設の利用は最大5回まで(自己負担額は世帯の課税状況などで異なります。要確認)',
   'deadline_type': '常時',
-  'assume_reachable': True,
-  'verified': True,
-  'verified_at': '2026-08-06',
-  'verified_by': 'kensho(公式ページ照合WebSearch・並列検証)+小柳さん同席確認 2026-08-06'},
+  'assume_reachable': True},
  {'id': 'fk-yomitan-kodomo-iryo',
   'name': '読谷村 こども医療費助成',
   'category': '医療・健康',
@@ -765,14 +766,14 @@ EXTRA_SEEDS = [{'id': 'fk-naha-kodomo-iryo',
   'area': '読谷村',
   'target_household': '読谷村にお住まいのひとり親家庭(母子・父子家庭)などの方が対象となる可能性があります。',
   'how_to_apply': '読谷村役場 こども未来課(児童福祉担当)の窓口',
-  # 2026-11-26: 旧出典(…/hitorioyashien/1286.html)は 404(収集の点検 2026-11-26 03:55)。村の「1.経済的支援」ページ(6665.html)に
-  # 「医療費（健康保険適用分）の一部を助成…所得制限や資格要件等があります」の記載(検索結果で確認・本文は未取得)。
-  # 出典が変わり、新しいページの本文を人が照合していないため、照合済みの印は外す(2026-08-06 の照合は旧ページ)
-  'source_url': 'https://www.vill.yomitan.okinawa.jp/soshiki/kodomomirai/gyomu/jidofukushi/hitorioyashien/6665.html',
+  # 2026-11-26: 旧出典(…/hitorioyashien/1286.html)は 404(収集の点検 2026-11-26 03:55)。事業ページは …/bosihusiiryou/1286.html へ移っていた
+  # (更新日 2026-05-27・取得して確認: 対象・18歳年度末・所得制限は児童扶養手当に準じる・こども未来課窓口)。
+  # 人による照合はまだのため、照合済みの印は外す(2026-08-06 の照合は旧ページ)
+  'source_url': 'https://www.vill.yomitan.okinawa.jp/soshiki/kodomomirai/gyomu/jidofukushi/hitorioyashien/bosihusiiryou/1286.html',
   'deadline_type': '要確認',
   'assume_reachable': True,
   'combine': {'type': 'adjust', 'note': '他の医療費助成との併給調整がある場合があります(要確認/窓口でご確認ください)。'},
-  'amount_note': 'ひとり親家庭等の医療費(健康保険適用分)の一部が助成される場合があります。所得制限や資格要件があります(要確認)'},
+  'amount_note': '医療保険の自己負担分から一部負担金を差し引いた額が助成されます。児童は18歳に達した日以後の最初の3月末日まで(中程度以上の障害がある場合は20歳まで)。所得制限は児童扶養手当に準じます(要確認)'},
  {'id': 'fk-chatan-kodomo-iryo',
   'name': '北谷町 こども医療費助成',
   'category': '医療・健康',
