@@ -1,0 +1,6 @@
+{"ts": "2026-11-26T06:19:58Z", "session_id": "d7bcc254-339b-5fe3-87ae-985c1d6d5e14", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/cool-bell-ugyalg", "tool": "Bash", "program": "git"}
+{"ts": "2026-11-26T06:20:04Z", "session_id": "d7bcc254-339b-5fe3-87ae-985c1d6d5e14", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/cool-bell-ugyalg", "tool": "Bash", "program": "cd"}
+{"ts": "2026-11-26T06:20:18Z", "session_id": "d7bcc254-339b-5fe3-87ae-985c1d6d5e14", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/cool-bell-ugyalg", "tool": "Bash", "program": "cd"}
+{"ts": "2026-11-26T06:20:25Z", "session_id": "d7bcc254-339b-5fe3-87ae-985c1d6d5e14", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/cool-bell-ugyalg", "tool": "Bash", "program": "cd"}
+{"ts": "2026-11-26T06:21:27Z", "session_id": "d7bcc254-339b-5fe3-87ae-985c1d6d5e14", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/cool-bell-ugyalg", "tool": "Bash", "program": "mkdir"}
+{"ts": "2026-11-26T06:21:47Z", "session_id": "d7bcc254-339b-5fe3-87ae-985c1d6d5e14", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/cool-bell-ugyalg", "tool": "Write", "path": "<external>"}
