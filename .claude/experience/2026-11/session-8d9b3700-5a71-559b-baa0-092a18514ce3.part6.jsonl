@@ -1,0 +1,5 @@
+{"ts": "2026-11-26T01:09:47Z", "session_id": "8d9b3700-5a71-559b-baa0-092a18514ce3", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/admin-system-isdoeg", "tool": "Bash", "program": "git"}
+{"ts": "2026-11-26T01:12:06Z", "session_id": "8d9b3700-5a71-559b-baa0-092a18514ce3", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/admin-system-isdoeg", "tool": "Write", "path": "<external>"}
+{"ts": "2026-11-26T01:12:11Z", "session_id": "8d9b3700-5a71-559b-baa0-092a18514ce3", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/admin-system-isdoeg", "tool": "Bash", "program": "cd"}
+{"ts": "2026-11-26T01:12:20Z", "session_id": "8d9b3700-5a71-559b-baa0-092a18514ce3", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/admin-system-isdoeg", "tool": "Bash", "program": "git"}
+{"ts": "2026-11-26T01:12:23Z", "session_id": "8d9b3700-5a71-559b-baa0-092a18514ce3", "event": "tool", "repo": "allgroup-inc/hojo-hq", "visibility": "public", "branch": "claude/admin-system-isdoeg", "tool": "Bash", "program": "cat"}
