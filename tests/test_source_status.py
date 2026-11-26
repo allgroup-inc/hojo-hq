@@ -112,6 +112,13 @@ class Pages(unittest.TestCase):
         cls.items = [copy.deepcopy(i) for i in cls.db["items"] if i.get("area") not in kit.HIDDEN_MUNIS]
         for i in cls.items:
             i.pop("source_unavailable", None)
+        # 2026-11-25 に本番の出典を直した(#651)ため、本番データにはもう 404 の出典が無い。
+        # 仕組みを確かめるため、テスト用の複製でだけ、ひとり親家庭支援の出典を 404 だった旧URLに戻す
+        for i in cls.items:
+            if i["id"] == "fk-ken-hitorioya-sodan":
+                i["source_url"] = DEAD
+            if i["id"] == "fk-ken-kouto-shokugyo-kunren":   # 同じ階層だが 404 を記録していないURL(止めない側の例)
+                i["source_url"] = NEAR
         cls.marked = copy.deepcopy(cls.items)
         fgsrc.mark_unavailable(cls.marked, fgsrc.dead_sources([], {}))
 
