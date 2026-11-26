@@ -1,5 +1,5 @@
 {
- "checked_at": "2026-11-26 03:55",
+ "checked_at": "2026-11-26 12:18",
  "publish": true,
  "reasons": [],
  "previous_count": 260,
@@ -17,20 +17,12 @@
    "since": "2026-11-26 03:55",
    "reason": "URL到達不可(HTTP 404)"
   },
-  "https://www.town.yonabaru.okinawa.jp/soshiki/12/6941.html": {
-   "since": "2026-11-25 18:11",
-   "reason": "URL到達不可(HTTP 404)"
-  },
-  "https://www.town.yonabaru.okinawa.jp/soshiki/16/8978.html": {
-   "since": "2026-11-26 03:55",
-   "reason": "URL到達不可(HTTP 404)"
-  },
   "https://www.vill.higashi.okinawa.jp/soshikikarasagasu/kyoikuiinkai/gyomuannai/2/1277.html": {
    "since": "2026-11-26 03:55",
    "reason": "URL到達不可(HTTP 404)"
   },
-  "https://www.vill.yomitan.okinawa.jp/soshiki/kodomomirai/gyomu/jidofukushi/hitorioyashien/1286.html": {
-   "since": "2026-11-26 03:55",
+  "https://www.vill.ogimi.okinawa.jp/docs/2023032200017/": {
+   "since": "2026-11-26 12:18",
    "reason": "URL到達不可(HTTP 404)"
   }
  }
