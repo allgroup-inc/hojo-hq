@@ -1,0 +1,18 @@
+{
+ "open_items": [],
+ "judges": {
+  "Claude": {
+   "state": "auth",
+   "since": "2026-11-27"
+  },
+  "Gemini": {
+   "state": "ok",
+   "since": "2026-11-27"
+  },
+  "照合処理": {
+   "state": "ok",
+   "since": "2026-11-27"
+  }
+ },
+ "updated": "2026-11-27"
+}

@@ -6319,5 +6319,84 @@
     "issues": []
    }
   ]
+ },
+ {
+  "date": "2026-11-27",
+  "status": "degraded",
+  "sample": 5,
+  "recheck": 0,
+  "ng": 0,
+  "ng_recheck": 0,
+  "judge_state": {
+   "Claude": "auth",
+   "Gemini": "ok",
+   "照合処理": "ok"
+  },
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 1
+  },
+  "items": [
+   {
+    "name": "休廃止鉱山鉱害防止等工事費補助金（令和８年度当初）【九州監督部】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDYurMAH",
+    "method": "jgrants",
+    "status": "ok",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和７年度補正「次世代革新炉の開発・建設に向けた技術開発・サプライチェーン構築支援事業補助金」【三次公募】",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ0000049swXUAQ",
+    "method": "jgrants",
+    "status": "ok",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "産業車両等の脱炭素化促進事業のうち、空港における脱炭素化促進事業③空港におけるEV・FCV型車両改造事業（二酸化炭素排出抑制対策事業費等補助金）",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZ1GMAX",
+    "method": "jgrants",
+    "status": "ok",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "「ナトリウムイオン電池に関する技術（特許）動向調査」の公募",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ0000047V4oUAE",
+    "method": "jgrants",
+    "status": "ok",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "稼ぐ海外展開モデル支援事業補助金",
+    "url": "https://okinawa-ric.jp/service/post-32-1.html",
+    "method": "ai",
+    "status": "partial",
+    "judges": [
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": [],
+    "judge_status": {
+     "Claude": "auth",
+     "Gemini": "ok"
+    }
+   }
+  ]
  }
 ]
