@@ -37,6 +37,13 @@ OK = {"success"}
 MIN_STREAK = 3
 MIN_DAYS = 2
 PER_WORKFLOW = 30
+# 断続的な失敗(2026-11-27 追加): 成功と失敗を繰り返すと「連続」にならず、ここに載らなかった
+# (原文照合は 11/5〜11/26 の21回中11回が鍵の失効で失敗していたが、一度も載らなかった)。
+# 直近 INTERMITTENT_WINDOW 回のうち INTERMITTENT_MIN 回以上が失敗で、最新の失敗が
+# INTERMITTENT_RECENT_DAYS 日以内のものも載せる。
+INTERMITTENT_WINDOW = 10
+INTERMITTENT_MIN = 3
+INTERMITTENT_RECENT_DAYS = 7
 JST = dt.timezone(dt.timedelta(hours=9))
 
 
@@ -120,20 +127,36 @@ def summarize(runs, now=None, only_paths=None):
                 last_ok = r
                 break
             # cancelled / skipped などは数えずに飛ばす
-        if not streak:
-            continue
-        since = _ts(streak[-1]["created_at"])
-        days = (now - since).total_seconds() / 86400
-        if len(streak) < MIN_STREAK and not (len(streak) >= 2 and days >= MIN_DAYS):
+        since = _ts(streak[-1]["created_at"]) if streak else None
+        days = (now - since).total_seconds() / 86400 if since else 0
+        if not streak or (len(streak) < MIN_STREAK and not (len(streak) >= 2 and days >= MIN_DAYS)):
+            row = intermittent(name, rs, now)
+            if row:
+                out.append(row)
             continue
         out.append({
-            "name": name, "streak": len(streak), "since": since, "days": days,
+            "name": name, "kind": "streak", "streak": len(streak), "since": since, "days": days,
             "last_ok": _ts(last_ok["created_at"]) if last_ok else None,
             "url": streak[0].get("html_url", ""),
             "complete": last_ok is not None,   # 見た範囲に成功が無ければ、失敗はもっと前から
         })
-    out.sort(key=lambda x: -x["days"])
+    out.sort(key=lambda x: (x["kind"] != "streak", -x["days"]))
     return out
+
+
+def intermittent(name, rs, now):
+    """新しい順の rs から、直近の成功・失敗だけを数えて「断続的な失敗」かを判定する。"""
+    recent = [r for r in rs if r.get("conclusion") in FAIL | OK][:INTERMITTENT_WINDOW]
+    fails = [r for r in recent if r.get("conclusion") in FAIL]
+    if len(fails) < INTERMITTENT_MIN:
+        return None
+    latest = _ts(fails[0]["created_at"])
+    if (now - latest).total_seconds() / 86400 > INTERMITTENT_RECENT_DAYS:
+        return None
+    since = _ts(recent[-1]["created_at"])
+    return {"name": name, "kind": "intermittent", "fails": len(fails), "window": len(recent),
+            "since": since, "days": (now - since).total_seconds() / 86400, "latest": latest,
+            "url": fails[0].get("html_url", "")}
 
 
 def _d(t):
@@ -144,15 +167,25 @@ def render(rows, now=None):
     now = now or dt.datetime.now(dt.timezone.utc)
     if not rows:
         return ""
-    lines = [f"定時実行が失敗し続けているワークフローが **{len(rows)}件** あります"
+    streak = [r for r in rows if r["kind"] == "streak"]
+    inter = [r for r in rows if r["kind"] == "intermittent"]
+    lines = [f"定時実行が失敗し続けている・失敗を繰り返しているワークフローが **{len(rows)}件** あります"
              f"({_d(now)} 時点・main の定時実行のみ)。",
-             f"1回だけの失敗は載せていません(連続{MIN_STREAK}回以上、または2回以上の失敗が{MIN_DAYS}日以上続いているもの)。",
-             "", "| ワークフロー | 連続失敗 | 失敗が始まった日 | 最後の成功 | 最新の失敗 |",
-             "|---|---|---|---|---|"]
-    for r in rows:
-        since = _d(r["since"]) + ("" if r["complete"] else " 以前")
-        lines.append(f"| {r['name']} | {r['streak']}回({r['days']:.0f}日) | {since} | "
-                     f"{_d(r['last_ok'])} | [ログ]({r['url']}) |")
+             f"1回だけの失敗は載せていません(連続{MIN_STREAK}回以上、または2回以上の失敗が{MIN_DAYS}日以上続いているもの。"
+             f"成功を挟んでも、直近{INTERMITTENT_WINDOW}回のうち{INTERMITTENT_MIN}回以上の失敗)。"]
+    if streak:
+        lines += ["", "**連続で失敗**", "",
+                  "| ワークフロー | 連続失敗 | 失敗が始まった日 | 最後の成功 | 最新の失敗 |", "|---|---|---|---|---|"]
+        for r in streak:
+            since = _d(r["since"]) + ("" if r["complete"] else " 以前")
+            lines.append(f"| {r['name']} | {r['streak']}回({r['days']:.0f}日) | {since} | "
+                         f"{_d(r['last_ok'])} | [ログ]({r['url']}) |")
+    if inter:
+        lines += ["", "**成功と失敗を繰り返している**(成功した回があっても、原因が直ったとは限らない)", "",
+                  "| ワークフロー | 直近の失敗 | 数えた期間 | 最新の失敗 |", "|---|---|---|---|"]
+        for r in inter:
+            lines.append(f"| {r['name']} | {r['window']}回中{r['fails']}回 | {_d(r['since'])}〜 | "
+                         f"[{_d(r['latest'])}のログ]({r['url']}) |")
     lines += ["", "原因はログの最初のエラー行で確かめる。秘密情報(トークン・APIキー)の登録切れは、"
               "コードでは直せないので人が登録し直す。",
               "", f"<!-- failing: {','.join(sorted(r['name'] for r in rows))} -->"]
@@ -203,6 +236,10 @@ def self_test():
         # 見た範囲に成功が無い
         *[run("never-ok", 23, "failure", h) for h in (1, 2, 3)],
     ]
+    # 成功と失敗を繰り返す(原文照合型: 鍵の失効で、AIの出番がある日だけ失敗)→ 断続で載る
+    runs += [run("alternating", d, "failure" if d % 2 else "success") for d in range(14, 24)]
+    # 昔に3回失敗、最近は成功続き → 載せない(最新の失敗が7日より前)
+    runs += [run("old-flaky", d, "failure" if d in (1, 2, 3) else "success") for d in range(1, 10)]
     rows = summarize(runs, now)
     names = [r["name"] for r in rows]
     check("毎日の失敗が載る", "daily-broken" in names)
@@ -226,14 +263,21 @@ def self_test():
     db = next(r for r in rows if r["name"] == "daily-broken")
     check("連続回数と最後の成功", db["streak"] == 6 and db["last_ok"].day == 17)
     check("長く止まっている順", names[0] == "weekly-broken")
+    alt = next((r for r in rows if r["name"] == "alternating"), None)
+    check("成功と失敗の繰り返しを断続として載せる",
+          alt is not None and alt["kind"] == "intermittent" and alt["fails"] == 5 and alt["window"] == 10)
+    check("昔の失敗だけなら断続に載せない", "old-flaky" not in names)
+    check("1回だけの失敗は断続にも載らない", "flaky" not in names and "weekly-once" not in names)
+    check("断続は連続の後ろに並ぶ", names[-1] == "alternating")
+    check("断続の表を出す", "成功と失敗を繰り返している" in render([alt], now) and "10回中5回" in render([alt], now))
     nv = next(r for r in rows if r["name"] == "never-ok")
     check("成功が見つからなければ「以前」と書く", not nv["complete"] and "以前" in render([nv], now))
     md = render(rows, now)
-    check("一覧と差分の印", "<!-- failing: cancel-mixed,daily-broken,never-ok,weekly-broken -->" in md)
+    check("一覧と差分の印", "<!-- failing: alternating,cancel-mixed,daily-broken,never-ok,weekly-broken -->" in md)
     check("何も無ければ空", render([], now) == "")
     check("新しく止まったものだけを拾う",
-          new_names(md, "<!-- failing: daily-broken,weekly-broken -->") == ["cancel-mixed", "never-ok"])
-    check("前回が無ければ全部が新しい", len(new_names(md, "")) == 4)
+          new_names(md, "<!-- failing: daily-broken,weekly-broken -->") == ["alternating", "cancel-mixed", "never-ok"])
+    check("前回が無ければ全部が新しい", len(new_names(md, "")) == 5)
 
     import io
 

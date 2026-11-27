@@ -6,7 +6,16 @@ name: verify-sources
 # マルチAIダブルチェック(2026-08-06 小柳さん決裁): Secrets に GEMINI_API_KEY を
 # 設定すると、同じ原文を Gemini でも独立照合し、どちらかが矛盾を検知したら NG。
 # 未設定の間は従来の Claude 単独照合のまま動く。
-# 不一致は Issue を自動起票し、回復したら自動クローズする。
+#
+# 2026-11-27 改修: 11/5〜11/26 に Claude の鍵の失効(401)で11回失敗したのに、
+# 「掲載データと原文に不一致」の Issue として知らせ、国のAPIだけの日の成功で
+# 「解消しました」と閉じていた。失敗した日は照合履歴にも残っていなかった。
+# いまは Issue を原因ごとに2つに分ける。
+#   - 内容(label: verify-sources): 原文と食い違う/出典を開けない掲載。同じ制度を照合し直して
+#     問題が無くなる(または掲載が終わる)まで閉じない
+#   - 照合の障害(label: verify-sources-outage): AIの鍵の失効・上限・未登録、処理の異常終了。
+#     そのAIが実際に照合できた回に閉じる(国のAPIだけの回の成功では閉じない)
+# 状態は scripts/verify_sources.py が verify_status.json に書き出す。
 
 on:
   schedule:
@@ -18,18 +27,41 @@ on:
         description: "Sample size (default: 5, Phase 2: 20)"
         required: false
         default: "5"
+  pull_request:   # PR では自己テストだけ(下の selftest ジョブ)
+    paths:
+      - "scripts/verify_sources.py"
+      - "tests/test_verify_sources_status.py"
+      - ".github/workflows/verify-sources.yml"
 
 permissions:
-  contents: write  # 照合履歴(data/kpi/verify_history.json)のコミットに必要
-  issues: write
+  contents: read
 
 concurrency:
-  group: verify-sources
+  # PR の実行が、待っている定時の照合を取り消さないよう、PR は別のグループにする
+  group: verify-sources-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
   cancel-in-progress: false
 
 jobs:
-  verify:
+  # PR では自己テストだけ(書き込みの権限なし・照合・Issue・コミットはしない)
+  selftest:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: 自己テスト(外部に接続しない合成データ)
+        run: python -m unittest tests/test_verify_sources_status.py
+
+  verify:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 照合履歴(data/kpi/verify_history.json)と未解決の状態のコミットに必要
+      issues: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -40,20 +72,26 @@ jobs:
       - name: Install deps  # ハッシュ固定(決裁 #26 S4 事前条件)。版の正本は .github/requirements/verify-sources.txt
         run: python -m pip install --require-hashes -r .github/requirements/verify-sources.txt
 
+      - name: 自己テスト(外部に接続しない合成データ)
+        run: python -m unittest tests/test_verify_sources_status.py
+
       - name: Run source verification
+        id: verify
+        continue-on-error: true   # 結果の判定は最後の手順で行う(履歴の保存と Issue の更新を先に済ませる)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           VERIFY_SAMPLE_SIZE: ${{ github.event.inputs.sample_size || '5' }}
         run: python scripts/verify_sources.py
 
-      # ── 照合履歴を台帳へ蓄積(NG検知時も必ず実行。効果測定2026-11-06の根拠データ)──
+      # ── 照合履歴と未解決の状態を台帳へ(失敗・未実施の回も必ず残す)──
       - name: Commit verify history
         if: always()
         run: |
           git config user.name "hojo-hq-bot"
           git config user.email "bot@en-life.co.jp"
           git add data/kpi/verify_history.json
+          [ -f data/kpi/verify_open.json ] && git add data/kpi/verify_open.json
           git diff --cached --quiet && exit 0
           git commit -m "auto: verify history $(date -u '+%Y-%m-%d')"
           d=2
@@ -65,48 +103,87 @@ jobs:
           done
           echo "::warning::照合履歴のpushに失敗(照合自体は完了)"
 
-      # ── 不一致検知時: Issue を起票 / 既存の未解決Issueに追記 ──
-      - name: Open or update issue on failure
-        if: failure()
+      # ── 内容の Issue: 新しく見つかった日だけ追記。未解決が0件になったら閉じる ──
+      - name: Content issue (mismatch / source not reachable)
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -e
-          gh label create verify-sources --color FBCA04 \
-            --description "原文照合で掲載データと原文の不一致を検知" 2>/dev/null || true
-          report=verify_report.txt
-          [ -f "$report" ] || echo "レポート生成前に失敗しました。Actionsログを確認してください。" > "$report"
+          if [ ! -f verify_status.json ] || [ "$(jq -r .status verify_status.json)" = crash ]; then
+            echo "異常終了の回は、内容の Issue を触らない(閉じない)"; exit 0
+          fi
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          {
-            echo "自動検知: 原文照合で不一致が見つかりました。締切・金額は原文通りが絶対ルールです。"
-            echo ""
-            echo "- 実行: $run_url"
-            echo "- 日時(UTC): $(date -u '+%Y-%m-%d %H:%M')"
-            echo ""
-            echo '```'
-            cat "$report"
-            echo '```'
-          } > issue_body.md
-          existing=$(gh issue list --state open --label verify-sources \
-            --json number --jq '.[0].number')
-          if [ -n "$existing" ]; then
-            gh issue comment "$existing" --body-file issue_body.md
-            echo "既存Issue #$existing に追記しました"
-          else
-            gh issue create --label verify-sources \
-              --title "⚠️ 原文照合NG: 掲載データと原文に不一致" \
-              --body-file issue_body.md
+          jq -r '.content_issue // ""' verify_status.json > content.md
+          new=$(jq -r '(.changes.new_items // []) | length' verify_status.json)
+          existing=$(gh issue list --state open --label verify-sources --json number --jq '.[0].number // empty')
+          if [ -s content.md ] && [ "$(wc -c < content.md)" -gt 1 ]; then
+            printf '\n\n- 実行: %s\n' "$run_url" >> content.md
+            if [ -z "$existing" ]; then
+              gh label create verify-sources --color FBCA04 \
+                --description "原文照合で、原文と食い違う・出典を開けない掲載を検知" 2>/dev/null || true
+              gh issue create --label verify-sources --title "⚠️ 原文照合: 確かめが必要な掲載があります" --body-file content.md
+            else
+              gh issue edit "$existing" --body-file content.md   # 本文は毎回いまの一覧に差し替える
+              if [ "$new" -gt 0 ]; then
+                gh issue comment "$existing" --body "新しく見つかった掲載が ${new}件 あります(一覧は本文)。$run_url"
+              fi
+            fi
+          elif [ -n "$existing" ]; then
+            resolved=$(jq -r '(.changes.resolved // []) | length' verify_status.json)
+            if [ "$resolved" -gt 0 ]; then
+              gh issue comment "$existing" --body "✅ 未解決だった掲載を照合し直し、問題が無くなったことを確かめました(掲載が終わった制度を含む)。自動で閉じます。$run_url"
+              gh issue close "$existing"
+            else
+              echo "::warning::未解決の一覧は空だが、この回で照合し直して解決した制度は無い。Issue #$existing は閉じない(人が確かめて閉じる)"
+            fi
           fi
 
-      # ── 回復時: 未解決の verify-sources Issue を自動クローズ ──
-      - name: Auto-close issue on recovery
-        if: success()
+      # ── 照合の障害の Issue: 状態が変わった日だけ追記。全AIが照合できたら閉じる ──
+      - name: Outage issue (AI keys / quota / crash)
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          open=$(gh issue list --state open --label verify-sources \
-            --json number --jq '.[].number' 2>/dev/null || true)
-          for n in $open; do
-            gh issue comment "$n" --body "✅ 直近の原文照合で不一致が解消しました。自動クローズします。"
-            gh issue close "$n"
-          done
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          if [ -f verify_status.json ]; then
+            jq -r '.outage_issue // ""' verify_status.json > outage.md
+            changed=$(jq -r '(.changes.judge_changed // []) | length' verify_status.json)
+          else
+            printf '**照合が実行されませんでした(自己テスト・準備の失敗、または処理の異常終了)。掲載データの誤りではありません。**\n\n```\n' > outage.md
+            cat verify_report.txt >> outage.md 2>/dev/null || echo "レポートなし" >> outage.md
+            printf '\n```\n' >> outage.md
+            changed=1
+          fi
+          existing=$(gh issue list --state open --label verify-sources-outage --json number --jq '.[0].number // empty')
+          if [ -s outage.md ] && [ "$(wc -c < outage.md)" -gt 1 ]; then
+            printf '\n\n- 実行: %s\n' "$run_url" >> outage.md
+            if [ -z "$existing" ]; then
+              gh label create verify-sources-outage --color D93F0B \
+                --description "原文照合が実施できない(鍵・上限・異常終了)。掲載データの誤りではない" 2>/dev/null || true
+              gh issue create --label verify-sources-outage \
+                --title "⚠️ 原文照合の障害: AIによる照合が実施できていません(掲載データの誤りではありません)" \
+                --body-file outage.md
+            else
+              gh issue edit "$existing" --body-file outage.md
+              if [ "$changed" -gt 0 ]; then
+                gh issue comment "$existing" --body "障害の状態が変わりました(いまの状態は本文)。$run_url"
+              fi
+            fi
+          elif [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "✅ Claude・Gemini とも、実際に照合できたことを確かめました。自動で閉じます。$run_url"
+            gh issue close "$existing"
+          fi
+
+      # ── この回の結果: 正常(国のAPIだけの回を含む)以外は失敗にする(連続失敗の見張りが拾う)──
+      - name: Result
+        if: always()
+        run: |
+          status=$(jq -r '.status // "crash"' verify_status.json 2>/dev/null || echo crash)
+          echo "照合の結果: $status"
+          case "$status" in
+            ok|ok_api_only) exit 0 ;;
+            degraded) echo "::error::AIによる照合が欠けています(鍵・上限・未登録)。掲載データの誤りではありません"; exit 1 ;;
+            mismatch) echo "::error::原文と食い違う掲載があります"; exit 1 ;;
+            fetch_error) echo "::error::出典を開けない掲載があります(内容の誤りとは限らない)"; exit 1 ;;
+            *) echo "::error::照合処理が異常終了しました"; exit 1 ;;
+          esac

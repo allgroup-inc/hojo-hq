@@ -1,6 +1,7 @@
 # ヘルスチェック/原文照合のローカル生成物(Actionsでは一時ファイル)
 healthcheck_report.txt
 verify_report.txt
+verify_status.json
 
 # E2E(Playwright)の実行時生成物
 node_modules/
