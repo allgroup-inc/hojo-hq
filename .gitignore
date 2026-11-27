@@ -65,3 +65,6 @@ data/subsidies.json.backup
 .claude/memory.off
 .claude/locks/
 .claude/wiki.off
+
+# 会話の機械記録(WikiSkill Experience)は公開リポジトリに入れない。2026-11 決定: 記録は作業コンテナ内にのみ残す
+.claude/experience/
