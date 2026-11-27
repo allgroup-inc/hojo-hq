@@ -87,7 +87,7 @@ class TenCases(Harness):
         self.assertEqual(r["status"], "degraded")
         ai = next(x for x in r["records"] if x["method"] == "ai")
         self.assertEqual(ai["status"], "ai_unavailable")
-        self.assertEqual(r["history"]["judge_state"], {"Claude": "unconfigured", "Gemini": "unconfigured"})
+        self.assertEqual(r["history"]["judge_state"], {"Claude": "unconfigured", "Gemini": "unconfigured", "照合処理": "ok"})
         self.assertIn("鍵が未登録", r["outage_issue"])
         self.assertEqual(r["content_issue"], "", "鍵が無いことを掲載データの誤りとして報告しない")
 
@@ -104,7 +104,7 @@ class TenCases(Harness):
     def test_03_api_only_run_is_its_own_status(self):
         r = self.day("2026-11-03", FakeClaude(), gemini(), items=JG)
         self.assertEqual(r["status"], "ok_api_only")
-        self.assertEqual(r["history"]["judge_state"], {"Claude": "not_exercised", "Gemini": "not_exercised"})
+        self.assertEqual(r["history"]["judge_state"], {"Claude": "not_exercised", "Gemini": "not_exercised", "照合処理": "ok"})
         self.assertEqual(r["outage_issue"], "")
 
     def test_04_only_claude_ok(self):
@@ -207,6 +207,27 @@ class MoreCases(Harness):
         self.assertEqual(h["ng"] + h["ng_recheck"], sum(x["status"] == "mismatch" for x in h["items"]))
 
 
+class SecondReview(Harness):
+    def test_missing_claude_key_is_an_outage_even_if_gemini_works(self):
+        r = self.day("2026-11-25", None, gemini())
+        self.assertEqual(r["status"], "degraded", "Claude が主。Gemini 単独を正常とみなさない")
+        self.assertIn("Claude | 鍵が未登録", r["outage_issue"])
+
+    def test_first_mismatch_found_on_recheck_gets_a_human_verdict(self):
+        prev = {"open_items": [{"key": AI["id"], "url": AI["source_url"], "name": AI["name"], "since": "2026-11-01",
+                                "status": "fetch_error", "issues": []}]}
+        r = self.day("2026-11-26", FakeClaude(issues={AI["name"]: ["金額が違う"]}), gemini(),
+                     items=JG + [AI, AI2], prev=prev, size=3)
+        x = next(i for i in r["history"]["items"] if i["url"] == AI["source_url"])
+        self.assertEqual(x["status"], "mismatch")
+        self.assertIn("human_verdict", x, "最初は開けなかった制度の初めての不一致は、人の判定の対象")
+
+    def test_close_text_matches_the_state(self):
+        r = self.day("2026-11-27", FakeClaude(), None)
+        self.assertIn("Gemini 鍵が未登録(Claude 単独で照合)", r["close_text"])
+        self.assertNotIn("Claude・Gemini とも", r["close_text"])
+
+
 class Parts(unittest.TestCase):
     def test_sample_always_has_an_ai_item(self):
         for d in range(1, 31):
@@ -262,8 +283,13 @@ class Parts(unittest.TestCase):
             raise AttributeError("'list' object has no attribute 'get'")
         with mock.patch.object(vs, "verify_jgrants", boom):
             r = vs.run(JG[:3], "2026-11-23", FakeClaude(), "", {}, size=3)
-        self.assertEqual(r["status"], "fetch_error")
+        self.assertEqual(r["status"], "degraded")
         self.assertEqual(len(r["history"]["items"]), 3)
+        self.assertEqual(r["content_issue"], "", "処理の不具合を、掲載の問題(出典を開けない)として出さない")
+        self.assertIn("照合処理 | 想定外のエラー", r["outage_issue"])
+        with mock.patch.object(vs, "verify_jgrants", jgrants_ok):
+            r2 = vs.run(JG[:3], "2026-11-24", FakeClaude(), "", r["state"], size=3)
+        self.assertEqual(r2["outage_issue"], "", "不具合の無い回で、処理の障害は閉じる")
 
 
 def load(tmp, name):
@@ -317,6 +343,7 @@ class MainWritesEveryRun(unittest.TestCase):
                     p.stop()
         self.assertEqual(code, 2, "状態ファイルが読めないのに空として進めると、未解決が黙って消える")
         self.assertEqual(st["status"], "crash")
+        self.assertIn("前のコミットの版に戻す", st["outage_issue"], "直し方を障害の Issue に書く")
 
     def test_crash_is_recorded(self):
         with tempfile.TemporaryDirectory() as tmp:

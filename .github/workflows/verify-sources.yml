@@ -170,7 +170,8 @@ jobs:
               fi
             fi
           elif [ -n "$existing" ]; then
-            gh issue comment "$existing" --body "✅ Claude・Gemini とも、実際に照合できたことを確かめました。自動で閉じます。$run_url"
+            msg=$(jq -r '.outage_close_text // "✅ 照合の障害が解消しました。自動で閉じます。"' verify_status.json 2>/dev/null)
+            gh issue comment "$existing" --body "$msg $run_url"
             gh issue close "$existing"
           fi
 

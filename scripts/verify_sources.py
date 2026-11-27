@@ -367,10 +367,25 @@ def recheck_with_gemini(item: dict, page_text: str, issues: list[str], api_key: 
 STATE_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "kpi", "verify_open.json")
 STATUS_PATH = os.path.join(os.path.dirname(__file__), "..", "verify_status.json")
 JUDGES = ("Claude", "Gemini")
+PROCESS = "照合処理"  # 想定外のエラー(掲載の問題ではない)を、障害として持ち越すときの名前
 RECHECK_MAX = 10  # 未解決の制度を、毎回いっしょに照合し直す上限
 OK_RUN = ("ok", "ok_api_only")
 JUDGE_LABEL = {"ok": "正常", "auth": "認証エラー(鍵の失効・誤り)", "quota": "利用上限",
                "error": "応答の異常", "unconfigured": "鍵が未登録", "not_exercised": "出番なし"}
+
+
+def label_of(j: str, st: str) -> str:
+    if j == PROCESS:
+        return "想定外のエラー(掲載の問題ではない)" if st == "error" else "正常"
+    if j == "Gemini" and st == "unconfigured":
+        return "鍵が未登録(Claude 単独で照合)"
+    return JUDGE_LABEL.get(st, st)
+
+
+def close_text(state: dict) -> str:
+    """障害の Issue を閉じるときの文。いまの状態から作る(実態と違うことを書かない)。"""
+    parts = [f"{j} {label_of(j, v['state'])}" for j, v in sorted(state.get("judges", {}).items())]
+    return "✅ 照合の障害が解消しました(いまの状態: " + " / ".join(parts) + ")。自動で閉じます。"
 
 
 def is_ai_item(item: dict) -> bool:
@@ -487,7 +502,7 @@ def safe_verify(item: dict, client, gemini_key: str) -> dict:
         return {"name": item.get("name"), "url": item.get("source_url"), "id": item.get("id"),
                 "method": "ai" if is_ai_item(item) else "jgrants", "judges": [], "judge_status": {},
                 "issues": [f"照合中に想定外のエラー: {type(e).__name__}: {redact(str(e))}"],
-                "notes": [], "status": "fetch_error"}
+                "notes": [], "status": "error"}  # 掲載の問題ではなく、照合処理の不具合
 
 
 def run_judge_state(records: list[dict], j: str, configured: bool) -> str:
@@ -544,20 +559,18 @@ def update_state(prev: dict, records: list[dict], judge_now: dict, items_by_key:
 
 
 def outage_of(state: dict) -> dict:
-    """障害として知らせるAI。鍵が未登録のAIは、ほかのAIが動いていれば障害にしない
-    (Gemini は鍵がある間だけ二重照合に加わる設計。議事 2026-08-06)。1つも鍵が無ければ障害。"""
+    """障害として知らせるもの。Claude が主で、Gemini は鍵がある間だけ二重照合に加わる設計
+    (議事 2026-08-06)なので、鍵の未登録を障害にしないのは Gemini だけ。Claude の未登録は障害。"""
     judges = state.get("judges", {})
-    bad = {j: v for j, v in judges.items() if v.get("state") not in ("ok", "unconfigured")}
-    if all((judges.get(j) or {}).get("state") == "unconfigured" for j in JUDGES):
-        bad = dict(judges)
-    return bad
+    return {j: v for j, v in judges.items()
+            if v.get("state") != "ok" and not (j == "Gemini" and v.get("state") == "unconfigured")}
 
 
 def run_status(records: list[dict], state: dict) -> str:
     st = {r["status"] for r in records}
     if "mismatch" in st or any(o["status"] == "mismatch" for o in state.get("open_items", [])):
         return "mismatch"
-    if st & {"ai_unavailable", "partial"} or outage_of(state):
+    if st & {"ai_unavailable", "partial", "error"} or outage_of(state):
         return "degraded"
     if "fetch_error" in st or state.get("open_items"):
         return "fetch_error"
@@ -566,6 +579,7 @@ def run_status(records: list[dict], state: dict) -> str:
 
 def render_report(today: str, records: list[dict], state: dict, status: str) -> str:
     mark = {"ok": "✅ OK", "partial": "🟡 片方のAIだけで確認", "mismatch": "❌ 不一致",
+            "error": "🛠 照合処理の不具合",
             "fetch_error": "⚠ 開けない", "ai_unavailable": "⏸ AIで確認できず"}
     lines = [f"原文照合レポート {today}(照合 {len(records)}件・結果: {status})", ""]
     for r in records:
@@ -577,7 +591,7 @@ def render_report(today: str, records: list[dict], state: dict, status: str) -> 
                          "(掲載は要確認のまま。人の原文確認後に追記)")
     lines.append("")
     for j, v in sorted(state.get("judges", {}).items()):
-        lines.append(f"{j}: {JUDGE_LABEL.get(v['state'], v['state'])}({v['since']}から)")
+        lines.append(f"{j}: {label_of(j, v['state'])}({v['since']}から)")
     if state.get("open_items"):
         lines.append(f"未解決の掲載: {len(state['open_items'])}件(照合し直して解消を確かめるまで残す)")
     return "\n".join(lines)
@@ -601,8 +615,7 @@ def issue_texts(state: dict) -> tuple[str, str]:
         rows = ["**AIによる照合が実施できていません。掲載データの誤りではありません。**",
                 "国のAPIでの照合と情報の収集は続いています。AIで照合する制度は、確かめられないまま残ります"
                 "(照合済みには上げません)。", "", "| AI | 状態 | いつから |", "|---|---|---|"]
-        rows += [f"| {j} | {JUDGE_LABEL.get(v['state'], v['state'])} | {v['since']} |"
-                 for j, v in sorted(out.items())]
+        rows += [f"| {j} | {label_of(j, v['state'])} | {v['since']} |" for j, v in sorted(out.items())]
         rows += ["", "直し方: 鍵の失効・未登録なら、代表が鍵を発行し直して Secrets に登録する"
                  "(値はチャット・Issue・ログに書かない)。そのAIが次に照合できた回に自動で閉じます。"]
         outage = "\n".join(rows)
@@ -635,7 +648,7 @@ def history_item(r: dict) -> dict:
         h["recheck"] = " / ".join(r["notes"])  # 従来どおり: AIが再確認で指摘を撤回したメモ
     if r.get("amount_in_source"):
         h["amount_in_source"] = r["amount_in_source"]
-    if r["status"] == "mismatch" and not r.get("recheck"):
+    if r["status"] == "mismatch" and (not r.get("recheck") or r.get("first_mismatch")):
         h["human_verdict"] = None  # 人が後から false_positive / true_mismatch を記入
     return h
 
@@ -649,10 +662,15 @@ def run(items: list[dict], today: str, client, gemini_key: str, prev_state: dict
     open_keys = [o.get("key") or o["url"] for o in prev_state.get("open_items", [])]
     recheck = [items_by_key[k] for k in open_keys if k in items_by_key and k not in keys][:RECHECK_MAX]
     records = [safe_verify(x, client, gemini_key) for x in sample + recheck]
+    prev_status = {o.get("key") or o["url"]: o.get("status") for o in prev_state.get("open_items", [])}
     for r, x in zip(records, sample + recheck):
         r["recheck"] = x in recheck
+        # その制度で初めての不一致(前は「開けない」等)なら、照合し直した回でも人の判定の対象にする
+        r["first_mismatch"] = r["status"] == "mismatch" and prev_status.get(key_of(r)) != "mismatch"
     judge_now = {j: run_judge_state(records, j, c) for j, c in
                  (("Claude", client is not None), ("Gemini", bool(gemini_key)))}
+    # 照合処理そのものの不具合も、障害として同じ仕組みで持ち越す(掲載の問題にしない)
+    judge_now[PROCESS] = "error" if any(r["status"] == "error" for r in records) else "ok"
     state, changes = update_state(prev_state, records, judge_now, items_by_key, today)
     status = run_status(records, state)
     content, outage = issue_texts(state)
@@ -668,6 +686,7 @@ def run(items: list[dict], today: str, client, gemini_key: str, prev_state: dict
         "items": [history_item(r) for r in records],
     }
     return {"status": status, "records": records, "state": state, "changes": changes,
+            "close_text": close_text(state),
             "history": entry, "report": render_report(today, records, state, status),
             "content_issue": content, "outage_issue": outage}
 
@@ -694,8 +713,14 @@ def main() -> int:
         gemini_key = os.environ.get("GEMINI_API_KEY") or ""
         prev = {}
         if os.path.exists(STATE_PATH):  # あるのに読めないなら止める(空として読むと未解決が消える)
-            with open(STATE_PATH, encoding="utf-8") as f:
-                prev = json.load(f)
+            try:
+                with open(STATE_PATH, encoding="utf-8") as f:
+                    prev = json.load(f)
+            except ValueError as e:
+                raise RuntimeError(
+                    f"未解決の状態ファイル(data/kpi/verify_open.json)が読めない: {e}。"
+                    "直し方: そのファイルを前のコミットの版に戻す(git log -- data/kpi/verify_open.json)。"
+                    "消すと未解決の掲載の記録も消えるので、消すのは中身を確かめてから") from None
         res = run(items, today, client, gemini_key, prev)
     except Exception as e:  # 処理そのものの異常終了。履歴と状態に残し、障害として知らせる
         msg = f"照合処理が異常終了: {type(e).__name__}: {redact(str(e))}"
@@ -718,6 +743,7 @@ def main() -> int:
     write_json(STATUS_PATH, {
         "status": res["status"], "changes": res["changes"],
         "content_issue": res["content_issue"], "outage_issue": res["outage_issue"],
+        "outage_close_text": res["close_text"],
     })
     return 0 if res["status"] in OK_RUN else 1
 
