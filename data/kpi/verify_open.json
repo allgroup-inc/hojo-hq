@@ -2,7 +2,7 @@
  "open_items": [],
  "judges": {
   "Claude": {
-   "state": "auth",
+   "state": "unconfigured",
    "since": "2026-11-27"
   },
   "Gemini": {

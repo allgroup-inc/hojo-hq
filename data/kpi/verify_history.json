@@ -6328,7 +6328,7 @@
   "ng": 0,
   "ng_recheck": 0,
   "judge_state": {
-   "Claude": "auth",
+   "Claude": "unconfigured",
    "Gemini": "ok",
    "照合処理": "ok"
   },
@@ -6386,14 +6386,14 @@
     "name": "稼ぐ海外展開モデル支援事業補助金",
     "url": "https://okinawa-ric.jp/service/post-32-1.html",
     "method": "ai",
-    "status": "partial",
+    "status": "ok",
     "judges": [
      "Gemini"
     ],
     "ok": true,
     "issues": [],
     "judge_status": {
-     "Claude": "auth",
+     "Claude": "unconfigured",
      "Gemini": "ok"
     }
    }
