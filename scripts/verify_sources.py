@@ -617,7 +617,8 @@ def issue_texts(state: dict) -> tuple[str, str]:
                 "(照合済みには上げません)。", "", "| AI | 状態 | いつから |", "|---|---|---|"]
         rows += [f"| {j} | {label_of(j, v['state'])} | {v['since']} |" for j, v in sorted(out.items())]
         rows += ["", "直し方: 鍵の失効・未登録なら、代表が鍵を発行し直して Secrets に登録する"
-                 "(値はチャット・Issue・ログに書かない)。そのAIが次に照合できた回に自動で閉じます。"]
+                 "(Claude はミカタの照合専用の `MIKATA_ANTHROPIC_API_KEY`。値はチャット・Issue・ログに書かない)。"
+                 "そのAIが次に照合できた回に自動で閉じます。"]
         outage = "\n".join(rows)
     return content, outage
 
