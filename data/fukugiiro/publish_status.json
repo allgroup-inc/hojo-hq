@@ -1,5 +1,5 @@
 {
- "checked_at": "2026-11-27 12:23",
+ "checked_at": "2026-11-28 03:36",
  "publish": true,
  "reasons": [],
  "previous_count": 260,
@@ -13,8 +13,16 @@
    "since": "2026-11-27 03:44",
    "reason": "URL到達不可(HTTP 404)"
   },
+  "https://www.nakijin.jp/pagtop/kosodate/kyoiku_iinkai/information/5121.html": {
+   "since": "2026-11-28 03:36",
+   "reason": "URL到達不可(HTTP 404)"
+  },
   "https://www.town.haebaru.lg.jp/docs/2022060100030/": {
    "since": "2026-11-27 12:23",
+   "reason": "URL到達不可(HTTP 404)"
+  },
+  "https://www.town.haebaru.lg.jp/soshiki/10/3323.html": {
+   "since": "2026-11-28 03:36",
    "reason": "URL到達不可(HTTP 404)"
   },
   "https://www.town.kumejima.okinawa.jp/docs/birth_grant/": {
@@ -27,6 +35,10 @@
   },
   "https://www.town.motobu.okinawa.jp/kosodatekyouiku/kosodatesien/kodomoiryoujyosei": {
    "since": "2026-11-27 12:23",
+   "reason": "URL到達不可(HTTP 404)"
+  },
+  "https://www.town.yonaguni.okinawa.jp/docs/2026040200024": {
+   "since": "2026-11-28 03:36",
    "reason": "URL到達不可(HTTP 404)"
   },
   "https://www.vill.higashi.okinawa.jp/soshikikarasagasu/kyoikuiinkai/gyomuannai/2/1277.html": {
