@@ -1,5 +1,5 @@
 {
- "checked_at": "2026-11-27 03:44",
+ "checked_at": "2026-11-27 12:23",
  "publish": true,
  "reasons": [],
  "previous_count": 260,
@@ -13,12 +13,20 @@
    "since": "2026-11-27 03:44",
    "reason": "URL到達不可(HTTP 404)"
   },
+  "https://www.town.haebaru.lg.jp/docs/2022060100030/": {
+   "since": "2026-11-27 12:23",
+   "reason": "URL到達不可(HTTP 404)"
+  },
   "https://www.town.kumejima.okinawa.jp/docs/birth_grant/": {
    "since": "2026-11-25 18:11",
    "reason": "URL到達不可(HTTP 404)"
   },
   "https://www.town.kumejima.okinawa.jp/docs/childmedical_expenses/": {
    "since": "2026-11-26 03:55",
+   "reason": "URL到達不可(HTTP 404)"
+  },
+  "https://www.town.motobu.okinawa.jp/kosodatekyouiku/kosodatesien/kodomoiryoujyosei": {
+   "since": "2026-11-27 12:23",
    "reason": "URL到達不可(HTTP 404)"
   },
   "https://www.vill.higashi.okinawa.jp/soshikikarasagasu/kyoikuiinkai/gyomuannai/2/1277.html": {
@@ -29,8 +37,16 @@
    "since": "2026-11-27 03:44",
    "reason": "URL到達不可(HTTP 404)"
   },
+  "https://www.vill.iheya.okinawa.jp/soshiki/5/1616.html": {
+   "since": "2026-11-27 12:23",
+   "reason": "URL到達不可(HTTP 404)"
+  },
   "https://www.vill.ogimi.okinawa.jp/docs/2023032200017/": {
    "since": "2026-11-26 12:18",
+   "reason": "URL到達不可(HTTP 404)"
+  },
+  "https://www.vill.ogimi.okinawa.jp/soshiki/jumin_fukushi/gyomu/ninshin_shussan/216.html": {
+   "since": "2026-11-27 12:23",
    "reason": "URL到達不可(HTTP 404)"
   }
  }
