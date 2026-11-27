@@ -79,7 +79,9 @@ jobs:
         id: verify
         continue-on-error: true   # 結果の判定は最後の手順で行う(履歴の保存と Issue の更新を先に済ませる)
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # ミカタの照合専用の鍵(2026-11-27 決裁②: 事業ごとに鍵・費用上限を分ける)。共通の鍵は読まない
+          # (共通の鍵を戻したときに、別事業の処理が一緒に再開しないように)。未登録なら Claude は「鍵が未登録」の障害になる
+          ANTHROPIC_API_KEY: ${{ secrets.MIKATA_ANTHROPIC_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           VERIFY_SAMPLE_SIZE: ${{ github.event.inputs.sample_size || '5' }}
         run: python scripts/verify_sources.py
