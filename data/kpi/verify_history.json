@@ -6398,5 +6398,85 @@
     }
    }
   ]
+ },
+ {
+  "date": "2026-11-28",
+  "status": "degraded",
+  "sample": 5,
+  "recheck": 0,
+  "ng": 0,
+  "ng_recheck": 0,
+  "judge_state": {
+   "Claude": "unconfigured",
+   "Gemini": "ok",
+   "照合処理": "ok"
+  },
+  "gemini": {
+   "enabled": true,
+   "eligible": 1,
+   "joined": 1
+  },
+  "items": [
+   {
+    "name": "令和8年度　建築GX・DX推進事業",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDZ2OMAX",
+    "method": "jgrants",
+    "status": "ok",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "成田空港の次代を担う若者の奨学金返還支援事業補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WfQ000003aZqLUAU",
+    "method": "jgrants",
+    "status": "ok",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度都市ガス分野の災害対応・レジリエンス強化に係る支援事業費補助金",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDc0YMAT",
+    "method": "jgrants",
+    "status": "ok",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "令和８年度SDGsファイナンス支援事業補助金(ソーシャルボンド/ソーシャルローン)",
+    "url": "https://www.jgrants-portal.go.jp/subsidy/a0WJ200000CDdA6MAL",
+    "method": "jgrants",
+    "status": "ok",
+    "judges": [
+     "api"
+    ],
+    "ok": true,
+    "issues": []
+   },
+   {
+    "name": "流通環境整備支援事業(農林水産物県外出荷・流通合理化 実証事業)",
+    "url": "https://okinawa-ric.jp/service/post-55.html",
+    "method": "ai",
+    "status": "ok",
+    "judges": [
+     "Gemini"
+    ],
+    "ok": true,
+    "issues": [],
+    "judge_status": {
+     "Claude": "unconfigured",
+     "Gemini": "ok"
+    },
+    "amount_in_source": "２千万円"
+   }
+  ]
  }
 ]
